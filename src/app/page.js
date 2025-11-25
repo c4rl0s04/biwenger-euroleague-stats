@@ -3,9 +3,18 @@ import { getMarketKPIs, getPorrasStats, getSquadStats } from '@/lib/database';
 
 export default function Home() {
   // Fetch data on the server
-  const marketKPIs = getMarketKPIs();
-  const porrasStats = getPorrasStats();
-  const squadStats = getSquadStats();
+  let marketKPIs, porrasStats, squadStats;
+  
+  try {
+    marketKPIs = getMarketKPIs();
+    porrasStats = getPorrasStats();
+    squadStats = getSquadStats();
+  } catch (error) {
+    console.error('Error loading data:', error);
+    marketKPIs = { total_transfers: 0, active_users: 0 };
+    porrasStats = [];
+    squadStats = [];
+  }
   
   // Get top performer
   const topPorrasPlayer = porrasStats[0];
@@ -27,13 +36,13 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <QuickStat
           label="Total Fichajes"
-          value={marketKPIs.total_transfers}
+          value={marketKPIs.total_transfers || 0}
           icon="💰"
           color="amber"
         />
         <QuickStat
           label="Valor Medio"
-          value={`${marketKPIs.avg_value?.toLocaleString('es-ES')}€`}
+          value={`${(marketKPIs.avg_value || 0).toLocaleString('es-ES')}€`}
           icon="📊"
           color="blue"
         />
@@ -64,9 +73,9 @@ export default function Home() {
               Análisis completo del mercado de fichajes
             </p>
             <div className="space-y-2">
-              <StatRow label="Total Transferencias" value={marketKPIs.total_transfers} />
-              <StatRow label="Valor Promedio" value={`${marketKPIs.avg_value?.toLocaleString('es-ES')}€`} />
-              <StatRow label="Fichaje Récord" value={`${marketKPIs.max_value?.toLocaleString('es-ES')}€`} />
+              <StatRow label="Total Transferencias" value={marketKPIs.total_transfers || 0} />
+              <StatRow label="Valor Promedio" value={`${(marketKPIs.avg_value || 0).toLocaleString('es-ES')}€`} />
+              <StatRow label="Fichaje Récord" value={`${(marketKPIs.max_value || 0).toLocaleString('es-ES')}€`} />
             </div>
           </div>
         </Link>

@@ -20,12 +20,14 @@ export function getMarketKPIs() {
   const query = `
     SELECT 
       COUNT(*) as total_transfers,
-      ROUND(AVG(valor), 2) as avg_value,
-      MAX(valor) as max_value,
-      MIN(valor) as min_value
+      ROUND(AVG(precio), 2) as avg_value,
+      MAX(precio) as max_value,
+      MIN(precio) as min_value,
+      COUNT(DISTINCT comprador) as active_buyers,
+      COUNT(DISTINCT vendedor) as active_sellers
     FROM fichajes
   `;
-
+  
   return db.prepare(query).get();
 }
 
@@ -38,16 +40,19 @@ export function getMarketKPIs() {
 export function getAllTransfers(limit = 100, offset = 0) {
   const query = `
     SELECT 
-      usuario,
-      jugador,
-      accion,
-      valor,
-      fecha
+      id,
+      fecha,
+      player_id,
+      precio,
+      vendedor,
+      comprador,
+      pujas,
+      puntos
     FROM fichajes
-    ORDER BY fecha DESC
+    ORDER BY timestamp DESC
     LIMIT ? OFFSET ?
   `;
-
+  
   return db.prepare(query).all(limit, offset);
 }
 
@@ -151,13 +156,13 @@ export function getMarketTrends() {
     SELECT 
       DATE(fecha) as date,
       COUNT(*) as count,
-      ROUND(AVG(valor), 2) as avg_value
+      ROUND(AVG(precio), 2) as avg_value
     FROM fichajes
     GROUP BY DATE(fecha)
     ORDER BY date DESC
     LIMIT 30
   `;
-
+  
   return db.prepare(query).all().reverse();
 }
 
