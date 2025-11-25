@@ -5,11 +5,11 @@
  * that was created by the Python scraper.
  */
 
-import Database from "better-sqlite3";
-import path from "path";
+import Database from 'better-sqlite3';
 
-// Connect to the database
-const dbPath = path.join(process.cwd(), "data", "biwenger.db");
+// Connect to the SHARED database from the Flask project
+// Both Flask and Next.js will use the same database file
+const dbPath = '/Users/carlosandreshuete/Documents/Python/SimpleBiwenger/data/biwenger.db';
 const db = new Database(dbPath, { readonly: true });
 
 /**
