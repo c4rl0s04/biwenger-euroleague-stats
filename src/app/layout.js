@@ -8,7 +8,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
-      <body>
+      <body className="flex flex-col min-h-screen">
         {/* Modern Header */}
         <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/60">
           <div className="max-w-7xl mx-auto px-6 py-4">
