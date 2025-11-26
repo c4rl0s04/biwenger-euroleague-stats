@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 :root {
-  /* Slate-950 as base background */
   --background: #020617; 
   --foreground: #f8fafc;
 }
@@ -14,7 +13,35 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+  
+  /* Opción 6: Cyber Nebula (Grid + Colores Vibrantes) */
+  background-image: 
+    /* 1. Capa de Grid (Cuadrícula) */
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    
+    /* 2. Capa de Nebulosa (Colores) */
+    /* Naranja vibrante arriba izquierda */
+    radial-gradient(circle at 15% 25%, rgba(249, 115, 22, 0.12) 0%, transparent 50%),
+    /* Morado profundo abajo derecha */
+    radial-gradient(circle at 85% 75%, rgba(147, 51, 234, 0.12) 0%, transparent 50%),
+    /* Azul eléctrico centro derecha */
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
+    /* Rojo intenso centro izquierda */
+    radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.12) 0%, transparent 50%);
+    
+  /* Tamaños: Grid pequeño (40px) y Nebulosas gigantes (cover) */
+  background-size: 
+    40px 40px, 40px 40px, /* Grid */
+    100% 100%, 100% 100%, 100% 100%, 100% 100%; /* Nebulosas */
+    
+  background-position: 
+    center top, center top, /* Grid */
+    0 0, 0 0, 0 0, 0 0; /* Nebulosas */
+    
+  background-attachment: fixed;
 }
