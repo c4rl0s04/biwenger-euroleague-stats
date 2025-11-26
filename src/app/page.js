@@ -6,14 +6,20 @@ export default function Home() {
       {/* Hero Section */}
       <div className="text-center mb-16 space-y-6">
         <div className="relative inline-block">
+          {/* Glowing effect behind title */}
+          <div className="absolute inset-0 blur-3xl opacity-30 bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 animate-pulse"></div>
+          
           <h1 className="relative text-7xl md:text-8xl font-black tracking-tight mb-4">
             <span className="block bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 bg-clip-text text-transparent drop-shadow-2xl">
-              Tu Liga
+              BIWENGER
             </span>
             <span className="block text-5xl md:text-6xl bg-gradient-to-r from-red-400 via-orange-400 to-red-500 bg-clip-text text-transparent">
-              Bajo el Microscopio
+              ANALYTICS
             </span>
           </h1>
+          
+          {/* Underline effect */}
+          <div className="h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full opacity-60"></div>
         </div>
         
         <p className="text-slate-400 text-lg md:text-xl font-light max-w-2xl mx-auto">
