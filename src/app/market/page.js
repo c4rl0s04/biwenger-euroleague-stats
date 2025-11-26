@@ -99,7 +99,7 @@ export default function MarketPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6 text-center">
-          <p className="text-red-400 text-xl mb-2">❌ Error</p>
+          <p className="text-red-400 text-xl mb-2 font-semibold">Error</p>
           <p className="text-red-300">{error}</p>
           <button 
             onClick={fetchMarketData}
@@ -118,7 +118,7 @@ export default function MarketPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2">
-            💰 Análisis de Mercado
+            Análisis de Mercado
           </h1>
           <p className="text-slate-400">
             Transferencias, tendencias y estadísticas
@@ -129,7 +129,10 @@ export default function MarketPage() {
           onClick={fetchMarketData}
           className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
         >
-          🔄 Actualizar
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Actualizar
         </button>
       </div>
       
