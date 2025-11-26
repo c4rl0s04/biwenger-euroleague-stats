@@ -10,7 +10,7 @@ export default function RootLayout({ children }) {
     <html lang="es">
       <body>
         {/* Modern Header */}
-        <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-slate-800">
+        <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/70 border-b border-white/5">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               {/* Logo with Basketball Icon */}
