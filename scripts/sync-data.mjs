@@ -143,7 +143,10 @@ async function syncData() {
     let skippedOld = 0;
 
     // Helper to get league ID for raw fetch
-    const leagueId = process.env.BIWENGER_LEAGUE_ID || '2028379';
+    const leagueId = process.env.BIWENGER_LEAGUE_ID;
+    if (!leagueId) {
+        throw new Error('BIWENGER_LEAGUE_ID is not defined in .env');
+    }
 
     while (moreTransfers) {
       console.log(`   Fetching batch (offset: ${offset})...`);
