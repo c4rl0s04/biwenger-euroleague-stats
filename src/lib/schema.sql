@@ -55,11 +55,12 @@ CREATE TABLE player_round_stats (
 CREATE TABLE lineups (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
+                round_id INTEGER,
                 round_name TEXT,
                 player_id INTEGER,
                 is_captain BOOLEAN,
                 points INTEGER,
-                UNIQUE(user_id, round_name, player_id),
+                UNIQUE(user_id, round_id, player_id),
                 FOREIGN KEY(player_id) REFERENCES players(id)
             );
 

@@ -121,9 +121,15 @@ async function syncData() {
     // 3. Sync Transfers (Full Board History)
     console.log('\n📥 Fetching Full Board History...');
     
-    // Clear existing transfers to avoid duplicates/conflicts with new approach
-    db.prepare('DELETE FROM fichajes').run();
-    console.log('   (Cleared fichajes table)');
+    // Check for existing transfers to do incremental sync
+    const lastTransfer = db.prepare('SELECT MAX(timestamp) as ts FROM fichajes').get();
+    const lastTimestamp = lastTransfer ? lastTransfer.ts : 0;
+    
+    if (lastTimestamp > 0) {
+        console.log(`   Found existing transfers up to ${new Date(lastTimestamp * 1000).toISOString()}. Syncing only new...`);
+    } else {
+        console.log('   No existing transfers. Doing full sync...');
+    }
 
     const insertTransfer = db.prepare(`
       INSERT OR IGNORE INTO fichajes (timestamp, fecha, player_id, precio, vendedor, comprador)
@@ -134,6 +140,7 @@ async function syncData() {
     const limit = 50;
     let moreTransfers = true;
     let totalTransfers = 0;
+    let skippedOld = 0;
 
     // Helper to get league ID for raw fetch
     const leagueId = process.env.BIWENGER_LEAGUE_ID || '2028379';
@@ -162,6 +169,16 @@ async function syncData() {
 
           for (const content of t.content) {
             const timestamp = t.date;
+            
+            // Incremental check: if we reach a transfer older or equal to what we have, stop
+            if (timestamp <= lastTimestamp) {
+                // We found a transfer we already have (or older). 
+                // Since API returns newest first, we can stop fetching entirely.
+                moreTransfers = false; 
+                skippedOld++;
+                continue; 
+            }
+
             const date = new Date(timestamp * 1000).toISOString();
             const playerId = content.player;
 
@@ -320,17 +337,28 @@ async function syncData() {
     // 6. Sync Lineups (from /rounds/league/{id})
     console.log('\n📥 Syncing Lineups...');
     
-    // Re-create lineups table to match new schema (drop role)
-    db.prepare('DROP TABLE IF EXISTS lineups').run();
+    // Check if lineups table has round_id column (migration check)
+    let hasRoundId = false;
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(lineups)").all();
+        hasRoundId = tableInfo.some(c => c.name === 'round_id');
+    } catch (e) {}
+
+    if (!hasRoundId) {
+        console.log('   Migrating lineups table to include round_id...');
+        db.prepare('DROP TABLE IF EXISTS lineups').run();
+    }
+
     db.prepare(`
-      CREATE TABLE lineups (
+      CREATE TABLE IF NOT EXISTS lineups (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT,
+        round_id INTEGER,
         round_name TEXT,
         player_id INTEGER,
         is_captain BOOLEAN,
         points INTEGER,
-        UNIQUE(user_id, round_name, player_id),
+        UNIQUE(user_id, round_id, player_id),
         FOREIGN KEY(player_id) REFERENCES players(id)
       )
     `).run();
@@ -344,19 +372,30 @@ async function syncData() {
     `).run();
 
     const insertLineup = db.prepare(`
-      INSERT INTO lineups (user_id, round_name, player_id, is_captain, points)
-      VALUES (@user_id, @round_name, @player_id, @is_captain, @points)
+      INSERT INTO lineups (user_id, round_id, round_name, player_id, is_captain, points)
+      VALUES (@user_id, @round_id, @round_name, @player_id, @is_captain, @points)
     `);
 
     const insertUser = db.prepare(`
       INSERT OR IGNORE INTO users (id, name) VALUES (@id, @name)
     `);
 
+    // Get existing rounds to skip
+    const existingRounds = new Set(db.prepare('SELECT DISTINCT round_id FROM lineups').pluck().all());
+    if (existingRounds.size > 0) {
+        console.log(`   Found ${existingRounds.size} existing rounds in DB. Skipping them...`);
+    }
+
     let totalLineupsInserted = 0;
     const startRoundId = 4746; // Jornada 1
     const maxRounds = 40; // Safety limit
 
     for (let roundId = startRoundId; roundId < startRoundId + maxRounds; roundId++) {
+      if (existingRounds.has(roundId)) {
+          // console.log(`   Skipping Round ${roundId} (already synced).`);
+          continue;
+      }
+
       try {
         // console.log(`   Fetching Round ${roundId}...`);
         const roundData = await fetchRoundsLeague(roundId);
@@ -404,6 +443,7 @@ async function syncData() {
                 try {
                   insertLineup.run({
                     user_id: user.id.toString(),
+                    round_id: roundId,
                     round_name: roundName,
                     player_id: playerId,
                     is_captain: playerId === captainId ? 1 : 0,
