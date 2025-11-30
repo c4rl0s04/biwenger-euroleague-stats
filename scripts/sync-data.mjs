@@ -426,6 +426,13 @@ async function syncData() {
             continue;
         }
 
+        // Check if this round actually has lineups (future rounds might have standings but no lineups)
+        const hasLineups = standings.some(user => user.lineup && user.lineup.players && user.lineup.players.length > 0);
+        if (!hasLineups) {
+             console.log(`   Round ${roundId}: Standings found but NO lineups (likely future), stopping.`);
+             break;
+        }
+
         console.log(`   Processing ${roundName} (ID: ${roundId})...`);
 
         db.transaction(() => {
