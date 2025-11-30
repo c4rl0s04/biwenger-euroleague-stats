@@ -1,3 +1,4 @@
+
 /**
  * Database access layer using better-sqlite3
  *
@@ -7,10 +8,9 @@
 
 import Database from 'better-sqlite3';
 
-// Connect to the SHARED database from the Flask project
-// Both Flask and Next.js will use the same database file
-const dbPath = '/Users/carlosandreshuete/Documents/Python/SimpleBiwenger/data/biwenger.db';
-const db = new Database(dbPath, { readonly: true });
+// Connect to the LOCAL database
+const dbPath = process.env.DB_PATH || 'data/local.db';
+const db = new Database(dbPath, { readonly: false }); // Allow writes for sync
 
 /**
  * Get Market KPIs
@@ -134,7 +134,6 @@ export function getUserSquad(userId) {
       p.team,
       p.puntos,
       p.partidos_jugados,
-      p.media,
       COALESCE(mv.price, 0) as value
     FROM user_squads us
     JOIN players p ON us.player_id = p.id
