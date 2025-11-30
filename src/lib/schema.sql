@@ -32,15 +32,7 @@ CREATE TABLE players (
     points_away INTEGER,
     points_last_season INTEGER);
 
-CREATE TABLE player_rounds (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id INTEGER,
-                round_name TEXT,
-                points INTEGER,
-                stats_json TEXT,
-                UNIQUE(player_id, round_name),
-                FOREIGN KEY(player_id) REFERENCES players(id)
-            );
+
 
 CREATE TABLE player_round_stats (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
