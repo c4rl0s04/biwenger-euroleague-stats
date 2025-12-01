@@ -117,3 +117,11 @@ export async function fetchRoundsLeague(roundId) {
   const endpoint = roundId ? `/rounds/league/${roundId}` : `/rounds/league`;
   return biwengerFetch(endpoint);
 }
+
+/**
+ * Get Round Games (Results and Schedule)
+ * @param {number|string} roundId - Round ID
+ */
+export async function fetchRoundGames(roundId) {
+  return biwengerFetch(`/rounds/euroleague/${roundId}?score=1&lang=es`);
+}

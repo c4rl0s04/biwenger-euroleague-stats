@@ -1,10 +1,14 @@
-
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import Database from 'better-sqlite3';
 import path from 'path';
-import { fetchMarket, fetchLeague, fetchTransfers, fetchCompetition, biwengerFetch, fetchAllPlayers, fetchRoundsLeague } from '../src/lib/biwenger-client.js';
+import { syncPlayers } from '../src/lib/sync/sync-players.js';
+import { syncStandings } from '../src/lib/sync/sync-standings.js';
+import { syncTransfers } from '../src/lib/sync/sync-transfers.js';
+import { syncMatches } from '../src/lib/sync/sync-matches.js';
+import { syncLineups } from '../src/lib/sync/sync-lineups.js';
+import { ensureSchema } from '../src/lib/sync/ensure-schema.js';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'local.db');
 
@@ -15,467 +19,64 @@ async function syncData() {
   
   try {
     // 1. Sync Players (Required for Foreign Keys)
-    console.log('\n📥 Fetching Players Database...');
-    const competition = await fetchAllPlayers();
+    // Returns competition data which contains rounds list and teams
+    const competition = await syncPlayers(db);
     
-    // Structure is usually data.data.players
-    const playersList = competition.data.data ? competition.data.data.players : competition.data.players;
-    
-    if (!playersList) {
-      throw new Error('Could not find players list in competition data');
-    }
-
-    console.log(`Found ${Object.keys(playersList).length} players. Updating DB...`);
-    
-    const insertPlayer = db.prepare(`
-      INSERT INTO players (
-        id, name, team, position, 
-        puntos, partidos_jugados, 
-        played_home, played_away, 
-        points_home, points_away, points_last_season
-      ) 
-      VALUES (
-        @id, @name, @team, @position, 
-        @puntos, @partidos_jugados, 
-        @played_home, @played_away, 
-        @points_home, @points_away, @points_last_season
-      )
-      ON CONFLICT(id) DO UPDATE SET 
-        name=excluded.name, 
-        team=excluded.team, 
-        position=excluded.position,
-        puntos=excluded.puntos,
-        partidos_jugados=excluded.partidos_jugados,
-        played_home=excluded.played_home,
-        played_away=excluded.played_away,
-        points_home=excluded.points_home,
-        points_away=excluded.points_away,
-        points_last_season=excluded.points_last_season
-    `);
-
-    // Also prepare to insert current price into market_values for ALL players
-    const insertMarketValue = db.prepare(`
-      INSERT OR IGNORE INTO market_values (player_id, price, date)
-      VALUES (@player_id, @price, @date)
-    `);
-    
-    const today = new Date().toISOString().split('T')[0];
-
-    // Helper to map position ID to text
-    // 1 -> Base, 2 -> Alero, 3 -> Pivot
-    const positions = { 1: 'Base', 2: 'Alero', 3: 'Pivot', 4: 'Entrenador', 5: 'Entrenador' }; 
-    const teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
-
-    db.transaction(() => {
-      for (const [id, player] of Object.entries(playersList)) {
-        // Insert Player
-        insertPlayer.run({
-          id: parseInt(id),
-          name: player.name,
-          team: teams[player.teamID]?.name || 'Unknown',
-          position: positions[player.position] || 'Unknown',
-          
-          // New Stats
-          puntos: player.points || 0,
-          partidos_jugados: (player.playedHome || 0) + (player.playedAway || 0),
-          played_home: player.playedHome || 0,
-          played_away: player.playedAway || 0,
-          points_home: player.pointsHome || 0,
-          points_away: player.pointsAway || 0,
-          points_last_season: player.pointsLastSeason || 0
-        });
-
-        // Insert Price (if exists)
-        if (player.price) {
-          insertMarketValue.run({
-            player_id: parseInt(id),
-            price: player.price,
-            date: today
-          });
-        }
-      }
-    })();
-    console.log('✅ Players and current prices synced.');
-
     // 2. Sync Standings (Users)
-    console.log('\n📥 Fetching Standings...');
-    const league = await fetchLeague();
-    const standings = league.data.standings;
-    
-    const insertUserRound = db.prepare(`
-      INSERT INTO user_rounds (user_id, round_name, points, participated)
-      VALUES (@user_id, 'GLOBAL', @points, 1)
-      ON CONFLICT(user_id, round_name) DO UPDATE SET points=excluded.points
-    `);
+    await syncStandings(db);
 
-    db.transaction(() => {
-      for (const user of standings) {
-        insertUserRound.run({
-          user_id: user.id.toString(),
-          points: user.points
-        });
-      }
-    })();
-    console.log(`✅ Standings synced (${standings.length} users).`);
+    // 3. Sync Transfers
+    // Needs players list and teams for filtering/placeholders
+    const playersList = competition.data.data ? competition.data.data.players : competition.data.players;
+    const teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
+    await syncTransfers(db, playersList, teams);
 
-    // 3. Sync Transfers (Full Board History)
-    console.log('\n📥 Fetching Full Board History...');
-    
-    // Check for existing transfers to do incremental sync
-    const lastTransfer = db.prepare('SELECT MAX(timestamp) as ts FROM fichajes').get();
-    const lastTimestamp = lastTransfer ? lastTransfer.ts : 0;
-    
-    if (lastTimestamp > 0) {
-        console.log(`   Found existing transfers up to ${new Date(lastTimestamp * 1000).toISOString()}. Syncing only new...`);
-    } else {
-        console.log('   No existing transfers. Doing full sync...');
-    }
+    // 4. Ensure Schema (Tables for matches, lineups, etc.)
+    ensureSchema(db);
 
-    const insertTransfer = db.prepare(`
-      INSERT OR IGNORE INTO fichajes (timestamp, fecha, player_id, precio, vendedor, comprador)
-      VALUES (@timestamp, @fecha, @player_id, @precio, @vendedor, @comprador)
-    `);
-
-    let offset = 0;
-    const limit = 50;
-    let moreTransfers = true;
-    let totalTransfers = 0;
-    let skippedOld = 0;
-
-    // Helper to get league ID for raw fetch
-    const leagueId = process.env.BIWENGER_LEAGUE_ID;
-    if (!leagueId) {
-        throw new Error('BIWENGER_LEAGUE_ID is not defined in .env');
-    }
-
-    while (moreTransfers) {
-      console.log(`   Fetching batch (offset: ${offset})...`);
-      // Fetch WITHOUT type filter to get everything (transfers, market, movements)
-      const response = await biwengerFetch(`/league/${leagueId}/board?offset=${offset}&limit=${limit}`);
-      const items = response.data;
-      
-      if (!items || items.length === 0) {
-        moreTransfers = false;
-        break;
-      }
-
-      db.transaction(() => {
-        for (const t of items) {
-          // Filter for relevant types
-          // transfer: User <-> User
-          // market: User <-> Market (Direct)
-          // playerMovements: Admin/System moves
-          if (!['transfer', 'market', 'playerMovements'].includes(t.type)) continue;
-          
-          // Some events might not have content or be different
-          if (!t.content || !Array.isArray(t.content)) continue;
-
-          for (const content of t.content) {
-            const timestamp = t.date;
-            
-            // Incremental check: if we reach a transfer older or equal to what we have, stop
-            if (timestamp <= lastTimestamp) {
-                // We found a transfer we already have (or older). 
-                // Since API returns newest first, we can stop fetching entirely.
-                moreTransfers = false; 
-                skippedOld++;
-                continue; 
-            }
-
-            const date = new Date(timestamp * 1000).toISOString();
-            const playerId = content.player;
-
-            // Check if player exists, if not insert placeholder
-            if (!playersList[playerId]) {
-              // console.warn(`⚠️ Player ${playerId} not found. Inserting placeholder.`);
-              try {
-                insertPlayer.run({
-                  id: playerId,
-                  name: `Unknown Player (${playerId})`,
-                  team: 'Unknown',
-                  position: 'Unknown',
-                  puntos: 0,
-                  partidos_jugados: 0,
-                  played_home: 0,
-                  played_away: 0,
-                  points_home: 0,
-                  points_away: 0,
-                  points_last_season: 0
-                });
-                playersList[playerId] = { name: `Unknown Player (${playerId})` };
-              } catch (e) { }
-            }
-            
-            // Determine From/To names safely
-            let fromName = 'Mercado';
-            let toName = 'Mercado';
-
-            if (content.from) fromName = content.from.name;
-            if (content.to) toName = content.to.name;
-
-            // FILTER 1: Skip Mercado -> Mercado (Redundant)
-            if (fromName === 'Mercado' && toName === 'Mercado') {
-              // console.log('   Skipping Mercado->Mercado');
-              continue;
-            }
-
-            // FILTER 2: Skip Real Teams (e.g. "Real Madrid" selling to "Mercado")
-            // We only want User transactions (User->User, User->Mercado, Mercado->User)
-            const teamNames = new Set(Object.values(teams).map(t => t.name));
-            if (teamNames.has(fromName) || teamNames.has(toName)) {
-              // console.log(`   Skipping Team transaction: ${fromName} -> ${toName}`);
-              continue;
-            }
-
-            insertTransfer.run({
-              timestamp: timestamp,
-              fecha: date,
-              player_id: playerId,
-              precio: content.amount || 0,
-              vendedor: fromName,
-              comprador: toName
-            });
-            totalTransfers++;
-          }
-        }
-      })();
-
-      if (items.length < limit) {
-        moreTransfers = false;
-      } else {
-        offset += limit;
-      }
-    }
-    console.log(`✅ All transfers synced (${totalTransfers} processed).`);
-
-    // 4. Sync Player Round Statistics (Simplified)
-    // console.log('\n📥 Syncing Player Round Statistics...');
-    
-    // const insertPlayerStat = db.prepare(`
-    //   INSERT OR REPLACE INTO player_round_stats (player_id, round_id, round_name, points)
-    //   VALUES (@player_id, @round_id, @round_name, @points)
-    // `);
-
-    // let totalStatsInserted = 0;
-    // let roundsProcessed = 0;
-    // const startRoundId = 4746; // Jornada 1
-    // const maxRounds = 40; // Safety limit
-
-    // for (let roundId = startRoundId; roundId < startRoundId + maxRounds; roundId++) {
-    //   try {
-    //     const roundData = await biwengerFetch(`/rounds/euroleague/${roundId}?score=1&lang=es`);
-        
-    //     if (!roundData.data || !roundData.data.games) {
-    //       console.log(`   Round ${roundId}: No data, stopping`);
-    //       break;
-    //     }
-
-    //     const roundName = roundData.data.name || `Round ${roundId}`;
-    //     console.log(`   Processing ${roundName} (ID: ${roundId})...`);
-
-    //     // Aggregate player points across all games in this round
-    //     const playerPoints = {}; // { playerId: totalPoints }
-
-    //     db.transaction(() => {
-    //       for (const game of roundData.data.games) {
-    //         // Process home team players
-    //         if (game.home && game.home.reports) {
-    //           for (const report of game.home.reports) {
-    //             const playerId = report.player.id;
-    //             const points = report.points || 0;
-                
-    //             if (!playerPoints[playerId]) {
-    //               playerPoints[playerId] = 0;
-    //             }
-    //             playerPoints[playerId] += points;
-    //           }
-    //         }
-            
-    //         // Process away team players
-    //         if (game.away && game.away.reports) {
-    //           for (const report of game.away.reports) {
-    //             const playerId = report.player.id;
-    //             const points = report.points || 0;
-                
-    //             if (!playerPoints[playerId]) {
-    //               playerPoints[playerId] = 0;
-    //             }
-    //             playerPoints[playerId] += points;
-    //           }
-    //         }
-    //       }
-
-    //       // Insert aggregated stats for this round
-    //       for (const [playerId, totalPoints] of Object.entries(playerPoints)) {
-    //         const result = insertPlayerStat.run({
-    //           player_id: parseInt(playerId),
-    //           round_id: roundId,
-    //           round_name: roundName,
-    //           points: totalPoints
-    //         });
-    //         if (result.changes > 0) totalStatsInserted++;
-    //       }
-    //     })();
-
-    //     roundsProcessed++;
-        
-    //   } catch (error) {
-    //     if (error.message && error.message.includes('404')) {
-    //       console.log(`   Round ${roundId}: Not found (future round), stopping`);
-    //       break;
-    //     }
-    //     console.error(`   Error processing round ${roundId}:`, error.message);
-    //   }
-    // }
-
-    // console.log(`✅ Player stats synced (${roundsProcessed} rounds, ${totalStatsInserted} players tracked).`);
-
-    // 5. Sync Market (Current Sales) - DISABLED
-    // The /market endpoint returns active listings in the league.
-    // Structure: { data: { sales: [ { price: 123, player: { id: 1 }, ... } ] } }
-    // We currently get official prices from fetchAllPlayers, so this is redundant unless
-    // we want to track specific active sales/bids in the future.
-    console.log('\nℹ️ Market sync skipped (redundant with players DB).');
-
-    // 6. Sync Lineups (from /rounds/league/{id})
+    // 5. Sync Lineups and Matches
     console.log('\n📥 Syncing Lineups...');
+
+    // Reset all lineup points to 0 as requested
+    db.prepare('UPDATE lineups SET points = 0').run();
+
+    // Get existing rounds to skip (incremental update for LINEUPS only)
+    const existingLineupRoundsArr = db.prepare('SELECT DISTINCT round_id FROM lineups').pluck().all();
+    const existingLineupRounds = new Set(existingLineupRoundsArr);
+    const lastLineupRoundId = existingLineupRoundsArr.length > 0 ? Math.max(...existingLineupRoundsArr) : 0;
     
-    // Check if lineups table has round_id column (migration check)
-    let hasRoundId = false;
-    try {
-        const tableInfo = db.prepare("PRAGMA table_info(lineups)").all();
-        hasRoundId = tableInfo.some(c => c.name === 'round_id');
-    } catch (e) {}
-
-    if (!hasRoundId) {
-        console.log('   Migrating lineups table to include round_id...');
-        db.prepare('DROP TABLE IF EXISTS lineups').run();
+    // Get rounds list
+    let allRounds = [];
+    const compData = competition.data.data || competition.data;
+    
+    if (compData.rounds) {
+        allRounds = compData.rounds;
+    } else if (compData.season && compData.season.rounds) {
+        allRounds = compData.season.rounds;
     }
-
-    db.prepare(`
-      CREATE TABLE IF NOT EXISTS lineups (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT,
-        round_id INTEGER,
-        round_name TEXT,
-        player_id INTEGER,
-        is_captain BOOLEAN,
-        points INTEGER,
-        UNIQUE(user_id, round_id, player_id),
-        FOREIGN KEY(player_id) REFERENCES players(id)
-      )
-    `).run();
-
-    // Create users table if not exists
-    db.prepare(`
-      CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        name TEXT
-      )
-    `).run();
-
-    const insertLineup = db.prepare(`
-      INSERT INTO lineups (user_id, round_id, round_name, player_id, is_captain, points)
-      VALUES (@user_id, @round_id, @round_name, @player_id, @is_captain, @points)
-    `);
-
-    const insertUser = db.prepare(`
-      INSERT OR IGNORE INTO users (id, name) VALUES (@id, @name)
-    `);
-
-    // Get existing rounds to skip
-    const existingRounds = new Set(db.prepare('SELECT DISTINCT round_id FROM lineups').pluck().all());
-    if (existingRounds.size > 0) {
-        console.log(`   Found ${existingRounds.size} existing rounds in DB. Skipping them...`);
+    
+    if (allRounds.length > 0) {
+        console.log(`Found ${allRounds.length} rounds in competition data.`);
+    } else {
+        console.error('No rounds found in competition data. Lineups sync will be skipped.');
     }
 
     let totalLineupsInserted = 0;
-    const startRoundId = 4746; // Jornada 1
-    const maxRounds = 40; // Safety limit
 
-    for (let roundId = startRoundId; roundId < startRoundId + maxRounds; roundId++) {
-      if (existingRounds.has(roundId)) {
-          // console.log(`   Skipping Round ${roundId} (already synced).`);
-          continue;
-      }
+    for (const round of allRounds) {
+        const roundName = round.name;
+        const status = round.status;
 
-      try {
-        // console.log(`   Fetching Round ${roundId}...`);
-        const roundData = await fetchRoundsLeague(roundId);
-        
-        // Determine where standings are
-        let standings = null;
-        let roundName = `Round ${roundId}`;
+        console.log(`\n--- Processing ${roundName} (${status}) ---`);
 
-        if (roundData.data) {
-            if (roundData.data.round) {
-                if (roundData.data.round.name) {
-                    roundName = roundData.data.round.name;
-                }
-                if (roundData.data.round.standings) {
-                    standings = roundData.data.round.standings;
-                }
-            }
-            if (!standings && roundData.data.league && roundData.data.league.standings) {
-                standings = roundData.data.league.standings;
-            }
-            // Fallback for name if not found in round object but maybe in league object or just generic
-            if (roundName === `Round ${roundId}` && roundData.data.name) {
-                 roundName = roundData.data.name;
-            }
-        }
+        if (roundName === 'GLOBAL') continue;
 
-        if (!standings) {
-            continue;
-        }
+        // Sync Matches
+        await syncMatches(db, round);
 
-        // Check if this round actually has lineups (future rounds might have standings but no lineups)
-        const hasLineups = standings.some(user => user.lineup && user.lineup.players && user.lineup.players.length > 0);
-        if (!hasLineups) {
-             console.log(`   Round ${roundId}: Standings found but NO lineups (likely future), stopping.`);
-             break;
-        }
-
-        console.log(`   Processing ${roundName} (ID: ${roundId})...`);
-
-        db.transaction(() => {
-          for (const user of standings) {
-            // Insert user info
-            insertUser.run({
-                id: user.id.toString(),
-                name: user.name
-            });
-
-            if (user.lineup && user.lineup.players) {
-              const captainId = user.lineup.captain ? user.lineup.captain.id : null;
-              
-              for (const playerId of user.lineup.players) {
-                try {
-                  insertLineup.run({
-                    user_id: user.id.toString(),
-                    round_id: roundId,
-                    round_name: roundName,
-                    player_id: playerId,
-                    is_captain: playerId === captainId ? 1 : 0,
-                    points: 0 // Points per player not available in this view
-                  });
-                  totalLineupsInserted++;
-                } catch (e) {
-                  // Ignore duplicates
-                }
-              }
-            }
-          }
-        })();
-
-      } catch (error) {
-        // Stop if we hit a 404 or similar error indicating end of rounds
-        if (error.message && (error.message.includes('404') || error.message.includes('400'))) {
-          console.log(`   Round ${roundId}: Not found (likely future), stopping.`);
-          break;
-        }
-        console.error(`   Error processing round ${roundId}:`, error.message);
-      }
+        // Sync Lineups
+        const inserted = await syncLineups(db, round, existingLineupRounds, lastLineupRoundId);
+        totalLineupsInserted += inserted;
     }
     
     console.log(`✅ Lineups synced (${totalLineupsInserted} entries).`);

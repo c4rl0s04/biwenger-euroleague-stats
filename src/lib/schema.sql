@@ -34,15 +34,7 @@ CREATE TABLE players (
 
 
 
-CREATE TABLE player_round_stats (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    player_id INTEGER NOT NULL,
-    round_id INTEGER NOT NULL,
-    round_name TEXT,
-    points INTEGER,
-    UNIQUE(round_id, player_id),
-    FOREIGN KEY(player_id) REFERENCES players(id)
-);
+
 
 CREATE TABLE lineups (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,6 +50,7 @@ CREATE TABLE lineups (
 
 CREATE TABLE matches (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                round_id INTEGER,
                 round_name TEXT,
                 home_team TEXT,
                 away_team TEXT,
@@ -65,7 +58,7 @@ CREATE TABLE matches (
                 status TEXT,
                 home_score INTEGER,
                 away_score INTEGER,
-                UNIQUE(round_name, home_team, away_team)
+                UNIQUE(round_id, home_team, away_team)
             );
 
 CREATE TABLE fichajes (
