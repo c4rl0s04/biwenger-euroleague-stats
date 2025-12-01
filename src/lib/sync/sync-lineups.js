@@ -60,13 +60,15 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                         try {
                             const participated = user.lineup.count ? 1 : 0;
                             db.prepare(`
-                                INSERT INTO user_rounds (user_id, round_name, points, participated)
-                                VALUES (?, ?, ?, ?)
-                                ON CONFLICT(user_id, round_name) DO UPDATE SET
+                                INSERT INTO user_rounds (user_id, round_id, round_name, points, participated)
+                                VALUES (?, ?, ?, ?, ?)
+                                ON CONFLICT(user_id, round_id) DO UPDATE SET
                                 points=excluded.points,
-                                participated=excluded.participated
+                                participated=excluded.participated,
+                                round_name=excluded.round_name
                             `).run(
                                 user.id.toString(),
+                                roundId,
                                 roundName,
                                 user.lineup.points || 0,
                                 participated

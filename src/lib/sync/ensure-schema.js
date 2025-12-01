@@ -65,15 +65,28 @@ export function ensureSchema(db) {
       )
     `).run();
 
+    // Check if user_rounds table has round_id column (migration check)
+    let userRoundsHasRoundId = false;
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(user_rounds)").all();
+        userRoundsHasRoundId = tableInfo.some(c => c.name === 'round_id');
+    } catch (e) {}
+
+    if (!userRoundsHasRoundId) {
+        console.log('   Migrating user_rounds table to include round_id...');
+        db.prepare('DROP TABLE IF EXISTS user_rounds').run();
+    }
+
     // Create user_rounds table if not exists
     db.prepare(`
       CREATE TABLE IF NOT EXISTS user_rounds (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT,
+        round_id INTEGER,
         round_name TEXT,
         points INTEGER,
         participated BOOLEAN DEFAULT 1,
-        UNIQUE(user_id, round_name)
+        UNIQUE(user_id, round_id)
       )
     `).run();
 }

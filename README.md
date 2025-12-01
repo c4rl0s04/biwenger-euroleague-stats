@@ -65,11 +65,23 @@ biwengerstats-next/
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **UI**: React 19 + Tailwind CSS
-- **Database**: SQLite (better-sqlite3)
-- **Charts**: Chart.js + react-chartjs-2
-- **Sync Engine**: Node.js (Modular Architecture)
+### Frontend
+
+- **Next.js 15 (App Router)**: Framework for server-side rendering and routing.
+- **React 19**: UI library for building interactive components.
+- **Tailwind CSS**: Utility-first CSS framework for rapid styling.
+- **Chart.js + react-chartjs-2**: For visualizing stats and trends.
+
+### Backend & Data
+
+- **Node.js**: Runtime for the synchronization engine.
+- **SQLite (better-sqlite3)**: Fast, serverless, local database for storing stats.
+- **Biwenger API**: External source of truth for all data.
+
+### Testing & Quality
+
+- **Vitest**: Blazing fast unit test runner (compatible with Jest).
+- **ESLint**: Linter for code quality and consistency.
 
 ## 🔄 Data Synchronization
 

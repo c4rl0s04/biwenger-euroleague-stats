@@ -14,9 +14,10 @@ CREATE TABLE users (
 CREATE TABLE user_rounds (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
+                round_id INTEGER,
                 round_name TEXT,
                 points INTEGER, participated BOOLEAN DEFAULT 1,
-                UNIQUE(user_id, round_name)
+                UNIQUE(user_id, round_id)
             );
 
 CREATE TABLE players (
