@@ -58,16 +58,18 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                     // Insert User Round Score (ALWAYS update/insert since we cleared table)
                     if (user.lineup) {
                         try {
+                            const participated = user.lineup.count ? 1 : 0;
                             db.prepare(`
                                 INSERT INTO user_rounds (user_id, round_name, points, participated)
                                 VALUES (?, ?, ?, ?)
                                 ON CONFLICT(user_id, round_name) DO UPDATE SET
-                                points=excluded.points
+                                points=excluded.points,
+                                participated=excluded.participated
                             `).run(
                                 user.id.toString(),
                                 roundName,
                                 user.lineup.points || 0,
-                                1
+                                participated
                             );
                         } catch (e) {
                             console.error(`Error inserting user_round for ${user.name}: ${e.message}`);
