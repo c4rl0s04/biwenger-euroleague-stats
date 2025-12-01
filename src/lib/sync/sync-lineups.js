@@ -1,5 +1,14 @@
 import { fetchRoundsLeague } from '../biwenger-client.js';
 
+/**
+ * Syncs lineups and user points for a specific round.
+ * Only syncs if round is finished or active.
+ * @param {import('better-sqlite3').Database} db - Database instance
+ * @param {Object} round - Round object
+ * @param {Set<number>} existingLineupRounds - Set of round IDs already synced
+ * @param {number} lastLineupRoundId - ID of the last synced round
+ * @returns {Promise<number>} - Number of lineups inserted
+ */
 export async function syncLineups(db, round, existingLineupRounds, lastLineupRoundId) {
     const roundId = round.id;
     const roundName = round.name;

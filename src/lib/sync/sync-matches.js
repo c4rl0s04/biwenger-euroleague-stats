@@ -1,5 +1,10 @@
 import { fetchRoundGames } from '../biwenger-client.js';
 
+/**
+ * Syncs matches (games) for a specific round.
+ * @param {import('better-sqlite3').Database} db - Database instance
+ * @param {Object} round - Round object (id, name, status)
+ */
 export async function syncMatches(db, round) {
     const roundId = round.id;
     const roundName = round.name;

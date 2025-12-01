@@ -1,3 +1,8 @@
+/**
+ * Ensures that all necessary database tables exist and are up to date.
+ * Handles migrations (e.g. adding round_id to lineups).
+ * @param {import('better-sqlite3').Database} db - Database instance
+ */
 export function ensureSchema(db) {
     // Check if lineups table has round_id column (migration check)
     let hasRoundId = false;

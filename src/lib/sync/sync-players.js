@@ -1,5 +1,12 @@
 import { fetchAllPlayers } from '../biwenger-client.js';
+import { CONFIG } from '../config.js';
 
+/**
+ * Syncs all players from the competition to the local database.
+ * Also updates market values (current price).
+ * @param {import('better-sqlite3').Database} db - Database instance
+ * @returns {Promise<Object>} - The full competition data object
+ */
 export async function syncPlayers(db) {
   console.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
@@ -49,7 +56,7 @@ export async function syncPlayers(db) {
 
   // Helper to map position ID to text
   // 1 -> Base, 2 -> Alero, 3 -> Pivot
-  const positions = { 1: 'Base', 2: 'Alero', 3: 'Pivot', 4: 'Entrenador', 5: 'Entrenador' }; 
+  const positions = CONFIG.POSITIONS; 
   const teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
 
   db.transaction(() => {

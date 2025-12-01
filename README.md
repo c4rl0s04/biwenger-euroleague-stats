@@ -2,22 +2,39 @@
 
 > Modern React dashboard for BiwengerLeague statistics - Built with Next.js 15
 
-This is the **Next.js migration** of the original Flask-based BiwengerStats dashboard. This version uses React for the frontend and Next.js API routes for the backend, while maintaining the same SQLite database.
+This project is a comprehensive dashboard for Biwenger fantasy leagues. It includes a fully autonomous data synchronization system built with Node.js, removing the dependency on external Python scrapers.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js 18+
-- The SQLite database from the Flask version (`data/biwenger.db`)
+- Biwenger Account Credentials (Token, League ID)
 
 ### Installation
 
-```bash
-# Install dependencies
-npm install
+1. Install dependencies:
 
-# Run development server
+```bash
+npm install
+```
+
+2. Configure environment variables:
+   Copy `.env.example` to `.env.local` and fill in your details:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Run the initial data sync:
+
+```bash
+npm run sync
+```
+
+4. Start the development server:
+
+```bash
 npm run dev
 ```
 
@@ -29,18 +46,21 @@ Open [http://localhost:3000](http://localhost:3000) to see the dashboard.
 biwengerstats-next/
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── layout.js          # Root layout with navigation
-│   │   ├── page.js            # Home page
-│   │   ├── market/            # Market analysis page
-│   │   ├── porras/            # Porras statistics page
-│   │   ├── usuarios/          # Squad analysis page
-│   │   └── api/               # API routes (backend)
-│   ├── components/            # Reusable React components
-│   └── lib/                   # Utilities
-│       └── database.js        # SQLite database access
-├── data/                      # SQLite database
-│   └── biwenger.db           # Copied from Flask project
-└── public/                    # Static assets
+│   ├── components/             # Reusable React components
+│   └── lib/                    # Utilities & Core Logic
+│       ├── biwenger-client.js  # API Client
+│       ├── config.js           # Centralized Configuration
+│       ├── database.js         # SQLite Access
+│       └── sync/               # Synchronization Modules
+│           ├── sync-players.js
+│           ├── sync-standings.js
+│           ├── sync-transfers.js
+│           ├── sync-matches.js
+│           └── sync-lineups.js
+├── scripts/
+│   └── sync-data.mjs           # Main Sync Orchestrator
+├── data/                       # SQLite database (local.db)
+└── public/                     # Static assets
 ```
 
 ## 🛠️ Tech Stack
@@ -49,72 +69,25 @@ biwengerstats-next/
 - **UI**: React 19 + Tailwind CSS
 - **Database**: SQLite (better-sqlite3)
 - **Charts**: Chart.js + react-chartjs-2
-- **Deployment**: Vercel (recommended)
+- **Sync Engine**: Node.js (Modular Architecture)
 
-## 📊 Features
+## 🔄 Data Synchronization
 
-### ✅ Implemented
+The project includes a robust synchronization system that fetches data directly from the Biwenger API.
 
-- [x] Home dashboard with quick stats
-- [x] Navigation layout
-- [x] Database connection
-- [x] Server-side data fetching
-
-### 🚧 In Progress (Migration from Flask)
-
-- [ ] Market page with charts
-- [ ] Porras statistics page
-- [ ] Usuarios/Squad analysis page
-- [ ] Analytics page
-
-## 🔄 Development
+To run the sync manually:
 
 ```bash
-# Development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
+npm run sync
 ```
 
-## 📚 Learning Resources
+This process:
 
-This project is part of learning React/Next.js. Key concepts demonstrated:
-
-- **Server Components**: Data fetching on the server
-- **Client Components**: Interactive UI elements
-- **App Router**: File-based routing
-- **API Routes**: Backend endpoints
-- **Tailwind CSS**: Utility-first styling
-
-## 🔗 Related Projects
-
-- **Flask Version**: `../SimpleBiwenger` - Original Python/Flask dashboard
-- **Scraper**: Uses the same database created by the Python scraper
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-1. Push to GitHub
-2. Import project in Vercel
-3. Deploy automatically
-
-### Environment Variables
-
-No environment variables needed - database is included in the repo (local use only).
-
-## 📝 Notes
-
-- This project uses the **same SQLite database** as the Flask version
-- Data is scraped by the Python project and read by this Next.js app
-- Both projects can run simultaneously on different ports
+1.  **Players**: Updates player database and market values.
+2.  **Standings**: Updates user list.
+3.  **Transfers**: Incrementally syncs market transfers.
+4.  **Matches**: Updates calendar and match results.
+5.  **Lineups**: Syncs user lineups and points for finished rounds.
 
 ## 👤 Author
 

@@ -2,15 +2,15 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import Database from 'better-sqlite3';
-import path from 'path';
 import { syncPlayers } from '../src/lib/sync/sync-players.js';
 import { syncStandings } from '../src/lib/sync/sync-standings.js';
 import { syncTransfers } from '../src/lib/sync/sync-transfers.js';
 import { syncMatches } from '../src/lib/sync/sync-matches.js';
 import { syncLineups } from '../src/lib/sync/sync-lineups.js';
 import { ensureSchema } from '../src/lib/sync/ensure-schema.js';
+import { CONFIG } from '../src/lib/config.js';
 
-const DB_PATH = path.join(process.cwd(), 'data', 'local.db');
+const DB_PATH = CONFIG.DB.PATH;
 
 async function syncData() {
   console.log('🚀 Starting Biwenger Data Sync...');

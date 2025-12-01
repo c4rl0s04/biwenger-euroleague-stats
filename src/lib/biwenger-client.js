@@ -11,16 +11,17 @@
  * - BIWENGER_ACCOUNT_ID: (Optional) Sometimes required in headers
  */
 
-const BASE_URL = 'https://biwenger.as.com/api/v2';
+import { CONFIG } from './config.js';
 
 /**
- * Generic fetch wrapper with headers
+ * Generic fetch wrapper for Biwenger API
+ * @param {string} endpoint - API endpoint (relative to BASE_URL)
+ * @returns {Promise<any>} - JSON response
  */
 export async function biwengerFetch(endpoint) {
-  // Read config lazily to ensure env vars are loaded
-  const tokenRaw = process.env.BIWENGER_TOKEN;
-  const leagueId = process.env.BIWENGER_LEAGUE_ID;
-  const userId = process.env.BIWENGER_USER_ID;
+  const tokenRaw = CONFIG.API.TOKEN;
+  const leagueId = CONFIG.API.LEAGUE_ID;
+  const userId = CONFIG.API.USER_ID;
 
   if (!tokenRaw) {
     throw new Error('BIWENGER_TOKEN is missing in environment variables');
@@ -29,7 +30,7 @@ export async function biwengerFetch(endpoint) {
     throw new Error('BIWENGER_LEAGUE_ID is missing in environment variables');
   }
 
-  const url = `${BASE_URL}${endpoint}`;
+  const url = `${CONFIG.API.BASE_URL}${endpoint}`;
   
   // Handle token prefix
   const token = tokenRaw.startsWith('Bearer ') ? tokenRaw : `Bearer ${tokenRaw}`;
@@ -56,72 +57,52 @@ export async function biwengerFetch(endpoint) {
     throw error;
   }
 }
-/**
- * Helper to get League ID lazily
- */
-function getLeagueId() {
-  const id = process.env.BIWENGER_LEAGUE_ID;
-  if (!id) throw new Error('BIWENGER_LEAGUE_ID is missing');
-  return id;
-}
 
 /**
- * Get Market Data (Players for sale)
+ * Fetch market data (active sales)
  */
 export async function fetchMarket() {
-  return biwengerFetch(`/league/${getLeagueId()}/market`);
+  return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, 0, 100));
 }
 
 /**
- * Get League Details (Standings, settings)
+ * Fetch league standings and users
  */
 export async function fetchLeague() {
-  return biwengerFetch(`/league/${getLeagueId()}?fields=standings`);
+  return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_STANDINGS(CONFIG.API.LEAGUE_ID));
 }
 
 /**
- * Get All Players in the League (Squads)
- */
-export async function fetchBoard() {
-  return biwengerFetch(`/league/${getLeagueId()}/board`);
-}
-
-/**
- * Get Transfers (Fichajes)
- * @param {number} offset - Pagination offset
- * @param {number} limit - Number of results
+ * Fetch board/transfers history
  */
 export async function fetchTransfers(offset = 0, limit = 20) {
-  return biwengerFetch(`/league/${getLeagueId()}/board?type=transfer&offset=${offset}&limit=${limit}`);
+  return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, offset, limit));
 }
 
 /**
- * Get Competition Data (e.g. Euroleague)
+ * Fetch competition data (players, teams, rounds)
  */
-export async function fetchCompetition(id = 'euroleague') {
-  return biwengerFetch(`/competitions/${id}`);
+export async function fetchCompetition() {
+  return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA);
 }
 
 /**
- * Get All Players (Database of all players in the game)
+ * Fetch all players (alias for fetchCompetition)
  */
 export async function fetchAllPlayers() {
-  return biwengerFetch(`/competitions/euroleague/data?lang=es`); 
+  return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA); 
 }
 
 /**
- * Get Rounds League Data (Standings with lineups)
- * @param {number|string} [roundId] - Optional round ID to fetch specific round
+ * Fetch rounds list or specific round details (lineups)
  */
 export async function fetchRoundsLeague(roundId) {
-  const endpoint = roundId ? `/rounds/league/${roundId}` : `/rounds/league`;
-  return biwengerFetch(endpoint);
+  return biwengerFetch(CONFIG.ENDPOINTS.ROUND_LEAGUE(roundId));
 }
 
 /**
- * Get Round Games (Results and Schedule)
- * @param {number|string} roundId - Round ID
+ * Fetch games/matches for a specific round
  */
 export async function fetchRoundGames(roundId) {
-  return biwengerFetch(`/rounds/euroleague/${roundId}?score=1&lang=es`);
+  return biwengerFetch(CONFIG.ENDPOINTS.ROUND_GAMES(roundId));
 }

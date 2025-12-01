@@ -1,5 +1,9 @@
 import { fetchLeague } from '../biwenger-client.js';
 
+/**
+ * Syncs league standings (users) to the local database.
+ * @param {import('better-sqlite3').Database} db - Database instance
+ */
 export async function syncStandings(db) {
   console.log('\n📥 Fetching Standings...');
   const league = await fetchLeague();

@@ -1,5 +1,12 @@
 import { biwengerFetch } from '../biwenger-client.js';
+import { CONFIG } from '../config.js';
 
+/**
+ * Syncs transfer market history (fichajes) incrementally.
+ * @param {import('better-sqlite3').Database} db - Database instance
+ * @param {Object} playersList - Map of player IDs to player objects
+ * @param {Object} teams - Map of team IDs to team objects
+ */
 export async function syncTransfers(db, playersList, teams) {
     console.log('\n📥 Fetching Full Board History...');
     
@@ -42,7 +49,7 @@ export async function syncTransfers(db, playersList, teams) {
     let skippedOld = 0;
 
     // Helper to get league ID for raw fetch
-    const leagueId = process.env.BIWENGER_LEAGUE_ID;
+    const leagueId = CONFIG.API.LEAGUE_ID;
     if (!leagueId) {
         throw new Error('BIWENGER_LEAGUE_ID is not defined in .env');
     }
