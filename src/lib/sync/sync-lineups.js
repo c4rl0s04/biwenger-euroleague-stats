@@ -39,13 +39,14 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
              `);
 
              const insertLineup = db.prepare(`
-               INSERT INTO lineups (user_id, round_id, round_name, player_id, is_captain, points)
-               VALUES (@user_id, @round_id, @round_name, @player_id, @is_captain, @points)
-               ON CONFLICT(user_id, round_id, player_id) DO UPDATE SET
-               points=excluded.points,
-               is_captain=excluded.is_captain,
-               round_name=excluded.round_name
-             `);
+                               INSERT INTO lineups (user_id, round_id, round_name, player_id, is_captain, points, role)
+                               VALUES (@user_id, @round_id, @round_name, @player_id, @is_captain, @points, @role)
+                               ON CONFLICT(user_id, round_id, player_id) DO UPDATE SET
+                               points=excluded.points,
+                               is_captain=excluded.is_captain,
+                               round_name=excluded.round_name,
+                               role=excluded.role
+                             `);
 
              db.transaction(() => {
                 for (const user of standings) {
@@ -87,21 +88,26 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                         if (user.lineup && user.lineup.players) {
                             const captainId = user.lineup.captain ? user.lineup.captain.id : null;
                             
-                            for (const playerId of user.lineup.players) {
+                            user.lineup.players.forEach((playerId, index) => {
                                 try {
+                                    let role = 'suplente';
+                                    if (index < 5) role = 'titular';
+                                    else if (index === 5) role = '6th_man';
+
                                     insertLineup.run({
                                         user_id: user.id.toString(),
                                         round_id: roundId,
                                         round_name: roundName,
                                         player_id: playerId,
                                         is_captain: playerId === captainId ? 1 : 0,
-                                        points: 0 // Always 0
+                                        points: 0, // Always 0
+                                        role: role
                                     });
                                     insertedCount++;
                                 } catch (e) {
                                     // Ignore duplicates
                                 }
-                            }
+                            });
                         }
                     }
                 }

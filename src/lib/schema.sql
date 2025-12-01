@@ -47,6 +47,7 @@ CREATE TABLE lineups (
                 player_id INTEGER,
                 is_captain BOOLEAN,
                 points INTEGER,
+                role TEXT,
                 UNIQUE(user_id, round_id, player_id),
                 FOREIGN KEY(player_id) REFERENCES players(id)
             );

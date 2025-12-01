@@ -43,6 +43,18 @@ export function ensureSchema(db) {
       )
     `).run();
 
+    // Check if lineups table has role column (migration check)
+    let lineupsHasRole = false;
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(lineups)").all();
+        lineupsHasRole = tableInfo.some(c => c.name === 'role');
+    } catch (e) {}
+
+    if (!lineupsHasRole) {
+        console.log('   Migrating lineups table to include role...');
+        db.prepare('DROP TABLE IF EXISTS lineups').run();
+    }
+
     db.prepare(`
       CREATE TABLE IF NOT EXISTS lineups (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +64,7 @@ export function ensureSchema(db) {
         player_id INTEGER,
         is_captain BOOLEAN,
         points INTEGER,
+        role TEXT,
         UNIQUE(user_id, round_id, player_id),
         FOREIGN KEY(player_id) REFERENCES players(id)
       )
