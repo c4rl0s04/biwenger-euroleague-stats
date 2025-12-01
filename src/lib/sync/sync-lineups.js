@@ -59,19 +59,22 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                     if (user.lineup) {
                         try {
                             const participated = user.lineup.count ? 1 : 0;
+                            const alineacion = user.lineup.type || null;
                             db.prepare(`
-                                INSERT INTO user_rounds (user_id, round_id, round_name, points, participated)
-                                VALUES (?, ?, ?, ?, ?)
+                                INSERT INTO user_rounds (user_id, round_id, round_name, points, participated, alineacion)
+                                VALUES (?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(user_id, round_id) DO UPDATE SET
                                 points=excluded.points,
                                 participated=excluded.participated,
-                                round_name=excluded.round_name
+                                round_name=excluded.round_name,
+                                alineacion=excluded.alineacion
                             `).run(
                                 user.id.toString(),
                                 roundId,
                                 roundName,
                                 user.lineup.points || 0,
-                                participated
+                                participated,
+                                alineacion
                             );
                         } catch (e) {
                             console.error(`Error inserting user_round for ${user.name}: ${e.message}`);

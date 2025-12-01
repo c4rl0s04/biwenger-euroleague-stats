@@ -16,7 +16,9 @@ CREATE TABLE user_rounds (
                 user_id TEXT,
                 round_id INTEGER,
                 round_name TEXT,
-                points INTEGER, participated BOOLEAN DEFAULT 1,
+                points INTEGER,
+                participated BOOLEAN DEFAULT 1,
+                alineacion TEXT,
                 UNIQUE(user_id, round_id)
             );
 

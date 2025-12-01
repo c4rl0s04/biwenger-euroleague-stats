@@ -65,15 +65,15 @@ export function ensureSchema(db) {
       )
     `).run();
 
-    // Check if user_rounds table has round_id column (migration check)
-    let userRoundsHasRoundId = false;
+    // Check if user_rounds table has alineacion column (migration check)
+    let userRoundsHasAlineacion = false;
     try {
         const tableInfo = db.prepare("PRAGMA table_info(user_rounds)").all();
-        userRoundsHasRoundId = tableInfo.some(c => c.name === 'round_id');
+        userRoundsHasAlineacion = tableInfo.some(c => c.name === 'alineacion');
     } catch (e) {}
 
-    if (!userRoundsHasRoundId) {
-        console.log('   Migrating user_rounds table to include round_id...');
+    if (!userRoundsHasAlineacion) {
+        console.log('   Migrating user_rounds table to include alineacion...');
         db.prepare('DROP TABLE IF EXISTS user_rounds').run();
     }
 
@@ -86,6 +86,7 @@ export function ensureSchema(db) {
         round_name TEXT,
         points INTEGER,
         participated BOOLEAN DEFAULT 1,
+        alineacion TEXT,
         UNIQUE(user_id, round_id)
       )
     `).run();
