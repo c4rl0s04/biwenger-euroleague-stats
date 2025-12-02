@@ -104,5 +104,7 @@ export async function fetchRoundsLeague(roundId) {
  * Fetch games/matches for a specific round
  */
 export async function fetchRoundGames(roundId) {
-  return biwengerFetch(CONFIG.ENDPOINTS.ROUND_GAMES(roundId));
+  // Fetch with score=1 to get standard fantasy points
+  // Remove lang=es to match user expectations (English API seems closer to user's 27 points)
+  return biwengerFetch(`/rounds/euroleague/${roundId}?score=1`);
 }

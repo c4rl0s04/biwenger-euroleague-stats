@@ -37,49 +37,40 @@ async function syncData() {
     // 5. Sync Lineups and Matches
     console.log('\n📥 Syncing Lineups...');
 
-    // Reset all lineup points to 0 as requested
-    db.prepare('UPDATE lineups SET points = 0').run();
-
     // Get existing rounds to skip (incremental update for LINEUPS only)
     const existingLineupRoundsArr = db.prepare('SELECT DISTINCT round_id FROM lineups').pluck().all();
     const existingLineupRounds = new Set(existingLineupRoundsArr);
     const lastLineupRoundId = existingLineupRoundsArr.length > 0 ? Math.max(...existingLineupRoundsArr) : 0;
     
     // Get rounds list
-    let allRounds = [];
-    const compData = competition.data.data || competition.data;
+    // Fetch rounds from competition data
+    const rounds = competition.data.data ? competition.data.data.season.rounds : competition.data.season.rounds;
     
-    if (compData.rounds) {
-        allRounds = compData.rounds;
-    } else if (compData.season && compData.season.rounds) {
-        allRounds = compData.season.rounds;
-    }
-    
-    if (allRounds.length > 0) {
-        console.log(`Found ${allRounds.length} rounds in competition data.`);
+    if (!rounds) {
+        console.error('Could not find rounds in competition data');
     } else {
-        console.error('No rounds found in competition data. Lineups sync will be skipped.');
+        console.log(`Found ${rounds.length} rounds in competition data.`);
+        
+        let totalLineupsInserted = 0;
+
+        for (const round of rounds) {
+             const roundName = round.name;
+             const status = round.status;
+
+             console.log(`\n--- Processing ${roundName} (${status}) ---`);
+
+             if (roundName === 'GLOBAL') continue;
+
+             // Sync Matches (and Player Stats) for ALL rounds
+             // Pass playersList to handle missing players
+             await syncMatches(db, round, playersList);
+             
+             // Sync Lineups only for finished rounds
+             const inserted = await syncLineups(db, round, existingLineupRounds, lastLineupRoundId);
+             totalLineupsInserted += inserted;
+        }
+        console.log(`✅ Lineups synced (${totalLineupsInserted} entries).`);
     }
-
-    let totalLineupsInserted = 0;
-
-    for (const round of allRounds) {
-        const roundName = round.name;
-        const status = round.status;
-
-        console.log(`\n--- Processing ${roundName} (${status}) ---`);
-
-        if (roundName === 'GLOBAL') continue;
-
-        // Sync Matches
-        await syncMatches(db, round);
-
-        // Sync Lineups
-        const inserted = await syncLineups(db, round, existingLineupRounds, lastLineupRoundId);
-        totalLineupsInserted += inserted;
-    }
-    
-    console.log(`✅ Lineups synced (${totalLineupsInserted} entries).`);
 
   } catch (error) {
     console.error('❌ Sync Failed:', error);
