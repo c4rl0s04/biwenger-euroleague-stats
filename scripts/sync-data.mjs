@@ -69,9 +69,10 @@ async function syncData() {
              // Pass playersList to handle missing players
              await syncMatches(db, round, playersList);
              
-             // Sync Lineups only for finished rounds
-             const inserted = await syncLineups(db, round, existingLineupRounds, lastLineupRoundId);
-             totalLineupsInserted += inserted;
+             // Sync Lineups (only if round is finished/active)
+        // We pass playersList to filter out unknown players
+        const inserted = await syncLineups(db, round, existingLineupRounds, lastLineupRoundId, playersList);
+        totalLineupsInserted += inserted;
         }
         console.log(`✅ Lineups synced (${totalLineupsInserted} entries).`);
     }

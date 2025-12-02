@@ -150,25 +150,10 @@ export async function syncBoard(db, playersList, teams) {
             const date = new Date(timestamp * 1000).toISOString();
             const playerId = content.player;
 
-            // Check if player exists, if not insert placeholder
+            // Check if player exists, if not skip
             if (!playersList[playerId]) {
-              // console.warn(`⚠️ Player ${playerId} not found. Inserting placeholder.`);
-              try {
-                insertPlayer.run({
-                  id: playerId,
-                  name: `Unknown Player (${playerId})`,
-                  team: 'Unknown',
-                  position: 'Unknown',
-                  puntos: 0,
-                  partidos_jugados: 0,
-                  played_home: 0,
-                  played_away: 0,
-                  points_home: 0,
-                  points_away: 0,
-                  points_last_season: 0
-                });
-                playersList[playerId] = { name: `Unknown Player (${playerId})` };
-              } catch (e) { }
+              // console.warn(`⚠️ Player ${playerId} not found. Skipping transfer.`);
+              continue;
             }
             
             // Determine From/To names safely

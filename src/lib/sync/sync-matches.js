@@ -104,25 +104,8 @@ export async function syncMatches(db, round, playersList = {}) {
                             
                             // Check if player exists, insert placeholder if not
                             if (!playersList[playerId]) {
-                                try {
-                                    insertPlayer.run({
-                                        id: playerId,
-                                        name: report.player ? report.player.name : `Unknown Player (${playerId})`,
-                                        team: 'Unknown',
-                                        position: 'Unknown',
-                                        puntos: 0,
-                                        partidos_jugados: 0,
-                                        played_home: 0,
-                                        played_away: 0,
-                                        points_home: 0,
-                                        points_away: 0,
-                                        points_last_season: 0
-                                    });
-                                    playersList[playerId] = { name: report.player ? report.player.name : `Unknown Player (${playerId})` };
-                                    // console.log(`   -> Inserted missing player: ${playerId}`);
-                                } catch (e) {
-                                    console.error(`   Failed to insert player ${playerId}:`, e.message);
-                                }
+                                // console.warn(`   Skipping stats for unknown player ${playerId} (${report.player ? report.player.name : 'No Name'})`);
+                                continue; // Skip processing stats for this unknown player
                             }
 
                             const statsMap = {};

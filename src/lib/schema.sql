@@ -10,7 +10,8 @@ CREATE TABLE porras (
 
 CREATE TABLE users (
                 id TEXT PRIMARY KEY,
-                name TEXT
+                name TEXT,
+                icon TEXT
             );
 
 CREATE TABLE user_rounds (
@@ -36,7 +37,10 @@ CREATE TABLE players (
     points_home INTEGER,
     points_away INTEGER,
     points_last_season INTEGER,
-    owner_id TEXT
+    owner_id TEXT,
+    img_url TEXT,
+    status TEXT,
+    price_increment INTEGER
 );
 
 

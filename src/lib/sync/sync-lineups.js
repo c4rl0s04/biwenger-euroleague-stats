@@ -1,15 +1,15 @@
 import { fetchRoundsLeague } from '../biwenger-client.js';
 
 /**
- * Syncs lineups and user points for a specific round.
- * Only syncs if round is finished or active.
+ * Syncs lineups for finished rounds.
  * @param {import('better-sqlite3').Database} db - Database instance
  * @param {Object} round - Round object
  * @param {Set<number>} existingLineupRounds - Set of round IDs already synced
  * @param {number} lastLineupRoundId - ID of the last synced round
+ * @param {Object} playersList - Map of player IDs to player objects
  * @returns {Promise<number>} - Number of lineups inserted
  */
-export async function syncLineups(db, round, existingLineupRounds, lastLineupRoundId) {
+export async function syncLineups(db, round, existingLineupRounds, lastLineupRoundId, playersList) {
     const roundId = round.id;
     const roundName = round.name;
     const status = round.status;
@@ -91,6 +91,13 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                                     let role = 'suplente';
                                     if (index < 5) role = 'titular';
                                     else if (index === 5) role = '6th_man';
+                                    // Check if player exists in our list
+                                    if (!playersList[playerId]) {
+                                        // console.warn(`   Skipping lineup for unknown player ${playerId}`);
+                                        return; // Use return for forEach to skip current iteration
+                                    }
+
+
 
                                     insertLineup.run({
                                         user_id: user.id.toString(),

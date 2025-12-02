@@ -10,14 +10,16 @@ export async function syncStandings(db) {
   const standings = league.data.standings;
   
   const insertUserStandings = db.prepare(`
-    INSERT OR IGNORE INTO users (id, name) VALUES (@id, @name)
+    INSERT INTO users (id, name, icon) VALUES (@id, @name, @icon)
+    ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon
   `);
 
   db.transaction(() => {
     for (const user of standings) {
       insertUserStandings.run({
         id: user.id.toString(),
-        name: user.name
+        name: user.name,
+        icon: user.icon ? `https://cdn.biwenger.com/${user.icon}` : null
       });
     }
   })();

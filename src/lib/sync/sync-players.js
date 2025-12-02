@@ -25,13 +25,15 @@ export async function syncPlayers(db) {
       id, name, team, position, 
       puntos, partidos_jugados, 
       played_home, played_away, 
-      points_home, points_away, points_last_season
+      points_home, points_away, points_last_season,
+      img_url, status, price_increment
     ) 
     VALUES (
       @id, @name, @team, @position, 
       @puntos, @partidos_jugados, 
       @played_home, @played_away, 
-      @points_home, @points_away, @points_last_season
+      @points_home, @points_away, @points_last_season,
+      @img_url, @status, @price_increment
     )
     ON CONFLICT(id) DO UPDATE SET 
       name=excluded.name, 
@@ -43,7 +45,10 @@ export async function syncPlayers(db) {
       played_away=excluded.played_away,
       points_home=excluded.points_home,
       points_away=excluded.points_away,
-      points_last_season=excluded.points_last_season
+      points_last_season=excluded.points_last_season,
+      img_url=excluded.img_url,
+      status=excluded.status,
+      price_increment=excluded.price_increment
   `);
 
   // Also prepare to insert current price into market_values for ALL players
@@ -61,6 +66,11 @@ export async function syncPlayers(db) {
 
   db.transaction(() => {
     for (const [id, player] of Object.entries(playersList)) {
+      // Construct Image URL
+      // Pattern: https://cdn.biwenger.com/face/euroleague/{id}.png
+      // Or generic if not found? No, usually this pattern works.
+      const imgUrl = `https://cdn.biwenger.com/face/euroleague/${id}.png`;
+
       // Insert Player
       insertPlayer.run({
         id: parseInt(id),
@@ -75,7 +85,12 @@ export async function syncPlayers(db) {
         played_away: player.playedAway || 0,
         points_home: player.pointsHome || 0,
         points_away: player.pointsAway || 0,
-        points_last_season: player.pointsLastSeason || 0
+        points_last_season: player.pointsLastSeason || 0,
+        
+        // Enhanced Data
+        img_url: imgUrl,
+        status: player.status || 'ok',
+        price_increment: player.priceIncrement || 0
       });
 
       // Insert Price (if exists)

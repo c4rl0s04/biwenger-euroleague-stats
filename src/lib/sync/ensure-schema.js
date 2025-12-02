@@ -147,6 +147,48 @@ export function ensureSchema(db) {
         }
     }
 
+    // Check for new player columns (img_url, status, price_increment)
+    const playerCols = ['img_url', 'status', 'price_increment'];
+    try {
+        const info = db.prepare("PRAGMA table_info(players)").all();
+        const existingCols = new Set(info.map(c => c.name));
+        
+        for (const col of playerCols) {
+            if (!existingCols.has(col)) {
+                console.log(`Migrating players table (adding ${col} column)...`);
+                let type = col === 'price_increment' ? 'INTEGER' : 'TEXT';
+                db.prepare(`ALTER TABLE players ADD COLUMN ${col} ${type}`).run();
+            }
+        }
+    } catch (e) {
+        console.log('Error migrating players table:', e.message);
+    }
+
+    // Create users table
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        icon TEXT
+      )
+    `).run();
+
+    // Check if users table has icon column
+    let usersHasIcon = false;
+    try {
+        const info = db.prepare("PRAGMA table_info(users)").all();
+        usersHasIcon = info.some(col => col.name === 'icon');
+    } catch (e) {}
+
+    if (!usersHasIcon) {
+        console.log('Migrating users table (adding icon column)...');
+        try {
+            db.prepare('ALTER TABLE users ADD COLUMN icon TEXT').run();
+        } catch (e) {
+            console.log('Column icon likely already exists or error adding it:', e.message);
+        }
+    }
+
     // Create player_round_stats table
     db.prepare(`
       CREATE TABLE IF NOT EXISTS player_round_stats (
