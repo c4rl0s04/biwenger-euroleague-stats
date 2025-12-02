@@ -122,66 +122,48 @@ export function getSquadStats() {
 }
 
 /**
- * Get user squad details
- * @param {string} userId - User ID
+ * Get user squad details (Current Squad)
+ * @param {number} userId - User ID
  * @returns {Array} Player details
  */
 export function getUserSquad(userId) {
   const query = `
     SELECT 
+      p.id,
       p.name,
       p.position,
       p.team,
-      p.puntos,
-      p.partidos_jugados,
-      COALESCE(mv.price, 0) as value
-    FROM user_squads us
-    JOIN players p ON us.player_id = p.id
-    LEFT JOIN market_values mv ON p.id = mv.player_id
-    WHERE us.user_id = ?
-      AND us.date_scraped = (SELECT MAX(date_scraped) FROM user_squads)
-    ORDER BY p.position, p.name
+      p.price,
+      p.points,
+      p.average,
+      p.img_url,
+      p.status
+    FROM players p
+    WHERE p.owner_id = ?
+    ORDER BY p.points DESC
   `;
 
   return db.prepare(query).all(userId);
 }
 
 /**
- * Get market trends over time
- * @returns {Array} Transfer volumes by date
+ * Get the next upcoming round
+ * @returns {Object} Next round details
  */
-export function getMarketTrends() {
+export function getNextRound() {
+  // Find the first match in the future
   const query = `
     SELECT 
-      DATE(fecha) as date,
-      COUNT(*) as count,
-      ROUND(AVG(precio), 2) as avg_value
-    FROM fichajes
-    GROUP BY DATE(fecha)
-    ORDER BY date DESC
-    LIMIT 30
+      round_id,
+      round_name,
+      MIN(date) as start_date
+    FROM matches
+    WHERE date > datetime('now')
+    GROUP BY round_id
+    ORDER BY date ASC
+    LIMIT 1
   `;
-  
-  return db.prepare(query).all().reverse();
-}
-
-/**
- * Get league standings
- * @returns {Array} Current standings
- */
-export function getStandings() {
-  const query = `
-    SELECT 
-      user_id,
-      position,
-      points,
-      team_value
-    FROM standings
-    WHERE date_recorded = (SELECT MAX(date_recorded) FROM standings)
-    ORDER BY position ASC
-  `;
-
-  return db.prepare(query).all();
+  return db.prepare(query).get();
 }
 
 // Export db instance for custom queries if needed

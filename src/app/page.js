@@ -1,118 +1,166 @@
+import { getNextRound, getTopPlayers, getRecentTransfers, getStandings } from '../lib/database';
 import Link from 'next/link';
+import { Calendar, TrendingUp, Users, ArrowRight, Euro } from 'lucide-react';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default function Dashboard() {
+  const nextRound = getNextRound();
+  const topPlayers = getTopPlayers(5);
+  const transfers = getRecentTransfers(5);
+  const standings = getStandings().slice(0, 5); // Top 5 users
+
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center">
-      {/* Hero Section */}
-      <div className="text-center mb-16 space-y-6">
-        <div className="relative inline-block">
-          {/* Glowing effect behind title */}
-          <div className="absolute inset-0 blur-3xl opacity-30 bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 animate-pulse"></div>
-          
-          <h1 className="relative text-7xl md:text-8xl font-black tracking-tight mb-4">
-            <span className="block bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 bg-clip-text text-transparent drop-shadow-2xl">
-              BIWENGER
-            </span>
-            <span className="block text-5xl md:text-6xl bg-gradient-to-r from-red-400 via-orange-400 to-red-500 bg-clip-text text-transparent">
-              ANALYTICS
-            </span>
-          </h1>
-          
-          {/* Underline effect */}
-          <div className="h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full opacity-60"></div>
-        </div>
+    <div className="space-y-8">
+      {/* Hero Section: Next Round & Standings Preview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <p className="text-slate-400 text-lg md:text-xl font-light max-w-2xl mx-auto">
-          Estadísticas avanzadas · Análisis en tiempo real · Insights profesionales
-        </p>
+        {/* Next Round Card */}
+        <div className="lg:col-span-1 bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <Calendar className="w-24 h-24 text-orange-500" />
+          </div>
+          <div>
+            <h2 className="text-slate-400 font-medium mb-1">Próxima Jornada</h2>
+            {nextRound ? (
+              <>
+                <div className="text-3xl font-bold text-white mb-2">{nextRound.round_name}</div>
+                <div className="text-orange-500 font-mono text-lg">
+                  {new Date(nextRound.start_date).toLocaleDateString('es-ES', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="text-2xl font-bold text-white">Temporada Finalizada</div>
+            )}
+          </div>
+          <div className="mt-6">
+            <Link href="/matches" className="text-sm text-slate-300 hover:text-white flex items-center gap-2 transition-colors">
+              Ver calendario completo <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Standings Preview */}
+        <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-500" /> Clasificación
+            </h2>
+            <Link href="/standings" className="text-sm text-blue-400 hover:text-blue-300">Ver todo</Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-slate-400 uppercase bg-slate-800/50">
+                <tr>
+                  <th className="px-4 py-3 rounded-l-lg">Pos</th>
+                  <th className="px-4 py-3">Usuario</th>
+                  <th className="px-4 py-3 text-right">Puntos</th>
+                  <th className="px-4 py-3 text-right rounded-r-lg">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {standings.map((user) => (
+                  <tr key={user.user_id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors">
+                    <td className="px-4 py-3 font-medium text-white">#{user.position}</td>
+                    <td className="px-4 py-3 flex items-center gap-3">
+                      {user.icon ? (
+                        <img src={user.icon} alt={user.name} className="w-6 h-6 rounded-full" />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">{user.name.charAt(0)}</div>
+                      )}
+                      <span className="truncate max-w-[120px] sm:max-w-none">{user.name}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold text-orange-500">{user.total_points}</td>
+                    <td className="px-4 py-3 text-right text-slate-400">{(user.team_value / 1000000).toFixed(1)}M€</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      {/* Navigation Cards - 4 sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl px-4">
+      {/* Top Players & Market */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Market Card - Orange/Yellow */}
-        <Link href="/market" className="group">
-          <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-2 border-slate-700/50 rounded-2xl p-6 hover:border-orange-500/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/30 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-amber-500/0 to-orange-500/0 group-hover:from-orange-500/10 group-hover:via-amber-500/10 group-hover:to-orange-500/5 transition-all duration-500"></div>
-            
-            <div className="relative z-10">
-              <div className="mb-4">
-                <svg className="w-12 h-12 text-orange-400 transform group-hover:scale-110 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors duration-300">
-                Market
-              </h2>
-              <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors duration-300">
-                Fichajes y tendencias
-              </p>
-            </div>
+        {/* Top Players */}
+        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-green-500" /> Top Jugadores
+            </h2>
+            <Link href="/players" className="text-sm text-green-400 hover:text-green-300">Ver todos</Link>
           </div>
-        </Link>
+          <div className="space-y-4">
+            {topPlayers.map((player, index) => (
+              <div key={player.id} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-700">
+                <div className="relative w-12 h-12 flex-shrink-0">
+                  <img 
+                    src={player.img_url} 
+                    alt={player.name} 
+                    className="w-full h-full object-cover rounded-full bg-slate-800"
+                    onError={(e) => { e.target.src = 'https://biwenger.as.com/face/default.png'; }}
+                  />
+                  <div className="absolute -top-1 -left-1 w-5 h-5 bg-slate-900 rounded-full flex items-center justify-center text-xs font-bold text-white border border-slate-700">
+                    {index + 1}
+                  </div>
+                </div>
+                <div className="flex-grow min-w-0">
+                  <div className="font-medium text-white truncate">{player.name}</div>
+                  <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-green-400">{player.points} pts</div>
+                  <div className="text-xs text-slate-500">{player.average} avg</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* Porras Card - Purple */}
-        <Link href="/porras" className="group">
-          <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-2 border-slate-700/50 rounded-2xl p-6 hover:border-purple-500/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/30 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:via-purple-500/10 group-hover:to-purple-500/5 transition-all duration-500"></div>
-            
-            <div className="relative z-10">
-              <div className="mb-4">
-                <svg className="w-12 h-12 text-purple-400 transform group-hover:scale-110 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors duration-300">
-                Porras
-              </h2>
-              <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors duration-300">
-                Rankings y predicciones
-              </p>
-            </div>
+        {/* Recent Transfers */}
+        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Euro className="w-5 h-5 text-yellow-500" /> Últimos Fichajes
+            </h2>
+            <Link href="/market" className="text-sm text-yellow-400 hover:text-yellow-300">Ir al mercado</Link>
           </div>
-        </Link>
+          <div className="space-y-0">
+            {transfers.map((transfer) => (
+              <div key={transfer.id} className="flex items-center justify-between py-3 border-b border-slate-800/50 last:border-0">
+                <div className="flex items-center gap-3">
+                   <img 
+                    src={transfer.img_url} 
+                    alt={transfer.player_name} 
+                    className="w-10 h-10 object-cover rounded-full bg-slate-800"
+                  />
+                  <div>
+                    <div className="font-medium text-white text-sm">{transfer.player_name}</div>
+                    <div className="text-xs text-slate-400 flex items-center gap-1">
+                      <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
+                      <ArrowRight className="w-3 h-3" />
+                      <span className="text-green-400">{transfer.comprador}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-white text-sm">{(transfer.precio / 1000000).toFixed(2)}M€</div>
+                  <div className="text-[10px] text-slate-500">
+                    {new Date(transfer.timestamp * 1000).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* Usuarios Card - Blue */}
-        <Link href="/usuarios" className="group">
-          <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-2 border-slate-700/50 rounded-2xl p-6 hover:border-blue-500/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/0 group-hover:from-blue-500/10 group-hover:via-blue-500/10 group-hover:to-blue-500/5 transition-all duration-500"></div>
-            
-            <div className="relative z-10">
-              <div className="mb-4">
-                <svg className="w-12 h-12 text-blue-400 transform group-hover:scale-110 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300">
-                Usuarios
-              </h2>
-              <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors duration-300">
-                Plantillas y rendimiento
-              </p>
-            </div>
-          </div>
-        </Link>
-
-        {/* Analytics Card - Green */}
-        <Link href="/analytics" className="group">
-          <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-2 border-slate-700/50 rounded-2xl p-6 hover:border-green-500/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/30 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/0 via-green-500/0 to-green-500/0 group-hover:from-green-500/10 group-hover:via-green-500/10 group-hover:to-green-500/5 transition-all duration-500"></div>
-            
-            <div className="relative z-10">
-              <div className="mb-4">
-                <svg className="w-12 h-12 text-green-400 transform group-hover:scale-110 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors duration-300">
-                Analytics
-              </h2>
-              <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors duration-300">
-                Datos avanzados
-              </p>
-            </div>
-          </div>
-        </Link>
       </div>
     </div>
   );
