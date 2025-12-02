@@ -113,6 +113,40 @@ export function ensureSchema(db) {
         db.prepare('DROP TABLE IF EXISTS user_rounds').run();
     }
 
+    // Create players table
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS players (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        position TEXT,
+        team TEXT,
+        puntos INTEGER,
+        partidos_jugados INTEGER,
+        played_home INTEGER,
+        played_away INTEGER,
+        points_home INTEGER,
+        points_away INTEGER,
+        points_last_season INTEGER,
+        owner_id TEXT
+      )
+    `).run();
+
+    // Check if players table has owner_id column (migration check)
+    let playersHasOwnerId = false;
+    try {
+        const info = db.prepare("PRAGMA table_info(players)").all();
+        playersHasOwnerId = info.some(col => col.name === 'owner_id');
+    } catch (e) {}
+
+    if (!playersHasOwnerId) {
+        console.log('Migrating players table (adding owner_id column)...');
+        try {
+            db.prepare('ALTER TABLE players ADD COLUMN owner_id TEXT').run();
+        } catch (e) {
+            console.log('Column owner_id likely already exists or error adding it:', e.message);
+        }
+    }
+
     // Create player_round_stats table
     db.prepare(`
       CREATE TABLE IF NOT EXISTS player_round_stats (

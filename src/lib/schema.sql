@@ -35,7 +35,9 @@ CREATE TABLE players (
     played_away INTEGER,
     points_home INTEGER,
     points_away INTEGER,
-    points_last_season INTEGER);
+    points_last_season INTEGER,
+    owner_id TEXT
+);
 
 
 
