@@ -4,7 +4,7 @@ dotenv.config({ path: '.env.local' });
 import Database from 'better-sqlite3';
 import { syncPlayers } from '../src/lib/sync/sync-players.js';
 import { syncStandings } from '../src/lib/sync/sync-standings.js';
-import { syncTransfers } from '../src/lib/sync/sync-transfers.js';
+import { syncBoard } from '../src/lib/sync/sync-board.js';
 import { syncMatches } from '../src/lib/sync/sync-matches.js';
 import { syncLineups } from '../src/lib/sync/sync-lineups.js';
 import { ensureSchema } from '../src/lib/sync/ensure-schema.js';
@@ -18,6 +18,9 @@ async function syncData() {
   const db = new Database(DB_PATH);
   
   try {
+    // 0. Ensure Schema (Create tables if not exist)
+    ensureSchema(db);
+
     // 1. Sync Players (Required for Foreign Keys)
     // Returns competition data which contains rounds list and teams
     const competition = await syncPlayers(db);
@@ -25,14 +28,11 @@ async function syncData() {
     // 2. Sync Standings (Users)
     await syncStandings(db);
 
-    // 3. Sync Transfers
+    // 3. Sync Board (Transfers & Porras)
     // Needs players list and teams for filtering/placeholders
     const playersList = competition.data.data ? competition.data.data.players : competition.data.players;
     const teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
-    await syncTransfers(db, playersList, teams);
-
-    // 4. Ensure Schema (Tables for matches, lineups, etc.)
-    ensureSchema(db);
+    await syncBoard(db, playersList, teams);
 
     // 5. Sync Lineups and Matches
     console.log('\n📥 Syncing Lineups...');

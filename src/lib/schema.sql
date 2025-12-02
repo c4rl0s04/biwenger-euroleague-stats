@@ -1,9 +1,11 @@
 CREATE TABLE porras (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                jornada TEXT,
-                usuario TEXT,
+                user_id TEXT,
+                round_id INTEGER,
+                round_name TEXT,
+                result TEXT,
                 aciertos INTEGER,
-                UNIQUE(jornada, usuario)
+                UNIQUE(user_id, round_id)
             );
 
 CREATE TABLE users (
@@ -75,6 +77,15 @@ CREATE TABLE fichajes (
                 comprador TEXT,
                 UNIQUE(timestamp, player_id, vendedor, comprador, precio),
                 FOREIGN KEY(player_id) REFERENCES players(id)
+            );
+
+CREATE TABLE transfer_bids (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                transfer_id INTEGER,
+                bidder_id TEXT,
+                bidder_name TEXT,
+                amount INTEGER,
+                FOREIGN KEY(transfer_id) REFERENCES fichajes(id) ON DELETE CASCADE
             );
 
 

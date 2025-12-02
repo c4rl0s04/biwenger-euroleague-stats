@@ -70,6 +70,18 @@ export function ensureSchema(db) {
       )
     `).run();
 
+    // Create transfer_bids table
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS transfer_bids (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transfer_id INTEGER,
+        bidder_id TEXT,
+        bidder_name TEXT,
+        amount INTEGER,
+        FOREIGN KEY(transfer_id) REFERENCES fichajes(id) ON DELETE CASCADE
+      )
+    `).run();
+
     // Create users table if not exists
     db.prepare(`
       CREATE TABLE IF NOT EXISTS users (
@@ -89,6 +101,31 @@ export function ensureSchema(db) {
         console.log('   Migrating user_rounds table to include alineacion...');
         db.prepare('DROP TABLE IF EXISTS user_rounds').run();
     }
+
+    // Check if porras table has round_id column (migration check)
+    let porrasHasRoundId = false;
+    try {
+        const tableInfo = db.prepare("PRAGMA table_info(porras)").all();
+        porrasHasRoundId = tableInfo.some(c => c.name === 'round_id');
+    } catch (e) {}
+
+    if (!porrasHasRoundId) {
+        console.log('   Migrating porras table to new schema...');
+        db.prepare('DROP TABLE IF EXISTS porras').run();
+    }
+
+    // Create porras table
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS porras (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        round_id INTEGER,
+        round_name TEXT,
+        result TEXT,
+        aciertos INTEGER,
+        UNIQUE(user_id, round_id)
+      )
+    `).run();
 
     // Create user_rounds table if not exists
     db.prepare(`

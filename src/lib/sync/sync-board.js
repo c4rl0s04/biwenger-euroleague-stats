@@ -2,27 +2,38 @@ import { biwengerFetch } from '../biwenger-client.js';
 import { CONFIG } from '../config.js';
 
 /**
- * Syncs transfer market history (fichajes) incrementally.
+ * Syncs board history (transfers, porras, etc.) incrementally.
  * @param {import('better-sqlite3').Database} db - Database instance
  * @param {Object} playersList - Map of player IDs to player objects
  * @param {Object} teams - Map of team IDs to team objects
  */
-export async function syncTransfers(db, playersList, teams) {
+export async function syncBoard(db, playersList, teams) {
     console.log('\n📥 Fetching Full Board History...');
     
     // Check for existing transfers to do incremental sync
+    // We use fichajes timestamp as the anchor for now, assuming board is sequential
     const lastTransfer = db.prepare('SELECT MAX(timestamp) as ts FROM fichajes').get();
     const lastTimestamp = lastTransfer ? lastTransfer.ts : 0;
     
     if (lastTimestamp > 0) {
-        console.log(`Found existing transfers up to ${new Date(lastTimestamp * 1000).toISOString()}. Syncing only new...`);
+        console.log(`Found existing data up to ${new Date(lastTimestamp * 1000).toISOString()}. Syncing only new...`);
     } else {
-        console.log('No existing transfers. Doing full sync...');
+        console.log('No existing data. Doing full sync...');
     }
 
     const insertTransfer = db.prepare(`
       INSERT OR IGNORE INTO fichajes (timestamp, fecha, player_id, precio, vendedor, comprador)
       VALUES (@timestamp, @fecha, @player_id, @precio, @vendedor, @comprador)
+    `);
+
+    const insertBid = db.prepare(`
+      INSERT INTO transfer_bids (transfer_id, bidder_id, bidder_name, amount)
+      VALUES (@transfer_id, @bidder_id, @bidder_name, @amount)
+    `);
+
+    const insertPorra = db.prepare(`
+      INSERT OR IGNORE INTO porras (user_id, round_id, round_name, result, aciertos)
+      VALUES (@user_id, @round_id, @round_name, @result, @aciertos)
     `);
 
     // Helper to insert unknown players on the fly
@@ -46,6 +57,7 @@ export async function syncTransfers(db, playersList, teams) {
     const limit = 50;
     let moreTransfers = true;
     let totalTransfers = 0;
+    let totalPorras = 0;
     let skippedOld = 0;
 
     // Helper to get league ID for raw fetch
@@ -56,7 +68,7 @@ export async function syncTransfers(db, playersList, teams) {
 
     while (moreTransfers) {
       console.log(`Fetching batch (offset: ${offset})...`);
-      // Fetch WITHOUT type filter to get everything (transfers, market, movements)
+      // Fetch WITHOUT type filter to get everything (transfers, market, movements, bettingPool)
       const response = await biwengerFetch(`/league/${leagueId}/board?offset=${offset}&limit=${limit}`);
       const items = response.data;
       
@@ -68,13 +80,60 @@ export async function syncTransfers(db, playersList, teams) {
       db.transaction(() => {
         for (const t of items) {
           // Filter for relevant types
-          // transfer: User <-> User
-          // market: User <-> Market (Direct)
-          // playerMovements: Admin/System moves
-          if (!['transfer', 'market', 'playerMovements'].includes(t.type)) continue;
+          if (!['transfer', 'market', 'playerMovements', 'bettingPool'].includes(t.type)) continue;
           
           // Some events might not have content or be different
-          if (!t.content || !Array.isArray(t.content)) continue;
+          if (!t.content) continue;
+
+          // Handle Betting Pool (Porras)
+          if (t.type === 'bettingPool') {
+             // Structure: content.pool.responses[]
+             // content.pool.round { id, name }
+             const pool = t.content.pool;
+             if (!pool || !pool.responses) continue;
+
+             const roundId = pool.round ? pool.round.id : null;
+             const roundName = pool.round ? pool.round.name : 'Unknown Round';
+
+             // Check timestamp for incremental sync (using event date)
+             if (t.date <= lastTimestamp) {
+                 moreTransfers = false;
+                 skippedOld++;
+                 continue;
+             }
+
+             for (const response of pool.responses) {
+                 try {
+                     const userId = response.id;
+                     // const userName = response.name;
+                     
+                     // Results: ["1", "2", ...] -> "1-2-..."
+                     let result = response.response;
+                     if (Array.isArray(result)) {
+                         result = result.join('-');
+                     }
+                     
+                     const hits = response.hits !== undefined ? response.hits : null;
+
+                     if (userId && roundId) {
+                         insertPorra.run({
+                             user_id: userId.toString(),
+                             round_id: roundId,
+                             round_name: roundName,
+                             result: result || '',
+                             aciertos: hits
+                         });
+                         totalPorras++;
+                     }
+                 } catch (e) {
+                     // console.error('Error processing porra:', e);
+                 }
+             }
+             continue; // Done with bettingPool
+          }
+
+          // Handle Transfers
+          if (!Array.isArray(t.content)) continue;
 
           for (const content of t.content) {
             const timestamp = t.date;
@@ -133,7 +192,7 @@ export async function syncTransfers(db, playersList, teams) {
               continue;
             }
 
-            insertTransfer.run({
+            const info = insertTransfer.run({
               timestamp: timestamp,
               fecha: date,
               player_id: playerId,
@@ -141,6 +200,28 @@ export async function syncTransfers(db, playersList, teams) {
               vendedor: fromName,
               comprador: toName
             });
+            
+            // If transfer was inserted (not ignored), insert bids
+            if (info.changes > 0 && content.bids && Array.isArray(content.bids)) {
+                const transferId = info.lastInsertRowid;
+                
+                for (const bid of content.bids) {
+                    try {
+                        const bidderId = bid.user ? (bid.user.id || bid.user) : null;
+                        const bidderName = bid.user ? (bid.user.name || 'Unknown') : 'Unknown';
+                        
+                        insertBid.run({
+                            transfer_id: transferId,
+                            bidder_id: bidderId ? bidderId.toString() : null,
+                            bidder_name: bidderName,
+                            amount: bid.amount || 0
+                        });
+                    } catch (e) {
+                        // Ignore bid errors
+                    }
+                }
+            }
+            
             totalTransfers++;
           }
         }
@@ -152,5 +233,5 @@ export async function syncTransfers(db, playersList, teams) {
         offset += limit;
       }
     }
-    console.log(`✅ All transfers synced (${totalTransfers} processed).`);
+    console.log(`✅ Board synced (${totalTransfers} transfers, ${totalPorras} porras).`);
 }
