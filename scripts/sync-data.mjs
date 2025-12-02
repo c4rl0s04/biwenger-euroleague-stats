@@ -5,6 +5,7 @@ import Database from 'better-sqlite3';
 import { syncPlayers } from '../src/lib/sync/sync-players.js';
 import { syncStandings } from '../src/lib/sync/sync-standings.js';
 import { syncSquads } from '../src/lib/sync/sync-squads.js';
+import { syncImages } from '../src/lib/sync/sync-images.js';
 import { syncBoard } from '../src/lib/sync/sync-board.js';
 import { syncMatches } from '../src/lib/sync/sync-matches.js';
 import { syncLineups } from '../src/lib/sync/sync-lineups.js';
@@ -37,6 +38,11 @@ async function syncData() {
     const playersList = competition.data.data ? competition.data.data.players : competition.data.players;
     const teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
     await syncBoard(db, playersList, teams);
+
+    // 5. Sync Player Images (TheSportsDB)
+    await syncImages(db);
+
+    console.log('\n✅ Sync process completed successfully!');
 
     // 5. Sync Lineups and Matches
     console.log('\n📥 Syncing Lineups...');

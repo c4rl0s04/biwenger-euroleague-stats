@@ -67,9 +67,8 @@ export async function syncPlayers(db) {
   db.transaction(() => {
     for (const [id, player] of Object.entries(playersList)) {
       // Construct Image URL
-      // Pattern: https://cdn.biwenger.com/face/euroleague/{id}.png
-      // Or generic if not found? No, usually this pattern works.
-      const imgUrl = `https://cdn.biwenger.com/face/euroleague/${id}.png`;
+      // Pattern: https://biwenger.as.com/face/euroleague/{id}.png
+      const imgUrl = `https://biwenger.as.com/face/euroleague/${id}.png`;
 
       // Insert Player
       insertPlayer.run({
