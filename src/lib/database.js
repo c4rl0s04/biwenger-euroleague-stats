@@ -268,7 +268,8 @@ export function getMarketTrends() {
  * @returns {Object} User season statistics
  */
 export function getUserSeasonStats(userId) {
-  const query = `
+  // Get basic stats
+  const statsQuery = `
     WITH UserRounds AS (
       SELECT 
         user_id,
@@ -286,16 +287,240 @@ export function getUserSeasonStats(userId) {
     FROM UserRounds
   `;
   
-  const stats = db.prepare(query).get(userId);
+  const stats = db.prepare(statsQuery).get(userId);
   
-  // Get user position from standings
+  // Calculate position per round for this user
+  const positionsQuery = `
+    WITH RoundPositions AS (
+      SELECT 
+        ur.round_id,
+        ur.user_id,
+        RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
+      FROM user_rounds ur
+      WHERE ur.participated = 1
+    )
+    SELECT 
+      MIN(position) as best_position,
+      MAX(position) as worst_position
+    FROM RoundPositions
+    WHERE user_id = ?
+  `;
+  
+  const positions = db.prepare(positionsQuery).get(userId);
+  
+  // Get user current standing
   const standings = getStandings();
   const userStanding = standings.find(u => u.user_id === userId);
   
   return {
     ...stats,
+    ...positions,
     position: userStanding?.position || 0,
     team_value: userStanding?.team_value || 0,
     price_trend: userStanding?.price_trend || 0
   };
+}
+
+/**
+ * Get user's squad with price trends
+ * @param {string} userId - User ID
+ * @returns {Object} Squad details with trending players
+ */
+export function getUserSquadDetails(userId) {
+  const query = `
+    SELECT 
+      id, name, position, team, price, price_increment, puntos as points
+    FROM players
+    WHERE owner_id = ?
+    ORDER BY price_increment DESC
+  `;
+  
+  const squad = db.prepare(query).all(userId);
+  
+  const totalValue = squad.reduce((sum, p) => sum + (p.price || 0), 0);
+  const totalTrend = squad.reduce((sum, p) => sum + (p.price_increment || 0), 0);
+  
+  return {
+    total_value: totalValue,
+    price_trend: totalTrend,
+    top_rising: squad.filter(p => p.price_increment > 0).slice(0, 3),
+    top_falling: squad.filter(p => p.price_increment < 0).slice(-3).reverse()
+  };
+}
+
+/**
+ * Get user's recent rounds performance
+ * @param {string} userId - User ID
+ * @param {number} limit - Number of rounds
+ * @returns {Array} Recent rounds with position
+ */
+export function getUserRecentRounds(userId, limit = 10) {
+  const query = `
+    WITH RoundPositions AS (
+      SELECT 
+        ur.round_id,
+        ur.round_name,
+        ur.user_id,
+        ur.points,
+        RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
+      FROM user_rounds ur
+      WHERE ur.participated = 1
+    )
+    SELECT 
+      round_id,
+      round_name,
+      points,
+      position
+    FROM RoundPositions
+    WHERE user_id = ?
+    ORDER BY round_id DESC
+    LIMIT ?
+  `;
+  
+  return db.prepare(query).all(userId, limit);
+}
+
+/**
+ * Get user's captain statistics
+ * @param {string} userId - User ID
+ * @returns {Object} Captain stats
+ */
+export function getUserCaptainStats(userId) {
+  // Get overall captain stats
+  const overallQuery = `
+    SELECT 
+      COUNT(DISTINCT l.round_id) as total_rounds,
+      SUM(COALESCE(prs.fantasy_points, 0)) as extra_points,
+      AVG(COALESCE(prs.fantasy_points, 0)) as avg_points
+    FROM lineups l
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    WHERE l.user_id = ? AND l.is_captain = 1
+  `;
+  
+  const overall = db.prepare(overallQuery).get(userId);
+  
+  // Get most used captains with their stats
+  const mostUsedQuery = `
+    SELECT 
+      p.name,
+      COUNT(DISTINCT l.round_id) as times_captain,
+      AVG(COALESCE(prs.fantasy_points, 0)) as avg_as_captain
+    FROM lineups l
+    JOIN players p ON l.player_id = p.id
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    WHERE l.user_id = ? AND l.is_captain = 1
+    GROUP BY l.player_id, p.name
+    ORDER BY times_captain DESC, avg_as_captain DESC
+    LIMIT 3
+  `;
+  
+  const mostUsed = db.prepare(mostUsedQuery).all(userId);
+  
+  // Get best and worst captain rounds with player names
+  const bestQuery = `
+    SELECT 
+      p.name,
+      COALESCE(prs.fantasy_points, 0) as points
+    FROM lineups l
+    JOIN players p ON l.player_id = p.id
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    WHERE l.user_id = ? AND l.is_captain = 1
+    ORDER BY points DESC
+    LIMIT 1
+  `;
+  
+  const worstQuery = `
+    SELECT 
+      p.name,
+      COALESCE(prs.fantasy_points, 0) as points
+    FROM lineups l
+    JOIN players p ON l.player_id = p.id
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    WHERE l.user_id = ? AND l.is_captain = 1
+    ORDER BY points ASC
+    LIMIT 1
+  `;
+  
+  const best = db.prepare(bestQuery).get(userId);
+  const worst = db.prepare(worstQuery).get(userId);
+  
+  return {
+    total_rounds: overall.total_rounds || 0,
+    extra_points: overall.extra_points || 0,
+    avg_points: overall.avg_points || 0,
+    most_used: mostUsed,
+    best_round: best ? { name: best.name, points: best.points } : { name: '', points: 0 },
+    worst_round: worst ? { name: worst.name, points: worst.points } : { name: '', points: 0 }
+  };
+}
+
+/**
+ * Get comparison with league leader
+ * @param {string} userId - User ID
+ * @returns {Object} Leader comparison
+ */
+export function getLeaderComparison(userId) {
+  const standings = getStandings();
+  const leader = standings[0];
+  const user = standings.find(u => u.user_id === userId);
+  
+  if (!user || !leader) return null;
+  
+  const gap = leader.total_points - user.total_points;
+  const roundsNeeded = user.position > 1 
+    ? Math.ceil(gap / 10) // Assuming 10pts average per round
+    : 0;
+  
+  return {
+    leader_name: leader.name,
+    leader_points: leader.total_points,
+    user_points: user.total_points,
+    gap: gap,
+    rounds_needed: roundsNeeded,
+    is_leader: user.position === 1
+  };
+}
+
+/**
+ * Get user's home/away performance
+ * @param {string} userId - User ID
+ * @returns {Object} Home/away stats
+ */
+export function getUserHomeAwayStats(userId) {
+  const query = `
+    SELECT 
+      SUM(points_home) as total_home,
+      SUM(points_away) as total_away,
+      SUM(played_home) as games_home,
+      SUM(played_away) as games_away
+    FROM players
+    WHERE owner_id = ?
+  `;
+  
+  const stats = db.prepare(query).get(userId);
+  
+  return {
+    total_home: stats.total_home || 0,
+    total_away: stats.total_away || 0,
+    avg_home: stats.games_home > 0 ? Math.round(stats.total_home / stats.games_home) : 0,
+    avg_away: stats.games_away > 0 ? Math.round(stats.total_away / stats.games_away) : 0,
+    difference_pct: stats.total_home > 0 && stats.total_away > 0
+      ? Math.round(((stats.total_home - stats.total_away) / stats.total_away) * 100)
+      : 0
+  };
+}
+
+/**
+ * Get league average points per round
+ * @returns {number} Average points
+ */
+export function getLeagueAveragePoints() {
+  const query = `
+    SELECT ROUND(AVG(points), 1) as avg_points
+    FROM user_rounds
+    WHERE participated = 1
+  `;
+  
+  const result = db.prepare(query).get();
+  return result.avg_points || 0;
 }

@@ -3,6 +3,12 @@ import Link from 'next/link';
 import { Calendar, TrendingUp, Users, ArrowRight, Euro } from 'lucide-react';
 import StandingsTable from '@/components/StandingsTable';
 import MySeasonCard from '@/components/MySeasonCard';
+import SquadValueCard from '@/components/SquadValueCard';
+import RecentRoundsCard from '@/components/RecentRoundsCard';
+import CaptainStatsCard from '@/components/CaptainStatsCard';
+import LeaderGapCard from '@/components/LeaderGapCard';
+import HomeAwayCard from '@/components/HomeAwayCard';
+import LeagueComparisonCard from '@/components/LeagueComparisonCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,18 +16,27 @@ export default function Dashboard() {
   const nextRound = getNextRound();
   const topPlayers = getTopPlayers(5);
   const transfers = getRecentTransfers(5);
-  const standings = getStandings(); // Show all users
+  const standings = getStandings();
 
   return (
-    <div className="space-y-8">
-      {/* Hero Section: My Season, Next Round & Standings Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        {/* My Season Card */}
-        <div className="lg:col-span-1">
-          <MySeasonCard />
-        </div>
+    <div className="space-y-6">
+      {/* Personal Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MySeasonCard />
+        <SquadValueCard />
+        <RecentRoundsCard />
+        <CaptainStatsCard />
+      </div>
 
+      {/* Secondary Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <LeaderGapCard />
+        <HomeAwayCard />
+        <LeagueComparisonCard />
+      </div>
+
+      {/* Main Content: Next Round & Standings */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Next Round Card */}
         <div className="lg:col-span-1 bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -67,7 +82,6 @@ export default function Dashboard() {
 
       {/* Top Players & Market */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
         {/* Top Players */}
         <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
@@ -129,7 +143,6 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

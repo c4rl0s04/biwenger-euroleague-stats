@@ -61,10 +61,10 @@ export default function MySeasonCard() {
           Tu Temporada
         </h2>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {/* Position */}
           <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-slate-400 text-xs mb-1">Posición</div>
+            <div className="text-slate-400 text-xs mb-1">Posición Actual</div>
             <div className={`text-2xl font-bold ${getPositionColor(stats.position)}`}>
               #{stats.position}
             </div>
@@ -76,22 +76,34 @@ export default function MySeasonCard() {
             <div className="text-2xl font-bold text-orange-500">{stats.total_points}</div>
           </div>
 
-          {/* Best Round */}
+          {/* Best Position */}
           <div className="bg-slate-800/50 rounded-lg p-3">
             <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
-              Mejor
+              Mejor Pos.
             </div>
-            <div className="text-lg font-bold text-green-400">{stats.best_round}</div>
+            <div className="text-lg font-bold text-green-400">#{stats.best_position || '-'}</div>
+          </div>
+
+          {/* Worst Position */}
+          <div className="bg-slate-800/50 rounded-lg p-3">
+            <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
+              <TrendingDown className="w-3 h-3" />
+              Peor Pos.
+            </div>
+            <div className="text-lg font-bold text-red-400">#{stats.worst_position || '-'}</div>
+          </div>
+
+          {/* Best Round */}
+          <div className="bg-slate-800/50 rounded-lg p-3">
+            <div className="text-slate-400 text-xs mb-1">Mejor Jornada</div>
+            <div className="text-base font-bold text-green-400">{stats.best_round} pts</div>
           </div>
 
           {/* Worst Round */}
           <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
-              <TrendingDown className="w-3 h-3" />
-              Peor
-            </div>
-            <div className="text-lg font-bold text-red-400">{stats.worst_round}</div>
+            <div className="text-slate-400 text-xs mb-1">Peor Jornada</div>
+            <div className="text-base font-bold text-red-400">{stats.worst_round} pts</div>
           </div>
 
           {/* Average */}
