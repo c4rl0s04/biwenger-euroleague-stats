@@ -19,11 +19,15 @@ export default function RecentRoundsCard() {
   if (!currentUser || !rounds) return null;
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 flex flex-col">
-      <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <Activity className="w-5 h-5 text-purple-500" />
-        Últimas Jornadas
-      </h2>
+    <div className="bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-xl shadow-black/5 flex flex-col hover:border-slate-600/50 transition-all duration-300">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-base font-bold text-white/90 flex items-center gap-2">
+          <div className="p-1.5 bg-purple-500/10 rounded-lg">
+            <Activity className="w-4 h-4 text-purple-500" />
+          </div>
+          Últimas Jornadas
+        </h2>
+      </div>
 
       <div className="space-y-1 flex-grow">
         {rounds.map((round, idx) => {
