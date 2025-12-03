@@ -26,14 +26,14 @@ export async function syncPlayers(db) {
       puntos, partidos_jugados, 
       played_home, played_away, 
       points_home, points_away, points_last_season,
-      img_url, status, price_increment
+      status, price_increment
     ) 
     VALUES (
       @id, @name, @team, @position, 
       @puntos, @partidos_jugados, 
       @played_home, @played_away, 
       @points_home, @points_away, @points_last_season,
-      @img_url, @status, @price_increment
+      @status, @price_increment
     )
     ON CONFLICT(id) DO UPDATE SET 
       name=excluded.name, 
@@ -46,7 +46,6 @@ export async function syncPlayers(db) {
       points_home=excluded.points_home,
       points_away=excluded.points_away,
       points_last_season=excluded.points_last_season,
-      img_url=excluded.img_url,
       status=excluded.status,
       price_increment=excluded.price_increment
   `);
@@ -66,10 +65,6 @@ export async function syncPlayers(db) {
 
   db.transaction(() => {
     for (const [id, player] of Object.entries(playersList)) {
-      // Construct Image URL
-      // Pattern: https://biwenger.as.com/face/euroleague/{id}.png
-      const imgUrl = `https://biwenger.as.com/face/euroleague/${id}.png`;
-
       // Insert Player
       insertPlayer.run({
         id: parseInt(id),
@@ -87,7 +82,6 @@ export async function syncPlayers(db) {
         points_last_season: player.pointsLastSeason || 0,
         
         // Enhanced Data
-        img_url: imgUrl,
         status: player.status || 'ok',
         price_increment: player.priceIncrement || 0
       });

@@ -45,9 +45,7 @@ export function getAllTransfers(limit = 100, offset = 0) {
       player_id,
       precio,
       vendedor,
-      comprador,
-      pujas,
-      puntos
+      comprador
     FROM fichajes
     ORDER BY timestamp DESC
     LIMIT ? OFFSET ?
@@ -98,23 +96,26 @@ export function getAllPorrasRounds() {
  * Get squad statistics for all users
  * @returns {Array} Squad stats per user
  */
+/**
+ * Get squad statistics for all users
+ * @returns {Array} Squad stats per user
+ */
 export function getSquadStats() {
   const query = `
     SELECT 
-      s.user_id,
-      COUNT(DISTINCT s.player_id) as squad_size,
-      SUM(COALESCE(mv.price, 0)) as total_value,
+      p.owner_id as user_id,
+      COUNT(p.id) as squad_size,
+      SUM(COALESCE(p.price, 0)) as total_value,
       ur.total_points
-    FROM user_squads s
-    LEFT JOIN market_values mv ON s.player_id = mv.player_id
+    FROM players p
     LEFT JOIN (
       SELECT user_id, SUM(points) as total_points
       FROM user_rounds
       WHERE participated = 1
       GROUP BY user_id
-    ) ur ON s.user_id = ur.user_id
-    WHERE s.date_scraped = (SELECT MAX(date_scraped) FROM user_squads)
-    GROUP BY s.user_id
+    ) ur ON p.owner_id = ur.user_id
+    WHERE p.owner_id IS NOT NULL
+    GROUP BY p.owner_id
     ORDER BY total_points DESC
   `;
 
@@ -134,13 +135,12 @@ export function getUserSquad(userId) {
       p.position,
       p.team,
       p.price,
-      p.points,
-      p.average,
-      p.img_url,
+      p.puntos as points,
+      ROUND(CAST(p.puntos AS FLOAT) / NULLIF(p.partidos_jugados, 0), 1) as average,
       p.status
     FROM players p
     WHERE p.owner_id = ?
-    ORDER BY p.points DESC
+    ORDER BY p.puntos DESC
   `;
 
   return db.prepare(query).all(userId);
@@ -168,3 +168,96 @@ export function getNextRound() {
 
 // Export db instance for custom queries if needed
 export { db };
+
+/**
+ * Get top performing players
+ * @param {number} limit - Number of players
+ * @returns {Array} List of top players
+ */
+export function getTopPlayers(limit = 10) {
+  const query = `
+    SELECT 
+      id, name, team, position, 
+      puntos as points, 
+      ROUND(CAST(puntos AS FLOAT) / NULLIF(partidos_jugados, 0), 1) as average
+    FROM players 
+    ORDER BY puntos DESC 
+    LIMIT ?
+  `;
+  return db.prepare(query).all(limit);
+}
+
+/**
+ * Get recent market activity
+ * @param {number} limit - Number of transfers
+ * @returns {Array} Recent transfers
+ */
+export function getRecentTransfers(limit = 5) {
+  const query = `
+    SELECT 
+      f.*,
+      p.name as player_name,
+      p.position
+    FROM fichajes f
+    JOIN players p ON f.player_id = p.id
+    ORDER BY f.timestamp DESC
+    LIMIT ?
+  `;
+  return db.prepare(query).all(limit);
+}
+
+/**
+ * Get league standings (Latest)
+ * @returns {Array} Current standings with user details
+ */
+export function getStandings() {
+  const query = `
+    WITH UserTotals AS (
+      SELECT 
+        user_id,
+        SUM(points) as total_points
+      FROM user_rounds
+      WHERE participated = 1
+      GROUP BY user_id
+    )
+    SELECT 
+      u.id as user_id,
+      u.name,
+      u.icon,
+      COALESCE(ut.total_points, 0) as total_points,
+      COALESCE(sq.team_value, 0) as team_value,
+      COALESCE(sq.price_trend, 0) as price_trend,
+      RANK() OVER (ORDER BY COALESCE(ut.total_points, 0) DESC) as position
+    FROM users u
+    LEFT JOIN UserTotals ut ON u.id = ut.user_id
+    LEFT JOIN (
+      SELECT 
+        owner_id, 
+        SUM(price) as team_value,
+        SUM(price_increment) as price_trend
+      FROM players
+      WHERE owner_id IS NOT NULL
+      GROUP BY owner_id
+    ) sq ON u.id = sq.owner_id
+    ORDER BY position ASC
+  `;
+  return db.prepare(query).all();
+}
+
+/**
+ * Get market trends (Volume & Avg Price per day)
+ * @returns {Array} Daily market stats
+ */
+export function getMarketTrends() {
+  const query = `
+    SELECT 
+      substr(fecha, 1, 10) as date,
+      COUNT(*) as count,
+      ROUND(AVG(precio), 0) as avg_value
+    FROM fichajes
+    GROUP BY date
+    ORDER BY date ASC
+    LIMIT 30
+  `;
+  return db.prepare(query).all();
+}

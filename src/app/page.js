@@ -1,6 +1,7 @@
 import { getNextRound, getTopPlayers, getRecentTransfers, getStandings } from '../lib/database';
 import Link from 'next/link';
 import { Calendar, TrendingUp, Users, ArrowRight, Euro } from 'lucide-react';
+import StandingsTable from '@/components/StandingsTable';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +9,7 @@ export default function Dashboard() {
   const nextRound = getNextRound();
   const topPlayers = getTopPlayers(5);
   const transfers = getRecentTransfers(5);
-  const standings = getStandings().slice(0, 5); // Top 5 users
+  const standings = getStandings(); // Show all users
 
   return (
     <div className="space-y-8">
@@ -54,35 +55,7 @@ export default function Dashboard() {
             </h2>
             <Link href="/standings" className="text-sm text-blue-400 hover:text-blue-300">Ver todo</Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-slate-400 uppercase bg-slate-800/50">
-                <tr>
-                  <th className="px-4 py-3 rounded-l-lg">Pos</th>
-                  <th className="px-4 py-3">Usuario</th>
-                  <th className="px-4 py-3 text-right">Puntos</th>
-                  <th className="px-4 py-3 text-right rounded-r-lg">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {standings.map((user) => (
-                  <tr key={user.user_id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors">
-                    <td className="px-4 py-3 font-medium text-white">#{user.position}</td>
-                    <td className="px-4 py-3 flex items-center gap-3">
-                      {user.icon ? (
-                        <img src={user.icon} alt={user.name} className="w-6 h-6 rounded-full" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">{user.name.charAt(0)}</div>
-                      )}
-                      <span className="truncate max-w-[120px] sm:max-w-none">{user.name}</span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold text-orange-500">{user.total_points}</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{(user.team_value / 1000000).toFixed(1)}M€</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <StandingsTable standings={standings} />
         </div>
       </div>
 
@@ -100,16 +73,8 @@ export default function Dashboard() {
           <div className="space-y-4">
             {topPlayers.map((player, index) => (
               <div key={player.id} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-700">
-                <div className="relative w-12 h-12 flex-shrink-0">
-                  <img 
-                    src={player.img_url} 
-                    alt={player.name} 
-                    className="w-full h-full object-cover rounded-full bg-slate-800"
-                    onError={(e) => { e.target.src = 'https://biwenger.as.com/face/default.png'; }}
-                  />
-                  <div className="absolute -top-1 -left-1 w-5 h-5 bg-slate-900 rounded-full flex items-center justify-center text-xs font-bold text-white border border-slate-700">
-                    {index + 1}
-                  </div>
+                <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-lg font-bold text-white border-2 border-slate-600">
+                  {index + 1}
                 </div>
                 <div className="flex-grow min-w-0">
                   <div className="font-medium text-white truncate">{player.name}</div>
@@ -136,11 +101,9 @@ export default function Dashboard() {
             {transfers.map((transfer) => (
               <div key={transfer.id} className="flex items-center justify-between py-3 border-b border-slate-800/50 last:border-0">
                 <div className="flex items-center gap-3">
-                   <img 
-                    src={transfer.img_url} 
-                    alt={transfer.player_name} 
-                    className="w-10 h-10 object-cover rounded-full bg-slate-800"
-                  />
+                   <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-white">
+                    {transfer.player_name?.charAt(0) || '?'}
+                   </div>
                   <div>
                     <div className="font-medium text-white text-sm">{transfer.player_name}</div>
                     <div className="text-xs text-slate-400 flex items-center gap-1">
