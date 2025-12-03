@@ -25,8 +25,8 @@ export const CONFIG = {
     COMPETITION_DATA: '/competitions/euroleague/data?lang=es',
     LEAGUE_STANDINGS: (leagueId) => `/league/${leagueId}?fields=standings`,
     LEAGUE_BOARD: (leagueId, offset, limit) => `/league/${leagueId}/board?offset=${offset}&limit=${limit}`,
-    ROUND_GAMES: (roundId) => `/rounds/euroleague/${roundId}?score=1&lang=es`,
-    ROUND_LEAGUE: (roundId) => roundId ? `/rounds/league/${roundId}` : `/rounds/league`
+    ROUND_GAMES: (roundId) => `/rounds/euroleague/${roundId}?score=1&lang=es&v=629`,
+    ROUND_LEAGUE: (roundId) => roundId ? `/rounds/league/${roundId}?v=629` : `/rounds/league?v=629`
   }
 };
 
