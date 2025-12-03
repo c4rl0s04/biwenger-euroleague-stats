@@ -147,8 +147,8 @@ export function ensureSchema(db) {
         }
     }
 
-    // Check for new player columns (img_url, status, price_increment)
-    const playerCols = ['img_url', 'status', 'price_increment'];
+    // Check for new player columns (status, price_increment)
+    const playerCols = ['status', 'price_increment'];
     try {
         const info = db.prepare("PRAGMA table_info(players)").all();
         const existingCols = new Set(info.map(c => c.name));

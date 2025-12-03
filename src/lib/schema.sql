@@ -38,7 +38,6 @@ CREATE TABLE players (
     points_away INTEGER,
     points_last_season INTEGER,
     owner_id TEXT,
-    img_url TEXT,
     status TEXT,
     price_increment INTEGER
 );
