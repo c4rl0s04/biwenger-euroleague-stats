@@ -261,3 +261,41 @@ export function getMarketTrends() {
   `;
   return db.prepare(query).all();
 }
+
+/**
+ * Get detailed season statistics for a specific user
+ * @param {string} userId - User ID
+ * @returns {Object} User season statistics
+ */
+export function getUserSeasonStats(userId) {
+  const query = `
+    WITH UserRounds AS (
+      SELECT 
+        user_id,
+        points,
+        participated
+      FROM user_rounds
+      WHERE user_id = ? AND participated = 1
+    )
+    SELECT 
+      COALESCE(SUM(points), 0) as total_points,
+      COALESCE(MAX(points), 0) as best_round,
+      COALESCE(MIN(points), 0) as worst_round,
+      COALESCE(ROUND(AVG(points), 1), 0) as average_points,
+      COUNT(*) as rounds_played
+    FROM UserRounds
+  `;
+  
+  const stats = db.prepare(query).get(userId);
+  
+  // Get user position from standings
+  const standings = getStandings();
+  const userStanding = standings.find(u => u.user_id === userId);
+  
+  return {
+    ...stats,
+    position: userStanding?.position || 0,
+    team_value: userStanding?.team_value || 0,
+    price_trend: userStanding?.price_trend || 0
+  };
+}

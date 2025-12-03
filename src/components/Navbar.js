@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trophy, Users, User, ShoppingCart, Calendar } from 'lucide-react';
+import UserSelector from './UserSelector';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -49,7 +50,8 @@ export default function Navbar() {
             </div>
           </div>
           
-          {/* Mobile menu button could go here */}
+          {/* User Selector */}
+          <UserSelector />
         </div>
       </div>
       

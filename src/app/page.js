@@ -2,6 +2,7 @@ import { getNextRound, getTopPlayers, getRecentTransfers, getStandings } from '.
 import Link from 'next/link';
 import { Calendar, TrendingUp, Users, ArrowRight, Euro } from 'lucide-react';
 import StandingsTable from '@/components/StandingsTable';
+import MySeasonCard from '@/components/MySeasonCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,9 +14,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section: Next Round & Standings Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Hero Section: My Season, Next Round & Standings Preview */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
+        {/* My Season Card */}
+        <div className="lg:col-span-1">
+          <MySeasonCard />
+        </div>
+
         {/* Next Round Card */}
         <div className="lg:col-span-1 bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
