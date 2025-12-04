@@ -21,11 +21,11 @@ export async function GET(request) {
     
     // Get captain recommendations if userId is provided
     const captainRecommendations = userId 
-      ? getCaptainRecommendations(userId, 3)
+      ? getCaptainRecommendations(userId, 5)
       : [];
     
     // Get market opportunities
-    const marketOpportunities = getMarketOpportunities(3);
+    const marketOpportunities = getMarketOpportunities(5);
 
     return NextResponse.json({
       success: true,

@@ -42,122 +42,122 @@ export default function NextRoundCard() {
   const { nextRound, topPlayersForm, captainRecommendations, marketOpportunities } = data || {};
 
   return (
-    <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-600/50 transition-all">
+    <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 relative overflow-hidden group hover:border-slate-600/50 transition-all">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
         <Calendar className="w-32 h-32 text-orange-500" />
       </div>
 
       <div className="relative">
-        {/* Header */}
-        <div className="mb-6">
-          <h2 className="text-slate-400 font-medium mb-2 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-orange-500" />
+        {/* Header - Compact */}
+        <div className="mb-3">
+          <h2 className="text-slate-400 font-medium mb-1 flex items-center gap-2 text-sm">
+            <Calendar className="w-4 h-4 text-orange-500" />
             Próxima Jornada
           </h2>
           {nextRound ? (
-            <>
-              <div className="text-3xl font-bold text-white mb-2">{nextRound.round_name}</div>
-              <div className="text-orange-500 font-mono text-lg">
+            <div className="flex items-baseline gap-3">
+              <div className="text-2xl font-bold text-white">{nextRound.round_name}</div>
+              <div className="text-orange-500 font-mono text-xs">
                 {new Date(nextRound.start_date).toLocaleDateString('es-ES', { 
-                  weekday: 'long', 
+                  weekday: 'short', 
                   day: 'numeric', 
-                  month: 'long',
+                  month: 'short',
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
               </div>
-            </>
+            </div>
           ) : (
             <div className="text-2xl font-bold text-white">Temporada Finalizada</div>
           )}
         </div>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Top Players by Form */}
-          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30">
-            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+        {/* Content Grid - Tighter spacing */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Top Players by Form - Top 5 */}
+          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+            <h3 className="text-sm font-semibold text-white mb-2.5 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-500" />
               Top Forma
             </h3>
             <div className="space-y-2">
               {topPlayersForm && topPlayersForm.length > 0 ? (
-                topPlayersForm.slice(0, 3).map((player, idx) => (
-                  <div key={player.player_id} className="flex items-center justify-between text-xs">
+                topPlayersForm.slice(0, 5).map((player, idx) => (
+                  <div key={player.player_id} className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <span className="text-slate-500 font-mono w-4">{idx + 1}.</span>
-                      <span className="text-white truncate">{player.name}</span>
+                      <span className="text-slate-500 font-mono text-xs w-4">{idx + 1}.</span>
+                      <span className="text-white truncate text-sm">{player.name}</span>
                     </div>
-                    <span className="text-green-400 font-bold ml-2">{player.avg_points}</span>
+                    <span className="text-green-400 font-bold ml-2 text-sm">{Number(player.avg_points).toFixed(2)}</span>
                   </div>
                 ))
               ) : (
-                <div className="text-slate-500 text-xs">No hay datos disponibles</div>
+                <div className="text-slate-500 text-sm">No hay datos disponibles</div>
               )}
             </div>
           </div>
 
-          {/* Captain Recommendations */}
-          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30">
-            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          {/* Captain Recommendations - Top 5 */}
+          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+            <h3 className="text-sm font-semibold text-white mb-2.5 flex items-center gap-2">
               <Star className="w-4 h-4 text-yellow-500" />
               Capitán Sugerido
             </h3>
             <div className="space-y-2">
               {captainRecommendations && captainRecommendations.length > 0 ? (
-                captainRecommendations.slice(0, 3).map((player, idx) => (
-                  <div key={player.player_id} className="text-xs">
+                captainRecommendations.slice(0, 5).map((player, idx) => (
+                  <div key={player.player_id}>
                     <div className="flex items-center justify-between">
-                      <span className="text-white font-medium truncate">{player.name}</span>
-                      <span className="text-yellow-400 font-bold ml-2">{player.avg_recent_points}</span>
+                      <span className="text-white font-medium truncate text-sm">{player.name}</span>
+                      <span className="text-yellow-400 font-bold ml-2 text-sm">{Number(player.avg_recent_points).toFixed(2)}</span>
                     </div>
-                    <div className="text-slate-500 text-[10px] mt-0.5">{player.form_label}</div>
+                    <div className="text-slate-500 text-xs mt-0.5">{player.form_label}</div>
                   </div>
                 ))
               ) : (
-                <div className="text-slate-500 text-xs">Selecciona un usuario</div>
+                <div className="text-slate-500 text-sm">Selecciona un usuario</div>
               )}
             </div>
           </div>
 
-          {/* Market Opportunities */}
-          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30">
-            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          {/* Market Opportunities - Top 5 */}
+          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+            <h3 className="text-sm font-semibold text-white mb-2.5 flex items-center gap-2">
               <ShoppingCart className="w-4 h-4 text-blue-500" />
               Oportunidades
             </h3>
             <div className="space-y-2">
               {marketOpportunities && marketOpportunities.length > 0 ? (
-                marketOpportunities.slice(0, 3).map((player) => (
-                  <div key={player.player_id} className="text-xs">
+                marketOpportunities.slice(0, 5).map((player) => (
+                  <div key={player.player_id}>
                     <div className="flex items-center justify-between">
-                      <span className="text-white font-medium truncate">{player.name}</span>
-                      <span className="text-blue-400 font-mono text-[10px] ml-2">
-                        {(player.price / 1000000).toFixed(1)}M
+                      <span className="text-white font-medium truncate text-sm">{player.name}</span>
+                      <span className="text-blue-400 font-mono text-xs ml-2">
+                        {(player.price / 1000000).toFixed(2)}M
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] mt-0.5">
+                    <div className="flex items-center justify-between text-xs mt-0.5">
                       <span className="text-slate-500">{player.team}</span>
-                      <span className="text-green-400">{player.avg_recent_points} pts</span>
+                      <span className="text-green-400">{Number(player.avg_recent_points).toFixed(2)} pts</span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-slate-500 text-xs">No hay chollos ahora</div>
+                <div className="text-slate-500 text-sm">No hay chollos ahora</div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Footer Link */}
-        <div className="mt-4 pt-4 border-t border-slate-800/50">
+        {/* Footer Link - Minimal spacing */}
+        <div className="mt-2.5">
           <Link 
             href="/matches" 
-            className="text-sm text-slate-300 hover:text-white flex items-center gap-2 transition-colors group/link"
+            className="text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors group/link"
           >
             Ver calendario completo 
-            <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>

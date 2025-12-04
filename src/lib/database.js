@@ -177,11 +177,13 @@ export { db };
 export function getTopPlayers(limit = 10) {
   const query = `
     SELECT 
-      id, name, team, position, 
-      puntos as points, 
-      ROUND(CAST(puntos AS FLOAT) / NULLIF(partidos_jugados, 0), 1) as average
-    FROM players 
-    ORDER BY puntos DESC 
+      p.id, p.name, p.team, p.position, 
+      p.puntos as points, 
+      ROUND(CAST(p.puntos AS FLOAT) / NULLIF(p.partidos_jugados, 0), 1) as average,
+      u.name as owner_name
+    FROM players p
+    LEFT JOIN users u ON p.owner_id = u.id
+    ORDER BY p.puntos DESC 
     LIMIT ?
   `;
   return db.prepare(query).all(limit);
@@ -399,19 +401,20 @@ export function getUserCaptainStats(userId) {
   
   const overall = db.prepare(overallQuery).get(userId);
   
-  // Get most used captains with their stats
+  // Get ALL captains used with their stats (no limit)
+  // Note: fantasy_points are the base points, NOT multiplied by 2
   const mostUsedQuery = `
     SELECT 
       p.name,
       COUNT(DISTINCT l.round_id) as times_captain,
-      AVG(COALESCE(prs.fantasy_points, 0)) as avg_as_captain
+      AVG(COALESCE(prs.fantasy_points, 0)) as avg_as_captain,
+      SUM(COALESCE(prs.fantasy_points, 0)) as total_as_captain
     FROM lineups l
     JOIN players p ON l.player_id = p.id
     LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
     WHERE l.user_id = ? AND l.is_captain = 1
     GROUP BY l.player_id, p.name
     ORDER BY times_captain DESC, avg_as_captain DESC
-    LIMIT 3
   `;
   
   const mostUsed = db.prepare(mostUsedQuery).all(userId);
@@ -462,6 +465,7 @@ export function getUserCaptainStats(userId) {
 export function getLeaderComparison(userId) {
   const standings = getStandings();
   const leader = standings[0];
+  const secondPlace = standings[1];
   const user = standings.find(u => u.user_id === userId);
   
   if (!user || !leader) return null;
@@ -471,11 +475,17 @@ export function getLeaderComparison(userId) {
     ? Math.ceil(gap / 10) // Assuming 10pts average per round
     : 0;
   
+  // If user is leader, calculate gap to second place
+  const gapToSecond = (user.position === 1 && secondPlace) 
+    ? user.total_points - secondPlace.total_points 
+    : 0;
+  
   return {
     leader_name: leader.name,
     leader_points: leader.total_points,
     user_points: user.total_points,
     gap: gap,
+    gap_to_second: gapToSecond,
     rounds_needed: roundsNeeded,
     is_leader: user.position === 1
   };
@@ -848,4 +858,177 @@ export function getPersonalizedAlerts(userId, limit = 5) {
   }
   
   return alerts.slice(0, limit);
+}
+
+/**
+ * Get players with birthdays today
+ * @returns {Array} Players celebrating birthdays
+ */
+export function getPlayersBirthday() {
+  const query = `
+    SELECT 
+      p.id,
+      p.name,
+      p.team,
+      p.position,
+      p.birth_date,
+      u.name as owner_name
+    FROM players p
+    LEFT JOIN users u ON p.owner_id = u.id
+    WHERE p.birth_date IS NOT NULL
+      AND strftime('%m-%d', p.birth_date) = strftime('%m-%d', 'now')
+    ORDER BY p.name
+  `;
+  
+  return db.prepare(query).all();
+}
+
+/**
+ * Get players on hot or cold streaks
+ * @param {number} minGames - Minimum games for streak
+ * @returns {Object} Hot and cold players
+ */
+export function getPlayerStreaks(minGames = 3) {
+  const query = `
+    WITH RecentRounds AS (
+      SELECT DISTINCT round_id
+      FROM player_round_stats
+      ORDER BY round_id DESC
+      LIMIT 5
+    ),
+    PlayerRecentForm AS (
+      SELECT 
+        prs.player_id,
+        p.name,
+        p.team,
+        p.position,
+        COUNT(*) as games,
+        AVG(prs.fantasy_points) as recent_avg,
+        u.name as owner_name
+      FROM player_round_stats prs
+      JOIN players p ON prs.player_id = p.id
+      LEFT JOIN users u ON p.owner_id = u.id
+      WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
+      GROUP BY prs.player_id, p.name, p.team, p.position, u.name
+      HAVING games >= ?
+    ),
+    SeasonAvg AS (
+      SELECT 
+        player_id,
+        AVG(fantasy_points) as season_avg
+      FROM player_round_stats
+      GROUP BY player_id
+    )
+    SELECT 
+      prf.player_id,
+      prf.name,
+      prf.team,
+      prf.position,
+      prf.games,
+      prf.recent_avg,
+      prf.owner_name,
+      COALESCE(sa.season_avg, 0) as season_avg,
+      ROUND((prf.recent_avg - COALESCE(sa.season_avg, 0)) / NULLIF(sa.season_avg, 1) * 100, 1) as trend_pct
+    FROM PlayerRecentForm prf
+    LEFT JOIN SeasonAvg sa ON prf.player_id = sa.player_id
+    ORDER BY ABS(prf.recent_avg - COALESCE(sa.season_avg, 0)) DESC
+    LIMIT 20
+  `;
+  
+  const allPlayers = db.prepare(query).all(minGames);
+  
+  return {
+    hot: allPlayers.filter(p => p.trend_pct > 20).slice(0, 5),
+    cold: allPlayers.filter(p => p.trend_pct < -20).slice(0, 5)
+  };
+}
+
+/**
+ * Get best performers from the last completed round
+ * @param {number} limit - Number of MVPs
+ * @returns {Array} Top MVPs from last round
+ */
+export function getLastRoundMVPs(limit = 5) {
+  const query = `
+    WITH LastRound AS (
+      SELECT MAX(round_id) as last_round_id
+      FROM player_round_stats
+    )
+    SELECT 
+      prs.player_id,
+      p.name,
+      p.team,
+      p.position,
+      prs.fantasy_points as points,
+      u.name as owner_name
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN users u ON p.owner_id = u.id
+    WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
+    ORDER BY prs.fantasy_points DESC
+    LIMIT ?
+  `;
+  
+  return db.prepare(query).all(limit);
+}
+
+/**
+ * Get players showing improvement trend
+ * @param {number} limit - Number of rising stars
+ * @returns {Array} Players with improving performance
+ */
+export function getRisingStars(limit = 5) {
+  const query = `
+    WITH RecentRounds AS (
+      SELECT DISTINCT round_id
+      FROM player_round_stats
+      ORDER BY round_id DESC
+      LIMIT 5
+    ),
+    EarlierRounds AS (
+      SELECT DISTINCT round_id
+      FROM player_round_stats
+      WHERE round_id NOT IN (SELECT round_id FROM RecentRounds)
+      ORDER BY round_id DESC
+      LIMIT 5
+    ),
+    RecentPerformance AS (
+      SELECT 
+        player_id,
+        AVG(fantasy_points) as recent_avg,
+        COUNT(*) as recent_games
+      FROM player_round_stats
+      WHERE round_id IN (SELECT round_id FROM RecentRounds)
+      GROUP BY player_id
+      HAVING recent_games >= 3
+    ),
+    EarlierPerformance AS (
+      SELECT 
+        player_id,
+        AVG(fantasy_points) as earlier_avg
+      FROM player_round_stats
+      WHERE round_id IN (SELECT round_id FROM EarlierRounds)
+      GROUP BY player_id
+    )
+    SELECT 
+      p.id as player_id,
+      p.name,
+      p.team,
+      p.position,
+      rp.recent_avg,
+      COALESCE(ep.earlier_avg, 0) as earlier_avg,
+      ROUND(rp.recent_avg - COALESCE(ep.earlier_avg, 0), 1) as improvement,
+      ROUND((rp.recent_avg - COALESCE(ep.earlier_avg, 0)) / NULLIF(ep.earlier_avg, 1) * 100, 1) as improvement_pct,
+      u.name as owner_name
+    FROM RecentPerformance rp
+    JOIN players p ON rp.player_id = p.id
+    LEFT JOIN EarlierPerformance ep ON rp.player_id = ep.player_id
+    LEFT JOIN users u ON p.owner_id = u.id
+    WHERE rp.recent_avg > COALESCE(ep.earlier_avg, 0)
+      AND (rp.recent_avg - COALESCE(ep.earlier_avg, 0)) >= 3
+    ORDER BY improvement DESC
+    LIMIT ?
+  `;
+  
+  return db.prepare(query).all(limit);
 }

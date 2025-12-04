@@ -1,6 +1,6 @@
-import { getTopPlayers, getStandings } from '../lib/database';
+import { getStandings } from '../lib/database';
 import Link from 'next/link';
-import { TrendingUp, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import StandingsTable from '@/components/StandingsTable';
 import MySeasonCard from '@/components/MySeasonCard';
 import SquadValueCard from '@/components/SquadValueCard';
@@ -10,12 +10,16 @@ import LeaderGapCard from '@/components/LeaderGapCard';
 import HomeAwayCard from '@/components/HomeAwayCard';
 import LeagueComparisonCard from '@/components/LeagueComparisonCard';
 import NextRoundCard from '@/components/NextRoundCard';
-import RecentActivityCard from '@/components/RecentActivityCard';
+import TopPlayersCard from '@/components/TopPlayersCard';
+import MarketActivityCard from '@/components/MarketActivityCard';
+import BirthdayCard from '@/components/BirthdayCard';
+import HotColdStreaksCard from '@/components/HotColdStreaksCard';
+import WeekMVPsCard from '@/components/WeekMVPsCard';
+import RisingStarsCard from '@/components/RisingStarsCard';
 
 export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
-  const topPlayers = getTopPlayers(5);
   const standings = getStandings();
 
   return (
@@ -52,35 +56,21 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Top Players */}
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-green-500" /> Top Jugadores
-          </h2>
-          <Link href="/players" className="text-sm text-green-400 hover:text-green-300">Ver todos</Link>
-        </div>
-        <div className="space-y-4">
-          {topPlayers.map((player, index) => (
-            <div key={player.id} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-700">
-              <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-lg font-bold text-white border-2 border-slate-600">
-                {index + 1}
-              </div>
-              <div className="flex-grow min-w-0">
-                <div className="font-medium text-white truncate">{player.name}</div>
-                <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-green-400">{player.points} pts</div>
-                <div className="text-xs text-slate-500">{player.average} avg</div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Top Players & Market Activity - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TopPlayersCard />
+        <MarketActivityCard />
       </div>
 
-      {/* Recent Activity - Enhanced Component */}
-      <RecentActivityCard />
+      {/* Performance Stats - 3 Column Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <WeekMVPsCard />
+        <HotColdStreaksCard />
+        <RisingStarsCard />
+      </div>
+
+      {/* Birthday Card - Full Width */}
+      <BirthdayCard />
     </div>
   );
 }

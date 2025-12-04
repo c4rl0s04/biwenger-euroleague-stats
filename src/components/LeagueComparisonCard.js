@@ -30,32 +30,40 @@ export default function LeagueComparisonCard() {
   const percentage = data.leagueAvg > 0 ? Math.round((difference / data.leagueAvg) * 100) : 0;
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
-      <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <BarChart3 className="w-5 h-5 text-cyan-500" />
+    <div className="bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-xl shadow-black/5 hover:border-slate-600/50 transition-all">
+      <h2 className="text-base font-bold text-white/90 mb-4 flex items-center gap-2">
+        <div className="p-1.5 bg-cyan-500/10 rounded-lg">
+          <BarChart3 className="w-4 h-4 text-cyan-500" />
+        </div>
         vs Liga
       </h2>
 
       <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <div className="text-slate-400 text-sm">Tu promedio</div>
-          <div className="text-xl font-bold text-orange-500">{data.userAvg} pts</div>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <div className="text-slate-400 text-sm">Promedio Liga</div>
-          <div className="text-xl font-bold text-slate-300">{data.leagueAvg} pts</div>
-        </div>
-
-        <div className="pt-3 border-t border-slate-800">
-          <div className="flex justify-between items-center">
-            <div className="text-slate-400 text-sm">Diferencia</div>
-            <div className={`text-2xl font-bold ${difference >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {difference >= 0 ? '+' : ''}{difference.toFixed(1)} pts
-            </div>
+        {/* User vs League averages in grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30">
+            <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">Tu Promedio</div>
+            <div className="text-xl font-bold text-orange-500">{data.userAvg}</div>
           </div>
-          <div className={`text-right text-sm mt-1 ${percentage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            ({percentage >= 0 ? '+' : ''}{percentage}%)
+          
+          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30">
+            <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">Promedio Liga</div>
+            <div className="text-xl font-bold text-slate-300">{data.leagueAvg}</div>
+          </div>
+        </div>
+        
+        {/* Difference - compact single box */}
+        <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30">
+          <div className="flex items-baseline justify-between">
+            <span className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Diferencia</span>
+            <div className="text-right">
+              <span className={`text-2xl font-bold ${difference >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {difference >= 0 ? '+' : ''}{difference.toFixed(1)}
+              </span>
+              <span className={`text-sm ml-2 ${percentage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                ({percentage >= 0 ? '+' : ''}{percentage}%)
+              </span>
+            </div>
           </div>
         </div>
       </div>

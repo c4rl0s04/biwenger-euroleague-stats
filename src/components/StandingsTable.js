@@ -44,68 +44,67 @@ export default function StandingsTable({ standings }) {
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('es-ES').format(price);
+    // Format in millions for more compact display
+    return (price / 1000000).toFixed(2);
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left">
-        <thead className="text-xs text-slate-400 uppercase bg-slate-800/50">
-          <tr>
-            <th className="px-2 py-2 rounded-l-lg">Pos</th>
-            <th className="px-2 py-2">Usuario</th>
-            <th 
-              className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
-              onClick={() => handleSort('total_points')}
-            >
-              Puntos {getSortIndicator('total_points')}
-            </th>
-            <th 
-              className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
-              onClick={() => handleSort('team_value')}
-            >
-              Valor {getSortIndicator('team_value')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedStandings.map((user, idx) => {
-            const pointsGap = getPointsGap(user.total_points, user.position);
-            return (
-              <tr key={user.user_id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors">
-                <td className="px-2 py-2 font-medium text-white text-xs">#{user.position}</td>
-                <td className="px-2 py-2">
-                  <div className="flex items-center gap-2">
-                    {user.icon ? (
-                      <img src={user.icon} alt={user.name} className="w-5 h-5 rounded-full" />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">{user.name.charAt(0)}</div>
-                    )}
-                    <span className="truncate max-w-[100px] sm:max-w-none text-xs">{user.name}</span>
-                  </div>
-                </td>
-                <td className="px-2 py-2 text-right">
-                  <div className="font-bold text-orange-500 text-sm">{user.total_points}</div>
-                  {pointsGap !== null && (
-                    <div className="text-[9px] text-slate-500">-{pointsGap}</div>
+    <table className="w-full text-sm text-left">
+      <thead className="text-xs text-slate-400 uppercase bg-slate-800/50">
+        <tr>
+          <th className="px-2 py-2 rounded-l-lg">Pos</th>
+          <th className="px-2 py-2">Usuario</th>
+          <th 
+            className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
+            onClick={() => handleSort('total_points')}
+          >
+            Puntos {getSortIndicator('total_points')}
+          </th>
+          <th 
+            className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
+            onClick={() => handleSort('team_value')}
+          >
+            Valor {getSortIndicator('team_value')}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {sortedStandings.map((user, idx) => {
+          const pointsGap = getPointsGap(user.total_points, user.position);
+          return (
+            <tr key={user.user_id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors">
+              <td className="px-2 py-2 font-medium text-white text-xs">#{user.position}</td>
+              <td className="px-2 py-2">
+                <div className="flex items-center gap-2">
+                  {user.icon ? (
+                    <img src={user.icon} alt={user.name} className="w-5 h-5 rounded-full" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">{user.name.charAt(0)}</div>
                   )}
-                </td>
-                <td className="px-2 py-2 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <span className="text-slate-400 text-xs">{formatPrice(user.team_value)}€</span>
-                    {getPriceTrendIcon(user.price_trend)}
+                  <span className="truncate max-w-[100px] sm:max-w-none text-xs">{user.name}</span>
+                </div>
+              </td>
+              <td className="px-2 py-2 text-right">
+                <div className="font-bold text-orange-500 text-sm">{user.total_points}</div>
+                {pointsGap !== null && (
+                  <div className="text-xs text-red-400 font-medium">-{pointsGap}</div>
+                )}
+              </td>
+              <td className="px-2 py-2 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <span className="text-slate-400 text-xs">{formatPrice(user.team_value)}M€</span>
+                  {getPriceTrendIcon(user.price_trend)}
+                </div>
+                {user.price_trend !== 0 && (
+                  <div className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {user.price_trend > 0 ? '+' : ''}{formatPrice(Math.abs(user.price_trend))}M
                   </div>
-                  {user.price_trend !== 0 && (
-                    <div className={`text-[9px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {user.price_trend > 0 ? '+' : ''}{formatPrice(user.price_trend)}€
-                    </div>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
   );
 }
