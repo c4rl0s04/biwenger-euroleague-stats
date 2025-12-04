@@ -26,10 +26,10 @@ CREATE TABLE user_rounds (
             );
 
 CREATE TABLE players (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE,
-                position TEXT,
-                team TEXT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE,
+    position TEXT,
+    team TEXT,
     puntos INTEGER,
     partidos_jugados INTEGER,
     played_home INTEGER,
@@ -39,7 +39,11 @@ CREATE TABLE players (
     points_last_season INTEGER,
     owner_id TEXT,
     status TEXT,
-    price_increment INTEGER
+    price_increment INTEGER,
+    -- NUEVAS COLUMNAS:
+    birth_date TEXT,
+    height INTEGER,
+    weight INTEGER
 );
 
 

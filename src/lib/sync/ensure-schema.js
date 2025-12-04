@@ -147,8 +147,8 @@ export function ensureSchema(db) {
         }
     }
 
-    // Check for new player columns (status, price_increment)
-    const playerCols = ['status', 'price_increment'];
+    // Check for new player columns (status, price_increment, birth_date, height, weight)
+    const playerCols = ['status', 'price_increment', 'birth_date', 'height', 'weight'];
     try {
         const info = db.prepare("PRAGMA table_info(players)").all();
         const existingCols = new Set(info.map(c => c.name));
@@ -156,7 +156,10 @@ export function ensureSchema(db) {
         for (const col of playerCols) {
             if (!existingCols.has(col)) {
                 console.log(`Migrating players table (adding ${col} column)...`);
-                let type = col === 'price_increment' ? 'INTEGER' : 'TEXT';
+                let type = 'TEXT';
+                if (['price_increment', 'height', 'weight'].includes(col)) {
+                    type = 'INTEGER';
+                }
                 db.prepare(`ALTER TABLE players ADD COLUMN ${col} ${type}`).run();
             }
         }

@@ -1,38 +1,30 @@
 /**
  * Biwenger API Client (Unofficial)
- * 
- * This client interacts with the Biwenger API to fetch data for the application.
- * Since this is an unofficial API, we need to be careful with headers and rate limiting.
- * 
- * REQUIRED CONFIGURATION:
- * You must provide the following environment variables or hardcoded values:
- * - BIWENGER_TOKEN: The Bearer token (found in Authorization header)
- * - BIWENGER_LEAGUE_ID: The ID of your league (found in X-League header or URL)
- * - BIWENGER_ACCOUNT_ID: (Optional) Sometimes required in headers
  */
 
 import { CONFIG } from './config.js';
 
+// Función de espera auxiliar
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
- * Generic fetch wrapper for Biwenger API
+ * Generic fetch wrapper for Biwenger API with Retry Logic
  * @param {string} endpoint - API endpoint (relative to BASE_URL)
+ * @param {object} options - Internal options for retries
  * @returns {Promise<any>} - JSON response
  */
-export async function biwengerFetch(endpoint) {
+export async function biwengerFetch(endpoint, options = {}) {
   const tokenRaw = CONFIG.API.TOKEN;
   const leagueId = CONFIG.API.LEAGUE_ID;
   const userId = CONFIG.API.USER_ID;
 
-  if (!tokenRaw) {
-    throw new Error('BIWENGER_TOKEN is missing in environment variables');
-  }
-  if (!leagueId) {
-    throw new Error('BIWENGER_LEAGUE_ID is missing in environment variables');
-  }
+  // Configuración de reintentos por defecto
+  const { retries = 3, retryDelay = 5000 } = options;
+
+  if (!tokenRaw) throw new Error('BIWENGER_TOKEN is missing');
+  if (!leagueId) throw new Error('BIWENGER_LEAGUE_ID is missing');
 
   const url = `${CONFIG.API.BASE_URL}${endpoint}`;
-  
-  // Handle token prefix
   const token = tokenRaw.startsWith('Bearer ') ? tokenRaw : `Bearer ${tokenRaw}`;
 
   const headers = {
@@ -41,11 +33,25 @@ export async function biwengerFetch(endpoint) {
     'X-User': userId,
     'Accept': 'application/json, text/plain, */*'
   };
+  
   console.log(`Fetching: ${url}`);
   
   try {
     const response = await fetch(url, { headers });
     
+    // --- LÓGICA DE REINTENTO PARA 429 ---
+    if (response.status === 429) {
+        if (retries > 0) {
+            console.warn(`⚠️ Rate Limit (429). Pausando ${retryDelay}ms antes de reintentar...`);
+            await sleep(retryDelay);
+            // Llamada recursiva: 1 intento menos, doble de espera (Exponential Backoff)
+            return biwengerFetch(endpoint, { ...options, retries: retries - 1, retryDelay: retryDelay * 2 });
+        } else {
+            throw new Error(`Biwenger API Error: 429 Too Many Requests (Max retries exceeded)`);
+        }
+    }
+    // ------------------------------------
+
     if (!response.ok) {
       throw new Error(`Biwenger API Error: ${response.status} ${response.statusText}`);
     }
@@ -53,58 +59,45 @@ export async function biwengerFetch(endpoint) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error(`Failed to fetch ${endpoint}:`, error.message);
+    // Evitamos loguear el error si es un reintento interno, salvo que sea el final
+    if (retries === 0 || !error.message.includes('429')) {
+        console.error(`Failed to fetch ${endpoint}:`, error.message);
+    }
     throw error;
   }
 }
 
-/**
- * Fetch market data (active sales)
- */
+// --- Exportaciones de métodos específicos (Igual que antes) ---
+
 export async function fetchMarket() {
   return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, 0, 100));
 }
 
-/**
- * Fetch league standings and users
- */
 export async function fetchLeague() {
   return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_STANDINGS(CONFIG.API.LEAGUE_ID));
 }
 
-/**
- * Fetch board/transfers history
- */
 export async function fetchTransfers(offset = 0, limit = 20) {
   return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, offset, limit));
 }
 
-/**
- * Fetch competition data (players, teams, rounds)
- */
 export async function fetchCompetition() {
   return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA);
 }
 
-/**
- * Fetch all players (alias for fetchCompetition)
- */
 export async function fetchAllPlayers() {
   return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA); 
 }
 
-/**
- * Fetch rounds list or specific round details (lineups)
- */
 export async function fetchRoundsLeague(roundId) {
   return biwengerFetch(CONFIG.ENDPOINTS.ROUND_LEAGUE(roundId));
 }
 
-/**
- * Fetch games/matches for a specific round
- */
 export async function fetchRoundGames(roundId) {
-  // Fetch with score=1 to get standard fantasy points
-  // v=629 parameter matches the official Biwenger client implementation
   return biwengerFetch(CONFIG.ENDPOINTS.ROUND_GAMES(roundId));
+}
+
+// Esta es la nueva función que añadiste
+export async function fetchPlayerDetails(playerId) {
+  return biwengerFetch(CONFIG.ENDPOINTS.PLAYER_DETAILS(playerId));
 }
