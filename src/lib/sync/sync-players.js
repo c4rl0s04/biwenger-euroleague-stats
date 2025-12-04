@@ -1,7 +1,7 @@
 import { fetchAllPlayers, fetchPlayerDetails } from '../biwenger-client.js';
 import { CONFIG } from '../config.js';
 
-const SLEEP_MS = 600; // Pausa para no saturar la API
+const SLEEP_MS = 600; // Mantenemos la pausa segura para evitar el error 429
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -27,7 +27,7 @@ const parsePriceDate = (dateInt) => {
 
 /**
  * Syncs all players from the competition to the local database.
- * Also updates market values (current price) and fetches extended details.
+ * Optimized to only insert new market values.
  * @param {import('better-sqlite3').Database} db - Database instance
  * @returns {Promise<Object>} - The full competition data object
  */
@@ -35,7 +35,6 @@ export async function syncPlayers(db) {
   console.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
   
-  // Structure is usually data.data.players
   const playersList = competition.data.data ? competition.data.data.players : competition.data.players;
   
   if (!playersList) {
@@ -44,9 +43,8 @@ export async function syncPlayers(db) {
 
   console.log(`Found ${Object.keys(playersList).length} players. Updating DB and fetching details...`);
   
-  // 1. PREPARACIÓN DE QUERIES
+  // --- 1. PREPARACIÓN DE QUERIES ---
 
-  // Query Original (MODIFICADA: Se ha eliminado img_url)
   const insertPlayer = db.prepare(`
     INSERT INTO players (
       id, name, team, position, 
@@ -77,14 +75,15 @@ export async function syncPlayers(db) {
       price_increment=excluded.price_increment
   `);
 
-  // Nueva Query: Actualizar solo los detalles físicos y fecha
   const updatePlayerDetails = db.prepare(`
     UPDATE players 
     SET birth_date = @birth_date, height = @height, weight = @weight
     WHERE id = @id
   `);
 
-  // Query Mercado (Sirve para el historial completo)
+  // NUEVA QUERY: Obtener la última fecha registrada para un jugador
+  const getLastDate = db.prepare('SELECT max(date) as last_date FROM market_values WHERE player_id = ?');
+
   const insertMarketValue = db.prepare(`
     INSERT OR IGNORE INTO market_values (player_id, price, date)
     VALUES (@player_id, @price, @date)
@@ -93,19 +92,17 @@ export async function syncPlayers(db) {
   const positions = CONFIG.POSITIONS; 
   const teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
 
-  // 2. PROCESAMIENTO
+  // --- 2. PROCESAMIENTO ---
 
   for (const [id, player] of Object.entries(playersList)) {
       const playerId = parseInt(id);
 
-      // A) Inserción Básica (Sin img_url)
+      // A) Inserción Básica
       insertPlayer.run({
         id: playerId,
         name: player.name,
         team: teams[player.teamID]?.name || 'Unknown',
         position: positions[player.position] || 'Unknown',
-        
-        // Stats originales
         puntos: player.points || 0,
         partidos_jugados: (player.playedHome || 0) + (player.playedAway || 0),
         played_home: player.playedHome || 0,
@@ -113,57 +110,69 @@ export async function syncPlayers(db) {
         points_home: player.pointsHome || 0,
         points_away: player.pointsAway || 0,
         points_last_season: player.pointsLastSeason || 0,
-        
-        // Enhanced Data
         status: player.status || 'ok',
         price_increment: player.priceIncrement || 0
       });
 
       // B) Obtención de Detalles Extendidos
       try {
-          // Pausa de cortesía a la API
           await sleep(SLEEP_MS);
           
-          // Usamos el slug si existe, si no, el ID
           const lookupId = player.slug || playerId;
-
-          // Llamada al endpoint optimizado
           const details = await fetchPlayerDetails(lookupId);
           
           if (details.data) {
               const d = details.data;
 
-              // B.1 Actualizamos los datos físicos en la tabla players
+              // B.1 Actualizar datos físicos
               updatePlayerDetails.run({
-                  id: playerId, // Siempre usamos el ID numérico para guardar en DB
+                  id: playerId,
                   birth_date: parseBiwengerDate(d.birthday),
                   height: d.height || null,
                   weight: d.weight || null
               });
 
-              // B.2 Insertamos TODO el historial de precios
+              // B.2 Insertar SOLO precios nuevos (Optimización)
               if (d.prices && Array.isArray(d.prices)) {
-                  const insertHistory = db.transaction((prices) => {
-                      for (const [dateInt, price] of prices) {
-                          insertMarketValue.run({
-                              player_id: playerId,
-                              price: price,
-                              date: parsePriceDate(dateInt)
-                          });
-                      }
+                  
+                  // 1. Consultamos qué tenemos ya en la base de datos
+                  const lastDateRow = getLastDate.get(playerId);
+                  const lastDate = lastDateRow ? lastDateRow.last_date : null;
+
+                  // 2. Filtramos: solo nos interesan las fechas POSTERIORES a la última que tenemos
+                  const newPrices = d.prices.filter(([dateInt]) => {
+                      // Si no tenemos historial, nos interesan todos (return true)
+                      if (!lastDate) return true;
+                      
+                      // Convertimos fecha API (250918) a SQL (2025-09-18) y comparamos
+                      const priceDate = parsePriceDate(dateInt);
+                      return priceDate > lastDate;
                   });
-                  insertHistory(d.prices);
+
+                  // 3. Insertamos solo el delta (si hay algo nuevo)
+                  if (newPrices.length > 0) {
+                      const insertHistory = db.transaction((prices) => {
+                          for (const [dateInt, price] of prices) {
+                              insertMarketValue.run({
+                                  player_id: playerId,
+                                  price: price,
+                                  date: parsePriceDate(dateInt)
+                              });
+                          }
+                      });
+                      insertHistory(newPrices);
+                      // Opcional: Log para depurar
+                      // console.log(`   -> Added ${newPrices.length} new prices for ${player.name}`);
+                  }
               }
           }
       } catch (e) {
-          // Log mejorado para ver qué ID falló
           const lookupId = player.slug || playerId;
           console.error(`   ⚠️ Error fetching details for ${player.name} (${lookupId}): ${e.message}`);
       }
   }
 
-  console.log('✅ Players (with full stats) and market history synced.');
+  console.log('✅ Players synced (Incremental market update).');
   
-  // Return competition data for other modules
   return competition;
 }
