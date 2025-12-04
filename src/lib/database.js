@@ -524,3 +524,328 @@ export function getLeagueAveragePoints() {
   const result = db.prepare(query).get();
   return result.avg_points || 0;
 }
+
+/**
+ * Get top players by recent form (last N rounds)
+ * @param {number} limit - Number of players to return
+ * @param {number} rounds - Number of recent rounds to analyze
+ * @returns {Array} List of top performing players by form
+ */
+export function getTopPlayersByForm(limit = 5, rounds = 3) {
+  const query = `
+    WITH RecentRounds AS (
+      SELECT DISTINCT round_id
+      FROM player_round_stats
+      ORDER BY round_id DESC
+      LIMIT ?
+    ),
+    PlayerFormStats AS (
+      SELECT 
+        prs.player_id,
+        p.name,
+        p.position,
+        p.team,
+        SUM(prs.fantasy_points) as total_points,
+        ROUND(AVG(prs.fantasy_points), 1) as avg_points,
+        COUNT(*) as games_played
+      FROM player_round_stats prs
+      JOIN players p ON prs.player_id = p.id
+      WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
+      GROUP BY prs.player_id, p.name, p.position, p.team
+      HAVING games_played >= 2
+    )
+    SELECT 
+      player_id,
+      name,
+      position,
+      team,
+      total_points,
+      avg_points,
+      games_played
+    FROM PlayerFormStats
+    ORDER BY avg_points DESC, total_points DESC
+    LIMIT ?
+  `;
+  
+  return db.prepare(query).all(rounds, limit);
+}
+
+/**
+ * Get captain recommendations based on form and upcoming matches
+ * @param {string} userId - User ID to get recommendations for
+ * @param {number} limit - Number of recommendations
+ * @returns {Array} List of recommended captain picks
+ */
+export function getCaptainRecommendations(userId, limit = 3) {
+  // Get user's squad players with their recent form
+  const query = `
+    WITH RecentRounds AS (
+      SELECT DISTINCT round_id
+      FROM player_round_stats
+      ORDER BY round_id DESC
+      LIMIT 3
+    ),
+    UserSquadForm AS (
+      SELECT 
+        p.id as player_id,
+        p.name,
+        p.position,
+        p.team,
+        COALESCE(AVG(prs.fantasy_points), 0) as avg_recent_points,
+        COUNT(prs.id) as recent_games
+      FROM players p
+      LEFT JOIN player_round_stats prs ON p.id = prs.player_id 
+        AND prs.round_id IN (SELECT round_id FROM RecentRounds)
+      WHERE p.owner_id = ?
+      GROUP BY p.id, p.name, p.position, p.team
+    )
+    SELECT 
+      player_id,
+      name,
+      position,
+      team,
+      avg_recent_points,
+      recent_games,
+      CASE 
+        WHEN avg_recent_points >= 25 THEN 'Excelente forma'
+        WHEN avg_recent_points >= 18 THEN 'Buena forma'
+        WHEN avg_recent_points >= 12 THEN 'Forma regular'
+        ELSE 'Forma baja'
+      END as form_label
+    FROM UserSquadForm
+    WHERE avg_recent_points > 0
+    ORDER BY avg_recent_points DESC
+    LIMIT ?
+  `;
+  
+  return db.prepare(query).all(userId, limit);
+}
+
+/**
+ * Get market opportunities (undervalued players with good form)
+ * @param {number} limit - Number of opportunities to return
+ * @returns {Array} List of recommended buys
+ */
+export function getMarketOpportunities(limit = 3) {
+  const query = `
+    WITH RecentRounds AS (
+      SELECT DISTINCT round_id
+      FROM player_round_stats
+      ORDER BY round_id DESC
+      LIMIT 3
+    ),
+    PlayerForm AS (
+      SELECT 
+        prs.player_id,
+        AVG(prs.fantasy_points) as avg_recent_points
+      FROM player_round_stats prs
+      WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
+      GROUP BY prs.player_id
+      HAVING COUNT(*) >= 2
+    )
+    SELECT 
+      p.id as player_id,
+      p.name,
+      p.position,
+      p.team,
+      p.price,
+      COALESCE(p.price_increment, 0) as price_trend,
+      COALESCE(pf.avg_recent_points, 0) as avg_recent_points,
+      ROUND(COALESCE(pf.avg_recent_points, 0) * 1000000.0 / NULLIF(p.price, 0), 2) as value_score
+    FROM players p
+    LEFT JOIN PlayerForm pf ON p.id = pf.player_id
+    WHERE p.owner_id IS NULL
+      AND p.price > 0
+      AND pf.avg_recent_points >= 12
+    ORDER BY value_score DESC, price_trend DESC
+    LIMIT ?
+  `;
+  
+  return db.prepare(query).all(limit);
+}
+
+/**
+ * Get significant price changes in the last period
+ * @param {number} hoursAgo - Hours to look back
+ * @param {number} minChange - Minimum price change threshold
+ * @returns {Array} Players with significant price changes
+ */
+export function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
+  // Since we don't have historical price tracking with timestamps,
+  // we'll use price_increment as a proxy for recent changes
+  const query = `
+    SELECT 
+      id as player_id,
+      name,
+      position,
+      team,
+      price,
+      price_increment,
+      owner_id
+    FROM players
+    WHERE ABS(COALESCE(price_increment, 0)) >= ?
+    ORDER BY ABS(price_increment) DESC
+    LIMIT 5
+  `;
+  
+  return db.prepare(query).all(minChange);
+}
+
+/**
+ * Get recent records broken
+ * @returns {Array} Recent league records
+ */
+export function getRecentRecords() {
+  const records = [];
+  
+  // Highest round score
+  const highestRoundQuery = `
+    SELECT 
+      ur.user_id,
+      u.name as user_name,
+      ur.round_name,
+      ur.points
+    FROM user_rounds ur
+    JOIN users u ON ur.user_id = u.id
+    WHERE ur.participated = 1
+    ORDER BY ur.points DESC
+    LIMIT 1
+  `;
+  const highestRound = db.prepare(highestRoundQuery).get();
+  if (highestRound) {
+    records.push({
+      type: 'highest_round',
+      label: 'Récord de puntos en jornada',
+      description: `${highestRound.user_name} - ${highestRound.points} pts en ${highestRound.round_name}`,
+      user_name: highestRound.user_name,
+      value: highestRound.points
+    });
+  }
+  
+  // Highest transfer price
+  const highestTransferQuery = `
+    SELECT 
+      f.precio,
+      p.name as player_name,
+      f.comprador,
+      f.fecha
+    FROM fichajes f
+    JOIN players p ON f.player_id = p.id
+    ORDER BY f.precio DESC
+    LIMIT 1
+  `;
+  const highestTransfer = db.prepare(highestTransferQuery).get();
+  if (highestTransfer) {
+    records.push({
+      type: 'highest_transfer',
+      label: 'Fichaje más caro',
+      description: `${highestTransfer.player_name} - ${(highestTransfer.precio / 1000000).toFixed(2)}M€ (${highestTransfer.comprador})`,
+      user_name: highestTransfer.comprador,
+      value: highestTransfer.precio
+    });
+  }
+  
+  // Biggest price gain
+  const biggestGainQuery = `
+    SELECT 
+      id,
+      name,
+      price_increment,
+      owner_id
+    FROM players
+    WHERE price_increment > 0
+    ORDER BY price_increment DESC
+    LIMIT 1
+  `;
+  const biggestGain = db.prepare(biggestGainQuery).get();
+  if (biggestGain && biggestGain.price_increment > 0) {
+    records.push({
+      type: 'biggest_gain',
+      label: 'Mayor revalorización',
+      description: `${biggestGain.name} +${(biggestGain.price_increment / 1000000).toFixed(2)}M€`,
+      player_name: biggestGain.name,
+      value: biggestGain.price_increment
+    });
+  }
+  
+  return records.slice(0, 3);
+}
+
+/**
+ * Get personalized alerts for a user
+ * @param {string} userId - User ID
+ * @param {number} limit - Number of alerts
+ * @returns {Array} Personalized alerts
+ */
+export function getPersonalizedAlerts(userId, limit = 5) {
+  const alerts = [];
+  
+  // Check for players with significant price increases
+  const priceGainsQuery = `
+    SELECT 
+      name,
+      price_increment
+    FROM players
+    WHERE owner_id = ? AND price_increment > 500000
+    ORDER BY price_increment DESC
+    LIMIT 2
+  `;
+  const priceGains = db.prepare(priceGainsQuery).all(userId);
+  priceGains.forEach(player => {
+    alerts.push({
+      type: 'price_gain',
+      icon: '📈',
+      message: `Tu jugador ${player.name} ha ganado ${(player.price_increment / 1000000).toFixed(2)}M€`,
+      severity: 'success'
+    });
+  });
+  
+  // Check for players with significant price decreases
+  const priceLossesQuery = `
+    SELECT 
+      name,
+      price_increment
+    FROM players
+    WHERE owner_id = ? AND price_increment < -500000
+    ORDER BY price_increment ASC
+    LIMIT 2
+  `;
+  const priceLosses = db.prepare(priceLossesQuery).all(userId);
+  priceLosses.forEach(player => {
+    alerts.push({
+      type: 'price_loss',
+      icon: '📉',
+      message: `Tu jugador ${player.name} ha perdido ${Math.abs(player.price_increment / 1000000).toFixed(2)}M€`,
+      severity: 'warning'
+    });
+  });
+  
+  // Check for recent good performance
+  const recentGoodFormQuery = `
+    WITH LastRound AS (
+      SELECT MAX(round_id) as max_round
+      FROM player_round_stats
+    )
+    SELECT 
+      p.name,
+      prs.fantasy_points
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    WHERE p.owner_id = ? 
+      AND prs.round_id = (SELECT max_round FROM LastRound)
+      AND prs.fantasy_points >= 25
+    ORDER BY prs.fantasy_points DESC
+    LIMIT 1
+  `;
+  const goodForm = db.prepare(recentGoodFormQuery).get(userId);
+  if (goodForm) {
+    alerts.push({
+      type: 'good_performance',
+      icon: '⭐',
+      message: `¡${goodForm.name} brilló con ${goodForm.fantasy_points} puntos!`,
+      severity: 'info'
+    });
+  }
+  
+  return alerts.slice(0, limit);
+}
