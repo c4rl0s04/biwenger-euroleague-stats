@@ -1,0 +1,25 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BIWENGER_TOKEN=${BIWENGER_TOKEN}
+      - BIWENGER_LEAGUE_ID=${BIWENGER_LEAGUE_ID}
+      - BIWENGER_USER_ID=${BIWENGER_USER_ID}
+    volumes:
+      # Persist database between container restarts
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  data:
