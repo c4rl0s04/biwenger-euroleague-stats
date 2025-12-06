@@ -43,5 +43,6 @@ next-env.d.ts
 *.swo
 *~
 
-# Local Database
-data/local.db
+# Local Database (keep folder, ignore db file)
+data/*.db
+!data/.gitkeep

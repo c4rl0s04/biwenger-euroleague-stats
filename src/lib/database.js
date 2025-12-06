@@ -7,10 +7,37 @@
  */
 
 import Database from 'better-sqlite3';
+import fs from 'fs';
+import path from 'path';
 
 // Connect to the LOCAL database
 const dbPath = process.env.DB_PATH || 'data/local.db';
+
+// Ensure data directory exists
+const dataDir = path.dirname(dbPath);
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
 const db = new Database(dbPath, { readonly: false }); // Allow writes for sync
+
+// Initialize empty tables if database is new (prevents errors on first run)
+const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").pluck().all();
+if (tables.length === 0) {
+  console.log('📦 Initializing empty database schema...');
+  // Create minimal tables so queries don't fail
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT, icon TEXT);
+    CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, position TEXT, team TEXT, puntos INTEGER, partidos_jugados INTEGER, played_home INTEGER, played_away INTEGER, points_home INTEGER, points_away INTEGER, points_last_season INTEGER, owner_id TEXT, status TEXT, price_increment INTEGER, birth_date TEXT, height INTEGER, weight INTEGER, price INTEGER);
+    CREATE TABLE IF NOT EXISTS user_rounds (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, round_id INTEGER, round_name TEXT, points INTEGER, participated BOOLEAN DEFAULT 1, alineacion TEXT, UNIQUE(user_id, round_id));
+    CREATE TABLE IF NOT EXISTS fichajes (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER, fecha TEXT, player_id INTEGER, precio INTEGER, vendedor TEXT, comprador TEXT, UNIQUE(timestamp, player_id, vendedor, comprador, precio));
+    CREATE TABLE IF NOT EXISTS lineups (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, round_id INTEGER, round_name TEXT, player_id INTEGER, is_captain BOOLEAN, role TEXT, UNIQUE(user_id, round_id, player_id));
+    CREATE TABLE IF NOT EXISTS matches (id INTEGER PRIMARY KEY AUTOINCREMENT, round_id INTEGER, round_name TEXT, home_team TEXT, away_team TEXT, date DATE, status TEXT, home_score INTEGER, away_score INTEGER, UNIQUE(round_id, home_team, away_team));
+    CREATE TABLE IF NOT EXISTS player_round_stats (id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, round_id INTEGER, fantasy_points INTEGER, minutes INTEGER, points INTEGER, UNIQUE(player_id, round_id));
+    CREATE TABLE IF NOT EXISTS porras (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, round_id INTEGER, round_name TEXT, result TEXT, aciertos INTEGER, UNIQUE(user_id, round_id));
+    CREATE TABLE IF NOT EXISTS market_values (id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, price INTEGER, date DATE);
+  `);
+}
 
 /**
  * Get Market KPIs

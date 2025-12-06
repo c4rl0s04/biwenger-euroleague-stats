@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+// Try to load .env.local (for local dev), but don't fail if missing (Docker uses env vars directly)
 dotenv.config({ path: '.env.local' });
 
 import Database from 'better-sqlite3';
@@ -10,6 +11,14 @@ import { syncMatches } from '../src/lib/sync/sync-matches.js';
 import { syncLineups } from '../src/lib/sync/sync-lineups.js';
 import { ensureSchema } from '../src/lib/sync/ensure-schema.js';
 import { CONFIG } from '../src/lib/config.js';
+
+// Validate environment before starting
+if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
+  console.error('❌ ERROR: BIWENGER_TOKEN is required!');
+  console.error('   Set it in .env.local or as an environment variable.');
+  process.exit(1);
+}
+
 
 const DB_PATH = CONFIG.DB.PATH;
 

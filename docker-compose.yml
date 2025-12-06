@@ -6,11 +6,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    env_file:
+      - .env.local
     environment:
       - NODE_ENV=production
-      - BIWENGER_TOKEN=${BIWENGER_TOKEN}
-      - BIWENGER_LEAGUE_ID=${BIWENGER_LEAGUE_ID}
-      - BIWENGER_USER_ID=${BIWENGER_USER_ID}
     volumes:
       # Persist database between container restarts
       - ./data:/app/data

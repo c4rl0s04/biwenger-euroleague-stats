@@ -1,7 +1,8 @@
 import path from 'path';
 import dotenv from 'dotenv';
 
-// Ensure env vars are loaded if this file is imported directly
+// Try to load .env.local for local dev - Docker passes env vars directly
+// This won't fail if the file doesn't exist
 dotenv.config({ path: '.env.local' });
 
 export const CONFIG = {
