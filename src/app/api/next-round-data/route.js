@@ -17,15 +17,15 @@ export async function GET(request) {
     const nextRound = getNextRound();
     
     // Get top players by recent form
-    const topPlayersForm = getTopPlayersByForm(5, 3);
+    const topPlayersForm = getTopPlayersByForm(6, 3);
     
     // Get captain recommendations if userId is provided
     const captainRecommendations = userId 
-      ? getCaptainRecommendations(userId, 5)
+      ? getCaptainRecommendations(userId, 6)
       : [];
     
     // Get market opportunities
-    const marketOpportunities = getMarketOpportunities(5);
+    const marketOpportunities = getMarketOpportunities(6);
 
     return NextResponse.json({
       success: true,

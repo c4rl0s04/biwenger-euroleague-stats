@@ -73,85 +73,163 @@ export default function NextRoundCard() {
           )}
         </div>
 
-        {/* Content Grid - Tighter spacing */}
+        {/* Content Grid - 3 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Top Players by Form - Top 5 */}
-          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
-            <h3 className="text-sm font-semibold text-white mb-2.5 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-green-500" />
-              Top Forma
-            </h3>
-            <div className="space-y-2">
-              {topPlayersForm && topPlayersForm.length > 0 ? (
-                topPlayersForm.slice(0, 5).map((player, idx) => (
-                  <div key={player.player_id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <span className="text-slate-500 font-mono text-xs w-4">{idx + 1}.</span>
-                      <span className="text-white truncate text-sm">{player.name}</span>
-                    </div>
-                    <span className="text-green-400 font-bold ml-2 text-sm">{Number(player.avg_points).toFixed(2)}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="text-slate-500 text-sm">No hay datos disponibles</div>
-              )}
-            </div>
-          </div>
+          {/* Helper for score colors */}
+          {(() => {
+            const getScoreColor = (score) => {
+              const s = Number(score);
+              if (s >= 25) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+              if (s >= 15) return 'bg-green-500/20 text-green-300 border-green-500/30';
+              if (s >= 5) return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+              return 'bg-slate-700/50 text-slate-400 border-slate-600/30';
+            };
 
-          {/* Captain Recommendations - Top 5 */}
-          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
-            <h3 className="text-sm font-semibold text-white mb-2.5 flex items-center gap-2">
-              <Star className="w-4 h-4 text-yellow-500" />
-              Capitán Sugerido
-            </h3>
-            <div className="space-y-2">
-              {captainRecommendations && captainRecommendations.length > 0 ? (
-                captainRecommendations.slice(0, 5).map((player, idx) => (
-                  <div key={player.player_id}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white font-medium truncate text-sm">{player.name}</span>
-                      <span className="text-yellow-400 font-bold ml-2 text-sm">{Number(player.avg_recent_points).toFixed(2)}</span>
-                    </div>
-                    <div className="text-slate-500 text-xs mt-0.5">{player.form_label}</div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-slate-500 text-sm">Selecciona un usuario</div>
-              )}
-            </div>
-          </div>
+            return (
+              <>
+                {/* Top Players by Form */}
+                <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+                  <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    Top Forma
+                  </h3>
+                  <div className="space-y-3">
+                    {topPlayersForm && topPlayersForm.length > 0 ? (
+                      topPlayersForm.slice(0, 6).map((player, idx) => (
+                        <div key={player.player_id} className="group/item">
+                          {/* Line 1: Name */}
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-slate-500 font-mono text-xs w-4 shrink-0">{idx + 1}.</span>
+                            <span className="text-white font-medium text-sm truncate" title={player.name}>{player.name}</span>
+                          </div>
+                          
+                          {/* Line 2: Context */}
+                          <div className="flex items-center gap-2 text-xs text-slate-400 pl-6 mb-1.5">
+                            <span className="truncate">{player.team}</span>
+                            <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                            <span className="truncate">{player.position}</span>
+                            {player.owner_name && (
+                              <>
+                                <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                <span className="text-slate-500 truncate max-w-[80px]" title={`Dueño: ${player.owner_name}`}>
+                                  {player.owner_name}
+                                </span>
+                              </>
+                            )}
+                          </div>
 
-          {/* Market Opportunities - Top 5 */}
-          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
-            <h3 className="text-sm font-semibold text-white mb-2.5 flex items-center gap-2">
-              <ShoppingCart className="w-4 h-4 text-blue-500" />
-              Oportunidades
-            </h3>
-            <div className="space-y-2">
-              {marketOpportunities && marketOpportunities.length > 0 ? (
-                marketOpportunities.slice(0, 5).map((player) => (
-                  <div key={player.player_id}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white font-medium truncate text-sm">{player.name}</span>
-                      <span className="text-blue-400 font-mono text-xs ml-2">
-                        {(player.price / 1000000).toFixed(2)}M
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs mt-0.5">
-                      <span className="text-slate-500">{player.team}</span>
-                      <span className="text-green-400">{Number(player.avg_recent_points).toFixed(2)} pts</span>
-                    </div>
+                          {/* Line 3: Scores & Avg */}
+                          <div className="flex items-center justify-between pl-6">
+                            <div className="flex gap-1">
+                              {player.recent_scores && player.recent_scores.split(',').map((score, i) => (
+                                <span key={i} className={`text-[10px] px-1.5 py-0.5 rounded border ${getScoreColor(score)}`}>
+                                  {score}
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-green-400 font-bold text-sm">{Number(player.avg_points).toFixed(1)}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-slate-500 text-sm">No hay datos disponibles</div>
+                    )}
                   </div>
-                ))
-              ) : (
-                <div className="text-slate-500 text-sm">No hay chollos ahora</div>
-              )}
-            </div>
-          </div>
+                </div>
+
+                {/* Captain Recommendations */}
+                <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+                  <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    Capitán Sugerido
+                  </h3>
+                  <div className="space-y-3">
+                    {captainRecommendations && captainRecommendations.length > 0 ? (
+                      captainRecommendations.slice(0, 6).map((player) => (
+                        <div key={player.player_id} className="group/item">
+                          {/* Line 1: Name */}
+                          <div className="mb-1">
+                            <span className="text-white font-medium text-sm truncate block" title={player.name}>{player.name}</span>
+                          </div>
+                          
+                          {/* Line 2: Context */}
+                          <div className="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                            <span className="truncate">{player.team}</span>
+                            <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                            <span className="text-yellow-500/80">{player.form_label}</span>
+                          </div>
+
+                          {/* Line 3: Scores & Avg */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-1">
+                              {player.recent_scores && player.recent_scores.split(',').map((score, i) => (
+                                <span key={i} className={`text-[10px] px-1.5 py-0.5 rounded border ${getScoreColor(score)}`}>
+                                  {score}
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-yellow-400 font-bold text-sm">{Number(player.avg_recent_points).toFixed(1)}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-slate-500 text-sm">Selecciona un usuario</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Market Opportunities */}
+                <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+                  <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                    <ShoppingCart className="w-4 h-4 text-blue-500" />
+                    Oportunidades
+                  </h3>
+                  <div className="space-y-3">
+                    {marketOpportunities && marketOpportunities.length > 0 ? (
+                      marketOpportunities.slice(0, 6).map((player) => (
+                        <div key={player.player_id} className="group/item">
+                          {/* Line 1: Name */}
+                          <div className="mb-1">
+                            <span className="text-white font-medium text-sm truncate block" title={player.name}>{player.name}</span>
+                          </div>
+                          
+                          {/* Line 2: Context */}
+                          <div className="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                            <span className="truncate">{player.team}</span>
+                            <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                            <span className="text-blue-400 font-mono">{(player.price / 1000000).toFixed(2)}M</span>
+                          </div>
+
+                          {/* Line 3: Scores & Avg */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-1">
+                              {player.recent_scores && player.recent_scores.split(',').map((score, i) => (
+                                <span key={i} className={`text-[10px] px-1.5 py-0.5 rounded border ${getScoreColor(score)}`}>
+                                  {score}
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-green-400 font-bold text-sm">{Number(player.avg_recent_points).toFixed(1)} pts</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-slate-500 text-sm">No hay chollos ahora</div>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
-        {/* Footer Link - Minimal spacing */}
-        <div className="mt-2.5">
+
+
+        {/* Footer Info */}
+        <div className="mt-4 flex items-center justify-between border-t border-slate-700/30 pt-3">
+          <div className="text-xs text-slate-500 italic">
+            * Datos calculados en base a las últimas 3 jornadas
+          </div>
           <Link 
             href="/matches" 
             className="text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors group/link"
