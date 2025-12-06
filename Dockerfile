@@ -1,6 +1,14 @@
 # Build stage
 FROM node:20-alpine AS builder
 
+# Metadata
+LABEL org.opencontainers.image.title="BiwengerStats"
+LABEL org.opencontainers.image.description="Modern dashboard for Biwenger Euroleague fantasy basketball statistics"
+LABEL org.opencontainers.image.authors="Carlos Andrés Huete <github.com/c4rl0s04>"
+LABEL org.opencontainers.image.source="https://github.com/c4rl0s04/biwengerstats-next"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.version="1.0.0"
+
 # Install build dependencies for better-sqlite3
 RUN apk add --no-cache python3 make g++ 
 
