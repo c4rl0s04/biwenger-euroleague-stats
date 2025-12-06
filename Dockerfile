@@ -48,12 +48,14 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy scripts and data directory structure
+# Copy everything needed for sync script
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/src/lib/schema.sql ./src/lib/schema.sql
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/node_modules ./node_modules
 
 # Create data directory and set permissions
-RUN mkdir -p ./data && chown -R nextjs:nodejs ./data
+RUN mkdir -p ./data && chown -R nextjs:nodejs ./data ./src ./scripts
 
 # Switch to non-root user
 USER nextjs

@@ -25,20 +25,45 @@ BIWENGER_USER_ID=your_user_id_here
 
 > **How to get your token**: Open Biwenger in your browser, go to Developer Tools → Network tab, and find the `Authorization` header in any API request.
 
-### 3. Run with Docker Compose
+### 3. Build and Run
 
 ```bash
 # Build and start the container
-docker-compose up -d
+docker-compose up -d --build
 
-# View logs
-docker-compose logs -f
+# Wait for it to start (check logs)
+docker logs -f biwengerstats
+```
 
-# Stop the container
-docker-compose down
+### 4. Sync Data (First Time REQUIRED)
+
+```bash
+# Sync data from Biwenger API
+docker exec biwengerstats npm run sync
 ```
 
 The app will be available at **http://localhost:3000**
+
+---
+
+## Common Commands
+
+```bash
+# Start the container
+docker-compose up -d
+
+# Stop the container
+docker-compose down
+
+# View logs
+docker logs -f biwengerstats
+
+# Sync data
+docker exec biwengerstats npm run sync
+
+# Rebuild after code changes
+docker-compose up -d --build
+```
 
 ---
 
@@ -65,16 +90,6 @@ docker run -d \
 
 ## Data Synchronization
 
-To sync data from the Biwenger API, run:
-
-```bash
-# With docker-compose
-docker-compose exec web npm run sync
-
-# Or directly
-docker exec biwengerstats npm run sync
-```
-
 > **Note**: The database is persisted in the `./data` folder, so your data survives container restarts.
 
 ---
@@ -98,34 +113,48 @@ docker build -t yourusername/biwengerstats:latest .
 docker push yourusername/biwengerstats:latest
 ```
 
-### Environment Variables Summary
+---
+
+## Troubleshooting
+
+### "No data" error on first run
+
+You must sync data first:
+
+```bash
+docker exec biwengerstats npm run sync
+```
+
+### Container not found
+
+Make sure the container is running:
+
+```bash
+docker-compose up -d
+docker ps
+```
+
+### Permission issues with data folder
+
+```bash
+chmod -R 777 ./data
+```
+
+### Rebuild from scratch
+
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+docker exec biwengerstats npm run sync
+```
+
+---
+
+## Environment Variables
 
 | Variable             | Description                | Required |
 | -------------------- | -------------------------- | -------- |
 | `BIWENGER_TOKEN`     | Bearer token from Biwenger | Yes      |
 | `BIWENGER_LEAGUE_ID` | Your league ID             | Yes      |
 | `BIWENGER_USER_ID`   | Your user ID               | Optional |
-
----
-
-## Troubleshooting
-
-### Container won't start
-
-```bash
-docker-compose logs web
-```
-
-### Database permission issues
-
-```bash
-chmod 755 ./data
-```
-
-### Rebuild after changes
-
-```bash
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
-```
