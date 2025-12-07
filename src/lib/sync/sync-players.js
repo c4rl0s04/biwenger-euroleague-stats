@@ -51,14 +51,14 @@ export async function syncPlayers(db) {
       puntos, partidos_jugados, 
       played_home, played_away, 
       points_home, points_away, points_last_season,
-      status, price_increment
+      status, price_increment, price
     ) 
     VALUES (
       @id, @name, @team, @position, 
       @puntos, @partidos_jugados, 
       @played_home, @played_away, 
       @points_home, @points_away, @points_last_season,
-      @status, @price_increment
+      @status, @price_increment, @price
     )
     ON CONFLICT(id) DO UPDATE SET 
       name=excluded.name, 
@@ -72,7 +72,8 @@ export async function syncPlayers(db) {
       points_away=excluded.points_away,
       points_last_season=excluded.points_last_season,
       status=excluded.status,
-      price_increment=excluded.price_increment
+      price_increment=excluded.price_increment,
+      price=excluded.price
   `);
 
   const updatePlayerDetails = db.prepare(`
@@ -111,7 +112,8 @@ export async function syncPlayers(db) {
         points_away: player.pointsAway || 0,
         points_last_season: player.pointsLastSeason || 0,
         status: player.status || 'ok',
-        price_increment: player.priceIncrement || 0
+        price_increment: player.priceIncrement || 0,
+        price: player.price || 0
       });
 
       // B) Obtención de Detalles Extendidos

@@ -13,6 +13,7 @@ import { fetchRoundGames } from '../biwenger-client.js';
  */
 export async function syncMatches(db, round, playersList = {}) {
     const roundId = round.id;
+    const dbRoundId = round.dbId || round.id; // Use mapped ID for DB if present
     const roundName = round.name;
     
     console.log('Fetching matches...');
@@ -85,7 +86,7 @@ export async function syncMatches(db, round, playersList = {}) {
             db.transaction(() => {
                 for (const game of gamesData.data.games) {
                     insertMatch.run({
-                        round_id: roundId,
+                        round_id: dbRoundId,
                         round_name: roundName,
                         home_team: game.home.name,
                         away_team: game.away.name,
@@ -133,7 +134,7 @@ export async function syncMatches(db, round, playersList = {}) {
 
                             insertStats.run({
                                 player_id: playerId,
-                                round_id: roundId,
+                                round_id: dbRoundId,
                                 fantasy_points: report.points || 0,
                                 minutes: parseInt(statsMap['Minutes played']) || 0,
                                 points: parseInt(statsMap['Points']) || 0,

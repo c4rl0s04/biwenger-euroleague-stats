@@ -76,6 +76,16 @@ async function syncData() {
 
              if (roundName === 'GLOBAL') continue;
 
+             // Round Mapping Strategy (Merge postponed rounds into original)
+             const ROUND_MAPPING = {
+               4797: 4759 // Jornada 14 (aplazada) -> Jornada 14
+             };
+
+             if (ROUND_MAPPING[round.id]) {
+               console.log(`   -> 🔀 Merging round ${round.id} into ${ROUND_MAPPING[round.id]}`);
+               round.dbId = ROUND_MAPPING[round.id];
+             }
+
              // Sync Matches (and Player Stats) for ALL rounds
              // Pass playersList to handle missing players
              await syncMatches(db, round, playersList);

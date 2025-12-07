@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const topPlayers = getTopPlayers(5);
+    const topPlayers = getTopPlayers(6);
 
     return NextResponse.json({
       success: true,

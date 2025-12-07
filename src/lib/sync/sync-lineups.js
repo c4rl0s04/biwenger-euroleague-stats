@@ -11,6 +11,7 @@ import { fetchRoundsLeague } from '../biwenger-client.js';
  */
 export async function syncLineups(db, round, existingLineupRounds, lastLineupRoundId, playersList) {
     const roundId = round.id;
+    const dbRoundId = round.dbId || round.id; // Use mapped ID for DB if present
     const roundName = round.name;
     const status = round.status;
     let insertedCount = 0;
@@ -69,7 +70,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                                 alineacion=excluded.alineacion
                             `).run(
                                 user.id.toString(),
-                                roundId,
+                                dbRoundId,
                                 roundName,
                                 user.lineup.points || 0,
                                 participated,
@@ -82,7 +83,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
 
                     // Insert Lineup (ONLY if not exists or is last round)
                     // We check existingLineupRounds
-                    if (!existingLineupRounds.has(roundId) || roundId >= lastLineupRoundId) {
+                    if (!existingLineupRounds.has(dbRoundId) || dbRoundId >= lastLineupRoundId) {
                         if (user.lineup && user.lineup.players) {
                             const captainId = user.lineup.captain ? user.lineup.captain.id : null;
                             
@@ -101,7 +102,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
 
                                     insertLineup.run({
                                         user_id: user.id.toString(),
-                                        round_id: roundId,
+                                        round_id: dbRoundId,
                                         round_name: roundName,
                                         player_id: playerId,
                                         is_captain: playerId === captainId ? 1 : 0,
