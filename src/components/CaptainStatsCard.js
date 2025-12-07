@@ -3,6 +3,7 @@
 import { useUser } from '@/contexts/UserContext';
 import { Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function CaptainStatsCard() {
   const { currentUser } = useUser();
@@ -59,7 +60,9 @@ export default function CaptainStatsCard() {
               <div key={idx} className="flex items-center justify-between text-xs bg-slate-800/30 rounded-lg px-2.5 py-2 hover:bg-slate-800/50 transition-colors border border-slate-700/20">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <span className="text-slate-500 font-mono text-[10px] w-5">{idx + 1}.</span>
-                  <span className="text-white truncate font-medium">{captain.name}</span>
+                  <Link href={`/player/${captain.player_id}`} className="text-white truncate font-medium hover:text-yellow-400 transition-colors block">
+                    {captain.name}
+                  </Link>
                 </div>
                 <div className="flex items-center gap-2.5 flex-shrink-0 ml-2">
                   <div className="text-right">

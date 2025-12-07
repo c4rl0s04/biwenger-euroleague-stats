@@ -1,6 +1,7 @@
 'use client';
 
 import { Trophy, Award } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function WeekMVPsCard() {
@@ -67,7 +68,9 @@ export default function WeekMVPsCard() {
                     {index === 0 ? <Award className="w-5 h-5" /> : index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-white text-sm">{player.name}</div>
+                    <Link href={`/player/${player.player_id}`} className="font-medium text-white text-sm hover:text-yellow-400 transition-colors block">
+                      {player.name}
+                    </Link>
                     <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
                     {player.owner_name && (
                       <div className="text-xs text-blue-400">👤 {player.owner_name}</div>

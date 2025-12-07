@@ -2,6 +2,7 @@
 
 import { Sparkles , TrendingUp, ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function RisingStarsCard() {
   const [stars, setStars] = useState([]);
@@ -54,7 +55,9 @@ export default function RisingStarsCard() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-white text-sm flex items-center gap-2">
-                      {player.name}
+                      <Link href={`/player/${player.player_id}`} className="hover:text-emerald-400 transition-colors">
+                        {player.name}
+                      </Link>
                       <TrendingUp className="w-4 h-4 text-emerald-400" />
                     </div>
                     <div className="text-xs text-slate-400">{player.team} · {player.position}</div>

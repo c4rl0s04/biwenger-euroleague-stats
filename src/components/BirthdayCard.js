@@ -2,6 +2,7 @@
 
 import { Cake, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function BirthdayCard() {
   const [birthdays, setBirthdays] = useState([]);
@@ -50,7 +51,9 @@ export default function BirthdayCard() {
               <div key={player.id} className="flex items-center gap-3 p-3 bg-pink-500/10 rounded-lg border border-pink-500/20">
                 <Sparkles className="w-5 h-5 text-pink-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-white">{player.name}</div>
+                  <Link href={`/player/${player.id}`} className="font-medium text-white hover:text-pink-400 transition-colors block">
+                    {player.name}
+                  </Link>
                   <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
                   {player.owner_name && (
                     <div className="text-xs text-pink-400">👤 {player.owner_name}</div>

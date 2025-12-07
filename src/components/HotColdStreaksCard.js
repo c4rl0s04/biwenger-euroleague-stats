@@ -2,6 +2,7 @@
 
 import { Flame, Snowflake, TrendingUp, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function HotColdStreaksCard() {
   const [streaks, setStreaks] = useState({ hot: [], cold: [] });
@@ -94,7 +95,9 @@ export default function HotColdStreaksCard() {
               <div key={player.player_id} className="p-3 bg-slate-800/40 rounded-lg border border-slate-700/30 hover:border-slate-600/50 transition-all">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-white text-sm">{player.name}</div>
+                    <Link href={`/player/${player.player_id}`} className="font-medium text-white text-sm hover:text-blue-400 transition-colors block">
+                      {player.name}
+                    </Link>
                     <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
                     {player.owner_name && (
                       <div className="text-xs text-blue-400">👤 {player.owner_name}</div>

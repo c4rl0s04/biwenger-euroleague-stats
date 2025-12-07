@@ -4,6 +4,7 @@ import { useUser } from '@/contexts/UserContext';
 import { Calendar, TrendingUp, Star, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getScoreColor, getShortTeamName } from '@/lib/utils';
 
 export default function NextRoundCard() {
   const { currentUser } = useUser();
@@ -75,16 +76,8 @@ export default function NextRoundCard() {
 
         {/* Content Grid - 3 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Helper for score colors */}
+          {/* Helper for score colors removed, using imported utility */}
           {(() => {
-            const getScoreColor = (score) => {
-              const s = Number(score);
-              if (s >= 25) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-              if (s >= 15) return 'bg-green-500/20 text-green-300 border-green-500/30';
-              if (s >= 5) return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-              return 'bg-slate-700/50 text-slate-400 border-slate-600/30';
-            };
-
             return (
               <>
                 {/* Top Players by Form */}
@@ -95,26 +88,25 @@ export default function NextRoundCard() {
                   </h3>
                   <div className="space-y-3">
                     {topPlayersForm && topPlayersForm.length > 0 ? (
-                      topPlayersForm.slice(0, 6).map((player, idx) => (
+                      topPlayersForm.slice(0, 5).map((player, idx) => (
                         <div key={player.player_id} className="group/item">
                           {/* Line 1: Name */}
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-slate-500 font-mono text-xs w-4 shrink-0">{idx + 1}.</span>
-                            <span className="text-white font-medium text-sm truncate" title={player.name}>{player.name}</span>
+                            <Link href={`/player/${player.player_id}`} className="text-white font-medium text-sm truncate hover:text-blue-400 transition-colors" title={player.name}>
+                              {player.name}
+                            </Link>
                           </div>
                           
                           {/* Line 2: Context */}
-                          <div className="flex items-center gap-2 text-xs text-slate-400 pl-6 mb-1.5">
-                            <span className="truncate">{player.team}</span>
-                            <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                            <span className="truncate">{player.position}</span>
+                          <div className="pl-6 mb-1.5 space-y-0.5">
+                            <div className="text-xs text-slate-400 truncate" title={player.team}>
+                              {getShortTeamName(player.team)}
+                            </div>
                             {player.owner_name && (
-                              <>
-                                <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                                <span className="text-slate-500 truncate max-w-[80px]" title={`Dueño: ${player.owner_name}`}>
-                                  {player.owner_name}
-                                </span>
-                              </>
+                              <div className="text-xs text-blue-400 truncate" title={`Dueño: ${player.owner_name}`}>
+                                👤 {player.owner_name}
+                              </div>
                             )}
                           </div>
 
@@ -149,12 +141,14 @@ export default function NextRoundCard() {
                         <div key={player.player_id} className="group/item">
                           {/* Line 1: Name */}
                           <div className="mb-1">
-                            <span className="text-white font-medium text-sm truncate block" title={player.name}>{player.name}</span>
+                            <Link href={`/player/${player.player_id}`} className="text-white font-medium text-sm truncate block hover:text-yellow-400 transition-colors" title={player.name}>
+                              {player.name}
+                            </Link>
                           </div>
                           
                           {/* Line 2: Context */}
                           <div className="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
-                            <span className="truncate">{player.team}</span>
+                            <span className="truncate" title={player.team}>{getShortTeamName(player.team)}</span>
                             <span className="w-1 h-1 rounded-full bg-slate-600"></span>
                             <span className="text-yellow-500/80">{player.form_label}</span>
                           </div>
@@ -190,14 +184,16 @@ export default function NextRoundCard() {
                         <div key={player.player_id} className="group/item">
                           {/* Line 1: Name */}
                           <div className="mb-1">
-                            <span className="text-white font-medium text-sm truncate block" title={player.name}>{player.name}</span>
+                            <Link href={`/player/${player.player_id}`} className="text-white font-medium text-sm truncate block hover:text-blue-400 transition-colors" title={player.name}>
+                              {player.name}
+                            </Link>
                           </div>
                           
                           {/* Line 2: Context */}
                           <div className="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
-                            <span className="truncate">{player.team}</span>
+                            <span className="truncate" title={player.team}>{getShortTeamName(player.team)}</span>
                             <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                            <span className="text-blue-400 font-mono">{(player.price / 1000000).toFixed(2)}M</span>
+                            <span className="text-blue-400 font-mono">{new Intl.NumberFormat('es-ES').format(player.price)}€</span>
                           </div>
 
                           {/* Line 3: Scores & Avg */}

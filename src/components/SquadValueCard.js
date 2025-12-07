@@ -3,6 +3,7 @@
 import { useUser } from '@/contexts/UserContext';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function SquadValueCard() {
   const { currentUser } = useUser();
@@ -52,7 +53,9 @@ export default function SquadValueCard() {
             <div className="space-y-1.5">
               {data.top_rising.map(p => (
                 <div key={p.id} className="flex justify-between text-sm bg-slate-800/20 rounded-lg px-2.5 py-1.5 hover:bg-slate-800/40 transition-colors">
-                  <span className="text-slate-300 truncate text-xs">{p.name}</span>
+                  <Link href={`/player/${p.id}`} className="text-slate-300 truncate text-xs hover:text-green-400 transition-colors block">
+                    {p.name}
+                  </Link>
                   <span className="text-green-400 font-semibold text-xs">+{formatPrice(p.price_increment)}€</span>
                 </div>
               ))}
@@ -70,7 +73,9 @@ export default function SquadValueCard() {
             <div className="space-y-1.5">
               {data.top_falling.map(p => (
                 <div key={p.id} className="flex justify-between text-sm bg-slate-800/20 rounded-lg px-2.5 py-1.5 hover:bg-slate-800/40 transition-colors">
-                  <span className="text-slate-300 truncate text-xs">{p.name}</span>
+                  <Link href={`/player/${p.id}`} className="text-slate-300 truncate text-xs hover:text-red-400 transition-colors block">
+                    {p.name}
+                  </Link>
                   <span className="text-red-400 font-semibold text-xs">{formatPrice(p.price_increment)}€</span>
                 </div>
               ))}

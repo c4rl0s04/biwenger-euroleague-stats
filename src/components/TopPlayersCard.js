@@ -53,7 +53,9 @@ export default function TopPlayersCard() {
                 {index + 1}
               </div>
               <div className="flex-grow min-w-0">
-                <div className="font-medium text-white truncate">{player.name}</div>
+                <Link href={`/player/${player.id}`} className="font-medium text-white truncate hover:text-green-400 transition-colors block">
+                  {player.name}
+                </Link>
                 <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
                 {player.owner_name && (
                   <div className="text-xs text-blue-400">👤 {player.owner_name}</div>

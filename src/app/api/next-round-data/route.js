@@ -17,7 +17,7 @@ export async function GET(request) {
     const nextRound = getNextRound();
     
     // Get top players by recent form
-    const topPlayersForm = getTopPlayersByForm(6, 3);
+    const topPlayersForm = getTopPlayersByForm(5, 3);
     
     // Get captain recommendations if userId is provided
     const captainRecommendations = userId 

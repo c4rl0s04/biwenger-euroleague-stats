@@ -74,7 +74,9 @@ export default function MarketActivityCard() {
                     {transfer.player_name?.charAt(0) || '?'}
                   </div>
                   <div>
-                    <div className="font-medium text-white text-sm">{transfer.player_name}</div>
+                    <Link href={`/player/${transfer.player_id}`} className="font-medium text-white text-sm hover:text-purple-400 transition-colors block">
+                      {transfer.player_name}
+                    </Link>
                     <div className="text-xs text-slate-400 flex items-center gap-1">
                       <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
                       <ArrowRight className="w-3 h-3" />
