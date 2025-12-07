@@ -67,7 +67,7 @@ export default function CaptainStatsCard() {
                 <div className="flex items-center gap-2.5 flex-shrink-0 ml-2">
                   <div className="text-right">
                     <div className="text-yellow-400 font-semibold">{captain.times_captain}x</div>
-                    <div className="text-slate-500 text-[9px]">veces</div>
+                    <div className="text-slate-500 text-[9px]">{captain.times_captain === 1 ? 'vez' : 'veces'}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-green-400 font-semibold">{captain.avg_as_captain.toFixed(1)}</div>

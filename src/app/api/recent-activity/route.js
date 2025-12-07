@@ -14,7 +14,7 @@ export async function GET(request) {
     const userId = searchParams.get('userId');
 
     // Get recent transfers
-    const recentTransfers = getRecentTransfers(5);
+    const recentTransfers = getRecentTransfers(8);
     
     // Get significant price changes (last 24h, min 500k change)
     const priceChanges = getSignificantPriceChanges(24, 500000);

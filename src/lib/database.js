@@ -203,13 +203,26 @@ export { db };
  */
 export function getTopPlayers(limit = 10) {
   const query = `
+    WITH RecentScores AS (
+      SELECT 
+        player_id,
+        GROUP_CONCAT(fantasy_points) as recent_scores
+      FROM (
+        SELECT player_id, fantasy_points
+        FROM player_round_stats
+        ORDER BY round_id DESC
+      )
+      GROUP BY player_id
+    )
     SELECT 
-      p.id, p.name, p.team, p.position, 
+      p.id, p.name, p.team, p.position, p.price,
       p.puntos as points, 
       ROUND(CAST(p.puntos AS FLOAT) / NULLIF(p.partidos_jugados, 0), 1) as average,
-      u.name as owner_name
+      u.name as owner_name,
+      rs.recent_scores
     FROM players p
     LEFT JOIN users u ON p.owner_id = u.id
+    LEFT JOIN RecentScores rs ON p.id = rs.player_id
     ORDER BY p.puntos DESC 
     LIMIT ?
   `;
@@ -665,25 +678,31 @@ export function getCaptainRecommendations(userId, limit = 3) {
     RoundCount AS (
       SELECT COUNT(*) as total_rounds FROM RecentRounds
     ),
-    OrderedStats AS (
-      SELECT prs.* 
-      FROM player_round_stats prs
-      WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
-      ORDER BY prs.round_id DESC
-    ),
     UserSquadForm AS (
       SELECT 
         p.id as player_id,
         p.name,
         p.position,
         p.team,
-        COALESCE(SUM(os.fantasy_points), 0) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
-        COUNT(os.id) as recent_games,
-        GROUP_CONCAT(os.fantasy_points) as recent_scores
+        COALESCE(ps.total_points, 0) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
+        COALESCE(ps.games_played, 0) as recent_games,
+        ps.recent_scores
       FROM players p
-      LEFT JOIN OrderedStats os ON p.id = os.player_id 
+      LEFT JOIN (
+        SELECT 
+          player_id, 
+          GROUP_CONCAT(fantasy_points) as recent_scores,
+          SUM(fantasy_points) as total_points,
+          COUNT(*) as games_played
+        FROM (
+          SELECT player_id, fantasy_points
+          FROM player_round_stats
+          WHERE round_id IN (SELECT round_id FROM RecentRounds)
+          ORDER BY round_id DESC
+        )
+        GROUP BY player_id
+      ) ps ON p.id = ps.player_id
       WHERE p.owner_id = ?
-      GROUP BY p.id, p.name, p.position, p.team
     )
     SELECT 
       player_id,
@@ -724,19 +743,18 @@ export function getMarketOpportunities(limit = 3) {
     RoundCount AS (
       SELECT COUNT(*) as total_rounds FROM RecentRounds
     ),
-    OrderedStats AS (
-      SELECT prs.* 
-      FROM player_round_stats prs
-      WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
-      ORDER BY prs.round_id DESC
-    ),
     PlayerForm AS (
       SELECT 
-        os.player_id,
-        SUM(os.fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
-        GROUP_CONCAT(os.fantasy_points) as recent_scores
-      FROM OrderedStats os
-      GROUP BY os.player_id
+        player_id,
+        SUM(fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
+        GROUP_CONCAT(fantasy_points) as recent_scores
+      FROM (
+        SELECT player_id, fantasy_points
+        FROM player_round_stats
+        WHERE round_id IN (SELECT round_id FROM RecentRounds)
+        ORDER BY round_id DESC
+      )
+      GROUP BY player_id
       HAVING COUNT(*) >= 2
     )
     SELECT 

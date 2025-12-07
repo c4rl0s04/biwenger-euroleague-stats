@@ -66,7 +66,7 @@ export default function Dashboard() {
               <div className="bg-slate-800/30 rounded-xl p-3 text-center">
                 <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Valor Liga</div>
                 <div className="text-lg font-bold text-blue-400">
-                  {(standings.reduce((acc, u) => acc + u.team_value, 0) / 1000000).toFixed(1)}M€
+                  {new Intl.NumberFormat('es-ES').format(standings.reduce((acc, u) => acc + u.team_value, 0))}€
                 </div>
               </div>
             </div>

@@ -86,7 +86,7 @@ export default function MarketActivityCard() {
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-white text-sm">
-                    {(transfer.precio / 1000000).toFixed(2)}M€
+                    {new Intl.NumberFormat('es-ES').format(transfer.precio)}€
                   </div>
                   <div className="text-[10px] text-slate-500">
                     {new Date(transfer.timestamp * 1000).toLocaleDateString()}

@@ -44,8 +44,7 @@ export default function StandingsTable({ standings }) {
   };
 
   const formatPrice = (price) => {
-    // Format in millions for more compact display
-    return (price / 1000000).toFixed(2);
+    return new Intl.NumberFormat('es-ES').format(price);
   };
 
   return (
@@ -92,12 +91,12 @@ export default function StandingsTable({ standings }) {
               </td>
               <td className="px-2 py-2 text-right">
                 <div className="flex items-center justify-end gap-1">
-                  <span className="text-slate-400 text-xs">{formatPrice(user.team_value)}M€</span>
+                  <span className="text-slate-400 text-xs">{formatPrice(user.team_value)}€</span>
                   {getPriceTrendIcon(user.price_trend)}
                 </div>
                 {user.price_trend !== 0 && (
                   <div className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {user.price_trend > 0 ? '+' : ''}{formatPrice(Math.abs(user.price_trend))}M
+                    {user.price_trend > 0 ? '+' : ''}{formatPrice(Math.abs(user.price_trend))}€
                   </div>
                 )}
               </td>
