@@ -93,7 +93,10 @@ export default function TopPlayersCard() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`font-bold ${styles.text}`}>{player.points} pts</div>
+                  <div className={`font-bold ${styles.text}`}>
+                    {player.points} pts
+                    <span className="text-xs font-normal opacity-70 ml-1">({player.average})</span>
+                  </div>
                   <div className="flex justify-end gap-1 mt-1">
                     {player.recent_scores ? (
                       player.recent_scores.split(',').slice(0, 5).map((score, i) => (
