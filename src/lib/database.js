@@ -1,4 +1,3 @@
-
 /**
  * Database access layer using better-sqlite3
  *
@@ -119,10 +118,6 @@ export function getAllPorrasRounds() {
   return db.prepare(query).all();
 }
 
-/**
- * Get squad statistics for all users
- * @returns {Array} Squad stats per user
- */
 /**
  * Get squad statistics for all users
  * @returns {Array} Squad stats per user
@@ -336,7 +331,6 @@ export function getMarketTrends() {
  * @returns {Object} User season statistics
  */
 export function getUserSeasonStats(userId) {
-  // Get basic stats
   const statsQuery = `
     WITH UserRounds AS (
       SELECT 
@@ -357,7 +351,6 @@ export function getUserSeasonStats(userId) {
   
   const stats = db.prepare(statsQuery).get(userId);
   
-  // Calculate position per round for this user
   const positionsQuery = `
     WITH RoundPositions AS (
       SELECT 
@@ -375,8 +368,6 @@ export function getUserSeasonStats(userId) {
   `;
   
   const positions = db.prepare(positionsQuery).get(userId);
-  
-  // Get user current standing
   const standings = getStandings();
   const userStanding = standings.find(u => u.user_id === userId);
   
@@ -454,7 +445,6 @@ export function getUserRecentRounds(userId, limit = 10) {
  * @returns {Object} Captain stats
  */
 export function getUserCaptainStats(userId) {
-  // Get overall captain stats
   const overallQuery = `
     SELECT 
       COUNT(DISTINCT l.round_id) as total_rounds,
@@ -467,8 +457,6 @@ export function getUserCaptainStats(userId) {
   
   const overall = db.prepare(overallQuery).get(userId);
   
-  // Get ALL captains used with their stats (no limit)
-  // Note: fantasy_points are the base points, NOT multiplied by 2
   const mostUsedQuery = `
     SELECT 
       p.id as player_id,
@@ -486,7 +474,6 @@ export function getUserCaptainStats(userId) {
   
   const mostUsed = db.prepare(mostUsedQuery).all(userId);
   
-  // Get best and worst captain rounds with player names
   const bestQuery = `
     SELECT 
       p.name,
@@ -539,10 +526,9 @@ export function getLeaderComparison(userId) {
   
   const gap = leader.total_points - user.total_points;
   const roundsNeeded = user.position > 1 
-    ? Math.ceil(gap / 10) // Assuming 10pts average per round
+    ? Math.ceil(gap / 10)
     : 0;
   
-  // If user is leader, calculate gap to second place
   const gapToSecond = (user.position === 1 && secondPlace) 
     ? user.total_points - secondPlace.total_points 
     : 0;
@@ -620,8 +606,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
       SELECT COUNT(*) as total_rounds FROM RecentRounds
     ),
     OrderedStats AS (
-      SELECT prs.* 
-      FROM player_round_stats prs
+      SELECT prs.* FROM player_round_stats prs
       WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
       ORDER BY prs.round_id DESC
     ),
@@ -667,7 +652,6 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
  * @returns {Array} List of recommended captain picks
  */
 export function getCaptainRecommendations(userId, limit = 3) {
-  // Get user's squad players with their recent form
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id
@@ -801,7 +785,6 @@ export function getPlayerDetails(playerId) {
   
   if (!player) return null;
 
-  // Get recent matches
   const matchesQuery = `
     SELECT 
       prs.round_id,
@@ -830,8 +813,6 @@ export function getPlayerDetails(playerId) {
  * @returns {Array} Players with significant price changes
  */
 export function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
-  // Since we don't have historical price tracking with timestamps,
-  // we'll use price_increment as a proxy for recent changes
   const query = `
     SELECT 
       id as player_id,
@@ -857,7 +838,6 @@ export function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
 export function getRecentRecords() {
   const records = [];
   
-  // Highest round score
   const highestRoundQuery = `
     SELECT 
       ur.user_id,
@@ -881,7 +861,6 @@ export function getRecentRecords() {
     });
   }
   
-  // Highest transfer price
   const highestTransferQuery = `
     SELECT 
       f.precio,
@@ -904,7 +883,6 @@ export function getRecentRecords() {
     });
   }
   
-  // Biggest price gain
   const biggestGainQuery = `
     SELECT 
       id,
@@ -939,7 +917,6 @@ export function getRecentRecords() {
 export function getPersonalizedAlerts(userId, limit = 5) {
   const alerts = [];
   
-  // Check for players with significant price increases
   const priceGainsQuery = `
     SELECT 
       name,
@@ -959,7 +936,6 @@ export function getPersonalizedAlerts(userId, limit = 5) {
     });
   });
   
-  // Check for players with significant price decreases
   const priceLossesQuery = `
     SELECT 
       name,
@@ -979,7 +955,6 @@ export function getPersonalizedAlerts(userId, limit = 5) {
     });
   });
   
-  // Check for recent good performance
   const recentGoodFormQuery = `
     WITH LastRound AS (
       SELECT MAX(round_id) as max_round
@@ -1180,4 +1155,32 @@ export function getRisingStars(limit = 5) {
   `;
   
   return db.prepare(query).all(limit);
+}
+
+/**
+ * Get all player stats for the last completed round to calculate ideal lineup
+ * @returns {Array} List of players with their stats for the last round
+ */
+export function getLastRoundStats() {
+  const query = `
+    WITH LastRound AS (
+      SELECT MAX(round_id) as last_round_id
+      FROM player_round_stats
+    )
+    SELECT 
+      prs.player_id,
+      p.name,
+      p.team,
+      p.position,
+      p.price,
+      prs.fantasy_points as points,
+      u.name as owner_name,
+      (SELECT round_name FROM matches WHERE round_id = prs.round_id LIMIT 1) as round_name
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN users u ON p.owner_id = u.id
+    WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
+    ORDER BY prs.fantasy_points DESC
+  `;
+  return db.prepare(query).all();
 }
