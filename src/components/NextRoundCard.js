@@ -81,7 +81,7 @@ export default function NextRoundCard() {
             return (
               <>
                 {/* Top Players by Form */}
-                <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+                <div className="bg-gradient-to-br from-green-900/10 to-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-green-700/30">
                   <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-green-500" />
                     Top Forma
@@ -93,7 +93,7 @@ export default function NextRoundCard() {
                           {/* Line 1: Name */}
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-slate-500 font-mono text-xs w-4 shrink-0">{idx + 1}.</span>
-                            <Link href={`/player/${player.player_id}`} className="text-white font-medium text-sm truncate hover:text-blue-400 transition-colors" title={player.name}>
+                            <Link href={`/player/${player.player_id}`} className="text-white font-medium text-sm truncate hover:text-green-400 transition-colors" title={player.name}>
                               {player.name}
                             </Link>
                           </div>
@@ -130,7 +130,7 @@ export default function NextRoundCard() {
                 </div>
 
                 {/* Captain Recommendations */}
-                <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+                <div className="bg-gradient-to-br from-yellow-900/10 to-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-yellow-700/30">
                   <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                     <Star className="w-4 h-4 text-yellow-500" />
                     Capitán Sugerido
@@ -173,7 +173,7 @@ export default function NextRoundCard() {
                 </div>
 
                 {/* Market Opportunities */}
-                <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-slate-700/30">
+                <div className="bg-gradient-to-br from-blue-900/10 to-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-blue-700/30">
                   <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                     <ShoppingCart className="w-4 h-4 text-blue-500" />
                     Oportunidades

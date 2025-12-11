@@ -1,5 +1,6 @@
 import { getPlayerDetails } from '@/lib/database';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, TrendingUp, Shield, User, DollarSign } from 'lucide-react';
 import { getScoreColor } from '@/lib/utils';
 
@@ -33,9 +34,15 @@ export default async function PlayerPage({ params }) {
       <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 md:p-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
           {/* Player Image / Avatar Placeholder */}
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-slate-800 flex items-center justify-center border-4 border-slate-700 shrink-0">
+          <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-slate-800 flex items-center justify-center border-4 border-slate-700 shrink-0">
              {player.img ? (
-                <img src={player.img} alt={player.name} className="w-full h-full rounded-full object-cover" />
+                <Image 
+                  src={player.img} 
+                  alt={player.name} 
+                  fill
+                  sizes="(max-width: 768px) 96px, 128px"
+                  className="rounded-full object-cover"
+                />
              ) : (
                 <User className="w-12 h-12 text-slate-500" />
              )}

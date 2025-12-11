@@ -20,8 +20,13 @@ export default function CaptainStatsCard() {
   if (!currentUser || !stats) return null;
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-xl shadow-black/5 flex flex-col hover:border-slate-600/50 transition-all duration-300">
-      <div className="flex items-center justify-between mb-5">
+    <div className="bg-gradient-to-br from-yellow-900/20 to-slate-900 backdrop-blur-md border border-yellow-700/30 rounded-2xl p-6 relative overflow-hidden group hover:border-yellow-600/50 transition-all flex flex-col h-full">
+      {/* Background decoration */}
+      <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+        <Award className="w-32 h-32 text-yellow-500" />
+      </div>
+
+      <div className="flex items-center justify-between mb-5 relative z-10">
         <h2 className="text-base font-bold text-white/90 flex items-center gap-2">
           <div className="p-1.5 bg-yellow-500/10 rounded-lg">
             <Award className="w-4 h-4 text-yellow-500" />

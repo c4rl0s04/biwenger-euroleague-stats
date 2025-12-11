@@ -86,6 +86,12 @@ async function syncData() {
                round.dbId = ROUND_MAPPING[round.id];
              }
 
+             // Sanitize round name (e.g. "Jornada 14 (aplazada)" -> "Jornada 14")
+             if (round.name.includes('(aplazada)')) {
+                round.name = round.name.replace(' (aplazada)', '');
+                console.log(`   -> 🧹 Sanitized name to: ${round.name}`);
+             }
+
              // Sync Matches (and Player Stats) for ALL rounds
              // Pass playersList to handle missing players
              await syncMatches(db, round, playersList);

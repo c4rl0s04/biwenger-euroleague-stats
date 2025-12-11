@@ -43,10 +43,10 @@ export default function MarketActivityCard() {
   const { recentTransfers } = data || {};
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-600/50 transition-all">
+    <div className="bg-gradient-to-br from-purple-900/20 to-slate-900 backdrop-blur-md border border-purple-700/30 rounded-2xl p-6 relative overflow-hidden group hover:border-purple-600/50 transition-all">
       {/* Background decoration */}
-      <div className="absolute -bottom-10 -right-10 opacity-5 group-hover:opacity-10 transition-opacity">
-        <ShoppingBag className="w-40 h-40 text-purple-500" />
+      <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity">
+        <ShoppingBag className="w-32 h-32 text-purple-500" />
       </div>
 
       <div className="relative">
