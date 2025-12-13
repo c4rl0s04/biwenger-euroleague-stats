@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getLastRoundMVPs } from '@/lib/database';
+import { getLastRoundMVPs } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 

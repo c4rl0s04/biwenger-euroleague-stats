@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getRisingStars } from '@/lib/database';
+import { getRisingStars } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 

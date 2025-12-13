@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getLeagueAveragePoints } from '@/lib/database';
+import { getLeagueAveragePoints } from '@/lib/db';
 
 export async function GET() {
   try {

@@ -9,7 +9,7 @@ import { syncSquads } from '../src/lib/sync/sync-squads.js';
 import { syncBoard } from '../src/lib/sync/sync-board.js';
 import { syncMatches } from '../src/lib/sync/sync-matches.js';
 import { syncLineups } from '../src/lib/sync/sync-lineups.js';
-import { ensureSchema } from '../src/lib/sync/ensure-schema.js';
+import { ensureSchema } from '../src/lib/db/schema.js';
 import { CONFIG } from '../src/lib/config.js';
 
 // Validate environment before starting

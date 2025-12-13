@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPlayersBirthday } from '@/lib/database';
+import { getPlayersBirthday } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 

@@ -6,7 +6,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getMarketKPIs, getAllTransfers, getMarketTrends } from '@/lib/database';
+import { getMarketKPIs, getAllTransfers, getMarketTrends } from '@/lib/db';
 
 /**
  * GET /api/market

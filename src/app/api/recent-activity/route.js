@@ -4,7 +4,7 @@ import {
   getSignificantPriceChanges,
   getRecentRecords,
   getPersonalizedAlerts
-} from '@/lib/database';
+} from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 

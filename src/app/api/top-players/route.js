@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTopPlayers } from '@/lib/database';
+import { getTopPlayers } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 

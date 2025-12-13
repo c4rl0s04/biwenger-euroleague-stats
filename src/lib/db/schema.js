@@ -1,0 +1,205 @@
+/**
+ * Ensures that all necessary database tables exist and are up to date.
+ * Handles migrations (e.g. adding columns).
+ * @param {import('better-sqlite3').Database} db - Database instance
+ */
+export function ensureSchema(db) {
+  // 1. Users Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      icon TEXT
+    )
+  `).run();
+
+  // 2. Players Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS players (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE,
+      position TEXT,
+      team TEXT,
+      puntos INTEGER,
+      partidos_jugados INTEGER,
+      played_home INTEGER,
+      played_away INTEGER,
+      points_home INTEGER,
+      points_away INTEGER,
+      points_last_season INTEGER,
+      owner_id TEXT,
+      status TEXT,
+      price_increment INTEGER,
+      birth_date TEXT,
+      height INTEGER,
+      weight INTEGER,
+      price INTEGER
+    )
+  `).run();
+
+  // 3. User Rounds Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS user_rounds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      round_id INTEGER,
+      round_name TEXT,
+      points INTEGER,
+      participated BOOLEAN DEFAULT 1,
+      alineacion TEXT,
+      UNIQUE(user_id, round_id)
+    )
+  `).run();
+
+  // 4. Fichajes (Transfers) Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS fichajes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      timestamp INTEGER,
+      fecha TEXT,
+      player_id INTEGER,
+      precio INTEGER,
+      vendedor TEXT,
+      comprador TEXT,
+      UNIQUE(timestamp, player_id, vendedor, comprador, precio)
+    )
+  `).run();
+
+  // 5. Lineups Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS lineups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      round_id INTEGER,
+      round_name TEXT,
+      player_id INTEGER,
+      is_captain BOOLEAN,
+      role TEXT,
+      UNIQUE(user_id, round_id, player_id),
+      FOREIGN KEY(player_id) REFERENCES players(id)
+    )
+  `).run();
+
+  // 6. Matches Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS matches (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      round_id INTEGER,
+      round_name TEXT,
+      home_team TEXT,
+      away_team TEXT,
+      date DATE,
+      status TEXT,
+      home_score INTEGER,
+      away_score INTEGER,
+      UNIQUE(round_id, home_team, away_team)
+    )
+  `).run();
+
+  // 7. Player Round Stats Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS player_round_stats (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      player_id INTEGER,
+      round_id INTEGER,
+      fantasy_points INTEGER,
+      minutes INTEGER,
+      points INTEGER,
+      two_points_made INTEGER,
+      two_points_attempted INTEGER,
+      three_points_made INTEGER,
+      three_points_attempted INTEGER,
+      free_throws_made INTEGER,
+      free_throws_attempted INTEGER,
+      rebounds INTEGER,
+      assists INTEGER,
+      steals INTEGER,
+      blocks INTEGER,
+      turnovers INTEGER,
+      fouls_committed INTEGER,
+      UNIQUE(player_id, round_id),
+      FOREIGN KEY(player_id) REFERENCES players(id)
+    )
+  `).run();
+
+  // 8. Porras Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS porras (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      round_id INTEGER,
+      round_name TEXT,
+      result TEXT,
+      aciertos INTEGER,
+      UNIQUE(user_id, round_id)
+    )
+  `).run();
+
+  // 9. Market Values Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS market_values (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      player_id INTEGER,
+      price INTEGER,
+      date DATE
+    )
+  `).run();
+
+  // 10. Transfer Bids Table
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS transfer_bids (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      transfer_id INTEGER,
+      bidder_id TEXT,
+      bidder_name TEXT,
+      amount INTEGER,
+      FOREIGN KEY(transfer_id) REFERENCES fichajes(id) ON DELETE CASCADE
+    )
+  `).run();
+
+  // --- MIGRATIONS ---
+  // Apply specific migrations that might be needed for existing databases
+  
+  // Migration: Add owner_id, status, price_increment, etc. to players
+  const playerCols = ['owner_id', 'status', 'price_increment', 'birth_date', 'height', 'weight', 'price'];
+  const playersInfo = db.prepare("PRAGMA table_info(players)").all();
+  const existingPlayerCols = new Set(playersInfo.map(c => c.name));
+
+  for (const col of playerCols) {
+    if (!existingPlayerCols.has(col)) {
+      console.log(`Migrating players table (adding ${col} column)...`);
+      let type = 'TEXT';
+      if (['price_increment', 'height', 'weight', 'price'].includes(col)) {
+        type = 'INTEGER';
+      }
+      try {
+        db.prepare(`ALTER TABLE players ADD COLUMN ${col} ${type}`).run();
+      } catch (e) {
+        console.warn(`Could not add column ${col} to players: ${e.message}`);
+      }
+    }
+  }
+
+  // Migration: Add icon to users
+  const usersInfo = db.prepare("PRAGMA table_info(users)").all();
+  if (!usersInfo.some(c => c.name === 'icon')) {
+      console.log('Migrating users table (adding icon column)...');
+      try {
+        db.prepare('ALTER TABLE users ADD COLUMN icon TEXT').run();
+      } catch (e) {}
+  }
+
+  // Migration: Check for round_id in lineups
+  const lineupsInfo = db.prepare("PRAGMA table_info(lineups)").all();
+  if (!lineupsInfo.some(c => c.name === 'round_id')) {
+    console.log('Migrating lineups table (resetting for schema update)...');
+    // Drop logic avoided for brevity unless strictly necessary, but better to add column
+    // For simplicity, we assume schema is mostly stable or use ensureSchema logic if needed
+    // The previous ensure-schema.js did DROP TABLE for some changes. 
+    // Ideally we ALTER TABLE ADD COLUMN.
+    try {
+        db.prepare('ALTER TABLE lineups ADD COLUMN round_id INTEGER').run();
+        db.prepare('ALTER TABLE lineups ADD COLUMN round_name TEXT').run();
+    } catch(e) {}
+  }
+}

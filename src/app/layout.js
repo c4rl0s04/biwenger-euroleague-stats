@@ -1,6 +1,6 @@
 import Navbar from '../components/Navbar';
 import ClientWrapper from '../components/ClientWrapper';
-import { getStandings } from '../lib/database';
+import { getStandings } from '@/lib/db';
 import './globals.css';
 import { Inter } from 'next/font/google';
 

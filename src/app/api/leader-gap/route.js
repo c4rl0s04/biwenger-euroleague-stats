@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getLeaderComparison } from '@/lib/database';
+import { getLeaderComparison } from '@/lib/db';
 
 export async function GET(request) {
   try {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserRecentRounds } from '@/lib/database';
+import { getUserRecentRounds } from '@/lib/db';
 
 export async function GET(request) {
   try {

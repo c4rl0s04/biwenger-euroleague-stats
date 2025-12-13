@@ -1,4 +1,4 @@
-import { getStandings } from '../lib/database';
+import { getStandings } from '@/lib/db';
 import Link from 'next/link';
 import StandingsCard from '@/components/StandingsCard';
 import StandingsTable from '@/components/StandingsTable';

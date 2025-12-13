@@ -1,4 +1,4 @@
-import { getPlayerDetails } from '@/lib/database';
+import { getPlayerDetails } from '@/lib/db';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, TrendingUp, Shield, User, DollarSign } from 'lucide-react';

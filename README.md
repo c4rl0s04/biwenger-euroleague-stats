@@ -1,193 +1,80 @@
-# 🏀 BiwengerStats
+# Biwenger Stats - Euroleague Analytics
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://reactjs.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](https://www.docker.com/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+An advanced analytics dashboard for Euroleague fantasy managers on Biwenger. This application synchronizes data directly from Biwenger and provides insights, statistics, and tools to help you win your league.
 
-> 📊 Modern dashboard for Biwenger Euroleague fantasy basketball statistics
+## Features
 
-<p align="center">
-  <img src="docs/screenshots/dashboard-preview.png" alt="Dashboard Preview" width="800">
-</p>
+-   **Dashboard**: Overview of your team, market trends, and league standings.
+-   **Player Analysis**: Detailed stats, hot/cold streaks, and form analysis.
+-   **Market Intelligence**: Track price changes, undervalued players, and transfer history.
+-   **League Stats**: "Porras" (prediction game) tracking, leader comparisons, and average points.
+-   **Tools**: Ideal lineup calculator and captain recommendations.
 
-## ✨ Features
+## Tech Stack
 
-- 🏆 **Live Standings** - Real-time league leaderboard with point gaps
-- 📈 **Player Analytics** - Top performers, form streaks, rising stars
-- 💰 **Market Tracking** - Latest transfers and player movements
-- 🎯 **Captain Insights** - Track your captain picks performance
-- 🏠 **Home/Away Stats** - Compare performance by venue
-- 🎂 **Birthday Tracker** - See which players celebrate today
-- 🔥 **Hot & Cold Streaks** - Identify in-form and struggling players
-- 🏅 **Weekly MVPs** - Celebrate last round's top performers
+-   **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+-   **Language**: JavaScript / Node.js
+-   **Database**: SQLite (via `better-sqlite3`)
+-   **Styling**: Tailwind CSS
+-   **Charts**: Chart.js
 
-## 🖼️ Screenshots
+## Prerequisites
 
-<details>
-<summary>Click to expand screenshots</summary>
+-   Node.js 18+
+-   A generic or public Biwenger account (for tokens)
 
-### Dashboard Overview
+## Setup
 
-<!-- Add your screenshot here -->
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/yourusername/biwengerstats-next.git
+    cd biwengerstats-next
+    ```
 
-![Dashboard](docs/screenshots/dashboard.png)
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-### Player Statistics
+3.  **Configure Environment**:
+    Copy `.env.example` to `.env.local` and fill in your details:
+    ```bash
+    cp .env.example .env.local
+    ```
+    
+    *   `BIWENGER_TOKEN`: Your Bearer token (inspect network requests on biwenger.com).
+    *   `BIWENGER_LEAGUE_ID`: The ID of the league you want to track.
+    *   `BIWENGER_USER_ID`: (Optional) Your specific user ID to highlight your team.
 
-<!-- Add your screenshot here -->
+4.  **Sync Data**:
+    Run the sync script to fetch data from Biwenger and populate the SQLite database.
+    ```bash
+    npm run sync
+    ```
 
-![Players](docs/screenshots/players.png)
+5.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-### Market Activity
+## Docker Support
 
-<!-- Add your screenshot here -->
-
-![Market](docs/screenshots/market.png)
-
-</details>
-
-## 🚀 Quick Start
-
-### Option 1: Docker (Recommended)
-
-```bash
-# Clone the repo
-git clone https://github.com/c4rl0s04/biwengerstats-next.git
-cd biwengerstats-next
-
-# Configure credentials
-cp .env.example .env.local
-# Edit .env.local with your Biwenger token
-
-# Run with Docker
-docker-compose up -d
-
-# Open http://localhost:3000
-```
-
-### Option 2: Local Development
+Build and run using Docker:
 
 ```bash
-# Install dependencies
-npm install
-
-# Configure environment
-cp .env.example .env.local
-
-# Sync data from Biwenger
-npm run sync
-
-# Start dev server
-npm run dev
+docker build -t biwengerstats .
+docker run -p 3000:3000 -v $(pwd)/data:/app/data --env-file .env.local biwengerstats
 ```
 
-## 🔑 Getting Your Biwenger Credentials
+## Project Structure
 
-1. Log into [Biwenger](https://biwenger.as.com) in your browser
-2. Open Developer Tools (F12)
-3. Go to **Network** tab
-4. Click any option in Biwenger
-5. Find a request and copy the `Authorization` header value
-6. Copy your `X-League` header for your League ID
+-   `src/app`: Next.js pages and API routes.
+-   `src/components`: React components (Cards, Charts, Tables).
+-   `src/lib/db`: Database layer (Client, Schema, Queries).
+-   `scripts`: Data synchronization scripts.
+-   `data`: SQLite database storage (git-ignored).
 
-<details>
-<summary>📸 Visual Guide</summary>
+## Contributing
 
-![How to get token](docs/screenshots/get-token.png)
-
-</details>
-
-## 📂 Project Structure
-
-```
-biwengerstats-next/
-├── src/
-│   ├── app/              # Next.js App Router pages
-│   ├── components/       # React components
-│   └── lib/              # Core utilities
-│       ├── database.js   # SQLite queries
-│       └── sync/         # Data sync modules
-├── scripts/              # CLI scripts
-├── data/                 # SQLite database
-├── public/               # Static assets
-└── docs/                 # Documentation
-```
-
-## 🛠️ Tech Stack
-
-| Category   | Technology                 |
-| ---------- | -------------------------- |
-| Framework  | Next.js 16 (App Router)    |
-| UI         | React 19 + Tailwind CSS 4  |
-| Database   | SQLite (better-sqlite3)    |
-| Charts     | Chart.js + react-chartjs-2 |
-| Icons      | Lucide React               |
-| Testing    | Vitest                     |
-| Deployment | Docker                     |
-
-## 🔄 Data Synchronization
-
-Sync your league data from the Biwenger API:
-
-```bash
-# Local
-npm run sync
-
-# Docker
-docker-compose exec web npm run sync
-```
-
-This fetches:
-
-- ✅ Players & market values
-- ✅ User standings
-- ✅ Transfers & bids
-- ✅ Match results
-- ✅ Lineups & captain picks
-
-## 🐳 Docker Deployment
-
-See [DOCKER.md](DOCKER.md) for detailed deployment instructions.
-
-```bash
-# Quick start
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Update
-docker-compose pull && docker-compose up -d
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👤 Author
-
-**Carlos Andrés Huete**
-
-- GitHub: [@c4rl0s04](https://github.com/c4rl0s04)
-
----
-
-<p align="center">
-  Made with ❤️ for the Biwenger community
-</p>
-
-<p align="center">
-  <a href="#-biwengerstats">Back to top ↑</a>
-</p>
+Contributions are welcome! Please open an issue or submit a pull request.

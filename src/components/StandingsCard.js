@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Users, Trophy } from 'lucide-react';
 import StandingsTable from '@/components/StandingsTable';
-import { getLastRoundWinner } from '@/lib/database';
+import { getLastRoundWinner } from '@/lib/db';
 
 export default function StandingsCard({ standings }) {
   const lastWinner = getLastRoundWinner();

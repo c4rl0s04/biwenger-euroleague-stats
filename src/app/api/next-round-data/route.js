@@ -4,7 +4,7 @@ import {
   getTopPlayersByForm, 
   getCaptainRecommendations, 
   getMarketOpportunities 
-} from '@/lib/database';
+} from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
