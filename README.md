@@ -44,7 +44,7 @@ An advanced analytics dashboard for Euroleague fantasy managers on Biwenger. Thi
     
     *   `BIWENGER_TOKEN`: Your Bearer token (inspect network requests on biwenger.com).
     *   `BIWENGER_LEAGUE_ID`: The ID of the league you want to track.
-    *   `BIWENGER_USER_ID`: (Optional) Your specific user ID to highlight your team.
+    *   `BIWENGER_USER_ID`: Your specific user ID (found in headers).
 
 4.  **Sync Data**:
     Run the sync script to fetch data from Biwenger and populate the SQLite database.
