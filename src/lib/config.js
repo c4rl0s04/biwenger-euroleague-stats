@@ -33,6 +33,6 @@ export const CONFIG = {
 };
 
 // Validate required config
-if (!CONFIG.API.TOKEN) console.warn('⚠️ BIWENGER_TOKEN is missing in .env.local');
-if (!CONFIG.API.LEAGUE_ID) console.warn('⚠️ BIWENGER_LEAGUE_ID is missing in .env.local');
-if (!CONFIG.API.USER_ID) console.warn('⚠️ BIWENGER_USER_ID is missing in .env.local');
+if (!CONFIG.API.TOKEN) console.warn('⚠️ BIWENGER_TOKEN is missing in environment variables');
+if (!CONFIG.API.LEAGUE_ID) console.warn('⚠️ BIWENGER_LEAGUE_ID is missing in environment variables');
+if (!CONFIG.API.USER_ID) console.warn('⚠️ BIWENGER_USER_ID is missing in environment variables');
