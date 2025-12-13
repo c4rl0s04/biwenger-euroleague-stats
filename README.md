@@ -58,23 +58,7 @@ An advanced analytics dashboard for Euroleague fantasy managers on Biwenger. Thi
     ```
     Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-## 🔄 Automated Sync & Deployment
 
-This project includes a **GitHub Actions Workflow** (`.github/workflows/daily-sync.yml`) that runs every day at 06:00 UTC.
-
-### How it works:
-1.  **The Cloud**: GitHub runs `npm run sync`.
-2.  **The Update**: The script updates `data/local.db`.
-3.  **The Commit**: The Action **commits and pushes** the updated database back to your repository (`main` branch).
-
-### Use Local:
-To get the latest data on your computer:
-```bash
-git pull origin main
-```
-
-### Use Production (Vercel/Netlify):
-If you deploy this app (e.g., to Vercel), simply connect it to your GitHub repository. When the Action pushes the new database, Vercel will detect the new commit and **automatically redeploy** the app with the fresh data.
 
 ## Docker Support
 
