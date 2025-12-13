@@ -45,7 +45,6 @@ export default function HotColdStreaksCard() {
   const activeData = activeTab === 'hot' ? streaks.hot : streaks.cold;
 
   return (
-  return (
     <div className={`bg-gradient-to-br ${activeTab === 'hot' ? 'from-orange-900/20 border-orange-700/30 hover:border-orange-600/50' : 'from-cyan-900/20 border-cyan-700/30 hover:border-cyan-600/50'} to-slate-900 backdrop-blur-md border rounded-2xl p-6 relative overflow-hidden group transition-all h-full flex flex-col`}>
       {/* Background decoration */}
       <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity">

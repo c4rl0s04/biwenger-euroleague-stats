@@ -37,7 +37,6 @@ export default function RisingStarsCard() {
   }
 
   return (
-  return (
     <div className="bg-gradient-to-br from-emerald-900/20 to-slate-900 backdrop-blur-md border border-emerald-700/30 rounded-2xl p-6 relative overflow-hidden group hover:border-emerald-600/50 transition-all h-full flex flex-col">
       {/* Background decoration */}
       <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity">
