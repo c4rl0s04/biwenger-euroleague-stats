@@ -66,30 +66,40 @@ async function syncData() {
     } else {
         console.log(`Found ${rounds.length} rounds in competition data.`);
         
+        // 0. Build Lookup Map for Canonical Rounds (e.g. "Jornada 14")
+        const roundNameMap = {};
+        for (const r of rounds) {
+            if (!r.name.includes('(aplazada)')) {
+                roundNameMap[r.name] = r.id;
+            }
+        }
+
         let totalLineupsInserted = 0;
 
         for (const round of rounds) {
-             const roundName = round.name;
+             let roundName = round.name;
              const status = round.status;
 
              console.log(`\n--- Processing ${roundName} (${status}) ---`);
 
              if (roundName === 'GLOBAL') continue;
 
-             // Round Mapping Strategy (Merge postponed rounds into original)
-             const ROUND_MAPPING = {
-               4797: 4759 // Jornada 14 (aplazada) -> Jornada 14
-             };
-
-             if (ROUND_MAPPING[round.id]) {
-               console.log(`   -> 🔀 Merging round ${round.id} into ${ROUND_MAPPING[round.id]}`);
-               round.dbId = ROUND_MAPPING[round.id];
-             }
-
-             // Sanitize round name (e.g. "Jornada 14 (aplazada)" -> "Jornada 14")
-             if (round.name.includes('(aplazada)')) {
-                round.name = round.name.replace(' (aplazada)', '');
-                console.log(`   -> 🧹 Sanitized name to: ${round.name}`);
+             // Dynamic Round Mapping (Merge postponed rounds into original)
+             if (roundName.includes('(aplazada)')) {
+                const canonicalName = roundName.replace(' (aplazada)', '');
+                const originalId = roundNameMap[canonicalName];
+                
+                if (originalId) {
+                    console.log(`   -> 🔀 Merging round ${round.id} into ${originalId} (${canonicalName})`);
+                    round.dbId = originalId;
+                    round.name = canonicalName; // Clean name for display/db
+                    roundName = canonicalName;  // Update local var for logging
+                } else {
+                    console.warn(`   ⚠️ Found postponed round "${roundName}" but could not find original "${canonicalName}"`);
+                    // Fallback: just clean the name but keep ID? Or keep as is?
+                    // Let's clean the name at least so it looks nice in UI
+                    round.name = canonicalName;
+                }
              }
 
              // Sync Matches (and Player Stats) for ALL rounds
