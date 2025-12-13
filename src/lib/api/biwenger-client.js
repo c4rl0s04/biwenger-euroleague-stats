@@ -2,7 +2,7 @@
  * Biwenger API Client (Unofficial)
  */
 
-import { CONFIG } from './config.js';
+import { CONFIG } from '../config.js';
 
 // Función de espera auxiliar
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
