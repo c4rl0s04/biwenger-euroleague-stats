@@ -80,7 +80,7 @@ export default function HotColdStreaksCard() {
                 <Icon className="w-4 h-4" />
                 {tab.label}
                 {tab.count > 0 && (
-                  <span className="bg-slate-700 text-slate-300 text-xs px-1.5 py-0.5 rounded-full ml-auto">
+                  <span className="bg-slate-700 text-slate-300 text-xs px-1.5 py-0.5 rounded-full ml-2">
                     {tab.count}
                   </span>
                 )}
