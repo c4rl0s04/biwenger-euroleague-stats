@@ -3,6 +3,7 @@
 import { Sparkles , TrendingUp, ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getShortTeamName } from '@/lib/utils/format';
 
 export default function RisingStarsCard() {
   const [stars, setStars] = useState([]);
@@ -60,7 +61,7 @@ export default function RisingStarsCard() {
                       </Link>
                       <TrendingUp className="w-4 h-4 text-emerald-400" />
                     </div>
-                    <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
+                    <div className="text-xs text-slate-400">{getShortTeamName(player.team)} · {player.position}</div>
                     {player.owner_name && (
                       <div className="text-xs text-blue-400">👤 {player.owner_name}</div>
                     )}

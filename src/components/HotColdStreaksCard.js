@@ -3,6 +3,7 @@
 import { Flame, Snowflake, TrendingUp, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getShortTeamName } from '@/lib/utils/format';
 
 export default function HotColdStreaksCard() {
   const [streaks, setStreaks] = useState({ hot: [], cold: [] });
@@ -98,7 +99,7 @@ export default function HotColdStreaksCard() {
                     <Link href={`/player/${player.player_id}`} className="font-medium text-white text-sm hover:text-blue-400 transition-colors block">
                       {player.name}
                     </Link>
-                    <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
+                    <div className="text-xs text-slate-400">{getShortTeamName(player.team)} · {player.position}</div>
                     {player.owner_name && (
                       <div className="text-xs text-blue-400">👤 {player.owner_name}</div>
                     )}
