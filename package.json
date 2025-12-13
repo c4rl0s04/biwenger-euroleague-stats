@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync": "node scripts/sync-data.mjs",
+    "sync": "node src/lib/sync/index.js",
     "test": "vitest"
   },
   "dependencies": {

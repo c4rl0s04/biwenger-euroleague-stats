@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncMatches } from '../sync-matches.js';
-import * as client from '../../biwenger-client.js';
+import * as client from '../../api/biwenger-client.js';
 
 // Mock biwenger-client
-vi.mock('../../biwenger-client.js', () => ({
+vi.mock('../../api/biwenger-client.js', () => ({
   fetchRoundGames: vi.fn(),
 }));
 

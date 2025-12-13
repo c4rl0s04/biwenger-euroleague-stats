@@ -1,4 +1,4 @@
-import { fetchAllPlayers, fetchPlayerDetails } from '../biwenger-client.js';
+import { fetchAllPlayers, fetchPlayerDetails } from '../api/biwenger-client.js';
 import { CONFIG } from '../config.js';
 
 const SLEEP_MS = 600; // Mantenemos la pausa segura para evitar el error 429

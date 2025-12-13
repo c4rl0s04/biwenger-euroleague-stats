@@ -4,7 +4,7 @@ import { useUser } from '@/contexts/UserContext';
 import { Calendar, TrendingUp, Star, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getScoreColor, getShortTeamName } from '@/lib/utils';
+import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
 
 export default function NextRoundCard() {
   const { currentUser } = useUser();

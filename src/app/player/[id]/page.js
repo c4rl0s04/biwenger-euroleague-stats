@@ -2,7 +2,7 @@ import { getPlayerDetails } from '@/lib/db';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, TrendingUp, Shield, User, DollarSign } from 'lucide-react';
-import { getScoreColor } from '@/lib/utils';
+import { getScoreColor } from '@/lib/utils/format';
 
 export const dynamic = 'force-dynamic';
 

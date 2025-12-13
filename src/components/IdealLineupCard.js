@@ -3,7 +3,7 @@
 import { Crown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getScoreColor, getShortTeamName } from '@/lib/utils';
+import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
 
 export default function IdealLineupCard() {
   const [data, setData] = useState(null);

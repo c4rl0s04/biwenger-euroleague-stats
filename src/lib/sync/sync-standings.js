@@ -1,4 +1,4 @@
-import { fetchLeague } from '../biwenger-client.js';
+import { fetchLeague } from '../api/biwenger-client.js';
 
 /**
  * Syncs league standings (users) to the local database.

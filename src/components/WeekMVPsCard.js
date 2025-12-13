@@ -3,7 +3,7 @@
 import { Trophy, Award } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getShortTeamName } from '@/lib/utils';
+import { getShortTeamName } from '@/lib/utils/format';
 
 export default function WeekMVPsCard() {
   const [mvps, setMvps] = useState([]);

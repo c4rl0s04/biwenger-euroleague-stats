@@ -1,4 +1,4 @@
-import { fetchRoundsLeague } from '../biwenger-client.js';
+import { fetchRoundsLeague } from '../api/biwenger-client.js';
 
 /**
  * Syncs lineups for finished rounds.

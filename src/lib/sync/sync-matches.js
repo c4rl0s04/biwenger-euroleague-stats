@@ -1,4 +1,4 @@
-import { fetchRoundGames } from '../biwenger-client.js';
+import { fetchRoundGames } from '../api/biwenger-client.js';
 
 /**
  * Syncs matches (games) for a specific round.

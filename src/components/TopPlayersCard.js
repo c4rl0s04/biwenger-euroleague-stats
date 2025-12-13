@@ -3,7 +3,7 @@
 import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getScoreColor, getShortTeamName } from '@/lib/utils';
+import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
 
 export default function TopPlayersCard() {
   const [topPlayers, setTopPlayers] = useState([]);

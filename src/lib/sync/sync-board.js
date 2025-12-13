@@ -1,4 +1,4 @@
-import { biwengerFetch } from '../biwenger-client.js';
+import { biwengerFetch } from '../api/biwenger-client.js';
 import { CONFIG } from '../config.js';
 
 /**

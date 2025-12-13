@@ -1,16 +1,16 @@
 import dotenv from 'dotenv';
 // Try to load .env.local (for local dev), but don't fail if missing (Docker uses env vars directly)
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '../../../.env.local' });
 
 import Database from 'better-sqlite3';
-import { syncPlayers } from '../src/lib/sync/sync-players.js';
-import { syncStandings } from '../src/lib/sync/sync-standings.js';
-import { syncSquads } from '../src/lib/sync/sync-squads.js';
-import { syncBoard } from '../src/lib/sync/sync-board.js';
-import { syncMatches } from '../src/lib/sync/sync-matches.js';
-import { syncLineups } from '../src/lib/sync/sync-lineups.js';
-import { ensureSchema } from '../src/lib/db/schema.js';
-import { CONFIG } from '../src/lib/config.js';
+import { syncPlayers } from './sync-players.js';
+import { syncStandings } from './sync-standings.js';
+import { syncSquads } from './sync-squads.js';
+import { syncBoard } from './sync-board.js';
+import { syncMatches } from './sync-matches.js';
+import { syncLineups } from './sync-lineups.js';
+import { ensureSchema } from '../db/schema.js';
+import { CONFIG } from '../config.js';
 
 // Validate environment before starting
 if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {

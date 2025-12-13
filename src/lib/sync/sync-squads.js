@@ -1,4 +1,4 @@
-import { biwengerFetch, fetchLeague } from '../biwenger-client.js';
+import { biwengerFetch, fetchLeague } from '../api/biwenger-client.js';
 
 /**
  * Syncs current squads (ownership) for all users.
