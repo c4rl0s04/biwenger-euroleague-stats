@@ -1,0 +1,58 @@
+name: Daily Biwenger Sync
+
+on:
+  schedule:
+    # Runs at 06:00 UTC (07:00/08:00 CET depending on daylight savings)
+    # Good time before games/market checks
+    - cron: '0 6 * * *'
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync-and-update:
+    runs-on: ubuntu-latest
+    
+    # Permission needed to push changes back to the repository
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history if needed, but usually default is fine
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Data Sync
+        env:
+          # Secrets configured in GitHub Repo Settings
+          BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
+          BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
+          BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
+          # DB Path is relative to root, standard config works fine
+        run: npm run sync
+
+      - name: Commit and Push DB Changes
+        run: |
+          git config --global user.name 'Biwenger Bot'
+          git config --global user.email 'bot@biwengerstats.com'
+          
+          # Check if data/local.db has changed
+          if [[ -n $(git status --porcelain data/local.db) ]]; then
+            echo "Changes detected in database. Committing..."
+            git add data/local.db
+            git commit -m "🤖 Auto-sync: Update database data [skip ci]"
+            git push
+          else
+            echo "No changes in database."
+          fi
