@@ -117,6 +117,19 @@ export async function syncPlayers(db) {
       });
 
       // B) Obtención de Detalles Extendidos
+      
+      // OPTIMIZACIÓN: Chequeo de frescura
+      // Si ya tenemos un valor de mercado para HOY (o fecha muy reciente), no pedimos detalles.
+      const today = new Date().toISOString().split('T')[0];
+      const lastDateRow = getLastDate.get(playerId);
+      const lastDate = lastDateRow ? lastDateRow.last_date : null;
+
+      // Si la última fecha registrada es HOY (o mayor, por si acaso), saltamos
+      if (lastDate && lastDate >= today) {
+          // console.log(`   ⏭️ Skipped ${player.name} (Already updated for ${lastDate})`);
+          continue; 
+      }
+
       try {
           await sleep(SLEEP_MS);
           
@@ -137,9 +150,9 @@ export async function syncPlayers(db) {
               // B.2 Insertar SOLO precios nuevos (Optimización)
               if (d.prices && Array.isArray(d.prices)) {
                   
-                  // 1. Consultamos qué tenemos ya en la base de datos
-                  const lastDateRow = getLastDate.get(playerId);
-                  const lastDate = lastDateRow ? lastDateRow.last_date : null;
+                  // 1. Consultamos qué tenemos ya en la base de datos (redundante variable pero claro)
+                  // const lastDateRow = getLastDate.get(playerId); 
+                  // const lastDate = lastDateRow ? lastDateRow.last_date : null;
 
                   // 2. Filtramos: solo nos interesan las fechas POSTERIORES a la última que tenemos
                   const newPrices = d.prices.filter(([dateInt]) => {
