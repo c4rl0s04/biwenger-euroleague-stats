@@ -69,7 +69,7 @@ export default function HotColdStreaksCard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 ${
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 ${
                   activeTab === tab.id
                     ? tab.color === 'orange'
                       ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
