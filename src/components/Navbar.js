@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trophy, Users, User, ShoppingCart, Calendar } from 'lucide-react';
 import UserSelector from './UserSelector';
 
+import { useCardTheme } from '@/contexts/CardThemeContext';
+
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Clasificación', href: '/standings', icon: Trophy },
@@ -14,11 +16,28 @@ const navItems = [
   { name: 'Partidos', href: '/matches', icon: Calendar },
 ];
 
+const navVariants = {
+  standard: 'bg-slate-950/70 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-orange-900/5 support-[backdrop-filter]:bg-slate-950/70',
+  glass: 'bg-slate-900/30 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]',
+  mesh: 'bg-slate-950/60 backdrop-blur-xl border-b border-indigo-500/10 shadow-lg shadow-indigo-900/5',
+  neo: 'bg-[#0A0A0A] border-b-2 border-slate-800 shadow-none'
+};
+
 export default function Navbar() {
   const pathname = usePathname();
+  // Safe access to theme context
+  let theme = 'standard';
+  try {
+    const context = useCardTheme();
+    if (context) theme = context.theme;
+  } catch (e) {
+    // Fallback if used outside provider
+  }
+
+  const navClass = navVariants[theme] || navVariants.standard;
 
   return (
-    <nav className="bg-slate-950/70 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50 shadow-2xl shadow-orange-900/5 support-[backdrop-filter]:bg-slate-950/70">
+    <nav className={`${navClass} sticky top-0 z-50 transition-all duration-700`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">

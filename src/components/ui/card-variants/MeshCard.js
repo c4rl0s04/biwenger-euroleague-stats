@@ -7,7 +7,10 @@ const colorVariants = {
   indigo: 'from-indigo-950/80 via-slate-950 to-slate-950 border-indigo-500/20 text-indigo-400',
   purple: 'from-purple-950/80 via-slate-950 to-slate-950 border-purple-500/20 text-purple-400',
   blue: 'from-blue-950/80 via-slate-950 to-slate-950 border-blue-500/20 text-blue-400',
-  orange: 'from-orange-950/80 via-slate-950 to-slate-950 border-orange-500/20 text-orange-400'
+  orange: 'from-orange-950/80 via-slate-950 to-slate-950 border-orange-500/20 text-orange-400',
+  cyan: 'from-cyan-950/80 via-slate-950 to-slate-950 border-cyan-500/20 text-cyan-400',
+  yellow: 'from-yellow-950/80 via-slate-950 to-slate-950 border-yellow-500/20 text-yellow-400',
+  pink: 'from-pink-950/80 via-slate-950 to-slate-950 border-pink-500/20 text-pink-400'
 };
 
 export default function MeshCard({ children, title, icon, color = 'indigo', loading = false, className = '', actionRight = null }) {
@@ -17,9 +20,20 @@ export default function MeshCard({ children, title, icon, color = 'indigo', load
 
   if (loading) {
     return (
-      <div className={`bg-slate-950 border border-slate-800 rounded-2xl p-6 h-full animate-pulse ${className}`}>
-        <div className="h-6 bg-slate-800 rounded w-1/3 mb-4"></div>
-        <div className="h-32 bg-slate-900 rounded-xl"></div>
+      <div className={`bg-slate-950 border border-slate-800 rounded-2xl p-0 h-full flex flex-col animate-pulse overflow-hidden ${className}`}>
+         {/* Mimic Header Glow */}
+        <div className={`h-24 bg-gradient-to-b from-${glowColor || 'indigo-900'}/20 to-transparent opacity-50`}></div>
+        <div className="p-6 -mt-20 flex-1 flex flex-col">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-5 h-5 rounded bg-slate-800"></div> 
+            <div className="h-4 bg-slate-800 rounded w-24"></div>
+          </div>
+          <div className="space-y-3 flex-1">
+            <div className="h-20 bg-slate-900/50 rounded-xl border border-slate-800/50"></div>
+            <div className="h-12 bg-slate-900/50 rounded-xl border border-slate-800/50"></div>
+            <div className="flex-1 bg-slate-900/50 rounded-xl border border-slate-800/50"></div>
+          </div>
+        </div>
       </div>
     );
   }

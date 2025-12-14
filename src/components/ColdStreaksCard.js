@@ -40,9 +40,9 @@ export default function ColdStreaksCard() {
 
   return (
     <PremiumCard
-      title="En Bache"
+      title="Rachas Negativas"
       icon={Snowflake}
-      color="cyan"
+      color="blue"
       loading={loading}
       actionRight={infoTooltip}
     >

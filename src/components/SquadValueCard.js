@@ -34,7 +34,7 @@ export default function SquadValueCard() {
     <PremiumCard
       title="Tu Plantilla"
       icon={Wallet}
-      color="indigo"
+      color="cyan"
       loading={loading}
     >
       {!loading && data && (

@@ -13,9 +13,17 @@ export default function NeoCard({ children, title, icon, color = 'indigo', loadi
 
   if (loading) {
     return (
-      <div className={`bg-slate-950 border border-slate-800 rounded-lg p-5 h-full opacity-60 ${className}`}>
-        <div className="h-4 bg-slate-800 w-24 mb-4 rounded"></div>
-        <div className="h-20 bg-slate-900 rounded"></div>
+      <div className={`bg-slate-950 border border-slate-800 border-l-4 ${accentClass} rounded-lg p-5 h-full flex flex-col animate-pulse ${className}`}>
+        <div className="flex justify-between items-start mb-4 border-b border-slate-900 pb-4">
+          <div className="space-y-2">
+            <div className="h-4 bg-slate-800 w-32 rounded-sm"></div>
+            <div className="h-0.5 w-8 bg-slate-800 rounded-full"></div>
+          </div>
+          <div className="w-5 h-5 bg-slate-800 rounded-sm"></div>
+        </div>
+        <div className="flex-1 space-y-3">
+          <div className="h-full bg-slate-900/40 rounded-sm border border-slate-800/50"></div>
+        </div>
       </div>
     );
   }

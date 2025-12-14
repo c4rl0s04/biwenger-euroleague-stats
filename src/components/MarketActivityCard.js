@@ -40,7 +40,7 @@ export default function MarketActivityCard() {
     <PremiumCard
       title="Últimos Fichajes"
       icon={ShoppingBag}
-      color="purple"
+      color="pink"
       loading={loading}
       actionRight={actionLink}
     >

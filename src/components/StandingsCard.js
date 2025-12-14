@@ -36,7 +36,7 @@ export default function StandingsCard() {
     <PremiumCard
       title="Clasificación"
       icon={Users}
-      color="blue"
+      color="indigo"
       className="lg:col-span-1"
       actionRight={actionLink}
       loading={loading}

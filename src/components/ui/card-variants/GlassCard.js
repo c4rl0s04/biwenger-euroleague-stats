@@ -43,13 +43,15 @@ export default function GlassCard({ children, title, icon, color = 'indigo', loa
 
   if (loading) {
      return (
-       <div className={`backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6 h-full animate-pulse ${className}`}>
+       <div className={`backdrop-blur-xl bg-slate-900/30 border border-white/5 rounded-3xl p-6 h-full animate-pulse flex flex-col ${className}`}>
          <div className="flex items-center gap-3 mb-6">
-           <div className="w-10 h-10 rounded-full bg-white/10"></div>
-           <div className="h-5 bg-white/10 rounded w-1/3"></div>
+           <div className="w-10 h-10 rounded-2xl bg-white/10 shadow-inner"></div>
+           <div className="h-5 bg-white/5 rounded-full w-1/3"></div>
          </div>
-         <div className="space-y-3">
-           <div className="h-20 bg-white/5 rounded-2xl"></div>
+         <div className="space-y-4 flex-1">
+           <div className="h-24 bg-white/5 rounded-2xl border border-white/5"></div>
+           <div className="h-16 bg-white/5 rounded-2xl border border-white/5"></div>
+           <div className="flex-1 bg-white/5 rounded-2xl border border-white/5"></div>
          </div>
        </div>
      );

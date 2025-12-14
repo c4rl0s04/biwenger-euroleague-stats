@@ -31,7 +31,7 @@ export default function HomeAwayCard() {
     <PremiumCard
       title="Casa vs Fuera"
       icon={Home}
-      color="cyan"
+      color="orange"
       loading={loading}
     >
       {!loading && stats && (
