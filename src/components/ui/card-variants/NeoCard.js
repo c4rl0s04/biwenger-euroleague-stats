@@ -39,7 +39,7 @@ export default function NeoCard({ children, title, icon, color = 'indigo', loadi
         </div>
       </div>
 
-      <div className="flex-1 text-slate-300">
+      <div className="flex-1 flex flex-col text-slate-300">
         {children}
       </div>
     </div>

@@ -1,3 +1,5 @@
+'use client';
+
 import { createElement } from 'react';
 
 const colorVariants = {
@@ -43,7 +45,7 @@ export default function MeshCard({ children, title, icon, color = 'indigo', load
           {actionRight}
         </div>
         
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col">
           {children}
         </div>
       </div>

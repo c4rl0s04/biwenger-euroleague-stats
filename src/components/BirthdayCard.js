@@ -32,9 +32,9 @@ export default function BirthdayCard() {
       loading={loading}
     >
       {!loading && (
-        <div className="relative">
+        <div className="relative flex-1 flex flex-col h-full">
           {birthdays && birthdays.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-3 flex-1">
               {birthdays.map((player) => (
                 <div key={player.id} className="flex items-center gap-3 p-3 bg-pink-500/10 rounded-lg border border-pink-500/20">
                   <Sparkles className="w-5 h-5 text-pink-400 flex-shrink-0" />

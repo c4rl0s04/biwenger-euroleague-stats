@@ -9,6 +9,7 @@ import NeoCard from './card-variants/NeoCard';
 export default function PremiumCard(props) {
   // Use try/catch or default because this component might be used 
   // outside the provider during initial render/hydration
+  // (Resolved build error refresh)
   let theme = 'standard';
   try {
     const context = useCardTheme();
