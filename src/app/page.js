@@ -1,4 +1,3 @@
-import { getStandings } from '@/lib/db';
 import Link from 'next/link';
 import StandingsCard from '@/components/StandingsCard';
 import StandingsTable from '@/components/StandingsTable';
@@ -13,6 +12,7 @@ import NextRoundCard from '@/components/NextRoundCard';
 import TopPlayersCard from '@/components/TopPlayersCard';
 import MarketActivityCard from '@/components/MarketActivityCard';
 import BirthdayCard from '@/components/BirthdayCard';
+import WeekMVPsCard from '@/components/WeekMVPsCard';
 import HotStreaksCard from '@/components/HotStreaksCard';
 import ColdStreaksCard from '@/components/ColdStreaksCard';
 import IdealLineupCard from '@/components/IdealLineupCard';
@@ -20,8 +20,6 @@ import IdealLineupCard from '@/components/IdealLineupCard';
 export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
-  const standings = getStandings();
-
   return (
     <div className="space-y-6">
       {/* Personal Stats Row */}
@@ -45,7 +43,7 @@ export default function Dashboard() {
         <NextRoundCard />
 
         {/* Standings Preview */}
-        <StandingsCard standings={standings} />
+        <StandingsCard />
       </div>
 
       {/* Top Players & Market Activity - Side by Side */}

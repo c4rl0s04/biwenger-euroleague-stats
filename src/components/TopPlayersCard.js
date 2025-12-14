@@ -4,6 +4,7 @@ import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
+import PremiumCard from '@/components/ui/PremiumCard';
 
 export default function TopPlayersCard() {
   const [topPlayers, setTopPlayers] = useState([]);
@@ -25,32 +26,18 @@ export default function TopPlayersCard() {
       });
   }, []);
 
-  if (loading) {
-    return (
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-pulse">
-        <div className="h-6 bg-slate-700/50 rounded w-1/3 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-16 bg-slate-700/50 rounded"></div>
-          <div className="h-16 bg-slate-700/50 rounded"></div>
-          <div className="h-16 bg-slate-700/50 rounded"></div>
-        </div>
-      </div>
-    );
-  }
+  const actionLink = (
+    <Link href="/players" className="text-sm text-emerald-400 hover:text-emerald-300">Ver todos</Link>
+  );
 
   return (
-    <div className="bg-gradient-to-br from-green-900/20 to-slate-900 backdrop-blur-md border border-green-700/30 rounded-2xl p-6 relative overflow-hidden group hover:border-green-600/50 transition-all">
-      {/* Background decoration */}
-      <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity">
-        <TrendingUp className="w-32 h-32 text-green-500" />
-      </div>
-
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-green-500" /> Top Jugadores
-        </h2>
-        <Link href="/players" className="text-sm text-green-400 hover:text-green-300">Ver todos</Link>
-      </div>
+    <PremiumCard
+      title="Top Jugadores"
+      icon={TrendingUp}
+      color="emerald"
+      loading={loading}
+      actionRight={actionLink}
+    >
       <div className="space-y-4">
         {topPlayers.length > 0 ? (
           topPlayers.map((player, index) => {
@@ -121,6 +108,6 @@ export default function TopPlayersCard() {
           <div className="text-center text-slate-500 py-8">No hay datos disponibles</div>
         )}
       </div>
-    </div>
+    </PremiumCard>
   );
 }

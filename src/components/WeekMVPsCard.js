@@ -4,6 +4,7 @@ import { Trophy, Award } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getShortTeamName } from '@/lib/utils/format';
+import PremiumCard from '@/components/ui/PremiumCard';
 
 export default function WeekMVPsCard() {
   const [mvps, setMvps] = useState([]);
@@ -57,67 +58,50 @@ export default function WeekMVPsCard() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 h-full flex flex-col animate-pulse">
-        <div className="h-6 bg-slate-700/50 rounded w-1/2 mb-6 shrink-0"></div>
-        <div className="flex-1 space-y-3">
-          <div className="h-16 bg-slate-700/50 rounded"></div>
-          <div className="h-16 bg-slate-700/50 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-gradient-to-br from-yellow-900/20 to-slate-900 backdrop-blur-md border border-yellow-700/30 rounded-2xl p-6 h-full flex flex-col relative overflow-hidden group hover:border-yellow-600/50 transition-all">
-      {/* Background decoration */}
-      <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity">
-        <Trophy className="w-32 h-32 text-yellow-500" />
-      </div>
-
-      <div className="shrink-0 relative z-10 mb-4">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
-          MVPs Última Jornada
-        </h2>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-between gap-2 relative z-10">
-        {mvps && mvps.length > 0 ? (
-          mvps.map((player, index) => {
-            const styles = getRankStyles(index);
-            return (
-              <div 
-                key={player.player_id} 
-                className={`p-3 rounded-lg border transition-all ${styles.container}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0 ${styles.badge}`}>
-                    {index <= 2 ? <Award className="w-5 h-5" /> : index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <Link href={`/player/${player.player_id}`} className={`font-medium text-white text-sm transition-colors block ${styles.hoverText}`}>
-                      {player.name}
-                    </Link>
-                    <div className="text-xs text-slate-400">{getShortTeamName(player.team)} · {player.position}</div>
-                    {player.owner_name && (
-                      <div className="text-xs text-blue-400">👤 {player.owner_name}</div>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <div className={`font-bold text-sm ${styles.text}`}>
-                      {player.points} pts
+    <PremiumCard
+      title="MVPs Última Jornada"
+      icon={Trophy}
+      color="yellow"
+      loading={loading}
+    >
+      {!loading && (
+        <div className="flex-1 flex flex-col justify-between gap-2 relative z-10">
+          {mvps && mvps.length > 0 ? (
+            mvps.map((player, index) => {
+              const styles = getRankStyles(index);
+              return (
+                <div 
+                  key={player.player_id} 
+                  className={`p-3 rounded-lg border transition-all ${styles.container}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0 ${styles.badge}`}>
+                      {index <= 2 ? <Award className="w-5 h-5" /> : index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/player/${player.player_id}`} className={`font-medium text-white text-sm transition-colors block ${styles.hoverText}`}>
+                        {player.name}
+                      </Link>
+                      <div className="text-xs text-slate-400">{getShortTeamName(player.team)} · {player.position}</div>
+                      {player.owner_name && (
+                        <div className="text-xs text-blue-400">👤 {player.owner_name}</div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className={`font-bold text-sm ${styles.text}`}>
+                        {player.points} pts
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-500">No hay datos de la última jornada</div>
-        )}
-      </div>
-    </div>
+              );
+            })
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-slate-500">No hay datos de la última jornada</div>
+          )}
+        </div>
+      )}
+    </PremiumCard>
   );
 }

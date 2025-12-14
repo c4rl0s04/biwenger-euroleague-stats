@@ -18,7 +18,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+    <nav className="bg-slate-950/70 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50 shadow-2xl shadow-orange-900/5 support-[backdrop-filter]:bg-slate-950/70">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -56,7 +56,7 @@ export default function Navbar() {
       </div>
       
       {/* Mobile Navigation (Bottom Bar for easy access) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 pb-safe">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-xl border-t border-white/5 pb-safe z-50">
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => {
             const isActive = pathname === item.href;

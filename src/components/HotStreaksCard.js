@@ -4,6 +4,7 @@ import { Flame, TrendingUp, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
+import PremiumCard from '@/components/ui/PremiumCard';
 
 export default function HotStreaksCard() {
   const [players, setPlayers] = useState([]);
@@ -24,44 +25,28 @@ export default function HotStreaksCard() {
       });
   }, []);
 
-  if (loading) {
-    return (
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-pulse h-full">
-        <div className="h-6 bg-slate-700/50 rounded w-1/2 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-16 bg-slate-700/50 rounded"></div>
-          <div className="h-16 bg-slate-700/50 rounded"></div>
+  const infoTooltip = (
+    <div className="group/info relative">
+      <Info className="w-4 h-4 text-slate-500 hover:text-orange-400 cursor-help transition-colors" />
+      <div className="absolute right-0 top-6 w-64 bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg p-3 shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50">
+        <p className="mb-2 font-semibold text-orange-400">Criterio de Racha:</p>
+        Comparativa entre la media de las últimas 5 jornadas (mín. 3 jugados) y la media de la temporada.
+        <div className="mt-2 text-slate-400 border-t border-slate-700 pt-2">
+          Se requiere una mejora superior al <span className="text-white">20%</span>.
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="bg-gradient-to-br from-orange-900/20 to-slate-900 backdrop-blur-md border border-orange-700/30 rounded-2xl p-6 relative overflow-visible group hover:border-orange-600/50 transition-all h-full flex flex-col">
-      {/* Background decoration */}
-      <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity overflow-hidden">
-        <Flame className="w-32 h-32 text-orange-500" />
-      </div>
-
-      <div className="relative flex-1 flex flex-col">
-        <div className="flex items-center gap-2 mb-4 shrink-0 relative">
-          <Flame className="w-5 h-5 text-orange-500" />
-          <h2 className="text-xl font-bold text-white">En Racha</h2>
-          
-          {/* Info Tooltip */}
-          <div className="group/info relative ml-auto">
-            <Info className="w-4 h-4 text-slate-500 hover:text-orange-400 cursor-help transition-colors" />
-            <div className="absolute right-0 top-6 w-64 bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg p-3 shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50">
-              <p className="mb-2 font-semibold text-orange-400">Criterio de Racha:</p>
-              Comparativa entre la media de las últimas 5 jornadas (mín. 3 jugados) y la media de la temporada.
-              <div className="mt-2 text-slate-400 border-t border-slate-700 pt-2">
-                Se requiere una mejora superior al <span className="text-white">20%</span>.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
+    <PremiumCard
+      title="En Racha"
+      icon={Flame}
+      color="orange"
+      loading={loading}
+      actionRight={infoTooltip}
+    >
+      {!loading && (
         <div className="flex-1 flex flex-col justify-between gap-2">
           {players && players.length > 0 ? (
             players.map((player) => (
@@ -90,7 +75,7 @@ export default function HotStreaksCard() {
             <div className="text-center text-slate-500 py-8">No hay jugadores en racha</div>
           )}
         </div>
-      </div>
-    </div>
+      )}
+    </PremiumCard>
   );
 }
