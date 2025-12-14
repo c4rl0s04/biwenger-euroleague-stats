@@ -13,9 +13,8 @@ import NextRoundCard from '@/components/NextRoundCard';
 import TopPlayersCard from '@/components/TopPlayersCard';
 import MarketActivityCard from '@/components/MarketActivityCard';
 import BirthdayCard from '@/components/BirthdayCard';
-import HotColdStreaksCard from '@/components/HotColdStreaksCard';
-import WeekMVPsCard from '@/components/WeekMVPsCard';
-import RisingStarsCard from '@/components/RisingStarsCard';
+import HotStreaksCard from '@/components/HotStreaksCard';
+import ColdStreaksCard from '@/components/ColdStreaksCard';
 import IdealLineupCard from '@/components/IdealLineupCard';
 
 export const dynamic = 'force-dynamic';
@@ -59,8 +58,8 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <WeekMVPsCard />
         <IdealLineupCard />
-        <HotColdStreaksCard />
-        <RisingStarsCard />
+        <HotStreaksCard />
+        <ColdStreaksCard />
       </div>
 
       {/* Birthday Card - Full Width */}
