@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trophy, Users, User, ShoppingCart, Calendar } from 'lucide-react';
-import UserSelector from './UserSelector';
+import UserSelector from '@/components/user/UserSelector';
 
 import { useCardTheme } from '@/contexts/CardThemeContext';
 

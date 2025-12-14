@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Users, Trophy } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import StandingsTable from '@/components/StandingsTable';
+import StandingsTable from './StandingsTable';
 import PremiumCard from '@/components/ui/PremiumCard';
 
 export default function StandingsCard() {
