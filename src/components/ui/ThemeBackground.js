@@ -1,17 +1,12 @@
 'use client';
 
 import { useCardTheme } from '@/contexts/CardThemeContext';
-import { useEffect, useState } from 'react';
+
 
 export default function ThemeBackground() {
   const { theme } = useCardTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  // Removed mounted check to allow server-side rendering of default theme
+  // and avoid cascading renders from synchronous setState in effect.
 
   const renderBackground = () => {
     switch (theme) {
@@ -45,17 +40,29 @@ export default function ThemeBackground() {
                  
                  SIMPLEST FIX: 'absolute' inset-0 z-[-1] and assume body grows.
              */}
-             <div className="absolute top-0 left-0 w-full h-[200vh] overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-[300vh] overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-950/40 to-transparent opacity-60" />
                 
-                {/* Top Blob (Always visible) */}
-                <div className="absolute top-[-100px] left-[20%] w-[600px] h-[600px] bg-purple-600/20 blur-[100px] rounded-full mix-blend-screen animate-blob" />
+                {/* 1. Purple (Top Left) */}
+                <div className="absolute top-[-100px] left-[10%] w-[600px] h-[600px] bg-purple-600/20 blur-[100px] rounded-full mix-blend-screen animate-blob" />
                 
-                {/* Middle Blob (Revealed on scroll) */}
-                <div className="absolute top-[40vh] right-[10%] w-[600px] h-[600px] bg-blue-600/20 blur-[100px] rounded-full mix-blend-screen animate-blob animation-delay-2000" />
+                {/* 2. Emerald (Top Right - NEW) */}
+                <div className="absolute top-[5vh] right-[10%] w-[500px] h-[500px] bg-emerald-500/15 blur-[100px] rounded-full mix-blend-screen animate-blob animation-delay-2000" />
+
+                {/* 3. Blue (Upper Middle Right) */}
+                <div className="absolute top-[40vh] right-[20%] w-[600px] h-[600px] bg-blue-600/20 blur-[100px] rounded-full mix-blend-screen animate-blob animation-delay-4000" />
                 
-                {/* Bottom Blob (Deep scroll) */}
-                <div className="absolute top-[90vh] left-[30%] w-[800px] h-[800px] bg-pink-600/15 blur-[120px] rounded-full mix-blend-screen animate-blob animation-delay-4000" />
+                {/* 4. Orange (Middle Left - NEW) */}
+                <div className="absolute top-[55vh] left-[15%] w-[500px] h-[500px] bg-orange-500/15 blur-[100px] rounded-full mix-blend-screen animate-blob animation-delay-2000" />
+
+                {/* 5. Pink (Lower Middle) */}
+                <div className="absolute top-[90vh] left-[40%] w-[700px] h-[700px] bg-pink-600/15 blur-[120px] rounded-full mix-blend-screen animate-blob" />
+
+                {/* 6. Cyan (Bottom Right - NEW) */}
+                <div className="absolute top-[130vh] right-[15%] w-[600px] h-[600px] bg-cyan-500/15 blur-[100px] rounded-full mix-blend-screen animate-blob animation-delay-4000" />
+                
+                {/* 7. Yellow (Deep Bottom Left - NEW) */}
+                <div className="absolute top-[180vh] left-[10%] w-[600px] h-[600px] bg-yellow-500/10 blur-[100px] rounded-full mix-blend-screen animate-blob" />
              </div>
           </div>
         );

@@ -42,9 +42,16 @@ export default function BirthdayCard() {
                     <Link href={`/player/${player.id}`} className="font-medium text-white hover:text-pink-400 transition-colors block">
                       {player.name}
                     </Link>
-                    <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
+                    <div className="text-xs text-slate-400 flex items-center gap-2">
+                       <span>{player.team} · {player.position}</span>
+                       {player.birth_date && (
+                         <span className="text-pink-300 font-semibold px-1.5 py-0.5 bg-pink-500/10 rounded">
+                           {new Date().getFullYear() - new Date(player.birth_date).getFullYear()} años
+                         </span>
+                       )}
+                    </div>
                     {player.owner_name && (
-                      <div className="text-xs text-pink-400">👤 {player.owner_name}</div>
+                      <div className="text-xs text-pink-400 mt-0.5">👤 {player.owner_name}</div>
                     )}
                   </div>
                   <div className="text-2xl">🎂</div>
