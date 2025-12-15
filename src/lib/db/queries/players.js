@@ -158,12 +158,52 @@ export function getPlayerDetails(playerId) {
 
   // 4. Ownership History (Transfers)
   const transfersQuery = `
-    SELECT fecha as date, vendedor as from_name, comprador as to_name, precio as amount 
-    FROM fichajes 
-    WHERE player_id = ? 
-    ORDER BY timestamp DESC
+    SELECT 
+      f.fecha as date, 
+      f.vendedor as from_name, 
+      f.comprador as to_name, 
+      f.precio as amount,
+      u1.icon as from_img,
+      u2.icon as to_img
+    FROM fichajes f
+    LEFT JOIN users u1 ON f.vendedor = u1.name
+    LEFT JOIN users u2 ON f.comprador = u2.name
+    WHERE f.player_id = ? 
+    ORDER BY f.timestamp DESC
   `;
   const transfers = db.prepare(transfersQuery).all(playerId);
+
+  // Check for Initial Squad Assignment (Calculated)
+  const initialSquadQuery = `
+    SELECT 
+      u.name as owner_name, 
+      u.icon as owner_img 
+    FROM initial_squads s
+    JOIN users u ON s.user_id = u.id
+    WHERE s.player_id = ?
+  `;
+  const initialOwner = db.prepare(initialSquadQuery).get(playerId);
+
+  if (initialOwner) {
+    // Determine a date for the initial assignment.
+    // If there are existing transfers, put it slightly before the oldest one.
+    // Otherwise, use a default league start date (e.g., Sep 1, 2023 or similar, or just '2023-01-01')
+    let initialDate = '2024-09-01T00:00:00.000Z'; // Approximate season start
+    if (transfers.length > 0) {
+      const oldestTransfer = new Date(transfers[transfers.length - 1].date);
+      oldestTransfer.setHours(oldestTransfer.getHours() - 24); // 1 day before
+      initialDate = oldestTransfer.toISOString();
+    }
+
+    transfers.push({
+      date: initialDate,
+      from_name: 'Biwenger',
+      to_name: initialOwner.owner_name,
+      amount: 0,
+      from_img: null, // System usually has no img, or we could handle in UI
+      to_img: initialOwner.owner_img
+    });
+  }
 
   // 5. Next Match
   // Find the first match in the future where player's TEAM is playing
