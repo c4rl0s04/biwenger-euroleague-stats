@@ -10,7 +10,8 @@ const colorVariants = {
   orange: 'from-orange-950/80 via-slate-950 to-slate-950 border-orange-500/20 text-orange-400',
   cyan: 'from-cyan-950/80 via-slate-950 to-slate-950 border-cyan-500/20 text-cyan-400',
   yellow: 'from-yellow-950/80 via-slate-950 to-slate-950 border-yellow-500/20 text-yellow-400',
-  pink: 'from-pink-950/80 via-slate-950 to-slate-950 border-pink-500/20 text-pink-400'
+  pink: 'from-pink-950/80 via-slate-950 to-slate-950 border-pink-500/20 text-pink-400',
+  rose: 'from-rose-950/80 via-slate-950 to-slate-950 border-rose-500/20 text-rose-400'
 };
 
 export default function MeshCard({ children, title, icon, color = 'indigo', loading = false, className = '', actionRight = null }) {

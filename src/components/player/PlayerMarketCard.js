@@ -5,7 +5,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 
 export default function PlayerMarketCard({ player, className = '' }) {
   return (
-    <PremiumCard title="Mercado" icon={DollarSign} color="cyan" className={`h-full ${className}`}>
+    <PremiumCard title="Mercado" icon={DollarSign} color="emerald" className={`h-full ${className}`}>
         <div className="space-y-5">
             <div className="flex justify-between items-start">
                 <div>

@@ -96,6 +96,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
  * @returns {Object} Player details including stats
  */
 export function getPlayerDetails(playerId) {
+  // 1. Base Player Info (now including height/weight from sync updates)
   const query = `
     SELECT 
       p.*,
@@ -112,27 +113,103 @@ export function getPlayerDetails(playerId) {
   
   if (!player) return null;
 
+  // 2. Matches History (Existing + New Advanced Stats Cols)
   const matchesQuery = `
     SELECT 
       prs.round_id,
       (SELECT round_name FROM matches WHERE round_id = prs.round_id LIMIT 1) as round_name,
+      m.date as match_date,
+      m.home_team,
+      m.away_team,
+      m.home_score,
+      m.away_score,
       prs.fantasy_points,
       prs.minutes as minutes_played,
       prs.points as points_scored,
       prs.rebounds,
-      prs.three_points_made as triples,
       prs.assists,
-      prs.steals
+      prs.steals,
+      prs.blocks,
+      prs.turnovers,
+      prs.two_points_made,
+      prs.two_points_attempted,
+      prs.three_points_made,
+      prs.three_points_attempted,
+      prs.free_throws_made,
+      prs.free_throws_attempted,
+      prs.fouls_committed
     FROM player_round_stats prs
+    LEFT JOIN matches m ON prs.round_id = m.round_id
     WHERE prs.player_id = ?
+    GROUP BY prs.round_id
     ORDER BY prs.round_id DESC
   `;
   
   const recentMatches = db.prepare(matchesQuery).all(playerId);
-  
+
+  // 3. Price History
+  const priceHistoryQuery = `
+    SELECT date, price 
+    FROM market_values 
+    WHERE player_id = ? 
+    ORDER BY date ASC
+  `;
+  const priceHistory = db.prepare(priceHistoryQuery).all(playerId);
+
+  // 4. Ownership History (Transfers)
+  const transfersQuery = `
+    SELECT fecha as date, vendedor as from_name, comprador as to_name, precio as amount 
+    FROM fichajes 
+    WHERE player_id = ? 
+    ORDER BY timestamp DESC
+  `;
+  const transfers = db.prepare(transfersQuery).all(playerId);
+
+  // 5. Next Match
+  // Find the first match in the future where player's TEAM is playing
+  // We assume 'player.team' name functions as team identifier in matches table
+  const nextMatchQuery = `
+    SELECT 
+      date, 
+      home_team, 
+      away_team,
+      round_name
+    FROM matches 
+    WHERE (home_team = ? OR away_team = ?) 
+      AND date > datetime('now') 
+    ORDER BY date ASC 
+    LIMIT 1
+  `;
+  const nextMatch = db.prepare(nextMatchQuery).get(player.team, player.team);
+
+  // 6. Advanced Stats Aggregates (Season Totals)
+  // We could calculate this in JS from recentMatches, but SQL is fine too.
+  // Using JS reduce here since we already fetched detailed stats in recentMatches
+  const advancedStats = recentMatches.reduce((acc, m) => {
+    acc.two_points_made += m.two_points_made || 0;
+    acc.two_points_attempted += m.two_points_attempted || 0;
+    acc.three_points_made += m.three_points_made || 0;
+    acc.three_points_attempted += m.three_points_attempted || 0;
+    acc.free_throws_made += m.free_throws_made || 0;
+    acc.free_throws_attempted += m.free_throws_attempted || 0;
+    acc.blocks += m.blocks || 0;
+    acc.turnovers += m.turnovers || 0;
+    acc.fouls += m.fouls_committed || 0;
+    return acc;
+  }, {
+    two_points_made: 0, two_points_attempted: 0,
+    three_points_made: 0, three_points_attempted: 0,
+    free_throws_made: 0, free_throws_attempted: 0,
+    blocks: 0, turnovers: 0, fouls: 0
+  });
+
   return {
     ...player,
-    recentMatches
+    recentMatches,
+    priceHistory,
+    transfers,
+    nextMatch,
+    advancedStats
   };
 }
 

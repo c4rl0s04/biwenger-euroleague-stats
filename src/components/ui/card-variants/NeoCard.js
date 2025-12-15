@@ -5,7 +5,8 @@ const colorVariants = {
   indigo: 'border-l-indigo-500 shadow-indigo-900/5',
   purple: 'border-l-purple-500 shadow-purple-900/5',
   blue: 'border-l-blue-500 shadow-blue-900/5',
-  orange: 'border-l-orange-500 shadow-orange-900/5'
+  orange: 'border-l-orange-500 shadow-orange-900/5',
+  rose: 'border-l-rose-500 shadow-rose-900/5'
 };
 
 export default function NeoCard({ children, title, icon, color = 'indigo', loading = false, className = '', actionRight = null }) {

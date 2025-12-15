@@ -6,7 +6,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 
 export default function PlayerIdentityCard({ player, className = '' }) {
   return (
-    <PremiumCard title="Ficha Técnica" icon={User} color="indigo" className={`h-full ${className}`}>
+    <PremiumCard title="Ficha Técnica" icon={User} color="blue" className={`h-full ${className}`}>
         <div className="flex items-center gap-6 h-full">
             {/* Avatar */}
             <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-slate-700/50 shadow-xl shrink-0">

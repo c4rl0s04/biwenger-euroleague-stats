@@ -5,7 +5,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 
 export default function PlayerStatsCard({ player, className = '' }) {
   return (
-    <PremiumCard title="Rendimiento" icon={Activity} color="emerald" className={`h-full ${className}`}>
+    <PremiumCard title="Rendimiento" icon={Activity} color="amber" className={`h-full ${className}`}>
         <div className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
                 <div>

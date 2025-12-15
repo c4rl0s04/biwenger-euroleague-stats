@@ -35,6 +35,13 @@ const colorVariants = {
     glow: 'shadow-[0_8px_32px_-8px_rgba(249,115,22,0.3)]',
     text: 'text-orange-400',
     iconBg: 'bg-orange-500/20'
+  },
+  rose: {
+    bg: 'bg-rose-900/10',
+    border: 'border-white/10 group-hover:border-rose-500/30',
+    glow: 'shadow-[0_8px_32px_-8px_rgba(244,63,94,0.3)]',
+    text: 'text-rose-400',
+    iconBg: 'bg-rose-500/20'
   }
 };
 

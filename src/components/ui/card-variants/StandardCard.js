@@ -65,6 +65,14 @@ const colorVariants = {
     iconBg: 'text-blue-500',
     titleIconBg: 'bg-blue-500/10',
   },
+  rose: {
+    gradient: 'from-rose-900/20 to-slate-900',
+    border: 'border-rose-700/30',
+    hoverBorder: 'hover:border-rose-600/50',
+    iconText: 'text-rose-500',
+    iconBg: 'text-rose-500',
+    titleIconBg: 'bg-rose-500/10',
+  },
 };
 
 export default function StandardCard({ 

@@ -128,18 +128,28 @@ export async function syncMatches(db, round, playersList = {}) {
                                 };
                             };
 
-                            const twoPt = parseShooting(statsMap['2-point field goals']);
+                            const twoPtRaw = parseShooting(statsMap['2-point field goals']);
                             const threePt = parseShooting(statsMap['3 pointers']);
                             const ft = parseShooting(statsMap['Free throws']);
+
+                            // Fix for API discrepancies: Calculate 2PM from Total Points
+                            // Points = 2*2PM + 3*3PM + 1*FTM
+                            // => 2PM = (Points - 3*3PM - FTM) / 2
+                            const totalPoints = parseInt(statsMap['Points']) || 0;
+                            const calculated2PM = Math.max(0, (totalPoints - (3 * threePt.made) - ft.made) / 2);
+                            
+                            // Use calculated 2PM. For attempts, ensure at least as many as made.
+                            const twoPtMade = Number.isInteger(calculated2PM) ? calculated2PM : twoPtRaw.made;
+                            const twoPtAtt = Math.max(twoPtMade, twoPtRaw.attempted);
 
                             insertStats.run({
                                 player_id: playerId,
                                 round_id: dbRoundId,
                                 fantasy_points: report.points || 0,
                                 minutes: parseInt(statsMap['Minutes played']) || 0,
-                                points: parseInt(statsMap['Points']) || 0,
-                                two_points_made: twoPt.made,
-                                two_points_attempted: twoPt.attempted,
+                                points: totalPoints,
+                                two_points_made: twoPtMade,
+                                two_points_attempted: twoPtAtt,
                                 three_points_made: threePt.made,
                                 three_points_attempted: threePt.attempted,
                                 free_throws_made: ft.made,
