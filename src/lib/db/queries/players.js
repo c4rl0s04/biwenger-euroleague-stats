@@ -116,8 +116,8 @@ export function getPlayerDetails(playerId) {
   // 2. Matches History (Existing + New Advanced Stats Cols)
   const matchesQuery = `
     SELECT 
-      prs.round_id,
-      (SELECT round_name FROM matches WHERE round_id = prs.round_id LIMIT 1) as round_name,
+      m.round_id,
+      m.round_name,
       m.date as match_date,
       m.home_team,
       m.away_team,
@@ -138,11 +138,12 @@ export function getPlayerDetails(playerId) {
       prs.free_throws_made,
       prs.free_throws_attempted,
       prs.fouls_committed
-    FROM player_round_stats prs
-    LEFT JOIN matches m ON prs.round_id = m.round_id
-    WHERE prs.player_id = ?
-    GROUP BY prs.round_id
-    ORDER BY prs.round_id DESC
+    FROM matches m
+    JOIN players p ON p.id = ?
+    LEFT JOIN player_round_stats prs ON m.round_id = prs.round_id AND prs.player_id = p.id
+    WHERE (m.home_team = p.team OR m.away_team = p.team)
+      AND m.date < datetime('now')
+    ORDER BY m.round_id DESC
   `;
   
   const recentMatches = db.prepare(matchesQuery).all(playerId);

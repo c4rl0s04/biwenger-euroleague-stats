@@ -16,7 +16,17 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
     };
 
     matches.forEach(m => {
-      const isHome = m.home_team === playerTeam;
+      // Aggressively normalize: remove all non-alphanumeric chars and lowercase
+      const normalize = (str) => str?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+      const homeNorm = normalize(m.home_team);
+      const playerNorm = normalize(playerTeam);
+      
+      // Check exact match OR inclusion (e.g. "Bayern" in "FC Bayern Munich")
+      const isHome = homeNorm && playerNorm && (homeNorm === playerNorm || homeNorm.includes(playerNorm) || playerNorm.includes(homeNorm));
+      
+      // SKIP DNP (Did Not Play) - Don't count toward stats
+      if (m.fantasy_points === null) return;
+
       const points = m.fantasy_points || 0;
       
       // Home/Away
@@ -89,24 +99,59 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
       color="yellow"
       className="h-full"
     >
-      <div className="space-y-1">
-        <StatRow 
-            label="Local vs Visitante" 
-            val1={splits.home} label1="Casa"
-            val2={splits.away} label2="Fuera"
-            icon={MapPin}
-            color="blue"
-        />
-        <StatRow 
-            label="Victoria vs Derrota" 
-            val1={splits.win} label1="Ganados"
-            val2={splits.loss} label2="Perdidos"
-            icon={Trophy}
-            color="amber"
-        />
-      </div>
-      <div className="mt-4 text-[10px] text-slate-500 text-center italic">
-          Promedio de puntos fantasy según el resultado del partido real
+      <div className="space-y-6 pt-2">
+        {/* Home vs Away */}
+        <div className="space-y-3">
+             <div className="flex items-center justify-between text-xs uppercase tracking-wider font-semibold text-slate-400">
+                <div className="flex items-center gap-2">
+                    <MapPin className="w-3 h-3 text-blue-400" /> Contexto
+                </div>
+                <span>Promedio Puntos</span>
+             </div>
+             
+             {/* Visual Bar */}
+             <div className="relative h-2 bg-slate-800 rounded-full overflow-hidden flex">
+                <div 
+                    className="bg-blue-500 h-full transition-all duration-500" 
+                    style={{ width: `${(parseFloat(splits.home) / (parseFloat(splits.home) + parseFloat(splits.away)) * 100) || 50}%` }} 
+                />
+                <div 
+                    className="bg-purple-500 h-full transition-all duration-500 flex-1" 
+                />
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/30 rounded-lg p-2 border border-slate-700/30">
+                    <div className="text-[10px] text-slate-500 uppercase mb-0.5">Casa (Local)</div>
+                    <div className="text-xl font-bold text-white">{splits.home}</div>
+                </div>
+                <div className="text-right bg-slate-800/30 rounded-lg p-2 border border-slate-700/30">
+                    <div className="text-[10px] text-slate-500 uppercase mb-0.5">Fuera (Visitante)</div>
+                    <div className="text-xl font-bold text-white">{splits.away}</div>
+                </div>
+             </div>
+        </div>
+
+        {/* Win vs Loss */}
+        <div className="space-y-3 pt-4 border-t border-slate-700/30">
+             <div className="flex items-center justify-between text-xs uppercase tracking-wider font-semibold text-slate-400">
+                <div className="flex items-center gap-2">
+                    <Trophy className="w-3 h-3 text-amber-400" /> Resultado
+                </div>
+                <span>Promedio Puntos</span>
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                 <div className="bg-emerald-900/10 rounded-lg p-2 border border-emerald-500/10">
+                    <div className="text-[10px] text-emerald-400 uppercase mb-0.5">En Victoria</div>
+                    <div className="text-xl font-bold text-emerald-100">{splits.win}</div>
+                </div>
+                <div className="text-right bg-rose-900/10 rounded-lg p-2 border border-rose-500/10">
+                    <div className="text-[10px] text-rose-400 uppercase mb-0.5">En Derrota</div>
+                    <div className="text-xl font-bold text-rose-100">{splits.loss}</div>
+                </div>
+             </div>
+        </div>
       </div>
     </PremiumCard>
   );

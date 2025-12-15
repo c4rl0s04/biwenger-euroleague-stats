@@ -57,7 +57,8 @@ export async function syncPlayers(db) {
       @id, @name, @team, @position, 
       @puntos, @partidos_jugados, 
       @played_home, @played_away, 
-      @points_home, @points_away, @points_last_season,
+      @points_home, @points_away, 
+      @points_last_season,
       @status, @price_increment, @price
     )
     ON CONFLICT(id) DO UPDATE SET 

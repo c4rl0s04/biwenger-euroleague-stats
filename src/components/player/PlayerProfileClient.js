@@ -83,7 +83,7 @@ export default function PlayerProfileClient({ player }) {
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
            <div className="lg:col-span-2">
                 <FadeIn delay={450} className="h-full">
-                    <PlayerPointsGraph matches={player.recentMatches} />
+                    <PlayerPointsGraph matches={player.recentMatches} playerTeam={player.team} />
                 </FadeIn>
            </div>
            <div className="lg:col-span-1">
@@ -105,7 +105,7 @@ export default function PlayerProfileClient({ player }) {
       {/* Row 5: Match History Table */}
       <div className="grid grid-cols-1">
             <FadeIn delay={500}>
-                 <PlayerHistoryCard recentMatches={player.recentMatches} />
+                 <PlayerHistoryCard recentMatches={player.recentMatches} playerTeam={player.team} />
             </FadeIn>
       </div>
 

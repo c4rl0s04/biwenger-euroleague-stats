@@ -13,9 +13,38 @@ import {
 } from 'recharts';
 import { useMemo } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
-import { TrendingUp } from 'lucide-react';
+import { House, Plane, TrendingUp } from 'lucide-react';
 
-export default function PlayerPointsGraph({ matches }) {
+// Custom Tooltip Component (defined outside to avoid re-creation)
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const d = payload[0].payload;
+    return (
+      <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl pointer-events-none"> {/* Added pointer-events-none to prevent flickering */}
+         <div className="text-slate-400 text-xs mb-1 font-medium">{d.fullRound}</div>
+         <div className="flex items-center gap-2 mb-2">
+            {d.isHome ? <House className="w-3 h-3 text-blue-400" /> : <Plane className="w-3 h-3 text-slate-400" />}
+            <span className="text-white text-sm font-semibold">{d.rival}</span>
+         </div>
+         <div className="text-rose-400 font-bold text-lg">
+            {d.isDNP ? (
+               <span className="text-slate-500">No Jugado</span> 
+            ) : (
+               <>
+                 {d.points} <span className="text-xs font-normal text-rose-400/70">pts</span>
+               </>
+            )}
+         </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+export default function PlayerPointsGraph({ matches, playerTeam }) {
+  // Helper to normalize team names for comparison (reused for consistency)
+  const normalize = (str) => str?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+
   // Process data for graph
   const data = useMemo(() => {
     if (!matches || matches.length === 0) return [];
@@ -23,18 +52,32 @@ export default function PlayerPointsGraph({ matches }) {
     // Create a copy and reverse to show chronological order (Round 1 -> Current)
     return [...matches]
       .reverse()
-      .map(match => ({
-        name: match.round_name.replace('Jornada ', 'J'),
-        points: match.fantasy_points,
-        avg: match.fantasy_points // Placeholder for potential moving average
-      }));
-  }, [matches]);
+      .map(match => {
+        // Determine Rival for Tooltip
+        const pTeamNorm = normalize(playerTeam);
+        const hTeamNorm = normalize(match.home_team);
+        const isHome = pTeamNorm && hTeamNorm && (pTeamNorm === hTeamNorm || pTeamNorm.includes(hTeamNorm) || hTeamNorm.includes(pTeamNorm));
+        
+        return {
+          name: match.round_name.replace('Jornada ', 'J'),
+          fullRound: match.round_name,
+          points: match.fantasy_points !== null ? match.fantasy_points : 0, // Zero height for DNP
+          isDNP: match.fantasy_points === null, // Flag for tooltip
+          rival: isHome ? match.away_team : match.home_team,
+          isHome: isHome,
+          avg: match.fantasy_points
+        };
+      });
+  }, [matches, playerTeam]);
 
-  // Calculate average for reference line
+
+
+  // Calculate average for reference line (excluding DNPs)
   const averagePoints = useMemo(() => {
-    if (data.length === 0) return 0;
-    const sum = data.reduce((acc, curr) => acc + curr.points, 0);
-    return sum / data.length;
+    const playedRounds = data.filter(d => !d.isDNP);
+    if (playedRounds.length === 0) return 0;
+    const sum = playedRounds.reduce((acc, curr) => acc + curr.points, 0);
+    return sum / playedRounds.length;
   }, [data]);
 
   // Calculate ticks strictly at multiples of 5
@@ -90,15 +133,7 @@ export default function PlayerPointsGraph({ matches }) {
             />
             <Tooltip 
               cursor={{ fill: '#334155', opacity: 0.4 }}
-              contentStyle={{ 
-                backgroundColor: '#1e293b', 
-                borderColor: '#475569', 
-                color: '#f8fafc',
-                borderRadius: '0.5rem',
-                fontSize: '12px'
-              }}
-              itemStyle={{ color: '#f43f5e' }}
-              labelStyle={{ color: '#94a3b8', marginBottom: '0.25rem' }}
+              content={<CustomTooltip />}
             />
             <ReferenceLine y={averagePoints} stroke="#94a3b8" strokeDasharray="3 3" opacity={0.5} label={{ value: 'Avg', position: 'insideRight', fill: '#94a3b8', fontSize: 10 }} />
             <Bar 

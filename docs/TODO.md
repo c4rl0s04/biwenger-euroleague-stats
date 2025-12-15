@@ -10,4 +10,29 @@
 - [ ] **UI Feature**: Visualize "Initial Squad Efficiency" (Actual vs Potential) using the logic stored in `src/lib/db/queries/analytics.js`.
 
 ## Backlog
+### Server-Side Dashboard Refactor (Performance & SEO)
+Convert the Client-Side Dashboard (API-based fetching) to a Server Component architecture to improve initial load time and SEO.
+
+- [ ] **1. Architecture Change: URL-Based User Selection**
+    - Replace `UserContext` (localStorage) with URL routing.
+    - Create dynamic route: `src/app/dashboard/user/[userId]/page.js`.
+    - Redirect `/dashboard` middleware to default user ID if cookies exist, else prompt selection.
+
+- [ ] **2. Parallel Data Fetching in Server Page**
+    - Move data fetching logic from individual Cards (`MySeasonCard`, etc.) to `page.js`.
+    - Execute parallel DB queries in `page.js` using `Promise.all()`:
+        ```javascript
+        const [userData, standings, market] = await Promise.all([
+             getUserStats(userId),
+             getStandings(),
+             getMarketActivity()
+        ]);
+        ```
+    - Remove `useEffect` and `fetch('/api/...')` from all dashboard cards.
+
+- [ ] **3. Component "Dumbing Down"**
+    - Refactor all Dashboard Cards to be "Pure UI Components".
+    - They should receive `data` via Props and handle only rendering/interactivity.
+    - Remove internal loading states (Server Page handles loading via `loading.js` Suspense).
+
 - [ ] Review implementation of other ideas in [IDEAS.md](./IDEAS.md)
