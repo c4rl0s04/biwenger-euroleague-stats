@@ -44,7 +44,7 @@ export default function MySeasonCard() {
     >
       {!loading && stats && (
         <>
-          <div className="grid grid-cols-2 gap-2.5 flex-1">
+          <div className="grid grid-cols-2 grid-rows-4 gap-2.5 flex-1 h-full">
             {/* Position */}
             <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30 hover:border-emerald-500/30 transition-all flex flex-col justify-center">
               <div className="text-slate-400 text-[10px] font-medium mb-1.5 uppercase tracking-wider">Posición Actual</div>

@@ -107,8 +107,8 @@ export default function PlayerPointsGraph({ matches, playerTeam }) {
       color="rose"
       className="lg:col-span-2 min-h-[350px]"
     >
-      <div className="h-[280px] w-full mt-2">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-[280px] w-full mt-2 min-w-0">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <BarChart
             data={data}
             margin={{ top: 10, right: 30, left: -10, bottom: 0 }}

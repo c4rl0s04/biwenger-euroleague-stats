@@ -58,7 +58,7 @@ export default function CaptainStatsCard() {
               <div className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Todos los Capitanes</div>
               <div className="text-slate-500 text-[9px]">Puntos sin duplicar (1x)</div>
             </div>
-            <div className="max-h-[180px] overflow-y-auto space-y-1.5 pr-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800/50">
+            <div className="space-y-1.5 pr-1">
               {stats.most_used?.map((captain, idx) => (
                 <div key={idx} className="flex items-center justify-between text-xs bg-slate-800/30 rounded-lg px-2.5 py-2 hover:bg-slate-800/50 transition-colors border border-slate-700/20">
                   <div className="flex items-center gap-2 min-w-0 flex-1">

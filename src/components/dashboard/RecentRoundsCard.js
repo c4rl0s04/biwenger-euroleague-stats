@@ -35,7 +35,7 @@ export default function RecentRoundsCard() {
       loading={loading}
     >
       {!loading && rounds && (
-        <div className="space-y-1 flex-1">
+        <div className="space-y-1 flex-1 flex flex-col justify-between h-full">
           {rounds.map((round, idx) => {
             const isRecent = idx < 3;
             return (
