@@ -33,7 +33,7 @@ export default function PlayerBioCard({ player, className = '' }) {
                  <div className="text-blue-400 mb-1">
                     <Ruler className="w-5 h-5" />
                 </div>
-                <div className="text-xl font-bold text-white">{player.height ? player.height : '-'}</div>
+                <div className="text-xl font-bold text-white">{player.height ? (player.height / 100).toFixed(2).replace('.', ',') : '-'}</div>
                 <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Metros</div>
             </div>
 

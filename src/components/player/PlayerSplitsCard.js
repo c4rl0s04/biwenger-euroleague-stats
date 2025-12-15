@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
-import { Split, MapPin, Trophy, XCircle } from 'lucide-react';
+import { Split, MapPin, Trophy, XCircle, Home, Plane } from 'lucide-react';
 
 export default function PlayerSplitsCard({ matches, playerTeam }) {
   const splits = useMemo(() => {
@@ -104,9 +104,11 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
         <div className="space-y-3">
              <div className="flex items-center justify-between text-xs uppercase tracking-wider font-semibold text-slate-400">
                 <div className="flex items-center gap-2">
-                    <MapPin className="w-3 h-3 text-blue-400" /> Contexto
+                    <Home className="w-3 h-3 text-blue-400" /> Local
                 </div>
-                <span>Promedio Puntos</span>
+                <div className="flex items-center gap-2">
+                    Visitante <Plane className="w-3 h-3 text-purple-400" />
+                </div>
              </div>
              
              {/* Visual Bar */}
@@ -121,13 +123,13 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
              </div>
 
              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-800/30 rounded-lg p-2 border border-slate-700/30">
-                    <div className="text-[10px] text-slate-500 uppercase mb-0.5">Casa (Local)</div>
-                    <div className="text-xl font-bold text-white">{splits.home}</div>
+                <div className="bg-blue-500/10 rounded-lg p-2 border border-blue-500/10 transition-colors hover:bg-blue-500/20">
+                    <div className="text-[10px] text-blue-400 uppercase mb-0.5">Casa (Local)</div>
+                    <div className="text-xl font-bold text-blue-100">{splits.home}</div>
                 </div>
-                <div className="text-right bg-slate-800/30 rounded-lg p-2 border border-slate-700/30">
-                    <div className="text-[10px] text-slate-500 uppercase mb-0.5">Fuera (Visitante)</div>
-                    <div className="text-xl font-bold text-white">{splits.away}</div>
+                <div className="text-right bg-purple-500/10 rounded-lg p-2 border border-purple-500/10 transition-colors hover:bg-purple-500/20">
+                    <div className="text-[10px] text-purple-400 uppercase mb-0.5">Fuera (Visitante)</div>
+                    <div className="text-xl font-bold text-purple-100">{splits.away}</div>
                 </div>
              </div>
         </div>
@@ -136,17 +138,30 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
         <div className="space-y-3 pt-4 border-t border-slate-700/30">
              <div className="flex items-center justify-between text-xs uppercase tracking-wider font-semibold text-slate-400">
                 <div className="flex items-center gap-2">
-                    <Trophy className="w-3 h-3 text-amber-400" /> Resultado
+                    <Trophy className="w-3 h-3 text-emerald-400" /> Victoria
                 </div>
-                <span>Promedio Puntos</span>
+                <div className="flex items-center gap-2">
+                    Derrota <XCircle className="w-3 h-3 text-rose-400" />
+                </div>
+             </div>
+
+             {/* Visual Bar */}
+             <div className="relative h-2 bg-slate-800 rounded-full overflow-hidden flex">
+                <div 
+                    className="bg-emerald-500 h-full transition-all duration-500" 
+                    style={{ width: `${(parseFloat(splits.win) / (parseFloat(splits.win) + parseFloat(splits.loss)) * 100) || 50}%` }} 
+                />
+                <div 
+                    className="bg-rose-500 h-full transition-all duration-500 flex-1" 
+                />
              </div>
 
              <div className="grid grid-cols-2 gap-4">
-                 <div className="bg-emerald-900/10 rounded-lg p-2 border border-emerald-500/10">
+                 <div className="bg-emerald-900/10 rounded-lg p-2 border border-emerald-500/10 transition-colors hover:bg-emerald-900/20">
                     <div className="text-[10px] text-emerald-400 uppercase mb-0.5">En Victoria</div>
                     <div className="text-xl font-bold text-emerald-100">{splits.win}</div>
                 </div>
-                <div className="text-right bg-rose-900/10 rounded-lg p-2 border border-rose-500/10">
+                <div className="text-right bg-rose-900/10 rounded-lg p-2 border border-rose-500/10 transition-colors hover:bg-rose-900/20">
                     <div className="text-[10px] text-rose-400 uppercase mb-0.5">En Derrota</div>
                     <div className="text-xl font-bold text-rose-100">{splits.loss}</div>
                 </div>

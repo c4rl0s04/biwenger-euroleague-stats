@@ -87,28 +87,31 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
                                 </div>
 
                                 {/* Flow Visualization */}
-                                <div className="flex items-center justify-between bg-slate-900/30 rounded-lg p-2 border border-slate-800/50">
+                                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 bg-slate-900/30 rounded-lg p-2 border border-slate-800/50">
                                     {/* FROM */}
-                                    <div className="flex items-center gap-2 max-w-[40%]">
+                                    <div className="flex items-center gap-2 overflow-hidden justify-start">
                                         {t.from_img ? (
-                                            <img src={t.from_img} alt={t.from_name} className="w-6 h-6 rounded-full border border-slate-700 object-cover" />
+                                            <img src={t.from_img} alt={t.from_name} className="w-6 h-6 rounded-full border border-slate-700 object-cover shrink-0" />
                                         ) : (
-                                            <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-slate-400 border border-slate-600">
+                                            <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-slate-400 border border-slate-600 shrink-0">
                                                 {t.from_name.charAt(0)}
                                             </div>
                                         )}
                                         <div className="text-xs text-slate-300 truncate font-medium">{t.from_name}</div>
                                     </div>
 
-                                    <ArrowRight className="w-3 h-3 text-slate-600 shrink-0" />
+                                    {/* The Arrow itself, inherently centered by grid column 2 */}
+                                    <div className="flex justify-center text-white">
+                                        <ArrowRight className="w-4 h-4" />
+                                    </div>
 
                                     {/* TO */}
-                                    <div className="flex items-center gap-2 max-w-[40%] justify-end">
-                                        <div className="text-xs text-slate-300 truncate font-medium">{t.to_name}</div>
+                                    <div className="flex items-center gap-2 overflow-hidden justify-end">
+                                        <div className="text-xs text-slate-300 truncate font-medium text-right">{t.to_name}</div>
                                         {t.to_img ? (
-                                            <img src={t.to_img} alt={t.to_name} className="w-6 h-6 rounded-full border border-slate-700 object-cover" />
+                                            <img src={t.to_img} alt={t.to_name} className="w-6 h-6 rounded-full border border-slate-700 object-cover shrink-0" />
                                         ) : (
-                                            <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-slate-400 border border-slate-600">
+                                            <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-slate-400 border border-slate-600 shrink-0">
                                                 {t.to_name.charAt(0)}
                                             </div>
                                         )}
