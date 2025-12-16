@@ -9,11 +9,16 @@ import {
   Tooltip, 
   ResponsiveContainer,
   ReferenceLine,
-  LabelList
+  LabelList,
+  Cell
 } from 'recharts';
 import { useMemo } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { House, Plane, TrendingUp } from 'lucide-react';
+
+// Colors for home and away matches
+const HOME_COLOR = '#3b82f6'; // blue-500
+const AWAY_COLOR = '#a855f7'; // purple-500
 
 // Custom Tooltip Component (defined outside to avoid re-creation)
 const CustomTooltip = ({ active, payload, label }) => {
@@ -23,15 +28,18 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl pointer-events-none"> {/* Added pointer-events-none to prevent flickering */}
          <div className="text-slate-400 text-xs mb-1 font-medium">{d.fullRound}</div>
          <div className="flex items-center gap-2 mb-2">
-            {d.isHome ? <House className="w-3 h-3 text-blue-400" /> : <Plane className="w-3 h-3 text-slate-400" />}
+            {d.isHome ? <House className="w-3 h-3 text-blue-400" /> : <Plane className="w-3 h-3 text-purple-400" />}
             <span className="text-white text-sm font-semibold">{d.rival}</span>
+            <span className={`text-xs px-1.5 py-0.5 rounded ${d.isHome ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+              {d.isHome ? 'Casa' : 'Fuera'}
+            </span>
          </div>
-         <div className="text-rose-400 font-bold text-lg">
+         <div className={`font-bold text-lg ${d.isHome ? 'text-blue-400' : 'text-purple-400'}`}>
             {d.isDNP ? (
                <span className="text-slate-500">No Jugado</span> 
             ) : (
                <>
-                 {d.points} <span className="text-xs font-normal text-rose-400/70">pts</span>
+                 {d.points} <span className="text-xs font-normal opacity-70">pts</span>
                </>
             )}
          </div>
@@ -138,22 +146,42 @@ export default function PlayerPointsGraph({ matches, playerTeam }) {
             <ReferenceLine y={averagePoints} stroke="#94a3b8" strokeDasharray="3 3" opacity={0.5} label={{ value: 'Avg', position: 'insideRight', fill: '#94a3b8', fontSize: 10 }} />
             <Bar 
               dataKey="points" 
-              fill="#f43f5e" 
               radius={[4, 4, 0, 0]}
               animationDuration={1500}
             >
-              <LabelList dataKey="points" position="top" fill="#f43f5e" fontSize={10} fontWeight="bold" />
+              {data.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.isHome ? HOME_COLOR : AWAY_COLOR} 
+                />
+              ))}
+              <LabelList 
+                dataKey="points" 
+                position="top" 
+                fontSize={10} 
+                fontWeight="bold"
+                formatter={(value, entry) => value}
+                fill="#94a3b8"
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
+      {/* Legend */}
       <div className="flex justify-between items-center px-4 mt-2">
-         <div className="text-xs text-slate-500">
-            Jornada {data[0]?.name} - {data[data.length - 1]?.name}
-         </div>
-         <div className="text-xs text-rose-400 font-medium">
-             Media: {averagePoints.toFixed(1)} pts
-         </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: HOME_COLOR }} />
+            <span className="text-xs text-slate-400">Casa</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: AWAY_COLOR }} />
+            <span className="text-xs text-slate-400">Fuera</span>
+          </div>
+        </div>
+        <div className="text-xs text-slate-400 font-medium">
+            Media: {averagePoints.toFixed(1)} pts
+        </div>
       </div>
     </PremiumCard>
   );

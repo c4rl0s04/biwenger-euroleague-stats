@@ -9,6 +9,7 @@ import { syncSquads } from './sync-squads.js';
 import { syncBoard } from './sync-board.js';
 import { syncMatches } from './sync-matches.js';
 import { syncLineups } from './sync-lineups.js';
+import { cleanupDuplicateRounds } from './cleanup-rounds.js';
 import { ensureSchema } from '../db/schema.js';
 import { CONFIG } from '../config.js';
 
@@ -30,6 +31,9 @@ async function syncData() {
   try {
     // 0. Ensure Schema (Create tables if not exist)
     ensureSchema(db);
+    
+    // 0.5 Cleanup any duplicate rounds from previous syncs
+    cleanupDuplicateRounds(db);
 
     // 1. Sync Players (Required for Foreign Keys)
     // Returns competition data which contains rounds list and teams
@@ -66,11 +70,17 @@ async function syncData() {
     } else {
         console.log(`Found ${rounds.length} rounds in competition data.`);
         
-        // 0. Build Lookup Map for Canonical Rounds (e.g. "Jornada 14")
+        // 0. Build Lookup Map for Canonical Rounds
+        // Maps base round name (without "(aplazada)") to the first/lowest round ID
         const roundNameMap = {};
         for (const r of rounds) {
-            if (!r.name.includes('(aplazada)')) {
-                roundNameMap[r.name] = r.id;
+            const baseName = r.name.includes('(aplazada)') 
+              ? r.name.replace(' (aplazada)', '').trim()
+              : r.name;
+            
+            // Store the lowest ID for each base name (canonical)
+            if (!roundNameMap[baseName] || r.id < roundNameMap[baseName]) {
+                roundNameMap[baseName] = r.id;
             }
         }
 
@@ -84,22 +94,24 @@ async function syncData() {
 
              if (roundName === 'GLOBAL') continue;
 
-             // Dynamic Round Mapping (Merge postponed rounds into original)
-             if (roundName.includes('(aplazada)')) {
-                const canonicalName = roundName.replace(' (aplazada)', '');
-                const originalId = roundNameMap[canonicalName];
-                
-                if (originalId) {
-                    console.log(`   -> 🔀 Merging round ${round.id} into ${originalId} (${canonicalName})`);
-                    round.dbId = originalId;
-                    round.name = canonicalName; // Clean name for display/db
-                    roundName = canonicalName;  // Update local var for logging
-                } else {
-                    console.warn(`   ⚠️ Found postponed round "${roundName}" but could not find original "${canonicalName}"`);
-                    // Fallback: just clean the name but keep ID? Or keep as is?
-                    // Let's clean the name at least so it looks nice in UI
-                    round.name = canonicalName;
-                }
+             // Extract base name (strip "(aplazada)" if present)
+             const baseName = roundName.includes('(aplazada)') 
+               ? roundName.replace(' (aplazada)', '').trim()
+               : roundName;
+             
+             // Get canonical ID for this round name
+             const canonicalId = roundNameMap[baseName];
+             
+             // If this round's ID doesn't match the canonical ID, merge it
+             if (canonicalId && round.id !== canonicalId) {
+                 console.log(`   -> 🔀 Merging round ${round.id} into ${canonicalId} (${baseName})`);
+                 round.dbId = canonicalId;
+                 round.name = baseName; // Clean name for display/db
+                 roundName = baseName;  // Update local var for logging
+             } else if (roundName.includes('(aplazada)')) {
+                 // Clean the name even if we couldn't find canonical
+                 console.warn(`   ⚠️ Found postponed round "${roundName}" but could not find original "${baseName}"`);
+                 round.name = baseName;
              }
 
              // Sync Matches (and Player Stats) for ALL rounds
