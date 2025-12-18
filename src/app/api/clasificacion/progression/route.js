@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const progression = getPointsProgression(10);
+    const progression = getPointsProgression(38); // Fetch all potential rounds (or large enough number)
     const valueRanking = getValueRanking();
     
     return NextResponse.json({ 

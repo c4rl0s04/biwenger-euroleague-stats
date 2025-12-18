@@ -4,22 +4,7 @@ import { Trophy } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
 
-// Color palette for different users
-const USER_COLORS = [
-  { bg: 'from-blue-500/20 to-blue-600/10', border: 'border-blue-500/30', text: 'text-blue-400' },
-  { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-purple-500/30', text: 'text-purple-400' },
-  { bg: 'from-emerald-500/20 to-emerald-600/10', border: 'border-emerald-500/30', text: 'text-emerald-400' },
-  { bg: 'from-pink-500/20 to-pink-600/10', border: 'border-pink-500/30', text: 'text-pink-400' },
-  { bg: 'from-cyan-500/20 to-cyan-600/10', border: 'border-cyan-500/30', text: 'text-cyan-400' },
-  { bg: 'from-orange-500/20 to-orange-600/10', border: 'border-orange-500/30', text: 'text-orange-400' },
-  { bg: 'from-yellow-500/20 to-yellow-600/10', border: 'border-yellow-500/30', text: 'text-yellow-400' },
-  { bg: 'from-red-500/20 to-red-600/10', border: 'border-red-500/30', text: 'text-red-400' },
-];
-
-// Special colors for specific users
-const SPECIAL_USER_COLORS = {
-  'All Stars': { bg: 'from-amber-700/30 to-amber-900/20', border: 'border-amber-600/40', text: 'text-amber-500' },
-};
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function RoundWinnersCard() {
   const [winners, setWinners] = useState([]);
@@ -40,23 +25,6 @@ export default function RoundWinnersCard() {
       });
   }, []);
 
-  // Create a stable color mapping for each unique user
-  const userColorMap = useMemo(() => {
-    const uniqueUsers = [...new Set(winners.map(w => w.user_id))];
-    const map = {};
-    let colorIndex = 0;
-    uniqueUsers.forEach((userId) => {
-      const userName = winners.find(w => w.user_id === userId)?.name;
-      if (SPECIAL_USER_COLORS[userName]) {
-        map[userId] = SPECIAL_USER_COLORS[userName];
-      } else {
-        map[userId] = USER_COLORS[colorIndex % USER_COLORS.length];
-        colorIndex++;
-      }
-    });
-    return map;
-  }, [winners]);
-
   return (
     <PremiumCard
       title="Ganadores de Jornada"
@@ -68,7 +36,7 @@ export default function RoundWinnersCard() {
         <div className="flex flex-wrap justify-center gap-3">
           {winners.length > 0 ? (
             winners.map((winner) => {
-              const colors = userColorMap[winner.user_id];
+              const colors = getColorForUser(winner.user_id, winner.name);
               return (
                 <div 
                   key={winner.round_id}

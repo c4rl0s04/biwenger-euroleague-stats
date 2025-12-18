@@ -1,8 +1,19 @@
 'use client';
 
-import { TrendingUp, Activity } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Activity } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from 'recharts';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function PointsProgressionCard() {
   const [progression, setProgression] = useState([]);
@@ -23,19 +34,64 @@ export default function PointsProgressionCard() {
       });
   }, []);
 
-  // Group by round for display
-  const rounds = [...new Set(progression.map(p => p.round_name))].slice(-5);
-  const users = [...new Set(progression.map(p => p.name))];
-  
-  // Get cumulative points per user for the last round
-  const lastRound = rounds[rounds.length - 1];
-  const userTotals = users.map(name => {
-    const lastEntry = progression.find(p => p.name === name && p.round_name === lastRound);
-    return { name, cumulative: lastEntry?.cumulative_points || 0 };
-  }).sort((a, b) => b.cumulative - a.cumulative);
+  // Process data for the chart
+  const { chartData, users } = useMemo(() => {
+    if (!progression.length) return { chartData: [], users: [] };
 
-  // Calculate max for bar width
-  const maxPoints = Math.max(...userTotals.map(u => u.cumulative), 1);
+    // Get unique rounds and users
+    const roundNames = [...new Set(progression.map(p => p.round_name))];
+    
+    // Map of userId -> userName for legend and lines
+    const userMap = new Map();
+    progression.forEach(p => {
+      if (!userMap.has(p.user_id)) {
+        userMap.set(p.user_id, p.name);
+      }
+    });
+
+    // Pivot data: [{ name: 'J1', [userId1]: score, [userId2]: score }, ...]
+    const data = roundNames.map(round => {
+      const entry = { name: round.replace('Jornada ', 'J') };
+      userMap.forEach((name, id) => {
+        const stats = progression.find(p => p.round_name === round && p.user_id === id);
+        if (stats) {
+          entry[id] = stats.cumulative_points;
+        }
+      });
+      return entry;
+    });
+
+    return { 
+      chartData: data, 
+      users: Array.from(userMap.entries()).map(([id, name]) => ({ id, name })) 
+    };
+  }, [progression]);
+
+  // Custom tooltup
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl">
+          <p className="text-slate-400 text-xs mb-2 font-medium">{label}</p>
+          <div className="space-y-1">
+            {payload
+              .sort((a, b) => b.value - a.value)
+              .map((entry, index) => (
+                <div key={index} className="flex items-center gap-2 text-xs">
+                  <div 
+                    className="w-2 h-2 rounded-full" 
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="text-slate-300 w-20 truncate">{entry.name}</span>
+                  <span className="text-white font-bold ml-auto">{entry.value}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <PremiumCard
@@ -45,48 +101,51 @@ export default function PointsProgressionCard() {
       loading={loading}
     >
       {!loading && (
-        <div className="space-y-3">
-          {userTotals.slice(0, 6).map((user, index) => {
-            const percentage = (user.cumulative / maxPoints) * 100;
-            const isTop3 = index < 3;
-            
-            return (
-              <div key={user.name} className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-medium ${isTop3 ? 'text-white' : 'text-slate-400'}`}>
-                    {user.name}
-                  </span>
-                  <span className={`text-xs font-bold ${
-                    index === 0 ? 'text-yellow-400' :
-                    index === 1 ? 'text-slate-300' :
-                    index === 2 ? 'text-orange-400' :
-                    'text-slate-500'
-                  }`}>
-                    {user.cumulative}
-                  </span>
-                </div>
-                <div className="h-2 bg-slate-800/60 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      index === 0 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' :
-                      index === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-300' :
-                      index === 2 ? 'bg-gradient-to-r from-orange-600 to-orange-400' :
-                      'bg-gradient-to-r from-purple-600 to-purple-400'
-                    }`}
-                    style={{ width: `${percentage}%` }}
+        <div className="h-[300px] w-full mt-2 -ml-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
+              <XAxis 
+                dataKey="name" 
+                stroke="#94a3b8" 
+                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                tickLine={false}
+                axisLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                stroke="#94a3b8" 
+                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                tickLine={false}
+                axisLine={false}
+                width={35}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                wrapperStyle={{ paddingTop: '10px', fontSize: '10px' }} 
+                formatter={(value) => <span className="text-slate-400 hover:text-white transition-colors ml-1">{value}</span>}
+              />
+              {users.map(user => {
+                const colors = getColorForUser(user.id, user.name);
+                return (
+                  <Line
+                    key={user.id}
+                    type="monotone"
+                    dataKey={user.id}
+                    name={user.name}
+                    stroke={colors.stroke}
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4, strokeWidth: 0 }}
+                    connectNulls
                   />
-                </div>
-              </div>
-            );
-          })}
-          
-          {rounds.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-slate-800/50">
-              <div className="text-xs text-slate-500 text-center">
-                Basado en las últimas {rounds.length} jornadas
-              </div>
-            </div>
-          )}
+                );
+              })}
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       )}
     </PremiumCard>

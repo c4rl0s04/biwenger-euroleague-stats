@@ -31,12 +31,14 @@ export default function ClasificacionPage() {
         <RoundWinnersCard />
       </FadeIn>
 
-      {/* Points Progression + Value Ranking */}
+      {/* Points Progression - Full Width Row */}
       <FadeIn delay={300}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <PointsProgressionCard />
-          <TeamValueRankingCard />
-        </div>
+        <PointsProgressionCard />
+      </FadeIn>
+
+      {/* Team Value Ranking */}
+      <FadeIn delay={400}>
+        <TeamValueRankingCard />
       </FadeIn>
     </div>
   );
