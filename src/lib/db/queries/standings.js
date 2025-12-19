@@ -246,12 +246,11 @@ export function getPointsProgression(limit = 10) {
       u.name,
       ur.round_id,
       ur.round_name,
-      ur.points,
-      SUM(ur.points) OVER (PARTITION BY ur.user_id ORDER BY ur.round_id) as cumulative_points
+      CASE WHEN ur.participated = 1 THEN ur.points ELSE 0 END as points,
+      SUM(CASE WHEN ur.participated = 1 THEN ur.points ELSE 0 END) OVER (PARTITION BY ur.user_id ORDER BY ur.round_id) as cumulative_points
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
     WHERE ur.round_id IN (SELECT round_id FROM RecentRounds)
-      AND ur.participated = 1
     ORDER BY ur.round_id ASC, ur.points DESC
   `;
   return db.prepare(query).all(limit);

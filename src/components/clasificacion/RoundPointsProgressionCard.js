@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity } from 'lucide-react';
+import { BarChart2 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import {
   LineChart,
@@ -15,7 +15,7 @@ import {
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 
-export default function PointsProgressionCard() {
+export default function RoundPointsProgressionCard() {
   const [progression, setProgression] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState(new Set());
@@ -56,13 +56,13 @@ export default function PointsProgressionCard() {
       userMap.forEach((name, id) => {
         const stats = progression.find(p => p.round_name === round && p.user_id === id);
         if (stats) {
-          entry[String(id)] = stats.cumulative_points; // Ensure key is string
+          entry[String(id)] = stats.points; // Using raw points instead of cumulative_points
         }
       });
       return entry;
     });
 
-    // Sort users by their final round points for consistent legend ordering
+    // Sort users by their latest round points for somewhat consistent legend ordering
     const lastRoundData = data[data.length - 1] || {};
     const sortedUsers = Array.from(userMap.entries())
       .map(([id, name]) => ({ id: String(id), name, finalPoints: lastRoundData[String(id)] || 0 }))
@@ -127,9 +127,9 @@ export default function PointsProgressionCard() {
 
   return (
     <PremiumCard
-      title="Evolución de Puntos"
-      icon={Activity}
-      color="purple"
+      title="Puntos por Jornada"
+      icon={BarChart2}
+      color="blue"
       loading={loading}
     >
       {!loading && (

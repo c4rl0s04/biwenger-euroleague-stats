@@ -11,3 +11,4 @@ export * from './queries/rounds.js';
 export * from './queries/users.js';
 export * from './queries/players.js';
 export * from './queries/standings.js';
+export * from './queries/performance.js';
