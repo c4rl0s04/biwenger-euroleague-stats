@@ -129,8 +129,8 @@ export function getEfficiencyStats() {
 }
 
 /**
- * Get streak stats (Consecutive rounds with 50+ points)
- * @returns {Array} Users with their longest 50+ point streak
+ * Get streak stats (Consecutive rounds with 175+ points)
+ * @returns {Array} Users with their longest 175+ point streak
  */
 export function getStreakStats() {
   const query = `
@@ -138,7 +138,7 @@ export function getStreakStats() {
       SELECT 
         user_id, 
         round_id, 
-        CASE WHEN points >= 50 THEN 1 ELSE 0 END as is_high_score
+        CASE WHEN points >= 175 THEN 1 ELSE 0 END as is_high_score
       FROM user_rounds
       WHERE participated = 1
     ),
@@ -203,6 +203,142 @@ export function getBottlerStats() {
     GROUP BY u.id
     HAVING (seconds > 0 OR thirds > 0)
     ORDER BY bottler_score DESC
+  `;
+  return db.prepare(query).all();
+}
+
+/**
+ * Get Heartbreaker stats (Total margin of defeat in 2nd place finishes)
+ * @returns {Array} Users sorted by total points missed by
+ */
+export function getHeartbreakerStats() {
+  const query = `
+    WITH RoundScores AS (
+      SELECT round_id, MAX(points) as winning_points
+      FROM user_rounds
+      WHERE participated = 1
+      GROUP BY round_id
+    ),
+    UserDiffs AS (
+      SELECT 
+        ur.user_id,
+        ur.round_id,
+        ur.points,
+        rs.winning_points,
+        (rs.winning_points - ur.points) as diff
+      FROM user_rounds ur
+      JOIN RoundScores rs ON ur.round_id = rs.round_id
+      WHERE ur.participated = 1
+    )
+    SELECT 
+      u.id as user_id,
+      u.name,
+      u.icon,
+      COUNT(ud.round_id) as heartbreaking_losses,
+      SUM(ud.diff) as total_margin
+    FROM users u
+    JOIN UserDiffs ud ON u.id = ud.user_id
+    WHERE ud.diff > 0 AND ud.diff < 10 -- Only count "close" losses (e.g. less than 10 pts)
+    -- Actually, user asked for "Sum of points you missed winning by". 
+    -- Let's stick to the user's logic: "if winner has 100 and you have 98, that's +2 bad luck".
+    -- I will filter for 2nd place explicitly to be more precise about "almost winning".
+    GROUP BY u.id
+    ORDER BY total_margin ASC -- Maybe DESC? "Bad Luck score" = total missed. So HIGH is bad luck.
+  `;
+  
+  // Revised query to be stricter: You must be 2nd place.
+  const refinedQuery = `
+    WITH RoundRanks AS (
+      SELECT 
+        user_id,
+        round_id,
+        points,
+        RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position,
+        MAX(points) OVER (PARTITION BY round_id) as winner_points
+      FROM user_rounds
+      WHERE participated = 1
+    )
+    SELECT 
+      u.id as user_id,
+      u.name,
+      u.icon,
+      COUNT(r.round_id) as count,
+      SUM(r.winner_points - r.points) as total_diff
+    FROM users u
+    JOIN RoundRanks r ON u.id = r.user_id
+    WHERE r.position = 2
+    GROUP BY u.id
+    ORDER BY total_diff ASC
+  `;
+  return db.prepare(refinedQuery).all();
+}
+
+/**
+ * Get "No Glory" stats (Total points in non-winning rounds)
+ * @returns {Array} Users sorted by points scored without winning
+ */
+export function getNoGloryStats() {
+  const query = `
+    WITH RoundRanks AS (
+      SELECT 
+        user_id,
+        round_id,
+        points,
+        RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
+      FROM user_rounds
+      WHERE participated = 1
+    )
+    SELECT 
+      u.id as user_id,
+      u.name,
+      u.icon,
+      SUM(r.points) as total_points_no_glory,
+      COUNT(r.round_id) as rounds_count
+    FROM users u
+    JOIN RoundRanks r ON u.id = r.user_id
+    WHERE r.position > 1 -- Did not win
+    GROUP BY u.id
+    ORDER BY total_points_no_glory DESC
+  `;
+  return db.prepare(query).all();
+}
+
+/**
+ * Get "Jinx" stats (Above avg score but bottom half rank)
+ * @returns {Array} Users sorted by count of "jinxed" rounds
+ */
+export function getJinxStats() {
+  const query = `
+    WITH RoundStats AS (
+      SELECT 
+        round_id,
+        AVG(points) as league_avg,
+        COUNT(user_id) as participant_count
+      FROM user_rounds
+      WHERE participated = 1
+      GROUP BY round_id
+    ),
+    UserRoundsWithRank AS (
+      SELECT 
+        ur.user_id,
+        ur.round_id,
+        ur.points,
+        RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
+      FROM user_rounds ur
+      WHERE participated = 1
+    )
+    SELECT 
+      u.id as user_id,
+      u.name,
+      u.icon,
+      COUNT(urr.round_id) as jinxed_count
+    FROM users u
+    JOIN UserRoundsWithRank urr ON u.id = urr.user_id
+    JOIN RoundStats rs ON urr.round_id = rs.round_id
+    WHERE urr.points > rs.league_avg -- Good score
+      AND urr.position > (rs.participant_count / 2) -- Bad rank (bottom half)
+    GROUP BY u.id
+    ORDER BY jinxed_count DESC
   `;
   return db.prepare(query).all();
 }

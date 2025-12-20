@@ -32,14 +32,10 @@ export default function EfficiencyCard() {
       loading={loading}
     >
       {!loading && (
-        <div className="space-y-4 pr-2">
-          <div className="flex justify-between text-xs text-slate-400 px-2 mb-2">
-            <span>Usuario</span>
-            <div className="flex gap-4">
-              <span className="w-20 text-right">Valor</span>
-              <span className="w-16 text-right">Pts/M</span>
-            </div>
-          </div>
+        <div className="space-y-4 pr-2 mt-2">
+            <p className="text-xs text-slate-400 italic px-2">
+              Relación entre puntos totales y valor de mercado. Indica el retorno de inversión (ROI).
+            </p>
           {data.map((user, index) => {
              const colors = getColorForUser(user.user_id, user.name);
              const maxValue = Math.max(...data.map(d => d.points_per_million));
@@ -47,14 +43,14 @@ export default function EfficiencyCard() {
 
              return (
               <div key={user.user_id} className="relative group">
-                <div className="absolute inset-0 bg-slate-800/50 rounded-lg -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="flex items-center justify-between p-2 rounded-lg">
+                <div className="absolute inset-0 bg-slate-800/30 rounded-lg -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex items-center justify-between p-3 rounded-lg border border-slate-800">
                   <div className="flex items-center gap-3">
                     <span className={`text-sm font-bold w-4 text-slate-500`}>
                       {index + 1}
                     </span>
                     <div 
-                      className="w-1 h-8 rounded-full" 
+                      className="w-1 h-10 rounded-full" 
                       style={{ backgroundColor: colors.stroke }}
                     />
                     <div>
@@ -71,13 +67,13 @@ export default function EfficiencyCard() {
                     </div>
                   </div>
                   
-                  <div className="flex gap-4 text-sm items-center">
-                    <span className="w-20 text-right text-slate-400 font-mono text-xs">
-                       {(user.team_value / 1000000).toFixed(1)}M
-                    </span>
-                    <span className="w-16 text-right font-bold text-yellow-400 font-mono flex items-center justify-end gap-1">
-                      <CircleDollarSign size={10} />
+                  <div className="flex flex-col items-end">
+                    <span className="font-black text-2xl text-yellow-400 flex items-center gap-1">
+                      <CircleDollarSign size={16} />
                       {user.points_per_million}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                      {(user.team_value / 1000000).toFixed(1)}M Valor
                     </span>
                   </div>
                 </div>

@@ -12,6 +12,9 @@ import LeaguePerformanceCard from '@/components/clasificacion/LeaguePerformanceC
 import EfficiencyCard from '@/components/clasificacion/EfficiencyCard';
 import StreaksCard from '@/components/clasificacion/StreaksCard';
 import BottlerCard from '@/components/clasificacion/BottlerCard';
+import HeartbreakersCard from '@/components/clasificacion/HeartbreakersCard';
+import NoGloryCard from '@/components/clasificacion/NoGloryCard';
+import JinxCard from '@/components/clasificacion/JinxCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,8 +80,27 @@ export default function ClasificacionPage() {
         </div>
       </div>
 
+      {/* Bad Luck Section */}
+      <div className="pt-8">
+        <FadeIn delay={750}>
+          <h2 className="text-2xl font-bold text-white mb-6">Mala Suerte</h2>
+        </FadeIn>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <FadeIn delay={800}>
+             <HeartbreakersCard />
+          </FadeIn>
+          <FadeIn delay={850}>
+             <NoGloryCard />
+          </FadeIn>
+          <FadeIn delay={900}>
+             <JinxCard />
+          </FadeIn>
+        </div>
+      </div>
+
       {/* Team Value Ranking */}
-      <FadeIn delay={750}>
+      <FadeIn delay={950}>
         <div className="pt-4">
            <TeamValueRankingCard />
         </div>

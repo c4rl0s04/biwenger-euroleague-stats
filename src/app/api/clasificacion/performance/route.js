@@ -5,7 +5,10 @@ import {
   getLeagueComparisonStats,
   getEfficiencyStats,
   getStreakStats,
-  getBottlerStats
+  getBottlerStats,
+  getHeartbreakerStats,
+  getNoGloryStats,
+  getJinxStats
 } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +21,9 @@ export async function GET() {
     const efficiency = getEfficiencyStats();
     const streaks = getStreakStats();
     const bottlers = getBottlerStats();
+    const heartbreakers = getHeartbreakerStats();
+    const noGlory = getNoGloryStats();
+    const jinx = getJinxStats();
     
     return NextResponse.json({ 
       success: true, 
@@ -27,7 +33,10 @@ export async function GET() {
         leagueComparison,
         efficiency,
         streaks,
-        bottlers
+        bottlers,
+        heartbreakers,
+        noGlory,
+        jinx
       } 
     });
   } catch (error) {

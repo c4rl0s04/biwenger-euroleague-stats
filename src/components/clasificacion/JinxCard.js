@@ -1,11 +1,11 @@
 'use client';
 
-import { Flame } from 'lucide-react';
+import { Skull } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 
-export default function StreaksCard() {
+export default function JinxCard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,31 +13,31 @@ export default function StreaksCard() {
     fetch('/api/clasificacion/performance')
       .then(res => res.json())
       .then(result => {
-        if (result.success && result.data.streaks) {
-          setData(result.data.streaks);
+        if (result.success && result.data.jinx) {
+          setData(result.data.jinx);
         }
         setLoading(false);
       })
       .catch(err => {
-        console.error('Error fetching streak stats:', err);
+        console.error('Error fetching jinx stats:', err);
         setLoading(false);
       });
   }, []);
 
   return (
     <PremiumCard
-      title="Rachas > 175 Pts"
-      icon={Flame}
-      color="orange"
+      title="El Pupas (Rondas Malditas)"
+      icon={Skull}
+      color="purple"
       loading={loading}
     >
       {!loading && (
         <div className="space-y-4 pr-2 mt-2">
             <p className="text-xs text-slate-400 italic px-2">
-              Número de jornadas consecutivas en las que el usuario ha superado los 175 puntos.
+              Jornadas con puntuación superior a la media pero posición en la mitad inferior.
             </p>
           {data.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">Sin rachas activas</p>
+            <p className="text-slate-500 text-center py-4 text-sm">Nadie ha sido gafado</p>
           ) : (
             data.map((user, index) => {
               const colors = getColorForUser(user.user_id, user.name);
@@ -61,9 +61,9 @@ export default function StreaksCard() {
                     
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1">
-                        <Flame size={16} className="text-orange-500 animate-pulse" />
+                        <Skull size={16} className="text-purple-500" />
                         <span className="font-black text-2xl text-slate-200">
-                          {user.longest_streak}
+                          {user.jinxed_count}
                         </span>
                       </div>
                       <span className="text-[10px] uppercase tracking-wider text-slate-500">

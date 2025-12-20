@@ -76,7 +76,7 @@ export default function PlacementStatsCard() {
               <YAxis 
                 dataKey="name" 
                 type="category" 
-                width={100}
+                width={150}
                 tick={{ fill: '#cbd5e1', fontSize: 13, fontWeight: 500 }}
                 axisLine={false}
                 tickLine={false}
