@@ -157,6 +157,16 @@ export function ensureSchema(db) {
     )
   `).run();
 
+  // 11. Initial Squads Table (Inferred)
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS initial_squads (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      player_id INTEGER,
+      UNIQUE(user_id, player_id)
+    )
+  `).run();
+
   // --- MIGRATIONS ---
   // Apply specific migrations that might be needed for existing databases
   

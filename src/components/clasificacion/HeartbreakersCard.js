@@ -67,7 +67,7 @@ export default function HeartbreakersCard() {
                         </span>
                       </div>
                       <span className="text-[10px] uppercase tracking-wider text-slate-500">
-                        Puntos Perdidos
+                        Perdidos
                       </span>
                     </div>
                   </div>

@@ -7,6 +7,7 @@ import { syncPlayers } from './sync-players.js';
 import { syncStandings } from './sync-standings.js';
 import { syncSquads } from './sync-squads.js';
 import { syncBoard } from './sync-board.js';
+import { syncInitialSquads } from './sync-initial-squads.js';
 import { syncMatches } from './sync-matches.js';
 import { syncLineups } from './sync-lineups.js';
 import { cleanupDuplicateRounds } from './cleanup-rounds.js';
@@ -50,6 +51,10 @@ async function syncData() {
     const playersList = competition.data.data ? competition.data.data.players : competition.data.players;
     const teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
     await syncBoard(db, playersList, teams);
+
+    // 5. Sync Initial Squads (Inferred from Transfers & Ownership)
+    // Must run after Board (for transfer history) and Squads (for current ownership)
+    await syncInitialSquads(db);
 
     console.log('\n✅ Sync process completed successfully!');
 

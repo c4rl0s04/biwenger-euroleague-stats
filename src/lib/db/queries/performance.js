@@ -257,18 +257,26 @@ export function getHeartbreakerStats() {
         MAX(points) OVER (PARTITION BY round_id) as winner_points
       FROM user_rounds
       WHERE participated = 1
+    ),
+    HeartbreakEvents AS (
+      SELECT 
+        user_id,
+        round_id,
+        (winner_points - points) as diff
+      FROM RoundRanks
+      WHERE position = 2
     )
     SELECT 
       u.id as user_id,
       u.name,
       u.icon,
-      COUNT(r.round_id) as count,
-      SUM(r.winner_points - r.points) as total_diff
+      COUNT(he.round_id) as count,
+      COALESCE(SUM(he.diff), 0) as total_diff
     FROM users u
-    JOIN RoundRanks r ON u.id = r.user_id
-    WHERE r.position = 2
+    LEFT JOIN HeartbreakEvents he ON u.id = he.user_id
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = 1) -- Only active users
     GROUP BY u.id
-    ORDER BY total_diff ASC
+    ORDER BY (CASE WHEN total_diff = 0 THEN 1 ELSE 0 END) ASC, total_diff ASC
   `;
   return db.prepare(refinedQuery).all();
 }
@@ -287,16 +295,23 @@ export function getNoGloryStats() {
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM user_rounds
       WHERE participated = 1
+    ),
+    NoGloryEvents AS (
+      SELECT 
+        user_id,
+        points
+      FROM RoundRanks
+      WHERE position > 1
     )
     SELECT 
       u.id as user_id,
       u.name,
       u.icon,
-      SUM(r.points) as total_points_no_glory,
-      COUNT(r.round_id) as rounds_count
+      COALESCE(SUM(nge.points), 0) as total_points_no_glory,
+      COUNT(nge.points) as rounds_count
     FROM users u
-    JOIN RoundRanks r ON u.id = r.user_id
-    WHERE r.position > 1 -- Did not win
+    LEFT JOIN NoGloryEvents nge ON u.id = nge.user_id
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = 1)
     GROUP BY u.id
     ORDER BY total_points_no_glory DESC
   `;
@@ -326,17 +341,24 @@ export function getJinxStats() {
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
       WHERE participated = 1
+    ),
+    JinxEvents AS (
+      SELECT 
+        urr.user_id,
+        urr.round_id
+      FROM UserRoundsWithRank urr
+      JOIN RoundStats rs ON urr.round_id = rs.round_id
+      WHERE urr.points > rs.league_avg 
+        AND urr.position > (rs.participant_count / 2)
     )
     SELECT 
       u.id as user_id,
       u.name,
       u.icon,
-      COUNT(urr.round_id) as jinxed_count
+      COUNT(je.round_id) as jinxed_count
     FROM users u
-    JOIN UserRoundsWithRank urr ON u.id = urr.user_id
-    JOIN RoundStats rs ON urr.round_id = rs.round_id
-    WHERE urr.points > rs.league_avg -- Good score
-      AND urr.position > (rs.participant_count / 2) -- Bad rank (bottom half)
+    LEFT JOIN JinxEvents je ON u.id = je.user_id
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = 1)
     GROUP BY u.id
     ORDER BY jinxed_count DESC
   `;

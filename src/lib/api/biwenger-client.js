@@ -7,6 +7,11 @@ import { CONFIG } from '../config.js';
 // Función de espera auxiliar
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Helper to get random delay between min and max ms
+const getRandomDelay = (min = 2000, max = 5000) => {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
 /**
  * Generic fetch wrapper for Biwenger API with Retry Logic
  * @param {string} endpoint - API endpoint (relative to BASE_URL)
@@ -31,10 +36,14 @@ export async function biwengerFetch(endpoint, options = {}) {
     'Authorization': token,
     'X-League': leagueId,
     'X-User': userId,
-    'Accept': 'application/json, text/plain, */*'
+    'Accept': 'application/json, text/plain, */*',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
   };
   
-  console.log(`Fetching: ${url}`);
+  // RANDOM DELAY: Safety measure against bans (2-5 seconds random)
+  const safeDelay = getRandomDelay(2000, 5000);
+  console.log(`Fetching: ${url} (Wait: ${safeDelay}ms)`);
+  await sleep(safeDelay);
   
   try {
     const response = await fetch(url, { headers });
