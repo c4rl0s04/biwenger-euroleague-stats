@@ -2,31 +2,14 @@
 
 import Link from 'next/link';
 import { Users, Trophy } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import StandingsTable from './StandingsTable';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function StandingsCard() {
-  const [standings, setStandings] = useState([]);
-  const [lastWinner, setLastWinner] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Fetch both standings and last winner
-    Promise.all([
-      fetch('/api/standings').then(res => res.json()),
-      fetch('/api/last-winner').then(res => res.json())
-    ])
-    .then(([standingsRes, winnerRes]) => {
-      if (standingsRes.success) setStandings(standingsRes.data);
-      if (winnerRes.success) setLastWinner(winnerRes.data);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error('Error fetching data:', err);
-      setLoading(false);
-    });
-  }, []);
+  const { data, loading } = useApiData('/api/standings-with-winner');
+  const standings = data?.standings || [];
+  const lastWinner = data?.lastWinner || null;
 
   const actionLink = (
     <Link href="/standings" className="text-sm text-blue-400 hover:text-blue-300">Ver todo</Link>

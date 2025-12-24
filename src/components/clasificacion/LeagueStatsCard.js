@@ -1,27 +1,13 @@
 'use client';
 
 import { BarChart3, Users, TrendingUp, Crown, Zap, Flame } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function LeagueStatsCard() {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/stats')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setStats(result.data.totals);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching league stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: stats, loading } = useApiData('/api/clasificacion/stats', {
+    transform: (d) => d.totals || null
+  });
 
   const formatPrice = (price) => {
     if (price >= 1000000) {

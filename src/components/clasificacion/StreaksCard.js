@@ -1,28 +1,12 @@
 'use client';
 
-import { Flame } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Flame, Zap } from 'lucide-react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function StreaksCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.streaks) {
-          setData(result.data.streaks);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching streak stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/streaks');
 
   return (
     <PremiumCard
@@ -31,7 +15,7 @@ export default function StreaksCard() {
       color="orange"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
         <div className="space-y-4 pr-2 mt-2">
             <p className="text-xs text-slate-400 italic px-2">
               Número de jornadas consecutivas en las que el usuario ha superado los 175 puntos.

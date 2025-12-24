@@ -15,6 +15,7 @@ import BottlerCard from '@/components/clasificacion/BottlerCard';
 import HeartbreakersCard from '@/components/clasificacion/HeartbreakersCard';
 import NoGloryCard from '@/components/clasificacion/NoGloryCard';
 import JinxCard from '@/components/clasificacion/JinxCard';
+import InitialSquadAnalysisCard from '@/components/clasificacion/InitialSquadAnalysisCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,42 +70,46 @@ export default function ClasificacionPage() {
             <LeaguePerformanceCard />
           </FadeIn>
           <FadeIn delay={600}>
-             <EfficiencyCard />
+            <EfficiencyCard />
           </FadeIn>
           <FadeIn delay={650}>
-             <StreaksCard />
+            <StreaksCard />
           </FadeIn>
           <FadeIn delay={700}>
-             <BottlerCard />
+            <BottlerCard />
+          </FadeIn>
+          <FadeIn delay={750}>
+            <InitialSquadAnalysisCard />
           </FadeIn>
         </div>
       </div>
 
       {/* Bad Luck Section */}
       <div className="pt-8">
-        <FadeIn delay={750}>
+        <FadeIn delay={800}>
           <h2 className="text-2xl font-bold text-white mb-6">Mala Suerte</h2>
         </FadeIn>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FadeIn delay={800}>
-             <HeartbreakersCard />
-          </FadeIn>
           <FadeIn delay={850}>
-             <NoGloryCard />
+            <HeartbreakersCard />
           </FadeIn>
           <FadeIn delay={900}>
-             <JinxCard />
+            <NoGloryCard />
+          </FadeIn>
+          <FadeIn delay={950}>
+            <JinxCard />
           </FadeIn>
         </div>
       </div>
 
       {/* Team Value Ranking */}
-      <FadeIn delay={950}>
+      <FadeIn delay={1000}>
         <div className="pt-4">
-           <TeamValueRankingCard />
+          <TeamValueRankingCard />
         </div>
       </FadeIn>
     </div>
   );
 }
+

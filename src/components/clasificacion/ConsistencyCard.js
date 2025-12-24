@@ -1,37 +1,21 @@
 'use client';
 
 import { Activity } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function ConsistencyCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.volatility) {
-          setData(result.data.volatility);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching consistency stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/volatility');
 
   return (
     <PremiumCard
       title="Consistencia (Volatilidad)"
       icon={Activity}
-      color="green" // Stability implies green?
+      color="green"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
         <div className="space-y-4 pr-2">
           <div className="flex justify-between text-xs text-slate-400 px-2 mb-2">
             <span>Usuario</span>

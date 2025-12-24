@@ -1,28 +1,12 @@
 'use client';
 
 import { CloudRain } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function NoGloryCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.noGlory) {
-          setData(result.data.noGlory);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching no glory stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/no-glory');
 
   return (
     <PremiumCard
@@ -31,7 +15,7 @@ export default function NoGloryCard() {
       color="slate"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
         <div className="space-y-4 pr-2 mt-2">
             <p className="text-xs text-slate-400 italic px-2">
               Total de puntos acumulados en jornadas donde no conseguiste ganar.

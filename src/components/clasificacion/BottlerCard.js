@@ -1,37 +1,21 @@
 'use client';
 
 import { Wine, AlertTriangle } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function BottlerCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.bottlers) {
-          setData(result.data.bottlers);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching bottler stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/bottlers');
 
   return (
     <PremiumCard
       title="The Bottlers (Casi ganan)"
-      icon={Wine} // Wine glass for "bottle"? Or AlertTriangle?
+      icon={Wine}
       color="pink"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
         <div className="space-y-4 pr-2 mt-2">
             <p className="text-xs text-slate-400 italic px-2">
               Puntos por: 2º puesto (3pts), 3er puesto (1pt). Se resta por ganar (-2pts).

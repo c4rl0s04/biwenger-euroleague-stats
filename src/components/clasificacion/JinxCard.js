@@ -1,28 +1,12 @@
 'use client';
 
-import { Skull } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Ghost, Skull } from 'lucide-react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function JinxCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.jinx) {
-          setData(result.data.jinx);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching jinx stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/jinx');
 
   return (
     <PremiumCard
@@ -31,7 +15,7 @@ export default function JinxCard() {
       color="purple"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
         <div className="space-y-4 pr-2 mt-2">
             <p className="text-xs text-slate-400 italic px-2">
               Jornadas con puntuación superior a la media pero posición en la mitad inferior.

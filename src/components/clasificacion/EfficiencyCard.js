@@ -1,28 +1,12 @@
 'use client';
 
 import { Coins, CircleDollarSign } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function EfficiencyCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.efficiency) {
-          setData(result.data.efficiency);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching efficiency stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/efficiency');
 
   return (
     <PremiumCard
@@ -31,7 +15,7 @@ export default function EfficiencyCard() {
       color="yellow"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
         <div className="space-y-4 pr-2 mt-2">
             <p className="text-xs text-slate-400 italic px-2">
               Relación entre puntos totales y valor de mercado. Indica el retorno de inversión (ROI).

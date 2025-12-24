@@ -2,28 +2,12 @@
 
 import { Trophy, Award } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { getShortTeamName } from '@/lib/utils/format';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function WeekMVPsCard() {
-  const [mvps, setMvps] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/last-round-mvps')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setMvps(result.data || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching MVPs:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: mvps = [], loading } = useApiData('/api/last-round-mvps');
 
   const getRankStyles = (index) => {
     switch (index) {

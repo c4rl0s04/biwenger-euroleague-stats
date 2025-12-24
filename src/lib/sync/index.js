@@ -1,6 +1,4 @@
-import dotenv from 'dotenv';
-// Try to load .env.local (for local dev), but don't fail if missing (Docker uses env vars directly)
-dotenv.config({ path: '../../../.env.local' });
+// Environment variables are loaded by config.js (conditionally)
 
 import Database from 'better-sqlite3';
 import { syncPlayers } from './sync-players.js';

@@ -1,7 +1,7 @@
 'use client';
 
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useApiData } from '@/lib/hooks/useApiData';
 import {
   BarChart,
   Bar,
@@ -42,23 +42,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function LeaguePerformanceCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.leagueComparison) {
-          setData(result.data.leagueComparison);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching league performance:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/league-comparison');
 
   return (
     <PremiumCard
@@ -67,7 +51,7 @@ export default function LeaguePerformanceCard() {
       color="cyan"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
 
         <div className="w-full" style={{ height: `${Math.max(100, data.length * 65 + 40)}px` }}>
           <ResponsiveContainer width="100%" height="100%">

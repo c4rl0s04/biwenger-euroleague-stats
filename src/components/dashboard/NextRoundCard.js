@@ -2,32 +2,19 @@
 
 import { useUser } from '@/contexts/UserContext';
 import { Calendar, TrendingUp, Star, ShoppingCart, ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function NextRoundCard() {
   const { currentUser } = useUser();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const userId = currentUser?.id || '';
-    
-    fetch(`/api/next-round-data?userId=${userId}`)
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setData(result.data);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching next round data:', err);
-        setLoading(false);
-      });
-  }, [currentUser]);
+  const userId = currentUser?.id || '';
+  
+  const { data, loading } = useApiData(
+    `/api/next-round-data?userId=${userId}`,
+    { dependencies: [userId] }
+  );
 
   if (loading) {
     return <PremiumCard loading={true} className="lg:col-span-2" />;

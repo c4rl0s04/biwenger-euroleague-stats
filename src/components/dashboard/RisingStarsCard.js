@@ -1,29 +1,13 @@
 'use client';
 
 import { Sparkles , TrendingUp, ArrowUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RisingStarsCard() {
-  const [stars, setStars] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/rising-stars')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setStars(result.data || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching rising stars:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: stars = [], loading } = useApiData('/api/rising-stars');
 
   return (
     <PremiumCard

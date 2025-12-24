@@ -1,28 +1,12 @@
 'use client';
 
 import { Cake, Sparkles } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function BirthdayCard() {
-  const [birthdays, setBirthdays] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/birthdays')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setBirthdays(result.data || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching birthdays:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: birthdays = [], loading } = useApiData('/api/birthdays');
 
   return (
     <PremiumCard

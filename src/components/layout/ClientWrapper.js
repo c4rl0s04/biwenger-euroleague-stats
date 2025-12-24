@@ -5,6 +5,7 @@ import { CardThemeProvider } from '@/contexts/CardThemeContext';
 import UserSelectionModal from '@/components/user/UserSelectionModal';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import ThemeBackground from '@/components/ui/ThemeBackground';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
 export default function ClientWrapper({ children, users }) {
   return (
@@ -13,7 +14,9 @@ export default function ClientWrapper({ children, users }) {
         <ThemeBackground />
         <UserSelectionModal />
         <ThemeSwitcher />
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </UserProvider>
     </CardThemeProvider>
   );

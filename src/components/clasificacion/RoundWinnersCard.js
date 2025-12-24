@@ -1,29 +1,15 @@
 'use client';
 
 import { Trophy } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
-
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RoundWinnersCard() {
-  const [winners, setWinners] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/round-winners')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setWinners(result.data.winners || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching round winners:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: winners = [], loading } = useApiData('/api/clasificacion/round-winners', {
+    transform: (d) => d.winners || []
+  });
 
   return (
     <PremiumCard

@@ -1,9 +1,10 @@
 import path from 'path';
 import dotenv from 'dotenv';
 
-// Try to load .env.local for local dev - Docker passes env vars directly
-// This won't fail if the file doesn't exist
-dotenv.config({ path: '.env.local' });
+// Try to load .env.local for local dev if not already loaded (Next.js loads it automatically)
+if (!process.env.BIWENGER_LEAGUE_ID) {
+  dotenv.config({ path: '.env.local' });
+}
 
 export const CONFIG = {
   API: {
@@ -28,7 +29,8 @@ export const CONFIG = {
     LEAGUE_BOARD: (leagueId, offset, limit) => `/league/${leagueId}/board?offset=${offset}&limit=${limit}`,
     ROUND_GAMES: (roundId) => `/rounds/euroleague/${roundId}?score=1&v=629`,
     ROUND_LEAGUE: (roundId) => roundId ? `/rounds/league/${roundId}?v=629` : `/rounds/league?v=629`,
-    PLAYER_DETAILS: (id) => `/players/euroleague/${id}?lang=es&fields=prices,birthday,height,weight`
+    PLAYER_DETAILS: (id) => `/players/euroleague/${id}?lang=es&fields=prices,birthday,height,weight`,
+    USER_PLAYERS: (id) => `/user/${id}?fields=players`
   }
 };
 

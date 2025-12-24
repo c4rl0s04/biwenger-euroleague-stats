@@ -1,28 +1,12 @@
 'use client';
 
-import { HeartCrack } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { HeartCrack, Frown } from 'lucide-react';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function HeartbreakersCard() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/performance')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data.heartbreakers) {
-          setData(result.data.heartbreakers);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching heartbreaker stats:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data = [], loading } = useApiData('/api/clasificacion/heartbreakers');
 
   return (
     <PremiumCard
@@ -31,7 +15,7 @@ export default function HeartbreakersCard() {
       color="rose"
       loading={loading}
     >
-      {!loading && (
+      {!loading && data.length > 0 && (
         <div className="space-y-4 pr-2 mt-2">
             <p className="text-xs text-slate-400 italic px-2">
               Suma de puntos por los que te has quedado sin ganar (siendo 2º).

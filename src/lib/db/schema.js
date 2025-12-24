@@ -167,6 +167,19 @@ export function ensureSchema(db) {
     )
   `).run();
 
+  // 12. Finances Table (Bonuses, Rewards)
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS finances (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      round_id INTEGER,
+      date TEXT,
+      type TEXT,
+      amount INTEGER,
+      description TEXT
+    )
+  `).run();
+
   // --- MIGRATIONS ---
   // Apply specific migrations that might be needed for existing databases
   

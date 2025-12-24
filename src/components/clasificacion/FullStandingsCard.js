@@ -1,29 +1,16 @@
 'use client';
 
 import { Trophy, Medal } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function FullStandingsCard() {
-  const [standings, setStandings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: 'position', direction: 'asc' });
-
-  useEffect(() => {
-    fetch('/api/clasificacion/stats')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setStandings(result.data.standings || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching standings:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: standings = [], loading } = useApiData('/api/clasificacion/stats', {
+    transform: (d) => d.standings || []
+  });
 
   const handleSort = (key) => {
     let direction = 'asc';

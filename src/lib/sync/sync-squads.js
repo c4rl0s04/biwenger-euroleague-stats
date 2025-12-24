@@ -1,4 +1,5 @@
 import { biwengerFetch, fetchLeague } from '../api/biwenger-client.js';
+import { CONFIG } from '../config.js';
 
 /**
  * Syncs current squads (ownership) for all users.
@@ -26,7 +27,7 @@ export async function syncSquads(db) {
       try {
           // Fetch user details with players field
           // Note: This endpoint might be rate-limited if many users, but usually fine for small leagues
-          const response = await biwengerFetch(`/user/${user.id}?fields=players`);
+          const response = await biwengerFetch(CONFIG.ENDPOINTS.USER_PLAYERS(user.id));
           const data = response.data;
           
           if (data && data.players) {

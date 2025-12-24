@@ -2,29 +2,12 @@
 
 import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function TopPlayersCard() {
-  const [topPlayers, setTopPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Fetch top players from API
-    fetch('/api/top-players')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setTopPlayers(result.data || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching top players:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: topPlayers = [], loading } = useApiData('/api/top-players');
 
   const actionLink = (
     <Link href="/players" className="text-sm text-emerald-400 hover:text-emerald-300">Ver todos</Link>

@@ -1,27 +1,13 @@
 'use client';
 
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import PremiumCard from '@/components/ui/PremiumCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function TeamValueRankingCard() {
-  const [ranking, setRanking] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clasificacion/progression')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setRanking(result.data.valueRanking || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching value ranking:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: ranking = [], loading } = useApiData('/api/clasificacion/progression', {
+    transform: (d) => d.valueRanking || []
+  });
 
   const formatPrice = (price) => {
     if (price >= 1000000) {

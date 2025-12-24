@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart2 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -14,26 +14,13 @@ import {
 } from 'recharts';
 import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RoundPointsProgressionCard() {
-  const [progression, setProgression] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState(new Set());
-
-  useEffect(() => {
-    fetch('/api/clasificacion/progression')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setProgression(result.data.progression || []);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching progression:', err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: progression = [], loading } = useApiData('/api/clasificacion/progression', {
+    transform: (d) => d.progression || []
+  });
 
   // Process data for the chart
   const { chartData, users } = useMemo(() => {

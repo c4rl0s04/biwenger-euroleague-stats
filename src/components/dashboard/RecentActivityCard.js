@@ -2,31 +2,19 @@
 
 import { useUser } from '@/contexts/UserContext';
 import { Activity, TrendingUp, TrendingDown, Trophy, Euro, ArrowRight, Bell } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RecentActivityCard() {
   const { currentUser } = useUser();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('transfers');
-
-  useEffect(() => {
-    const userId = currentUser?.id || '';
-    
-    fetch(`/api/recent-activity?userId=${userId}`)
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setData(result.data);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching recent activity:', err);
-        setLoading(false);
-      });
-  }, [currentUser]);
+  const userId = currentUser?.id || '';
+  
+  const { data, loading } = useApiData(
+    `/api/recent-activity?userId=${userId}`,
+    { dependencies: [userId] }
+  );
 
   if (loading) {
     return (
