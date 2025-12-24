@@ -15,15 +15,13 @@ export default function NoGloryCard() {
       color="slate"
       loading={loading}
     >
-      {!loading && data.length > 0 && (
-        <div className="space-y-4 pr-2 mt-2">
-            <p className="text-xs text-slate-400 italic px-2">
-              Total de puntos acumulados en jornadas donde no conseguiste ganar.
-            </p>
-          {data.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">Todos han ganado algo</p>
-          ) : (
-            data.map((user, index) => {
+      {!loading && (
+        data.length > 0 ? (
+          <div className="space-y-4 pr-2 mt-2">
+              <p className="text-xs text-slate-400 italic px-2">
+                Total de puntos acumulados en jornadas donde no conseguiste ganar.
+              </p>
+            {data.map((user, index) => {
               const colors = getColorForUser(user.user_id, user.name);
               
               return (
@@ -56,9 +54,11 @@ export default function NoGloryCard() {
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-8">Todos han ganado algo</div>
+        )
       )}
     </PremiumCard>
   );

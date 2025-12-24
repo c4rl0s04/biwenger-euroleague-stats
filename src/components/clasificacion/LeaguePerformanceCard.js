@@ -51,46 +51,49 @@ export default function LeaguePerformanceCard() {
       color="cyan"
       loading={loading}
     >
-      {!loading && data.length > 0 && (
-
-        <div className="w-full" style={{ height: `${Math.max(100, data.length * 65 + 40)}px` }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={data}
-              margin={{ top: 0, right: 30, left: -20, bottom: 0 }}
-              layout="vertical"
-              barGap={2}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} horizontal={false} />
-              <XAxis 
-                type="number" 
-                hide 
-              />
-              <YAxis 
-                dataKey="name" 
-                type="category" 
-                width={150}
-                tick={{ fill: '#cbd5e1', fontSize: 13, fontWeight: 500 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{fill: 'rgba(255,255,255,0.05)'}} />
-              <ReferenceLine x={0} stroke="#475569" />
-              <Bar 
-                dataKey="avg_diff" 
-                radius={[0, 4, 4, 0]} 
-                barSize={18}
+      {!loading && (
+        data.length > 0 ? (
+          <div className="w-full" style={{ height: `${Math.max(100, data.length * 65 + 40)}px` }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={data}
+                margin={{ top: 0, right: 30, left: -20, bottom: 0 }}
+                layout="vertical"
+                barGap={2}
               >
-                {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.avg_diff > 0 ? '#22d3ee' : '#f472b6'} 
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} horizontal={false} />
+                <XAxis 
+                  type="number" 
+                  hide 
+                />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  width={150}
+                  tick={{ fill: '#cbd5e1', fontSize: 13, fontWeight: 500 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{fill: 'rgba(255,255,255,0.05)'}} />
+                <ReferenceLine x={0} stroke="#475569" />
+                <Bar 
+                  dataKey="avg_diff" 
+                  radius={[0, 4, 4, 0]} 
+                  barSize={18}
+                >
+                  {data.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.avg_diff > 0 ? '#22d3ee' : '#f472b6'} 
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-8">No hay datos de rendimiento</div>
+        )
       )}
     </PremiumCard>
   );

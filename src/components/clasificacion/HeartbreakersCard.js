@@ -15,15 +15,13 @@ export default function HeartbreakersCard() {
       color="rose"
       loading={loading}
     >
-      {!loading && data.length > 0 && (
-        <div className="space-y-4 pr-2 mt-2">
-            <p className="text-xs text-slate-400 italic px-2">
-              Suma de puntos por los que te has quedado sin ganar (siendo 2º).
-            </p>
-          {data.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">Sin dolor... todavía</p>
-          ) : (
-            data.map((user, index) => {
+      {!loading && (
+        data.length > 0 ? (
+          <div className="space-y-4 pr-2 mt-2">
+              <p className="text-xs text-slate-400 italic px-2">
+                Suma de puntos por los que te has quedado sin ganar (siendo 2º).
+              </p>
+            {data.map((user, index) => {
               const colors = getColorForUser(user.user_id, user.name);
               
               return (
@@ -57,9 +55,11 @@ export default function HeartbreakersCard() {
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-8">Sin dolor... todavía</div>
+        )
       )}
     </PremiumCard>
   );

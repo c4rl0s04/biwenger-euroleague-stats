@@ -15,15 +15,13 @@ export default function JinxCard() {
       color="purple"
       loading={loading}
     >
-      {!loading && data.length > 0 && (
-        <div className="space-y-4 pr-2 mt-2">
-            <p className="text-xs text-slate-400 italic px-2">
-              Jornadas con puntuación superior a la media pero posición en la mitad inferior.
-            </p>
-          {data.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">Nadie ha sido gafado</p>
-          ) : (
-            data.map((user, index) => {
+      {!loading && (
+        data.length > 0 ? (
+          <div className="space-y-4 pr-2 mt-2">
+              <p className="text-xs text-slate-400 italic px-2">
+                Jornadas con puntuación superior a la media pero posición en la mitad inferior.
+              </p>
+            {data.map((user, index) => {
               const colors = getColorForUser(user.user_id, user.name);
               
               return (
@@ -57,9 +55,11 @@ export default function JinxCard() {
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-8">Nadie ha sido gafado</div>
+        )
       )}
     </PremiumCard>
   );

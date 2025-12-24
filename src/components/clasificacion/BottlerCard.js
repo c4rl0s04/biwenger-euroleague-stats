@@ -15,15 +15,13 @@ export default function BottlerCard() {
       color="pink"
       loading={loading}
     >
-      {!loading && data.length > 0 && (
-        <div className="space-y-4 pr-2 mt-2">
-            <p className="text-xs text-slate-400 italic px-2">
-              Puntos por: 2º puesto (3pts), 3er puesto (1pt). Se resta por ganar (-2pts).
-            </p>
-          {data.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">Nadie ha "boteado" todavía</p>
-          ) : (
-            data.map((user, index) => {
+      {!loading && (
+        data.length > 0 ? (
+          <div className="space-y-4 pr-2 mt-2">
+              <p className="text-xs text-slate-400 italic px-2">
+                Puntos por: 2º puesto (3pts), 3er puesto (1pt). Se resta por ganar (-2pts).
+              </p>
+            {data.map((user, index) => {
               const colors = getColorForUser(user.user_id, user.name);
               
               return (
@@ -73,9 +71,11 @@ export default function BottlerCard() {
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-8">Nadie ha boteado todavía</div>
+        )
       )}
     </PremiumCard>
   );
