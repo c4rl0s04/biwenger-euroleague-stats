@@ -6,7 +6,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function EfficiencyCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/efficiency');
+  const { data = [], loading } = useApiData('/api/standings/efficiency');
 
   return (
     <PremiumCard

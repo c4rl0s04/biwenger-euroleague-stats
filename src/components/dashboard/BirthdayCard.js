@@ -6,7 +6,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function BirthdayCard() {
-  const { data: birthdays = [], loading } = useApiData('/api/birthdays');
+  const { data: birthdays = [], loading } = useApiData('/api/dashboard/birthdays');
 
   return (
     <PremiumCard

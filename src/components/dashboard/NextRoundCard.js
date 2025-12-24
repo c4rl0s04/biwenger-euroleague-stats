@@ -12,7 +12,7 @@ export default function NextRoundCard() {
   const userId = currentUser?.id || '';
   
   const { data = {}, loading } = useApiData(
-    `/api/next-round-data?userId=${userId}`,
+    `/api/dashboard/next-round?userId=${userId}`,
     { dependencies: [userId] }
   );
 

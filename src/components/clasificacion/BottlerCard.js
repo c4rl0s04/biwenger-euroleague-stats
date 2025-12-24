@@ -6,7 +6,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function BottlerCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/bottlers');
+  const { data = [], loading } = useApiData('/api/standings/bottlers');
 
   return (
     <PremiumCard

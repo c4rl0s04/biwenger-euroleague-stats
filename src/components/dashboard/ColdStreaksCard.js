@@ -11,7 +11,7 @@ export default function ColdStreaksCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/player-streaks')
+    fetch('/api/player/streaks')
       .then(res => res.json())
       .then(result => {
         if (result.success) {

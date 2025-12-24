@@ -13,7 +13,7 @@ export default function HomeAwayCard() {
   useEffect(() => {
     if (!currentUser) return;
 
-    fetch(`/api/home-away?userId=${currentUser.id}`)
+    fetch(`/api/dashboard/home-away?userId=${currentUser.id}`)
       .then(res => res.json())
       .then(d => {
         if (d.success) setStats(d.stats);

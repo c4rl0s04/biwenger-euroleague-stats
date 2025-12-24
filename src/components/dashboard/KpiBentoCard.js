@@ -1,14 +1,14 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 /**
- * KpiBentoCard - Componente modular estilo Bento Grid
- * @param {string} title - Título de la tarjeta (ej: "Valor de Plantilla")
- * @param {string|number} value - El dato principal (ej: "45.2M€")
- * @param {string} subValue - Dato secundario pequeño (ej: "avg: 12.4")
- * @param {number} trend - Porcentaje o valor de cambio para la flecha
- * @param {string} trendLabel - Texto al lado de la tendencia (ej: "vs ayer")
- * @param {LucideIcon} icon - Icono de Lucide
- * @param {'default'|'success'|'danger'|'warning'|'brand'} variant - Estilo visual
+ * KpiBentoCard - Modular Bento Grid style component
+ * @param {string} title - Card title (e.g., "Squad Value")
+ * @param {string|number} value - Main data point (e.g., "45.2M€")
+ * @param {string} subValue - Small secondary data (e.g., "avg: 12.4")
+ * @param {number} trend - Percentage or change value for arrow
+ * @param {string} trendLabel - Text next to trend (e.g., "vs yesterday")
+ * @param {LucideIcon} icon - Lucide icon
+ * @param {'default'|'success'|'danger'|'warning'|'brand'} variant - Visual style
  */
 export default function KpiBentoCard({ 
   title, 
@@ -21,7 +21,7 @@ export default function KpiBentoCard({
   className = ""
 }) {
   
-  // Configuración de colores según la variante
+  // Color configuration based on variant
   const variants = {
     default: {
       iconBg: 'bg-slate-800',
@@ -56,7 +56,7 @@ export default function KpiBentoCard({
 
   return (
     <div className={`glass-panel rounded-2xl p-5 transition-all duration-300 group ${style.border} ${className}`}>
-      {/* Cabecera: Icono y Título */}
+      {/* Header: Icon and Title */}
       <div className="flex items-start justify-between mb-4">
         <div className={`p-2.5 rounded-xl ${style.iconBg} transition-colors group-hover:scale-110 duration-300`}>
           {Icon && <Icon className={`w-5 h-5 ${style.iconColor}`} />}
@@ -75,7 +75,7 @@ export default function KpiBentoCard({
         )}
       </div>
 
-      {/* Contenido Principal */}
+      {/* Main Content */}
       <div className="space-y-1">
         <h3 className="text-slate-400 text-xs font-medium uppercase tracking-wider">{title}</h3>
         <div className="flex items-baseline gap-2">

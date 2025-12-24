@@ -4,7 +4,7 @@
 
 import { CONFIG } from '../config.js';
 
-// Función de espera auxiliar
+// Auxiliary wait function
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Helper to get random delay between min and max ms
@@ -23,7 +23,7 @@ export async function biwengerFetch(endpoint, options = {}) {
   const leagueId = CONFIG.API.LEAGUE_ID;
   const userId = CONFIG.API.USER_ID;
 
-  // Configuración de reintentos por defecto
+  // Default retry configuration
   const { retries = 3, retryDelay = 5000 } = options;
 
   if (!tokenRaw) throw new Error('BIWENGER_TOKEN is missing');
@@ -48,12 +48,12 @@ export async function biwengerFetch(endpoint, options = {}) {
   try {
     const response = await fetch(url, { headers });
     
-    // --- LÓGICA DE REINTENTO PARA 429 ---
+    // --- RETRY LOGIC FOR 429 ---
     if (response.status === 429) {
         if (retries > 0) {
-            console.warn(`⚠️ Rate Limit (429). Pausando ${retryDelay}ms antes de reintentar...`);
+            console.warn(`⚠️ Rate Limit (429). Pausing ${retryDelay}ms before retrying...`);
             await sleep(retryDelay);
-            // Llamada recursiva: 1 intento menos, doble de espera (Exponential Backoff)
+            // Recursive call: 1 less attempt, double wait time (Exponential Backoff)
             return biwengerFetch(endpoint, { ...options, retries: retries - 1, retryDelay: retryDelay * 2 });
         } else {
             throw new Error(`Biwenger API Error: 429 Too Many Requests (Max retries exceeded)`);
@@ -68,7 +68,7 @@ export async function biwengerFetch(endpoint, options = {}) {
     const data = await response.json();
     return data;
   } catch (error) {
-    // Evitamos loguear el error si es un reintento interno, salvo que sea el final
+    // Avoid logging error if it's an internal retry, unless it's the final one
     if (retries === 0 || !error.message.includes('429')) {
         console.error(`Failed to fetch ${endpoint}:`, error.message);
     }
@@ -76,7 +76,7 @@ export async function biwengerFetch(endpoint, options = {}) {
   }
 }
 
-// --- Exportaciones de métodos específicos (Igual que antes) ---
+// --- Specific method exports (Same as before) ---
 
 export async function fetchMarket() {
   return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, 0, 100));
@@ -106,7 +106,7 @@ export async function fetchRoundGames(roundId) {
   return biwengerFetch(CONFIG.ENDPOINTS.ROUND_GAMES(roundId));
 }
 
-// Esta es la nueva función que añadiste
+// This is the new function you added
 export async function fetchPlayerDetails(playerId) {
   return biwengerFetch(CONFIG.ENDPOINTS.PLAYER_DETAILS(playerId));
 }

@@ -5,7 +5,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function LeagueStatsCard() {
-  const { data: stats = null, loading } = useApiData('/api/clasificacion/league-totals');
+  const { data: stats = null, loading } = useApiData('/api/standings/league-totals');
 
   const formatPrice = (price) => {
     if (price >= 1000000) {

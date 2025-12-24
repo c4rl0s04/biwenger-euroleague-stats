@@ -37,7 +37,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function PlacementStatsCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/placements');
+  const { data = [], loading } = useApiData('/api/standings/placements');
 
   return (
     <PremiumCard

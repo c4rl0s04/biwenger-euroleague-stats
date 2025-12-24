@@ -6,7 +6,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function HeartbreakersCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/heartbreakers');
+  const { data = [], loading } = useApiData('/api/standings/heartbreakers');
 
   return (
     <PremiumCard

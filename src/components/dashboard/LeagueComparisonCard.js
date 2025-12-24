@@ -14,7 +14,7 @@ export default function LeagueComparisonCard() {
     if (!currentUser) return;
 
     Promise.all([
-      fetch(`/api/user-stats?userId=${currentUser.id}`).then(r => r.json()),
+      fetch(`/api/player/stats?userId=${currentUser.id}`).then(r => r.json()),
       fetch('/api/league-average').then(r => r.json())
     ]).then(([userRes, avgRes]) => {
       if (userRes.success && avgRes.success) {

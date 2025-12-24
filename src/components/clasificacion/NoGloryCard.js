@@ -6,7 +6,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function NoGloryCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/no-glory');
+  const { data = [], loading } = useApiData('/api/standings/no-glory');
 
   return (
     <PremiumCard

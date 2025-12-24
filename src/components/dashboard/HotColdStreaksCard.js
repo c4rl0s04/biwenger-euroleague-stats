@@ -11,7 +11,7 @@ export default function HotColdStreaksCard() {
   const [activeTab, setActiveTab] = useState('hot');
 
   useEffect(() => {
-    fetch('/api/player-streaks')
+    fetch('/api/player/streaks')
       .then(res => res.json())
       .then(result => {
         if (result.success) {

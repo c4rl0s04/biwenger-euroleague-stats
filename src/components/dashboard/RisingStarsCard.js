@@ -7,7 +7,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RisingStarsCard() {
-  const { data: stars = [], loading } = useApiData('/api/rising-stars');
+  const { data: stars = [], loading } = useApiData('/api/dashboard/rising-stars');
 
   return (
     <PremiumCard

@@ -14,7 +14,7 @@ export default function SquadValueCard() {
   useEffect(() => {
     if (!currentUser) return;
 
-    fetch(`/api/user-squad?userId=${currentUser.id}`)
+    fetch(`/api/player/squad?userId=${currentUser.id}`)
       .then(res => res.json())
       .then(d => {
         if (d.success) setData(d.data);

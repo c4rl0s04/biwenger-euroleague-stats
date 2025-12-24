@@ -7,7 +7,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function TopPlayersCard() {
-  const { data: topPlayers = [], loading } = useApiData('/api/top-players');
+  const { data: topPlayers = [], loading } = useApiData('/api/dashboard/top-players');
 
   const actionLink = (
     <Link href="/players" className="text-sm text-emerald-400 hover:text-emerald-300">Ver todos</Link>

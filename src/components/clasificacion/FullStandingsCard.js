@@ -8,7 +8,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function FullStandingsCard() {
   const [sortConfig, setSortConfig] = useState({ key: 'position', direction: 'asc' });
-  const { data: standings = [], loading } = useApiData('/api/clasificacion/standings');
+  const { data: standings = [], loading } = useApiData('/api/standings/full');
 
   const handleSort = (key) => {
     let direction = 'asc';

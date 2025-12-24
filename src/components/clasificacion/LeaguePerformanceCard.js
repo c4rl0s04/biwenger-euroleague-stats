@@ -42,7 +42,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function LeaguePerformanceCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/league-comparison');
+  const { data = [], loading } = useApiData('/api/standings/league-comparison');
 
   return (
     <PremiumCard

@@ -13,7 +13,7 @@ export default function RecentRoundsCard() {
   useEffect(() => {
     if (!currentUser) return;
 
-    fetch(`/api/user-rounds?userId=${currentUser.id}`)
+    fetch(`/api/player/rounds?userId=${currentUser.id}`)
       .then(res => res.json())
       .then(d => {
         if (d.success) setRounds(d.rounds);

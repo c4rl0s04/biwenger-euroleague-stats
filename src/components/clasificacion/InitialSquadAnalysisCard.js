@@ -10,7 +10,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
  * Shows ROI analysis of users' initial squads vs actual performance
  */
 export default function InitialSquadAnalysisCard() {
-  const { data = [], loading, error } = useApiData('/api/analytics');
+  const { data = [], loading, error } = useApiData('/api/standings/analytics');
 
   // Calculate color based on ROI percentage
   const getROIColor = (roi) => {

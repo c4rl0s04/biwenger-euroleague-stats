@@ -6,7 +6,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function JinxCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/jinx');
+  const { data = [], loading } = useApiData('/api/standings/jinx');
 
   return (
     <PremiumCard

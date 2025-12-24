@@ -43,7 +43,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function RoundPointsProgressionCard() {
-  const { data: progression = [], loading } = useApiData('/api/clasificacion/points-progression');
+  const { data: progression = [], loading } = useApiData('/api/standings/points-progression');
   const [selectedUsers, setSelectedUsers] = useState(new Set());
 
   // Process data for the chart

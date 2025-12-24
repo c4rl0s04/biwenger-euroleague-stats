@@ -11,7 +11,7 @@ export default function IdealLineupCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/ideal-lineup')
+    fetch('/api/dashboard/ideal-lineup')
       .then(res => res.json())
       .then(result => {
         if (result.success) {

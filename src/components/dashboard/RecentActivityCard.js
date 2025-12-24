@@ -12,7 +12,7 @@ export default function RecentActivityCard() {
   const userId = currentUser?.id || '';
   
   const { data = {}, loading } = useApiData(
-    `/api/recent-activity?userId=${userId}`,
+    `/api/dashboard/recent-activity?userId=${userId}`,
     { dependencies: [userId] }
   );
 

@@ -14,7 +14,7 @@ export default function MarketActivityCard() {
   useEffect(() => {
     const userId = currentUser?.id || '';
     
-    fetch(`/api/recent-activity?userId=${userId}`)
+    fetch(`/api/dashboard/recent-activity?userId=${userId}`)
       .then(res => res.json())
       .then(result => {
         if (result.success) {

@@ -7,7 +7,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RoundWinnersCard() {
-  const { data: winners = [], loading } = useApiData('/api/clasificacion/round-winners');
+  const { data: winners = [], loading } = useApiData('/api/standings/round-winners');
 
   return (
     <PremiumCard

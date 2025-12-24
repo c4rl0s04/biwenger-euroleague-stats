@@ -13,7 +13,7 @@ export default function LeaderGapCard() {
   useEffect(() => {
     if (!currentUser) return;
 
-    fetch(`/api/leader-gap?userId=${currentUser.id}`)
+    fetch(`/api/dashboard/leader-gap?userId=${currentUser.id}`)
       .then(res => res.json())
       .then(d => {
         if (d.success) setData(d.data);

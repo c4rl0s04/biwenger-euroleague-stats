@@ -6,7 +6,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function ConsistencyCard() {
-  const { data = [], loading } = useApiData('/api/clasificacion/volatility');
+  const { data = [], loading } = useApiData('/api/standings/volatility');
 
   return (
     <PremiumCard

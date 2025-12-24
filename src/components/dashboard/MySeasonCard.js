@@ -13,7 +13,7 @@ export default function MySeasonCard() {
   useEffect(() => {
     if (!currentUser) return;
 
-    fetch(`/api/user-stats?userId=${currentUser.id}`)
+    fetch(`/api/player/stats?userId=${currentUser.id}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

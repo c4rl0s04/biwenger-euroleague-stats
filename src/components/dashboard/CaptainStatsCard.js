@@ -14,7 +14,7 @@ export default function CaptainStatsCard() {
   useEffect(() => {
     if (!currentUser) return;
 
-    fetch(`/api/captain-stats?userId=${currentUser.id}`)
+    fetch(`/api/dashboard/captain-stats?userId=${currentUser.id}`)
       .then(res => res.json())
       .then(d => {
         if (d.success) setStats(d.stats);

@@ -7,7 +7,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function WeekMVPsCard() {
-  const { data: mvps = [], loading } = useApiData('/api/last-round-mvps');
+  const { data: mvps = [], loading } = useApiData('/api/dashboard/mvps');
 
   const getRankStyles = (index) => {
     switch (index) {
