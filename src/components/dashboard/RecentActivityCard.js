@@ -11,7 +11,7 @@ export default function RecentActivityCard() {
   const [activeTab, setActiveTab] = useState('transfers');
   const userId = currentUser?.id || '';
   
-  const { data, loading } = useApiData(
+  const { data = {}, loading } = useApiData(
     `/api/recent-activity?userId=${userId}`,
     { dependencies: [userId] }
   );

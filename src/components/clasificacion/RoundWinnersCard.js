@@ -7,9 +7,7 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RoundWinnersCard() {
-  const { data: winners = [], loading } = useApiData('/api/clasificacion/round-winners', {
-    transform: (d) => d.winners || []
-  });
+  const { data: winners = [], loading } = useApiData('/api/clasificacion/round-winners');
 
   return (
     <PremiumCard
@@ -25,7 +23,7 @@ export default function RoundWinnersCard() {
               const colors = getColorForUser(winner.user_id, winner.name);
               return (
                 <div 
-                  key={winner.round_id}
+                  key={`${winner.round_id}-${winner.user_id}`}
                   className={`flex-shrink-0 w-28 p-3 rounded-xl text-center transition-all bg-gradient-to-b ${colors.bg} border ${colors.border} hover:scale-105`}
                 >
                   <div className="text-slate-400 text-[10px] font-medium mb-2">{winner.round_name}</div>

@@ -37,7 +37,7 @@ export function useApiData(endpoint, options = {}) {
     skip = false 
   } = options;
   
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(undefined);
   const [loading, setLoading] = useState(immediate && !skip);
   const [error, setError] = useState(null);
   

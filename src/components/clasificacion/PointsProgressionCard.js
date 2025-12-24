@@ -16,11 +16,35 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
+// Custom tooltip - defined outside component to avoid recreation on each render
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl z-50 pointer-events-none">
+        <p className="text-slate-400 text-xs mb-2 font-medium">{label}</p>
+        <div className="space-y-1">
+          {payload
+            .sort((a, b) => b.value - a.value)
+            .map((entry, index) => (
+              <div key={index} className="flex items-center gap-2 text-xs">
+                <div 
+                  className="w-2 h-2 rounded-full" 
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-slate-300 w-20 truncate">{entry.name}</span>
+                <span className="text-white font-bold ml-auto">{entry.value}</span>
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function PointsProgressionCard() {
   const [selectedUsers, setSelectedUsers] = useState(new Set());
-  const { data: progression = [], loading } = useApiData('/api/clasificacion/progression', {
-    transform: (d) => d.progression || []
-  });
+  const { data: progression = [], loading } = useApiData('/api/clasificacion/points-progression');
 
   // Process data for the chart
   const { chartData, users } = useMemo(() => {
@@ -61,12 +85,15 @@ export default function PointsProgressionCard() {
     };
   }, [progression]);
 
-  // Initialize selected users when data loads
-  useEffect(() => {
-    if (users.length > 0 && selectedUsers.size === 0) {
-      setSelectedUsers(new Set(users.map(u => u.id)));
-    }
+  // Initialize selectedUsers when users change (memoized to avoid unnecessary updates)
+  const initializedUsers = useMemo(() => {
+    return new Set(users.map(u => u.id));
   }, [users]);
+
+  // Use a ref-like pattern: if selectedUsers is empty and users exist, use initializedUsers
+  const effectiveSelectedUsers = selectedUsers.size === 0 && users.length > 0 
+    ? initializedUsers 
+    : selectedUsers;
 
   const toggleUser = (userId) => {
     const newSelected = new Set(selectedUsers);
@@ -84,32 +111,6 @@ export default function PointsProgressionCard() {
     } else {
       setSelectedUsers(new Set(users.map(u => u.id)));
     }
-  };
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl z-50 pointer-events-none">
-          <p className="text-slate-400 text-xs mb-2 font-medium">{label}</p>
-          <div className="space-y-1">
-            {payload
-              .sort((a, b) => b.value - a.value)
-              .map((entry, index) => (
-                <div key={index} className="flex items-center gap-2 text-xs">
-                  <div 
-                    className="w-2 h-2 rounded-full" 
-                    style={{ backgroundColor: entry.color }}
-                  />
-                  <span className="text-slate-300 w-20 truncate">{entry.name}</span>
-                  <span className="text-white font-bold ml-auto">{entry.value}</span>
-                </div>
-              ))}
-          </div>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (

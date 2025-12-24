@@ -5,9 +5,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function TeamValueRankingCard() {
-  const { data: ranking = [], loading } = useApiData('/api/clasificacion/progression', {
-    transform: (d) => d.valueRanking || []
-  });
+  const { data: ranking = [], loading } = useApiData('/api/clasificacion/value-ranking');
 
   const formatPrice = (price) => {
     if (price >= 1000000) {

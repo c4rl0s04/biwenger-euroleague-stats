@@ -7,7 +7,7 @@ import PremiumCard from '@/components/ui/PremiumCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function StandingsCard() {
-  const { data, loading } = useApiData('/api/standings-with-winner');
+  const { data = {}, loading } = useApiData('/api/standings-with-winner');
   const standings = data?.standings || [];
   const lastWinner = data?.lastWinner || null;
 
