@@ -256,15 +256,16 @@ export function getUserHomeAwayStats(userId) {
  */
 export function getCaptainRecommendations(userId, limit = 3) {
   const query = `
-    WITH RecentRounds AS (
-      SELECT DISTINCT m.round_id
+    WITH FinishedRounds AS (
+      SELECT m.round_id
       FROM matches m
-      WHERE m.status = 'finished'
+      GROUP BY m.round_id
+      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
       ORDER BY m.round_id DESC
       LIMIT 3
     ),
     RoundCount AS (
-      SELECT COUNT(*) as total_rounds FROM RecentRounds
+      SELECT COUNT(*) as total_rounds FROM FinishedRounds
     ),
     UserSquadForm AS (
       SELECT 
@@ -285,7 +286,7 @@ export function getCaptainRecommendations(userId, limit = 3) {
         FROM (
           SELECT player_id, fantasy_points
           FROM player_round_stats
-          WHERE round_id IN (SELECT round_id FROM RecentRounds)
+          WHERE round_id IN (SELECT round_id FROM FinishedRounds)
           ORDER BY round_id DESC
         )
         GROUP BY player_id

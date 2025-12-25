@@ -8,9 +8,10 @@ import { db } from '../client.js';
 export function getTopPlayers(limit = 10) {
   const query = `
     WITH FinishedRounds AS (
-      SELECT DISTINCT m.round_id
+      SELECT m.round_id
       FROM matches m
-      WHERE m.status = 'finished'
+      GROUP BY m.round_id
+      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
       ORDER BY m.round_id DESC
       LIMIT 5
     ),
@@ -58,9 +59,10 @@ export function getTopPlayers(limit = 10) {
 export function getTopPlayersByForm(limit = 5, rounds = 3) {
   const query = `
     WITH RecentRounds AS (
-      SELECT DISTINCT m.round_id
+      SELECT m.round_id
       FROM matches m
-      WHERE m.status = 'finished'
+      GROUP BY m.round_id
+      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
       ORDER BY m.round_id DESC
       LIMIT ?
     ),
