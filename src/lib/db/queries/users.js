@@ -257,9 +257,10 @@ export function getUserHomeAwayStats(userId) {
 export function getCaptainRecommendations(userId, limit = 3) {
   const query = `
     WITH RecentRounds AS (
-      SELECT DISTINCT round_id
-      FROM player_round_stats
-      ORDER BY round_id DESC
+      SELECT DISTINCT m.round_id
+      FROM matches m
+      WHERE m.status = 'finished'
+      ORDER BY m.round_id DESC
       LIMIT 3
     ),
     RoundCount AS (

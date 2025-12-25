@@ -65,9 +65,9 @@ export function getNextRound() {
 export function getLastRoundWinner() {
   const query = `
     WITH LastRound AS (
-      SELECT MAX(round_id) as round_id
-      FROM user_rounds
-      WHERE participated = 1
+      SELECT MAX(m.round_id) as round_id
+      FROM matches m
+      WHERE m.status = 'finished'
     )
     SELECT 
       ur.user_id,
@@ -78,6 +78,7 @@ export function getLastRoundWinner() {
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
     WHERE ur.round_id = (SELECT round_id FROM LastRound)
+      AND ur.participated = 1
     ORDER BY ur.points DESC
     LIMIT 1
   `;
@@ -124,8 +125,9 @@ export function getUserRecentRounds(userId, limit = 10) {
 export function getLastRoundMVPs(limit = 5) {
   const query = `
     WITH LastRound AS (
-      SELECT MAX(round_id) as last_round_id
-      FROM player_round_stats
+      SELECT MAX(m.round_id) as last_round_id
+      FROM matches m
+      WHERE m.status = 'finished'
     )
     SELECT 
       prs.player_id,
@@ -152,8 +154,9 @@ export function getLastRoundMVPs(limit = 5) {
 export function getLastRoundStats() {
   const query = `
     WITH LastRound AS (
-      SELECT MAX(round_id) as last_round_id
-      FROM player_round_stats
+      SELECT MAX(m.round_id) as last_round_id
+      FROM matches m
+      WHERE m.status = 'finished'
     )
     SELECT 
       prs.player_id,

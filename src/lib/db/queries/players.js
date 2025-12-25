@@ -12,9 +12,11 @@ export function getTopPlayers(limit = 10) {
         player_id,
         GROUP_CONCAT(fantasy_points) as recent_scores
       FROM (
-        SELECT player_id, fantasy_points
-        FROM player_round_stats
-        ORDER BY round_id DESC
+        SELECT prs.player_id, prs.fantasy_points
+        FROM player_round_stats prs
+        JOIN matches m ON prs.round_id = m.round_id
+        WHERE m.status = 'finished'
+        ORDER BY prs.round_id DESC
       )
       GROUP BY player_id
     )
@@ -42,9 +44,10 @@ export function getTopPlayers(limit = 10) {
 export function getTopPlayersByForm(limit = 5, rounds = 3) {
   const query = `
     WITH RecentRounds AS (
-      SELECT DISTINCT round_id
-      FROM player_round_stats
-      ORDER BY round_id DESC
+      SELECT DISTINCT m.round_id
+      FROM matches m
+      WHERE m.status = 'finished'
+      ORDER BY m.round_id DESC
       LIMIT ?
     ),
     RoundCount AS (
