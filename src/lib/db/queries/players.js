@@ -7,16 +7,30 @@ import { db } from '../client.js';
  */
 export function getTopPlayers(limit = 10) {
   const query = `
-    WITH RecentScores AS (
+    WITH FinishedRounds AS (
+      SELECT DISTINCT m.round_id
+      FROM matches m
+      WHERE m.status = 'finished'
+      ORDER BY m.round_id DESC
+      LIMIT 5
+    ),
+    PlayerRoundScores AS (
+      SELECT 
+        prs.player_id,
+        prs.round_id,
+        SUM(prs.fantasy_points) as round_points
+      FROM player_round_stats prs
+      WHERE prs.round_id IN (SELECT round_id FROM FinishedRounds)
+      GROUP BY prs.player_id, prs.round_id
+    ),
+    RecentScores AS (
       SELECT 
         player_id,
-        GROUP_CONCAT(fantasy_points) as recent_scores
+        GROUP_CONCAT(round_points, ',') as recent_scores
       FROM (
-        SELECT prs.player_id, prs.fantasy_points
-        FROM player_round_stats prs
-        JOIN matches m ON prs.round_id = m.round_id
-        WHERE m.status = 'finished'
-        ORDER BY prs.round_id DESC
+        SELECT player_id, round_points
+        FROM PlayerRoundScores
+        ORDER BY round_id DESC
       )
       GROUP BY player_id
     )
