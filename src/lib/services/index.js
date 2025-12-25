@@ -56,7 +56,6 @@ export {
   fetchUserRecentRounds,
   fetchUserSquadDetails,
   fetchPlayerStreaks,
-  fetchPlayerRoundHistory,
 } from './playerService';
 
 // Market Service

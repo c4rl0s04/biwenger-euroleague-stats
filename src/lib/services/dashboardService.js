@@ -15,7 +15,6 @@ import {
   getUserHomeAwayStats,
   getPersonalizedAlerts,
   getUserSquadDetails,
-  getLeaderGap,
   getLeagueAveragePoints,
   getLastRoundMVPs,
   getRisingStars,
@@ -112,7 +111,7 @@ export function getUserDashboardData(userId) {
     homeAwayStats: getUserHomeAwayStats(userId),
     alerts: getPersonalizedAlerts(userId, 5),
     squadDetails: getUserSquadDetails(userId),
-    leaderGap: getLeaderGap(userId),
+    leaderGap: getLeaderComparison(userId),
   };
 }
 

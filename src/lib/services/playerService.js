@@ -7,17 +7,13 @@
 
 import {
   getPlayerDetails,
-  getPlayerRoundHistory,
-  getPlayerAdvancedStats,
-  getPlayerOwnershipHistory,
-  getPlayerPriceHistory,
-  getTopPlayersThisSeason,
-  getPlayersByTeam,
-  getPlayersByPosition,
+  getTopPlayers,
+  getTopPlayersByForm,
   getUserSeasonStats,
   getUserRecentRounds,
   getUserSquadDetails,
   getPlayerStreaks,
+  getPlayersBirthday
 } from '@/lib/db';
 
 // ============ DIRECT WRAPPERS ============
@@ -36,10 +32,6 @@ export function fetchUserSquadDetails(userId) {
 
 export function fetchPlayerStreaks(playerId) {
   return getPlayerStreaks(playerId);
-}
-
-export function fetchPlayerRoundHistory(playerId) {
-  return getPlayerRoundHistory(playerId);
 }
 
 // ============ AGGREGATED FUNCTIONS ============
@@ -94,11 +86,9 @@ export function getPlayerPerformanceSummary(playerId) {
  * @returns {Array} Matching players
  */
 export function searchPlayers(filters = {}) {
-  const { team, position, limit = 20 } = filters;
-
-  if (team) return getPlayersByTeam(team);
-  if (position) return getPlayersByPosition(position);
-  return getTopPlayersThisSeason(limit);
+  const { limit = 20 } = filters;
+  // Team/position filtering not available at db level
+  return getTopPlayers(limit);
 }
 
 /**
@@ -107,5 +97,5 @@ export function searchPlayers(filters = {}) {
  * @returns {Array} Top players
  */
 export function getTopPerformers(limit = 10) {
-  return getTopPlayersThisSeason(limit);
+  return getTopPlayers(limit);
 }
