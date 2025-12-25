@@ -13,8 +13,7 @@ import TopPlayersCard from '@/components/dashboard/TopPlayersCard';
 import MarketActivityCard from '@/components/dashboard/MarketActivityCard';
 import BirthdayCard from '@/components/dashboard/BirthdayCard';
 import WeekMVPsCard from '@/components/dashboard/WeekMVPsCard';
-import HotStreaksCard from '@/components/dashboard/HotStreaksCard';
-import ColdStreaksCard from '@/components/dashboard/ColdStreaksCard';
+import StreakCard from '@/components/dashboard/StreakCard';
 import IdealLineupCard from '@/components/dashboard/IdealLineupCard';
 
 import FadeIn from '@/components/ui/FadeIn';
@@ -67,8 +66,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <WeekMVPsCard />
           <IdealLineupCard />
-          <HotStreaksCard />
-          <ColdStreaksCard />
+          <StreakCard type="hot" />
+          <StreakCard type="cold" />
         </div>
       </FadeIn>
 

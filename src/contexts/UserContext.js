@@ -22,6 +22,10 @@ export function UserProvider({ children, users }) {
   }, []);
 
   const selectUser = (userId) => {
+    if (!users || !Array.isArray(users)) {
+      console.warn('Users not available yet');
+      return;
+    }
     const user = users.find(u => u.user_id === userId);
     if (user) {
       const userData = {

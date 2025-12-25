@@ -67,10 +67,10 @@ export default function InitialSquadAnalysisCard() {
                         <p className="font-bold text-slate-200">{user.user_name}</p>
                         <div className="flex gap-3 text-[10px] text-slate-400 mt-1">
                           <span>
-                            Real: <span className="text-slate-300 font-medium">{user.actual_points.toLocaleString()}</span>
+                            Real: <span className="text-slate-300 font-medium">{(user.actual_points ?? 0).toLocaleString()}</span>
                           </span>
                           <span>
-                            Max: <span className="text-slate-300 font-medium">{user.potential_points.toLocaleString()}</span>
+                            Max: <span className="text-slate-300 font-medium">{(user.potential_points ?? 0).toLocaleString()}</span>
                           </span>
                         </div>
                       </div>

@@ -13,11 +13,11 @@ export function ensureSchema(db) {
     )
   `).run();
 
-  // 2. Players Table
+  // 2. Players Table (id is Biwenger player ID, not auto-increment)
   db.prepare(`
     CREATE TABLE IF NOT EXISTS players (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE,
+      id INTEGER PRIMARY KEY,
+      name TEXT,
       position TEXT,
       team TEXT,
       puntos INTEGER,
@@ -141,7 +141,9 @@ export function ensureSchema(db) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       player_id INTEGER,
       price INTEGER,
-      date DATE
+      date DATE,
+      UNIQUE(player_id, date),
+      FOREIGN KEY(player_id) REFERENCES players(id)
     )
   `).run();
 
@@ -157,13 +159,15 @@ export function ensureSchema(db) {
     )
   `).run();
 
-  // 11. Initial Squads Table (Inferred)
+  // 11. Initial Squads Table
   db.prepare(`
     CREATE TABLE IF NOT EXISTS initial_squads (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
       player_id INTEGER,
-      UNIQUE(user_id, player_id)
+      price INTEGER,
+      UNIQUE(user_id, player_id),
+      FOREIGN KEY(player_id) REFERENCES players(id)
     )
   `).run();
 

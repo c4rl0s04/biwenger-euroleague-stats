@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
 import { getInitialSquadActualPerformance } from '@/lib/db';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const analytics = getInitialSquadActualPerformance();
-    return NextResponse.json({ success: true, data: analytics });
+    return successResponse(analytics, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching analytics:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

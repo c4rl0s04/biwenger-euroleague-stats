@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getStandings, getLastRoundWinner } from '@/lib/db';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,12 +14,9 @@ export async function GET() {
     const standings = getStandings();
     const lastWinner = getLastRoundWinner();
     
-    return NextResponse.json({ 
-      success: true, 
-      data: { standings, lastWinner } 
-    });
+    return successResponse({ standings, lastWinner }, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching standings with winner:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

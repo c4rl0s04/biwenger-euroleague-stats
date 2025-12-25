@@ -55,8 +55,8 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                         name: user.name
                     });
 
-                    // Insert User Round Score (ALWAYS update/insert since we cleared table)
-                    if (user.lineup) {
+                    // Insert User Round Score (only for FINISHED rounds to avoid 0-point entries)
+                    if (user.lineup && status === 'finished') {
                         try {
                             const participated = user.lineup.count ? 1 : 0;
                             const alineacion = user.lineup.type || null;

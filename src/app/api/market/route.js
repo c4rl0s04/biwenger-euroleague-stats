@@ -7,12 +7,13 @@
 
 import { NextResponse } from 'next/server';
 import { getMarketKPIs, getAllTransfers, getMarketTrends } from '@/lib/db';
+import { validateNumber } from '@/lib/utils/validation';
 
 /**
  * GET /api/market
  * 
  * Query params:
- * - limit: number of transfers to return (default: 50)
+ * - limit: number of transfers to return (default: 50, max: 500)
  * 
  * Returns JSON with:
  * - kpis: Market statistics (total, avg, max, min)
@@ -21,13 +22,24 @@ import { getMarketKPIs, getAllTransfers, getMarketTrends } from '@/lib/db';
  */
 export async function GET(request) {
   try {
-    // Parse query parameters
+    // Parse and validate query parameters
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limitValidation = validateNumber(searchParams.get('limit'), { 
+      defaultValue: 50, 
+      min: 1, 
+      max: 500 
+    });
+    
+    if (!limitValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: limitValidation.error },
+        { status: 400 }
+      );
+    }
     
     // Get data from database
     const kpis = getMarketKPIs();
-    const transfers = getAllTransfers(limit);
+    const transfers = getAllTransfers(limitValidation.value);
     const trends = getMarketTrends();
     
     // Return JSON response
