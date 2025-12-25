@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const players = getLastRoundStats();
+    const players = fetchLastRoundStats();
 
     if (!players || players.length === 0) {
       return successResponse(

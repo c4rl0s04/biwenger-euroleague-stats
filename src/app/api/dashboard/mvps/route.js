@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const mvps = getLastRoundMVPs(5);
+    const mvps = fetchLastRoundMVPs();
     return successResponse(mvps, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching last round MVPs:', error);

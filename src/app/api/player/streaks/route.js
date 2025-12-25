@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const streaks = getPlayerStreaks(3);
+    const streaks = fetchPlayerStreaks();
     return successResponse(streaks, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching player streaks:', error);

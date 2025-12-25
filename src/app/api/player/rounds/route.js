@@ -10,7 +10,7 @@ export async function GET(request) {
       return errorResponse('User ID required', 400);
     }
 
-    const rounds = getUserRecentRounds(userId, 10);
+    const rounds = fetchUserRecentRounds(userId);
     return successResponse({ rounds }, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('API Error:', error);
