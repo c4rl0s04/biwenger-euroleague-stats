@@ -57,7 +57,7 @@ export function fetchStandingsPreview() {
   const standings = getStandings();
   const lastRoundWinner = getLastRoundWinner();
   return {
-    standings: standings.slice(0, 5),
+    standings: standings, // Show all users instead of top 5
     totalUsers: standings.length,
     lastRoundWinner,
   };
