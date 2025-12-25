@@ -26,9 +26,9 @@ export function getTopPlayers(limit = 10) {
     RecentScores AS (
       SELECT 
         player_id,
-        GROUP_CONCAT(round_points, ',') as recent_scores
+        GROUP_CONCAT(round_points) as recent_scores
       FROM (
-        SELECT player_id, round_points
+        SELECT player_id, round_id, round_points
         FROM PlayerRoundScores
         ORDER BY round_id DESC
       )
