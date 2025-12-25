@@ -67,6 +67,6 @@ export {
   fetchAllTransfers,
   fetchMarketTrends,
   fetchRecentTransfers,
-  fetchTransfersByUser,
   fetchMarketOpportunities,
 } from './marketService';
+

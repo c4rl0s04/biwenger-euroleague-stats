@@ -10,7 +10,6 @@ import {
   getAllTransfers,
   getMarketTrends,
   getRecentTransfers,
-  getTransfersByUser,
   getMarketOpportunities,
 } from '@/lib/db';
 
@@ -30,10 +29,6 @@ export function fetchMarketTrends() {
 
 export function fetchRecentTransfers(limit = 20) {
   return getRecentTransfers(limit);
-}
-
-export function fetchTransfersByUser(userId) {
-  return getTransfersByUser(userId);
 }
 
 export function fetchMarketOpportunities(limit = 6) {
@@ -57,16 +52,11 @@ export function getMarketPageData() {
 /**
  * Get market activity feed
  * @param {Object} options - Options
- * @param {string} [options.userId] - Filter by user
  * @param {number} [options.limit=20] - Result limit
- * @returns {Object} Market activity
+ * @returns {Array} Market activity
  */
 export function getMarketActivity(options = {}) {
-  const { userId, limit = 20 } = options;
-
-  if (userId) {
-    return getTransfersByUser(userId);
-  }
-
+  const { limit = 20 } = options;
   return getRecentTransfers(limit);
 }
+

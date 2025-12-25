@@ -17,10 +17,6 @@ import {
   getUserSquadDetails,
   getLeaderGap,
   getLeagueAveragePoints,
-  getRoundMVPs,
-  getUpcomingBirthdays,
-  getHotStreaks,
-  getColdStreaks,
   getLastRoundMVPs,
   getRisingStars,
   getStandings,
@@ -32,6 +28,7 @@ import {
   getRecentTransfers,
   getSignificantPriceChanges,
   getRecentRecords,
+  getStreakStats
 } from '@/lib/db';
 
 // ============ DIRECT WRAPPERS ============
@@ -124,12 +121,13 @@ export function getUserDashboardData(userId) {
  * @returns {Object} League dashboard data
  */
 export function getLeagueDashboardData() {
+  const streaks = getStreakStats();
   return {
     leagueAverage: getLeagueAveragePoints(),
-    roundMVPs: getRoundMVPs(5),
-    upcomingBirthdays: getUpcomingBirthdays(),
-    hotStreaks: getHotStreaks(3),
-    coldStreaks: getColdStreaks(3),
+    roundMVPs: getLastRoundMVPs(5),
+    upcomingBirthdays: getPlayersBirthday(),
+    hotStreaks: streaks.hot?.slice(0, 3) || [],
+    coldStreaks: streaks.cold?.slice(0, 3) || [],
   };
 }
 
@@ -140,7 +138,9 @@ export function getLeagueDashboardData() {
  * @returns {Array} Streak data
  */
 export function getStreakData(type, limit = 5) {
-  return type === 'hot' ? getHotStreaks(limit) : getColdStreaks(limit);
+  const streaks = getStreakStats();
+  const data = type === 'hot' ? streaks.hot : streaks.cold;
+  return data?.slice(0, limit) || [];
 }
 
 /**
