@@ -1,10 +1,5 @@
-import { NextResponse } from 'next/server';
-import { 
-  getRecentTransfers,
-  getSignificantPriceChanges,
-  getRecentRecords,
-  getPersonalizedAlerts
-} from '@/lib/db';
+import { getRecentActivityData } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,38 +8,11 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
-    // Get recent transfers
-    const recentTransfers = getRecentTransfers(8);
-    
-    // Get significant price changes (last 24h, min 500k change)
-    const priceChanges = getSignificantPriceChanges(24, 500000);
-    
-    // Get recent records broken
-    const recentRecords = getRecentRecords();
-    
-    // Get personalized alerts if userId is provided
-    const personalizedAlerts = userId 
-      ? getPersonalizedAlerts(userId, 5)
-      : [];
+    const data = getRecentActivityData(userId);
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        recentTransfers,
-        priceChanges,
-        recentRecords,
-        personalizedAlerts
-      }
-    });
+    return successResponse(data, CACHE_DURATIONS.SHORT);
   } catch (error) {
     console.error('Error fetching recent activity:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch recent activity',
-        message: error.message 
-      },
-      { status: 500 }
-    );
+    return errorResponse('Failed to fetch recent activity');
   }
 }

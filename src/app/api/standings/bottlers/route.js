@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getBottlerStats } from '@/lib/db';
+import { fetchBottlerStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const bottlers = getBottlerStats();
-    return NextResponse.json({ success: true, data: bottlers });
+    const bottlers = fetchBottlerStats();
+    return successResponse(bottlers, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching bottler stats:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

@@ -1,8 +1,19 @@
+/**
+ * @fileoverview Standings query functions
+ * Provides functions for fetching league standings and rankings
+ */
+
 import { db } from '../client.js';
+
+// Import shared type definitions for IDE support
+/** @typedef {import('../types.js').UserStanding} UserStanding */
+/** @typedef {import('../types.js').RoundWinner} RoundWinner */
+/** @typedef {import('../types.js').LeagueTotals} LeagueTotals */
+/** @typedef {import('../types.js').PointsProgression} PointsProgression */
 
 /**
  * Get extended standings with additional statistics
- * @returns {Array} Full standings with wins and averages
+ * @returns {UserStanding[]} Full standings with wins, averages, and team values
  */
 export function getExtendedStandings() {
   const query = `
@@ -65,8 +76,8 @@ export function getExtendedStandings() {
 
 /**
  * Get history of round winners
- * @param {number} limit - Number of rounds to return
- * @returns {Array} Round winners history
+ * @param {number} [limit=15] - Number of rounds to return
+ * @returns {RoundWinner[]} Round winners history with points
  */
 export function getRoundWinners(limit = 15) {
   const query = `
@@ -100,7 +111,7 @@ export function getRoundWinners(limit = 15) {
 
 /**
  * Get aggregated league statistics
- * @returns {Object} League totals and averages
+ * @returns {LeagueTotals & {most_valuable_user: Object, round_record: Object, leader_streak: number}} League totals, averages, and records
  */
 export function getLeagueTotals() {
   const pointsQuery = `
@@ -112,7 +123,7 @@ export function getLeagueTotals() {
     FROM user_rounds
     WHERE participated = 1
   `;
-  
+
   // Get total season rounds from matches table
   // Count unique base round names (strip "(aplazada)" suffix and duplicates)
   const seasonRoundsQuery = `
@@ -124,7 +135,7 @@ export function getLeagueTotals() {
     ) as total_season_rounds
     FROM matches
   `;
-  
+
   const valueQuery = `
     SELECT 
       SUM(sq.team_value) as total_league_value,
@@ -137,7 +148,7 @@ export function getLeagueTotals() {
       GROUP BY owner_id
     ) sq
   `;
-  
+
   const mostValuableQuery = `
     SELECT 
       u.name,
@@ -150,12 +161,12 @@ export function getLeagueTotals() {
     ORDER BY team_value DESC
     LIMIT 1
   `;
-  
+
   const pointsStats = db.prepare(pointsQuery).get();
   const seasonRounds = db.prepare(seasonRoundsQuery).get();
   const valueStats = db.prepare(valueQuery).get();
   const mostValuable = db.prepare(mostValuableQuery).get();
-  
+
   // Record for most points in a single round
   const roundRecordQuery = `
     SELECT 
@@ -171,7 +182,7 @@ export function getLeagueTotals() {
     LIMIT 1
   `;
   const roundRecord = db.prepare(roundRecordQuery).get();
-  
+
   // Leader streak - count consecutive rounds where current leader was #1
   const leaderStreakQuery = `
     WITH RankedRounds AS (
@@ -210,28 +221,28 @@ export function getLeagueTotals() {
     )
     WHERE grp = 0
   `;
-  
+
   let leaderStreak = { streak: 0 };
   try {
     leaderStreak = db.prepare(leaderStreakQuery).get() || { streak: 0 };
   } catch (e) {
     // Fallback if query fails
   }
-  
+
   return {
     ...pointsStats,
     ...valueStats,
     total_season_rounds: seasonRounds?.total_season_rounds || 34,
     most_valuable_user: mostValuable,
     round_record: roundRecord,
-    leader_streak: leaderStreak.streak || 0
+    leader_streak: leaderStreak.streak || 0,
   };
 }
 
 /**
  * Get points progression for all users across rounds
- * @param {number} limit - Number of most recent rounds
- * @returns {Array} Points by round for each user
+ * @param {number} [limit=10] - Number of most recent rounds
+ * @returns {PointsProgression[]} Points by round for each user with cumulative totals
  */
 export function getPointsProgression(limit = 10) {
   const query = `
@@ -258,7 +269,7 @@ export function getPointsProgression(limit = 10) {
 
 /**
  * Get users ranked by team value
- * @returns {Array} Users sorted by squad value
+ * @returns {{user_id: number, name: string, icon: string, team_value: number, price_trend: number, squad_size: number, value_position: number}[]} Users sorted by squad value
  */
 export function getValueRanking() {
   const query = `
@@ -280,7 +291,7 @@ export function getValueRanking() {
 
 /**
  * Get win count per user
- * @returns {Array} Users with their round win counts
+ * @returns {{user_id: number, name: string, icon: string, wins: number}[]} Users with their round win counts
  */
 export function getWinCounts() {
   const query = `

@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getStreakStats } from '@/lib/db';
+import { fetchStreakStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const streaks = getStreakStats();
-    return NextResponse.json({ success: true, data: streaks });
+    const streaks = fetchStreakStats();
+    return successResponse(streaks, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching streaks:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

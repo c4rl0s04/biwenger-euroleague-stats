@@ -1,22 +1,52 @@
+import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
-import StandingsCard from '@/components/dashboard/StandingsCard';
+import { CardSkeleton, FadeIn } from '@/components/ui';
+import {
+  StandingsCard,
+  MySeasonCard,
+  SquadValueCard,
+  RecentRoundsCard,
+  CaptainStatsCard,
+  LeaderGapCard,
+  HomeAwayCard,
+  LeagueComparisonCard,
+} from '@/components/dashboard';
 
-import MySeasonCard from '@/components/dashboard/MySeasonCard';
-import SquadValueCard from '@/components/dashboard/SquadValueCard';
-import RecentRoundsCard from '@/components/dashboard/RecentRoundsCard';
-import CaptainStatsCard from '@/components/dashboard/CaptainStatsCard';
-import LeaderGapCard from '@/components/dashboard/LeaderGapCard';
-import HomeAwayCard from '@/components/dashboard/HomeAwayCard';
-import LeagueComparisonCard from '@/components/dashboard/LeagueComparisonCard';
-import NextRoundCard from '@/components/dashboard/NextRoundCard';
-import TopPlayersCard from '@/components/dashboard/TopPlayersCard';
-import MarketActivityCard from '@/components/dashboard/MarketActivityCard';
-import BirthdayCard from '@/components/dashboard/BirthdayCard';
-import WeekMVPsCard from '@/components/dashboard/WeekMVPsCard';
-import StreakCard from '@/components/dashboard/StreakCard';
-import IdealLineupCard from '@/components/dashboard/IdealLineupCard';
+// Below-the-fold: Lazy load for better initial page load
+const NextRoundCard = nextDynamic(() => import('@/components/dashboard/NextRoundCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
 
-import FadeIn from '@/components/ui/FadeIn';
+const TopPlayersCard = nextDynamic(() => import('@/components/dashboard/TopPlayersCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
+const MarketActivityCard = nextDynamic(() => import('@/components/dashboard/MarketActivityCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
+const BirthdayCard = nextDynamic(() => import('@/components/dashboard/BirthdayCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
+const WeekMVPsCard = nextDynamic(() => import('@/components/dashboard/WeekMVPsCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
+const StreakCard = nextDynamic(() => import('@/components/dashboard/StreakCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
+const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLineupCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
 
 export const dynamic = 'force-dynamic';
 

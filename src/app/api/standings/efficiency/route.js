@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getEfficiencyStats } from '@/lib/db';
+import { fetchEfficiencyStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const efficiency = getEfficiencyStats();
-    return NextResponse.json({ success: true, data: efficiency });
+    const efficiency = fetchEfficiencyStats();
+    return successResponse(efficiency, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching efficiency stats:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

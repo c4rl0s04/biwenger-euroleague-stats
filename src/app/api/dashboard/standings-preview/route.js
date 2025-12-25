@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import { getStandings, getLastRoundWinner } from '@/lib/db';
+import { fetchStandingsPreview } from '@/lib/services';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
@@ -11,10 +10,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
-    const standings = getStandings();
-    const lastWinner = getLastRoundWinner();
-    
-    return successResponse({ standings, lastWinner }, CACHE_DURATIONS.MEDIUM);
+    const data = fetchStandingsPreview();
+    return successResponse(data, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching standings with winner:', error);
     return errorResponse('Internal Server Error');

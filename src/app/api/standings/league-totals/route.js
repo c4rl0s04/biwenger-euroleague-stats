@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getLeagueTotals } from '@/lib/db';
+import { getLeagueOverview } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const totals = getLeagueTotals();
-    return NextResponse.json({ success: true, data: totals });
+    const totals = getLeagueOverview();
+    return successResponse(totals, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching league totals:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

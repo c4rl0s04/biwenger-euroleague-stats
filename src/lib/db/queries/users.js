@@ -1,9 +1,19 @@
+/**
+ * @fileoverview User query functions
+ * Provides functions for fetching user data, squads, and personalized stats
+ */
+
 import { db } from '../client.js';
 import { getStandings } from './stats.js';
 
+// Import shared type definitions for IDE support
+/** @typedef {import('../types.js').User} User */
+/** @typedef {import('../types.js').Player} Player */
+/** @typedef {import('../types.js').UserSeasonStats} UserSeasonStats */
+
 /**
  * Get squad statistics for all users
- * @returns {Array} Squad stats per user
+ * @returns {{user_id: number, squad_size: number, total_value: number, total_points: number}[]} Squad stats per user
  */
 export function getSquadStats() {
   const query = `
@@ -74,9 +84,9 @@ export function getUserSeasonStats(userId) {
       COUNT(*) as rounds_played
     FROM UserRounds
   `;
-  
+
   const stats = db.prepare(statsQuery).get(userId);
-  
+
   const positionsQuery = `
     WITH RoundPositions AS (
       SELECT 
@@ -92,17 +102,17 @@ export function getUserSeasonStats(userId) {
     FROM RoundPositions
     WHERE user_id = ?
   `;
-  
+
   const positions = db.prepare(positionsQuery).get(userId);
   const standings = getStandings();
-  const userStanding = standings.find(u => u.user_id === userId);
-  
+  const userStanding = standings.find((u) => u.user_id === userId);
+
   return {
     ...stats,
     ...positions,
     position: userStanding?.position || 0,
     team_value: userStanding?.team_value || 0,
-    price_trend: userStanding?.price_trend || 0
+    price_trend: userStanding?.price_trend || 0,
   };
 }
 
@@ -119,17 +129,20 @@ export function getUserSquadDetails(userId) {
     WHERE owner_id = ?
     ORDER BY price_increment DESC
   `;
-  
+
   const squad = db.prepare(query).all(userId);
-  
+
   const totalValue = squad.reduce((sum, p) => sum + (p.price || 0), 0);
   const totalTrend = squad.reduce((sum, p) => sum + (p.price_increment || 0), 0);
-  
+
   return {
     total_value: totalValue,
     price_trend: totalTrend,
-    top_rising: squad.filter(p => p.price_increment > 0).slice(0, 3),
-    top_falling: squad.filter(p => p.price_increment < 0).slice(-3).reverse()
+    top_rising: squad.filter((p) => p.price_increment > 0).slice(0, 3),
+    top_falling: squad
+      .filter((p) => p.price_increment < 0)
+      .slice(-3)
+      .reverse(),
   };
 }
 
@@ -148,9 +161,9 @@ export function getUserCaptainStats(userId) {
     LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
     WHERE l.user_id = ? AND l.is_captain = 1
   `;
-  
+
   const overall = db.prepare(overallQuery).get(userId);
-  
+
   const mostUsedQuery = `
     SELECT 
       p.id as player_id,
@@ -165,9 +178,9 @@ export function getUserCaptainStats(userId) {
     GROUP BY l.player_id, p.name
     ORDER BY times_captain DESC, avg_as_captain DESC
   `;
-  
+
   const mostUsed = db.prepare(mostUsedQuery).all(userId);
-  
+
   const bestQuery = `
     SELECT 
       p.name,
@@ -179,7 +192,7 @@ export function getUserCaptainStats(userId) {
     ORDER BY points DESC
     LIMIT 1
   `;
-  
+
   const worstQuery = `
     SELECT 
       p.name,
@@ -191,17 +204,17 @@ export function getUserCaptainStats(userId) {
     ORDER BY points ASC
     LIMIT 1
   `;
-  
+
   const best = db.prepare(bestQuery).get(userId);
   const worst = db.prepare(worstQuery).get(userId);
-  
+
   return {
     total_rounds: overall.total_rounds || 0,
     extra_points: overall.extra_points || 0,
     avg_points: overall.avg_points || 0,
     most_used: mostUsed,
     best_round: best ? { name: best.name, points: best.points } : { name: '', points: 0 },
-    worst_round: worst ? { name: worst.name, points: worst.points } : { name: '', points: 0 }
+    worst_round: worst ? { name: worst.name, points: worst.points } : { name: '', points: 0 },
   };
 }
 
@@ -220,17 +233,18 @@ export function getUserHomeAwayStats(userId) {
     FROM players
     WHERE owner_id = ?
   `;
-  
+
   const stats = db.prepare(query).get(userId);
-  
+
   return {
     total_home: stats.total_home || 0,
     total_away: stats.total_away || 0,
     avg_home: stats.games_home > 0 ? Math.round(stats.total_home / stats.games_home) : 0,
     avg_away: stats.games_away > 0 ? Math.round(stats.total_away / stats.games_away) : 0,
-    difference_pct: stats.total_home > 0 && stats.total_away > 0
-      ? Math.round(((stats.total_home - stats.total_away) / stats.total_away) * 100)
-      : 0
+    difference_pct:
+      stats.total_home > 0 && stats.total_away > 0
+        ? Math.round(((stats.total_home - stats.total_away) / stats.total_away) * 100)
+        : 0,
   };
 }
 
@@ -296,7 +310,7 @@ export function getCaptainRecommendations(userId, limit = 3) {
     ORDER BY avg_recent_points DESC
     LIMIT ?
   `;
-  
+
   return db.prepare(query).all(userId, limit);
 }
 
@@ -308,7 +322,7 @@ export function getCaptainRecommendations(userId, limit = 3) {
  */
 export function getPersonalizedAlerts(userId, limit = 5) {
   const alerts = [];
-  
+
   const priceGainsQuery = `
     SELECT 
       name,
@@ -319,15 +333,15 @@ export function getPersonalizedAlerts(userId, limit = 5) {
     LIMIT 2
   `;
   const priceGains = db.prepare(priceGainsQuery).all(userId);
-  priceGains.forEach(player => {
+  priceGains.forEach((player) => {
     alerts.push({
       type: 'price_gain',
       icon: '📈',
       message: `Tu jugador ${player.name} ha ganado ${(player.price_increment / 1000000).toFixed(2)}M€`,
-      severity: 'success'
+      severity: 'success',
     });
   });
-  
+
   const priceLossesQuery = `
     SELECT 
       name,
@@ -338,15 +352,15 @@ export function getPersonalizedAlerts(userId, limit = 5) {
     LIMIT 2
   `;
   const priceLosses = db.prepare(priceLossesQuery).all(userId);
-  priceLosses.forEach(player => {
+  priceLosses.forEach((player) => {
     alerts.push({
       type: 'price_loss',
       icon: '📉',
       message: `Tu jugador ${player.name} ha perdido ${Math.abs(player.price_increment / 1000000).toFixed(2)}M€`,
-      severity: 'warning'
+      severity: 'warning',
     });
   });
-  
+
   const recentGoodFormQuery = `
     WITH LastRound AS (
       SELECT MAX(round_id) as max_round
@@ -369,9 +383,9 @@ export function getPersonalizedAlerts(userId, limit = 5) {
       type: 'good_performance',
       icon: '⭐',
       message: `¡${goodForm.name} brilló con ${goodForm.fantasy_points} puntos!`,
-      severity: 'info'
+      severity: 'info',
     });
   }
-  
+
   return alerts.slice(0, limit);
 }

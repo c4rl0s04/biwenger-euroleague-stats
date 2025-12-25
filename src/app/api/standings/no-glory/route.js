@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getNoGloryStats } from '@/lib/db';
+import { fetchNoGloryStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const noGlory = getNoGloryStats();
-    return NextResponse.json({ success: true, data: noGlory });
+    const noGlory = fetchNoGloryStats();
+    return successResponse(noGlory, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching no glory stats:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

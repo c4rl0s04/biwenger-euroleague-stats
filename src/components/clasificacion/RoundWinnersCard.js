@@ -2,7 +2,7 @@
 
 import { Trophy } from 'lucide-react';
 import { useMemo } from 'react';
-import PremiumCard from '@/components/ui/PremiumCard';
+import { PremiumCard } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -10,34 +10,35 @@ export default function RoundWinnersCard() {
   const { data: winners = [], loading } = useApiData('/api/standings/round-winners');
 
   return (
-    <PremiumCard
-      title="Ganadores de Jornada"
-      icon={Trophy}
-      color="yellow"
-      loading={loading}
-    >
+    <PremiumCard title="Ganadores de Jornada" icon={Trophy} color="yellow" loading={loading}>
       {!loading && (
         <div className="flex flex-wrap justify-center gap-3">
           {winners.length > 0 ? (
             winners.map((winner) => {
               const colors = getColorForUser(winner.user_id, winner.name);
               return (
-                <div 
+                <div
                   key={`${winner.round_id}-${winner.user_id}`}
                   className={`flex-shrink-0 w-28 p-3 rounded-xl text-center transition-all bg-gradient-to-b ${colors.bg} border ${colors.border} hover:scale-105`}
                 >
-                  <div className="text-slate-400 text-[10px] font-medium mb-2">{winner.round_name}</div>
+                  <div className="text-slate-400 text-[10px] font-medium mb-2">
+                    {winner.round_name}
+                  </div>
                   <div className="flex justify-center mb-2">
                     {winner.icon ? (
-                      <img src={winner.icon} alt={winner.name} className="w-10 h-10 rounded-full ring-2 ring-white/20" />
+                      <img
+                        src={winner.icon}
+                        alt={winner.name}
+                        className="w-10 h-10 rounded-full ring-2 ring-white/20"
+                      />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium">{winner.name.charAt(0)}</div>
+                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium">
+                        {winner.name.charAt(0)}
+                      </div>
                     )}
                   </div>
                   <div className="text-xs font-medium text-white truncate mb-1">{winner.name}</div>
-                  <div className={`text-sm font-bold ${colors.text}`}>
-                    {winner.points} pts
-                  </div>
+                  <div className={`text-sm font-bold ${colors.text}`}>{winner.points} pts</div>
                 </div>
               );
             })

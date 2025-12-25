@@ -1,18 +1,21 @@
-import { NextResponse } from 'next/server';
-import { getLastRoundStats } from '@/lib/db';
+import { fetchLastRoundStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const players = getLastRoundStats();
-    
+
     if (!players || players.length === 0) {
-        return NextResponse.json({ success: true, data: { lineup: [], total_points: 0, round_name: '-' } });
+      return successResponse(
+        { lineup: [], total_points: 0, round_name: '-' },
+        CACHE_DURATIONS.SHORT
+      );
     }
 
     const roundName = players[0].round_name;
-    
+
     // Logic to select top 5 players with max 3 per position
     const lineup = [];
     const positionCounts = {};
@@ -27,30 +30,23 @@ export async function GET() {
       if (currentCount < 3) {
         // Construct image URL (Biwenger standard)
         player.img = `https://cdn.biwenger.com/players/euroleague/${player.player_id}.png`;
-        
+
         lineup.push(player);
         positionCounts[pos] = currentCount + 1;
         totalPoints += player.points;
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
+    return successResponse(
+      {
         lineup,
         total_points: totalPoints,
-        round_name: roundName
-      }
-    });
+        round_name: roundName,
+      },
+      CACHE_DURATIONS.MEDIUM
+    );
   } catch (error) {
     console.error('Error fetching ideal lineup:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch ideal lineup',
-        message: error.message 
-      },
-      { status: 500 }
-    );
+    return errorResponse('Failed to fetch ideal lineup');
   }
 }

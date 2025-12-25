@@ -1,25 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getRisingStars } from '@/lib/db';
+import { fetchRisingStars } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const stars = getRisingStars(5);
-
-    return NextResponse.json({
-      success: true,
-      data: stars
-    });
+    return successResponse(stars, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching rising stars:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch rising stars',
-        message: error.message 
-      },
-      { status: 500 }
-    );
+    return errorResponse('Failed to fetch rising stars');
   }
 }

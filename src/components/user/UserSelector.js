@@ -3,6 +3,7 @@
 import { useUser } from '@/contexts/UserContext';
 import { ChevronDown, UserCircle2 } from 'lucide-react';
 import { useState } from 'react';
+import { UserAvatar } from '@/components/ui';
 
 export default function UserSelector() {
   const { currentUser, selectUser, users } = useUser();
@@ -18,7 +19,9 @@ export default function UserSelector() {
       >
         <UserCircle2 className="w-4 h-4 text-orange-500" />
         <span className="text-white text-sm hidden sm:block">{currentUser.name}</span>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && (
@@ -36,16 +39,12 @@ export default function UserSelector() {
                   currentUser.id === user.user_id ? 'bg-slate-800' : ''
                 }`}
               >
-                {user.icon ? (
-                  <img src={user.icon} alt={user.name} className="w-6 h-6 rounded-full flex-shrink-0" />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                    {user.name.charAt(0)}
-                  </div>
-                )}
-                <span className={`text-sm truncate ${
-                  currentUser.id === user.user_id ? 'text-orange-500 font-medium' : 'text-white'
-                }`}>
+                <UserAvatar src={user.icon} alt={user.name} size={24} className="flex-shrink-0" />
+                <span
+                  className={`text-sm truncate ${
+                    currentUser.id === user.user_id ? 'text-orange-500 font-medium' : 'text-white'
+                  }`}
+                >
                   {user.name}
                 </span>
                 {currentUser.id === user.user_id && (

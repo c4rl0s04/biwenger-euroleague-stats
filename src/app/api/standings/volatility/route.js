@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getVolatilityStats } from '@/lib/db';
+import { fetchVolatilityStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const volatility = getVolatilityStats();
-    return NextResponse.json({ success: true, data: volatility });
+    const volatility = fetchVolatilityStats();
+    return successResponse(volatility, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching volatility:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

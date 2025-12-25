@@ -5,16 +5,19 @@
  */
 export function ensureSchema(db) {
   // 1. Users Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       name TEXT,
       icon TEXT
     )
-  `).run();
+  `
+  ).run();
 
   // 2. Players Table (id is Biwenger player ID, not auto-increment)
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS players (
       id INTEGER PRIMARY KEY,
       name TEXT,
@@ -35,10 +38,12 @@ export function ensureSchema(db) {
       weight INTEGER,
       price INTEGER
     )
-  `).run();
+  `
+  ).run();
 
   // 3. User Rounds Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS user_rounds (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
@@ -49,10 +54,12 @@ export function ensureSchema(db) {
       alineacion TEXT,
       UNIQUE(user_id, round_id)
     )
-  `).run();
+  `
+  ).run();
 
   // 4. Fichajes (Transfers) Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS fichajes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       timestamp INTEGER,
@@ -63,10 +70,12 @@ export function ensureSchema(db) {
       comprador TEXT,
       UNIQUE(timestamp, player_id, vendedor, comprador, precio)
     )
-  `).run();
+  `
+  ).run();
 
   // 5. Lineups Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS lineups (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
@@ -78,10 +87,12 @@ export function ensureSchema(db) {
       UNIQUE(user_id, round_id, player_id),
       FOREIGN KEY(player_id) REFERENCES players(id)
     )
-  `).run();
+  `
+  ).run();
 
   // 6. Matches Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS matches (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       round_id INTEGER,
@@ -94,10 +105,12 @@ export function ensureSchema(db) {
       away_score INTEGER,
       UNIQUE(round_id, home_team, away_team)
     )
-  `).run();
+  `
+  ).run();
 
   // 7. Player Round Stats Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS player_round_stats (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       player_id INTEGER,
@@ -120,10 +133,12 @@ export function ensureSchema(db) {
       UNIQUE(player_id, round_id),
       FOREIGN KEY(player_id) REFERENCES players(id)
     )
-  `).run();
+  `
+  ).run();
 
   // 8. Porras Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS porras (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
@@ -133,10 +148,12 @@ export function ensureSchema(db) {
       aciertos INTEGER,
       UNIQUE(user_id, round_id)
     )
-  `).run();
+  `
+  ).run();
 
   // 9. Market Values Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS market_values (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       player_id INTEGER,
@@ -145,10 +162,12 @@ export function ensureSchema(db) {
       UNIQUE(player_id, date),
       FOREIGN KEY(player_id) REFERENCES players(id)
     )
-  `).run();
+  `
+  ).run();
 
   // 10. Transfer Bids Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS transfer_bids (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       transfer_id INTEGER,
@@ -157,10 +176,12 @@ export function ensureSchema(db) {
       amount INTEGER,
       FOREIGN KEY(transfer_id) REFERENCES fichajes(id) ON DELETE CASCADE
     )
-  `).run();
+  `
+  ).run();
 
   // 11. Initial Squads Table
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS initial_squads (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
@@ -169,10 +190,12 @@ export function ensureSchema(db) {
       UNIQUE(user_id, player_id),
       FOREIGN KEY(player_id) REFERENCES players(id)
     )
-  `).run();
+  `
+  ).run();
 
   // 12. Finances Table (Bonuses, Rewards)
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS finances (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
@@ -182,15 +205,24 @@ export function ensureSchema(db) {
       amount INTEGER,
       description TEXT
     )
-  `).run();
+  `
+  ).run();
 
   // --- MIGRATIONS ---
   // Apply specific migrations that might be needed for existing databases
-  
+
   // Migration: Add owner_id, status, price_increment, etc. to players
-  const playerCols = ['owner_id', 'status', 'price_increment', 'birth_date', 'height', 'weight', 'price'];
-  const playersInfo = db.prepare("PRAGMA table_info(players)").all();
-  const existingPlayerCols = new Set(playersInfo.map(c => c.name));
+  const playerCols = [
+    'owner_id',
+    'status',
+    'price_increment',
+    'birth_date',
+    'height',
+    'weight',
+    'price',
+  ];
+  const playersInfo = db.prepare('PRAGMA table_info(players)').all();
+  const existingPlayerCols = new Set(playersInfo.map((c) => c.name));
 
   for (const col of playerCols) {
     if (!existingPlayerCols.has(col)) {
@@ -208,25 +240,74 @@ export function ensureSchema(db) {
   }
 
   // Migration: Add icon to users
-  const usersInfo = db.prepare("PRAGMA table_info(users)").all();
-  if (!usersInfo.some(c => c.name === 'icon')) {
-      console.log('Migrating users table (adding icon column)...');
-      try {
-        db.prepare('ALTER TABLE users ADD COLUMN icon TEXT').run();
-      } catch (e) {}
+  const usersInfo = db.prepare('PRAGMA table_info(users)').all();
+  if (!usersInfo.some((c) => c.name === 'icon')) {
+    console.log('Migrating users table (adding icon column)...');
+    try {
+      db.prepare('ALTER TABLE users ADD COLUMN icon TEXT').run();
+    } catch (e) {}
   }
 
   // Migration: Check for round_id in lineups
-  const lineupsInfo = db.prepare("PRAGMA table_info(lineups)").all();
-  if (!lineupsInfo.some(c => c.name === 'round_id')) {
+  const lineupsInfo = db.prepare('PRAGMA table_info(lineups)').all();
+  if (!lineupsInfo.some((c) => c.name === 'round_id')) {
     console.log('Migrating lineups table (resetting for schema update)...');
     // Drop logic avoided for brevity unless strictly necessary, but better to add column
     // For simplicity, we assume schema is mostly stable or use ensureSchema logic if needed
-    // The previous ensure-schema.js did DROP TABLE for some changes. 
+    // The previous ensure-schema.js did DROP TABLE for some changes.
     // Ideally we ALTER TABLE ADD COLUMN.
     try {
-        db.prepare('ALTER TABLE lineups ADD COLUMN round_id INTEGER').run();
-        db.prepare('ALTER TABLE lineups ADD COLUMN round_name TEXT').run();
-    } catch(e) {}
+      db.prepare('ALTER TABLE lineups ADD COLUMN round_id INTEGER').run();
+      db.prepare('ALTER TABLE lineups ADD COLUMN round_name TEXT').run();
+    } catch (e) {}
+  }
+
+  // --- INDEXES ---
+  // Add indexes for common query patterns to improve performance
+  const indexes = [
+    // User rounds - frequently queried by user_id and sorted by round_id
+    'CREATE INDEX IF NOT EXISTS idx_user_rounds_user_id ON user_rounds(user_id)',
+    'CREATE INDEX IF NOT EXISTS idx_user_rounds_round_id ON user_rounds(round_id DESC)',
+    'CREATE INDEX IF NOT EXISTS idx_user_rounds_user_round ON user_rounds(user_id, round_id)',
+
+    // Player round stats - critical for player performance queries
+    'CREATE INDEX IF NOT EXISTS idx_player_round_stats_player_id ON player_round_stats(player_id)',
+    'CREATE INDEX IF NOT EXISTS idx_player_round_stats_round_id ON player_round_stats(round_id DESC)',
+
+    // Lineups - user-specific lineup queries
+    'CREATE INDEX IF NOT EXISTS idx_lineups_user_id ON lineups(user_id)',
+    'CREATE INDEX IF NOT EXISTS idx_lineups_round_id ON lineups(round_id)',
+    'CREATE INDEX IF NOT EXISTS idx_lineups_player_id ON lineups(player_id)',
+
+    // Fichajes (transfers) - sorted by timestamp for recent activity
+    'CREATE INDEX IF NOT EXISTS idx_fichajes_timestamp ON fichajes(timestamp DESC)',
+    'CREATE INDEX IF NOT EXISTS idx_fichajes_player_id ON fichajes(player_id)',
+
+    // Market values - price history queries by player and date
+    'CREATE INDEX IF NOT EXISTS idx_market_values_player_id ON market_values(player_id)',
+    'CREATE INDEX IF NOT EXISTS idx_market_values_date ON market_values(date DESC)',
+
+    // Players - common filters
+    'CREATE INDEX IF NOT EXISTS idx_players_owner_id ON players(owner_id)',
+    'CREATE INDEX IF NOT EXISTS idx_players_team ON players(team)',
+    'CREATE INDEX IF NOT EXISTS idx_players_position ON players(position)',
+    'CREATE INDEX IF NOT EXISTS idx_players_puntos ON players(puntos DESC)',
+
+    // Matches - round-based queries
+    'CREATE INDEX IF NOT EXISTS idx_matches_round_id ON matches(round_id)',
+
+    // Initial squads - user squad queries
+    'CREATE INDEX IF NOT EXISTS idx_initial_squads_user_id ON initial_squads(user_id)',
+
+    // Finances - user finance history
+    'CREATE INDEX IF NOT EXISTS idx_finances_user_id ON finances(user_id)',
+  ];
+
+  for (const indexSql of indexes) {
+    try {
+      db.prepare(indexSql).run();
+    } catch (e) {
+      // Index might already exist or column doesn't exist yet
+    }
   }
 }

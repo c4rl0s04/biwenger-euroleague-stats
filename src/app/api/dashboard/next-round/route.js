@@ -1,10 +1,5 @@
-import { NextResponse } from 'next/server';
-import { 
-  getNextRound, 
-  getTopPlayersByForm, 
-  getCaptainRecommendations, 
-  getMarketOpportunities 
-} from '@/lib/db';
+import { getNextRoundData } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,38 +8,11 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
-    // Get next round information
-    const nextRound = getNextRound();
-    
-    // Get top players by recent form
-    const topPlayersForm = getTopPlayersByForm(5, 3);
-    
-    // Get captain recommendations if userId is provided
-    const captainRecommendations = userId 
-      ? getCaptainRecommendations(userId, 6)
-      : [];
-    
-    // Get market opportunities
-    const marketOpportunities = getMarketOpportunities(6);
+    const data = getNextRoundData(userId);
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        nextRound,
-        topPlayersForm,
-        captainRecommendations,
-        marketOpportunities
-      }
-    });
+    return successResponse(data, CACHE_DURATIONS.SHORT);
   } catch (error) {
     console.error('Error fetching next round data:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch next round data',
-        message: error.message 
-      },
-      { status: 500 }
-    );
+    return errorResponse('Failed to fetch next round data');
   }
 }

@@ -2,36 +2,25 @@
 
 import { useUser } from '@/contexts/UserContext';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import PremiumCard from '@/components/ui/PremiumCard';
+import { PremiumCard } from '@/components/ui';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function MarketActivityCard() {
   const { currentUser } = useUser();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const userId = currentUser?.id || '';
-    
-    fetch(`/api/dashboard/recent-activity?userId=${userId}`)
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setData(result.data);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching market activity:', err);
-        setLoading(false);
-      });
-  }, [currentUser]);
+  const { data, loading } = useApiData(
+    () => `/api/dashboard/recent-activity?userId=${currentUser?.id || ''}`,
+    { dependencies: [currentUser?.id] }
+  );
 
   const { recentTransfers } = data || {};
 
   const actionLink = (
-    <Link href="/market" className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+    <Link
+      href="/market"
+      className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+    >
       Ver mercado
     </Link>
   );
@@ -47,8 +36,8 @@ export default function MarketActivityCard() {
       <div className="space-y-0">
         {recentTransfers && recentTransfers.length > 0 ? (
           recentTransfers.slice(0, 8).map((transfer) => (
-            <div 
-              key={transfer.id} 
+            <div
+              key={transfer.id}
               className="flex items-center justify-between py-3 border-b border-slate-800/50 last:border-0 hover:bg-slate-800/20 px-2 rounded transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -56,7 +45,10 @@ export default function MarketActivityCard() {
                   {transfer.player_name?.charAt(0) || '?'}
                 </div>
                 <div>
-                  <Link href={`/player/${transfer.player_id}`} className="font-medium text-white text-sm hover:text-purple-400 transition-colors block">
+                  <Link
+                    href={`/player/${transfer.player_id}`}
+                    className="font-medium text-white text-sm hover:text-purple-400 transition-colors block"
+                  >
                     {transfer.player_name}
                   </Link>
                   <div className="text-xs text-slate-400 flex items-center gap-1">

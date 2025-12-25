@@ -8,8 +8,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write src/",
     "sync": "node src/lib/sync/index.js",
-    "test": "vitest"
+    "test": "vitest",
+    "analyze": "ANALYZE=true next build --webpack",
+    "prepare": "husky"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.6",
@@ -18,16 +21,30 @@
     "dotenv": "^17.2.3",
     "lucide-react": "^0.555.0",
     "next": "16.0.4",
+    "prop-types": "^15.8.1",
     "react": "19.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.0",
     "recharts": "^3.5.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.1",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.0.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.5.3",
     "tailwindcss": "^4",
     "vitest": "^4.0.14"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   }
 }

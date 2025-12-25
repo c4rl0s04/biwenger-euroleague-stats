@@ -1,23 +1,42 @@
-import FullStandingsCard from '@/components/clasificacion/FullStandingsCard';
-import LeagueStatsCard from '@/components/clasificacion/LeagueStatsCard';
-import RoundWinnersCard from '@/components/clasificacion/RoundWinnersCard';
-import PointsProgressionCard from '@/components/clasificacion/PointsProgressionCard';
-import RoundPointsProgressionCard from '@/components/clasificacion/RoundPointsProgressionCard';
-import TeamValueRankingCard from '@/components/clasificacion/TeamValueRankingCard';
-import FadeIn from '@/components/ui/FadeIn';
+'use client';
 
-import ConsistencyCard from '@/components/clasificacion/ConsistencyCard';
-import PlacementStatsCard from '@/components/clasificacion/PlacementStatsCard';
-import LeaguePerformanceCard from '@/components/clasificacion/LeaguePerformanceCard';
-import EfficiencyCard from '@/components/clasificacion/EfficiencyCard';
-import StreaksCard from '@/components/clasificacion/StreaksCard';
-import BottlerCard from '@/components/clasificacion/BottlerCard';
-import HeartbreakersCard from '@/components/clasificacion/HeartbreakersCard';
-import NoGloryCard from '@/components/clasificacion/NoGloryCard';
-import JinxCard from '@/components/clasificacion/JinxCard';
-import InitialSquadAnalysisCard from '@/components/clasificacion/InitialSquadAnalysisCard';
+import dynamic from 'next/dynamic';
+import { CardSkeleton, FadeIn } from '@/components/ui';
+import {
+  FullStandingsCard,
+  LeagueStatsCard,
+  RoundWinnersCard,
+  TeamValueRankingCard,
+  ConsistencyCard,
+  EfficiencyCard,
+  StreaksCard,
+  BottlerCard,
+  HeartbreakersCard,
+  NoGloryCard,
+  JinxCard,
+  InitialSquadAnalysisCard,
+} from '@/components/clasificacion';
 
-export const dynamic = 'force-dynamic';
+// Dynamic imports for chart components - ssr: false excludes recharts from server bundle
+const PointsProgressionCard = dynamic(
+  () => import('@/components/clasificacion/PointsProgressionCard'),
+  { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
+);
+
+const RoundPointsProgressionCard = dynamic(
+  () => import('@/components/clasificacion/RoundPointsProgressionCard'),
+  { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
+);
+
+const PlacementStatsCard = dynamic(() => import('@/components/clasificacion/PlacementStatsCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: false,
+});
+
+const LeaguePerformanceCard = dynamic(
+  () => import('@/components/clasificacion/LeaguePerformanceCard'),
+  { loading: () => <CardSkeleton />, ssr: false }
+);
 
 export default function ClasificacionPage() {
   return (
@@ -26,7 +45,9 @@ export default function ClasificacionPage() {
       <FadeIn delay={0}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Clasificación</h1>
-          <p className="text-slate-400">Estadísticas completas de la liga y evolución de los participantes</p>
+          <p className="text-slate-400">
+            Estadísticas completas de la liga y evolución de los participantes
+          </p>
         </div>
       </FadeIn>
 
@@ -58,7 +79,7 @@ export default function ClasificacionPage() {
         <FadeIn delay={400}>
           <h2 className="text-2xl font-bold text-white mb-6">Rendimiento y Consistencia</h2>
         </FadeIn>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FadeIn delay={450}>
             <ConsistencyCard />
@@ -78,9 +99,6 @@ export default function ClasificacionPage() {
           <FadeIn delay={700}>
             <BottlerCard />
           </FadeIn>
-          <FadeIn delay={750}>
-            <InitialSquadAnalysisCard />
-          </FadeIn>
         </div>
       </div>
 
@@ -89,7 +107,7 @@ export default function ClasificacionPage() {
         <FadeIn delay={800}>
           <h2 className="text-2xl font-bold text-white mb-6">Mala Suerte</h2>
         </FadeIn>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FadeIn delay={850}>
             <HeartbreakersCard />
@@ -112,4 +130,3 @@ export default function ClasificacionPage() {
     </div>
   );
 }
-

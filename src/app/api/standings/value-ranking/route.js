@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getValueRanking } from '@/lib/db';
+import { fetchValueRanking } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const valueRanking = getValueRanking();
-    return NextResponse.json({ success: true, data: valueRanking });
+    const valueRanking = fetchValueRanking();
+    return successResponse(valueRanking, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching value ranking:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

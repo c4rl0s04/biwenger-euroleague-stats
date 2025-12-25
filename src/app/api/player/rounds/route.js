@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getUserRecentRounds } from '@/lib/db';
+import { fetchUserRecentRounds } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export async function GET(request) {
   try {
@@ -7,14 +7,13 @@ export async function GET(request) {
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
+      return errorResponse('User ID required', 400);
     }
 
     const rounds = getUserRecentRounds(userId, 10);
-    return NextResponse.json({ success: true, rounds });
-
+    return successResponse({ rounds }, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to fetch rounds' }, { status: 500 });
+    return errorResponse('Failed to fetch rounds');
   }
 }

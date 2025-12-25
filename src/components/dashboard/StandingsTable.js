@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
+import PropTypes from 'prop-types';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { UserAvatar } from '@/components/ui';
 
-export default function StandingsTable({ standings }) {
+function StandingsTable({ standings }) {
   const [sortConfig, setSortConfig] = useState({ key: 'position', direction: 'asc' });
 
   const handleSort = (key) => {
@@ -17,7 +19,7 @@ export default function StandingsTable({ standings }) {
   const sortedStandings = [...standings].sort((a, b) => {
     const aVal = a[sortConfig.key];
     const bVal = b[sortConfig.key];
-    
+
     if (sortConfig.direction === 'asc') {
       return aVal > bVal ? 1 : -1;
     } else {
@@ -38,7 +40,7 @@ export default function StandingsTable({ standings }) {
 
   const getPointsGap = (currentPoints, position) => {
     if (position === 1) return null;
-    const prevUser = sortedStandings.find(u => u.position === position - 1);
+    const prevUser = sortedStandings.find((u) => u.position === position - 1);
     if (!prevUser) return null;
     return prevUser.total_points - currentPoints;
   };
@@ -53,13 +55,13 @@ export default function StandingsTable({ standings }) {
         <tr>
           <th className="px-2 py-2 rounded-l-lg">Pos</th>
           <th className="px-2 py-2">Usuario</th>
-          <th 
+          <th
             className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
             onClick={() => handleSort('total_points')}
           >
             Puntos {getSortIndicator('total_points')}
           </th>
-          <th 
+          <th
             className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
             onClick={() => handleSort('team_value')}
           >
@@ -71,15 +73,14 @@ export default function StandingsTable({ standings }) {
         {sortedStandings.map((user, idx) => {
           const pointsGap = getPointsGap(user.total_points, user.position);
           return (
-            <tr key={user.user_id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors">
+            <tr
+              key={user.user_id}
+              className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors"
+            >
               <td className="px-2 py-2 font-medium text-white text-xs">#{user.position}</td>
               <td className="px-2 py-2">
                 <div className="flex items-center gap-2">
-                  {user.icon ? (
-                    <img src={user.icon} alt={user.name} className="w-5 h-5 rounded-full" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">{user.name.charAt(0)}</div>
-                  )}
+                  <UserAvatar src={user.icon} alt={user.name} size={20} />
                   <span className="truncate max-w-[100px] sm:max-w-none text-xs">{user.name}</span>
                 </div>
               </td>
@@ -95,8 +96,11 @@ export default function StandingsTable({ standings }) {
                   {getPriceTrendIcon(user.price_trend)}
                 </div>
                 {user.price_trend !== 0 && (
-                  <div className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {user.price_trend > 0 ? '+' : ''}{formatPrice(Math.abs(user.price_trend))}€
+                  <div
+                    className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}
+                  >
+                    {user.price_trend > 0 ? '+' : ''}
+                    {formatPrice(Math.abs(user.price_trend))}€
                   </div>
                 )}
               </td>
@@ -107,3 +111,20 @@ export default function StandingsTable({ standings }) {
     </table>
   );
 }
+
+StandingsTable.propTypes = {
+  /** Array of standings data with user info, points, and team value */
+  standings: PropTypes.arrayOf(
+    PropTypes.shape({
+      user_id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      icon: PropTypes.string,
+      position: PropTypes.number.isRequired,
+      total_points: PropTypes.number.isRequired,
+      team_value: PropTypes.number.isRequired,
+      price_trend: PropTypes.number,
+    })
+  ).isRequired,
+};
+
+export default memo(StandingsTable);

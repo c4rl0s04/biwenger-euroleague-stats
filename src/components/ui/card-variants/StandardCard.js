@@ -1,4 +1,5 @@
 import { createElement } from 'react';
+import PropTypes from 'prop-types';
 
 const colorVariants = {
   emerald: {
@@ -6,8 +7,8 @@ const colorVariants = {
     border: 'border-emerald-700/30',
     hoverBorder: 'hover:border-emerald-600/50',
     iconText: 'text-emerald-500',
-    iconBg: 'text-emerald-500', 
-    titleIconBg: 'bg-emerald-500/10', 
+    iconBg: 'text-emerald-500',
+    titleIconBg: 'bg-emerald-500/10',
   },
   indigo: {
     gradient: 'from-indigo-900/20 to-slate-900',
@@ -75,20 +76,22 @@ const colorVariants = {
   },
 };
 
-export default function StandardCard({ 
-  children, 
-  title, 
-  icon, 
-  color = 'indigo', 
-  loading = false, 
+export default function StandardCard({
+  children,
+  title,
+  icon,
+  color = 'indigo',
+  loading = false,
   className = '',
-  actionRight = null 
+  actionRight = null,
 }) {
   const styles = colorVariants[color] || colorVariants.indigo;
 
   if (loading) {
     return (
-      <div className={`bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-pulse h-full ${className}`}>
+      <div
+        className={`bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-pulse h-full ${className}`}
+      >
         <div className="h-6 bg-slate-700/50 rounded w-1/2 mb-4"></div>
         <div className="space-y-3">
           <div className="h-16 bg-slate-700/50 rounded"></div>
@@ -99,7 +102,9 @@ export default function StandardCard({
   }
 
   return (
-    <div className={`bg-gradient-to-br ${styles.gradient} backdrop-blur-md border ${styles.border} rounded-2xl p-6 relative overflow-hidden group ${styles.hoverBorder} transition-all duration-300 h-full flex flex-col ${className}`}>
+    <div
+      className={`bg-gradient-to-br ${styles.gradient} backdrop-blur-md border ${styles.border} rounded-2xl p-6 relative overflow-hidden group ${styles.hoverBorder} transition-all duration-300 h-full flex flex-col ${className}`}
+    >
       {/* Background decoration */}
       <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
         {icon && createElement(icon, { className: `w-32 h-32 ${styles.iconBg}` })}
@@ -109,18 +114,39 @@ export default function StandardCard({
         <div className="flex items-center gap-2 mb-5 shrink-0 relative">
           {icon && createElement(icon, { className: `w-5 h-5 ${styles.iconText}` })}
           <h2 className="text-xl font-bold text-white">{title}</h2>
-          
-          {actionRight && (
-            <div className="ml-auto">
-              {actionRight}
-            </div>
-          )}
+
+          {actionRight && <div className="ml-auto">{actionRight}</div>}
         </div>
 
-        <div className="flex-1 flex flex-col relative z-10">
-          {children}
-        </div>
+        <div className="flex-1 flex flex-col relative z-10">{children}</div>
       </div>
     </div>
   );
 }
+
+StandardCard.propTypes = {
+  /** Card content */
+  children: PropTypes.node,
+  /** Card title displayed in header */
+  title: PropTypes.string.isRequired,
+  /** Lucide icon component to display */
+  icon: PropTypes.elementType,
+  /** Color theme variant */
+  color: PropTypes.oneOf([
+    'emerald',
+    'indigo',
+    'purple',
+    'orange',
+    'cyan',
+    'yellow',
+    'pink',
+    'blue',
+    'rose',
+  ]),
+  /** Show loading skeleton state */
+  loading: PropTypes.bool,
+  /** Additional CSS classes */
+  className: PropTypes.string,
+  /** Action element to display on the right side of header */
+  actionRight: PropTypes.node,
+};

@@ -1,9 +1,11 @@
 'use client';
 
+import PropTypes from 'prop-types';
+
 /**
  * Loading Skeleton Component
  * Displays animated placeholder lines while content is loading
- * 
+ *
  * @param {number} lines - Number of skeleton lines to display (default: 3)
  * @param {string} className - Additional CSS classes
  * @param {'sm' | 'md' | 'lg'} size - Size variant for line heights
@@ -11,8 +13,8 @@
 export default function LoadingSkeleton({ lines = 3, className = '', size = 'md' }) {
   const sizeClasses = {
     sm: 'h-3',
-    md: 'h-4', 
-    lg: 'h-6'
+    md: 'h-4',
+    lg: 'h-6',
   };
 
   const heightClass = sizeClasses[size] || sizeClasses.md;
@@ -23,14 +25,23 @@ export default function LoadingSkeleton({ lines = 3, className = '', size = 'md'
   return (
     <div className={`animate-pulse space-y-3 ${className}`}>
       {Array.from({ length: lines }).map((_, i) => (
-        <div 
-          key={i} 
-          className={`${heightClass} ${widths[i % widths.length]} bg-slate-700/50 rounded`} 
+        <div
+          key={i}
+          className={`${heightClass} ${widths[i % widths.length]} bg-slate-700/50 rounded`}
         />
       ))}
     </div>
   );
 }
+
+LoadingSkeleton.propTypes = {
+  /** Number of skeleton lines to display */
+  lines: PropTypes.number,
+  /** Additional CSS classes */
+  className: PropTypes.string,
+  /** Size variant for line heights */
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+};
 
 /**
  * Card Loading Skeleton
@@ -50,3 +61,8 @@ export function CardSkeleton({ className = '' }) {
     </div>
   );
 }
+
+CardSkeleton.propTypes = {
+  /** Additional CSS classes */
+  className: PropTypes.string,
+};

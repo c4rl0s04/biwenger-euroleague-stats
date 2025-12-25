@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getJinxStats } from '@/lib/db';
+import { fetchJinxStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const jinx = getJinxStats();
-    return NextResponse.json({ success: true, data: jinx });
+    const jinx = fetchJinxStats();
+    return successResponse(jinx, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching jinx stats:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return errorResponse('Internal Server Error');
   }
 }

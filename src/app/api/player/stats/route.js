@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getUserSeasonStats } from '@/lib/db';
+import { fetchUserSeasonStats } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export async function GET(request) {
   try {
@@ -7,24 +7,13 @@ export async function GET(request) {
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
-      );
+      return errorResponse('User ID is required', 400);
     }
 
-    const stats = getUserSeasonStats(userId);
-
-    return NextResponse.json({
-      success: true,
-      stats
-    });
-
+    const stats = fetchUserSeasonStats(userId);
+    return successResponse({ stats }, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch user stats' },
-      { status: 500 }
-    );
+    return errorResponse('Failed to fetch user stats');
   }
 }

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getLeaderComparison } from '@/lib/db';
+import { fetchLeaderComparison } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export async function GET(request) {
   try {
@@ -7,14 +7,13 @@ export async function GET(request) {
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
+      return errorResponse('User ID required', 400);
     }
 
-    const data = getLeaderComparison(userId);
-    return NextResponse.json({ success: true, data });
-
+    const data = fetchLeaderComparison(userId);
+    return successResponse(data, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to fetch leader comparison' }, { status: 500 });
+    return errorResponse('Failed to fetch leader comparison');
   }
 }

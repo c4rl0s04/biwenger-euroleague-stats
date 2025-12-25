@@ -3,7 +3,7 @@
 import { Trophy, Medal } from 'lucide-react';
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import PremiumCard from '@/components/ui/PremiumCard';
+import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function FullStandingsCard() {
@@ -21,7 +21,7 @@ export default function FullStandingsCard() {
   const sortedStandings = [...standings].sort((a, b) => {
     const aVal = a[sortConfig.key];
     const bVal = b[sortConfig.key];
-    
+
     if (sortConfig.direction === 'asc') {
       return aVal > bVal ? 1 : -1;
     } else {
@@ -68,25 +68,25 @@ export default function FullStandingsCard() {
               <tr>
                 <th className="px-3 py-3 rounded-l-lg">Pos</th>
                 <th className="px-3 py-3">Usuario</th>
-                <th 
+                <th
                   className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors"
                   onClick={() => handleSort('total_points')}
                 >
                   Puntos {getSortIndicator('total_points')}
                 </th>
-                <th 
+                <th
                   className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors hidden md:table-cell"
                   onClick={() => handleSort('avg_points')}
                 >
                   Media {getSortIndicator('avg_points')}
                 </th>
-                <th 
+                <th
                   className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors hidden lg:table-cell"
                   onClick={() => handleSort('round_wins')}
                 >
                   Victorias {getSortIndicator('round_wins')}
                 </th>
-                <th 
+                <th
                   className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors rounded-r-lg"
                   onClick={() => handleSort('team_value')}
                 >
@@ -98,9 +98,14 @@ export default function FullStandingsCard() {
               {sortedStandings.map((user) => {
                 const gapToLeader = leader ? leader.total_points - user.total_points : 0;
                 return (
-                  <tr key={user.user_id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors">
+                  <tr
+                    key={user.user_id}
+                    className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors"
+                  >
                     <td className="px-3 py-3">
-                      <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${getPositionStyle(user.position)}`}>
+                      <span
+                        className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${getPositionStyle(user.position)}`}
+                      >
                         {user.position}
                       </span>
                     </td>
@@ -109,11 +114,15 @@ export default function FullStandingsCard() {
                         {user.icon ? (
                           <img src={user.icon} alt={user.name} className="w-8 h-8 rounded-full" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium">{user.name.charAt(0)}</div>
+                          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium">
+                            {user.name.charAt(0)}
+                          </div>
                         )}
                         <div>
                           <div className="font-medium text-white">{user.name}</div>
-                          <div className="text-xs text-slate-500">{user.rounds_played} jornadas</div>
+                          <div className="text-xs text-slate-500">
+                            {user.rounds_played} jornadas
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -132,17 +141,28 @@ export default function FullStandingsCard() {
                     <td className="px-3 py-3 text-right hidden lg:table-cell">
                       <div className="flex items-center justify-end gap-1">
                         {user.round_wins > 0 && <Medal className="w-4 h-4 text-yellow-500" />}
-                        <span className={user.round_wins > 0 ? 'text-yellow-400 font-bold' : 'text-slate-500'}>{user.round_wins}</span>
+                        <span
+                          className={
+                            user.round_wins > 0 ? 'text-yellow-400 font-bold' : 'text-slate-500'
+                          }
+                        >
+                          {user.round_wins}
+                        </span>
                       </div>
                     </td>
                     <td className="px-3 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <span className="text-slate-400 text-xs">{formatPrice(user.team_value)}€</span>
+                        <span className="text-slate-400 text-xs">
+                          {formatPrice(user.team_value)}€
+                        </span>
                         {getPriceTrendIcon(user.price_trend)}
                       </div>
                       {user.price_trend !== 0 && (
-                        <div className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {user.price_trend > 0 ? '+' : ''}{formatPrice(user.price_trend)}€
+                        <div
+                          className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}
+                        >
+                          {user.price_trend > 0 ? '+' : ''}
+                          {formatPrice(user.price_trend)}€
                         </div>
                       )}
                     </td>

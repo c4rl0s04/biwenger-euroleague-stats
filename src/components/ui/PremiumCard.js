@@ -1,13 +1,14 @@
 'use client';
 
+import { memo } from 'react';
 import { useCardTheme } from '@/contexts/CardThemeContext';
 import StandardCard from './card-variants/StandardCard';
 import GlassCard from './card-variants/GlassCard';
 import MeshCard from './card-variants/MeshCard';
 import NeoCard from './card-variants/NeoCard';
 
-export default function PremiumCard(props) {
-  // Use try/catch or default because this component might be used 
+function PremiumCard(props) {
+  // Use try/catch or default because this component might be used
   // outside the provider during initial render/hydration
   // (Resolved build error refresh)
   let theme = 'standard';
@@ -30,3 +31,5 @@ export default function PremiumCard(props) {
       return <StandardCard {...props} />;
   }
 }
+
+export default memo(PremiumCard);

@@ -4,79 +4,133 @@ An advanced analytics dashboard for Euroleague fantasy managers on Biwenger. Thi
 
 ## Features
 
--   **Dashboard**: Overview of your team, market trends, and league standings.
--   **Player Analysis**: Detailed stats, hot/cold streaks, and form analysis.
--   **Market Intelligence**: Track price changes, undervalued players, and transfer history.
--   **League Stats**: "Porras" (prediction game) tracking, leader comparisons, and average points.
--   **Tools**: Ideal lineup calculator and captain recommendations.
+- **Dashboard**: Overview of your team, market trends, and league standings
+- **Player Analysis**: Detailed stats, hot/cold streaks, and form analysis
+- **Market Intelligence**: Track price changes, undervalued players, and transfer history
+- **League Stats**: Standings, round winners, and points progression charts
+- **Tools**: Ideal lineup calculator and captain recommendations
 
 ## Tech Stack
 
--   **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
--   **Language**: JavaScript / Node.js
--   **Database**: SQLite (via `better-sqlite3`)
--   **Styling**: Tailwind CSS
--   **Charts**: Chart.js
+| Category  | Technology              |
+| --------- | ----------------------- |
+| Framework | Next.js 16 (App Router) |
+| Language  | JavaScript / Node.js    |
+| Database  | SQLite (better-sqlite3) |
+| Styling   | Tailwind CSS            |
+| Charts    | Recharts                |
+| Testing   | Vitest (79 tests)       |
 
-## Prerequisites
+## Quick Start
 
--   Node.js 18+
--   A generic or public Biwenger account (for tokens)
+```bash
+# 1. Clone and install
+git clone https://github.com/yourusername/biwengerstats-next.git
+cd biwengerstats-next
+npm install
 
-## Setup
+# 2. Configure environment
+cp .env.example .env.local
+# Edit .env.local with your Biwenger credentials
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/yourusername/biwengerstats-next.git
-    cd biwengerstats-next
-    ```
+# 3. Sync data from Biwenger
+npm run sync
 
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
+# 4. Start development server
+npm run dev
+```
 
-3.  **Configure Environment**:
-    Copy `.env.example` to `.env.local` and fill in your details:
-    ```bash
-    cp .env.example .env.local
-    ```
-    
-    *   `BIWENGER_TOKEN`: Your Bearer token (inspect network requests on biwenger.com).
-    *   `BIWENGER_LEAGUE_ID`: The ID of the league you want to track.
-    *   `BIWENGER_USER_ID`: Your specific user ID (found in headers).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-4.  **Sync Data**:
-    Run the sync script to fetch data from Biwenger and populate the SQLite database.
-    ```bash
-    npm run sync
-    ```
+## Available Scripts
 
-5.  **Run Development Server**:
-    ```bash
-    npm run dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) with your browser.
+| Script            | Description                 |
+| ----------------- | --------------------------- |
+| `npm run dev`     | Start development server    |
+| `npm run build`   | Build for production        |
+| `npm run start`   | Start production server     |
+| `npm run sync`    | Sync data from Biwenger API |
+| `npm test`        | Run test suite (79 tests)   |
+| `npm run lint`    | Run ESLint                  |
+| `npm run format`  | Format code with Prettier   |
+| `npm run analyze` | Analyze bundle size         |
 
+## Documentation
 
+| Document                                             | Description                         |
+| ---------------------------------------------------- | ----------------------------------- |
+| [API.md](./API.md)                                   | API endpoints reference (32 routes) |
+| [DATABASE.md](./DATABASE.md)                         | Database schema and ERD             |
+| [COMPONENTS.md](./COMPONENTS.md)                     | Component usage examples            |
+| [IMPROVEMENTS_ROADMAP.md](./IMPROVEMENTS_ROADMAP.md) | Development roadmap                 |
+
+## Project Structure
+
+```
+src/
+├── app/                 # Next.js pages and API routes
+│   ├── api/             # 32 API endpoints
+│   ├── dashboard/       # Dashboard page
+│   ├── standings/       # Standings page
+│   └── player/[id]/     # Player profile page
+├── components/          # React components
+│   ├── dashboard/       # Dashboard cards (19)
+│   ├── clasificacion/   # Standings cards (16)
+│   ├── player/          # Player cards (12)
+│   └── ui/              # Shared UI components
+└── lib/                 # Utilities and database
+    ├── db/              # Database layer
+    │   ├── queries/     # Query functions
+    │   └── types.js     # JSDoc type definitions
+    ├── hooks/           # Custom React hooks
+    ├── sync/            # Data sync scripts
+    └── utils/           # Utilities (validation, response)
+```
 
 ## Docker Support
-
-Build and run using Docker:
 
 ```bash
 docker build -t biwengerstats .
 docker run -p 3000:3000 -v $(pwd)/data:/app/data --env-file .env.local biwengerstats
 ```
 
-## Project Structure
+## Development
 
--   `src/app`: Next.js pages and API routes.
--   `src/components`: React components (Cards, Charts, Tables).
--   `src/lib/db`: Database layer (Client, Schema, Queries).
--   `scripts`: Data synchronization scripts.
--   `data`: SQLite database storage (git-ignored).
+### Pre-commit Hooks
+
+This project uses Husky + lint-staged for automatic code formatting:
+
+```bash
+git commit -m "Your message"
+# Automatically runs Prettier and ESLint on staged files
+```
+
+### Testing
+
+```bash
+npm test           # Run all tests
+npm test -- --ui   # Run with Vitest UI
+```
+
+### CI/CD
+
+GitHub Actions runs on every push/PR:
+
+- Lint check
+- Test suite
+- Build verification
+- Format check
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `npm test`
+5. Submit a pull request
+
+## License
+
+MIT
