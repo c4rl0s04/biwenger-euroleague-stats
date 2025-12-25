@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const comparison = getLeagueComparisonStats();
+    const comparison = fetchLeagueComparisonStats();
     return successResponse(comparison, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching league comparison:', error);
