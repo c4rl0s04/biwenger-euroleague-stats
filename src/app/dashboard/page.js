@@ -1,16 +1,14 @@
 import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
 import { CardSkeleton, FadeIn } from '@/components/ui';
-import {
-  StandingsCard,
-  MySeasonCard,
-  SquadValueCard,
-  RecentRoundsCard,
-  CaptainStatsCard,
-  LeaderGapCard,
-  HomeAwayCard,
-  LeagueComparisonCard,
-} from '@/components/dashboard';
+import StandingsCard from '@/components/dashboard/StandingsCard';
+import MySeasonCard from '@/components/dashboard/MySeasonCard';
+import SquadValueCard from '@/components/dashboard/SquadValueCard';
+import RecentRoundsCard from '@/components/dashboard/RecentRoundsCard';
+import CaptainStatsCard from '@/components/dashboard/CaptainStatsCard';
+import LeaderGapCard from '@/components/dashboard/LeaderGapCard';
+import HomeAwayCard from '@/components/dashboard/HomeAwayCard';
+import LeagueComparisonCard from '@/components/dashboard/LeagueComparisonCard';
 
 // Below-the-fold: Lazy load for better initial page load
 const NextRoundCard = nextDynamic(() => import('@/components/dashboard/NextRoundCard'), {

@@ -5,7 +5,7 @@ import { db } from '../client.js';
  * @param {number} limit - Number of players
  * @returns {Array} List of top players
  */
-export function getTopPlayers(limit = 10) {
+export function getTopPlayers(limit = 6) {
   const query = `
     WITH FinishedRounds AS (
       SELECT m.round_id
@@ -105,7 +105,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
     ORDER BY avg_points DESC, total_points DESC
     LIMIT ?
   `;
-  
+
   return db.prepare(query).all(rounds, limit);
 }
 
@@ -127,9 +127,9 @@ export function getPlayerDetails(playerId) {
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE p.id = ?
   `;
-  
+
   const player = db.prepare(query).get(playerId);
-  
+
   if (!player) return null;
 
   // 2. Matches History (Existing + New Advanced Stats Cols)
@@ -164,7 +164,7 @@ export function getPlayerDetails(playerId) {
       AND m.date < datetime('now')
     ORDER BY m.round_id DESC
   `;
-  
+
   const recentMatches = db.prepare(matchesQuery).all(playerId);
 
   // 3. Price History
@@ -221,7 +221,7 @@ export function getPlayerDetails(playerId) {
       to_name: initialOwner.owner_name,
       amount: 0,
       from_img: null, // System usually has no img, or we could handle in UI
-      to_img: initialOwner.owner_img
+      to_img: initialOwner.owner_img,
     });
   }
 
@@ -245,23 +245,31 @@ export function getPlayerDetails(playerId) {
   // 6. Advanced Stats Aggregates (Season Totals)
   // We could calculate this in JS from recentMatches, but SQL is fine too.
   // Using JS reduce here since we already fetched detailed stats in recentMatches
-  const advancedStats = recentMatches.reduce((acc, m) => {
-    acc.two_points_made += m.two_points_made || 0;
-    acc.two_points_attempted += m.two_points_attempted || 0;
-    acc.three_points_made += m.three_points_made || 0;
-    acc.three_points_attempted += m.three_points_attempted || 0;
-    acc.free_throws_made += m.free_throws_made || 0;
-    acc.free_throws_attempted += m.free_throws_attempted || 0;
-    acc.blocks += m.blocks || 0;
-    acc.turnovers += m.turnovers || 0;
-    acc.fouls += m.fouls_committed || 0;
-    return acc;
-  }, {
-    two_points_made: 0, two_points_attempted: 0,
-    three_points_made: 0, three_points_attempted: 0,
-    free_throws_made: 0, free_throws_attempted: 0,
-    blocks: 0, turnovers: 0, fouls: 0
-  });
+  const advancedStats = recentMatches.reduce(
+    (acc, m) => {
+      acc.two_points_made += m.two_points_made || 0;
+      acc.two_points_attempted += m.two_points_attempted || 0;
+      acc.three_points_made += m.three_points_made || 0;
+      acc.three_points_attempted += m.three_points_attempted || 0;
+      acc.free_throws_made += m.free_throws_made || 0;
+      acc.free_throws_attempted += m.free_throws_attempted || 0;
+      acc.blocks += m.blocks || 0;
+      acc.turnovers += m.turnovers || 0;
+      acc.fouls += m.fouls_committed || 0;
+      return acc;
+    },
+    {
+      two_points_made: 0,
+      two_points_attempted: 0,
+      three_points_made: 0,
+      three_points_attempted: 0,
+      free_throws_made: 0,
+      free_throws_attempted: 0,
+      blocks: 0,
+      turnovers: 0,
+      fouls: 0,
+    }
+  );
 
   return {
     ...player,
@@ -269,7 +277,7 @@ export function getPlayerDetails(playerId) {
     priceHistory,
     transfers,
     nextMatch,
-    advancedStats
+    advancedStats,
   };
 }
 
@@ -292,7 +300,7 @@ export function getPlayersBirthday() {
       AND strftime('%m-%d', p.birth_date) = strftime('%m-%d', 'now')
     ORDER BY p.name
   `;
-  
+
   return db.prepare(query).all();
 }
 
@@ -347,12 +355,12 @@ export function getPlayerStreaks(minGames = 3) {
     ORDER BY ABS(prf.recent_avg - COALESCE(sa.season_avg, 0)) DESC
     LIMIT 20
   `;
-  
+
   const allPlayers = db.prepare(query).all(minGames);
-  
+
   return {
-    hot: allPlayers.filter(p => p.trend_pct > 20).slice(0, 5),
-    cold: allPlayers.filter(p => p.trend_pct < -20).slice(0, 5)
+    hot: allPlayers.filter((p) => p.trend_pct > 20).slice(0, 5),
+    cold: allPlayers.filter((p) => p.trend_pct < -20).slice(0, 5),
   };
 }
 
@@ -413,6 +421,6 @@ export function getRisingStars(limit = 5) {
     ORDER BY improvement DESC
     LIMIT ?
   `;
-  
+
   return db.prepare(query).all(limit);
 }

@@ -45,6 +45,8 @@ next-env.d.ts
 
 # Local Database (keep folder, ignore db file)
 data/*.db
+data/*.db-shm
+data/*.db-wal
 !data/.gitkeep
 
 # Local folders

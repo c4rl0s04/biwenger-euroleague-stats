@@ -18,10 +18,10 @@ export default function LeagueComparisonCard() {
     }
   );
 
-  // Fetch league average
-  const { data: leagueData, loading: leagueLoading } = useApiData('/api/league-average', {
-    skip: !currentUser,
-  });
+  // Fetch league comparison data
+  const { data: leagueData, loading: leagueLoading } = useApiData(
+    '/api/standings/league-comparison'
+  );
 
   if (!currentUser) return null;
 
