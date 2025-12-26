@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trophy, Users, User, ShoppingCart, Calendar } from 'lucide-react';
-import UserSelector from '@/components/user/UserSelector';
+import { UserSelector } from '@/components/user';
 
 import { useCardTheme } from '@/contexts/CardThemeContext';
 
@@ -17,10 +17,12 @@ const navItems = [
 ];
 
 const navVariants = {
-  standard: 'bg-slate-950/70 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-orange-900/5 support-[backdrop-filter]:bg-slate-950/70',
-  glass: 'bg-slate-900/30 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]',
+  standard:
+    'bg-slate-950/70 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-orange-900/5 support-[backdrop-filter]:bg-slate-950/70',
+  glass:
+    'bg-slate-900/30 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]',
   mesh: 'bg-slate-950/60 backdrop-blur-xl border-b border-indigo-500/10 shadow-lg shadow-indigo-900/5',
-  neo: 'bg-[#0A0A0A] border-b-2 border-slate-800 shadow-none'
+  neo: 'bg-[#0A0A0A] border-b-2 border-slate-800 shadow-none',
 };
 
 export default function Navbar() {
@@ -60,7 +62,9 @@ export default function Navbar() {
                           : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                       }`}
                     >
-                      <item.icon className={`w-4 h-4 mr-2 ${isActive ? 'text-orange-500' : 'text-slate-400'}`} />
+                      <item.icon
+                        className={`w-4 h-4 mr-2 ${isActive ? 'text-orange-500' : 'text-slate-400'}`}
+                      />
                       {item.name}
                     </Link>
                   );
@@ -68,12 +72,12 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-          
+
           {/* User Selector */}
           <UserSelector />
         </div>
       </div>
-      
+
       {/* Mobile Navigation (Bottom Bar for easy access) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-xl border-t border-white/5 pb-safe z-50">
         <div className="flex justify-around items-center h-16">

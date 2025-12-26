@@ -2,7 +2,7 @@
 
 import { UserProvider } from '@/contexts/UserContext';
 import { CardThemeProvider } from '@/contexts/CardThemeContext';
-import UserSelectionModal from '@/components/user/UserSelectionModal';
+import { UserSelectionModal } from '@/components/user';
 import { ThemeSwitcher, ThemeBackground, ErrorBoundary } from '@/components/ui';
 
 export default function ClientWrapper({ children, users }) {

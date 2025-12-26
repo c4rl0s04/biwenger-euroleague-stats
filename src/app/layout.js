@@ -1,5 +1,4 @@
-import Navbar from '@/components/layout/Navbar';
-import ClientWrapper from '@/components/layout/ClientWrapper';
+import { Navbar, ClientWrapper } from '@/components/layout';
 import { getStandings } from '@/lib/db';
 import './globals.css';
 import { Inter } from 'next/font/google';
