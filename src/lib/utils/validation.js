@@ -63,3 +63,22 @@ export function validatePlayerId(id) {
   
   return { valid: true, value: parsed };
 }
+
+/**
+ * Validates a user ID (positive integer)
+ * @param {string|number|null} id - User ID
+ * @returns {{ valid: boolean, value?: number, error?: string }}
+ */
+export function validateUserId(id) {
+  if (id === null || id === undefined || id === '') {
+    return { valid: false, error: 'User ID is required' };
+  }
+  
+  const parsed = parseInt(id, 10);
+  
+  if (isNaN(parsed) || parsed <= 0) {
+    return { valid: false, error: 'Invalid user ID format' };
+  }
+  
+  return { valid: true, value: id };
+}

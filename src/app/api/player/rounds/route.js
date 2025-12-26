@@ -1,19 +1,21 @@
 import { fetchUserRecentRounds } from '@/lib/services';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { validateUserId } from '@/lib/utils/validation';
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const userIdValidation = validateUserId(searchParams.get('userId'));
 
-    if (!userId) {
-      return errorResponse('User ID required', 400);
+    if (!userIdValidation.valid) {
+      return errorResponse(userIdValidation.error, 400);
     }
 
-    const rounds = fetchUserRecentRounds(userId);
+    const rounds = fetchUserRecentRounds(userIdValidation.value);
     return successResponse({ rounds }, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('API Error:', error);
     return errorResponse('Failed to fetch rounds');
   }
 }
+
