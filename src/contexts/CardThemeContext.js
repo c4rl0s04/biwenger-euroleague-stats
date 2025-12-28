@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 const CardThemeContext = createContext({
   theme: 'standard',
@@ -8,15 +8,11 @@ const CardThemeContext = createContext({
 });
 
 export function CardThemeProvider({ children }) {
-  const [theme, setTheme] = useState('standard');
-
-  useEffect(() => {
-    // Load saved theme from local storage if available
-    const savedTheme = localStorage.getItem('card-theme');
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-  }, []);
+  const [theme, setTheme] = useState(() => {
+    // Lazy initialization: read from localStorage on first render (client-side only)
+    if (typeof window === 'undefined') return 'standard';
+    return localStorage.getItem('card-theme') || 'standard';
+  });
 
   const handleSetTheme = (newTheme) => {
     setTheme(newTheme);
