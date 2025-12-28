@@ -12,18 +12,18 @@ import { fetchRoundGames } from '../api/biwenger-client.js';
  * @param {Object} playersList - Map of player IDs to player objects (optional)
  */
 export async function syncMatches(db, round, playersList = {}) {
-    const roundId = round.id;
-    const dbRoundId = round.dbId || round.id; // Use mapped ID for DB if present
-    const roundName = round.name;
-    
-    console.log('Fetching matches...');
-    let gamesData = null;
-    try {
-        // Use score=1 to get standard fantasy points
-        gamesData = await fetchRoundGames(roundId);
-        
-        if (gamesData.data && gamesData.data.games) {
-            const insertMatch = db.prepare(`
+  const roundId = round.id;
+  const dbRoundId = round.dbId || round.id; // Use mapped ID for DB if present
+  const roundName = round.name;
+
+  console.log('Fetching matches...');
+  let gamesData = null;
+  try {
+    // Use score=1 to get standard fantasy points
+    gamesData = await fetchRoundGames(roundId);
+
+    if (gamesData.data && gamesData.data.games) {
+      const insertMatch = db.prepare(`
                 INSERT INTO matches (round_id, round_name, home_team, away_team, date, status, home_score, away_score)
                 VALUES (@round_id, @round_name, @home_team, @away_team, @date, @status, @home_score, @away_score)
                 ON CONFLICT(round_id, home_team, away_team) DO UPDATE SET
@@ -34,7 +34,7 @@ export async function syncMatches(db, round, playersList = {}) {
                 date=excluded.date
             `);
 
-            const insertStats = db.prepare(`
+      const insertStats = db.prepare(`
                 INSERT INTO player_round_stats (
                     player_id, round_id, fantasy_points, minutes, points,
                     two_points_made, two_points_attempted,
@@ -66,8 +66,8 @@ export async function syncMatches(db, round, playersList = {}) {
                     fouls_committed=excluded.fouls_committed
             `);
 
-            // Helper to insert unknown players on the fly
-            const insertPlayer = db.prepare(`
+      // Helper to insert unknown players on the fly
+      const insertPlayer = db.prepare(`
               INSERT INTO players (
                 id, name, team, position, 
                 puntos, partidos_jugados, 
@@ -83,94 +83,94 @@ export async function syncMatches(db, round, playersList = {}) {
               ON CONFLICT(id) DO NOTHING
             `);
 
-            db.transaction(() => {
-                for (const game of gamesData.data.games) {
-                    insertMatch.run({
-                        round_id: dbRoundId,
-                        round_name: roundName,
-                        home_team: game.home.name,
-                        away_team: game.away.name,
-                        date: new Date(game.date * 1000).toISOString(),
-                        status: game.status,
-                        home_score: game.home.score,
-                        away_score: game.away.score
-                    });
+      db.transaction(() => {
+        for (const game of gamesData.data.games) {
+          insertMatch.run({
+            round_id: dbRoundId,
+            round_name: roundName,
+            home_team: game.home.name,
+            away_team: game.away.name,
+            date: new Date(game.date * 1000).toISOString(),
+            status: game.status,
+            home_score: game.home.score,
+            away_score: game.away.score,
+          });
 
-                    // Process Player Stats (Reports)
-                    const processReports = (reports) => {
-                        if (!reports) return;
-                        for (const [key, report] of Object.entries(reports)) {
-                            // The key is just an index (0, 1, 2...), the real ID is in report.player.id
-                            const playerId = report.player ? report.player.id : parseInt(key);
-                            
-                            // Check if player exists, insert placeholder if not
-                            if (!playersList[playerId]) {
-                                // console.warn(`   Skipping stats for unknown player ${playerId} (${report.player ? report.player.name : 'No Name'})`);
-                                continue; // Skip processing stats for this unknown player
-                            }
+          // Process Player Stats (Reports)
+          const processReports = (reports) => {
+            if (!reports) return;
+            for (const [key, report] of Object.entries(reports)) {
+              // The key is just an index (0, 1, 2...), the real ID is in report.player.id
+              const playerId = report.player ? report.player.id : parseInt(key);
 
-                            const statsMap = {};
-                            if (report.stats) {
-                                for (const [label, value] of report.stats) {
-                                    statsMap[label] = value;
-                                }
-                            }
+              // Check if player exists, insert placeholder if not
+              if (!playersList[playerId]) {
+                // console.warn(`   Skipping stats for unknown player ${playerId} (${report.player ? report.player.name : 'No Name'})`);
+                continue; // Skip processing stats for this unknown player
+              }
 
-                            const parseShooting = (val) => {
-                                if (!val) return { made: 0, attempted: 0 };
-                                // Format: "1/5 (20%)" or "-1/-5 (20%)"
-                                // Remove negative signs if present (formatting artifact?)
-                                const cleanVal = val.toString().replace(/-/g, '');
-                                const parts = cleanVal.split(' ')[0].split('/');
-                                return {
-                                    made: parseInt(parts[0]) || 0,
-                                    attempted: parseInt(parts[1]) || 0
-                                };
-                            };
-
-                            const twoPtRaw = parseShooting(statsMap['2-point field goals']);
-                            const threePt = parseShooting(statsMap['3 pointers']);
-                            const ft = parseShooting(statsMap['Free throws']);
-
-                            // Fix for API discrepancies: Calculate 2PM from Total Points
-                            // Points = 2*2PM + 3*3PM + 1*FTM
-                            // => 2PM = (Points - 3*3PM - FTM) / 2
-                            const totalPoints = parseInt(statsMap['Points']) || 0;
-                            const calculated2PM = Math.max(0, (totalPoints - (3 * threePt.made) - ft.made) / 2);
-                            
-                            // Use calculated 2PM. For attempts, ensure at least as many as made.
-                            const twoPtMade = Number.isInteger(calculated2PM) ? calculated2PM : twoPtRaw.made;
-                            const twoPtAtt = Math.max(twoPtMade, twoPtRaw.attempted);
-
-                            insertStats.run({
-                                player_id: playerId,
-                                round_id: dbRoundId,
-                                fantasy_points: report.points || 0,
-                                minutes: parseInt(statsMap['Minutes played']) || 0,
-                                points: totalPoints,
-                                two_points_made: twoPtMade,
-                                two_points_attempted: twoPtAtt,
-                                three_points_made: threePt.made,
-                                three_points_attempted: threePt.attempted,
-                                free_throws_made: ft.made,
-                                free_throws_attempted: ft.attempted,
-                                rebounds: parseInt(statsMap['Rebounds']) || 0,
-                                assists: parseInt(statsMap['Assists']) || 0,
-                                steals: parseInt(statsMap['Tackles']) || 0, // Mapping Tackles to Steals
-                                blocks: parseInt(statsMap['Blocks']) || 0,
-                                turnovers: parseInt(statsMap['Turnovers']) || 0,
-                                fouls_committed: parseInt(statsMap['Fouls committed']) || 0
-                            });
-                        }
-                    };
-
-                    processReports(game.home.reports);
-                    processReports(game.away.reports);
+              const statsMap = {};
+              if (report.stats) {
+                for (const [label, value] of report.stats) {
+                  statsMap[label] = value;
                 }
-            })();
-            console.log(`   -> Synced ${gamesData.data.games.length} matches and player stats.`);
+              }
+
+              const parseShooting = (val) => {
+                if (!val) return { made: 0, attempted: 0 };
+                // Format: "1/5 (20%)" or "-1/-5 (20%)"
+                // Remove negative signs if present (formatting artifact?)
+                const cleanVal = val.toString().replace(/-/g, '');
+                const parts = cleanVal.split(' ')[0].split('/');
+                return {
+                  made: parseInt(parts[0]) || 0,
+                  attempted: parseInt(parts[1]) || 0,
+                };
+              };
+
+              const twoPtRaw = parseShooting(statsMap['2-point field goals']);
+              const threePt = parseShooting(statsMap['3 pointers']);
+              const ft = parseShooting(statsMap['Free throws']);
+
+              // Fix for API discrepancies: Calculate 2PM from Total Points
+              // Points = 2*2PM + 3*3PM + 1*FTM
+              // => 2PM = (Points - 3*3PM - FTM) / 2
+              const totalPoints = parseInt(statsMap['Points']) || 0;
+              const calculated2PM = Math.max(0, (totalPoints - 3 * threePt.made - ft.made) / 2);
+
+              // Use calculated 2PM. For attempts, ensure at least as many as made.
+              const twoPtMade = Number.isInteger(calculated2PM) ? calculated2PM : twoPtRaw.made;
+              const twoPtAtt = Math.max(twoPtMade, twoPtRaw.attempted);
+
+              insertStats.run({
+                player_id: playerId,
+                round_id: dbRoundId,
+                fantasy_points: report.points || 0,
+                minutes: parseInt(statsMap['Minutes played']) || 0,
+                points: totalPoints,
+                two_points_made: twoPtMade,
+                two_points_attempted: twoPtAtt,
+                three_points_made: threePt.made,
+                three_points_attempted: threePt.attempted,
+                free_throws_made: ft.made,
+                free_throws_attempted: ft.attempted,
+                rebounds: parseInt(statsMap['Rebounds']) || 0,
+                assists: parseInt(statsMap['Assists']) || 0,
+                steals: parseInt(statsMap['Tackles']) || 0, // Mapping Tackles to Steals
+                blocks: parseInt(statsMap['Blocks']) || 0,
+                turnovers: parseInt(statsMap['Turnovers']) || 0,
+                fouls_committed: parseInt(statsMap['Fouls committed']) || 0,
+              });
+            }
+          };
+
+          processReports(game.home.reports);
+          processReports(game.away.reports);
         }
-    } catch (e) {
-         console.error(`   Error fetching games for round ${roundId}: ${e.message}`);
+      })();
+      console.log(`   -> Synced ${gamesData.data.games.length} matches and player stats.`);
     }
+  } catch (e) {
+    console.error(`   Error fetching games for round ${roundId}: ${e.message}`);
+  }
 }

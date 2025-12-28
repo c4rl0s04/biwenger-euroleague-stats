@@ -1,37 +1,34 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 const UserContext = createContext();
 
 export function UserProvider({ children, users }) {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Load user from localStorage on mount
-    const savedUser = localStorage.getItem('selectedUser');
-    if (savedUser) {
-      try {
-        setCurrentUser(JSON.parse(savedUser));
-      } catch (e) {
-        console.error('Error parsing saved user:', e);
-      }
+  const [currentUser, setCurrentUser] = useState(() => {
+    // Lazy initialization: read from localStorage on first render (client-side only)
+    if (typeof window === 'undefined') return null;
+    try {
+      const savedUser = localStorage.getItem('selectedUser');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      console.error('Error parsing saved user:', e);
+      return null;
     }
-    setIsLoading(false);
-  }, []);
+  });
+  const [isLoading] = useState(false);
 
   const selectUser = (userId) => {
     if (!users || !Array.isArray(users)) {
       console.warn('Users not available yet');
       return;
     }
-    const user = users.find(u => u.user_id === userId);
+    const user = users.find((u) => u.user_id === userId);
     if (user) {
       const userData = {
         id: user.user_id,
         name: user.name,
-        icon: user.icon
+        icon: user.icon,
       };
       setCurrentUser(userData);
       localStorage.setItem('selectedUser', JSON.stringify(userData));

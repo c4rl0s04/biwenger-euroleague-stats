@@ -37,10 +37,10 @@ describe('syncMatches', () => {
             home: { name: 'Real Madrid', score: 80 },
             away: { name: 'Barcelona', score: 75 },
             date: 1700000000,
-            status: 'finished'
-          }
-        ]
-      }
+            status: 'finished',
+          },
+        ],
+      },
     };
     client.fetchRoundGames.mockResolvedValue(mockGamesData);
 
@@ -62,7 +62,7 @@ describe('syncMatches', () => {
       date: new Date(1700000000 * 1000).toISOString(),
       status: 'finished',
       home_score: 80,
-      away_score: 75
+      away_score: 75,
     });
   });
 
@@ -75,7 +75,7 @@ describe('syncMatches', () => {
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Error fetching games'));
     expect(runMock).not.toHaveBeenCalled();
-    
+
     consoleSpy.mockRestore();
   });
 });

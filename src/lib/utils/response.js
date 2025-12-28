@@ -9,10 +9,10 @@ import { NextResponse } from 'next/server';
  * Cache duration constants (in seconds)
  */
 export const CACHE_DURATIONS = {
-  SHORT: 60,        // 1 minute - for frequently changing data
-  MEDIUM: 300,      // 5 minutes - for dashboard data
-  LONG: 900,        // 15 minutes - for standings/analytics
-  STALE: 60         // Stale-while-revalidate duration
+  SHORT: 60, // 1 minute - for frequently changing data
+  MEDIUM: 300, // 5 minutes - for dashboard data
+  LONG: 900, // 15 minutes - for standings/analytics
+  STALE: 60, // Stale-while-revalidate duration
 };
 
 /**
@@ -25,17 +25,13 @@ export const CACHE_DURATIONS = {
  * @returns {NextResponse}
  */
 export function cachedResponse(data, options = {}) {
-  const { 
-    maxAge = CACHE_DURATIONS.MEDIUM, 
-    stale = CACHE_DURATIONS.STALE,
-    status = 200 
-  } = options;
-  
+  const { maxAge = CACHE_DURATIONS.MEDIUM, stale = CACHE_DURATIONS.STALE, status = 200 } = options;
+
   return NextResponse.json(data, {
     status,
     headers: {
-      'Cache-Control': `public, max-age=${maxAge}, stale-while-revalidate=${stale}`
-    }
+      'Cache-Control': `public, max-age=${maxAge}, stale-while-revalidate=${stale}`,
+    },
   });
 }
 
@@ -56,8 +52,5 @@ export function successResponse(data, maxAge = CACHE_DURATIONS.MEDIUM) {
  * @returns {NextResponse}
  */
 export function errorResponse(message, status = 500) {
-  return NextResponse.json(
-    { success: false, error: message },
-    { status }
-  );
+  return NextResponse.json({ success: false, error: message }, { status });
 }

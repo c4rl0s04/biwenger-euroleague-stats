@@ -21,20 +21,24 @@ export const CONFIG = {
     2: 'Alero',
     3: 'Pivot',
     4: 'Entrenador',
-    5: 'Entrenador'
+    5: 'Entrenador',
   },
   ENDPOINTS: {
     COMPETITION_DATA: '/competitions/euroleague/data?lang=es',
     LEAGUE_STANDINGS: (leagueId) => `/league/${leagueId}?fields=standings`,
-    LEAGUE_BOARD: (leagueId, offset, limit) => `/league/${leagueId}/board?offset=${offset}&limit=${limit}`,
+    LEAGUE_BOARD: (leagueId, offset, limit) =>
+      `/league/${leagueId}/board?offset=${offset}&limit=${limit}`,
     ROUND_GAMES: (roundId) => `/rounds/euroleague/${roundId}?score=1&v=629`,
-    ROUND_LEAGUE: (roundId) => roundId ? `/rounds/league/${roundId}?v=629` : `/rounds/league?v=629`,
-    PLAYER_DETAILS: (id) => `/players/euroleague/${id}?lang=es&fields=prices,birthday,height,weight`,
-    USER_PLAYERS: (id) => `/user/${id}?fields=players`
-  }
+    ROUND_LEAGUE: (roundId) =>
+      roundId ? `/rounds/league/${roundId}?v=629` : `/rounds/league?v=629`,
+    PLAYER_DETAILS: (id) =>
+      `/players/euroleague/${id}?lang=es&fields=prices,birthday,height,weight`,
+    USER_PLAYERS: (id) => `/user/${id}?fields=players`,
+  },
 };
 
 // Validate required config
 if (!CONFIG.API.TOKEN) console.warn('⚠️ BIWENGER_TOKEN is missing in environment variables');
-if (!CONFIG.API.LEAGUE_ID) console.warn('⚠️ BIWENGER_LEAGUE_ID is missing in environment variables');
+if (!CONFIG.API.LEAGUE_ID)
+  console.warn('⚠️ BIWENGER_LEAGUE_ID is missing in environment variables');
 if (!CONFIG.API.USER_ID) console.warn('⚠️ BIWENGER_USER_ID is missing in environment variables');

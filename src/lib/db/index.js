@@ -13,4 +13,3 @@ export * from './queries/players.js';
 export * from './queries/standings.js';
 export * from './queries/performance.js';
 export * from './queries/analytics.js';
-

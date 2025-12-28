@@ -10,11 +10,10 @@ export default function RecentActivityCard() {
   const { currentUser } = useUser();
   const [activeTab, setActiveTab] = useState('transfers');
   const userId = currentUser?.id || '';
-  
-  const { data = {}, loading } = useApiData(
-    `/api/dashboard/recent-activity?userId=${userId}`,
-    { dependencies: [userId] }
-  );
+
+  const { data = {}, loading } = useApiData(`/api/dashboard/recent-activity?userId=${userId}`, {
+    dependencies: [userId],
+  });
 
   if (loading) {
     return (
@@ -35,7 +34,7 @@ export default function RecentActivityCard() {
     { id: 'transfers', label: 'Fichajes', icon: Euro, count: recentTransfers?.length || 0 },
     { id: 'prices', label: 'Precios', icon: Activity, count: priceChanges?.length || 0 },
     { id: 'records', label: 'Récords', icon: Trophy, count: recentRecords?.length || 0 },
-    { id: 'alerts', label: 'Alertas', icon: Bell, count: personalizedAlerts?.length || 0 }
+    { id: 'alerts', label: 'Alertas', icon: Bell, count: personalizedAlerts?.length || 0 },
   ];
 
   return (
@@ -52,7 +51,10 @@ export default function RecentActivityCard() {
             <Activity className="w-5 h-5 text-blue-500" />
             Actividad Reciente
           </h2>
-          <Link href="/market" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+          <Link
+            href="/market"
+            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+          >
             Ver mercado
           </Link>
         </div>
@@ -90,8 +92,8 @@ export default function RecentActivityCard() {
             <div className="space-y-0">
               {recentTransfers && recentTransfers.length > 0 ? (
                 recentTransfers.map((transfer) => (
-                  <div 
-                    key={transfer.id} 
+                  <div
+                    key={transfer.id}
                     className="flex items-center justify-between py-3 border-b border-slate-800/50 last:border-0 hover:bg-slate-800/20 px-2 rounded transition-colors"
                   >
                     <div className="flex items-center gap-3">
@@ -128,23 +130,32 @@ export default function RecentActivityCard() {
             <div className="space-y-2">
               {priceChanges && priceChanges.length > 0 ? (
                 priceChanges.map((player) => (
-                  <div 
+                  <div
                     key={player.player_id}
                     className="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg border border-slate-700/30 hover:border-slate-600/50 transition-all"
                   >
                     <div className="flex-1">
                       <div className="font-medium text-white text-sm">{player.name}</div>
-                      <div className="text-xs text-slate-400">{player.team} · {player.position}</div>
+                      <div className="text-xs text-slate-400">
+                        {player.team} · {player.position}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="font-mono text-sm text-white">
                         {(player.price / 1000000).toFixed(2)}M€
                       </div>
-                      <div className={`text-xs font-bold flex items-center gap-1 justify-end ${
-                        player.price_increment > 0 ? 'text-green-400' : 'text-red-400'
-                      }`}>
-                        {player.price_increment > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                        {player.price_increment > 0 ? '+' : ''}{(player.price_increment / 1000000).toFixed(2)}M
+                      <div
+                        className={`text-xs font-bold flex items-center gap-1 justify-end ${
+                          player.price_increment > 0 ? 'text-green-400' : 'text-red-400'
+                        }`}
+                      >
+                        {player.price_increment > 0 ? (
+                          <TrendingUp className="w-3 h-3" />
+                        ) : (
+                          <TrendingDown className="w-3 h-3" />
+                        )}
+                        {player.price_increment > 0 ? '+' : ''}
+                        {(player.price_increment / 1000000).toFixed(2)}M
                       </div>
                     </div>
                   </div>
@@ -160,7 +171,7 @@ export default function RecentActivityCard() {
             <div className="space-y-3">
               {recentRecords && recentRecords.length > 0 ? (
                 recentRecords.map((record, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     className="p-4 bg-gradient-to-r from-slate-800/60 to-slate-800/20 rounded-lg border border-slate-700/30 hover:border-yellow-500/30 transition-all"
                   >
@@ -170,9 +181,7 @@ export default function RecentActivityCard() {
                         <div className="text-xs font-semibold text-yellow-400 uppercase tracking-wide mb-1">
                           {record.label}
                         </div>
-                        <div className="text-sm text-white font-medium">
-                          {record.description}
-                        </div>
+                        <div className="text-sm text-white font-medium">{record.description}</div>
                       </div>
                     </div>
                   </div>
@@ -188,27 +197,27 @@ export default function RecentActivityCard() {
             <div className="space-y-2">
               {personalizedAlerts && personalizedAlerts.length > 0 ? (
                 personalizedAlerts.map((alert, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     className={`p-3 rounded-lg border flex items-start gap-3 transition-all ${
-                      alert.severity === 'success' 
-                        ? 'bg-green-500/10 border-green-500/30 hover:border-green-500/50' 
+                      alert.severity === 'success'
+                        ? 'bg-green-500/10 border-green-500/30 hover:border-green-500/50'
                         : alert.severity === 'warning'
-                        ? 'bg-yellow-500/10 border-yellow-500/30 hover:border-yellow-500/50'
-                        : 'bg-blue-500/10 border-blue-500/30 hover:border-blue-500/50'
+                          ? 'bg-yellow-500/10 border-yellow-500/30 hover:border-yellow-500/50'
+                          : 'bg-blue-500/10 border-blue-500/30 hover:border-blue-500/50'
                     }`}
                   >
                     <span className="text-2xl flex-shrink-0">{alert.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm text-white font-medium">
-                        {alert.message}
-                      </div>
+                      <div className="text-sm text-white font-medium">{alert.message}</div>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center text-slate-500 py-8">
-                  {currentUser ? 'No hay alertas para ti' : 'Selecciona un usuario para ver alertas'}
+                  {currentUser
+                    ? 'No hay alertas para ti'
+                    : 'Selecciona un usuario para ver alertas'}
                 </div>
               )}
             </div>

@@ -15,7 +15,7 @@ export function getMarketKPIs() {
       COUNT(DISTINCT vendedor) as active_sellers
     FROM fichajes
   `;
-  
+
   return db.prepare(query).get();
 }
 
@@ -66,19 +66,16 @@ export function getLeaderComparison(userId) {
   const standings = getStandings();
   const leader = standings[0];
   const secondPlace = standings[1];
-  const user = standings.find(u => u.user_id === userId);
-  
+  const user = standings.find((u) => u.user_id === userId);
+
   if (!user || !leader) return null;
-  
+
   const gap = leader.total_points - user.total_points;
-  const roundsNeeded = user.position > 1 
-    ? Math.ceil(gap / 10)
-    : 0;
-  
-  const gapToSecond = (user.position === 1 && secondPlace) 
-    ? user.total_points - secondPlace.total_points 
-    : 0;
-  
+  const roundsNeeded = user.position > 1 ? Math.ceil(gap / 10) : 0;
+
+  const gapToSecond =
+    user.position === 1 && secondPlace ? user.total_points - secondPlace.total_points : 0;
+
   return {
     leader_name: leader.name,
     leader_points: leader.total_points,
@@ -86,7 +83,7 @@ export function getLeaderComparison(userId) {
     gap: gap,
     gap_to_second: gapToSecond,
     rounds_needed: roundsNeeded,
-    is_leader: user.position === 1
+    is_leader: user.position === 1,
   };
 }
 
@@ -100,7 +97,7 @@ export function getLeagueAveragePoints() {
     FROM user_rounds
     WHERE participated = 1
   `;
-  
+
   const result = db.prepare(query).get();
   return result.avg_points || 0;
 }
@@ -111,7 +108,7 @@ export function getLeagueAveragePoints() {
  */
 export function getRecentRecords() {
   const records = [];
-  
+
   const highestRoundQuery = `
     SELECT 
       ur.user_id,
@@ -131,10 +128,10 @@ export function getRecentRecords() {
       label: 'Récord de puntos en jornada',
       description: `${highestRound.user_name} - ${highestRound.points} pts en ${highestRound.round_name}`,
       user_name: highestRound.user_name,
-      value: highestRound.points
+      value: highestRound.points,
     });
   }
-  
+
   const highestTransferQuery = `
     SELECT 
       f.precio,
@@ -153,10 +150,10 @@ export function getRecentRecords() {
       label: 'Fichaje más caro',
       description: `${highestTransfer.player_name} - ${(highestTransfer.precio / 1000000).toFixed(2)}M€ (${highestTransfer.comprador})`,
       user_name: highestTransfer.comprador,
-      value: highestTransfer.precio
+      value: highestTransfer.precio,
     });
   }
-  
+
   const biggestGainQuery = `
     SELECT 
       id,
@@ -175,9 +172,9 @@ export function getRecentRecords() {
       label: 'Mayor revalorización',
       description: `${biggestGain.name} +${(biggestGain.price_increment / 1000000).toFixed(2)}M€`,
       player_name: biggestGain.name,
-      value: biggestGain.price_increment
+      value: biggestGain.price_increment,
     });
   }
-  
+
   return records.slice(0, 3);
 }

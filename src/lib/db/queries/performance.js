@@ -245,7 +245,7 @@ export function getHeartbreakerStats() {
     GROUP BY u.id
     ORDER BY total_margin ASC -- Maybe DESC? "Bad Luck score" = total missed. So HIGH is bad luck.
   `;
-  
+
   // Revised query to be stricter: You must be 2nd place.
   const refinedQuery = `
     WITH RoundRanks AS (

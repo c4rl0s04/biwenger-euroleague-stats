@@ -13,7 +13,7 @@ import {
   getUserRecentRounds,
   getUserSquadDetails,
   getPlayerStreaks,
-  getPlayersBirthday
+  getPlayersBirthday,
 } from '@/lib/db';
 
 // ============ DIRECT WRAPPERS ============

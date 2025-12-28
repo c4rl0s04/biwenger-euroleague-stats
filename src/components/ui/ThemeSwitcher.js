@@ -17,25 +17,27 @@ export default function ThemeSwitcher() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <div className={`absolute bottom-full right-0 mb-4 bg-slate-800 border border-slate-700 rounded-xl p-2 shadow-2xl transition-all duration-300 transform origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}>
+      <div
+        className={`absolute bottom-full right-0 mb-4 bg-slate-800 border border-slate-700 rounded-xl p-2 shadow-2xl transition-all duration-300 transform origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}
+      >
         <div className="flex flex-col gap-1 w-40">
-           {themes.map(t => (
-             <button
-                key={t.id}
-                onClick={() => {
-                  setTheme(t.id);
-                  setIsOpen(false);
-                }}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  theme === t.id 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                }`}
-             >
-                <t.icon className="w-4 h-4" />
-                {t.name}
-             </button>
-           ))}
+          {themes.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => {
+                setTheme(t.id);
+                setIsOpen(false);
+              }}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                theme === t.id
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <t.icon className="w-4 h-4" />
+              {t.name}
+            </button>
+          ))}
         </div>
       </div>
 

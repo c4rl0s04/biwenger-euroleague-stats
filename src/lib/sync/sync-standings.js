@@ -8,7 +8,7 @@ export async function syncStandings(db) {
   console.log('\n📥 Fetching Standings...');
   const league = await fetchLeague();
   const standings = league.data.standings;
-  
+
   const insertUserStandings = db.prepare(`
     INSERT INTO users (id, name, icon) VALUES (@id, @name, @icon)
     ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon
@@ -19,7 +19,7 @@ export async function syncStandings(db) {
       insertUserStandings.run({
         id: user.id.toString(),
         name: user.name,
-        icon: user.icon ? `https://cdn.biwenger.com/${user.icon}` : null
+        icon: user.icon ? `https://cdn.biwenger.com/${user.icon}` : null,
       });
     }
   })();

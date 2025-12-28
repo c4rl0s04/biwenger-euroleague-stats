@@ -27,7 +27,7 @@ import {
   getRecentTransfers,
   getSignificantPriceChanges,
   getRecentRecords,
-  getStreakStats
+  getStreakStats,
 } from '@/lib/db';
 
 // ============ DIRECT WRAPPERS ============

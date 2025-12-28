@@ -19,7 +19,7 @@ export function getAllTransfers(limit = 100, offset = 0) {
     ORDER BY timestamp DESC
     LIMIT ? OFFSET ?
   `;
-  
+
   return db.prepare(query).all(limit, offset);
 }
 
@@ -108,7 +108,7 @@ export function getMarketOpportunities(limit = 3) {
     ORDER BY value_score DESC, price_trend DESC
     LIMIT ?
   `;
-  
+
   return db.prepare(query).all(limit);
 }
 
@@ -133,6 +133,6 @@ export function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
     ORDER BY ABS(price_increment) DESC
     LIMIT 5
   `;
-  
+
   return db.prepare(query).all(minChange);
 }

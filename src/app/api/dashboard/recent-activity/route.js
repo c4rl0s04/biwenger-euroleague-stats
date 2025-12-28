@@ -8,7 +8,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const userIdParam = searchParams.get('userId');
-    
+
     // Optional userId - validate format if provided
     let userId = null;
     if (userIdParam) {
@@ -26,4 +26,3 @@ export async function GET(request) {
     return errorResponse('Failed to fetch recent activity');
   }
 }
-

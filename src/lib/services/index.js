@@ -68,4 +68,3 @@ export {
   fetchRecentTransfers,
   fetchMarketOpportunities,
 } from './marketService';
-

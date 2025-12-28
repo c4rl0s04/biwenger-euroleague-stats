@@ -20,7 +20,7 @@ export function getScoreColor(score) {
  */
 export function getShortTeamName(teamName) {
   if (!teamName) return '';
-  
+
   const map = {
     'Real Madrid': 'R. Madrid',
     'FC Barcelona': 'Barça',
@@ -41,7 +41,7 @@ export function getShortTeamName(teamName) {
     'LDLC ASVEL Villeurbanne': 'ASVEL',
     'Paris Basketball': 'Paris',
     'Dubai Basketball': 'Dubai',
-    'Hapoel IBI Tel Aviv': 'Hapoel'
+    'Hapoel IBI Tel Aviv': 'Hapoel',
   };
 
   return map[teamName] || teamName;

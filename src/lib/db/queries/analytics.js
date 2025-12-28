@@ -3,7 +3,7 @@ import { db } from '../client.js';
 /**
  * Calculates the actual performance of initial squads based on lineup usage.
  * Appreciation: Starter (1.0), 6th Man (0.75), Bench (0.5).
- * 
+ *
  * @returns {Array} List of users with their total weighted points.
  */
 export function getInitialSquadActualPerformance() {
@@ -30,7 +30,7 @@ export function getInitialSquadActualPerformance() {
 
 /**
  * Calculates the theoretical maximum points of initial squads if they were never sold or benched.
- * 
+ *
  * @returns {Array} List of users with their potential total points.
  */
 export function getInitialSquadTheoreticalPotential() {
@@ -51,7 +51,7 @@ export function getInitialSquadTheoreticalPotential() {
  * Get detailed potential breakdown by player for a specific user (or all if null)
  */
 export function getTheoreticalBreakdown() {
-   const query = `
+  const query = `
     SELECT 
       u.name as user_name,
       p.name as player_name,

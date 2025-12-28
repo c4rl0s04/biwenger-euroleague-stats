@@ -5,7 +5,7 @@
 import { CONFIG } from '../config.js';
 
 // Auxiliary wait function
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper to get random delay between min and max ms
 const getRandomDelay = (min = 2000, max = 5000) => {
@@ -33,44 +33,49 @@ export async function biwengerFetch(endpoint, options = {}) {
   const token = tokenRaw.startsWith('Bearer ') ? tokenRaw : `Bearer ${tokenRaw}`;
 
   const headers = {
-    'Authorization': token,
+    Authorization: token,
     'X-League': leagueId,
     'X-User': userId,
-    'Accept': 'application/json, text/plain, */*',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    Accept: 'application/json, text/plain, */*',
+    'User-Agent':
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   };
-  
+
   // RANDOM DELAY: Safety measure against bans (2-5 seconds random)
   const safeDelay = getRandomDelay(2000, 5000);
   console.log(`Fetching: ${url} (Wait: ${safeDelay}ms)`);
   await sleep(safeDelay);
-  
+
   try {
     const response = await fetch(url, { headers });
-    
+
     // --- RETRY LOGIC FOR 429 ---
     if (response.status === 429) {
-        if (retries > 0) {
-            console.warn(`⚠️ Rate Limit (429). Pausing ${retryDelay}ms before retrying...`);
-            await sleep(retryDelay);
-            // Recursive call: 1 less attempt, double wait time (Exponential Backoff)
-            return biwengerFetch(endpoint, { ...options, retries: retries - 1, retryDelay: retryDelay * 2 });
-        } else {
-            throw new Error(`Biwenger API Error: 429 Too Many Requests (Max retries exceeded)`);
-        }
+      if (retries > 0) {
+        console.warn(`⚠️ Rate Limit (429). Pausing ${retryDelay}ms before retrying...`);
+        await sleep(retryDelay);
+        // Recursive call: 1 less attempt, double wait time (Exponential Backoff)
+        return biwengerFetch(endpoint, {
+          ...options,
+          retries: retries - 1,
+          retryDelay: retryDelay * 2,
+        });
+      } else {
+        throw new Error(`Biwenger API Error: 429 Too Many Requests (Max retries exceeded)`);
+      }
     }
     // ------------------------------------
 
     if (!response.ok) {
       throw new Error(`Biwenger API Error: ${response.status} ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
     // Avoid logging error if it's an internal retry, unless it's the final one
     if (retries === 0 || !error.message.includes('429')) {
-        console.error(`Failed to fetch ${endpoint}:`, error.message);
+      console.error(`Failed to fetch ${endpoint}:`, error.message);
     }
     throw error;
   }
@@ -95,7 +100,7 @@ export async function fetchCompetition() {
 }
 
 export async function fetchAllPlayers() {
-  return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA); 
+  return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA);
 }
 
 export async function fetchRoundsLeague(roundId) {

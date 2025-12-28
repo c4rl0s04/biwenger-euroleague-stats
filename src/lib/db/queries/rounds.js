@@ -116,7 +116,7 @@ export function getUserRecentRounds(userId, limit = 10) {
     ORDER BY round_id DESC
     LIMIT ?
   `;
-  
+
   return db.prepare(query).all(userId, limit);
 }
 
@@ -149,7 +149,7 @@ export function getLastRoundMVPs(limit = 5) {
     ORDER BY prs.fantasy_points DESC
     LIMIT ?
   `;
-  
+
   return db.prepare(query).all(limit);
 }
 

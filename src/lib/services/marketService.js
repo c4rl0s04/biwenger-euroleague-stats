@@ -59,4 +59,3 @@ export function getMarketActivity(options = {}) {
   const { limit = 20 } = options;
   return getRecentTransfers(limit);
 }
-

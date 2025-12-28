@@ -18,4 +18,3 @@ export async function GET(request) {
     return errorResponse('Failed to fetch rounds');
   }
 }
-

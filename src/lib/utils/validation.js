@@ -14,25 +14,25 @@
  */
 export function validateNumber(value, options = {}) {
   const { defaultValue = 0, min = 0, max = 1000 } = options;
-  
+
   if (value === null || value === undefined || value === '') {
     return { valid: true, value: defaultValue };
   }
-  
+
   const parsed = parseInt(value, 10);
-  
+
   if (isNaN(parsed)) {
     return { valid: false, error: 'Invalid numeric value' };
   }
-  
+
   if (parsed < min) {
     return { valid: false, error: `Value must be at least ${min}` };
   }
-  
+
   if (parsed > max) {
     return { valid: false, error: `Value must be at most ${max}` };
   }
-  
+
   return { valid: true, value: parsed };
 }
 
@@ -56,11 +56,11 @@ export function validateRequiredString(value, paramName = 'parameter') {
  */
 export function validatePlayerId(id) {
   const parsed = parseInt(id, 10);
-  
+
   if (isNaN(parsed) || parsed <= 0) {
     return { valid: false, error: 'Invalid player ID' };
   }
-  
+
   return { valid: true, value: parsed };
 }
 
@@ -73,12 +73,12 @@ export function validateUserId(id) {
   if (id === null || id === undefined || id === '') {
     return { valid: false, error: 'User ID is required' };
   }
-  
+
   const parsed = parseInt(id, 10);
-  
+
   if (isNaN(parsed) || parsed <= 0) {
     return { valid: false, error: 'Invalid user ID format' };
   }
-  
+
   return { valid: true, value: id };
 }
