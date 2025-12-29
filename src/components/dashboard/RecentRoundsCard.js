@@ -5,6 +5,11 @@ import { Activity } from 'lucide-react';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
+/**
+ * RecentRoundsCard - Redesigned with Bento Grid architecture
+ * Zone 1: Latest round hero display
+ * Zone 2: Condensed scrollable list of previous rounds
+ */
 export default function RecentRoundsCard() {
   const { currentUser, isReady } = useClientUser();
 
@@ -19,51 +24,61 @@ export default function RecentRoundsCard() {
 
   if (!isReady) return null;
 
+  const getPositionBadge = (pos) => {
+    if (pos === 1) return 'text-yellow-400';
+    if (pos <= 3) return 'text-primary';
+    return 'text-muted-foreground';
+  };
+
+  const latestRound = rounds?.[0];
+  const previousRounds = rounds?.slice(1) || [];
+
   return (
     <PremiumCard title="Últimas Jornadas" icon={Activity} color="purple" loading={loading}>
       {!loading && rounds && (
-        <div className="space-y-1 flex-1 flex flex-col justify-between h-full">
-          {rounds.map((round, idx) => {
-            const isRecent = idx < 3;
-            return (
-              <div
-                key={round.round_id}
-                className={`flex items-center justify-between py-2 px-3 rounded-lg transition-all ${
-                  isRecent
-                    ? 'bg-slate-800/60 border border-slate-700/30'
-                    : 'bg-slate-800/20 border border-transparent'
-                } hover:bg-slate-800/80 hover:border-purple-500/30`}
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`text-xs font-mono font-medium ${isRecent ? 'text-slate-300' : 'text-slate-500'}`}
-                  >
-                    {round.round_name}
-                  </div>
+        <div className="flex flex-col h-full flex-1">
+          {/* Zone 1: Latest Round - Hero Display */}
+          {latestRound && (
+            <div className="mb-4 pb-4 border-b border-border/50">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-muted-foreground text-xs uppercase tracking-wider">
+                  {latestRound.round_name}
                 </div>
-                <div className="flex items-center gap-3">
+                <span className={`text-2xl font-display ${getPositionBadge(latestRound.position)}`}>
+                  #{latestRound.position}
+                </span>
+              </div>
+              <div className="text-5xl font-display text-foreground">
+                {latestRound.points}
+                <span className="text-2xl text-muted-foreground ml-1">pts</span>
+              </div>
+            </div>
+          )}
+
+          {/* Zone 2: Previous Rounds - Condensed List */}
+          <div className="flex-1 space-y-1.5 overflow-y-auto">
+            {previousRounds.map((round) => (
+              <div key={round.round_id} className="flex items-center justify-between py-2 group">
+                <div className="text-muted-foreground text-xs font-mono">{round.round_name}</div>
+                <div className="flex items-center gap-4">
+                  <div className="text-foreground font-semibold text-sm">{round.points}</div>
                   <div
-                    className={`font-bold text-sm ${isRecent ? 'text-white' : 'text-slate-400'}`}
+                    className={`text-xs font-display min-w-[28px] text-right ${getPositionBadge(round.position)}`}
                   >
-                    {round.points}
-                  </div>
-                  <div className="min-w-[35px] text-right">
-                    <span
-                      className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                        round.position === 1
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : round.position <= 3
-                            ? 'bg-orange-500/20 text-orange-400'
-                            : 'bg-slate-700/50 text-slate-400'
-                      }`}
-                    >
-                      #{round.position}
-                    </span>
+                    #{round.position}
                   </div>
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Footer: Summary */}
+          <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
+            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">
+              Total jornadas
+            </span>
+            <span className="text-foreground font-display text-lg">{rounds.length}</span>
+          </div>
         </div>
       )}
     </PremiumCard>

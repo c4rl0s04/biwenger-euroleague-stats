@@ -6,6 +6,11 @@ import Link from 'next/link';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
+/**
+ * SquadValueCard - Redesigned with Bento Grid architecture
+ * Zone 1: Dominant hero value display
+ * Zone 2: Rising/Falling players (condensed list)
+ */
 export default function SquadValueCard() {
   const { currentUser, isReady } = useClientUser();
 
@@ -24,81 +29,84 @@ export default function SquadValueCard() {
   return (
     <PremiumCard title="Tu Plantilla" icon={Wallet} color="cyan" loading={loading}>
       {!loading && data && (
-        <div className="space-y-2 flex-1 flex flex-col h-full">
-          {/* Total Value */}
-          <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30 hover:border-indigo-500/30 transition-all flex-1 flex flex-col justify-center">
-            <div className="text-slate-400 text-[10px] font-medium mb-1.5 uppercase tracking-wider">
+        <div className="flex flex-col h-full flex-1">
+          {/* Zone 1: Hero Value - Large and dominant */}
+          <div className="mb-6">
+            <div className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-2">
               Valor Total
             </div>
-            <div className="text-2xl font-bold text-white/90">{formatPrice(data.total_value)}€</div>
+            <div className="text-5xl font-display text-foreground">
+              {formatPrice(data.total_value)}€
+            </div>
             <div
-              className={`text-sm flex items-center gap-1 mt-1 ${data.price_trend >= 0 ? 'text-green-400' : 'text-red-400'}`}
+              className={`flex items-center gap-1.5 mt-2 text-lg font-semibold ${
+                data.price_trend >= 0 ? 'text-emerald-500' : 'text-red-500'
+              }`}
             >
               {data.price_trend >= 0 ? (
-                <TrendingUp className="w-3.5 h-3.5" />
+                <TrendingUp className="w-5 h-5" />
               ) : (
-                <TrendingDown className="w-3.5 h-3.5" />
+                <TrendingDown className="w-5 h-5" />
               )}
               {data.price_trend >= 0 ? '+' : ''}
               {formatPrice(data.price_trend)}€
             </div>
           </div>
 
-          {/* Rising Players */}
-          {data.top_rising?.length > 0 && (
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30 hover:border-green-500/30 transition-all flex-1 flex flex-col justify-center">
-              <div className="text-slate-400 text-[10px] font-medium mb-2 flex items-center gap-1 uppercase tracking-wider">
-                <TrendingUp className="w-3 h-3 text-green-400" />
-                Más suben
+          {/* Zone 2: Rising & Falling - Side by side */}
+          <div className="grid grid-cols-2 gap-4 flex-1">
+            {/* Rising Players */}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-3">
+                <TrendingUp className="w-3 h-3 text-emerald-500" />
+                Suben
               </div>
-              <div className="space-y-1.5 w-full">
-                {data.top_rising.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex justify-between text-sm bg-slate-800/40 rounded-lg px-2.5 py-1.5 hover:bg-slate-800/60 transition-colors"
-                  >
+              <div className="space-y-2 flex-1">
+                {data.top_rising?.slice(0, 3).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between">
                     <Link
                       href={`/player/${p.id}`}
-                      className="text-slate-300 truncate text-xs hover:text-green-400 transition-colors block"
+                      className="text-muted-foreground text-xs truncate hover:text-emerald-500 transition-colors max-w-[60%]"
                     >
                       {p.name}
                     </Link>
-                    <span className="text-green-400 font-semibold text-xs">
+                    <span className="text-emerald-500 font-semibold text-xs">
                       +{formatPrice(p.price_increment)}€
                     </span>
                   </div>
                 ))}
+                {(!data.top_rising || data.top_rising.length === 0) && (
+                  <div className="text-muted-foreground/50 text-xs">Sin datos</div>
+                )}
               </div>
             </div>
-          )}
 
-          {/* Falling Players */}
-          {data.top_falling?.length > 0 && (
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30 hover:border-red-500/30 transition-all flex-1 flex flex-col justify-center">
-              <div className="text-slate-400 text-[10px] font-medium mb-2 flex items-center gap-1 uppercase tracking-wider">
-                <TrendingDown className="w-3 h-3 text-red-400" />
-                Más bajan
+            {/* Falling Players */}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-3">
+                <TrendingDown className="w-3 h-3 text-red-500" />
+                Bajan
               </div>
-              <div className="space-y-1.5 w-full">
-                {data.top_falling.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex justify-between text-sm bg-slate-800/40 rounded-lg px-2.5 py-1.5 hover:bg-slate-800/60 transition-colors"
-                  >
+              <div className="space-y-2 flex-1">
+                {data.top_falling?.slice(0, 3).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between">
                     <Link
                       href={`/player/${p.id}`}
-                      className="text-slate-300 truncate text-xs hover:text-red-400 transition-colors block"
+                      className="text-muted-foreground text-xs truncate hover:text-red-500 transition-colors max-w-[60%]"
                     >
                       {p.name}
                     </Link>
-                    <span className="text-red-400 font-semibold text-xs">
+                    <span className="text-red-500 font-semibold text-xs">
                       {formatPrice(p.price_increment)}€
                     </span>
                   </div>
                 ))}
+                {(!data.top_falling || data.top_falling.length === 0) && (
+                  <div className="text-muted-foreground/50 text-xs">Sin datos</div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </PremiumCard>
