@@ -75,9 +75,11 @@ export default function RecentRoundsCard() {
           {/* Footer: Summary */}
           <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
             <span className="text-muted-foreground text-[10px] uppercase tracking-wider">
-              Total jornadas
+              Mostrando
             </span>
-            <span className="text-foreground font-display text-lg">{rounds.length}</span>
+            <span className="text-muted-foreground text-sm">
+              <span className="text-foreground font-display text-lg">{rounds.length}</span> jornadas
+            </span>
           </div>
         </div>
       )}

@@ -53,24 +53,24 @@ export default function SquadValueCard() {
             </div>
           </div>
 
-          {/* Zone 2: Rising & Falling - Side by side */}
-          <div className="grid grid-cols-2 gap-4 flex-1">
+          {/* Zone 2: Rising & Falling - Stacked vertically */}
+          <div className="flex flex-col gap-4 flex-1">
             {/* Rising Players */}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-2">
                 <TrendingUp className="w-3 h-3 text-emerald-500" />
-                Suben
+                Más suben
               </div>
-              <div className="space-y-2 flex-1">
+              <div className="space-y-1.5">
                 {data.top_rising?.slice(0, 3).map((p) => (
                   <div key={p.id} className="flex items-center justify-between">
                     <Link
                       href={`/player/${p.id}`}
-                      className="text-muted-foreground text-xs truncate hover:text-emerald-500 transition-colors max-w-[60%]"
+                      className="text-muted-foreground text-sm truncate hover:text-emerald-500 transition-colors flex-1 mr-2"
                     >
                       {p.name}
                     </Link>
-                    <span className="text-emerald-500 font-semibold text-xs">
+                    <span className="text-emerald-500 font-semibold text-sm">
                       +{formatPrice(p.price_increment)}€
                     </span>
                   </div>
@@ -82,21 +82,21 @@ export default function SquadValueCard() {
             </div>
 
             {/* Falling Players */}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-2">
                 <TrendingDown className="w-3 h-3 text-red-500" />
-                Bajan
+                Más bajan
               </div>
-              <div className="space-y-2 flex-1">
+              <div className="space-y-1.5">
                 {data.top_falling?.slice(0, 3).map((p) => (
                   <div key={p.id} className="flex items-center justify-between">
                     <Link
                       href={`/player/${p.id}`}
-                      className="text-muted-foreground text-xs truncate hover:text-red-500 transition-colors max-w-[60%]"
+                      className="text-muted-foreground text-sm truncate hover:text-red-500 transition-colors flex-1 mr-2"
                     >
                       {p.name}
                     </Link>
-                    <span className="text-red-500 font-semibold text-xs">
+                    <span className="text-red-500 font-semibold text-sm">
                       {formatPrice(p.price_increment)}€
                     </span>
                   </div>

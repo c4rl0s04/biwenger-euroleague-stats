@@ -41,7 +41,7 @@ export default function MySeasonCard() {
               <div className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">
                 Posición
               </div>
-              <div className={`text-6xl font-display ${getPositionColor(stats.position)}`}>
+              <div className={`text-8xl font-display ${getPositionColor(stats.position)}`}>
                 #{stats.position}
               </div>
             </div>
@@ -51,7 +51,7 @@ export default function MySeasonCard() {
               <div className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">
                 Puntos Totales
               </div>
-              <div className="text-4xl font-display text-foreground">
+              <div className="text-6xl font-display text-foreground">
                 {stats.total_points?.toLocaleString('es-ES')}
               </div>
             </div>
