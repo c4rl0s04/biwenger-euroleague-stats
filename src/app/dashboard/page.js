@@ -49,13 +49,24 @@ const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLi
 
 export const dynamic = 'force-dynamic';
 
-// Section component with background support for visual depth
+/**
+ * Section component with split-color title and background support
+ * Title format: "MI TEMPORADA" -> "MI" in white, "TEMPORADA" in primary (orange)
+ */
 function Section({ title, children, delay = 0, background = '' }) {
+  // Split title into first word and rest
+  const words = title.split(' ');
+  const firstWord = words[0];
+  const restWords = words.slice(1).join(' ');
+
   return (
     <FadeIn delay={delay}>
-      <section className={`${background} px-4 sm:px-6 lg:px-8 py-8`}>
-        <div className="max-w-7xl mx-auto space-y-4">
-          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">{title}</h2>
+      <section className={`${background} px-4 sm:px-6 lg:px-8 py-10`}>
+        <div className="max-w-7xl mx-auto space-y-6">
+          <h2 className="font-display text-3xl tracking-wide">
+            <span className="text-foreground">{firstWord}</span>
+            {restWords && <span className="text-primary"> {restWords}</span>}
+          </h2>
           {children}
         </div>
       </section>

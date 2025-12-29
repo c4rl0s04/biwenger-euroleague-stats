@@ -5,8 +5,8 @@ import { createElement } from 'react';
 /**
  * ElegantCard - Minimal, clean card design
  * - Dark solid background
- * - Simple 1px border
- * - No gradients, no glow, no shadows
+ * - Left border accent in primary color
+ * - Simple border on other sides
  * - Subtle border color change on hover
  */
 export default function ElegantCard({
@@ -25,7 +25,7 @@ export default function ElegantCard({
     indigo: 'text-indigo-500',
     purple: 'text-purple-500',
     blue: 'text-blue-500',
-    orange: 'text-primary', // Use design system primary
+    orange: 'text-primary',
     cyan: 'text-cyan-500',
     yellow: 'text-yellow-500',
     pink: 'text-pink-500',
@@ -38,8 +38,8 @@ export default function ElegantCard({
     return (
       <div
         className={`
-          bg-card border border-border rounded-xl p-6 h-full 
-          flex flex-col animate-pulse
+          bg-card border-l-2 border-l-primary/50 border border-border 
+          rounded-lg p-6 h-full flex flex-col animate-pulse
           ${className}
         `}
       >
@@ -59,9 +59,9 @@ export default function ElegantCard({
   return (
     <div
       className={`
-        bg-card border border-border rounded-xl p-6 h-full 
-        flex flex-col transition-colors duration-200
-        hover:border-primary/30
+        bg-card border-l-2 border-l-primary border border-border 
+        rounded-lg p-6 h-full flex flex-col 
+        transition-all duration-200 hover:border-primary/40
         ${className}
       `}
     >
@@ -71,9 +71,9 @@ export default function ElegantCard({
           <div className="flex items-center gap-2.5">
             {icon &&
               createElement(icon, {
-                className: `w-5 h-5 ${iconColor}`,
+                className: `w-4 h-4 ${iconColor}`,
               })}
-            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               {title}
             </span>
           </div>
