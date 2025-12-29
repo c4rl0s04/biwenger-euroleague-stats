@@ -367,7 +367,7 @@ All statistics organized by category with feasibility status.
 
 ## 8. Porras (`/porras`) — TO BUILD
 
-**Purpose:** Prediction game tracking and leaderboards.
+**Purpose:** Prediction game tracking, achievements, and leaderboards.
 
 ### Page Layout
 
@@ -377,47 +377,140 @@ All statistics organized by category with feasibility status.
 ├─────────────────────────────────────────────────────────────┤
 │  Section: "Resumen" (Overview KPIs)                         │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
-│  │TotalRnds │ │MyAccuracy│ │BestRound │ │LeagueAvg │        │
+│  │ Jornadas │ │MiPromedio│ │MejorJrnd │ │MediaLiga │        │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘        │
 ├─────────────────────────────────────────────────────────────┤
-│  Section: "Mi Rendimiento" (My Performance)                 │
+│  Section: "🏆 Logros" (Achievements)                        │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐│
+│  │ Perfect 10 │ │  Blanked   │ │ClutchPlayr│ │ MásVictorias││
+│  │(10/10 usrs)│ │(0 aciertos)│ │(últimas 3) │ │(más wins)  ││
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "📈 Evolución" (Progression)                      │
 │  ┌─────────────────────────────────────────────────────────┐│
-│  │        PorrasProgressionCard (line chart - my aciertos) ││
+│  │   PorrasEvolutionChart (multi-line: all users aciertos) ││
+│  └─────────────────────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │   ParticipationChart (bar: participants per round)      ││
 │  └─────────────────────────────────────────────────────────┘│
 ├─────────────────────────────────────────────────────────────┤
-│  Section: "Clasificación" (Leaderboard)                     │
+│  Section: "📊 Estadísticas Detalladas" (Detailed Stats)     │
 │  ┌─────────────────────────────────────────────────────────┐│
-│  │          PorrasLeaderboardCard (full standings table)   ││
-│  │   Name | Total Aciertos | Avg/Round | Best Round | Rank ││
+│  │  PorrasStatsTable (sortable)                            ││
+│  │  Usuario|Promedio|Mediana|Jornadas|Total|Mejor|Peor|Forma││
 │  └─────────────────────────────────────────────────────────┘│
 ├─────────────────────────────────────────────────────────────┤
-│  Section: "Historial por Jornada" (Round History)           │
+│  Section: "📅 Histórico por Jornadas" (Round History)       │
 │  ┌─────────────────────────────────────────────────────────┐│
-│  │          PorrasHistoryCard (round-by-round table)       ││
-│  │   Round | My Aciertos | Winner | Winner Aciertos        ││
+│  │  CrossReferenceTable (heatmap style)                    ││
+│  │  Rows: Rounds | Cols: Users | Values: Aciertos (colored)││
 │  └─────────────────────────────────────────────────────────┘│
-├─────────────────────────────────────────────────────────────┤
-│  Section: "Estadísticas" (Stats)                            │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
-│  │MostWinsCard│ │ConsistncyPr│ │LuckyRoundCd│               │
-│  └────────────┘ └────────────┘ └────────────┘               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Cards Breakdown
+### Cards & Components
 
-| Card                      | Description                           | Data Source                 |
-| ------------------------- | ------------------------------------- | --------------------------- |
-| **TotalRoundsKPI**        | Number of rounds with porras          | `porras` count              |
-| **MyAccuracyKPI**         | Total aciertos / total predictions    | `porras.aciertos`           |
-| **BestRoundKPI**          | Your highest scoring round            | `porras` max                |
-| **LeagueAvgKPI**          | Average aciertos across all users     | `porras` avg                |
-| **PorrasProgressionCard** | Line chart of your aciertos over time | `porras` by round           |
-| **PorrasLeaderboardCard** | Full rankings table                   | `porras` aggregated by user |
-| **PorrasHistoryCard**     | Your results each round               | `porras` for current user   |
-| **MostWinsCard**          | Who won most rounds                   | `porras` winner per round   |
-| **ConsistencyPorrasCard** | Most consistent predictor             | `porras` std deviation      |
-| **LuckyRoundCard**        | Round with highest total aciertos     | `porras` sum by round       |
+| Component               | Description                          | Data Source                               |
+| ----------------------- | ------------------------------------ | ----------------------------------------- |
+| **JornadasKPI**         | Total rounds played                  | `porras` count distinct round_id          |
+| **MiPromedioKPI**       | My average aciertos                  | `porras.aciertos` avg for user            |
+| **MejorJornadaKPI**     | Best round (user + aciertos + round) | `porras` max                              |
+| **MediaLigaKPI**        | League average aciertos              | `porras.aciertos` global avg              |
+| **Perfect10Card**       | Users with 10/10 (user + round)      | `porras WHERE aciertos = 10`              |
+| **BlankedCard**         | Users with 0 aciertos                | `porras WHERE aciertos = 0`               |
+| **ClutchPlayerCard**    | Best avg last 3 rounds               | `porras` last 3 rounds avg                |
+| **MasVictoriasCard**    | Most round wins                      | `porras` winner count                     |
+| **EvolutionChart**      | Multi-line: all users over time      | `porras` by round/user                    |
+| **ParticipationChart**  | Bar: participants per round          | `porras` count by round                   |
+| **StatsTable**          | Detailed stats per user              | Computed: avg, median, best, worst, trend |
+| **CrossReferenceTable** | Heatmap: Round × User                | `porras` full matrix                      |
+
+### Color Legend (Rendimiento)
+
+| Aciertos | Color       | Indicator |
+| -------- | ----------- | --------- |
+| ≥7       | 🟢 Verde    | Excelente |
+| 5-6      | 🟡 Amarillo | Bueno     |
+| 3-4      | 🟠 Naranja  | Regular   |
+| <3       | 🔴 Rojo     | Malo      |
+
+---
+
+## 9. Usuarios (`/usuarios`) — TO BUILD
+
+**Purpose:** User profiles, squad analysis, and efficiency rankings.
+
+### Page Layout
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: "Usuarios" + subtitle "Análisis de plantillas"     │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Vista General" (Overview Cards - per user)       │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐│
+│  │ User 1     │ │ User 2     │ │ User 3     │ │ User 4     ││
+│  │ Jugadores  │ │ Jugadores  │ │ Jugadores  │ │ Jugadores  ││
+│  │ Valor      │ │ Valor      │ │ Valor      │ │ Valor      ││
+│  │ Media pts  │ │ Media pts  │ │ Media pts  │ │ Media pts  ││
+│  │ MVP        │ │ MVP        │ │ MVP        │ │ MVP        ││
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "💰 Análisis de Valor" (Value Analysis)           │
+│  ┌─────────────────────────┐ ┌─────────────────────────────┐│
+│  │  ValorPlantillasChart   │ │   EficienciaScatterChart    ││
+│  │  (horizontal bars)      │ │   (Valor vs Puntos)         ││
+│  └─────────────────────────┘ └─────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "📊 Eficiencia y ROI"                             │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │ Pts/Millón │ │  Podio     │ │ Top3 Users │               │
+│  │  Ranking   │ │ Eficiencia │ │  Jugadores │               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "🎯 Distribución Posicional" (per user)           │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐│
+│  │ User1 Dona │ │ User2 Dona │ │ User3 Dona │ │ User4 Dona ││
+│  │ B/A/P %    │ │ B/A/P %    │ │ B/A/P %    │ │ B/A/P %    ││
+│  │ Equilibrio │ │ Equilibrio │ │ Equilibrio │ │ Equilibrio ││
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "🏀 Equipos Más Fichados" (Teams)                 │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  TeamDistributionChart (horizontal bars by team)        ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "📋 Detalle de Plantillas" (Expandable per user)  │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  [▼ User 1] [▼ User 2] [▼ User 3] ...                   ││
+│  │  Expanded: Jugador | Pos | Puntos | Media | Valor       ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Cards & Components
+
+| Component                  | Description                        | Data Source                          |
+| -------------------------- | ---------------------------------- | ------------------------------------ |
+| **UserOverviewCard**       | Players count, value, avg pts, MVP | `players` by owner                   |
+| **ValorPlantillasChart**   | Horizontal bars: value per user    | `players` sum price by owner         |
+| **EficienciaScatterChart** | Scatter: Value vs Total Points     | `players + user_rounds`              |
+| **PtsPorMillonCard**       | Points per million ranking         | `user_rounds.points / players.price` |
+| **PodioEficienciaCard**    | Top 3 most efficient users         | Computed efficiency                  |
+| **Top3JugadoresCard**      | Best 3 players per user            | `players` top by puntos per owner    |
+| **DistribucionPosCard**    | Doughnut: B/A/P breakdown          | `players.position` by owner          |
+| **EquilibrioScore**        | Balance score (%)                  | Position distribution analysis       |
+| **TeamDistributionChart**  | Players by real team (all users)   | `players.team` count                 |
+| **DetallePlantillaTable**  | Expandable squad table per user    | `players WHERE owner_id = X`         |
+
+### Position Colors
+
+| Code | Position   | Color      |
+| ---- | ---------- | ---------- |
+| B    | Base       | 🔵 Azul    |
+| A    | Alero      | 🟢 Verde   |
+| P    | Pívot      | 🔴 Rojo    |
+| AP   | Ala-Pívot  | 🟠 Naranja |
+| E    | Entrenador | 🟣 Índigo  |
 
 ---
 
@@ -428,7 +521,8 @@ All statistics organized by category with feasibility status.
 1. `/players` - Player directory with search/filters
 2. `/matches` - Schedule and results
 3. `/lineups` - Squad analysis
-4. `/porras` - Prediction game leaderboards
+4. `/porras` - Prediction game with achievements
+5. `/usuarios` - User profiles and squad analysis
 
 ### Phase 2: Add High-Priority Stats
 
