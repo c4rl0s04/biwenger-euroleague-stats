@@ -34,7 +34,7 @@ export default function RecentRoundsCard() {
     if (pos === 2) return 'text-slate-300'; // 🥈 Silver
     if (pos === 3) return 'text-amber-600'; // 🥉 Bronze
     if (pos <= 6) return 'text-primary'; // Top half - orange
-    return 'text-muted-foreground'; // Bottom half - gray
+    return 'text-red-500'; // Bottom half - red
   };
 
   // Find latest participated round for hero display
