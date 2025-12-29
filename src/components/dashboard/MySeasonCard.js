@@ -101,41 +101,39 @@ export default function MySeasonCard() {
                 <Target className="w-3 h-3 text-red-500" />
                 Peor Jornada
               </div>
-
-              {/* Separator */}
-              <div className="border-t border-border/50 my-4"></div>
-
-              {/* Zone 3: Achievements */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Victories */}
-                <div className="flex flex-col justify-center">
-                  <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                    <Trophy className="w-3 h-3 text-yellow-400" />
-                    Victorias
-                  </div>
-                  <div className="text-xl font-display text-yellow-400">
-                    {stats.victories || 0}{' '}
-                    <span className="text-xs font-sans text-muted-foreground font-normal">
-                      {stats.victories === 1 ? 'vez' : 'veces'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Podiums */}
-                <div className="flex flex-col justify-center">
-                  <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                    <Award className="w-3 h-3 text-orange-400" />
-                    Podios
-                  </div>
-                  <div className="text-xl font-display text-orange-400">
-                    {stats.podiums || 0}{' '}
-                    <span className="text-xs font-sans text-muted-foreground font-normal">
-                      Top 3
-                    </span>
-                  </div>
-                </div>
-              </div>
               <div className="text-xl font-display text-red-500">{stats.worst_round} pts</div>
+            </div>
+          </div>
+
+          {/* Separator */}
+          <div className="border-t border-border/50 my-4"></div>
+
+          {/* Zone 3: Achievements */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Victories */}
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+                <Trophy className="w-3 h-3 text-yellow-400" />
+                Victorias
+              </div>
+              <div className="text-xl font-display text-yellow-400">
+                {stats.victories || 0}{' '}
+                <span className="text-xs font-sans text-muted-foreground font-normal">
+                  {stats.victories === 1 ? 'vez' : 'veces'}
+                </span>
+              </div>
+            </div>
+
+            {/* Podiums */}
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+                <Award className="w-3 h-3 text-orange-400" />
+                Podios
+              </div>
+              <div className="text-xl font-display text-orange-400">
+                {stats.podiums || 0}{' '}
+                <span className="text-xs font-sans text-muted-foreground font-normal">Top 3</span>
+              </div>
             </div>
           </div>
 
