@@ -138,10 +138,10 @@ export function getUserSquadDetails(userId) {
   return {
     total_value: totalValue,
     price_trend: totalTrend,
-    top_rising: squad.filter((p) => p.price_increment > 0).slice(0, 3),
+    top_rising: squad.filter((p) => p.price_increment > 0).slice(0, 7),
     top_falling: squad
       .filter((p) => p.price_increment < 0)
-      .slice(-3)
+      .slice(-7)
       .reverse(),
   };
 }

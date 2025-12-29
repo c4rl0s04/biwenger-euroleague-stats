@@ -65,7 +65,7 @@ export default function SquadValueCard() {
                 Más suben
               </div>
               <div className="space-y-1.5">
-                {data.top_rising?.slice(0, 3).map((p) => (
+                {data.top_rising?.slice(0, 7).map((p) => (
                   <div key={p.id} className="flex items-center justify-between">
                     <Link
                       href={`/player/${p.id}`}
@@ -94,7 +94,7 @@ export default function SquadValueCard() {
                 Más bajan
               </div>
               <div className="space-y-1.5">
-                {data.top_falling?.slice(0, 3).map((p) => (
+                {data.top_falling?.slice(0, 7).map((p) => (
                   <div key={p.id} className="flex items-center justify-between">
                     <Link
                       href={`/player/${p.id}`}
