@@ -39,8 +39,8 @@
   --radius: 0.75rem;
 
   /* Custom glow and gradient tokens */
-  --glow-primary: 0 0 40px hsl(19 99% 49% / 0.3);
-  --glow-subtle: 0 0 60px hsl(19 99% 49% / 0.15);
+  --glow-primary: 0 0 30px hsla(19, 99%, 49%, 0.4);
+  --glow-subtle: 0 0 20px hsla(19, 99%, 49%, 0.2);
   --gradient-card: linear-gradient(145deg, hsl(220 18% 12%), hsl(220 18% 8%));
   --gradient-hero: linear-gradient(180deg, hsl(220 20% 8%) 0%, hsl(220 20% 4%) 100%);
   --gradient-accent: linear-gradient(135deg, hsl(19 99% 49%), hsl(30 100% 50%));
@@ -195,9 +195,15 @@ h3,
   backdrop-filter: none !important;
 }
 
-/* Keep the card outer border intact */
+/* Keep the card outer border intact + hover glow */
 .bg-card {
   border: 1px solid hsl(0 0% 30%) !important;
+  transition: all 0.3s ease;
+}
+
+.bg-card:hover {
+  border-color: hsl(var(--primary) / 0.5) !important;
+  box-shadow: var(--glow-subtle);
 }
 
 /* ========================================
