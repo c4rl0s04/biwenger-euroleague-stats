@@ -31,7 +31,7 @@ export default function SquadValueCard() {
       {!loading && data && (
         <div className="flex flex-col h-full flex-1">
           {/* Zone 1: Hero Value - Large and dominant */}
-          <div className="mb-6">
+          <div className="mb-3">
             <div className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-2">
               Valor Total
             </div>
@@ -54,7 +54,7 @@ export default function SquadValueCard() {
           </div>
 
           {/* Separator */}
-          <div className="border-t border-border/50 my-4"></div>
+          <div className="border-t border-border/50 my-3"></div>
 
           {/* Zone 2: Rising & Falling - Stacked vertically */}
           <div className="flex flex-col gap-4 flex-1">
