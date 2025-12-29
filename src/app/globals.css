@@ -197,7 +197,8 @@ h3,
 
 /* Keep the card outer border intact */
 .bg-card {
-  border-color: hsl(var(--border)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-left: 2px solid hsl(var(--primary)) !important;
 }
 
 /* ========================================
