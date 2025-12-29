@@ -23,7 +23,7 @@ export default function CaptainStatsCard() {
   return (
     <PremiumCard title="Capitanía" icon={Award} color="yellow" loading={loading}>
       {!loading && stats && (
-        <div className="space-y-3 flex-grow flex flex-col">
+        <div className="flex-grow flex flex-col gap-3">
           {/* Overall stats */}
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
@@ -49,7 +49,7 @@ export default function CaptainStatsCard() {
           </div>
 
           {/* Separator */}
-          <div className="border-t border-border/50 my-2"></div>
+          <div className="border-t border-border/50"></div>
 
           {/* All captains used - scrollable list */}
           <div className="flex-grow min-h-0">
@@ -100,7 +100,7 @@ export default function CaptainStatsCard() {
           </div>
 
           {/* Separator */}
-          <div className="border-t border-border/50 my-2"></div>
+          <div className="border-t border-border/50"></div>
 
           {/* Best/Worst - more compact */}
           <div className="grid grid-cols-2 gap-2 mt-auto">
