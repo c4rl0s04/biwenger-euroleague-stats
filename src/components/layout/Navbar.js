@@ -1,19 +1,11 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trophy, Users, User, ShoppingCart, Calendar } from 'lucide-react';
 import { UserSelector } from '@/components/user';
 
 import { useCardTheme } from '@/contexts/CardThemeContext';
-
-// Subscription function for useSyncExternalStore (no-op - value never changes)
-const emptySubscribe = () => () => {};
-
-// These functions determine if we're mounted (client-side)
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -24,6 +16,7 @@ const navItems = [
   { name: 'Partidos', href: '/matches', icon: Calendar },
 ];
 
+// Navbar styles for each theme (kept for backend configuration)
 const navVariants = {
   standard:
     'bg-slate-950/70 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-orange-900/5 support-[backdrop-filter]:bg-slate-950/70',
@@ -35,20 +28,8 @@ const navVariants = {
 
 export default function Navbar() {
   const pathname = usePathname();
-
-  // useSyncExternalStore returns false on server, true on client after hydration
-  const isClient = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
-
-  // Safe access to theme context - use standard on server to prevent hydration mismatch
-  let theme = 'standard';
-  try {
-    const context = useCardTheme();
-    if (context && isClient) theme = context.theme;
-  } catch (e) {
-    // Fallback if used outside provider
-  }
-
-  const navClass = navVariants[theme] || navVariants.standard;
+  const { theme } = useCardTheme();
+  const navClass = navVariants[theme] || navVariants.mesh;
 
   return (
     <nav className={`${navClass} sticky top-0 z-50 transition-all duration-700`}>

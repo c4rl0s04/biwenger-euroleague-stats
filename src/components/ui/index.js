@@ -27,5 +27,4 @@ export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as UserAvatar } from './UserAvatar';
 
 // Theme
-export { default as ThemeSwitcher } from './ThemeSwitcher';
 export { default as ThemeBackground } from './ThemeBackground';
