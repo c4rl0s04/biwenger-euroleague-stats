@@ -53,6 +53,9 @@ export default function SquadValueCard() {
             </div>
           </div>
 
+          {/* Separator */}
+          <div className="border-t border-border/50 my-4"></div>
+
           {/* Zone 2: Rising & Falling - Stacked vertically */}
           <div className="flex flex-col gap-4 flex-1">
             {/* Rising Players */}
