@@ -74,7 +74,11 @@ export default function RecentRoundsCard() {
                     !round.participated ? 'opacity-40' : ''
                   }`}
                 >
-                  <div className="text-muted-foreground text-xs font-mono">{round.round_name}</div>
+                  <div
+                    className={`text-xs font-mono ${getPositionBadge(round.position, round.participated)}`}
+                  >
+                    {round.round_name}
+                  </div>
                   <div className="flex items-center gap-4">
                     {round.participated ? (
                       <>
