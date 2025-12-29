@@ -25,9 +25,11 @@ export default function MySeasonCard() {
   if (!isReady) return null;
 
   const getPositionColor = (pos) => {
-    if (pos === 1) return 'text-yellow-400';
-    if (pos <= 3) return 'text-primary';
-    return 'text-foreground';
+    if (pos === 1) return 'text-yellow-400'; // 🥇 Gold
+    if (pos === 2) return 'text-slate-300'; // 🥈 Silver
+    if (pos === 3) return 'text-amber-600'; // 🥉 Bronze
+    if (pos <= 6) return 'text-foreground'; // Top half - white
+    return 'text-red-500'; // Bottom half - red
   };
 
   return (
