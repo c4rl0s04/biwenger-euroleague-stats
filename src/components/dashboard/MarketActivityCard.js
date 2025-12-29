@@ -34,6 +34,7 @@ export default function MarketActivityCard() {
       color="pink"
       loading={loading}
       actionRight={actionLink}
+      className="card-glow"
     >
       <div className="space-y-0">
         {recentTransfers && recentTransfers.length > 0 ? (

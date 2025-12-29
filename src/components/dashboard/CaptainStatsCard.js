@@ -21,7 +21,13 @@ export default function CaptainStatsCard() {
   if (!isReady) return null;
 
   return (
-    <PremiumCard title="Capitanía" icon={Award} color="yellow" loading={loading}>
+    <PremiumCard
+      title="Rendimiento de Capitanes"
+      icon={Crown}
+      color="yellow"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && stats && (
         <div className="flex-grow flex flex-col gap-3">
           {/* Overall stats */}

@@ -23,7 +23,7 @@ export default function StandingsCard() {
       title="Clasificación"
       icon={Users}
       color="indigo"
-      className="lg:col-span-1"
+      className="lg:col-span-1 card-glow"
       actionRight={actionLink}
       loading={loading}
     >

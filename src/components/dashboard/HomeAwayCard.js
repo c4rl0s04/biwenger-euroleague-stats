@@ -20,7 +20,13 @@ export default function HomeAwayCard() {
   if (!isReady) return null;
 
   return (
-    <PremiumCard title="Casa vs Fuera" icon={Home} color="orange" loading={loading}>
+    <PremiumCard
+      title="Casa vs Fuera"
+      icon={Home}
+      color="orange"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && stats && (
         <div className="grid grid-cols-2 gap-4 flex-1">
           <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30 hover:border-cyan-500/30 transition-all flex flex-col justify-center">

@@ -42,7 +42,13 @@ export default function RecentRoundsCard() {
   const allRounds = rounds;
 
   return (
-    <PremiumCard title="Últimas Jornadas" icon={Activity} color="purple" loading={loading}>
+    <PremiumCard
+      title="Últimas Jornadas"
+      icon={History}
+      color="purple"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && rounds.length > 0 && (
         <div className="flex flex-col h-full flex-1">
           {/* Zone 1: Latest Participated Round - Hero Display */}

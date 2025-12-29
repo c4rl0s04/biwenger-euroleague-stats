@@ -43,7 +43,13 @@ export default function WeekMVPsCard() {
   };
 
   return (
-    <PremiumCard title="MVPs Última Jornada" icon={Trophy} color="yellow" loading={loading}>
+    <PremiumCard
+      title="MVPs Última Jornada"
+      icon={Trophy}
+      color="yellow"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && (
         <div className="flex-1 flex flex-col justify-between gap-2 relative z-10">
           {mvps && mvps.length > 0 ? (

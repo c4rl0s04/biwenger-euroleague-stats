@@ -9,7 +9,13 @@ export default function BirthdayCard() {
   const { data: birthdays = [], loading } = useApiData('/api/dashboard/birthdays');
 
   return (
-    <PremiumCard title="Cumpleaños Hoy" icon={Cake} color="pink" loading={loading}>
+    <PremiumCard
+      title="Cumpleaños Hoy"
+      icon={Cake}
+      color="pink"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && (
         <div className="relative flex-1 flex flex-col h-full">
           {birthdays && birthdays.length > 0 ? (

@@ -27,7 +27,13 @@ export default function SquadValueCard() {
   const formatPrice = (price) => new Intl.NumberFormat('es-ES').format(price);
 
   return (
-    <PremiumCard title="Tu Plantilla" icon={Wallet} color="cyan" loading={loading}>
+    <PremiumCard
+      title="Valor de Equipo"
+      icon={TrendingUp}
+      color="blue"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && data && (
         <div className="flex flex-col h-full flex-1">
           {/* Zone 1: Hero Value - Large and dominant */}

@@ -22,6 +22,7 @@ export default function TopPlayersCard() {
       color="emerald"
       loading={loading}
       actionRight={actionLink}
+      className="card-glow"
     >
       <div className="space-y-4">
         {topPlayers.length > 0 ? (
