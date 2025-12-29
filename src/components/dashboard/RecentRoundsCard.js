@@ -33,7 +33,7 @@ export default function RecentRoundsCard() {
     if (pos === 1) return 'text-yellow-400'; // 🥇 Gold
     if (pos === 2) return 'text-slate-300'; // 🥈 Silver
     if (pos === 3) return 'text-amber-600'; // 🥉 Bronze
-    if (pos <= 6) return 'text-primary'; // Top half - orange
+    if (pos <= 6) return 'text-foreground'; // Top half - white
     return 'text-red-500'; // Bottom half - red
   };
 
@@ -84,7 +84,11 @@ export default function RecentRoundsCard() {
                   <div className="flex items-center gap-4">
                     {round.participated ? (
                       <>
-                        <div className="text-foreground font-semibold text-sm">{round.points}</div>
+                        <div
+                          className={`font-semibold text-sm ${getPositionBadge(round.position, true)}`}
+                        >
+                          {round.points}
+                        </div>
                         <div
                           className={`text-xs font-display min-w-[28px] text-right ${getPositionBadge(round.position, true)}`}
                         >
