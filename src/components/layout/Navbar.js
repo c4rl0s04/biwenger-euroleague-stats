@@ -1,11 +1,19 @@
 'use client';
 
+import { useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trophy, Users, User, ShoppingCart, Calendar } from 'lucide-react';
 import { UserSelector } from '@/components/user';
 
 import { useCardTheme } from '@/contexts/CardThemeContext';
+
+// Subscription function for useSyncExternalStore (no-op - value never changes)
+const emptySubscribe = () => () => {};
+
+// These functions determine if we're mounted (client-side)
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -27,11 +35,15 @@ const navVariants = {
 
 export default function Navbar() {
   const pathname = usePathname();
-  // Safe access to theme context
+
+  // useSyncExternalStore returns false on server, true on client after hydration
+  const isClient = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
+
+  // Safe access to theme context - use standard on server to prevent hydration mismatch
   let theme = 'standard';
   try {
     const context = useCardTheme();
-    if (context) theme = context.theme;
+    if (context && isClient) theme = context.theme;
   } catch (e) {
     // Fallback if used outside provider
   }
