@@ -38,7 +38,7 @@ export default function ElegantCard({
     return (
       <div
         className={`
-          bg-card border-l-2 border-l-primary/50 border border-border 
+          bg-card border border-border 
           rounded-lg p-6 h-full flex flex-col animate-pulse
           ${className}
         `}
@@ -59,9 +59,9 @@ export default function ElegantCard({
   return (
     <div
       className={`
-        bg-card border-l-2 border-l-primary border border-border 
+        bg-card border border-border 
         rounded-lg p-6 h-full flex flex-col 
-        transition-all duration-200 hover:border-primary/40
+        transition-all duration-200 hover:border-white/40
         ${className}
       `}
     >
