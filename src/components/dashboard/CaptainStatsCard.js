@@ -96,8 +96,11 @@ export default function CaptainStatsCard() {
             </div>
           </div>
 
+          {/* Separator */}
+          <div className="border-t border-border/50 my-2"></div>
+
           {/* Best/Worst - more compact */}
-          <div className="grid grid-cols-2 gap-2 mt-auto pt-2">
+          <div className="grid grid-cols-2 gap-2 mt-auto">
             <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
               <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Mejor
