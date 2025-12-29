@@ -1,10 +1,14 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 
 export default function UserSelectionModal() {
-  const { currentUser, selectUser, users } = useUser();
+  const { currentUser, selectUser, users, isClient } = useClientUser();
 
+  // Don't render on server to prevent hydration mismatch
+  if (!isClient) return null;
+
+  // User already selected, hide modal
   if (currentUser) return null;
 
   return (
