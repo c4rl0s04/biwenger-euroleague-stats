@@ -6,18 +6,83 @@ Complete specification of all pages, their features, and required data sources.
 
 ## Database Capabilities Summary
 
-| Table                | Key Data Available                                                                           |
-| -------------------- | -------------------------------------------------------------------------------------------- |
-| `users`              | id, name, icon                                                                               |
-| `players`            | name, position, team, price, puntos, owner_id, price_increment, birth_date, home/away splits |
-| `user_rounds`        | user points per round, participation status                                                  |
-| `lineups`            | player in lineup, is_captain, role (starter/bench)                                           |
-| `player_round_stats` | fantasy_points, real stats (points, rebounds, assists, etc.)                                 |
-| `fichajes`           | transfer history (buyer, seller, price, timestamp)                                           |
-| `matches`            | schedule, scores, home/away teams                                                            |
-| `market_values`      | historical price per player                                                                  |
-| `porras`             | predictions (aciertos)                                                                       |
-| `initial_squads`     | starting squad at season begin                                                               |
+| Table                | Key Data Available                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `users`              | id, name, icon                                                                                       |
+| `players`            | name, position, team, price, puntos, owner_id, price_increment, birth_date, status, home/away splits |
+| `user_rounds`        | user points per round, participation status                                                          |
+| `lineups`            | player in lineup, is_captain, role (starter/bench)                                                   |
+| `player_round_stats` | fantasy_points, real stats (points, rebounds, assists, etc.)                                         |
+| `fichajes`           | transfer history (buyer, seller, price, timestamp)                                                   |
+| `matches`            | schedule, scores, home/away teams                                                                    |
+| `market_values`      | historical price per player                                                                          |
+| `porras`             | predictions (aciertos)                                                                               |
+| `initial_squads`     | starting squad at season begin                                                                       |
+| `finances`           | user budget/cash (if tracked)                                                                        |
+
+---
+
+## Statistics Catalog
+
+All statistics organized by category with feasibility assessment.
+
+### 🌟 Performance & Consistency
+
+| Statistic                 | Description                            | Data Source                       | Status                                 |
+| ------------------------- | -------------------------------------- | --------------------------------- | -------------------------------------- |
+| Weekly Volatility         | Standard deviation of points per round | `user_rounds.points`              | ✅ Implemented (ConsistencyCard)       |
+| Top 3 / Bottom 3 Count    | Podium vs relegation zone finishes     | `user_rounds` position per round  | ✅ Implemented (PlacementStatsCard)    |
+| Above/Below Average Weeks | % of weeks above league average        | `user_rounds` vs avg              | ✅ Implemented (LeaguePerformanceCard) |
+| Points per Million        | Total points / team value              | `user_rounds + players.price`     | ✅ Implemented (EfficiencyCard)        |
+| Hypothetical Standings    | "If everyone played every week"        | `user_rounds` with avg for missed | ⏳ To Build                            |
+| Streak 50+ Rounds         | Longest streak above threshold         | `user_rounds.points`              | ⏳ To Build                            |
+| Bottler Metric            | Most 2nd/3rd without wins              | `user_rounds` positions           | ✅ Implemented (BottlerCard)           |
+
+---
+
+### 💰 Economy & Team Value
+
+| Statistic                      | Description                            | Data Source                            | Status                  |
+| ------------------------------ | -------------------------------------- | -------------------------------------- | ----------------------- |
+| Squad Value Growth Rate        | Team value increase since season start | `initial_squads + players.price`       | ⏳ To Build             |
+| Bench Value                    | Total value of bench players           | `lineups.role='bench' + players.price` | ⏳ To Build (Dashboard) |
+| Most Expensive Player per Team | Each user's star player (bubble chart) | `players` grouped by owner             | ⏳ To Build             |
+| Cash Hoarders                  | Ranking by available balance           | `finances` (if available)              | ❓ Needs data           |
+| Daily Market Winners           | Most gained from price increases       | `players.price_increment` by owner     | ⏳ To Build (Market)    |
+| Average Player Value           | Team value / squad size                | `players` by owner                     | ⏳ To Build             |
+
+---
+
+### 🏟️ Squad & Composition
+
+| Statistic            | Description                             | Data Source                     | Status                         |
+| -------------------- | --------------------------------------- | ------------------------------- | ------------------------------ |
+| Squad Composition    | Breakdown by position (pie chart)       | `players.position` by owner     | ⏳ To Build                    |
+| Team Dependency      | % value in top 3 players                | `players.price` top 3 per owner | ⏳ To Build                    |
+| Most Owned Real Team | Who owns most Real Madrid players, etc. | `players.team` by owner         | ⏳ To Build                    |
+| Injury Crisis        | Count of injured/doubtful players       | `players.status`                | ✅ Feasible (if status synced) |
+
+---
+
+### ⚔️ Head-to-Head & Rivals
+
+| Statistic    | Description                       | Data Source                                             | Status      |
+| ------------ | --------------------------------- | ------------------------------------------------------- | ----------- |
+| The Nemesis  | User you finish behind most often | `user_rounds` position comparison                       | ⏳ To Build |
+| Gap Analysis | Points needed to catch leader     | Simple math: `(leader_pts - my_pts) / remaining_rounds` | ⏳ To Build |
+| Mini-Leagues | Top 4 vs Bottom 4 groupings       | `user_rounds` aggregated                                | ⏳ To Build |
+
+---
+
+### 📅 Time-Based / History
+
+| Statistic             | Description                          | Data Source                           | Status                           |
+| --------------------- | ------------------------------------ | ------------------------------------- | -------------------------------- |
+| Best Month            | Monthly winner breakdown             | `user_rounds` grouped by month        | ⏳ To Build                      |
+| Comeback King         | Biggest rank improvement             | Position at round X vs now            | ⏳ To Build                      |
+| Ideal Lineup (League) | Team of the Season by position       | `player_round_stats` top per position | ✅ Implemented (IdealLineupCard) |
+| Lost Points           | Potential max - actual (bench waste) | `lineups + player_round_stats`        | ⏳ To Build                      |
+| One Hit Wonders       | High single-round, low total         | `player_round_stats` max vs sum       | ⏳ To Build (Players page)       |
 
 ---
 
@@ -27,31 +92,32 @@ Complete specification of all pages, their features, and required data sources.
 
 ### Current Cards (14)
 
-| Card                  | Status | Data Source                  |
-| --------------------- | ------ | ---------------------------- |
-| MySeasonCard          | ✅     | user_rounds                  |
-| SquadValueCard        | ✅     | players (owner)              |
-| RecentRoundsCard      | ✅     | user_rounds                  |
-| CaptainStatsCard      | ✅     | lineups + player_round_stats |
-| LeaderGapCard         | ✅     | user_rounds (aggregated)     |
-| HomeAwayCard          | ✅     | players (home/away splits)   |
-| LeagueComparisonCard  | ✅     | user_rounds (vs league avg)  |
-| NextRoundCard         | ✅     | matches                      |
-| StandingsCard         | ✅     | user_rounds                  |
-| TopPlayersCard        | ✅     | player_round_stats           |
-| MarketActivityCard    | ✅     | fichajes                     |
-| WeekMVPsCard          | ✅     | player_round_stats           |
-| IdealLineupCard       | ✅     | player_round_stats           |
-| StreakCard (hot/cold) | ✅     | player_round_stats           |
-| BirthdayCard          | ✅     | players (birth_date)         |
+| Card                  | Data Source                  |
+| --------------------- | ---------------------------- |
+| MySeasonCard          | user_rounds                  |
+| SquadValueCard        | players (owner)              |
+| RecentRoundsCard      | user_rounds                  |
+| CaptainStatsCard      | lineups + player_round_stats |
+| LeaderGapCard         | user_rounds (aggregated)     |
+| HomeAwayCard          | players (home/away splits)   |
+| LeagueComparisonCard  | user_rounds (vs league avg)  |
+| NextRoundCard         | matches                      |
+| StandingsCard         | user_rounds                  |
+| TopPlayersCard        | player_round_stats           |
+| MarketActivityCard    | fichajes                     |
+| WeekMVPsCard          | player_round_stats           |
+| IdealLineupCard       | player_round_stats           |
+| StreakCard (hot/cold) | player_round_stats           |
+| BirthdayCard          | players (birth_date)         |
 
 ### Proposed Additions
 
-| Card               | Description                                                    | Feasibility                                      |
-| ------------------ | -------------------------------------------------------------- | ------------------------------------------------ |
-| **PorrasCard**     | User's prediction accuracy this season                         | ✅ `porras.aciertos`                             |
-| **BenchValueCard** | Total value sitting on bench                                   | ✅ `lineups.role + players.price`                |
-| **LostPointsCard** | Difference between max possible (all players) vs actual lineup | ⚠️ Needs lineup + player_round_stats calculation |
+| Card                 | Description                     | Priority |
+| -------------------- | ------------------------------- | -------- |
+| **PorrasCard**       | Prediction accuracy this season | Medium   |
+| **BenchValueCard**   | Total value on bench            | High     |
+| **LostPointsCard**   | Points wasted on bench          | Medium   |
+| **InjuryCrisisCard** | Injured players in your squad   | Low      |
 
 ---
 
@@ -59,78 +125,56 @@ Complete specification of all pages, their features, and required data sources.
 
 **Purpose:** League-wide analytics. Compare all users.
 
-### Current Cards (17)
+### Current Cards (16)
 
-| Card                       | Status                                |
-| -------------------------- | ------------------------------------- |
-| FullStandingsCard          | ✅ Complete standings table           |
-| LeagueStatsCard            | ✅ Aggregate league stats             |
-| RoundWinnersCard           | ✅ Who won each round                 |
-| PointsProgressionCard      | ✅ Line chart of cumulative points    |
-| RoundPointsProgressionCard | ✅ Per-round points chart             |
-| ConsistencyCard            | ✅ Standard deviation of points       |
-| PlacementStatsCard         | ✅ Top 3 / Bottom 3 finishes          |
-| LeaguePerformanceCard      | ✅ Above/below average weeks          |
-| EfficiencyCard             | ✅ Points per million €               |
-| StreaksCard                | ✅ Win/loss streaks                   |
-| BottlerCard                | ✅ Most 2nd/3rd without wins          |
-| HeartbreakersCard          | ✅ Close losses (2nd by small margin) |
-| NoGloryCard                | ✅ Zero wins despite playing          |
-| JinxCard                   | ✅ Who you always lose to             |
-| TeamValueRankingCard       | ✅ Squad values ranked                |
-| InitialSquadAnalysisCard   | ✅ Compare current vs initial squad   |
+- FullStandingsCard, LeagueStatsCard, RoundWinnersCard
+- PointsProgressionCard, RoundPointsProgressionCard
+- ConsistencyCard (Volatility), PlacementStatsCard (Top3/Bottom3)
+- LeaguePerformanceCard (Above/Below Avg), EfficiencyCard (Points/Million)
+- StreaksCard, BottlerCard, HeartbreakersCard, NoGloryCard
+- JinxCard, TeamValueRankingCard, InitialSquadAnalysisCard
 
-### Proposed Additions (from your ideas)
+### Proposed Additions
 
-#### ✅ Feasible - Data Available
-
-| Card                      | Description                                        | Data Source                        |
-| ------------------------- | -------------------------------------------------- | ---------------------------------- |
-| **VolatilityCard**        | Std deviation ranking (already in ConsistencyCard) | `user_rounds`                      |
-| **HypotheticalStandings** | "If everyone played every week"                    | `user_rounds` (avg missing rounds) |
-| **Streak50PlusCard**      | Longest streak above 50 pts                        | `user_rounds.points`               |
-| **ComebackKingCard**      | Biggest rank improvement from round X to now       | `user_rounds` position tracking    |
-| **BestMonthCard**         | Who dominated each month                           | `user_rounds` grouped by month     |
-| **PorrasLeaderboard**     | Who has most prediction accuracy                   | `porras.aciertos`                  |
-
-#### ⚠️ Needs Calculation
-
-| Card                 | Description                      | Complexity                            |
-| -------------------- | -------------------------------- | ------------------------------------- |
-| **NemesisCard**      | Who you finish behind most often | Medium - compare positions each round |
-| **SeasonProjection** | Points needed to catch leader    | Simple math on remaining rounds       |
+| Card                          | Description                   | Priority |
+| ----------------------------- | ----------------------------- | -------- |
+| **HypotheticalStandingsCard** | If everyone played every week | High     |
+| **Streak50PlusCard**          | Longest streak above 50 pts   | Medium   |
+| **ComebackKingCard**          | Biggest rank improvement      | High     |
+| **BestMonthCard**             | Monthly winners               | Medium   |
+| **NemesisCard**               | User you lose to most         | High     |
+| **GapAnalysisCard**           | Points needed to catch leader | Medium   |
+| **MiniLeaguesCard**           | Top 4 vs Bottom 4 battle      | Low      |
+| **SquadValueGrowthCard**      | Value increase since start    | Medium   |
+| **TeamDependencyCard**        | % value in top 3 players      | Low      |
 
 ---
 
 ## 3. Players (`/players`) — **TO BUILD**
 
-**Purpose:** Player discovery, search, and analysis. League-wide player database.
+**Purpose:** Player discovery, search, and analysis.
 
-### Proposed Structure
+### Structure
 
-#### Header Section
+**Header:** Search bar + Filters (Position, Team, Owner, Price range)
 
-- Search bar (by name, team, position)
-- Filters: Position, Team, Owner (All/Free/Mine), Price range
+### Cards
 
-#### Featured Sections
+| Card                    | Description                  |
+| ----------------------- | ---------------------------- |
+| **TopScorersList**      | Top 10 by fantasy points     |
+| **RisingStarsCard**     | Biggest price increases      |
+| **FallingStarsCard**    | Biggest price drops          |
+| **BargainsCard**        | Best points-per-million      |
+| **OneHitWondersCard**   | High single-round, low total |
+| **MostTransferredCard** | Players with most transfers  |
+| **TeamStatsCard**       | Average points by real team  |
+| **FreeAgentsCard**      | Top available players        |
+| **PositionBreakdown**   | Best by position             |
 
-| Card                    | Description                                | Data Source                          |
-| ----------------------- | ------------------------------------------ | ------------------------------------ |
-| **TopScorersList**      | Top 10 by total fantasy points             | `players.puntos`                     |
-| **RisingStarsCard**     | Biggest price increases                    | `players.price_increment`            |
-| **FallingStarsCard**    | Biggest price drops                        | `players.price_increment` (negative) |
-| **BargainsCard**        | Best points-per-million ratio              | `players.puntos / players.price`     |
-| **OneHitWondersCard**   | High single-round score but low total      | `player_round_stats` analysis        |
-| **MostTransferredCard** | Players with most transfers                | `fichajes` count by player           |
-| **TeamStatsCard**       | Average points by real-life team           | `players` grouped by team            |
-| **PositionBreakdown**   | Best players by position                   | Filter by `players.position`         |
-| **FreeAgentsCard**      | Top available players (`owner_id IS NULL`) | `players`                            |
+### Player Table
 
-#### Player Table
-
-- Sortable columns: Points, Price, Price Change, Games Played
-- Click to go to `/player/[id]`
+Sortable: Points, Price, Price Change, Games Played → Links to `/player/[id]`
 
 ---
 
@@ -138,29 +182,19 @@ Complete specification of all pages, their features, and required data sources.
 
 **Purpose:** Deep dive into a single player.
 
-### Current Cards (12)
+### Current Cards (11)
 
-| Card                    | Status                        |
-| ----------------------- | ----------------------------- |
-| PlayerIdentityCard      | ✅ Name, team, position       |
-| PlayerBioCard           | ✅ Height, weight, birth date |
-| PlayerStatsCard         | ✅ Season totals              |
-| PlayerMarketCard        | ✅ Current price, increment   |
-| PlayerAdvancedStatsCard | ✅ Per-game averages          |
-| PlayerSplitsCard        | ✅ Home vs away performance   |
-| PlayerNextMatchCard     | ✅ Upcoming game              |
-| PlayerPointsGraph       | ✅ Points per round chart     |
-| PlayerPriceHistoryCard  | ✅ Price over time            |
-| PlayerOwnershipCard     | ✅ Current/past owners        |
-| PlayerHistoryCard       | ✅ Round-by-round stats table |
+PlayerIdentityCard, PlayerBioCard, PlayerStatsCard, PlayerMarketCard,
+PlayerAdvancedStatsCard, PlayerSplitsCard, PlayerNextMatchCard,
+PlayerPointsGraph, PlayerPriceHistoryCard, PlayerOwnershipCard, PlayerHistoryCard
 
 ### Proposed Additions
 
-| Card                    | Description                           | Feasibility             |
-| ----------------------- | ------------------------------------- | ----------------------- |
-| **CaptainHistoryCard**  | How often player was captain + impact | ✅ `lineups.is_captain` |
-| **SimilarPlayersCard**  | Players with similar stats/price      | ✅ Comparison query     |
-| **TransferHistoryCard** | All buy/sell events for this player   | ✅ `fichajes.player_id` |
+| Card                    | Description                      |
+| ----------------------- | -------------------------------- |
+| **CaptainHistoryCard**  | How often captained + impact     |
+| **SimilarPlayersCard**  | Players with similar stats/price |
+| **TransferHistoryCard** | All buy/sell events              |
 
 ---
 
@@ -170,20 +204,19 @@ Complete specification of all pages, their features, and required data sources.
 
 ### Current Features
 
-- 4 KPI cards (Total, Avg, Max, Active Buyers)
-- Search + sortable transfers table
+4 KPI cards + Search + Sortable transfers table
 
 ### Proposed Additions
 
-| Card                          | Description                                             | Data Source                        |
-| ----------------------------- | ------------------------------------------------------- | ---------------------------------- |
-| **BiggestSpendersCard**       | Users who spent most total                              | `fichajes` sum by `comprador`      |
-| **BiggestSellersCard**        | Users who earned most from sales                        | `fichajes` sum by `vendedor`       |
-| **MostBidWarCard**            | Transfers with most bids (if `transfer_bids` populated) | `transfer_bids`                    |
-| **DailyMarketWinnersCard**    | Who gained most from price changes today                | `players.price_increment` by owner |
-| **TradingVolumeChart**        | Transfers per week over season                          | `fichajes` grouped by week         |
-| **AverageTransferByPosition** | Are strikers more expensive than goalkeepers?           | `fichajes + players.position`      |
-| **MarketHeatmapCard**         | Which teams' players are traded most                    | `fichajes + players.team`          |
+| Card                          | Description                        |
+| ----------------------------- | ---------------------------------- |
+| **BiggestSpendersCard**       | Users who spent most               |
+| **BiggestSellersCard**        | Users who earned most              |
+| **DailyMarketWinnersCard**    | Who gained most from price changes |
+| **TradingVolumeChart**        | Transfers per week                 |
+| **AverageTransferByPosition** | Price by position                  |
+| **MarketHeatmapCard**         | Which teams traded most            |
+| **MostBidWarCard**            | Transfers with most bids           |
 
 ---
 
@@ -191,23 +224,20 @@ Complete specification of all pages, their features, and required data sources.
 
 **Purpose:** Game schedule, results, and team performance.
 
-### Proposed Structure
+### Structure
 
-#### Header Section
+**Header:** Round selector + View toggle (Calendar/List/Results)
 
-- Round selector dropdown
-- View toggle: Calendar / List / Results
+### Cards
 
-#### Cards
-
-| Card                     | Description                              | Data Source                       |
-| ------------------------ | ---------------------------------------- | --------------------------------- |
-| **UpcomingMatchesCard**  | Next X games with dates                  | `matches WHERE status='pending'`  |
-| **RecentResultsCard**    | Last X finished games with scores        | `matches WHERE status='finished'` |
-| **RoundScheduleCard**    | All games in selected round              | `matches WHERE round_id=X`        |
-| **TeamFormCard**         | Win/loss streak by team                  | `matches` analysis                |
-| **HighScoringGamesCard** | Games with most combined points          | `matches` ordered by total score  |
-| **TopFantasyRoundCard**  | Which round produced most fantasy points | `player_round_stats` sum by round |
+| Card                     | Description                    |
+| ------------------------ | ------------------------------ |
+| **UpcomingMatchesCard**  | Next games with dates          |
+| **RecentResultsCard**    | Last finished games            |
+| **RoundScheduleCard**    | All games in round             |
+| **TeamFormCard**         | Win/loss streak by team        |
+| **HighScoringGamesCard** | Most combined points           |
+| **TopFantasyRoundCard**  | Round with most fantasy points |
 
 ---
 
@@ -215,55 +245,49 @@ Complete specification of all pages, their features, and required data sources.
 
 **Purpose:** Squad management and lineup analysis.
 
-### Proposed Structure
+### For Current User
 
-#### For Current User
+| Card                   | Description               |
+| ---------------------- | ------------------------- |
+| **CurrentLineupCard**  | Active lineup with points |
+| **LineupHistoryCard**  | Past round lineups        |
+| **CaptainSuccessCard** | Captain choices + impact  |
+| **BenchImpactCard**    | Points left on bench      |
+| **OptimalLineupCard**  | Best possible lineup      |
+| **LostPointsCard**     | Wasted bench points total |
 
-| Card                   | Description                           | Data Source                               |
-| ---------------------- | ------------------------------------- | ----------------------------------------- |
-| **CurrentLineupCard**  | Your active lineup with points        | `lineups` for current round               |
-| **LineupHistoryCard**  | Your lineups over past rounds         | `lineups` all rounds                      |
-| **CaptainSuccessCard** | Captain choices and their points      | `lineups.is_captain + player_round_stats` |
-| **BenchImpactCard**    | Points left on bench each round       | Compare bench vs starters                 |
-| **OptimalLineupCard**  | What your best lineup would have been | `player_round_stats` for owned players    |
+### League-Wide
 
-#### League-Wide
-
-| Card                  | Description                         | Data Source                    |
-| --------------------- | ----------------------------------- | ------------------------------ |
-| **MostCaptainedCard** | Top captained players in league     | `lineups.is_captain` count     |
-| **MostStartedCard**   | Players that appear in most lineups | `lineups.role='starter'` count |
-| **SquadOverlapCard**  | Who shares most players with you    | Compare lineups                |
+| Card                  | Description             |
+| --------------------- | ----------------------- |
+| **MostCaptainedCard** | Top captained players   |
+| **MostStartedCard**   | Most used players       |
+| **SquadOverlapCard**  | Who shares most players |
 
 ---
 
 ## Implementation Priority
 
-### Phase 1: Complete Missing Pages
+### Phase 1: Build Missing Pages
 
 1. `/players` - Player directory with search/filters
 2. `/matches` - Schedule and results
 3. `/lineups` - Squad analysis
 
-### Phase 2: Enhance Existing Pages
+### Phase 2: Add High-Priority Stats
 
-1. Standings: Add Comeback King, Best Month, Nemesis
-2. Dashboard: Add Porras card, Bench Value
-3. Market: Add spending/selling leaderboards
+1. Standings: HypotheticalStandings, ComebackKing, Nemesis
+2. Dashboard: BenchValue, PorrasCard
+3. Market: Spenders/Sellers leaderboards
 
-### Phase 3: Advanced Features
+### Phase 3: Add Medium-Priority Stats
 
-1. Head-to-head comparisons
-2. Season projections
-3. Historical data (previous seasons)
+1. Streak50Plus, BestMonth, GapAnalysis
+2. SquadValueGrowth, TeamDependency
+3. OneHitWonders, DailyMarketWinners
 
----
+### Phase 4: Advanced Features
 
-## User Review Required
-
-> [!IMPORTANT]
-> Please review this plan and provide feedback:
->
-> 1. Which pages/cards are highest priority?
-> 2. Any features to add or remove?
-> 3. Should we proceed with Phase 1 first?
+1. Mini-Leagues groups
+2. Historical comparisons
+3. Season projections
