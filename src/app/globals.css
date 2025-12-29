@@ -186,11 +186,13 @@ h3,
    ELEGANT THEME - REMOVE INNER CARD BORDERS
    ======================================== */
 
-/* Remove borders from elements inside cards */
-.bg-card [class*='border-slate'],
-.bg-card [class*='border-transparent'],
-.bg-card [class*='border-'] {
-  border-color: transparent !important;
+/* Remove inner stat boxes styling inside cards */
+.bg-card [class*='bg-slate-800'],
+.bg-card [class*='bg-gradient-to'] {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
 }
 
 /* Keep the card outer border intact */
