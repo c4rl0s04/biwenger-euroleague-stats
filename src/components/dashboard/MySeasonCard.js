@@ -1,12 +1,12 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function MySeasonCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
 
   const { data: stats, loading } = useApiData(
     () => (currentUser ? `/api/player/stats?userId=${currentUser.id}` : null),
@@ -17,7 +17,8 @@ export default function MySeasonCard() {
     }
   );
 
-  if (!currentUser) return null;
+  // Don't render on server or when user not ready
+  if (!isReady) return null;
 
   const getPositionColor = (pos) => {
     if (pos === 1) return 'text-yellow-400';

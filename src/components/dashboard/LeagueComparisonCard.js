@@ -1,12 +1,12 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { BarChart3 } from 'lucide-react';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function LeagueComparisonCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
 
   // Fetch user stats
   const { data: userStats, loading: userLoading } = useApiData(
@@ -23,7 +23,7 @@ export default function LeagueComparisonCard() {
     skip: !currentUser,
   });
 
-  if (!currentUser) return null;
+  if (!isReady) return null;
 
   const loading = userLoading || leagueLoading;
   const data =

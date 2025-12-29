@@ -1,12 +1,12 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Target, Crown } from 'lucide-react';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function LeaderGapCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
 
   const { data, loading } = useApiData(
     () => (currentUser ? `/api/dashboard/leader-gap?userId=${currentUser.id}` : null),
@@ -16,7 +16,7 @@ export default function LeaderGapCard() {
     }
   );
 
-  if (!currentUser) return null;
+  if (!isReady) return null;
 
   if (loading) {
     return <PremiumCard loading={true} />;

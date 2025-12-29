@@ -1,18 +1,20 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function MarketActivityCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
 
   const { data, loading } = useApiData(
     () => `/api/dashboard/recent-activity?userId=${currentUser?.id || ''}`,
     { dependencies: [currentUser?.id] }
   );
+
+  if (!isReady) return null;
 
   const { recentTransfers } = data || {};
 

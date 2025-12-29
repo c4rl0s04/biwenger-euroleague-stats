@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Calendar, TrendingUp, Star, ShoppingCart, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
@@ -8,14 +8,15 @@ import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function NextRoundCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
   const userId = currentUser?.id || '';
 
   const { data = {}, loading } = useApiData(`/api/dashboard/next-round?userId=${userId}`, {
     dependencies: [userId],
   });
 
-  if (loading) {
+  // Don't render on server to prevent hydration mismatch
+  if (!isReady) {
     return <PremiumCard loading={true} className="lg:col-span-2" />;
   }
 

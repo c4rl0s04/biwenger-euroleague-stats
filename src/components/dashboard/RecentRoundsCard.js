@@ -1,12 +1,12 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Activity } from 'lucide-react';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RecentRoundsCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
 
   const { data: rounds, loading } = useApiData(
     () => (currentUser ? `/api/player/rounds?userId=${currentUser.id}` : null),
@@ -17,7 +17,7 @@ export default function RecentRoundsCard() {
     }
   );
 
-  if (!currentUser) return null;
+  if (!isReady) return null;
 
   return (
     <PremiumCard title="Últimas Jornadas" icon={Activity} color="purple" loading={loading}>

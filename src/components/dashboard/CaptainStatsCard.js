@@ -1,13 +1,13 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Award } from 'lucide-react';
 import Link from 'next/link';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function CaptainStatsCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
 
   const { data: stats, loading } = useApiData(
     () => (currentUser ? `/api/dashboard/captain-stats?userId=${currentUser.id}` : null),
@@ -18,7 +18,7 @@ export default function CaptainStatsCard() {
     }
   );
 
-  if (!currentUser) return null;
+  if (!isReady) return null;
 
   return (
     <PremiumCard title="Capitanía" icon={Award} color="yellow" loading={loading}>

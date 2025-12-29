@@ -1,12 +1,12 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Home } from 'lucide-react';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function HomeAwayCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isReady } = useClientUser();
 
   const { data: stats, loading } = useApiData(
     () => (currentUser ? `/api/dashboard/home-away?userId=${currentUser.id}` : null),
@@ -17,7 +17,7 @@ export default function HomeAwayCard() {
     }
   );
 
-  if (!currentUser) return null;
+  if (!isReady) return null;
 
   return (
     <PremiumCard title="Casa vs Fuera" icon={Home} color="orange" loading={loading}>
