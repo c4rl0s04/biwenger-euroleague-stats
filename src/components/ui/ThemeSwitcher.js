@@ -1,8 +1,15 @@
 'use client';
 
+import { useSyncExternalStore, useState } from 'react';
 import { useCardTheme } from '@/contexts/CardThemeContext';
-import { Palette, Monitor, Zap, Layout, Box } from 'lucide-react';
-import { useState } from 'react';
+import { Palette, Layout, Zap, Monitor, Box } from 'lucide-react';
+
+// Subscription function for useSyncExternalStore (no-op - value never changes)
+const emptySubscribe = () => () => {};
+
+// These functions determine if we're mounted (client-side)
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 const themes = [
   { id: 'standard', name: 'Original', icon: Layout },
@@ -14,6 +21,14 @@ const themes = [
 export default function ThemeSwitcher() {
   const { theme, setTheme } = useCardTheme();
   const [isOpen, setIsOpen] = useState(false);
+
+  // useSyncExternalStore returns false on server, true on client after hydration
+  const isClient = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
+
+  // Don't render on server to prevent hydration mismatch
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
