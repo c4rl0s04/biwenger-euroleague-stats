@@ -38,18 +38,18 @@ export default function MySeasonCard() {
           <div className="flex gap-6 items-end mb-6">
             {/* Position - Primary Hero */}
             <div className="flex-1">
-              <div className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">
+              <div className="text-muted-foreground text-s font-medium uppercase tracking-wider mb-1">
                 Posición
               </div>
-              <div className={`text-8xl font-display ${getPositionColor(stats.position)}`}>
+              <div className={`text-6xl font-display ${getPositionColor(stats.position)}`}>
                 #{stats.position}
               </div>
             </div>
 
             {/* Points - Secondary Hero */}
             <div className="text-right">
-              <div className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">
-                Puntos Totales
+              <div className="text-muted-foreground text-s font-medium uppercase tracking-wider mb-1">
+                Puntos
               </div>
               <div className="text-6xl font-display text-foreground">
                 {stats.total_points?.toLocaleString('es-ES')}

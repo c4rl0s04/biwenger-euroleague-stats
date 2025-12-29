@@ -81,6 +81,9 @@ export default function SquadValueCard() {
               </div>
             </div>
 
+            {/* Separator */}
+            <div className="border-t border-border/50"></div>
+
             {/* Falling Players */}
             <div className="flex-1">
               <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-2">
