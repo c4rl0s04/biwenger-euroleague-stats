@@ -98,7 +98,9 @@ export function getUserSeasonStats(userId) {
     )
     SELECT 
       MIN(position) as best_position,
-      MAX(position) as worst_position
+      MAX(position) as worst_position,
+      COUNT(CASE WHEN position = 1 THEN 1 END) as victories,
+      COUNT(CASE WHEN position <= 3 THEN 1 END) as podiums
     FROM RoundPositions
     WHERE user_id = ?
   `;
