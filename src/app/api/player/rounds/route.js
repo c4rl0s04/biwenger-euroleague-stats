@@ -11,8 +11,8 @@ export async function GET(request) {
       return errorResponse(userIdValidation.error, 400);
     }
 
-    const rounds = fetchUserRecentRounds(userIdValidation.value);
-    return successResponse({ rounds }, CACHE_DURATIONS.MEDIUM);
+    const data = fetchUserRecentRounds(userIdValidation.value);
+    return successResponse(data, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('API Error:', error);
     return errorResponse('Failed to fetch rounds');

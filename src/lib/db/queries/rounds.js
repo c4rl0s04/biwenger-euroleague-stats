@@ -95,29 +95,46 @@ export function getLastRoundWinner() {
  * @returns {Array} Recent rounds with position
  */
 export function getUserRecentRounds(userId, limit = 10) {
+  // Get all rounds (including non-participated) with position when participated
   const query = `
-    WITH RoundPositions AS (
+    WITH AllRounds AS (
+      SELECT DISTINCT round_id, round_name
+      FROM user_rounds
+      ORDER BY round_id DESC
+      LIMIT ?
+    ),
+    RoundPositions AS (
       SELECT 
         ur.round_id,
-        ur.round_name,
         ur.user_id,
         ur.points,
+        ur.participated,
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
       WHERE ur.participated = 1
     )
     SELECT 
-      round_id,
-      round_name,
-      points,
-      position
-    FROM RoundPositions
-    WHERE user_id = ?
-    ORDER BY round_id DESC
-    LIMIT ?
+      ar.round_id,
+      ar.round_name,
+      COALESCE(rp.points, 0) as points,
+      COALESCE(rp.position, 0) as position,
+      CASE WHEN rp.user_id IS NOT NULL THEN 1 ELSE 0 END as participated
+    FROM AllRounds ar
+    LEFT JOIN RoundPositions rp ON ar.round_id = rp.round_id AND rp.user_id = ?
+    ORDER BY ar.round_id DESC
   `;
 
-  return db.prepare(query).all(userId, limit);
+  const rounds = db.prepare(query).all(limit, userId);
+
+  // Count total rounds where user participated
+  const countQuery = `
+    SELECT COUNT(*) as total_played
+    FROM user_rounds
+    WHERE user_id = ? AND participated = 1
+  `;
+  const { total_played } = db.prepare(countQuery).get(userId) || { total_played: 0 };
+
+  return { rounds, total_played };
 }
 
 /**
