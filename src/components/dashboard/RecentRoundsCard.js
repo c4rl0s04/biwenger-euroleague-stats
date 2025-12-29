@@ -30,9 +30,11 @@ export default function RecentRoundsCard() {
 
   const getPositionBadge = (pos, participated) => {
     if (!participated) return 'text-muted-foreground/40';
-    if (pos === 1) return 'text-yellow-400';
-    if (pos <= 3) return 'text-primary';
-    return 'text-muted-foreground';
+    if (pos === 1) return 'text-yellow-400'; // 🥇 Gold
+    if (pos === 2) return 'text-slate-300'; // 🥈 Silver
+    if (pos === 3) return 'text-amber-600'; // 🥉 Bronze
+    if (pos <= 6) return 'text-primary'; // Top half - orange
+    return 'text-muted-foreground'; // Bottom half - gray
   };
 
   // Find latest participated round for hero display
