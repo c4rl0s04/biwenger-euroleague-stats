@@ -35,21 +35,21 @@ export default function CaptainStatsCard() {
 
             <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
               <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
-                Total pts (1x)
+                Total pts
               </div>
               <div className="text-xl font-bold text-yellow-400">{stats.extra_points}</div>
             </div>
 
             <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
               <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
-                Promedio (1x)
+                Promedio
               </div>
               <div className="text-xl font-bold text-orange-400">{stats.avg_points.toFixed(1)}</div>
             </div>
           </div>
 
           {/* Separator */}
-          <div className="border-t border-border/50 my-2"></div>
+          <div className="border-t border-border/50 mt-1 mb-2"></div>
 
           {/* All captains used - scrollable list */}
           <div className="flex-grow min-h-0">
