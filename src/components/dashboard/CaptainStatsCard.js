@@ -49,7 +49,7 @@ export default function CaptainStatsCard() {
           </div>
 
           {/* Separator */}
-          <div className="border-t border-border/50 mt-1 mb-2"></div>
+          <div className="border-t border-border/50 my-2"></div>
 
           {/* All captains used - scrollable list */}
           <div className="flex-grow min-h-0">
