@@ -1,43 +1,190 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ========================================
+   BIWENGER STATS - Sports Design System
+   Primary: #fa5001 (Sports Orange)
+   ======================================== */
 
 :root {
-  /* Fondo base profundo */
-  --background: #020617; /* slate-950 */
-  --foreground: #f8fafc; /* slate-50 */
+  /* Dark sports theme backgrounds */
+  --background: 220 20% 6%;
+  --foreground: 0 0% 95%;
 
-  /* Colores Semánticos (Marca y Estado) */
-  --color-brand: #6366f1; /* indigo-500 */
-  --color-brand-glow: rgba(99, 102, 241, 0.15);
+  --card: 220 18% 10%;
+  --card-foreground: 0 0% 95%;
 
-  --color-success: #10b981; /* emerald-500 */
-  --color-danger: #f43f5e; /* rose-500 */
-  --color-warning: #f59e0b; /* amber-500 */
+  --popover: 220 18% 10%;
+  --popover-foreground: 0 0% 95%;
 
-  /* Superficies de cristal */
+  /* Sports orange primary - #fa5001 */
+  --primary: 19 99% 49%;
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 220 15% 15%;
+  --secondary-foreground: 0 0% 90%;
+
+  --muted: 220 15% 18%;
+  --muted-foreground: 220 10% 55%;
+
+  --accent: 19 90% 42%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 220 15% 18%;
+  --input: 220 15% 20%;
+  --ring: 19 99% 49%;
+  --radius: 0.75rem;
+
+  /* Custom glow and gradient tokens */
+  --glow-primary: 0 0 40px hsl(19 99% 49% / 0.3);
+  --glow-subtle: 0 0 60px hsl(19 99% 49% / 0.15);
+  --gradient-card: linear-gradient(145deg, hsl(220 18% 12%), hsl(220 18% 8%));
+  --gradient-hero: linear-gradient(180deg, hsl(220 20% 8%) 0%, hsl(220 20% 4%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(19 99% 49%), hsl(30 100% 50%));
+
+  /* Sidebar tokens */
+  --sidebar-background: 220 20% 8%;
+  --sidebar-foreground: 0 0% 90%;
+  --sidebar-primary: 19 99% 49%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 220 15% 15%;
+  --sidebar-accent-foreground: 0 0% 90%;
+  --sidebar-border: 220 15% 18%;
+  --sidebar-ring: 19 99% 49%;
+
+  /* Legacy glass tokens (kept for existing components) */
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-surface: rgba(15, 23, 42, 0.6); /* slate-900 con opacidad */
+  --glass-surface: rgba(15, 23, 42, 0.6);
 }
 
+/* Tailwind v4 theme configuration */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+}
+
+/* Base styles */
+* {
+  border-color: hsl(var(--border));
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
-/* Clase maestra para tus tarjetas */
-.glass-panel {
-  @apply bg-slate-900/60 backdrop-blur-xl border border-white/5 shadow-xl;
+h1,
+h2,
+h3,
+.stat-value,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
 }
 
-/* Animations */
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Text gradient - sports orange */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: var(--gradient-accent);
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: var(--glow-primary);
+}
+
+.glow-subtle {
+  box-shadow: var(--glow-subtle);
+}
+
+/* Gradient backgrounds */
+.card-gradient {
+  background: var(--gradient-card);
+}
+
+.hero-gradient {
+  background: var(--gradient-hero);
+}
+
+.accent-gradient {
+  background: var(--gradient-accent);
+}
+
+/* Legacy glass panel (kept for existing components) */
+.glass-panel {
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ========================================
+   STAT CARD COMPONENT
+   ======================================== */
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  padding: 1.5rem;
+  background: var(--gradient-card);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: linear-gradient(135deg, hsl(19 99% 49% / 0.1), transparent);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: var(--glow-subtle);
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -49,6 +196,92 @@ body {
   }
 }
 
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation blob for theme background */
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0%, 0%) scale(1);
+  }
+  25% {
+    transform: translate(5%, 5%) scale(1.03);
+  }
+  50% {
+    transform: translate(0%, 10%) scale(0.97);
+  }
+  75% {
+    transform: translate(-5%, 5%) scale(1.03);
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-count-up {
+  animation: countUp 0.4s ease-out;
+}
+
+.animate-blob {
+  animation: blob 8s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
 }
