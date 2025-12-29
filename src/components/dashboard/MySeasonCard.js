@@ -59,6 +59,9 @@ export default function MySeasonCard() {
             </div>
           </div>
 
+          {/* Separator */}
+          <div className="border-t border-border/50 my-4"></div>
+
           {/* Zone 2: Performance Grid - fills remaining space */}
           <div className="grid grid-cols-2 gap-3 flex-1">
             {/* Best Position */}
