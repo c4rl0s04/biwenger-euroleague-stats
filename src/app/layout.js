@@ -16,12 +16,12 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="es" className="dark">
-      <body className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen flex flex-col`}>
+      <body
+        className={`${inter.className} bg-background text-foreground min-h-screen flex flex-col`}
+      >
         <ClientWrapper users={users}>
           <Navbar />
-          <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-            {children}
-          </main>
+          <main className="flex-grow w-full">{children}</main>
           <footer className="border-t border-slate-800/50 mt-auto bg-slate-950/30 backdrop-blur-sm">
             <div className="max-w-7xl mx-auto px-6 py-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">

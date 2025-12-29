@@ -53,7 +53,7 @@ export const dynamic = 'force-dynamic';
 function Section({ title, children, delay = 0, background = '' }) {
   return (
     <FadeIn delay={delay}>
-      <section className={`${background} -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-6`}>
+      <section className={`${background} px-4 sm:px-6 lg:px-8 py-8`}>
         <div className="max-w-7xl mx-auto space-y-4">
           <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">{title}</h2>
           {children}
@@ -65,7 +65,7 @@ function Section({ title, children, delay = 0, background = '' }) {
 
 export default function Dashboard() {
   return (
-    <div className="-mt-6">
+    <div>
       {/* Section: Mi Temporada */}
       <Section title="Mi Temporada" delay={0} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
