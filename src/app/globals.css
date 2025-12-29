@@ -183,6 +183,22 @@ h3,
 }
 
 /* ========================================
+   ELEGANT THEME - REMOVE INNER CARD BORDERS
+   ======================================== */
+
+/* Remove borders from elements inside cards */
+.bg-card [class*='border-slate'],
+.bg-card [class*='border-transparent'],
+.bg-card [class*='border-'] {
+  border-color: transparent !important;
+}
+
+/* Keep the card outer border intact */
+.bg-card {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* ========================================
    ANIMATIONS
    ======================================== */
 
