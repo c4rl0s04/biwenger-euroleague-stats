@@ -65,7 +65,7 @@ function Section({ title, children, delay = 0, background = '' }) {
         <div className="max-w-7xl mx-auto space-y-6">
           <h2 className="font-display text-4xl tracking-wide">
             <span className="text-foreground">{firstWord}</span>
-            {restWords && <span className="text-primary"> {restWords}</span>}
+            {restWords && <span className="text-gradient"> {restWords}</span>}
           </h2>
           {children}
         </div>
