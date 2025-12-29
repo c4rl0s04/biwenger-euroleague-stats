@@ -13,7 +13,7 @@ export default function UserSelectionModal() {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+      <div className="bg-[hsl(220,18%,10%)] border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl">
         <h2 className="text-2xl font-bold text-white mb-4 text-center">¿Quién eres?</h2>
 
         <div className="space-y-2">
@@ -21,7 +21,7 @@ export default function UserSelectionModal() {
             <button
               key={user.user_id}
               onClick={() => selectUser(user.user_id)}
-              className="w-full flex items-center gap-3 p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500 rounded-xl transition-all cursor-pointer"
+              className="w-full flex items-center gap-3 p-3 bg-[hsl(220,18%,10%)] hover:bg-[hsl(220,18%,15%)] border border-border hover:border-primary rounded-xl transition-all cursor-pointer"
             >
               {user.icon ? (
                 <img src={user.icon} alt={user.name} className="w-8 h-8 rounded-full" />
