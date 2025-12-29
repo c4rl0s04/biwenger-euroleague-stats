@@ -49,13 +49,15 @@ const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLi
 
 export const dynamic = 'force-dynamic';
 
-// Section component for consistent heading styles
-function Section({ title, children, delay = 0 }) {
+// Section component with background support for visual depth
+function Section({ title, children, delay = 0, background = '' }) {
   return (
     <FadeIn delay={delay}>
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-white flex items-center gap-2">{title}</h2>
-        {children}
+      <section className={`${background} -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-6`}>
+        <div className="max-w-7xl mx-auto space-y-4">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">{title}</h2>
+          {children}
+        </div>
       </section>
     </FadeIn>
   );
@@ -63,9 +65,9 @@ function Section({ title, children, delay = 0 }) {
 
 export default function Dashboard() {
   return (
-    <div className="space-y-8">
+    <div className="-mt-6">
       {/* Section: Mi Temporada */}
-      <Section title="Mi Temporada" delay={0}>
+      <Section title="Mi Temporada" delay={0} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MySeasonCard />
           <SquadValueCard />
@@ -75,7 +77,7 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Comparativa */}
-      <Section title="Comparativa" delay={100}>
+      <Section title="Comparativa" delay={100} background="section-raised">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <LeaderGapCard />
           <HomeAwayCard />
@@ -84,7 +86,7 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Próxima Jornada */}
-      <Section title="Próxima Jornada" delay={200}>
+      <Section title="Próxima Jornada" delay={200} background="section-base">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <NextRoundCard />
           <StandingsCard />
@@ -92,7 +94,7 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Mercado y Jugadores */}
-      <Section title="Mercado y Jugadores" delay={300}>
+      <Section title="Mercado y Jugadores" delay={300} background="section-raised">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TopPlayersCard />
           <MarketActivityCard />
@@ -100,7 +102,7 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Rendimiento de la Liga */}
-      <Section title="Rendimiento de la Liga" delay={400}>
+      <Section title="Rendimiento de la Liga" delay={400} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <WeekMVPsCard />
           <IdealLineupCard />
@@ -110,7 +112,7 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Curiosidades */}
-      <Section title="Curiosidades" delay={500}>
+      <Section title="Curiosidades" delay={500} background="section-raised">
         <BirthdayCard />
       </Section>
     </div>
