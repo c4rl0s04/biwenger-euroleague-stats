@@ -1,11 +1,27 @@
 'use client';
 
+import { useSyncExternalStore } from 'react';
 import { useCardTheme } from '@/contexts/CardThemeContext';
+
+// Subscription function for useSyncExternalStore (no-op - value never changes)
+const emptySubscribe = () => () => {};
+
+// These functions determine if we're mounted (client-side)
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 export default function ThemeBackground() {
   const { theme } = useCardTheme();
-  // Removed mounted check to allow server-side rendering of default theme
-  // and avoid cascading renders from synchronous setState in effect.
+
+  // useSyncExternalStore returns false on server, true on client after hydration
+  const isClient = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
+
+  // Render placeholder on server to prevent hydration mismatch
+  if (!isClient) {
+    return (
+      <div className="fixed inset-0 z-[-1] bg-slate-950 transition-colors duration-700 pointer-events-none" />
+    );
+  }
 
   const renderBackground = () => {
     switch (theme) {
