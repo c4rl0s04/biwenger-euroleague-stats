@@ -1,23 +1,13 @@
 'use client';
 
-import { useSyncExternalStore, useState } from 'react';
-import { useUser } from '@/contexts/UserContext';
+import { useState } from 'react';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { ChevronDown, UserCircle2 } from 'lucide-react';
 import { UserAvatar } from '@/components/ui';
 
-// Subscription function for useSyncExternalStore (no-op - value never changes)
-const emptySubscribe = () => () => {};
-
-// These functions determine if we're mounted (client-side)
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
-
 export default function UserSelector() {
-  const { currentUser, selectUser, users } = useUser();
+  const { currentUser, selectUser, users, isClient } = useClientUser();
   const [isOpen, setIsOpen] = useState(false);
-
-  // useSyncExternalStore returns false on server, true on client after hydration
-  const isClient = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
 
   // Don't render on server or if no user to prevent hydration mismatch
   if (!isClient || !currentUser) return null;

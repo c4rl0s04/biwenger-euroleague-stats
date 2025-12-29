@@ -1,19 +1,22 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Activity, TrendingUp, TrendingDown, Trophy, Euro, ArrowRight, Bell } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RecentActivityCard() {
-  const { currentUser } = useUser();
+  const { currentUser, isClient } = useClientUser();
   const [activeTab, setActiveTab] = useState('transfers');
   const userId = currentUser?.id || '';
 
   const { data = {}, loading } = useApiData(`/api/dashboard/recent-activity?userId=${userId}`, {
     dependencies: [userId],
   });
+
+  // Don't render on server to prevent hydration mismatch
+  if (!isClient) return null;
 
   if (loading) {
     return (
