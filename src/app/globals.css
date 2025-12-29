@@ -285,3 +285,26 @@ h3,
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* ========================================
+   SECTION BACKGROUNDS (Elegant Theme)
+   Use these to create visual depth between sections
+   ======================================== */
+
+.section-base {
+  background-color: hsl(var(--background));
+}
+
+.section-raised {
+  background-color: hsl(220 18% 8%);
+}
+
+.section-sunken {
+  background-color: hsl(220 20% 4%);
+}
+
+.section-accent {
+  background-color: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+}

@@ -18,6 +18,7 @@ const navItems = [
 
 // Navbar styles for each theme (kept for backend configuration)
 const navVariants = {
+  elegant: 'bg-[hsl(220,20%,5%)] border-b border-border',
   standard:
     'bg-slate-950/70 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-orange-900/5 support-[backdrop-filter]:bg-slate-950/70',
   glass:
@@ -29,7 +30,7 @@ const navVariants = {
 export default function Navbar() {
   const pathname = usePathname();
   const { theme } = useCardTheme();
-  const navClass = navVariants[theme] || navVariants.mesh;
+  const navClass = navVariants[theme] || navVariants.elegant;
 
   return (
     <nav className={`${navClass} sticky top-0 z-50 transition-all duration-700`}>

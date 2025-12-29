@@ -4,7 +4,7 @@ import { useCardTheme } from '@/contexts/CardThemeContext';
 
 /**
  * ThemeBackground - Dynamic background based on theme
- * Currently uses static 'mesh' theme (configured in CardThemeContext)
+ * Currently uses static 'elegant' theme (configured in CardThemeContext)
  * Keeps all variants for future backend theme configuration
  */
 export default function ThemeBackground() {
@@ -12,6 +12,9 @@ export default function ThemeBackground() {
 
   const renderBackground = () => {
     switch (theme) {
+      case 'elegant':
+        return <div className="fixed inset-0 z-[-1] bg-background pointer-events-none" />;
+
       case 'glass':
         return (
           <div className="fixed inset-0 z-[-1] bg-slate-950 transition-colors duration-700 pointer-events-none">
