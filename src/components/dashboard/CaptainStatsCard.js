@@ -1,7 +1,7 @@
 'use client';
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
-import { Award } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import Link from 'next/link';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
