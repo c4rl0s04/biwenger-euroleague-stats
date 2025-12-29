@@ -48,6 +48,9 @@ export default function CaptainStatsCard() {
             </div>
           </div>
 
+          {/* Separator */}
+          <div className="border-t border-border/50 my-2"></div>
+
           {/* All captains used - scrollable list */}
           <div className="flex-grow min-h-0">
             <div className="flex items-baseline justify-between mb-2">
