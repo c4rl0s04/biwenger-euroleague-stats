@@ -26,6 +26,7 @@ export default function RecentRoundsCard() {
 
   const rounds = data?.rounds || [];
   const totalPlayed = data?.total_played || 0;
+  const totalRounds = data?.total_rounds || 0;
 
   const getPositionBadge = (pos, participated) => {
     if (!participated) return 'text-muted-foreground/40';
@@ -99,7 +100,7 @@ export default function RecentRoundsCard() {
             </span>
             <span className="text-muted-foreground text-sm">
               <span className="text-foreground font-display text-lg">{totalPlayed}</span> de{' '}
-              {rounds.length}
+              {totalRounds}
             </span>
           </div>
         </div>

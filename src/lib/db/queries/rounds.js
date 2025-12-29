@@ -134,7 +134,14 @@ export function getUserRecentRounds(userId, limit = 10) {
   `;
   const { total_played } = db.prepare(countQuery).get(userId) || { total_played: 0 };
 
-  return { rounds, total_played };
+  // Count total rounds in the season (distinct round_ids)
+  const totalRoundsQuery = `
+    SELECT COUNT(DISTINCT round_id) as total_rounds
+    FROM user_rounds
+  `;
+  const { total_rounds } = db.prepare(totalRoundsQuery).get() || { total_rounds: 0 };
+
+  return { rounds, total_played, total_rounds };
 }
 
 /**
