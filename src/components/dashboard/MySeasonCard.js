@@ -1,7 +1,7 @@
 'use client';
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
-import { Trophy, TrendingUp, TrendingDown, Target, Zap, Award } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Target, Zap, Award, ShoppingBag } from 'lucide-react';
 import { PremiumCard } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -137,6 +137,38 @@ export default function MySeasonCard() {
             </div>
           </div>
 
+          {/* Separator */}
+          <div className="border-t border-border/50 my-4"></div>
+
+          {/* Zone 4: Market Activity */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Purchases */}
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+                <ShoppingBag className="w-3 h-3 text-emerald-500" />
+                Compras
+              </div>
+              <div className="text-xl font-display text-emerald-500">
+                {stats.purchases || 0}{' '}
+                <span className="text-xs font-sans text-muted-foreground font-normal">
+                  fichajes
+                </span>
+              </div>
+            </div>
+
+            {/* Sales */}
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+                <ShoppingBag className="w-3 h-3 text-red-500" />
+                Ventas
+              </div>
+              <div className="text-xl font-display text-red-500">
+                {stats.sales || 0}{' '}
+                <span className="text-xs font-sans text-muted-foreground font-normal">ventas</span>
+              </div>
+            </div>
+          </div>
+
           {/* Footer: Average */}
           <div className="mt-4 pt-4 border-t border-border/50">
             <div className="flex items-center justify-between">
@@ -144,6 +176,12 @@ export default function MySeasonCard() {
                 Promedio por jornada
               </div>
               <div className="text-2xl font-display text-primary">{stats.average_points} pts</div>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <div className="text-muted-foreground text-xs uppercase tracking-wider">
+                Posición Media
+              </div>
+              <div className="text-2xl font-display text-foreground">#{stats.average_position}</div>
             </div>
             <div className="text-muted-foreground text-[10px] mt-2 text-right">
               {stats.rounds_played} jornadas jugadas

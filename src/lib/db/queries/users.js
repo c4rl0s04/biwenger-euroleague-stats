@@ -67,6 +67,9 @@ export function getUserSquad(userId) {
  * @returns {Object} User season statistics
  */
 export function getUserSeasonStats(userId) {
+  // First get user details for name
+  const user = db.prepare('SELECT name FROM users WHERE id = ?').get(userId);
+
   const statsQuery = `
     WITH UserRounds AS (
       SELECT 
@@ -100,18 +103,34 @@ export function getUserSeasonStats(userId) {
       MIN(position) as best_position,
       MAX(position) as worst_position,
       COUNT(CASE WHEN position = 1 THEN 1 END) as victories,
+      MIN(position) as best_position,
+      MAX(position) as worst_position,
+      ROUND(AVG(position), 1) as average_position,
+      COUNT(CASE WHEN position = 1 THEN 1 END) as victories,
       COUNT(CASE WHEN position <= 3 THEN 1 END) as podiums
     FROM RoundPositions
     WHERE user_id = ?
   `;
 
+  // Transfers query
+  const transfersQuery = `
+    SELECT
+      COUNT(CASE WHEN comprador = ? THEN 1 END) as purchases,
+      COUNT(CASE WHEN vendedor = ? THEN 1 END) as sales
+    FROM fichajes
+  `;
+
   const positions = db.prepare(positionsQuery).get(userId);
+  const transfers = user
+    ? db.prepare(transfersQuery).get(user.name, user.name)
+    : { purchases: 0, sales: 0 };
   const standings = getStandings();
   const userStanding = standings.find((u) => u.user_id === userId);
 
   return {
     ...stats,
     ...positions,
+    ...transfers,
     position: userStanding?.position || 0,
     team_value: userStanding?.team_value || 0,
     price_trend: userStanding?.price_trend || 0,
