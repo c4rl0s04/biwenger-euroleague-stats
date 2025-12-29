@@ -32,163 +32,183 @@ export default function MySeasonCard() {
     return 'text-red-500'; // Bottom half - red
   };
 
+  if (loading || !stats) {
+    return (
+      <div className="stat-card h-full flex flex-col animate-pulse">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-5 h-5 rounded bg-muted"></div>
+          <div className="h-4 bg-muted rounded w-24"></div>
+        </div>
+        <div className="space-y-3 flex-1">
+          <div className="h-16 bg-muted/50 rounded-lg"></div>
+          <div className="h-12 bg-muted/50 rounded-lg"></div>
+          <div className="flex-1 bg-muted/50 rounded-lg"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <PremiumCard title="Tu Temporada" icon={Trophy} color="emerald" loading={loading}>
-      {!loading && stats && (
-        <div className="flex flex-col h-full flex-1">
-          {/* Zone 1: Hero Stats - Position & Points */}
-          <div className="flex gap-6 items-end mb-6">
-            {/* Position - Primary Hero */}
-            <div className="flex-1">
-              <div className="text-muted-foreground text-s font-medium uppercase tracking-wider mb-1">
-                Posición
-              </div>
-              <div className={`text-6xl font-display ${getPositionColor(stats.position)}`}>
-                #{stats.position}
-              </div>
-            </div>
+    <div className="stat-card h-full flex flex-col group">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-center gap-2.5">
+          <Trophy className="w-4 h-4 text-emerald-500" />
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+            Tu Temporada
+          </span>
+        </div>
+      </div>
 
-            {/* Points - Secondary Hero */}
-            <div className="text-right">
-              <div className="text-muted-foreground text-s font-medium uppercase tracking-wider mb-1">
-                Puntos
-              </div>
-              <div className="text-6xl font-display text-foreground">
-                {stats.total_points?.toLocaleString('es-ES')}
-              </div>
+      <div className="flex flex-col h-full flex-1">
+        {/* Zone 1: Hero Stats - Position & Points */}
+        <div className="flex gap-6 items-end mb-6">
+          {/* Position - Primary Hero */}
+          <div className="flex-1">
+            <div className="text-muted-foreground text-s font-medium uppercase tracking-wider mb-1">
+              Posición
+            </div>
+            <div className={`text-6xl font-display ${getPositionColor(stats.position)}`}>
+              #{stats.position}
             </div>
           </div>
 
-          {/* Separator */}
-          <div className="border-t border-border/50 my-4"></div>
-
-          {/* Zone 2: Performance Grid - fills remaining space */}
-          <div className="grid grid-cols-2 gap-3 flex-1">
-            {/* Best Position */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <TrendingUp className="w-3 h-3 text-emerald-500" />
-                Mejor Pos.
-              </div>
-              <div className="text-2xl font-display text-emerald-500">
-                #{stats.best_position || '-'}
-              </div>
+          {/* Points - Secondary Hero */}
+          <div className="text-right">
+            <div className="text-muted-foreground text-s font-medium uppercase tracking-wider mb-1">
+              Puntos
             </div>
-
-            {/* Worst Position */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <TrendingDown className="w-3 h-3 text-red-500" />
-                Peor Pos.
-              </div>
-              <div className="text-2xl font-display text-red-500">
-                #{stats.worst_position || '-'}
-              </div>
-            </div>
-
-            {/* Best Round */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <Zap className="w-3 h-3 text-emerald-500" />
-                Mejor Jda.
-              </div>
-              <div className="text-xl font-display text-emerald-500">{stats.best_round} pts</div>
-            </div>
-
-            {/* Worst Round */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <Target className="w-3 h-3 text-red-500" />
-                Peor Jda.
-              </div>
-              <div className="text-xl font-display text-red-500">{stats.worst_round} pts</div>
-            </div>
-          </div>
-
-          {/* Separator */}
-          <div className="border-t border-border/50 my-4"></div>
-
-          {/* Zone 3: Achievements */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Victories */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <Trophy className="w-3 h-3 text-yellow-400" />
-                Victorias
-              </div>
-              <div className="text-xl font-display text-yellow-400">
-                {stats.victories || 0}{' '}
-                <span className="text-xs font-sans text-muted-foreground font-normal">
-                  {stats.victories === 1 ? 'vez' : 'veces'}
-                </span>
-              </div>
-            </div>
-
-            {/* Podiums */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <Award className="w-3 h-3 text-orange-400" />
-                Podios
-              </div>
-              <div className="text-xl font-display text-orange-400">
-                {stats.podiums || 0}{' '}
-                <span className="text-xs font-sans text-muted-foreground font-normal">Top 3</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Separator */}
-          <div className="border-t border-border/50 my-4"></div>
-
-          {/* Zone 4: Market Activity */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Purchases */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <ShoppingBag className="w-3 h-3 text-emerald-500" />
-                Compras
-              </div>
-              <div className="text-xl font-display text-emerald-500">
-                {stats.purchases || 0}{' '}
-                <span className="text-xs font-sans text-muted-foreground font-normal">
-                  fichajes
-                </span>
-              </div>
-            </div>
-
-            {/* Sales */}
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
-                <ShoppingBag className="w-3 h-3 text-red-500" />
-                Ventas
-              </div>
-              <div className="text-xl font-display text-red-500">
-                {stats.sales || 0}{' '}
-                <span className="text-xs font-sans text-muted-foreground font-normal">ventas</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer: Average */}
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <div className="flex items-center justify-between">
-              <div className="text-muted-foreground text-xs uppercase tracking-wider">
-                Promedio por jornada
-              </div>
-              <div className="text-2xl font-display text-primary">{stats.average_points} pts</div>
-            </div>
-            <div className="flex items-center justify-between mt-2">
-              <div className="text-muted-foreground text-xs uppercase tracking-wider">
-                Posición Media
-              </div>
-              <div className="text-2xl font-display text-foreground">#{stats.average_position}</div>
-            </div>
-            <div className="text-muted-foreground text-[10px] mt-2 text-right">
-              {stats.rounds_played} jornadas jugadas
+            <div className="text-6xl font-display text-foreground">
+              {stats.total_points?.toLocaleString('es-ES')}
             </div>
           </div>
         </div>
-      )}
-    </PremiumCard>
+
+        {/* Separator */}
+        <div className="border-t border-border/50 my-4"></div>
+
+        {/* Zone 2: Performance Grid - fills remaining space */}
+        <div className="grid grid-cols-2 gap-3 flex-1">
+          {/* Best Position */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <TrendingUp className="w-3 h-3 text-emerald-500" />
+              Mejor Pos.
+            </div>
+            <div className="text-2xl font-display text-emerald-500">
+              #{stats.best_position || '-'}
+            </div>
+          </div>
+
+          {/* Worst Position */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <TrendingDown className="w-3 h-3 text-red-500" />
+              Peor Pos.
+            </div>
+            <div className="text-2xl font-display text-red-500">#{stats.worst_position || '-'}</div>
+          </div>
+
+          {/* Best Round */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <Zap className="w-3 h-3 text-emerald-500" />
+              Mejor Jda.
+            </div>
+            <div className="text-xl font-display text-emerald-500">{stats.best_round} pts</div>
+          </div>
+
+          {/* Worst Round */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <Target className="w-3 h-3 text-red-500" />
+              Peor Jda.
+            </div>
+            <div className="text-xl font-display text-red-500">{stats.worst_round} pts</div>
+          </div>
+        </div>
+
+        {/* Separator */}
+        <div className="border-t border-border/50 my-4"></div>
+
+        {/* Zone 3: Achievements */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Victories */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <Trophy className="w-3 h-3 text-yellow-400" />
+              Victorias
+            </div>
+            <div className="text-xl font-display text-yellow-400">
+              {stats.victories || 0}{' '}
+              <span className="text-xs font-sans text-muted-foreground font-normal">
+                {stats.victories === 1 ? 'vez' : 'veces'}
+              </span>
+            </div>
+          </div>
+
+          {/* Podiums */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <Award className="w-3 h-3 text-orange-400" />
+              Podios
+            </div>
+            <div className="text-xl font-display text-orange-400">
+              {stats.podiums || 0}{' '}
+              <span className="text-xs font-sans text-muted-foreground font-normal">Top 3</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Separator */}
+        <div className="border-t border-border/50 my-4"></div>
+
+        {/* Zone 4: Market Activity */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Purchases */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <ShoppingBag className="w-3 h-3 text-emerald-500" />
+              Compras
+            </div>
+            <div className="text-xl font-display text-emerald-500">
+              {stats.purchases || 0}{' '}
+              <span className="text-xs font-sans text-muted-foreground font-normal">fichajes</span>
+            </div>
+          </div>
+
+          {/* Sales */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              <ShoppingBag className="w-3 h-3 text-red-500" />
+              Ventas
+            </div>
+            <div className="text-xl font-display text-red-500">
+              {stats.sales || 0}{' '}
+              <span className="text-xs font-sans text-muted-foreground font-normal">ventas</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer: Average */}
+        <div className="mt-4 pt-4 border-t border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="text-muted-foreground text-xs uppercase tracking-wider">
+              Promedio por jornada
+            </div>
+            <div className="text-2xl font-display text-primary">{stats.average_points} pts</div>
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <div className="text-muted-foreground text-xs uppercase tracking-wider">
+              Posición Media
+            </div>
+            <div className="text-2xl font-display text-foreground">#{stats.average_position}</div>
+          </div>
+          <div className="text-muted-foreground text-[10px] mt-2 text-right">
+            {stats.rounds_played} jornadas jugadas
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
