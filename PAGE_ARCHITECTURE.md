@@ -365,6 +365,62 @@ All statistics organized by category with feasibility status.
 
 ---
 
+## 8. Porras (`/porras`) — TO BUILD
+
+**Purpose:** Prediction game tracking and leaderboards.
+
+### Page Layout
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: "Porras" + subtitle "Predicciones de la temporada" │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Resumen" (Overview KPIs)                         │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+│  │TotalRnds │ │MyAccuracy│ │BestRound │ │LeagueAvg │        │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘        │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Mi Rendimiento" (My Performance)                 │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │        PorrasProgressionCard (line chart - my aciertos) ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Clasificación" (Leaderboard)                     │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │          PorrasLeaderboardCard (full standings table)   ││
+│  │   Name | Total Aciertos | Avg/Round | Best Round | Rank ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Historial por Jornada" (Round History)           │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │          PorrasHistoryCard (round-by-round table)       ││
+│  │   Round | My Aciertos | Winner | Winner Aciertos        ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Estadísticas" (Stats)                            │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │MostWinsCard│ │ConsistncyPr│ │LuckyRoundCd│               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Cards Breakdown
+
+| Card                      | Description                           | Data Source                 |
+| ------------------------- | ------------------------------------- | --------------------------- |
+| **TotalRoundsKPI**        | Number of rounds with porras          | `porras` count              |
+| **MyAccuracyKPI**         | Total aciertos / total predictions    | `porras.aciertos`           |
+| **BestRoundKPI**          | Your highest scoring round            | `porras` max                |
+| **LeagueAvgKPI**          | Average aciertos across all users     | `porras` avg                |
+| **PorrasProgressionCard** | Line chart of your aciertos over time | `porras` by round           |
+| **PorrasLeaderboardCard** | Full rankings table                   | `porras` aggregated by user |
+| **PorrasHistoryCard**     | Your results each round               | `porras` for current user   |
+| **MostWinsCard**          | Who won most rounds                   | `porras` winner per round   |
+| **ConsistencyPorrasCard** | Most consistent predictor             | `porras` std deviation      |
+| **LuckyRoundCard**        | Round with highest total aciertos     | `porras` sum by round       |
+
+---
+
 ## Implementation Priority
 
 ### Phase 1: Build Missing Pages
@@ -372,11 +428,12 @@ All statistics organized by category with feasibility status.
 1. `/players` - Player directory with search/filters
 2. `/matches` - Schedule and results
 3. `/lineups` - Squad analysis
+4. `/porras` - Prediction game leaderboards
 
 ### Phase 2: Add High-Priority Stats
 
 1. Standings: HypotheticalStandings, ComebackKing, Nemesis
-2. Dashboard: BenchValue, LostPoints
+2. Dashboard: BenchValue, LostPoints, CurrentPorraCard (quick preview)
 3. Market: Spenders/Sellers leaderboards
 
 ### Phase 3: Add Medium-Priority Stats
