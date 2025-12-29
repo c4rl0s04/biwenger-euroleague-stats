@@ -1,180 +1,212 @@
 # Page Architecture Plan
 
-Complete specification of all pages, their features, and required data sources.
-
----
-
-## Database Capabilities Summary
-
-| Table                | Key Data Available                                                                                   |
-| -------------------- | ---------------------------------------------------------------------------------------------------- |
-| `users`              | id, name, icon                                                                                       |
-| `players`            | name, position, team, price, puntos, owner_id, price_increment, birth_date, status, home/away splits |
-| `user_rounds`        | user points per round, participation status                                                          |
-| `lineups`            | player in lineup, is_captain, role (starter/bench)                                                   |
-| `player_round_stats` | fantasy_points, real stats (points, rebounds, assists, etc.)                                         |
-| `fichajes`           | transfer history (buyer, seller, price, timestamp)                                                   |
-| `matches`            | schedule, scores, home/away teams                                                                    |
-| `market_values`      | historical price per player                                                                          |
-| `porras`             | predictions (aciertos)                                                                               |
-| `initial_squads`     | starting squad at season begin                                                                       |
-| `finances`           | user budget/cash (if tracked)                                                                        |
+Complete specification of all pages with section headings and card organization.
 
 ---
 
 ## Statistics Catalog
 
-All statistics organized by category with feasibility assessment.
+All statistics organized by category with feasibility status.
 
 ### 🌟 Performance & Consistency
 
-| Statistic                 | Description                            | Data Source                       | Status                                 |
-| ------------------------- | -------------------------------------- | --------------------------------- | -------------------------------------- |
-| Weekly Volatility         | Standard deviation of points per round | `user_rounds.points`              | ✅ Implemented (ConsistencyCard)       |
-| Top 3 / Bottom 3 Count    | Podium vs relegation zone finishes     | `user_rounds` position per round  | ✅ Implemented (PlacementStatsCard)    |
-| Above/Below Average Weeks | % of weeks above league average        | `user_rounds` vs avg              | ✅ Implemented (LeaguePerformanceCard) |
-| Points per Million        | Total points / team value              | `user_rounds + players.price`     | ✅ Implemented (EfficiencyCard)        |
-| Hypothetical Standings    | "If everyone played every week"        | `user_rounds` with avg for missed | ⏳ To Build                            |
-| Streak 50+ Rounds         | Longest streak above threshold         | `user_rounds.points`              | ⏳ To Build                            |
-| Bottler Metric            | Most 2nd/3rd without wins              | `user_rounds` positions           | ✅ Implemented (BottlerCard)           |
-
----
+| Statistic              | Description                   | Status                   |
+| ---------------------- | ----------------------------- | ------------------------ |
+| Weekly Volatility      | Std deviation of points       | ✅ ConsistencyCard       |
+| Top 3 / Bottom 3 Count | Podium vs relegation finishes | ✅ PlacementStatsCard    |
+| Above/Below Average    | % weeks above league avg      | ✅ LeaguePerformanceCard |
+| Points per Million     | Total points / team value     | ✅ EfficiencyCard        |
+| Hypothetical Standings | If everyone played every week | ⏳ To Build              |
+| Streak 50+ Rounds      | Longest streak above 50 pts   | ⏳ To Build              |
+| Bottler Metric         | Most 2nd/3rd without wins     | ✅ BottlerCard           |
 
 ### 💰 Economy & Team Value
 
-| Statistic                      | Description                            | Data Source                            | Status                  |
-| ------------------------------ | -------------------------------------- | -------------------------------------- | ----------------------- |
-| Squad Value Growth Rate        | Team value increase since season start | `initial_squads + players.price`       | ⏳ To Build             |
-| Bench Value                    | Total value of bench players           | `lineups.role='bench' + players.price` | ⏳ To Build (Dashboard) |
-| Most Expensive Player per Team | Each user's star player (bubble chart) | `players` grouped by owner             | ⏳ To Build             |
-| Cash Hoarders                  | Ranking by available balance           | `finances` (if available)              | ❓ Needs data           |
-| Daily Market Winners           | Most gained from price increases       | `players.price_increment` by owner     | ⏳ To Build (Market)    |
-| Average Player Value           | Team value / squad size                | `players` by owner                     | ⏳ To Build             |
-
----
+| Statistic             | Description                    | Status      |
+| --------------------- | ------------------------------ | ----------- |
+| Squad Value Growth    | Increase since season start    | ⏳ To Build |
+| Bench Value           | Total value of bench           | ⏳ To Build |
+| Most Expensive Player | Each user's star player        | ⏳ To Build |
+| Daily Market Winners  | Most gained from price changes | ⏳ To Build |
+| Average Player Value  | Team value / squad size        | ⏳ To Build |
 
 ### 🏟️ Squad & Composition
 
-| Statistic            | Description                             | Data Source                     | Status                         |
-| -------------------- | --------------------------------------- | ------------------------------- | ------------------------------ |
-| Squad Composition    | Breakdown by position (pie chart)       | `players.position` by owner     | ⏳ To Build                    |
-| Team Dependency      | % value in top 3 players                | `players.price` top 3 per owner | ⏳ To Build                    |
-| Most Owned Real Team | Who owns most Real Madrid players, etc. | `players.team` by owner         | ⏳ To Build                    |
-| Injury Crisis        | Count of injured/doubtful players       | `players.status`                | ✅ Feasible (if status synced) |
-
----
+| Statistic            | Description              | Status      |
+| -------------------- | ------------------------ | ----------- |
+| Squad Composition    | Breakdown by position    | ⏳ To Build |
+| Team Dependency      | % value in top 3 players | ⏳ To Build |
+| Most Owned Real Team | Most RM/Barça players    | ⏳ To Build |
+| Injury Crisis        | Injured/doubtful count   | ⏳ To Build |
 
 ### ⚔️ Head-to-Head & Rivals
 
-| Statistic    | Description                       | Data Source                                             | Status      |
-| ------------ | --------------------------------- | ------------------------------------------------------- | ----------- |
-| The Nemesis  | User you finish behind most often | `user_rounds` position comparison                       | ⏳ To Build |
-| Gap Analysis | Points needed to catch leader     | Simple math: `(leader_pts - my_pts) / remaining_rounds` | ⏳ To Build |
-| Mini-Leagues | Top 4 vs Bottom 4 groupings       | `user_rounds` aggregated                                | ⏳ To Build |
-
----
+| Statistic    | Description                   | Status      |
+| ------------ | ----------------------------- | ----------- |
+| The Nemesis  | User you lose to most         | ⏳ To Build |
+| Gap Analysis | Points needed to catch leader | ⏳ To Build |
+| Mini-Leagues | Top 4 vs Bottom 4 battle      | ⏳ To Build |
 
 ### 📅 Time-Based / History
 
-| Statistic             | Description                          | Data Source                           | Status                           |
-| --------------------- | ------------------------------------ | ------------------------------------- | -------------------------------- |
-| Best Month            | Monthly winner breakdown             | `user_rounds` grouped by month        | ⏳ To Build                      |
-| Comeback King         | Biggest rank improvement             | Position at round X vs now            | ⏳ To Build                      |
-| Ideal Lineup (League) | Team of the Season by position       | `player_round_stats` top per position | ✅ Implemented (IdealLineupCard) |
-| Lost Points           | Potential max - actual (bench waste) | `lineups + player_round_stats`        | ⏳ To Build                      |
-| One Hit Wonders       | High single-round, low total         | `player_round_stats` max vs sum       | ⏳ To Build (Players page)       |
+| Statistic       | Description                  | Status             |
+| --------------- | ---------------------------- | ------------------ |
+| Best Month      | Monthly winner breakdown     | ⏳ To Build        |
+| Comeback King   | Biggest rank improvement     | ⏳ To Build        |
+| Ideal Lineup    | Team of the Season           | ✅ IdealLineupCard |
+| Lost Points     | Bench waste total            | ⏳ To Build        |
+| One Hit Wonders | High single-round, low total | ⏳ To Build        |
 
 ---
 
 ## 1. Dashboard (`/dashboard`)
 
-**Purpose:** Personal hub for the current user. Quick glance at their status.
+**Purpose:** Personal hub showing current user's status at a glance.
 
-### Current Cards (14)
+### Page Layout
 
-| Card                  | Data Source                  |
-| --------------------- | ---------------------------- |
-| MySeasonCard          | user_rounds                  |
-| SquadValueCard        | players (owner)              |
-| RecentRoundsCard      | user_rounds                  |
-| CaptainStatsCard      | lineups + player_round_stats |
-| LeaderGapCard         | user_rounds (aggregated)     |
-| HomeAwayCard          | players (home/away splits)   |
-| LeagueComparisonCard  | user_rounds (vs league avg)  |
-| NextRoundCard         | matches                      |
-| StandingsCard         | user_rounds                  |
-| TopPlayersCard        | player_round_stats           |
-| MarketActivityCard    | fichajes                     |
-| WeekMVPsCard          | player_round_stats           |
-| IdealLineupCard       | player_round_stats           |
-| StreakCard (hot/cold) | player_round_stats           |
-| BirthdayCard          | players (birth_date)         |
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Section: "Mi Temporada" (My Season)                        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+│  │MySeason  │ │SquadValue│ │RecentRnds│ │CaptainSts│        │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘        │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Comparativa" (Comparison)                        │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │ LeaderGap  │ │  HomeAway  │ │LeagueComp  │               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Próxima Jornada" (Next Round)                    │
+│  ┌─────────────────────┐ ┌────────────────────────────────┐ │
+│  │    NextRoundCard    │ │      StandingsCard             │ │
+│  │   (lg:col-span-1)   │ │      (lg:col-span-2)           │ │
+│  └─────────────────────┘ └────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Mercado y Jugadores" (Market & Players)         │
+│  ┌─────────────────────┐ ┌─────────────────────┐           │
+│  │   TopPlayersCard    │ │  MarketActivityCard │           │
+│  └─────────────────────┘ └─────────────────────┘           │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Rendimiento de la Liga" (League Performance)    │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+│  │WeekMVPs  │ │IdealLinup│ │StreakHot │ │StreakCold│        │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘        │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Curiosidades" (Fun Facts) - Full Width          │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                    BirthdayCard                         ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
 
 ### Proposed Additions
 
-| Card                 | Description                     | Priority |
-| -------------------- | ------------------------------- | -------- |
-| **PorrasCard**       | Prediction accuracy this season | Medium   |
-| **BenchValueCard**   | Total value on bench            | High     |
-| **LostPointsCard**   | Points wasted on bench          | Medium   |
-| **InjuryCrisisCard** | Injured players in your squad   | Low      |
+| Section      | New Cards                      |
+| ------------ | ------------------------------ |
+| Mi Temporada | BenchValueCard, LostPointsCard |
+| Curiosidades | PorrasCard, InjuryCrisisCard   |
 
 ---
 
 ## 2. Standings (`/standings`)
 
-**Purpose:** League-wide analytics. Compare all users.
+**Purpose:** League-wide analytics comparing all users.
 
-### Current Cards (16)
+### Page Layout
 
-- FullStandingsCard, LeagueStatsCard, RoundWinnersCard
-- PointsProgressionCard, RoundPointsProgressionCard
-- ConsistencyCard (Volatility), PlacementStatsCard (Top3/Bottom3)
-- LeaguePerformanceCard (Above/Below Avg), EfficiencyCard (Points/Million)
-- StreaksCard, BottlerCard, HeartbreakersCard, NoGloryCard
-- JinxCard, TeamValueRankingCard, InitialSquadAnalysisCard
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: "Clasificación" + subtitle                         │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Tabla General" (Main Standings)                  │
+│  ┌─────────────────────────┐ ┌─────────────────────────────┐│
+│  │   FullStandingsCard     │ │      LeagueStatsCard        ││
+│  │     (lg:col-span-2)     │ │      (lg:col-span-1)        ││
+│  └─────────────────────────┘ └─────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Ganadores por Jornada" (Round Winners)           │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │               RoundWinnersCard (full width)             ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Evolución" (Progression) - Charts               │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │           PointsProgressionCard (line chart)            ││
+│  └─────────────────────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │         RoundPointsProgressionCard (bar chart)          ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Rendimiento y Consistencia" (Performance)        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐                     │
+│  │Consistncy│ │Placement │ │LeaguePfmc│                     │
+│  └──────────┘ └──────────┘ └──────────┘                     │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐                     │
+│  │Efficiency│ │ Streaks  │ │ Bottler  │                     │
+│  └──────────┘ └──────────┘ └──────────┘                     │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Mala Suerte" (Bad Luck)                          │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │Heartbreakrs│ │  NoGlory   │ │    Jinx    │               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Valor de Equipos" (Team Value)                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              TeamValueRankingCard                       ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
 
 ### Proposed Additions
 
-| Card                          | Description                   | Priority |
-| ----------------------------- | ----------------------------- | -------- |
-| **HypotheticalStandingsCard** | If everyone played every week | High     |
-| **Streak50PlusCard**          | Longest streak above 50 pts   | Medium   |
-| **ComebackKingCard**          | Biggest rank improvement      | High     |
-| **BestMonthCard**             | Monthly winners               | Medium   |
-| **NemesisCard**               | User you lose to most         | High     |
-| **GapAnalysisCard**           | Points needed to catch leader | Medium   |
-| **MiniLeaguesCard**           | Top 4 vs Bottom 4 battle      | Low      |
-| **SquadValueGrowthCard**      | Value increase since start    | Medium   |
-| **TeamDependencyCard**        | % value in top 3 players      | Low      |
+| Section            | New Cards                                     |
+| ------------------ | --------------------------------------------- |
+| Evolución          | HypotheticalStandingsCard, ComebackKingCard   |
+| Rendimiento        | Streak50PlusCard, BestMonthCard               |
+| NEW: "Rivalidades" | NemesisCard, GapAnalysisCard, MiniLeaguesCard |
+| Valor de Equipos   | SquadValueGrowthCard, TeamDependencyCard      |
 
 ---
 
-## 3. Players (`/players`) — **TO BUILD**
+## 3. Players (`/players`) — TO BUILD
 
 **Purpose:** Player discovery, search, and analysis.
 
-### Structure
+### Page Layout
 
-**Header:** Search bar + Filters (Position, Team, Owner, Price range)
-
-### Cards
-
-| Card                    | Description                  |
-| ----------------------- | ---------------------------- |
-| **TopScorersList**      | Top 10 by fantasy points     |
-| **RisingStarsCard**     | Biggest price increases      |
-| **FallingStarsCard**    | Biggest price drops          |
-| **BargainsCard**        | Best points-per-million      |
-| **OneHitWondersCard**   | High single-round, low total |
-| **MostTransferredCard** | Players with most transfers  |
-| **TeamStatsCard**       | Average points by real team  |
-| **FreeAgentsCard**      | Top available players        |
-| **PositionBreakdown**   | Best by position             |
-
-### Player Table
-
-Sortable: Points, Price, Price Change, Games Played → Links to `/player/[id]`
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: "Jugadores" + Search Bar + Filters                 │
+│  [🔍 Search...] [Position ▼] [Team ▼] [Owner ▼] [Price ▼]   │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Mejores Jugadores" (Top Players)                 │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              TopScorersList (table)                     ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Mercado" (Market Movers)                         │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │RisingStars │ │FallingStars│ │  Bargains  │               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Análisis" (Analysis)                             │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │OneHitWondrs│ │MostTransfrd│ │ TeamStats  │               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Agentes Libres" (Free Agents)                    │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              FreeAgentsCard (table)                     ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Todos los Jugadores" (All Players)               │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │         Full Player Table (sortable, paginated)         ││
+│  │  Name | Team | Position | Points | Price | Owner        ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -182,19 +214,46 @@ Sortable: Points, Price, Price Change, Games Played → Links to `/player/[id]`
 
 **Purpose:** Deep dive into a single player.
 
-### Current Cards (11)
+### Page Layout
 
-PlayerIdentityCard, PlayerBioCard, PlayerStatsCard, PlayerMarketCard,
-PlayerAdvancedStatsCard, PlayerSplitsCard, PlayerNextMatchCard,
-PlayerPointsGraph, PlayerPriceHistoryCard, PlayerOwnershipCard, PlayerHistoryCard
-
-### Proposed Additions
-
-| Card                    | Description                      |
-| ----------------------- | -------------------------------- |
-| **CaptainHistoryCard**  | How often captained + impact     |
-| **SimilarPlayersCard**  | Players with similar stats/price |
-| **TransferHistoryCard** | All buy/sell events              |
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Section: "Perfil" (Identity)                               │
+│  ┌─────────────────────┐ ┌─────────────────────────────────┐│
+│  │ PlayerIdentityCard  │ │      PlayerBioCard             ││
+│  │   (photo, name)     │ │   (height, weight, age)        ││
+│  └─────────────────────┘ └─────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Estadísticas" (Stats)                            │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │ StatsCard  │ │ MarketCard │ │AdvancedSts │               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Rendimiento" (Performance)                       │
+│  ┌─────────────────────┐ ┌─────────────────────┐           │
+│  │   SplitsCard        │ │   NextMatchCard     │           │
+│  │  (home vs away)     │ │  (upcoming game)    │           │
+│  └─────────────────────┘ └─────────────────────┘           │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Evolución" (Charts)                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              PlayerPointsGraph (line chart)             ││
+│  └─────────────────────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │           PlayerPriceHistoryCard (line chart)           ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Propiedad" (Ownership)                           │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │            PlayerOwnershipCard (timeline)               ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Historial" (History)                             │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │         PlayerHistoryCard (round-by-round table)        ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -202,67 +261,107 @@ PlayerPointsGraph, PlayerPriceHistoryCard, PlayerOwnershipCard, PlayerHistoryCar
 
 **Purpose:** Transfer activity and trading analytics.
 
-### Current Features
+### Page Layout
 
-4 KPI cards + Search + Sortable transfers table
-
-### Proposed Additions
-
-| Card                          | Description                        |
-| ----------------------------- | ---------------------------------- |
-| **BiggestSpendersCard**       | Users who spent most               |
-| **BiggestSellersCard**        | Users who earned most              |
-| **DailyMarketWinnersCard**    | Who gained most from price changes |
-| **TradingVolumeChart**        | Transfers per week                 |
-| **AverageTransferByPosition** | Price by position                  |
-| **MarketHeatmapCard**         | Which teams traded most            |
-| **MostBidWarCard**            | Transfers with most bids           |
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: "Mercado" + Refresh Button                         │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Resumen" (KPIs)                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+│  │  Total   │ │  AvgVal  │ │  MaxVal  │ │  Buyers  │        │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘        │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Actividad del Mercado" (Activity) - NEW          │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │BigSpenders │ │BigSellers  │ │DailyWinners│               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Tendencias" (Trends) - NEW                       │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │           TradingVolumeChart (bar chart)                ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Historial de Fichajes" (Transfer History)        │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ [🔍 Search...]                                          ││
+│  │ Sortable Table: Date | Player | Buyer | Seller | Price  ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 6. Matches (`/matches`) — **TO BUILD**
+## 6. Matches (`/matches`) — TO BUILD
 
 **Purpose:** Game schedule, results, and team performance.
 
-### Structure
+### Page Layout
 
-**Header:** Round selector + View toggle (Calendar/List/Results)
-
-### Cards
-
-| Card                     | Description                    |
-| ------------------------ | ------------------------------ |
-| **UpcomingMatchesCard**  | Next games with dates          |
-| **RecentResultsCard**    | Last finished games            |
-| **RoundScheduleCard**    | All games in round             |
-| **TeamFormCard**         | Win/loss streak by team        |
-| **HighScoringGamesCard** | Most combined points           |
-| **TopFantasyRoundCard**  | Round with most fantasy points |
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: "Partidos" + Round Selector [Round 15 ▼]           │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Próximos Partidos" (Upcoming)                    │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              UpcomingMatchesCard (list)                 ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Resultados Recientes" (Recent Results)           │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              RecentResultsCard (list)                   ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Jornada Completa" (Full Round)                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │             RoundScheduleCard (full table)              ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Estadísticas" (Stats)                            │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │ TeamForm   │ │HighScoring │ │TopFantasyRd│               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 7. Lineups (`/lineups`) — **TO BUILD**
+## 7. Lineups (`/lineups`) — TO BUILD
 
 **Purpose:** Squad management and lineup analysis.
 
-### For Current User
+### Page Layout
 
-| Card                   | Description               |
-| ---------------------- | ------------------------- |
-| **CurrentLineupCard**  | Active lineup with points |
-| **LineupHistoryCard**  | Past round lineups        |
-| **CaptainSuccessCard** | Captain choices + impact  |
-| **BenchImpactCard**    | Points left on bench      |
-| **OptimalLineupCard**  | Best possible lineup      |
-| **LostPointsCard**     | Wasted bench points total |
-
-### League-Wide
-
-| Card                  | Description             |
-| --------------------- | ----------------------- |
-| **MostCaptainedCard** | Top captained players   |
-| **MostStartedCard**   | Most used players       |
-| **SquadOverlapCard**  | Who shares most players |
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: "Alineaciones" + Round Selector                    │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Mi Alineación Actual" (My Current Lineup)        │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │            CurrentLineupCard (visual formation)         ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Análisis Personal" (Personal Analysis)          │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │CaptainSuccs│ │BenchImpact │ │OptimalLinup│               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Puntos Perdidos" (Lost Points)                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │               LostPointsCard (breakdown)                ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Historial" (Lineup History)                      │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │            LineupHistoryCard (past rounds)              ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Section: "Tendencias de la Liga" (League Trends)           │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐               │
+│  │MostCaptaind│ │MostStarted │ │SquadOverlap│               │
+│  └────────────┘ └────────────┘ └────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -277,7 +376,7 @@ PlayerPointsGraph, PlayerPriceHistoryCard, PlayerOwnershipCard, PlayerHistoryCar
 ### Phase 2: Add High-Priority Stats
 
 1. Standings: HypotheticalStandings, ComebackKing, Nemesis
-2. Dashboard: BenchValue, PorrasCard
+2. Dashboard: BenchValue, LostPoints
 3. Market: Spenders/Sellers leaderboards
 
 ### Phase 3: Add Medium-Priority Stats
@@ -285,9 +384,3 @@ PlayerPointsGraph, PlayerPriceHistoryCard, PlayerOwnershipCard, PlayerHistoryCar
 1. Streak50Plus, BestMonth, GapAnalysis
 2. SquadValueGrowth, TeamDependency
 3. OneHitWonders, DailyMarketWinners
-
-### Phase 4: Advanced Features
-
-1. Mini-Leagues groups
-2. Historical comparisons
-3. Season projections
