@@ -1,5 +1,6 @@
 import nextDynamic from 'next/dynamic';
-import { CardSkeleton, FadeIn } from '@/components/ui';
+import { CardSkeleton } from '@/components/ui';
+import { Section } from '@/components/layout';
 import {
   StandingsCard,
   MySeasonCard,
@@ -48,31 +49,6 @@ const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLi
 });
 
 export const dynamic = 'force-dynamic';
-
-/**
- * Section component with split-color title and background support
- * Title format: "MI TEMPORADA" -> "MI" in white, "TEMPORADA" in primary (orange)
- */
-function Section({ title, children, delay = 0, background = '' }) {
-  // Split title into first word and rest
-  const words = title.split(' ');
-  const firstWord = words[0];
-  const restWords = words.slice(1).join(' ');
-
-  return (
-    <FadeIn delay={delay}>
-      <section className={`${background} px-4 sm:px-6 lg:px-8 py-10`}>
-        <div className="max-w-7xl mx-auto space-y-6">
-          <h2 className="font-display text-5xl tracking-wide">
-            <span className="text-foreground">{firstWord}</span>
-            {restWords && <span className="text-gradient"> {restWords}</span>}
-          </h2>
-          {children}
-        </div>
-      </section>
-    </FadeIn>
-  );
-}
 
 export default function Dashboard() {
   return (
