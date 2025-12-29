@@ -63,7 +63,7 @@ function Section({ title, children, delay = 0, background = '' }) {
     <FadeIn delay={delay}>
       <section className={`${background} px-4 sm:px-6 lg:px-8 py-10`}>
         <div className="max-w-7xl mx-auto space-y-6">
-          <h2 className="font-display text-3xl tracking-wide">
+          <h2 className="font-display text-4xl tracking-wide">
             <span className="text-foreground">{firstWord}</span>
             {restWords && <span className="text-primary"> {restWords}</span>}
           </h2>
