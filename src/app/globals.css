@@ -155,6 +155,7 @@ h3,
    STAT CARD COMPONENT
    ======================================== */
 
+/* Base stat card - combines glow with gradient background */
 .stat-card {
   position: relative;
   overflow: hidden;
@@ -164,6 +165,14 @@ h3,
   background: var(--gradient-card);
 }
 
+/* Reusable glow effect (can be applied to any card) */
+.card-glow,
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-glow::before,
 .stat-card::before {
   content: '';
   position: absolute;
@@ -171,12 +180,15 @@ h3,
   opacity: 0;
   transition: opacity 0.3s ease;
   background: linear-gradient(135deg, hsl(19 99% 49% / 0.1), transparent);
+  pointer-events: none;
 }
 
+.card-glow:hover::before,
 .stat-card:hover::before {
   opacity: 1;
 }
 
+.card-glow:hover,
 .stat-card:hover {
   border-color: hsl(var(--primary) / 0.3);
   box-shadow: var(--glow-subtle);

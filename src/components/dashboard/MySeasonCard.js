@@ -34,7 +34,7 @@ export default function MySeasonCard() {
 
   if (loading || !stats) {
     return (
-      <div className="stat-card h-full flex flex-col animate-pulse">
+      <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col animate-pulse">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-5 h-5 rounded bg-muted"></div>
           <div className="h-4 bg-muted rounded w-24"></div>
@@ -49,17 +49,13 @@ export default function MySeasonCard() {
   }
 
   return (
-    <div className="stat-card h-full flex flex-col group">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-5">
-        <div className="flex items-center gap-2.5">
-          <Trophy className="w-4 h-4 text-emerald-500" />
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-            Tu Temporada
-          </span>
-        </div>
-      </div>
-
+    <PremiumCard
+      title="Tu Temporada"
+      icon={Trophy}
+      color="emerald"
+      loading={loading}
+      className="card-glow"
+    >
       <div className="flex flex-col h-full flex-1">
         {/* Zone 1: Hero Stats - Position & Points */}
         <div className="flex gap-6 items-end mb-6">
@@ -209,6 +205,6 @@ export default function MySeasonCard() {
           </div>
         </div>
       </div>
-    </div>
+    </PremiumCard>
   );
 }
