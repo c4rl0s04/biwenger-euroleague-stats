@@ -167,7 +167,7 @@ export default function SearchDropdown({ onClose }) {
         )}
         {!loading && !query && (
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 bg-slate-800 rounded border border-border/50">
-            {isMac ? '⌘' : 'Ctrl'}K
+            {isMac ? '⌘' : 'Ctrl'} + K
           </kbd>
         )}
       </div>
