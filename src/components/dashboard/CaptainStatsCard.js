@@ -60,7 +60,7 @@ export default function CaptainStatsCard() {
           {/* All captains used - scrollable list */}
           <div className="flex-grow min-h-0">
             <div className="flex items-baseline justify-between mb-2">
-              <div className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">
+              <div className="text-slate-400 text-xs font-medium uppercase tracking-wider">
                 Todos los Capitanes
               </div>
               <div className="text-slate-500 text-[9px]">Puntos sin duplicar (1x)</div>
