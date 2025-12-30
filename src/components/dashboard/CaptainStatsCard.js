@@ -36,7 +36,7 @@ export default function CaptainStatsCard() {
               <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Jornadas
               </div>
-              <div className="text-xl font-bold text-white/90">{stats.total_rounds}</div>
+              <div className="text-xl font-bold text-foreground/90">{stats.total_rounds}</div>
             </div>
 
             <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
@@ -75,7 +75,7 @@ export default function CaptainStatsCard() {
                     <span className="text-slate-500 font-mono text-[10px] w-5">{idx + 1}.</span>
                     <Link
                       href={`/player/${captain.player_id}`}
-                      className="text-white truncate font-medium hover:text-yellow-400 transition-colors block"
+                      className="text-muted-foreground truncate font-medium hover:text-yellow-400 transition-colors block"
                     >
                       {captain.name}
                     </Link>
@@ -115,7 +115,7 @@ export default function CaptainStatsCard() {
                 Mejor
               </div>
               {stats.best_round?.name && (
-                <div className="text-xs font-medium text-white/80 mb-1 truncate">
+                <div className="text-xs font-medium text-muted-foreground mb-1 truncate">
                   {stats.best_round.name}
                 </div>
               )}
@@ -129,7 +129,7 @@ export default function CaptainStatsCard() {
                 Peor
               </div>
               {stats.worst_round?.name && (
-                <div className="text-xs font-medium text-white/80 mb-1 truncate">
+                <div className="text-xs font-medium text-muted-foreground mb-1 truncate">
                   {stats.worst_round.name}
                 </div>
               )}
