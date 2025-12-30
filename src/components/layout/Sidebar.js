@@ -183,7 +183,7 @@ export default function Sidebar({ isOpen, onClose }) {
                       )}
                     </div>
                     <div className="text-[11px] text-slate-500 mt-1">
-                      {squadData.player_count || 0} jugadores activos
+                      {squadData.player_count || 0} jugadores en plantilla
                     </div>
                   </>
                 ) : (
