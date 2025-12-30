@@ -50,6 +50,18 @@ export default function SearchDropdown({ onClose }) {
     inputRef.current?.focus();
   }, []);
 
+  // Global keyboard shortcut: Cmd+K or Ctrl+K to focus search
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
   // Close on click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
