@@ -114,10 +114,10 @@ h3,
 
 /* Gradient text effect */
 .text-gradient {
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: var(--gradient-accent);
 }
 
 /* Glow effects */

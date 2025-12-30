@@ -2,6 +2,7 @@ import nextDynamic from 'next/dynamic';
 import { CardSkeleton } from '@/components/ui';
 import { Section } from '@/components/layout';
 import {
+  HeroHeader,
   StandingsCard,
   MySeasonCard,
   SquadValueCard,
@@ -54,16 +55,7 @@ export default function Dashboard() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="section-sunken px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-gradient text-5xl sm:text-6xl lg:text-7xl tracking-wide mb-4">
-            BIWENGER STATS
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Análisis avanzado de tu liga de Fantasy Euroliga
-          </p>
-        </div>
-      </section>
+      <HeroHeader />
 
       {/* Section: Mi Temporada */}
       <Section title="Mi Temporada" delay={0} background="section-base">

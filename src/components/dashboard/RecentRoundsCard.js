@@ -44,7 +44,7 @@ export default function RecentRoundsCard() {
   return (
     <PremiumCard
       title="Últimas Jornadas"
-      icon={History}
+      icon={Activity}
       color="purple"
       loading={loading}
       className="card-glow"
