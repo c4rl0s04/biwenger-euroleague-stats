@@ -17,12 +17,14 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
+  Home,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 const navItems = [
+  { name: 'Inicio', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Clasificación', href: '/standings', icon: Trophy },
   { name: 'Jugadores', href: '/players', icon: User },
