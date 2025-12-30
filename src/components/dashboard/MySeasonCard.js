@@ -2,7 +2,7 @@
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Trophy, TrendingUp, TrendingDown, Target, Zap, Award, ShoppingBag } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
@@ -49,7 +49,7 @@ export default function MySeasonCard() {
   }
 
   return (
-    <PremiumCard
+    <Card
       title="Tu Temporada"
       icon={Trophy}
       color="emerald"
@@ -205,6 +205,6 @@ export default function MySeasonCard() {
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

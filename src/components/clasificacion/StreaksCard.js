@@ -1,7 +1,7 @@
 'use client';
 
 import { Flame, Zap } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -9,7 +9,7 @@ export default function StreaksCard() {
   const { data = [], loading } = useApiData('/api/standings/streaks');
 
   return (
-    <PremiumCard title="Rachas > 175 Pts" icon={Flame} color="orange" loading={loading}>
+    <Card title="Rachas > 175 Pts" icon={Flame} color="orange" loading={loading}>
       {!loading &&
         (data.length > 0 ? (
           <div className="space-y-4 pr-2 mt-2">
@@ -53,6 +53,6 @@ export default function StreaksCard() {
         ) : (
           <div className="text-center text-slate-500 py-8">Sin rachas activas</div>
         ))}
-    </PremiumCard>
+    </Card>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { Ghost, Skull } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -9,7 +9,7 @@ export default function JinxCard() {
   const { data = [], loading } = useApiData('/api/standings/jinx');
 
   return (
-    <PremiumCard title="El Pupas (Rondas Malditas)" icon={Skull} color="purple" loading={loading}>
+    <Card title="El Pupas (Rondas Malditas)" icon={Skull} color="purple" loading={loading}>
       {!loading &&
         (data.length > 0 ? (
           <div className="space-y-4 pr-2 mt-2">
@@ -53,6 +53,6 @@ export default function JinxCard() {
         ) : (
           <div className="text-center text-slate-500 py-8">Nadie ha sido gafado</div>
         ))}
-    </PremiumCard>
+    </Card>
   );
 }

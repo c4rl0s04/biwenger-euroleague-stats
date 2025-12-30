@@ -9,11 +9,11 @@ import NeoCard from './card-variants/NeoCard';
 import ElegantCard from './card-variants/ElegantCard';
 
 /**
- * PremiumCard - Theme-aware card component
+ * Card - Theme-aware card component
  * Currently uses static 'elegant' theme (configured in CardThemeContext)
  * Keeps all variants for future backend theme configuration
  */
-function PremiumCard(props) {
+function Card(props) {
   const { theme } = useCardTheme();
 
   switch (theme) {
@@ -31,4 +31,4 @@ function PremiumCard(props) {
   }
 }
 
-export default memo(PremiumCard);
+export default memo(Card);

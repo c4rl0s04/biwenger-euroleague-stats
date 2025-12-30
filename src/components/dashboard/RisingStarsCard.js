@@ -3,14 +3,14 @@
 import { Sparkles, TrendingUp, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RisingStarsCard() {
   const { data: stars = [], loading } = useApiData('/api/dashboard/rising-stars');
 
   return (
-    <PremiumCard title="Estrellas Emergentes" icon={Sparkles} color="emerald" loading={loading}>
+    <Card title="Estrellas Emergentes" icon={Sparkles} color="emerald" loading={loading}>
       {!loading && (
         <div className="flex-1 flex flex-col justify-between gap-2">
           {stars && stars.length > 0 ? (
@@ -59,6 +59,6 @@ export default function RisingStarsCard() {
           )}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

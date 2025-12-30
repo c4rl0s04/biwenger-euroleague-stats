@@ -18,7 +18,7 @@ export { default as LoadingSkeleton, CardSkeleton, TableRowSkeleton } from './Lo
 export { default as FadeIn } from './FadeIn';
 
 // Cards
-export { default as PremiumCard } from './PremiumCard';
+export { default as Card } from './Card';
 
 // Error Handling
 export { default as ErrorBoundary } from './ErrorBoundary';

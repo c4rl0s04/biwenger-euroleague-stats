@@ -2,11 +2,11 @@
 
 import Image from 'next/image';
 import { User } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 export default function PlayerIdentityCard({ player, className = '' }) {
   return (
-    <PremiumCard title="Ficha Técnica" icon={User} color="blue" className={`h-full ${className}`}>
+    <Card title="Ficha Técnica" icon={User} color="blue" className={`h-full ${className}`}>
       <div className="flex items-center gap-6 h-full">
         {/* Avatar */}
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-slate-700/50 shadow-xl shrink-0">
@@ -38,6 +38,6 @@ export default function PlayerIdentityCard({ player, className = '' }) {
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

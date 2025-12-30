@@ -1,7 +1,7 @@
 'use client';
 
 import { Ruler, Scale, CalendarDays } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 function calculateAge(birthDate) {
   if (!birthDate) return null;
@@ -19,12 +19,7 @@ export default function PlayerBioCard({ player, className = '' }) {
   const age = calculateAge(player.birth_date);
 
   return (
-    <PremiumCard
-      title="Biografía"
-      icon={CalendarDays}
-      color="emerald"
-      className={`h-full ${className}`}
-    >
+    <Card title="Biografía" icon={CalendarDays} color="emerald" className={`h-full ${className}`}>
       <div className="grid grid-cols-3 gap-3 h-full content-center">
         <div className="text-center p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/10 flex flex-col justify-center items-center gap-1 hover:bg-emerald-500/10 transition-colors">
           <div className="text-emerald-400 mb-1">
@@ -54,6 +49,6 @@ export default function PlayerBioCard({ player, className = '' }) {
           <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Kg</div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

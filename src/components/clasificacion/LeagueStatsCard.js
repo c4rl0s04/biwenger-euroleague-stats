@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart3, Users, TrendingUp, Crown, Zap, Flame } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function LeagueStatsCard() {
@@ -15,7 +15,7 @@ export default function LeagueStatsCard() {
   };
 
   return (
-    <PremiumCard title="Estadísticas de Liga" icon={BarChart3} color="cyan" loading={loading}>
+    <Card title="Estadísticas de Liga" icon={BarChart3} color="cyan" loading={loading}>
       {!loading && stats && (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
@@ -155,6 +155,6 @@ export default function LeagueStatsCard() {
           })()}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

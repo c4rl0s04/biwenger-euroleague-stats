@@ -3,7 +3,7 @@
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import Link from 'next/link';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
@@ -27,7 +27,7 @@ export default function SquadValueCard() {
   const formatPrice = (price) => new Intl.NumberFormat('es-ES').format(price);
 
   return (
-    <PremiumCard
+    <Card
       title="Valor de Equipo"
       icon={TrendingUp}
       color="blue"
@@ -124,6 +124,6 @@ export default function SquadValueCard() {
           </div>
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

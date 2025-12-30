@@ -3,7 +3,7 @@
 import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function TopPlayersCard() {
@@ -16,7 +16,7 @@ export default function TopPlayersCard() {
   );
 
   return (
-    <PremiumCard
+    <Card
       title="Top Jugadores"
       icon={TrendingUp}
       color="emerald"
@@ -110,6 +110,6 @@ export default function TopPlayersCard() {
           <div className="text-center text-slate-500 py-8">No hay datos disponibles</div>
         )}
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

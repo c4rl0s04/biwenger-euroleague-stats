@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { Split, MapPin, Trophy, XCircle, Home, Plane } from 'lucide-react';
 
 export default function PlayerSplitsCard({ matches, playerTeam }) {
@@ -100,7 +100,7 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
   );
 
   return (
-    <PremiumCard title="Rendimiento por Contexto" icon={Split} color="yellow" className="h-full">
+    <Card title="Rendimiento por Contexto" icon={Split} color="yellow" className="h-full">
       <div className="space-y-6 pt-2">
         {/* Home vs Away */}
         <div className="space-y-3">
@@ -170,6 +170,6 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

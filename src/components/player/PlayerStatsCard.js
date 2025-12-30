@@ -1,16 +1,11 @@
 'use client';
 
 import { Activity, HeartPulse } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 export default function PlayerStatsCard({ player, className = '' }) {
   return (
-    <PremiumCard
-      title="Rendimiento"
-      icon={Activity}
-      color="amber"
-      className={`h-full ${className}`}
-    >
+    <Card title="Rendimiento" icon={Activity} color="amber" className={`h-full ${className}`}>
       <div className="flex flex-col h-full justify-between space-y-4">
         <div className="grid grid-cols-2 gap-6">
           {/* Media Season */}
@@ -71,6 +66,6 @@ export default function PlayerStatsCard({ player, className = '' }) {
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

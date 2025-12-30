@@ -1,7 +1,7 @@
 'use client';
 
 import { Activity } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -9,7 +9,7 @@ export default function ConsistencyCard() {
   const { data = [], loading } = useApiData('/api/standings/volatility');
 
   return (
-    <PremiumCard title="Consistencia (Volatilidad)" icon={Activity} color="green" loading={loading}>
+    <Card title="Consistencia (Volatilidad)" icon={Activity} color="green" loading={loading}>
       {!loading &&
         (data.length > 0 ? (
           <div className="space-y-4 pr-2">
@@ -71,6 +71,6 @@ export default function ConsistencyCard() {
         ) : (
           <div className="text-center text-slate-500 py-8">No hay datos de consistencia</div>
         ))}
-    </PremiumCard>
+    </Card>
   );
 }

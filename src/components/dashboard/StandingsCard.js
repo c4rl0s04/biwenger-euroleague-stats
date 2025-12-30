@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Users, Trophy } from 'lucide-react';
 import StandingsTable from './StandingsTable';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { UserAvatar } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -19,7 +19,7 @@ export default function StandingsCard() {
   );
 
   return (
-    <PremiumCard
+    <Card
       title="Clasificación"
       icon={Users}
       color="indigo"
@@ -79,6 +79,6 @@ export default function StandingsCard() {
           </div>
         </>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { CloudRain } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -9,7 +9,7 @@ export default function NoGloryCard() {
   const { data = [], loading } = useApiData('/api/standings/no-glory');
 
   return (
-    <PremiumCard title="Puntos sin Gloria" icon={CloudRain} color="slate" loading={loading}>
+    <Card title="Puntos sin Gloria" icon={CloudRain} color="slate" loading={loading}>
       {!loading &&
         (data.length > 0 ? (
           <div className="space-y-4 pr-2 mt-2">
@@ -52,6 +52,6 @@ export default function NoGloryCard() {
         ) : (
           <div className="text-center text-slate-500 py-8">Todos han ganado algo</div>
         ))}
-    </PremiumCard>
+    </Card>
   );
 }

@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -40,7 +40,7 @@ export default function PlacementStatsCard() {
   const { data = [], loading } = useApiData('/api/standings/placements');
 
   return (
-    <PremiumCard title="Podios vs Descenso" icon={Trophy} color="amber" loading={loading}>
+    <Card title="Podios vs Descenso" icon={Trophy} color="amber" loading={loading}>
       {!loading &&
         (data.length > 0 ? (
           <div className="w-full" style={{ height: `${Math.max(100, data.length * 65 + 40)}px` }}>
@@ -89,6 +89,6 @@ export default function PlacementStatsCard() {
         ) : (
           <div className="text-center text-slate-500 py-8">No hay datos de posiciones</div>
         ))}
-    </PremiumCard>
+    </Card>
   );
 }

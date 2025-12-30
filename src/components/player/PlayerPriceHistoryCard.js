@@ -11,7 +11,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 // Custom Tooltip moved outside render
 function CustomTooltip({ active, payload, label }) {
@@ -54,7 +54,7 @@ export default function PlayerPriceHistoryCard({ priceHistory, className = '' })
   }));
 
   return (
-    <PremiumCard
+    <Card
       title="Evolución de Mercado"
       icon={TrendingUp}
       color="cyan"
@@ -118,6 +118,6 @@ export default function PlayerPriceHistoryCard({ priceHistory, className = '' })
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

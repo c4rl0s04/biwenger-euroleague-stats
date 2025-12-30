@@ -1,7 +1,7 @@
 'use client';
 
 import { Target, TrendingUp } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -20,7 +20,7 @@ export default function InitialSquadAnalysisCard() {
   };
 
   return (
-    <PremiumCard title="Initial Squad ROI" icon={Target} color="cyan" loading={loading}>
+    <Card title="Initial Squad ROI" icon={Target} color="cyan" loading={loading}>
       {!loading && (
         <div className="space-y-4 pr-2 mt-2">
           <p className="text-xs text-slate-400 italic px-2">
@@ -92,6 +92,6 @@ export default function InitialSquadAnalysisCard() {
           )}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

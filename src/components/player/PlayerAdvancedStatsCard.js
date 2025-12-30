@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart2, Shield, Target, AlertCircle } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 export default function PlayerAdvancedStatsCard({ advancedStats, className = '' }) {
   if (!advancedStats) return null;
@@ -31,7 +31,7 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
   );
 
   return (
-    <PremiumCard title="Estadísticas Avanzadas" icon={BarChart2} color="pink" className={className}>
+    <Card title="Estadísticas Avanzadas" icon={BarChart2} color="pink" className={className}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Shooting Splits */}
         <div>
@@ -126,6 +126,6 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

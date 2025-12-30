@@ -2,7 +2,7 @@
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Activity } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
@@ -42,7 +42,7 @@ export default function RecentRoundsCard() {
   const allRounds = rounds;
 
   return (
-    <PremiumCard
+    <Card
       title="Últimas Jornadas"
       icon={Activity}
       color="purple"
@@ -121,6 +121,6 @@ export default function RecentRoundsCard() {
           </div>
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

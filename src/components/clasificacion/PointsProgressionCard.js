@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -110,7 +110,7 @@ export default function PointsProgressionCard() {
   };
 
   return (
-    <PremiumCard title="Evolución de Puntos" icon={Activity} color="purple" loading={loading}>
+    <Card title="Evolución de Puntos" icon={Activity} color="purple" loading={loading}>
       {!loading && (
         <div className="space-y-4">
           {/* User Filter */}
@@ -210,6 +210,6 @@ export default function PointsProgressionCard() {
           </div>
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

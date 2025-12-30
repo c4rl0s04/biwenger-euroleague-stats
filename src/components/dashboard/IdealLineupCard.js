@@ -3,7 +3,7 @@
 import { Crown } from 'lucide-react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function IdealLineupCard() {
@@ -57,7 +57,7 @@ export default function IdealLineupCard() {
   );
 
   return (
-    <PremiumCard
+    <Card
       title="Quinteto Ideal"
       icon={Crown}
       color="indigo"
@@ -129,6 +129,6 @@ export default function IdealLineupCard() {
           </div>
         )
       )}
-    </PremiumCard>
+    </Card>
   );
 }

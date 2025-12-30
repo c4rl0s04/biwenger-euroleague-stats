@@ -2,14 +2,14 @@
 
 import { Cake, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function BirthdayCard() {
   const { data: birthdays = [], loading } = useApiData('/api/dashboard/birthdays');
 
   return (
-    <PremiumCard title="Cumpleaños Hoy" icon={Cake} color="pink" loading={loading}>
+    <Card title="Cumpleaños Hoy" icon={Cake} color="pink" loading={loading}>
       {!loading && (
         <div className="relative flex-1 flex flex-col h-full">
           {birthdays && birthdays.length > 0 ? (
@@ -54,6 +54,6 @@ export default function BirthdayCard() {
           )}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

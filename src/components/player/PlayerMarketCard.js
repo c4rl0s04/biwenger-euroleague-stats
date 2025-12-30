@@ -1,16 +1,11 @@
 'use client';
 
 import { DollarSign, TrendingUp } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 export default function PlayerMarketCard({ player, className = '' }) {
   return (
-    <PremiumCard
-      title="Mercado"
-      icon={DollarSign}
-      color="emerald"
-      className={`h-full ${className}`}
-    >
+    <Card title="Mercado" icon={DollarSign} color="emerald" className={`h-full ${className}`}>
       <div className="flex flex-col h-full justify-between">
         <div className="flex justify-between items-start">
           <div>
@@ -52,6 +47,6 @@ export default function PlayerMarketCard({ player, className = '' }) {
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

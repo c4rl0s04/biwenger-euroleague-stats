@@ -3,7 +3,7 @@
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Crown } from 'lucide-react';
 import Link from 'next/link';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function CaptainStatsCard() {
@@ -21,7 +21,7 @@ export default function CaptainStatsCard() {
   if (!isReady) return null;
 
   return (
-    <PremiumCard
+    <Card
       title="Rendimiento de Capitanes"
       icon={Crown}
       color="yellow"
@@ -140,6 +140,6 @@ export default function CaptainStatsCard() {
           </div>
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

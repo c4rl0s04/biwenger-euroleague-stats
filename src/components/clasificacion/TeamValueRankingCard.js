@@ -1,7 +1,7 @@
 'use client';
 
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function TeamValueRankingCard() {
@@ -22,7 +22,7 @@ export default function TeamValueRankingCard() {
   };
 
   return (
-    <PremiumCard title="Ranking por Valor" icon={Wallet} color="emerald" loading={loading}>
+    <Card title="Ranking por Valor" icon={Wallet} color="emerald" loading={loading}>
       {!loading && (
         <div className="space-y-2">
           {ranking.length > 0 ? (
@@ -80,6 +80,6 @@ export default function TeamValueRankingCard() {
           )}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

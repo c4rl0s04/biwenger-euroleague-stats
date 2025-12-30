@@ -1,7 +1,7 @@
 'use client';
 
 import { Calendar, House, Plane } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getScoreColor } from '@/lib/utils/format';
 
 export default function PlayerHistoryCard({ recentMatches, playerTeam, className = '' }) {
@@ -9,7 +9,7 @@ export default function PlayerHistoryCard({ recentMatches, playerTeam, className
   const normalize = (str) => str?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
 
   return (
-    <PremiumCard title="Historial de Partidos" icon={Calendar} color="blue" className={className}>
+    <Card title="Historial de Partidos" icon={Calendar} color="blue" className={className}>
       <div className="overflow-x-auto -mx-6 px-6">
         <table className="w-full text-sm text-left">
           <thead className="text-xs text-slate-400 uppercase bg-slate-800/30 border-b border-slate-700/50">
@@ -165,6 +165,6 @@ export default function PlayerHistoryCard({ recentMatches, playerTeam, className
           </tbody>
         </table>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

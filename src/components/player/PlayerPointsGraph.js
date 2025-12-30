@@ -13,7 +13,7 @@ import {
   Cell,
 } from 'recharts';
 import { useMemo, useState } from 'react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { House, Plane, TrendingUp, Trophy, Ban } from 'lucide-react';
 
 // Colors
@@ -151,7 +151,7 @@ export default function PlayerPointsGraph({ matches, playerTeam }) {
   if (!matches || matches.length === 0) return null;
 
   return (
-    <PremiumCard
+    <Card
       title="Evolución de Puntos"
       icon={TrendingUp}
       color="rose"
@@ -267,6 +267,6 @@ export default function PlayerPointsGraph({ matches, playerTeam }) {
           Media: {averagePoints.toFixed(1)} pts
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

@@ -3,7 +3,7 @@
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function MarketActivityCard() {
@@ -28,7 +28,7 @@ export default function MarketActivityCard() {
   );
 
   return (
-    <PremiumCard
+    <Card
       title="Últimos Fichajes"
       icon={ShoppingBag}
       color="pink"
@@ -74,6 +74,6 @@ export default function MarketActivityCard() {
           <div className="text-center text-slate-500 py-8">No hay fichajes recientes</div>
         )}
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

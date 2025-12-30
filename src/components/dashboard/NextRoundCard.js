@@ -4,7 +4,7 @@ import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Calendar, TrendingUp, Star, ShoppingCart, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function NextRoundCard() {
@@ -17,7 +17,7 @@ export default function NextRoundCard() {
 
   // Don't render on server to prevent hydration mismatch
   if (!isReady) {
-    return <PremiumCard loading={true} className="lg:col-span-2" />;
+    return <Card loading={true} className="lg:col-span-2" />;
   }
 
   const { nextRound, topPlayersForm, captainRecommendations, marketOpportunities } = data || {};
@@ -40,7 +40,7 @@ export default function NextRoundCard() {
   );
 
   return (
-    <PremiumCard
+    <Card
       title="Próxima Jornada"
       icon={Calendar}
       color="blue"
@@ -238,6 +238,6 @@ export default function NextRoundCard() {
           <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
         </Link>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

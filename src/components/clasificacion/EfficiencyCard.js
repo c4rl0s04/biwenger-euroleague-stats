@@ -1,7 +1,7 @@
 'use client';
 
 import { Coins, CircleDollarSign } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -9,7 +9,7 @@ export default function EfficiencyCard() {
   const { data = [], loading } = useApiData('/api/standings/efficiency');
 
   return (
-    <PremiumCard title="Eficiencia (ROI)" icon={Coins} color="yellow" loading={loading}>
+    <Card title="Eficiencia (ROI)" icon={Coins} color="yellow" loading={loading}>
       {!loading &&
         (data.length > 0 ? (
           <div className="space-y-4 pr-2 mt-2">
@@ -63,6 +63,6 @@ export default function EfficiencyCard() {
         ) : (
           <div className="text-center text-slate-500 py-8">No hay datos de eficiencia</div>
         ))}
-    </PremiumCard>
+    </Card>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Target, Crown } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function LeaderGapCard() {
@@ -19,21 +19,21 @@ export default function LeaderGapCard() {
   if (!isReady) return null;
 
   if (loading) {
-    return <PremiumCard loading={true} />;
+    return <Card loading={true} />;
   }
 
   // If data failed to load, show empty state
   if (!data) {
     return (
-      <PremiumCard title="A la Caza del Líder" icon={Target} color="emerald">
+      <Card title="A la Caza del Líder" icon={Target} color="emerald">
         <div className="text-center text-slate-500 py-4">No hay datos disponibles</div>
-      </PremiumCard>
+      </Card>
     );
   }
 
   if (data.is_leader) {
     return (
-      <PremiumCard title="Líder de la Liga" icon={Crown} color="yellow">
+      <Card title="Líder de la Liga" icon={Crown} color="yellow">
         <div className="grid grid-cols-2 gap-3 flex-1">
           <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30 hover:border-yellow-500/30 transition-all flex flex-col justify-center">
             <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
@@ -53,13 +53,13 @@ export default function LeaderGapCard() {
         <div className="mt-3 text-slate-400 text-xs text-center font-medium">
           Mantén el ritmo para ganar la liga
         </div>
-      </PremiumCard>
+      </Card>
     );
   }
 
   // Not leader view
   return (
-    <PremiumCard title="A la Caza del Líder" icon={Target} color="emerald">
+    <Card title="A la Caza del Líder" icon={Target} color="emerald">
       <div className="space-y-3 flex-1">
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30 hover:border-yellow-500/30 transition-all">
@@ -88,6 +88,6 @@ export default function LeaderGapCard() {
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

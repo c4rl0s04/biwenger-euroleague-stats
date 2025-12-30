@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Flame, Snowflake, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
@@ -64,7 +64,7 @@ export default function StreakCard({ type = 'hot' }) {
   const TrendIcon = cfg.TrendIcon;
 
   return (
-    <PremiumCard
+    <Card
       title={cfg.title}
       icon={cfg.icon}
       color={cfg.color}
@@ -113,7 +113,7 @@ export default function StreakCard({ type = 'hot' }) {
           )}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }
 

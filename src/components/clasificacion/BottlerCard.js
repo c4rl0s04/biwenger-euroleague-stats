@@ -1,7 +1,7 @@
 'use client';
 
 import { Wine, AlertTriangle } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -9,7 +9,7 @@ export default function BottlerCard() {
   const { data = [], loading } = useApiData('/api/standings/bottlers');
 
   return (
-    <PremiumCard title="The Bottlers (Casi ganan)" icon={Wine} color="pink" loading={loading}>
+    <Card title="The Bottlers (Casi ganan)" icon={Wine} color="pink" loading={loading}>
       {!loading &&
         (data.length > 0 ? (
           <div className="space-y-4 pr-2 mt-2">
@@ -71,6 +71,6 @@ export default function BottlerCard() {
         ) : (
           <div className="text-center text-slate-500 py-8">Nadie ha boteado todavía</div>
         ))}
-    </PremiumCard>
+    </Card>
   );
 }

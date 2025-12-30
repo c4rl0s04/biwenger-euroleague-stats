@@ -1,12 +1,12 @@
 'use client';
 
 import { CalendarClock, MapPin } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 export default function PlayerNextMatchCard({ nextMatch, playerTeam, className = '' }) {
   if (!nextMatch) {
     return (
-      <PremiumCard
+      <Card
         title="Próximo Partido"
         icon={CalendarClock}
         color="orange"
@@ -15,7 +15,7 @@ export default function PlayerNextMatchCard({ nextMatch, playerTeam, className =
         <div className="flex items-center justify-center h-20 text-slate-500 text-sm italic">
           Sin partidos programados
         </div>
-      </PremiumCard>
+      </Card>
     );
   }
 
@@ -33,7 +33,7 @@ export default function PlayerNextMatchCard({ nextMatch, playerTeam, className =
   const timeStr = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <PremiumCard
+    <Card
       title="Próximo Partido"
       icon={CalendarClock}
       color="orange"
@@ -62,6 +62,6 @@ export default function PlayerNextMatchCard({ nextMatch, playerTeam, className =
           </div>
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

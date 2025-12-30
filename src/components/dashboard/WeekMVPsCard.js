@@ -3,7 +3,7 @@
 import { Trophy, Award } from 'lucide-react';
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function WeekMVPsCard() {
@@ -43,7 +43,7 @@ export default function WeekMVPsCard() {
   };
 
   return (
-    <PremiumCard title="MVPs Última Jornada" icon={Trophy} color="yellow" loading={loading}>
+    <Card title="MVPs Última Jornada" icon={Trophy} color="yellow" loading={loading}>
       {!loading && (
         <div className="flex-1 flex flex-col justify-between gap-2 relative z-10">
           {mvps && mvps.length > 0 ? (
@@ -88,6 +88,6 @@ export default function WeekMVPsCard() {
           )}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

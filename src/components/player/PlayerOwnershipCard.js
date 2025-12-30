@@ -1,7 +1,7 @@
 'use client';
 
 import { History, ArrowRight, ShoppingCart, User, Wallet, Sparkles } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 export default function PlayerOwnershipCard({ transfers, className = '' }) {
   if (!transfers || transfers.length === 0) {
@@ -9,7 +9,7 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
   }
 
   return (
-    <PremiumCard title="Historial de Traspasos" icon={History} color="cyan" className={className}>
+    <Card title="Historial de Traspasos" icon={History} color="cyan" className={className}>
       <div className="relative pl-2 pr-2 py-2">
         {/* Vertical Line */}
         <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-slate-700/50"></div>
@@ -145,6 +145,6 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
           })}
         </div>
       </div>
-    </PremiumCard>
+    </Card>
   );
 }

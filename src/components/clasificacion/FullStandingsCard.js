@@ -3,7 +3,7 @@
 import { Trophy, Medal } from 'lucide-react';
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function FullStandingsCard() {
@@ -54,7 +54,7 @@ export default function FullStandingsCard() {
   const leader = standings[0];
 
   return (
-    <PremiumCard
+    <Card
       title="Clasificación Completa"
       icon={Trophy}
       color="indigo"
@@ -173,6 +173,6 @@ export default function FullStandingsCard() {
           </table>
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }

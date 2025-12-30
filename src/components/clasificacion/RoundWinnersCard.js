@@ -2,7 +2,7 @@
 
 import { Trophy } from 'lucide-react';
 import { useMemo } from 'react';
-import { PremiumCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
@@ -10,7 +10,7 @@ export default function RoundWinnersCard() {
   const { data: winners = [], loading } = useApiData('/api/standings/round-winners');
 
   return (
-    <PremiumCard title="Ganadores de Jornada" icon={Trophy} color="yellow" loading={loading}>
+    <Card title="Ganadores de Jornada" icon={Trophy} color="yellow" loading={loading}>
       {!loading && (
         <div className="flex flex-wrap justify-center gap-3">
           {winners.length > 0 ? (
@@ -47,6 +47,6 @@ export default function RoundWinnersCard() {
           )}
         </div>
       )}
-    </PremiumCard>
+    </Card>
   );
 }
