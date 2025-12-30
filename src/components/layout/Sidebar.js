@@ -15,9 +15,12 @@ import {
   ChevronRight,
   Sparkles,
   TrendingUp,
+  TrendingDown,
   Wallet,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useClientUser } from '@/lib/hooks/useClientUser';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -32,8 +35,39 @@ const navItems = [
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { currentUser, isReady } = useClientUser();
+
+  // Fetch squad data for Quick Stats widget
+  const { data: squadData, loading } = useApiData(
+    () => (currentUser ? `/api/player/squad?userId=${currentUser.id}` : null),
+    {
+      dependencies: [currentUser?.id],
+      skip: !currentUser,
+    }
+  );
 
   const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
+
+  // Format large numbers as compact (e.g., 15.2M)
+  const formatCompact = (value) => {
+    if (!value) return '—';
+    if (value >= 1000000) {
+      return `€${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `€${(value / 1000).toFixed(0)}K`;
+    }
+    return `€${value}`;
+  };
+
+  // Calculate trend percentage
+  const getTrendPercent = () => {
+    if (!squadData?.total_value || !squadData?.price_trend) return null;
+    const percent = (squadData.price_trend / squadData.total_value) * 100;
+    return percent.toFixed(1);
+  };
+
+  const trendPercent = getTrendPercent();
+  const isPositiveTrend = squadData?.price_trend >= 0;
 
   return (
     <>
@@ -118,22 +152,45 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Quick Stats Widget (only when expanded) */}
-        {!isCollapsed && (
+        {!isCollapsed && isReady && (
           <div className="px-3 py-3 border-t border-border/30">
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl p-3 border border-border/30">
-              <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                <Wallet size={14} />
-                <span>Mi Plantilla</span>
+            <Link href="/dashboard">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl p-3 border border-border/30 hover:border-primary/30 transition-colors cursor-pointer">
+                <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                  <Wallet size={14} />
+                  <span>Mi Plantilla</span>
+                </div>
+                {loading ? (
+                  <div className="h-7 w-24 bg-slate-700/50 rounded animate-shimmer" />
+                ) : squadData ? (
+                  <>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-bold text-white">
+                        {formatCompact(squadData.total_value)}
+                      </span>
+                      {trendPercent && (
+                        <span
+                          className={`flex items-center text-xs ${isPositiveTrend ? 'text-green-400' : 'text-red-400'}`}
+                        >
+                          {isPositiveTrend ? (
+                            <TrendingUp size={12} className="mr-0.5" />
+                          ) : (
+                            <TrendingDown size={12} className="mr-0.5" />
+                          )}
+                          {isPositiveTrend ? '+' : ''}
+                          {trendPercent}%
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-1">
+                      {squadData.player_count || 0} jugadores activos
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-sm text-slate-500">Selecciona usuario</div>
+                )}
               </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-white">€15.2M</span>
-                <span className="flex items-center text-xs text-green-400">
-                  <TrendingUp size={12} className="mr-0.5" />
-                  +2.3%
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-500 mt-1">12 jugadores activos</div>
-            </div>
+            </Link>
           </div>
         )}
 
@@ -160,12 +217,15 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Collapsed state: just icons for quick stats */}
         {isCollapsed && (
           <div className="px-2 py-3 border-t border-border/30 space-y-2">
-            <button
-              className="w-full p-2 rounded-lg hover:bg-slate-800/50 text-slate-400 hover:text-white transition-colors"
-              title="Mi Plantilla €15.2M"
+            <Link
+              href="/dashboard"
+              className="w-full p-2 rounded-lg hover:bg-slate-800/50 text-slate-400 hover:text-white transition-colors flex items-center justify-center"
+              title={
+                squadData ? `Mi Plantilla ${formatCompact(squadData.total_value)}` : 'Mi Plantilla'
+              }
             >
-              <Wallet size={20} className="mx-auto" />
-            </button>
+              <Wallet size={20} />
+            </Link>
             <button
               className="w-full p-2 rounded-lg bg-gradient-to-br from-purple-600/20 to-pink-600/20 text-purple-400 hover:text-white transition-colors"
               title="Premium"
