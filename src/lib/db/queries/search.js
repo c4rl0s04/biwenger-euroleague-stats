@@ -1,4 +1,4 @@
-import db from '../database';
+import { db } from '../client.js';
 
 /**
  * Search across players, teams, and users
