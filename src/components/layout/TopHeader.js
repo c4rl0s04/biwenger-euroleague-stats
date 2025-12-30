@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, Search, Bell, Settings } from 'lucide-react';
+import { Menu, Search, Bell } from 'lucide-react';
 import { UserSelector } from '@/components/user';
 import { useState } from 'react';
 import SearchDropdown from './SearchDropdown';
+import SettingsDropdown from './SettingsDropdown';
 
 export default function TopHeader({ onMobileMenuClick }) {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -62,9 +63,9 @@ export default function TopHeader({ onMobileMenuClick }) {
           </button>
 
           {/* Settings */}
-          <button className="hidden sm:flex p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
-            <Settings size={20} />
-          </button>
+          <div className="hidden sm:flex">
+            <SettingsDropdown />
+          </div>
 
           {/* Divider */}
           <div className="hidden sm:block w-px h-6 bg-border/50" />
