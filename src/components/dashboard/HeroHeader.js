@@ -1,6 +1,26 @@
+'use client';
+
 import { Trophy, TrendingUp, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const HeroHeader = () => {
+  const [stats, setStats] = useState({
+    userCount: 0,
+    currentRound: 'Loading...',
+    weeksToPlayoffs: 0,
+  });
+
+  useEffect(() => {
+    fetch('/api/landing-stats')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) {
+          setStats(data);
+        }
+      })
+      .catch((err) => console.error('Failed to load landing stats', err));
+  }, []);
+
   return (
     <header className="relative overflow-hidden hero-gradient border-b border-border/30">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/10 blur-[120px] rounded-full" />
@@ -30,15 +50,19 @@ const HeroHeader = () => {
           >
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-muted-foreground" />
-              <span className="text-muted-foreground">12 Teams</span>
+              <span className="text-muted-foreground">
+                {stats.userCount > 0 ? `${stats.userCount} Users` : 'Loading...'}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-muted-foreground" />
-              <span className="text-muted-foreground">Round 18</span>
+              <span className="text-muted-foreground">{stats.currentRound}</span>
             </div>
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-primary" />
-              <span className="text-primary font-medium">Playoffs in 4 weeks</span>
+              <span className="text-primary font-medium">
+                Playoffs in {stats.weeksToPlayoffs} weeks
+              </span>
             </div>
           </div>
         </div>
