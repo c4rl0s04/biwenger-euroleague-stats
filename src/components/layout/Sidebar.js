@@ -190,7 +190,7 @@ export default function Sidebar({ isOpen, onClose }) {
                         <div className="text-[10px] text-slate-400">jugadores</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-semibold text-primary">
                           {new Intl.NumberFormat('es-ES').format(squadData.total_points || 0)}
                         </div>
                         <div className="text-[10px] text-slate-400">puntos</div>
