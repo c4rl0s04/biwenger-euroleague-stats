@@ -8,5 +8,7 @@
 
 export { default as Navbar } from './Navbar';
 export { default as Sidebar } from './Sidebar';
+export { default as TopHeader } from './TopHeader';
+export { default as AppShell } from './AppShell';
 export { default as ClientWrapper } from './ClientWrapper';
 export { default as Section } from './Section';

@@ -10,12 +10,10 @@ import {
   ShoppingCart,
   Calendar,
   Target,
-  Menu,
   X,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { UserSelector } from '@/components/user';
 import { useState } from 'react';
 
 const navItems = [
@@ -28,29 +26,19 @@ const navItems = [
   { name: 'Porras', href: '/porras', icon: Target },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
 
   return (
     <>
-      {/* Mobile Hamburger Button */}
-      <button
-        onClick={() => setIsMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card/80 backdrop-blur-sm border border-border/50 text-foreground"
-        aria-label="Open menu"
-      >
-        <Menu size={24} />
-      </button>
-
       {/* Mobile Overlay */}
-      {isMobileOpen && (
+      {isOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-          onClick={() => setIsMobileOpen(false)}
+          onClick={onClose}
         />
       )}
 
@@ -62,37 +50,32 @@ export default function Sidebar() {
           bg-[hsl(220,20%,5%)] border-r border-border/50
           flex flex-col
           transition-all duration-300 ease-in-out
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          md:top-16 md:h-[calc(100vh-4rem)]
+          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
-        {/* Header / Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-border/30">
-          <Link href="/" className="flex items-center gap-3" onClick={() => setIsMobileOpen(false)}>
-            {!isCollapsed && (
-              <span className="text-lg font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent whitespace-nowrap">
-                Biwenger Stats
-              </span>
-            )}
-            {isCollapsed && (
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
-                BS
-              </span>
-            )}
+        {/* Mobile Header (only visible on mobile) */}
+        <div className="h-16 flex items-center justify-between px-4 border-b border-border/30 md:hidden">
+          <Link href="/" className="flex items-center gap-3" onClick={onClose}>
+            <span className="text-lg font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent whitespace-nowrap">
+              Biwenger Stats
+            </span>
           </Link>
 
-          {/* Mobile Close Button */}
           <button
-            onClick={() => setIsMobileOpen(false)}
-            className="md:hidden p-1 rounded hover:bg-slate-800 text-slate-400"
+            onClick={onClose}
+            className="p-1 rounded hover:bg-slate-800 text-slate-400"
             aria-label="Close menu"
           >
             <X size={20} />
           </button>
+        </div>
 
-          {/* Desktop Collapse Toggle */}
+        {/* Desktop Collapse Toggle */}
+        <div className="hidden md:flex items-center justify-end px-2 py-2 border-b border-border/30">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:flex p-1 rounded hover:bg-slate-800 text-slate-400"
+            className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -108,7 +91,7 @@ export default function Sidebar() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    onClick={() => setIsMobileOpen(false)}
+                    onClick={onClose}
                     className={`
                       flex items-center gap-3 px-3 py-2.5 rounded-lg
                       transition-all duration-200
@@ -130,11 +113,6 @@ export default function Sidebar() {
             })}
           </ul>
         </nav>
-
-        {/* User Selector at Bottom */}
-        <div className={`p-3 border-t border-border/30 ${isCollapsed ? 'px-1' : ''}`}>
-          <UserSelector collapsed={isCollapsed} />
-        </div>
       </aside>
     </>
   );
