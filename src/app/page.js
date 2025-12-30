@@ -40,9 +40,10 @@ export default function Home() {
 
       <main className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-display text-gradient mb-10 flex items-center gap-4">
+          <h2 className="text-4xl md:text-5xl font-display mb-10 flex items-center gap-4">
             <span className="w-1.5 h-10 bg-primary rounded-full"></span>
-            Available Modules
+            <span className="text-foreground">Available </span>
+            <span className="text-gradient">Modules</span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
