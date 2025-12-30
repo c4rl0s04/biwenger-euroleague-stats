@@ -267,11 +267,6 @@ h3,
   transition: all 0.3s ease;
 }
 
-.bg-card:hover {
-  border-color: hsl(var(--primary) / 0.5) !important;
-  box-shadow: var(--glow-subtle);
-}
-
 /* ========================================
    ANIMATIONS
    ======================================== */
