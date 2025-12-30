@@ -57,6 +57,9 @@ export default function SquadValueCard() {
               {data.price_trend >= 0 ? '+' : ''}
               {formatPrice(data.price_trend)}€
             </div>
+            <div className="text-muted-foreground text-xs mt-2">
+              {data.player_count || 0} jugadores en plantilla
+            </div>
           </div>
 
           {/* Separator */}
