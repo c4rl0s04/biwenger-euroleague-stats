@@ -15,9 +15,15 @@ export default function SearchDropdown({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [isMac, setIsMac] = useState(true);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
   const router = useRouter();
+
+  // Detect OS for keyboard shortcut display
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+  }, []);
 
   // Debounced search
   useEffect(() => {
@@ -140,7 +146,7 @@ export default function SearchDropdown({ onClose }) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar jugadores, equipos, usuarios..."
-          className="w-full pl-10 pr-10 py-2 rounded-xl bg-slate-900/50 border border-border/50 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+          className="w-full pl-10 pr-16 py-2 rounded-xl bg-slate-900/50 border border-border/50 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
         {loading && (
           <Loader2
@@ -158,6 +164,11 @@ export default function SearchDropdown({ onClose }) {
           >
             <X size={16} />
           </button>
+        )}
+        {!loading && !query && (
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 bg-slate-800 rounded border border-border/50">
+            {isMac ? '⌘' : 'Ctrl'}K
+          </kbd>
         )}
       </div>
 
