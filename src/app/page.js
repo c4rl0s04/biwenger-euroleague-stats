@@ -95,15 +95,17 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
                 <div className="relative z-10">
-                  <div
-                    className={`flex items-center justify-center mb-4 text-${card.color}-500 group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    <card.icon size={40} />
-                  </div>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div
+                      className={`text-${card.color}-500 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <card.icon size={40} />
+                    </div>
 
-                  <h3 className="text-3xl font-display text-white mb-2 group-hover:text-primary transition-colors">
-                    {card.title}
-                  </h3>
+                    <h3 className="text-3xl font-display text-white group-hover:text-primary transition-colors">
+                      {card.title}
+                    </h3>
+                  </div>
                   <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
 
                   <div className="flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
