@@ -15,7 +15,7 @@ import Link from 'next/link';
 export default function Home() {
   const cards = [
     {
-      title: 'Análisis del Dashboard',
+      title: 'Dashboard',
       description: 'Analítica avanzada para tu equipo fantasy',
       icon: LayoutDashboard,
       href: '/dashboard',
@@ -24,7 +24,7 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Clasificación de la Liga',
+      title: 'Clasificación',
       description: 'Tabla completa y datos históricos',
       icon: Trophy,
       href: '/standings',
@@ -33,7 +33,7 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Mercado y Jugadores',
+      title: 'Mercado',
       description: 'Tendencias de mercado y estadísticas',
       icon: ShoppingCart,
       href: '/market',
@@ -42,7 +42,7 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Perfiles de Jugador',
+      title: 'Jugadores',
       description: 'Estadísticas detalladas e historial',
       icon: User,
       href: '/players',
@@ -51,7 +51,7 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Alineaciones Óptimas',
+      title: 'Alineaciones',
       description: 'Sugerencias de alineación por IA',
       icon: Users,
       href: '/lineups',
@@ -60,7 +60,7 @@ export default function Home() {
       disabled: true,
     },
     {
-      title: 'Calendario de Partidos',
+      title: 'Partidos',
       description: 'Próximos partidos y resultados',
       icon: Calendar,
       href: '/matches',
