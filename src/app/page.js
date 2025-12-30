@@ -40,8 +40,8 @@ export default function Home() {
 
       <main className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-display text-white mb-8 flex items-center gap-2">
-            <span className="w-1 h-8 bg-primary rounded-full"></span>
+          <h2 className="text-4xl md:text-5xl font-display text-gradient mb-10 flex items-center gap-4">
+            <span className="w-1.5 h-10 bg-primary rounded-full"></span>
             Available Modules
           </h2>
 

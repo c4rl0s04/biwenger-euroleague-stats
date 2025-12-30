@@ -29,7 +29,7 @@ const HeroHeader = () => {
         <div className="flex flex-col items-center text-center gap-6">
           <div className="flex items-center gap-3 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 animate-fade-in">
             <Trophy className="w-5 h-5 text-primary" />
-            <span className="text-sm font-medium text-primary">Season 2024-25</span>
+            <span className="text-sm font-medium text-primary">Season 2025-26</span>
           </div>
 
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl tracking-tight animate-slide-up">
@@ -41,7 +41,8 @@ const HeroHeader = () => {
             className="text-muted-foreground text-lg max-w-xl animate-slide-up"
             style={{ animationDelay: '0.1s' }}
           >
-            Track your league standings, player performances, and weekly matchups.
+            Sigue la clasificación de tu liga, el rendimiento de los jugadores y los enfrentamientos
+            semanales.
           </p>
 
           <div
@@ -51,7 +52,7 @@ const HeroHeader = () => {
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-muted-foreground" />
               <span className="text-muted-foreground">
-                {stats.userCount > 0 ? `${stats.userCount} Users` : 'Loading...'}
+                {stats.userCount > 0 ? `${stats.userCount} Usuarios` : 'Loading...'}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -61,7 +62,7 @@ const HeroHeader = () => {
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-primary" />
               <span className="text-primary font-medium">
-                Playoffs in {stats.weeksToPlayoffs} weeks
+                Playoffs en {stats.weeksToPlayoffs} semanas
               </span>
             </div>
           </div>
