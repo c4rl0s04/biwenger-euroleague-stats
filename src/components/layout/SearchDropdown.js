@@ -137,7 +137,7 @@ export default function SearchDropdown({ onClose }) {
       <div className="relative group">
         <Search
           size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
         />
         <input
           ref={inputRef}
@@ -146,12 +146,12 @@ export default function SearchDropdown({ onClose }) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar jugadores, equipos, usuarios..."
-          className="w-full pl-10 pr-16 py-2 rounded-xl bg-slate-900/50 border border-border/50 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+          className="w-full pl-10 pr-16 py-2 rounded-xl bg-secondary border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
         {loading && (
           <Loader2
             size={16}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 animate-spin"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground animate-spin"
           />
         )}
         {!loading && query && (
@@ -160,13 +160,13 @@ export default function SearchDropdown({ onClose }) {
               setQuery('');
               setResults({ players: [], teams: [], users: [] });
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
             <X size={16} />
           </button>
         )}
         {!loading && !query && (
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 bg-slate-800 rounded border border-border/50">
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-secondary rounded border border-border/50">
             {isMac ? '⌘' : 'Ctrl'} + K
           </kbd>
         )}
@@ -174,9 +174,9 @@ export default function SearchDropdown({ onClose }) {
 
       {/* Dropdown Results */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[hsl(220,20%,8%)] border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50 max-h-[400px] overflow-y-auto">
           {!hasResults && !loading && (
-            <div className="p-4 text-center text-slate-500 text-sm">
+            <div className="p-4 text-center text-muted-foreground text-sm">
               No se encontraron resultados para &ldquo;{query}&rdquo;
             </div>
           )}
@@ -184,7 +184,7 @@ export default function SearchDropdown({ onClose }) {
           {/* Players */}
           {results.players.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-900/50">
+              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/50">
                 Jugadores
               </div>
               {results.players.map((player, idx) => {
@@ -193,9 +193,9 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`player-${player.id}`}
                     onClick={() => handleSelect({ type: 'player', ...player })}
-                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-secondary hover:border-l-2 hover:border-primary transition-all ${
                       activeIndex === globalIdx
-                        ? 'bg-slate-800/50 border-l-2 border-primary'
+                        ? 'bg-secondary border-l-2 border-primary'
                         : 'border-l-2 border-transparent'
                     }`}
                   >
@@ -205,7 +205,7 @@ export default function SearchDropdown({ onClose }) {
                         className={`text-sm transition-colors ${
                           activeIndex === globalIdx
                             ? 'text-primary'
-                            : 'text-white group-hover:text-primary'
+                            : 'text-foreground group-hover:text-primary'
                         }`}
                       >
                         {player.name}
@@ -224,7 +224,7 @@ export default function SearchDropdown({ onClose }) {
           {/* Teams */}
           {results.teams.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-900/50">
+              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/50">
                 Equipos
               </div>
               {results.teams.map((team, idx) => {
@@ -233,9 +233,9 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`team-${team.name}`}
                     onClick={() => handleSelect({ type: 'team', ...team })}
-                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-secondary hover:border-l-2 hover:border-primary transition-all ${
                       activeIndex === globalIdx
-                        ? 'bg-slate-800/50 border-l-2 border-primary'
+                        ? 'bg-secondary border-l-2 border-primary'
                         : 'border-l-2 border-transparent'
                     }`}
                   >
@@ -245,7 +245,7 @@ export default function SearchDropdown({ onClose }) {
                         className={`text-sm transition-colors ${
                           activeIndex === globalIdx
                             ? 'text-primary'
-                            : 'text-white group-hover:text-primary'
+                            : 'text-foreground group-hover:text-primary'
                         }`}
                       >
                         {team.name}
@@ -261,7 +261,7 @@ export default function SearchDropdown({ onClose }) {
           {/* Users */}
           {results.users.length > 0 && (
             <div>
-              <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-900/50">
+              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/50">
                 Usuarios
               </div>
               {results.users.map((user, idx) => {
@@ -270,9 +270,9 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`user-${user.id}`}
                     onClick={() => handleSelect({ type: 'user', ...user })}
-                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-secondary hover:border-l-2 hover:border-primary transition-all ${
                       activeIndex === globalIdx
-                        ? 'bg-slate-800/50 border-l-2 border-primary'
+                        ? 'bg-secondary border-l-2 border-primary'
                         : 'border-l-2 border-transparent'
                     }`}
                   >
@@ -282,7 +282,7 @@ export default function SearchDropdown({ onClose }) {
                         className={`text-sm transition-colors ${
                           activeIndex === globalIdx
                             ? 'text-primary'
-                            : 'text-white group-hover:text-primary'
+                            : 'text-foreground group-hover:text-primary'
                         }`}
                       >
                         {user.name}

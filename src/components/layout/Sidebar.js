@@ -86,7 +86,7 @@ export default function Sidebar({ isOpen, onClose }) {
         className={`
           fixed md:sticky top-0 left-0 h-screen z-50
           ${sidebarWidth}
-          bg-[hsl(220,20%,5%)] border-r border-border/50
+          bg-card border-r border-border/50
           flex flex-col
           transition-all duration-300 ease-in-out
           md:top-16 md:h-[calc(100vh-4rem)]
@@ -103,7 +103,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400"
+            className="p-1 rounded hover:bg-secondary text-muted-foreground"
             aria-label="Close menu"
           >
             <X size={20} />
@@ -114,7 +114,7 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="hidden md:flex items-center justify-end px-2 py-2 border-b border-border/30">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+            className="p-1.5 rounded hover:bg-secondary text-muted-foreground"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -137,12 +137,15 @@ export default function Sidebar({ isOpen, onClose }) {
                       ${
                         isActive
                           ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                          : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                       }
                     `}
                     title={isCollapsed ? item.name : undefined}
                   >
-                    <item.icon size={20} className={isActive ? 'text-primary' : 'text-slate-400'} />
+                    <item.icon
+                      size={20}
+                      className={isActive ? 'text-primary' : 'text-muted-foreground'}
+                    />
                     {!isCollapsed && (
                       <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
                     )}
@@ -157,17 +160,17 @@ export default function Sidebar({ isOpen, onClose }) {
         {!isCollapsed && isReady && (
           <div className="px-3 py-3 border-t border-border/30">
             <Link href="/dashboard">
-              <div className="card-glow bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl p-3 border border-border/30 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
-                <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
+              <div className="card-glow bg-secondary/50 rounded-xl p-3 border border-border/30 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                   <Wallet size={14} />
                   <span>Mi Plantilla</span>
                 </div>
                 {loading ? (
-                  <div className="h-7 w-24 bg-slate-700/50 rounded animate-shimmer" />
+                  <div className="h-7 w-24 bg-muted rounded animate-shimmer" />
                 ) : squadData ? (
                   <>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-bold text-white">
+                      <span className="text-xl font-bold text-foreground">
                         {formatCompact(squadData.total_value)}
                       </span>
                       {trendPercent && (
@@ -232,7 +235,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <div className="px-2 py-3 border-t border-border/30 space-y-2">
             <Link
               href="/dashboard"
-              className="w-full p-2 rounded-lg hover:bg-slate-800/50 text-slate-400 hover:text-white transition-colors flex items-center justify-center"
+              className="w-full p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
               title={
                 squadData ? `Mi Plantilla ${formatCompact(squadData.total_value)}` : 'Mi Plantilla'
               }

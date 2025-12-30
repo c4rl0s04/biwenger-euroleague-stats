@@ -49,8 +49,8 @@ export default function SettingsDropdown() {
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors ${
-          isOpen ? 'bg-slate-800 text-white' : ''
+        className={`p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ${
+          isOpen ? 'bg-secondary text-foreground' : ''
         }`}
         aria-label="Settings"
       >

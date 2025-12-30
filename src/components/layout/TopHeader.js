@@ -11,7 +11,7 @@ export default function TopHeader({ onMobileMenuClick }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <header className="h-16 bg-[hsl(220,20%,5%)]/95 backdrop-blur-xl border-b border-border/50 sticky top-0 z-40">
+    <header className="h-16 bg-card/95 backdrop-blur-xl border-b border-border/50 sticky top-0 z-40">
       {/* Subtle gradient line at top */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
@@ -21,7 +21,7 @@ export default function TopHeader({ onMobileMenuClick }) {
           {/* Mobile Hamburger */}
           <button
             onClick={onMobileMenuClick}
-            className="md:hidden p-2 rounded-lg hover:bg-slate-800 text-slate-400"
+            className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground"
             aria-label="Open menu"
           >
             <Menu size={24} />
@@ -49,14 +49,14 @@ export default function TopHeader({ onMobileMenuClick }) {
           {/* Mobile Search Toggle */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-slate-800 text-slate-400"
+            className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground"
             aria-label="Search"
           >
             <Search size={20} />
           </button>
 
           {/* Notifications */}
-          <button className="relative p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+          <button className="relative p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
             <Bell size={20} />
             {/* Notification dot */}
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
@@ -77,7 +77,7 @@ export default function TopHeader({ onMobileMenuClick }) {
 
       {/* Mobile Search Bar (expandable) */}
       {searchOpen && (
-        <div className="md:hidden px-4 pb-3 bg-[hsl(220,20%,5%)] border-b border-border/50">
+        <div className="md:hidden px-4 pb-3 bg-card border-b border-border/50">
           <SearchDropdown onClose={() => setSearchOpen(false)} />
         </div>
       )}
