@@ -11,7 +11,7 @@ export default function TopHeader({ onMobileMenuClick }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <header className="h-16 bg-card/95 backdrop-blur-xl border-b border-border sticky top-0 z-40">
+    <header className="h-16 bg-card/95 backdrop-blur-xl border-b border-b-[hsl(0_0%_30%)] sticky top-0 z-40">
       {/* Subtle gradient line at top */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
