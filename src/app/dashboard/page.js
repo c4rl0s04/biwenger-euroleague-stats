@@ -2,7 +2,6 @@ import nextDynamic from 'next/dynamic';
 import { CardSkeleton } from '@/components/ui';
 import { Section } from '@/components/layout';
 import {
-  HeroHeader,
   StandingsCard,
   MySeasonCard,
   SquadValueCard,
@@ -55,7 +54,7 @@ export default function Dashboard() {
   return (
     <div>
       {/* Hero Section */}
-      <HeroHeader />
+      {/* Hero Section Removed - Moved to Home Page */}
 
       {/* Section: Mi Temporada */}
       <Section title="Mi Temporada" delay={0} background="section-base">
