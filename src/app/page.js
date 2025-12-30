@@ -58,7 +58,7 @@ export default function Home() {
       href: '/lineups',
       color: 'purple',
       delay: '0.5s',
-      disabled: true,
+      disabled: false,
     },
     {
       title: 'Partidos',
@@ -67,7 +67,7 @@ export default function Home() {
       href: '/matches',
       color: 'red',
       delay: '0.6s',
-      disabled: true,
+      disabled: false,
     },
     {
       title: 'Porras',
