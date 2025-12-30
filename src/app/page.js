@@ -101,7 +101,7 @@ export default function Home() {
                     <card.icon size={24} />
                   </div>
 
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
+                  <h3 className="text-3xl font-display text-white mb-2 group-hover:text-primary transition-colors">
                     {card.title}
                   </h3>
                   <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
