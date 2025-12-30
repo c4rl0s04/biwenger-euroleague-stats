@@ -15,8 +15,8 @@ import Link from 'next/link';
 export default function Home() {
   const cards = [
     {
-      title: 'Dashboard Analysis',
-      description: 'Advanced analytics for your fantasy team performance',
+      title: 'Análisis del Dashboard',
+      description: 'Analítica avanzada para tu equipo fantasy',
       icon: LayoutDashboard,
       href: '/dashboard',
       color: 'primary',
@@ -24,8 +24,8 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'League Standings',
-      description: 'Complete league table and historical data',
+      title: 'Clasificación de la Liga',
+      description: 'Tabla completa y datos históricos',
       icon: Trophy,
       href: '/standings',
       color: 'yellow',
@@ -33,8 +33,8 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Market & Players',
-      description: 'Transfer market trends and player statistics',
+      title: 'Mercado y Jugadores',
+      description: 'Tendencias de mercado y estadísticas',
       icon: ShoppingCart,
       href: '/market',
       color: 'green',
@@ -42,8 +42,8 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Player Profiles',
-      description: 'Detailed stats and history for every player',
+      title: 'Perfiles de Jugador',
+      description: 'Estadísticas detalladas e historial',
       icon: User,
       href: '/players',
       color: 'blue',
@@ -51,8 +51,8 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Optimal Lineups',
-      description: 'AI-powered lineup suggestions for next round',
+      title: 'Alineaciones Óptimas',
+      description: 'Sugerencias de alineación por IA',
       icon: Users,
       href: '/lineups',
       color: 'purple',
@@ -60,8 +60,8 @@ export default function Home() {
       disabled: true,
     },
     {
-      title: 'Match Schedule',
-      description: 'Upcoming fixtures and live results',
+      title: 'Calendario de Partidos',
+      description: 'Próximos partidos y resultados',
       icon: Calendar,
       href: '/matches',
       color: 'red',
@@ -78,8 +78,8 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-display mb-10 flex items-center gap-4">
             <span className="w-1.5 h-10 bg-primary rounded-full"></span>
-            <span className="text-foreground">Available </span>
-            <span className="text-gradient">Modules</span>
+            <span className="text-foreground">Módulos </span>
+            <span className="text-gradient">Disponibles</span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -107,7 +107,7 @@ export default function Home() {
                   <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
 
                   <div className="flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                    Open Module <ArrowRight size={16} className="ml-1" />
+                    Abrir Módulo <ArrowRight size={16} className="ml-1" />
                   </div>
                 </div>
               </Link>
