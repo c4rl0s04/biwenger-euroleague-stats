@@ -1,7 +1,15 @@
 'use client';
 
 import HeroHeader from '@/components/home/HeroHeader';
-import { LayoutDashboard, Users, Trophy, ArrowRight } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  Trophy,
+  ArrowRight,
+  User,
+  ShoppingCart,
+  Calendar,
+} from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -13,23 +21,51 @@ export default function Home() {
       href: '/dashboard',
       color: 'primary',
       delay: '0.1s',
-    },
-    {
-      title: 'Market & Players',
-      description: 'Transfer market trends and player statistics',
-      icon: Users,
-      href: '/market', // Placeholder route based on typical structure
-      color: 'blue',
-      delay: '0.2s',
-      disabled: true, // Assuming these might not be fully ready or requested yet
+      disabled: false,
     },
     {
       title: 'League Standings',
       description: 'Complete league table and historical data',
       icon: Trophy,
-      href: '/standings', // Placeholder
+      href: '/standings',
       color: 'yellow',
+      delay: '0.2s',
+      disabled: false,
+    },
+    {
+      title: 'Market & Players',
+      description: 'Transfer market trends and player statistics',
+      icon: ShoppingCart,
+      href: '/market',
+      color: 'green',
       delay: '0.3s',
+      disabled: false,
+    },
+    {
+      title: 'Player Profiles',
+      description: 'Detailed stats and history for every player',
+      icon: User,
+      href: '/players',
+      color: 'blue',
+      delay: '0.4s',
+      disabled: false,
+    },
+    {
+      title: 'Optimal Lineups',
+      description: 'AI-powered lineup suggestions for next round',
+      icon: Users,
+      href: '/lineups',
+      color: 'purple',
+      delay: '0.5s',
+      disabled: true,
+    },
+    {
+      title: 'Match Schedule',
+      description: 'Upcoming fixtures and live results',
+      icon: Calendar,
+      href: '/matches',
+      color: 'red',
+      delay: '0.6s',
       disabled: true,
     },
   ];
