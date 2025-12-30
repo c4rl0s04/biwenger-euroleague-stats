@@ -70,7 +70,6 @@ export default function StreakCard({ type = 'hot' }) {
       color={cfg.color}
       loading={loading}
       actionRight={infoTooltip}
-      className="card-glow"
     >
       {!loading && (
         <div className="flex-1 flex flex-col justify-between gap-2">

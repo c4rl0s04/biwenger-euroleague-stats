@@ -17,7 +17,7 @@ export default function NextRoundCard() {
 
   // Don't render on server to prevent hydration mismatch
   if (!isReady) {
-    return <PremiumCard loading={true} className="lg:col-span-2 card-glow" />;
+    return <PremiumCard loading={true} className="lg:col-span-2" />;
   }
 
   const { nextRound, topPlayersForm, captainRecommendations, marketOpportunities } = data || {};
@@ -44,7 +44,7 @@ export default function NextRoundCard() {
       title="Próxima Jornada"
       icon={Calendar}
       color="blue"
-      className="lg:col-span-2 card-glow"
+      className="lg:col-span-2"
       actionRight={headerAction}
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

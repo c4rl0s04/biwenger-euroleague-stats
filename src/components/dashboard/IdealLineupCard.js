@@ -63,7 +63,6 @@ export default function IdealLineupCard() {
       color="indigo"
       loading={loading}
       actionRight={data ? headerInfo : null}
-      className="card-glow"
     >
       {!loading && lineup && lineup.length > 0 ? (
         <div className="flex-1 flex flex-col justify-between gap-2 relative z-10">

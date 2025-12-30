@@ -39,13 +39,7 @@ export default function LeagueComparisonCard() {
     data && data.leagueAvg > 0 ? Math.round((difference / data.leagueAvg) * 100) : 0;
 
   return (
-    <PremiumCard
-      title="vs Liga"
-      icon={BarChart3}
-      color="pink"
-      loading={loading}
-      className="card-glow"
-    >
+    <PremiumCard title="vs Liga" icon={BarChart3} color="pink" loading={loading}>
       {!loading && data && (
         <div className="space-y-3 flex-1 flex flex-col">
           {/* User vs League averages in grid */}
