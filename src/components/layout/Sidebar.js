@@ -160,7 +160,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {!isCollapsed && isReady && (
           <div className="px-3 py-3 border-t border-border/30">
             <Link href="/dashboard">
-              <div className="card-glow bg-secondary/50 rounded-xl p-3 border border-border/30 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
+              <div className="bg-secondary/50 rounded-xl p-3 border border-border/30 transition-all duration-300 cursor-pointer">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                   <Wallet size={14} />
                   <span>Mi Plantilla</span>
