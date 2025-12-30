@@ -155,10 +155,12 @@ export function getUserSquadDetails(userId) {
 
   const totalValue = squad.reduce((sum, p) => sum + (p.price || 0), 0);
   const totalTrend = squad.reduce((sum, p) => sum + (p.price_increment || 0), 0);
+  const totalPoints = squad.reduce((sum, p) => sum + (p.points || 0), 0);
 
   return {
     total_value: totalValue,
     price_trend: totalTrend,
+    total_points: totalPoints,
     player_count: squad.length,
     top_rising: squad.filter((p) => p.price_increment > 0).slice(0, 7),
     top_falling: squad

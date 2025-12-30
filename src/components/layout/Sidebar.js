@@ -182,8 +182,11 @@ export default function Sidebar({ isOpen, onClose }) {
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-1">
-                      {squadData.player_count || 0} jugadores en plantilla
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2">
+                      <span>{squadData.player_count || 0} jugadores</span>
+                      <span>
+                        {new Intl.NumberFormat('es-ES').format(squadData.total_points || 0)} pts
+                      </span>
                     </div>
                   </>
                 ) : (
