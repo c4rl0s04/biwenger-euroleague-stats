@@ -170,7 +170,7 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`player-${player.id}`}
                     onClick={() => handleSelect({ type: 'player', ...player })}
-                    className={`w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
                       activeIndex === globalIdx
                         ? 'bg-slate-800/50 border-l-2 border-primary'
                         : 'border-l-2 border-transparent'
@@ -178,7 +178,15 @@ export default function SearchDropdown({ onClose }) {
                   >
                     <User size={16} className="text-blue-400" />
                     <div className="flex-1 text-left">
-                      <div className="text-sm text-white">{player.name}</div>
+                      <div
+                        className={`text-sm transition-colors ${
+                          activeIndex === globalIdx
+                            ? 'text-primary'
+                            : 'text-white group-hover:text-primary'
+                        }`}
+                      >
+                        {player.name}
+                      </div>
                       <div className="text-xs text-slate-500">
                         {player.position} · {player.team}
                       </div>
@@ -202,7 +210,7 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`team-${team.name}`}
                     onClick={() => handleSelect({ type: 'team', ...team })}
-                    className={`w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
                       activeIndex === globalIdx
                         ? 'bg-slate-800/50 border-l-2 border-primary'
                         : 'border-l-2 border-transparent'
@@ -210,7 +218,15 @@ export default function SearchDropdown({ onClose }) {
                   >
                     <Trophy size={16} className="text-yellow-400" />
                     <div className="flex-1 text-left">
-                      <div className="text-sm text-white">{team.name}</div>
+                      <div
+                        className={`text-sm transition-colors ${
+                          activeIndex === globalIdx
+                            ? 'text-primary'
+                            : 'text-white group-hover:text-primary'
+                        }`}
+                      >
+                        {team.name}
+                      </div>
                     </div>
                     <div className="text-xs text-slate-400">{team.player_count} jugadores</div>
                   </button>
@@ -231,7 +247,7 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`user-${user.id}`}
                     onClick={() => handleSelect({ type: 'user', ...user })}
-                    className={`w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
                       activeIndex === globalIdx
                         ? 'bg-slate-800/50 border-l-2 border-primary'
                         : 'border-l-2 border-transparent'
@@ -239,7 +255,15 @@ export default function SearchDropdown({ onClose }) {
                   >
                     <Users size={16} className="text-green-400" />
                     <div className="flex-1 text-left">
-                      <div className="text-sm text-white">{user.name}</div>
+                      <div
+                        className={`text-sm transition-colors ${
+                          activeIndex === globalIdx
+                            ? 'text-primary'
+                            : 'text-white group-hover:text-primary'
+                        }`}
+                      >
+                        {user.name}
+                      </div>
                     </div>
                   </button>
                 );
