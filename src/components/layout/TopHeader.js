@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Menu, Search, Bell, Settings } from 'lucide-react';
 import { UserSelector } from '@/components/user';
 import { useState } from 'react';
+import SearchDropdown from './SearchDropdown';
 
 export default function TopHeader({ onMobileMenuClick }) {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -39,20 +40,7 @@ export default function TopHeader({ onMobileMenuClick }) {
 
         {/* Center: Search Bar (desktop) */}
         <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full group">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors"
-            />
-            <input
-              type="text"
-              placeholder="Buscar jugadores, equipos..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/50 border border-border/50 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
-            />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-slate-500 bg-slate-800 rounded border border-border/50">
-              ⌘K
-            </kbd>
-          </div>
+          <SearchDropdown />
         </div>
 
         {/* Right: Actions */}
@@ -89,15 +77,7 @@ export default function TopHeader({ onMobileMenuClick }) {
       {/* Mobile Search Bar (expandable) */}
       {searchOpen && (
         <div className="md:hidden px-4 pb-3 bg-[hsl(220,20%,5%)] border-b border-border/50">
-          <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Buscar jugadores, equipos..."
-              autoFocus
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/50 border border-border/50 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:border-primary/50"
-            />
-          </div>
+          <SearchDropdown onClose={() => setSearchOpen(false)} />
         </div>
       )}
     </header>
