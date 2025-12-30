@@ -1,6 +1,6 @@
 'use client';
 
-import { HeroHeader } from '@/components/dashboard';
+import HeroHeader from '@/components/home/HeroHeader';
 import { LayoutDashboard, Users, Trophy, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 

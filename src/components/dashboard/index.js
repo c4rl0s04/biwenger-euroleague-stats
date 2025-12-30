@@ -35,5 +35,4 @@ export { default as RecentActivityCard } from './RecentActivityCard';
 export { default as BirthdayCard } from './BirthdayCard';
 
 // Layout
-export { default as HeroHeader } from './HeroHeader';
 export { default as KpiBentoCard } from './KpiBentoCard';
