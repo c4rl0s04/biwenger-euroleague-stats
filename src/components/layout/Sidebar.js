@@ -86,7 +86,7 @@ export default function Sidebar({ isOpen, onClose }) {
         className={`
           fixed md:sticky top-0 left-0 h-screen z-50
           ${sidebarWidth}
-          bg-card border-r border-border/50
+          bg-card
           flex flex-col
           transition-all duration-300 ease-in-out
           md:top-16 md:h-[calc(100vh-4rem)]
