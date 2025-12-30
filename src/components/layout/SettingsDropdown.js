@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Sun, Moon, Globe, ChevronRight, Check } from 'lucide-react';
+import { Settings, Sun, Moon, Check } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 /**
  * SettingsDropdown - Settings menu with language and theme options
  */
 export default function SettingsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const [theme, setTheme] = useState('dark');
   const [language, setLanguage] = useState('es');
   const dropdownRef = useRef(null);
+  const { theme, setTheme } = useTheme();
 
   // Close on click outside
   useEffect(() => {
@@ -35,8 +36,6 @@ export default function SettingsDropdown() {
 
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
-    // TODO: Implement actual theme change
-    console.log('Theme changed to:', newTheme);
   };
 
   const handleLanguageChange = (newLanguage) => {
@@ -60,15 +59,15 @@ export default function SettingsDropdown() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-[hsl(220,20%,8%)] border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50">
+        <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50">
           {/* Header */}
           <div className="px-3 py-2 border-b border-border/30">
-            <h3 className="text-sm font-semibold text-white">Configuración</h3>
+            <h3 className="text-sm font-semibold text-foreground">Configuración</h3>
           </div>
 
           {/* Theme Section */}
           <div className="p-2">
-            <div className="text-xs text-slate-400 uppercase tracking-wider px-2 py-1 mb-1">
+            <div className="text-xs text-muted-foreground uppercase tracking-wider px-2 py-1 mb-1">
               Tema
             </div>
             <div className="grid grid-cols-2 gap-1">
@@ -76,10 +75,10 @@ export default function SettingsDropdown() {
                 <button
                   key={t.id}
                   onClick={() => handleThemeChange(t.id)}
-                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer ${
                     theme === t.id
                       ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-white border border-transparent'
+                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground border border-transparent'
                   }`}
                 >
                   <t.icon size={16} />
@@ -91,17 +90,17 @@ export default function SettingsDropdown() {
 
           {/* Language Section */}
           <div className="p-2 border-t border-border/30">
-            <div className="text-xs text-slate-400 uppercase tracking-wider px-2 py-1 mb-1">
+            <div className="text-xs text-muted-foreground uppercase tracking-wider px-2 py-1 mb-1">
               Idioma
             </div>
             {languages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all cursor-pointer ${
                   language === lang.code
-                    ? 'bg-slate-800/50 text-white'
-                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                    ? 'bg-secondary text-foreground'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                 }`}
               >
                 <span className="text-lg">{lang.flag}</span>

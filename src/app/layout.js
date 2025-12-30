@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
   const users = getStandings();
 
   return (
-    <html lang="es" className="dark">
+    <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} bg-background text-foreground min-h-screen`}>
         <ClientWrapper users={users}>
           <AppShell>{children}</AppShell>
