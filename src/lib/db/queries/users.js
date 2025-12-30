@@ -159,6 +159,7 @@ export function getUserSquadDetails(userId) {
   return {
     total_value: totalValue,
     price_trend: totalTrend,
+    player_count: squad.length,
     top_rising: squad.filter((p) => p.price_increment > 0).slice(0, 7),
     top_falling: squad
       .filter((p) => p.price_increment < 0)
