@@ -9,6 +9,7 @@ import {
   User,
   ShoppingCart,
   Calendar,
+  Target,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -68,6 +69,15 @@ export default function Home() {
       delay: '0.6s',
       disabled: true,
     },
+    {
+      title: 'Porras',
+      description: 'Predicciones y logros de la temporada',
+      icon: Target,
+      href: '/porras',
+      color: 'pink',
+      delay: '0.7s',
+      disabled: false,
+    },
   ];
 
   return (
@@ -78,7 +88,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-display mb-10 flex items-center gap-4">
             <span className="w-1.5 h-10 bg-primary rounded-full"></span>
-            <span className="text-foreground">Módulos </span>
+            <span className="text-foreground">Páginas </span>
             <span className="text-gradient">Disponibles</span>
           </h2>
 
