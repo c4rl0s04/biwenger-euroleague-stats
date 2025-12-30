@@ -35,7 +35,7 @@ function StandingsTable({ standings }) {
   const getPriceTrendIcon = (trend) => {
     if (trend > 0) return <TrendingUp className="w-3 h-3 text-green-400" />;
     if (trend < 0) return <TrendingDown className="w-3 h-3 text-red-400" />;
-    return <Minus className="w-3 h-3 text-slate-500" />;
+    return <Minus className="w-3 h-3 text-muted-foreground" />;
   };
 
   const getPointsGap = (currentPoints, position) => {
@@ -51,18 +51,18 @@ function StandingsTable({ standings }) {
 
   return (
     <table className="w-full text-sm text-left">
-      <thead className="text-xs text-slate-400 uppercase bg-slate-800/50">
+      <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
         <tr>
           <th className="px-2 py-2 rounded-l-lg">Pos</th>
           <th className="px-2 py-2">Usuario</th>
           <th
-            className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
+            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors"
             onClick={() => handleSort('total_points')}
           >
             Puntos {getSortIndicator('total_points')}
           </th>
           <th
-            className="px-2 py-2 text-right cursor-pointer hover:text-white transition-colors"
+            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors"
             onClick={() => handleSort('team_value')}
           >
             Valor {getSortIndicator('team_value')}
@@ -75,9 +75,9 @@ function StandingsTable({ standings }) {
           return (
             <tr
               key={user.user_id}
-              className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors"
+              className="border-b border-border/50 last:border-0 hover:bg-secondary/30 transition-colors"
             >
-              <td className="px-2 py-2 font-medium text-white text-xs">#{user.position}</td>
+              <td className="px-2 py-2 font-medium text-foreground text-xs">#{user.position}</td>
               <td className="px-2 py-2">
                 <div className="flex items-center gap-2">
                   <UserAvatar src={user.icon} alt={user.name} size={20} />
@@ -92,7 +92,9 @@ function StandingsTable({ standings }) {
               </td>
               <td className="px-2 py-2 text-right">
                 <div className="flex items-center justify-end gap-1">
-                  <span className="text-slate-400 text-xs">{formatPrice(user.team_value)}€</span>
+                  <span className="text-muted-foreground text-xs">
+                    {formatPrice(user.team_value)}€
+                  </span>
                   {getPriceTrendIcon(user.price_trend)}
                 </div>
                 {user.price_trend !== 0 && (

@@ -24,7 +24,7 @@ export default function NextRoundCard() {
 
   const headerAction = nextRound ? (
     <div className="text-right">
-      <div className="text-lg font-bold text-white">{nextRound.round_name}</div>
+      <div className="text-lg font-bold text-foreground">{nextRound.round_name}</div>
       <div className="text-blue-400 font-mono text-xs">
         {new Date(nextRound.start_date).toLocaleDateString('es-ES', {
           weekday: 'short',
@@ -36,7 +36,7 @@ export default function NextRoundCard() {
       </div>
     </div>
   ) : (
-    <div className="text-lg font-bold text-white">Temporada Finalizada</div>
+    <div className="text-lg font-bold text-foreground">Temporada Finalizada</div>
   );
 
   return (
@@ -49,8 +49,8 @@ export default function NextRoundCard() {
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* Top Players by Form */}
-        <div className="bg-gradient-to-br from-green-900/10 to-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-green-700/30">
-          <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-green-900/10 to-secondary/40 backdrop-blur-sm rounded-xl p-3.5 border border-green-700/30">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-green-500" />
             Top Forma
           </h3>
@@ -60,12 +60,12 @@ export default function NextRoundCard() {
                 <div key={player.player_id} className="group/item">
                   {/* Line 1: Name */}
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-slate-500 font-mono text-xs w-4 shrink-0">
+                    <span className="text-muted-foreground font-mono text-xs w-4 shrink-0">
                       {idx + 1}.
                     </span>
                     <Link
                       href={`/player/${player.player_id}`}
-                      className="text-white font-medium text-sm truncate hover:text-green-400 transition-colors"
+                      className="text-foreground font-medium text-sm truncate hover:text-green-400 transition-colors"
                       title={player.name}
                     >
                       {player.name}
@@ -74,7 +74,7 @@ export default function NextRoundCard() {
 
                   {/* Line 2: Context */}
                   <div className="pl-6 mb-1.5 space-y-0.5">
-                    <div className="text-xs text-slate-400 truncate" title={player.team}>
+                    <div className="text-xs text-muted-foreground truncate" title={player.team}>
                       {getShortTeamName(player.team)}
                     </div>
                     {player.owner_name && (
@@ -107,13 +107,13 @@ export default function NextRoundCard() {
                 </div>
               ))
             ) : (
-              <div className="text-slate-500 text-sm">No hay datos disponibles</div>
+              <div className="text-muted-foreground text-sm">No hay datos disponibles</div>
             )}
           </div>
         </div>
 
         {/* Captain Recommendations */}
-        <div className="bg-gradient-to-br from-yellow-900/10 to-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-yellow-700/30">
+        <div className="bg-gradient-to-br from-yellow-900/10 to-secondary/40 backdrop-blur-sm rounded-xl p-3.5 border border-yellow-700/30">
           <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <Star className="w-4 h-4 text-yellow-500" />
             Capitán Sugerido
@@ -126,7 +126,7 @@ export default function NextRoundCard() {
                   <div className="mb-1">
                     <Link
                       href={`/player/${player.player_id}`}
-                      className="text-white font-medium text-sm truncate block hover:text-yellow-400 transition-colors"
+                      className="text-foreground font-medium text-sm truncate block hover:text-yellow-400 transition-colors"
                       title={player.name}
                     >
                       {player.name}
@@ -134,11 +134,11 @@ export default function NextRoundCard() {
                   </div>
 
                   {/* Line 2: Context */}
-                  <div className="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
                     <span className="truncate" title={player.team}>
                       {getShortTeamName(player.team)}
                     </span>
-                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                    <span className="w-1 h-1 rounded-full bg-muted"></span>
                     <span className="text-yellow-500/80">{player.form_label}</span>
                   </div>
 
@@ -162,13 +162,13 @@ export default function NextRoundCard() {
                 </div>
               ))
             ) : (
-              <div className="text-slate-500 text-sm">Selecciona un usuario</div>
+              <div className="text-muted-foreground text-sm">Selecciona un usuario</div>
             )}
           </div>
         </div>
 
         {/* Market Opportunities */}
-        <div className="bg-gradient-to-br from-blue-900/10 to-slate-800/40 backdrop-blur-sm rounded-xl p-3.5 border border-blue-700/30">
+        <div className="bg-gradient-to-br from-blue-900/10 to-secondary/40 backdrop-blur-sm rounded-xl p-3.5 border border-blue-700/30">
           <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <ShoppingCart className="w-4 h-4 text-blue-500" />
             Oportunidades
@@ -181,7 +181,7 @@ export default function NextRoundCard() {
                   <div className="mb-1">
                     <Link
                       href={`/player/${player.player_id}`}
-                      className="text-white font-medium text-sm truncate block hover:text-blue-400 transition-colors"
+                      className="text-foreground font-medium text-sm truncate block hover:text-blue-400 transition-colors"
                       title={player.name}
                     >
                       {player.name}
@@ -189,7 +189,7 @@ export default function NextRoundCard() {
                   </div>
 
                   {/* Line 2: Context */}
-                  <div className="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
                     <span className="truncate" title={player.team}>
                       {getShortTeamName(player.team)}
                     </span>
@@ -219,20 +219,20 @@ export default function NextRoundCard() {
                 </div>
               ))
             ) : (
-              <div className="text-slate-500 text-sm">No hay chollos ahora</div>
+              <div className="text-muted-foreground text-sm">No hay chollos ahora</div>
             )}
           </div>
         </div>
       </div>
 
       {/* Footer Info */}
-      <div className="mt-4 flex items-center justify-between border-t border-slate-700/30 pt-3">
-        <div className="text-xs text-slate-500 italic">
+      <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-3">
+        <div className="text-xs text-muted-foreground italic">
           * Datos calculados en base a las últimas 3 jornadas
         </div>
         <Link
           href="/matches"
-          className="text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors group/link"
+          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors group/link"
         >
           Ver calendario completo
           <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />

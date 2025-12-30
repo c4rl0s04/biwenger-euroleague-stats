@@ -40,10 +40,10 @@ export default function IdealLineupCard() {
     // Fallback
     return {
       label: pos.charAt(0).toUpperCase(),
-      bg: 'bg-slate-700',
-      border: 'border-slate-600',
-      text: 'text-slate-300',
-      ring: 'ring-slate-500/30',
+      bg: 'bg-secondary',
+      border: 'border-border',
+      text: 'text-muted-foreground',
+      ring: 'ring-border/30',
     };
   };
 
@@ -51,8 +51,8 @@ export default function IdealLineupCard() {
 
   const headerInfo = (
     <div className="text-right">
-      <div className="text-2xl font-bold text-white">{total_points}</div>
-      <div className="text-[10px] text-slate-400 uppercase tracking-wider">{round_name}</div>
+      <div className="text-2xl font-bold text-foreground">{total_points}</div>
+      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{round_name}</div>
     </div>
   );
 
@@ -72,12 +72,12 @@ export default function IdealLineupCard() {
             return (
               <div
                 key={player.player_id}
-                className="p-2 bg-slate-800/40 rounded-lg border border-slate-700/30 hover:bg-slate-800/60 transition-all flex items-center gap-3"
+                className="p-2 bg-secondary/40 rounded-lg border border-border/30 hover:bg-secondary/60 transition-all flex items-center gap-3"
               >
                 <div className="relative shrink-0">
                   {/* Large Circle with Position Style */}
                   <div
-                    className={`w-11 h-11 rounded-full overflow-hidden border-2 ${style.border} bg-slate-800 flex items-center justify-center shadow-sm ${style.ring}`}
+                    className={`w-11 h-11 rounded-full overflow-hidden border-2 ${style.border} bg-secondary flex items-center justify-center shadow-sm ${style.ring}`}
                   >
                     <img
                       src={player.img}
@@ -86,7 +86,7 @@ export default function IdealLineupCard() {
                       onError={(e) => {
                         e.target.style.display = 'none';
                         const parent = e.target.parentNode;
-                        parent.classList.remove('bg-slate-800');
+                        parent.classList.remove('bg-secondary');
                         parent.classList.add(...style.bg.split(' '));
                         parent.innerHTML = `<span class="font-bold text-lg ${style.text}">${style.label}</span>`;
                       }}
@@ -97,11 +97,11 @@ export default function IdealLineupCard() {
                 <div className="flex-1 min-w-0">
                   <Link
                     href={`/player/${player.player_id}`}
-                    className="font-medium text-white text-sm hover:text-indigo-400 transition-colors truncate block"
+                    className="font-medium text-foreground text-sm hover:text-indigo-400 transition-colors truncate block"
                   >
                     {player.name}
                   </Link>
-                  <div className="flex flex-col gap-0.5 text-xs text-slate-400 mt-0.5">
+                  <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mt-0.5">
                     <span>{getShortTeamName(player.team)}</span>
                     {player.owner_name && (
                       <span className="text-indigo-300 truncate text-[11px]">
@@ -124,7 +124,7 @@ export default function IdealLineupCard() {
         </div>
       ) : (
         !loading && (
-          <div className="flex-1 flex items-center justify-center text-slate-500">
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
             No hay datos disponibles
           </div>
         )

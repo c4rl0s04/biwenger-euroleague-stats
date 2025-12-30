@@ -41,14 +41,14 @@ export default function TopPlayersCard() {
                 };
               if (idx === 2)
                 return {
-                  bg: 'bg-gradient-to-r from-orange-700/20 to-amber-800/20 border-orange-700/30',
-                  text: 'text-orange-400',
-                  rank: 'bg-orange-600 text-white border-orange-500',
+                  bg: 'bg-gradient-to-r from-muted/20 to-muted/10 border-border/30',
+                  text: 'text-muted-foreground',
+                  rank: 'bg-muted text-foreground border-border',
                 };
               return {
-                bg: 'bg-slate-800/30 border-transparent hover:border-slate-700',
-                text: 'text-white',
-                rank: 'bg-slate-700 text-white border-slate-600',
+                bg: 'bg-secondary/30 border-transparent hover:border-border',
+                text: 'text-foreground',
+                rank: 'bg-secondary text-foreground border-border',
               };
             };
 
@@ -67,12 +67,12 @@ export default function TopPlayersCard() {
                 <div className="flex-grow min-w-0">
                   <Link
                     href={`/player/${player.id}`}
-                    className={`font-medium truncate hover:opacity-80 transition-opacity block ${index < 3 ? 'text-white' : 'text-slate-200'}`}
+                    className={`font-medium truncate hover:opacity-80 transition-opacity block ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
                   >
                     {player.name}
                   </Link>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-slate-400 bg-slate-800/50 px-1.5 py-0.5 rounded">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded">
                       {getShortTeamName(player.team)}
                     </div>
                     <div className="text-xs font-mono text-blue-400">
@@ -99,7 +99,7 @@ export default function TopPlayersCard() {
                           </span>
                         ))
                     ) : (
-                      <span className="text-[10px] text-slate-600">-</span>
+                      <span className="text-[10px] text-muted-foreground/60">-</span>
                     )}
                   </div>
                 </div>
@@ -107,7 +107,7 @@ export default function TopPlayersCard() {
             );
           })
         ) : (
-          <div className="text-center text-slate-500 py-8">No hay datos disponibles</div>
+          <div className="text-center text-muted-foreground py-8">No hay datos disponibles</div>
         )}
       </div>
     </Card>

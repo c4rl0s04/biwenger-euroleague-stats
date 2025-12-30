@@ -17,11 +17,11 @@ export default function RisingStarsCard() {
             stars.map((player) => (
               <div
                 key={player.player_id}
-                className="p-3 bg-slate-800/40 rounded-lg border border-slate-700/30 hover:border-emerald-600/50 transition-all"
+                className="p-3 bg-secondary/40 rounded-lg border border-border/30 hover:border-emerald-600/50 transition-all"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-white text-sm flex items-center gap-2">
+                    <div className="font-medium text-foreground text-sm flex items-center gap-2">
                       <Link
                         href={`/player/${player.player_id}`}
                         className="hover:text-emerald-400 transition-colors"
@@ -30,7 +30,7 @@ export default function RisingStarsCard() {
                       </Link>
                       <TrendingUp className="w-4 h-4 text-emerald-400" />
                     </div>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-muted-foreground">
                       {getShortTeamName(player.team)} · {player.position}
                     </div>
                     {player.owner_name && (
@@ -44,10 +44,12 @@ export default function RisingStarsCard() {
                         <div className="text-sm font-bold text-emerald-400">
                           +{player.improvement.toFixed(1)}
                         </div>
-                        <div className="text-xs text-slate-500">{player.improvement_pct}%</div>
+                        <div className="text-xs text-muted-foreground">
+                          {player.improvement_pct}%
+                        </div>
                       </div>
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
+                    <div className="text-xs text-muted-foreground mt-1">
                       {player.recent_avg.toFixed(1)} pts/g
                     </div>
                   </div>
@@ -55,7 +57,7 @@ export default function RisingStarsCard() {
               </div>
             ))
           ) : (
-            <div className="text-center text-slate-500 py-8">No hay datos suficientes</div>
+            <div className="text-center text-muted-foreground py-8">No hay datos suficientes</div>
           )}
         </div>
       )}

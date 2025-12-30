@@ -34,8 +34,8 @@ export default function WeekMVPsCard() {
         };
       default:
         return {
-          container: 'bg-slate-800/40 border-slate-700/30 hover:border-slate-600/50',
-          badge: 'bg-slate-700 text-slate-300',
+          container: 'bg-secondary/40 border-border/30 hover:border-border/50',
+          badge: 'bg-secondary text-muted-foreground',
           text: 'text-green-400',
           hoverText: 'hover:text-blue-400',
         };
@@ -63,11 +63,11 @@ export default function WeekMVPsCard() {
                     <div className="flex-1 min-w-0">
                       <Link
                         href={`/player/${player.player_id}`}
-                        className={`font-medium text-white text-sm transition-colors block ${styles.hoverText}`}
+                        className={`font-medium text-foreground text-sm transition-colors block ${styles.hoverText}`}
                       >
                         {player.name}
                       </Link>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-muted-foreground">
                         {getShortTeamName(player.team)} · {player.position}
                       </div>
                       {player.owner_name && (
@@ -82,7 +82,7 @@ export default function WeekMVPsCard() {
               );
             })
           ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-500">
+            <div className="flex-1 flex items-center justify-center text-muted-foreground">
               No hay datos de la última jornada
             </div>
           )}

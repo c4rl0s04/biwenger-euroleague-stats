@@ -48,14 +48,14 @@ export default function StreakCard({ type = 'hot' }) {
   const infoTooltip = (
     <div className="group/info relative">
       <Info
-        className={`w-4 h-4 text-slate-500 hover:text-${cfg.color}-400 cursor-help transition-colors`}
+        className={`w-4 h-4 text-muted-foreground hover:text-${cfg.color}-400 cursor-help transition-colors`}
       />
-      <div className="absolute right-0 top-6 w-64 bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg p-3 shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50">
+      <div className="absolute right-0 top-6 w-64 bg-popover border border-border text-muted-foreground text-xs rounded-lg p-3 shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50">
         <p className={`mb-2 font-semibold text-${cfg.color}-400`}>{cfg.tooltipTitle}</p>
         Comparativa entre la media de las últimas 5 jornadas (mín. 3 jugados) y la media de la
         temporada.
-        <div className="mt-2 text-slate-400 border-t border-slate-700 pt-2">
-          Se requiere un {cfg.tooltipDesc} superior al <span className="text-white">20%</span>.
+        <div className="mt-2 text-muted-foreground border-t border-border pt-2">
+          Se requiere un {cfg.tooltipDesc} superior al <span className="text-foreground">20%</span>.
         </div>
       </div>
     </div>
@@ -77,17 +77,17 @@ export default function StreakCard({ type = 'hot' }) {
             players.map((player) => (
               <div
                 key={player.player_id}
-                className={`p-3 bg-slate-800/40 rounded-lg border border-slate-700/30 hover:border-${cfg.color}-600/50 transition-all`}
+                className={`p-3 bg-secondary/40 rounded-lg border border-border/30 hover:border-${cfg.color}-600/50 transition-all`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <Link
                       href={`/player/${player.player_id}`}
-                      className={`font-medium text-white text-sm hover:text-${cfg.color}-400 transition-colors block`}
+                      className={`font-medium text-foreground text-sm hover:text-${cfg.color}-400 transition-colors block`}
                     >
                       {player.name}
                     </Link>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-muted-foreground">
                       {getShortTeamName(player.team)} · {player.position}
                     </div>
                     {player.owner_name && (
@@ -101,7 +101,7 @@ export default function StreakCard({ type = 'hot' }) {
                       <TrendIcon className="w-4 h-4" />
                       {Math.abs(player.trend_pct)}%
                     </div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-muted-foreground">
                       {player.recent_avg.toFixed(1)} pts/g
                     </div>
                   </div>
@@ -109,7 +109,7 @@ export default function StreakCard({ type = 'hot' }) {
               </div>
             ))
           ) : (
-            <div className="text-center text-slate-500 py-8">{cfg.emptyMessage}</div>
+            <div className="text-center text-muted-foreground py-8">{cfg.emptyMessage}</div>
           )}
         </div>
       )}
