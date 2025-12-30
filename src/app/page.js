@@ -96,9 +96,9 @@ export default function Home() {
 
                 <div className="relative z-10">
                   <div
-                    className={`w-12 h-12 rounded-xl bg-${card.color}-500/10 flex items-center justify-center mb-4 text-${card.color}-500 group-hover:scale-110 transition-transform duration-300`}
+                    className={`flex items-center justify-center mb-4 text-${card.color}-500 group-hover:scale-110 transition-transform duration-300`}
                   >
-                    <card.icon size={24} />
+                    <card.icon size={40} />
                   </div>
 
                   <h3 className="text-3xl font-display text-white mb-2 group-hover:text-primary transition-colors">
