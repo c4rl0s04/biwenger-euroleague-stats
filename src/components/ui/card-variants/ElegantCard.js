@@ -61,7 +61,7 @@ export default function ElegantCard({
       className={`
         bg-card border border-border 
         rounded-lg p-6 h-full flex flex-col 
-        transition-all duration-200 hover:border-white/40
+        transition-all duration-200
         ${className}
       `}
     >
