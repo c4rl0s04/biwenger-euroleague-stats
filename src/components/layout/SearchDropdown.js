@@ -170,8 +170,10 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`player-${player.id}`}
                     onClick={() => handleSelect({ type: 'player', ...player })}
-                    className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-slate-800/50 transition-colors ${
-                      activeIndex === globalIdx ? 'bg-slate-800/50' : ''
+                    className={`w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                      activeIndex === globalIdx
+                        ? 'bg-slate-800/50 border-l-2 border-primary'
+                        : 'border-l-2 border-transparent'
                     }`}
                   >
                     <User size={16} className="text-blue-400" />
@@ -200,8 +202,10 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`team-${team.name}`}
                     onClick={() => handleSelect({ type: 'team', ...team })}
-                    className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-slate-800/50 transition-colors ${
-                      activeIndex === globalIdx ? 'bg-slate-800/50' : ''
+                    className={`w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                      activeIndex === globalIdx
+                        ? 'bg-slate-800/50 border-l-2 border-primary'
+                        : 'border-l-2 border-transparent'
                     }`}
                   >
                     <Trophy size={16} className="text-yellow-400" />
@@ -227,8 +231,10 @@ export default function SearchDropdown({ onClose }) {
                   <button
                     key={`user-${user.id}`}
                     onClick={() => handleSelect({ type: 'user', ...user })}
-                    className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-slate-800/50 transition-colors ${
-                      activeIndex === globalIdx ? 'bg-slate-800/50' : ''
+                    className={`w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 hover:border-l-2 hover:border-primary transition-all ${
+                      activeIndex === globalIdx
+                        ? 'bg-slate-800/50 border-l-2 border-primary'
+                        : 'border-l-2 border-transparent'
                     }`}
                   >
                     <Users size={16} className="text-green-400" />
