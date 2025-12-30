@@ -182,11 +182,19 @@ export default function Sidebar({ isOpen, onClose }) {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2">
-                      <span>{squadData.player_count || 0} jugadores</span>
-                      <span>
-                        {new Intl.NumberFormat('es-ES').format(squadData.total_points || 0)} pts
-                      </span>
+                    <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-border/20">
+                      <div>
+                        <div className="text-sm font-semibold text-white">
+                          {squadData.player_count || 0}
+                        </div>
+                        <div className="text-[10px] text-slate-400">jugadores</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-white">
+                          {new Intl.NumberFormat('es-ES').format(squadData.total_points || 0)}
+                        </div>
+                        <div className="text-[10px] text-slate-400">puntos</div>
+                      </div>
                     </div>
                   </>
                 ) : (
