@@ -41,6 +41,7 @@ export default function LeaderGapCard() {
                 Tus Puntos
               </div>
               <div className="text-3xl font-bold text-yellow-400">{data.user_points}</div>
+              <div className="text-muted-foreground text-xs invisible">spacer</div>
             </div>
 
             <div className="flex flex-col justify-center">
@@ -48,6 +49,7 @@ export default function LeaderGapCard() {
                 Ventaja
               </div>
               <div className="text-3xl font-bold text-green-400">+{data.gap_to_second || 0}</div>
+              <div className="text-muted-foreground text-xs invisible">spacer</div>
             </div>
           </div>
 
