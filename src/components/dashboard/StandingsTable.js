@@ -56,7 +56,7 @@ function StandingsTable({ standings }) {
           <th className="px-2 py-2 rounded-l-lg">Pos</th>
           <th className="px-2 py-2">Usuario</th>
           <th
-            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors rounded-r-lg"
+            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors rounded-r-lg whitespace-nowrap"
             onClick={() => handleSort('total_points')}
           >
             Puntos {getSortIndicator('total_points')}
