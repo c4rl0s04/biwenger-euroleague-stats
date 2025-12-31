@@ -22,20 +22,24 @@ export default function HomeAwayCard() {
   return (
     <Card title="Casa vs Fuera" icon={Home} color="orange" loading={loading}>
       {!loading && stats && (
-        <div className="grid grid-cols-2 gap-4 flex-1">
-          <div className="flex flex-col justify-center">
-            <div className="text-muted-foreground text-xs mb-1 font-medium">🏠 Casa</div>
-            <div className="text-xl font-bold text-foreground">{stats.total_home} pts</div>
-            <div className="text-muted-foreground text-xs">Avg: {stats.avg_home}</div>
+        <div className="flex-1 flex flex-col">
+          {/* Top stats in grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col justify-center">
+              <div className="text-muted-foreground text-xs mb-1 font-medium">🏠 Casa</div>
+              <div className="text-xl font-bold text-foreground">{stats.total_home} pts</div>
+              <div className="text-muted-foreground text-xs">Avg: {stats.avg_home}</div>
+            </div>
+
+            <div className="flex flex-col justify-center">
+              <div className="text-muted-foreground text-xs mb-1 font-medium">✈️ Fuera</div>
+              <div className="text-xl font-bold text-foreground">{stats.total_away} pts</div>
+              <div className="text-muted-foreground text-xs">Avg: {stats.avg_away}</div>
+            </div>
           </div>
 
-          <div className="flex flex-col justify-center">
-            <div className="text-muted-foreground text-xs mb-1 font-medium">✈️ Fuera</div>
-            <div className="text-xl font-bold text-foreground">{stats.total_away} pts</div>
-            <div className="text-muted-foreground text-xs">Avg: {stats.avg_away}</div>
-          </div>
-
-          <div className="col-span-2 mt-3 pt-3 border-t border-border/20 flex flex-col justify-center">
+          {/* Bottom section with divider - flex-1 pushes it down */}
+          <div className="mt-auto pt-3 border-t border-border/20 flex flex-col justify-center">
             <div className="text-muted-foreground text-xs mb-1 font-medium">
               Diferencia de Rendimiento
             </div>

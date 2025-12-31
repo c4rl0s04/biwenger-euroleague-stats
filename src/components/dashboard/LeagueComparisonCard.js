@@ -60,7 +60,7 @@ export default function LeagueComparisonCard() {
           </div>
 
           {/* Difference - compact single box */}
-          <div className="mt-3 pt-3 border-t border-border/20 flex flex-col justify-center flex-1">
+          <div className="mt-auto pt-3 border-t border-border/20 flex flex-col justify-center">
             <div className="flex items-baseline justify-between">
               <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
                 Diferencia
