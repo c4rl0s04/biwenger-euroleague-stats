@@ -143,7 +143,7 @@ export function getUserSeasonStats(userId) {
  * @returns {Object} Squad details with trending players
  */
 export function getUserSquadDetails(userId) {
-  const query = `
+  const squadQuery = `
     SELECT 
       id, name, position, team, price, price_increment, puntos as points
     FROM players
@@ -151,16 +151,23 @@ export function getUserSquadDetails(userId) {
     ORDER BY price_increment DESC
   `;
 
-  const squad = db.prepare(query).all(userId);
+  const squad = db.prepare(squadQuery).all(userId);
+
+  // Get user's actual competition points from user_rounds
+  const userPointsQuery = `
+    SELECT COALESCE(SUM(points), 0) as total_points
+    FROM user_rounds
+    WHERE user_id = ? AND participated = 1
+  `;
+  const userPoints = db.prepare(userPointsQuery).get(userId);
 
   const totalValue = squad.reduce((sum, p) => sum + (p.price || 0), 0);
   const totalTrend = squad.reduce((sum, p) => sum + (p.price_increment || 0), 0);
-  const totalPoints = squad.reduce((sum, p) => sum + (p.points || 0), 0);
 
   return {
     total_value: totalValue,
     price_trend: totalTrend,
-    total_points: totalPoints,
+    total_points: userPoints?.total_points || 0,
     player_count: squad.length,
     top_rising: squad.filter((p) => p.price_increment > 0).slice(0, 7),
     top_falling: squad
