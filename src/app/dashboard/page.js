@@ -48,6 +48,11 @@ const BirthdayCard = nextDynamic(() => import('@/components/dashboard/BirthdayCa
   ssr: true,
 });
 
+const NextRoundSubtitle = nextDynamic(() => import('@/components/dashboard/NextRoundSubtitle'), {
+  loading: () => <span className="inline-block h-6 w-48 animate-pulse rounded bg-secondary" />,
+  ssr: false,
+});
+
 const WeekMVPsCard = nextDynamic(() => import('@/components/dashboard/WeekMVPsCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
@@ -66,17 +71,6 @@ const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLi
 export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
-  const nextRound = fetchNextRound();
-  const roundInfo = nextRound
-    ? `${nextRound.round_name} • ${new Date(nextRound.start_date).toLocaleDateString('es-ES', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        hour: '2-digit',
-        minute: '2-digit',
-      })}`
-    : null;
-
   return (
     <div>
       {/* Hero Section */}
@@ -102,7 +96,12 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Próxima Jornada */}
-      <Section title="Próxima Jornada" subtitle={roundInfo} delay={200} background="section-base">
+      <Section
+        title="Próxima Jornada"
+        subtitle={<NextRoundSubtitle />}
+        delay={200}
+        background="section-base"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <TopFormCard />
           <CaptainSuggestCard />
