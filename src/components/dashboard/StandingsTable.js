@@ -56,16 +56,10 @@ function StandingsTable({ standings }) {
           <th className="px-2 py-2 rounded-l-lg">Pos</th>
           <th className="px-2 py-2">Usuario</th>
           <th
-            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors"
+            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors rounded-r-lg"
             onClick={() => handleSort('total_points')}
           >
             Puntos {getSortIndicator('total_points')}
-          </th>
-          <th
-            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors"
-            onClick={() => handleSort('team_value')}
-          >
-            Valor {getSortIndicator('team_value')}
           </th>
         </tr>
       </thead>
@@ -88,22 +82,6 @@ function StandingsTable({ standings }) {
                 <div className="font-bold text-orange-500 text-sm">{user.total_points}</div>
                 {pointsGap !== null && (
                   <div className="text-xs text-red-400 font-medium">-{pointsGap}</div>
-                )}
-              </td>
-              <td className="px-2 py-2 text-right">
-                <div className="flex items-center justify-end gap-1">
-                  <span className="text-muted-foreground text-xs">
-                    {formatPrice(user.team_value)}€
-                  </span>
-                  {getPriceTrendIcon(user.price_trend)}
-                </div>
-                {user.price_trend !== 0 && (
-                  <div
-                    className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}
-                  >
-                    {user.price_trend > 0 ? '+' : ''}
-                    {formatPrice(Math.abs(user.price_trend))}€
-                  </div>
                 )}
               </td>
             </tr>
