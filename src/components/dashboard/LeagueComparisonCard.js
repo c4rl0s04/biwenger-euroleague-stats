@@ -43,7 +43,7 @@ export default function LeagueComparisonCard() {
       {!loading && data && (
         <div className="flex-1 flex flex-col">
           {/* User vs League averages in grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex flex-col justify-center">
               <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Tu Promedio

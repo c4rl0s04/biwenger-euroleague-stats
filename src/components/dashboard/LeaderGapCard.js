@@ -35,7 +35,7 @@ export default function LeaderGapCard() {
     return (
       <Card title="Líder de la Liga" icon={Crown} color="yellow">
         <div className="flex-1 flex flex-col">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex flex-col justify-center">
               <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Tus Puntos
@@ -70,7 +70,7 @@ export default function LeaderGapCard() {
   return (
     <Card title="A la Caza del Líder" icon={Target} color="emerald">
       <div className="space-y-3 flex-1">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <div>
             <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
               Líder: {data.leader_name}

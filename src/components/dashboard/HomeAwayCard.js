@@ -24,7 +24,7 @@ export default function HomeAwayCard() {
       {!loading && stats && (
         <div className="flex-1 flex flex-col">
           {/* Top stats in grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <div className="text-muted-foreground text-xs mb-1 font-medium">🏠 Casa</div>
               <div className="text-xl font-bold text-foreground">{stats.total_home} pts</div>
