@@ -40,14 +40,16 @@ export default function HomeAwayCard() {
 
           {/* Bottom section */}
           <div className="mt-auto pt-3 border-t border-border/20">
-            <div className="text-muted-foreground text-xs mb-1 font-medium">
-              Diferencia de Rendimiento
-            </div>
-            <div
-              className={`text-2xl font-bold ${stats.difference_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}
-            >
-              {stats.difference_pct >= 0 ? '+' : ''}
-              {stats.difference_pct}%
+            <div className="flex items-baseline justify-between">
+              <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
+                Diferencia de Rendimiento
+              </span>
+              <span
+                className={`text-2xl font-bold ${stats.difference_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}
+              >
+                {stats.difference_pct >= 0 ? '+' : ''}
+                {stats.difference_pct}%
+              </span>
             </div>
           </div>
         </div>
