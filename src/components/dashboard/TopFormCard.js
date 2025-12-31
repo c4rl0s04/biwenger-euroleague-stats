@@ -10,7 +10,13 @@ export default function TopFormCard() {
   const { data: players = [], loading } = useApiData('/api/dashboard/top-form');
 
   return (
-    <Card title="Top Forma" icon={TrendingUp} color="green" loading={loading}>
+    <Card
+      title="Top Forma"
+      icon={TrendingUp}
+      color="emerald"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && (
         <div className="space-y-4 flex-1">
           {players && players.length > 0 ? (

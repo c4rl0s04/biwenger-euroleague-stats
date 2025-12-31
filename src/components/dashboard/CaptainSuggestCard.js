@@ -21,7 +21,13 @@ export default function CaptainSuggestCard() {
   if (!isReady) return null;
 
   return (
-    <Card title="Capitán Sugerido" icon={Star} color="yellow" loading={loading}>
+    <Card
+      title="Capitán Sugerido"
+      icon={Star}
+      color="yellow"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && (
         <div className="space-y-4 flex-1">
           {players && players.length > 0 ? (

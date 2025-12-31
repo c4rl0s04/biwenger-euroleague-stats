@@ -20,7 +20,13 @@ export default function HomeAwayCard() {
   if (!isReady) return null;
 
   return (
-    <Card title="Casa vs Fuera" icon={Home} color="orange" loading={loading}>
+    <Card
+      title="Local vs Visitante"
+      icon={Home}
+      color="orange"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && stats && (
         <div className="flex-1 flex flex-col">
           {/* Top stats in grid */}

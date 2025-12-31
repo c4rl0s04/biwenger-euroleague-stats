@@ -10,7 +10,13 @@ export default function MarketOpportunitiesCard() {
   const { data: players = [], loading } = useApiData('/api/dashboard/market-opportunities');
 
   return (
-    <Card title="Oportunidades" icon={ShoppingCart} color="blue" loading={loading}>
+    <Card
+      title="Oportunidades"
+      icon={ShoppingCart}
+      color="blue"
+      loading={loading}
+      className="card-glow"
+    >
       {!loading && (
         <div className="space-y-4 flex-1">
           {players && players.length > 0 ? (

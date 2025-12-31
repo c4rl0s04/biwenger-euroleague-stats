@@ -19,9 +19,9 @@ export default function StandingsCard() {
   return (
     <Card
       title="Clasificación"
-      icon={Users}
-      color="indigo"
-      className="lg:col-span-1"
+      icon={Trophy} // Changed icon
+      color="yellow" // Changed color
+      className="lg:col-span-1 card-glow h-full" // Added card-glow h-full
       actionRight={actionLink}
       loading={loading}
     >

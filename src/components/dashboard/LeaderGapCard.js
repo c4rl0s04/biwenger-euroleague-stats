@@ -25,7 +25,7 @@ export default function LeaderGapCard() {
   // If data failed to load, show empty state
   if (!data) {
     return (
-      <Card title="A la Caza del Líder" icon={Target} color="emerald">
+      <Card title="A la Caza del Líder" icon={Target} color="emerald" className="card-glow">
         <div className="text-center text-muted-foreground py-4">No hay datos disponibles</div>
       </Card>
     );
@@ -33,7 +33,7 @@ export default function LeaderGapCard() {
 
   if (data.is_leader) {
     return (
-      <Card title="Líder de la Liga" icon={Crown} color="yellow">
+      <Card title="Líder de la Liga" icon={Crown} color="yellow" className="card-glow">
         <div className="flex-1 flex flex-col">
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex flex-col justify-center">
@@ -68,7 +68,7 @@ export default function LeaderGapCard() {
 
   // Not leader view
   return (
-    <Card title="A la Caza del Líder" icon={Target} color="emerald">
+    <Card title="A la Caza del Líder" icon={Target} color="emerald" className="card-glow">
       <div className="flex-1 flex flex-col">
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div>
