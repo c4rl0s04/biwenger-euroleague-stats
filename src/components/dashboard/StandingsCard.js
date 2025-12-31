@@ -34,11 +34,11 @@ export default function StandingsCard() {
           {/* League Insights Footer */}
           <div className="mt-6 pt-5 border-t border-border/50">
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-secondary/30 rounded-xl p-3 text-center">
+              <div className="text-center">
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
                   Media Puntos
                 </div>
-                <div className="text-lg font-bold text-muted-foreground">
+                <div className="text-lg font-bold text-orange-400">
                   {standings.length > 0
                     ? Math.round(
                         standings.reduce((acc, u) => acc + u.total_points, 0) / standings.length
@@ -46,7 +46,7 @@ export default function StandingsCard() {
                     : 0}
                 </div>
               </div>
-              <div className="bg-secondary/30 rounded-xl p-3 text-center">
+              <div className="text-center">
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
                   Valor Liga
                 </div>
