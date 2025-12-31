@@ -51,10 +51,7 @@ export default function StandingsCard() {
                   Valor Liga
                 </div>
                 <div className="text-lg font-bold text-blue-400">
-                  {new Intl.NumberFormat('es-ES').format(
-                    standings.reduce((acc, u) => acc + u.team_value, 0)
-                  )}
-                  €
+                  {(standings.reduce((acc, u) => acc + u.team_value, 0) / 1000000).toFixed(1)}M€
                 </div>
               </div>
             </div>
