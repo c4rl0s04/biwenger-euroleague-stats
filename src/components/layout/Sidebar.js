@@ -13,7 +13,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   TrendingUp,
   TrendingDown,
   Wallet,
@@ -210,26 +209,6 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
         )}
 
-        {/* Premium CTA Banner (only when expanded) */}
-        {!isCollapsed && (
-          <div className="px-3 pb-3">
-            <button className="w-full group relative overflow-hidden rounded-xl p-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/20 hover:border-purple-500/40 transition-all">
-              {/* Animated gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-              <div className="relative flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <Sparkles size={16} className="text-white" />
-                </div>
-                <div className="text-left">
-                  <div className="text-sm font-medium text-white">Premium</div>
-                  <div className="text-[11px] text-slate-400">Desbloquea todo</div>
-                </div>
-              </div>
-            </button>
-          </div>
-        )}
-
         {/* Collapsed state: just icons for quick stats */}
         {isCollapsed && (
           <div className="px-2 py-3 border-t border-border/30 space-y-2">
@@ -242,12 +221,6 @@ export default function Sidebar({ isOpen, onClose }) {
             >
               <Wallet size={20} />
             </Link>
-            <button
-              className="w-full p-2 rounded-lg bg-gradient-to-br from-purple-600/20 to-pink-600/20 text-purple-400 hover:text-white transition-colors"
-              title="Premium"
-            >
-              <Sparkles size={20} className="mx-auto" />
-            </button>
           </div>
         )}
       </aside>
