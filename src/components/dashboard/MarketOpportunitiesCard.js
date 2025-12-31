@@ -12,7 +12,7 @@ export default function MarketOpportunitiesCard() {
   return (
     <Card title="Oportunidades" icon={ShoppingCart} color="blue" loading={loading}>
       {!loading && (
-        <div className="space-y-3 flex-1">
+        <div className="space-y-4 flex-1">
           {players && players.length > 0 ? (
             players.slice(0, 6).map((player) => (
               <div key={player.player_id} className="group/item">

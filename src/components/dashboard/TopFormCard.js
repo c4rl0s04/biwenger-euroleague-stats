@@ -12,7 +12,7 @@ export default function TopFormCard() {
   return (
     <Card title="Top Forma" icon={TrendingUp} color="green" loading={loading}>
       {!loading && (
-        <div className="space-y-3 flex-1">
+        <div className="space-y-4 flex-1">
           {players && players.length > 0 ? (
             players.slice(0, 5).map((player, idx) => (
               <div key={player.player_id} className="group/item">
