@@ -44,6 +44,8 @@ export {
   fetchTopPlayers,
   fetchPlayerBirthdays,
   fetchLastRoundStats,
+  fetchTopPlayersByForm,
+  fetchCaptainRecommendations,
 } from './dashboardService';
 
 // Player Service

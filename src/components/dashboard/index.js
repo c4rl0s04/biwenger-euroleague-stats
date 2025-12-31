@@ -30,7 +30,9 @@ export { default as MarketActivityCard } from './MarketActivityCard';
 export { default as IdealLineupCard } from './IdealLineupCard';
 
 // Schedule & Activity
-export { default as NextRoundCard } from './NextRoundCard';
+export { default as TopFormCard } from './TopFormCard';
+export { default as CaptainSuggestCard } from './CaptainSuggestCard';
+export { default as MarketOpportunitiesCard } from './MarketOpportunitiesCard';
 export { default as RecentActivityCard } from './RecentActivityCard';
 export { default as BirthdayCard } from './BirthdayCard';
 

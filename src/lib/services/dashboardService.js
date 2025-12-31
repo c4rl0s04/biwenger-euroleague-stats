@@ -79,6 +79,18 @@ export function fetchLastRoundStats(userId) {
   return getLastRoundStats(userId);
 }
 
+export function fetchTopPlayersByForm(limit = 5, rounds = 3) {
+  return getTopPlayersByForm(limit, rounds);
+}
+
+export function fetchCaptainRecommendations(userId, limit = 6) {
+  return getCaptainRecommendations(userId, limit);
+}
+
+export function fetchMarketOpportunities(limit = 6) {
+  return getMarketOpportunities(limit);
+}
+
 // ============ AGGREGATED FUNCTIONS ============
 
 /**
