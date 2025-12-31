@@ -35,14 +35,14 @@ export default function LeaderGapCard() {
     return (
       <Card title="Líder de la Liga" icon={Crown} color="yellow">
         <div className="grid grid-cols-2 gap-3 flex-1">
-          <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 border border-border/30 hover:border-yellow-500/30 transition-all flex flex-col justify-center">
+          <div className="flex flex-col justify-center">
             <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
               Tus Puntos
             </div>
             <div className="text-2xl font-bold text-yellow-400">{data.user_points}</div>
           </div>
 
-          <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 border border-border/30 hover:border-yellow-500/30 transition-all flex flex-col justify-center">
+          <div className="flex flex-col justify-center">
             <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
               Ventaja
             </div>
@@ -62,14 +62,14 @@ export default function LeaderGapCard() {
     <Card title="A la Caza del Líder" icon={Target} color="emerald">
       <div className="space-y-3 flex-1">
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 border border-border/30 hover:border-yellow-500/30 transition-all">
+          <div>
             <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
               Líder: {data.leader_name}
             </div>
             <div className="text-xl font-bold text-foreground">{data.leader_points} pts</div>
           </div>
 
-          <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 border border-border/30 hover:border-yellow-500/30 transition-all">
+          <div>
             <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
               Tú
             </div>
@@ -77,7 +77,7 @@ export default function LeaderGapCard() {
           </div>
         </div>
 
-        <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 border border-border/30 hover:border-yellow-500/30 transition-all">
+        <div className="mt-3 pt-3 border-t border-border/20">
           <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
             Distancia
           </div>

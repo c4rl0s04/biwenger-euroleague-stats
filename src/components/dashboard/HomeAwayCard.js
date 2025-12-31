@@ -23,19 +23,19 @@ export default function HomeAwayCard() {
     <Card title="Casa vs Fuera" icon={Home} color="orange" loading={loading}>
       {!loading && stats && (
         <div className="grid grid-cols-2 gap-4 flex-1">
-          <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 border border-border/30 hover:border-cyan-500/30 transition-all flex flex-col justify-center">
+          <div className="flex flex-col justify-center">
             <div className="text-muted-foreground text-xs mb-1 font-medium">🏠 Casa</div>
             <div className="text-xl font-bold text-foreground">{stats.total_home} pts</div>
             <div className="text-muted-foreground text-xs">Avg: {stats.avg_home}</div>
           </div>
 
-          <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 border border-border/30 hover:border-cyan-500/30 transition-all flex flex-col justify-center">
+          <div className="flex flex-col justify-center">
             <div className="text-muted-foreground text-xs mb-1 font-medium">✈️ Fuera</div>
             <div className="text-xl font-bold text-foreground">{stats.total_away} pts</div>
             <div className="text-muted-foreground text-xs">Avg: {stats.avg_away}</div>
           </div>
 
-          <div className="bg-secondary/40 backdrop-blur-sm rounded-xl p-3 col-span-2 border border-border/30 hover:border-cyan-500/30 transition-all flex flex-col justify-center">
+          <div className="col-span-2 mt-3 pt-3 border-t border-border/20 flex flex-col justify-center">
             <div className="text-muted-foreground text-xs mb-1 font-medium">
               Diferencia de Rendimiento
             </div>
