@@ -17,7 +17,7 @@ export default function Home() {
   const cards = [
     {
       title: 'Dashboard',
-      description: 'Analítica avanzada para tu equipo fantasy',
+      description: 'Análisis global de la competición',
       icon: LayoutDashboard,
       href: '/dashboard',
       color: 'primary',
@@ -35,7 +35,7 @@ export default function Home() {
     },
     {
       title: 'Mercado',
-      description: 'Tendencias de mercado y estadísticas',
+      description: 'Tendencias de mercado',
       icon: ShoppingCart,
       href: '/market',
       color: 'green',
@@ -119,7 +119,7 @@ export default function Home() {
                   <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
 
                   <div className="flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                    Abrir Módulo <ArrowRight size={16} className="ml-1" />
+                    Abrir Página <ArrowRight size={16} className="ml-1" />
                   </div>
                 </div>
               </Link>
