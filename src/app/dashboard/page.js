@@ -13,7 +13,7 @@ import {
 } from '@/components/dashboard';
 
 // Below-the-fold: Lazy load for better initial page load
-import { getNextRound } from '@/lib/db';
+import { fetchNextRound } from '@/lib/services';
 
 const TopFormCard = nextDynamic(() => import('@/components/dashboard/TopFormCard'), {
   loading: () => <CardSkeleton />,
@@ -66,7 +66,7 @@ const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLi
 export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
-  const nextRound = getNextRound();
+  const nextRound = fetchNextRound();
   const roundInfo = nextRound
     ? `${nextRound.round_name} • ${new Date(nextRound.start_date).toLocaleDateString('es-ES', {
         weekday: 'long',

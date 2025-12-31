@@ -91,6 +91,10 @@ export function fetchMarketOpportunities(limit = 6) {
   return getMarketOpportunities(limit);
 }
 
+export function fetchNextRound() {
+  return getNextRound();
+}
+
 // ============ AGGREGATED FUNCTIONS ============
 
 /**

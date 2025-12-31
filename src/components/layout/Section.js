@@ -26,7 +26,7 @@ export default function Section({ title, subtitle, children, delay = 0, backgrou
               <span className="text-foreground">{firstWord}</span>
               {restWords && <span className="text-gradient"> {restWords}</span>}
             </h2>
-            {subtitle && <p className="text-xl text-muted-foreground font-medium">{subtitle}</p>}
+            {subtitle && <p className="text-xl text-gradient font-medium">{subtitle}</p>}
           </div>
           {children}
         </div>
