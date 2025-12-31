@@ -58,6 +58,10 @@
   /* Legacy glass tokens (kept for existing components) */
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-surface: rgba(15, 23, 42, 0.6);
+
+  /* Section depth backgrounds */
+  --section-raised: 220 18% 10%;
+  --section-sunken: 220 20% 4%;
 }
 
 /* Light theme */
@@ -112,6 +116,10 @@
   /* Light glass tokens */
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-surface: rgba(255, 255, 255, 0.8);
+
+  /* Section depth backgrounds for light */
+  --section-raised: 0 0% 100%;
+  --section-sunken: 220 14% 96%;
 }
 
 /* Tailwind v4 theme configuration */
@@ -453,11 +461,11 @@ h3,
 }
 
 .section-raised {
-  background-color: hsl(220 18% 8%);
+  background-color: hsl(var(--section-raised));
 }
 
 .section-sunken {
-  background-color: hsl(220 20% 4%);
+  background-color: hsl(var(--section-sunken));
 }
 
 .section-accent {
