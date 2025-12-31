@@ -51,8 +51,15 @@ export default function LeaderGapCard() {
             </div>
           </div>
 
-          <div className="mt-auto pt-3 border-t border-border/20 text-muted-foreground text-xs text-center font-medium">
-            Mantén el ritmo para ganar la liga
+          <div className="mt-auto pt-3 border-t border-border/20">
+            <div className="flex items-baseline justify-between">
+              <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
+                Estado
+              </span>
+              <span className="text-foreground text-xs font-medium">
+                Mantén el ritmo para ganar la liga
+              </span>
+            </div>
           </div>
         </div>
       </Card>
@@ -79,14 +86,17 @@ export default function LeaderGapCard() {
           </div>
         </div>
 
-        <div className="mt-3 pt-3 border-t border-border/20">
-          <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
-            Distancia
-          </div>
-          <div className="text-2xl font-bold text-red-400 mb-1">-{data.gap} pts</div>
-          <div className="text-muted-foreground text-[10px]">
-            ~{data.rounds_needed} {data.rounds_needed === 1 ? 'jornada' : 'jornadas'} (estimado:
-            +10pts/jornada)
+        <div className="mt-auto pt-3 border-t border-border/20">
+          <div className="flex items-baseline justify-between">
+            <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
+              Distancia
+            </span>
+            <div className="text-right">
+              <span className="text-2xl font-bold text-red-400">-{data.gap} pts</span>
+              <div className="text-muted-foreground text-[10px]">
+                ~{data.rounds_needed} {data.rounds_needed === 1 ? 'jornada' : 'jornadas'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
