@@ -43,17 +43,23 @@ export function getAllPorrasRounds() {
  * @returns {Object} Next round details
  */
 export function getNextRound() {
-  // Find the first match in the future
+  // Find the round of the upcoming match, then get its full details (true start date)
   const query = `
+    WITH NextMatchRound AS (
+      SELECT round_id
+      FROM matches
+      WHERE date > datetime('now')
+      ORDER BY date ASC
+      LIMIT 1
+    )
     SELECT 
-      round_id,
-      round_name,
-      MIN(date) as start_date
-    FROM matches
-    WHERE date > datetime('now')
-    GROUP BY round_id
-    ORDER BY date ASC
-    LIMIT 1
+      m.round_id,
+      m.round_name,
+      MIN(m.date) as start_date,
+      MAX(m.date) as end_date
+    FROM matches m
+    JOIN NextMatchRound nm ON m.round_id = nm.round_id
+    GROUP BY m.round_id
   `;
   return db.prepare(query).get();
 }

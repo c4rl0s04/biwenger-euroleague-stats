@@ -14,7 +14,11 @@ export default function NextRoundSubtitle() {
 
   if (!nextRound) return null;
 
-  const dateStr = new Date(nextRound.start_date).toLocaleDateString('es-ES', {
+  const startDate = new Date(nextRound.start_date);
+  const now = new Date();
+  const hasStarted = now > startDate;
+
+  const dateStr = startDate.toLocaleDateString('es-ES', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -23,8 +27,15 @@ export default function NextRoundSubtitle() {
   });
 
   return (
-    <span>
-      {nextRound.round_name} • {dateStr}
+    <span className="flex items-center gap-2">
+      <span>
+        {nextRound.round_name} • {dateStr}
+      </span>
+      {hasStarted && (
+        <span className="px-2 py-0.5 text-xs font-bold bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
+          En juego
+        </span>
+      )}
     </span>
   );
 }
