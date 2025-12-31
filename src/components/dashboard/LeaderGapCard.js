@@ -40,14 +40,14 @@ export default function LeaderGapCard() {
               <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Tus Puntos
               </div>
-              <div className="text-4xl font-bold text-yellow-400">{data.user_points}</div>
+              <div className="text-3xl font-bold text-yellow-400">{data.user_points}</div>
             </div>
 
             <div className="flex flex-col justify-center">
               <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Ventaja
               </div>
-              <div className="text-4xl font-bold text-green-400">+{data.gap_to_second || 0}</div>
+              <div className="text-3xl font-bold text-green-400">+{data.gap_to_second || 0}</div>
             </div>
           </div>
 
