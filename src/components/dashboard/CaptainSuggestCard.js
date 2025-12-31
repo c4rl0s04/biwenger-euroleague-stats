@@ -31,7 +31,7 @@ export default function CaptainSuggestCard() {
                 <div className="mb-1">
                   <Link
                     href={`/player/${player.player_id}`}
-                    className="text-foreground font-medium text-sm truncate block hover:text-yellow-400 transition-colors"
+                    className="text-foreground font-medium text-sm truncate block hover:text-yellow-500 transition-colors"
                     title={player.name}
                   >
                     {player.name}

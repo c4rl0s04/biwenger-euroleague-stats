@@ -23,7 +23,7 @@ export default function TopFormCard() {
                   </span>
                   <Link
                     href={`/player/${player.player_id}`}
-                    className="text-foreground font-medium text-sm truncate hover:text-green-400 transition-colors"
+                    className="text-foreground font-medium text-sm truncate hover:text-green-500 transition-colors"
                     title={player.name}
                   >
                     {player.name}

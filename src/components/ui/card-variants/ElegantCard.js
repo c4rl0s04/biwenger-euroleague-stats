@@ -30,6 +30,7 @@ export default function ElegantCard({
     yellow: 'text-yellow-500',
     pink: 'text-pink-500',
     rose: 'text-rose-500',
+    green: 'text-green-500',
   };
 
   const iconColor = iconColors[color] || iconColors.primary;
