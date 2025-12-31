@@ -34,24 +34,26 @@ export default function LeaderGapCard() {
   if (data.is_leader) {
     return (
       <Card title="Líder de la Liga" icon={Crown} color="yellow">
-        <div className="grid grid-cols-2 gap-3 flex-1">
-          <div className="flex flex-col justify-center">
-            <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
-              Tus Puntos
+        <div className="flex-1 flex flex-col">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col justify-center">
+              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
+                Tus Puntos
+              </div>
+              <div className="text-2xl font-bold text-yellow-400">{data.user_points}</div>
             </div>
-            <div className="text-2xl font-bold text-yellow-400">{data.user_points}</div>
+
+            <div className="flex flex-col justify-center">
+              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
+                Ventaja
+              </div>
+              <div className="text-2xl font-bold text-green-400">+{data.gap_to_second || 0}</div>
+            </div>
           </div>
 
-          <div className="flex flex-col justify-center">
-            <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
-              Ventaja
-            </div>
-            <div className="text-2xl font-bold text-green-400">+{data.gap_to_second || 0}</div>
+          <div className="mt-auto pt-3 border-t border-border/20 text-muted-foreground text-xs text-center font-medium">
+            Mantén el ritmo para ganar la liga
           </div>
-        </div>
-
-        <div className="mt-3 text-muted-foreground text-xs text-center font-medium">
-          Mantén el ritmo para ganar la liga
         </div>
       </Card>
     );

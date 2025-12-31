@@ -22,7 +22,7 @@ export default function HomeAwayCard() {
   return (
     <Card title="Casa vs Fuera" icon={Home} color="orange" loading={loading}>
       {!loading && stats && (
-        <div className="space-y-3 flex-1">
+        <div className="flex-1 flex flex-col">
           {/* Top stats in grid */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -39,7 +39,7 @@ export default function HomeAwayCard() {
           </div>
 
           {/* Bottom section */}
-          <div className="pt-3 border-t border-border/20">
+          <div className="mt-auto pt-3 border-t border-border/20">
             <div className="text-muted-foreground text-xs mb-1 font-medium">
               Diferencia de Rendimiento
             </div>

@@ -41,7 +41,7 @@ export default function LeagueComparisonCard() {
   return (
     <Card title="vs Liga" icon={BarChart3} color="pink" loading={loading}>
       {!loading && data && (
-        <div className="space-y-3 flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
           {/* User vs League averages in grid */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col justify-center">
@@ -60,7 +60,7 @@ export default function LeagueComparisonCard() {
           </div>
 
           {/* Difference - bottom section */}
-          <div className="pt-3 border-t border-border/20">
+          <div className="mt-auto pt-3 border-t border-border/20">
             <div className="flex items-baseline justify-between">
               <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
                 Diferencia
