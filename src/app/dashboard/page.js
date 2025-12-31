@@ -50,7 +50,6 @@ const BirthdayCard = nextDynamic(() => import('@/components/dashboard/BirthdayCa
 
 const NextRoundSubtitle = nextDynamic(() => import('@/components/dashboard/NextRoundSubtitle'), {
   loading: () => <span className="inline-block h-6 w-48 animate-pulse rounded bg-secondary" />,
-  ssr: false,
 });
 
 const WeekMVPsCard = nextDynamic(() => import('@/components/dashboard/WeekMVPsCard'), {
