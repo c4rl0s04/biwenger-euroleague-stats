@@ -33,7 +33,23 @@ export default function ElegantCard({
     green: 'text-green-500',
   };
 
+  // Border colors for hover effect
+  const hoverBorderColors = {
+    primary: 'hover:border-primary/50',
+    emerald: 'hover:border-emerald-500/50',
+    indigo: 'hover:border-indigo-500/50',
+    purple: 'hover:border-purple-500/50',
+    blue: 'hover:border-blue-500/50',
+    orange: 'hover:border-primary/50',
+    cyan: 'hover:border-cyan-500/50',
+    yellow: 'hover:border-yellow-500/50',
+    pink: 'hover:border-pink-500/50',
+    rose: 'hover:border-rose-500/50',
+    green: 'hover:border-green-500/50',
+  };
+
   const iconColor = iconColors[color] || iconColors.primary;
+  const hoverBorderColor = hoverBorderColors[color] || hoverBorderColors.primary;
 
   if (loading) {
     return (
@@ -63,6 +79,7 @@ export default function ElegantCard({
         bg-card border border-border 
         rounded-lg p-6 h-full flex flex-col 
         transition-all duration-200
+        ${hoverBorderColor} hover:shadow-lg hover:shadow-${color}-500/5
         ${className}
       `}
     >
