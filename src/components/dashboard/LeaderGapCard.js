@@ -91,12 +91,7 @@ export default function LeaderGapCard() {
             <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
               Distancia
             </span>
-            <div className="text-right">
-              <span className="text-2xl font-bold text-red-400">-{data.gap} pts</span>
-              <div className="text-muted-foreground text-[10px]">
-                ~{data.rounds_needed} {data.rounds_needed === 1 ? 'jornada' : 'jornadas'}
-              </div>
-            </div>
+            <span className="text-2xl font-bold text-red-400">-{data.gap} pts</span>
           </div>
         </div>
       </div>
