@@ -13,10 +13,7 @@ import {
 } from '@/components/dashboard';
 
 // Below-the-fold: Lazy load for better initial page load
-const NextRoundInfoCard = nextDynamic(() => import('@/components/dashboard/NextRoundInfoCard'), {
-  loading: () => <CardSkeleton />,
-  ssr: true,
-});
+import { getNextRound } from '@/lib/db';
 
 const TopFormCard = nextDynamic(() => import('@/components/dashboard/TopFormCard'), {
   loading: () => <CardSkeleton />,
@@ -69,6 +66,11 @@ const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLi
 export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
+  const nextRound = getNextRound();
+  const roundTitle = nextRound
+    ? `${nextRound.round_name} • ${new Date(nextRound.start_date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`
+    : 'Próxima Jornada';
+
   return (
     <div>
       {/* Hero Section */}
@@ -94,9 +96,8 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Próxima Jornada */}
-      <Section title="Próxima Jornada" delay={200} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <NextRoundInfoCard />
+      <Section title={roundTitle} delay={200} background="section-base">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <TopFormCard />
           <CaptainSuggestCard />
           <MarketOpportunitiesCard />
