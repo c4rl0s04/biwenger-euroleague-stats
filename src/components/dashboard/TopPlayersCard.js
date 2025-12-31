@@ -29,26 +29,22 @@ export default function TopPlayersCard() {
             const getRankStyles = (idx) => {
               if (idx === 0)
                 return {
-                  bg: 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-500/30',
-                  text: 'text-yellow-400',
                   rank: 'bg-yellow-500 text-slate-900 border-yellow-400',
+                  hoverText: 'hover:text-yellow-400',
                 };
               if (idx === 1)
                 return {
-                  bg: 'bg-gradient-to-r from-slate-400/20 to-slate-300/20 border-slate-400/30',
-                  text: 'text-slate-300',
                   rank: 'bg-slate-300 text-slate-900 border-slate-200',
+                  hoverText: 'hover:text-slate-300',
                 };
               if (idx === 2)
                 return {
-                  bg: 'bg-gradient-to-r from-muted/20 to-muted/10 border-border/30',
-                  text: 'text-muted-foreground',
-                  rank: 'bg-muted text-foreground border-border',
+                  rank: 'bg-amber-700 text-white border-amber-600', // Bronze
+                  hoverText: 'hover:text-amber-600',
                 };
               return {
-                bg: 'bg-secondary/30 border-transparent hover:border-border',
-                text: 'text-foreground',
                 rank: 'bg-secondary text-foreground border-border',
+                hoverText: 'hover:text-primary',
               };
             };
 
@@ -57,51 +53,29 @@ export default function TopPlayersCard() {
             return (
               <div
                 key={player.id}
-                className={`flex items-center gap-4 p-3 rounded-xl transition-colors border ${styles.bg}`}
+                className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item"
               >
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold border-2 shadow-lg ${styles.rank}`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border ${styles.rank} shrink-0`}
                 >
                   {index + 1}
                 </div>
                 <div className="flex-grow min-w-0">
                   <Link
                     href={`/player/${player.id}`}
-                    className={`font-medium truncate hover:opacity-80 transition-opacity block ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
+                    className={`font-medium truncate transition-colors block ${styles.hoverText} ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
                   >
                     {player.name}
                   </Link>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded">
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="text-xs text-muted-foreground truncate">
                       {getShortTeamName(player.team)}
-                    </div>
-                    <div className="text-xs font-mono text-blue-400">
-                      {new Intl.NumberFormat('es-ES').format(player.price)}€
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className={`font-bold ${styles.text}`}>
-                    {player.points} pts
-                    <span className="text-xs font-normal opacity-70 ml-1">({player.average})</span>
-                  </div>
-                  <div className="flex justify-end gap-1 mt-1">
-                    {player.recent_scores ? (
-                      player.recent_scores
-                        .split(',')
-                        .slice(0, 5)
-                        .map((score, i) => (
-                          <span
-                            key={i}
-                            className={`text-[10px] px-1 py-0.5 rounded ${getScoreColor(score)}`}
-                          >
-                            {score}
-                          </span>
-                        ))
-                    ) : (
-                      <span className="text-[10px] text-muted-foreground/60">-</span>
-                    )}
-                  </div>
+                <div className="text-right shrink-0">
+                  <div className="font-bold text-sm text-foreground">{player.points} pts</div>
+                  <div className="text-[10px] text-muted-foreground">Avg: {player.average}</div>
                 </div>
               </div>
             );
