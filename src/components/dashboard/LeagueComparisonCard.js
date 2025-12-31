@@ -44,18 +44,16 @@ export default function LeagueComparisonCard() {
         <div className="flex-1 flex flex-col">
           {/* User vs League averages in grid */}
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="flex flex-col justify-center">
-              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
-                Tu Promedio
-              </div>
-              <div className="text-3xl font-bold text-orange-500">{data.userAvg}</div>
+            <div>
+              <div className="text-muted-foreground text-xs mb-1 font-medium">Tu Promedio</div>
+              <div className="text-xl font-bold text-orange-500">{data.userAvg}</div>
+              <div className="text-muted-foreground text-xs invisible">spacer</div>
             </div>
 
-            <div className="flex flex-col justify-center">
-              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
-                Promedio Liga
-              </div>
-              <div className="text-3xl font-bold text-muted-foreground">{data.leagueAvg}</div>
+            <div>
+              <div className="text-muted-foreground text-xs mb-1 font-medium">Promedio Liga</div>
+              <div className="text-xl font-bold text-muted-foreground">{data.leagueAvg}</div>
+              <div className="text-muted-foreground text-xs invisible">spacer</div>
             </div>
           </div>
 
