@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Users } from 'lucide-react';
+import { Users, ExternalLink, Trophy } from 'lucide-react';
 import StandingsTable from './StandingsTable';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
