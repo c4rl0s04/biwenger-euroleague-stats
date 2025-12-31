@@ -32,7 +32,7 @@ export default function NextRoundSubtitle() {
         {nextRound.round_name} • {dateStr}
       </span>
       {hasStarted && (
-        <span className="px-2 py-0.5 text-xs font-bold bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
+        <span className="px-3 py-1 text-sm font-bold bg-green-500/10 text-green-500 rounded-full border border-green-500/20 ml-2">
           En juego
         </span>
       )}
