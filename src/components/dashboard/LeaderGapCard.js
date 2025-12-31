@@ -51,7 +51,7 @@ export default function LeaderGapCard() {
             </div>
           </div>
 
-          <div className="mt-auto pt-3 border-t border-border/20">
+          <div className="mt-auto pt-4 border-t border-border/20">
             <div className="flex items-baseline justify-between">
               <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
                 Estado
@@ -86,7 +86,7 @@ export default function LeaderGapCard() {
           </div>
         </div>
 
-        <div className="mt-auto pt-3 border-t border-border/20">
+        <div className="mt-auto pt-4 border-t border-border/20">
           <div className="flex items-baseline justify-between">
             <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
               Distancia
