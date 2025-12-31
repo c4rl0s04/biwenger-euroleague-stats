@@ -37,7 +37,7 @@ export default function MarketActivityCard() {
     >
       <div className="space-y-0">
         {recentTransfers && recentTransfers.length > 0 ? (
-          recentTransfers.slice(0, 8).map((transfer) => (
+          recentTransfers.slice(0, 5).map((transfer) => (
             <div
               key={transfer.id}
               className="flex items-center justify-between py-3 border-b border-border/50 last:border-0 hover:bg-secondary/20 px-2 rounded transition-colors"

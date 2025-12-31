@@ -25,7 +25,7 @@ export default function TopPlayersCard() {
     >
       <div className="space-y-4">
         {topPlayers.length > 0 ? (
-          topPlayers.map((player, index) => {
+          topPlayers.slice(0, 5).map((player, index) => {
             const getRankStyles = (idx) => {
               if (idx === 0)
                 return {
