@@ -33,6 +33,7 @@ export { default as IdealLineupCard } from './IdealLineupCard';
 export { default as TopFormCard } from './TopFormCard';
 export { default as CaptainSuggestCard } from './CaptainSuggestCard';
 export { default as MarketOpportunitiesCard } from './MarketOpportunitiesCard';
+export { default as NextRoundInfoCard } from './NextRoundInfoCard';
 export { default as RecentActivityCard } from './RecentActivityCard';
 export { default as BirthdayCard } from './BirthdayCard';
 

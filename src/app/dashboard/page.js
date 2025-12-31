@@ -13,6 +13,11 @@ import {
 } from '@/components/dashboard';
 
 // Below-the-fold: Lazy load for better initial page load
+const NextRoundInfoCard = nextDynamic(() => import('@/components/dashboard/NextRoundInfoCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
 const TopFormCard = nextDynamic(() => import('@/components/dashboard/TopFormCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
@@ -90,7 +95,8 @@ export default function Dashboard() {
 
       {/* Section: Próxima Jornada */}
       <Section title="Próxima Jornada" delay={200} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <NextRoundInfoCard />
           <TopFormCard />
           <CaptainSuggestCard />
           <MarketOpportunitiesCard />
