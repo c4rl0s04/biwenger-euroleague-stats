@@ -67,9 +67,15 @@ export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
   const nextRound = getNextRound();
-  const roundTitle = nextRound
-    ? `${nextRound.round_name} • ${new Date(nextRound.start_date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`
-    : 'Próxima Jornada';
+  const roundInfo = nextRound
+    ? `${nextRound.round_name} • ${new Date(nextRound.start_date).toLocaleDateString('es-ES', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`
+    : null;
 
   return (
     <div>
@@ -96,7 +102,7 @@ export default function Dashboard() {
       </Section>
 
       {/* Section: Próxima Jornada */}
-      <Section title={roundTitle} delay={200} background="section-base">
+      <Section title="Próxima Jornada" subtitle={roundInfo} delay={200} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <TopFormCard />
           <CaptainSuggestCard />
