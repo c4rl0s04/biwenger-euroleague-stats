@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { BarChart2 } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
@@ -145,7 +145,7 @@ export default function StatsLeadersCard() {
                     {/* Total with stat name */}
                     <div>
                       <div className={`font-bold text-base ${displayConfig.color}`}>
-                        {player.value}
+                        <AnimatedNumber value={player.value} duration={0.8} />
                       </div>
                       <div className="text-[10px] text-muted-foreground">
                         {displayConfig.label}
@@ -154,7 +154,7 @@ export default function StatsLeadersCard() {
                     {/* Average per game */}
                     <div>
                       <div className="font-bold text-base text-foreground">
-                        {player.avg_value}
+                        <AnimatedNumber value={player.avg_value} decimals={1} duration={0.8} />
                       </div>
                       <div className="text-[10px] text-muted-foreground">
                         Promedio
@@ -163,7 +163,7 @@ export default function StatsLeadersCard() {
                     {/* Games played */}
                     <div>
                       <div className="font-bold text-base text-foreground">
-                        {player.games_played}
+                        <AnimatedNumber value={player.games_played} duration={0.8} />
                       </div>
                       <div className="text-[10px] text-muted-foreground">
                         Partidos

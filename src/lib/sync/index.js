@@ -6,6 +6,7 @@ import { syncStandings } from './sync-standings.js';
 import { syncSquads } from './sync-squads.js';
 import { syncBoard } from './sync-board.js';
 import { syncInitialSquads } from './sync-initial-squads.js';
+import { syncEuroleagueGameStats, syncBiwengerFantasyPoints } from './sync-euroleague-stats.js';
 import { syncMatches } from './sync-matches.js';
 import { syncLineups } from './sync-lineups.js';
 import { cleanupDuplicateRounds } from './cleanup-rounds.js';
@@ -27,7 +28,7 @@ if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
 const DB_PATH = CONFIG.DB.PATH;
 
 async function syncData() {
-  console.log('🚀 Starting Biwenger Data Sync...');
+  console.log('🚀 Starting Data Sync (Euroleague + Biwenger)...');
 
   const db = new Database(DB_PATH);
 
@@ -116,9 +117,27 @@ async function syncData() {
           round.name = baseName;
         }
 
-        // Sync Matches (and Player Stats) for ALL rounds
-        // Pass playersList to handle missing players
+        // 1. Sync Match Schedule from Biwenger (populates matches table for ALL rounds, including future)
         await syncMatches(db, round, playersList);
+
+        // 2. Sync Game Stats from Euroleague (official data)
+        // Euroleague uses game codes (1, 2, 3...) not round IDs
+        // Biwenger round 1 corresponds to Euroleague game codes 1-8 (8 games per round)
+        const roundNumber = parseInt(baseName.replace(/\D/g, '')) || 0;
+        if (roundNumber > 0) {
+          const gamesPerRound = 9; // Euroleague has 18 teams = 9 games per round
+          const startGameCode = (roundNumber - 1) * gamesPerRound + 1;
+          const endGameCode = startGameCode + gamesPerRound - 1;
+          
+          console.log(`   📊 Fetching Euroleague games ${startGameCode}-${endGameCode}...`);
+          
+          for (let gameCode = startGameCode; gameCode <= endGameCode; gameCode++) {
+            await syncEuroleagueGameStats(db, gameCode, round.dbId || round.id, round.name);
+          }
+        }
+
+        // Sync Fantasy Points from Biwenger
+        await syncBiwengerFantasyPoints(db, round, playersList);
 
         // Sync Lineups (only if round is finished/active)
         // We pass playersList to filter out unknown players

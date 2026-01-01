@@ -36,7 +36,8 @@ export function ensureSchema(db) {
       birth_date TEXT,
       height INTEGER,
       weight INTEGER,
-      price INTEGER
+      price INTEGER,
+      euroleague_code TEXT
     )
   `
   ).run();
@@ -130,6 +131,7 @@ export function ensureSchema(db) {
       blocks INTEGER,
       turnovers INTEGER,
       fouls_committed INTEGER,
+      valuation INTEGER,
       UNIQUE(player_id, round_id),
       FOREIGN KEY(player_id) REFERENCES players(id)
     )
@@ -220,6 +222,7 @@ export function ensureSchema(db) {
     'height',
     'weight',
     'price',
+    'euroleague_code',
   ];
   const playersInfo = db.prepare('PRAGMA table_info(players)').all();
   const existingPlayerCols = new Set(playersInfo.map((c) => c.name));
@@ -245,6 +248,15 @@ export function ensureSchema(db) {
     console.log('Migrating users table (adding icon column)...');
     try {
       db.prepare('ALTER TABLE users ADD COLUMN icon TEXT').run();
+    } catch (e) {}
+  }
+
+  // Migration: Add valuation to player_round_stats
+  const statsInfo = db.prepare('PRAGMA table_info(player_round_stats)').all();
+  if (!statsInfo.some((c) => c.name === 'valuation')) {
+    console.log('Migrating player_round_stats table (adding valuation column)...');
+    try {
+      db.prepare('ALTER TABLE player_round_stats ADD COLUMN valuation INTEGER').run();
     } catch (e) {}
   }
 

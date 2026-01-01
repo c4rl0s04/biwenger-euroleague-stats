@@ -16,6 +16,7 @@ export { default as LoadingSkeleton, CardSkeleton, TableRowSkeleton } from './Lo
 
 // Animation
 export { default as FadeIn } from './FadeIn';
+export { default as AnimatedNumber, AnimatedCounter } from './AnimatedNumber';
 
 // Cards
 export { default as Card } from './Card';

@@ -190,7 +190,7 @@ export function getStatLeaders(type = 'points') {
     points: 'points',
     rebounds: 'rebounds',
     assists: 'assists',
-    pir: 'fantasy_points', // Using fantasy points as proxy for PIR/Valoration
+    pir: 'valuation',
   };
 
   const column = columnMap[type] || 'points';

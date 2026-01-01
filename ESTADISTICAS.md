@@ -16,6 +16,83 @@ La página principal ofrece acceso a tres secciones:
 
 ---
 
+## � Dashboard (`/dashboard`)
+
+> Vista general de la liga. Datos resumidos, no detallados.
+
+### KPIs Principales
+
+| Métrica           | Descripción                              |
+| ----------------- | ---------------------------------------- |
+| **Posición Liga** | Tu posición actual en la clasificación   |
+| **Puntos Totales**| Suma de puntos fantasy de la temporada   |
+| **Valor Plantilla**| Valor total de mercado de tu equipo     |
+
+### Tarjetas de Resumen
+
+| Tarjeta                  | Contenido                                       |
+| ------------------------ | ----------------------------------------------- |
+| **Mi Temporada**         | Puntos, partidos, promedio                      |
+| **Líderes por Stat**     | Top 5 en puntos, rebotes, asistencias, PIR      |
+| **Próxima Jornada**      | Fecha y partidos                                |
+| **Cumpleaños Próximos**  | Jugadores con cumpleaños esta semana            |
+| **Actividad de Mercado** | Últimos fichajes y ventas                       |
+| **Racha Actual**         | Tendencia últimas 5 jornadas                    |
+
+### Gráficos (Dashboard)
+
+| Gráfico                     | Tipo        | Datos                                    |
+| --------------------------- | ----------- | ---------------------------------------- |
+| **Mi Evolución Fantasy** 📈 | Línea       | Puntos por jornada (últimas 10)          |
+| **Posición en Liga** 📊     | Área        | Evolución de tu posición a lo largo del tiempo |
+| **Sparklines en Líderes**   | Mini-líneas | Tendencia últimos 5 partidos por jugador |
+
+---
+
+## 🏀 Detalle Jugador (`/player/[id]`)
+
+> Vista individual de un jugador con todo el detalle.
+
+### Información Principal
+
+| Dato              | Descripción                              |
+| ----------------- | ---------------------------------------- |
+| **Nombre/Equipo** | Jugador, equipo, posición, dorsal        |
+| **Propietario**   | Quién lo tiene fichado                   |
+| **Precio Actual** | Valor de mercado + tendencia             |
+| **Estado**        | Lesionado, sancionado, ok                |
+
+### Estadísticas de Temporada
+
+| Métrica           | Total  | Media  |
+| ----------------- | ------ | ------ |
+| **Puntos Reales** | SUM    | AVG    |
+| **Fantasy Points**| SUM    | AVG    |
+| **Rebotes**       | SUM    | AVG    |
+| **Asistencias**   | SUM    | AVG    |
+| **Robos**         | SUM    | AVG    |
+| **Tapones**       | SUM    | AVG    |
+| **Valoración**    | SUM    | AVG    |
+
+### Gráficos (Jugador)
+
+| Gráfico                        | Tipo          | Datos                                    |
+| ------------------------------ | ------------- | ---------------------------------------- |
+| **�📈 Evolución de Precio**     | Línea + Área  | Histórico de precio con marcas compra/venta |
+| **🕸️ Radar de Habilidades**    | Radar         | PTS, REB, AST, STL, BLK, PIR (normalizado) |
+| **📊 Rendimiento por Jornada** | Barras        | Fantasy points cada jornada              |
+| **🏠/✈️ Casa vs Fuera**        | Barras dobles | Comparativa puntos local/visitante       |
+
+### Historial de Traspasos
+
+| Columna   | Descripción                       |
+| --------- | --------------------------------- |
+| Fecha     | Cuándo se realizó                 |
+| De → A    | Vendedor → Comprador              |
+| Precio    | Monto de la transacción           |
+
+---
+
 ## 📈 Mercado (`/market`)
 
 ### KPIs Principales
@@ -51,12 +128,13 @@ La página principal ofrece acceso a tres secciones:
 | **Récord de Pujas**   | Jugador con más pujas, precio final y comprador |
 | **Top 5 Más Pujados** | Jugadores con mayor número máximo de pujas      |
 
-### Gráficos
+### Gráficos (Mercado)
 
 | Gráfico                             | Tipo         | Datos                              |
 | ----------------------------------- | ------------ | ---------------------------------- |
 | **Distribución por Posición**       | Pie/Doughnut | Fichajes agrupados por posición    |
 | **Tendencias de Mercado (30 días)** | Línea dual   | Volumen de fichajes + Precio medio |
+| **📈 Inflación del Mercado**        | Área         | Precio medio por semana            |
 
 ### Tablas
 
@@ -85,12 +163,13 @@ La página principal ofrece acceso a tres secciones:
 | **Mejor Jornada**  | Récord de aciertos en una jornada (usuario + aciertos + jornada)     |
 | **Mejor Promedio** | Usuario con mejor promedio de aciertos (promedio + jornadas jugadas) |
 
-### Gráficos
+### Gráficos (Porras)
 
 | Gráfico                   | Tipo              | Datos                                  |
 | ------------------------- | ----------------- | -------------------------------------- |
 | **Participación**         | Barras            | Número de participantes por jornada    |
 | **Evolución de Aciertos** | Línea multi-serie | Aciertos por jornada para cada usuario |
+| **🏆 Ranking Animado**    | Race bar chart    | Evolución del ranking a lo largo de la temporada |
 
 ### Tabla de Estadísticas Detalladas
 
@@ -173,6 +252,20 @@ Los 3 mejores jugadores de cada usuario:
 
 ---
 
+## 🆚 Comparador de Jugadores (Nueva Página)
+
+> Selecciona 2 jugadores para comparar lado a lado.
+
+### Visualización
+
+| Gráfico                   | Tipo        | Datos                                    |
+| ------------------------- | ----------- | ---------------------------------------- |
+| **Radar Comparativo**     | Radar doble | Ambos jugadores superpuestos             |
+| **Barras Lado a Lado**    | Barras H2H  | Cada stat comparada directamente         |
+| **Evolución de Precio**   | Línea dual  | Histórico de precio de ambos             |
+
+---
+
 ## 🎨 Leyenda de Colores por Posición
 
 | Código | Posición   | Color      |
@@ -197,3 +290,4 @@ Los 3 mejores jugadores de cada usuario:
 ---
 
 _BiwengerStats © 2025_
+

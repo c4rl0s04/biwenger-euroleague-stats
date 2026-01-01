@@ -208,7 +208,7 @@ export function getPlayerDetails(playerId) {
     // Determine a date for the initial assignment.
     // If there are existing transfers, put it slightly before the oldest one.
     // Otherwise, use a default league start date (e.g., Sep 1, 2023 or similar, or just '2023-01-01')
-    let initialDate = '2024-09-01T00:00:00.000Z'; // Approximate season start
+    let initialDate = '2025-09-01T00:00:00.000Z'; // Approximate season start
     if (transfers.length > 0) {
       const oldestTransfer = new Date(transfers[transfers.length - 1].date);
       oldestTransfer.setHours(oldestTransfer.getHours() - 24); // 1 day before
