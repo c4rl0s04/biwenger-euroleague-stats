@@ -24,7 +24,7 @@ export default function SnowfallEffect() {
         left: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: 50,
+        zIndex: 9999,
         pointerEvents: 'none',
       }}
     >
@@ -34,7 +34,7 @@ export default function SnowfallEffect() {
         radius={[0.5, 2.5]}
         speed={[0.5, 2.0]}
         wind={[-0.5, 1.0]}
-        style={{ zIndex: 50 }}
+        style={{ zIndex: 9999 }}
       />
     </div>
   );
