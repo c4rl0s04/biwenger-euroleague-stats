@@ -6,8 +6,8 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { UserSelectionModal } from '@/components/user';
 import ThemeBackground from '@/components/ui/ThemeBackground';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
-// Import the effect
 import SnowfallEffect from '@/components/ui/SnowfallEffect';
+import CommandPalette from '@/components/ui/CommandPalette';
 
 export default function ClientWrapper({ children, users }) {
   return (
@@ -15,8 +15,8 @@ export default function ClientWrapper({ children, users }) {
       <CardThemeProvider>
         <UserProvider users={users}>
           <ThemeBackground />
-          {/* Add SnowfallEffect here - it is safe because it is inside ThemeProvider */}
           <SnowfallEffect />
+          <CommandPalette /> {/* Add this line */}
           <UserSelectionModal />
           <ErrorBoundary>{children}</ErrorBoundary>
         </UserProvider>

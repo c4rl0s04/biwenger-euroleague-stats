@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, User, Users, Trophy, X, Loader2 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 /**
  * SearchDropdown - Global search with dropdown results
- * Searches players, teams, and users
+ * Updated: Consistent structure but with type-specific color coding
  */
 export default function SearchDropdown({ onClose }) {
   const [query, setQuery] = useState('');
@@ -15,15 +14,9 @@ export default function SearchDropdown({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const [isMac, setIsMac] = useState(true);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
   const router = useRouter();
-
-  // Detect OS for keyboard shortcut display
-  useEffect(() => {
-    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
-  }, []);
 
   // Debounced search
   useEffect(() => {
@@ -51,23 +44,6 @@ export default function SearchDropdown({ onClose }) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  // Global keyboard shortcut: Cmd+K or Ctrl+K to focus search
-  useEffect(() => {
-    const handleGlobalKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-    };
-    document.addEventListener('keydown', handleGlobalKeyDown);
-    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
-
   // Close on click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -79,7 +55,7 @@ export default function SearchDropdown({ onClose }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Build flat list of all results for keyboard navigation
+  // Build flat list for keyboard navigation
   const allResults = [
     ...results.players.map((p) => ({ type: 'player', ...p })),
     ...results.teams.map((t) => ({ type: 'team', ...t })),
@@ -122,14 +98,71 @@ export default function SearchDropdown({ onClose }) {
     onClose?.();
   };
 
-  const formatPrice = (price) => {
-    if (!price) return '';
-    if (price >= 1000000) return `€${(price / 1000000).toFixed(1)}M`;
-    if (price >= 1000) return `€${(price / 1000).toFixed(0)}K`;
-    return `€${price}`;
+  const hasResults = allResults.length > 0;
+
+  // Helper to get color styles based on result type
+  const getTypeStyles = (type) => {
+    switch (type) {
+      case 'player':
+        return {
+          iconColor: 'text-blue-400',
+          activeBg: 'bg-blue-500/10',
+          activeText: 'text-blue-400',
+        };
+      case 'team':
+        return {
+          iconColor: 'text-amber-400',
+          activeBg: 'bg-amber-500/10',
+          activeText: 'text-amber-400',
+        };
+      case 'user':
+        return {
+          iconColor: 'text-emerald-400',
+          activeBg: 'bg-emerald-500/10',
+          activeText: 'text-emerald-400',
+        };
+      default:
+        return {
+          iconColor: 'text-muted-foreground',
+          activeBg: 'bg-secondary',
+          activeText: 'text-foreground',
+        };
+    }
   };
 
-  const hasResults = allResults.length > 0;
+  const renderItem = (item, index, icon, subtitle, rightContent = null) => {
+    const isActive = activeIndex === index;
+    const Icon = icon;
+    const styles = getTypeStyles(item.type);
+
+    return (
+      <button
+        key={`${item.type}-${item.id || item.name}`}
+        onClick={() => handleSelect(item)}
+        onMouseEnter={() => setActiveIndex(index)}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer text-sm transition-colors ${
+          isActive
+            ? `${styles.activeBg} ${styles.activeText}`
+            : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+        }`}
+      >
+        <Icon
+          className={`w-4 h-4 shrink-0 ${isActive ? 'text-current' : styles.iconColor}`} 
+        />
+        <div className="flex-1 flex flex-col items-start min-w-0">
+          <span className={`font-medium truncate ${isActive ? 'text-current' : 'text-foreground'}`}>
+            {item.name}
+          </span>
+          {subtitle && (
+            <span className={`text-xs truncate font-normal ${isActive ? 'opacity-80' : 'text-muted-foreground'}`}>
+              {subtitle}
+            </span>
+          )}
+        </div>
+        {rightContent && <div className="text-xs opacity-70 shrink-0">{rightContent}</div>}
+      </button>
+    );
+  };
 
   return (
     <div ref={dropdownRef} className="relative w-full">
@@ -145,8 +178,8 @@ export default function SearchDropdown({ onClose }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Buscar jugadores, equipos, usuarios..."
-          className="w-full pl-10 pr-16 py-2 rounded-xl bg-secondary border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+          placeholder="Buscar..."
+          className="w-full pl-10 pr-10 py-2 rounded-xl bg-secondary border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
         {loading && (
           <Loader2
@@ -165,11 +198,6 @@ export default function SearchDropdown({ onClose }) {
             <X size={16} />
           </button>
         )}
-        {!loading && !query && (
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-secondary rounded border border-border/50">
-            {isMac ? '⌘' : 'Ctrl'} + K
-          </kbd>
-        )}
       </div>
 
       {/* Dropdown Results */}
@@ -183,39 +211,17 @@ export default function SearchDropdown({ onClose }) {
 
           {/* Players */}
           {results.players.length > 0 && (
-            <div>
-              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/50">
+            <div className="p-2">
+              <div className="px-2 py-1.5 text-xs font-semibold text-blue-400/70 uppercase tracking-wider mb-1">
                 Jugadores
               </div>
               {results.players.map((player, idx) => {
                 const globalIdx = idx;
-                return (
-                  <button
-                    key={`player-${player.id}`}
-                    onClick={() => handleSelect({ type: 'player', ...player })}
-                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-secondary hover:border-l-2 hover:border-primary transition-all ${
-                      activeIndex === globalIdx
-                        ? 'bg-secondary border-l-2 border-primary'
-                        : 'border-l-2 border-transparent'
-                    }`}
-                  >
-                    <User size={16} className="text-blue-400" />
-                    <div className="flex-1 text-left">
-                      <div
-                        className={`text-sm transition-colors ${
-                          activeIndex === globalIdx
-                            ? 'text-primary'
-                            : 'text-foreground group-hover:text-primary'
-                        }`}
-                      >
-                        {player.name}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {player.position} · {player.team}
-                      </div>
-                    </div>
-                    <div className="text-xs text-slate-400">{formatPrice(player.price)}</div>
-                  </button>
+                return renderItem(
+                  { type: 'player', ...player },
+                  globalIdx,
+                  User,
+                  `${player.team} · ${player.position}`
                 );
               })}
             </div>
@@ -223,73 +229,26 @@ export default function SearchDropdown({ onClose }) {
 
           {/* Teams */}
           {results.teams.length > 0 && (
-            <div>
-              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/50">
+            <div className="p-2 border-t border-border/30">
+              <div className="px-2 py-1.5 text-xs font-semibold text-amber-400/70 uppercase tracking-wider mb-1">
                 Equipos
               </div>
               {results.teams.map((team, idx) => {
                 const globalIdx = results.players.length + idx;
-                return (
-                  <button
-                    key={`team-${team.name}`}
-                    onClick={() => handleSelect({ type: 'team', ...team })}
-                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-secondary hover:border-l-2 hover:border-primary transition-all ${
-                      activeIndex === globalIdx
-                        ? 'bg-secondary border-l-2 border-primary'
-                        : 'border-l-2 border-transparent'
-                    }`}
-                  >
-                    <Trophy size={16} className="text-yellow-400" />
-                    <div className="flex-1 text-left">
-                      <div
-                        className={`text-sm transition-colors ${
-                          activeIndex === globalIdx
-                            ? 'text-primary'
-                            : 'text-foreground group-hover:text-primary'
-                        }`}
-                      >
-                        {team.name}
-                      </div>
-                    </div>
-                    <div className="text-xs text-slate-400">{team.player_count} jugadores</div>
-                  </button>
-                );
+                return renderItem({ type: 'team', ...team }, globalIdx, Trophy, null);
               })}
             </div>
           )}
 
           {/* Users */}
           {results.users.length > 0 && (
-            <div>
-              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/50">
+            <div className="p-2 border-t border-border/30">
+              <div className="px-2 py-1.5 text-xs font-semibold text-emerald-400/70 uppercase tracking-wider mb-1">
                 Usuarios
               </div>
               {results.users.map((user, idx) => {
                 const globalIdx = results.players.length + results.teams.length + idx;
-                return (
-                  <button
-                    key={`user-${user.id}`}
-                    onClick={() => handleSelect({ type: 'user', ...user })}
-                    className={`group w-full px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-secondary hover:border-l-2 hover:border-primary transition-all ${
-                      activeIndex === globalIdx
-                        ? 'bg-secondary border-l-2 border-primary'
-                        : 'border-l-2 border-transparent'
-                    }`}
-                  >
-                    <Users size={16} className="text-green-400" />
-                    <div className="flex-1 text-left">
-                      <div
-                        className={`text-sm transition-colors ${
-                          activeIndex === globalIdx
-                            ? 'text-primary'
-                            : 'text-foreground group-hover:text-primary'
-                        }`}
-                      >
-                        {user.name}
-                      </div>
-                    </div>
-                  </button>
-                );
+                return renderItem({ type: 'user', ...user }, globalIdx, Users, null);
               })}
             </div>
           )}

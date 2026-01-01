@@ -17,6 +17,7 @@ export { default as TopPlayersCard } from './TopPlayersCard';
 export { default as RisingStarsCard } from './RisingStarsCard';
 export { default as StreakCard } from './StreakCard';
 export { default as WeekMVPsCard } from './WeekMVPsCard';
+export { default as StatsLeadersCard } from './StatsLeadersCard';
 
 // User Stats
 export { default as MySeasonCard } from './MySeasonCard';

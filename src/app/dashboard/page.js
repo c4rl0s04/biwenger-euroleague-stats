@@ -57,6 +57,11 @@ const WeekMVPsCard = nextDynamic(() => import('@/components/dashboard/WeekMVPsCa
   ssr: true,
 });
 
+const StatsLeadersCard = nextDynamic(() => import('@/components/dashboard/StatsLeadersCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
 const StreakCard = nextDynamic(() => import('@/components/dashboard/StreakCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
@@ -119,9 +124,10 @@ export default function Dashboard() {
 
       {/* Section: Rendimiento de la Liga */}
       <Section title="Rendimiento de la Liga" delay={400} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* CHANGED: Removed 'lg:grid-cols-4' so it stays as 2 columns on large screens */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <WeekMVPsCard />
-          <IdealLineupCard />
+          <StatsLeadersCard />
           <StreakCard type="hot" />
           <StreakCard type="cold" />
         </div>

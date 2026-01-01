@@ -2,19 +2,11 @@
 
 import PropTypes from 'prop-types';
 import { Flame, Snowflake, TrendingUp, TrendingDown, Info } from 'lucide-react';
-import Link from 'next/link';
-import { getShortTeamName } from '@/lib/utils/format';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
+import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
-/**
- * Unified Streak Card Component
- * Displays players on hot or cold streaks based on type prop
- *
- * @param {'hot' | 'cold'} type - Type of streaks to display
- */
 export default function StreakCard({ type = 'hot' }) {
-  // Configuration based on streak type
   const config = {
     hot: {
       title: 'En Racha',
@@ -39,6 +31,7 @@ export default function StreakCard({ type = 'hot' }) {
   };
 
   const cfg = config[type] || config.hot;
+  const TrendIcon = cfg.TrendIcon;
 
   const { data: players, loading } = useApiData('/api/player/streaks', {
     transform: (d) => d?.[cfg.dataKey] || [],
@@ -47,21 +40,13 @@ export default function StreakCard({ type = 'hot' }) {
 
   const infoTooltip = (
     <div className="group/info relative">
-      <Info
-        className={`w-4 h-4 text-muted-foreground hover:text-${cfg.color}-400 cursor-help transition-colors`}
-      />
+      <Info className={`w-4 h-4 text-muted-foreground hover:text-${cfg.color}-400 cursor-help`} />
       <div className="absolute right-0 top-6 w-64 bg-popover border border-border text-muted-foreground text-xs rounded-lg p-3 shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50">
         <p className={`mb-2 font-semibold text-${cfg.color}-400`}>{cfg.tooltipTitle}</p>
-        Comparativa entre la media de las últimas 5 jornadas (mín. 3 jugados) y la media de la
-        temporada.
-        <div className="mt-2 text-muted-foreground border-t border-border pt-2">
-          Se requiere un {cfg.tooltipDesc} superior al <span className="text-foreground">20%</span>.
-        </div>
+        Comparativa entre la media de las últimas 5 jornadas y la media de la temporada.
       </div>
     </div>
   );
-
-  const TrendIcon = cfg.TrendIcon;
 
   return (
     <Card
@@ -72,56 +57,49 @@ export default function StreakCard({ type = 'hot' }) {
       actionRight={infoTooltip}
       className="card-glow"
     >
-      {!loading && (
-        <div className="flex-1 flex flex-col justify-between gap-0">
-          {players && players.length > 0 ? (
-            players.map((player) => (
-              <div
-                key={player.player_id}
-                className={`flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors hover:bg-${cfg.color}-500/5`}
-              >
-                <div className="flex-1 min-w-0">
-                  <Link
-                    href={`/player/${player.player_id}`}
-                    className={`font-medium text-foreground text-sm hover:text-${cfg.color}-400 transition-colors block truncate`}
-                  >
-                    {player.name}
-                  </Link>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                    <span>{getShortTeamName(player.team)}</span>
-                    <span>·</span>
-                    <span>{player.position}</span>
-                    {player.owner_name && (
-                      <>
-                        <span className="ml-1">|</span>
-                        <span className={`text-${cfg.color}-400 ml-1`}>👤 {player.owner_name}</span>
-                      </>
-                    )}
+      <div className="flex flex-col">
+        {!loading && players && players.length > 0 ? (
+          players.map((player) => (
+            <DashboardPlayerRow
+              key={player.player_id}
+              playerId={player.player_id}
+              name={player.name}
+              team={player.team}
+              owner={player.owner_name}
+              // AVATAR: Glowing Icon (Flame or Snowflake)
+              avatar={
+                <div className="relative w-10 h-10 flex items-center justify-center">
+                  <div className={`absolute inset-0 rounded-full blur-md opacity-50 animate-pulse ${type === 'hot' ? 'bg-orange-500' : 'bg-blue-500'}`} />
+                  <div className="relative w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
+                    {type === 'hot' ? 
+                      <Flame className="w-5 h-5 text-orange-500" /> : 
+                      <Snowflake className="w-5 h-5 text-blue-500" />
+                    }
                   </div>
                 </div>
-                <div className="text-right shrink-0">
-                  <div
-                    className={`flex items-center justify-end gap-1 text-sm font-bold text-${cfg.color}-400`}
-                  >
-                    <TrendIcon className="w-4 h-4" />
+              }
+              // STATS: Percentage + Avg
+              rightContent={
+                <>
+                  <div className={`flex items-center justify-end gap-1 text-sm font-bold text-${cfg.color}-400`}>
+                    <TrendIcon className="w-3 h-3" />
                     {Math.abs(player.trend_pct)}%
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {player.recent_avg.toFixed(1)} pts/g
+                  <div className="text-[10px] text-muted-foreground">
+                    {player.recent_avg.toFixed(1)} pts
                   </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center text-muted-foreground py-8">{cfg.emptyMessage}</div>
-          )}
-        </div>
-      )}
+                </>
+              }
+            />
+          ))
+        ) : (
+          !loading && (
+            <div className="text-center text-muted-foreground py-8">
+              {cfg.emptyMessage}
+            </div>
+          )
+        )}
+      </div>
     </Card>
   );
 }
-
-StreakCard.propTypes = {
-  /** Type of streaks to display: 'hot' for positive, 'cold' for negative */
-  type: PropTypes.oneOf(['hot', 'cold']),
-};
