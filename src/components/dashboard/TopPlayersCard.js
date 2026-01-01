@@ -63,7 +63,7 @@ export default function TopPlayersCard() {
                 <div className="flex-grow min-w-0">
                   <Link
                     href={`/player/${player.id}`}
-                    className={`font-medium truncate transition-colors block ${styles.hoverText} ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
+                    className={`font-medium truncate transition-colors block text-sm ${styles.hoverText} ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
                   >
                     {player.name}
                   </Link>
