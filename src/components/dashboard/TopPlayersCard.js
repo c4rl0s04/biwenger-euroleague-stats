@@ -22,8 +22,9 @@ export default function TopPlayersCard() {
       color="emerald"
       loading={loading}
       actionRight={actionLink}
+      className="card-glow"
     >
-      <div className="space-y-4">
+      <div className="space-y-0">
         {topPlayers.length > 0 ? (
           topPlayers.slice(0, 5).map((player, index) => {
             const getRankStyles = (idx) => {
@@ -39,7 +40,7 @@ export default function TopPlayersCard() {
                 };
               if (idx === 2)
                 return {
-                  rank: 'bg-amber-700 text-white border-amber-600', // Bronze
+                  rank: 'bg-amber-700 text-white border-amber-600',
                   hoverText: 'hover:text-amber-600',
                 };
               return {
@@ -53,29 +54,34 @@ export default function TopPlayersCard() {
             return (
               <div
                 key={player.id}
-                className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item"
+                className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors"
               >
+                {/* Increased size to w-10 h-10 and text to text-base */}
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border ${styles.rank} shrink-0`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold border ${styles.rank} shrink-0`}
                 >
                   {index + 1}
                 </div>
                 <div className="flex-grow min-w-0">
                   <Link
                     href={`/player/${player.id}`}
-                    className={`font-medium truncate transition-colors block text-sm ${styles.hoverText} ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
+                    // Increased to text-base
+                    className={`font-medium truncate transition-colors block text-base ${styles.hoverText} ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
                   >
                     {player.name}
                   </Link>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <div className="text-xs text-muted-foreground truncate">
+                    {/* Increased to text-sm */}
+                    <div className="text-sm text-muted-foreground truncate">
                       {getShortTeamName(player.team)}
                     </div>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="font-bold text-sm text-foreground">{player.points} pts</div>
-                  <div className="text-[10px] text-muted-foreground">Avg: {player.average}</div>
+                  {/* Increased to text-base */}
+                  <div className="font-bold text-base text-foreground">{player.points} pts</div>
+                  {/* Increased to text-xs */}
+                  <div className="text-xs text-muted-foreground">Avg: {player.average}</div>
                 </div>
               </div>
             );

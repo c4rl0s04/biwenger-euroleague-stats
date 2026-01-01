@@ -21,7 +21,8 @@ export default function MarketActivityCard() {
   const actionLink = (
     <Link
       href="/market"
-      className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+      // Changed from purple to pink to match the icon color
+      className="text-sm text-pink-400 hover:text-pink-300 transition-colors"
     >
       Ver mercado
     </Link>
@@ -34,6 +35,7 @@ export default function MarketActivityCard() {
       color="pink"
       loading={loading}
       actionRight={actionLink}
+      className="card-glow"
     >
       <div className="space-y-0">
         {recentTransfers && recentTransfers.length > 0 ? (
@@ -42,29 +44,27 @@ export default function MarketActivityCard() {
               key={transfer.id}
               className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-foreground shrink-0 border border-border">
+              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-foreground shrink-0 border border-border">
                 {transfer.player_name?.charAt(0) || '?'}
               </div>
               <div className="flex-grow min-w-0">
                 <Link
                   href={`/player/${transfer.player_id}`}
-                  className="font-medium text-foreground text-sm hover:text-pink-400 transition-colors block truncate"
+                  className="font-medium text-foreground text-base hover:text-pink-400 transition-colors block truncate"
                 >
                   {transfer.player_name}
                 </Link>
-                <div className="text-xs text-muted-foreground flex items-center gap-1 truncate mt-0.5">
-                  <span className="text-red-400 truncate max-w-[80px]">
-                    {transfer.vendedor || 'Mercado'}
-                  </span>
+                <div className="text-sm text-muted-foreground flex items-center flex-wrap gap-1 mt-0.5">
+                  <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
                   <ArrowRight className="w-3 h-3 shrink-0" />
-                  <span className="text-green-400 truncate max-w-[80px]">{transfer.comprador}</span>
+                  <span className="text-green-400">{transfer.comprador}</span>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <div className="font-bold text-foreground text-sm">
+                <div className="font-bold text-foreground text-base">
                   {new Intl.NumberFormat('es-ES').format(transfer.precio)}€
                 </div>
-                <div className="text-[10px] text-muted-foreground/70">
+                <div className="text-xs text-muted-foreground/70">
                   {new Date(transfer.timestamp * 1000).toLocaleDateString()}
                 </div>
               </div>
