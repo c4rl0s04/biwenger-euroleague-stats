@@ -40,27 +40,27 @@ export default function MarketActivityCard() {
           recentTransfers.slice(0, 5).map((transfer) => (
             <div
               key={transfer.id}
-              className="flex items-center justify-between py-3 border-b border-border/50 last:border-0 hover:bg-secondary/20 px-2 rounded transition-colors"
+              className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
-                  {transfer.player_name?.charAt(0) || '?'}
-                </div>
-                <div>
-                  <Link
-                    href={`/player/${transfer.player_id}`}
-                    className="font-medium text-foreground text-sm hover:text-purple-400 transition-colors block"
-                  >
-                    {transfer.player_name}
-                  </Link>
-                  <div className="text-xs text-muted-foreground flex items-center gap-1">
-                    <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
-                    <ArrowRight className="w-3 h-3" />
-                    <span className="text-green-400">{transfer.comprador}</span>
-                  </div>
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-foreground shrink-0 border border-border">
+                {transfer.player_name?.charAt(0) || '?'}
+              </div>
+              <div className="flex-grow min-w-0">
+                <Link
+                  href={`/player/${transfer.player_id}`}
+                  className="font-medium text-foreground text-sm hover:text-pink-400 transition-colors block truncate"
+                >
+                  {transfer.player_name}
+                </Link>
+                <div className="text-xs text-muted-foreground flex items-center gap-1 truncate mt-0.5">
+                  <span className="text-red-400 truncate max-w-[80px]">
+                    {transfer.vendedor || 'Mercado'}
+                  </span>
+                  <ArrowRight className="w-3 h-3 shrink-0" />
+                  <span className="text-green-400 truncate max-w-[80px]">{transfer.comprador}</span>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <div className="font-bold text-foreground text-sm">
                   {new Intl.NumberFormat('es-ES').format(transfer.precio)}€
                 </div>
