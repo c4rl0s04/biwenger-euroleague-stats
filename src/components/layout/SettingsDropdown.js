@@ -1,19 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Sun, Moon, Check } from 'lucide-react';
+import { Settings, Sun, Moon, Check, Snowflake } from 'lucide-react'; // Added Snowflake
 import { useTheme } from '@/contexts/ThemeContext';
 
-/**
- * SettingsDropdown - Settings menu with language and theme options
- */
 export default function SettingsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState('es');
   const dropdownRef = useRef(null);
-  const { theme, setTheme } = useTheme();
 
-  // Close on click outside
+  // Destructure new snow properties
+  const { theme, setTheme, showSnow, toggleSnow } = useTheme();
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -40,13 +38,11 @@ export default function SettingsDropdown() {
 
   const handleLanguageChange = (newLanguage) => {
     setLanguage(newLanguage);
-    // TODO: Implement actual language change
     console.log('Language changed to:', newLanguage);
   };
 
   return (
     <div ref={dropdownRef} className="relative">
-      {/* Settings Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ${
@@ -57,10 +53,8 @@ export default function SettingsDropdown() {
         <Settings size={20} />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50">
-          {/* Header */}
           <div className="px-3 py-2 border-b border-border/30">
             <h3 className="text-sm font-semibold text-foreground">Configuración</h3>
           </div>
@@ -86,6 +80,38 @@ export default function SettingsDropdown() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Effects Section (New) */}
+          <div className="p-2 border-t border-border/30">
+            <div className="text-xs text-muted-foreground uppercase tracking-wider px-2 py-1 mb-1">
+              Efectos
+            </div>
+            <button
+              onClick={toggleSnow}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all cursor-pointer ${
+                showSnow
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Snowflake size={16} />
+                <span className="text-sm">Nieve</span>
+              </div>
+              <div
+                className={`w-8 h-4 rounded-full relative transition-colors ${
+                  showSnow ? 'bg-primary' : 'bg-muted'
+                }`}
+              >
+                <div
+                  className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
+                    showSnow ? 'left-4.5' : 'left-0.5'
+                  }`}
+                  style={{ left: showSnow ? 'calc(100% - 14px)' : '2px' }}
+                />
+              </div>
+            </button>
           </div>
 
           {/* Language Section */}

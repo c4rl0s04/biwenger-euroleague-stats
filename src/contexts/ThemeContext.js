@@ -6,6 +6,9 @@ const ThemeContext = createContext({
   theme: 'dark',
   setTheme: () => {},
   toggleTheme: () => {},
+  // New properties
+  showSnow: true,
+  toggleSnow: () => {},
 });
 
 export function useTheme() {
@@ -29,63 +32,63 @@ function getServerSnapshot() {
   return false;
 }
 
-// Get initial theme from localStorage or system preference
+// Get initial theme
 function getStoredTheme() {
   if (typeof window === 'undefined') return 'dark';
-
   try {
     const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'light' || storedTheme === 'dark') {
-      return storedTheme;
-    }
-  } catch {
-    // localStorage might not be available
-  }
-
-  if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-    return 'light';
-  }
-
+    if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+  } catch {}
+  if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
   return 'dark';
 }
 
+// Get initial snow preference (default to true)
+function getStoredSnow() {
+  if (typeof window === 'undefined') return true;
+  try {
+    const stored = localStorage.getItem('showSnow');
+    if (stored !== null) return stored === 'true';
+  } catch {}
+  return true;
+}
+
 export function ThemeProvider({ children }) {
-  // Use useSyncExternalStore to safely detect client-side mounting
   const isClient = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  // Use lazy initialization to avoid setState in effect
+  // Lazy initialization
   const [theme, setThemeState] = useState(() => getStoredTheme());
+  const [showSnow, setShowSnowState] = useState(() => getStoredSnow());
 
-  // Apply theme class to document when theme changes (only on client)
+  // Effect for Theme
   useEffect(() => {
     if (!isClient) return;
-
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-
     try {
       localStorage.setItem('theme', theme);
-    } catch {
-      // localStorage might not be available
-    }
+    } catch {}
   }, [theme, isClient]);
 
-  const setTheme = (newTheme) => {
-    setThemeState(newTheme);
-  };
+  // Effect for Snow
+  useEffect(() => {
+    if (!isClient) return;
+    try {
+      localStorage.setItem('showSnow', String(showSnow));
+    } catch {}
+  }, [showSnow, isClient]);
 
-  const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
+  const setTheme = (newTheme) => setThemeState(newTheme);
+  const toggleTheme = () => setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
-  // Prevent flash by not rendering children until on client
-  if (!isClient) {
-    return null;
-  }
+  // New toggle function
+  const toggleSnow = () => setShowSnowState((prev) => !prev);
+
+  if (!isClient) return null;
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, showSnow, toggleSnow }}>
       {children}
     </ThemeContext.Provider>
   );

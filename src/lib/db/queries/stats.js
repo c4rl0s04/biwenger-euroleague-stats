@@ -178,3 +178,44 @@ export function getRecentRecords() {
 
   return records.slice(0, 3);
 }
+
+/**
+ * Get stat leaders (Top 5)
+ * @param {string} type - Stat type (real_points, rebounds, assists, pir)
+ * @returns {Array} List of top players for the stat
+ */
+export function getStatLeaders(type = 'points') {
+  const columnMap = {
+    real_points: 'points',
+    points: 'points',
+    rebounds: 'rebounds',
+    assists: 'assists',
+    pir: 'fantasy_points', // Using fantasy points as proxy for PIR/Valoration
+  };
+
+  const column = columnMap[type] || 'points';
+
+  const query = `
+    SELECT 
+      p.id as player_id,
+      p.name,
+      p.team,
+      p.owner_id,
+      u.name as owner_name,
+      SUM(prs.${column}) as value
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN users u ON p.owner_id = u.id
+    GROUP BY p.id
+    HAVING value > 0
+    ORDER BY value DESC
+    LIMIT 5
+  `;
+
+  try {
+    return db.prepare(query).all();
+  } catch (error) {
+    console.error('Error fetching stat leaders:', error);
+    return [];
+  }
+}
