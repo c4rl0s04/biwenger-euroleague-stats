@@ -146,15 +146,15 @@ export default function SearchDropdown({ onClose }) {
             : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
         }`}
       >
-        <Icon
-          className={`w-4 h-4 shrink-0 ${isActive ? 'text-current' : styles.iconColor}`} 
-        />
+        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-current' : styles.iconColor}`} />
         <div className="flex-1 flex flex-col items-start min-w-0">
           <span className={`font-medium truncate ${isActive ? 'text-current' : 'text-foreground'}`}>
             {item.name}
           </span>
           {subtitle && (
-            <span className={`text-xs truncate font-normal ${isActive ? 'opacity-80' : 'text-muted-foreground'}`}>
+            <span
+              className={`text-xs truncate font-normal ${isActive ? 'opacity-80' : 'text-muted-foreground'}`}
+            >
               {subtitle}
             </span>
           )}

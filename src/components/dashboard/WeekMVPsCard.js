@@ -32,39 +32,35 @@ export default function WeekMVPsCard() {
       className="card-glow"
     >
       <div className="flex flex-col">
-        {!loading && mvps && mvps.length > 0 ? (
-          mvps.map((player, index) => (
-            <DashboardPlayerRow
-              key={player.player_id}
-              playerId={player.player_id}
-              name={player.name}
-              team={player.team}
-              owner={player.owner_name}
-              avatar={
-                <div
-                  // CHANGED: w-8 h-8 -> w-10 h-10 (Matches IdealLineup & StreakCard)
-                  // Added border-2 to match the visual weight of other avatars
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 ${getRankStyles(
-                    index
-                  )}`}
-                >
-                  {index <= 2 ? <Award className="w-5 h-5" /> : index + 1}
-                </div>
-              }
-              rightContent={
-                <div className={`font-bold text-sm ${getTextStyles(index)}`}>
-                  {player.points} pts
-                </div>
-              }
-            />
-          ))
-        ) : (
-          !loading && (
-            <div className="text-center text-muted-foreground py-8">
-              No hay datos disponibles
-            </div>
-          )
-        )}
+        {!loading && mvps && mvps.length > 0
+          ? mvps.map((player, index) => (
+              <DashboardPlayerRow
+                key={player.player_id}
+                playerId={player.player_id}
+                name={player.name}
+                team={player.team}
+                owner={player.owner_name}
+                avatar={
+                  <div
+                    // CHANGED: w-8 h-8 -> w-10 h-10 (Matches IdealLineup & StreakCard)
+                    // Added border-2 to match the visual weight of other avatars
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 ${getRankStyles(
+                      index
+                    )}`}
+                  >
+                    {index <= 2 ? <Award className="w-5 h-5" /> : index + 1}
+                  </div>
+                }
+                rightContent={
+                  <div className={`font-bold text-sm ${getTextStyles(index)}`}>
+                    {player.points} pts
+                  </div>
+                }
+              />
+            ))
+          : !loading && (
+              <div className="text-center text-muted-foreground py-8">No hay datos disponibles</div>
+            )}
       </div>
     </Card>
   );

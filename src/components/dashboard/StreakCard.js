@@ -58,47 +58,48 @@ export default function StreakCard({ type = 'hot' }) {
       className="card-glow"
     >
       <div className="flex flex-col">
-        {!loading && players && players.length > 0 ? (
-          players.map((player) => (
-            <DashboardPlayerRow
-              key={player.player_id}
-              playerId={player.player_id}
-              name={player.name}
-              team={player.team}
-              owner={player.owner_name}
-              // AVATAR: Glowing Icon (Flame or Snowflake)
-              avatar={
-                <div className="relative w-10 h-10 flex items-center justify-center">
-                  <div className={`absolute inset-0 rounded-full blur-md opacity-50 animate-pulse ${type === 'hot' ? 'bg-orange-500' : 'bg-blue-500'}`} />
-                  <div className="relative w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
-                    {type === 'hot' ? 
-                      <Flame className="w-5 h-5 text-orange-500" /> : 
-                      <Snowflake className="w-5 h-5 text-blue-500" />
-                    }
+        {!loading && players && players.length > 0
+          ? players.map((player) => (
+              <DashboardPlayerRow
+                key={player.player_id}
+                playerId={player.player_id}
+                name={player.name}
+                team={player.team}
+                owner={player.owner_name}
+                // AVATAR: Glowing Icon (Flame or Snowflake)
+                avatar={
+                  <div className="relative w-10 h-10 flex items-center justify-center">
+                    <div
+                      className={`absolute inset-0 rounded-full blur-md opacity-50 animate-pulse ${type === 'hot' ? 'bg-orange-500' : 'bg-blue-500'}`}
+                    />
+                    <div className="relative w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
+                      {type === 'hot' ? (
+                        <Flame className="w-5 h-5 text-orange-500" />
+                      ) : (
+                        <Snowflake className="w-5 h-5 text-blue-500" />
+                      )}
+                    </div>
                   </div>
-                </div>
-              }
-              // STATS: Percentage + Avg
-              rightContent={
-                <>
-                  <div className={`flex items-center justify-end gap-1 text-sm font-bold text-${cfg.color}-400`}>
-                    <TrendIcon className="w-3 h-3" />
-                    {Math.abs(player.trend_pct)}%
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {player.recent_avg.toFixed(1)} pts
-                  </div>
-                </>
-              }
-            />
-          ))
-        ) : (
-          !loading && (
-            <div className="text-center text-muted-foreground py-8">
-              {cfg.emptyMessage}
-            </div>
-          )
-        )}
+                }
+                // STATS: Percentage + Avg
+                rightContent={
+                  <>
+                    <div
+                      className={`flex items-center justify-end gap-1 text-sm font-bold text-${cfg.color}-400`}
+                    >
+                      <TrendIcon className="w-3 h-3" />
+                      {Math.abs(player.trend_pct)}%
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {player.recent_avg.toFixed(1)} pts
+                    </div>
+                  </>
+                }
+              />
+            ))
+          : !loading && (
+              <div className="text-center text-muted-foreground py-8">{cfg.emptyMessage}</div>
+            )}
       </div>
     </Card>
   );

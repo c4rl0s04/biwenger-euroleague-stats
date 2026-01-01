@@ -21,9 +21,12 @@ export default function StatsLeadersCard() {
 
   // Fetch data based on the selected stat
   // API URL example: /api/stats/leaders?type=rebounds
-  const { data: leaders = [], loading } = useApiData(`/api/stats/leaders?type=${currentConfig.query}`, {
-    dependencies: [statType] // Re-fetch when statType changes
-  });
+  const { data: leaders = [], loading } = useApiData(
+    `/api/stats/leaders?type=${currentConfig.query}`,
+    {
+      dependencies: [statType], // Re-fetch when statType changes
+    }
+  );
 
   // The dropdown selector for the card header
   const statSelector = (
@@ -52,40 +55,36 @@ export default function StatsLeadersCard() {
       className="card-glow"
     >
       <div className="flex flex-col">
-        {!loading && leaders && leaders.length > 0 ? (
-          leaders.map((player, index) => (
-            <DashboardPlayerRow
-              key={`${statType}-${player.player_id}`}
-              playerId={player.player_id}
-              name={player.name}
-              team={player.team}
-              owner={player.owner_name}
-              // AVATAR: Simple Rank Number
-              avatar={
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">
-                  {index + 1}
-                </div>
-              }
-              // STATS: Dynamic Value based on selection
-              rightContent={
-                <div className="text-right">
-                  <div className={`font-bold text-base ${currentConfig.color}`}>
-                    {player.value}
+        {!loading && leaders && leaders.length > 0
+          ? leaders.map((player, index) => (
+              <DashboardPlayerRow
+                key={`${statType}-${player.player_id}`}
+                playerId={player.player_id}
+                name={player.name}
+                team={player.team}
+                owner={player.owner_name}
+                // AVATAR: Simple Rank Number
+                avatar={
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">
+                    {index + 1}
                   </div>
-                  <div className="text-[10px] text-muted-foreground uppercase">
-                    {currentConfig.unit}
+                }
+                // STATS: Dynamic Value based on selection
+                rightContent={
+                  <div className="text-right">
+                    <div className={`font-bold text-base ${currentConfig.color}`}>
+                      {player.value}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground uppercase">
+                      {currentConfig.unit}
+                    </div>
                   </div>
-                </div>
-              }
-            />
-          ))
-        ) : (
-          !loading && (
-            <div className="text-center text-muted-foreground py-8">
-              No hay datos disponibles
-            </div>
-          )
-        )}
+                }
+              />
+            ))
+          : !loading && (
+              <div className="text-center text-muted-foreground py-8">No hay datos disponibles</div>
+            )}
       </div>
     </Card>
   );

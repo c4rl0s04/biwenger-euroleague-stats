@@ -9,21 +9,17 @@ export default function DashboardPlayerRow({
   name,
   team,
   owner,
-  avatar,       // The circular icon/image component
+  avatar, // The circular icon/image component
   rightContent, // The stats (Points, Price, etc.)
 }) {
   return (
     // FIXED HEIGHT: h-20 (80px) is tall enough for 3 distinct lines without feeling cramped
     <div className="flex items-center gap-4 h-20 px-3 border-b border-border/50 last:border-0 group/item transition-all hover:bg-secondary/20">
-      
       {/* 1. Left: Avatar Container */}
-      <div className="w-10 flex justify-center shrink-0">
-        {avatar}
-      </div>
+      <div className="w-10 flex justify-center shrink-0">{avatar}</div>
 
       {/* 2. Middle: Player Info (Strict 3-Line Grid) */}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        
         {/* Line 1: Player Name */}
         <Link
           href={`/player/${playerId}`}
@@ -31,7 +27,7 @@ export default function DashboardPlayerRow({
         >
           {name}
         </Link>
-        
+
         {/* Line 2: Team Name */}
         <div className="text-xs text-muted-foreground truncate leading-tight mb-0.5">
           {getShortTeamName(team)}
@@ -51,7 +47,6 @@ export default function DashboardPlayerRow({
             </span>
           )}
         </div>
-
       </div>
 
       {/* 3. Right: Stats Container */}
