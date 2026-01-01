@@ -70,40 +70,44 @@ export default function StreakCard({ type = 'hot' }) {
       color={cfg.color}
       loading={loading}
       actionRight={infoTooltip}
+      className="card-glow"
     >
       {!loading && (
-        <div className="flex-1 flex flex-col justify-between gap-2">
+        <div className="flex-1 flex flex-col justify-between gap-0">
           {players && players.length > 0 ? (
             players.map((player) => (
               <div
                 key={player.player_id}
-                className={`p-3 bg-secondary/40 rounded-lg border border-border/30 hover:border-${cfg.color}-600/50 transition-all`}
+                className={`flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors hover:bg-${cfg.color}-500/5`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/player/${player.player_id}`}
-                      className={`font-medium text-foreground text-sm hover:text-${cfg.color}-400 transition-colors block`}
-                    >
-                      {player.name}
-                    </Link>
-                    <div className="text-xs text-muted-foreground">
-                      {getShortTeamName(player.team)} · {player.position}
-                    </div>
+                <div className="flex-1 min-w-0">
+                  <Link
+                    href={`/player/${player.player_id}`}
+                    className={`font-medium text-foreground text-sm hover:text-${cfg.color}-400 transition-colors block truncate`}
+                  >
+                    {player.name}
+                  </Link>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                    <span>{getShortTeamName(player.team)}</span>
+                    <span>·</span>
+                    <span>{player.position}</span>
                     {player.owner_name && (
-                      <div className="text-xs text-blue-400">👤 {player.owner_name}</div>
+                      <>
+                        <span className="ml-1">|</span>
+                        <span className={`text-${cfg.color}-400 ml-1`}>👤 {player.owner_name}</span>
+                      </>
                     )}
                   </div>
-                  <div className="text-right ml-3">
-                    <div
-                      className={`flex items-center gap-1 text-sm font-bold text-${cfg.color}-400`}
-                    >
-                      <TrendIcon className="w-4 h-4" />
-                      {Math.abs(player.trend_pct)}%
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {player.recent_avg.toFixed(1)} pts/g
-                    </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div
+                    className={`flex items-center justify-end gap-1 text-sm font-bold text-${cfg.color}-400`}
+                  >
+                    <TrendIcon className="w-4 h-4" />
+                    {Math.abs(player.trend_pct)}%
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {player.recent_avg.toFixed(1)} pts/g
                   </div>
                 </div>
               </div>
