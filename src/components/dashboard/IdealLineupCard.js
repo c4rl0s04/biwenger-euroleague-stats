@@ -63,21 +63,21 @@ export default function IdealLineupCard() {
       color="indigo"
       loading={loading}
       actionRight={data ? headerInfo : null}
+      className="card-glow"
     >
       {!loading && lineup && lineup.length > 0 ? (
-        <div className="flex-1 flex flex-col justify-between gap-2 relative z-10">
+        <div className="flex-1 flex flex-col justify-between gap-0 relative z-10">
           {lineup.map((player) => {
             const style = getPositionStyles(player.position);
 
             return (
               <div
                 key={player.player_id}
-                className="p-2 bg-secondary/40 rounded-lg border border-border/30 hover:bg-secondary/60 transition-all flex items-center gap-3"
+                className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors"
               >
                 <div className="relative shrink-0">
-                  {/* Large Circle with Position Style */}
                   <div
-                    className={`w-11 h-11 rounded-full overflow-hidden border-2 ${style.border} bg-secondary flex items-center justify-center shadow-sm ${style.ring}`}
+                    className={`w-10 h-10 rounded-full overflow-hidden border-2 ${style.border} bg-secondary flex items-center justify-center shadow-sm ${style.ring}`}
                   >
                     <img
                       src={player.img}
@@ -101,10 +101,10 @@ export default function IdealLineupCard() {
                   >
                     {player.name}
                   </Link>
-                  <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mt-0.5">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                     <span>{getShortTeamName(player.team)}</span>
                     {player.owner_name && (
-                      <span className="text-indigo-300 truncate text-[11px]">
+                      <span className="text-indigo-300 truncate text-[11px] ml-1">
                         👤 {player.owner_name}
                       </span>
                     )}
@@ -113,7 +113,7 @@ export default function IdealLineupCard() {
 
                 <div className="text-right shrink-0">
                   <span
-                    className={`text-sm font-bold px-2.5 py-1 rounded-md ${getScoreColor(player.points)}`}
+                    className={`text-sm font-bold px-2 py-0.5 rounded-md ${getScoreColor(player.points)}`}
                   >
                     {player.points}
                   </span>
