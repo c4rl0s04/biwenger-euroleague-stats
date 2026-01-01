@@ -43,7 +43,7 @@ export default function MarketActivityCard() {
               className="flex items-center justify-between py-3 border-b border-border/50 last:border-0 hover:bg-secondary/20 px-2 rounded transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-foreground">
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
                   {transfer.player_name?.charAt(0) || '?'}
                 </div>
                 <div>
