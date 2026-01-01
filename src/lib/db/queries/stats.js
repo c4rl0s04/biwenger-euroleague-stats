@@ -202,7 +202,9 @@ export function getStatLeaders(type = 'points') {
       p.team,
       p.owner_id,
       u.name as owner_name,
-      SUM(prs.${column}) as value
+      SUM(prs.${column}) as value,
+      COUNT(prs.id) as games_played,
+      ROUND(AVG(prs.${column}), 1) as avg_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN users u ON p.owner_id = u.id

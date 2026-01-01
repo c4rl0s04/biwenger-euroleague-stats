@@ -141,12 +141,33 @@ export default function StatsLeadersCard() {
                   </div>
                 }
                 rightContent={
-                  <div className="text-right">
-                    <div className={`font-bold text-base ${displayConfig.color}`}>
-                      {player.value}
+                  <div className="flex items-center gap-4 text-right">
+                    {/* Total with stat name */}
+                    <div>
+                      <div className={`font-bold text-base ${displayConfig.color}`}>
+                        {player.value}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {displayConfig.label}
+                      </div>
                     </div>
-                    <div className="text-[10px] text-muted-foreground uppercase">
-                      {displayConfig.unit}
+                    {/* Average per game */}
+                    <div>
+                      <div className="font-bold text-base text-foreground">
+                        {player.avg_value}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        Promedio
+                      </div>
+                    </div>
+                    {/* Games played */}
+                    <div>
+                      <div className="font-bold text-base text-foreground">
+                        {player.games_played}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        Partidos
+                      </div>
                     </div>
                   </div>
                 }
