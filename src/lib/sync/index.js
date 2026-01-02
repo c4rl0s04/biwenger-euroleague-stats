@@ -125,7 +125,7 @@ async function syncData() {
         // Biwenger round 1 corresponds to Euroleague game codes 1-8 (8 games per round)
         const roundNumber = parseInt(baseName.replace(/\D/g, '')) || 0;
         if (roundNumber > 0) {
-          const gamesPerRound = 9; // Euroleague has 18 teams = 9 games per round
+          const gamesPerRound = Math.floor(Object.keys(teams).length / 2) || 9; // Dynamic based on teams count
           const startGameCode = (roundNumber - 1) * gamesPerRound + 1;
           const endGameCode = startGameCode + gamesPerRound - 1;
 

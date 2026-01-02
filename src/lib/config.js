@@ -13,6 +13,9 @@ export const CONFIG = {
     LEAGUE_ID: process.env.BIWENGER_LEAGUE_ID,
     USER_ID: process.env.BIWENGER_USER_ID,
   },
+  EUROLEAGUE: {
+    SEASON_CODE: process.env.EUROLEAGUE_SEASON_CODE,
+  },
   DB: {
     PATH: path.join(process.cwd(), 'data', 'local.db'),
   },

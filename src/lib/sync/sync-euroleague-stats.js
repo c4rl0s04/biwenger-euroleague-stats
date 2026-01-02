@@ -4,8 +4,9 @@ import {
   parseBoxScoreStats,
   normalizePlayerName,
 } from '../api/euroleague-client.js';
+import { CONFIG } from '../config.js';
 
-const CURRENT_SEASON = 'E2025';
+const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 
 /**
  * Syncs game stats from Euroleague official API.
