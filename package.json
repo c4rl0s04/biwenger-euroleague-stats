@@ -10,6 +10,7 @@
     "lint": "eslint",
     "format": "prettier --write src/",
     "sync": "node src/lib/sync/index.js",
+    "seed": "node src/lib/sync/seed-mock.js",
     "test": "vitest",
     "analyze": "ANALYZE=true next build --webpack",
     "prepare": "husky"

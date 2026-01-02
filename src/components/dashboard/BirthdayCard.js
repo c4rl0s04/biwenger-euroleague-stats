@@ -13,12 +13,12 @@ export default function BirthdayCard() {
       {!loading && (
         <div className="relative flex-1 flex flex-col h-full">
           {birthdays && birthdays.length > 0 ? (
-            <div className="space-y-3 flex-1">
+            <div className="space-y-0 flex-1">
               {birthdays.map((player) => (
-                <div
-                  key={player.id}
-                  className="flex items-center gap-3 p-3 bg-pink-500/10 rounded-lg border border-pink-500/20"
-                >
+              <div
+                key={player.id}
+                className="flex items-center gap-3 py-3 border-b border-white/5 last:border-0 hover:bg-white/5 rounded-lg px-2 transition-colors"
+              >
                   <Sparkles className="w-5 h-5 text-pink-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <Link
@@ -42,7 +42,7 @@ export default function BirthdayCard() {
                       <div className="text-xs text-pink-400 mt-0.5">👤 {player.owner_name}</div>
                     )}
                   </div>
-                  <div className="text-2xl">🎂</div>
+
                 </div>
               ))}
             </div>

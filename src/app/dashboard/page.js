@@ -10,6 +10,7 @@ import {
   LeaderGapCard,
   HomeAwayCard,
   LeagueComparisonCard,
+  NextMatchesCard,
 } from '@/components/dashboard';
 
 // Below-the-fold: Lazy load for better initial page load
@@ -72,6 +73,11 @@ const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLi
   ssr: true,
 });
 
+const NextMatchesCardDynamic = nextDynamic(() => import('@/components/dashboard/NextMatchesCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
 export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
@@ -107,10 +113,14 @@ export default function Dashboard() {
         background="section-base"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
           <TopFormCard />
           <CaptainSuggestCard />
           <MarketOpportunitiesCard />
           <StandingsCard />
+        </div>
+        <div className="mt-4">
+          <NextMatchesCardDynamic />
         </div>
       </Section>
 

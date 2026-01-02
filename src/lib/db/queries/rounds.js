@@ -61,7 +61,31 @@ export function getNextRound() {
     JOIN NextMatchRound nm ON m.round_id = nm.round_id
     GROUP BY m.round_id
   `;
-  return db.prepare(query).get();
+  const round = db.prepare(query).get();
+
+  if (round) {
+    const matchesQuery = `
+      SELECT 
+        m.home_team, 
+        m.away_team, 
+        m.date, 
+        m.status,
+        m.home_score,
+        m.away_score,
+        t1.img as home_logo,
+        t1.short_name as home_short,
+        t2.img as away_logo,
+        t2.short_name as away_short
+      FROM matches m
+      LEFT JOIN teams t1 ON m.home_id = t1.id
+      LEFT JOIN teams t2 ON m.away_id = t2.id
+      WHERE m.round_id = ? 
+      ORDER BY m.date ASC
+    `;
+    round.matches = db.prepare(matchesQuery).all(round.round_id);
+  }
+
+  return round;
 }
 
 /**

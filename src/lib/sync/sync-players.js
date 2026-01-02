@@ -1,4 +1,5 @@
 import { fetchAllPlayers, fetchPlayerDetails } from '../api/biwenger-client.js';
+import { getShortTeamName } from '../utils/format.js';
 import { CONFIG } from '../config.js';
 
 const SLEEP_MS = 600; // Mantenemos la pausa segura para evitar el error 429
@@ -101,6 +102,29 @@ export async function syncPlayers(db) {
   const teams =
     (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
 
+  // --- 1.1 SYNC TEAMS ---
+  console.log('Syncing Teams...');
+  
+  // --- 1.1 SYNC TEAMS ---
+  console.log('Syncing Teams...');
+  const insertTeam = db.prepare(`
+    INSERT INTO teams (id, name, short_name, img) VALUES (@id, @name, @short_name, @img)
+    ON CONFLICT(id) DO UPDATE SET name=excluded.name, short_name=excluded.short_name, img=excluded.img
+  `);
+
+  const teamTx = db.transaction(() => {
+    for (const [teamId, teamData] of Object.entries(teams)) {
+      insertTeam.run({
+        id: parseInt(teamId),
+        name: teamData.name,
+        short_name: getShortTeamName(teamData.name),
+        img: teamData.img || `https://cdn.biwenger.com/teams/${teamId}.png`, // Fallback
+      });
+    }
+  });
+  teamTx();
+  console.log(`✅ Synced ${Object.keys(teams).length} teams.`);
+
   // --- 2. PROCESSING ---
 
   for (const [id, player] of Object.entries(playersList)) {
@@ -110,6 +134,7 @@ export async function syncPlayers(db) {
     insertPlayer.run({
       id: playerId,
       name: player.name,
+      team_id: player.teamID,
       team: teams[player.teamID]?.name || 'Unknown',
       position: positions[player.position] || 'Unknown',
       puntos: player.points || 0,

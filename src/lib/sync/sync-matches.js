@@ -19,8 +19,8 @@ export async function syncMatches(db, round, playersList = {}) {
 
     if (gamesData.data && gamesData.data.games) {
       const insertMatch = db.prepare(`
-                INSERT INTO matches (round_id, round_name, home_team, away_team, date, status, home_score, away_score)
-                VALUES (@round_id, @round_name, @home_team, @away_team, @date, @status, @home_score, @away_score)
+                INSERT INTO matches (round_id, round_name, home_team, home_id, away_team, away_id, date, status, home_score, away_score)
+                VALUES (@round_id, @round_name, @home_team, @home_id, @away_team, @away_id, @date, @status, @home_score, @away_score)
                 ON CONFLICT(round_id, home_team, away_team) DO UPDATE SET
                 round_name=excluded.round_name,
                 status=excluded.status,
@@ -35,7 +35,9 @@ export async function syncMatches(db, round, playersList = {}) {
             round_id: dbRoundId,
             round_name: roundName,
             home_team: game.home.name,
+            home_id: game.home.id,
             away_team: game.away.name,
+            away_id: game.away.id,
             date: new Date(game.date * 1000).toISOString(),
             status: game.status,
             home_score: game.home.score,

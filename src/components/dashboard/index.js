@@ -39,4 +39,5 @@ export { default as BirthdayCard } from './BirthdayCard';
 
 // Layout
 export { default as KpiBentoCard } from './KpiBentoCard';
+export { default as NextMatchesCard } from './NextMatchesCard';
 export { default as NextRoundSubtitle } from './NextRoundSubtitle';

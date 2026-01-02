@@ -15,6 +15,18 @@ export function ensureSchema(db) {
   `
   ).run();
 
+  // 1b. Teams Table
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS teams (
+      id INTEGER PRIMARY KEY,
+      name TEXT,
+      short_name TEXT,
+      img TEXT
+    )
+  `
+  ).run();
+
   // 2. Players Table (id is Biwenger player ID, not auto-increment)
   db.prepare(
     `
@@ -259,6 +271,27 @@ export function ensureSchema(db) {
       db.prepare('ALTER TABLE player_round_stats ADD COLUMN valuation INTEGER').run();
     } catch (e) {}
   }
+  
+
+  
+  // Migration: Add home_id/away_id to matches
+  const matchesInfo = db.prepare('PRAGMA table_info(matches)').all();
+  if (!matchesInfo.some((c) => c.name === 'home_id')) {
+    console.log('Migrating matches table (adding team IDs)...');
+    try {
+      db.prepare('ALTER TABLE matches ADD COLUMN home_id INTEGER').run();
+      db.prepare('ALTER TABLE matches ADD COLUMN away_id INTEGER').run();
+    } catch (e) {}
+  }
+  
+  // Migration: Add team_id to players
+  const playersInfoChecks = db.prepare('PRAGMA table_info(players)').all();
+  if (!playersInfoChecks.some((c) => c.name === 'team_id')) {
+    console.log('Migrating players table (adding team_id)...');
+    try {
+      db.prepare('ALTER TABLE players ADD COLUMN team_id INTEGER').run();
+    } catch (e) {}
+  }
 
   // Migration: Check for round_id in lineups
   const lineupsInfo = db.prepare('PRAGMA table_info(lineups)').all();
@@ -321,5 +354,14 @@ export function ensureSchema(db) {
     } catch (e) {
       // Index might already exist or column doesn't exist yet
     }
+  }
+
+  // Migration: Add short_name to teams
+  const teamsInfo = db.prepare('PRAGMA table_info(teams)').all();
+  if (!teamsInfo.some((c) => c.name === 'short_name')) {
+    console.log('Migrating teams table (adding short_name)...');
+    try {
+      db.prepare('ALTER TABLE teams ADD COLUMN short_name TEXT').run();
+    } catch (e) {}
   }
 }
