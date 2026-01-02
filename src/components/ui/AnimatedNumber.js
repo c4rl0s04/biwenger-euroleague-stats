@@ -6,7 +6,7 @@ import { motion, useSpring, useTransform, useInView } from 'framer-motion';
 /**
  * AnimatedNumber - A component that animates numbers counting up/down
  * Uses framer-motion for smooth spring-based animations
- * 
+ *
  * @param {number} value - The target number to animate to
  * @param {string} className - Additional CSS classes
  * @param {number} duration - Animation duration in seconds (default: 1)
@@ -26,7 +26,7 @@ export default function AnimatedNumber({
 }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
-  
+
   // Spring animation for smooth counting
   const spring = useSpring(0, {
     stiffness: 100,
@@ -62,16 +62,12 @@ export default function AnimatedNumber({
  * AnimatedCounter - A simpler version for quick counting animations
  * Good for dashboard KPIs
  */
-export function AnimatedCounter({ 
-  value, 
-  className = '',
-  formatOptions = {},
-}) {
+export function AnimatedCounter({ value, className = '', formatOptions = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
-  
+
   const spring = useSpring(0, { stiffness: 75, damping: 25 });
-  
+
   const display = useTransform(spring, (latest) => {
     return Math.round(latest).toLocaleString('es-ES', formatOptions);
   });

@@ -128,9 +128,9 @@ async function syncData() {
           const gamesPerRound = 9; // Euroleague has 18 teams = 9 games per round
           const startGameCode = (roundNumber - 1) * gamesPerRound + 1;
           const endGameCode = startGameCode + gamesPerRound - 1;
-          
+
           console.log(`   📊 Fetching Euroleague games ${startGameCode}-${endGameCode}...`);
-          
+
           for (let gameCode = startGameCode; gameCode <= endGameCode; gameCode++) {
             await syncEuroleagueGameStats(db, gameCode, round.dbId || round.id, round.name);
           }

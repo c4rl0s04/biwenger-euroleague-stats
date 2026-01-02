@@ -271,9 +271,7 @@ export function ensureSchema(db) {
       db.prepare('ALTER TABLE player_round_stats ADD COLUMN valuation INTEGER').run();
     } catch (e) {}
   }
-  
 
-  
   // Migration: Add home_id/away_id to matches
   const matchesInfo = db.prepare('PRAGMA table_info(matches)').all();
   if (!matchesInfo.some((c) => c.name === 'home_id')) {
@@ -283,7 +281,7 @@ export function ensureSchema(db) {
       db.prepare('ALTER TABLE matches ADD COLUMN away_id INTEGER').run();
     } catch (e) {}
   }
-  
+
   // Migration: Add team_id to players
   const playersInfoChecks = db.prepare('PRAGMA table_info(players)').all();
   if (!playersInfoChecks.some((c) => c.name === 'team_id')) {

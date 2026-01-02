@@ -104,7 +104,7 @@ export async function syncPlayers(db) {
 
   // --- 1.1 SYNC TEAMS ---
   console.log('Syncing Teams...');
-  
+
   // --- 1.1 SYNC TEAMS ---
   console.log('Syncing Teams...');
   const insertTeam = db.prepare(`

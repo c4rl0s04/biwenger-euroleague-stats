@@ -14,7 +14,10 @@ export default function NextMatchesCard() {
     return (
       <div className="flex gap-4 overflow-hidden py-2">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="min-w-[240px] h-32 rounded-xl bg-card border border-border animate-pulse" />
+          <div
+            key={i}
+            className="min-w-[240px] h-32 rounded-xl bg-card border border-border animate-pulse"
+          />
         ))}
       </div>
     );
@@ -49,54 +52,52 @@ export default function NextMatchesCard() {
 
               {/* Teams */}
               <div className="space-y-3">
-
-
                 {/* Home */}
                 <div className="flex justify-between items-center group/home">
                   <div className="flex items-center gap-3">
-                     {match.home_logo && (
-                        <img 
-                          src={match.home_logo} 
-                          alt={match.home_team} 
-                          className="w-8 h-8 object-contain"
-                          onError={(e) => e.target.style.display = 'none'}
-                        />
-                     )}
-                     <span className="font-display text-lg text-foreground group-hover/home:text-blue-400 transition-colors">
-                        {match.home_short || getShortTeamName(match.home_team)}
-                     </span>
+                    {match.home_logo && (
+                      <img
+                        src={match.home_logo}
+                        alt={match.home_team}
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => (e.target.style.display = 'none')}
+                      />
+                    )}
+                    <span className="font-display text-lg text-foreground group-hover/home:text-blue-400 transition-colors">
+                      {match.home_short || getShortTeamName(match.home_team)}
+                    </span>
                   </div>
                   {match.home_score !== null && (
                     <span className="font-mono text-lg">{match.home_score}</span>
                   )}
                 </div>
-                
+
                 {/* Away */}
                 <div className="flex justify-between items-center group/away">
                   <div className="flex items-center gap-3">
-                     {match.away_logo && (
-                        <img 
-                          src={match.away_logo} 
-                          alt={match.away_team} 
-                          className="w-8 h-8 object-contain" 
-                          onError={(e) => e.target.style.display = 'none'}
-                        />
-                     )}
-                     <span className="font-display text-lg text-foreground group-hover/away:text-blue-400 transition-colors">
-                        {match.away_short || getShortTeamName(match.away_team)}
-                     </span>
+                    {match.away_logo && (
+                      <img
+                        src={match.away_logo}
+                        alt={match.away_team}
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => (e.target.style.display = 'none')}
+                      />
+                    )}
+                    <span className="font-display text-lg text-foreground group-hover/away:text-blue-400 transition-colors">
+                      {match.away_short || getShortTeamName(match.away_team)}
+                    </span>
                   </div>
                   {match.away_score !== null && (
-                     <span className="font-mono text-lg">{match.away_score}</span>
+                    <span className="font-mono text-lg">{match.away_score}</span>
                   )}
                 </div>
               </div>
 
               {/* VS Divider (Decorative) */}
               {match.home_score === null && (
-                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[40px] font-display text-white/5 pointer-events-none">
-                   VS
-                 </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[40px] font-display text-white/5 pointer-events-none">
+                  VS
+                </div>
               )}
             </div>
           );

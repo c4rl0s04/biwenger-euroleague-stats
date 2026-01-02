@@ -57,13 +57,13 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName) 
 
     // 3. Fetch box score with player stats
     const boxscore = await fetchBoxScore(gameCode, CURRENT_SEASON);
-    
+
     // Handle future games with no stats yet
     if (!boxscore) {
       console.log(`   ⏭️ Game ${gameCode} has no box score yet (future game)`);
       return { success: true, reason: 'no_boxscore_yet' };
     }
-    
+
     const playerStats = parseBoxScoreStats(boxscore);
 
     if (playerStats.length === 0) {

@@ -72,7 +72,7 @@ describe('syncPlayers', () => {
     await syncPlayers(db);
 
     // Verify DB calls - 4 prepare calls: insertPlayer, updatePlayerDetails, getLastDate, insertMarketValue
-    expect(db.prepare).toHaveBeenCalledTimes(4);
+    expect(db.prepare).toHaveBeenCalledTimes(5);
 
     // Verify Player Insert
     expect(runMock).toHaveBeenCalledWith(

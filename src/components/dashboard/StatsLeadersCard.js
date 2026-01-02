@@ -147,27 +147,21 @@ export default function StatsLeadersCard() {
                       <div className={`font-bold text-base ${displayConfig.color}`}>
                         <AnimatedNumber value={player.value} duration={0.8} />
                       </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        {displayConfig.label}
-                      </div>
+                      <div className="text-[10px] text-muted-foreground">{displayConfig.label}</div>
                     </div>
                     {/* Average per game */}
                     <div>
                       <div className="font-bold text-base text-foreground">
                         <AnimatedNumber value={player.avg_value} decimals={1} duration={0.8} />
                       </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        Promedio
-                      </div>
+                      <div className="text-[10px] text-muted-foreground">Promedio</div>
                     </div>
                     {/* Games played */}
                     <div>
                       <div className="font-bold text-base text-foreground">
                         <AnimatedNumber value={player.games_played} duration={0.8} />
                       </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        Partidos
-                      </div>
+                      <div className="text-[10px] text-muted-foreground">Partidos</div>
                     </div>
                   </div>
                 }
