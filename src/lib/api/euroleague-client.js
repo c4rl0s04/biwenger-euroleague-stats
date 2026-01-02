@@ -3,7 +3,39 @@
  * Uses the public live.euroleague.net API endpoints
  */
 
-const BASE_URL = 'https://live.euroleague.net/api';
+import { XMLParser } from 'fast-xml-parser';
+
+const API_V1_URL = 'https://api-live.euroleague.net';
+const API_LEGACY_URL = 'https://live.euroleague.net/api';
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '',
+  parseAttributeValue: true,
+});
+
+/**
+ * Fetch all teams and their rosters
+ * Returns deeply nested structure: { clubs: { club: [ { code: "MAD", name: "Real Madrid", members: { member: [...] } } ] } }
+ * @param {string} season - Season code
+ * @returns {Promise<Object>} Parsed XML object
+ */
+export async function fetchTeams(season = 'E2024') {
+  // V1 API uses api-live domain
+  const url = `${API_V1_URL}/v1/teams?seasonCode=${season}&competitionCode=E`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
+
+    const xml = await response.text();
+    const result = parser.parse(xml);
+    return result;
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+    throw error;
+  }
+}
 
 /**
  * Fetch box score for a game (player stats)
@@ -11,8 +43,9 @@ const BASE_URL = 'https://live.euroleague.net/api';
  * @param {string} season - Season code (e.g., 'E2024' for 2024-25 Euroleague)
  * @returns {Promise<Object|null>} Box score with player stats, or null if game doesn't exist
  */
-export async function fetchBoxScore(gameCode, season = 'E2025') {
-  const url = `${BASE_URL}/Boxscore?gamecode=${gameCode}&seasoncode=${season}`;
+export async function fetchBoxScore(gameCode, season = 'E2024') {
+  // Legacy API uses live.euroleague.net domain
+  const url = `${API_LEGACY_URL}/Boxscore?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
     const response = await fetch(url);
@@ -27,7 +60,13 @@ export async function fetchBoxScore(gameCode, season = 'E2025') {
       return null; // Game hasn't been played yet
     }
 
-    return JSON.parse(text);
+    // Try to parse as JSON. If it fails, might be an XML error page or empty
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.warn(`Failed to parse BoxScore JSON for game ${gameCode}:`, text.substring(0, 100));
+      return null;
+    }
   } catch (error) {
     console.error(`Error fetching box score for game ${gameCode}:`, error);
     throw error;
@@ -40,8 +79,9 @@ export async function fetchBoxScore(gameCode, season = 'E2025') {
  * @param {string} season - Season code
  * @returns {Promise<Object|null>} Game header info, or null if game doesn't exist
  */
-export async function fetchGameHeader(gameCode, season = 'E2025') {
-  const url = `${BASE_URL}/Header?gamecode=${gameCode}&seasoncode=${season}`;
+export async function fetchGameHeader(gameCode, season = 'E2024') {
+  // Legacy API uses live.euroleague.net domain
+  const url = `${API_LEGACY_URL}/Header?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
     const response = await fetch(url);

@@ -64,8 +64,38 @@ export function getNextRound() {
   const round = db.prepare(query).get();
 
   if (round) {
+    // 1. Calculate Standings (Positions)
+    // Based on number of wins from finished matches
+    const standingsQuery = `
+      WITH TeamResults AS (
+        SELECT home_id as team_id, CASE WHEN home_score > away_score THEN 1 ELSE 0 END as win
+        FROM matches WHERE status = 'finished'
+        UNION ALL
+        SELECT away_id as team_id, CASE WHEN away_score > home_score THEN 1 ELSE 0 END as win
+        FROM matches WHERE status = 'finished'
+      ),
+      TeamStats AS (
+        SELECT team_id, SUM(win) as wins
+        FROM TeamResults
+        GROUP BY team_id
+      )
+      SELECT team_id, RANK() OVER (ORDER BY wins DESC) as position
+      FROM TeamStats
+    `;
+
+    let positionMap = new Map();
+    try {
+      const standings = db.prepare(standingsQuery).all();
+      standings.forEach((s) => positionMap.set(s.team_id, s.position));
+    } catch (err) {
+      console.warn('Could not calculate standings:', err);
+    }
+
+    // 2. Get Matches
     const matchesQuery = `
       SELECT 
+        m.home_id,
+        m.away_id,
         m.home_team, 
         m.away_team, 
         m.date, 
@@ -82,7 +112,15 @@ export function getNextRound() {
       WHERE m.round_id = ? 
       ORDER BY m.date ASC
     `;
-    round.matches = db.prepare(matchesQuery).all(round.round_id);
+
+    round.matches = db
+      .prepare(matchesQuery)
+      .all(round.round_id)
+      .map((match) => ({
+        ...match,
+        home_position: positionMap.get(match.home_id) || null,
+        away_position: positionMap.get(match.away_id) || null,
+      }));
   }
 
   return round;

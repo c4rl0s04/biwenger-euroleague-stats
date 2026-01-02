@@ -1,9 +1,162 @@
 'use client';
 
-import { Calendar } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/utils/format';
-// import { getTeamLogo } from '@/lib/utils/teams'; // Database now handles logos
+
+function DayMatchRow({ dayName, matches, roundName }) {
+  const scrollContainerRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  const checkScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [matches]);
+
+  const scroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+      setTimeout(checkScroll, 300);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 relative group/carousel">
+      {/* Day Header */}
+      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
+        <Calendar className="w-4 h-4 text-blue-400" />
+        {dayName}
+      </div>
+
+      <div className="relative">
+        {/* Left Arrow */}
+        {showLeftArrow && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-background/80 backdrop-blur-sm border border-border rounded-full shadow-lg hover:bg-accent transition-all duration-200 -ml-2 lg:opacity-0 lg:group-hover/carousel:opacity-100 cursor-pointer"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Right Arrow */}
+        {showRightArrow && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-background/80 backdrop-blur-sm border border-border rounded-full shadow-lg hover:bg-accent transition-all duration-200 -mr-2 lg:opacity-0 lg:group-hover/carousel:opacity-100 cursor-pointer"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Matches Row */}
+        <div
+          ref={scrollContainerRef}
+          onScroll={checkScroll}
+          className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-4 px-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        >
+          {matches.map((match, idx) => {
+            const date = new Date(match.date);
+            const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+            return (
+              <div
+                key={idx}
+                className="snap-center shrink-0 w-[260px] bg-card/40 backdrop-blur-sm border border-border/50 rounded-xl hover:border-blue-500/30 transition-all group relative overflow-hidden flex flex-col"
+              >
+                {/* Card Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                {/* Top: Time */}
+                <div className="bg-muted/30 py-3 text-center border-b border-white/5 group-hover:bg-blue-500/5 transition-colors">
+                  <span className="text-2xl font-bold text-foreground font-mono tracking-tight block">
+                    {time}
+                  </span>
+                  {/* Optional: Show score if match is live/finished instead of time, or below? 
+                        For "Next Matches", usually no score, but let's handle it if it exists 
+                    */}
+                  {match.home_score !== null && (
+                    <div className="text-xs font-bold text-blue-400 mt-1">
+                      {match.home_score} - {match.away_score}
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom: Teams Side-by-Side */}
+                <div className="grid grid-cols-2 gap-2 p-3 pt-4 items-start">
+                  {/* Home Team */}
+                  <div className="flex flex-col items-center text-center gap-2 group/home cursor-pointer">
+                    {match.home_logo && (
+                      <div className="relative w-12 h-12 transition-transform group-hover/home:scale-110 duration-200">
+                        <img
+                          src={match.home_logo}
+                          alt={match.home_team}
+                          className="w-full h-full object-contain drop-shadow-md"
+                          onError={(e) => (e.target.style.display = 'none')}
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-display text-base font-bold text-foreground leading-tight group-hover/home:text-blue-400 transition-colors">
+                        {match.home_short || getShortTeamName(match.home_team)}
+                      </span>
+                      {match.home_position && (
+                        <span className="text-[10px] font-mono text-muted-foreground">
+                          {match.home_position}º
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Away Team */}
+                  <div className="flex flex-col items-center text-center gap-2 group/away cursor-pointer">
+                    {match.away_logo && (
+                      <div className="relative w-12 h-12 transition-transform group-hover/away:scale-110 duration-200">
+                        <img
+                          src={match.away_logo}
+                          alt={match.away_team}
+                          className="w-full h-full object-contain drop-shadow-md"
+                          onError={(e) => (e.target.style.display = 'none')}
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-display text-base font-bold text-foreground leading-tight group-hover/away:text-blue-400 transition-colors">
+                        {match.away_short || getShortTeamName(match.away_team)}
+                      </span>
+                      {match.away_position && (
+                        <span className="text-[10px] font-mono text-muted-foreground">
+                          {match.away_position}º
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function NextMatchesCard() {
   const { data, loading } = useApiData('/api/dashboard/next-round');
@@ -25,84 +178,40 @@ export default function NextMatchesCard() {
 
   if (!nextRound?.matches?.length) return null;
 
+  // Group matches by day
+  const matchesByDay = nextRound.matches.reduce((acc, match) => {
+    const date = new Date(match.date);
+    const dateKey = date.toLocaleDateString('es-ES'); // Grouping key
+
+    if (!acc[dateKey]) {
+      acc[dateKey] = {
+        date: date,
+        matches: [],
+      };
+    }
+    acc[dateKey].matches.push(match);
+    return acc;
+  }, {});
+
+  const dayGroups = Object.values(matchesByDay);
+
   return (
-    <div className="w-full">
-      {/* Container with horizontal scroll */}
-      <div className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
-        {nextRound.matches.map((match, idx) => {
-          const date = new Date(match.date);
-          const dayName = date.toLocaleDateString('es-ES', { weekday: 'long' });
-          const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
-          const isEuroleague = true; // Assuming all matches are EL in this context
-
-          return (
-            <div
-              key={idx}
-              className="snap-center shrink-0 min-w-[260px] bg-card border border-border/50 rounded-xl p-4 hover:border-blue-500/30 transition-colors group relative overflow-hidden"
-            >
-              {/* Card Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-              {/* Date Header */}
-              <div className="flex justify-between items-center mb-4 text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                <span className="text-blue-400">{dayName}</span>
-                <span>{time}</span>
-              </div>
-
-              {/* Teams */}
-              <div className="space-y-3">
-                {/* Home */}
-                <div className="flex justify-between items-center group/home">
-                  <div className="flex items-center gap-3">
-                    {match.home_logo && (
-                      <img
-                        src={match.home_logo}
-                        alt={match.home_team}
-                        className="w-8 h-8 object-contain"
-                        onError={(e) => (e.target.style.display = 'none')}
-                      />
-                    )}
-                    <span className="font-display text-lg text-foreground group-hover/home:text-blue-400 transition-colors">
-                      {match.home_short || getShortTeamName(match.home_team)}
-                    </span>
-                  </div>
-                  {match.home_score !== null && (
-                    <span className="font-mono text-lg">{match.home_score}</span>
-                  )}
-                </div>
-
-                {/* Away */}
-                <div className="flex justify-between items-center group/away">
-                  <div className="flex items-center gap-3">
-                    {match.away_logo && (
-                      <img
-                        src={match.away_logo}
-                        alt={match.away_team}
-                        className="w-8 h-8 object-contain"
-                        onError={(e) => (e.target.style.display = 'none')}
-                      />
-                    )}
-                    <span className="font-display text-lg text-foreground group-hover/away:text-blue-400 transition-colors">
-                      {match.away_short || getShortTeamName(match.away_team)}
-                    </span>
-                  </div>
-                  {match.away_score !== null && (
-                    <span className="font-mono text-lg">{match.away_score}</span>
-                  )}
-                </div>
-              </div>
-
-              {/* VS Divider (Decorative) */}
-              {match.home_score === null && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[40px] font-display text-white/5 pointer-events-none">
-                  VS
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+    <div className="w-full flex flex-col gap-8">
+      {dayGroups.map((group, groupIdx) => {
+        const dayName = group.date.toLocaleDateString('es-ES', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        });
+        return (
+          <DayMatchRow
+            key={groupIdx}
+            dayName={dayName}
+            matches={group.matches}
+            roundName={nextRound.round_name}
+          />
+        );
+      })}
     </div>
   );
 }

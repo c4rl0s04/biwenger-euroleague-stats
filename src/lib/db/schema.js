@@ -222,6 +222,17 @@ export function ensureSchema(db) {
   `
   ).run();
 
+  // 13. Player Mappings Table (Linker)
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS player_mappings (
+      biwenger_id INTEGER PRIMARY KEY,
+      euroleague_code TEXT NOT NULL,
+      details_json TEXT
+    )
+  `
+  ).run();
+
   // --- MIGRATIONS ---
   // Apply specific migrations that might be needed for existing databases
 
@@ -355,11 +366,20 @@ export function ensureSchema(db) {
   }
 
   // Migration: Add short_name to teams
+  // Migration: Add short_name and code to teams
   const teamsInfo = db.prepare('PRAGMA table_info(teams)').all();
+
   if (!teamsInfo.some((c) => c.name === 'short_name')) {
     console.log('Migrating teams table (adding short_name)...');
     try {
       db.prepare('ALTER TABLE teams ADD COLUMN short_name TEXT').run();
+    } catch (e) {}
+  }
+
+  if (!teamsInfo.some((c) => c.name === 'code')) {
+    console.log('Migrating teams table (adding Euroleague code column)...');
+    try {
+      db.prepare('ALTER TABLE teams ADD COLUMN code TEXT').run();
     } catch (e) {}
   }
 }

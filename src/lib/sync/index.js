@@ -2,6 +2,7 @@
 
 import Database from 'better-sqlite3';
 import { syncPlayers } from './sync-players.js';
+import { syncEuroleagueMaster } from './sync-euroleague-master.js';
 import { syncStandings } from './sync-standings.js';
 import { syncSquads } from './sync-squads.js';
 import { syncBoard } from './sync-board.js';
@@ -42,6 +43,10 @@ async function syncData() {
     // 1. Sync Players (Required for Foreign Keys)
     // Returns competition data which contains rounds list and teams
     const competition = await syncPlayers(db);
+
+    // 1.5 Sync Euroleague Master Data (Linker & Enrichment)
+    // Needs players and teams to be present first
+    await syncEuroleagueMaster(db);
 
     // 2. Sync Standings (Users)
     await syncStandings(db);
