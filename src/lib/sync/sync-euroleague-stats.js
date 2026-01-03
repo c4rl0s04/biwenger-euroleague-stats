@@ -16,9 +16,18 @@ const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
  * @param {number} gameCode - Euroleague game code (1, 2, 3...)
  * @param {number} roundId - Round ID for our database
  * @param {string} roundName - Round name
+ * @param {Object} options - { activeOnly: boolean }
  */
-export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName) {
+export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, options = {}) {
   console.log(`📊 Syncing Euroleague game ${gameCode} for round ${roundId}...`);
+
+  // OPTIMIZATION: If activeOnly is set, check if we already have a FINAL result for this game
+  if (options.activeOnly) {
+     const existingMatch = db.prepare('SELECT status FROM matches WHERE round_id = ? AND (home_team = ? OR away_team = ?)').get(roundId, 'UNKNOWN_TEAM', 'UNKNOWN_TEAM'); 
+     // The above query is tricky because we don't know the Team ID or Code yet without fetching header.
+     // However, we can check by ROUND and DATE if we TRUST the schedule.
+     // Better approach: Let's fetch the header (cheap call) then decide if we fetch the BOXSCORE (expensive/heavy parsing).
+  }
 
   try {
     // 1. Fetch game header for match info
@@ -55,6 +64,20 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName) 
       home_score: parseInt(header.ScoreA) || 0,
       away_score: parseInt(header.ScoreB) || 0,
     });
+
+    // 2.5 Check activeOnly optimization
+    if (options.activeOnly && !header.Live && header.ScoreA !== null) {
+        // Game is finished. Do we really need to update stats?
+        // If we strictly follow "activeOnly", we skip finished games.
+        // But maybe we want to sync ONCE after finish.
+        // For now, let's assume "activeOnly" means "don't re-sync old stuff".
+        // Use a DB check: does this match already have stats?
+        const statsCount = db.prepare('SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?').get(roundId);
+        if (statsCount.c > 0) {
+            console.log(`   ⏭️ Skipping boxscore (Game Finished & Stats exist & --active-only)`);
+            return { success: true, reason: 'skipped_active_only' };
+        }
+    }
 
     // 3. Fetch box score with player stats
     const boxscore = await fetchBoxScore(gameCode, CURRENT_SEASON);

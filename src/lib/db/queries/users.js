@@ -128,6 +128,7 @@ export function getUserSeasonStats(userId) {
   const userStanding = standings.find((u) => u.user_id === userId);
 
   return {
+    name: user?.name || 'Desconocido',
     ...stats,
     ...positions,
     ...transfers,

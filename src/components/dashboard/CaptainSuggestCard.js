@@ -46,9 +46,13 @@ export default function CaptainSuggestCard() {
 
                 {/* Line 2: Context */}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
-                  <span className="truncate" title={player.team}>
+                  <Link
+                     href={`/team/${encodeURIComponent(player.team)}`}
+                     className="truncate hover:text-yellow-500 transition-colors"
+                     title={player.team}
+                  >
                     {getShortTeamName(player.team)}
-                  </span>
+                  </Link>
                   <span className="w-1 h-1 rounded-full bg-muted"></span>
                   <span className="text-yellow-500/80">{player.form_label}</span>
                 </div>

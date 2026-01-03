@@ -32,7 +32,7 @@ const parsePriceDate = (dateInt) => {
  * @param {import('better-sqlite3').Database} db - Database instance
  * @returns {Promise<Object>} - The full competition data object
  */
-export async function syncPlayers(db) {
+export async function syncPlayers(db, options = {}) {
   console.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
 
@@ -127,6 +127,12 @@ export async function syncPlayers(db) {
 
   // --- 2. PROCESSING ---
 
+  // Check options
+  const skipDetails = options.skipDetails; 
+  if (skipDetails) {
+     console.log('   ⏩ Skipping detailed player fetch (CLI flag --no-details active). Prices/Bio will not be updated.');
+  }
+
   for (const [id, player] of Object.entries(playersList)) {
     const playerId = parseInt(id);
 
@@ -148,6 +154,9 @@ export async function syncPlayers(db) {
       price_increment: player.priceIncrement || 0,
       price: player.price || 0,
     });
+    
+    // SKIP DETAILS IF FLAG IS SET
+    if (skipDetails) continue;
 
     // B) Fetching Extended Details
 

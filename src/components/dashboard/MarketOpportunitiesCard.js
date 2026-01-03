@@ -35,9 +35,13 @@ export default function MarketOpportunitiesCard() {
 
                 {/* Line 2: Context */}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
-                  <span className="truncate" title={player.team}>
+                  <Link
+                    href={`/team/${encodeURIComponent(player.team)}`}
+                    className="truncate hover:text-blue-500 transition-colors"
+                    title={player.team}
+                  >
                     {getShortTeamName(player.team)}
-                  </span>
+                  </Link>
                   <span className="w-1 h-1 rounded-full bg-muted"></span>
                   <span className="text-blue-400 font-mono">
                     {new Intl.NumberFormat('es-ES').format(player.price)}€

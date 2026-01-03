@@ -29,7 +29,19 @@ if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
 const DB_PATH = CONFIG.DB.PATH;
 
 async function syncData() {
+  // --- CLI ARGUMENTS PARSING ---
+  const args = process.argv.slice(2);
+  const flags = {
+    noDetails: args.includes('--no-details'),      // Skip player details (prices/bio) -> SAVES 300 CALLS
+    onlyMarket: args.includes('--only-market'),    // Only sync board/transfers
+    activeOnly: args.includes('--active-only'),    // Only sync active/future matches
+    onlyRound: args.find(a => a.startsWith('--only-round='))?.split('=')[1], // Sync specific round
+    skipEuroleague: args.includes('--skip-euroleague'),
+    matchOnly: args.includes('--only-matches'),    // Only sync matches (no players/market)
+  };
+
   console.log('🚀 Starting Data Sync (Euroleague + Biwenger)...');
+  console.log('   🔧 Config:', JSON.stringify(flags, null, 2));
 
   const db = new Database(DB_PATH);
 
@@ -40,35 +52,65 @@ async function syncData() {
     // 0.5 Cleanup any duplicate rounds from previous syncs
     cleanupDuplicateRounds(db);
 
-    // 1. Sync Players (Required for Foreign Keys)
-    // Returns competition data which contains rounds list and teams
-    const competition = await syncPlayers(db);
+    let competition = { data: { data: { players: {}, teams: {} } } };
+    let playersList = {};
+    let teams = {};
 
-    // 1.5 Sync Euroleague Master Data (Linker & Enrichment)
-    // Needs players and teams to be present first
-    await syncEuroleagueMaster(db);
+    // --- PHASE 1: CORE DATA (Players & Teams) ---
+    // Skip if --only-market or --only-round is passed (unless we need players for mapping)
+    // Actually, we usually need players list for everything. But we can skip DETAILED fetch.
+    
+    if (!flags.onlyMarket && !flags.matchOnly) {
+       // 1. Sync Players
+       // Pass 'noDetails' flag to skip the 300+ calls
+       competition = await syncPlayers(db, { skipDetails: flags.noDetails });
+       
+       playersList = competition.data.data ? competition.data.data.players : competition.data.players;
+       teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
 
-    // 2. Sync Standings (Users)
-    await syncStandings(db);
+       // 1.5 Sync Euroleague Master Data (Linker & Enrichment)
+       if (!flags.skipEuroleague) {
+          await syncEuroleagueMaster(db);
+       }
+    } else {
+        // If skipping sync, load minimal data from DB or mock for references?
+        // For 'onlyMarket', we might need player IDs.
+        // For now, let's assume if onlyMarket, we just fetch the list quickly without details.
+        // Actually, let's just run syncPlayers with skipDetails implicitly if we need list.
+        if (flags.onlyMarket) {
+             console.log('   ℹ️ Fetching basic player list for market sync...');
+             competition = await syncPlayers(db, { skipDetails: true });
+             playersList = competition.data.data ? competition.data.data.players : competition.data.players;
+             teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
+        }
+    }
 
-    // 3. Sync Squads (Current Ownership)
-    await syncSquads(db);
+    // --- PHASE 2: USER DATA & MARKET ---
+    if (!flags.matchOnly && !flags.onlyRound) {
+        // 2. Sync Standings (Users)
+        await syncStandings(db);
 
-    // 4. Sync Board (Transfers & Porras)
-    // Needs players list and teams for filtering/placeholders
-    const playersList = competition.data.data
-      ? competition.data.data.players
-      : competition.data.players;
-    const teams =
-      (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
-    await syncBoard(db, playersList, teams);
+        // 3. Sync Squads (Current Ownership)
+        await syncSquads(db);
 
-    // 5. Sync Initial Squads (Inferred from Transfers & Ownership)
-    // Must run after Board (for transfer history) and Squads (for current ownership)
-    await syncInitialSquads(db);
+        // 4. Sync Board (Transfers & Porras)
+        // Needs players list and teams for filtering/placeholders
+        if (Object.keys(playersList).length > 0) {
+            await syncBoard(db, playersList, teams);
+        }
 
-    console.log('\n✅ Sync process completed successfully!');
+        // 5. Sync Initial Squads (Inferred from Transfers & Ownership)
+        await syncInitialSquads(db);
+    }
+    
+    if (flags.onlyMarket) {
+        console.log('\n✅ Market Sync completed. Exiting.');
+        return;
+    }
 
+    console.log('\n✅ Core Data synced.');
+
+    // --- PHASE 3: MATCHES & STATS ---
     // 5. Sync Lineups and Matches
     console.log('\n📥 Syncing Lineups...');
 
@@ -104,6 +146,11 @@ async function syncData() {
         console.log(`\n--- Processing ${originalName} (${status}) ---`);
 
         if (originalName === 'GLOBAL') continue;
+        
+        // FILTER: --only-round
+        if (flags.onlyRound && round.id.toString() !== flags.onlyRound && round.name !== flags.onlyRound) {
+            continue;
+        }
 
         // Get normalized name and canonical ID using helpers
         const baseName = normalizeRoundName(originalName);
@@ -123,21 +170,33 @@ async function syncData() {
         }
 
         // 1. Sync Match Schedule from Biwenger (populates matches table for ALL rounds, including future)
-        await syncMatches(db, round, playersList);
+        // Actually, syncMatches now uses EuroLeague API to get dates/scores.
+        if (!flags.skipEuroleague) {
+             await syncMatches(db, round, playersList);
+        } else {
+             console.log(`   ⏭️ Skipping matches sync (EuroLeague skipped).`);
+        }
 
         // 2. Sync Game Stats from Euroleague (official data)
         // Euroleague uses game codes (1, 2, 3...) not round IDs
         // Biwenger round 1 corresponds to Euroleague game codes 1-8 (8 games per round)
         const roundNumber = parseInt(baseName.replace(/\D/g, '')) || 0;
         if (roundNumber > 0) {
-          const gamesPerRound = Math.floor(Object.keys(teams).length / 2) || 9; // Dynamic based on teams count
+          // Get team count from sync_meta (set by syncEuroleagueMaster), fallback to 20
+          const metaRow = db.prepare('SELECT value FROM sync_meta WHERE key = ?').get('euroleague_team_count');
+          const teamCount = metaRow ? parseInt(metaRow.value) : 20;
+          const gamesPerRound = Math.floor(teamCount / 2);
           const startGameCode = (roundNumber - 1) * gamesPerRound + 1;
           const endGameCode = startGameCode + gamesPerRound - 1;
 
           console.log(`   📊 Fetching Euroleague games ${startGameCode}-${endGameCode}...`);
 
           for (let gameCode = startGameCode; gameCode <= endGameCode; gameCode++) {
-            await syncEuroleagueGameStats(db, gameCode, round.dbId || round.id, round.name);
+            // Check 'activeOnly' flag? logic inside syncEuroleagueGameStats?
+            // Better to pass the flag.
+            if (!flags.skipEuroleague) {
+                await syncEuroleagueGameStats(db, gameCode, round.dbId || round.id, round.name, { activeOnly: flags.activeOnly });
+            }
           }
         }
 

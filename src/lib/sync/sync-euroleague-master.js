@@ -24,6 +24,17 @@ export async function syncEuroleagueMaster(db) {
     const clubs = Array.isArray(data.clubs.club) ? data.clubs.club : [data.clubs.club];
     console.log(`   Found ${clubs.length} Euroleague clubs.`);
 
+    // Store team count in sync_meta for dynamic games/round calculation
+    const upsertMeta = db.prepare(`
+      INSERT INTO sync_meta (key, value, updated_at) VALUES (@key, @value, @updated_at)
+      ON CONFLICT(key) DO UPDATE SET value = @value, updated_at = @updated_at
+    `);
+    upsertMeta.run({
+      key: 'euroleague_team_count',
+      value: String(clubs.length),
+      updated_at: new Date().toISOString()
+    });
+
     // Prepare Statements
     const updateTeam = db.prepare(`
       UPDATE teams 
@@ -34,25 +45,59 @@ export async function syncEuroleagueMaster(db) {
     // We also want to capture the Euroleague Team Code -> Biwenger Team ID map
     const teamMap = new Map(); // EL Code -> Biwenger ID
 
-    // 1. Sync Teams
+    // Fuzzy matching helper: tokenize name into significant words
+    const tokenize = (name) => {
+      const stopWords = ['FC', 'THE', 'BC', 'BK', 'AND', 'OF', 'DE', 'DEL'];
+      return name
+        .toUpperCase()
+        .replace(/[^A-Z0-9\s]/g, '') // Remove special chars
+        .split(/\s+/)
+        .filter(word => word.length > 2 && !stopWords.includes(word));
+    };
+
+    // Count matching words between two token arrays
+    const countMatchingWords = (tokens1, tokens2) => {
+      return tokens1.filter(t => tokens2.includes(t)).length;
+    };
+
+    // Get current DB teams
+    const dbTeams = db.prepare('SELECT id, name FROM teams').all();
+    console.log('   ℹ️ Current DB Teams:', dbTeams.map(t => t.name).join(', '));
+
+    // Pre-tokenize DB teams
+    const dbTeamsTokenized = dbTeams.map(t => ({
+      ...t,
+      tokens: tokenize(t.name)
+    }));
+
+    // 1. Sync Teams using fuzzy matching
     for (const club of clubs) {
       const code = club.code;
-      const name = club.name;
-      const shortName = getShortTeamName(name);
+      const elName = club.name;
+      const elTokens = tokenize(elName);
+      const shortName = getShortTeamName(club.name);
+      
+      // Find best match by word overlap
+      let bestMatch = null;
+      let bestScore = 0;
 
-      // Try to match with existing Biwenger teams
-      // We use fuzzy matching on name
-      updateTeam.run({
-        code: code,
-        name: name,
-        short_name: shortName,
-        fuzzy_name: `%${name.split(' ')[0]}%`, // Heuristic: "Real" matches "Real Madrid"
-      });
+      for (const dbTeam of dbTeamsTokenized) {
+        const matchCount = countMatchingWords(elTokens, dbTeam.tokens);
+        // Require at least 2 matching words OR >50% of the shorter name
+        const minRequired = Math.min(2, Math.ceil(Math.min(elTokens.length, dbTeam.tokens.length) / 2));
+        
+        if (matchCount >= minRequired && matchCount > bestScore) {
+          bestScore = matchCount;
+          bestMatch = dbTeam;
+        }
+      }
 
-      // Get the ID for our map
-      const teamRow = db.prepare('SELECT id FROM teams WHERE code = ?').get(code);
-      if (teamRow) {
-        teamMap.set(code, teamRow.id);
+      if (bestMatch) {
+        console.log(`   ✅ Matched [${code}] "${elName}" -> DB: "${bestMatch.name}" (${bestScore} words)`);
+        db.prepare('UPDATE teams SET code = ?, short_name = ? WHERE id = ?').run(code, shortName, bestMatch.id);
+        teamMap.set(code, bestMatch.id);
+      } else {
+        console.log(`   ⚠️ No match for [${code}] "${elName}"`);
       }
     }
 

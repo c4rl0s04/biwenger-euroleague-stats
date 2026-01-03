@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, memo } from 'react';
+import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { UserAvatar } from '@/components/ui';
@@ -73,10 +74,15 @@ function StandingsTable({ standings }) {
             >
               <td className="px-2 py-2 font-medium text-foreground text-xs">#{user.position}</td>
               <td className="px-2 py-2">
-                <div className="flex items-center gap-2">
+                <Link 
+                  href={`/user/${user.user_id}`}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                >
                   <UserAvatar src={user.icon} alt={user.name} size={20} />
-                  <span className="truncate max-w-[100px] sm:max-w-none text-xs">{user.name}</span>
-                </div>
+                  <span className="truncate max-w-[100px] sm:max-w-none text-xs hover:text-blue-400 transition-colors">
+                    {user.name}
+                  </span>
+                </Link>
               </td>
               <td className="px-2 py-2 text-right">
                 <div className="font-bold text-orange-500 text-sm">{user.total_points}</div>

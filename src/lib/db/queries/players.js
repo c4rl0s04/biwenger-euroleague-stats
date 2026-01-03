@@ -80,6 +80,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
         p.name,
         p.position,
         p.team,
+        p.owner_id,
         u.name as owner_name,
         SUM(os.fantasy_points) as total_points,
         ROUND(SUM(os.fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount), 1) as avg_points,
@@ -88,7 +89,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
       FROM OrderedStats os
       JOIN players p ON os.player_id = p.id
       LEFT JOIN users u ON p.owner_id = u.id
-      GROUP BY os.player_id, p.name, p.position, p.team, u.name
+      GROUP BY os.player_id, p.name, p.position, p.team, p.owner_id, u.name
       HAVING games_played >= 2
     )
     SELECT 
@@ -96,6 +97,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
       name,
       position,
       team,
+      owner_id,
       owner_name,
       total_points,
       avg_points,

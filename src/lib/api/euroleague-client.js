@@ -4,6 +4,7 @@
  */
 
 import { XMLParser } from 'fast-xml-parser';
+import { CONFIG } from '../config.js';
 
 const API_V1_URL = 'https://api-live.euroleague.net';
 const API_LEGACY_URL = 'https://live.euroleague.net/api';
@@ -20,7 +21,7 @@ const parser = new XMLParser({
  * @param {string} season - Season code
  * @returns {Promise<Object>} Parsed XML object
  */
-export async function fetchTeams(season = 'E2024') {
+export async function fetchTeams(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   // V1 API uses api-live domain
   const url = `${API_V1_URL}/v1/teams?seasonCode=${season}&competitionCode=E`;
 
@@ -43,7 +44,7 @@ export async function fetchTeams(season = 'E2024') {
  * @param {string} season - Season code (e.g., 'E2024' for 2024-25 Euroleague)
  * @returns {Promise<Object|null>} Box score with player stats, or null if game doesn't exist
  */
-export async function fetchBoxScore(gameCode, season = 'E2024') {
+export async function fetchBoxScore(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   // Legacy API uses live.euroleague.net domain
   const url = `${API_LEGACY_URL}/Boxscore?gamecode=${gameCode}&seasoncode=${season}`;
 
@@ -79,7 +80,7 @@ export async function fetchBoxScore(gameCode, season = 'E2024') {
  * @param {string} season - Season code
  * @returns {Promise<Object|null>} Game header info, or null if game doesn't exist
  */
-export async function fetchGameHeader(gameCode, season = 'E2024') {
+export async function fetchGameHeader(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   // Legacy API uses live.euroleague.net domain
   const url = `${API_LEGACY_URL}/Header?gamecode=${gameCode}&seasoncode=${season}`;
 

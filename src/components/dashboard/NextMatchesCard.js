@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/utils/format';
@@ -102,7 +103,10 @@ function DayMatchRow({ dayName, matches, roundName }) {
                 {/* Bottom: Teams Side-by-Side */}
                 <div className="grid grid-cols-2 gap-2 p-3 pt-4 items-start">
                   {/* Home Team */}
-                  <div className="flex flex-col items-center text-center gap-2 group/home cursor-pointer">
+                  <Link 
+                    href={`/team/${encodeURIComponent(match.home_team)}`}
+                    className="flex flex-col items-center text-center gap-2 group/home cursor-pointer"
+                  >
                     {match.home_logo && (
                       <div className="relative w-12 h-12 transition-transform group-hover/home:scale-110 duration-200">
                         <img
@@ -123,10 +127,13 @@ function DayMatchRow({ dayName, matches, roundName }) {
                         </span>
                       )}
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Away Team */}
-                  <div className="flex flex-col items-center text-center gap-2 group/away cursor-pointer">
+                  <Link 
+                    href={`/team/${encodeURIComponent(match.away_team)}`}
+                    className="flex flex-col items-center text-center gap-2 group/away cursor-pointer"
+                  >
                     {match.away_logo && (
                       <div className="relative w-12 h-12 transition-transform group-hover/away:scale-110 duration-200">
                         <img
@@ -147,7 +154,7 @@ function DayMatchRow({ dayName, matches, roundName }) {
                         </span>
                       )}
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
             );

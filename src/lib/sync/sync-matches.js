@@ -22,20 +22,17 @@ export async function syncMatches(db, round, playersList = {}) {
   const roundNum = parseInt(match[0]);
 
   // 2. Calculate Game Codes
-  // Euroleague Regular Season: 18 teams -> 9 games per round.
-  // Game 1 is Round 1, Game 1.
   // Formula: (Round - 1) * GamesPerRound + 1
-
-  // Get teams count from DB to be dynamic? Or config.
-  // We can count teams in 'teams' table with a Euroleague Code.
-  const teamCountObj = db.prepare('SELECT COUNT(*) as c FROM teams WHERE code IS NOT NULL').get();
-  const teamCount = teamCountObj.c || 18; // Default to 18 if sync-master hasn't run
+  
+  // Get team count from sync_meta (set by syncEuroleagueMaster), fallback to 20
+  const metaRow = db.prepare('SELECT value FROM sync_meta WHERE key = ?').get('euroleague_team_count');
+  const teamCount = metaRow ? parseInt(metaRow.value) : 20;
   const gamesPerRound = Math.floor(teamCount / 2);
 
   const startCode = (roundNum - 1) * gamesPerRound + 1;
   const endCode = startCode + gamesPerRound - 1;
 
-  console.log(`   🌍 Syncing Matches (Euroleague Games ${startCode}-${endCode})...`);
+  console.log(`   🌍 Syncing Matches (Euroleague Games ${startCode}-${endCode}, ${teamCount} teams)...`);
 
   // 3. Prepare DB
   // Get Map of Euroleague Code -> Biwenger Team ID
@@ -66,11 +63,11 @@ export async function syncMatches(db, round, playersList = {}) {
       }
 
       // Map Teams
-      // API returns: TeamA (code), TeamB (code), ScoreA, ScoreB, Date, Stats (status?)
-      // Example: { TeamA: "MAD", TeamB: "BAR", ScoreA: 86, ScoreB: 79, Date: "...", Live: false }
-
-      const homeCode = game.TeamA;
-      const awayCode = game.TeamB;
+      // API returns: TeamA (Name), CodeTeamA (Code)
+      // We must use CodeTeamA to map to our DB's 'euroleague_code'
+      
+      const homeCode = game.CodeTeamA;
+      const awayCode = game.CodeTeamB;
       const homeId = elCodeToId.get(homeCode);
       const awayId = elCodeToId.get(awayCode);
 

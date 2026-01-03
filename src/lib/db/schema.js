@@ -233,6 +233,17 @@ export function ensureSchema(db) {
   `
   ).run();
 
+  // 14. Sync Meta Table (Dynamic Configuration)
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS sync_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at TEXT
+    )
+  `
+  ).run();
+
   // --- MIGRATIONS ---
   // Apply specific migrations that might be needed for existing databases
 
