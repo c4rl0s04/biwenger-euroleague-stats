@@ -313,27 +313,6 @@ export function ensureSchema(db) {
     } catch (e) {}
   }
 
-  // Migration: Add V3 Player Fields (dorsal, country)
-  if (!playersInfoChecks.some((c) => c.name === 'dorsal')) {
-    console.log('Migrating players table (adding V3 fields)...');
-    try {
-      db.prepare('ALTER TABLE players ADD COLUMN dorsal TEXT').run();
-      db.prepare('ALTER TABLE players ADD COLUMN country TEXT').run();
-    } catch (e) {}
-  }
-
-  // Migration: Add V3 Stats Fields (plus_minus, is_starter, etc.)
-  const statsInfoChecks = db.prepare('PRAGMA table_info(player_round_stats)').all();
-  if (!statsInfoChecks.some((c) => c.name === 'plus_minus')) {
-    console.log('Migrating player_round_stats table (adding V3 stats fields)...');
-    try {
-      db.prepare('ALTER TABLE player_round_stats ADD COLUMN plus_minus INTEGER').run();
-      db.prepare('ALTER TABLE player_round_stats ADD COLUMN is_starter BOOLEAN').run();
-      db.prepare('ALTER TABLE player_round_stats ADD COLUMN fouls_received INTEGER').run();
-      db.prepare('ALTER TABLE player_round_stats ADD COLUMN blocks_against INTEGER').run();
-    } catch (e) {}
-  }
-
   // Migration: Check for round_id in lineups
   const lineupsInfo = db.prepare('PRAGMA table_info(lineups)').all();
   if (!lineupsInfo.some((c) => c.name === 'round_id')) {

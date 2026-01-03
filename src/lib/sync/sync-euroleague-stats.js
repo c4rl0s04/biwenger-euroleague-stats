@@ -71,15 +71,13 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
         two_points_made, two_points_attempted,
         three_points_made, three_points_attempted,
         free_throws_made, free_throws_attempted,
-        rebounds, assists, steals, blocks, turnovers, fouls_committed, valuation,
-        plus_minus, is_starter, fouls_received, blocks_against
+        rebounds, assists, steals, blocks, turnovers, fouls_committed, valuation
       ) VALUES (
         @player_id, @round_id, @fantasy_points, @minutes, @points,
         @two_points_made, @two_points_attempted,
         @three_points_made, @three_points_attempted,
         @free_throws_made, @free_throws_attempted,
-        @rebounds, @assists, @steals, @blocks, @turnovers, @fouls_committed, @valuation,
-        @plus_minus, @is_starter, @fouls_received, @blocks_against
+        @rebounds, @assists, @steals, @blocks, @turnovers, @fouls_committed, @valuation
       )
       ON CONFLICT(player_id, round_id) DO UPDATE SET
         minutes=excluded.minutes,
@@ -96,11 +94,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
         blocks=excluded.blocks,
         turnovers=excluded.turnovers,
         fouls_committed=excluded.fouls_committed,
-        valuation=excluded.valuation,
-        plus_minus=excluded.plus_minus,
-        is_starter=excluded.is_starter,
-        fouls_received=excluded.fouls_received,
-        blocks_against=excluded.blocks_against
+        valuation=excluded.valuation
     `);
 
     let matched = 0;
@@ -157,10 +151,6 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
           turnovers: stat.turnovers,
           fouls_committed: stat.fouls_committed,
           valuation: stat.valuation,
-          plus_minus: stat.plusminus,
-          is_starter: stat.is_starter ? 1 : 0,
-          fouls_received: stat.fouls_received,
-          blocks_against: stat.blocks_against,
         });
       }
     })();

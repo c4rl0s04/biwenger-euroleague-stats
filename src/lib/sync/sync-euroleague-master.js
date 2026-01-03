@@ -114,8 +114,7 @@ export async function syncEuroleagueMaster(db) {
     const biwengerPlayers = db.prepare('SELECT id, name, team_id FROM players').all();
     const updatePlayer = db.prepare(`
       UPDATE players
-      SET euroleague_code = @el_code, height = @height, weight = @weight, birth_date = @birth_date,
-          dorsal = @dorsal, country = @country
+      SET euroleague_code = @el_code, height = @height, weight = @weight, birth_date = @birth_date
       WHERE id = @biwenger_id
     `);
 
@@ -166,8 +165,6 @@ export async function syncEuroleagueMaster(db) {
             height: stat.height || null,
             weight: stat.weight || null,
             birth_date: stat.birth_date ? stat.birth_date.split('T')[0] : null,
-            dorsal: stat.dorsal || null,
-            country: stat.country || null,
           });
 
           insertMapping.run({
