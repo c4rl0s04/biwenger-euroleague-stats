@@ -2,10 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncMatches } from '../sync-matches.js';
 import * as euroleagueClient from '../../api/euroleague-client.js';
 
-// Mock V3 euroleague-client functions
+// Mock euroleague-client (syncMatches now uses fetchGameHeader, not fetchRoundGames)
 vi.mock('../../api/euroleague-client.js', () => ({
-  fetchGameStats: vi.fn(),
-  extractMatchInfo: vi.fn(),
+  fetchGameHeader: vi.fn(),
 }));
 
 describe('syncMatches', () => {
@@ -38,28 +37,26 @@ describe('syncMatches', () => {
   });
 
   it('should sync matches correctly when data is returned', async () => {
-    // Mock V3 API response
-    const mockGameStats = {
-      local: { players: [{ stats: { points: 20 } }] },
-      road: { players: [] },
-    };
-    euroleagueClient.fetchGameStats.mockResolvedValue(mockGameStats);
-    euroleagueClient.extractMatchInfo.mockReturnValue({
-      homeTeam: 'Anadolu Efes Istanbul',
-      homeCode: 'IST',
-      awayTeam: 'Maccabi Rapyd Tel Aviv',
-      awayCode: 'TEL',
-      homeScore: 85,
-      awayScore: 78,
-      played: true,
+    // Mock API response for fetchGameHeader
+    euroleagueClient.fetchGameHeader.mockResolvedValue({
+      Round: '1',
+      CodeTeamA: 'IST',
+      CodeTeamB: 'TEL',
+      TeamA: 'Anadolu Efes Istanbul',
+      TeamB: 'Maccabi Rapyd Tel Aviv',
+      ScoreA: '85',
+      ScoreB: '78',
+      Date: '01/10/2025',
+      Hour: '20:00',
+      Stadium: 'Test Arena',
     });
 
     const round = { id: 4746, name: 'Jornada 1', status: 'finished' };
 
     await syncMatches(db, round);
 
-    // Verify fetchGameStats was called for each game in the round
-    expect(euroleagueClient.fetchGameStats).toHaveBeenCalled();
+    // Verify fetchGameHeader was called for each game in the round
+    expect(euroleagueClient.fetchGameHeader).toHaveBeenCalled();
 
     // Verify DB prepare was called
     expect(db.prepare).toHaveBeenCalled();
@@ -67,13 +64,13 @@ describe('syncMatches', () => {
 
   it('should handle games with no data gracefully', async () => {
     // Mock API returning null (game not played yet)
-    euroleagueClient.fetchGameStats.mockResolvedValue(null);
+    euroleagueClient.fetchGameHeader.mockResolvedValue(null);
 
     const round = { id: 4771, name: 'Jornada 26', status: 'pending' };
 
     await syncMatches(db, round);
 
     // Should not throw, just log warnings
-    expect(euroleagueClient.fetchGameStats).toHaveBeenCalled();
+    expect(euroleagueClient.fetchGameHeader).toHaveBeenCalled();
   });
 });

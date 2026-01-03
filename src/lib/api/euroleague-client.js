@@ -1,81 +1,105 @@
 /**
- * Euroleague Official API Client - V3 (JSON only)
- * Uses the unified api-live.euroleague.net/v3 endpoints
+ * Euroleague Official API Client
+ * Uses the public live.euroleague.net API endpoints
  */
 
+import { XMLParser } from 'fast-xml-parser';
 import { CONFIG } from '../config.js';
 
-const API_V3_URL = 'https://api-live.euroleague.net/v3';
-const COMPETITION_CODE = 'E'; // EuroLeague
+const API_V1_URL = 'https://api-live.euroleague.net';
+const API_LEGACY_URL = 'https://live.euroleague.net/api';
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '',
+  parseAttributeValue: true,
+});
 
 /**
- * Fetch game stats (box score + player info in one call)
- * @param {number} gameCode - Game number in the season (1, 2, 3...)
- * @param {string} season - Season code (e.g., 'E2025')
- * @returns {Promise<Object|null>} Game stats with player data, or null if game doesn't exist
+ * Fetch all teams and their rosters
+ * Returns deeply nested structure: { clubs: { club: [ { code: "MAD", name: "Real Madrid", members: { member: [...] } } ] } }
+ * @param {string} season - Season code
+ * @returns {Promise<Object>} Parsed XML object
  */
-export async function fetchGameStats(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
-  const url = `${API_V3_URL}/competitions/${COMPETITION_CODE}/seasons/${season}/games/${gameCode}/stats`;
+export async function fetchTeams(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
+  // V1 API uses api-live domain
+  const url = `${API_V1_URL}/v1/teams?seasonCode=${season}&competitionCode=E`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
+
+    const xml = await response.text();
+    const result = parser.parse(xml);
+    return result;
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch box score for a game (player stats)
+ * @param {number} gameCode - Game number in the season (1, 2, 3...)
+ * @param {string} season - Season code (e.g., 'E2024' for 2024-25 Euroleague)
+ * @returns {Promise<Object|null>} Box score with player stats, or null if game doesn't exist
+ */
+export async function fetchBoxScore(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
+  // Legacy API uses live.euroleague.net domain
+  const url = `${API_LEGACY_URL}/Boxscore?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
     const response = await fetch(url);
 
     if (!response.ok) {
-      if (response.status === 404) return null; // Game doesn't exist
-      throw new Error(`Euroleague V3 API error: ${response.status}`);
+      throw new Error(`Euroleague API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data;
+    // Check if response is empty (future game)
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+      return null; // Game hasn't been played yet
+    }
+
+    // Try to parse as JSON. If it fails, might be an XML error page or empty
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.warn(`Failed to parse BoxScore JSON for game ${gameCode}:`, text.substring(0, 100));
+      return null;
+    }
   } catch (error) {
-    console.error(`Error fetching game stats for game ${gameCode}:`, error);
-    return null;
+    console.error(`Error fetching box score for game ${gameCode}:`, error);
+    throw error;
   }
 }
 
 /**
- * Fetch game report (match metadata: teams, scores, date)
+ * Fetch game header (metadata: teams, scores, date, round)
  * @param {number} gameCode - Game number in the season
  * @param {string} season - Season code
- * @returns {Promise<Object|null>} Game report, or null if game doesn't exist
+ * @returns {Promise<Object|null>} Game header info, or null if game doesn't exist
  */
-export async function fetchGameReport(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
-  const url = `${API_V3_URL}/competitions/${COMPETITION_CODE}/seasons/${season}/games/${gameCode}/report`;
+export async function fetchGameHeader(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
+  // Legacy API uses live.euroleague.net domain
+  const url = `${API_LEGACY_URL}/Header?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
     const response = await fetch(url);
 
     if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(`Euroleague V3 API error: ${response.status}`);
+      throw new Error(`Euroleague API error: ${response.status}`);
     }
 
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching game report for game ${gameCode}:`, error);
-    return null;
-  }
-}
-
-/**
- * Fetch all clubs (teams)
- * @returns {Promise<Array>} Array of club objects
- */
-export async function fetchClubs() {
-  const url = `${API_V3_URL}/clubs`;
-
-  try {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`Euroleague V3 API error: ${response.status}`);
+    // Check if response is empty (future game)
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+      return null; // Game hasn't been played yet
     }
 
-    const data = await response.json();
-    // V3 returns { data: [...] }
-    return data.data || data;
+    return JSON.parse(text);
   } catch (error) {
-    console.error('Error fetching clubs:', error);
+    console.error(`Error fetching game header for game ${gameCode}:`, error);
     throw error;
   }
 }
@@ -103,135 +127,57 @@ export function normalizePlayerName(name) {
 }
 
 /**
- * Parse V3 game stats into player stats array
- * @param {Object} gameStats - V3 game stats response
+ * Parse Euroleague player stats from box score response
+ * @param {Object} boxscore - Raw box score response
  * @returns {Array} Array of player stats objects
  */
-export function parseGameStats(gameStats) {
+export function parseBoxScoreStats(boxscore) {
   const allStats = [];
 
-  if (!gameStats) return allStats;
+  if (!boxscore?.Stats) return allStats;
 
-  // V3 has 'local' and 'road' teams
-  const teams = [
-    { side: 'local', data: gameStats.local },
-    { side: 'road', data: gameStats.road },
-  ];
+  for (const teamStats of boxscore.Stats) {
+    const teamCode = teamStats.Team;
 
-  for (const { side, data } of teams) {
-    if (!data?.players) continue;
+    if (!teamStats.PlayersStats) continue;
 
-    for (const playerData of data.players) {
-      const player = playerData.player;
-      const stats = playerData.stats;
+    for (const player of teamStats.PlayersStats) {
+      // Skip DNP (Did Not Play)
+      if (player.Minutes === 'DNP') continue;
 
-      if (!player || !stats) continue;
-
-      // Skip DNP (timePlayed = 0 and all stats are 0)
-      if (stats.timePlayed === 0 && stats.points === 0) continue;
-
-      // Parse minutes from timePlayed (in seconds or decimal minutes)
-      const minutes = Math.round(stats.timePlayed) || 0;
+      // Parse minutes "16:18" -> 16
+      let minutes = 0;
+      if (player.Minutes && player.Minutes !== 'DNP') {
+        const [mins] = player.Minutes.split(':');
+        minutes = parseInt(mins) || 0;
+      }
 
       allStats.push({
-        // Player identification
-        euroleague_code: player.person?.code,
-        name: player.person?.name,
-        team_code: player.club?.code,
-        team_name: player.club?.name,
-
-        // Bio data (bonus - V3 includes this!)
-        height: player.person?.height,
-        weight: player.person?.weight,
-        birth_date: player.person?.birthDate,
-        position: player.positionName,
-
-        // Stats
+        euroleague_code: player.Player_ID?.trim(),
+        name: player.Player,
+        team_code: player.Team,
+        team_name: teamCode,
         minutes,
-        points: stats.points || 0,
-        two_points_made: stats.fieldGoalsMade2 || 0,
-        two_points_attempted: stats.fieldGoalsAttempted2 || 0,
-        three_points_made: stats.fieldGoalsMade3 || 0,
-        three_points_attempted: stats.fieldGoalsAttempted3 || 0,
-        free_throws_made: stats.freeThrowsMade || 0,
-        free_throws_attempted: stats.freeThrowsAttempted || 0,
-        rebounds: stats.totalRebounds || 0,
-        offensive_rebounds: stats.offensiveRebounds || 0,
-        defensive_rebounds: stats.defensiveRebounds || 0,
-        assists: stats.assistances || 0,
-        steals: stats.steals || 0,
-        blocks: stats.blocksFavour || 0,
-        turnovers: stats.turnovers || 0,
-        fouls_committed: stats.foulsCommited || 0,
-        valuation: stats.valuation || 0, // PIR
-        plusminus: stats.plusMinus || 0,
+        points: player.Points || 0,
+        two_points_made: player.FieldGoalsMade2 || 0,
+        two_points_attempted: player.FieldGoalsAttempted2 || 0,
+        three_points_made: player.FieldGoalsMade3 || 0,
+        three_points_attempted: player.FieldGoalsAttempted3 || 0,
+        free_throws_made: player.FreeThrowsMade || 0,
+        free_throws_attempted: player.FreeThrowsAttempted || 0,
+        rebounds: player.TotalRebounds || 0,
+        offensive_rebounds: player.OffensiveRebounds || 0,
+        defensive_rebounds: player.DefensiveRebounds || 0,
+        assists: player.Assistances || 0,
+        steals: player.Steals || 0,
+        blocks: player.BlocksFavour || 0,
+        turnovers: player.Turnovers || 0,
+        fouls_committed: player.FoulsCommited || 0,
+        valuation: player.Valuation || 0, // PIR
+        plusminus: player.Plusminus || 0,
       });
     }
   }
 
   return allStats;
-}
-
-/**
- * Extract match info from V3 game stats
- * @param {Object} gameStats - V3 game stats response
- * @returns {Object|null} Match metadata
- */
-export function extractMatchInfo(gameStats) {
-  if (!gameStats) return null;
-
-  const local = gameStats.local;
-  const road = gameStats.road;
-
-  if (!local || !road) return null;
-
-  // Calculate scores from player stats
-  const localScore = local.players?.reduce((sum, p) => sum + (p.stats?.points || 0), 0) || 0;
-  const roadScore = road.players?.reduce((sum, p) => sum + (p.stats?.points || 0), 0) || 0;
-
-  return {
-    homeTeam: local.team?.name || local.club?.name,
-    homeCode: local.team?.code || local.club?.code,
-    awayTeam: road.team?.name || road.club?.name,
-    awayCode: road.team?.code || road.club?.code,
-    homeScore: localScore,
-    awayScore: roadScore,
-    // Game is finished if there are stats
-    played: local.players?.length > 0,
-  };
-}
-
-// ============== LEGACY COMPATIBILITY ==============
-// Keep old function names for gradual migration
-
-/**
- * @deprecated Use fetchGameStats instead
- */
-export async function fetchBoxScore(gameCode, season) {
-  console.warn('fetchBoxScore is deprecated. Use fetchGameStats instead.');
-  return fetchGameStats(gameCode, season);
-}
-
-/**
- * @deprecated Use fetchGameReport or fetchGameStats instead
- */
-export async function fetchGameHeader(gameCode, season) {
-  console.warn('fetchGameHeader is deprecated. Use fetchGameReport instead.');
-  return fetchGameReport(gameCode, season);
-}
-
-/**
- * @deprecated Use fetchClubs instead
- */
-export async function fetchTeams(season) {
-  console.warn('fetchTeams is deprecated. Use fetchClubs instead.');
-  return fetchClubs();
-}
-
-/**
- * @deprecated Use parseGameStats instead
- */
-export function parseBoxScoreStats(boxscore) {
-  console.warn('parseBoxScoreStats is deprecated. Use parseGameStats instead.');
-  return parseGameStats(boxscore);
 }
