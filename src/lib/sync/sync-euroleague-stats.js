@@ -1,16 +1,11 @@
-import {
-  fetchBoxScore,
-  fetchGameHeader,
-  parseBoxScoreStats,
-  normalizePlayerName,
-} from '../api/euroleague-client.js';
+import { fetchGameStats, parseGameStats, normalizePlayerName } from '../api/euroleague-client.js';
 import { CONFIG } from '../config.js';
 
 const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 
 /**
- * Syncs game stats from Euroleague official API.
- * This replaces the old Biwenger stats sync for more accurate data.
+ * Syncs game stats from Euroleague official V3 API.
+ * Uses the unified /games/{gameCode}/stats endpoint.
  *
  * @param {import('better-sqlite3').Database} db - Database instance
  * @param {number} gameCode - Euroleague game code (1, 2, 3...)
@@ -21,49 +16,28 @@ const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, options = {}) {
   console.log(`📊 Syncing Euroleague game ${gameCode} for round ${roundId}...`);
 
-  // OPTIMIZATION: If activeOnly is set, check if we already have a FINAL result for this game
+  // OPTIMIZATION: If activeOnly is set, check if we already have stats for this round
   if (options.activeOnly) {
-    const existingMatch = db
-      .prepare('SELECT status FROM matches WHERE round_id = ? AND (home_team = ? OR away_team = ?)')
-      .get(roundId, 'UNKNOWN_TEAM', 'UNKNOWN_TEAM');
-    // The above query is tricky because we don't know the Team ID or Code yet without fetching header.
-    // However, we can check by ROUND and DATE if we TRUST the schedule.
-    // Better approach: Let's fetch the header (cheap call) then decide if we fetch the BOXSCORE (expensive/heavy parsing).
+    const statsCount = db
+      .prepare('SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?')
+      .get(roundId);
+    if (statsCount.c > 0) {
+      console.log(`   ⏭️ Skipping (Stats exist & --active-only)`);
+      return { success: true, reason: 'skipped_active_only' };
+    }
   }
 
   try {
-    // 1. Fetch game header to check if game exists and is finished
-    const header = await fetchGameHeader(gameCode, CURRENT_SEASON);
+    // 1. Fetch game stats from V3 API (includes player info + stats in one call)
+    const gameStats = await fetchGameStats(gameCode, CURRENT_SEASON);
 
-    if (!header || !header.TeamA) {
-      console.log(`   ⚠️ Game ${gameCode} has no data yet`);
+    if (!gameStats) {
+      console.log(`   ⚠️ Game ${gameCode} has no data yet (future game)`);
       return { success: false, reason: 'no_data' };
     }
 
-    // Note: matches table is now populated by sync-matches.js only
-    // This function only handles player_round_stats
-
-    // 2. Check activeOnly optimization - skip if game is finished and we already have stats
-    if (options.activeOnly && !header.Live && header.ScoreA !== null) {
-      const statsCount = db
-        .prepare('SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?')
-        .get(roundId);
-      if (statsCount.c > 0) {
-        console.log(`   ⏭️ Skipping boxscore (Game Finished & Stats exist & --active-only)`);
-        return { success: true, reason: 'skipped_active_only' };
-      }
-    }
-
-    // 3. Fetch box score with player stats
-    const boxscore = await fetchBoxScore(gameCode, CURRENT_SEASON);
-
-    // Handle future games with no stats yet
-    if (!boxscore) {
-      console.log(`   ⏭️ Game ${gameCode} has no box score yet (future game)`);
-      return { success: true, reason: 'no_boxscore_yet' };
-    }
-
-    const playerStats = parseBoxScoreStats(boxscore);
+    // 2. Parse player stats from V3 format
+    const playerStats = parseGameStats(gameStats);
 
     if (playerStats.length === 0) {
       console.log(`   ⚠️ No player stats for game ${gameCode}`);

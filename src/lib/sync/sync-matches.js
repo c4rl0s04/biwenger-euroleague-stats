@@ -1,8 +1,8 @@
-import { fetchGameHeader } from '../api/euroleague-client.js';
+import { fetchGameStats, extractMatchInfo } from '../api/euroleague-client.js';
 
 /**
- * Syncs matches (games) for a specific round using Euroleague Official Data.
- * Hybrid Approach: matches Euroleague games to Biwenger Rounds.
+ * Syncs matches (games) for a specific round using Euroleague V3 API.
+ * Uses /games/{gameCode}/stats endpoint to get match info.
  * @param {import('better-sqlite3').Database} db - Database instance
  * @param {Object} round - Round object (id, name, status)
  * @param {Object} playersList - Map of player IDs to player objects (unused but kept for signature)
@@ -13,7 +13,6 @@ export async function syncMatches(db, round, playersList = {}) {
   const roundName = round.name;
 
   // 1. Extract Round Number (e.g. "Jornada 4" -> 4)
-  // handle "Playoffs", "Final Four" later if needed. For now assume Regular Season.
   const match = roundName.match(/\d+/);
   if (!match) {
     console.log(`   ⚠️ Skipping match sync for non-numeric round: ${roundName}`);
@@ -23,8 +22,6 @@ export async function syncMatches(db, round, playersList = {}) {
 
   // 2. Calculate Game Codes
   // Formula: (Round - 1) * GamesPerRound + 1
-
-  // Get team count from sync_meta (set by syncEuroleagueMaster), fallback to 20
   const metaRow = db
     .prepare('SELECT value FROM sync_meta WHERE key = ?')
     .get('euroleague_team_count');
@@ -39,7 +36,6 @@ export async function syncMatches(db, round, playersList = {}) {
   );
 
   // 3. Prepare DB
-  // Get Map of Euroleague Code -> Biwenger Team ID
   const teams = db.prepare('SELECT id, code, name FROM teams WHERE code IS NOT NULL').all();
   const elCodeToId = new Map();
   teams.forEach((t) => elCodeToId.set(t.code, t.id));
@@ -59,58 +55,47 @@ export async function syncMatches(db, round, playersList = {}) {
 
   for (let code = startCode; code <= endCode; code++) {
     try {
-      const game = await fetchGameHeader(code);
+      // Fetch game stats from V3 API
+      const gameStats = await fetchGameStats(code);
 
-      if (!game) {
-        // console.log(`      Game ${code} not found/future.`);
+      if (!gameStats) {
+        // Game not found or future game
         continue;
       }
 
-      // Map Teams
-      // API returns: TeamA (Name), CodeTeamA (Code)
-      // We must use CodeTeamA to map to our DB's 'euroleague_code'
+      // Extract match info from V3 response
+      const matchInfo = extractMatchInfo(gameStats);
 
-      const homeCode = game.CodeTeamA;
-      const awayCode = game.CodeTeamB;
-      const homeId = elCodeToId.get(homeCode);
-      const awayId = elCodeToId.get(awayCode);
+      if (!matchInfo) {
+        continue;
+      }
+
+      // Map team codes to IDs
+      const homeId = elCodeToId.get(matchInfo.homeCode);
+      const awayId = elCodeToId.get(matchInfo.awayCode);
 
       if (!homeId || !awayId) {
-        console.warn(`      ⚠️ Could not map teams for game ${code}: ${homeCode} vs ${awayCode}`);
+        console.warn(
+          `      ⚠️ Could not map teams for game ${code}: ${matchInfo.homeCode} vs ${matchInfo.awayCode}`
+        );
         continue;
       }
 
-      // Status mapping
-      // EuroLeague API returns:
-      // - Live: true/false (is game currently being played)
-      // - GameTime: "40:00" when finished (full game = 40 min), "00:00" for future
-      // - ScoreA/ScoreB: scores (can be "0" for unplayed games)
-      let status = 'scheduled';
-      if (game.Live === true) {
-        status = 'live';
-      } else if (game.GameTime && game.GameTime !== '00:00') {
-        // Game has been played (GameTime > 0)
-        status = 'finished';
-      }
-
-      // Date parsing - API returns "DD/MM/YYYY" format
-      let matchDate = game.Date;
-      if (matchDate && matchDate.includes('/')) {
-        const [day, month, year] = matchDate.split('/');
-        matchDate = `${year}-${month}-${day}`;
-      }
+      // Determine game status
+      // V3: If we have player stats, game is finished
+      const status = matchInfo.played ? 'finished' : 'scheduled';
 
       insertMatch.run({
         round_id: dbRoundId,
         round_name: roundName,
-        home_team: game.TeamA || homeCode,
+        home_team: matchInfo.homeTeam,
         home_id: homeId,
-        away_team: game.TeamB || awayCode,
+        away_team: matchInfo.awayTeam,
         away_id: awayId,
-        date: matchDate,
+        date: null, // V3 game stats doesn't include date, would need /report endpoint
         status: status,
-        home_score: parseInt(game.ScoreA) || 0,
-        away_score: parseInt(game.ScoreB) || 0,
+        home_score: matchInfo.homeScore || 0,
+        away_score: matchInfo.awayScore || 0,
       });
       syncedCount++;
     } catch (e) {
