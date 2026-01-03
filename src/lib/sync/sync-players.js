@@ -52,14 +52,14 @@ export async function syncPlayers(db, options = {}) {
 
   const insertPlayer = db.prepare(`
     INSERT INTO players (
-      id, name, team, position, 
+      id, name, team_id, team, position, 
       puntos, partidos_jugados, 
       played_home, played_away, 
       points_home, points_away, points_last_season,
       status, price_increment, price
     ) 
     VALUES (
-      @id, @name, @team, @position, 
+      @id, @name, @team_id, @team, @position, 
       @puntos, @partidos_jugados, 
       @played_home, @played_away, 
       @points_home, @points_away, 
@@ -68,6 +68,7 @@ export async function syncPlayers(db, options = {}) {
     )
     ON CONFLICT(id) DO UPDATE SET 
       name=excluded.name, 
+      team_id=excluded.team_id,
       team=excluded.team, 
       position=excluded.position,
       puntos=excluded.puntos,
