@@ -81,30 +81,36 @@ export async function syncMatches(db, round, playersList = {}) {
       }
 
       // Status mapping
-      // Biwenger: 'finished', 'scheduled'
-      // Euroleague: Live=true/false. If scores present and Live=false -> finished.
+      // EuroLeague API returns:
+      // - Live: true/false (is game currently being played)
+      // - GameTime: "40:00" when finished (full game = 40 min), "00:00" for future
+      // - ScoreA/ScoreB: scores (can be "0" for unplayed games)
       let status = 'scheduled';
-      if (game.Live) status = 'live';
-      else if (game.ScoreA !== null && game.ScoreB !== null) status = 'finished';
+      if (game.Live === true) {
+        status = 'live';
+      } else if (game.GameTime && game.GameTime !== '00:00') {
+        // Game has been played (GameTime > 0)
+        status = 'finished';
+      }
 
-      // Date parsing
-      // game.Date format might be custom string or ISO. Client header usually has "Date": "23/10/2025" + "Time": "20:30"
-      // or "Date": "2025-10-23T20:30:00"
-      // Let's assume it needs standardizing. fetchGameHeader returns raw JSON.
-      // We might need to inspect the format.
-      // Safe fallback: new Date(game.Date)
+      // Date parsing - API returns "DD/MM/YYYY" format
+      let matchDate = game.Date;
+      if (matchDate && matchDate.includes('/')) {
+        const [day, month, year] = matchDate.split('/');
+        matchDate = `${year}-${month}-${day}`;
+      }
 
       insertMatch.run({
         round_id: dbRoundId,
         round_name: roundName,
-        home_team: game.TeamAName || homeCode, // Use Name if available
+        home_team: game.TeamA || homeCode,
         home_id: homeId,
-        away_team: game.TeamBName || awayCode,
+        away_team: game.TeamB || awayCode,
         away_id: awayId,
-        date: game.Date, // Warning: Verify format
+        date: matchDate,
         status: status,
-        home_score: game.ScoreA,
-        away_score: game.ScoreB,
+        home_score: parseInt(game.ScoreA) || 0,
+        away_score: parseInt(game.ScoreB) || 0,
       });
       syncedCount++;
     } catch (e) {

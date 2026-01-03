@@ -32,7 +32,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
   }
 
   try {
-    // 1. Fetch game header for match info
+    // 1. Fetch game header to check if game exists and is finished
     const header = await fetchGameHeader(gameCode, CURRENT_SEASON);
 
     if (!header || !header.TeamA) {
@@ -40,40 +40,11 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
       return { success: false, reason: 'no_data' };
     }
 
-    // 2. Insert/update match record
-    const insertMatch = db.prepare(`
-      INSERT INTO matches (round_id, round_name, home_team, away_team, date, status, home_score, away_score)
-      VALUES (@round_id, @round_name, @home_team, @away_team, @date, @status, @home_score, @away_score)
-      ON CONFLICT(round_id, home_team, away_team) DO UPDATE SET
-        round_name=excluded.round_name,
-        status=excluded.status,
-        home_score=excluded.home_score,
-        away_score=excluded.away_score,
-        date=excluded.date
-    `);
+    // Note: matches table is now populated by sync-matches.js only
+    // This function only handles player_round_stats
 
-    // Parse date from "03/10/2024" format
-    const [day, month, year] = header.Date.split('/');
-    const matchDate = `${year}-${month}-${day}`;
-
-    insertMatch.run({
-      round_id: roundId,
-      round_name: roundName,
-      home_team: header.TeamA,
-      away_team: header.TeamB,
-      date: matchDate,
-      status: header.Live ? 'live' : 'finished',
-      home_score: parseInt(header.ScoreA) || 0,
-      away_score: parseInt(header.ScoreB) || 0,
-    });
-
-    // 2.5 Check activeOnly optimization
+    // 2. Check activeOnly optimization - skip if game is finished and we already have stats
     if (options.activeOnly && !header.Live && header.ScoreA !== null) {
-      // Game is finished. Do we really need to update stats?
-      // If we strictly follow "activeOnly", we skip finished games.
-      // But maybe we want to sync ONCE after finish.
-      // For now, let's assume "activeOnly" means "don't re-sync old stuff".
-      // Use a DB check: does this match already have stats?
       const statsCount = db
         .prepare('SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?')
         .get(roundId);
