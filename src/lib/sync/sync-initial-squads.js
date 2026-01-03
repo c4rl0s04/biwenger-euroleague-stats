@@ -3,8 +3,13 @@
  * Logic: Initial Squad = (Players Sold by User + Players Currently Owned by User) - Players Bought by User
  * @param {import('better-sqlite3').Database} db - Database instance
  */
+
+// League start date - when users joined and drafted their initial squads
+const LEAGUE_START_DATE = '2025-09-25';
+
 export async function syncInitialSquads(db) {
   console.log('\n📥 Syncing Initial Squads (Inferred)...');
+  console.log(`   📅 Using league start date: ${LEAGUE_START_DATE}`);
 
   // 1. Get all users
   const users = db.prepare('SELECT id, name FROM users').all();
@@ -14,8 +19,16 @@ export async function syncInitialSquads(db) {
   }
 
   const insertInitial = db.prepare(`
-      INSERT OR IGNORE INTO initial_squads (user_id, player_id) 
-      VALUES (@user_id, @player_id)
+      INSERT OR IGNORE INTO initial_squads (user_id, player_id, price) 
+      VALUES (@user_id, @player_id, @price)
+  `);
+
+  // Query to get player's price on league start date (or closest date before it)
+  const getInitialPrice = db.prepare(`
+    SELECT price FROM market_values 
+    WHERE player_id = ? AND date <= ?
+    ORDER BY date DESC
+    LIMIT 1
   `);
 
   let totalInferred = 0;
@@ -107,10 +120,18 @@ export async function syncInitialSquads(db) {
       }
     }
 
-    // Insert inferred players
+    // Insert inferred players with their initial price
     const transaction = db.transaction(() => {
       for (const pid of inferredInitial) {
-        insertInitial.run({ user_id: user.id, player_id: pid });
+        // Look up price on league start date
+        const priceRow = getInitialPrice.get(pid, LEAGUE_START_DATE);
+        const initialPrice = priceRow ? priceRow.price : null;
+
+        insertInitial.run({
+          user_id: user.id,
+          player_id: pid,
+          price: initialPrice,
+        });
       }
     });
     transaction();
