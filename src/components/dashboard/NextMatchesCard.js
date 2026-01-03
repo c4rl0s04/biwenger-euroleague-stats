@@ -103,7 +103,7 @@ function DayMatchRow({ dayName, matches, roundName }) {
                 {/* Bottom: Teams Side-by-Side */}
                 <div className="grid grid-cols-2 gap-2 p-3 pt-4 items-start">
                   {/* Home Team */}
-                  <Link 
+                  <Link
                     href={`/team/${encodeURIComponent(match.home_team)}`}
                     className="flex flex-col items-center text-center gap-2 group/home cursor-pointer"
                   >
@@ -130,7 +130,7 @@ function DayMatchRow({ dayName, matches, roundName }) {
                   </Link>
 
                   {/* Away Team */}
-                  <Link 
+                  <Link
                     href={`/team/${encodeURIComponent(match.away_team)}`}
                     className="flex flex-col items-center text-center gap-2 group/away cursor-pointer"
                   >

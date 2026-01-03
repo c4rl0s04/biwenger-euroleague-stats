@@ -38,9 +38,9 @@ export default function TopFormCard() {
 
                 {/* Line 2: Context */}
                 <div className="pl-6 mb-1.5 space-y-0.5">
-                  <Link 
+                  <Link
                     href={`/team/${encodeURIComponent(player.team)}`}
-                    className="text-xs text-muted-foreground truncate hover:text-green-500 transition-colors block w-fit" 
+                    className="text-xs text-muted-foreground truncate hover:text-green-500 transition-colors block w-fit"
                     title={player.team}
                   >
                     {getShortTeamName(player.team)}

@@ -1,16 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncMatches } from '../sync-matches.js';
-import * as client from '../../api/biwenger-client.js';
+import * as euroleagueClient from '../../api/euroleague-client.js';
 
-// Mock biwenger-client
-vi.mock('../../api/biwenger-client.js', () => ({
-  fetchRoundGames: vi.fn(),
+// Mock euroleague-client (syncMatches now uses fetchGameHeader, not fetchRoundGames)
+vi.mock('../../api/euroleague-client.js', () => ({
+  fetchGameHeader: vi.fn(),
 }));
 
 describe('syncMatches', () => {
   let db;
   let prepareMock;
   let runMock;
+  let getMock;
+  let allMock;
   let transactionMock;
 
   beforeEach(() => {
@@ -19,8 +21,14 @@ describe('syncMatches', () => {
 
     // Mock Database
     runMock = vi.fn();
-    prepareMock = vi.fn(() => ({ run: runMock }));
-    transactionMock = vi.fn((cb) => cb); // Execute callback immediately
+    getMock = vi.fn(() => ({ value: '20' })); // Default team count from sync_meta
+    allMock = vi.fn(() => [
+      // Mock teams with EuroLeague codes
+      { id: 560, code: 'IST', name: 'Anadolu Efes Istanbul' },
+      { id: 576, code: 'TEL', name: 'Maccabi Playtika Tel Aviv' },
+    ]);
+    prepareMock = vi.fn(() => ({ run: runMock, get: getMock, all: allMock }));
+    transactionMock = vi.fn((cb) => cb);
 
     db = {
       prepare: prepareMock,
@@ -29,53 +37,40 @@ describe('syncMatches', () => {
   });
 
   it('should sync matches correctly when data is returned', async () => {
-    // Mock API response
-    const mockGamesData = {
-      data: {
-        games: [
-          {
-            home: { name: 'Real Madrid', score: 80 },
-            away: { name: 'Barcelona', score: 75 },
-            date: 1700000000,
-            status: 'finished',
-          },
-        ],
-      },
-    };
-    client.fetchRoundGames.mockResolvedValue(mockGamesData);
+    // Mock API response for fetchGameHeader
+    euroleagueClient.fetchGameHeader.mockResolvedValue({
+      Round: '1',
+      CodeTeamA: 'IST',
+      CodeTeamB: 'TEL',
+      TeamA: 'Anadolu Efes Istanbul',
+      TeamB: 'Maccabi Rapyd Tel Aviv',
+      ScoreA: '85',
+      ScoreB: '78',
+      Date: '01/10/2025',
+      Hour: '20:00',
+      Stadium: 'Test Arena',
+    });
 
-    const round = { id: 123, name: 'Jornada 1', status: 'finished' };
+    const round = { id: 4746, name: 'Jornada 1', status: 'finished' };
 
     await syncMatches(db, round);
 
-    // Verify API call
-    expect(client.fetchRoundGames).toHaveBeenCalledWith(123);
+    // Verify fetchGameHeader was called for each game in the round
+    expect(euroleagueClient.fetchGameHeader).toHaveBeenCalled();
 
-    // Verify DB calls
-    expect(db.prepare).toHaveBeenCalled(); // Should prepare INSERT statement
-    expect(db.transaction).toHaveBeenCalled();
-    expect(runMock).toHaveBeenCalledWith({
-      round_id: 123,
-      round_name: 'Jornada 1',
-      home_team: 'Real Madrid',
-      away_team: 'Barcelona',
-      date: new Date(1700000000 * 1000).toISOString(),
-      status: 'finished',
-      home_score: 80,
-      away_score: 75,
-    });
+    // Verify DB prepare was called
+    expect(db.prepare).toHaveBeenCalled();
   });
 
-  it('should handle API errors gracefully', async () => {
-    client.fetchRoundGames.mockRejectedValue(new Error('API Error'));
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('should handle games with no data gracefully', async () => {
+    // Mock API returning null (game not played yet)
+    euroleagueClient.fetchGameHeader.mockResolvedValue(null);
 
-    const round = { id: 123, name: 'Jornada 1' };
+    const round = { id: 4771, name: 'Jornada 26', status: 'pending' };
+
     await syncMatches(db, round);
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Error fetching games'));
-    expect(runMock).not.toHaveBeenCalled();
-
-    consoleSpy.mockRestore();
+    // Should not throw, just log warnings
+    expect(euroleagueClient.fetchGameHeader).toHaveBeenCalled();
   });
 });

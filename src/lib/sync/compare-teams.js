@@ -17,11 +17,11 @@ const tokenize = (name) => {
     .toUpperCase()
     .replace(/[^A-Z0-9\s]/g, '')
     .split(/\s+/)
-    .filter(word => word.length > 2 && !stopWords.includes(word));
+    .filter((word) => word.length > 2 && !stopWords.includes(word));
 };
 
 const countMatchingWords = (tokens1, tokens2) => {
-  return tokens1.filter(t => tokens2.includes(t)).length;
+  return tokens1.filter((t) => tokens2.includes(t)).length;
 };
 
 async function main() {
@@ -30,10 +30,10 @@ async function main() {
   // 1. Fetch Biwenger Teams
   const biwengerRes = await fetch('https://biwenger.as.com/api/v2/competitions/euroleague/data', {
     headers: {
-      'Authorization': `Bearer ${process.env.BIWENGER_TOKEN}`,
+      Authorization: `Bearer ${process.env.BIWENGER_TOKEN}`,
       'X-League': process.env.BIWENGER_LEAGUE_ID,
       'X-User': process.env.BIWENGER_USER_ID,
-    }
+    },
   });
   const biwengerData = await biwengerRes.json();
   const biwengerTeams = biwengerData.data?.teams || {};
@@ -47,7 +47,9 @@ async function main() {
   }
 
   // 2. Fetch EuroLeague Teams
-  const elRes = await fetch('https://api-live.euroleague.net/v1/teams?seasonCode=E2025&competitionCode=E');
+  const elRes = await fetch(
+    'https://api-live.euroleague.net/v1/teams?seasonCode=E2025&competitionCode=E'
+  );
   const elXml = await elRes.text();
   const elData = parser.parse(elXml);
   const clubs = elData.clubs?.club || [];
@@ -72,7 +74,7 @@ async function main() {
     for (const bw of biwengerList) {
       const matchCount = countMatchingWords(el.tokens, bw.tokens);
       const minRequired = Math.min(2, Math.ceil(Math.min(el.tokens.length, bw.tokens.length) / 2));
-      
+
       if (matchCount >= minRequired && matchCount > bestScore) {
         bestScore = matchCount;
         bestMatch = bw;
@@ -80,7 +82,9 @@ async function main() {
     }
 
     if (bestMatch) {
-      console.log(`  ✅ [${el.code}] "${el.name}" <-> [${bestMatch.id}] "${bestMatch.name}" (${bestScore} words)`);
+      console.log(
+        `  ✅ [${el.code}] "${el.name}" <-> [${bestMatch.id}] "${bestMatch.name}" (${bestScore} words)`
+      );
       matched++;
     } else {
       console.log(`  ❌ [${el.code}] "${el.name}" -> NO MATCH`);
@@ -90,7 +94,7 @@ async function main() {
 
   console.log(`\n📊 Summary: ${matched}/${elList.length} matched.`);
   if (unmatched.length > 0) {
-    console.log('   Unmatched EuroLeague teams:', unmatched.map(u => u.name).join(', '));
+    console.log('   Unmatched EuroLeague teams:', unmatched.map((u) => u.name).join(', '));
   } else {
     console.log('   🎉 All teams matched! Ready to sync.');
   }

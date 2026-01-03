@@ -74,7 +74,7 @@ function StandingsTable({ standings }) {
             >
               <td className="px-2 py-2 font-medium text-foreground text-xs">#{user.position}</td>
               <td className="px-2 py-2">
-                <Link 
+                <Link
                   href={`/user/${user.user_id}`}
                   className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >

@@ -128,9 +128,11 @@ export async function syncPlayers(db, options = {}) {
   // --- 2. PROCESSING ---
 
   // Check options
-  const skipDetails = options.skipDetails; 
+  const skipDetails = options.skipDetails;
   if (skipDetails) {
-     console.log('   ⏩ Skipping detailed player fetch (CLI flag --no-details active). Prices/Bio will not be updated.');
+    console.log(
+      '   ⏩ Skipping detailed player fetch (CLI flag --no-details active). Prices/Bio will not be updated.'
+    );
   }
 
   for (const [id, player] of Object.entries(playersList)) {
@@ -154,7 +156,7 @@ export async function syncPlayers(db, options = {}) {
       price_increment: player.priceIncrement || 0,
       price: player.price || 0,
     });
-    
+
     // SKIP DETAILS IF FLAG IS SET
     if (skipDetails) continue;
 

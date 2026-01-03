@@ -32,7 +32,7 @@ export async function syncEuroleagueMaster(db) {
     upsertMeta.run({
       key: 'euroleague_team_count',
       value: String(clubs.length),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     });
 
     // Prepare Statements
@@ -52,22 +52,22 @@ export async function syncEuroleagueMaster(db) {
         .toUpperCase()
         .replace(/[^A-Z0-9\s]/g, '') // Remove special chars
         .split(/\s+/)
-        .filter(word => word.length > 2 && !stopWords.includes(word));
+        .filter((word) => word.length > 2 && !stopWords.includes(word));
     };
 
     // Count matching words between two token arrays
     const countMatchingWords = (tokens1, tokens2) => {
-      return tokens1.filter(t => tokens2.includes(t)).length;
+      return tokens1.filter((t) => tokens2.includes(t)).length;
     };
 
     // Get current DB teams
     const dbTeams = db.prepare('SELECT id, name FROM teams').all();
-    console.log('   ℹ️ Current DB Teams:', dbTeams.map(t => t.name).join(', '));
+    console.log('   ℹ️ Current DB Teams:', dbTeams.map((t) => t.name).join(', '));
 
     // Pre-tokenize DB teams
-    const dbTeamsTokenized = dbTeams.map(t => ({
+    const dbTeamsTokenized = dbTeams.map((t) => ({
       ...t,
-      tokens: tokenize(t.name)
+      tokens: tokenize(t.name),
     }));
 
     // 1. Sync Teams using fuzzy matching
@@ -76,7 +76,7 @@ export async function syncEuroleagueMaster(db) {
       const elName = club.name;
       const elTokens = tokenize(elName);
       const shortName = getShortTeamName(club.name);
-      
+
       // Find best match by word overlap
       let bestMatch = null;
       let bestScore = 0;
@@ -84,8 +84,11 @@ export async function syncEuroleagueMaster(db) {
       for (const dbTeam of dbTeamsTokenized) {
         const matchCount = countMatchingWords(elTokens, dbTeam.tokens);
         // Require at least 2 matching words OR >50% of the shorter name
-        const minRequired = Math.min(2, Math.ceil(Math.min(elTokens.length, dbTeam.tokens.length) / 2));
-        
+        const minRequired = Math.min(
+          2,
+          Math.ceil(Math.min(elTokens.length, dbTeam.tokens.length) / 2)
+        );
+
         if (matchCount >= minRequired && matchCount > bestScore) {
           bestScore = matchCount;
           bestMatch = dbTeam;
@@ -93,8 +96,14 @@ export async function syncEuroleagueMaster(db) {
       }
 
       if (bestMatch) {
-        console.log(`   ✅ Matched [${code}] "${elName}" -> DB: "${bestMatch.name}" (${bestScore} words)`);
-        db.prepare('UPDATE teams SET code = ?, short_name = ? WHERE id = ?').run(code, shortName, bestMatch.id);
+        console.log(
+          `   ✅ Matched [${code}] "${elName}" -> DB: "${bestMatch.name}" (${bestScore} words)`
+        );
+        db.prepare('UPDATE teams SET code = ?, short_name = ? WHERE id = ?').run(
+          code,
+          shortName,
+          bestMatch.id
+        );
         teamMap.set(code, bestMatch.id);
       } else {
         console.log(`   ⚠️ No match for [${code}] "${elName}"`);

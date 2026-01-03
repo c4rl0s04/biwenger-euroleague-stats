@@ -23,16 +23,20 @@ export async function syncMatches(db, round, playersList = {}) {
 
   // 2. Calculate Game Codes
   // Formula: (Round - 1) * GamesPerRound + 1
-  
+
   // Get team count from sync_meta (set by syncEuroleagueMaster), fallback to 20
-  const metaRow = db.prepare('SELECT value FROM sync_meta WHERE key = ?').get('euroleague_team_count');
+  const metaRow = db
+    .prepare('SELECT value FROM sync_meta WHERE key = ?')
+    .get('euroleague_team_count');
   const teamCount = metaRow ? parseInt(metaRow.value) : 20;
   const gamesPerRound = Math.floor(teamCount / 2);
 
   const startCode = (roundNum - 1) * gamesPerRound + 1;
   const endCode = startCode + gamesPerRound - 1;
 
-  console.log(`   🌍 Syncing Matches (Euroleague Games ${startCode}-${endCode}, ${teamCount} teams)...`);
+  console.log(
+    `   🌍 Syncing Matches (Euroleague Games ${startCode}-${endCode}, ${teamCount} teams)...`
+  );
 
   // 3. Prepare DB
   // Get Map of Euroleague Code -> Biwenger Team ID
@@ -65,7 +69,7 @@ export async function syncMatches(db, round, playersList = {}) {
       // Map Teams
       // API returns: TeamA (Name), CodeTeamA (Code)
       // We must use CodeTeamA to map to our DB's 'euroleague_code'
-      
+
       const homeCode = game.CodeTeamA;
       const awayCode = game.CodeTeamB;
       const homeId = elCodeToId.get(homeCode);
