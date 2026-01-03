@@ -146,7 +146,10 @@ export async function syncEuroleagueMaster(db) {
         totalElPlayers++;
 
         const elName = player.name; // "BEAUBOIS, RODRIGUE"
-        const elCode = player.code;
+        // Add "P" prefix to match BoxScore API Player_ID format
+        // Roster API returns: code="009005"
+        // BoxScore API returns: Player_ID="P009005"
+        const elCode = `P${player.code}`;
         const normalizedElName = normalizePlayerName(elName);
 
         // Find match in Biwenger DB
