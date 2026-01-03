@@ -145,6 +145,8 @@ export function parseGameStats(gameStats) {
         weight: player.person?.weight,
         birth_date: player.person?.birthDate,
         position: player.positionName,
+        dorsal: player.dorsal,
+        country: player.person?.country?.code,
 
         // Stats
         minutes,
@@ -161,10 +163,13 @@ export function parseGameStats(gameStats) {
         assists: stats.assistances || 0,
         steals: stats.steals || 0,
         blocks: stats.blocksFavour || 0,
+        blocks_against: stats.blocksAgainst || 0,
         turnovers: stats.turnovers || 0,
         fouls_committed: stats.foulsCommited || 0,
+        fouls_received: stats.foulsReceived || 0,
         valuation: stats.valuation || 0, // PIR
         plusminus: stats.plusMinus || 0,
+        is_starter: stats.startFive || false,
       });
     }
   }
