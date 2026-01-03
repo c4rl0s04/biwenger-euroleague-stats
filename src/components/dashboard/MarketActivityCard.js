@@ -55,9 +55,27 @@ export default function MarketActivityCard() {
                   {transfer.player_name}
                 </Link>
                 <div className="text-sm text-muted-foreground flex items-center flex-wrap gap-1 mt-0.5">
-                  <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
+                  {transfer.vendedor_id ? (
+                    <Link
+                      href={`/user/${transfer.vendedor_id}`}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      {transfer.vendedor}
+                    </Link>
+                  ) : (
+                    <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
+                  )}
                   <ArrowRight className="w-3 h-3 shrink-0" />
-                  <span className="text-green-400">{transfer.comprador}</span>
+                  {transfer.comprador_id ? (
+                    <Link
+                      href={`/user/${transfer.comprador_id}`}
+                      className="text-green-400 hover:text-green-300 transition-colors"
+                    >
+                      {transfer.comprador}
+                    </Link>
+                  ) : (
+                    <span className="text-green-400">{transfer.comprador}</span>
+                  )}
                 </div>
               </div>
               <div className="text-right shrink-0">

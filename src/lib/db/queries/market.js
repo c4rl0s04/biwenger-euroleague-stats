@@ -33,9 +33,13 @@ export function getRecentTransfers(limit = 5) {
     SELECT 
       f.*,
       p.name as player_name,
-      p.position
+      p.position,
+      seller.id as vendedor_id,
+      buyer.id as comprador_id
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
+    LEFT JOIN users seller ON f.vendedor = seller.name
+    LEFT JOIN users buyer ON f.comprador = buyer.name
     ORDER BY f.timestamp DESC
     LIMIT ?
   `;

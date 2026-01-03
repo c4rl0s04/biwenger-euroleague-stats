@@ -136,19 +136,17 @@ export async function syncEuroleagueMaster(db) {
     let totalElPlayers = 0;
 
     for (const club of clubs) {
-      if (!club.members || !club.members.member) continue;
+      // Use roster.player instead of members.member - roster only contains actual players
+      if (!club.roster || !club.roster.player) continue;
 
-      const members = Array.isArray(club.members.member)
-        ? club.members.member
-        : [club.members.member];
+      const players = Array.isArray(club.roster.player) ? club.roster.player : [club.roster.player];
       const elTeamId = teamMap.get(club.code);
 
-      for (const member of members) {
-        if (member.active !== 'true') continue; // Skip inactive? Maybe keep them.
+      for (const player of players) {
         totalElPlayers++;
 
-        const elName = member.name; // "CAMPAZZO, FACUNDO"
-        const elCode = member.code;
+        const elName = player.name; // "BEAUBOIS, RODRIGUE"
+        const elCode = player.code;
         const normalizedElName = normalizePlayerName(elName);
 
         // Find match in Biwenger DB
@@ -169,33 +167,22 @@ export async function syncEuroleagueMaster(db) {
 
         if (match) {
           // Found a link!
-          const height = member.height ? parseInt(member.height) : null;
-          const weight = member.weight ? parseInt(member.weight) : null;
-
-          // Format Birth Date: "1991-03-23" -> already in correct format mostly?
-          // XML example: "CAMPAZZO, FACUNDO" ... no birthdate in that snippet.
-          // Wait, snippet 1418 didn't show birthdate in <member> attributes?
-          // Ah, looking closely at 1418: <member profile="J" active="true" code="011082" name="CAMPAZZO, FACUNDO" alias="CAMPAZZO, F." dorsal="7" position="Guard" countrycode="ARG" countryname="Argentina" signin="2023-09-15..." signout="2025-06-30..." />
-          // It DOES NOT have bio data in this list!
-          // That's a discovery. We might need `fetchPlayer` or extract it from elsewhere?
-          // Wait, Biwenger has `birth_date`. EuroLeague boxscore usually has age.
-          // Let's rely on Biwenger for bio if EL xml lacks it, OR fetch details.
-          // Actually, the `fetchRoster` might get more details?
-          // For now, let's link the CODE. Bio data is a "nice to have".
+          // Note: roster.player doesn't have height/weight - would need separate player API call
+          // For now just link the CODE. Bio data can come from Biwenger or separate fetch.
 
           updatePlayer.run({
             biwenger_id: match.id,
             el_code: elCode,
-            height: height,
-            weight: weight,
-            birth_date: null, // Placeholder
-            position: member.position, // "Guard"
+            height: null,
+            weight: null,
+            birth_date: null,
+            position: player.position, // "Guard", "Center", "Forward"
           });
 
           insertMapping.run({
             biwenger_id: match.id,
             el_code: elCode,
-            json: JSON.stringify(member),
+            json: JSON.stringify(player),
           });
 
           linkedCount++;

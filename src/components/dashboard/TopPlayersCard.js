@@ -72,9 +72,12 @@ export default function TopPlayersCard() {
                   </Link>
                   <div className="flex items-center gap-2 mt-0.5">
                     {/* Increased to text-sm */}
-                    <div className="text-sm text-muted-foreground truncate">
+                    <Link
+                      href={`/team/${encodeURIComponent(player.team)}`}
+                      className="text-sm text-muted-foreground truncate hover:text-emerald-400 transition-colors"
+                    >
                       {getShortTeamName(player.team)}
-                    </div>
+                    </Link>
                   </div>
                 </div>
                 <div className="text-right shrink-0">

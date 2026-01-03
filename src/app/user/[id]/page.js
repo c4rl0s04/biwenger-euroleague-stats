@@ -13,16 +13,20 @@ export default function UserProfilePage() {
   const params = useParams();
   const userId = params.id;
 
+  // Only fetch if userId looks like a valid number
+  const isValidId = userId && !isNaN(parseInt(userId, 10));
+
   const { data, loading } = useApiData(
-    () => (userId ? `/api/player/stats?userId=${userId}` : null),
+    () => (isValidId ? `/api/player/stats?userId=${userId}` : null),
     {
       dependencies: [userId],
-      skip: !userId,
+      skip: !isValidId,
     }
   );
 
   const stats = data?.stats;
-  const userName = stats?.name || 'Usuario';
+  const userName =
+    stats?.name || (isValidId ? 'Usuario' : decodeURIComponent(userId || 'Desconocido'));
 
   return (
     <div className="min-h-screen bg-background pb-20">
