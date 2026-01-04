@@ -38,7 +38,7 @@ export function prepareUserMutations(db) {
     INSERT INTO users (id, name, icon) VALUES (@id, @name, @icon)
     ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=COALESCE(excluded.icon, users.icon)
   `);
-  // Note: sync-lineups uses INSERT OR IGNORE just for ID/Name, 
+  // Note: sync-lineups uses INSERT OR IGNORE just for ID/Name,
   // sync-standings updates Icon. This unified query handles both (if icon is null, preserve existing).
 
   // --- Initial Squads Inference ---
@@ -81,7 +81,6 @@ export function prepareUserMutations(db) {
       WHERE player_id = ? AND (vendedor = ? OR vendedor = ?)
       ORDER BY timestamp ASC
   `);
-
 
   // --- Lineups & User Rounds ---
 

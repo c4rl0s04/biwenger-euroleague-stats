@@ -75,7 +75,7 @@ export function prepareMatchMutations(db) {
   `);
 
   const deleteUserRounds = db.prepare('DELETE FROM user_rounds WHERE round_id = ?');
-  
+
   const deleteLineups = db.prepare('DELETE FROM lineups WHERE round_id = ?');
 
   return {

@@ -38,7 +38,7 @@ export function prepareEuroleagueMutations(db) {
   `);
 
   const updateTeamCode = db.prepare('UPDATE teams SET code = ?, short_name = ? WHERE id = ?');
-  
+
   const getDbTeams = db.prepare('SELECT id, name FROM teams');
 
   const updatePlayerLink = db.prepare(`
@@ -111,10 +111,14 @@ export function prepareEuroleagueMutations(db) {
       SET fantasy_points = @fantasy_points 
       WHERE player_id = @player_id AND round_id = @round_id
   `);
-  
+
   // Helpers
-  const checkFinishedMatch = db.prepare('SELECT status FROM matches WHERE round_id = ? AND (home_team = ? OR away_team = ?)');
-  const checkStatsExist = db.prepare('SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?');
+  const checkFinishedMatch = db.prepare(
+    'SELECT status FROM matches WHERE round_id = ? AND (home_team = ? OR away_team = ?)'
+  );
+  const checkStatsExist = db.prepare(
+    'SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?'
+  );
 
   return {
     upsertSyncMeta,
@@ -124,13 +128,13 @@ export function prepareEuroleagueMutations(db) {
     updatePlayerLink,
     insertPlayerMapping,
     getBiwengerPlayers,
-    
+
     // Stats related
     getPlayerByEuroleagueCode,
     getAllPlayers,
     updatePlayerEuroleagueCode,
     insertPlayerStats,
-    
+
     // Fantasy Update
     updateFantasyPoints,
 
