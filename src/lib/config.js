@@ -14,7 +14,12 @@ export const CONFIG = {
     USER_ID: process.env.BIWENGER_USER_ID,
   },
   EUROLEAGUE: {
-    SEASON_CODE: process.env.EUROLEAGUE_SEASON_CODE || 'E2025',
+    SEASON_CODE: 'E2025',
+    API_V1_URL: 'https://api-live.euroleague.net',
+    API_LEGACY_URL: 'https://live.euroleague.net/api',
+  },
+  LEAGUE: {
+    START_DATE: '2025-09-25',
   },
   DB: {
     PATH: path.join(process.cwd(), 'data', 'local.db'),

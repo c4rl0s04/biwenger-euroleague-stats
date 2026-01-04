@@ -6,8 +6,8 @@
 import { XMLParser } from 'fast-xml-parser';
 import { CONFIG } from '../config.js';
 
-const API_V1_URL = 'https://api-live.euroleague.net';
-const API_LEGACY_URL = 'https://live.euroleague.net/api';
+const API_V1_URL = CONFIG.EUROLEAGUE.API_V1_URL;
+const API_LEGACY_URL = CONFIG.EUROLEAGUE.API_LEGACY_URL;
 
 const parser = new XMLParser({
   ignoreAttributes: false,

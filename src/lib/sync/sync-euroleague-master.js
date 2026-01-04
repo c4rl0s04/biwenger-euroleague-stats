@@ -149,10 +149,6 @@ export async function syncEuroleagueMaster(db) {
           mutations.updatePlayerLink.run({
             biwenger_id: match.id,
             el_code: elCode,
-            height: null,
-            weight: null,
-            birth_date: null,
-            position: player.position, // "Guard", "Center", "Forward"
             dorsal: player.dorsal || null, // V3 dorsal is nullable for now
             country: player.countryname || null,
           });

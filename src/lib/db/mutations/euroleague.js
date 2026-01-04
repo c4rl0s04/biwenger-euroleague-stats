@@ -45,10 +45,6 @@ export function prepareEuroleagueMutations(db) {
     UPDATE players
     SET 
         euroleague_code = @el_code,
-        height = @height,
-        weight = @weight,
-        birth_date = @birth_date,
-        position = @position,
         dorsal = @dorsal,
         country = @country
     WHERE id = @biwenger_id

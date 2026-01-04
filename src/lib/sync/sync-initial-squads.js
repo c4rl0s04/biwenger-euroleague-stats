@@ -3,10 +3,11 @@
  * Logic: Initial Squad = (Players Sold by User + Players Currently Owned by User) - Players Bought by User
  * @param {import('better-sqlite3').Database} db - Database instance
  */
+import { CONFIG } from '../config.js';
 import { prepareUserMutations } from '../db/mutations/users.js';
 
 // League start date - when users joined and drafted their initial squads
-const LEAGUE_START_DATE = '2025-09-25';
+const LEAGUE_START_DATE = CONFIG.LEAGUE.START_DATE;
 
 export async function syncInitialSquads(db) {
   console.log('\n📥 Syncing Initial Squads (Inferred)...');
