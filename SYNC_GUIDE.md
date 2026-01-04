@@ -32,7 +32,18 @@ npm run sync -- [FLAGS]
 
 ---
 
-### 2. `--active-only` (For Game Nights) 🏀
+### 2. `--force-details` (Forced Update) 🔨
+**Purpose:** Forces the script to check and update EVERY player's bio and price, ignoring the optimize-freshness check.
+*   **Use Case:** If you suspect bio data (height, weight, birthday) is missing or outdated despite running a sync.
+*   **Warning:** Adds significant time (~2-3 mins) as it fetches 350+ player details.
+
+| Table | Status | Notes |
+| :--- | :--- | :--- |
+| `players` | ✅ **Updated** | Forces overwrite of birth_date, height, weight. |
+
+---
+
+### 3. `--active-only` (For Game Nights) 🏀
 **Purpose:** Syncs only the *current* or *upcoming* matches. Skips checking 100+ finished games.
 *   **Saves:** ~300 EuroLeague API calls (depending on season progress).
 *   **Use Case:** Running multiple times during a game night to get live scores.
@@ -45,7 +56,7 @@ npm run sync -- [FLAGS]
 
 ---
 
-### 3. `--only-market` (Fastest) ⚡
+### 4. `--only-market` (Fastest) ⚡
 **Purpose:** Updates *only* the transfer market and board. Ignores matches and stats.
 *   **Use Case:** frequent checks for new players on the market.
 
@@ -59,7 +70,7 @@ npm run sync -- [FLAGS]
 
 ---
 
-### 4. `--skip-euroleague` (Offline Mode) 📴
+### 5. `--skip-euroleague` (Offline Mode) 📴
 **Purpose:** Forces the script to use ONLY Biwenger data.
 *   **Use Case:** If the EuroLeague API is down or blocking connections.
 
@@ -71,12 +82,12 @@ npm run sync -- [FLAGS]
 
 ---
 
-### 5. `--only-round=<N>` (Targeted Fix) 🎯
-**Purpose:** Forces a sync of a specific round ID (e.g., `4746`).
+### 6. `--only-round=<N>` (Targeted Fix) 🎯
+**Purpose:** Forces a sync of a specific round ID (e.g., `4764`).
 *   **Use Case:** If a specific past round had errors or missing data.
 
 ```bash
-npm run sync -- --only-round=4746
+npm run sync -- --only-round=4764
 ```
 
 ---
@@ -95,9 +106,9 @@ Update only the active games to get latest scores.
 npm run sync -- --no-details --active-only
 ```
 
-### 🛠️ Weekly Maintenance (Once)
-Full rebuild to ensure all player bios and price histories are perfect.
+### 🛠️ Full Rebuild (Missing Bio Data?)
+If you notice missing heights/weights/birthdates, run this ONCE.
 ```bash
-npm run sync
+npm run sync -- --force-details
 ```
 *(Warning: This makes ~350 calls to Biwenger. Do not run more than once per hour).*

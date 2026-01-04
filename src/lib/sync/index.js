@@ -33,6 +33,7 @@ async function syncData() {
   const args = process.argv.slice(2);
   const flags = {
     noDetails: args.includes('--no-details'), // Skip player details (prices/bio) -> SAVES 300 CALLS
+    forceDetails: args.includes('--force-details'), // Force fetch details even if up to date
     onlyMarket: args.includes('--only-market'), // Only sync board/transfers
     activeOnly: args.includes('--active-only'), // Only sync active/future matches
     onlyRound: args.find((a) => a.startsWith('--only-round='))?.split('=')[1], // Sync specific round
@@ -63,7 +64,10 @@ async function syncData() {
     if (!flags.onlyMarket && !flags.matchOnly) {
       // 1. Sync Players
       // Pass 'noDetails' flag to skip the 300+ calls
-      competition = await syncPlayers(db, { skipDetails: flags.noDetails });
+      competition = await syncPlayers(db, {
+        skipDetails: flags.noDetails,
+        forceDetails: flags.forceDetails,
+      });
 
       playersList = competition.data.data
         ? competition.data.data.players

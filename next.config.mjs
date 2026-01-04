@@ -6,7 +6,7 @@ const bundleAnalyzer = withBundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // output: 'standalone', // Disabled by user request
   serverExternalPackages: ['better-sqlite3'],
   // experimental: {
   //   allowedOrigins: ['192.168.1.40:3000', 'localhost:3000'],

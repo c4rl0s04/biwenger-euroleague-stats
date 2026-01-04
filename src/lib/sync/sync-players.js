@@ -170,7 +170,8 @@ export async function syncPlayers(db, options = {}) {
     const lastDate = lastDateRow ? lastDateRow.last_date : null;
 
     // If the last recorded date is TODAY (or later, just in case), skip
-    if (lastDate && lastDate >= today) {
+    // Unless forceDetails is true
+    if (!options.forceDetails && lastDate && lastDate >= today) {
       // console.log(`   ⏭️ Skipped ${player.name} (Already updated for ${lastDate})`);
       continue;
     }
@@ -178,7 +179,7 @@ export async function syncPlayers(db, options = {}) {
     try {
       await sleep(SLEEP_MS);
 
-      const lookupId = player.slug || playerId;
+      const lookupId = player.slug || player.id || playerId;
       const details = await fetchPlayerDetails(lookupId);
 
       if (details.data) {

@@ -257,6 +257,8 @@ export function ensureSchema(db) {
     'weight',
     'price',
     'euroleague_code',
+    'dorsal',
+    'country',
   ];
   const playersInfo = db.prepare('PRAGMA table_info(players)').all();
   const existingPlayerCols = new Set(playersInfo.map((c) => c.name));
@@ -265,6 +267,14 @@ export function ensureSchema(db) {
     if (!existingPlayerCols.has(col)) {
       console.log(`Migrating players table (adding ${col} column)...`);
       let type = 'TEXT';
+      if (['price_increment', 'height', 'weight', 'price', 'dorsal'].includes(col)) {
+        // Dorsal can be textual (00) but often treated as number. Biwenger likely treats as String/Number mix.
+        // Let's stick to TEXT for safety or INTEGER if we are sure.
+        // Update: Dorsal is just a number usually. Let's make it TEXT to keep leading zeros if any?
+        // Actually, schema definition above uses TEXT for almost everything flexible.
+        // Let's stick to TEXT for dorsal to be safe with "00".
+        // modifying check below to exclude dorsal from INTEGER if we want TEXT
+      }
       if (['price_increment', 'height', 'weight', 'price'].includes(col)) {
         type = 'INTEGER';
       }

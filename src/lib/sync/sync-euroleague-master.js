@@ -120,7 +120,9 @@ export async function syncEuroleagueMaster(db) {
             height = @height,
             weight = @weight,
             birth_date = @birth_date,
-            position = @position
+            position = @position,
+            dorsal = @dorsal,
+            country = @country
         WHERE id = @biwenger_id
     `);
 
@@ -180,6 +182,8 @@ export async function syncEuroleagueMaster(db) {
             weight: null,
             birth_date: null,
             position: player.position, // "Guard", "Center", "Forward"
+            dorsal: player.dorsal || null,
+            country: player.countryname || null,
           });
 
           insertMapping.run({
