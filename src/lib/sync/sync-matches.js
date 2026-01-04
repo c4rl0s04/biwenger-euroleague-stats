@@ -1,4 +1,5 @@
 import { fetchGameHeader } from '../api/euroleague-client.js';
+import { prepareMatchMutations } from '../db/mutations/matches.js';
 
 /**
  * Syncs matches (games) for a specific round using Euroleague Official Data.
@@ -40,20 +41,10 @@ export async function syncMatches(db, round, playersList = {}) {
 
   // 3. Prepare DB
   // Get Map of Euroleague Code -> Biwenger Team ID
-  const teams = db.prepare('SELECT id, code, name FROM teams WHERE code IS NOT NULL').all();
+  const mutations = prepareMatchMutations(db);
+  const teams = mutations.getMappedTeams.all();
   const elCodeToId = new Map();
   teams.forEach((t) => elCodeToId.set(t.code, t.id));
-
-  const insertMatch = db.prepare(`
-    INSERT INTO matches (round_id, round_name, home_team, home_id, away_team, away_id, date, status, home_score, away_score)
-    VALUES (@round_id, @round_name, @home_team, @home_id, @away_team, @away_id, @date, @status, @home_score, @away_score)
-    ON CONFLICT(round_id, home_team, away_team) DO UPDATE SET
-      round_name=excluded.round_name,
-      status=excluded.status,
-      home_score=excluded.home_score,
-      away_score=excluded.away_score,
-      date=excluded.date
-  `);
 
   let syncedCount = 0;
 
@@ -100,7 +91,7 @@ export async function syncMatches(db, round, playersList = {}) {
         matchDate = `${year}-${month}-${day}`;
       }
 
-      insertMatch.run({
+      mutations.upsertMatch.run({
         round_id: dbRoundId,
         round_name: roundName,
         home_team: game.TeamA || homeCode,

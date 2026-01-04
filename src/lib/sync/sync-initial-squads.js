@@ -3,6 +3,7 @@
  * Logic: Initial Squad = (Players Sold by User + Players Currently Owned by User) - Players Bought by User
  * @param {import('better-sqlite3').Database} db - Database instance
  */
+import { prepareUserMutations } from '../db/mutations/users.js';
 
 // League start date - when users joined and drafted their initial squads
 const LEAGUE_START_DATE = '2025-09-25';
@@ -11,54 +12,28 @@ export async function syncInitialSquads(db) {
   console.log('\n📥 Syncing Initial Squads (Inferred)...');
   console.log(`   📅 Using league start date: ${LEAGUE_START_DATE}`);
 
+  // Initialize Mutations
+  const mutations = prepareUserMutations(db);
+
   // 1. Get all users
-  const users = db.prepare('SELECT id, name FROM users').all();
+  const users = mutations.getAllUsers.all();
   if (users.length === 0) {
     console.log('No users found. Skipping.');
     return;
   }
-
-  const insertInitial = db.prepare(`
-      INSERT OR IGNORE INTO initial_squads (user_id, player_id, price) 
-      VALUES (@user_id, @player_id, @price)
-  `);
-
-  // Query to get player's price on league start date (or closest date before it)
-  const getInitialPrice = db.prepare(`
-    SELECT price FROM market_values 
-    WHERE player_id = ? AND date <= ?
-    ORDER BY date DESC
-    LIMIT 1
-  `);
 
   let totalInferred = 0;
 
   for (const user of users) {
     // A. Get all players EVER sold by this user
     // If you sold it, you must have owned it.
-    const soldPlayers = db
-      .prepare(
-        `
-          SELECT DISTINCT player_id 
-          FROM fichajes 
-          WHERE vendedor = ? OR vendedor = ?
-      `
-      )
+    const soldPlayers = mutations.getPlayersSoldByUser
       .all(user.name, user.id)
       .map((r) => r.player_id);
 
     // B. Get players CURRENTLY owned by this user
     // If you own it now, you might have started with it.
-    const currentPlayers = db
-      .prepare(
-        `
-          SELECT id as player_id 
-          FROM players 
-          WHERE owner_id = ?
-      `
-      )
-      .all(user.id)
-      .map((r) => r.player_id);
+    const currentPlayers = mutations.getPlayersOwnedByUser.all(user.id).map((r) => r.player_id);
 
     // Union of Sold + Current = All players ever interacting with this user as "Owner"
     const allOwned = new Set([...soldPlayers, ...currentPlayers]);
@@ -78,28 +53,10 @@ export async function syncInitialSquads(db) {
       // We order by timestamp ASC.
 
       // Fichajes involving user as Buyer
-      const buys = db
-        .prepare(
-          `
-              SELECT timestamp, 'buy' as type
-              FROM fichajes
-              WHERE player_id = ? AND (comprador = ? OR comprador = ?)
-              ORDER BY timestamp ASC
-          `
-        )
-        .all(playerId, user.name, user.id);
+      const buys = mutations.getPurchasesByPlayerAndUser.all(playerId, user.name, user.id);
 
       // Fichajes involving user as Seller
-      const sells = db
-        .prepare(
-          `
-              SELECT timestamp, 'sell' as type
-              FROM fichajes
-              WHERE player_id = ? AND (vendedor = ? OR vendedor = ?)
-              ORDER BY timestamp ASC
-          `
-        )
-        .all(playerId, user.name, user.id);
+      const sells = mutations.getSalesByPlayerAndUser.all(playerId, user.name, user.id);
 
       // Combine and Sort by time
       const events = [...buys, ...sells].sort((a, b) => a.timestamp - b.timestamp);
@@ -124,10 +81,10 @@ export async function syncInitialSquads(db) {
     const transaction = db.transaction(() => {
       for (const pid of inferredInitial) {
         // Look up price on league start date
-        const priceRow = getInitialPrice.get(pid, LEAGUE_START_DATE);
+        const priceRow = mutations.getInitialPrice.get(pid, LEAGUE_START_DATE);
         const initialPrice = priceRow ? priceRow.price : null;
 
-        insertInitial.run({
+        mutations.insertInitialSquad.run({
           user_id: user.id,
           player_id: pid,
           price: initialPrice,

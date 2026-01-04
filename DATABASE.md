@@ -15,6 +15,7 @@ erDiagram
     players ||--o{ player_round_stats : "has stats"
     players ||--o{ market_values : "price history"
     players ||--o{ fichajes : "transferred"
+    players ||--|| player_mappings : "linked to"
 
     matches ||--o{ player_round_stats : "played in"
 
@@ -29,9 +30,21 @@ erDiagram
         TEXT name
         TEXT position
         TEXT team
+        INTEGER team_id
         INTEGER price
         INTEGER puntos
         TEXT owner_id FK
+        TEXT dorsal
+        TEXT country
+        TEXT euroleague_code
+    }
+
+    teams {
+        INTEGER id PK
+        TEXT name
+        TEXT short_name
+        TEXT code
+        TEXT img
     }
 
     user_rounds {
@@ -58,8 +71,7 @@ erDiagram
         INTEGER round_id
         INTEGER fantasy_points
         INTEGER points
-        INTEGER rebounds
-        INTEGER assists
+        INTEGER valuation
     }
 ```
 
@@ -88,7 +100,8 @@ All players in the competition.
 | `id`                 | INTEGER | Primary key (Biwenger player ID)          |
 | `name`               | TEXT    | Player name                               |
 | `position`           | TEXT    | Position (Base, Alero, Pivot, Entrenador) |
-| `team`               | TEXT    | Current team                              |
+| `team`               | TEXT    | Current team name                         |
+| `team_id`            | INTEGER | Biwenger Team ID                          |
 | `puntos`             | INTEGER | Total fantasy points                      |
 | `partidos_jugados`   | INTEGER | Games played                              |
 | `played_home`        | INTEGER | Home games                                |
@@ -97,16 +110,33 @@ All players in the competition.
 | `points_away`        | INTEGER | Away points                               |
 | `points_last_season` | INTEGER | Previous season points                    |
 | `owner_id`           | TEXT    | FK → users.id (null if free agent)        |
-| `status`             | TEXT    | Player status                             |
+| `status`             | TEXT    | Player status (ok, injured, etc.)         |
 | `price_increment`    | INTEGER | Recent price change                       |
 | `birth_date`         | TEXT    | Birthday (YYYY-MM-DD)                     |
 | `height`             | INTEGER | Height in cm                              |
 | `weight`             | INTEGER | Weight in kg                              |
 | `price`              | INTEGER | Current market price                      |
+| `euroleague_code`    | TEXT    | Linked EuroLeague ID (e.g. "009586")      |
+| `dorsal`             | TEXT    | Jersey Number                             |
+| `country`            | TEXT    | Country of origin                         |
 
 ---
 
-### 3. `user_rounds`
+### 3. `teams`
+
+EuroLeague teams.
+
+| Column       | Type    | Description                    |
+| ------------ | ------- | ------------------------------ |
+| `id`         | INTEGER | Primary key (Biwenger Team ID) |
+| `name`       | TEXT    | Team Full Name                 |
+| `short_name` | TEXT    | Abbreviated Name (e.g. BAR)    |
+| `code`       | TEXT    | EuroLeague Team Code (e.g. BAR)|
+| `img`        | TEXT    | Team Logo URL                  |
+
+---
+
+### 4. `user_rounds`
 
 User performance per round.
 
@@ -124,7 +154,7 @@ User performance per round.
 
 ---
 
-### 4. `fichajes`
+### 5. `fichajes`
 
 Transfer history.
 
@@ -142,7 +172,7 @@ Transfer history.
 
 ---
 
-### 5. `lineups`
+### 6. `lineups`
 
 User lineups per round.
 
@@ -160,7 +190,7 @@ User lineups per round.
 
 ---
 
-### 6. `matches`
+### 7. `matches`
 
 Game schedule and results.
 
@@ -171,6 +201,8 @@ Game schedule and results.
 | `round_name` | TEXT    | Round display name |
 | `home_team`  | TEXT    | Home team name     |
 | `away_team`  | TEXT    | Away team name     |
+| `home_id`    | INTEGER | FK → teams.id      |
+| `away_id`    | INTEGER | FK → teams.id      |
 | `date`       | DATE    | Game date          |
 | `status`     | TEXT    | pending/finished   |
 | `home_score` | INTEGER | Home team score    |
@@ -180,7 +212,7 @@ Game schedule and results.
 
 ---
 
-### 7. `player_round_stats`
+### 8. `player_round_stats`
 
 Detailed player statistics per round.
 
@@ -204,12 +236,13 @@ Detailed player statistics per round.
 | `blocks`                 | INTEGER | Blocks                |
 | `turnovers`              | INTEGER | Turnovers             |
 | `fouls_committed`        | INTEGER | Personal fouls        |
+| `valuation`              | INTEGER | PIR (Valoración)      |
 
 **Unique constraint:** `(player_id, round_id)`
 
 ---
 
-### 8. `porras`
+### 9. `porras`
 
 User predictions/guesses per round.
 
@@ -226,7 +259,7 @@ User predictions/guesses per round.
 
 ---
 
-### 9. `market_values`
+### 10. `market_values`
 
 Player price history.
 
@@ -241,7 +274,7 @@ Player price history.
 
 ---
 
-### 10. `transfer_bids`
+### 11. `transfer_bids`
 
 Bids on transfers (auction).
 
@@ -252,6 +285,30 @@ Bids on transfers (auction).
 | `bidder_id`   | TEXT    | Bidder user ID   |
 | `bidder_name` | TEXT    | Bidder name      |
 | `amount`      | INTEGER | Bid amount       |
+
+---
+
+### 12. `player_mappings` (Internal)
+
+Links Biwenger IDs to EuroLeague IDs.
+
+| Column            | Type    | Description                      |
+| ----------------- | ------- | -------------------------------- |
+| `biwenger_id`     | INTEGER | Primary key (FK → players.id)    |
+| `euroleague_code` | TEXT    | EuroLeague Player Code (Unique)  |
+| `details_json`    | TEXT    | Raw JSON/XML from EuroLeague API |
+
+---
+
+### 13. `sync_meta` (Configuration)
+
+Key-value store for sync configuration.
+
+| Column       | Type | Description        |
+| ------------ | ---- | ------------------ |
+| `key`        | TEXT | Config key         |
+| `value`      | TEXT | Config value       |
+| `updated_at` | TEXT | Last updated time  |
 
 ---
 

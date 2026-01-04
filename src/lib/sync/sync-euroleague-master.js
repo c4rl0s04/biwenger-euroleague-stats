@@ -1,6 +1,7 @@
 import { fetchTeams, normalizePlayerName } from '../api/euroleague-client.js';
 import { getShortTeamName } from '../utils/format.js';
 import { CONFIG } from '../config.js';
+import { prepareEuroleagueMutations } from '../db/mutations/euroleague.js';
 
 /**
  * Syncs Euroleague Master Data (Teams & Players Linker)
@@ -24,23 +25,15 @@ export async function syncEuroleagueMaster(db) {
     const clubs = Array.isArray(data.clubs.club) ? data.clubs.club : [data.clubs.club];
     console.log(`   Found ${clubs.length} Euroleague clubs.`);
 
+    // Initialize Mutations
+    const mutations = prepareEuroleagueMutations(db);
+
     // Store team count in sync_meta for dynamic games/round calculation
-    const upsertMeta = db.prepare(`
-      INSERT INTO sync_meta (key, value, updated_at) VALUES (@key, @value, @updated_at)
-      ON CONFLICT(key) DO UPDATE SET value = @value, updated_at = @updated_at
-    `);
-    upsertMeta.run({
+    mutations.upsertSyncMeta.run({
       key: 'euroleague_team_count',
       value: String(clubs.length),
       updated_at: new Date().toISOString(),
     });
-
-    // Prepare Statements
-    const updateTeam = db.prepare(`
-      UPDATE teams 
-      SET code = @code, name = @name, short_name = @short_name
-      WHERE name LIKE @fuzzy_name OR short_name = @short_name
-    `);
 
     // We also want to capture the Euroleague Team Code -> Biwenger Team ID map
     const teamMap = new Map(); // EL Code -> Biwenger ID
@@ -61,7 +54,7 @@ export async function syncEuroleagueMaster(db) {
     };
 
     // Get current DB teams
-    const dbTeams = db.prepare('SELECT id, name FROM teams').all();
+    const dbTeams = mutations.getDbTeams.all();
     console.log('   ℹ️ Current DB Teams:', dbTeams.map((t) => t.name).join(', '));
 
     // Pre-tokenize DB teams
@@ -99,11 +92,7 @@ export async function syncEuroleagueMaster(db) {
         console.log(
           `   ✅ Matched [${code}] "${elName}" -> DB: "${bestMatch.name}" (${bestScore} words)`
         );
-        db.prepare('UPDATE teams SET code = ?, short_name = ? WHERE id = ?').run(
-          code,
-          shortName,
-          bestMatch.id
-        );
+        mutations.updateTeamCode.run(code, shortName, bestMatch.id);
         teamMap.set(code, bestMatch.id);
       } else {
         console.log(`   ⚠️ No match for [${code}] "${elName}"`);
@@ -113,26 +102,8 @@ export async function syncEuroleagueMaster(db) {
     // 2. Sync Players (Linker)
     console.log('   🔗 Linking Players (Biwenger ↔ Euroleague)...');
 
-    const updatePlayer = db.prepare(`
-        UPDATE players
-        SET 
-            euroleague_code = @el_code,
-            height = @height,
-            weight = @weight,
-            birth_date = @birth_date,
-            position = @position,
-            dorsal = @dorsal,
-            country = @country
-        WHERE id = @biwenger_id
-    `);
-
-    const insertMapping = db.prepare(`
-        INSERT OR REPLACE INTO player_mappings (biwenger_id, euroleague_code, details_json)
-        VALUES (@biwenger_id, @el_code, @json)
-    `);
-
     // Get all Biwenger players to search against
-    const biwengerPlayers = db.prepare('SELECT id, name, team_id FROM players').all();
+    const biwengerPlayers = mutations.getBiwengerPlayers.all();
 
     let linkedCount = 0;
     let totalElPlayers = 0;
@@ -175,18 +146,18 @@ export async function syncEuroleagueMaster(db) {
           // Note: roster.player doesn't have height/weight - would need separate player API call
           // For now just link the CODE. Bio data can come from Biwenger or separate fetch.
 
-          updatePlayer.run({
+          mutations.updatePlayerLink.run({
             biwenger_id: match.id,
             el_code: elCode,
             height: null,
             weight: null,
             birth_date: null,
             position: player.position, // "Guard", "Center", "Forward"
-            dorsal: player.dorsal || null,
+            dorsal: player.dorsal || null, // V3 dorsal is nullable for now
             country: player.countryname || null,
           });
 
-          insertMapping.run({
+          mutations.insertPlayerMapping.run({
             biwenger_id: match.id,
             el_code: elCode,
             json: JSON.stringify(player),

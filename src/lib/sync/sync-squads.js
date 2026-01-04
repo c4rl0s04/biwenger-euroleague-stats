@@ -1,5 +1,6 @@
 import { biwengerFetch, fetchLeague } from '../api/biwenger-client.js';
 import { CONFIG } from '../config.js';
+import { prepareUserMutations } from '../db/mutations/users.js';
 
 /**
  * Syncs current squads (ownership) for all users.
@@ -8,18 +9,19 @@ import { CONFIG } from '../config.js';
 export async function syncSquads(db) {
   console.log('\n📥 Syncing Squads (Ownership)...');
 
+  // Initialize Mutations
+  const mutations = prepareUserMutations(db);
+
   // 1. Reset all ownerships first (in case players were sold to market)
-  db.prepare('UPDATE players SET owner_id = NULL').run();
+  mutations.resetAllOwners.run();
 
   // 2. Get all users from DB (or fetch league if DB is empty, but syncStandings runs first)
-  const users = db.prepare('SELECT id, name FROM users').all();
+  const users = mutations.getAllUsers.all();
 
   if (users.length === 0) {
     console.log('No users found in DB. Skipping squad sync.');
     return;
   }
-
-  const updateOwner = db.prepare('UPDATE players SET owner_id = @owner_id WHERE id = @player_id');
 
   let totalPlayersOwned = 0;
 
@@ -35,7 +37,7 @@ export async function syncSquads(db) {
 
         const updateTransaction = db.transaction(() => {
           for (const playerId of playerIds) {
-            updateOwner.run({
+            mutations.updatePlayerOwner.run({
               owner_id: user.id,
               player_id: playerId,
             });

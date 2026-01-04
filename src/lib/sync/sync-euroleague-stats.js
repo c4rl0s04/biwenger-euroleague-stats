@@ -5,6 +5,7 @@ import {
   normalizePlayerName,
 } from '../api/euroleague-client.js';
 import { CONFIG } from '../config.js';
+import { prepareEuroleagueMutations } from '../db/mutations/euroleague.js';
 
 const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 
@@ -21,11 +22,12 @@ const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, options = {}) {
   console.log(`📊 Syncing Euroleague game ${gameCode} for round ${roundId}...`);
 
+  // Initialize Mutations
+  const mutations = prepareEuroleagueMutations(db);
+
   // OPTIMIZATION: If activeOnly is set, check if we already have a FINAL result for this game
   if (options.activeOnly) {
-    const existingMatch = db
-      .prepare('SELECT status FROM matches WHERE round_id = ? AND (home_team = ? OR away_team = ?)')
-      .get(roundId, 'UNKNOWN_TEAM', 'UNKNOWN_TEAM');
+    const existingMatch = mutations.checkFinishedMatch.get(roundId, 'UNKNOWN_TEAM', 'UNKNOWN_TEAM');
     // The above query is tricky because we don't know the Team ID or Code yet without fetching header.
     // However, we can check by ROUND and DATE if we TRUST the schedule.
     // Better approach: Let's fetch the header (cheap call) then decide if we fetch the BOXSCORE (expensive/heavy parsing).
@@ -45,9 +47,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
 
     // 2. Check activeOnly optimization - skip if game is finished and we already have stats
     if (options.activeOnly && !header.Live && header.ScoreA !== null) {
-      const statsCount = db
-        .prepare('SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?')
-        .get(roundId);
+      const statsCount = mutations.checkStatsExist.get(roundId);
       if (statsCount.c > 0) {
         console.log(`   ⏭️ Skipping boxscore (Game Finished & Stats exist & --active-only)`);
         return { success: true, reason: 'skipped_active_only' };
@@ -71,13 +71,8 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
     }
 
     // 4. Get player ID mapping (euroleague_code -> biwenger id)
-    const getPlayerByEuroleagueCode = db.prepare(
-      'SELECT id, name FROM players WHERE euroleague_code = ?'
-    );
-
     // Also prepare fallback: find by name similarity
-    const getAllPlayers = db.prepare('SELECT id, name, team FROM players');
-    const allPlayers = getAllPlayers.all();
+    const allPlayers = mutations.getAllPlayers.all();
 
     // Build normalized name lookup
     const playerNameMap = new Map();
@@ -86,42 +81,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
       playerNameMap.set(normalized, p);
     }
 
-    // Prepare update statements
-    const updateEuroleagueCode = db.prepare(
-      'UPDATE players SET euroleague_code = @euroleague_code WHERE id = @id'
-    );
-
-    const insertStats = db.prepare(`
-      INSERT INTO player_round_stats (
-        player_id, round_id, fantasy_points, minutes, points,
-        two_points_made, two_points_attempted,
-        three_points_made, three_points_attempted,
-        free_throws_made, free_throws_attempted,
-        rebounds, assists, steals, blocks, turnovers, fouls_committed, valuation
-      ) VALUES (
-        @player_id, @round_id, @fantasy_points, @minutes, @points,
-        @two_points_made, @two_points_attempted,
-        @three_points_made, @three_points_attempted,
-        @free_throws_made, @free_throws_attempted,
-        @rebounds, @assists, @steals, @blocks, @turnovers, @fouls_committed, @valuation
-      )
-      ON CONFLICT(player_id, round_id) DO UPDATE SET
-        minutes=excluded.minutes,
-        points=excluded.points,
-        two_points_made=excluded.two_points_made,
-        two_points_attempted=excluded.two_points_attempted,
-        three_points_made=excluded.three_points_made,
-        three_points_attempted=excluded.three_points_attempted,
-        free_throws_made=excluded.free_throws_made,
-        free_throws_attempted=excluded.free_throws_attempted,
-        rebounds=excluded.rebounds,
-        assists=excluded.assists,
-        steals=excluded.steals,
-        blocks=excluded.blocks,
-        turnovers=excluded.turnovers,
-        fouls_committed=excluded.fouls_committed,
-        valuation=excluded.valuation
-    `);
+    // Prepare update statements - Using mutations module now
 
     let matched = 0;
     let unmatched = 0;
@@ -131,7 +91,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
         let playerId = null;
 
         // Try to find by euroleague_code first
-        const existing = getPlayerByEuroleagueCode.get(stat.euroleague_code);
+        const existing = mutations.getPlayerByEuroleagueCode.get(stat.euroleague_code);
         if (existing) {
           playerId = existing.id;
         } else {
@@ -142,7 +102,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
           if (matchedPlayer) {
             playerId = matchedPlayer.id;
             // Save the mapping for future lookups
-            updateEuroleagueCode.run({
+            mutations.updatePlayerEuroleagueCode.run({
               euroleague_code: stat.euroleague_code,
               id: playerId,
             });
@@ -158,7 +118,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
         matched++;
 
         // Insert stats (fantasy_points will be 0, updated later from Biwenger)
-        insertStats.run({
+        mutations.insertPlayerStats.run({
           player_id: playerId,
           round_id: roundId,
           fantasy_points: 0, // Will be updated from Biwenger
@@ -196,6 +156,8 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
 export async function syncBiwengerFantasyPoints(db, round, playersList) {
   // Import dynamically to avoid circular dependencies
   const { fetchRoundGames } = await import('../api/biwenger-client.js');
+  // Reuse mutations module (or initialize new one if db scope is different, here we assume db is passed)
+  const mutations = prepareEuroleagueMutations(db);
 
   const roundId = round.id;
   const dbRoundId = round.dbId || round.id;
@@ -210,12 +172,6 @@ export async function syncBiwengerFantasyPoints(db, round, playersList) {
       return;
     }
 
-    const updateFantasyPoints = db.prepare(`
-      UPDATE player_round_stats 
-      SET fantasy_points = @fantasy_points 
-      WHERE player_id = @player_id AND round_id = @round_id
-    `);
-
     let updated = 0;
 
     db.transaction(() => {
@@ -226,7 +182,7 @@ export async function syncBiwengerFantasyPoints(db, round, playersList) {
             const playerId = report.player?.id;
             if (!playerId || !playersList[playerId]) continue;
 
-            const result = updateFantasyPoints.run({
+            const result = mutations.updateFantasyPoints.run({
               fantasy_points: report.points || 0,
               player_id: playerId,
               round_id: dbRoundId,

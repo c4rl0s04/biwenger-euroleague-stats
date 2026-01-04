@@ -1,5 +1,6 @@
 import { biwengerFetch } from '../api/biwenger-client.js';
 import { CONFIG } from '../config.js';
+import { prepareMarketMutations } from '../db/mutations/market.js';
 
 /**
  * Syncs board history (transfers, porras, etc.) incrementally.
@@ -10,9 +11,12 @@ import { CONFIG } from '../config.js';
 export async function syncBoard(db, playersList, teams) {
   console.log('\n📥 Fetching Full Board History...');
 
+  // Initialize Mutations
+  const mutations = prepareMarketMutations(db);
+
   // Check for existing transfers to do incremental sync
   // We use fichajes timestamp as the anchor for now, assuming board is sequential
-  const lastTransfer = db.prepare('SELECT MAX(timestamp) as ts FROM fichajes').get();
+  const lastTransfer = mutations.getLastTransferDate.get();
   const lastTimestamp = lastTransfer ? lastTransfer.ts : 0;
 
   if (lastTimestamp > 0) {
@@ -22,38 +26,6 @@ export async function syncBoard(db, playersList, teams) {
   } else {
     console.log('No existing data. Doing full sync...');
   }
-
-  const insertTransfer = db.prepare(`
-      INSERT OR IGNORE INTO fichajes (timestamp, fecha, player_id, precio, vendedor, comprador)
-      VALUES (@timestamp, @fecha, @player_id, @precio, @vendedor, @comprador)
-    `);
-
-  const insertBid = db.prepare(`
-      INSERT INTO transfer_bids (transfer_id, bidder_id, bidder_name, amount)
-      VALUES (@transfer_id, @bidder_id, @bidder_name, @amount)
-    `);
-
-  const insertFinance = db.prepare(`
-      INSERT INTO finances (user_id, round_id, date, type, amount, description)
-      VALUES (@user_id, @round_id, @date, @type, @amount, @description)
-    `);
-
-  // Helper to insert unknown players on the fly
-  const insertPlayer = db.prepare(`
-      INSERT INTO players (
-        id, name, team, position, 
-        puntos, partidos_jugados, 
-        played_home, played_away, 
-        points_home, points_away, points_last_season
-      ) 
-      VALUES (
-        @id, @name, @team, @position, 
-        @puntos, @partidos_jugados, 
-        @played_home, @played_away, 
-        @points_home, @points_away, @points_last_season
-      )
-      ON CONFLICT(id) DO NOTHING
-    `);
 
   let offset = 0;
   const limit = 50;
@@ -121,7 +93,7 @@ export async function syncBoard(db, playersList, teams) {
             for (const res of t.content.results) {
               if (res.bonus && res.bonus > 0) {
                 try {
-                  insertFinance.run({
+                  mutations.insertFinance.run({
                     user_id: res.user.id || res.user,
                     round_id: roundId,
                     date: date,
@@ -148,7 +120,7 @@ export async function syncBoard(db, playersList, teams) {
           if (t.content.to && t.content.amount) {
             try {
               const date = new Date(t.date * 1000).toISOString();
-              insertFinance.run({
+              mutations.insertFinance.run({
                 user_id: t.content.to.id || t.content.to,
                 round_id: null,
                 date: date,
@@ -193,7 +165,7 @@ export async function syncBoard(db, playersList, teams) {
               const hits = response.hits !== undefined ? response.hits : null;
 
               if (userId && roundId) {
-                insertPorra.run({
+                mutations.insertPorra.run({
                   user_id: userId.toString(),
                   round_id: roundId,
                   round_name: roundName,
@@ -254,7 +226,7 @@ export async function syncBoard(db, playersList, teams) {
             continue;
           }
 
-          const info = insertTransfer.run({
+          const info = mutations.insertTransfer.run({
             timestamp: timestamp,
             fecha: date,
             player_id: playerId,
@@ -272,7 +244,7 @@ export async function syncBoard(db, playersList, teams) {
                 const bidderId = bid.user ? bid.user.id || bid.user : null;
                 const bidderName = bid.user ? bid.user.name || 'Unknown' : 'Unknown';
 
-                insertBid.run({
+                mutations.insertBid.run({
                   transfer_id: transferId,
                   bidder_id: bidderId ? bidderId.toString() : null,
                   bidder_name: bidderName,

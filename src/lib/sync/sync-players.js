@@ -1,6 +1,7 @@
 import { fetchAllPlayers, fetchPlayerDetails } from '../api/biwenger-client.js';
 import { getShortTeamName } from '../utils/format.js';
 import { CONFIG } from '../config.js';
+import { preparePlayerMutations } from '../db/mutations/players.js';
 
 const SLEEP_MS = 600; // Mantenemos la pausa segura para evitar el error 429
 
@@ -49,73 +50,17 @@ export async function syncPlayers(db, options = {}) {
   );
 
   // --- 1. QUERY PREPARATION ---
-
-  const insertPlayer = db.prepare(`
-    INSERT INTO players (
-      id, name, team_id, team, position, 
-      puntos, partidos_jugados, 
-      played_home, played_away, 
-      points_home, points_away, points_last_season,
-      status, price_increment, price
-    ) 
-    VALUES (
-      @id, @name, @team_id, @team, @position, 
-      @puntos, @partidos_jugados, 
-      @played_home, @played_away, 
-      @points_home, @points_away, 
-      @points_last_season,
-      @status, @price_increment, @price
-    )
-    ON CONFLICT(id) DO UPDATE SET 
-      name=excluded.name, 
-      team_id=excluded.team_id,
-      team=excluded.team, 
-      position=excluded.position,
-      puntos=excluded.puntos,
-      partidos_jugados=excluded.partidos_jugados,
-      played_home=excluded.played_home,
-      played_away=excluded.played_away,
-      points_home=excluded.points_home,
-      points_away=excluded.points_away,
-      points_last_season=excluded.points_last_season,
-      status=excluded.status,
-      price_increment=excluded.price_increment,
-      price=excluded.price
-  `);
-
-  const updatePlayerDetails = db.prepare(`
-    UPDATE players 
-    SET birth_date = @birth_date, height = @height, weight = @weight
-    WHERE id = @id
-  `);
-
-  // NEW QUERY: Get last recorded date for a player
-  const getLastDate = db.prepare(
-    'SELECT max(date) as last_date FROM market_values WHERE player_id = ?'
-  );
-
-  const insertMarketValue = db.prepare(`
-    INSERT OR IGNORE INTO market_values (player_id, price, date)
-    VALUES (@player_id, @price, @date)
-  `);
-
-  const positions = CONFIG.POSITIONS;
+  const mutations = preparePlayerMutations(db);
+  const positions = CONFIG.POSITIONS; // Position map
   const teams =
     (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
 
   // --- 1.1 SYNC TEAMS ---
   console.log('Syncing Teams...');
 
-  // --- 1.1 SYNC TEAMS ---
-  console.log('Syncing Teams...');
-  const insertTeam = db.prepare(`
-    INSERT INTO teams (id, name, short_name, img) VALUES (@id, @name, @short_name, @img)
-    ON CONFLICT(id) DO UPDATE SET name=excluded.name, short_name=excluded.short_name, img=excluded.img
-  `);
-
   const teamTx = db.transaction(() => {
     for (const [teamId, teamData] of Object.entries(teams)) {
-      insertTeam.run({
+      mutations.upsertTeam({
         id: parseInt(teamId),
         name: teamData.name,
         short_name: getShortTeamName(teamData.name),
@@ -140,7 +85,7 @@ export async function syncPlayers(db, options = {}) {
     const playerId = parseInt(id);
 
     // A) Basic Insertion
-    insertPlayer.run({
+    mutations.upsertPlayer({
       id: playerId,
       name: player.name,
       team_id: player.teamID,
@@ -166,13 +111,16 @@ export async function syncPlayers(db, options = {}) {
     // OPTIMIZATION: Freshness check
     // If we already have a market value for TODAY (or very recent date), skip details.
     const today = new Date().toISOString().split('T')[0];
-    const lastDateRow = getLastDate.get(playerId);
+    const lastDateRow = mutations.getLastDate(playerId);
     const lastDate = lastDateRow ? lastDateRow.last_date : null;
 
-    // If the last recorded date is TODAY (or later, just in case), skip
-    // Unless forceDetails is true
-    if (!options.forceDetails && lastDate && lastDate >= today) {
-      // console.log(`   ⏭️ Skipped ${player.name} (Already updated for ${lastDate})`);
+    // Check if we are missing bio data (self-healing)
+    const currentPlayer = mutations.getPlayerBioStatus(playerId);
+    const isMissingBio = !currentPlayer || !currentPlayer.birth_date || !currentPlayer.height;
+
+    // If the last recorded date is TODAY (or later) AND we have bio data, skip
+    if (!options.forceDetails && !isMissingBio && lastDate && lastDate >= today) {
+      // console.log(`   ⏭️ Skipping ${player.name} (Already updated for ${lastDate})`);
       continue;
     }
 
@@ -186,7 +134,7 @@ export async function syncPlayers(db, options = {}) {
         const d = details.data;
 
         // B.1 Update physical data
-        updatePlayerDetails.run({
+        mutations.updatePlayerDetails({
           id: playerId,
           birth_date: parseBiwengerDate(d.birthday),
           height: d.height || null,
@@ -213,7 +161,12 @@ export async function syncPlayers(db, options = {}) {
           if (newPrices.length > 0) {
             const insertHistory = db.transaction((prices) => {
               for (const [dateInt, price] of prices) {
-                insertMarketValue.run({
+                // Use raw statement from mutations.stmts for bulk efficiency if needed
+                // OR cleaner: mutations.insertMarketValue(...)
+                // Since this runs inside a tx loop, reusing the prepared stmt is key.
+                // mutations.insertMarketValue is a wrapper .run(), so it is fine.
+                // But passing 'prices' array to tx function is nicer.
+                mutations.insertMarketValue({
                   player_id: playerId,
                   price: price,
                   date: parsePriceDate(dateInt),

@@ -1,4 +1,5 @@
 import { fetchRoundsLeague } from '../api/biwenger-client.js';
+import { prepareUserMutations } from '../db/mutations/users.js';
 
 /**
  * Syncs lineups for finished rounds.
@@ -35,24 +36,18 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
     }
 
     if (standings) {
-      const insertUser = db.prepare(`
-               INSERT OR IGNORE INTO users (id, name) VALUES (@id, @name)
-             `);
-
-      const insertLineup = db.prepare(`
-                               INSERT INTO lineups (user_id, round_id, round_name, player_id, is_captain, role)
-                               VALUES (@user_id, @round_id, @round_name, @player_id, @is_captain, @role)
-                               ON CONFLICT(user_id, round_id, player_id) DO UPDATE SET
-                               is_captain=excluded.is_captain,
-                               role=excluded.role
-                             `);
+      // Initialize Mutations
+      const mutations = prepareUserMutations(db);
 
       db.transaction(() => {
         for (const user of standings) {
           // Insert user info
-          insertUser.run({
+          // Used to be INSERT OR IGNORE, now UPSERT but minimal impact
+          mutations.upsertUser.run({
             id: user.id.toString(),
             name: user.name,
+            icon: null, // We don't have icon here usually, prevent overwriting with null if possible?
+            // Wait, upsertUser uses COALESCE(excluded.icon, users.icon) so passing null is safe.
           });
 
           // Insert User Round Score (only for FINISHED rounds to avoid 0-point entries)
@@ -60,17 +55,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
             try {
               const participated = user.lineup.count ? 1 : 0;
               const alineacion = user.lineup.type || null;
-              db.prepare(
-                `
-                                INSERT INTO user_rounds (user_id, round_id, round_name, points, participated, alineacion)
-                                VALUES (?, ?, ?, ?, ?, ?)
-                                ON CONFLICT(user_id, round_id) DO UPDATE SET
-                                points=excluded.points,
-                                participated=excluded.participated,
-                                round_name=excluded.round_name,
-                                alineacion=excluded.alineacion
-                            `
-              ).run(
+              mutations.upsertUserRound.run(
                 user.id.toString(),
                 dbRoundId,
                 roundName,
@@ -100,7 +85,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                     return; // Use return for forEach to skip current iteration
                   }
 
-                  insertLineup.run({
+                  mutations.upsertLineup.run({
                     user_id: user.id.toString(),
                     round_id: dbRoundId,
                     round_name: roundName,

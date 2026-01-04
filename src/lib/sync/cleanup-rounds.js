@@ -5,28 +5,17 @@
  */
 import Database from 'better-sqlite3';
 import { CONFIG } from '../config.js';
+import { prepareMatchMutations } from '../db/mutations/matches.js';
 
 const DB_PATH = CONFIG.DB.PATH;
 
 export function cleanupDuplicateRounds(db) {
   console.log('🧹 Cleaning up duplicate rounds...');
 
-  // Find duplicate round names (including aplazada variations)
-  const duplicatesQuery = `
-    SELECT 
-      CASE 
-        WHEN round_name LIKE '%(aplazada)%' THEN TRIM(REPLACE(round_name, '(aplazada)', ''))
-        ELSE round_name
-      END as base_name,
-      GROUP_CONCAT(DISTINCT round_id) as round_ids,
-      MIN(round_id) as canonical_id,
-      COUNT(DISTINCT round_id) as count
-    FROM matches
-    GROUP BY base_name
-    HAVING count > 1
-  `;
+  // Initialize Mutations
+  const mutations = prepareMatchMutations(db);
 
-  const duplicates = db.prepare(duplicatesQuery).all();
+  const duplicates = mutations.findDuplicateRounds.all();
 
   if (duplicates.length === 0) {
     console.log('   No duplicate rounds found.');
@@ -45,58 +34,24 @@ export function cleanupDuplicateRounds(db) {
     db.transaction(() => {
       for (const dupId of duplicateIds) {
         // Delete duplicate matches (they should have same data as canonical)
-        db.prepare(
-          `
-          DELETE FROM matches WHERE round_id = ?
-        `
-        ).run(dupId);
+        mutations.deleteMatchesByRound.run(dupId);
 
         // Update player_round_stats - merge by updating round_id
         // First delete any conflicting entries (same player, same canonical round)
-        db.prepare(
-          `
-          DELETE FROM player_round_stats 
-          WHERE round_id = ? 
-          AND player_id IN (
-            SELECT player_id FROM player_round_stats WHERE round_id = ?
-          )
-        `
-        ).run(dupId, canonicalId);
+        mutations.deleteConflictingStats.run(dupId, canonicalId);
 
         // Then update remaining entries
-        db.prepare(
-          `
-          UPDATE player_round_stats SET round_id = ?
-          WHERE round_id = ?
-        `
-        ).run(canonicalId, dupId);
+        mutations.updateStatsRound.run(canonicalId, dupId);
 
         // Update user_rounds - merge points for same user/round
         // First, update points for users that have both rounds
-        db.prepare(
-          `
-          UPDATE user_rounds 
-          SET points = points + COALESCE((
-            SELECT points FROM user_rounds ur2 
-            WHERE ur2.user_id = user_rounds.user_id AND ur2.round_id = ?
-          ), 0)
-          WHERE round_id = ?
-        `
-        ).run(dupId, canonicalId);
+        mutations.mergeUserRoundPoints.run(dupId, canonicalId);
 
         // Delete duplicate user_round entries
-        db.prepare(
-          `
-          DELETE FROM user_rounds WHERE round_id = ?
-        `
-        ).run(dupId);
+        mutations.deleteUserRounds.run(dupId);
 
         // Delete duplicate lineups (keep canonical)
-        db.prepare(
-          `
-          DELETE FROM lineups WHERE round_id = ?
-        `
-        ).run(dupId);
+        mutations.deleteLineups.run(dupId);
       }
     })();
   }

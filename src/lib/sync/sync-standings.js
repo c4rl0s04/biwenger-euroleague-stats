@@ -1,4 +1,5 @@
 import { fetchLeague } from '../api/biwenger-client.js';
+import { prepareUserMutations } from '../db/mutations/users.js';
 
 /**
  * Syncs league standings (users) to the local database.
@@ -9,14 +10,12 @@ export async function syncStandings(db) {
   const league = await fetchLeague();
   const standings = league.data.standings;
 
-  const insertUserStandings = db.prepare(`
-    INSERT INTO users (id, name, icon) VALUES (@id, @name, @icon)
-    ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=excluded.icon
-  `);
+  // Initialize Mutations
+  const mutations = prepareUserMutations(db);
 
   db.transaction(() => {
     for (const user of standings) {
-      insertUserStandings.run({
+      mutations.upsertUser.run({
         id: user.id.toString(),
         name: user.name,
         icon: user.icon ? `https://cdn.biwenger.com/${user.icon}` : null,
