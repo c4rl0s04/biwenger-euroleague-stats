@@ -126,13 +126,13 @@ All players in the competition.
 
 EuroLeague teams.
 
-| Column       | Type    | Description                    |
-| ------------ | ------- | ------------------------------ |
-| `id`         | INTEGER | Primary key (Biwenger Team ID) |
-| `name`       | TEXT    | Team Full Name                 |
-| `short_name` | TEXT    | Abbreviated Name (e.g. BAR)    |
-| `code`       | TEXT    | EuroLeague Team Code (e.g. BAR)|
-| `img`        | TEXT    | Team Logo URL                  |
+| Column       | Type    | Description                     |
+| ------------ | ------- | ------------------------------- |
+| `id`         | INTEGER | Primary key (Biwenger Team ID)  |
+| `name`       | TEXT    | Team Full Name                  |
+| `short_name` | TEXT    | Abbreviated Name (e.g. BAR)     |
+| `code`       | TEXT    | EuroLeague Team Code (e.g. BAR) |
+| `img`        | TEXT    | Team Logo URL                   |
 
 ---
 
@@ -304,11 +304,11 @@ Links Biwenger IDs to EuroLeague IDs.
 
 Key-value store for sync configuration.
 
-| Column       | Type | Description        |
-| ------------ | ---- | ------------------ |
-| `key`        | TEXT | Config key         |
-| `value`      | TEXT | Config value       |
-| `updated_at` | TEXT | Last updated time  |
+| Column       | Type | Description       |
+| ------------ | ---- | ----------------- |
+| `key`        | TEXT | Config key        |
+| `value`      | TEXT | Config value      |
+| `updated_at` | TEXT | Last updated time |
 
 ---
 

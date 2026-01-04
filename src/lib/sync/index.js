@@ -61,7 +61,7 @@ async function syncData() {
     // Skip if --only-market or --only-round is passed (unless we need players for mapping)
     // Actually, we usually need players list for everything. But we can skip DETAILED fetch.
 
-    if (!flags.onlyMarket && !flags.matchOnly) {
+    if (!flags.onlyMarket && !flags.matchOnly && !flags.activeOnly) {
       // 1. Sync Players
       // Pass 'noDetails' flag to skip the 300+ calls
       competition = await syncPlayers(db, {
@@ -95,7 +95,7 @@ async function syncData() {
     }
 
     // --- PHASE 2: USER DATA & MARKET ---
-    if (!flags.matchOnly && !flags.onlyRound) {
+    if (!flags.matchOnly && !flags.onlyRound && !flags.activeOnly) {
       // 2. Sync Standings (Users)
       await syncStandings(db);
 
@@ -134,6 +134,18 @@ async function syncData() {
 
     // Get rounds list
     // Fetch rounds from competition data
+    const hasRounds =
+      (competition.data.data && competition.data.data.season) || competition.data.season;
+
+    if (!hasRounds) {
+      // We skipped player sync, so we need to fetch competition/round data separately
+      console.log('   ℹ️ Fetching round list (light mode)...');
+      // Dynamic import
+      const { fetchCompetition } = await import('../api/biwenger-client.js');
+      const rawComp = await fetchCompetition();
+      competition = { data: rawComp };
+    }
+
     const rounds = competition.data.data
       ? competition.data.data.season.rounds
       : competition.data.season.rounds;
@@ -163,6 +175,21 @@ async function syncData() {
           round.name !== flags.onlyRound
         ) {
           continue;
+        }
+
+        // FILTER: --active-only (renamed from activeOnly arg to avoid confusion with cli flag)
+        // If active-only flag is set, only process rounds that are active or in the future
+        // For efficiency, we really only want the CURRENT active round from Biwenger
+        if (flags.activeOnly) {
+          // We can check round.status if available (Biwenger data usually has it)
+          // Or simpler: if status is 'finished', skip it.
+          // However, user might want to sync the *just finished* round for final scores.
+          // So, let's say we skip rounds that are 'finished' AND have complete stats.
+          // For now, simple heuristic: skip if explicitly 'finished' in Biwenger
+          if (round.status === 'finished') {
+            console.log(`   ⏭️ Skipping round ${round.name} (--active-only mode)`);
+            continue;
+          }
         }
 
         // Get normalized name and canonical ID using helpers

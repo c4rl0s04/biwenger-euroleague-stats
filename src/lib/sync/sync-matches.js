@@ -1,4 +1,4 @@
-import { fetchGameHeader } from '../api/euroleague-client.js';
+import { fetchGameHeader, fetchSchedule } from '../api/euroleague-client.js';
 import { prepareMatchMutations } from '../db/mutations/matches.js';
 
 /**
@@ -22,22 +22,29 @@ export async function syncMatches(db, round, playersList = {}) {
   }
   const roundNum = parseInt(match[0]);
 
-  // 2. Calculate Game Codes
-  // Formula: (Round - 1) * GamesPerRound + 1
+  console.log(`   🌍 Syncing Matches for Round ${roundNum} (fetching full schedule)...`);
 
-  // Get team count from sync_meta (set by syncEuroleagueMaster), fallback to 20
-  const metaRow = db
-    .prepare('SELECT value FROM sync_meta WHERE key = ?')
-    .get('euroleague_team_count');
-  const teamCount = metaRow ? parseInt(metaRow.value) : 20;
-  const gamesPerRound = Math.floor(teamCount / 2);
+  // 2. Fetch Schedule
+  let scheduleData;
+  try {
+    scheduleData = await fetchSchedule();
+  } catch (e) {
+    console.error(`   ❌ Error fetching schedule: ${e.message}`);
+    return;
+  }
 
-  const startCode = (roundNum - 1) * gamesPerRound + 1;
-  const endCode = startCode + gamesPerRound - 1;
+  const allGames = scheduleData?.schedule?.item || [];
 
-  console.log(
-    `   🌍 Syncing Matches (Euroleague Games ${startCode}-${endCode}, ${teamCount} teams)...`
-  );
+  // Filter games for this round
+  // The API returns 'gameday' as the round number for Regular Season
+  const roundGames = allGames.filter((g) => parseInt(g.gameday) === roundNum);
+
+  if (roundGames.length === 0) {
+    console.log(`   ⚠️ No games found in schedule for Round ${roundNum}`);
+    return;
+  }
+
+  console.log(`   -> Found ${roundGames.length} games for Round ${roundNum}`);
 
   // 3. Prepare DB
   // Get Map of Euroleague Code -> Biwenger Team ID
@@ -48,64 +55,90 @@ export async function syncMatches(db, round, playersList = {}) {
 
   let syncedCount = 0;
 
-  for (let code = startCode; code <= endCode; code++) {
+  for (const game of roundGames) {
+    // Extract Game Code Number (e.g. "E2025_370" -> 370)
+    const gameCodeStr = game.gamecode || '';
+    const codeParts = gameCodeStr.split('_');
+    const gameCode = codeParts.length > 1 ? parseInt(codeParts[1]) : parseInt(game.game);
+
+    if (!gameCode) {
+      console.warn(`      ⚠️ Could not parse game code: ${gameCodeStr}`);
+      continue;
+    }
+
     try {
-      const game = await fetchGameHeader(code);
-
-      if (!game) {
-        // console.log(`      Game ${code} not found/future.`);
-        continue;
-      }
-
-      // Map Teams
-      // API returns: TeamA (Name), CodeTeamA (Code)
-      // We must use CodeTeamA to map to our DB's 'euroleague_code'
-
-      const homeCode = game.CodeTeamA;
-      const awayCode = game.CodeTeamB;
+      // Basic info from Schedule
+      const homeCode = game.homecode;
+      const awayCode = game.awaycode;
       const homeId = elCodeToId.get(homeCode);
       const awayId = elCodeToId.get(awayCode);
 
       if (!homeId || !awayId) {
-        console.warn(`      ⚠️ Could not map teams for game ${code}: ${homeCode} vs ${awayCode}`);
+        console.warn(
+          `      ⚠️ Could not map teams for game ${gameCode}: ${homeCode} vs ${awayCode}`
+        );
         continue;
       }
 
-      // Status mapping
-      // EuroLeague API returns:
-      // - Live: true/false (is game currently being played)
-      // - GameTime: "40:00" when finished (full game = 40 min), "00:00" for future
-      // - ScoreA/ScoreB: scores (can be "0" for unplayed games)
       let status = 'scheduled';
-      if (game.Live === true) {
-        status = 'live';
-      } else if (game.GameTime && game.GameTime !== '00:00') {
-        // Game has been played (GameTime > 0)
-        status = 'finished';
+      let scoreA = 0;
+      let scoreB = 0;
+      let matchDate = game.date; // "Sep 30, 2025" or similar format
+
+      // Parse date to YYYY-MM-DDTHH:mm:ss
+      // Schedule date format is usually "Mmm DD, YYYY" (e.g. "Oct 03, 2025")
+      // Start time is "HH:mm" (e.g. "18:45")
+      if (matchDate) {
+        const dateObj = new Date(matchDate);
+        if (!isNaN(dateObj.getTime())) {
+          const datePart = dateObj.toISOString().split('T')[0];
+          const timePart = game.startime ? `${game.startime}:00` : '00:00:00';
+          matchDate = `${datePart}T${timePart}`;
+        }
       }
 
-      // Date parsing - API returns "DD/MM/YYYY" format
-      let matchDate = game.Date;
-      if (matchDate && matchDate.includes('/')) {
-        const [day, month, year] = matchDate.split('/');
-        matchDate = `${year}-${month}-${day}`;
+      // If game is played, try to fetch details only for scores
+      // (Schedule XML doesn't include scores usually)
+      if (game.played === true || game.played === 'true') {
+        try {
+          const detailedGame = await fetchGameHeader(gameCode);
+          if (detailedGame) {
+            if (detailedGame.Live === true) status = 'live';
+            else if (detailedGame.GameTime && detailedGame.GameTime !== '00:00')
+              status = 'finished';
+
+            scoreA = parseInt(detailedGame.ScoreA) || 0;
+            scoreB = parseInt(detailedGame.ScoreB) || 0;
+
+            // Use more precise date/time if available?
+            // Keep schedule date as primary source for consistency unless missing
+          } else {
+            // fallback if detailed fetch fails but schedule says played
+            status = 'finished';
+          }
+        } catch (detailErr) {
+          console.warn(
+            `      ⚠️ Failed to fetch details for played game ${gameCode}, using schedule defaults. ${detailErr.message}`
+          );
+          status = 'finished'; // Assume finished if schedule says played
+        }
       }
 
       mutations.upsertMatch.run({
         round_id: dbRoundId,
         round_name: roundName,
-        home_team: game.TeamA || homeCode,
+        home_team: game.hometeam || homeCode, // Use name if available
         home_id: homeId,
-        away_team: game.TeamB || awayCode,
+        away_team: game.awayteam || awayCode,
         away_id: awayId,
         date: matchDate,
         status: status,
-        home_score: parseInt(game.ScoreA) || 0,
-        away_score: parseInt(game.ScoreB) || 0,
+        home_score: scoreA,
+        away_score: scoreB,
       });
       syncedCount++;
     } catch (e) {
-      console.error(`      Error syncing game ${code}: ${e.message}`);
+      console.error(`      Error syncing game ${gameCode}: ${e.message}`);
     }
   }
 

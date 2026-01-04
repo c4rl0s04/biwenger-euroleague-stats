@@ -39,6 +39,33 @@ export async function fetchTeams(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
 }
 
 /**
+ * Fetch season schedule (all games, past and future)
+ * @param {string} season - Season code
+ * @returns {Promise<Object>} Parsed XML object with schedule
+ */
+export async function fetchSchedule(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
+  const url = `${API_V1_URL}/v1/schedules?seasonCode=${season}&competitionCode=E`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
+
+    const xml = await response.text();
+    const result = parser.parse(xml);
+
+    // Normalize response structure (ensure schedule.item is always an array)
+    if (result.schedule && result.schedule.item && !Array.isArray(result.schedule.item)) {
+      result.schedule.item = [result.schedule.item];
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    throw error;
+  }
+}
+
+/**
  * Fetch box score for a game (player stats)
  * @param {number} gameCode - Game number in the season (1, 2, 3...)
  * @param {string} season - Season code (e.g., 'E2024' for 2024-25 Euroleague)
