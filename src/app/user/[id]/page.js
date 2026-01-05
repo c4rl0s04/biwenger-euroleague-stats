@@ -9,7 +9,8 @@ export const dynamic = 'force-dynamic';
  */
 export default async function UserProfilePage({ params }) {
   const { id } = await params;
-  const userId = parseInt(id, 10);
+  // User ID is TEXT in DB, we must check it as a string, not number
+  const userId = id;
 
   const stats = getUserSeasonStats(userId);
   const userName = stats?.name || 'Usuario';

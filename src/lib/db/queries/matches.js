@@ -12,11 +12,10 @@ export function getUpcomingMatches(limit = 5) {
       m.date,
       th.name as home_team,
       ta.name as away_team,
-      r.name as round_name
+      m.round_name
     FROM matches m
     LEFT JOIN teams th ON m.home_id = th.id
     LEFT JOIN teams ta ON m.away_id = ta.id
-    LEFT JOIN rounds r ON m.round_id = r.id
     WHERE m.status = 'scheduled' 
       AND m.date > datetime('now')
     ORDER BY m.date ASC

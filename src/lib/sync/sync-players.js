@@ -111,7 +111,6 @@ export async function run(manager) {
       status: player.status || 'ok',
       price_increment: player.priceIncrement || 0,
       price: player.price || 0,
-      img: player.img || `https://cdn.biwenger.com/players/${playerId}.png`,
     });
 
     // SKIP DETAILS IF FLAG IS SET

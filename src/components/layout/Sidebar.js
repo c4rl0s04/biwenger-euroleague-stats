@@ -176,7 +176,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Quick Stats Widget (only when expanded) */}
         {!isCollapsed && isReady && (
           <div className="px-3 py-3 border-t border-border/30">
-            <Link href="/dashboard">
+            <Link href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}>
               <div className="card-glow bg-secondary/50 rounded-xl p-3 border border-border/30 transition-all duration-300 cursor-pointer">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                   <Wallet size={14} />
@@ -231,7 +231,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {isCollapsed && (
           <div className="px-2 py-3 border-t border-border/30 space-y-2">
             <Link
-              href="/dashboard"
+              href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}
               className="w-full p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
               title={
                 squadData ? `Mi Plantilla ${formatCompact(squadData.total_value)}` : 'Mi Plantilla'
