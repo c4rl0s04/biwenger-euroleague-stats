@@ -9,8 +9,15 @@ import { prepareMatchMutations } from '../db/mutations/matches.js';
 
 const DB_PATH = CONFIG.DB.PATH;
 
-export function cleanupDuplicateRounds(db) {
-  console.log('🧹 Cleaning up duplicate rounds...');
+/**
+ * Cleanup script to merge duplicate rounds in the database.
+ * Rounds with the same name (or with "(aplazada)" suffix) should be merged
+ * into a single canonical round.
+ * @param {import('./manager').SyncManager} manager
+ */
+export async function run(manager) {
+  const db = manager.context.db;
+  manager.log('🧹 Cleaning up duplicate rounds...');
 
   // Initialize Mutations
   const mutations = prepareMatchMutations(db);
@@ -18,18 +25,18 @@ export function cleanupDuplicateRounds(db) {
   const duplicates = mutations.findDuplicateRounds.all();
 
   if (duplicates.length === 0) {
-    console.log('   No duplicate rounds found.');
-    return;
+    manager.log('   No duplicate rounds found.');
+    return { success: true, message: 'No duplicates found' };
   }
 
-  console.log(`   Found ${duplicates.length} round(s) with duplicates to merge.`);
+  manager.log(`   Found ${duplicates.length} round(s) with duplicates to merge.`);
 
   for (const dup of duplicates) {
     const roundIds = dup.round_ids.split(',').map((id) => parseInt(id));
     const canonicalId = dup.canonical_id;
     const duplicateIds = roundIds.filter((id) => id !== canonicalId);
 
-    console.log(`   Merging ${dup.base_name}: IDs ${duplicateIds.join(', ')} -> ${canonicalId}`);
+    manager.log(`   Merging ${dup.base_name}: IDs ${duplicateIds.join(', ')} -> ${canonicalId}`);
 
     db.transaction(() => {
       for (const dupId of duplicateIds) {
@@ -56,8 +63,24 @@ export function cleanupDuplicateRounds(db) {
     })();
   }
 
-  console.log('   ✅ Duplicate rounds merged successfully.');
+  manager.log('   ✅ Duplicate rounds merged successfully.');
+  return { success: true, message: 'Duplicate rounds merged successfully.' };
 }
+
+// Legacy export
+export const cleanupDuplicateRounds = (db) => {
+  // Wait, original was synchronous export but used in async context possibly?
+  // Actually index.js awaits imported functions usually.
+  // But checking index.js, cleanupDuplicateRounds was imported but not awaited? IT wasn't used in main sync flow explicitly?
+  // Ah, I see it provided a CLI run block at the end.
+  // Let's just wrap it.
+  const mockManager = {
+    context: { db },
+    log: console.log,
+    error: console.error,
+  };
+  return run(mockManager);
+};
 
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {

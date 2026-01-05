@@ -1,16 +1,15 @@
 // Environment variables are loaded by config.js (conditionally)
-
-import Database from 'better-sqlite3';
-import { syncPlayers } from './sync-players.js';
-import { syncEuroleagueMaster } from './sync-euroleague-master.js';
-import { syncStandings } from './sync-standings.js';
-import { syncSquads } from './sync-squads.js';
-import { syncBoard } from './sync-board.js';
-import { syncInitialSquads } from './sync-initial-squads.js';
-import { syncEuroleagueGameStats, syncBiwengerFantasyPoints } from './sync-euroleague-stats.js';
-import { syncMatches } from './sync-matches.js';
-import { syncLineups } from './sync-lineups.js';
-import { cleanupDuplicateRounds } from './cleanup-rounds.js';
+import { SyncManager } from './manager.js';
+import * as syncPlayers from './sync-players.js';
+import * as syncEuroleagueMaster from './sync-euroleague-master.js';
+import * as syncStandings from './sync-standings.js';
+import * as syncSquads from './sync-squads.js';
+import * as syncBoard from './sync-board.js';
+import * as syncInitialSquads from './sync-initial-squads.js';
+import * as syncEuroleagueStats from './sync-euroleague-stats.js';
+import * as syncMatches from './sync-matches.js';
+import * as syncLineups from './sync-lineups.js';
+import * as cleanupRounds from './cleanup-rounds.js';
 import {
   buildRoundNameMap,
   normalizeRoundName,
@@ -44,182 +43,165 @@ async function syncData() {
   console.log('🚀 Starting Data Sync (Euroleague + Biwenger)...');
   console.log('   🔧 Config:', JSON.stringify(flags, null, 2));
 
-  const db = new Database(DB_PATH);
+  // Use SyncManager
+  // Correctly pass DB_PATH and flags
+  const manager = new SyncManager(DB_PATH, flags);
 
   try {
-    // 0. Ensure Schema (Create tables if not exist)
-    ensureSchema(db);
+    // 0. Initialization & Schema
+    manager.addStep('Initialize', async (m) => {
+      ensureSchema(m.context.db);
+      return { success: true, message: 'Schema ensured.' };
+    });
 
-    // 0.5 Cleanup any duplicate rounds from previous syncs
-    cleanupDuplicateRounds(db);
-
-    let competition = { data: { data: { players: {}, teams: {} } } };
-    let playersList = {};
-    let teams = {};
+    manager.addStep('Cleanup Rounds', cleanupRounds.run);
 
     // --- PHASE 1: CORE DATA (Players & Teams) ---
-    // Skip if --only-market or --only-round is passed (unless we need players for mapping)
-    // Actually, we usually need players list for everything. But we can skip DETAILED fetch.
-
-    if (!flags.onlyMarket && !flags.matchOnly && !flags.activeOnly) {
-      // 1. Sync Players
-      // Pass 'noDetails' flag to skip the 300+ calls
-      competition = await syncPlayers(db, {
-        skipDetails: flags.noDetails,
-        forceDetails: flags.forceDetails,
-      });
-
-      playersList = competition.data.data
-        ? competition.data.data.players
-        : competition.data.players;
-      teams = (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
-
-      // 1.5 Sync Euroleague Master Data (Linker & Enrichment)
-      if (!flags.skipEuroleague) {
-        await syncEuroleagueMaster(db);
+    manager.addStep('Sync Players', async (m) => {
+      if (!m.flags.onlyMarket && !m.flags.matchOnly && !m.flags.activeOnly) {
+        return syncPlayers.run(m);
+      } else if (m.flags.onlyMarket) {
+        m.log('   ℹ️ Fetching basic player list for market sync...');
+        // Force skipDetails for market-only sync
+        m.flags.noDetails = true;
+        return syncPlayers.run(m);
       }
-    } else {
-      // If skipping sync, load minimal data from DB or mock for references?
-      // For 'onlyMarket', we might need player IDs.
-      // For now, let's assume if onlyMarket, we just fetch the list quickly without details.
-      // Actually, let's just run syncPlayers with skipDetails implicitly if we need list.
-      if (flags.onlyMarket) {
-        console.log('   ℹ️ Fetching basic player list for market sync...');
-        competition = await syncPlayers(db, { skipDetails: true });
-        playersList = competition.data.data
-          ? competition.data.data.players
-          : competition.data.players;
-        teams =
-          (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
+      return { success: true, message: 'Skipped Players sync.' };
+    });
+
+    manager.addStep('Sync Euroleague Master', async (m) => {
+      if (
+        !m.flags.onlyMarket &&
+        !m.flags.matchOnly &&
+        !m.flags.activeOnly &&
+        !m.flags.skipEuroleague
+      ) {
+        return syncEuroleagueMaster.run(m);
       }
-    }
+      return { success: true, message: 'Skipped Euroleague Master sync.' };
+    });
 
     // --- PHASE 2: USER DATA & MARKET ---
-    if (!flags.matchOnly && !flags.onlyRound && !flags.activeOnly) {
-      // 2. Sync Standings (Users)
-      await syncStandings(db);
-
-      // 3. Sync Squads (Current Ownership)
-      await syncSquads(db);
-
-      // 4. Sync Board (Transfers & Porras)
-      // Needs players list and teams for filtering/placeholders
-      if (Object.keys(playersList).length > 0) {
-        await syncBoard(db, playersList, teams);
+    manager.addStep('Sync Standings', async (m) => {
+      if (!m.flags.matchOnly && !m.flags.onlyRound && !m.flags.activeOnly) {
+        return syncStandings.run(m);
       }
+      return { success: true, message: 'Skipped Standings sync.' };
+    });
 
-      // 5. Sync Initial Squads (Inferred from Transfers & Ownership)
-      await syncInitialSquads(db);
-    }
+    manager.addStep('Sync Squads', async (m) => {
+      if (!m.flags.matchOnly && !m.flags.onlyRound && !m.flags.activeOnly) {
+        return syncSquads.run(m);
+      }
+      return { success: true, message: 'Skipped Squads sync.' };
+    });
 
-    if (flags.onlyMarket) {
-      console.log('\n✅ Market Sync completed. Exiting.');
-      return;
-    }
+    manager.addStep('Sync Board', async (m) => {
+      if (!m.flags.matchOnly && !m.flags.onlyRound && !m.flags.activeOnly) {
+        // SyncPlayers puts playersList and teams into context
+        if (m.context.playersList && Object.keys(m.context.playersList).length > 0) {
+          return syncBoard.run(m);
+        } else {
+          return { success: false, message: 'Cannot sync board without players list.' };
+        }
+      }
+      return { success: true, message: 'Skipped Board sync.' };
+    });
 
-    console.log('\n✅ Core Data synced.');
+    manager.addStep('Sync Initial Squads', async (m) => {
+      if (!m.flags.matchOnly && !m.flags.onlyRound && !m.flags.activeOnly) {
+        return syncInitialSquads.run(m);
+      }
+      return { success: true, message: 'Skipped Initial Squads sync.' };
+    });
 
     // --- PHASE 3: MATCHES & STATS ---
-    // 5. Sync Lineups and Matches
-    console.log('\n📥 Syncing Lineups...');
+    manager.addStep('Sync Matches & Stats', async (m) => {
+      if (m.flags.onlyMarket) {
+        return { success: true, message: 'Skipped Matches & Stats (market only).' };
+      }
 
-    // Get existing rounds to skip (incremental update for LINEUPS only)
-    const existingLineupRoundsArr = db
-      .prepare('SELECT DISTINCT round_id FROM lineups')
-      .pluck()
-      .all();
-    const existingLineupRounds = new Set(existingLineupRoundsArr);
-    const lastLineupRoundId =
-      existingLineupRoundsArr.length > 0 ? Math.max(...existingLineupRoundsArr) : 0;
+      const db = m.context.db;
+      // Get existing rounds to skip (incremental update for LINEUPS only)
+      const existingLineupRoundsArr = db
+        .prepare('SELECT DISTINCT round_id FROM lineups')
+        .pluck()
+        .all();
+      const existingLineupRounds = new Set(existingLineupRoundsArr);
+      const lastLineupRoundId =
+        existingLineupRoundsArr.length > 0 ? Math.max(...existingLineupRoundsArr) : 0;
 
-    // Get rounds list
-    // Fetch rounds from competition data
-    const hasRounds =
-      (competition.data.data && competition.data.data.season) || competition.data.season;
+      let competitionWithRounds = m.context.competition;
 
-    if (!hasRounds) {
-      // We skipped player sync, so we need to fetch competition/round data separately
-      console.log('   ℹ️ Fetching round list (light mode)...');
-      // Dynamic import
-      const { fetchCompetition } = await import('../api/biwenger-client.js');
-      const rawComp = await fetchCompetition();
-      competition = { data: rawComp };
-    }
+      // Fetch rounds if missing (e.g. if we skipped player sync)
+      const hasRounds =
+        competitionWithRounds?.data?.data?.season || competitionWithRounds?.data?.season;
 
-    const rounds = competition.data.data
-      ? competition.data.data.season.rounds
-      : competition.data.season.rounds;
+      if (!hasRounds) {
+        m.log('   ℹ️ Fetching round list (light mode)...');
+        const { fetchCompetition } = await import('../api/biwenger-client.js');
+        const rawComp = await fetchCompetition();
+        competitionWithRounds = { data: rawComp };
+        m.context.competition = competitionWithRounds; // Store back in context
+      }
 
-    if (!rounds) {
-      console.error('Could not find rounds in competition data');
-    } else {
-      console.log(`Found ${rounds.length} rounds in competition data.`);
+      const rounds = competitionWithRounds.data.data
+        ? competitionWithRounds.data.data.season.rounds
+        : competitionWithRounds.data.season.rounds;
 
-      // Build canonical round name map using helper
+      if (!rounds) {
+        m.error('Could not find rounds in competition data');
+        return { success: false, message: 'No rounds found' };
+      }
+
+      m.log(`Found ${rounds.length} rounds in competition data.`);
       const roundNameMap = buildRoundNameMap(rounds);
-
       let totalLineupsInserted = 0;
 
       for (const round of rounds) {
         const originalName = round.name;
         const status = round.status;
 
-        console.log(`\n--- Processing ${originalName} (${status}) ---`);
+        // m.log(`\n--- Processing ${originalName} (${status}) ---`); // Verbose log
 
         if (originalName === 'GLOBAL') continue;
 
         // FILTER: --only-round
         if (
-          flags.onlyRound &&
-          round.id.toString() !== flags.onlyRound &&
-          round.name !== flags.onlyRound
+          m.flags.onlyRound &&
+          round.id.toString() !== m.flags.onlyRound &&
+          round.name !== m.flags.onlyRound
         ) {
           continue;
         }
 
-        // FILTER: --active-only (renamed from activeOnly arg to avoid confusion with cli flag)
-        // If active-only flag is set, only process rounds that are active or in the future
-        // For efficiency, we really only want the CURRENT active round from Biwenger
-        if (flags.activeOnly) {
-          // We can check round.status if available (Biwenger data usually has it)
-          // Or simpler: if status is 'finished', skip it.
-          // However, user might want to sync the *just finished* round for final scores.
-          // So, let's say we skip rounds that are 'finished' AND have complete stats.
-          // For now, simple heuristic: skip if explicitly 'finished' in Biwenger
-          if (round.status === 'finished') {
-            console.log(`   ⏭️ Skipping round ${round.name} (--active-only mode)`);
-            continue;
-          }
+        // FILTER: --active-only
+        if (m.flags.activeOnly && round.status === 'finished') {
+          m.log(`   ⏭️ Skipping round ${round.name} (--active-only mode)`);
+          continue;
         }
 
-        // Get normalized name and canonical ID using helpers
+        // Normalize Round Name/ID
         const baseName = normalizeRoundName(originalName);
         const canonicalId = getCanonicalRoundId(round, roundNameMap);
 
-        // If this round's ID doesn't match the canonical ID, merge it
         if (canonicalId !== round.id) {
-          console.log(`   -> 🔀 Merging round ${round.id} into ${canonicalId} (${baseName})`);
+          m.log(`   -> 🔀 Merging round ${round.id} into ${canonicalId} (${baseName})`);
           round.dbId = canonicalId;
           round.name = baseName;
         } else if (originalName.includes('(aplazada)')) {
-          // Clean the name even if it's the canonical round
-          console.warn(
-            `   ⚠️ Found postponed round "${originalName}" but could not find original "${baseName}"`
-          );
+          // console.warn(...) -> m.warn(...)
           round.name = baseName;
         }
 
-        // 1. Sync Match Schedule from Biwenger (populates matches table for ALL rounds, including future)
-        // Actually, syncMatches now uses EuroLeague API to get dates/scores.
-        if (!flags.skipEuroleague) {
-          await syncMatches(db, round, playersList);
+        // 1. Sync Match Schedule
+        if (!m.flags.skipEuroleague) {
+          await syncMatches.run(m, round, m.context.playersList);
         } else {
-          console.log(`   ⏭️ Skipping matches sync (EuroLeague skipped).`);
+          m.log(`   ⏭️ Skipping matches sync (EuroLeague skipped).`);
         }
 
-        // 2. Sync Game Stats from Euroleague (official data)
-        // Euroleague uses game codes (1, 2, 3...) not round IDs
-        // Biwenger round 1 corresponds to Euroleague game codes 1-8 (8 games per round)
+        // 2. Sync Game Stats (Euroleague)
         const roundNumber = parseInt(baseName.replace(/\D/g, '')) || 0;
         if (roundNumber > 0) {
           // Get team count from sync_meta (set by syncEuroleagueMaster), fallback to 20
@@ -231,39 +213,50 @@ async function syncData() {
           const startGameCode = (roundNumber - 1) * gamesPerRound + 1;
           const endGameCode = startGameCode + gamesPerRound - 1;
 
-          console.log(`   📊 Fetching Euroleague games ${startGameCode}-${endGameCode}...`);
+          // m.log(`   📊 Fetching Euroleague games ${startGameCode}-${endGameCode}...`);
 
           for (let gameCode = startGameCode; gameCode <= endGameCode; gameCode++) {
-            // Check 'activeOnly' flag? logic inside syncEuroleagueGameStats?
-            // Better to pass the flag.
-            if (!flags.skipEuroleague) {
-              await syncEuroleagueGameStats(db, gameCode, round.dbId || round.id, round.name, {
-                activeOnly: flags.activeOnly,
+            if (!m.flags.skipEuroleague) {
+              await syncEuroleagueStats.runGame(m, gameCode, round.dbId || round.id, round.name, {
+                activeOnly: m.flags.activeOnly,
               });
             }
           }
         }
 
-        // Sync Fantasy Points from Biwenger
-        await syncBiwengerFantasyPoints(db, round, playersList);
+        // 3. Sync Fantasy Points (Biwenger)
+        await syncEuroleagueStats.runBiwengerPoints(m, round, m.context.playersList);
 
-        // Sync Lineups (only if round is finished/active)
-        // We pass playersList to filter out unknown players
-        const inserted = await syncLineups(
-          db,
+        // 4. Sync Lineups
+        const res = await syncLineups.run(
+          m,
           round,
           existingLineupRounds,
           lastLineupRoundId,
-          playersList
+          m.context.playersList
         );
-        totalLineupsInserted += inserted;
-      }
-      console.log(`✅ Lineups synced (${totalLineupsInserted} entries).`);
+        totalLineupsInserted += res.insertedCount || 0;
+      } // end round loop
+
+      return {
+        success: true,
+        message: `Matches, stats & lineups synced. (${totalLineupsInserted} lineups)`,
+      };
+    });
+
+    // Execute Manager
+    const summary = await manager.run();
+
+    if (!summary.success) {
+      console.error('❌ Sync process failed with errors.');
+      process.exit(1);
+    } else {
+      console.log('\n✅ Sync process completed successfully.');
+      process.exit(0);
     }
-  } catch (error) {
-    console.error('❌ Sync Failed:', error);
-  } finally {
-    db.close();
+  } catch (err) {
+    console.error('❌ Critical Error in Sync Manager wrapper:', err);
+    process.exit(1);
   }
 }
 

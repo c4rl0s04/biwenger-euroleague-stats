@@ -30,11 +30,17 @@ const parsePriceDate = (dateInt) => {
 /**
  * Syncs all players from the competition to the local database.
  * Optimized to only insert new market values.
- * @param {import('better-sqlite3').Database} db - Database instance
- * @returns {Promise<Object>} - The full competition data object
+ * @param {import('./manager').SyncManager} manager - Sync manager instance
+ * @returns {Promise<{success: boolean, message: string, data?: any}>}
  */
-export async function syncPlayers(db, options = {}) {
-  console.log('\n📥 Fetching Players Database...');
+export async function run(manager) {
+  const db = manager.context.db;
+  const options = {
+    skipDetails: manager.flags.noDetails,
+    forceDetails: manager.flags.forceDetails,
+  };
+
+  manager.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
 
   const playersList = competition.data.data
@@ -45,18 +51,23 @@ export async function syncPlayers(db, options = {}) {
     throw new Error('Could not find players list in competition data');
   }
 
-  console.log(
+  manager.log(
     `Found ${Object.keys(playersList).length} players. Updating DB and fetching details...`
   );
+
+  // Store context for next steps
+  manager.context.competition = competition;
+  manager.context.playersList = playersList;
+  manager.context.teams =
+    (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
 
   // --- 1. QUERY PREPARATION ---
   const mutations = preparePlayerMutations(db);
   const positions = CONFIG.POSITIONS; // Position map
-  const teams =
-    (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
+  const teams = manager.context.teams;
 
   // --- 1.1 SYNC TEAMS ---
-  console.log('Syncing Teams...');
+  manager.log('Syncing Teams...');
 
   const teamTx = db.transaction(() => {
     for (const [teamId, teamData] of Object.entries(teams)) {
@@ -69,14 +80,14 @@ export async function syncPlayers(db, options = {}) {
     }
   });
   teamTx();
-  console.log(`✅ Synced ${Object.keys(teams).length} teams.`);
+  // manager.log(`✅ Synced ${Object.keys(teams).length} teams.`); // Let manager handle success log
 
   // --- 2. PROCESSING ---
 
   // Check options
   const skipDetails = options.skipDetails;
   if (skipDetails) {
-    console.log(
+    manager.log(
       '   ⏩ Skipping detailed player fetch (CLI flag --no-details active). Prices/Bio will not be updated.'
     );
   }
@@ -89,7 +100,6 @@ export async function syncPlayers(db, options = {}) {
       id: playerId,
       name: player.name,
       team_id: player.teamID,
-      team: teams[player.teamID]?.name || 'Unknown',
       position: positions[player.position] || 'Unknown',
       puntos: player.points || 0,
       partidos_jugados: (player.playedHome || 0) + (player.playedAway || 0),
@@ -120,7 +130,7 @@ export async function syncPlayers(db, options = {}) {
 
     // If the last recorded date is TODAY (or later) AND we have bio data, skip
     if (!options.forceDetails && !isMissingBio && lastDate && lastDate >= today) {
-      // console.log(`   ⏭️ Skipping ${player.name} (Already updated for ${lastDate})`);
+      // manager.log(`   ⏭️ Skipping ${player.name} (Already updated for ${lastDate})`);
       continue;
     }
 
@@ -175,17 +185,37 @@ export async function syncPlayers(db, options = {}) {
             });
             insertHistory(newPrices);
             // Opcional: Log para depurar
-            // console.log(`   -> Added ${newPrices.length} new prices for ${player.name}`);
+            // manager.log(`   -> Added ${newPrices.length} new prices for ${player.name}`);
           }
         }
       }
     } catch (e) {
       const lookupId = player.slug || playerId;
-      console.error(`   ⚠️ Error fetching details for ${player.name} (${lookupId}): ${e.message}`);
+      manager.error(`   ⚠️ Error fetching details for ${player.name} (${lookupId}): ${e.message}`);
     }
   }
 
-  console.log('✅ Players synced (Incremental market update).');
-
-  return competition;
+  // Legacy return to maintain potential compatibility if called directly (though index.js will use manager)
+  // But for manager pattern, we return success object
+  return {
+    success: true,
+    message: `Players synced. (${Object.keys(teams).length} teams, ${Object.keys(playersList).length} players)`,
+    data: competition,
+  };
 }
+
+// Keep legacy export for backward compatibility during migration if needed
+export const syncPlayers = async (db, options) => {
+  // Minimal mock manager for direct calls
+  const mockManager = {
+    context: { db, playersList: {}, teams: {} },
+    flags: {
+      noDetails: options?.skipDetails,
+      forceDetails: options?.forceDetails,
+    },
+    log: console.log,
+    error: console.error,
+  };
+  const result = await run(mockManager);
+  return result.data;
+};

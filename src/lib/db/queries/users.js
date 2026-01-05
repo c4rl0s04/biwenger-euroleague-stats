@@ -48,12 +48,13 @@ export function getUserSquad(userId) {
       p.id,
       p.name,
       p.position,
-      p.team,
+      t.name as team,
       p.price,
       p.puntos as points,
       ROUND(CAST(p.puntos AS FLOAT) / NULLIF(p.partidos_jugados, 0), 1) as average,
       p.status
     FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
     WHERE p.owner_id = ?
     ORDER BY p.puntos DESC
   `;
@@ -146,9 +147,10 @@ export function getUserSeasonStats(userId) {
 export function getUserSquadDetails(userId) {
   const squadQuery = `
     SELECT 
-      id, name, position, team, price, price_increment, puntos as points
-    FROM players
-    WHERE owner_id = ?
+      p.id, p.name, p.position, t.name as team, p.price, p.price_increment, p.puntos as points
+    FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE p.owner_id = ?
     ORDER BY price_increment DESC
   `;
 
@@ -304,11 +306,12 @@ export function getCaptainRecommendations(userId, limit = 3) {
         p.id as player_id,
         p.name,
         p.position,
-        p.team,
+        t.name as team,
         COALESCE(ps.total_points, 0) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
         COALESCE(ps.games_played, 0) as recent_games,
         ps.recent_scores
       FROM players p
+      LEFT JOIN teams t ON p.team_id = t.id
       LEFT JOIN (
         SELECT 
           player_id, 

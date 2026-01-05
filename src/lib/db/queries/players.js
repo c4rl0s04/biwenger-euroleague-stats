@@ -37,12 +37,13 @@ export function getTopPlayers(limit = 6) {
       GROUP BY player_id
     )
     SELECT 
-      p.id, p.name, p.team, p.position, p.price,
+      p.id, p.name, t.name as team, p.position, p.price,
       p.puntos as points, 
       ROUND(CAST(p.puntos AS FLOAT) / NULLIF(p.partidos_jugados, 0), 1) as average,
       u.name as owner_name,
       rs.recent_scores
     FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
     LEFT JOIN RecentScores rs ON p.id = rs.player_id
     ORDER BY p.puntos DESC 
@@ -80,7 +81,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
         os.player_id,
         p.name,
         p.position,
-        p.team,
+        t.name as team,
         p.owner_id,
         u.name as owner_name,
         SUM(os.fantasy_points) as total_points,
@@ -89,8 +90,9 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
         GROUP_CONCAT(os.fantasy_points) as recent_scores
       FROM OrderedStats os
       JOIN players p ON os.player_id = p.id
+      LEFT JOIN teams t ON p.team_id = t.id
       LEFT JOIN users u ON p.owner_id = u.id
-      GROUP BY os.player_id, p.name, p.position, p.team, p.owner_id, u.name
+      GROUP BY os.player_id, p.name, p.position, t.name, p.owner_id, u.name
       HAVING games_played >= 2
     )
     SELECT 
@@ -125,8 +127,10 @@ export function getPlayerDetails(playerId) {
       u.name as owner_name,
       (SELECT COUNT(*) FROM player_round_stats WHERE player_id = p.id) as games_played,
       (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE player_id = p.id) as season_avg,
-      (SELECT SUM(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as total_points
+      (SELECT SUM(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as total_points,
+      t.name as team
     FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE p.id = ?
   `;
@@ -141,8 +145,8 @@ export function getPlayerDetails(playerId) {
       m.round_id,
       m.round_name,
       m.date as match_date,
-      m.home_team,
-      m.away_team,
+      th.name as home_team,
+      ta.name as away_team,
       m.home_score,
       m.away_score,
       prs.fantasy_points,
@@ -162,8 +166,10 @@ export function getPlayerDetails(playerId) {
       prs.fouls_committed
     FROM matches m
     JOIN players p ON p.id = ?
+    LEFT JOIN teams th ON m.home_id = th.id
+    LEFT JOIN teams ta ON m.away_id = ta.id
     LEFT JOIN player_round_stats prs ON m.round_id = prs.round_id AND prs.player_id = p.id
-    WHERE (m.home_team = p.team OR m.away_team = p.team)
+    WHERE (m.home_id = p.team_id OR m.away_id = p.team_id)
       AND m.date < datetime('now')
     ORDER BY m.round_id DESC
   `;
@@ -234,16 +240,18 @@ export function getPlayerDetails(playerId) {
   const nextMatchQuery = `
     SELECT 
       date, 
-      home_team, 
-      away_team,
+      th.name as home_team, 
+      ta.name as away_team,
       round_name
-    FROM matches 
-    WHERE (home_team = ? OR away_team = ?) 
+    FROM matches m
+    LEFT JOIN teams th ON m.home_id = th.id
+    LEFT JOIN teams ta ON m.away_id = ta.id
+    WHERE (m.home_id = ? OR m.away_id = ?) 
       AND date > datetime('now') 
     ORDER BY date ASC 
     LIMIT 1
   `;
-  const nextMatch = db.prepare(nextMatchQuery).get(player.team, player.team);
+  const nextMatch = db.prepare(nextMatchQuery).get(player.team_id, player.team_id);
 
   // 6. Advanced Stats Aggregates (Season Totals)
   // We could calculate this in JS from recentMatches, but SQL is fine too.
@@ -293,11 +301,12 @@ export function getPlayersBirthday() {
     SELECT 
       p.id,
       p.name,
-      p.team,
+      t.name as team,
       p.position,
       p.birth_date,
       u.name as owner_name
     FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE p.birth_date IS NOT NULL
       AND strftime('%m-%d', p.birth_date) = strftime('%m-%d', 'now')
@@ -324,16 +333,17 @@ export function getPlayerStreaks(minGames = 3) {
       SELECT 
         prs.player_id,
         p.name,
-        p.team,
+        t.name as team,
         p.position,
         COUNT(*) as games,
         AVG(prs.fantasy_points) as recent_avg,
         u.name as owner_name
       FROM player_round_stats prs
       JOIN players p ON prs.player_id = p.id
+      LEFT JOIN teams t ON p.team_id = t.id
       LEFT JOIN users u ON p.owner_id = u.id
       WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
-      GROUP BY prs.player_id, p.name, p.team, p.position, u.name
+      GROUP BY prs.player_id, p.name, t.name, p.position, u.name
       HAVING games >= ?
     ),
     SeasonAvg AS (
@@ -408,7 +418,7 @@ export function getRisingStars(limit = 5) {
     SELECT 
       p.id as player_id,
       p.name,
-      p.team,
+      t.name as team,
       p.position,
       rp.recent_avg,
       COALESCE(ep.earlier_avg, 0) as earlier_avg,
@@ -417,6 +427,7 @@ export function getRisingStars(limit = 5) {
       u.name as owner_name
     FROM RecentPerformance rp
     JOIN players p ON rp.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN EarlierPerformance ep ON rp.player_id = ep.player_id
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE rp.recent_avg > COALESCE(ep.earlier_avg, 0)

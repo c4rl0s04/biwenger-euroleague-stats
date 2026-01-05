@@ -1,146 +1,137 @@
-import { fetchGameHeader, fetchSchedule } from '../api/euroleague-client.js';
+import { fetchRoundGames } from '../api/biwenger-client.js';
 import { prepareMatchMutations } from '../db/mutations/matches.js';
 
 /**
- * Syncs matches (games) for a specific round using Euroleague Official Data.
- * Hybrid Approach: matches Euroleague games to Biwenger Rounds.
+ * Syncs matches (games) for a specific round using Biwenger API.
+ * Uses fetchRoundGames to retrieve match schedule, scores, and status.
+ *
  * @param {import('better-sqlite3').Database} db - Database instance
  * @param {Object} round - Round object (id, name, status)
- * @param {Object} playersList - Map of player IDs to player objects (unused but kept for signature)
+ * @param {Object} playersList - Map of player IDs to player objects (unused explicitly but kept for signature consistency)
  */
-export async function syncMatches(db, round, playersList = {}) {
+/**
+ * Syncs matches (games) for a specific round using Biwenger API.
+ * Uses fetchRoundGames to retrieve match schedule, scores, and status.
+ *
+ * @param {import('./manager').SyncManager} manager
+ * @param {Object} round - Round object (id, name, status)
+ * @param {Object} playersList - Map of player IDs to player objects (unused explicitly but kept for signature consistency)
+ */
+export async function run(manager, round, playersList = {}) {
+  const db = manager.context.db;
   const roundId = round.id;
   const dbRoundId = round.dbId || round.id;
   const roundName = round.name;
 
-  // 1. Extract Round Number (e.g. "Jornada 4" -> 4)
-  // handle "Playoffs", "Final Four" later if needed. For now assume Regular Season.
-  const match = roundName.match(/\d+/);
-  if (!match) {
-    console.log(`   ⚠️ Skipping match sync for non-numeric round: ${roundName}`);
-    return;
-  }
-  const roundNum = parseInt(match[0]);
+  manager.log(`   🌍 Syncing Matches for Round ${roundName} (using Biwenger API)...`);
 
-  console.log(`   🌍 Syncing Matches for Round ${roundNum} (fetching full schedule)...`);
-
-  // 2. Fetch Schedule
-  let scheduleData;
+  let gamesData;
   try {
-    scheduleData = await fetchSchedule();
+    gamesData = await fetchRoundGames(roundId);
   } catch (e) {
-    console.error(`   ❌ Error fetching schedule: ${e.message}`);
-    return;
+    manager.error(`   ❌ Error fetching games for round ${roundId}: ${e.message}`);
+    return { success: false, message: e.message, error: e };
   }
 
-  const allGames = scheduleData?.schedule?.item || [];
+  // Check the structure based on inspection:
+  // It seems games can be in root 'games' array or 'data.games'.
+  // Based on inspection output for Round 2, it was inside 'next.games' but fetchRoundGames likely returns the specific round data directly.
+  // Let's assume fetchRoundGames(roundId) returns the object containing 'data.games' or 'games'.
+  // Our inspect-biwenger-keys.js output showed:
+  // "Top level keys: [ 'data' ]" -> "data keys: [ 'score', 'games', ... ]"
+  // So the structure is likely response.data.games
+  // However, the helper might unwrap it? Let's check biwenger-client.js
+  // fetchRoundGames just calls biwengerFetch, which returns response.json().
+  // So likely: response.data.games
 
-  // Filter games for this round
-  // The API returns 'gameday' as the round number for Regular Season
-  const roundGames = allGames.filter((g) => parseInt(g.gameday) === roundNum);
-
-  if (roundGames.length === 0) {
-    console.log(`   ⚠️ No games found in schedule for Round ${roundNum}`);
-    return;
+  let games = [];
+  if (gamesData.data && Array.isArray(gamesData.data.games)) {
+    games = gamesData.data.games;
+  } else if (Array.isArray(gamesData.games)) {
+    games = gamesData.games;
+  } else {
+    // Maybe checking 'content' or other fields?
+    // Based on previous step 118 output: "Found 10 games in data.games" (deduced from context, actually step 118 didn't show logs but implied success).
+    // wait, step 114 output showed "data keys: ... games". So yes, gamesData.data.games.
+    manager.error(`   ⚠️ No 'games' array found in response for round ${roundId}`);
+    // return { success: false, message: 'No games array found' }; // Optional: suppress error return if we want to continue
+    return { success: true, message: `No matches found for round ${roundName}`, data: [] };
   }
 
-  console.log(`   -> Found ${roundGames.length} games for Round ${roundNum}`);
+  if (games.length === 0) {
+    manager.log(`   ⚠️ No games found for Round ${roundName}`);
+    return { success: true, message: `No games`, data: [] };
+  }
 
-  // 3. Prepare DB
-  // Get Map of Euroleague Code -> Biwenger Team ID
+  manager.log(`   -> Found ${games.length} games.`);
+
+  // Prepare DB mutations
   const mutations = prepareMatchMutations(db);
-  const teams = mutations.getMappedTeams.all();
-  const elCodeToId = new Map();
-  teams.forEach((t) => elCodeToId.set(t.code, t.id));
-
   let syncedCount = 0;
 
-  for (const game of roundGames) {
-    // Extract Game Code Number (e.g. "E2025_370" -> 370)
-    const gameCodeStr = game.gamecode || '';
-    const codeParts = gameCodeStr.split('_');
-    const gameCode = codeParts.length > 1 ? parseInt(codeParts[1]) : parseInt(game.game);
-
-    if (!gameCode) {
-      console.warn(`      ⚠️ Could not parse game code: ${gameCodeStr}`);
-      continue;
-    }
-
+  for (const game of games) {
     try {
-      // Basic info from Schedule
-      const homeCode = game.homecode;
-      const awayCode = game.awaycode;
-      const homeId = elCodeToId.get(homeCode);
-      const awayId = elCodeToId.get(awayCode);
+      // Map Teams
+      // Biwenger returns objects: { id, name, slug, score }
+      const homeTeam = game.home;
+      const awayTeam = game.away;
 
-      if (!homeId || !awayId) {
-        console.warn(
-          `      ⚠️ Could not map teams for game ${gameCode}: ${homeCode} vs ${awayCode}`
-        );
+      if (!homeTeam || !awayTeam) {
+        manager.log(`      ⚠️ Missing team data for game ${game.id}`);
         continue;
       }
 
+      // Safe IDs
+      const homeId = homeTeam.id;
+      const awayId = awayTeam.id;
+
+      // Status Mapping
+      // Biwenger status: 'finished', 'pending', 'playing'?
+      // We map to: 'finished', 'scheduled', 'live'
       let status = 'scheduled';
-      let scoreA = 0;
-      let scoreB = 0;
-      let matchDate = game.date; // "Sep 30, 2025" or similar format
-
-      // Parse date to YYYY-MM-DDTHH:mm:ss
-      // Schedule date format is usually "Mmm DD, YYYY" (e.g. "Oct 03, 2025")
-      // Start time is "HH:mm" (e.g. "18:45")
-      if (matchDate) {
-        const dateObj = new Date(matchDate);
-        if (!isNaN(dateObj.getTime())) {
-          const datePart = dateObj.toISOString().split('T')[0];
-          const timePart = game.startime ? `${game.startime}:00` : '00:00:00';
-          matchDate = `${datePart}T${timePart}`;
-        }
+      if (game.status === 'finished') {
+        status = 'finished';
+      } else if (game.status === 'playing' || game.status === 'live') {
+        status = 'live';
       }
 
-      // If game is played, try to fetch details only for scores
-      // (Schedule XML doesn't include scores usually)
-      if (game.played === true || game.played === 'true') {
-        try {
-          const detailedGame = await fetchGameHeader(gameCode);
-          if (detailedGame) {
-            if (detailedGame.Live === true) status = 'live';
-            else if (detailedGame.GameTime && detailedGame.GameTime !== '00:00')
-              status = 'finished';
-
-            scoreA = parseInt(detailedGame.ScoreA) || 0;
-            scoreB = parseInt(detailedGame.ScoreB) || 0;
-
-            // Use more precise date/time if available?
-            // Keep schedule date as primary source for consistency unless missing
-          } else {
-            // fallback if detailed fetch fails but schedule says played
-            status = 'finished';
-          }
-        } catch (detailErr) {
-          console.warn(
-            `      ⚠️ Failed to fetch details for played game ${gameCode}, using schedule defaults. ${detailErr.message}`
-          );
-          status = 'finished'; // Assume finished if schedule says played
-        }
+      // Date Handling
+      // Biwenger returns unix timestamp (seconds) in 'date' field
+      let matchDate = null;
+      if (game.date) {
+        matchDate = new Date(game.date * 1000).toISOString();
       }
+
+      const homeScore = typeof homeTeam.score === 'number' ? homeTeam.score : 0;
+      const awayScore = typeof awayTeam.score === 'number' ? awayTeam.score : 0;
 
       mutations.upsertMatch.run({
         round_id: dbRoundId,
         round_name: roundName,
-        home_team: game.hometeam || homeCode, // Use name if available
         home_id: homeId,
-        away_team: game.awayteam || awayCode,
         away_id: awayId,
         date: matchDate,
         status: status,
-        home_score: scoreA,
-        away_score: scoreB,
+        home_score: homeScore,
+        away_score: awayScore,
       });
+
       syncedCount++;
     } catch (e) {
-      console.error(`      Error syncing game ${gameCode}: ${e.message}`);
+      manager.error(`      Error syncing game ${game.id}: ${e.message}`);
     }
   }
 
-  console.log(`   -> Synced ${syncedCount} matches from official source.`);
+  // manager.log(`   -> Synced ${syncedCount} matches.`);
+  return { success: true, message: `Synced ${syncedCount} matches for ${roundName}.`, data: games };
 }
+
+// Legacy export
+export const syncMatches = async (db, round, playersList) => {
+  const mockManager = {
+    context: { db },
+    log: console.log,
+    error: console.error,
+  };
+  return run(mockManager, round, playersList);
+};

@@ -10,7 +10,25 @@ import { prepareUserMutations } from '../db/mutations/users.js';
  * @param {Object} playersList - Map of player IDs to player objects
  * @returns {Promise<number>} - Number of lineups inserted
  */
-export async function syncLineups(db, round, existingLineupRounds, lastLineupRoundId, playersList) {
+/**
+ * Syncs lineups for finished rounds.
+ * @param {import('./manager').SyncManager} manager
+ * @param {Object} round - Round object
+ * @param {Set<number>} existingLineupRounds - Set of round IDs already synced
+ * @param {number} lastLineupRoundId - ID of the last synced round
+ * @param {Object} playersListInput - Map of player IDs to player objects
+ * @returns {Promise<{success: boolean, insertedCount: number, message: string}>}
+ */
+export async function run(
+  manager,
+  round,
+  existingLineupRounds,
+  lastLineupRoundId,
+  playersListInput
+) {
+  const db = manager.context.db;
+  const playersList = playersListInput || manager.context.playersList || {};
+
   const roundId = round.id;
   const dbRoundId = round.dbId || round.id; // Use mapped ID for DB if present
   const roundName = round.name;
@@ -18,7 +36,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
   let insertedCount = 0;
 
   if (status === 'finished' || status === 'active') {
-    console.log('Fetching lineups/standings...');
+    manager.log('Fetching lineups/standings...');
 
     // Fetch round details to get standings
     let standings = null;
@@ -32,7 +50,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
         }
       }
     } catch (e) {
-      console.error(`Error fetching round details for ${roundId}: ${e.message}`);
+      manager.error(`Error fetching round details for ${roundId}: ${e.message}`);
     }
 
     if (standings) {
@@ -64,7 +82,7 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
                 alineacion
               );
             } catch (e) {
-              console.error(`Error inserting user_round for ${user.name}: ${e.message}`);
+              manager.error(`Error inserting user_round for ${user.name}: ${e.message}`);
             }
           }
 
@@ -102,11 +120,28 @@ export async function syncLineups(db, round, existingLineupRounds, lastLineupRou
           }
         }
       })();
-      console.log(`   -> Synced standings/lineups for ${standings.length} users.`);
+      manager.log(`   -> Synced standings/lineups for ${standings.length} users.`);
     }
   } else {
-    console.log('Skipping lineups (round not finished/active).');
+    manager.log('Skipping lineups (round not finished/active).');
   }
 
-  return insertedCount;
+  return { success: true, insertedCount, message: `Synced ${insertedCount} lineup entries.` };
 }
+
+// Legacy export
+export const syncLineups = async (
+  db,
+  round,
+  existingLineupRounds,
+  lastLineupRoundId,
+  playersList
+) => {
+  const mockManager = {
+    context: { db, playersList: playersList || {} },
+    log: console.log,
+    error: console.error,
+  };
+  const res = await run(mockManager, round, existingLineupRounds, lastLineupRoundId, playersList);
+  return res.insertedCount;
+};

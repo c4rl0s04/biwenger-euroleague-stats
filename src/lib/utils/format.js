@@ -42,6 +42,11 @@ export function getShortTeamName(teamName) {
     'Paris Basketball': 'Paris',
     'Dubai Basketball': 'Dubai',
     'Hapoel IBI Tel Aviv': 'Hapoel',
+    // Sponsored Names (Euroleague API)
+    'Maccabi Rapyd Tel Aviv': 'Maccabi',
+    'Kosner Baskonia Vitoria-Gasteiz': 'Baskonia',
+    'Panathinaikos AKTOR Athens': 'Panathinaikos',
+    'Virtus Bologna': 'Virtus',
   };
 
   return map[teamName] || teamName;

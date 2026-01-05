@@ -24,9 +24,9 @@ export function prepareMatchMutations(db) {
   const getMappedTeams = db.prepare('SELECT id, code, name FROM teams WHERE code IS NOT NULL');
 
   const upsertMatch = db.prepare(`
-    INSERT INTO matches (round_id, round_name, home_team, home_id, away_team, away_id, date, status, home_score, away_score)
-    VALUES (@round_id, @round_name, @home_team, @home_id, @away_team, @away_id, @date, @status, @home_score, @away_score)
-    ON CONFLICT(round_id, home_team, away_team) DO UPDATE SET
+    INSERT INTO matches (round_id, round_name, home_id, away_id, date, status, home_score, away_score)
+    VALUES (@round_id, @round_name, @home_id, @away_id, @date, @status, @home_score, @away_score)
+    ON CONFLICT(round_id, home_id, away_id) DO UPDATE SET
       round_name=excluded.round_name,
       status=excluded.status,
       home_score=excluded.home_score,

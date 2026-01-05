@@ -8,8 +8,19 @@ import { prepareMarketMutations } from '../db/mutations/market.js';
  * @param {Object} playersList - Map of player IDs to player objects
  * @param {Object} teams - Map of team IDs to team objects
  */
-export async function syncBoard(db, playersList, teams) {
-  console.log('\n📥 Fetching Full Board History...');
+/**
+ * Syncs board history (transfers, porras, etc.) incrementally.
+ * @param {import('./manager').SyncManager} manager
+ * @param {Object} playersList - Map of player IDs to player objects (optional override)
+ * @param {Object} teams - Map of team IDs to team objects (optional override)
+ */
+export async function run(manager, playersListInput, teamsInput) {
+  const db = manager.context.db;
+  // Use inputs if provided (legacy/compat), otherwise default to context
+  const playersList = playersListInput || manager.context.playersList || {};
+  const teams = teamsInput || manager.context.teams || {};
+
+  manager.log('\n📥 Fetching Full Board History...');
 
   // Initialize Mutations
   const mutations = prepareMarketMutations(db);
@@ -20,11 +31,11 @@ export async function syncBoard(db, playersList, teams) {
   const lastTimestamp = lastTransfer ? lastTransfer.ts : 0;
 
   if (lastTimestamp > 0) {
-    console.log(
+    manager.log(
       `Found existing data up to ${new Date(lastTimestamp * 1000).toISOString()}. Syncing only new...`
     );
   } else {
-    console.log('No existing data. Doing full sync...');
+    manager.log('No existing data. Doing full sync...');
   }
 
   let offset = 0;
@@ -42,7 +53,7 @@ export async function syncBoard(db, playersList, teams) {
   }
 
   while (moreTransfers) {
-    console.log(`Fetching batch (offset: ${offset})...`);
+    manager.log(`Fetching batch (offset: ${offset})...`);
     // Fetch WITHOUT type filter to get everything (transfers, market, movements, bettingPool)
     const response = await biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(leagueId, offset, limit));
     const items = response.data;
@@ -267,7 +278,21 @@ export async function syncBoard(db, playersList, teams) {
       offset += limit;
     }
   }
-  console.log(
-    `✅ Board synced (${totalTransfers} transfers, ${totalPorras} porras, ${totalFinances} finances).`
-  );
+  // manager.log(
+  //   `✅ Board synced (${totalTransfers} transfers, ${totalPorras} porras, ${totalFinances} finances).`
+  // );
+  return {
+    success: true,
+    message: `Board synced (${totalTransfers} transfers, ${totalPorras} porras, ${totalFinances} finances).`,
+  };
 }
+
+// Legacy export
+export const syncBoard = async (db, playersList, teams) => {
+  const mockManager = {
+    context: { db, playersList: playersList || {}, teams: teams || {} },
+    log: console.log,
+    error: console.error,
+  };
+  return run(mockManager, playersList, teams);
+};

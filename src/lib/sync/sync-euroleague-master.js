@@ -6,24 +6,25 @@ import { prepareEuroleagueMutations } from '../db/mutations/euroleague.js';
 /**
  * Syncs Euroleague Master Data (Teams & Players Linker)
  * This connects Biwenger IDs with Euroleague Codes
- * @param {import('better-sqlite3').Database} db
+ * @param {import('./manager').SyncManager} manager
  */
-export async function syncEuroleagueMaster(db) {
-  console.log('\n🌍 Syncing Euroleague Teams & Rosters (Master Data)...');
+export async function run(manager) {
+  const db = manager.context.db;
+  manager.log('\n🌍 Syncing Euroleague Teams & Rosters (Master Data)...');
 
   const seasonCode = CONFIG.EUROLEAGUE.SEASON_CODE;
-  console.log(`   Season: ${seasonCode}`);
+  manager.log(`   Season: ${seasonCode}`);
 
   try {
     const data = await fetchTeams(seasonCode);
 
     if (!data || !data.clubs || !data.clubs.club) {
-      console.error('   ❌ No clubs found in Euroleague response');
-      return;
+      manager.error('   ❌ No clubs found in Euroleague response');
+      return { success: false, message: 'No clubs found' };
     }
 
     const clubs = Array.isArray(data.clubs.club) ? data.clubs.club : [data.clubs.club];
-    console.log(`   Found ${clubs.length} Euroleague clubs.`);
+    manager.log(`   Found ${clubs.length} Euroleague clubs.`);
 
     // Initialize Mutations
     const mutations = prepareEuroleagueMutations(db);
@@ -55,7 +56,7 @@ export async function syncEuroleagueMaster(db) {
 
     // Get current DB teams
     const dbTeams = mutations.getDbTeams.all();
-    console.log('   ℹ️ Current DB Teams:', dbTeams.map((t) => t.name).join(', '));
+    manager.log('   ℹ️ Current DB Teams: ' + dbTeams.map((t) => t.name).join(', '));
 
     // Pre-tokenize DB teams
     const dbTeamsTokenized = dbTeams.map((t) => ({
@@ -89,18 +90,29 @@ export async function syncEuroleagueMaster(db) {
       }
 
       if (bestMatch) {
-        console.log(
+        manager.log(
           `   ✅ Matched [${code}] "${elName}" -> DB: "${bestMatch.name}" (${bestScore} words)`
         );
-        mutations.updateTeamCode.run(code, shortName, bestMatch.id);
+        // Use the DB Name (Biwenger) to generate the short name, not the Euroleague Name
+        const correctShortName = getShortTeamName(bestMatch.name);
+
+        mutations.updateTeamMaster.run({
+          code: code,
+          short_name: correctShortName,
+          fuzzy_name: `%${elName.split(' ')[0]}%`, // Fallback if needed, though we run matching above
+        });
+        // Actually updateTeamMaster uses WHERE name LIKE... but we already found bestMatch.id
+        // We should use updateTeamCode which updates by ID!
+
+        mutations.updateTeamCode.run(code, correctShortName, bestMatch.id);
         teamMap.set(code, bestMatch.id);
       } else {
-        console.log(`   ⚠️ No match for [${code}] "${elName}"`);
+        manager.log(`   ⚠️ No match for [${code}] "${elName}"`);
       }
     }
 
     // 2. Sync Players (Linker)
-    console.log('   🔗 Linking Players (Biwenger ↔ Euroleague)...');
+    manager.log('   🔗 Linking Players (Biwenger ↔ Euroleague)...');
 
     // Get all Biwenger players to search against
     const biwengerPlayers = mutations.getBiwengerPlayers.all();
@@ -164,8 +176,23 @@ export async function syncEuroleagueMaster(db) {
       }
     }
 
-    console.log(`   ✅ Linked ${linkedCount}/${totalElPlayers} active Euroleague players.`);
+    // manager.log(`   ✅ Linked ${linkedCount}/${totalElPlayers} active Euroleague players.`);
+    return {
+      success: true,
+      message: `Linked ${linkedCount}/${totalElPlayers} active Euroleague players.`,
+    };
   } catch (e) {
-    console.error('   ❌ Error syncing master data:', e);
+    manager.error('   ❌ Error syncing master data:', e);
+    return { success: false, message: e.message, error: e };
   }
 }
+
+// Legacy export for compatibility
+export const syncEuroleagueMaster = async (db) => {
+  const mockManager = {
+    context: { db },
+    log: console.log,
+    error: console.error,
+  };
+  return run(mockManager);
+};

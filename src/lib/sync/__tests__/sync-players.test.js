@@ -79,7 +79,7 @@ describe('syncPlayers', () => {
       expect.objectContaining({
         id: 101,
         name: 'Campazzo',
-        team: 'Real Madrid',
+        team_id: 5,
         position: 'Base',
         puntos: 150,
       })

@@ -33,7 +33,7 @@ export function prepareEuroleagueMutations(db) {
 
   const updateTeamMaster = db.prepare(`
     UPDATE teams 
-    SET code = @code, name = @name, short_name = @short_name
+    SET code = @code, short_name = @short_name
     WHERE name LIKE @fuzzy_name OR short_name = @short_name
   `);
 
@@ -63,7 +63,7 @@ export function prepareEuroleagueMutations(db) {
     'SELECT id, name FROM players WHERE euroleague_code = ?'
   );
 
-  const getAllPlayers = db.prepare('SELECT id, name, team FROM players');
+  const getAllPlayers = db.prepare('SELECT id, name, team_id FROM players');
 
   const updatePlayerEuroleagueCode = db.prepare(
     'UPDATE players SET euroleague_code = @euroleague_code WHERE id = @id'
@@ -110,7 +110,7 @@ export function prepareEuroleagueMutations(db) {
 
   // Helpers
   const checkFinishedMatch = db.prepare(
-    'SELECT status FROM matches WHERE round_id = ? AND (home_team = ? OR away_team = ?)'
+    'SELECT status FROM matches WHERE round_id = ? AND (home_id = ? OR away_id = ?)'
   );
   const checkStatsExist = db.prepare(
     'SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = ?'

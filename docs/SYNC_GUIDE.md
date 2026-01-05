@@ -137,3 +137,53 @@ npm run sync -- --force-details
 ```
 
 _(Warning: This makes ~350 calls to Biwenger. Do not run more than once per hour)._
+
+---
+
+## 🏗️ Architecture & Internals
+
+The synchronization process has been modularized to ensure robustness, easier debugging, and maintainability.
+
+### The `SyncManager`
+
+At the core is the `SyncManager` class (`src/lib/sync/manager.js`). It orchestrates the entire process by:
+
+1.  **Managing Context**: Holds the shared state (`db` connection, `playersList`, `teams` map, `competition` data) that travels between steps.
+2.  **Executing Steps**: Runs registered sync modules sequentially.
+3.  **Handling Errors**: Catches errors in individual steps without crashing the entire process (unless critical), and provides a consolidated summary at the end.
+4.  **Logging**: Centralizes logs with timestamps and consistent formatting.
+
+### Sync Steps
+
+Each major data retrieval task is a self-contained module (a "Step") that implements a standard interface `(manager) => Promise<{ success, message }>`.
+
+| Step Name           | Module                      | Responsibility                                                                            |
+| :------------------ | :-------------------------- | :---------------------------------------------------------------------------------------- |
+| **Initialize**      | `index.js` (inline)         | Ensures DB schema exists and migrates tables if needed.                                   |
+| **Cleanup Rounds**  | `cleanup-rounds.js`         | Merges duplicate rounds (e.g., "Jornada 1" vs "Jornada 1 (aplazada)").                    |
+| **Sync Players**    | `sync-players.js`           | Fetches the full player list. If standard mode, also fetches bio/prices for 300+ players. |
+| **Sync Euroleague** | `sync-euroleague-master.js` | Fetches official team data from Euroleague API and links it to Biwenger IDs.              |
+| **Sync Standings**  | `sync-standings.js`         | Updates user list and league table.                                                       |
+| **Sync Squads**     | `sync-squads.js`            | Updates current player ownership for all users.                                           |
+| **Sync Board**      | `sync-board.js`             | Processes the transfer market feed (sales, bids, purchases).                              |
+| **Sync Initial**    | `sync-initial-squads.js`    | Infers original squads based on transfer history (Sales + Current - Bought).              |
+| **Sync Matches**    | `sync-matches.js`           | Syncs match schedule (dates, scores) from Biwenger API.                                   |
+| **Sync Stats**      | `sync-euroleague-stats.js`  | Fetches official boxscores (Points, Rebounds, PIR) for finished games.                    |
+| **Sync Fantasy**    | `sync-euroleague-stats.js`  | Updates fantasy points from Biwenger for finished rounds.                                 |
+| **Sync Lineups**    | `sync-lineups.js`           | Records user lineups and captain choices for finished rounds.                             |
+
+### Data Flow
+
+```mermaid
+graph TD
+    A[Start Sync] --> B{Args?};
+    B -- --no-details --> C[Sync Players (Basic List)];
+    B -- (Standard) --> D[Sync Players (Full Details)];
+    C --> E[Sync Context Populated];
+    D --> E;
+    E --> F[Sync Euroleague Master];
+    F --> G[Sync User Data (Standings, Squads, Board)];
+    G --> H[Sync Matches & Stats];
+    H --> I[Sync Lineups];
+    I --> J[End];
+```

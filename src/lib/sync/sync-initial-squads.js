@@ -1,7 +1,7 @@
 /**
  * Syncs initial squads by inferring ownership.
  * Logic: Initial Squad = (Players Sold by User + Players Currently Owned by User) - Players Bought by User
- * @param {import('better-sqlite3').Database} db - Database instance
+ * @param {import('./manager').SyncManager} manager
  */
 import { CONFIG } from '../config.js';
 import { prepareUserMutations } from '../db/mutations/users.js';
@@ -9,9 +9,10 @@ import { prepareUserMutations } from '../db/mutations/users.js';
 // League start date - when users joined and drafted their initial squads
 const LEAGUE_START_DATE = CONFIG.LEAGUE.START_DATE;
 
-export async function syncInitialSquads(db) {
-  console.log('\n📥 Syncing Initial Squads (Inferred)...');
-  console.log(`   📅 Using league start date: ${LEAGUE_START_DATE}`);
+export async function run(manager) {
+  const db = manager.context.db;
+  manager.log('\n📥 Syncing Initial Squads (Inferred)...');
+  manager.log(`   📅 Using league start date: ${LEAGUE_START_DATE}`);
 
   // Initialize Mutations
   const mutations = prepareUserMutations(db);
@@ -19,8 +20,8 @@ export async function syncInitialSquads(db) {
   // 1. Get all users
   const users = mutations.getAllUsers.all();
   if (users.length === 0) {
-    console.log('No users found. Skipping.');
-    return;
+    manager.log('No users found. Skipping.');
+    return { success: true, message: 'No users found.' };
   }
 
   let totalInferred = 0;
@@ -98,5 +99,16 @@ export async function syncInitialSquads(db) {
     // console.log(`   -> User ${user.name}: Inferred ${inferredInitial.length} initial players.`);
   }
 
-  console.log(`✅ Initial Squads synced (${totalInferred} assignments).`);
+  // manager.log(`✅ Initial Squads synced (${totalInferred} assignments).`);
+  return { success: true, message: `Initial Squads synced (${totalInferred} assignments).` };
 }
+
+// Legacy export
+export const syncInitialSquads = async (db) => {
+  const mockManager = {
+    context: { db },
+    log: console.log,
+    error: console.error,
+  };
+  return run(mockManager);
+};

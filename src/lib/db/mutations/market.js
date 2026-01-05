@@ -44,13 +44,13 @@ export function prepareMarketMutations(db) {
   // Helper to insert unknown players on the fly
   const insertPlayerFallback = db.prepare(`
     INSERT INTO players (
-      id, name, team, position, 
+      id, name, position, 
       puntos, partidos_jugados, 
       played_home, played_away, 
       points_home, points_away, points_last_season
     ) 
     VALUES (
-      @id, @name, @team, @position, 
+      @id, @name, @position, 
       @puntos, @partidos_jugados, 
       @played_home, @played_away, 
       @points_home, @points_away, @points_last_season

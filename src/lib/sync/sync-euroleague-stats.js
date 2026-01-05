@@ -19,15 +19,26 @@ const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
  * @param {string} roundName - Round name
  * @param {Object} options - { activeOnly: boolean }
  */
-export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, options = {}) {
-  console.log(`📊 Syncing Euroleague game ${gameCode} for round ${roundId}...`);
+/**
+ * Syncs game stats from Euroleague official API.
+ * This replaces the old Biwenger stats sync for more accurate data.
+ *
+ * @param {import('./manager').SyncManager} manager
+ * @param {number} gameCode - Euroleague game code (1, 2, 3...)
+ * @param {number} roundId - Round ID for our database
+ * @param {string} roundName - Round name
+ * @param {Object} options - { activeOnly: boolean }
+ */
+export async function runGame(manager, gameCode, roundId, roundName, options = {}) {
+  const db = manager.context.db;
+  manager.log(`📊 Syncing Euroleague game ${gameCode} for round ${roundId}...`);
 
   // Initialize Mutations
   const mutations = prepareEuroleagueMutations(db);
 
   // OPTIMIZATION: If activeOnly is set, check if we already have a FINAL result for this game
   if (options.activeOnly) {
-    const existingMatch = mutations.checkFinishedMatch.get(roundId, 'UNKNOWN_TEAM', 'UNKNOWN_TEAM');
+    // const existingMatch = mutations.checkFinishedMatch.get(roundId, 'UNKNOWN_TEAM', 'UNKNOWN_TEAM');
     // The above query is tricky because we don't know the Team ID or Code yet without fetching header.
     // However, we can check by ROUND and DATE if we TRUST the schedule.
     // Better approach: Let's fetch the header (cheap call) then decide if we fetch the BOXSCORE (expensive/heavy parsing).
@@ -38,7 +49,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
     const header = await fetchGameHeader(gameCode, CURRENT_SEASON);
 
     if (!header || !header.TeamA) {
-      console.log(`   ⚠️ Game ${gameCode} has no data yet`);
+      manager.log(`   ⚠️ Game ${gameCode} has no data yet`);
       return { success: false, reason: 'no_data' };
     }
 
@@ -49,7 +60,7 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
     if (options.activeOnly && !header.Live && header.ScoreA !== null) {
       const statsCount = mutations.checkStatsExist.get(roundId);
       if (statsCount.c > 0) {
-        console.log(`   ⏭️ Skipping boxscore (Game Finished & Stats exist & --active-only)`);
+        manager.log(`   ⏭️ Skipping boxscore (Game Finished & Stats exist & --active-only)`);
         return { success: true, reason: 'skipped_active_only' };
       }
     }
@@ -59,14 +70,14 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
 
     // Handle future games with no stats yet
     if (!boxscore) {
-      console.log(`   ⏭️ Game ${gameCode} has no box score yet (future game)`);
+      manager.log(`   ⏭️ Game ${gameCode} has no box score yet (future game)`);
       return { success: true, reason: 'no_boxscore_yet' };
     }
 
     const playerStats = parseBoxScoreStats(boxscore);
 
     if (playerStats.length === 0) {
-      console.log(`   ⚠️ No player stats for game ${gameCode}`);
+      manager.log(`   ⚠️ No player stats for game ${gameCode}`);
       return { success: false, reason: 'no_stats' };
     }
 
@@ -141,19 +152,39 @@ export async function syncEuroleagueGameStats(db, gameCode, roundId, roundName, 
       }
     })();
 
-    console.log(`   ✅ Game ${gameCode}: ${matched} players matched, ${unmatched} unmatched`);
+    manager.log(`   ✅ Game ${gameCode}: ${matched} players matched, ${unmatched} unmatched`);
     return { success: true, matched, unmatched };
   } catch (error) {
-    console.error(`   ❌ Error syncing game ${gameCode}:`, error.message);
+    manager.error(`   ❌ Error syncing game ${gameCode}:`, error.message);
     return { success: false, error: error.message };
   }
 }
+
+// Legacy export
+export const syncEuroleagueGameStats = async (db, gameCode, roundId, roundName, options) => {
+  const mockManager = {
+    context: { db },
+    log: console.log,
+    error: console.error,
+  };
+  return runGame(mockManager, gameCode, roundId, roundName, options);
+};
 
 /**
  * Sync fantasy points from Biwenger (to be called after Euroleague stats sync)
  * Updates the fantasy_points column for player_round_stats
  */
-export async function syncBiwengerFantasyPoints(db, round, playersList) {
+/**
+ * Sync fantasy points from Biwenger (to be called after Euroleague stats sync)
+ * Updates the fantasy_points column for player_round_stats
+ * @param {import('./manager').SyncManager} manager
+ * @param {Object} round
+ * @param {Object} playersListInput
+ */
+export async function runBiwengerPoints(manager, round, playersListInput) {
+  const db = manager.context.db;
+  const playersList = playersListInput || manager.context.playersList || {};
+
   // Import dynamically to avoid circular dependencies
   const { fetchRoundGames } = await import('../api/biwenger-client.js');
   // Reuse mutations module (or initialize new one if db scope is different, here we assume db is passed)
@@ -162,14 +193,14 @@ export async function syncBiwengerFantasyPoints(db, round, playersList) {
   const roundId = round.id;
   const dbRoundId = round.dbId || round.id;
 
-  console.log(`💫 Syncing Biwenger fantasy points for round ${roundId}...`);
+  manager.log(`💫 Syncing Biwenger fantasy points for round ${roundId}...`);
 
   try {
     const gamesData = await fetchRoundGames(roundId);
 
     if (!gamesData?.data?.games) {
-      console.log('   ⚠️ No games data from Biwenger');
-      return;
+      manager.log('   ⚠️ No games data from Biwenger');
+      return { success: false, message: 'No games data' };
     }
 
     let updated = 0;
@@ -197,8 +228,20 @@ export async function syncBiwengerFantasyPoints(db, round, playersList) {
       }
     })();
 
-    console.log(`   ✅ Updated fantasy points for ${updated} players`);
+    manager.log(`   ✅ Updated fantasy points for ${updated} players`);
+    return { success: true, updated };
   } catch (error) {
-    console.error(`   ❌ Error syncing fantasy points:`, error.message);
+    manager.error(`   ❌ Error syncing fantasy points:`, error.message);
+    return { success: false, error: error.message };
   }
 }
+
+// Legacy export
+export const syncBiwengerFantasyPoints = async (db, round, playersList) => {
+  const mockManager = {
+    context: { db, playersList: playersList || {} },
+    log: console.log,
+    error: console.error,
+  };
+  return runBiwengerPoints(mockManager, round, playersList);
+};

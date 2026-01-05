@@ -96,8 +96,8 @@ export function getNextRound() {
       SELECT 
         m.home_id,
         m.away_id,
-        m.home_team, 
-        m.away_team, 
+        t1.name as home_team, 
+        t2.name as away_team, 
         m.date, 
         m.status,
         m.home_score,
@@ -230,12 +230,13 @@ export function getLastRoundMVPs(limit = 5) {
     SELECT 
       prs.player_id,
       p.name,
-      p.team,
+      t.name as team,
       p.position,
       prs.fantasy_points as points,
       u.name as owner_name
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
     ORDER BY prs.fantasy_points DESC
@@ -262,7 +263,7 @@ export function getLastRoundStats() {
     SELECT 
       prs.player_id,
       p.name,
-      p.team,
+      t.name as team,
       p.position,
       p.price,
       prs.fantasy_points as points,
@@ -270,6 +271,7 @@ export function getLastRoundStats() {
       (SELECT round_name FROM matches WHERE round_id = prs.round_id LIMIT 1) as round_name
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
     ORDER BY prs.fantasy_points DESC

@@ -98,13 +98,14 @@ export function getMarketOpportunities(limit = 3) {
       p.id as player_id,
       p.name,
       p.position,
-      p.team,
+      t.name as team,
       p.price,
       COALESCE(p.price_increment, 0) as price_trend,
       COALESCE(pf.avg_recent_points, 0) as avg_recent_points,
       pf.recent_scores,
       ROUND(COALESCE(pf.avg_recent_points, 0) * 1000000.0 / NULLIF(p.price, 0), 2) as value_score
     FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN PlayerForm pf ON p.id = pf.player_id
     WHERE p.owner_id IS NULL
       AND p.price > 0
@@ -125,15 +126,16 @@ export function getMarketOpportunities(limit = 3) {
 export function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
   const query = `
     SELECT 
-      id as player_id,
-      name,
-      position,
-      team,
-      price,
-      price_increment,
-      owner_id
-    FROM players
-    WHERE ABS(COALESCE(price_increment, 0)) >= ?
+      p.id as player_id,
+      p.name,
+      p.position,
+      t.name as team,
+      p.price,
+      p.price_increment,
+      p.owner_id
+    FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE ABS(COALESCE(p.price_increment, 0)) >= ?
     ORDER BY ABS(price_increment) DESC
     LIMIT 5
   `;

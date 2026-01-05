@@ -12,14 +12,14 @@ export function preparePlayerMutations(db) {
   // Insert/Update Player Core Data
   const upsertPlayer = db.prepare(`
     INSERT INTO players (
-      id, name, team_id, team, position, 
+      id, name, team_id, position, 
       puntos, partidos_jugados, 
       played_home, played_away, 
       points_home, points_away, points_last_season,
       status, price_increment, price
     ) 
     VALUES (
-      @id, @name, @team_id, @team, @position, 
+      @id, @name, @team_id, @position, 
       @puntos, @partidos_jugados, 
       @played_home, @played_away, 
       @points_home, @points_away, 
@@ -29,7 +29,6 @@ export function preparePlayerMutations(db) {
     ON CONFLICT(id) DO UPDATE SET 
       name=excluded.name, 
       team_id=excluded.team_id,
-      team=excluded.team, 
       position=excluded.position,
       puntos=excluded.puntos,
       partidos_jugados=excluded.partidos_jugados,

@@ -34,7 +34,6 @@ export function ensureSchema(db) {
       id INTEGER PRIMARY KEY,
       name TEXT,
       position TEXT,
-      team TEXT,
       puntos INTEGER,
       partidos_jugados INTEGER,
       played_home INTEGER,
@@ -110,16 +109,27 @@ export function ensureSchema(db) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       round_id INTEGER,
       round_name TEXT,
-      home_team TEXT,
-      away_team TEXT,
+      home_id INTEGER,
+      away_id INTEGER,
       date DATE,
       status TEXT,
       home_score INTEGER,
       away_score INTEGER,
-      UNIQUE(round_id, home_team, away_team)
+      UNIQUE(round_id, home_id, away_id)
     )
   `
   ).run();
+
+  // Migration: Drop redundant 'team' column from players if it exists
+  const playersInfoDrop = db.prepare('PRAGMA table_info(players)').all();
+  if (playersInfoDrop.some((c) => c.name === 'team')) {
+    console.log('Migrating players table (dropping redundant team column)...');
+    try {
+      db.prepare('ALTER TABLE players DROP COLUMN team').run();
+    } catch (e) {
+      console.error('Could not drop column team:', e.message);
+    }
+  }
 
   // 7. Player Round Stats Table
   db.prepare(

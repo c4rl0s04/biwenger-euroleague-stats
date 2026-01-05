@@ -199,7 +199,7 @@ export function getStatLeaders(type = 'points') {
     SELECT 
       p.id as player_id,
       p.name,
-      p.team,
+      t.name as team,
       p.owner_id,
       u.name as owner_name,
       SUM(prs.${column}) as value,
@@ -207,6 +207,7 @@ export function getStatLeaders(type = 'points') {
       ROUND(AVG(prs.${column}), 1) as avg_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
     GROUP BY p.id
     HAVING value > 0
