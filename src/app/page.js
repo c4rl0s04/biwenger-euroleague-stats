@@ -73,7 +73,7 @@ export default function Home() {
       title: 'Porras',
       description: 'Predicciones y logros de la temporada',
       icon: Target,
-      href: '/porras',
+      href: '/predictions',
       color: 'pink',
       delay: '0.7s',
       disabled: false,

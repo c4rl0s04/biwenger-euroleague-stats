@@ -16,26 +16,26 @@ import {
   NoGloryCard,
   JinxCard,
   InitialSquadAnalysisCard,
-} from '@/components/clasificacion';
+} from '@/components/standings';
 
 // Dynamic imports for chart components - ssr: false excludes recharts from server bundle
 const PointsProgressionCard = dynamic(
-  () => import('@/components/clasificacion/PointsProgressionCard'),
+  () => import('@/components/standings/PointsProgressionCard'),
   { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
 );
 
 const RoundPointsProgressionCard = dynamic(
-  () => import('@/components/clasificacion/RoundPointsProgressionCard'),
+  () => import('@/components/standings/RoundPointsProgressionCard'),
   { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
 );
 
-const PlacementStatsCard = dynamic(() => import('@/components/clasificacion/PlacementStatsCard'), {
+const PlacementStatsCard = dynamic(() => import('@/components/standings/PlacementStatsCard'), {
   loading: () => <CardSkeleton />,
   ssr: false,
 });
 
 const LeaguePerformanceCard = dynamic(
-  () => import('@/components/clasificacion/LeaguePerformanceCard'),
+  () => import('@/components/standings/LeaguePerformanceCard'),
   { loading: () => <CardSkeleton />, ssr: false }
 );
 

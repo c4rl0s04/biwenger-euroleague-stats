@@ -8,7 +8,7 @@
  * See PAGE_ARCHITECTURE.md section 8 for full layout specification.
  */
 
-export default function PorrasPage() {
+export default function PredictionsPage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <main className="container mx-auto px-4 py-12 relative z-10">

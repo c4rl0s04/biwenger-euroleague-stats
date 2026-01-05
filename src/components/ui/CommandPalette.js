@@ -35,7 +35,7 @@ export default function CommandPalette() {
     { name: 'Mercado', href: '/market', icon: ShoppingBag, keywords: ['fichajes', 'compras'] },
     { name: 'Partidos', href: '/matches', icon: Calendar, keywords: ['jornada', 'calendario'] },
     { name: 'Alineaciones', href: '/lineups', icon: Shirt, keywords: ['equipos', 'onues'] },
-    { name: 'Porras', href: '/porras', icon: Vote, keywords: ['apuestas', 'predicciones'] },
+    { name: 'Porras', href: '/predictions', icon: Vote, keywords: ['apuestas', 'predicciones'] },
   ];
 
   // Toggle with Cmd+K or Ctrl+K

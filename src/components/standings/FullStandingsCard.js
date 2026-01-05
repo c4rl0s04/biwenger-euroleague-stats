@@ -6,6 +6,8 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
+import Link from 'next/link';
+
 export default function FullStandingsCard() {
   const [sortConfig, setSortConfig] = useState({ key: 'position', direction: 'asc' });
   const { data: standings = [], loading } = useApiData('/api/standings/full');
@@ -110,21 +112,30 @@ export default function FullStandingsCard() {
                       </span>
                     </td>
                     <td className="px-3 py-3">
-                      <div className="flex items-center gap-2">
+                      <Link
+                        href={`/user/${user.user_id}`}
+                        className="flex items-center gap-2 group hover:opacity-100"
+                      >
                         {user.icon ? (
-                          <img src={user.icon} alt={user.name} className="w-8 h-8 rounded-full" />
+                          <img
+                            src={user.icon}
+                            alt={user.name}
+                            className="w-8 h-8 rounded-full transition-opacity group-hover:opacity-80"
+                          />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium">
+                          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium transition-opacity group-hover:opacity-80">
                             {user.name.charAt(0)}
                           </div>
                         )}
                         <div>
-                          <div className="font-medium text-white">{user.name}</div>
+                          <div className="font-medium text-white transition-colors group-hover:text-indigo-400">
+                            {user.name}
+                          </div>
                           <div className="text-xs text-slate-500">
                             {user.rounds_played} jornadas
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-3 py-3 text-right">
                       <div className="font-bold text-orange-500">{user.total_points}</div>

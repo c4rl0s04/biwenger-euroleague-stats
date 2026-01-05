@@ -30,7 +30,7 @@ const navItems = [
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },
   { name: 'Alineaciones', href: '/lineups', icon: Users },
-  { name: 'Porras', href: '/porras', icon: Target },
+  { name: 'Porras', href: '/predictions', icon: Target },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {

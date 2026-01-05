@@ -15,5 +15,5 @@
 // Re-export all component categories
 export * from './ui';
 export * from './dashboard';
-export * from './clasificacion';
+export * from './standings';
 export * from './player';

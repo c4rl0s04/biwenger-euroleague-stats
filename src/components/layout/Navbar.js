@@ -14,7 +14,7 @@ const navItems = [
   { name: 'Jugadores', href: '/players', icon: User },
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },
-  { name: 'Porras', href: '/porras', icon: Target },
+  { name: 'Porras', href: '/predictions', icon: Target },
 ];
 
 // Navbar styles for each theme (kept for backend configuration)
