@@ -17,7 +17,10 @@ describe('syncMatches', () => {
     vi.clearAllMocks();
 
     runMock = vi.fn();
-    prepareMock = vi.fn(() => ({ run: runMock }));
+    prepareMock = vi.fn(() => ({
+      run: runMock,
+      all: vi.fn(() => []),
+    }));
     transactionMock = vi.fn((cb) => cb);
 
     db = {
