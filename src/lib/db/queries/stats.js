@@ -199,6 +199,7 @@ export function getStatLeaders(type = 'points') {
     SELECT 
       p.id as player_id,
       p.name,
+      t.id as team_id,
       t.name as team,
       p.owner_id,
       u.name as owner_name,

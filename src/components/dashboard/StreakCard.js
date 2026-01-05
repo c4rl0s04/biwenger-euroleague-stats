@@ -65,7 +65,10 @@ export default function StreakCard({ type = 'hot' }) {
                 playerId={player.player_id}
                 name={player.name}
                 team={player.team}
+                teamId={player.team_id}
                 owner={player.owner_name}
+                ownerId={player.owner_id}
+                color={cfg.color}
                 // AVATAR: Glowing Icon (Flame or Snowflake)
                 avatar={
                   <div className="relative w-10 h-10 flex items-center justify-center">

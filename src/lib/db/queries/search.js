@@ -32,6 +32,7 @@ export function globalSearch(query, limit = 5) {
     .prepare(
       `
       SELECT 
+        t.id,
         t.name,
         COUNT(p.id) as player_count
       FROM teams t

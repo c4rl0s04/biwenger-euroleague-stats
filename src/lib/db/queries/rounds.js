@@ -230,9 +230,11 @@ export function getLastRoundMVPs(limit = 5) {
     SELECT 
       prs.player_id,
       p.name,
+      t.id as team_id,
       t.name as team,
       p.position,
       prs.fantasy_points as points,
+      u.id as owner_id,
       u.name as owner_name
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id

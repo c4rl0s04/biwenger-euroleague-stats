@@ -39,7 +39,10 @@ export default function WeekMVPsCard() {
                 playerId={player.player_id}
                 name={player.name}
                 team={player.team}
+                teamId={player.team_id}
                 owner={player.owner_name}
+                ownerId={player.owner_id}
+                color="yellow"
                 avatar={
                   <div
                     // CHANGED: w-8 h-8 -> w-10 h-10 (Matches IdealLineup & StreakCard)

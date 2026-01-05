@@ -48,7 +48,8 @@ export function ensureSchema(db) {
       height INTEGER,
       weight INTEGER,
       price INTEGER,
-      euroleague_code TEXT
+      euroleague_code TEXT,
+      img TEXT
     )
   `
   ).run();
@@ -331,6 +332,16 @@ export function ensureSchema(db) {
     try {
       db.prepare('ALTER TABLE players ADD COLUMN team_id INTEGER').run();
     } catch (e) {}
+  }
+
+  // Migration: Add img to players (for Official Euroleague Images)
+  if (!playersInfoChecks.some((c) => c.name === 'img')) {
+    console.log('Migrating players table (adding img column)...');
+    try {
+      db.prepare('ALTER TABLE players ADD COLUMN img TEXT').run();
+    } catch (e) {
+      console.error('Could not add column img:', e.message);
+    }
   }
 
   // Migration: Check for round_id in lineups

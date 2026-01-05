@@ -16,7 +16,7 @@ export function preparePlayerMutations(db) {
       puntos, partidos_jugados, 
       played_home, played_away, 
       points_home, points_away, points_last_season,
-      status, price_increment, price
+      status, price_increment, price, img
     ) 
     VALUES (
       @id, @name, @team_id, @position, 
@@ -24,7 +24,7 @@ export function preparePlayerMutations(db) {
       @played_home, @played_away, 
       @points_home, @points_away, 
       @points_last_season,
-      @status, @price_increment, @price
+      @status, @price_increment, @price, @img
     )
     ON CONFLICT(id) DO UPDATE SET 
       name=excluded.name, 

@@ -25,7 +25,7 @@ export {
   fetchJinxStats,
   fetchInitialSquadAnalytics,
   fetchLeagueComparisonStats,
-} from './standingsService';
+} from './standingsService.js';
 
 // Dashboard Service
 export {
@@ -47,7 +47,7 @@ export {
   fetchTopPlayersByForm,
   fetchCaptainRecommendations,
   fetchNextRound,
-} from './dashboardService';
+} from './dashboardService.js';
 
 // Player Service
 export {
@@ -59,7 +59,7 @@ export {
   fetchUserRecentRounds,
   fetchUserSquadDetails,
   fetchPlayerStreaks,
-} from './playerService';
+} from './playerService.js';
 
 // Market Service
 export {
@@ -70,4 +70,7 @@ export {
   fetchMarketTrends,
   fetchRecentTransfers,
   fetchMarketOpportunities,
-} from './marketService';
+} from './marketService.js';
+
+// Team Service
+export { fetchTeamProfile } from './teamService.js';

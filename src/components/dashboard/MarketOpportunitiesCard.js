@@ -36,7 +36,7 @@ export default function MarketOpportunitiesCard() {
                 {/* Line 2: Context */}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
                   <Link
-                    href={`/team/${encodeURIComponent(player.team)}`}
+                    href={`/team/${player.team_id}`}
                     className="truncate hover:text-blue-500 transition-colors"
                     title={player.team}
                   >

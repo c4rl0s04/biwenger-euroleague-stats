@@ -98,6 +98,7 @@ export function getMarketOpportunities(limit = 3) {
       p.id as player_id,
       p.name,
       p.position,
+      t.id as team_id,
       t.name as team,
       p.price,
       COALESCE(p.price_increment, 0) as price_trend,

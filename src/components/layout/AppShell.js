@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import TopHeader from './TopHeader';
 import Sidebar from './Sidebar';
+import NewsTicker from '../ui/NewsTicker';
 
 export default function AppShell({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -17,7 +18,8 @@ export default function AppShell({ children }) {
         <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
+          <NewsTicker />
           <main className="flex-grow w-full">{children}</main>
           <footer className="border-t border-border mt-auto bg-card">
             <div className="max-w-7xl mx-auto px-6 py-8">

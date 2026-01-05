@@ -134,7 +134,10 @@ export default function StatsLeadersCard() {
                 playerId={player.player_id}
                 name={player.name}
                 team={player.team}
+                teamId={player.team_id}
                 owner={player.owner_name}
+                ownerId={player.owner_id}
+                color="cyan"
                 avatar={
                   <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">
                     {index + 1}

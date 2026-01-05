@@ -85,7 +85,7 @@ export default function Sidebar({ isOpen, onClose }) {
         className={`
           fixed md:sticky top-0 left-0 h-screen z-50
           ${sidebarWidth}
-          bg-card
+          bg-[hsl(var(--sidebar-background))] border-r border-border/30
           flex flex-col
           transition-all duration-300 ease-in-out
           md:top-16 md:h-[calc(100vh-4rem)]
@@ -109,11 +109,18 @@ export default function Sidebar({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Desktop Collapse Toggle */}
-        <div className="hidden md:flex items-center justify-end px-2 py-2 border-b border-border/30">
+        {/* Desktop Header & Toggle */}
+        <div className="hidden md:flex items-center h-16 px-4 border-b border-white/5">
+          {!isCollapsed && (
+            <Link href="/" className="flex-1 animate-fade-in">
+              <span className="text-xl font-display tracking-wide bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
+                BIWENGER STATS
+              </span>
+            </Link>
+          )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1.5 rounded hover:bg-secondary text-muted-foreground"
+            className={`p-1.5 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -121,8 +128,8 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 py-4 overflow-y-auto">
-          <ul className="space-y-1 px-2">
+        <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
+          <ul className="space-y-1.5 px-3">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
               return (
@@ -131,22 +138,33 @@ export default function Sidebar({ isOpen, onClose }) {
                     href={item.href}
                     onClick={onClose}
                     className={`
-                      flex items-center gap-3 px-3 py-2.5 rounded-lg
-                      transition-all duration-200
+                      group flex items-center gap-3 px-3 py-2.5 rounded-md
+                      transition-all duration-300 relative overflow-hidden
                       ${
                         isActive
-                          ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                          ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary font-medium shadow-[inset_2px_0_0_0_hsl(var(--primary))]'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                       }
                     `}
                     title={isCollapsed ? item.name : undefined}
                   >
+                    {/* Active Glow Effect */}
+                    {isActive && <div className="absolute inset-0 bg-primary/5 blur-xl -z-10" />}
+
                     <item.icon
                       size={20}
-                      className={isActive ? 'text-primary' : 'text-muted-foreground'}
+                      className={`transition-colors duration-300 ${
+                        isActive
+                          ? 'text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.4)]'
+                          : 'group-hover:text-foreground'
+                      }`}
                     />
                     {!isCollapsed && (
-                      <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
+                      <span
+                        className={`text-sm whitespace-nowrap transition-colors duration-300 ${isActive ? 'translate-x-1' : ''}`}
+                      >
+                        {item.name}
+                      </span>
                     )}
                   </Link>
                 </li>

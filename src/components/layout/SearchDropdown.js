@@ -91,7 +91,7 @@ export default function SearchDropdown({ onClose }) {
     if (item.type === 'player') {
       router.push(`/player/${item.id}`);
     } else if (item.type === 'team') {
-      router.push(`/team/${encodeURIComponent(item.name)}`);
+      router.push(`/team/${item.id}`);
     } else if (item.type === 'user') {
       router.push(`/user/${item.id}`);
     }

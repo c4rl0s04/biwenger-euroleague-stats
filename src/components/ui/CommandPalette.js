@@ -213,7 +213,7 @@ export default function CommandPalette() {
                           key={t.name}
                           type="team"
                           icon={Trophy}
-                          onSelect={() => handleSelect(() => router.push(`/team/${t.name}`))}
+                          onSelect={() => handleSelect(() => router.push(`/team/${t.id}`))}
                         >
                           {t.name}
                         </Item>
