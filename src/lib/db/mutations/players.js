@@ -66,9 +66,10 @@ export function preparePlayerMutations(db) {
   );
 
   // Insert/Update Team (for Team Sync)
+  // Note: img is only set on INSERT, not on UPDATE, to preserve existing logos
   const upsertTeam = db.prepare(`
     INSERT INTO teams (id, name, short_name, img) VALUES (@id, @name, @short_name, @img)
-    ON CONFLICT(id) DO UPDATE SET name=excluded.name, short_name=excluded.short_name, img=excluded.img
+    ON CONFLICT(id) DO UPDATE SET name=excluded.name, short_name=excluded.short_name
   `);
 
   return {

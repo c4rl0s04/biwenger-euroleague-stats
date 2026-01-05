@@ -111,6 +111,7 @@ export async function run(manager) {
       status: player.status || 'ok',
       price_increment: player.priceIncrement || 0,
       price: player.price || 0,
+      img: player.img || null,
     });
 
     // SKIP DETAILS IF FLAG IS SET

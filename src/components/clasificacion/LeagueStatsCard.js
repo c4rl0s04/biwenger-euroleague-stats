@@ -125,10 +125,10 @@ export default function LeagueStatsCard() {
 
           {/* Season Progress Bar */}
           {(() => {
-            const TOTAL_ROUNDS = stats.total_season_rounds || 34;
-            const playedRounds = stats.total_rounds || 0;
-            const remainingRounds = TOTAL_ROUNDS - playedRounds;
-            const progressPct = (playedRounds / TOTAL_ROUNDS) * 100;
+            const TOTAL_ROUNDS = Number(stats.total_season_rounds) || 34;
+            const playedRounds = Number(stats.total_rounds) || 0;
+            const remainingRounds = Math.max(0, TOTAL_ROUNDS - playedRounds);
+            const progressPct = Math.min(100, Math.max(0, (playedRounds / TOTAL_ROUNDS) * 100));
 
             return (
               <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/30">
@@ -142,7 +142,7 @@ export default function LeagueStatsCard() {
                 </div>
                 <div className="h-2.5 bg-slate-700/50 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-500"
+                    className="h-full accent-gradient rounded-full transition-all duration-500"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>

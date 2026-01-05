@@ -1,5 +1,7 @@
 import { fetchRoundGames } from '../api/biwenger-client.js';
+import { fetchGameHeader, fetchSchedule } from '../api/euroleague-client.js';
 import { prepareMatchMutations } from '../db/mutations/matches.js';
+import { CONFIG } from '../config.js';
 
 /**
  * Syncs matches (games) for a specific round using Biwenger API.
@@ -24,6 +26,35 @@ export async function run(manager, round, playersList = {}) {
   const roundName = round.name;
 
   manager.log(`   🌍 Syncing Matches for Round ${roundName} (using Biwenger API)...`);
+
+  // --- Euroleague Data Setup ---
+  // Fetch team codes from DB
+  const teams = db.prepare('SELECT id, code FROM teams WHERE code IS NOT NULL').all();
+  const teamCodeMap = new Map(teams.map((t) => [t.id, t.code]));
+
+  // Fetch Euroleague Schedule for Game Code mapping
+  // Map Key: "HOMECODE_AWAYCODE" -> Value: GameCode
+  const gameCodeMap = new Map();
+  try {
+    const schedule = await fetchSchedule();
+    if (schedule && schedule.schedule && schedule.schedule.item) {
+      const items = Array.isArray(schedule.schedule.item)
+        ? schedule.schedule.item
+        : [schedule.schedule.item];
+      for (const item of items) {
+        if (item.homecode && item.awaycode && item.game) {
+          // Keys are lowercase in the parsed XML result
+          const codeA = item.homecode.trim();
+          const codeB = item.awaycode.trim();
+          gameCodeMap.set(`${codeA}_${codeB}`, item.game);
+        }
+      }
+    }
+  } catch (err) {
+    manager.error(
+      `   ⚠️ Failed to fetch EL schedule: ${err.message}. Regular time scores may be missing.`
+    );
+  }
 
   let gamesData;
   try {
@@ -105,6 +136,99 @@ export async function run(manager, round, playersList = {}) {
       const homeScore = typeof homeTeam.score === 'number' ? homeTeam.score : 0;
       const awayScore = typeof awayTeam.score === 'number' ? awayTeam.score : 0;
 
+      // Calculate regular time scores (excluding overtime)
+      // Try to fetch from Euroleague Header API if match is finished
+      let homeScoreRegtime = null;
+      let awayScoreRegtime = null;
+      let homeQ1 = null,
+        awayQ1 = null;
+      let homeQ2 = null,
+        awayQ2 = null;
+      let homeQ3 = null,
+        awayQ3 = null;
+      let homeQ4 = null,
+        awayQ4 = null;
+      let homeOT = null,
+        awayOT = null;
+
+      if (status === 'finished' && game.id) {
+        try {
+          // Map Biwenger team IDs to Euroleague codes
+          const homeCode = teamCodeMap.get(homeId);
+          const awayCode = teamCodeMap.get(awayId);
+
+          if (homeCode && awayCode) {
+            // Find game code using Home+Away combination
+            const gameKey = `${homeCode}_${awayCode}`;
+            const gameCode = gameCodeMap.get(gameKey);
+
+            if (gameCode) {
+              const header = await fetchGameHeader(gameCode);
+
+              if (header) {
+                // Extract Quarter Scores (Cumulative from API)
+                // Keys: ScoreQuarter1A, ScoreQuarter2A, etc.
+                const getCumulative = (q, team) => {
+                  return parseInt(header[`ScoreQuarter${q}${team}`] ?? 0);
+                };
+
+                const hQ1_cum = getCumulative(1, 'A');
+                const hQ2_cum = getCumulative(2, 'A');
+                const hQ3_cum = getCumulative(3, 'A');
+                const hQ4_cum = getCumulative(4, 'A');
+
+                const aQ1_cum = getCumulative(1, 'B');
+                const aQ2_cum = getCumulative(2, 'B');
+                const aQ3_cum = getCumulative(3, 'B');
+                const aQ4_cum = getCumulative(4, 'B');
+
+                // Calculate points per quarter (Delta)
+                homeQ1 = hQ1_cum;
+                homeQ2 = hQ2_cum - hQ1_cum;
+                homeQ3 = hQ3_cum - hQ2_cum;
+                homeQ4 = hQ4_cum - hQ3_cum;
+
+                awayQ1 = aQ1_cum;
+                awayQ2 = aQ2_cum - aQ1_cum;
+                awayQ3 = aQ3_cum - aQ2_cum;
+                awayQ4 = aQ4_cum - aQ3_cum;
+
+                // Regular time score is score at end of Q4
+                homeScoreRegtime = hQ4_cum;
+                awayScoreRegtime = aQ4_cum;
+
+                // OT Score is Total - Regular
+                // Use Euroleague provided total scores (ScoreA/ScoreB)
+                const totalHome = parseInt(header.ScoreA ?? 0);
+                const totalAway = parseInt(header.ScoreB ?? 0);
+
+                if (totalHome > homeScoreRegtime || totalAway > awayScoreRegtime) {
+                  homeOT = totalHome - homeScoreRegtime;
+                  awayOT = totalAway - awayScoreRegtime;
+                } else {
+                  homeOT = 0;
+                  awayOT = 0;
+                }
+
+                manager.log(
+                  `      ✅ Found Euroleague data for ${homeCode} vs ${awayCode} (Game ${gameCode}): ${homeScoreRegtime}-${awayScoreRegtime} (Reg) | Q1: ${homeQ1}-${awayQ1}, Q2: ${homeQ2}-${awayQ2}, Q3: ${homeQ3}-${awayQ3}, Q4: ${homeQ4}-${awayQ4}`
+                );
+              }
+            } else {
+              manager.log(`      ⚠️  No Euroleague game found for ${homeCode} vs ${awayCode}`);
+            }
+          }
+        } catch (e) {
+          manager.error(`      Error fetching EL data: ${e.message}`);
+        }
+      }
+
+      // If regular time scores not available, use final scores (fallback)
+      if (homeScoreRegtime === null) {
+        homeScoreRegtime = homeScore;
+        awayScoreRegtime = awayScore;
+      }
+
       mutations.upsertMatch.run({
         round_id: dbRoundId,
         round_name: roundName,
@@ -114,6 +238,18 @@ export async function run(manager, round, playersList = {}) {
         status: status,
         home_score: homeScore,
         away_score: awayScore,
+        home_score_regtime: homeScoreRegtime,
+        away_score_regtime: awayScoreRegtime,
+        home_q1: homeQ1,
+        away_q1: awayQ1,
+        home_q2: homeQ2,
+        away_q2: awayQ2,
+        home_q3: homeQ3,
+        away_q3: awayQ3,
+        home_q4: homeQ4,
+        away_q4: awayQ4,
+        home_ot: homeOT,
+        away_ot: awayOT,
       });
 
       syncedCount++;

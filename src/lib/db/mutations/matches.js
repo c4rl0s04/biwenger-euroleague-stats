@@ -24,13 +24,33 @@ export function prepareMatchMutations(db) {
   const getMappedTeams = db.prepare('SELECT id, code, name FROM teams WHERE code IS NOT NULL');
 
   const upsertMatch = db.prepare(`
-    INSERT INTO matches (round_id, round_name, home_id, away_id, date, status, home_score, away_score)
-    VALUES (@round_id, @round_name, @home_id, @away_id, @date, @status, @home_score, @away_score)
+    INSERT INTO matches (
+      round_id, round_name, home_id, away_id, date, status, 
+      home_score, away_score, home_score_regtime, away_score_regtime,
+      home_q1, away_q1, home_q2, away_q2, home_q3, away_q3, home_q4, away_q4, home_ot, away_ot
+    )
+    VALUES (
+      @round_id, @round_name, @home_id, @away_id, @date, @status, 
+      @home_score, @away_score, @home_score_regtime, @away_score_regtime,
+      @home_q1, @away_q1, @home_q2, @away_q2, @home_q3, @away_q3, @home_q4, @away_q4, @home_ot, @away_ot
+    )
     ON CONFLICT(round_id, home_id, away_id) DO UPDATE SET
       round_name=excluded.round_name,
       status=excluded.status,
       home_score=excluded.home_score,
       away_score=excluded.away_score,
+      home_score_regtime=excluded.home_score_regtime,
+      away_score_regtime=excluded.away_score_regtime,
+      home_q1=excluded.home_q1,
+      away_q1=excluded.away_q1,
+      home_q2=excluded.home_q2,
+      away_q2=excluded.away_q2,
+      home_q3=excluded.home_q3,
+      away_q3=excluded.away_q3,
+      home_q4=excluded.home_q4,
+      away_q4=excluded.away_q4,
+      home_ot=excluded.home_ot,
+      away_ot=excluded.away_ot,
       date=excluded.date
   `);
 

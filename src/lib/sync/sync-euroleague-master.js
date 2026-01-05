@@ -96,14 +96,8 @@ export async function run(manager) {
         // Use the DB Name (Biwenger) to generate the short name, not the Euroleague Name
         const correctShortName = getShortTeamName(bestMatch.name);
 
-        mutations.updateTeamMaster.run({
-          code: code,
-          short_name: correctShortName,
-          fuzzy_name: `%${elName.split(' ')[0]}%`, // Fallback if needed, though we run matching above
-        });
-        // Actually updateTeamMaster uses WHERE name LIKE... but we already found bestMatch.id
-        // We should use updateTeamCode which updates by ID!
-
+        // Update by specific ID to avoid matching multiple teams
+        // (updateTeamMaster uses fuzzy WHERE that can match multiple teams incorrectly)
         mutations.updateTeamCode.run(code, correctShortName, bestMatch.id);
         teamMap.set(code, bestMatch.id);
       } else {

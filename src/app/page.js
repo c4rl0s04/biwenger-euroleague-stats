@@ -93,37 +93,40 @@ export default function Home() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cards.map((card, idx) => (
-              <Link
-                key={idx}
-                href={card.disabled ? '#' : card.href}
-                className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 block ${
-                  card.disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-                }`}
-                style={{ animationDelay: card.delay }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            {cards.map((card, idx) => {
+              const isLastCard = idx === cards.length - 1;
+              return (
+                <Link
+                  key={idx}
+                  href={card.disabled ? '#' : card.href}
+                  className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 block ${
+                    card.disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+                  } ${isLastCard ? 'md:col-start-1 lg:col-start-2' : ''}`}
+                  style={{ animationDelay: card.delay }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-                <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div
-                      className={`text-${card.color}-500 group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      <card.icon size={40} />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div
+                        className={`text-${card.color}-500 group-hover:scale-110 transition-transform duration-300`}
+                      >
+                        <card.icon size={40} />
+                      </div>
+
+                      <h3 className="text-3xl font-display text-white group-hover:text-primary transition-colors">
+                        {card.title}
+                      </h3>
                     </div>
+                    <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
 
-                    <h3 className="text-3xl font-display text-white group-hover:text-primary transition-colors">
-                      {card.title}
-                    </h3>
+                    <div className="flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                      Abrir Página <ArrowRight size={16} className="ml-1" />
+                    </div>
                   </div>
-                  <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
-
-                  <div className="flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                    Abrir Página <ArrowRight size={16} className="ml-1" />
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </main>

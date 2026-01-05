@@ -46,7 +46,7 @@ export function fetchRoundWinners(limit = 15) {
   return getRoundWinners(limit);
 }
 
-export function fetchPointsProgression(limit = 10) {
+export function fetchPointsProgression(limit = 50) {
   return getPointsProgression(limit);
 }
 

@@ -5,8 +5,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const totals = getLeagueOverview();
-    return successResponse(totals, CACHE_DURATIONS.LONG);
+    const leagueTotals = getLeagueOverview();
+
+    // Cache for 1 hour (3600s) as these stats don't change often
+    return successResponse(leagueTotals, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching league totals:', error);
     return errorResponse('Internal Server Error');

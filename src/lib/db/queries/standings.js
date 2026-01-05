@@ -185,15 +185,7 @@ export function getLeagueTotals() {
 
   // Leader streak - count consecutive rounds where current leader was #1
   const leaderStreakQuery = `
-    WITH RankedRounds AS (
-      SELECT 
-        round_id,
-        user_id,
-        RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
-      FROM user_rounds
-      WHERE participated = 1
-    ),
-    CurrentLeader AS (
+    WITH CurrentLeader AS (
       SELECT user_id
       FROM (
         SELECT user_id, SUM(points) as total
@@ -204,22 +196,43 @@ export function getLeagueTotals() {
         LIMIT 1
       )
     ),
-    LeaderHistory AS (
+    LeagueRounds AS (
+      SELECT DISTINCT round_id 
+      FROM user_rounds 
+      WHERE participated = 1
+    ),
+    RoundRanks AS (
       SELECT 
-        rr.round_id,
-        rr.user_id,
-        rr.position,
-        CASE WHEN rr.user_id = (SELECT user_id FROM CurrentLeader) AND rr.position = 1 THEN 1 ELSE 0 END as is_leader_win
-      FROM RankedRounds rr
-      ORDER BY round_id DESC
+        round_id,
+        user_id,
+        RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
+      FROM user_rounds
+      WHERE participated = 1
+    ),
+    LeaderPerformance AS (
+      SELECT 
+        lr.round_id,
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 FROM RoundRanks rr 
+            WHERE rr.round_id = lr.round_id 
+            AND rr.user_id = (SELECT user_id FROM CurrentLeader)
+            AND rr.position = 1
+          ) THEN 1 
+          ELSE 0 
+        END as is_win
+      FROM LeagueRounds lr
+    ),
+    CalculatedStreak AS (
+      SELECT 
+        round_id,
+        is_win,
+        SUM(CASE WHEN is_win = 0 THEN 1 ELSE 0 END) OVER (ORDER BY round_id DESC) as grp
+      FROM LeaderPerformance
     )
     SELECT COUNT(*) as streak
-    FROM (
-      SELECT round_id, is_leader_win,
-        SUM(CASE WHEN is_leader_win = 0 THEN 1 ELSE 0 END) OVER (ORDER BY round_id DESC) as grp
-      FROM LeaderHistory
-    )
-    WHERE grp = 0
+    FROM CalculatedStreak
+    WHERE grp = 0 AND is_win = 1
   `;
 
   let leaderStreak = { streak: 0 };

@@ -1,4 +1,5 @@
 import { db } from '../client.js';
+import { getTeamPositions } from '../../utils/standings.js';
 
 /**
  * Get Porras statistics
@@ -64,29 +65,28 @@ export function getNextRound() {
   const round = db.prepare(query).get();
 
   if (round) {
-    // 1. Calculate Standings (Positions)
-    // Based on number of wins from finished matches
-    const standingsQuery = `
-      WITH TeamResults AS (
-        SELECT home_id as team_id, CASE WHEN home_score > away_score THEN 1 ELSE 0 END as win
-        FROM matches WHERE status = 'finished'
-        UNION ALL
-        SELECT away_id as team_id, CASE WHEN away_score > home_score THEN 1 ELSE 0 END as win
-        FROM matches WHERE status = 'finished'
-      ),
-      TeamStats AS (
-        SELECT team_id, SUM(win) as wins
-        FROM TeamResults
-        GROUP BY team_id
-      )
-      SELECT team_id, RANK() OVER (ORDER BY wins DESC) as position
-      FROM TeamStats
+    // 1. Get all finished matches to calculate standings
+    // Include regular time scores (excluding OT) for Article 19.4 compliance
+    const allFinishedMatchesQuery = `
+      SELECT 
+        home_id,
+        away_id,
+        home_score,
+        away_score,
+        home_score_regtime,
+        away_score_regtime,
+        status
+      FROM matches
+      WHERE status = 'finished'
+        AND home_score IS NOT NULL
+        AND away_score IS NOT NULL
     `;
 
     let positionMap = new Map();
     try {
-      const standings = db.prepare(standingsQuery).all();
-      standings.forEach((s) => positionMap.set(s.team_id, s.position));
+      const allFinishedMatches = db.prepare(allFinishedMatchesQuery).all();
+      // Use the standings utility to calculate positions properly (handles draws, tie-breaking, etc.)
+      positionMap = getTeamPositions(allFinishedMatches);
     } catch (err) {
       console.warn('Could not calculate standings:', err);
     }

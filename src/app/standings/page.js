@@ -1,7 +1,8 @@
 'use client';
 
+import { Section } from '@/components/layout';
 import dynamic from 'next/dynamic';
-import { CardSkeleton, FadeIn } from '@/components/ui';
+import { CardSkeleton } from '@/components/ui';
 import {
   FullStandingsCard,
   LeagueStatsCard,
@@ -40,93 +41,53 @@ const LeaguePerformanceCard = dynamic(
 
 export default function ClasificacionPage() {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <FadeIn delay={0}>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Clasificación</h1>
-          <p className="text-slate-400">
-            Estadísticas completas de la liga y evolución de los participantes
-          </p>
-        </div>
-      </FadeIn>
-
-      {/* Main Standings + League Stats Row */}
-      <FadeIn delay={100}>
+    <div>
+      {/* Section: Overview and Standings */}
+      <Section title="Clasificación General" delay={0} background="section-base">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <FullStandingsCard />
           <LeagueStatsCard />
         </div>
-      </FadeIn>
+      </Section>
 
-      {/* Round Winners - Full Width Row */}
-      <FadeIn delay={200}>
+      {/* Section: Round Winners */}
+      <Section title="Ganadores de Jornada" delay={100} background="section-raised">
         <RoundWinnersCard />
-      </FadeIn>
+      </Section>
 
-      {/* Points Progression - Full Width Row */}
-      <FadeIn delay={300}>
-        <PointsProgressionCard />
-      </FadeIn>
+      {/* Section: Progression */}
+      <Section title="Evolución de Puntos" delay={200} background="section-base">
+        <div className="space-y-6">
+          <PointsProgressionCard />
+          <RoundPointsProgressionCard />
+        </div>
+      </Section>
 
-      {/* Round Points Progression - Full Width Row */}
-      <FadeIn delay={350}>
-        <RoundPointsProgressionCard />
-      </FadeIn>
-
-      {/* Performance & Consistency Section */}
-      <div className="pt-8">
-        <FadeIn delay={400}>
-          <h2 className="text-2xl font-bold text-white mb-6">Rendimiento y Consistencia</h2>
-        </FadeIn>
-
+      {/* Section: Performance & Consistency */}
+      <Section title="Rendimiento y Consistencia" delay={300} background="section-raised">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FadeIn delay={450}>
-            <ConsistencyCard />
-          </FadeIn>
-          <FadeIn delay={500}>
-            <PlacementStatsCard />
-          </FadeIn>
-          <FadeIn delay={550}>
-            <LeaguePerformanceCard />
-          </FadeIn>
-          <FadeIn delay={600}>
-            <EfficiencyCard />
-          </FadeIn>
-          <FadeIn delay={650}>
-            <StreaksCard />
-          </FadeIn>
-          <FadeIn delay={700}>
-            <BottlerCard />
-          </FadeIn>
+          <ConsistencyCard />
+          <PlacementStatsCard />
+          <LeaguePerformanceCard />
+          <EfficiencyCard />
+          <StreaksCard />
+          <BottlerCard />
         </div>
-      </div>
+      </Section>
 
-      {/* Bad Luck Section */}
-      <div className="pt-8">
-        <FadeIn delay={800}>
-          <h2 className="text-2xl font-bold text-white mb-6">Mala Suerte</h2>
-        </FadeIn>
-
+      {/* Section: Bad Luck */}
+      <Section title="Mala Suerte" delay={400} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FadeIn delay={850}>
-            <HeartbreakersCard />
-          </FadeIn>
-          <FadeIn delay={900}>
-            <NoGloryCard />
-          </FadeIn>
-          <FadeIn delay={950}>
-            <JinxCard />
-          </FadeIn>
+          <HeartbreakersCard />
+          <NoGloryCard />
+          <JinxCard />
         </div>
-      </div>
+      </Section>
 
-      {/* Team Value Ranking */}
-      <FadeIn delay={1000}>
-        <div className="pt-4">
-          <TeamValueRankingCard />
-        </div>
-      </FadeIn>
+      {/* Section: Team Value */}
+      <Section title="Valor de Equipo" delay={500} background="section-raised">
+        <TeamValueRankingCard />
+      </Section>
     </div>
   );
 }

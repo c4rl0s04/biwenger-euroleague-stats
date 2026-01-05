@@ -116,10 +116,25 @@ export function ensureSchema(db) {
       status TEXT,
       home_score INTEGER,
       away_score INTEGER,
+      home_score_regtime INTEGER,
+      away_score_regtime INTEGER,
       UNIQUE(round_id, home_id, away_id)
     )
   `
   ).run();
+
+  // Migration: Add regular time score columns if they don't exist
+  const matchesInfo = db.prepare('PRAGMA table_info(matches)').all();
+  const hasRegtimeColumns = matchesInfo.some((c) => c.name === 'home_score_regtime');
+  if (!hasRegtimeColumns) {
+    console.log('Migrating matches table (adding regular time score columns)...');
+    try {
+      db.prepare('ALTER TABLE matches ADD COLUMN home_score_regtime INTEGER').run();
+      db.prepare('ALTER TABLE matches ADD COLUMN away_score_regtime INTEGER').run();
+    } catch (e) {
+      console.error('Could not add regular time score columns:', e.message);
+    }
+  }
 
   // Migration: Drop redundant 'team' column from players if it exists
   const playersInfoDrop = db.prepare('PRAGMA table_info(players)').all();
@@ -316,8 +331,8 @@ export function ensureSchema(db) {
   }
 
   // Migration: Add home_id/away_id to matches
-  const matchesInfo = db.prepare('PRAGMA table_info(matches)').all();
-  if (!matchesInfo.some((c) => c.name === 'home_id')) {
+  const matchesInfoIds = db.prepare('PRAGMA table_info(matches)').all();
+  if (!matchesInfoIds.some((c) => c.name === 'home_id')) {
     console.log('Migrating matches table (adding team IDs)...');
     try {
       db.prepare('ALTER TABLE matches ADD COLUMN home_id INTEGER').run();
