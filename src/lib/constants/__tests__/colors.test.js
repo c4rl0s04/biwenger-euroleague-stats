@@ -2,11 +2,11 @@
  * Tests for colors.js constants and utilities
  */
 import { describe, it, expect } from 'vitest';
-import { USER_COLORS, SPECIAL_USER_COLORS, getColorForUser } from '../colors.js';
+import { USER_COLORS, getColorForUser } from '../colors.js';
 
 describe('USER_COLORS', () => {
-  it('should have 8 color entries', () => {
-    expect(USER_COLORS).toHaveLength(8);
+  it('should have 13 color entries', () => {
+    expect(USER_COLORS).toHaveLength(13);
   });
 
   it('should have all required properties for each color', () => {
@@ -20,19 +20,7 @@ describe('USER_COLORS', () => {
   });
 });
 
-describe('SPECIAL_USER_COLORS', () => {
-  it('should have All Stars special color', () => {
-    expect(SPECIAL_USER_COLORS['All Stars']).toBeDefined();
-    expect(SPECIAL_USER_COLORS['All Stars'].stroke).toBe('#f59e0b');
-  });
-});
-
 describe('getColorForUser', () => {
-  it('should return special color for "All Stars"', () => {
-    const color = getColorForUser(123, 'All Stars');
-    expect(color).toEqual(SPECIAL_USER_COLORS['All Stars']);
-  });
-
   it('should return consistent color for same userId', () => {
     const color1 = getColorForUser(123, 'User1');
     const color2 = getColorForUser(123, 'User1');

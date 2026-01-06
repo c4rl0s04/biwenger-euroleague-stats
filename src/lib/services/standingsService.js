@@ -21,7 +21,18 @@ import {
   getNoGloryStats,
   getJinxStats,
   getInitialSquadActualPerformance,
+
   getLeagueComparisonStats,
+  getHeatCheckStats,
+  getHunterStats,
+  getRollingAverageStats,
+  getFloorCeilingStats,
+
+  getPointDistributionStats,
+  getAllPlayAllStats,
+  getDominanceStats,
+  getTheoreticalGapStats,
+  getHeatmapStats,
 } from '@/lib/db';
 
 /**
@@ -92,6 +103,46 @@ export function fetchInitialSquadAnalytics() {
 
 export function fetchLeagueComparisonStats(userId) {
   return getLeagueComparisonStats(userId);
+}
+
+// ============ ADVANCED STATS WRAPPERS ============
+
+export function fetchHeatCheckStats() {
+  return getHeatCheckStats();
+}
+
+export function fetchHunterStats() {
+  return getHunterStats();
+}
+
+export function fetchRollingAverageStats() {
+  return getRollingAverageStats();
+}
+
+export function fetchFloorCeilingStats() {
+  return getFloorCeilingStats();
+}
+
+
+
+export function fetchPointDistributionStats() {
+  return getPointDistributionStats();
+}
+
+export function fetchAllPlayAllStats() {
+  return getAllPlayAllStats();
+}
+
+export function fetchDominanceStats() {
+  return getDominanceStats();
+}
+
+export function fetchTheoreticalGapStats() {
+  return getTheoreticalGapStats();
+}
+
+export function fetchHeatmapStats() {
+  return getHeatmapStats();
 }
 
 // ============ AGGREGATED FUNCTIONS ============

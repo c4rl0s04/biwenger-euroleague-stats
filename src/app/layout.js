@@ -11,6 +11,7 @@ export const metadata = {
   description: 'Advanced analytics for your Biwenger league',
 };
 
+
 export default function RootLayout({ children }) {
   // Fetch users for the UserProvider
   const users = getStandings();

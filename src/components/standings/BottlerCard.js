@@ -1,6 +1,7 @@
 'use client';
 
 import { Wine, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
@@ -41,7 +42,14 @@ export default function BottlerCard() {
                         )}
                       </div>
                       <div>
-                        <p className="font-bold text-slate-200">{user.name}</p>
+                        <Link
+                          href={`/user/${user.user_id}`}
+                          className={`${colors.text} group/link block`}
+                        >
+                          <p className="font-bold text-slate-200 group-hover/link:text-inherit transition-colors">
+                            {user.name}
+                          </p>
+                        </Link>
                         <div className="flex gap-2 text-[10px] text-slate-400 mt-1">
                           <span className="flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-slate-300"></span>

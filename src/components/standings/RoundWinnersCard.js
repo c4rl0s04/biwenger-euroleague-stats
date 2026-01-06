@@ -8,44 +8,42 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RoundWinnersCard() {
-  const { data: winners = [], loading } = useApiData('/api/standings/round-winners');
+  const { data: winners = [], loading } = useApiData('/api/standings/round-winners?limit=100');
 
   return (
     <Card title="Ganadores de Jornada" icon={Trophy} color="yellow" loading={loading}>
       {!loading && (
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-2">
           {winners.length > 0 ? (
             winners.map((winner) => {
               const colors = getColorForUser(winner.user_id, winner.name);
               return (
-                <div
+                <Link
                   key={`${winner.round_id}-${winner.user_id}`}
-                  className={`flex-shrink-0 w-28 p-3 rounded-xl text-center transition-all bg-gradient-to-b ${colors.bg} border ${colors.border} ${colors.text} hover:scale-105`}
+                  href={`/user/${winner.user_id}`}
+                  className={`group flex-shrink-0 w-20 p-2 rounded-lg text-center transition-all bg-gradient-to-b ${colors.bg} border ${colors.border} ${colors.text} hover:scale-105 block`}
                 >
-                  <div className="text-slate-400 text-[10px] font-medium mb-2">
-                    {winner.round_name}
+                  <div className="text-slate-400 text-[9px] font-medium mb-1">
+                    {winner.round_name.replace('Jornada ', 'J')}
                   </div>
-                  <div className="flex justify-center mb-2">
+                  <div className="flex justify-center mb-1">
                     {winner.icon ? (
                       <img
                         src={winner.icon}
                         alt={winner.name}
-                        className="w-10 h-10 rounded-full ring-2 ring-white/20"
+                        className="w-8 h-8 rounded-full ring-2 ring-white/20 transition-transform group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium text-white">
+                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-medium text-white transition-transform group-hover:scale-105">
                         {winner.name.charAt(0)}
                       </div>
                     )}
                   </div>
-                  <Link
-                    href={`/user/${winner.user_id}`}
-                    className="text-xs font-bold truncate mb-1 text-white hover:text-inherit block"
-                  >
+                  <div className="text-[10px] font-bold truncate mb-0.5 text-white group-hover:text-inherit transition-colors">
                     {winner.name}
-                  </Link>
-                  <div className="text-sm font-bold">{winner.points} pts</div>
-                </div>
+                  </div>
+                  <div className="text-xs font-bold">{winner.points}</div>
+                </Link>
               );
             })
           ) : (

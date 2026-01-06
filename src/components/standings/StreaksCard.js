@@ -1,6 +1,7 @@
 'use client';
 
 import { Flame, Zap } from 'lucide-react';
+import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
@@ -31,7 +32,14 @@ export default function StreaksCard() {
                       >
                         {user.name.substring(0, 2).toUpperCase()}
                       </div>
-                      <p className="font-medium text-slate-200">{user.name}</p>
+                      <Link
+                        href={`/user/${user.user_id}`}
+                        className={`${colors.text} group/link block`}
+                      >
+                        <p className="font-medium text-slate-200 group-hover/link:text-inherit transition-colors">
+                          {user.name}
+                        </p>
+                      </Link>
                     </div>
 
                     <div className="flex flex-col items-end">

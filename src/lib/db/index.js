@@ -1,16 +1,12 @@
-/**
- * Database Entry Point
- * Re-exports the client and all queries.
- * This file replaces the old database.js.
- */
-
-export * from './client.js';
-export * from './queries/stats.js';
-export * from './queries/market.js';
-export * from './queries/rounds.js';
-export * from './queries/users.js';
-export * from './queries/players.js';
-export * from './queries/standings.js';
-export * from './queries/performance.js';
-export * from './queries/analytics.js';
-export * from './queries/teams.js';
+export * from './queries/users';
+export * from './queries/players';
+export * from './queries/teams';
+export * from './queries/rounds';
+export * from './queries/stats';
+export * from './queries/market';
+export * from './queries/standings';
+export * from './queries/performance'; // New analytics
+export * from './queries/matches';
+export * from './queries/search';
+export * from './queries/analytics';
+export * from './queries/advanced_stats'; // New Advanced Stats

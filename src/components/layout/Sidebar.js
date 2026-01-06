@@ -17,6 +17,7 @@ import {
   TrendingDown,
   Wallet,
   Home,
+  Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useClientUser } from '@/lib/hooks/useClientUser';
@@ -31,6 +32,10 @@ const navItems = [
   { name: 'Partidos', href: '/matches', icon: Calendar },
   { name: 'Alineaciones', href: '/lineups', icon: Users },
   { name: 'Porras', href: '/predictions', icon: Target },
+];
+
+const aiItems = [
+  { name: 'Assistant', href: '/ai', icon: Sparkles },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -110,17 +115,10 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* Desktop Header & Toggle */}
-        <div className="hidden md:flex items-center h-16 px-4 border-b border-white/5">
-          {!isCollapsed && (
-            <Link href="/" className="flex-1 animate-fade-in">
-              <span className="text-xl font-display tracking-wide bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
-                BIWENGER STATS
-              </span>
-            </Link>
-          )}
+        <div className="hidden md:flex items-center h-16 px-4 border-b border-white/5 justify-center">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`p-1.5 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
+            className={`p-1.5 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors cursor-pointer ${isCollapsed ? 'mx-auto' : ''}`}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -171,6 +169,57 @@ export default function Sidebar({ isOpen, onClose }) {
               );
             })}
           </ul>
+
+          {/* AI Tools Section */}
+          <div className="mt-6 mb-2 px-4">
+            {!isCollapsed && (
+              <h3 className="text-base font-black text-indigo-400 uppercase tracking-wider mb-3">
+                AI Tools
+              </h3>
+            )}
+            {isCollapsed && <div className="h-px bg-border/30 w-full mb-3" />}
+            <ul className="space-y-1.5">
+              {aiItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href}
+                        onClick={onClose}
+                        className={`
+                          group flex items-center gap-3 px-3 py-2.5 rounded-md
+                          transition-all duration-300 relative overflow-hidden
+                          ${
+                            isActive
+                              ? 'bg-gradient-to-r from-indigo-500/10 to-transparent text-indigo-400 font-medium shadow-[inset_2px_0_0_0_#6366f1]'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                          }
+                        `}
+                        title={isCollapsed ? item.name : undefined}
+                      >
+                        {isActive && <div className="absolute inset-0 bg-indigo-500/5 blur-xl -z-10" />}
+
+                        <item.icon
+                          size={20}
+                          className={`transition-colors duration-300 ${
+                            isActive
+                              ? 'text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]'
+                              : 'group-hover:text-foreground'
+                          }`}
+                        />
+                        {!isCollapsed && (
+                          <span
+                            className={`text-sm whitespace-nowrap transition-colors duration-300 ${isActive ? 'translate-x-1' : ''}`}
+                          >
+                            {item.name}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                );
+              })}
+            </ul>
+          </div>
         </nav>
 
         {/* Quick Stats Widget (only when expanded) */}

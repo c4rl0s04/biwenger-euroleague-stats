@@ -1,6 +1,7 @@
 'use client';
 
 import { Activity } from 'lucide-react';
+import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
@@ -42,7 +43,14 @@ export default function ConsistencyCard() {
                         style={{ backgroundColor: colors.stroke }}
                       />
                       <div>
-                        <p className="font-medium text-slate-200">{user.name}</p>
+                        <Link
+                          href={`/user/${user.user_id}`}
+                          className={`${colors.text} group/link block`}
+                        >
+                          <p className="font-medium text-slate-200 group-hover/link:text-inherit transition-colors">
+                            {user.name}
+                          </p>
+                        </Link>
                         <div className="w-24 h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"

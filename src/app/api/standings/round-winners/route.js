@@ -3,9 +3,11 @@ import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/res
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const winners = fetchRoundWinners();
+    const { searchParams } = new URL(request.url);
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')) : 15;
+    const winners = fetchRoundWinners(limit);
     return successResponse(winners, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching round winners:', error);

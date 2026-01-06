@@ -7,7 +7,6 @@ import {
   FullStandingsCard,
   LeagueStatsCard,
   RoundWinnersCard,
-  TeamValueRankingCard,
   ConsistencyCard,
   EfficiencyCard,
   StreaksCard,
@@ -16,7 +15,19 @@ import {
   NoGloryCard,
   JinxCard,
   InitialSquadAnalysisCard,
+  // New Stats
+  HeatCheckCard,
+  TheHunterCard,
+  RollingAverageCard,
+  FloorCeilingCard,
+  VolatilityCard,
+  PointDistributionCard,
+  AllPlayAllCard,
+  DominanceCard,
+  TheoreticalGapCard,
 } from '@/components/standings';
+
+import RoundHeatmapCard from '@/components/standings/RoundHeatmapCard';
 
 // Dynamic imports for chart components - ssr: false excludes recharts from server bundle
 const PointsProgressionCard = dynamic(
@@ -52,41 +63,68 @@ export default function ClasificacionPage() {
 
       {/* Section: Round Winners */}
       <Section title="Ganadores de Jornada" delay={100} background="section-raised">
-        <RoundWinnersCard />
+        <div className="space-y-6">
+            <RoundWinnersCard />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <DominanceCard />
+                <RoundHeatmapCard />
+            </div>
+        </div>
+      </Section>
+
+      {/* Section: Trends & Momentum */}
+      <Section title="Tendencias y Momento (Trends)" delay={150} background="section-base">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <HeatCheckCard />
+            <TheHunterCard />
+            <RollingAverageCard />
+        </div>
       </Section>
 
       {/* Section: Progression */}
-      <Section title="Evolución de Puntos" delay={200} background="section-base">
+      <Section title="Evolución de Puntos" delay={200} background="section-raised">
         <div className="space-y-6">
           <PointsProgressionCard />
           <RoundPointsProgressionCard />
         </div>
       </Section>
 
-      {/* Section: Performance & Consistency */}
-      <Section title="Rendimiento y Consistencia" delay={300} background="section-raised">
+      {/* Section: Performance Analysis */}
+      <Section title="Análisis de Rendimiento" delay={250} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <ConsistencyCard />
+            <FloorCeilingCard />
+            <VolatilityCard />
+            <PointDistributionCard />
+        </div>
+      </Section>
+
+       {/* Section: Efficiency & Consistency */}
+       <Section title="Eficiencia y Consistencia" delay={300} background="section-raised">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+             <AllPlayAllCard />
+             <TheoreticalGapCard />
+             <ConsistencyCard />
+             <EfficiencyCard />
+        </div>
+      </Section>
+
+      {/* Section: League Stats */}
+      <Section title="Estadísticas de Liga" delay={350} background="section-base">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <PlacementStatsCard />
           <LeaguePerformanceCard />
-          <EfficiencyCard />
-          <StreaksCard />
-          <BottlerCard />
+           <StreaksCard />
         </div>
       </Section>
 
       {/* Section: Bad Luck */}
-      <Section title="Mala Suerte" delay={400} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Section title="Mala Suerte y Curiosidades" delay={400} background="section-raised">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <HeartbreakersCard />
           <NoGloryCard />
           <JinxCard />
+          <BottlerCard />
         </div>
-      </Section>
-
-      {/* Section: Team Value */}
-      <Section title="Valor de Equipo" delay={500} background="section-raised">
-        <TeamValueRankingCard />
       </Section>
     </div>
   );

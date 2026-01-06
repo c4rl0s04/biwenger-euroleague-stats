@@ -119,7 +119,7 @@ export default function RoundPointsProgressionCard() {
           <div className="flex flex-wrap gap-2 pt-2">
             <button
               onClick={toggleAll}
-              className={`px-3 py-1 text-xs rounded-full border transition-all cursor-pointer ${
+              className={`px-3 py-1 text-xs !rounded-full border transition-all cursor-pointer focus:outline-none overflow-hidden ${
                 effectiveSelectedUsers.size === users.length
                   ? 'bg-slate-700 border-slate-600 text-white'
                   : 'bg-transparent border-slate-700 text-slate-400 hover:border-slate-500'
@@ -134,7 +134,7 @@ export default function RoundPointsProgressionCard() {
                 <button
                   key={user.id}
                   onClick={() => toggleUser(user.id)}
-                  className={`px-3 py-1 text-xs rounded-full border flex items-center gap-2 transition-all cursor-pointer ${
+                  className={`px-3 py-1 text-xs !rounded-full border flex items-center gap-2 transition-all cursor-pointer focus:outline-none overflow-hidden ${
                     isSelected
                       ? 'bg-slate-800/50 border-slate-700 text-white'
                       : 'bg-transparent border-slate-800 text-slate-500 opacity-50'
@@ -154,7 +154,7 @@ export default function RoundPointsProgressionCard() {
             })}
           </div>
 
-          <div className="h-[500px] w-full mt-2 -ml-2">
+          <div className="h-[500px] w-full mt-2">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid
@@ -176,7 +176,7 @@ export default function RoundPointsProgressionCard() {
                   tick={{ fill: '#cbd5e1', fontSize: 12, fontWeight: 500 }}
                   tickLine={false}
                   axisLine={false}
-                  width={35}
+                  width={45}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend
@@ -204,6 +204,7 @@ export default function RoundPointsProgressionCard() {
                       connectNulls
                       isAnimationActive={false}
                       hide={!isSelected}
+                      legendType="circle"
                     />
                   );
                 })}
