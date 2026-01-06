@@ -41,4 +41,3 @@ export { default as PointDistributionCard } from './PointDistributionCard';
 export { default as AllPlayAllCard } from './AllPlayAllCard';
 export { default as DominanceCard } from './DominanceCard';
 export { default as TheoreticalGapCard } from './TheoreticalGapCard';
-
