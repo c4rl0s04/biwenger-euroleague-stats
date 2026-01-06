@@ -34,9 +34,7 @@ const navItems = [
   { name: 'Porras', href: '/predictions', icon: Target },
 ];
 
-const aiItems = [
-  { name: 'Assistant', href: '/ai', icon: Sparkles },
-];
+const aiItems = [{ name: 'Assistant', href: '/ai', icon: Sparkles }];
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
@@ -182,11 +180,11 @@ export default function Sidebar({ isOpen, onClose }) {
               {aiItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        onClick={onClose}
-                        className={`
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
+                      className={`
                           group flex items-center gap-3 px-3 py-2.5 rounded-md
                           transition-all duration-300 relative overflow-hidden
                           ${
@@ -195,27 +193,29 @@ export default function Sidebar({ isOpen, onClose }) {
                               : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                           }
                         `}
-                        title={isCollapsed ? item.name : undefined}
-                      >
-                        {isActive && <div className="absolute inset-0 bg-indigo-500/5 blur-xl -z-10" />}
+                      title={isCollapsed ? item.name : undefined}
+                    >
+                      {isActive && (
+                        <div className="absolute inset-0 bg-indigo-500/5 blur-xl -z-10" />
+                      )}
 
-                        <item.icon
-                          size={20}
-                          className={`transition-colors duration-300 ${
-                            isActive
-                              ? 'text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]'
-                              : 'group-hover:text-foreground'
-                          }`}
-                        />
-                        {!isCollapsed && (
-                          <span
-                            className={`text-sm whitespace-nowrap transition-colors duration-300 ${isActive ? 'translate-x-1' : ''}`}
-                          >
-                            {item.name}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
+                      <item.icon
+                        size={20}
+                        className={`transition-colors duration-300 ${
+                          isActive
+                            ? 'text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]'
+                            : 'group-hover:text-foreground'
+                        }`}
+                      />
+                      {!isCollapsed && (
+                        <span
+                          className={`text-sm whitespace-nowrap transition-colors duration-300 ${isActive ? 'translate-x-1' : ''}`}
+                        >
+                          {item.name}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
                 );
               })}
             </ul>

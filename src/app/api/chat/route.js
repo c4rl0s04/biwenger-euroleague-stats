@@ -32,12 +32,12 @@ export async function POST(req) {
           parameters: z.object({}),
           execute: async () => {
             const standings = getExtendedStandings();
-            return standings.map(s => ({
+            return standings.map((s) => ({
               rank: s.position,
               user: s.name,
               points: s.total_points,
               team_value: s.team_value,
-              avg: s.average_points
+              avg: s.average_points,
             }));
           },
         }),
@@ -56,16 +56,16 @@ export async function POST(req) {
               LIMIT 1
             `);
             const player = searchStmt.get(`%${name}%`);
-  
+
             if (!player) {
               return { error: `Player '${name}' not found.` };
             }
-  
+
             // 2. Get detailed stats
             const details = getPlayerDetails(player.id);
-            
-            if (!details) return { error: "Could not fetch details." };
-  
+
+            if (!details) return { error: 'Could not fetch details.' };
+
             return {
               name: details.name,
               team: details.team,
@@ -74,25 +74,25 @@ export async function POST(req) {
               total_points: details.total_points,
               average: details.season_avg,
               games_played: details.games_played,
-              last_games: details.recentMatches.slice(0, 5).map(m => ({
+              last_games: details.recentMatches.slice(0, 5).map((m) => ({
                 round: m.round_name,
                 points: m.fantasy_points,
-                stats: `${m.points_scored}pts, ${m.rebounds}reb, ${m.assists}ast`
-              }))
+                stats: `${m.points_scored}pts, ${m.rebounds}reb, ${m.assists}ast`,
+              })),
             };
           },
         }),
       },
       maxSteps: 5, // Enable multi-step tool execution on the server
     });
-  
+
     // Compatibility: Try toDataStreamResponse, fallback to text stream if missing
     if (typeof result.toDataStreamResponse === 'function') {
-        return result.toDataStreamResponse();
+      return result.toDataStreamResponse();
     } else if (typeof result.toTextStreamResponse === 'function') {
-        return result.toTextStreamResponse();
+      return result.toTextStreamResponse();
     } else {
-        throw new Error('Streaming method not supported in this SDK version');
+      throw new Error('Streaming method not supported in this SDK version');
     }
   } catch (error) {
     console.error('Error in chat API:', error);

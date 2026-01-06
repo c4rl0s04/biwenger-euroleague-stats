@@ -58,7 +58,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
   // Split logic for up to 3 lines, max 10 chars each
   for (let i = 0; i < 3; i++) {
     if (!remaining) break;
-    
+
     // If it fits, just take it
     if (remaining.length <= 10) {
       lines.push(remaining);

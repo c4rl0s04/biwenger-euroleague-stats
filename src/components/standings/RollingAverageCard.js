@@ -17,8 +17,8 @@ export default function RollingAverageCard() {
   const chartData = [];
   if (data.length > 0) {
     const roundsMap = new Map();
-    data.forEach(user => {
-      user.data.forEach(point => {
+    data.forEach((user) => {
+      user.data.forEach((point) => {
         if (!roundsMap.has(point.round)) {
           roundsMap.set(point.round, { round: point.round });
         }
@@ -29,15 +29,25 @@ export default function RollingAverageCard() {
   }
 
   return (
-    <Card title="Media Móvil (3 Jornadas)" icon={Activity} color="indigo" loading={loading} tooltip="Tendencia de puntuación suavizada (media de las últimas 3 jornadas) para eliminar el ruido de una jornada puntual.">
+    <Card
+      title="Media Móvil (3 Jornadas)"
+      icon={Activity}
+      color="indigo"
+      loading={loading}
+      tooltip="Tendencia de puntuación suavizada (media de las últimas 3 jornadas) para eliminar el ruido de una jornada puntual."
+    >
       {!loading && chartData.length > 0 ? (
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <XAxis dataKey="round" stroke="#64748b" tick={{ fontSize: 10 }} />
               <YAxis stroke="#64748b" tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#0f172a',
+                  borderColor: '#334155',
+                  fontSize: '12px',
+                }}
                 itemStyle={{ padding: 0 }}
               />
               <Legend wrapperStyle={{ fontSize: '10px' }} iconType="circle" />
@@ -59,7 +69,9 @@ export default function RollingAverageCard() {
           </ResponsiveContainer>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">No hay historial suficiente</div>
+        !loading && (
+          <div className="text-center text-slate-500 py-4">No hay historial suficiente</div>
+        )
       )}
     </Card>
   );

@@ -10,7 +10,13 @@ export default function AllPlayAllCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=all-play-all');
 
   return (
-    <Card title="Campeón Virtual (All-Play-All)" icon={Swords} color="yellow" loading={loading} tooltip="Clasificación si cada jornada jugaras un 1vs1 contra todos los demás managers. % de victorias totales.">
+    <Card
+      title="Campeón Virtual (All-Play-All)"
+      icon={Swords}
+      color="yellow"
+      loading={loading}
+      tooltip="Clasificación si cada jornada jugaras un 1vs1 contra todos los demás managers. % de victorias totales."
+    >
       {!loading && data.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -27,7 +33,10 @@ export default function AllPlayAllCard() {
                 return (
                   <tr key={user.user_id} className="hover:bg-slate-800/30 transition-colors">
                     <td className="px-3 py-2 font-medium">
-                      <Link href={`/user/${user.user_id}`} className={`${userColor.hover} transition-colors`}>
+                      <Link
+                        href={`/user/${user.user_id}`}
+                        className={`${userColor.hover} transition-colors`}
+                      >
                         {user.name}
                       </Link>
                     </td>
@@ -44,7 +53,9 @@ export default function AllPlayAllCard() {
           </table>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">Calculando liga virtual...</div>
+        !loading && (
+          <div className="text-center text-slate-500 py-4">Calculando liga virtual...</div>
+        )
       )}
     </Card>
   );

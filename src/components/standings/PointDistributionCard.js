@@ -15,9 +15,9 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="font-bold text-slate-200 mb-1">{label}</p>
         <div className="space-y-1">
           {payload.map((entry, index) => (
-             <p key={index} style={{ color: entry.color }}>
-               {entry.name}: {entry.value} veces
-             </p>
+            <p key={index} style={{ color: entry.color }}>
+              {entry.name}: {entry.value} veces
+            </p>
           ))}
         </div>
       </div>
@@ -27,17 +27,22 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const CustomYAxisTick = ({ x, y, payload, data }) => {
-  const user = data.find(u => u.name === payload.value);
-  if (!user) return <text x={x} y={y} dy={4} textAnchor="end" fill="#94a3b8" fontSize={11}>{payload.value}</text>;
+  const user = data.find((u) => u.name === payload.value);
+  if (!user)
+    return (
+      <text x={x} y={y} dy={4} textAnchor="end" fill="#94a3b8" fontSize={11}>
+        {payload.value}
+      </text>
+    );
 
   const userColor = getColorForUser(user.user_id, user.name);
-  
+
   return (
     <g transform={`translate(${x},${y})`}>
       <foreignObject x={-150} y={-10} width={145} height={20}>
         <div className="flex justify-end items-center h-full pr-1">
-          <Link 
-            href={`/user/${user.user_id}`} 
+          <Link
+            href={`/user/${user.user_id}`}
             className={`text-[11px] font-medium text-slate-400 ${userColor.hover} transition-colors truncate text-right w-full block`}
             title={user.name}
           >
@@ -52,7 +57,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
 export default function PointDistributionCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=distribution');
 
-  const chartData = data.map(u => ({
+  const chartData = data.map((u) => ({
     name: u.name,
     user_id: u.user_id,
     '0-50': u.distribution['0-50'],
@@ -62,7 +67,13 @@ export default function PointDistributionCard() {
   }));
 
   return (
-    <Card title="Zona de Confort" icon={BarChart2} color="purple" loading={loading} tooltip="Distribución de puntuaciones: ¿En qué rango suelen caer sus puntos?">
+    <Card
+      title="Zona de Confort"
+      icon={BarChart2}
+      color="purple"
+      loading={loading}
+      tooltip="Distribución de puntuaciones: ¿En qué rango suelen caer sus puntos?"
+    >
       {!loading && chartData.length > 0 ? (
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -72,11 +83,11 @@ export default function PointDistributionCard() {
               margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
             >
               <XAxis type="number" hide />
-              <YAxis 
-                dataKey="name" 
-                type="category" 
-                width={90} 
-                tick={<CustomYAxisTick data={chartData} />} 
+              <YAxis
+                dataKey="name"
+                type="category"
+                width={90}
+                tick={<CustomYAxisTick data={chartData} />}
               />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
               <Legend wrapperStyle={{ fontSize: '10px' }} />

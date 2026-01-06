@@ -64,20 +64,20 @@ export default function ClasificacionPage() {
       {/* Section: Round Winners */}
       <Section title="Ganadores de Jornada" delay={100} background="section-raised">
         <div className="space-y-6">
-            <RoundWinnersCard />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <DominanceCard />
-                <RoundHeatmapCard />
-            </div>
+          <RoundWinnersCard />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <DominanceCard />
+            <RoundHeatmapCard />
+          </div>
         </div>
       </Section>
 
       {/* Section: Trends & Momentum */}
       <Section title="Tendencias y Momento (Trends)" delay={150} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <HeatCheckCard />
-            <TheHunterCard />
-            <RollingAverageCard />
+          <HeatCheckCard />
+          <TheHunterCard />
+          <RollingAverageCard />
         </div>
       </Section>
 
@@ -92,19 +92,19 @@ export default function ClasificacionPage() {
       {/* Section: Performance Analysis */}
       <Section title="Análisis de Rendimiento" delay={250} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FloorCeilingCard />
-            <VolatilityCard />
-            <PointDistributionCard />
+          <FloorCeilingCard />
+          <VolatilityCard />
+          <PointDistributionCard />
         </div>
       </Section>
 
-       {/* Section: Efficiency & Consistency */}
-       <Section title="Eficiencia y Consistencia" delay={300} background="section-raised">
+      {/* Section: Efficiency & Consistency */}
+      <Section title="Eficiencia y Consistencia" delay={300} background="section-raised">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-             <AllPlayAllCard />
-             <TheoreticalGapCard />
-             <ConsistencyCard />
-             <EfficiencyCard />
+          <AllPlayAllCard />
+          <TheoreticalGapCard />
+          <ConsistencyCard />
+          <EfficiencyCard />
         </div>
       </Section>
 
@@ -113,7 +113,7 @@ export default function ClasificacionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <PlacementStatsCard />
           <LeaguePerformanceCard />
-           <StreaksCard />
+          <StreaksCard />
         </div>
       </Section>
 

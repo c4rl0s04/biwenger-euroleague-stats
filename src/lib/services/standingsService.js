@@ -21,13 +21,11 @@ import {
   getNoGloryStats,
   getJinxStats,
   getInitialSquadActualPerformance,
-
   getLeagueComparisonStats,
   getHeatCheckStats,
   getHunterStats,
   getRollingAverageStats,
   getFloorCeilingStats,
-
   getPointDistributionStats,
   getAllPlayAllStats,
   getDominanceStats,
@@ -122,8 +120,6 @@ export function fetchRollingAverageStats() {
 export function fetchFloorCeilingStats() {
   return getFloorCeilingStats();
 }
-
-
 
 export function fetchPointDistributionStats() {
   return getPointDistributionStats();
