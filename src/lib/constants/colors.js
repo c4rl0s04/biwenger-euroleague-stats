@@ -1,4 +1,7 @@
+import { CONFIG } from '@/lib/config';
+
 export const USER_COLORS = [
+  // ... (colors remain unchanged) ...
   {
     bg: 'from-blue-500/20 to-blue-600/10',
     border: 'border-blue-500/30',
@@ -93,8 +96,15 @@ export const USER_COLORS = [
 ];
 
 export function getColorForUser(userId, userName) {
-  // Deterministic hash based on userId (works for both string/number IDs)
   const idStr = String(userId);
+  const fixedIndexes = CONFIG.USER_COLORS?.FIXED_INDEXES || {};
+
+  // Check fixed mapping first (from centralized config)
+  if (fixedIndexes.hasOwnProperty(idStr)) {
+    return USER_COLORS[fixedIndexes[idStr]];
+  }
+
+  // Fallback: Deterministic hash based on userId
   let hash = 0;
   for (let i = 0; i < idStr.length; i++) {
     hash = idStr.charCodeAt(i) + ((hash << 5) - hash);

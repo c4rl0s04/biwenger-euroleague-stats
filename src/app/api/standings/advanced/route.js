@@ -10,6 +10,7 @@ import {
   fetchDominanceStats,
   fetchTheoreticalGapStats,
   fetchHeatmapStats,
+  fetchPositionChangesStats,
 } from '@/lib/services/standingsService';
 
 export async function GET(request) {
@@ -49,6 +50,9 @@ export async function GET(request) {
         break;
       case 'heatmap':
         data = fetchHeatmapStats();
+        break;
+      case 'position-evolution':
+        data = fetchPositionChangesStats();
         break;
       default:
         return NextResponse.json({ error: 'Invalid stat type' }, { status: 400 });

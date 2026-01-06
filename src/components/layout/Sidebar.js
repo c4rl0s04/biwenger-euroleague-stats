@@ -19,9 +19,10 @@ import {
   Home,
   Sparkles,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { useSections } from './SectionContext';
 
 const navItems = [
   { name: 'Inicio', href: '/', icon: Home },
@@ -40,6 +41,16 @@ export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { currentUser, isReady } = useClientUser();
+  const { sections } = useSections();
+  const [isSectionsVisible, setIsSectionsVisible] = useState(true);
+
+  // Reset section visibility on route change
+  // Reset section visibility on route change
+  useEffect(() => {
+    // Defer to avoid synchronous state update warning during render cycle
+    const t = setTimeout(() => setIsSectionsVisible(true), 0);
+    return () => clearTimeout(t);
+  }, [pathname]);
 
   // Fetch squad data for Quick Stats widget
   const { data: squadData, loading } = useApiData(
@@ -124,45 +135,87 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden sidebar-scroll">
           <ul className="space-y-1.5 px-3">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+              const hasSections = isActive && sections.length > 0;
+
               return (
                 <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    className={`
-                      group flex items-center gap-3 px-3 py-2.5 rounded-md
-                      transition-all duration-300 relative overflow-hidden
-                      ${
-                        isActive
-                          ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary font-medium shadow-[inset_2px_0_0_0_hsl(var(--primary))]'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                      }
-                    `}
-                    title={isCollapsed ? item.name : undefined}
-                  >
-                    {/* Active Glow Effect */}
-                    {isActive && <div className="absolute inset-0 bg-primary/5 blur-xl -z-10" />}
+                  <div className="relative flex items-center">
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
+                      className={`
+                        group flex-1 flex items-center gap-3 px-3 py-2.5 rounded-md
+                        transition-all duration-300 relative overflow-hidden
+                        ${
+                          isActive
+                            ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary font-medium shadow-[inset_2px_0_0_0_hsl(var(--primary))]'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                        }
+                      `}
+                      title={isCollapsed ? item.name : undefined}
+                    >
+                      {/* Active Glow Effect */}
+                      {isActive && <div className="absolute inset-0 bg-primary/5 blur-xl -z-10" />}
 
-                    <item.icon
-                      size={20}
-                      className={`transition-colors duration-300 ${
-                        isActive
-                          ? 'text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.4)]'
-                          : 'group-hover:text-foreground'
-                      }`}
-                    />
-                    {!isCollapsed && (
-                      <span
-                        className={`text-sm whitespace-nowrap transition-colors duration-300 ${isActive ? 'translate-x-1' : ''}`}
+                      <item.icon
+                        size={20}
+                        className={`transition-colors duration-300 ${
+                          isActive
+                            ? 'text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.4)]'
+                            : 'group-hover:text-foreground'
+                        }`}
+                      />
+                      {!isCollapsed && (
+                        <span
+                          className={`text-sm whitespace-nowrap transition-colors duration-300 ${isActive ? 'translate-x-1' : ''}`}
+                        >
+                          {item.name}
+                        </span>
+                      )}
+                    </Link>
+
+                    {/* Collapse Toggle Button */}
+                    {!isCollapsed && hasSections && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsSectionsVisible(!isSectionsVisible);
+                        }}
+                        className={`
+                          absolute right-2 p-1 rounded-full 
+                          hover:bg-primary/20 text-primary/70 hover:text-primary 
+                          transition-all duration-200 cursor-pointer
+                        `}
                       >
-                        {item.name}
-                      </span>
+                        {isSectionsVisible ? (
+                          <ChevronLeft size={14} className="-rotate-90" />
+                        ) : (
+                          <ChevronLeft size={14} />
+                        )}
+                      </button>
                     )}
-                  </Link>
+                  </div>
+
+                  {/* Sub-items Rendering (Dynamic from Context) */}
+                  {!isCollapsed && hasSections && isSectionsVisible && (
+                    <ul className="mt-1 ml-4 space-y-0.5 border-l border-border/30 pl-2 animate-slide-up">
+                      {sections.map((section) => (
+                        <li key={section.id}>
+                          <Link
+                            href={`${item.href}#${section.id}`}
+                            className="block px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-md transition-colors"
+                          >
+                            {section.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               );
             })}

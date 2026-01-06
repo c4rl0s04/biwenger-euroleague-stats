@@ -31,6 +31,7 @@ import {
   getDominanceStats,
   getTheoreticalGapStats,
   getHeatmapStats,
+  getPositionChangesStats,
 } from '@/lib/db';
 
 /**
@@ -139,6 +140,10 @@ export function fetchTheoreticalGapStats() {
 
 export function fetchHeatmapStats() {
   return getHeatmapStats();
+}
+
+export function fetchPositionChangesStats() {
+  return getPositionChangesStats();
 }
 
 // ============ AGGREGATED FUNCTIONS ============

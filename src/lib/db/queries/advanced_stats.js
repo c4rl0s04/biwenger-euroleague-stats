@@ -155,8 +155,13 @@ export function getRollingAverageStats() {
         const sum = window.reduce((acc, curr) => acc + curr.points, 0);
         const avg = sum / window.length;
 
+        // Find round name from pre-fetched rounds array
+        const roundInfo = rounds.find((r) => r.round_id === userPoints[i].round_id);
+        const roundName = roundInfo ? roundInfo.round_name : `Jornada ${userPoints[i].round_id}`;
+
         dataPoints.push({
           round: userPoints[i].round_id,
+          round_name: roundName,
           avg: parseFloat(avg.toFixed(1)),
         });
       }
@@ -247,10 +252,10 @@ export function getPointDistributionStats() {
   try {
     const users = db.prepare('SELECT id, name FROM users').all();
     const buckets = [
-      { range: '0-50', min: 0, max: 50 },
-      { range: '51-100', min: 51, max: 100 },
-      { range: '101-150', min: 101, max: 150 },
-      { range: '150+', min: 151, max: 9999 },
+      { range: '90-135', min: 90, max: 135 },
+      { range: '136-170', min: 136, max: 170 },
+      { range: '171-205', min: 171, max: 205 },
+      { range: '206+', min: 206, max: 9999 },
     ];
 
     const result = [];
@@ -265,10 +270,10 @@ export function getPointDistributionStats() {
 
       rounds.forEach((r) => {
         const p = r.points;
-        if (p <= 50) distribution['0-50']++;
-        else if (p <= 100) distribution['51-100']++;
-        else if (p <= 150) distribution['101-150']++;
-        else distribution['150+']++;
+        if (p <= 135) distribution['90-135']++;
+        else if (p <= 170) distribution['136-170']++;
+        else if (p <= 205) distribution['171-205']++;
+        else distribution['206+']++;
       });
 
       result.push({
@@ -484,5 +489,106 @@ export function getHeatmapStats() {
   } catch (error) {
     console.error('Error in getHeatmapStats:', error);
     return { rounds: [], users: [] };
+  }
+}
+
+/**
+ * Get Position Changes Stats (Evolution Heatmap)
+ * Tracks rank changes round-by-round
+ */
+export function getPositionChangesStats() {
+  try {
+    const rounds = db
+      .prepare('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
+      .all();
+    const users = db.prepare('SELECT id, name, icon FROM users').all();
+    // Get all scores ordered by round
+    const scores = db
+      .prepare(
+        'SELECT user_id, round_id, points FROM user_rounds WHERE participated = 1 ORDER BY round_id ASC'
+      )
+      .all();
+
+    // Map scores by round: roundScores[roundId][userId] = points
+    const roundScores = {};
+    scores.forEach((s) => {
+      if (!roundScores[s.round_id]) roundScores[s.round_id] = {};
+      roundScores[s.round_id][s.user_id] = s.points;
+    });
+
+    // Tracking state
+    const userTotals = {}; // { userId: currentTotal }
+    users.forEach((u) => (userTotals[u.id] = 0));
+
+    const history = []; // [{ round_id, ranks: { userId: rank } }]
+
+    // Replay history
+    for (const round of rounds) {
+      // update totals
+      const currentRoundScores = roundScores[round.round_id] || {};
+      users.forEach((u) => {
+        userTotals[u.id] += currentRoundScores[u.id] || 0;
+      });
+
+      // calculate ranks for this round
+      // sort users by total points desc
+      const sortedUsers = [...users].sort((a, b) => userTotals[b.id] - userTotals[a.id]);
+
+      const currentRanks = {};
+      sortedUsers.forEach((u, index) => {
+        currentRanks[u.id] = index + 1;
+      });
+
+      history.push({
+        round_id: round.round_id,
+        round_name: round.round_name,
+        ranks: currentRanks,
+      });
+    }
+
+    // specific stats
+    let biggestClimber = { name: '', change: 0, round: '' };
+    let biggestFaller = { name: '', change: 0, round: '' };
+
+    // Format output: evolutions per user
+    const usersEvolution = users.map((user) => {
+      const historyData = history.map((h, index) => {
+        const currRank = h.ranks[user.id];
+
+        if (index === 0) {
+          return { position: currRank, change: 0 };
+        }
+
+        const prevRank = history[index - 1].ranks[user.id];
+
+        // If rank decreases (e.g. 5 -> 3), it's a climb (positive change)
+        const change = prevRank - currRank;
+
+        // Update records (only if there is a change)
+        if (change > biggestClimber.change)
+          biggestClimber = { name: user.name, change, round: h.round_name };
+        if (change < biggestFaller.change)
+          biggestFaller = { name: user.name, change, round: h.round_name };
+
+        return { position: currRank, change };
+      });
+
+      return {
+        id: user.id,
+        name: user.name,
+        icon: user.icon,
+        history: historyData, // Renamed from 'changes' to 'history' to reflect richer data
+      };
+    });
+
+    return {
+      rounds: rounds.map((r) => ({ id: r.round_id, name: r.round_name.replace('Jornada ', 'J') })),
+      users: usersEvolution,
+      valid: rounds.length > 1,
+      stats: { biggestClimber, biggestFaller },
+    };
+  } catch (error) {
+    console.error('Error in getPositionChangesStats:', error);
+    return { rounds: [], users: [], valid: false };
   }
 }

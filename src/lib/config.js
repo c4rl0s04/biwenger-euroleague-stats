@@ -1,10 +1,10 @@
-import path from 'path';
-import dotenv from 'dotenv';
+// This file is shared between Server (Next.js/Scripts) and Client components.
+// Be careful with server-only imports (fs, path, dotenv).
 
-// Try to load .env.local for local dev if not already loaded (Next.js loads it automatically)
-if (!process.env.BIWENGER_LEAGUE_ID) {
-  dotenv.config({ path: '.env.local' });
-}
+// Next.js automatically loads .env vars.
+// Standalone scripts must load 'dotenv' BEFORE importing this file.
+
+const API_BASE = 'https://biwenger.as.com/api/v2';
 
 export const CONFIG = {
   API: {
@@ -22,7 +22,11 @@ export const CONFIG = {
     START_DATE: '2025-09-25',
   },
   DB: {
-    PATH: path.join(process.cwd(), 'data', 'local.db'),
+    // Use conditional simple path for client-safety (Client should not use this anyway)
+    PATH:
+      typeof process !== 'undefined' && process.cwd
+        ? `${process.cwd()}/data/local.db`
+        : 'data/local.db',
   },
   POSITIONS: {
     1: 'Base',
@@ -42,6 +46,17 @@ export const CONFIG = {
     PLAYER_DETAILS: (id) =>
       `/players/euroleague/${id}?lang=es&fields=prices,birthday,height,weight`,
     USER_PLAYERS: (id) => `/user/${id}?fields=players`,
+  },
+  USER_COLORS: {
+    FIXED_INDEXES: {
+      13207868: 0, // All Stars -> Blue
+      13207910: 1, // June -> Purple
+      13207924: 2, // ask72 -> Emerald
+      13207974: 3, // Nonameyet -> Pink
+      13208192: 4, // Real Madrid Basket -> Cyan
+      13208960: 5, // Cactus Team -> Orange
+      13209320: 6, // Daniel De Castro -> Yellow
+    },
   },
 };
 

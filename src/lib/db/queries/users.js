@@ -12,6 +12,14 @@ import { getStandings } from './stats.js';
 /** @typedef {import('../types.js').UserSeasonStats} UserSeasonStats */
 
 /**
+ * Get all users with their basic info
+ * @returns {{id: number, name: string, icon: string}[]} List of users
+ */
+export function getAllUsers() {
+  return db.prepare('SELECT id, name, icon FROM users ORDER BY name ASC').all();
+}
+
+/**
  * Get squad statistics for all users
  * @returns {{user_id: number, squad_size: number, total_value: number, total_points: number}[]} Squad stats per user
  */

@@ -25,6 +25,7 @@ import {
   AllPlayAllCard,
   DominanceCard,
   TheoreticalGapCard,
+  PositionEvolutionCard,
 } from '@/components/standings';
 
 import RoundHeatmapCard from '@/components/standings/RoundHeatmapCard';
@@ -74,15 +75,18 @@ export default function ClasificacionPage() {
 
       {/* Section: Trends & Momentum */}
       <Section title="Tendencias y Momento (Trends)" delay={150} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <HeatCheckCard />
-          <TheHunterCard />
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <HeatCheckCard />
+            <TheHunterCard />
+          </div>
+          <PositionEvolutionCard />
           <RollingAverageCard />
         </div>
       </Section>
 
       {/* Section: Progression */}
-      <Section title="Evolución de Puntos" delay={200} background="section-raised">
+      <Section title="Progresión de Puntos" delay={200} background="section-raised">
         <div className="space-y-6">
           <PointsProgressionCard />
           <RoundPointsProgressionCard />

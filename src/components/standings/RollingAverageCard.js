@@ -20,7 +20,15 @@ export default function RollingAverageCard() {
     data.forEach((user) => {
       user.data.forEach((point) => {
         if (!roundsMap.has(point.round)) {
-          roundsMap.set(point.round, { round: point.round });
+          // Use J + number as requested
+          const label = point.round_name
+            ? point.round_name.replace('Jornada ', 'J')
+            : `J${point.round}`;
+
+          roundsMap.set(point.round, {
+            round: point.round,
+            label: label,
+          });
         }
         roundsMap.get(point.round)[user.name] = point.avg;
       });
@@ -37,36 +45,44 @@ export default function RollingAverageCard() {
       tooltip="Tendencia de puntuación suavizada (media de las últimas 3 jornadas) para eliminar el ruido de una jornada puntual."
     >
       {!loading && chartData.length > 0 ? (
-        <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <XAxis dataKey="round" stroke="#64748b" tick={{ fontSize: 10 }} />
-              <YAxis stroke="#64748b" tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#0f172a',
-                  borderColor: '#334155',
-                  fontSize: '12px',
-                }}
-                itemStyle={{ padding: 0 }}
-              />
-              <Legend wrapperStyle={{ fontSize: '10px' }} iconType="circle" />
-              {data.map((user) => {
-                const colors = getColorForUser(user.user_id, user.name);
-                return (
-                  <Line
-                    key={user.user_id}
-                    type="monotone"
-                    dataKey={user.name}
-                    stroke={colors.stroke}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                  />
-                );
-              })}
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="space-y-4">
+          <p className="text-xs text-slate-400 italic px-2 text-center">
+            Media de puntos de las últimas 3 jornadas. Ayuda a identificar
+            <span className="text-indigo-400 font-bold not-italic ml-1">rachas</span> y
+            <span className="text-indigo-400 font-bold not-italic ml-1">tendencias</span> más allá
+            de una jornada puntual.
+          </p>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <XAxis dataKey="label" stroke="#64748b" tick={{ fontSize: 10 }} />
+                <YAxis stroke="#64748b" tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#0f172a',
+                    borderColor: '#334155',
+                    fontSize: '12px',
+                  }}
+                  itemStyle={{ padding: 0 }}
+                />
+                <Legend wrapperStyle={{ fontSize: '10px' }} iconType="circle" />
+                {data.map((user) => {
+                  const colors = getColorForUser(user.user_id, user.name);
+                  return (
+                    <Line
+                      key={user.user_id}
+                      type="monotone"
+                      dataKey={user.name}
+                      stroke={colors.stroke}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 4 }}
+                    />
+                  );
+                })}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       ) : (
         !loading && (

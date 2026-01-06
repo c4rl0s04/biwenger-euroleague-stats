@@ -9,7 +9,7 @@ export default function RoundHeatmapCard() {
   const { data, loading } = useApiData('/api/standings/advanced?type=heatmap');
 
   const getColor = (score) => {
-    if (score === null) return 'bg-red-500/20 text-gray-500'; // Did not participate
+    if (score === null) return 'bg-rose-600 text-gray-500'; // Did not participate
     if (score >= 230)
       return 'bg-fuchsia-600 text-white shadow-[0_0_15px_rgba(192,38,211,0.6)] font-black border border-white/20'; // Top Tier
     if (score >= 210)
@@ -33,8 +33,7 @@ export default function RoundHeatmapCard() {
       {!loading && data ? (
         <div className="w-full h-full flex flex-col">
           {/* Header Row (Users) */}
-          {/* Header Row (Users) */}
-          <div className="flex w-full mb-1 sticky top-0 bg-card z-30 py-1 border-none outline-none ring-0">
+          <div className="flex w-full mb-1 py-1 flex-shrink-0">
             <div className="w-12 flex-shrink-0 font-bold text-[10px] text-slate-400 flex items-end justify-center pb-1">
               Jor.
             </div>
@@ -48,10 +47,12 @@ export default function RoundHeatmapCard() {
                   <img
                     src={user.icon}
                     alt={user.name}
-                    className="w-5 h-5 rounded-full object-cover ring-2 ring-transparent group-hover:ring-indigo-500/50 transition-all"
+                    // Changed w-5 h-5 to w-7 h-7 for slightly larger images
+                    className="w-7 h-7 rounded-full object-cover ring-2 ring-transparent group-hover:ring-indigo-500/50 transition-all"
                   />
                 ) : (
-                  <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 group-hover:ring-2 group-hover:ring-indigo-500/50 transition-all">
+                  // Changed w-5 h-5 to w-7 h-7 for fallback div to match
+                  <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 group-hover:ring-2 group-hover:ring-indigo-500/50 transition-all">
                     {user.name.charAt(0)}
                   </div>
                 )}
@@ -62,12 +63,12 @@ export default function RoundHeatmapCard() {
             ))}
           </div>
 
-          {/* Round Rows */}
-          <div className="space-y-0.5 flex-1">
+          {/* Round Rows Container - Adapted to fill height */}
+          <div className="flex-1 flex flex-col gap-[1px] min-h-0">
             {data.rounds.map((round, roundIndex) => (
               <div
                 key={round.id}
-                className="flex w-full group hover:bg-white/5 rounded transition-colors items-center h-6"
+                className="flex w-full group hover:bg-white/5 rounded transition-colors items-center flex-1 min-h-[1.25rem]"
               >
                 {/* Round Name */}
                 <div className="w-12 flex-shrink-0 font-mono text-[9px] text-slate-500 text-center mr-1">
