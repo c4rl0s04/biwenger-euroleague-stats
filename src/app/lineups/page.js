@@ -1,35 +1,299 @@
-'use client';
+import { Suspense } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { getUserSchedule, getScheduleRounds } from '@/lib/db/queries/schedule';
+import { getAllUsers } from '@/lib/db/queries/users';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  AlertCircle,
+  ChevronRight,
+  ChevronLeft,
+} from 'lucide-react';
 
-/**
- * Lineups Page
- *
- * Squad management and lineup analysis.
- *
- * See PAGE_ARCHITECTURE.md section 7 for full layout specification.
- */
+export default async function SchedulePage({ searchParams }) {
+  // Await searchParams for Next.js 15+ compatibility
+  const params = await searchParams;
+  const users = getAllUsers();
+  const rounds = getScheduleRounds();
 
-export default function LineupsPage() {
+  // Default to first user if none selected
+  const userId = params?.userId || (users.length > 0 ? users[0].id : null);
+  const roundId = params?.roundId ? parseInt(params.roundId) : null;
+
+  const schedule = userId
+    ? getUserSchedule(userId, roundId)
+    : { found: false, message: 'No user selected' };
+
+  // Helper to group matches by date
+  const groupedMatches = schedule.found
+    ? schedule.matches.reduce((acc, match) => {
+        const date = new Date(match.date);
+        const dateKey = date.toLocaleDateString('es-ES', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        });
+        if (!acc[dateKey]) acc[dateKey] = [];
+        acc[dateKey].push(match);
+        return acc;
+      }, {})
+    : {};
+
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <main className="container mx-auto px-4 py-12 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-display mb-4 flex items-center gap-4">
-            <span className="w-1.5 h-10 bg-primary rounded-full"></span>
-            <span className="text-foreground">Alineaciones</span>
-          </h1>
-          <p className="text-muted-foreground text-lg mb-10">
-            Gestión de plantilla y análisis de alineaciones
-          </p>
-
-          {/* Placeholder for future implementation */}
-          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-12 text-center">
-            <p className="text-muted-foreground text-lg">🚧 Página en construcción</p>
-            <p className="text-muted-foreground/70 text-sm mt-2">
-              Próximamente: alineación actual, análisis y puntos perdidos.
+    <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-8">
+      {/* Search Controls Container */}
+      <div className="flex flex-col gap-6 border-b border-white/10 pb-6">
+        {/* Header Title */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Calendar className="text-primary" size={24} />
+              Alineaciones
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">
+              {schedule.found ? schedule.round.round_name : 'Selecciona una jornada'}
             </p>
           </div>
         </div>
-      </main>
+
+        {/* Controls: User & Round Selectors */}
+        <div className="flex flex-col gap-4">
+          {/* User Selector */}
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+              Manager
+            </span>
+            <div className="flex overflow-x-auto pb-2 gap-1 scrollbar-hide mask-fade-right">
+              {users.map((u) => (
+                <Link
+                  key={u.id}
+                  href={`/lineups?userId=${u.id}${roundId ? `&roundId=${roundId}` : ''}`}
+                  className={`
+                    px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors border
+                    ${
+                      String(u.id) === String(userId)
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-600 hover:text-slate-200'
+                    }
+                  `}
+                >
+                  {u.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Round Selector */}
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+              Jornada
+            </span>
+            <div className="flex items-center gap-2">
+              {/* Prev Round Arrow */}
+              {(() => {
+                const currentRoundIndex = rounds.findIndex(
+                  (r) => r.round_id === (schedule.found ? schedule.round.round_id : -1)
+                );
+                const prevRound = currentRoundIndex > 0 ? rounds[currentRoundIndex - 1] : null;
+
+                return (
+                  <Link
+                    href={
+                      prevRound ? `/lineups?userId=${userId}&roundId=${prevRound.round_id}` : '#'
+                    }
+                    scroll={false}
+                    className={`
+                      p-2 rounded-md border text-slate-400
+                      ${
+                        prevRound
+                          ? 'bg-slate-900 border-slate-800 hover:border-slate-600 hover:text-white'
+                          : 'bg-slate-900/50 border-slate-800/50 opacity-50 cursor-not-allowed'
+                      }
+                    `}
+                    aria-disabled={!prevRound}
+                  >
+                    <ChevronLeft size={14} />
+                  </Link>
+                );
+              })()}
+
+              <div className="flex-1 flex overflow-x-auto pb-2 gap-1 scrollbar-hide mask-fade-right">
+                {rounds.map((r) => {
+                  const isActive = schedule.found && schedule.round.round_id === r.round_id;
+                  return (
+                    <Link
+                      key={r.round_id}
+                      href={`/lineups?userId=${userId}&roundId=${r.round_id}`}
+                      scroll={false}
+                      className={`
+                        min-w-[3rem] px-2 py-1.5 rounded-md text-xs font-mono font-medium text-center transition-colors border flex-shrink-0
+                        ${
+                          isActive
+                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/20'
+                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-600 hover:text-slate-200'
+                        }
+                      `}
+                    >
+                      {r.round_name.replace('Jornada ', 'J')}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Next Round Arrow */}
+              {(() => {
+                const currentRoundIndex = rounds.findIndex(
+                  (r) => r.round_id === (schedule.found ? schedule.round.round_id : -1)
+                );
+                const nextRound =
+                  currentRoundIndex !== -1 && currentRoundIndex < rounds.length - 1
+                    ? rounds[currentRoundIndex + 1]
+                    : null;
+
+                return (
+                  <Link
+                    href={
+                      nextRound ? `/lineups?userId=${userId}&roundId=${nextRound.round_id}` : '#'
+                    }
+                    scroll={false}
+                    className={`
+                      p-2 rounded-md border text-slate-400
+                      ${
+                        nextRound
+                          ? 'bg-slate-900 border-slate-800 hover:border-slate-600 hover:text-white'
+                          : 'bg-slate-900/50 border-slate-800/50 opacity-50 cursor-not-allowed'
+                      }
+                    `}
+                    aria-disabled={!nextRound}
+                  >
+                    <ChevronRight size={14} />
+                  </Link>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {schedule.found ? (
+        <div className="space-y-8">
+          {/* Loop through Groups (Days) */}
+          {Object.entries(groupedMatches).map(([dateKey, matches]) => (
+            <div key={dateKey} className="space-y-3">
+              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider pl-1">
+                {dateKey}
+              </h3>
+
+              <div className="flex flex-col gap-1.5">
+                {matches.map((match) => {
+                  const hasPlayers = match.user_players.length > 0;
+                  const date = new Date(match.date);
+                  const timeStr = date.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+
+                  return (
+                    <div
+                      key={match.match_id}
+                      className={`
+                        relative flex flex-col md:flex-row md:items-center gap-4 p-3 md:px-4 md:py-3 rounded-lg border transition-all
+                        ${
+                          hasPlayers
+                            ? 'bg-slate-800/80 border-primary/30 shadow-sm'
+                            : 'bg-slate-900/30 border-white/5 opacity-60 hover:opacity-100'
+                        }
+                      `}
+                    >
+                      {/* Left: Time & Match Info */}
+                      <div className="flex items-center gap-4 md:w-1/3 min-w-0">
+                        <div
+                          className={`
+                            text-xs font-mono font-medium px-2 py-1 rounded
+                            ${hasPlayers ? 'bg-black/30 text-white' : 'bg-transparent text-slate-500'}
+                         `}
+                        >
+                          {timeStr}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-2 text-sm">
+                            <span
+                              className={`font-bold truncate ${match.user_players.some((p) => p.team_id === match.home_id) ? 'text-white' : 'text-slate-400'}`}
+                            >
+                              {match.home_team}
+                            </span>
+                            <span className="text-slate-600 text-xs">vs</span>
+                            <span
+                              className={`font-bold truncate ${match.user_players.some((p) => p.team_id === match.away_id) ? 'text-white' : 'text-slate-400'}`}
+                            >
+                              {match.away_team}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Player Chips (Wrapped List) */}
+                      <div className="flex-1 flex flex-wrap items-center justify-start gap-2">
+                        {hasPlayers ? (
+                          match.user_players.map((player) => (
+                            <div
+                              key={player.id}
+                              className="flex items-center gap-2 pr-3 pl-1 py-1 rounded-full bg-black/40 border border-white/5"
+                            >
+                              {/* Avatar */}
+                              {player.img ? (
+                                <div className="relative w-6 h-6 rounded-full overflow-hidden bg-slate-800">
+                                  <Image
+                                    src={player.img}
+                                    alt={player.name}
+                                    fill
+                                    className="object-cover"
+                                    sizes="24px"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-400">
+                                  {player.name.charAt(0)}
+                                </div>
+                              )}
+
+                              {/* Name & Pos */}
+                              <div className="flex flex-col leading-none">
+                                <span className="text-xs font-medium text-slate-200">
+                                  {player.name}
+                                </span>
+                                <span className="text-[9px] text-slate-500 uppercase">
+                                  {player.position}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          // Spacer for empty matches to keep alignment
+                          <div className="hidden md:block h-8" />
+                        )}
+                      </div>
+
+                      {/* Mobile Visual Cue */}
+                      {hasPlayers && (
+                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-primary rounded-r"></div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-slate-500 bg-slate-900/30 rounded-xl border border-dashed border-slate-800">
+          <AlertCircle size={32} className="mb-3 opacity-50" />
+          <p className="text-sm font-medium">{schedule.message}</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
   Wallet,
   Home,
   Sparkles,
+  Clock,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useClientUser } from '@/lib/hooks/useClientUser';
@@ -32,6 +33,7 @@ const navItems = [
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },
   { name: 'Alineaciones', href: '/lineups', icon: Users },
+  { name: 'Jornadas', href: '/rounds', icon: Clock },
   { name: 'Porras', href: '/predictions', icon: Target },
 ];
 

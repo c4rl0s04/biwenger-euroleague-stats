@@ -1,22 +1,57 @@
 import { db } from '@/lib/db/client';
 
-export function getUserSchedule(userId) {
+export function getScheduleRounds() {
   try {
-    // 1. Find the ID of the next upcoming round
-    // We look for matches in the future
-    const nextRound = db
+    return db
       .prepare(
         `
-      SELECT round_id, round_name 
+      SELECT DISTINCT round_id, round_name 
       FROM matches 
-      WHERE date > datetime('now') 
-      ORDER BY date ASC 
-      LIMIT 1
+      ORDER BY date ASC
     `
       )
-      .get();
+      .all();
+  } catch (error) {
+    console.error('Error in getScheduleRounds:', error);
+    return [];
+  }
+}
 
-    if (!nextRound) {
+export function getUserSchedule(userId, targetRoundId = null) {
+  try {
+    let targetRound;
+
+    // 1. Determine which round to show
+    if (targetRoundId) {
+      targetRound = db
+        .prepare('SELECT DISTINCT round_id, round_name FROM matches WHERE round_id = ?')
+        .get(targetRoundId);
+    }
+
+    // Fallback: Find the ID of the next upcoming round
+    if (!targetRound) {
+      targetRound = db
+        .prepare(
+          `
+        SELECT round_id, round_name 
+        FROM matches 
+        WHERE datetime(date) > datetime('now') 
+        ORDER BY date ASC 
+        LIMIT 1
+      `
+        )
+        .get();
+    }
+
+    // If still no round (e.g., season over), maybe get the last played round?
+    // For now, if no future matches and no ID provided, try getting the LAST round
+    if (!targetRound) {
+      targetRound = db
+        .prepare('SELECT round_id, round_name FROM matches ORDER BY date DESC LIMIT 1')
+        .get();
+    }
+
+    if (!targetRound) {
       return { found: false, message: 'No upcoming rounds found.' };
     }
 
@@ -38,7 +73,7 @@ export function getUserSchedule(userId) {
       ORDER BY m.date ASC
     `
       )
-      .all(nextRound.round_id);
+      .all(targetRound.round_id);
 
     // 3. Get the user's players
     const userPlayers = db
@@ -62,7 +97,7 @@ export function getUserSchedule(userId) {
     if (userPlayers.length === 0) {
       return {
         found: true,
-        round: nextRound,
+        round: targetRound,
         matches: [],
         message: 'User has no players.',
       };
@@ -88,7 +123,7 @@ export function getUserSchedule(userId) {
 
     return {
       found: true,
-      round: nextRound,
+      round: targetRound,
       matches: schedule,
       total_players: schedule.reduce((acc, m) => acc + m.user_players.length, 0),
     };
