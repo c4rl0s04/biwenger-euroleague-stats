@@ -1,38 +1,37 @@
 'use client';
 
-import { Coins } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 
-export default function EfficiencyCard() {
-  const { data = [], loading } = useApiData('/api/standings/efficiency');
-
-  // Calculate max for relative bar width
-  const maxValue =
-    !loading && data.length > 0 ? Math.max(...data.map((d) => d.points_per_million)) : 100;
+export default function ReliabilityCard() {
+  const { data = [], loading } = useApiData('/api/standings/advanced?type=reliability');
 
   return (
     <Card
-      title="Eficiencia (ROI)"
-      icon={Coins}
-      color="yellow"
+      title="Fiabilidad (> Media)"
+      icon={Activity}
+      color="green"
       loading={loading}
+      tooltip="Porcentaje de jornadas en las que el usuario ha superado la media de puntos de esa jornada."
       className="h-full flex flex-col"
     >
       {!loading && data.length > 0 ? (
         <div className="flex flex-col h-full overflow-hidden">
           <div className="min-h-[40px] flex items-center mb-3 flex-shrink-0">
             <p className="text-xs text-slate-400 italic px-2">
-              Relación entre puntos totales y valor de mercado (ROI).
+              Frecuencia con la que superas la{' '}
+              <span className="text-green-400 font-bold not-italic">media</span>. &quot;Ganar el
+              par&quot;.
             </p>
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2 space-y-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {data.map((user, index) => {
               const colors = getColorForUser(user.user_id, user.name);
-              const percentage = (user.points_per_million / maxValue) * 100;
+              const percentage = user.pct;
 
               return (
                 <div key={user.user_id} className="relative group rounded-lg">
@@ -48,7 +47,7 @@ export default function EfficiencyCard() {
                         {index + 1}
                       </span>
 
-                      {/* Color Pill */}
+                      {/* Color Pill - Always uses user color now */}
                       <div
                         className="w-1 h-8 rounded-full flex-shrink-0"
                         style={{ backgroundColor: colors.stroke }}
@@ -65,8 +64,9 @@ export default function EfficiencyCard() {
                         </Link>
 
                         <div className="w-full h-1.5 bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+                          {/* Progress Bar - Always uses user color now */}
                           <div
-                            className="h-full rounded-full transition-all duration-500"
+                            className="h-full rounded-full transition-all duration-1000 ease-out"
                             style={{
                               width: `${percentage}%`,
                               backgroundColor: colors.stroke,
@@ -77,11 +77,13 @@ export default function EfficiencyCard() {
                     </div>
 
                     <div className="flex flex-col items-end flex-shrink-0 pl-2">
-                      <span className="font-black text-xl text-yellow-400 flex items-center gap-1">
-                        {user.points_per_million}
+                      <span
+                        className={`font-black text-xl ${percentage >= 50 ? 'text-green-400' : 'text-red-400'}`}
+                      >
+                        {percentage.toFixed(0)}%
                       </span>
                       <span className="text-[10px] uppercase tracking-wider text-slate-500">
-                        {(user.team_value / 1000000).toFixed(1)}M Valor
+                        Reliability
                       </span>
                     </div>
                   </div>
@@ -92,7 +94,7 @@ export default function EfficiencyCard() {
         </div>
       ) : (
         !loading && (
-          <div className="text-center text-slate-500 py-8">No hay datos de eficiencia</div>
+          <div className="text-center text-slate-500 py-8">No hay datos de fiabilidad</div>
         )
       )}
     </Card>

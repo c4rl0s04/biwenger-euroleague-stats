@@ -11,6 +11,8 @@ import {
   fetchTheoreticalGapStats,
   fetchHeatmapStats,
   fetchPositionChangesStats,
+  fetchReliabilityStats,
+  fetchRivalryMatrixStats,
 } from '@/lib/services/standingsService';
 
 export async function GET(request) {
@@ -53,6 +55,12 @@ export async function GET(request) {
         break;
       case 'position-evolution':
         data = fetchPositionChangesStats();
+        break;
+      case 'reliability':
+        data = fetchReliabilityStats();
+        break;
+      case 'rivalry-matrix':
+        data = fetchRivalryMatrixStats();
         break;
       default:
         return NextResponse.json({ error: 'Invalid stat type' }, { status: 400 });

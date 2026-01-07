@@ -24,14 +24,14 @@ export default function HeatCheckCard() {
             return (
               <div
                 key={user.user_id}
-                className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg"
+                className="group flex items-center justify-between p-2 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-slate-500 font-mono text-sm w-4">{index + 1}</span>
                   <div>
                     <Link
                       href={`/user/${user.user_id}`}
-                      className={`font-semibold text-sm ${userColor.hover} transition-colors`}
+                      className={`font-semibold text-sm ${userColor.text} transition-transform group-hover:scale-105 origin-left inline-block`}
                     >
                       {user.name}
                     </Link>

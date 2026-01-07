@@ -7,7 +7,7 @@ import {
   FullStandingsCard,
   LeagueStatsCard,
   RoundWinnersCard,
-  ConsistencyCard,
+  ReliabilityCard,
   EfficiencyCard,
   StreaksCard,
   BottlerCard,
@@ -26,6 +26,7 @@ import {
   DominanceCard,
   TheoreticalGapCard,
   PositionEvolutionCard,
+  RivalryMatrixCard,
 } from '@/components/standings';
 
 import RoundHeatmapCard from '@/components/standings/RoundHeatmapCard';
@@ -76,9 +77,10 @@ export default function ClasificacionPage() {
       {/* Section: Trends & Momentum */}
       <Section title="Tendencias y Momento (Trends)" delay={150} background="section-base">
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <HeatCheckCard />
             <TheHunterCard />
+            <StreaksCard />
           </div>
           <PositionEvolutionCard />
           <RollingAverageCard />
@@ -95,29 +97,29 @@ export default function ClasificacionPage() {
 
       {/* Section: Performance Analysis */}
       <Section title="Análisis de Rendimiento" delay={250} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           <FloorCeilingCard />
           <VolatilityCard />
           <PointDistributionCard />
+          <LeaguePerformanceCard />
         </div>
       </Section>
 
       {/* Section: Efficiency & Consistency */}
       <Section title="Eficiencia y Consistencia" delay={300} background="section-raised">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          <AllPlayAllCard />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <TheoreticalGapCard />
-          <ConsistencyCard />
+          <ReliabilityCard />
           <EfficiencyCard />
         </div>
       </Section>
 
       {/* Section: League Stats */}
       <Section title="Estadísticas de Liga" delay={350} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           <PlacementStatsCard />
-          <LeaguePerformanceCard />
-          <StreaksCard />
+          <AllPlayAllCard />
+          <RivalryMatrixCard />
         </div>
       </Section>
 

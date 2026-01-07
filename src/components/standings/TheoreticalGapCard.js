@@ -70,17 +70,17 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
           x={0}
           y={0}
           textAnchor="end"
-          fill="#94a3b8"
+          fill={userColor.stroke}
           fontSize={11}
-          className="group transition-colors"
-          style={{ '--hover-color': userColor.stroke }}
+          className="group transition-transform hover:scale-110 origin-right"
+          style={{ transformBox: 'fill-box' }}
         >
           {lines.map((line, index) => (
             <tspan
               key={index}
               x={-10}
               dy={index === 0 ? firstLineDy : lineHeight}
-              className="group-hover:fill-[var(--hover-color)] transition-colors cursor-pointer font-medium"
+              className="cursor-pointer font-bold"
             >
               {line}
             </tspan>
@@ -105,8 +105,8 @@ export default function TheoreticalGapCard() {
     >
       {!loading && data.length > 0 ? (
         <div className="flex flex-col h-full gap-4">
-          {/* Explanation Text */}
-          <p className="text-xs text-slate-400 italic px-2 text-center">
+          {/* Explanation Text - Changed text-center to text-left */}
+          <p className="text-xs text-slate-400 italic px-2 text-left">
             Eficiencia comparada con la{' '}
             <span className="text-yellow-400 font-bold not-italic">Temporada Perfecta</span> (suma
             de todos los MVPs). El porcentaje indica cuántos puntos has capturado del máximo teórico
@@ -139,13 +139,7 @@ export default function TheoreticalGapCard() {
                   {data.map((entry, index) => {
                     // Fetch user color using the helper
                     const userColor = getColorForUser(entry.user_id, entry.name);
-                    return (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={userColor.stroke}
-                        fillOpacity={0.8} // Slight opacity to make it look nice
-                      />
-                    );
+                    return <Cell key={`cell-${index}`} fill={userColor.stroke} fillOpacity={0.8} />;
                   })}
                 </Bar>
               </BarChart>

@@ -55,29 +55,18 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
   let lines = [];
   let remaining = name;
 
-  // Split logic for up to 3 lines, max 10 chars each
   for (let i = 0; i < 3; i++) {
     if (!remaining) break;
-
-    // If it fits, just take it
     if (remaining.length <= 10) {
       lines.push(remaining);
       remaining = null;
       break;
     }
-
-    // Last line case: truncate if too long
     if (i === 2) {
-      if (remaining.length > 10) {
-        lines.push(remaining.substring(0, 9) + '...');
-      } else {
-        lines.push(remaining);
-      }
+      lines.push(remaining.length > 10 ? remaining.substring(0, 9) + '...' : remaining);
       remaining = null;
       break;
     }
-
-    // Find split point
     const splitIndex = remaining.substring(0, 11).lastIndexOf(' ');
     if (splitIndex > 0) {
       lines.push(remaining.substring(0, splitIndex));
@@ -88,7 +77,6 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
     }
   }
 
-  // Calculate dy for first line to center the block
   const firstLineDy = lines.length === 1 ? 4 : lines.length === 2 ? -5 : -10;
 
   return (
@@ -99,11 +87,11 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
           y={0}
           dy={lines.length === 1 ? 4 : 0}
           textAnchor="end"
-          fill="#cbd5e1"
+          fill={colors.stroke}
           fontSize={11}
           fontWeight={500}
-          className="group transition-colors"
-          style={{ '--hover-color': colors.stroke }}
+          className="group transition-transform hover:scale-110 origin-right"
+          style={{ transformBox: 'fill-box' }}
         >
           <title>{name}</title>
           {lines.map((line, index) => (
@@ -111,7 +99,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
               key={index}
               x={0}
               dy={index === 0 ? (lines.length === 1 ? 0 : firstLineDy) : 10}
-              className="group-hover:fill-[var(--hover-color)] transition-colors cursor-pointer"
+              className="cursor-pointer font-bold"
             >
               {line}
             </tspan>
@@ -126,41 +114,53 @@ export default function LeaguePerformanceCard() {
   const { data = [], loading } = useApiData('/api/standings/league-comparison');
 
   return (
-    <Card title="Rendimiento vs Liga" icon={TrendingUp} color="cyan" loading={loading}>
+    <Card
+      title="Rendimiento vs Liga"
+      icon={TrendingUp}
+      color="cyan"
+      loading={loading}
+      className="h-full flex flex-col" // 1. Set full height
+    >
       {!loading &&
         (data.length > 0 ? (
-          <div className="w-full" style={{ height: `${Math.max(100, data.length * 65 + 40)}px` }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data}
-                margin={{ top: 0, right: 30, left: -10, bottom: 0 }}
-                layout="vertical"
-                barGap={2}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#334155"
-                  opacity={0.3}
-                  horizontal={false}
-                />
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={90}
-                  tick={<CustomYAxisTick data={data} />}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                <ReferenceLine x={0} stroke="#475569" />
-                <Bar dataKey="avg_diff" radius={[0, 4, 4, 0]} barSize={18}>
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.avg_diff > 0 ? '#22d3ee' : '#f472b6'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-2">
+            {/* 2. Container with calculated height */}
+            <div style={{ height: `${Math.max(300, data.length * 65)}px`, width: '100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data}
+                  margin={{ top: 0, right: 10, left: -10, bottom: 0 }}
+                  layout="vertical"
+                  barGap={2}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#334155"
+                    opacity={0.3}
+                    horizontal={false}
+                  />
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    width={90}
+                    tick={<CustomYAxisTick data={data} />}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                  <ReferenceLine x={0} stroke="#475569" />
+                  <Bar dataKey="avg_diff" radius={[0, 4, 4, 0]} barSize={18}>
+                    {data.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.avg_diff > 0 ? '#22d3ee' : '#f472b6'}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         ) : (
           <div className="text-center text-slate-500 py-8">No hay datos de rendimiento</div>

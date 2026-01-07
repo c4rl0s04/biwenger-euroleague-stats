@@ -18,7 +18,7 @@ export { default as PlacementStatsCard } from './PlacementStatsCard';
 export { default as LeaguePerformanceCard } from './LeaguePerformanceCard';
 
 // Performance Metrics
-export { default as ConsistencyCard } from './ConsistencyCard';
+export { default as ReliabilityCard } from './ReliabilityCard';
 export { default as EfficiencyCard } from './EfficiencyCard';
 export { default as StreaksCard } from './StreaksCard';
 
@@ -42,3 +42,4 @@ export { default as AllPlayAllCard } from './AllPlayAllCard';
 export { default as DominanceCard } from './DominanceCard';
 export { default as TheoreticalGapCard } from './TheoreticalGapCard';
 export { default as PositionEvolutionCard } from './PositionEvolutionCard';
+export { default as RivalryMatrixCard } from './RivalryMatrixCard';

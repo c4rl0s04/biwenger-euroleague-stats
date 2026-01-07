@@ -36,11 +36,13 @@ export default function VolatilityCard() {
                 <div key={user.user_id} className="relative group">
                   <Link
                     href={`/user/${user.user_id}`}
-                    className={`flex items-center justify-between py-2 px-2 hover:bg-slate-800 rounded transition-colors z-10 relative ${userColor.hover}`}
+                    className="flex items-center justify-between py-2 px-2 hover:bg-slate-800 rounded transition-colors z-10 relative"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-slate-500 font-mono w-4">{index + 1}</span>
-                      <span className="text-sm font-medium text-slate-300 group-hover:text-inherit transition-colors">
+                      <span
+                        className={`text-sm font-medium ${userColor.text} transition-transform group-hover:scale-105 origin-left inline-block`}
+                      >
                         {user.name}
                       </span>
                     </div>

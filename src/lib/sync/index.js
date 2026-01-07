@@ -1,50 +1,55 @@
-// Environment variables are loaded by config.js (conditionally)
-import { SyncManager } from './manager.js';
-import * as syncPlayers from './sync-players.js';
-import * as syncEuroleagueMaster from './sync-euroleague-master.js';
-import * as syncStandings from './sync-standings.js';
-import * as syncSquads from './sync-squads.js';
-import * as syncBoard from './sync-board.js';
-import * as syncInitialSquads from './sync-initial-squads.js';
-import * as syncEuroleagueStats from './sync-euroleague-stats.js';
-import * as syncMatches from './sync-matches.js';
-import * as syncLineups from './sync-lineups.js';
-import * as cleanupRounds from './cleanup-rounds.js';
-import {
-  buildRoundNameMap,
-  normalizeRoundName,
-  getCanonicalRoundId,
-} from './helpers/normalize-rounds.js';
-import { ensureSchema } from '../db/schema.js';
-import { CONFIG } from '../config.js';
+import dotenv from 'dotenv';
+import path from 'path';
 
-// Validate environment before starting
-if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
-  console.error('❌ ERROR: BIWENGER_TOKEN is required!');
-  console.error('   Set it in .env.local or as an environment variable.');
-  process.exit(1);
-}
+// 1. Load Environment Variables (Must happen before other imports)
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config();
 
-const DB_PATH = CONFIG.DB.PATH;
+console.log('🔧 Environment loaded.');
 
 async function syncData() {
+  // 2. Dynamic Imports (to ensure config.js reads the env vars we just set)
+  const { SyncManager } = await import('./manager.js');
+  const syncPlayers = await import('./sync-players.js');
+  const syncEuroleagueMaster = await import('./sync-euroleague-master.js');
+  const syncStandings = await import('./sync-standings.js');
+  const syncSquads = await import('./sync-squads.js');
+  const syncBoard = await import('./sync-board.js');
+  const syncInitialSquads = await import('./sync-initial-squads.js');
+  const syncEuroleagueStats = await import('./sync-euroleague-stats.js');
+  const syncMatches = await import('./sync-matches.js');
+  const syncLineups = await import('./sync-lineups.js');
+  const cleanupRounds = await import('./cleanup-rounds.js');
+  const { buildRoundNameMap, normalizeRoundName, getCanonicalRoundId } =
+    await import('./helpers/normalize-rounds.js');
+  const { ensureSchema } = await import('../db/schema.js');
+  const { CONFIG } = await import('../config.js');
+
+  // Validate environment
+  if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
+    console.error('❌ ERROR: BIWENGER_TOKEN is required!');
+    console.error('   Set it in .env.local or as an environment variable.');
+    process.exit(1);
+  }
+
+  const DB_PATH = CONFIG.DB.PATH;
+
   // --- CLI ARGUMENTS PARSING ---
   const args = process.argv.slice(2);
   const flags = {
-    noDetails: args.includes('--no-details'), // Skip player details (prices/bio) -> SAVES 300 CALLS
-    forceDetails: args.includes('--force-details'), // Force fetch details even if up to date
-    onlyMarket: args.includes('--only-market'), // Only sync board/transfers
-    activeOnly: args.includes('--active-only'), // Only sync active/future matches
-    onlyRound: args.find((a) => a.startsWith('--only-round='))?.split('=')[1], // Sync specific round
+    noDetails: args.includes('--no-details'),
+    forceDetails: args.includes('--force-details'),
+    onlyMarket: args.includes('--only-market'),
+    activeOnly: args.includes('--active-only'),
+    onlyRound: args.find((a) => a.startsWith('--only-round='))?.split('=')[1],
     skipEuroleague: args.includes('--skip-euroleague'),
-    matchOnly: args.includes('--only-matches'), // Only sync matches (no players/market)
+    matchOnly: args.includes('--only-matches'),
   };
 
   console.log('🚀 Starting Data Sync (Euroleague + Biwenger)...');
   console.log('   🔧 Config:', JSON.stringify(flags, null, 2));
 
   // Use SyncManager
-  // Correctly pass DB_PATH and flags
   const manager = new SyncManager(DB_PATH, flags);
 
   try {
@@ -62,7 +67,6 @@ async function syncData() {
         return syncPlayers.run(m);
       } else if (m.flags.onlyMarket) {
         m.log('   ℹ️ Fetching basic player list for market sync...');
-        // Force skipDetails for market-only sync
         m.flags.noDetails = true;
         return syncPlayers.run(m);
       }
@@ -98,7 +102,6 @@ async function syncData() {
 
     manager.addStep('Sync Board', async (m) => {
       if (!m.flags.matchOnly && !m.flags.onlyRound && !m.flags.activeOnly) {
-        // SyncPlayers puts playersList and teams into context
         if (m.context.playersList && Object.keys(m.context.playersList).length > 0) {
           return syncBoard.run(m);
         } else {
@@ -122,7 +125,6 @@ async function syncData() {
       }
 
       const db = m.context.db;
-      // Get existing rounds to skip (incremental update for LINEUPS only)
       const existingLineupRoundsArr = db
         .prepare('SELECT DISTINCT round_id FROM lineups')
         .pluck()
@@ -132,8 +134,6 @@ async function syncData() {
         existingLineupRoundsArr.length > 0 ? Math.max(...existingLineupRoundsArr) : 0;
 
       let competitionWithRounds = m.context.competition;
-
-      // Fetch rounds if missing (e.g. if we skipped player sync)
       const hasRounds =
         competitionWithRounds?.data?.data?.season || competitionWithRounds?.data?.season;
 
@@ -142,7 +142,7 @@ async function syncData() {
         const { fetchCompetition } = await import('../api/biwenger-client.js');
         const rawComp = await fetchCompetition();
         competitionWithRounds = { data: rawComp };
-        m.context.competition = competitionWithRounds; // Store back in context
+        m.context.competition = competitionWithRounds;
       }
 
       const rounds = competitionWithRounds.data.data
@@ -160,13 +160,8 @@ async function syncData() {
 
       for (const round of rounds) {
         const originalName = round.name;
-        const status = round.status;
-
-        // m.log(`\n--- Processing ${originalName} (${status}) ---`); // Verbose log
-
         if (originalName === 'GLOBAL') continue;
 
-        // FILTER: --only-round
         if (
           m.flags.onlyRound &&
           round.id.toString() !== m.flags.onlyRound &&
@@ -175,13 +170,11 @@ async function syncData() {
           continue;
         }
 
-        // FILTER: --active-only
         if (m.flags.activeOnly && round.status === 'finished') {
           m.log(`   ⏭️ Skipping round ${round.name} (--active-only mode)`);
           continue;
         }
 
-        // Normalize Round Name/ID
         const baseName = normalizeRoundName(originalName);
         const canonicalId = getCanonicalRoundId(round, roundNameMap);
 
@@ -190,21 +183,17 @@ async function syncData() {
           round.dbId = canonicalId;
           round.name = baseName;
         } else if (originalName.includes('(aplazada)')) {
-          // console.warn(...) -> m.warn(...)
           round.name = baseName;
         }
 
-        // 1. Sync Match Schedule
         if (!m.flags.skipEuroleague) {
           await syncMatches.run(m, round, m.context.playersList);
         } else {
           m.log(`   ⏭️ Skipping matches sync (EuroLeague skipped).`);
         }
 
-        // 2. Sync Game Stats (Euroleague)
         const roundNumber = parseInt(baseName.replace(/\D/g, '')) || 0;
         if (roundNumber > 0) {
-          // Get team count from sync_meta (set by syncEuroleagueMaster), fallback to 20
           const metaRow = db
             .prepare('SELECT value FROM sync_meta WHERE key = ?')
             .get('euroleague_team_count');
@@ -212,8 +201,6 @@ async function syncData() {
           const gamesPerRound = Math.floor(teamCount / 2);
           const startGameCode = (roundNumber - 1) * gamesPerRound + 1;
           const endGameCode = startGameCode + gamesPerRound - 1;
-
-          // m.log(`   📊 Fetching Euroleague games ${startGameCode}-${endGameCode}...`);
 
           for (let gameCode = startGameCode; gameCode <= endGameCode; gameCode++) {
             if (!m.flags.skipEuroleague) {
@@ -224,10 +211,8 @@ async function syncData() {
           }
         }
 
-        // 3. Sync Fantasy Points (Biwenger)
         await syncEuroleagueStats.runBiwengerPoints(m, round, m.context.playersList);
 
-        // 4. Sync Lineups
         const res = await syncLineups.run(
           m,
           round,
@@ -236,7 +221,7 @@ async function syncData() {
           m.context.playersList
         );
         totalLineupsInserted += res.insertedCount || 0;
-      } // end round loop
+      }
 
       return {
         success: true,
@@ -244,7 +229,6 @@ async function syncData() {
       };
     });
 
-    // Execute Manager
     const summary = await manager.run();
 
     if (!summary.success) {

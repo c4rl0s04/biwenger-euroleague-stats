@@ -32,6 +32,8 @@ import {
   getTheoreticalGapStats,
   getHeatmapStats,
   getPositionChangesStats,
+  getReliabilityStats,
+  getRivalryMatrixStats,
 } from '@/lib/db';
 
 /**
@@ -144,6 +146,14 @@ export function fetchHeatmapStats() {
 
 export function fetchPositionChangesStats() {
   return getPositionChangesStats();
+}
+
+export function fetchReliabilityStats() {
+  return getReliabilityStats();
+}
+
+export function fetchRivalryMatrixStats() {
+  return getRivalryMatrixStats();
 }
 
 // ============ AGGREGATED FUNCTIONS ============

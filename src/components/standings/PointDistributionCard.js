@@ -95,17 +95,17 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
           x={0}
           y={0}
           textAnchor="end"
-          fill="#94a3b8"
+          fill={userColor.stroke}
           fontSize={11}
-          className="group transition-colors"
-          style={{ '--hover-color': userColor.stroke }}
+          className="group transition-transform hover:scale-110 origin-right"
+          style={{ transformBox: 'fill-box' }}
         >
           {lines.map((line, index) => (
             <tspan
               key={index}
               x={-10}
               dy={index === 0 ? firstLineDy : lineHeight}
-              className="group-hover:fill-[var(--hover-color)] transition-colors cursor-pointer font-medium"
+              className="cursor-pointer font-bold"
             >
               {line}
             </tspan>

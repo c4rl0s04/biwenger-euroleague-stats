@@ -208,6 +208,75 @@ export function getFloorCeilingStats() {
 }
 
 /**
+ * Get Reliability Stats (% Rounds > Average)
+ */
+export function getReliabilityStats() {
+  try {
+    // 1. Calculate Average per Round
+    const roundAvgs = db
+      .prepare(
+        `
+      SELECT round_id, AVG(points) as avg_pts
+      FROM user_rounds
+      WHERE participated = 1
+      GROUP BY round_id
+    `
+      )
+      .all();
+
+    const roundAvgMap = {};
+    roundAvgs.forEach((r) => (roundAvgMap[r.round_id] = r.avg_pts));
+
+    // 2. Get all User Scores
+    const userScores = db
+      .prepare(
+        `
+      SELECT 
+        u.id as user_id,
+        u.name,
+        u.icon,
+        ur.round_id,
+        ur.points
+      FROM users u
+      JOIN user_rounds ur ON u.id = ur.user_id
+      WHERE ur.participated = 1
+    `
+      )
+      .all();
+
+    // 3. Aggregate
+    const userStats = {};
+    userScores.forEach((score) => {
+      if (!userStats[score.user_id]) {
+        userStats[score.user_id] = {
+          user_id: score.user_id,
+          name: score.name,
+          icon: score.icon,
+          total_rounds: 0,
+          rounds_above: 0,
+        };
+      }
+
+      const avg = roundAvgMap[score.round_id] || 0;
+      userStats[score.user_id].total_rounds++;
+      if (score.points > avg) {
+        userStats[score.user_id].rounds_above++;
+      }
+    });
+
+    return Object.values(userStats)
+      .map((u) => ({
+        ...u,
+        pct: u.total_rounds > 0 ? (u.rounds_above / u.total_rounds) * 100 : 0,
+      }))
+      .sort((a, b) => b.pct - a.pct);
+  } catch (error) {
+    console.error('Error in getReliabilityStats:', error);
+    return [];
+  }
+}
+
+/**
  * Get Volatility Stats (Standard Deviation)
  */
 export function getVolatilityStats() {
@@ -590,5 +659,66 @@ export function getPositionChangesStats() {
   } catch (error) {
     console.error('Error in getPositionChangesStats:', error);
     return { rounds: [], users: [], valid: false };
+  }
+}
+
+/**
+ * Get Rivalry Matrix Stats
+ * Head-to-Head record for every user pair
+ */
+export function getRivalryMatrixStats() {
+  try {
+    const users = db.prepare('SELECT id, name, icon FROM users').all();
+    const rounds = db
+      .prepare('SELECT DISTINCT round_id FROM user_rounds WHERE participated = 1')
+      .all();
+
+    // Initialize matrix
+    // Structure: { [userId]: { [opponentId]: { wins: 0, losses: 0, ties: 0 } } }
+    const matrix = {};
+    users.forEach((u) => {
+      matrix[u.id] = {};
+      users.forEach((opp) => {
+        if (u.id !== opp.id) {
+          matrix[u.id][opp.id] = { wins: 0, losses: 0, ties: 0 };
+        }
+      });
+    });
+
+    for (const round of rounds) {
+      const roundScores = db
+        .prepare('SELECT user_id, points FROM user_rounds WHERE round_id = ? AND participated = 1')
+        .all(round.round_id);
+
+      // Compare everyone against everyone
+      for (let i = 0; i < roundScores.length; i++) {
+        for (let j = i + 1; j < roundScores.length; j++) {
+          const u1 = roundScores[i];
+          const u2 = roundScores[j];
+
+          // Ensure both users exist in our matrix (safety check)
+          if (!matrix[u1.user_id] || !matrix[u2.user_id]) continue;
+
+          if (u1.points > u2.points) {
+            matrix[u1.user_id][u2.user_id].wins++;
+            matrix[u2.user_id][u1.user_id].losses++;
+          } else if (u2.points > u1.points) {
+            matrix[u2.user_id][u1.user_id].wins++;
+            matrix[u1.user_id][u2.user_id].losses++;
+          } else {
+            matrix[u1.user_id][u2.user_id].ties++;
+            matrix[u2.user_id][u1.user_id].ties++;
+          }
+        }
+      }
+    }
+
+    return {
+      users: users.map((u) => ({ id: u.id, name: u.name, icon: u.icon })),
+      matrix,
+    };
+  } catch (error) {
+    console.error('Error in getRivalryMatrixStats:', error);
+    return { users: [], matrix: {} };
   }
 }

@@ -7,6 +7,7 @@ import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 import Link from 'next/link';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function FullStandingsCard() {
   const [sortConfig, setSortConfig] = useState({ key: 'position', direction: 'asc' });
@@ -99,10 +100,11 @@ export default function FullStandingsCard() {
             <tbody>
               {sortedStandings.map((user) => {
                 const gapToLeader = leader ? leader.total_points - user.total_points : 0;
+                const userColor = getColorForUser(user.user_id, user.name);
                 return (
                   <tr
                     key={user.user_id}
-                    className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors"
+                    className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors group"
                   >
                     <td className="px-3 py-3">
                       <span
@@ -128,7 +130,9 @@ export default function FullStandingsCard() {
                           </div>
                         )}
                         <div>
-                          <div className="font-medium text-white transition-colors group-hover:text-indigo-400">
+                          <div
+                            className={`font-medium transition-transform group-hover:scale-105 origin-left inline-block ${userColor.text}`}
+                          >
                             {user.name}
                           </div>
                           <div className="text-xs text-slate-500">

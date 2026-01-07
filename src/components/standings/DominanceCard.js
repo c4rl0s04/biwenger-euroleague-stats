@@ -24,7 +24,7 @@ export default function DominanceCard() {
             return (
               <div
                 key={user.user_id}
-                className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:bg-slate-800/50 transition-colors w-full"
+                className="group flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:bg-slate-800/50 transition-colors w-full"
               >
                 {/* User Info */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -36,13 +36,16 @@ export default function DominanceCard() {
                       className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-white ring-2 ring-white/10">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ring-2 ring-white/10"
+                      style={{ backgroundColor: userColor.stroke }}
+                    >
                       {user.name.charAt(0)}
                     </div>
                   )}
                   <Link
                     href={`/user/${user.user_id}`}
-                    className={`font-semibold text-sm text-slate-200 ${userColor.hover} transition-colors truncate`}
+                    className={`font-semibold text-sm ${userColor.text} transition-transform group-hover:scale-105 origin-left truncate`}
                   >
                     {user.name}
                   </Link>
