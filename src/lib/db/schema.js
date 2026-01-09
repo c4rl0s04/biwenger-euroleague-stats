@@ -10,7 +10,8 @@ export function ensureSchema(db) {
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       name TEXT,
-      icon TEXT
+      icon TEXT,
+      color_index INTEGER DEFAULT 0
     )
   `
   ).run();

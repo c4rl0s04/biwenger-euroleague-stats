@@ -37,7 +37,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
   const user = data.find((u) => u.name === payload.value);
   if (!user) return null;
 
-  const userColor = getColorForUser(user.user_id, user.name);
+  const userColor = getColorForUser(user.user_id, user.name, user.color_index);
   const name = payload.value;
 
   let lines = [];

@@ -84,34 +84,34 @@ export async function biwengerFetch(endpoint, options = {}) {
 // --- Specific method exports (Same as before) ---
 
 export async function fetchMarket() {
-  return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, 0, 100));
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, 0, 100));
 }
 
 export async function fetchLeague() {
-  return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_STANDINGS(CONFIG.API.LEAGUE_ID));
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.LEAGUE_STANDINGS(CONFIG.API.LEAGUE_ID));
 }
 
 export async function fetchTransfers(offset = 0, limit = 20) {
-  return biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, offset, limit));
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, offset, limit));
 }
 
 export async function fetchCompetition() {
-  return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA);
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.COMPETITION_DATA);
 }
 
 export async function fetchAllPlayers() {
-  return biwengerFetch(CONFIG.ENDPOINTS.COMPETITION_DATA);
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.COMPETITION_DATA);
 }
 
 export async function fetchRoundsLeague(roundId) {
-  return biwengerFetch(CONFIG.ENDPOINTS.ROUND_LEAGUE(roundId));
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.ROUND_LEAGUE(roundId));
 }
 
 export async function fetchRoundGames(roundId) {
-  return biwengerFetch(CONFIG.ENDPOINTS.ROUND_GAMES(roundId));
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.ROUND_GAMES(roundId));
 }
 
 // This is the new function you added
 export async function fetchPlayerDetails(playerId) {
-  return biwengerFetch(CONFIG.ENDPOINTS.PLAYER_DETAILS(playerId));
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.PLAYER_DETAILS(playerId));
 }

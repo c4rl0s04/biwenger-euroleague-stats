@@ -56,6 +56,10 @@ async function syncData() {
   if (shouldRun(10)) manager.addStep('Sync Team Logos', stepTeams.run);
   if (shouldRun(11)) manager.addStep('Sync Player Images', stepImages.run);
 
+  // New User Color Step
+  const stepColors = await import('./steps/12-user-colors.js'); // Step 12
+  if (shouldRun(12)) manager.addStep('Sync User Colors', stepColors.run);
+
   // Execute
   await manager.run();
 

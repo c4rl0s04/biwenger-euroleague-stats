@@ -8,7 +8,7 @@ import path from 'path';
 import { CONFIG } from '../config.js';
 
 // Skip database connection in CI/build environment
-const skipDb = process.env.SKIP_DB === 'true';
+const skipDb = CONFIG.DB.SKIP;
 
 let db;
 

@@ -30,7 +30,7 @@ export default function ReliabilityCard() {
 
           <div className="flex-1 overflow-y-auto pr-2 space-y-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {data.map((user, index) => {
-              const colors = getColorForUser(user.user_id, user.name);
+              const colors = getColorForUser(user.user_id, user.name, user.color_index);
               const percentage = user.pct;
 
               return (

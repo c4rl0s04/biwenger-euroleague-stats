@@ -53,17 +53,18 @@ export default function PointsProgressionCard() {
     const roundNames = [...new Set(progression.map((p) => p.round_name))];
 
     // Map of userId -> userName
+    // Map of userId -> user details
     const userMap = new Map();
     progression.forEach((p) => {
       if (!userMap.has(p.user_id)) {
-        userMap.set(p.user_id, p.name);
+        userMap.set(p.user_id, { name: p.name, color_index: p.color_index });
       }
     });
 
     // Pivot data
     const data = roundNames.map((round) => {
       const entry = { name: round.replace('Jornada ', 'J') };
-      userMap.forEach((name, id) => {
+      userMap.forEach((details, id) => {
         const stats = progression.find((p) => p.round_name === round && p.user_id === id);
         if (stats) {
           entry[String(id)] = stats.cumulative_points; // Ensure key is string
@@ -75,7 +76,12 @@ export default function PointsProgressionCard() {
     // Sort users by their final round points for consistent legend ordering
     const lastRoundData = data[data.length - 1] || {};
     const sortedUsers = Array.from(userMap.entries())
-      .map(([id, name]) => ({ id: String(id), name, finalPoints: lastRoundData[String(id)] || 0 }))
+      .map(([id, details]) => ({
+        id: String(id),
+        name: details.name,
+        color_index: details.color_index,
+        finalPoints: lastRoundData[String(id)] || 0,
+      }))
       .sort((a, b) => b.finalPoints - a.finalPoints);
 
     return {
@@ -128,7 +134,7 @@ export default function PointsProgressionCard() {
               All
             </button>
             {users.map((user) => {
-              const colors = getColorForUser(user.id, user.name);
+              const colors = getColorForUser(user.id, user.name, user.color_index);
               const isSelected = effectiveSelectedUsers.has(user.id);
               return (
                 <button
@@ -188,7 +194,7 @@ export default function PointsProgressionCard() {
                   )}
                 />
                 {users.map((user) => {
-                  const colors = getColorForUser(user.id, user.name);
+                  const colors = getColorForUser(user.id, user.name, user.color_index);
                   const isSelected = effectiveSelectedUsers.has(user.id);
 
                   return (

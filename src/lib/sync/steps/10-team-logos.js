@@ -52,7 +52,7 @@ export async function run(manager) {
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
 
-      const url = CONFIG.ENDPOINTS.OFFICIAL_TEAM_PROFILE(slug, urlCode);
+      const url = CONFIG.ENDPOINTS.EUROLEAGUE_WEBSITE.OFFICIAL_TEAM_PROFILE(slug, urlCode);
 
       // 2. Fetch Logo
       // manager.log(`   🔗 Accessing: ${url}`);

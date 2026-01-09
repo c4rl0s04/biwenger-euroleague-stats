@@ -45,7 +45,9 @@ export async function run(manager, playersListInput, teamsInput) {
   while (moreTransfers) {
     manager.log(`Fetching batch (offset: ${offset})...`);
     // Fetch WITHOUT type filter to get everything (transfers, market, movements, bettingPool)
-    const response = await biwengerFetch(CONFIG.ENDPOINTS.LEAGUE_BOARD(leagueId, offset, limit));
+    const response = await biwengerFetch(
+      CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(leagueId, offset, limit)
+    );
     const items = response.data;
 
     if (!items || items.length === 0) {

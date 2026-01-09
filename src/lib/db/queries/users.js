@@ -16,7 +16,7 @@ import { getStandings } from './stats.js';
  * @returns {{id: number, name: string, icon: string}[]} List of users
  */
 export function getAllUsers() {
-  return db.prepare('SELECT id, name, icon FROM users ORDER BY name ASC').all();
+  return db.prepare('SELECT id, name, icon, color_index FROM users ORDER BY name ASC').all();
 }
 
 /**
@@ -77,7 +77,7 @@ export function getUserSquad(userId) {
  */
 export function getUserSeasonStats(userId) {
   // First get user details for name
-  const user = db.prepare('SELECT name FROM users WHERE id = ?').get(userId);
+  const user = db.prepare('SELECT name, color_index FROM users WHERE id = ?').get(userId);
 
   const statsQuery = `
     WITH UserRounds AS (
@@ -138,6 +138,7 @@ export function getUserSeasonStats(userId) {
 
   return {
     name: user?.name || 'Desconocido',
+    color_index: user?.color_index ?? 0,
     ...stats,
     ...positions,
     ...transfers,

@@ -41,7 +41,7 @@ export function getTopPlayers(limit = 6) {
       p.id, p.name, t.id as team_id, t.name as team, p.position, p.price,
       p.puntos as points, 
       ROUND(CAST(p.puntos AS FLOAT) / NULLIF(p.partidos_jugados, 0), 1) as average,
-      u.name as owner_name,
+      u.name as owner_name, u.color_index as owner_color_index,
       rs.recent_scores
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
@@ -85,7 +85,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
         t.id as team_id,
         t.name as team,
         p.owner_id,
-        u.name as owner_name,
+        u.name as owner_name, u.color_index as owner_color_index,
         SUM(os.fantasy_points) as total_points,
         ROUND(SUM(os.fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount), 1) as avg_points,
         COUNT(*) as games_played,
@@ -105,6 +105,7 @@ export function getTopPlayersByForm(limit = 5, rounds = 3) {
       team,
       owner_id,
       owner_name,
+      owner_color_index,
       total_points,
       avg_points,
       games_played,
@@ -127,7 +128,7 @@ export function getPlayerDetails(playerId) {
   const query = `
     SELECT 
       p.*,
-      u.name as owner_name,
+      u.name as owner_name, u.color_index as owner_color_index,
       (SELECT COUNT(*) FROM player_round_stats WHERE player_id = p.id) as games_played,
       (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE player_id = p.id) as season_avg,
       (SELECT SUM(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as total_points,
@@ -209,7 +210,7 @@ export function getPlayerDetails(playerId) {
   // Check for Initial Squad Assignment (Calculated)
   const initialSquadQuery = `
     SELECT 
-      u.name as owner_name, 
+      u.name as owner_name, u.color_index as owner_color_index, 
       u.icon as owner_img 
     FROM initial_squads s
     JOIN users u ON s.user_id = u.id
@@ -309,7 +310,7 @@ export function getPlayersBirthday() {
       t.name as team,
       p.position,
       p.birth_date,
-      u.name as owner_name
+      u.name as owner_name, u.color_index as owner_color_index
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
@@ -344,7 +345,7 @@ export function getPlayerStreaks(minGames = 3) {
         COUNT(*) as games,
         AVG(prs.fantasy_points) as recent_avg,
         p.owner_id,
-        u.name as owner_name
+        u.name as owner_name, u.color_index as owner_color_index
       FROM player_round_stats prs
       JOIN players p ON prs.player_id = p.id
       LEFT JOIN teams t ON p.team_id = t.id
@@ -373,6 +374,7 @@ export function getPlayerStreaks(minGames = 3) {
       prf.recent_avg,
       prf.owner_id,
       prf.owner_name,
+      prf.owner_color_index,
       COALESCE(sa.season_avg, 0) as season_avg,
       ROUND((prf.recent_avg - COALESCE(sa.season_avg, 0)) / NULLIF(sa.season_avg, 1) * 100, 1) as trend_pct
     FROM PlayerRecentForm prf
@@ -437,7 +439,7 @@ export function getRisingStars(limit = 5) {
       COALESCE(ep.earlier_avg, 0) as earlier_avg,
       ROUND(rp.recent_avg - COALESCE(ep.earlier_avg, 0), 1) as improvement,
       ROUND((rp.recent_avg - COALESCE(ep.earlier_avg, 0)) / NULLIF(ep.earlier_avg, 1) * 100, 1) as improvement_pct,
-      u.name as owner_name
+      u.name as owner_name, u.color_index as owner_color_index
     FROM RecentPerformance rp
     JOIN players p ON rp.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
@@ -490,7 +492,7 @@ export function getAllPlayers() {
        t.img as team_img,
 
        p.owner_id,
-       u.name as owner_name,
+       u.name as owner_name, u.color_index as owner_color_index,
        u.icon as owner_icon,
        p.puntos as total_points,
        p.partidos_jugados as played,

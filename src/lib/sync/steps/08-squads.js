@@ -34,7 +34,7 @@ export async function run(manager) {
     try {
       // Fetch user details with players field
       // Note: This endpoint might be rate-limited if many users, but usually fine for small leagues
-      const response = await biwengerFetch(CONFIG.ENDPOINTS.USER_PLAYERS(user.id));
+      const response = await biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.USER_PLAYERS(user.id));
       const data = response.data;
 
       if (data && data.players) {

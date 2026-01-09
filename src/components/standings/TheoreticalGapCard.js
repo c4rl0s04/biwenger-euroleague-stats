@@ -33,7 +33,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
       </text>
     );
 
-  const userColor = getColorForUser(user.user_id, user.name);
+  const userColor = getColorForUser(user.user_id, user.name, user.color_index);
   const name = user.name;
 
   // Split logic
@@ -138,7 +138,7 @@ export default function TheoreticalGapCard() {
                 <Bar dataKey="pct" barSize={15} radius={[0, 4, 4, 0]}>
                   {data.map((entry, index) => {
                     // Fetch user color using the helper
-                    const userColor = getColorForUser(entry.user_id, entry.name);
+                    const userColor = getColorForUser(entry.user_id, entry.name, entry.color_index);
                     return <Cell key={`cell-${index}`} fill={userColor.stroke} fillOpacity={0.8} />;
                   })}
                 </Bar>

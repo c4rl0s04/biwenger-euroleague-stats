@@ -80,7 +80,11 @@ export default function RivalryMatrixCard() {
 
                 {/* Column Headers (Top) */}
                 {sortedUsers.map((opponent) => {
-                  const oppColors = getColorForUser(opponent.id, opponent.name);
+                  const oppColors = getColorForUser(
+                    opponent.id,
+                    opponent.name,
+                    opponent.color_index
+                  );
                   return (
                     <div
                       key={`col-${opponent.id}`}
@@ -97,7 +101,7 @@ export default function RivalryMatrixCard() {
 
                 {/* Matrix Content */}
                 {sortedUsers.map((user, rowIndex) => {
-                  const userColors = getColorForUser(user.id, user.name);
+                  const userColors = getColorForUser(user.id, user.name, user.color_index);
                   return (
                     <React.Fragment key={user.id}>
                       {/* Row Header (Left) */}

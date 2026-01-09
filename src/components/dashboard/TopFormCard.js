@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function TopFormCard() {
   const { data: players = [], loading } = useApiData('/api/dashboard/top-form');
@@ -45,15 +46,23 @@ export default function TopFormCard() {
                   >
                     {getShortTeamName(player.team)}
                   </Link>
-                  {player.owner_name && (
-                    <Link
-                      href={`/user/${player.owner_id}`}
-                      className="text-xs text-blue-400 truncate hover:text-blue-300 transition-colors block w-fit"
-                      title={`Dueño: ${player.owner_name}`}
-                    >
-                      👤 {player.owner_name}
-                    </Link>
-                  )}
+                  {player.owner_name &&
+                    (() => {
+                      const color = getColorForUser(
+                        player.owner_id,
+                        player.owner_name,
+                        player.owner_color_index
+                      );
+                      return (
+                        <Link
+                          href={`/user/${player.owner_id}`}
+                          className={`text-xs truncate transition-colors block w-fit ${color.text} hover:opacity-80`}
+                          title={`Dueño: ${player.owner_name}`}
+                        >
+                          👤 {player.owner_name}
+                        </Link>
+                      );
+                    })()}
                 </div>
 
                 {/* Line 3: Scores & Avg */}

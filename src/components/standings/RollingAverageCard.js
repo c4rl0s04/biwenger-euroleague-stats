@@ -67,7 +67,7 @@ export default function RollingAverageCard() {
                 />
                 <Legend wrapperStyle={{ fontSize: '10px' }} iconType="circle" />
                 {data.map((user) => {
-                  const colors = getColorForUser(user.user_id, user.name);
+                  const colors = getColorForUser(user.user_id, user.name, user.color_index);
                   return (
                     <Line
                       key={user.user_id}

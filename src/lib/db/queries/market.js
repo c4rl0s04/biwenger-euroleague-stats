@@ -35,7 +35,9 @@ export function getRecentTransfers(limit = 5) {
       p.name as player_name,
       p.position,
       seller.id as vendedor_id,
-      buyer.id as comprador_id
+      seller.color_index as vendedor_color_index,
+      buyer.id as comprador_id,
+      buyer.color_index as comprador_color_index
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
     LEFT JOIN users seller ON f.vendedor = seller.name

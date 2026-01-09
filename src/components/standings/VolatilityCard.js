@@ -28,9 +28,10 @@ export default function VolatilityCard() {
           <div className="space-y-1">
             {data.slice(0, 8).map((user, index) => {
               // Visualize volatility with a bar proportional to max
-              const maxVol = data[0].stdDev;
-              const pct = (user.stdDev / maxVol) * 100;
-              const userColor = getColorForUser(user.user_id, user.name);
+              const maxVol = data[0].std_dev;
+              const { user_id, name, color_index, std_dev, avg_points } = user;
+              const pct = (std_dev / maxVol) * 100;
+              const userColor = getColorForUser(user_id, name, color_index);
 
               return (
                 <div key={user.user_id} className="relative group">
@@ -47,8 +48,8 @@ export default function VolatilityCard() {
                       </span>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold text-pink-400">{user.stdDev}</div>
-                      <div className="text-[10px] text-slate-500">Media: {user.mean}</div>
+                      <div className="text-sm font-bold text-pink-400">{user.std_dev}</div>
+                      <div className="text-[10px] text-slate-500">Media: {user.avg_points}</div>
                     </div>
                   </Link>
                   {/* Background Bar */}

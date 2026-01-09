@@ -10,6 +10,7 @@ export function getInitialSquadActualPerformance() {
   const query = `
     SELECT 
       users.name as user_name,
+      users.color_index as user_color_index,
       SUM(
         CASE 
           WHEN l.role = 'titular' THEN prs.fantasy_points * 1.0
@@ -37,6 +38,7 @@ export function getInitialSquadTheoreticalPotential() {
   const query = `
     SELECT 
       u.name as user_name,
+      u.color_index as user_color_index,
       SUM(prs.fantasy_points) as potential_points
     FROM initial_squads isq
     JOIN users u ON isq.user_id = u.id
@@ -54,6 +56,7 @@ export function getTheoreticalBreakdown() {
   const query = `
     SELECT 
       u.name as user_name,
+      u.color_index as user_color_index,
       p.name as player_name,
       SUM(prs.fantasy_points) as player_total_points
     FROM initial_squads isq

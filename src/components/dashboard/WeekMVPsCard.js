@@ -42,6 +42,7 @@ export default function WeekMVPsCard() {
                 teamId={player.team_id}
                 owner={player.owner_name}
                 ownerId={player.owner_id}
+                ownerColorIndex={player.owner_color_index}
                 color="yellow"
                 avatar={
                   <div

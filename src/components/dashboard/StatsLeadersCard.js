@@ -137,6 +137,7 @@ export default function StatsLeadersCard() {
                 teamId={player.team_id}
                 owner={player.owner_name}
                 ownerId={player.owner_id}
+                ownerColorIndex={player.owner_color_index}
                 color="cyan"
                 avatar={
                   <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function TopPlayersCard() {
   const { data: topPlayers = [], loading } = useApiData('/api/dashboard/top-players');
@@ -78,6 +79,25 @@ export default function TopPlayersCard() {
                     >
                       {getShortTeamName(player.team)}
                     </Link>
+                    {player.owner_name &&
+                      (() => {
+                        const color = getColorForUser(
+                          player.owner_id,
+                          player.owner_name,
+                          player.owner_color_index
+                        );
+                        return (
+                          <>
+                            <span className="text-border mx-1">|</span>
+                            <Link
+                              href={`/user/${player.owner_id}`}
+                              className={`text-xs truncate transition-colors ${color.text} hover:opacity-80`}
+                            >
+                              👤 {player.owner_name}
+                            </Link>
+                          </>
+                        );
+                      })()}
                   </div>
                 </div>
                 <div className="text-right shrink-0">

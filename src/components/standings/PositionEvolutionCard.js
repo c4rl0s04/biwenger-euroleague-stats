@@ -174,7 +174,7 @@ export default function PositionEvolutionCard() {
                     key={round.id}
                     className="flex-1 min-w-[2.75rem] text-center text-[10px] font-mono font-bold text-slate-500"
                   >
-                    {round.name.replace('Jornada ', 'J').replace('J', 'j')}
+                    {round.name.replace('Jornada ', 'J')}
                   </div>
                 ))}
               </div>
@@ -182,7 +182,7 @@ export default function PositionEvolutionCard() {
               {/* User Rows */}
               <div className="space-y-1.5">
                 {data.users.map((user) => {
-                  const userColor = getColorForUser(user.id, user.name);
+                  const userColor = getColorForUser(user.id, user.name, user.color_index);
                   return (
                     <div
                       key={user.id}

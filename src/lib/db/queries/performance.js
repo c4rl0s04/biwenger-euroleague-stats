@@ -22,6 +22,7 @@ export function getVolatilityStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       ROUND(s.avg_points, 1) as avg_points,
       ROUND(s.std_dev, 2) as std_dev
     FROM users u
@@ -50,6 +51,7 @@ export function getPlacementStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       SUM(CASE WHEN r.position <= 3 THEN 1 ELSE 0 END) as top_3_count,
       SUM(CASE WHEN r.position >= (r.total_participants - 2) THEN 1 ELSE 0 END) as bottom_3_count,
       COUNT(r.round_id) as total_rounds
@@ -79,6 +81,7 @@ export function getLeagueComparisonStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       SUM(CASE WHEN ur.points > ra.league_avg THEN 1 ELSE 0 END) as above_avg_count,
       SUM(CASE WHEN ur.points < ra.league_avg THEN 1 ELSE 0 END) as below_avg_count,
       ROUND(AVG(ur.points - ra.league_avg), 1) as avg_diff
@@ -115,6 +118,7 @@ export function getEfficiencyStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       up.total_points,
       COALESCE(uv.team_value, 0) as team_value,
       -- Calculate Points per 1M value
@@ -163,6 +167,7 @@ export function getStreakStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       MAX(gs.streak_length) as longest_streak
     FROM users u
     JOIN GroupedStreaks gs ON u.id = gs.user_id
@@ -191,6 +196,7 @@ export function getBottlerStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) as wins,
       SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) as seconds,
       SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) as thirds,
@@ -270,6 +276,7 @@ export function getHeartbreakerStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       COUNT(he.round_id) as count,
       COALESCE(SUM(he.diff), 0) as total_diff
     FROM users u
@@ -307,6 +314,7 @@ export function getNoGloryStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       COALESCE(SUM(nge.points), 0) as total_points_no_glory,
       COUNT(nge.points) as rounds_count
     FROM users u
@@ -355,6 +363,7 @@ export function getJinxStats() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       COUNT(je.round_id) as jinxed_count
     FROM users u
     LEFT JOIN JinxEvents je ON u.id = je.user_id

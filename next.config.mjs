@@ -8,9 +8,9 @@ const bundleAnalyzer = withBundleAnalyzer({
 const nextConfig = {
   // output: 'standalone', // Disabled by user request
   serverExternalPackages: ['better-sqlite3'],
-  // experimental: {
-  //   allowedOrigins: ['192.168.1.40:3000', 'localhost:3000'],
-  // },
+  experimental: {
+    allowedDevOrigins: ['192.168.1.40:3000', 'localhost:3000'],
+  },
   images: {
     remotePatterns: [
       {

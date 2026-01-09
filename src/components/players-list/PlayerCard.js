@@ -38,7 +38,9 @@ export default function PlayerCard({ player }) {
       {/* Background Gradient */}
       <div
         className={`absolute inset-0 transition-opacity bg-gradient-to-br ${
-          player.owner_id ? getColorForUser(player.owner_id).bg : 'from-gray-500/20 to-gray-600/10'
+          player.owner_id
+            ? getColorForUser(player.owner_id, player.owner_name, player.owner_color_index).bg
+            : 'from-gray-500/20 to-gray-600/10'
         }`}
       />
 

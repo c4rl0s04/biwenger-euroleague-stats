@@ -40,7 +40,7 @@ export async function run(manager) {
     const cleanCode = player.euroleague_code.toString().replace(/\D/g, '');
     const paddedId = cleanCode.padStart(6, '0');
 
-    const url = CONFIG.ENDPOINTS.OFFICIAL_PLAYER_PROFILE(slug, paddedId);
+    const url = CONFIG.ENDPOINTS.EUROLEAGUE_WEBSITE.OFFICIAL_PLAYER_PROFILE(slug, paddedId);
 
     // Output progress sparsely
     // manager.log(`   Fetching ${player.name} (${paddedId})...`);

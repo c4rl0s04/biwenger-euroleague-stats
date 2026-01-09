@@ -68,6 +68,7 @@ export default function StreakCard({ type = 'hot' }) {
                 teamId={player.team_id}
                 owner={player.owner_name}
                 ownerId={player.owner_id}
+                ownerColorIndex={player.owner_color_index}
                 color={cfg.color}
                 // AVATAR: Glowing Icon (Flame or Snowflake)
                 avatar={

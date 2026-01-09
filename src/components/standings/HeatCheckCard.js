@@ -20,7 +20,7 @@ export default function HeatCheckCard() {
       {!loading && data.length > 0 ? (
         <div className="space-y-3">
           {data.map((user, index) => {
-            const userColor = getColorForUser(user.user_id, user.name);
+            const userColor = getColorForUser(user.user_id, user.name, user.color_index);
             return (
               <div
                 key={user.user_id}

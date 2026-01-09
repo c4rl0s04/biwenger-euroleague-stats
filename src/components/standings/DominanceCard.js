@@ -20,7 +20,7 @@ export default function DominanceCard() {
       {!loading && data.length > 0 ? (
         <div className="flex flex-col gap-2 h-full">
           {data.map((user, index) => {
-            const userColor = getColorForUser(user.user_id, user.name);
+            const userColor = getColorForUser(user.user_id, user.name, user.color_index);
             return (
               <div
                 key={user.user_id}

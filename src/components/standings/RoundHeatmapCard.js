@@ -66,7 +66,7 @@ export default function RoundHeatmapCard() {
               Jor.
             </div>
             {data.users.map((user) => {
-              const userColor = getColorForUser(user.id, user.name);
+              const userColor = getColorForUser(user.id, user.name, user.color_index);
               return (
                 <Link
                   key={user.id}

@@ -48,6 +48,7 @@ export function getExtendedStandings() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       COALESCE(ut.total_points, 0) as total_points,
       COALESCE(ut.rounds_played, 0) as rounds_played,
       COALESCE(ut.avg_points, 0) as avg_points,
@@ -88,6 +89,7 @@ export function getRoundWinners(limit = 15) {
         ur.user_id,
         u.name,
         u.icon,
+        u.color_index,
         ur.points,
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
@@ -100,6 +102,7 @@ export function getRoundWinners(limit = 15) {
       user_id,
       name,
       icon,
+      color_index,
       points
     FROM RoundResults
     WHERE position = 1
@@ -153,6 +156,7 @@ export function getLeagueTotals() {
     SELECT 
       u.name,
       u.icon,
+      u.color_index,
       SUM(p.price) as team_value
     FROM players p
     JOIN users u ON p.owner_id = u.id
@@ -173,6 +177,7 @@ export function getLeagueTotals() {
       ur.user_id,
       u.name,
       u.icon,
+      u.color_index,
       ur.round_name,
       ur.points
     FROM user_rounds ur
@@ -268,6 +273,7 @@ export function getPointsProgression(limit = 10) {
     SELECT 
       ur.user_id,
       u.name,
+      u.color_index,
       ur.round_id,
       ur.round_name,
       CASE WHEN ur.participated = 1 THEN ur.points ELSE 0 END as points,
@@ -290,6 +296,7 @@ export function getValueRanking() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       COALESCE(SUM(p.price), 0) as team_value,
       COALESCE(SUM(p.price_increment), 0) as price_trend,
       COUNT(p.id) as squad_size,
@@ -320,6 +327,7 @@ export function getWinCounts() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       COUNT(rw.round_id) as wins
     FROM users u
     LEFT JOIN RoundWinners rw ON u.id = rw.user_id AND rw.position = 1

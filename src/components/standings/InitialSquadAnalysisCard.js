@@ -35,7 +35,7 @@ export default function InitialSquadAnalysisCard() {
             </p>
           ) : (
             data.map((user, index) => {
-              const colors = getColorForUser(null, user.user_name);
+              const colors = getColorForUser(null, user.user_name, user.user_color_index);
 
               return (
                 <div key={user.user_name} className="relative group">

@@ -30,7 +30,8 @@ export default function BottlerCard() {
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
               {data.map((user, index) => {
-                const colors = getColorForUser(user.user_id, user.name);
+                const { user_id, name, color_index } = user;
+                const colors = getColorForUser(user_id, name, color_index);
 
                 return (
                   <div key={user.user_id} className="relative group rounded-lg">

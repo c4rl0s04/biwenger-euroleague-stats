@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
 import { User } from 'lucide-react';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function DashboardPlayerRow({
   playerId,
@@ -11,6 +12,7 @@ export default function DashboardPlayerRow({
   teamId, // New prop
   owner,
   ownerId, // New prop
+  ownerColorIndex, // New prop for user colors
   avatar,
   rightContent,
   color = 'primary', // Default to primary (orange)
@@ -26,6 +28,13 @@ export default function DashboardPlayerRow({
   };
 
   const hoverClass = hoverMap[color] || 'hover:text-primary';
+
+  // Determine owner color
+  const ownerColorStyles =
+    owner && ownerId ? getColorForUser(ownerId, owner, ownerColorIndex) : null;
+  const ownerLinkClass = ownerColorStyles
+    ? `${ownerColorStyles.text} transition-colors`
+    : 'text-blue-400/90 hover:text-blue-300';
 
   return (
     // FIXED HEIGHT: h-20 (80px) is tall enough for 3 distinct lines without feeling cramped
@@ -57,19 +66,18 @@ export default function DashboardPlayerRow({
           </div>
         )}
 
-        {/* Line 3: Owner (Always takes up h-4 space, even if empty) */}
         <div className="h-4 flex items-center">
           {owner ? (
             ownerId ? (
               <Link
                 href={`/user/${ownerId}`}
-                className={`flex items-center gap-1 text-xs text-blue-400/90 truncate ${hoverClass} transition-colors`}
+                className={`flex items-center gap-1 text-xs truncate ${ownerLinkClass} hover:opacity-80`}
               >
                 <User size={10} className="shrink-0" />
                 <span className="truncate">{owner}</span>
               </Link>
             ) : (
-              <span className="flex items-center gap-1 text-xs text-blue-400/90 truncate">
+              <span className={`flex items-center gap-1 text-xs truncate ${ownerLinkClass}`}>
                 <User size={10} className="shrink-0" />
                 <span className="truncate">{owner}</span>
               </span>

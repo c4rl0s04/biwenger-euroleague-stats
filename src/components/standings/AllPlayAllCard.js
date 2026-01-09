@@ -32,7 +32,7 @@ export default function AllPlayAllCard() {
           {/* List Container - Increased gap between items (space-y-2) */}
           <div className="flex-1 min-h-0 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {data.map((user, index) => {
-              const colors = getColorForUser(user.user_id, user.name);
+              const colors = getColorForUser(user.user_id, user.name, user.color_index);
 
               // Determine Rank Color
               let rankColor = 'text-slate-600';

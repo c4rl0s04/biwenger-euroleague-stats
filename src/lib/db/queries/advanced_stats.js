@@ -41,6 +41,7 @@ export function getHeatCheckStats() {
         u.id as user_id, 
         u.name, 
         u.icon,
+        u.color_index,
         COALESCE(r.recent_avg, 0) as last5_avg,
         COALESCE(s.season_avg, 0) as season_avg,
         (COALESCE(r.recent_avg, 0) - COALESCE(s.season_avg, 0)) as diff
@@ -97,6 +98,7 @@ export function getHunterStats() {
         u.id as user_id, 
         u.name, 
         u.icon,
+        u.color_index,
         SUM(ur.points) as recent_points
       FROM users u
       JOIN user_rounds ur ON u.id = ur.user_id
@@ -130,7 +132,7 @@ export function getRollingAverageStats() {
     const rounds = db
       .prepare('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
       .all();
-    const users = db.prepare('SELECT id, name FROM users').all();
+    const users = db.prepare('SELECT id, name, color_index FROM users').all();
 
     const result = [];
 
@@ -169,6 +171,7 @@ export function getRollingAverageStats() {
       result.push({
         user_id: user.id,
         name: user.name,
+        color_index: user.color_index,
         data: dataPoints,
       });
     }
@@ -190,6 +193,7 @@ export function getFloorCeilingStats() {
         u.id as user_id, 
         u.name, 
         u.icon,
+        u.color_index,
         MIN(ur.points) as floor,
         MAX(ur.points) as ceiling,
         CAST(AVG(ur.points) as INTEGER) as avg
@@ -235,6 +239,7 @@ export function getReliabilityStats() {
         u.id as user_id,
         u.name,
         u.icon,
+        u.color_index,
         ur.round_id,
         ur.points
       FROM users u
@@ -252,6 +257,7 @@ export function getReliabilityStats() {
           user_id: score.user_id,
           name: score.name,
           icon: score.icon,
+          color_index: score.color_index,
           total_rounds: 0,
           rounds_above: 0,
         };
@@ -283,7 +289,7 @@ export function getVolatilityStats() {
   try {
     // SQLite doesn't have STDDEV, calculate manually or with complex query
     // Using avg diff squared approach
-    const users = db.prepare('SELECT id, name, icon FROM users').all();
+    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
     const result = [];
 
     for (const user of users) {
@@ -302,6 +308,7 @@ export function getVolatilityStats() {
         user_id: user.id,
         name: user.name,
         icon: user.icon,
+        color_index: user.color_index,
         stdDev: parseFloat(stdDev.toFixed(1)),
         mean: parseFloat(mean.toFixed(1)),
       });
@@ -319,7 +326,7 @@ export function getVolatilityStats() {
  */
 export function getPointDistributionStats() {
   try {
-    const users = db.prepare('SELECT id, name FROM users').all();
+    const users = db.prepare('SELECT id, name, color_index FROM users').all();
     const buckets = [
       { range: '90-135', min: 90, max: 135 },
       { range: '136-170', min: 136, max: 170 },
@@ -348,6 +355,7 @@ export function getPointDistributionStats() {
       result.push({
         user_id: user.id,
         name: user.name,
+        color_index: user.color_index,
         distribution,
       });
     }
@@ -368,7 +376,7 @@ export function getAllPlayAllStats() {
     const rounds = db
       .prepare('SELECT DISTINCT round_id FROM user_rounds WHERE participated = 1')
       .all();
-    const users = db.prepare('SELECT id, name, icon FROM users').all();
+    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
 
     const standings = {};
     users.forEach((u) => {
@@ -376,6 +384,7 @@ export function getAllPlayAllStats() {
         user_id: u.id,
         name: u.name,
         icon: u.icon,
+        color_index: u.color_index,
         wins: 0,
         losses: 0,
         ties: 0,
@@ -443,6 +452,7 @@ export function getDominanceStats() {
         w.user_id,
         u.name,
         u.icon,
+        u.color_index,
         COUNT(*) as wins,
         AVG(w.points - runner.points) as avg_margin
       FROM RoundWinners w
@@ -490,6 +500,7 @@ export function getTheoreticalGapStats() {
         u.id as user_id,
         u.name,
         u.icon,
+        u.color_index,
         SUM(ur.points) as current_points
       FROM user_rounds ur
       JOIN users u ON ur.user_id = u.id
@@ -525,7 +536,7 @@ export function getHeatmapStats() {
       .all();
 
     // Get all users
-    const users = db.prepare('SELECT id, name, icon FROM users').all();
+    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
 
     // Get all scores
     const scores = db
@@ -552,6 +563,7 @@ export function getHeatmapStats() {
         id: u.id,
         name: u.name,
         icon: u.icon,
+        color_index: u.color_index,
         scores: rounds.map((r) => scoreMap[u.id]?.[r.round_id] ?? null),
       })),
     };
@@ -570,7 +582,7 @@ export function getPositionChangesStats() {
     const rounds = db
       .prepare('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
       .all();
-    const users = db.prepare('SELECT id, name, icon FROM users').all();
+    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
     // Get all scores ordered by round
     const scores = db
       .prepare(
@@ -646,6 +658,7 @@ export function getPositionChangesStats() {
         id: user.id,
         name: user.name,
         icon: user.icon,
+        color_index: user.color_index,
         history: historyData, // Renamed from 'changes' to 'history' to reflect richer data
       };
     });
@@ -668,7 +681,7 @@ export function getPositionChangesStats() {
  */
 export function getRivalryMatrixStats() {
   try {
-    const users = db.prepare('SELECT id, name, icon FROM users').all();
+    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
     const rounds = db
       .prepare('SELECT DISTINCT round_id FROM user_rounds WHERE participated = 1')
       .all();
@@ -714,7 +727,12 @@ export function getRivalryMatrixStats() {
     }
 
     return {
-      users: users.map((u) => ({ id: u.id, name: u.name, icon: u.icon })),
+      users: users.map((u) => ({
+        id: u.id,
+        name: u.name,
+        icon: u.icon,
+        color_index: u.color_index,
+      })),
       matrix,
     };
   } catch (error) {
@@ -734,6 +752,7 @@ export function getCaptainStats() {
         l.user_id,
         u.name,
         u.icon,
+        u.color_index,
         COUNT(*) as total_captains,
         SUM(prs.points) as raw_captain_points,
         SUM(CASE 

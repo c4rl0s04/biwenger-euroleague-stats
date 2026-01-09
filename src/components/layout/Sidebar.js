@@ -24,7 +24,7 @@ import { useState, useEffect } from 'react';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useSections } from './SectionContext';
-import { LEAGUE_MEMBERS } from '@/lib/constants/league';
+
 import { getColorForUser } from '@/lib/constants/colors';
 
 const navItems = [
@@ -47,7 +47,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const { currentUser, isReady } = useClientUser();
   const { sections } = useSections();
   const [isSectionsVisible, setIsSectionsVisible] = useState(true);
-  const [isMembersVisible, setIsMembersVisible] = useState(true);
+  const [isMembersVisible, setIsMembersVisible] = useState(false);
 
   // Reset section visibility on route change
   // Reset section visibility on route change
@@ -65,6 +65,9 @@ export default function Sidebar({ isOpen, onClose }) {
       skip: !currentUser,
     }
   );
+
+  // Fetch all users for the members list
+  const { data: users = [] } = useApiData('/api/users');
 
   const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
 
@@ -293,7 +296,7 @@ export default function Sidebar({ isOpen, onClose }) {
               >
                 <ChevronLeft
                   size={12}
-                  className={`transition-transform duration-200 ${!isMembersVisible ? '-rotate-90' : 'rotate-90'}`}
+                  className={`transition-transform duration-200 ${!isMembersVisible ? 'rotate-90' : '-rotate-90'}`}
                 />
               </button>
             </div>
@@ -302,27 +305,24 @@ export default function Sidebar({ isOpen, onClose }) {
           <div
             className={`space-y-1 overflow-hidden transition-all duration-300 ${isMembersVisible && !isCollapsed ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}
           >
-            {LEAGUE_MEMBERS.map((member) => {
-              const color = getColorForUser(member.id);
-              // Use the background gradient class but strip 'bg-' to just get colors if possible,
-              // or better yet, use the 'stroke' or 'text' color for a solid dot.
-              // Let's use the 'stroke' Hex if available, or extract from class.
-              // Actually, simply using the class string for a small div is easiest if appropriate.
-              // getColorForUser returns { bg, border, text, stroke... }
+            {users.map((member) => {
+              const { id, name, color_index } = member;
+              const color = getColorForUser(id, name, color_index);
+
               return (
                 <Link
-                  key={member.id}
-                  href={`/user/${member.id}`}
+                  key={id}
+                  href={`/user/${id}`}
                   className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors group"
                 >
                   <div
                     className={`w-2 h-2 rounded-full ring-2 ring-white/10 ${color.text.replace('text-', 'bg-')}`}
-                    style={{ backgroundColor: color.stroke }} // fallback/override to precise hex
+                    style={{ backgroundColor: color.stroke }}
                   />
                   <span
                     className={`text-xs font-medium transition-colors truncate ${color.text} opacity-90 group-hover:opacity-100`}
                   >
-                    {member.name}
+                    {name}
                   </span>
                 </Link>
               );

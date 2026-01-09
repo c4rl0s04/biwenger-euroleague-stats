@@ -230,7 +230,8 @@ export function getLastRoundMVPs(limit = 5) {
       p.position,
       prs.fantasy_points as points,
       u.id as owner_id,
-      u.name as owner_name
+      u.name as owner_name,
+      u.color_index as owner_color_index
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id

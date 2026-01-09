@@ -59,7 +59,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
     );
   }
 
-  const userColor = getColorForUser(user.user_id, user.name);
+  const userColor = getColorForUser(user.user_id, user.name, user.color_index);
   const name = user.name;
 
   let lines = [];
@@ -122,6 +122,7 @@ export default function PointDistributionCard() {
   const chartData = data.map((u) => ({
     name: u.name,
     user_id: u.user_id,
+    color_index: u.color_index,
     '90-135': u.distribution['90-135'] || 0,
     '136-170': u.distribution['136-170'] || 0,
     '171-205': u.distribution['171-205'] || 0,

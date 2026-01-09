@@ -10,11 +10,11 @@ export const USER_COLORS = [
     stroke: '#60a5fa',
   },
   {
-    bg: 'from-purple-500/20 to-purple-600/10',
-    border: 'border-purple-500/30',
-    text: 'text-purple-400',
-    hover: 'hover:text-purple-400',
-    stroke: '#c084fc',
+    bg: 'from-yellow-500/20 to-yellow-600/10',
+    border: 'border-yellow-500/30',
+    text: 'text-yellow-400',
+    hover: 'hover:text-yellow-400',
+    stroke: '#facc15',
   },
   {
     bg: 'from-emerald-500/20 to-emerald-600/10',
@@ -45,11 +45,11 @@ export const USER_COLORS = [
     stroke: '#fb923c',
   },
   {
-    bg: 'from-yellow-500/20 to-yellow-600/10',
-    border: 'border-yellow-500/30',
-    text: 'text-yellow-400',
-    hover: 'hover:text-yellow-400',
-    stroke: '#facc15',
+    bg: 'from-purple-500/20 to-purple-600/10',
+    border: 'border-purple-500/30',
+    text: 'text-purple-400',
+    hover: 'hover:text-purple-400',
+    stroke: '#c084fc',
   },
   {
     bg: 'from-red-500/20 to-red-600/10',
@@ -95,21 +95,15 @@ export const USER_COLORS = [
   },
 ];
 
-export function getColorForUser(userId, userName) {
-  const idStr = String(userId);
-  const fixedIndexes = CONFIG.USER_COLORS?.FIXED_INDEXES || {};
-
-  // Check fixed mapping first (from centralized config)
-  if (fixedIndexes.hasOwnProperty(idStr)) {
-    return USER_COLORS[fixedIndexes[idStr]];
+export function getColorForUser(userId, userName, colorIndex) {
+  // 1. Use Database Index if available (Preferred)
+  if (colorIndex !== undefined && colorIndex !== null) {
+    return USER_COLORS[colorIndex % USER_COLORS.length];
   }
 
-  // Fallback: Deterministic hash based on userId
-  let hash = 0;
-  for (let i = 0; i < idStr.length; i++) {
-    hash = idStr.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  const index = Math.abs(hash) % USER_COLORS.length;
-  return USER_COLORS[index];
+  // 2. Fallback: Simple modulo of User ID
+  // This ensures a deterministic color even if DB index isn't passed (e.g. in legacy components)
+  // We strip non-digits just in case, though IDs are usually numeric.
+  const idNum = parseInt(String(userId).replace(/\D/g, ''), 10) || 0;
+  return USER_COLORS[idNum % USER_COLORS.length];
 }

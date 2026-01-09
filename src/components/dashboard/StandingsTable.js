@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { UserAvatar } from '@/components/ui';
+import { getColorForUser } from '@/lib/constants/colors';
 
 function StandingsTable({ standings }) {
   const [sortConfig, setSortConfig] = useState({ key: 'position', direction: 'asc' });
@@ -74,15 +75,28 @@ function StandingsTable({ standings }) {
             >
               <td className="px-2 py-2 font-medium text-foreground text-xs">#{user.position}</td>
               <td className="px-2 py-2">
-                <Link
-                  href={`/user/${user.user_id}`}
-                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                >
-                  <UserAvatar src={user.icon} alt={user.name} size={20} />
-                  <span className="truncate max-w-[100px] sm:max-w-none text-xs hover:text-blue-400 transition-colors">
-                    {user.name}
-                  </span>
-                </Link>
+                {(() => {
+                  const { user_id, name, color_index } = user;
+                  const color = getColorForUser(user_id, name, color_index);
+
+                  return (
+                    <Link
+                      href={`/user/${user_id}`}
+                      className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
+                    >
+                      <div
+                        className={`rounded-full p-0.5 ${color.bg} ${color.text.replace('text-', 'bg-').replace('500', '500/10')}`}
+                      >
+                        <UserAvatar src={user.icon} alt={name} size={20} />
+                      </div>
+                      <span
+                        className={`truncate max-w-[100px] sm:max-w-none text-xs font-medium transition-colors ${color.text} group-hover:opacity-80`}
+                      >
+                        {name}
+                      </span>
+                    </Link>
+                  );
+                })()}
               </td>
               <td className="px-2 py-2 text-right">
                 <div className="font-bold text-orange-500 text-sm">{user.total_points}</div>

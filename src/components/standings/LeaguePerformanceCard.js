@@ -47,10 +47,12 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const CustomYAxisTick = ({ x, y, payload, data }) => {
-  if (!data || !data[payload.index]) return null;
-  const user = data[payload.index];
-  const colors = getColorForUser(user.user_id, user.name);
-  const name = payload.value;
+  // Use payload.value (name) to find the user instead of relying on index
+  const user = data.find((u) => u.name === payload.value);
+  if (!user) return null;
+
+  const { user_id, name, color_index } = user;
+  const colors = getColorForUser(user_id, name, color_index);
 
   let lines = [];
   let remaining = name;

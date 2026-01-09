@@ -100,7 +100,7 @@ export default function FullStandingsCard() {
             <tbody>
               {sortedStandings.map((user) => {
                 const gapToLeader = leader ? leader.total_points - user.total_points : 0;
-                const userColor = getColorForUser(user.user_id, user.name);
+                const userColor = getColorForUser(user.user_id, user.name, user.color_index);
                 return (
                   <tr
                     key={user.user_id}

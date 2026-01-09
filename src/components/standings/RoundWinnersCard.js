@@ -16,7 +16,7 @@ export default function RoundWinnersCard() {
         <div className="flex flex-wrap justify-center gap-2">
           {winners.length > 0 ? (
             winners.map((winner) => {
-              const colors = getColorForUser(winner.user_id, winner.name);
+              const colors = getColorForUser(winner.user_id, winner.name, winner.color_index);
               return (
                 <Link
                   key={`${winner.round_id}-${winner.user_id}`}

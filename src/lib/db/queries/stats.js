@@ -37,6 +37,7 @@ export function getStandings() {
       u.id as user_id,
       u.name,
       u.icon,
+      u.color_index,
       COALESCE(ut.total_points, 0) as total_points,
       COALESCE(sq.team_value, 0) as team_value,
       COALESCE(sq.price_trend, 0) as price_trend,
@@ -203,6 +204,7 @@ export function getStatLeaders(type = 'points') {
       t.name as team,
       p.owner_id,
       u.name as owner_name,
+      u.color_index as owner_color_index,
       SUM(prs.${column}) as value,
       COUNT(prs.id) as games_played,
       ROUND(AVG(prs.${column}), 1) as avg_value

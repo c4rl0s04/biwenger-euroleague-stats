@@ -4,6 +4,7 @@ import { Cake, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function BirthdayCard() {
   const { data: birthdays = [], loading } = useApiData('/api/dashboard/birthdays');
@@ -38,9 +39,19 @@ export default function BirthdayCard() {
                         </span>
                       )}
                     </div>
-                    {player.owner_name && (
-                      <div className="text-xs text-pink-400 mt-0.5">👤 {player.owner_name}</div>
-                    )}
+                    {player.owner_name &&
+                      (() => {
+                        const color = getColorForUser(
+                          player.owner_id,
+                          player.owner_name,
+                          player.owner_color_index
+                        );
+                        return (
+                          <div className={`text-xs mt-0.5 ${color.text}`}>
+                            👤 {player.owner_name}
+                          </div>
+                        );
+                      })()}
                   </div>
                 </div>
               ))}

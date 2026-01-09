@@ -38,7 +38,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
     );
   }
 
-  const userColor = getColorForUser(user.user_id, user.name);
+  const userColor = getColorForUser(user.user_id, user.name, user.color_index);
   const name = user.name;
 
   // --- Splitting Logic (Max 10 chars per line) ---
@@ -119,6 +119,7 @@ export default function FloorCeilingCard() {
   const chartData = data.map((u) => ({
     name: u.name,
     user_id: u.user_id,
+    color_index: u.color_index,
     range: [u.floor, u.ceiling],
     avg: u.avg,
     floor: u.floor,

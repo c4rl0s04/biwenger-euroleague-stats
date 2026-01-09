@@ -5,6 +5,7 @@ import { ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function MarketActivityCard() {
   const { currentUser, isReady } = useClientUser();
@@ -56,23 +57,41 @@ export default function MarketActivityCard() {
                 </Link>
                 <div className="text-sm text-muted-foreground flex items-center flex-wrap gap-1 mt-0.5">
                   {transfer.vendedor_id ? (
-                    <Link
-                      href={`/user/${transfer.vendedor_id}`}
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                    >
-                      {transfer.vendedor}
-                    </Link>
+                    (() => {
+                      const sellerColor = getColorForUser(
+                        transfer.vendedor_id,
+                        transfer.vendedor,
+                        transfer.vendedor_color_index
+                      );
+                      return (
+                        <Link
+                          href={`/user/${transfer.vendedor_id}`}
+                          className={`${sellerColor.text} hover:opacity-80 transition-colors`}
+                        >
+                          {transfer.vendedor}
+                        </Link>
+                      );
+                    })()
                   ) : (
                     <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
                   )}
                   <ArrowRight className="w-3 h-3 shrink-0" />
                   {transfer.comprador_id ? (
-                    <Link
-                      href={`/user/${transfer.comprador_id}`}
-                      className="text-green-400 hover:text-green-300 transition-colors"
-                    >
-                      {transfer.comprador}
-                    </Link>
+                    (() => {
+                      const buyerColor = getColorForUser(
+                        transfer.comprador_id,
+                        transfer.comprador,
+                        transfer.comprador_color_index
+                      );
+                      return (
+                        <Link
+                          href={`/user/${transfer.comprador_id}`}
+                          className={`${buyerColor.text} hover:opacity-80 transition-colors`}
+                        >
+                          {transfer.comprador}
+                        </Link>
+                      );
+                    })()
                   ) : (
                     <span className="text-green-400">{transfer.comprador}</span>
                   )}
