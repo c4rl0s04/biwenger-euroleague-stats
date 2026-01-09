@@ -74,9 +74,10 @@ src/
 │   ├── standings/       # Standings page
 │   └── player/[id]/     # Player profile page
 ├── components/          # React components
-│   ├── dashboard/       # Dashboard cards (19)
-│   ├── clasificacion/   # Standings cards (16)
-│   ├── player/          # Player cards (12)
+│   ├── dashboard/       # Dashboard cards
+│   ├── standings/       # Standings cards
+│   ├── players-list/    # Player list components
+│   ├── player-profile/  # Player profile components
 │   └── ui/              # Shared UI components
 └── lib/                 # Utilities and database
     ├── db/              # Database layer
