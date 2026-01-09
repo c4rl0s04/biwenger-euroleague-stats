@@ -10,9 +10,6 @@
     "lint": "eslint",
     "format": "prettier --write src/",
     "sync": "node src/lib/sync/index.js",
-    "sync:teams": "node src/lib/sync/update-team-logos.js",
-    "sync:images": "node src/lib/sync/update-official-images.js",
-    "seed": "node src/lib/sync/seed-mock.js",
     "test": "vitest",
     "analyze": "ANALYZE=true next build --webpack",
     "prepare": "husky"

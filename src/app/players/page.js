@@ -7,7 +7,7 @@
  */
 
 import { getAllPlayers } from '@/lib/db/queries/players';
-import PlayersTable from '@/components/players/PlayersTable';
+import PlayersTable from '@/components/players-list/PlayersTable';
 
 export const dynamic = 'force-dynamic';
 

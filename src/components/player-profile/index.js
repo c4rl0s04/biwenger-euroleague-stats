@@ -3,7 +3,7 @@
  * Import player components from this file:
  *
  * @example
- * import { PlayerProfileClient, PlayerStatsCard } from '@/components/player';
+ * import { PlayerProfileClient, PlayerStatsCard } from '@/components/player-profile';
  */
 
 // Main

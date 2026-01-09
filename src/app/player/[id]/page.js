@@ -1,7 +1,7 @@
 import { getPlayerDetails } from '@/lib/db';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { PlayerProfileClient } from '@/components/player';
+import { PlayerProfileClient } from '@/components/player-profile';
 import { ThemeBackground } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';

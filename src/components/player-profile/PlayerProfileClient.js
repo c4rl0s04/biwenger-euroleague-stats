@@ -15,7 +15,7 @@ import {
   PlayerOwnershipCard,
   PlayerPointsGraph,
   PlayerSplitsCard,
-} from '@/components/player';
+} from '@/components/player-profile';
 
 export default function PlayerProfileClient({ player }) {
   if (!player) return null;
