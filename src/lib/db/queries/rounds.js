@@ -1,5 +1,6 @@
 import { db } from '../client.js';
 import { getTeamPositions } from '../../utils/standings.js';
+import { NEXT_ROUND_CTE } from '../sql_utils.js';
 
 /**
  * Get Porras statistics
@@ -46,20 +47,14 @@ export function getAllPorrasRounds() {
 export function getNextRound() {
   // Find the round of the upcoming match, then get its full details (true start date)
   const query = `
-    WITH NextMatchRound AS (
-      SELECT round_id
-      FROM matches
-      WHERE date > datetime('now')
-      ORDER BY date ASC
-      LIMIT 1
-    )
+    ${NEXT_ROUND_CTE}
     SELECT 
       m.round_id,
       m.round_name,
       MIN(m.date) as start_date,
       MAX(m.date) as end_date
     FROM matches m
-    JOIN NextMatchRound nm ON m.round_id = nm.round_id
+    JOIN NextRoundStart nr ON m.round_id = nr.round_id
     GROUP BY m.round_id
   `;
   const round = db.prepare(query).get();

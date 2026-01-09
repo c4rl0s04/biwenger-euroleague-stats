@@ -15,24 +15,24 @@ export default function RoundHeatmapCard() {
   const getColor = (score) => {
     if (score === null) return 'bg-slate-800/60 text-slate-500'; // Did not participate
 
+    // Brighter colors: Increased opacity (40 -> 80/90) and lighter shades (600 -> 500)
     if (score >= 230)
-      return 'bg-fuchsia-600/40 text-fuchsia-100 shadow-[0_0_15px_rgba(192,38,211,0.4)] font-black border border-fuchsia-500/50'; // Top Tier
+      return 'bg-fuchsia-500/90 text-white shadow-[0_0_15px_rgba(217,70,239,0.5)] font-black border border-fuchsia-400/50'; // Top Tier
 
     if (score >= 210)
-      return 'bg-purple-600/40 text-purple-100 shadow-[0_0_10px_rgba(147,51,234,0.3)] font-bold border border-purple-500/40'; // Excellent
+      return 'bg-purple-500/80 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)] font-bold border border-purple-400/50'; // Excellent
 
-    if (score >= 190)
-      return 'bg-indigo-600/40 text-indigo-100 font-bold border border-indigo-500/40'; // Great
+    if (score >= 190) return 'bg-indigo-500/80 text-white font-bold border border-indigo-400/50'; // Great
 
-    if (score >= 170) return 'bg-blue-600/40 text-blue-100 border border-blue-500/40'; // Above Average
+    if (score >= 170) return 'bg-blue-500/80 text-white border border-blue-400/50'; // Above Average
 
-    if (score >= 150) return 'bg-emerald-600/40 text-emerald-100 border border-emerald-500/40'; // Average
+    if (score >= 150) return 'bg-emerald-500/80 text-emerald-50 border border-emerald-400/50'; // Average
 
-    if (score >= 130) return 'bg-yellow-600/40 text-yellow-100 border border-yellow-500/40'; // Below Average
+    if (score >= 130) return 'bg-yellow-500/80 text-yellow-50 border border-yellow-400/50'; // Below Average
 
-    if (score >= 110) return 'bg-orange-600/40 text-orange-100 border border-orange-500/40'; // Low
+    if (score >= 110) return 'bg-orange-500/80 text-white border border-orange-400/50'; // Low
 
-    return 'bg-red-600/40 text-red-100 border border-red-500/40'; // Lowest (< 110)
+    return 'bg-red-500/80 text-white border border-red-400/50'; // Lowest (< 110)
   };
 
   // Helper to keep tooltip inside the card

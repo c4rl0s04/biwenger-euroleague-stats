@@ -1,7 +1,7 @@
-import { fetchAllPlayers, fetchPlayerDetails } from '../api/biwenger-client.js';
-import { getShortTeamName } from '../utils/format.js';
-import { CONFIG } from '../config.js';
-import { preparePlayerMutations } from '../db/mutations/players.js';
+import { fetchAllPlayers, fetchPlayerDetails } from '../../api/biwenger-client.js';
+import { getShortTeamName } from '../../utils/format.js';
+import { CONFIG } from '../../config.js';
+import { preparePlayerMutations } from '../../db/mutations/players.js';
 
 const SLEEP_MS = 600; // Mantenemos la pausa segura para evitar el error 429
 
@@ -35,11 +35,6 @@ const parsePriceDate = (dateInt) => {
  */
 export async function run(manager) {
   const db = manager.context.db;
-  const options = {
-    skipDetails: manager.flags.noDetails,
-    forceDetails: manager.flags.forceDetails,
-  };
-
   manager.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
 
@@ -84,13 +79,7 @@ export async function run(manager) {
 
   // --- 2. PROCESSING ---
 
-  // Check options
-  const skipDetails = options.skipDetails;
-  if (skipDetails) {
-    manager.log(
-      '   ⏩ Skipping detailed player fetch (CLI flag --no-details active). Prices/Bio will not be updated.'
-    );
-  }
+  // No flags or options to check in Simplification V2
 
   for (const [id, player] of Object.entries(playersList)) {
     const playerId = parseInt(id);
@@ -114,26 +103,7 @@ export async function run(manager) {
       img: player.img || null,
     });
 
-    // SKIP DETAILS IF FLAG IS SET
-    if (skipDetails) continue;
-
-    // B) Fetching Extended Details
-
-    // OPTIMIZATION: Freshness check
-    // If we already have a market value for TODAY (or very recent date), skip details.
-    const today = new Date().toISOString().split('T')[0];
-    const lastDateRow = mutations.getLastDate(playerId);
-    const lastDate = lastDateRow ? lastDateRow.last_date : null;
-
-    // Check if we are missing bio data (self-healing)
-    const currentPlayer = mutations.getPlayerBioStatus(playerId);
-    const isMissingBio = !currentPlayer || !currentPlayer.birth_date || !currentPlayer.height;
-
-    // If the last recorded date is TODAY (or later) AND we have bio data, skip
-    if (!options.forceDetails && !isMissingBio && lastDate && lastDate >= today) {
-      // manager.log(`   ⏭️ Skipping ${player.name} (Already updated for ${lastDate})`);
-      continue;
-    }
+    // B) Fetching Extended Details (Always)
 
     try {
       await sleep(SLEEP_MS);
@@ -152,42 +122,20 @@ export async function run(manager) {
           weight: d.weight || null,
         });
 
-        // B.2 Insert ONLY new prices (Optimization)
+        // B.2 Insert market values (Historical prices)
         if (d.prices && Array.isArray(d.prices)) {
-          // 1. Query what we already have in the database (redundant variable but clear)
-          // const lastDateRow = getLastDate.get(playerId);
-          // const lastDate = lastDateRow ? lastDateRow.last_date : null;
-
-          // 2. Filter: only dates AFTER the last one we have
-          const newPrices = d.prices.filter(([dateInt]) => {
-            // If we have no history, all are of interest (return true)
-            if (!lastDate) return true;
-
-            // Convert API date (250918) to SQL (2025-09-18) and compare
-            const priceDate = parsePriceDate(dateInt);
-            return priceDate > lastDate;
+          const insertHistory = db.transaction((prices) => {
+            for (const [dateInt, price] of prices) {
+              const priceDate = parsePriceDate(dateInt);
+              mutations.insertMarketValue({
+                player_id: playerId,
+                price: price,
+                date: priceDate,
+              });
+            }
           });
 
-          // 3. We only insert the delta (if there's something new)
-          if (newPrices.length > 0) {
-            const insertHistory = db.transaction((prices) => {
-              for (const [dateInt, price] of prices) {
-                // Use raw statement from mutations.stmts for bulk efficiency if needed
-                // OR cleaner: mutations.insertMarketValue(...)
-                // Since this runs inside a tx loop, reusing the prepared stmt is key.
-                // mutations.insertMarketValue is a wrapper .run(), so it is fine.
-                // But passing 'prices' array to tx function is nicer.
-                mutations.insertMarketValue({
-                  player_id: playerId,
-                  price: price,
-                  date: parsePriceDate(dateInt),
-                });
-              }
-            });
-            insertHistory(newPrices);
-            // Opcional: Log para depurar
-            // manager.log(`   -> Added ${newPrices.length} new prices for ${player.name}`);
-          }
+          insertHistory(d.prices);
         }
       }
     } catch (e) {
@@ -210,10 +158,7 @@ export const syncPlayers = async (db, options) => {
   // Minimal mock manager for direct calls
   const mockManager = {
     context: { db, playersList: {}, teams: {} },
-    flags: {
-      noDetails: options?.skipDetails,
-      forceDetails: options?.forceDetails,
-    },
+    // Flags object removed for legacy support
     log: console.log,
     error: console.error,
   };

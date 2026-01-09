@@ -1,6 +1,6 @@
-import { biwengerFetch } from '../api/biwenger-client.js';
-import { CONFIG } from '../config.js';
-import { prepareMarketMutations } from '../db/mutations/market.js';
+import { biwengerFetch } from '../../api/biwenger-client.js';
+import { CONFIG } from '../../config.js';
+import { prepareMarketMutations } from '../../db/mutations/market.js';
 
 /**
  * Syncs board history (transfers, porras, etc.) incrementally.
@@ -25,18 +25,8 @@ export async function run(manager, playersListInput, teamsInput) {
   // Initialize Mutations
   const mutations = prepareMarketMutations(db);
 
-  // Check for existing transfers to do incremental sync
-  // We use fichajes timestamp as the anchor for now, assuming board is sequential
-  const lastTransfer = mutations.getLastTransferDate.get();
-  const lastTimestamp = lastTransfer ? lastTransfer.ts : 0;
-
-  if (lastTimestamp > 0) {
-    manager.log(
-      `Found existing data up to ${new Date(lastTimestamp * 1000).toISOString()}. Syncing only new...`
-    );
-  } else {
-    manager.log('No existing data. Doing full sync...');
-  }
+  // Check for existing transfers to do incremental sync removed. Doing full sync.
+  manager.log('Fetching full board history...');
 
   let offset = 0;
   const limit = 50;
@@ -90,15 +80,8 @@ export async function run(manager, playersListInput, teamsInput) {
             const roundName = t.content.round ? t.content.round.name : 'Unknown';
             const date = new Date(t.date * 1000).toISOString();
 
-            if (t.date <= lastTimestamp) {
-              // We don't skip entire batch here because we might strictly be looking for finances
-              // But for now, we assume if we hit old transfers we hit old everything.
-              // HOWEVER, finances table isn't used for "lastTimestamp" check yet.
-              // Let's just insert duplicates? No, we need UNIQUE constraint or check exists.
-              // For now, let's assume we sync all if not found.
-              // Actually, let's skip if older than last transfer for safety
-              // skippedOld++;
-              // continue;
+            if (t.date <= 0) {
+              // Placeholder for any future logic, removed skippedOld
             }
 
             for (const res of t.content.results) {
@@ -155,12 +138,8 @@ export async function run(manager, playersListInput, teamsInput) {
           const roundId = pool.round ? pool.round.id : null;
           const roundName = pool.round ? pool.round.name : 'Unknown Round';
 
-          // Check timestamp for incremental sync (using event date)
-          if (t.date <= lastTimestamp) {
-            moreTransfers = false;
-            skippedOld++;
-            continue;
-          }
+          // Optimization removed: sync all
+          // if (t.date <= lastTimestamp) { ... }
 
           for (const response of pool.responses) {
             try {
@@ -198,14 +177,8 @@ export async function run(manager, playersListInput, teamsInput) {
         for (const content of t.content) {
           const timestamp = t.date;
 
-          // Incremental check: if we reach a transfer older or equal to what we have, stop
-          if (timestamp <= lastTimestamp) {
-            // We found a transfer we already have (or older).
-            // Since API returns newest first, we can stop fetching entirely.
-            moreTransfers = false;
-            skippedOld++;
-            continue;
-          }
+          // Optimization removed: sync all
+          // if (timestamp <= lastTimestamp) { ... }
 
           const date = new Date(timestamp * 1000).toISOString();
           const playerId = content.player;

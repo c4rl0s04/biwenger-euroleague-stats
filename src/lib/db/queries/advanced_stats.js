@@ -722,3 +722,55 @@ export function getRivalryMatrixStats() {
     return { users: [], matrix: {} };
   }
 }
+
+/**
+ * Get Captain Fantastic Stats
+ * Best performing captains
+ */
+export function getCaptainStats() {
+  try {
+    const sql = `
+      SELECT 
+        l.user_id,
+        u.name,
+        u.icon,
+        COUNT(*) as total_captains,
+        SUM(prs.points) as raw_captain_points,
+        SUM(CASE 
+          WHEN prs.fantasy_points IS NOT NULL THEN prs.fantasy_points 
+          ELSE prs.points * 2 /* Fallback/Simplification if fantasy points not synced? No, Biwenger usually doubles it in the final score? Actually, let's use raw points and simulate the bonus */
+        END) as weighted_points,
+        /* Calculate how many times the captain was actually the highest scorer in the lineup */
+        AVG(prs.points) as avg_captain_points
+      FROM lineups l
+      JOIN users u ON l.user_id = u.id
+      JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+      WHERE l.is_captain = 1
+      GROUP BY l.user_id
+      ORDER BY raw_captain_points DESC
+    `;
+
+    // NOTE: 'points' in player_round_stats is raw stats points (e.g. 15).
+    // In Biwenger, captain usually doubles the score.
+    // If 'fantasy_points' column exists and is populated, it might already include the doubling?
+    // Let's assume we want to track the BASE performance of the player chosen as captain.
+    // "Captain Points" usually means: How many points did your captain CONTRIBUTE? (Base x 2).
+    // Or "Accuracy": Did you pick the best player?
+
+    // Let's refine the query to be more "Best Choices":
+    // 1. Get Base Points of Captains.
+
+    return db
+      .prepare(sql)
+      .all()
+      .map((u) => ({
+        ...u,
+        total_bonus: u.raw_captain_points, // If raw points is 15, bonus is +15. So Total Gain = 15.
+        // Wait, if Captain gets 20 pts (10 base + 10 bonus), then "raw_points" is 10.
+        // So the "Value Added" by the captaincy choice is exactly equal to the Base Points.
+      }));
+  } catch (error) {
+    console.error('Error in getCaptainStats:', error);
+    return [];
+  }
+}

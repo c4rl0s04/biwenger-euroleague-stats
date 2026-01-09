@@ -1,4 +1,5 @@
 import { db } from '../client.js';
+import { FUTURE_MATCH_CONDITION } from '../sql_utils.js';
 
 /**
  * Get upcoming matches
@@ -17,7 +18,7 @@ export function getUpcomingMatches(limit = 5) {
     LEFT JOIN teams th ON m.home_id = th.id
     LEFT JOIN teams ta ON m.away_id = ta.id
     WHERE m.status = 'scheduled' 
-      AND m.date > datetime('now')
+      AND ${FUTURE_MATCH_CONDITION('m.date')}
     ORDER BY m.date ASC
     LIMIT ?
   `;

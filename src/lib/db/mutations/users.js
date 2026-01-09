@@ -115,5 +115,13 @@ export function prepareUserMutations(db) {
     getSalesByPlayerAndUser,
     upsertLineup,
     upsertUserRound,
+
+    // Step 9 Helpers (Backtracking)
+    clearInitialSquads: db.prepare('DELETE FROM initial_squads'),
+    getTransfersForBacktracking: db.prepare(`
+        SELECT timestamp, player_id, vendedor, comprador 
+        FROM fichajes 
+        ORDER BY timestamp DESC
+    `),
   };
 }

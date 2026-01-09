@@ -1,5 +1,5 @@
-import { fetchRoundsLeague } from '../api/biwenger-client.js';
-import { prepareUserMutations } from '../db/mutations/users.js';
+import { fetchRoundsLeague } from '../../../api/biwenger-client.js';
+import { prepareUserMutations } from '../../../db/mutations/users.js';
 
 /**
  * Syncs lineups for finished rounds.
@@ -19,13 +19,7 @@ import { prepareUserMutations } from '../db/mutations/users.js';
  * @param {Object} playersListInput - Map of player IDs to player objects
  * @returns {Promise<{success: boolean, insertedCount: number, message: string}>}
  */
-export async function run(
-  manager,
-  round,
-  existingLineupRounds,
-  lastLineupRoundId,
-  playersListInput
-) {
+export async function run(manager, round, playersListInput) {
   const db = manager.context.db;
   const playersList = playersListInput || manager.context.playersList || {};
 
@@ -86,37 +80,34 @@ export async function run(
             }
           }
 
-          // Insert Lineup (ONLY if not exists or is last round)
-          // We check existingLineupRounds
-          if (!existingLineupRounds.has(dbRoundId) || dbRoundId >= lastLineupRoundId) {
-            if (user.lineup && user.lineup.players) {
-              const captainId = user.lineup.captain ? user.lineup.captain.id : null;
+          // Insert Lineup (ALWAYS)
+          if (user.lineup && user.lineup.players) {
+            const captainId = user.lineup.captain ? user.lineup.captain.id : null;
 
-              user.lineup.players.forEach((playerId, index) => {
-                try {
-                  let role = 'suplente';
-                  if (index < 5) role = 'titular';
-                  else if (index === 5) role = '6th_man';
-                  // Check if player exists in our list
-                  if (!playersList[playerId]) {
-                    // console.warn(`   Skipping lineup for unknown player ${playerId}`);
-                    return; // Use return for forEach to skip current iteration
-                  }
-
-                  mutations.upsertLineup.run({
-                    user_id: user.id.toString(),
-                    round_id: dbRoundId,
-                    round_name: roundName,
-                    player_id: playerId,
-                    is_captain: playerId === captainId ? 1 : 0,
-                    role: role,
-                  });
-                  insertedCount++;
-                } catch (e) {
-                  // Ignore duplicates
+            user.lineup.players.forEach((playerId, index) => {
+              try {
+                let role = 'suplente';
+                if (index < 5) role = 'titular';
+                else if (index === 5) role = '6th_man';
+                // Check if player exists in our list
+                if (!playersList[playerId]) {
+                  // console.warn(`   Skipping lineup for unknown player ${playerId}`);
+                  return; // Use return for forEach to skip current iteration
                 }
-              });
-            }
+
+                mutations.upsertLineup.run({
+                  user_id: user.id.toString(),
+                  round_id: dbRoundId,
+                  round_name: roundName,
+                  player_id: playerId,
+                  is_captain: playerId === captainId ? 1 : 0,
+                  role: role,
+                });
+                insertedCount++;
+              } catch (e) {
+                // Ignore duplicates
+              }
+            });
           }
         }
       })();

@@ -1,4 +1,5 @@
 import { db } from '@/lib/db/client';
+import { NEXT_ROUND_CTE } from '../sql_utils.js';
 
 export function getScheduleRounds() {
   try {
@@ -33,11 +34,11 @@ export function getUserSchedule(userId, targetRoundId = null) {
       targetRound = db
         .prepare(
           `
-        SELECT round_id, round_name 
-        FROM matches 
-        WHERE datetime(date) > datetime('now') 
-        ORDER BY date ASC 
-        LIMIT 1
+        ${NEXT_ROUND_CTE}
+        SELECT m.round_id, m.round_name 
+        FROM matches m
+        JOIN NextRoundStart nr ON m.round_id = nr.round_id
+        GROUP BY m.round_id
       `
         )
         .get();

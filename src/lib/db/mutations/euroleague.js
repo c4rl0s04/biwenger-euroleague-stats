@@ -63,7 +63,7 @@ export function prepareEuroleagueMutations(db) {
     'SELECT id, name FROM players WHERE euroleague_code = ?'
   );
 
-  const getAllPlayers = db.prepare('SELECT id, name, team_id FROM players');
+  const getAllPlayers = db.prepare('SELECT id, name, team_id, euroleague_code FROM players');
 
   const updatePlayerEuroleagueCode = db.prepare(
     'UPDATE players SET euroleague_code = @euroleague_code WHERE id = @id'
@@ -103,9 +103,10 @@ export function prepareEuroleagueMutations(db) {
 
   // --- Fantasy Points Sync ---
   const updateFantasyPoints = db.prepare(`
-      UPDATE player_round_stats 
-      SET fantasy_points = @fantasy_points 
-      WHERE player_id = @player_id AND round_id = @round_id
+      INSERT INTO player_round_stats (player_id, round_id, fantasy_points)
+      VALUES (@player_id, @round_id, @fantasy_points)
+      ON CONFLICT(player_id, round_id) DO UPDATE SET 
+      fantasy_points = excluded.fantasy_points
   `);
 
   // Helpers
@@ -133,6 +134,14 @@ export function prepareEuroleagueMutations(db) {
 
     // Fantasy Update
     updateFantasyPoints,
+
+    // Image Updates
+    updateTeamImage: db.prepare('UPDATE teams SET img = ? WHERE code = ?'),
+    updatePlayerImage: db.prepare('UPDATE players SET img = ? WHERE id = ?'),
+
+    // Step 5 Helpers (Stats)
+    getTeamsWithCode: db.prepare('SELECT id, code FROM teams WHERE code IS NOT NULL'),
+    getMatchesByRound: db.prepare('SELECT home_id, away_id FROM matches WHERE round_id = ?'),
 
     // Helpers
     checkFinishedMatch,

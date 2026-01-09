@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, Search, Bell } from 'lucide-react';
 import { UserSelector } from '@/components/user';
 import { useState } from 'react';
@@ -29,9 +30,15 @@ export default function TopHeader({ onMobileMenuClick }) {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            {/* Logo icon with gradient background */}
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-shadow">
-              <span className="text-white font-bold text-sm">BS</span>
+            {/* Logo icon */}
+            <div className="relative w-20 h-20">
+              <Image
+                src="/brand-logo.png"
+                alt="Biwenger Stats Logo"
+                fill
+                className="object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"
+                priority
+              />
             </div>
             <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
               Biwenger Stats

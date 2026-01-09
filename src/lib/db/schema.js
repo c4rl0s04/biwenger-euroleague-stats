@@ -22,6 +22,7 @@ export function ensureSchema(db) {
       id INTEGER PRIMARY KEY,
       name TEXT,
       short_name TEXT,
+      code TEXT,
       img TEXT
     )
   `
@@ -49,6 +50,9 @@ export function ensureSchema(db) {
       weight INTEGER,
       price INTEGER,
       euroleague_code TEXT,
+      dorsal TEXT,
+      country TEXT,
+      team_id INTEGER,
       img TEXT
     )
   `
@@ -118,34 +122,20 @@ export function ensureSchema(db) {
       away_score INTEGER,
       home_score_regtime INTEGER,
       away_score_regtime INTEGER,
+      home_q1 INTEGER,
+      away_q1 INTEGER,
+      home_q2 INTEGER,
+      away_q2 INTEGER,
+      home_q3 INTEGER,
+      away_q3 INTEGER,
+      home_q4 INTEGER,
+      away_q4 INTEGER,
+      home_ot INTEGER,
+      away_ot INTEGER,
       UNIQUE(round_id, home_id, away_id)
     )
   `
   ).run();
-
-  // Migration: Add regular time score columns if they don't exist
-  const matchesInfo = db.prepare('PRAGMA table_info(matches)').all();
-  const hasRegtimeColumns = matchesInfo.some((c) => c.name === 'home_score_regtime');
-  if (!hasRegtimeColumns) {
-    console.log('Migrating matches table (adding regular time score columns)...');
-    try {
-      db.prepare('ALTER TABLE matches ADD COLUMN home_score_regtime INTEGER').run();
-      db.prepare('ALTER TABLE matches ADD COLUMN away_score_regtime INTEGER').run();
-    } catch (e) {
-      console.error('Could not add regular time score columns:', e.message);
-    }
-  }
-
-  // Migration: Drop redundant 'team' column from players if it exists
-  const playersInfoDrop = db.prepare('PRAGMA table_info(players)').all();
-  if (playersInfoDrop.some((c) => c.name === 'team')) {
-    console.log('Migrating players table (dropping redundant team column)...');
-    try {
-      db.prepare('ALTER TABLE players DROP COLUMN team').run();
-    } catch (e) {
-      console.error('Could not drop column team:', e.message);
-    }
-  }
 
   // 7. Player Round Stats Table
   db.prepare(
@@ -270,109 +260,6 @@ export function ensureSchema(db) {
   `
   ).run();
 
-  // --- MIGRATIONS ---
-  // Apply specific migrations that might be needed for existing databases
-
-  // Migration: Add owner_id, status, price_increment, etc. to players
-  const playerCols = [
-    'owner_id',
-    'status',
-    'price_increment',
-    'birth_date',
-    'height',
-    'weight',
-    'price',
-    'euroleague_code',
-    'dorsal',
-    'country',
-  ];
-  const playersInfo = db.prepare('PRAGMA table_info(players)').all();
-  const existingPlayerCols = new Set(playersInfo.map((c) => c.name));
-
-  for (const col of playerCols) {
-    if (!existingPlayerCols.has(col)) {
-      console.log(`Migrating players table (adding ${col} column)...`);
-      let type = 'TEXT';
-      if (['price_increment', 'height', 'weight', 'price', 'dorsal'].includes(col)) {
-        // Dorsal can be textual (00) but often treated as number. Biwenger likely treats as String/Number mix.
-        // Let's stick to TEXT for safety or INTEGER if we are sure.
-        // Update: Dorsal is just a number usually. Let's make it TEXT to keep leading zeros if any?
-        // Actually, schema definition above uses TEXT for almost everything flexible.
-        // Let's stick to TEXT for dorsal to be safe with "00".
-        // modifying check below to exclude dorsal from INTEGER if we want TEXT
-      }
-      if (['price_increment', 'height', 'weight', 'price'].includes(col)) {
-        type = 'INTEGER';
-      }
-      try {
-        db.prepare(`ALTER TABLE players ADD COLUMN ${col} ${type}`).run();
-      } catch (e) {
-        console.warn(`Could not add column ${col} to players: ${e.message}`);
-      }
-    }
-  }
-
-  // Migration: Add icon to users
-  const usersInfo = db.prepare('PRAGMA table_info(users)').all();
-  if (!usersInfo.some((c) => c.name === 'icon')) {
-    console.log('Migrating users table (adding icon column)...');
-    try {
-      db.prepare('ALTER TABLE users ADD COLUMN icon TEXT').run();
-    } catch (e) {}
-  }
-
-  // Migration: Add valuation to player_round_stats
-  const statsInfo = db.prepare('PRAGMA table_info(player_round_stats)').all();
-  if (!statsInfo.some((c) => c.name === 'valuation')) {
-    console.log('Migrating player_round_stats table (adding valuation column)...');
-    try {
-      db.prepare('ALTER TABLE player_round_stats ADD COLUMN valuation INTEGER').run();
-    } catch (e) {}
-  }
-
-  // Migration: Add home_id/away_id to matches
-  const matchesInfoIds = db.prepare('PRAGMA table_info(matches)').all();
-  if (!matchesInfoIds.some((c) => c.name === 'home_id')) {
-    console.log('Migrating matches table (adding team IDs)...');
-    try {
-      db.prepare('ALTER TABLE matches ADD COLUMN home_id INTEGER').run();
-      db.prepare('ALTER TABLE matches ADD COLUMN away_id INTEGER').run();
-    } catch (e) {}
-  }
-
-  // Migration: Add team_id to players
-  const playersInfoChecks = db.prepare('PRAGMA table_info(players)').all();
-  if (!playersInfoChecks.some((c) => c.name === 'team_id')) {
-    console.log('Migrating players table (adding team_id)...');
-    try {
-      db.prepare('ALTER TABLE players ADD COLUMN team_id INTEGER').run();
-    } catch (e) {}
-  }
-
-  // Migration: Add img to players (for Official Euroleague Images)
-  if (!playersInfoChecks.some((c) => c.name === 'img')) {
-    console.log('Migrating players table (adding img column)...');
-    try {
-      db.prepare('ALTER TABLE players ADD COLUMN img TEXT').run();
-    } catch (e) {
-      console.error('Could not add column img:', e.message);
-    }
-  }
-
-  // Migration: Check for round_id in lineups
-  const lineupsInfo = db.prepare('PRAGMA table_info(lineups)').all();
-  if (!lineupsInfo.some((c) => c.name === 'round_id')) {
-    console.log('Migrating lineups table (resetting for schema update)...');
-    // Drop logic avoided for brevity unless strictly necessary, but better to add column
-    // For simplicity, we assume schema is mostly stable or use ensureSchema logic if needed
-    // The previous ensure-schema.js did DROP TABLE for some changes.
-    // Ideally we ALTER TABLE ADD COLUMN.
-    try {
-      db.prepare('ALTER TABLE lineups ADD COLUMN round_id INTEGER').run();
-      db.prepare('ALTER TABLE lineups ADD COLUMN round_name TEXT').run();
-    } catch (e) {}
-  }
-
   // --- INDEXES ---
   // Add indexes for common query patterns to improve performance
   const indexes = [
@@ -420,23 +307,5 @@ export function ensureSchema(db) {
     } catch (e) {
       // Index might already exist or column doesn't exist yet
     }
-  }
-
-  // Migration: Add short_name to teams
-  // Migration: Add short_name and code to teams
-  const teamsInfo = db.prepare('PRAGMA table_info(teams)').all();
-
-  if (!teamsInfo.some((c) => c.name === 'short_name')) {
-    console.log('Migrating teams table (adding short_name)...');
-    try {
-      db.prepare('ALTER TABLE teams ADD COLUMN short_name TEXT').run();
-    } catch (e) {}
-  }
-
-  if (!teamsInfo.some((c) => c.name === 'code')) {
-    console.log('Migrating teams table (adding Euroleague code column)...');
-    try {
-      db.prepare('ALTER TABLE teams ADD COLUMN code TEXT').run();
-    } catch (e) {}
   }
 }

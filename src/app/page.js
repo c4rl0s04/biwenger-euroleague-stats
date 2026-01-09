@@ -10,6 +10,8 @@ import {
   ShoppingCart,
   Calendar,
   Target,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -34,30 +36,21 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Mercado',
-      description: 'Tendencias de mercado',
-      icon: ShoppingCart,
-      href: '/market',
-      color: 'green',
-      delay: '0.3s',
-      disabled: false,
-    },
-    {
       title: 'Jugadores',
       description: 'Estadísticas detalladas e historial',
       icon: User,
       href: '/players',
       color: 'blue',
-      delay: '0.4s',
+      delay: '0.3s',
       disabled: false,
     },
     {
-      title: 'Alineaciones',
-      description: 'Sugerencias de alineación por IA',
-      icon: Users,
-      href: '/lineups',
-      color: 'purple',
-      delay: '0.5s',
+      title: 'Mercado',
+      description: 'Tendencias de mercado',
+      icon: ShoppingCart,
+      href: '/market',
+      color: 'green',
+      delay: '0.4s',
       disabled: false,
     },
     {
@@ -66,7 +59,25 @@ export default function Home() {
       icon: Calendar,
       href: '/matches',
       color: 'red',
+      delay: '0.5s',
+      disabled: false,
+    },
+    {
+      title: 'Alineaciones',
+      description: 'Sugerencias de alineación por IA',
+      icon: Users,
+      href: '/lineups',
+      color: 'purple',
       delay: '0.6s',
+      disabled: false,
+    },
+    {
+      title: 'Jornadas',
+      description: 'Calendario y resultados por jornada',
+      icon: Clock,
+      href: '/rounds',
+      color: 'orange',
+      delay: '0.7s',
       disabled: false,
     },
     {
@@ -75,7 +86,16 @@ export default function Home() {
       icon: Target,
       href: '/predictions',
       color: 'pink',
-      delay: '0.7s',
+      delay: '0.8s',
+      disabled: false,
+    },
+    {
+      title: 'Assistant',
+      description: 'Tu asistente inteligente de Biwenger',
+      icon: Sparkles,
+      href: '/ai',
+      color: 'indigo',
+      delay: '0.9s',
       disabled: false,
     },
   ];
@@ -94,14 +114,13 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cards.map((card, idx) => {
-              const isLastCard = idx === cards.length - 1;
               return (
                 <Link
                   key={idx}
                   href={card.disabled ? '#' : card.href}
                   className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 block ${
                     card.disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-                  } ${isLastCard ? 'md:col-start-1 lg:col-start-2' : ''}`}
+                  }`}
                   style={{ animationDelay: card.delay }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />

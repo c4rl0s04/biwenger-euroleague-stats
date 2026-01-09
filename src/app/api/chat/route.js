@@ -86,14 +86,14 @@ export async function POST(req) {
       maxSteps: 5, // Enable multi-step tool execution on the server
     });
 
-    // Compatibility: Try toDataStreamResponse, fallback to text stream if missing
-    if (typeof result.toDataStreamResponse === 'function') {
-      return result.toDataStreamResponse();
-    } else if (typeof result.toTextStreamResponse === 'function') {
-      return result.toTextStreamResponse();
-    } else {
-      throw new Error('Streaming method not supported in this SDK version');
+    // Fallback to UIMessageStreamResponse since DataStream is missing
+    // This provides compatible event-stream format for useChat
+    if (typeof result.toUIMessageStreamResponse === 'function') {
+      return result.toUIMessageStreamResponse();
     }
+
+    // Last resort fallback
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('Error in chat API:', error);
     return new Response(JSON.stringify({ error: error.message }), {

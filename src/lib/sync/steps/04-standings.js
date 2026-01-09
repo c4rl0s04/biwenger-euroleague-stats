@@ -1,5 +1,5 @@
-import { fetchLeague } from '../api/biwenger-client.js';
-import { prepareUserMutations } from '../db/mutations/users.js';
+import { fetchLeague } from '../../api/biwenger-client.js';
+import { prepareUserMutations } from '../../db/mutations/users.js';
 
 /**
  * Syncs league standings (users) to the local database.

@@ -12,7 +12,7 @@ const API_LEGACY_URL = CONFIG.EUROLEAGUE.API_LEGACY_URL;
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '',
-  parseAttributeValue: true,
+  parseAttributeValue: false, // Prevent "00123" -> 123
 });
 
 /**
@@ -143,14 +143,17 @@ export function normalizePlayerName(name) {
   // Euroleague format: "LASTNAME, FIRSTNAME"
   const parts = name.split(',').map((p) => p.trim());
 
+  // Helper to remove accents
+  const stripAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
   if (parts.length === 2) {
     // Convert to "Firstname Lastname" format
     const [lastName, firstName] = parts;
-    return `${firstName} ${lastName}`.toLowerCase().replace(/\s+/g, ' ').trim();
+    return stripAccents(`${firstName} ${lastName}`.toLowerCase()).replace(/\s+/g, ' ').trim();
   }
 
   // Fallback: just lowercase and normalize spaces
-  return name.toLowerCase().replace(/\s+/g, ' ').trim();
+  return stripAccents(name.toLowerCase()).replace(/\s+/g, ' ').trim();
 }
 
 /**

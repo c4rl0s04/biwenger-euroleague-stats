@@ -16,7 +16,7 @@
  * }}
  */
 export function prepareMarketMutations(db) {
-  const getLastTransferDate = db.prepare('SELECT MAX(timestamp) as ts FROM fichajes');
+  // getLastTransferDate removed (always full sync)
 
   const insertTransfer = db.prepare(`
     INSERT OR IGNORE INTO fichajes (timestamp, fecha, player_id, precio, vendedor, comprador)
@@ -59,7 +59,7 @@ export function prepareMarketMutations(db) {
   `);
 
   return {
-    getLastTransferDate,
+    // getLastTransferDate removed
     insertTransfer,
     insertBid,
     insertFinance,

@@ -1,10 +1,10 @@
 import Database from 'better-sqlite3';
 import { CONFIG } from '../config.js';
+import { ensureSchema } from '../db/schema.js';
 
 export class SyncManager {
-  constructor(dbPath, flags = {}) {
+  constructor(dbPath) {
     this.dbPath = dbPath;
-    this.flags = flags;
     this.steps = [];
     this.context = {
       db: null,
@@ -39,9 +39,12 @@ export class SyncManager {
 
   async run() {
     this.log('🚀 Starting Data Sync (Manager Mode)...');
-    this.log(`   🔧 Config: ${JSON.stringify(this.flags, null, 2)}`);
 
     this.context.db = new Database(this.dbPath);
+
+    // Ensure Schema Exists
+    this.log('   🔨 Verifying/Creating Database Schema...');
+    ensureSchema(this.context.db);
 
     try {
       for (const step of this.steps) {

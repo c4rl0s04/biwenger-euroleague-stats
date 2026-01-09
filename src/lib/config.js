@@ -44,8 +44,13 @@ export const CONFIG = {
     ROUND_LEAGUE: (roundId) =>
       roundId ? `/rounds/league/${roundId}?v=629` : `/rounds/league?v=629`,
     PLAYER_DETAILS: (id) =>
-      `/players/euroleague/${id}?lang=es&fields=prices,birthday,height,weight`,
+      `/players/euroleague/${id}?lang=es&fields=prices,birthday,height,weight,img`,
     USER_PLAYERS: (id) => `/user/${id}?fields=players`,
+    // Official Website Scrapers
+    OFFICIAL_TEAM_PROFILE: (slug, code) =>
+      `https://www.euroleaguebasketball.net/euroleague/teams/${slug}/${code}/`,
+    OFFICIAL_PLAYER_PROFILE: (slug, paddedId) =>
+      `https://www.euroleaguebasketball.net/euroleague/players/${slug}/${paddedId}/`,
   },
   USER_COLORS: {
     FIXED_INDEXES: {

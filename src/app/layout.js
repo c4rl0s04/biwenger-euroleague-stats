@@ -10,6 +10,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   title: 'Biwenger Stats',
   description: 'Advanced statistics for your Biwenger league',
+  icons: {
+    icon: '/favicon.png', // Optimized for small size
+    shortcut: '/favicon.png',
+    apple: '/brand-logo.png', // Keep the nicer one for Apple Touch Icon
+  },
 };
 
 // Start of the application

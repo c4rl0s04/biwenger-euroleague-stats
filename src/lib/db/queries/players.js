@@ -1,5 +1,6 @@
 import { db } from '../client.js';
 import { CONFIG } from '../../config.js';
+import { FUTURE_MATCH_CONDITION } from '../sql_utils.js';
 
 /**
  * Get top performing players
@@ -250,7 +251,7 @@ export function getPlayerDetails(playerId) {
     LEFT JOIN teams th ON m.home_id = th.id
     LEFT JOIN teams ta ON m.away_id = ta.id
     WHERE (m.home_id = ? OR m.away_id = ?) 
-      AND date > datetime('now') 
+      AND ${FUTURE_MATCH_CONDITION('date')} 
     ORDER BY date ASC 
     LIMIT 1
   `;
@@ -449,4 +450,58 @@ export function getRisingStars(limit = 5) {
   `;
 
   return db.prepare(query).all(limit);
+}
+/**
+ * Get all players with basic stats for the players list
+ * @returns {Array} List of all players
+ */
+export function getAllPlayers() {
+  const query = `
+    WITH PlayerRoundScores AS (
+       SELECT 
+         player_id, 
+         round_id, 
+         fantasy_points
+       FROM player_round_stats
+     ),
+     RecentScores AS (
+       SELECT 
+         player_id,
+         GROUP_CONCAT(fantasy_points) as recent_scores
+       FROM (
+         SELECT 
+           player_id, 
+           fantasy_points,
+           ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY round_id DESC) as rn
+         FROM PlayerRoundScores
+       )
+       WHERE rn <= 5
+       GROUP BY player_id
+     )
+     SELECT 
+       p.id,
+       p.name,
+       p.img,
+       p.position,
+       p.price,
+       p.team_id,
+       t.name as team_name,
+       t.short_name as team_short_name,
+       t.img as team_img,
+
+       p.owner_id,
+       u.name as owner_name,
+       u.icon as owner_icon,
+       p.puntos as total_points,
+       p.partidos_jugados as played,
+       ROUND(CAST(p.puntos AS FLOAT) / NULLIF(p.partidos_jugados, 0), 1) as average,
+       p.status,
+       rs.recent_scores
+     FROM players p
+     LEFT JOIN teams t ON p.team_id = t.id
+     LEFT JOIN users u ON p.owner_id = u.id
+     LEFT JOIN RecentScores rs ON p.id = rs.player_id
+     ORDER BY p.puntos DESC
+  `;
+  return db.prepare(query).all();
 }

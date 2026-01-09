@@ -1,7 +1,7 @@
-import { fetchRoundGames } from '../api/biwenger-client.js';
-import { fetchGameHeader, fetchSchedule } from '../api/euroleague-client.js';
-import { prepareMatchMutations } from '../db/mutations/matches.js';
-import { CONFIG } from '../config.js';
+import { fetchRoundGames } from '../../../api/biwenger-client.js';
+import { fetchGameHeader, fetchSchedule } from '../../../api/euroleague-client.js';
+import { prepareMatchMutations } from '../../../db/mutations/matches.js';
+import { CONFIG } from '../../../config.js';
 
 /**
  * Syncs matches (games) for a specific round using Biwenger API.
@@ -151,7 +151,20 @@ export async function run(manager, round, playersList = {}) {
       let homeOT = null,
         awayOT = null;
 
-      if (status === 'finished' && game.id) {
+      // Determine if we should fetch Euroleague Data
+      // 1. Status is explicitly finished or live
+      // 2. Status is scheduled, but current time is past start time (or close to it)
+      const now = Date.now();
+      const gameTimeMs = game.date * 1000;
+      const isPastStartTime = matchDate && now > gameTimeMs - 15 * 60 * 1000; // Check 15m before just in case
+
+      const shouldFetchEuroleague =
+        (status === 'finished' ||
+          status === 'live' ||
+          (status === 'scheduled' && isPastStartTime)) &&
+        game.id;
+
+      if (shouldFetchEuroleague) {
         try {
           // Map Biwenger team IDs to Euroleague codes
           const homeCode = teamCodeMap.get(homeId);
@@ -166,6 +179,17 @@ export async function run(manager, round, playersList = {}) {
               const header = await fetchGameHeader(gameCode);
 
               if (header) {
+                // Update Status from Euroleague (Source of Truth)
+                if (header.Live) {
+                  status = 'live';
+                } else if (
+                  status !== 'finished' &&
+                  (parseInt(header.ScoreA) > 0 || parseInt(header.ScoreB) > 0)
+                ) {
+                  // If not live, but has scores, assume finished (if Biwenger didn't say so yet)
+                  status = 'finished';
+                }
+
                 // Extract Quarter Scores (Cumulative from API)
                 // Keys: ScoreQuarter1A, ScoreQuarter2A, etc.
                 const getCumulative = (q, team) => {
@@ -188,6 +212,14 @@ export async function run(manager, round, playersList = {}) {
                 homeQ3 = hQ3_cum - hQ2_cum;
                 homeQ4 = hQ4_cum - hQ3_cum;
 
+                // Sanity check for negative quarters (if data is messy during live)
+                if (status === 'live') {
+                  homeQ2 = Math.max(0, homeQ2);
+                  homeQ3 = Math.max(0, homeQ3);
+                  homeQ4 = Math.max(0, homeQ4);
+                  // ... same for away
+                }
+
                 awayQ1 = aQ1_cum;
                 awayQ2 = aQ2_cum - aQ1_cum;
                 awayQ3 = aQ3_cum - aQ2_cum;
@@ -202,16 +234,27 @@ export async function run(manager, round, playersList = {}) {
                 const totalHome = parseInt(header.ScoreA ?? 0);
                 const totalAway = parseInt(header.ScoreB ?? 0);
 
-                if (totalHome > homeScoreRegtime || totalAway > awayScoreRegtime) {
-                  homeOT = totalHome - homeScoreRegtime;
-                  awayOT = totalAway - awayScoreRegtime;
-                } else {
+                // If live, total score might be Q1+Q2.. etc.
+                if (status === 'live') {
+                  // During live, Regtime is current total.
+                  homeScoreRegtime = totalHome;
+                  awayScoreRegtime = totalAway;
+                  // OT logic is tricky during live. Let's rely on total-regtime ONLY if Q4 is done?
+                  // For simplicity: during live, just store totals.
                   homeOT = 0;
                   awayOT = 0;
+                } else {
+                  if (totalHome > homeScoreRegtime || totalAway > awayScoreRegtime) {
+                    homeOT = totalHome - homeScoreRegtime;
+                    awayOT = totalAway - awayScoreRegtime;
+                  } else {
+                    homeOT = 0;
+                    awayOT = 0;
+                  }
                 }
 
                 manager.log(
-                  `      ✅ Found Euroleague data for ${homeCode} vs ${awayCode} (Game ${gameCode}): ${homeScoreRegtime}-${awayScoreRegtime} (Reg) | Q1: ${homeQ1}-${awayQ1}, Q2: ${homeQ2}-${awayQ2}, Q3: ${homeQ3}-${awayQ3}, Q4: ${homeQ4}-${awayQ4}`
+                  `      ✅ Found Euroleague data for ${homeCode} vs ${awayCode} (Game ${gameCode}) [${status.toUpperCase()}]: ${totalHome}-${totalAway}`
                 );
               }
             } else {

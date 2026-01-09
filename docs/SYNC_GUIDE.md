@@ -22,9 +22,10 @@ npm run sync -- [FLAGS]
 
 **Purpose:** Updates core data without triggering the massive volume of individual player profile calls.
 
-- **Saves:** ~300+ Biwenger API calls per run.
+- **Implies:** `--incremental` (Skips already synced historical rounds).
+- **Saves:** ~300+ Biwenger API calls per run AND history sync time.
 - **Use Case:** Daily updates of points, market values, and transfers.
-- **What it Skips:** Detailed player bio (birthdate, height) and _full_ price history graph (it still updates _today's_ price).
+- **What it Skips:** Detailed player bio (birthdate, height), full price history graph, and old finished rounds.
 
 | Table           | Status         | Notes                                                      |
 | :-------------- | :------------- | :--------------------------------------------------------- |
@@ -66,7 +67,17 @@ npm run sync -- [FLAGS]
 
 ---
 
-### 4. `--only-market` (Fastest) ⚡
+### 4. `--incremental` / `-i` (Smart Sync) 🧠
+
+**Purpose:** Updates only new or active rounds, skipping historical rounds that are already fully synced in the database.
+
+- **Implies:** Enabled automatically by `--no-details`.
+- **Use Case:** use this if you **DO want** to check for new player details (e.g. new signings' positions/bio) but **DON'T want** to re-process all the old match history. Ideally run this once a week.
+- **What it Skips:** Any finished round (e.g., Round 1-15) if the database already has data for it.
+
+---
+
+### 5. `--only-market` (Fastest) ⚡
 
 **Purpose:** Updates _only_ the transfer market and board. Ignores matches and stats.
 
@@ -112,7 +123,7 @@ npm run sync -- --only-round=4764
 
 ### 📅 Daily Routine (Morning)
 
-Update everything but skip the heavy player details.
+Update everything efficiently (skips old rounds & heavy bio data).
 
 ```bash
 npm run sync -- --no-details

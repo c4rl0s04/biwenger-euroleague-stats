@@ -3,11 +3,11 @@ import {
   fetchGameHeader,
   parseBoxScoreStats,
   normalizePlayerName,
-} from '../api/euroleague-client.js';
-import { CONFIG } from '../config.js';
-import { prepareEuroleagueMutations } from '../db/mutations/euroleague.js';
-import { calculateRegularTimeScores } from '../utils/match-scores.js';
-import { prepareMatchMutations } from '../db/mutations/matches.js';
+} from '../../../api/euroleague-client.js';
+import { CONFIG } from '../../../config.js';
+import { prepareEuroleagueMutations } from '../../../db/mutations/euroleague.js';
+import { calculateRegularTimeScores } from '../../../utils/match-scores.js';
+import { prepareMatchMutations } from '../../../db/mutations/matches.js';
 
 const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 
@@ -57,15 +57,6 @@ export async function runGame(manager, gameCode, roundId, roundName, options = {
 
     // Note: matches table is now populated by sync-matches.js only
     // This function only handles player_round_stats
-
-    // 2. Check activeOnly optimization - skip if game is finished and we already have stats
-    if (options.activeOnly && !header.Live && header.ScoreA !== null) {
-      const statsCount = mutations.checkStatsExist.get(roundId);
-      if (statsCount.c > 0) {
-        manager.log(`   ⏭️ Skipping boxscore (Game Finished & Stats exist & --active-only)`);
-        return { success: true, reason: 'skipped_active_only' };
-      }
-    }
 
     // 3. Fetch box score with player stats
     const boxscore = await fetchBoxScore(gameCode, CURRENT_SEASON);
@@ -188,7 +179,7 @@ export async function runBiwengerPoints(manager, round, playersListInput) {
   const playersList = playersListInput || manager.context.playersList || {};
 
   // Import dynamically to avoid circular dependencies
-  const { fetchRoundGames } = await import('../api/biwenger-client.js');
+  const { fetchRoundGames } = await import('../../../api/biwenger-client.js');
   // Reuse mutations module (or initialize new one if db scope is different, here we assume db is passed)
   const mutations = prepareEuroleagueMutations(db);
 

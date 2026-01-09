@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { syncPlayers } from '../sync-players.js';
+import { syncPlayers } from '../steps/01-players.js';
 import * as client from '../../api/biwenger-client.js';
 import { CONFIG } from '../../config.js';
 

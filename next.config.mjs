@@ -31,6 +31,18 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'biwenger.as.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'media-cdn.incrowdsports.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
