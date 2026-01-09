@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { syncMatches } from '../sync-matches.js';
+import { syncMatches } from '../services/biwenger/matches.js';
 import * as client from '../../api/biwenger-client.js';
 
 // Mock biwenger-client
