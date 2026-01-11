@@ -35,9 +35,18 @@ async function syncData() {
   // Parse CLI Args
   const args = process.argv.slice(2);
   const onlyStep = args.find((a) => a.startsWith('--step='))?.split('=')[1] || null;
+  const isDaily = args.includes('--daily');
+
+  if (isDaily) {
+    console.log('📅 Daily Sync Mode Active: Skipping heavy steps (9-12).');
+  }
 
   // Register Pipeline Steps
-  const shouldRun = (num) => !onlyStep || String(onlyStep) === String(num);
+  const shouldRun = (num) => {
+    if (onlyStep) return String(onlyStep) === String(num);
+    if (isDaily && num > 8) return false; // Daily mode skips initial squads, images, colors
+    return true;
+  };
 
   if (shouldRun(1)) manager.addStep('Sync Players (Biwenger)', stepPlayers.run);
   if (shouldRun(2)) manager.addStep('Sync Master Data (Linking)', stepMaster.run);

@@ -61,6 +61,15 @@ export async function run(manager) {
   const positions = CONFIG.POSITIONS; // Position map
   const teams = manager.context.teams;
 
+  // Optimized: Get existing player IDs to avoid redundant API calls
+  const existingPlayerIds = new Set(
+    db
+      .prepare('SELECT id FROM players')
+      .all()
+      .map((p) => p.id)
+  );
+  manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing players in DB.`);
+
   // --- 1.1 SYNC TEAMS ---
   manager.log('Syncing Teams...');
 
@@ -78,13 +87,13 @@ export async function run(manager) {
   // manager.log(`✅ Synced ${Object.keys(teams).length} teams.`); // Let manager handle success log
 
   // --- 2. PROCESSING ---
-
-  // No flags or options to check in Simplification V2
+  let newPlayersCount = 0;
+  let skippedDetailsCount = 0;
 
   for (const [id, player] of Object.entries(playersList)) {
     const playerId = parseInt(id);
 
-    // A) Basic Insertion
+    // A) Basic Insertion (Always update basics like status, points, price)
     mutations.upsertPlayer({
       id: playerId,
       name: player.name,
@@ -103,46 +112,73 @@ export async function run(manager) {
       img: player.img || null,
     });
 
-    // B) Fetching Extended Details (Always)
+    // B) Market Value Update (Always update current price for everyone)
+    // Use today's date for the price entry
+    // COMPETITION DATA doesn't have a specific date for the price, but it implies "Current".
+    // We use a generated date string for "today".
+    const todayInt = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD (Biwenger format)
+    const priceDate = parsePriceDate(todayInt); // Returns YYYY-MM-DD
 
-    try {
-      await sleep(SLEEP_MS);
+    mutations.insertMarketValue({
+      player_id: playerId,
+      price: player.price || 0,
+      date: priceDate,
+    });
 
-      const lookupId = player.slug || player.id || playerId;
-      const details = await fetchPlayerDetails(lookupId);
+    // C) Fetching Extended Details (Conditional)
+    const isNewPlayer = !existingPlayerIds.has(playerId);
 
-      if (details.data) {
-        const d = details.data;
+    if (isNewPlayer) {
+      // It's a NEW player. We MUST fetch details (History, Bio, etc.)
+      try {
+        await sleep(SLEEP_MS);
+        newPlayersCount++;
 
-        // B.1 Update physical data
-        mutations.updatePlayerDetails({
-          id: playerId,
-          birth_date: parseBiwengerDate(d.birthday),
-          height: d.height || null,
-          weight: d.weight || null,
-        });
+        const lookupId = player.slug || player.id || playerId;
+        const details = await fetchPlayerDetails(lookupId);
 
-        // B.2 Insert market values (Historical prices)
-        if (d.prices && Array.isArray(d.prices)) {
-          const insertHistory = db.transaction((prices) => {
-            for (const [dateInt, price] of prices) {
-              const priceDate = parsePriceDate(dateInt);
-              mutations.insertMarketValue({
-                player_id: playerId,
-                price: price,
-                date: priceDate,
-              });
-            }
+        if (details.data) {
+          const d = details.data;
+
+          // C.1 Update physical data
+          mutations.updatePlayerDetails({
+            id: playerId,
+            birth_date: parseBiwengerDate(d.birthday),
+            height: d.height || null,
+            weight: d.weight || null,
           });
 
-          insertHistory(d.prices);
+          // C.2 Insert FULL market value history (only for new players)
+          if (d.prices && Array.isArray(d.prices)) {
+            const insertHistory = db.transaction((prices) => {
+              for (const [dateInt, price] of prices) {
+                const dateStr = parsePriceDate(dateInt);
+                mutations.insertMarketValue({
+                  player_id: playerId,
+                  price: price,
+                  date: dateStr,
+                });
+              }
+            });
+            insertHistory(d.prices);
+          }
         }
+      } catch (e) {
+        const lookupId = player.slug || playerId;
+        manager.error(
+          `   ⚠️ Error fetching details for NEW player ${player.name} (${lookupId}): ${e.message}`
+        );
       }
-    } catch (e) {
-      const lookupId = player.slug || playerId;
-      manager.error(`   ⚠️ Error fetching details for ${player.name} (${lookupId}): ${e.message}`);
+    } else {
+      // Existing player - Skip expensive details fetch
+      skippedDetailsCount++;
     }
   }
+
+  manager.log(`   ✨ New Players Detected: ${newPlayersCount} (Fetched full details)`);
+  manager.log(
+    `   ⏩ Existing Players: ${skippedDetailsCount} (Skipped details fetch, updated price)`
+  );
 
   // Legacy return to maintain potential compatibility if called directly (though index.js will use manager)
   // But for manager pattern, we return success object
