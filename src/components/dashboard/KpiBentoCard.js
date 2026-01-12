@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { AnimatedNumber } from '@/components/ui';
 
 /**
  * KpiBentoCard - Modular Bento Grid style component
@@ -90,7 +91,9 @@ export default function KpiBentoCard({
       <div className="space-y-1">
         <h3 className="text-slate-400 text-xs font-medium uppercase tracking-wider">{title}</h3>
         <div className="flex items-baseline gap-2">
-          <div className="text-2xl font-bold text-white tracking-tight font-mono">{value}</div>
+          <div className="text-2xl font-bold text-white tracking-tight font-mono">
+            {typeof value === 'number' ? <AnimatedNumber value={value} duration={1} /> : value}
+          </div>
           {subValue && <span className="text-sm text-slate-500">{subValue}</span>}
         </div>
       </div>

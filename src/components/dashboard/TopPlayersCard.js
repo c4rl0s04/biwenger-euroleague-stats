@@ -64,12 +64,17 @@ export default function TopPlayersCard() {
                   </div>
                 }
                 rightContent={
-                  <div className="flex flex-col items-end">
-                    <div className={`font-bold text-base ${getTextStyles(index)}`}>
-                      <AnimatedNumber value={player.average} decimals={1} duration={0.8} /> pts
+                  <div className="text-right">
+                    <div className="font-bold text-sm text-foreground">
+                      <AnimatedNumber
+                        value={parseFloat(player.average)}
+                        decimals={1}
+                        duration={0.8}
+                      />{' '}
+                      pts
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      Promedio
+                      Media
                     </div>
                   </div>
                 }

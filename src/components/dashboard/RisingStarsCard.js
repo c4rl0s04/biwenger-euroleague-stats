@@ -3,7 +3,7 @@
 import { Sparkles, TrendingUp, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RisingStarsCard() {
@@ -42,15 +42,30 @@ export default function RisingStarsCard() {
                       <ArrowUp className="w-4 h-4 text-emerald-400" />
                       <div>
                         <div className="text-sm font-bold text-emerald-400">
-                          +{player.improvement.toFixed(1)}
+                          +
+                          <AnimatedNumber
+                            value={parseFloat(player.improvement)}
+                            decimals={1}
+                            duration={0.8}
+                          />
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {player.improvement_pct}%
+                          <AnimatedNumber
+                            value={parseFloat(player.improvement_pct)}
+                            decimals={1}
+                            duration={0.8}
+                          />
+                          %
                         </div>
                       </div>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {player.recent_avg.toFixed(1)} pts/g
+                      <AnimatedNumber
+                        value={parseFloat(player.recent_avg)}
+                        decimals={1}
+                        duration={0.8}
+                      />{' '}
+                      pts/g
                     </div>
                   </div>
                 </div>

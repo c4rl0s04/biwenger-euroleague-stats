@@ -3,7 +3,7 @@
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import Link from 'next/link';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
@@ -42,7 +42,7 @@ export default function SquadValueCard() {
               Valor Total
             </div>
             <div className="text-5xl font-display text-foreground">
-              {formatPrice(data.total_value)}€
+              <AnimatedNumber value={data.total_value} suffix="€" duration={1.5} />
             </div>
             <div
               className={`flex items-center gap-1.5 mt-2 text-lg font-semibold ${
@@ -55,7 +55,7 @@ export default function SquadValueCard() {
                 <TrendingDown className="w-5 h-5" />
               )}
               {data.price_trend >= 0 ? '+' : ''}
-              {formatPrice(data.price_trend)}€
+              <AnimatedNumber value={data.price_trend} suffix="€" duration={1.2} />
             </div>
             <div className="text-muted-foreground text-xs mt-2">
               {data.player_count || 0} jugadores en plantilla
@@ -83,7 +83,7 @@ export default function SquadValueCard() {
                       {p.name}
                     </Link>
                     <span className="text-emerald-500 font-semibold text-sm">
-                      +{formatPrice(p.price_increment)}€
+                      +<AnimatedNumber value={p.price_increment} suffix="€" duration={0.8} />
                     </span>
                   </div>
                 ))}
@@ -112,7 +112,7 @@ export default function SquadValueCard() {
                       {p.name}
                     </Link>
                     <span className="text-red-500 font-semibold text-sm">
-                      {formatPrice(p.price_increment)}€
+                      <AnimatedNumber value={p.price_increment} suffix="€" duration={0.8} />
                     </span>
                   </div>
                 ))}

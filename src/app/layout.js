@@ -1,9 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
-import ClientWrapper from '@/components/layout/ClientWrapper';
-import AppShell from '@/components/layout/AppShell';
-import { getExtendedStandings } from '@/lib/db';
-import { SectionProvider } from '@/components/layout/SectionContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { CardThemeProvider } from '@/contexts/CardThemeContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -11,28 +9,19 @@ export const metadata = {
   title: 'Biwenger Stats',
   description: 'Advanced statistics for your Biwenger league',
   icons: {
-    icon: '/favicon.png', // Optimized for small size
+    icon: '/favicon.png',
     shortcut: '/favicon.png',
-    apple: '/brand-logo.png', // Keep the nicer one for Apple Touch Icon
+    apple: '/brand-logo.png',
   },
 };
-export const dynamic = 'force-dynamic';
 
-// Start of the application
-// We fetch server-side data here to pass to the client context
-export default async function RootLayout({ children }) {
-  // Fetch users for the UserProvider
-  // Using getExtendedStandings as it contains all active users with their formatting info
-  const users = await getExtendedStandings();
-
+export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} bg-background text-foreground min-h-screen`}>
-        <ClientWrapper users={users}>
-          <SectionProvider>
-            <AppShell>{children}</AppShell>
-          </SectionProvider>
-        </ClientWrapper>
+        <ThemeProvider>
+          <CardThemeProvider>{children}</CardThemeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

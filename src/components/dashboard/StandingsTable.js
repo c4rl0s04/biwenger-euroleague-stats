@@ -4,7 +4,7 @@ import { useState, memo } from 'react';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { UserAvatar } from '@/components/ui';
+import { UserAvatar, AnimatedNumber } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 
 function StandingsTable({ standings }) {
@@ -97,7 +97,9 @@ function StandingsTable({ standings }) {
                 })()}
               </td>
               <td className="px-2 py-2 text-right">
-                <div className="font-bold text-orange-500 text-sm">{user.total_points}</div>
+                <div className="font-bold text-orange-500 text-sm">
+                  <AnimatedNumber value={user.total_points} duration={1.2} />
+                </div>
                 {pointsGap !== null && (
                   <div className="text-xs text-red-400 font-medium">-{pointsGap}</div>
                 )}

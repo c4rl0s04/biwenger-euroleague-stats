@@ -2,7 +2,7 @@
 
 import { Crown } from 'lucide-react';
 import { getScoreColor } from '@/lib/utils/format';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
@@ -69,11 +69,9 @@ export default function IdealLineupCard() {
                     </div>
                   }
                   rightContent={
-                    <span
-                      className={`text-sm font-bold px-2 py-0.5 rounded-md ${getScoreColor(player.points)}`}
-                    >
-                      {player.points}
-                    </span>
+                    <div className="font-bold text-sm text-indigo-400">
+                      <AnimatedNumber value={Number(player.points)} duration={0.8} /> pts
+                    </div>
                   }
                 />
               );

@@ -30,7 +30,7 @@ if (skipDb) {
   const poolConfig = connectionString
     ? {
         connectionString,
-        ssl: isProduction || isRemote ? { rejectUnauthorized: false } : false,
+        ssl: isRemote ? { rejectUnauthorized: false } : false,
       }
     : {
         user: process.env.POSTGRES_USER || 'user',
@@ -38,7 +38,7 @@ if (skipDb) {
         host: process.env.POSTGRES_HOST || 'localhost',
         port: parseInt(process.env.POSTGRES_PORT || '5432'),
         database: process.env.POSTGRES_DB || 'biwenger',
-        ssl: isProduction || isRemote ? { rejectUnauthorized: false } : false,
+        ssl: isRemote ? { rejectUnauthorized: false } : false,
       };
 
   const pool = new Pool({

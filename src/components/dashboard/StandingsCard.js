@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Users, ExternalLink, Trophy } from 'lucide-react';
 import StandingsTable from './StandingsTable';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function StandingsCard() {
@@ -43,12 +43,18 @@ export default function StandingsCard() {
                   Media Puntos
                 </div>
                 <div className="text-lg font-bold text-orange-400">
-                  {standings.length > 0
-                    ? (
+                  {standings.length > 0 ? (
+                    <AnimatedNumber
+                      value={
                         standings.reduce((acc, u) => acc + (parseInt(u.total_points) || 0), 0) /
                         standings.length
-                      ).toFixed(2)
-                    : 0}
+                      }
+                      decimals={2}
+                      duration={1}
+                    />
+                  ) : (
+                    0
+                  )}
                 </div>
               </div>
               <div className="text-center">

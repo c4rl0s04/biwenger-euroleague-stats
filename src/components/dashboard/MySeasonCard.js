@@ -2,7 +2,7 @@
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Trophy, TrendingUp, TrendingDown, Target, Zap, Award, ShoppingBag } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
@@ -65,7 +65,7 @@ export default function MySeasonCard() {
               Posición
             </div>
             <div className={`text-6xl font-display ${getPositionColor(stats.position)}`}>
-              #{stats.position}
+              #<AnimatedNumber value={stats.position} duration={1} />
             </div>
           </div>
 
@@ -75,7 +75,7 @@ export default function MySeasonCard() {
               Puntos
             </div>
             <div className="text-6xl font-display text-foreground">
-              {stats.total_points?.toLocaleString('es-ES')}
+              <AnimatedNumber value={stats.total_points} duration={1.5} />
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function MySeasonCard() {
               Mejor Pos.
             </div>
             <div className="text-2xl font-display text-emerald-500">
-              #{stats.best_position || '-'}
+              #<AnimatedNumber value={stats.best_position || 0} duration={0.8} />
             </div>
           </div>
 
@@ -102,7 +102,9 @@ export default function MySeasonCard() {
               <TrendingDown className="w-3 h-3 text-red-500" />
               Peor Pos.
             </div>
-            <div className="text-2xl font-display text-red-500">#{stats.worst_position || '-'}</div>
+            <div className="text-2xl font-display text-red-500">
+              #<AnimatedNumber value={stats.worst_position || 0} duration={0.8} />
+            </div>
           </div>
 
           {/* Best Round */}
@@ -111,7 +113,9 @@ export default function MySeasonCard() {
               <Zap className="w-3 h-3 text-emerald-500" />
               Mejor Jda.
             </div>
-            <div className="text-xl font-display text-emerald-500">{stats.best_round} pts</div>
+            <div className="text-xl font-display text-emerald-500">
+              <AnimatedNumber value={stats.best_round} duration={0.8} /> pts
+            </div>
           </div>
 
           {/* Worst Round */}
@@ -120,7 +124,9 @@ export default function MySeasonCard() {
               <Target className="w-3 h-3 text-red-500" />
               Peor Jda.
             </div>
-            <div className="text-xl font-display text-red-500">{stats.worst_round} pts</div>
+            <div className="text-xl font-display text-red-500">
+              <AnimatedNumber value={stats.worst_round} duration={0.8} /> pts
+            </div>
           </div>
         </div>
 
@@ -136,7 +142,7 @@ export default function MySeasonCard() {
               Victorias
             </div>
             <div className="text-xl font-display text-yellow-400">
-              {stats.victories || 0}{' '}
+              <AnimatedNumber value={stats.victories || 0} duration={0.5} />{' '}
               <span className="text-xs font-sans text-muted-foreground font-normal">
                 {stats.victories === 1 ? 'vez' : 'veces'}
               </span>
@@ -150,7 +156,7 @@ export default function MySeasonCard() {
               Podios
             </div>
             <div className="text-xl font-display text-orange-400">
-              {stats.podiums || 0}{' '}
+              <AnimatedNumber value={stats.podiums || 0} duration={0.5} />{' '}
               <span className="text-xs font-sans text-muted-foreground font-normal">Top 3</span>
             </div>
           </div>
@@ -168,7 +174,7 @@ export default function MySeasonCard() {
               Compras
             </div>
             <div className="text-xl font-display text-emerald-500">
-              {stats.purchases || 0}{' '}
+              <AnimatedNumber value={stats.purchases || 0} duration={0.8} />{' '}
               <span className="text-xs font-sans text-muted-foreground font-normal">fichajes</span>
             </div>
           </div>
@@ -180,7 +186,7 @@ export default function MySeasonCard() {
               Ventas
             </div>
             <div className="text-xl font-display text-red-500">
-              {stats.sales || 0}{' '}
+              <AnimatedNumber value={stats.sales || 0} duration={0.8} />{' '}
               <span className="text-xs font-sans text-muted-foreground font-normal">ventas</span>
             </div>
           </div>
@@ -192,13 +198,17 @@ export default function MySeasonCard() {
             <div className="text-muted-foreground text-xs uppercase tracking-wider">
               Promedio por jornada
             </div>
-            <div className="text-2xl font-display text-primary">{stats.average_points} pts</div>
+            <div className="text-2xl font-display text-primary">
+              <AnimatedNumber value={stats.average_points} decimals={1} duration={1} /> pts
+            </div>
           </div>
           <div className="flex items-center justify-between mt-2">
             <div className="text-muted-foreground text-xs uppercase tracking-wider">
               Posición Media
             </div>
-            <div className="text-2xl font-display text-foreground">#{stats.average_position}</div>
+            <div className="text-2xl font-display text-foreground">
+              #<AnimatedNumber value={stats.average_position} decimals={1} duration={1} />
+            </div>
           </div>
           <div className="text-muted-foreground text-[10px] mt-2 text-right">
             {stats.rounds_played} jornadas jugadas

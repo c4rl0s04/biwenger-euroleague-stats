@@ -11,13 +11,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize: async (credentials) => {
         const accessPassword = process.env.ACCESS_PASSWORD;
 
-        // Detailed logging for debugging
-        console.log('Auth attempt:', {
-          provided: credentials?.password ? '***' : 'undefined',
-          stored: accessPassword ? '***' : 'undefined',
-          match: credentials?.password === accessPassword,
-        });
-
         if (!accessPassword) {
           console.error('ACCESS_PASSWORD environment variable is not set');
           return null;

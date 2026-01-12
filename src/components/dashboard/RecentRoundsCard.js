@@ -2,7 +2,7 @@
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Activity } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
@@ -66,7 +66,7 @@ export default function RecentRoundsCard() {
                 </span>
               </div>
               <div className="text-5xl font-display text-foreground">
-                {latestParticipated.points}
+                <AnimatedNumber value={latestParticipated.points} duration={0.8} />
                 <span className="text-2xl text-muted-foreground ml-1">pts</span>
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function RecentRoundsCard() {
                         <div
                           className={`font-semibold text-sm ${getPositionBadge(round.position, true)}`}
                         >
-                          {round.points}
+                          <AnimatedNumber value={round.points} duration={0.5} />
                         </div>
                         <div
                           className={`text-xs font-display min-w-[28px] text-right ${getPositionBadge(round.position, true)}`}

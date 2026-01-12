@@ -376,6 +376,7 @@ export async function getPlayerStreaks(minGames = 3) {
       prf.owner_name,
       prf.owner_color_index,
       COALESCE(sa.season_avg, 0) as season_avg,
+      ROUND(prf.recent_avg - COALESCE(sa.season_avg, 0), 1) as avg_diff,
       ROUND((prf.recent_avg - COALESCE(sa.season_avg, 0)) / NULLIF(sa.season_avg, 1) * 100, 1) as trend_pct
     FROM PlayerRecentForm prf
     LEFT JOIN SeasonAvg sa ON prf.player_id = sa.player_id
@@ -387,6 +388,7 @@ export async function getPlayerStreaks(minGames = 3) {
     ...p,
     recent_avg: parseFloat(p.recent_avg) || 0,
     season_avg: parseFloat(p.season_avg) || 0,
+    avg_diff: parseFloat(p.avg_diff) || 0,
     trend_pct: parseFloat(p.trend_pct) || 0,
   }));
 

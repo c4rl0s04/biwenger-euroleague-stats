@@ -3,7 +3,7 @@
 import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function MarketOpportunitiesCard() {
@@ -44,7 +44,7 @@ export default function MarketOpportunitiesCard() {
                   </Link>
                   <span className="w-1 h-1 rounded-full bg-muted"></span>
                   <span className="text-blue-400 font-mono">
-                    {new Intl.NumberFormat('es-ES').format(player.price)}€
+                    <AnimatedNumber value={Number(player.price)} suffix="€" duration={0.8} />
                   </span>
                 </div>
 
@@ -62,7 +62,12 @@ export default function MarketOpportunitiesCard() {
                       ))}
                   </div>
                   <span className="text-green-400 font-bold text-sm">
-                    {Number(player.avg_recent_points).toFixed(1)} pts
+                    <AnimatedNumber
+                      value={parseFloat(player.avg_recent_points)}
+                      decimals={1}
+                      duration={0.8}
+                    />{' '}
+                    pts
                   </span>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Trophy, Award } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
@@ -57,7 +57,7 @@ export default function WeekMVPsCard() {
                 }
                 rightContent={
                   <div className={`font-bold text-sm ${getTextStyles(index)}`}>
-                    {player.points} pts
+                    <AnimatedNumber value={Number(player.points)} duration={0.8} /> pts
                   </div>
                 }
               />

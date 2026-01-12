@@ -3,7 +3,7 @@
 import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/constants/colors';
 
@@ -82,6 +82,43 @@ export default function TopFormCard() {
                     {Number(player.avg_points).toFixed(1)}
                   </span>
                 </div>
+                {/* New section for improvement and recent average */}
+                {(player.improvement !== undefined || player.recent_avg !== undefined) && (
+                  <div className="flex items-center justify-between pl-6 mt-1">
+                    {player.improvement !== undefined && (
+                      <div className="flex flex-col items-start">
+                        <div className="text-sm font-bold text-emerald-400">
+                          +
+                          <AnimatedNumber
+                            value={parseFloat(player.improvement)}
+                            decimals={1}
+                            duration={0.8}
+                          />
+                        </div>
+                        {player.improvement_pct !== undefined && (
+                          <div className="text-xs text-muted-foreground">
+                            <AnimatedNumber
+                              value={parseFloat(player.improvement_pct)}
+                              decimals={1}
+                              duration={0.8}
+                            />
+                            %
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {player.recent_avg !== undefined && (
+                      <div className="text-xs text-muted-foreground">
+                        <AnimatedNumber
+                          value={parseFloat(player.recent_avg)}
+                          decimals={1}
+                          duration={0.8}
+                        />{' '}
+                        pts/g
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           ) : (

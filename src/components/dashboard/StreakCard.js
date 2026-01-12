@@ -2,7 +2,7 @@
 
 import PropTypes from 'prop-types';
 import { Flame, Snowflake, TrendingUp, TrendingDown, Info } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
@@ -58,52 +58,47 @@ export default function StreakCard({ type = 'hot' }) {
       className="card-glow"
     >
       <div className="flex flex-col">
-        {!loading && players && players.length > 0
-          ? players.map((player) => (
-              <DashboardPlayerRow
-                key={player.player_id}
-                playerId={player.player_id}
-                name={player.name}
-                team={player.team}
-                teamId={player.team_id}
-                owner={player.owner_name}
-                ownerId={player.owner_id}
-                ownerColorIndex={player.owner_color_index}
-                color={cfg.color}
-                // AVATAR: Glowing Icon (Flame or Snowflake)
-                avatar={
-                  <div className="relative w-10 h-10 flex items-center justify-center">
-                    <div
-                      className={`absolute inset-0 rounded-full blur-md opacity-50 animate-pulse ${type === 'hot' ? 'bg-orange-500' : 'bg-blue-500'}`}
-                    />
-                    <div className="relative w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
-                      {type === 'hot' ? (
-                        <Flame className="w-5 h-5 text-orange-500" />
-                      ) : (
-                        <Snowflake className="w-5 h-5 text-blue-500" />
-                      )}
-                    </div>
+        {!loading && players.length > 0 ? (
+          players.map((player) => (
+            <DashboardPlayerRow
+              key={player.player_id}
+              playerId={player.player_id}
+              name={player.name}
+              team={player.team}
+              owner={player.owner_name}
+              color={cfg.color}
+              avatar={
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center bg-${cfg.color}-500/10 text-${cfg.color}-400 border border-${cfg.color}-500/20`}
+                >
+                  <TrendIcon size={20} />
+                </div>
+              }
+              rightContent={
+                <div className="flex flex-col items-end">
+                  <div
+                    className={`font-bold text-base ${
+                      cfg.color === 'orange' ? 'text-orange-400' : 'text-blue-400'
+                    }`}
+                  >
+                    {player.avg_diff > 0 ? '+' : ''}
+                    <AnimatedNumber
+                      value={parseFloat(player.avg_diff) || 0}
+                      decimals={1}
+                      duration={0.8}
+                    />{' '}
+                    pts
                   </div>
-                }
-                // STATS: Percentage + Avg
-                rightContent={
-                  <>
-                    <div
-                      className={`flex items-center justify-end gap-1 text-sm font-bold text-${cfg.color}-400`}
-                    >
-                      <TrendIcon className="w-3 h-3" />
-                      {Math.abs(player.trend_pct)}%
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {player.recent_avg.toFixed(1)} pts
-                    </div>
-                  </>
-                }
-              />
-            ))
-          : !loading && (
-              <div className="text-center text-muted-foreground py-8">{cfg.emptyMessage}</div>
-            )}
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                    Diferencia
+                  </div>
+                </div>
+              }
+            />
+          ))
+        ) : (
+          <div className="text-center text-muted-foreground py-8">{cfg.emptyMessage}</div>
+        )}
       </div>
     </Card>
   );
