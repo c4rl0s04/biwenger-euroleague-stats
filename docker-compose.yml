@@ -12,5 +12,47 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: always
 
+  app:
+    build: .
+    container_name: biwenger_web
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-biwenger}
+      - BIWENGER_EMAIL=${BIWENGER_EMAIL}
+      - BIWENGER_PASSWORD=${BIWENGER_PASSWORD}
+      - BIWENGER_LEAGUE_ID=${BIWENGER_LEAGUE_ID}
+    depends_on:
+      - postgres
+
+  sync:
+    build: .
+    container_name: biwenger_sync
+    # Run sync on start, then loop every 6 hours (21600 seconds)
+    command: >
+      sh -c "
+        echo 'Starting sync service...'
+        while true; do
+          echo '[Sync] Starting scheduled sync at $(date)'
+          npm run sync || echo '[Sync] Failed'
+          echo '[Sync] Finished. Sleeping for 6 hours...'
+          sleep 21600
+        done
+      "
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-biwenger}
+      - BIWENGER_EMAIL=${BIWENGER_EMAIL}
+      - BIWENGER_PASSWORD=${BIWENGER_PASSWORD}
+      - BIWENGER_LEAGUE_ID=${BIWENGER_LEAGUE_ID}
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:

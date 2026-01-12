@@ -81,7 +81,7 @@ export async function biwengerFetch(endpoint, options = {}) {
   }
 }
 
-// --- Specific method exports (Same as before) ---
+// --- Specific method exports ---
 
 export async function fetchMarket() {
   return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, 0, 100));
