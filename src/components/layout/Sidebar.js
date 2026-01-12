@@ -305,28 +305,29 @@ export default function Sidebar({ isOpen, onClose }) {
           <div
             className={`space-y-1 overflow-hidden transition-all duration-300 ${isMembersVisible && !isCollapsed ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}
           >
-            {users.map((member) => {
-              const { id, name, color_index } = member;
-              const color = getColorForUser(id, name, color_index);
+            {Array.isArray(users) &&
+              users.map((member) => {
+                const { id, name, color_index } = member;
+                const color = getColorForUser(id, name, color_index);
 
-              return (
-                <Link
-                  key={id}
-                  href={`/user/${id}`}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors group"
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full ring-2 ring-white/10 ${color.text.replace('text-', 'bg-')}`}
-                    style={{ backgroundColor: color.stroke }}
-                  />
-                  <span
-                    className={`text-xs font-medium transition-colors truncate ${color.text} opacity-90 group-hover:opacity-100`}
+                return (
+                  <Link
+                    key={id}
+                    href={`/user/${id}`}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors group"
                   >
-                    {name}
-                  </span>
-                </Link>
-              );
-            })}
+                    <div
+                      className={`w-2 h-2 rounded-full ring-2 ring-white/10 ${color.text.replace('text-', 'bg-')}`}
+                      style={{ backgroundColor: color.stroke }}
+                    />
+                    <span
+                      className={`text-xs font-medium transition-colors truncate ${color.text} opacity-90 group-hover:opacity-100`}
+                    >
+                      {name}
+                    </span>
+                  </Link>
+                );
+              })}
           </div>
         </div>
 

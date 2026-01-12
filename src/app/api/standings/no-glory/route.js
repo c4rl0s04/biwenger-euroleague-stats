@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const noGlory = fetchNoGloryStats();
+    const noGlory = await fetchNoGloryStats();
     return successResponse(noGlory, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching no glory stats:', error);

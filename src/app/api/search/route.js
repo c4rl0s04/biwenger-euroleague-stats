@@ -10,7 +10,7 @@ export async function GET(request) {
       return successResponse({ players: [], teams: [], users: [] }, CACHE_DURATIONS.SHORT);
     }
 
-    const results = globalSearch(query);
+    const results = await globalSearch(query);
     return successResponse(results, CACHE_DURATIONS.SHORT);
   } catch (error) {
     console.error('Search API Error:', error);

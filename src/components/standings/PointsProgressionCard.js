@@ -42,7 +42,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function PointsProgressionCard() {
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const { data: progression = [], loading } = useApiData(
-    '/api/standings/points-progression?scope=all'
+    '/api/standings/points-progression?scope=all&limit=50'
   );
 
   // Process data for the chart

@@ -8,8 +8,8 @@ import { getTeamById } from '../db';
 /**
  * Get full team profile by ID
  * @param {number} teamId - Team ID
- * @returns {Object} Team profile data
+ * @returns {Promise<Object>} Team profile data
  */
-export function fetchTeamProfile(teamId) {
-  return getTeamById(teamId);
+export async function fetchTeamProfile(teamId) {
+  return await getTeamById(teamId);
 }

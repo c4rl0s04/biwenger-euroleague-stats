@@ -3,9 +3,9 @@ import { db } from '../client.js';
 /**
  * Get team details by ID
  * @param {number} id - Team ID
- * @returns {Object} Team details
+ * @returns {Promise<Object>} Team details
  */
-export function getTeamById(id) {
+export async function getTeamById(id) {
   const query = `
     SELECT 
       id,
@@ -13,7 +13,7 @@ export function getTeamById(id) {
       short_name,
       img as logo
     FROM teams
-    WHERE id = ?
+    WHERE id = $1
   `;
-  return db.prepare(query).get(id);
+  return (await db.query(query, [id])).rows[0];
 }

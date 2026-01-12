@@ -4,9 +4,9 @@ import { NEXT_ROUND_CTE } from '../sql_utils.js';
 
 /**
  * Get Porras statistics
- * @returns {Array} User statistics from prediction game
+ * @returns {Promise<Array>} User statistics from prediction game
  */
-export function getPorrasStats() {
+export async function getPorrasStats() {
   const query = `
     SELECT 
       usuario,
@@ -20,14 +20,14 @@ export function getPorrasStats() {
     ORDER BY total_hits DESC
   `;
 
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get all Porras rounds
- * @returns {Array} All rounds with results
+ * @returns {Promise<Array>} All rounds with results
  */
-export function getAllPorrasRounds() {
+export async function getAllPorrasRounds() {
   const query = `
     SELECT 
       jornada,
@@ -37,14 +37,14 @@ export function getAllPorrasRounds() {
     ORDER BY jornada DESC, aciertos DESC
   `;
 
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get the next upcoming round
- * @returns {Object} Next round details
+ * @returns {Promise<Object>} Next round details
  */
-export function getNextRound() {
+export async function getNextRound() {
   // Find the round of the upcoming match, then get its full details (true start date)
   const query = `
     ${NEXT_ROUND_CTE}
@@ -55,9 +55,10 @@ export function getNextRound() {
       MAX(m.date) as end_date
     FROM matches m
     JOIN NextRoundStart nr ON m.round_id = nr.round_id
-    GROUP BY m.round_id
+    GROUP BY m.round_id, m.round_name
   `;
-  const round = db.prepare(query).get();
+  const roundRes = await db.query(query);
+  const round = roundRes.rows[0];
 
   if (round) {
     // 1. Get all finished matches to calculate standings
@@ -79,7 +80,7 @@ export function getNextRound() {
 
     let positionMap = new Map();
     try {
-      const allFinishedMatches = db.prepare(allFinishedMatchesQuery).all();
+      const allFinishedMatches = (await db.query(allFinishedMatchesQuery)).rows;
       // Use the standings utility to calculate positions properly (handles draws, tie-breaking, etc.)
       positionMap = getTeamPositions(allFinishedMatches);
     } catch (err) {
@@ -104,18 +105,16 @@ export function getNextRound() {
       FROM matches m
       LEFT JOIN teams t1 ON m.home_id = t1.id
       LEFT JOIN teams t2 ON m.away_id = t2.id
-      WHERE m.round_id = ? 
+      WHERE m.round_id = $1
       ORDER BY m.date ASC
     `;
 
-    round.matches = db
-      .prepare(matchesQuery)
-      .all(round.round_id)
-      .map((match) => ({
-        ...match,
-        home_position: positionMap.get(match.home_id) || null,
-        away_position: positionMap.get(match.away_id) || null,
-      }));
+    const matchesRes = await db.query(matchesQuery, [round.round_id]);
+    round.matches = matchesRes.rows.map((match) => ({
+      ...match,
+      home_position: positionMap.get(match.home_id) || null,
+      away_position: positionMap.get(match.away_id) || null,
+    }));
   }
 
   return round;
@@ -123,9 +122,9 @@ export function getNextRound() {
 
 /**
  * Get the winner of the last completed round
- * @returns {Object} User who won the last round
+ * @returns {Promise<Object>} User who won the last round
  */
-export function getLastRoundWinner() {
+export async function getLastRoundWinner() {
   const query = `
     WITH LastRound AS (
       SELECT m.round_id
@@ -144,27 +143,27 @@ export function getLastRoundWinner() {
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
     WHERE ur.round_id = (SELECT round_id FROM LastRound)
-      AND ur.participated = 1
+      AND ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1
   `;
-  return db.prepare(query).get();
+  return (await db.query(query)).rows[0];
 }
 
 /**
  * Get user's recent rounds performance
  * @param {string} userId - User ID
  * @param {number} limit - Number of rounds
- * @returns {Array} Recent rounds with position
+ * @returns {Promise<Array>} Recent rounds with position
  */
-export function getUserRecentRounds(userId, limit = 10) {
+export async function getUserRecentRounds(userId, limit = 10) {
   // Get all rounds (including non-participated) with position when participated
   const query = `
     WITH AllRounds AS (
       SELECT DISTINCT round_id, round_name
       FROM user_rounds
       ORDER BY round_id DESC
-      LIMIT ?
+      LIMIT $1
     ),
     RoundPositions AS (
       SELECT 
@@ -174,7 +173,7 @@ export function getUserRecentRounds(userId, limit = 10) {
         ur.participated,
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
-      WHERE ur.participated = 1
+      WHERE ur.participated = TRUE
     )
     SELECT 
       ar.round_id,
@@ -183,26 +182,28 @@ export function getUserRecentRounds(userId, limit = 10) {
       COALESCE(rp.position, 0) as position,
       CASE WHEN rp.user_id IS NOT NULL THEN 1 ELSE 0 END as participated
     FROM AllRounds ar
-    LEFT JOIN RoundPositions rp ON ar.round_id = rp.round_id AND rp.user_id = ?
+    LEFT JOIN RoundPositions rp ON ar.round_id = rp.round_id AND rp.user_id = $2
     ORDER BY ar.round_id DESC
   `;
 
-  const rounds = db.prepare(query).all(limit, userId);
+  const rounds = (await db.query(query, [limit, userId])).rows;
 
   // Count total rounds where user participated
   const countQuery = `
     SELECT COUNT(*) as total_played
     FROM user_rounds
-    WHERE user_id = ? AND participated = 1
+    WHERE user_id = $1 AND participated = TRUE
   `;
-  const { total_played } = db.prepare(countQuery).get(userId) || { total_played: 0 };
+  const countRes = await db.query(countQuery, [userId]);
+  const total_played = countRes.rows[0]?.total_played || 0;
 
   // Count total rounds in the season (distinct round_ids)
   const totalRoundsQuery = `
     SELECT COUNT(DISTINCT round_id) as total_rounds
     FROM user_rounds
   `;
-  const { total_rounds } = db.prepare(totalRoundsQuery).get() || { total_rounds: 0 };
+  const totalRoundsRes = await db.query(totalRoundsQuery);
+  const total_rounds = totalRoundsRes.rows[0]?.total_rounds || 0;
 
   return { rounds, total_played, total_rounds };
 }
@@ -210,9 +211,9 @@ export function getUserRecentRounds(userId, limit = 10) {
 /**
  * Get best performers from the last completed round
  * @param {number} limit - Number of MVPs
- * @returns {Array} Top MVPs from last round
+ * @returns {Promise<Array>} Top MVPs from last round
  */
-export function getLastRoundMVPs(limit = 5) {
+export async function getLastRoundMVPs(limit = 5) {
   const query = `
     WITH LastRound AS (
       SELECT m.round_id as last_round_id
@@ -238,17 +239,17 @@ export function getLastRoundMVPs(limit = 5) {
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
     ORDER BY prs.fantasy_points DESC
-    LIMIT ?
+    LIMIT $1
   `;
 
-  return db.prepare(query).all(limit);
+  return (await db.query(query, [limit])).rows;
 }
 
 /**
  * Get all player stats for the last completed round to calculate ideal lineup
- * @returns {Array} List of players with their stats for the last round
+ * @returns {Promise<Array>} List of players with their stats for the last round
  */
-export function getLastRoundStats() {
+export async function getLastRoundStats() {
   const query = `
     WITH LastRound AS (
       SELECT m.round_id as last_round_id
@@ -274,5 +275,5 @@ export function getLastRoundStats() {
     WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
     ORDER BY prs.fantasy_points DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }

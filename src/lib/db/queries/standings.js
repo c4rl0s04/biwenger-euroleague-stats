@@ -13,9 +13,9 @@ import { db } from '../client.js';
 
 /**
  * Get extended standings with additional statistics
- * @returns {UserStanding[]} Full standings with wins, averages, and team values
+ * @returns {Promise<UserStanding[]>} Full standings with wins, averages, and team values
  */
-export function getExtendedStandings() {
+export async function getExtendedStandings() {
   const query = `
     WITH UserTotals AS (
       SELECT 
@@ -26,7 +26,7 @@ export function getExtendedStandings() {
         MAX(points) as best_round,
         MIN(points) as worst_round
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY user_id
     ),
     RoundWins AS (
@@ -39,8 +39,8 @@ export function getExtendedStandings() {
           points,
           RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
         FROM user_rounds
-        WHERE participated = 1
-      )
+        WHERE participated = TRUE
+      ) sub
       WHERE position = 1
       GROUP BY user_id
     )
@@ -72,15 +72,25 @@ export function getExtendedStandings() {
     ) sq ON u.id = sq.owner_id
     ORDER BY position ASC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    total_points: parseInt(row.total_points) || 0,
+    rounds_played: parseInt(row.rounds_played) || 0,
+    avg_points: parseFloat(row.avg_points) || 0,
+    best_round: parseInt(row.best_round) || 0,
+    worst_round: parseInt(row.worst_round) || 0,
+    round_wins: parseInt(row.round_wins) || 0,
+    team_value: parseInt(row.team_value) || 0,
+    price_trend: parseInt(row.price_trend) || 0,
+  }));
 }
 
 /**
  * Get history of round winners
  * @param {number} [limit=15] - Number of rounds to return
- * @returns {RoundWinner[]} Round winners history with points
+ * @returns {Promise<RoundWinner[]>} Round winners history with points
  */
-export function getRoundWinners(limit = 15) {
+export async function getRoundWinners(limit = 15) {
   const query = `
     WITH RoundResults AS (
       SELECT 
@@ -94,7 +104,7 @@ export function getRoundWinners(limit = 15) {
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
       JOIN users u ON ur.user_id = u.id
-      WHERE ur.participated = 1
+      WHERE ur.participated = TRUE
     )
     SELECT 
       round_id,
@@ -107,16 +117,16 @@ export function getRoundWinners(limit = 15) {
     FROM RoundResults
     WHERE position = 1
     ORDER BY round_id DESC
-    LIMIT ?
+    LIMIT $1
   `;
-  return db.prepare(query).all(limit);
+  return (await db.query(query, [limit])).rows;
 }
 
 /**
  * Get aggregated league statistics
- * @returns {LeagueTotals & {most_valuable_user: Object, round_record: Object, leader_streak: number}} League totals, averages, and records
+ * @returns {Promise<LeagueTotals & {most_valuable_user: Object, round_record: Object, leader_streak: number}>} League totals, averages, and records
  */
-export function getLeagueTotals() {
+export async function getLeagueTotals() {
   const pointsQuery = `
     SELECT 
       SUM(points) as total_points,
@@ -124,11 +134,12 @@ export function getLeagueTotals() {
       COUNT(DISTINCT round_id) as total_rounds,
       COUNT(DISTINCT user_id) as total_users
     FROM user_rounds
-    WHERE participated = 1
+    WHERE participated = TRUE
   `;
 
   // Get total season rounds from matches table
   // Count unique base round names (strip "(aplazada)" suffix and duplicates)
+  // Postgres replacement logic
   const seasonRoundsQuery = `
     SELECT COUNT(DISTINCT 
       CASE 
@@ -161,15 +172,17 @@ export function getLeagueTotals() {
     FROM players p
     JOIN users u ON p.owner_id = u.id
     WHERE p.owner_id IS NOT NULL
-    GROUP BY p.owner_id
+    GROUP BY p.owner_id, u.name, u.icon, u.color_index
     ORDER BY team_value DESC
     LIMIT 1
   `;
 
-  const pointsStats = db.prepare(pointsQuery).get();
-  const seasonRounds = db.prepare(seasonRoundsQuery).get();
-  const valueStats = db.prepare(valueQuery).get();
-  const mostValuable = db.prepare(mostValuableQuery).get();
+  const [pointsStats, seasonRounds, valueStats, mostValuable] = await Promise.all([
+    db.query(pointsQuery).then((res) => res.rows[0]),
+    db.query(seasonRoundsQuery).then((res) => res.rows[0]),
+    db.query(valueQuery).then((res) => res.rows[0]),
+    db.query(mostValuableQuery).then((res) => res.rows[0]),
+  ]);
 
   // Record for most points in a single round
   const roundRecordQuery = `
@@ -182,11 +195,11 @@ export function getLeagueTotals() {
       ur.points
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
-    WHERE ur.participated = 1
+    WHERE ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1
   `;
-  const roundRecord = db.prepare(roundRecordQuery).get();
+  const roundRecord = (await db.query(roundRecordQuery)).rows[0];
 
   // Leader streak - count consecutive rounds where current leader was #1
   const leaderStreakQuery = `
@@ -195,16 +208,16 @@ export function getLeagueTotals() {
       FROM (
         SELECT user_id, SUM(points) as total
         FROM user_rounds
-        WHERE participated = 1
+        WHERE participated = TRUE
         GROUP BY user_id
         ORDER BY total DESC
         LIMIT 1
-      )
+      ) sub
     ),
     LeagueRounds AS (
       SELECT DISTINCT round_id 
       FROM user_rounds 
-      WHERE participated = 1
+      WHERE participated = TRUE
     ),
     RoundRanks AS (
       SELECT 
@@ -212,7 +225,7 @@ export function getLeagueTotals() {
         user_id,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
     ),
     LeaderPerformance AS (
       SELECT 
@@ -242,33 +255,47 @@ export function getLeagueTotals() {
 
   let leaderStreak = { streak: 0 };
   try {
-    leaderStreak = db.prepare(leaderStreakQuery).get() || { streak: 0 };
+    const res = await db.query(leaderStreakQuery);
+    leaderStreak = res.rows[0] || { streak: 0 };
   } catch (e) {
     // Fallback if query fails
+    console.error('Leader Streak Query Error', e);
   }
 
   return {
     ...pointsStats,
     ...valueStats,
-    total_season_rounds: seasonRounds?.total_season_rounds || 34,
-    most_valuable_user: mostValuable,
+    total_points: parseInt(pointsStats?.total_points) || 0,
+    avg_round_points: parseFloat(pointsStats?.avg_round_points) || 0,
+    total_rounds: parseInt(pointsStats?.total_rounds) || 0,
+    total_users: parseInt(pointsStats?.total_users) || 0,
+    total_league_value: parseInt(valueStats?.total_league_value) || 0,
+    max_team_value: parseInt(valueStats?.max_team_value) || 0,
+    min_team_value: parseInt(valueStats?.min_team_value) || 0,
+    total_season_rounds: parseInt(seasonRounds?.total_season_rounds) || 34,
+    most_valuable_user: mostValuable
+      ? {
+          ...mostValuable,
+          team_value: parseInt(mostValuable.team_value) || 0,
+        }
+      : null,
     round_record: roundRecord,
-    leader_streak: leaderStreak.streak || 0,
+    leader_streak: parseInt(leaderStreak?.streak) || 0,
   };
 }
 
 /**
  * Get points progression for all users across rounds
  * @param {number} [limit=10] - Number of most recent rounds
- * @returns {PointsProgression[]} Points by round for each user with cumulative totals
+ * @returns {Promise<PointsProgression[]>} Points by round for each user with cumulative totals
  */
-export function getPointsProgression(limit = 10) {
+export async function getPointsProgression(limit = 10) {
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id, round_name
       FROM user_rounds
       ORDER BY round_id DESC
-      LIMIT ?
+      LIMIT $1
     )
     SELECT 
       ur.user_id,
@@ -276,21 +303,21 @@ export function getPointsProgression(limit = 10) {
       u.color_index,
       ur.round_id,
       ur.round_name,
-      CASE WHEN ur.participated = 1 THEN ur.points ELSE 0 END as points,
-      SUM(CASE WHEN ur.participated = 1 THEN ur.points ELSE 0 END) OVER (PARTITION BY ur.user_id ORDER BY ur.round_id) as cumulative_points
+      CASE WHEN ur.participated = TRUE THEN ur.points ELSE 0 END as points,
+      SUM(CASE WHEN ur.participated = TRUE THEN ur.points ELSE 0 END) OVER (PARTITION BY ur.user_id ORDER BY ur.round_id) as cumulative_points
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
     WHERE ur.round_id IN (SELECT round_id FROM RecentRounds)
     ORDER BY ur.round_id ASC, ur.points DESC
   `;
-  return db.prepare(query).all(limit);
+  return (await db.query(query, [limit])).rows;
 }
 
 /**
  * Get users ranked by team value
- * @returns {{user_id: number, name: string, icon: string, team_value: number, price_trend: number, squad_size: number, value_position: number}[]} Users sorted by squad value
+ * @returns {Promise<{user_id: number, name: string, icon: string, team_value: number, price_trend: number, squad_size: number, value_position: number}[]>} Users sorted by squad value
  */
-export function getValueRanking() {
+export async function getValueRanking() {
   const query = `
     SELECT 
       u.id as user_id,
@@ -306,14 +333,19 @@ export function getValueRanking() {
     GROUP BY u.id
     ORDER BY team_value DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    team_value: parseInt(row.team_value) || 0,
+    price_trend: parseInt(row.price_trend) || 0,
+    squad_size: parseInt(row.squad_size) || 0,
+  }));
 }
 
 /**
  * Get win count per user
- * @returns {{user_id: number, name: string, icon: string, wins: number}[]} Users with their round win counts
+ * @returns {Promise<{user_id: number, name: string, icon: string, wins: number}[]>} Users with their round win counts
  */
-export function getWinCounts() {
+export async function getWinCounts() {
   const query = `
     WITH RoundWinners AS (
       SELECT 
@@ -321,7 +353,7 @@ export function getWinCounts() {
         round_id,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
     )
     SELECT 
       u.id as user_id,
@@ -334,5 +366,8 @@ export function getWinCounts() {
     GROUP BY u.id
     ORDER BY wins DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    wins: parseInt(row.wins) || 0,
+  }));
 }

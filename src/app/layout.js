@@ -19,10 +19,10 @@ export const metadata = {
 
 // Start of the application
 // We fetch server-side data here to pass to the client context
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
   // Fetch users for the UserProvider
   // Using getExtendedStandings as it contains all active users with their formatting info
-  const users = getExtendedStandings();
+  const users = await getExtendedStandings();
 
   return (
     <html lang="es" suppressHydrationWarning>

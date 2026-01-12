@@ -10,3 +10,4 @@ export * from './queries/matches';
 export * from './queries/search';
 export * from './queries/analytics';
 export * from './queries/advanced_stats'; // New Advanced Stats
+export * from './queries/schedule';

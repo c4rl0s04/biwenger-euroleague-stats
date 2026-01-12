@@ -44,116 +44,116 @@ import {
 // ============ DIRECT WRAPPERS ============
 // These wrap query functions 1:1 for consistent service layer usage
 
-/** @returns {UserStanding[]} */
-export function getFullStandings() {
-  return getExtendedStandings();
+/** @returns {Promise<UserStanding[]>} */
+export async function getFullStandings() {
+  return await getExtendedStandings();
 }
 
-/** @returns {LeagueTotals} */
-export function getLeagueOverview() {
-  return getLeagueTotals();
+/** @returns {Promise<LeagueTotals>} */
+export async function getLeagueOverview() {
+  return await getLeagueTotals();
 }
 
-export function fetchRoundWinners(limit = 15) {
-  return getRoundWinners(limit);
+export async function fetchRoundWinners(limit = 15) {
+  return await getRoundWinners(limit);
 }
 
-export function fetchPointsProgression(limit = 50) {
-  return getPointsProgression(limit);
+export async function fetchPointsProgression(limit = 50) {
+  return await getPointsProgression(limit);
 }
 
-export function fetchValueRanking() {
-  return getValueRanking();
+export async function fetchValueRanking() {
+  return await getValueRanking();
 }
 
-export function fetchStreakStats() {
-  return getStreakStats();
+export async function fetchStreakStats() {
+  return await getStreakStats();
 }
 
-export function fetchVolatilityStats() {
-  return getVolatilityStats();
+export async function fetchVolatilityStats() {
+  return await getVolatilityStats();
 }
 
-export function fetchEfficiencyStats() {
-  return getEfficiencyStats();
+export async function fetchEfficiencyStats() {
+  return await getEfficiencyStats();
 }
 
-export function fetchPlacementStats() {
-  return getPlacementStats();
+export async function fetchPlacementStats() {
+  return await getPlacementStats();
 }
 
-export function fetchBottlerStats() {
-  return getBottlerStats();
+export async function fetchBottlerStats() {
+  return await getBottlerStats();
 }
 
-export function fetchHeartbreakerStats() {
-  return getHeartbreakerStats();
+export async function fetchHeartbreakerStats() {
+  return await getHeartbreakerStats();
 }
 
-export function fetchNoGloryStats() {
-  return getNoGloryStats();
+export async function fetchNoGloryStats() {
+  return await getNoGloryStats();
 }
 
-export function fetchJinxStats() {
-  return getJinxStats();
+export async function fetchJinxStats() {
+  return await getJinxStats();
 }
 
-export function fetchInitialSquadAnalytics() {
-  return getInitialSquadActualPerformance();
+export async function fetchInitialSquadAnalytics() {
+  return await getInitialSquadActualPerformance();
 }
 
-export function fetchLeagueComparisonStats(userId) {
-  return getLeagueComparisonStats(userId);
+export async function fetchLeagueComparisonStats(userId) {
+  return await getLeagueComparisonStats(userId);
 }
 
 // ============ ADVANCED STATS WRAPPERS ============
 
-export function fetchHeatCheckStats() {
-  return getHeatCheckStats();
+export async function fetchHeatCheckStats() {
+  return await getHeatCheckStats();
 }
 
-export function fetchHunterStats() {
-  return getHunterStats();
+export async function fetchHunterStats() {
+  return await getHunterStats();
 }
 
-export function fetchRollingAverageStats() {
-  return getRollingAverageStats();
+export async function fetchRollingAverageStats() {
+  return await getRollingAverageStats();
 }
 
-export function fetchFloorCeilingStats() {
-  return getFloorCeilingStats();
+export async function fetchFloorCeilingStats() {
+  return await getFloorCeilingStats();
 }
 
-export function fetchPointDistributionStats() {
-  return getPointDistributionStats();
+export async function fetchPointDistributionStats() {
+  return await getPointDistributionStats();
 }
 
-export function fetchAllPlayAllStats() {
-  return getAllPlayAllStats();
+export async function fetchAllPlayAllStats() {
+  return await getAllPlayAllStats();
 }
 
-export function fetchDominanceStats() {
-  return getDominanceStats();
+export async function fetchDominanceStats() {
+  return await getDominanceStats();
 }
 
-export function fetchTheoreticalGapStats() {
-  return getTheoreticalGapStats();
+export async function fetchTheoreticalGapStats() {
+  return await getTheoreticalGapStats();
 }
 
-export function fetchHeatmapStats() {
-  return getHeatmapStats();
+export async function fetchHeatmapStats() {
+  return await getHeatmapStats();
 }
 
-export function fetchPositionChangesStats() {
-  return getPositionChangesStats();
+export async function fetchPositionChangesStats() {
+  return await getPositionChangesStats();
 }
 
-export function fetchReliabilityStats() {
-  return getReliabilityStats();
+export async function fetchReliabilityStats() {
+  return await getReliabilityStats();
 }
 
-export function fetchRivalryMatrixStats() {
-  return getRivalryMatrixStats();
+export async function fetchRivalryMatrixStats() {
+  return await getRivalryMatrixStats();
 }
 
 // ============ AGGREGATED FUNCTIONS ============
@@ -163,28 +163,38 @@ export function fetchRivalryMatrixStats() {
  * @param {Object} options - Configuration options
  * @param {number} [options.roundsLimit=15] - Number of round winners
  * @param {number} [options.progressionLimit=10] - Rounds for progression
- * @returns {Object} Bundled standings page data
+ * @returns {Promise<Object>} Bundled standings page data
  */
-export function getStandingsPageData(options = {}) {
+export async function getStandingsPageData(options = {}) {
   const { roundsLimit = 15, progressionLimit = 10 } = options;
 
+  const [standings, leagueTotals, roundWinners, pointsProgression, valueRanking, winCounts] =
+    await Promise.all([
+      getExtendedStandings(),
+      getLeagueTotals(),
+      getRoundWinners(roundsLimit),
+      getPointsProgression(progressionLimit),
+      getValueRanking(),
+      getWinCounts(),
+    ]);
+
   return {
-    standings: getExtendedStandings(),
-    leagueTotals: getLeagueTotals(),
-    roundWinners: getRoundWinners(roundsLimit),
-    pointsProgression: getPointsProgression(progressionLimit),
-    valueRanking: getValueRanking(),
-    winCounts: getWinCounts(),
+    standings,
+    leagueTotals,
+    roundWinners,
+    pointsProgression,
+    valueRanking,
+    winCounts,
   };
 }
 
 /**
  * Get user's position and gap to leader
  * @param {string} userId - User ID to check
- * @returns {Object} Position data with gaps
+ * @returns {Promise<Object>} Position data with gaps
  */
-export function getUserPositionData(userId) {
-  const standings = getExtendedStandings();
+export async function getUserPositionData(userId) {
+  const standings = await getExtendedStandings();
   const userIndex = standings.findIndex((u) => String(u.user_id) === String(userId));
 
   if (userIndex === -1) {

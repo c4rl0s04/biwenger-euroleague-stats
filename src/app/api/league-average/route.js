@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
-    const average = fetchLeagueAveragePoints();
+    const average = await fetchLeagueAveragePoints();
     return successResponse({ average }, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching league average:', error);

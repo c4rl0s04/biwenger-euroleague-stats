@@ -10,7 +10,7 @@ export async function GET() {
 
     // 1. Recent Transfers (Top 5)
     try {
-      const transfers = getRecentTransfers(5);
+      const transfers = await getRecentTransfers(5);
       transfers.forEach((t) => {
         const amount = new Intl.NumberFormat('es-ES', {
           style: 'currency',
@@ -31,8 +31,8 @@ export async function GET() {
 
     // 2. Significant Price Changes
     try {
-      const changes = getSignificantPriceChanges(24, 200000); // >200k change
-      changes.forEach((c) => {
+      const priceChanges = await getSignificantPriceChanges(24, 200000); // >200k change
+      priceChanges.forEach((c) => {
         const amount = new Intl.NumberFormat('es-ES', {
           style: 'currency',
           currency: 'EUR',
@@ -52,7 +52,7 @@ export async function GET() {
 
     // 3. Upcoming Matches
     try {
-      const matches = getUpcomingMatches(3);
+      const matches = await getUpcomingMatches(3);
       matches.forEach((m) => {
         const date = new Date(m.date);
         const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
@@ -69,7 +69,7 @@ export async function GET() {
 
     // 4. Recent Results
     try {
-      const results = getRecentResults(3);
+      const results = await getRecentResults(3);
       results.forEach((m) => {
         news.push({
           type: 'result',

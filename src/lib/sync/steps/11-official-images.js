@@ -17,8 +17,8 @@ export async function run(manager) {
   const mutations = prepareEuroleagueMutations(db);
 
   // Get players with Euroleague Code
-  // We need name to construct slug
-  const players = mutations.getAllPlayers.all().filter((p) => p.euroleague_code);
+  const allPlayers = await mutations.getAllPlayers();
+  const players = allPlayers.filter((p) => p.euroleague_code);
 
   manager.log(`   Found ${players.length} players with Euroleague codes.`);
 
@@ -27,7 +27,6 @@ export async function run(manager) {
 
   for (const player of players) {
     // Construct URL
-    // Slug: "FIRSTNAME LASTNAME" -> "firstname-lastname"
     const slug = player.name
       .toLowerCase()
       .replace(/,/g, '') // Remove commas if any
@@ -42,13 +41,9 @@ export async function run(manager) {
 
     const url = CONFIG.ENDPOINTS.EUROLEAGUE_WEBSITE.OFFICIAL_PLAYER_PROFILE(slug, paddedId);
 
-    // Output progress sparsely
-    // manager.log(`   Fetching ${player.name} (${paddedId})...`);
-
     try {
       const res = await fetch(url);
       if (!res.ok) {
-        // Silent continue on 404s to avoid noise
         errorCount++;
         continue;
       }
@@ -59,9 +54,8 @@ export async function run(manager) {
 
       if (match && match[1]) {
         const imgUrl = match[1];
-        mutations.updatePlayerImage.run(imgUrl, player.id);
+        await mutations.updatePlayerImage(imgUrl, player.id);
         updatedCount++;
-        // manager.log(`      ✅ Found: ${imgUrl}`);
       } else {
         errorCount++;
       }

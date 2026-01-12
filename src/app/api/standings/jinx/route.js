@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const jinx = fetchJinxStats();
+    const jinx = await fetchJinxStats();
     return successResponse(jinx, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching jinx stats:', error);

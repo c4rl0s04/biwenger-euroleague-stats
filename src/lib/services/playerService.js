@@ -18,20 +18,20 @@ import {
 
 // ============ DIRECT WRAPPERS ============
 
-export function fetchUserSeasonStats(userId) {
-  return getUserSeasonStats(userId);
+export async function fetchUserSeasonStats(userId) {
+  return await getUserSeasonStats(userId);
 }
 
-export function fetchUserRecentRounds(userId) {
-  return getUserRecentRounds(userId);
+export async function fetchUserRecentRounds(userId) {
+  return await getUserRecentRounds(userId);
 }
 
-export function fetchUserSquadDetails(userId) {
-  return getUserSquadDetails(userId);
+export async function fetchUserSquadDetails(userId) {
+  return await getUserSquadDetails(userId);
 }
 
-export function fetchPlayerStreaks(playerId) {
-  return getPlayerStreaks(playerId);
+export async function fetchPlayerStreaks(playerId) {
+  return await getPlayerStreaks(playerId);
 }
 
 // ============ AGGREGATED FUNCTIONS ============
@@ -39,10 +39,10 @@ export function fetchPlayerStreaks(playerId) {
 /**
  * Get complete player profile data
  * @param {number|string} playerId - Player ID
- * @returns {Object|null} Complete player profile or null if not found
+ * @returns {Promise<Object|null>} Complete player profile or null if not found
  */
-export function getPlayerProfile(playerId) {
-  const player = getPlayerDetails(playerId);
+export async function getPlayerProfile(playerId) {
+  const player = await getPlayerDetails(playerId);
   if (!player) return null;
   return player;
 }
@@ -50,10 +50,10 @@ export function getPlayerProfile(playerId) {
 /**
  * Get player performance summary
  * @param {number|string} playerId - Player ID
- * @returns {Object} Performance summary
+ * @returns {Promise<Object>} Performance summary
  */
-export function getPlayerPerformanceSummary(playerId) {
-  const details = getPlayerDetails(playerId);
+export async function getPlayerPerformanceSummary(playerId) {
+  const details = await getPlayerDetails(playerId);
   if (!details) return null;
 
   const { recentMatches = [], advancedStats = {} } = details;
@@ -83,19 +83,19 @@ export function getPlayerPerformanceSummary(playerId) {
 /**
  * Search players with filters
  * @param {Object} filters - Search filters
- * @returns {Array} Matching players
+ * @returns {Promise<Array>} Matching players
  */
-export function searchPlayers(filters = {}) {
+export async function searchPlayers(filters = {}) {
   const { limit = 20 } = filters;
-  // Team/position filtering not available at db level
-  return getTopPlayers(limit);
+  // Team/position filtering not available at db level yet
+  return await getTopPlayers(limit);
 }
 
 /**
  * Get top performers for display
  * @param {number} [limit=10] - Number of results
- * @returns {Array} Top players
+ * @returns {Promise<Array>} Top players
  */
-export function getTopPerformers(limit = 10) {
-  return getTopPlayers(limit);
+export async function getTopPerformers(limit = 10) {
+  return await getTopPlayers(limit);
 }

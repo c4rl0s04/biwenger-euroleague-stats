@@ -11,7 +11,7 @@ export async function GET(request) {
       return errorResponse(userIdValidation.error, 400);
     }
 
-    const stats = fetchCaptainStats(userIdValidation.value);
+    const stats = await fetchCaptainStats(userIdValidation.value);
     return successResponse({ stats }, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('API Error:', error);

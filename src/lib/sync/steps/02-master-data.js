@@ -25,7 +25,7 @@ export async function run(manager) {
   manager.log(`   Found ${clubs.length} Euroleague clubs.`);
 
   // 2. Persist Team Count (for round calculation)
-  mutations.upsertSyncMeta.run({
+  await mutations.upsertSyncMeta({
     key: 'euroleague_team_count',
     value: String(clubs.length),
     updated_at: new Date().toISOString(),
@@ -33,7 +33,7 @@ export async function run(manager) {
 
   // 3. Prepare for Matching
   const teamMap = new Map(); // EL Code -> Biwenger ID
-  const biwengerTeams = mutations.getDbTeams.all();
+  const biwengerTeams = await mutations.getDbTeams();
 
   // Helper: Tokenize and clean team names for comparison
   const sanitize = (name) => {
@@ -92,14 +92,14 @@ export async function run(manager) {
     if (dbTeam) {
       teamMap.set(club.code, dbTeam.id);
       // Update team code in DB if needed
-      mutations.updateTeamCode.run(club.code, club.name, dbTeam.id);
+      await mutations.updateTeamCode(club.code, club.name, dbTeam.id);
     } else {
       manager.log(`   ⚠️ Could not link Euroleague club: ${club.name} (${club.code})`);
     }
   }
 
   // 4. Link Players
-  const biwengerPlayers = mutations.getAllPlayers.all();
+  const biwengerPlayers = await mutations.getAllPlayers();
   const matcher = new PlayerMatcher(manager);
   let linkedCount = 0;
 
@@ -118,7 +118,7 @@ export async function run(manager) {
       if (match) {
         // Persist the Link
         const elCode = `P${player.code}`;
-        mutations.updatePlayerLink.run({
+        await mutations.updatePlayerLink({
           biwenger_id: match.id,
           el_code: elCode,
           dorsal: player.dorsal || null,
@@ -126,7 +126,7 @@ export async function run(manager) {
         });
 
         // Store full JSON for posterity
-        mutations.insertPlayerMapping.run({
+        await mutations.insertPlayerMapping({
           biwenger_id: match.id,
           el_code: elCode,
           json: JSON.stringify(player),

@@ -4,9 +4,9 @@ import { db } from '../client.js';
  * Get all transfers with pagination
  * @param {number} limit - Number of results
  * @param {number} offset - Offset for pagination
- * @returns {Array} List of transfers
+ * @returns {Promise<Array>} List of transfers
  */
-export function getAllTransfers(limit = 100, offset = 0) {
+export async function getAllTransfers(limit = 100, offset = 0) {
   const query = `
     SELECT 
       id,
@@ -17,18 +17,18 @@ export function getAllTransfers(limit = 100, offset = 0) {
       comprador
     FROM fichajes
     ORDER BY timestamp DESC
-    LIMIT ? OFFSET ?
+    LIMIT $1 OFFSET $2
   `;
 
-  return db.prepare(query).all(limit, offset);
+  return (await db.query(query, [limit, offset])).rows;
 }
 
 /**
  * Get recent market activity
  * @param {number} limit - Number of transfers
- * @returns {Array} Recent transfers
+ * @returns {Promise<Array>} Recent transfers
  */
-export function getRecentTransfers(limit = 5) {
+export async function getRecentTransfers(limit = 5) {
   const query = `
     SELECT 
       f.*,
@@ -43,19 +43,19 @@ export function getRecentTransfers(limit = 5) {
     LEFT JOIN users seller ON f.vendedor = seller.name
     LEFT JOIN users buyer ON f.comprador = buyer.name
     ORDER BY f.timestamp DESC
-    LIMIT ?
+    LIMIT $1
   `;
-  return db.prepare(query).all(limit);
+  return (await db.query(query, [limit])).rows;
 }
 
 /**
  * Get market trends (Volume & Avg Price per day)
- * @returns {Array} Daily market stats
+ * @returns {Promise<Array>} Daily market stats
  */
-export function getMarketTrends() {
+export async function getMarketTrends() {
   const query = `
     SELECT 
-      substr(fecha, 1, 10) as date,
+      TO_CHAR(fecha::timestamp, 'YYYY-MM-DD') as date,
       COUNT(*) as count,
       ROUND(AVG(precio), 0) as avg_value
     FROM fichajes
@@ -63,15 +63,19 @@ export function getMarketTrends() {
     ORDER BY date ASC
     LIMIT 30
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    count: parseInt(row.count) || 0,
+    avg_value: parseFloat(row.avg_value) || 0,
+  }));
 }
 
 /**
  * Get market opportunities (undervalued players with good form)
  * @param {number} limit - Number of opportunities to return
- * @returns {Array} List of recommended buys
+ * @returns {Promise<Array>} List of recommended buys
  */
-export function getMarketOpportunities(limit = 3) {
+export async function getMarketOpportunities(limit = 3) {
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id
@@ -86,13 +90,13 @@ export function getMarketOpportunities(limit = 3) {
       SELECT 
         player_id,
         SUM(fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
-        GROUP_CONCAT(fantasy_points) as recent_scores
+        STRING_AGG(CAST(fantasy_points AS TEXT), ',') as recent_scores
       FROM (
         SELECT player_id, fantasy_points
         FROM player_round_stats
         WHERE round_id IN (SELECT round_id FROM RecentRounds)
         ORDER BY round_id DESC
-      )
+      ) sub
       GROUP BY player_id
       HAVING COUNT(*) >= 2
     )
@@ -114,19 +118,23 @@ export function getMarketOpportunities(limit = 3) {
       AND p.price > 0
       AND pf.avg_recent_points >= 12
     ORDER BY value_score DESC, price_trend DESC
-    LIMIT ?
+    LIMIT $1
   `;
 
-  return db.prepare(query).all(limit);
+  return (await db.query(query, [limit])).rows.map((row) => ({
+    ...row,
+    avg_recent_points: parseFloat(row.avg_recent_points) || 0,
+    value_score: parseFloat(row.value_score) || 0,
+  }));
 }
 
 /**
  * Get significant price changes in the last period
  * @param {number} hoursAgo - Hours to look back
  * @param {number} minChange - Minimum price change threshold
- * @returns {Array} Players with significant price changes
+ * @returns {Promise<Array>} Players with significant price changes
  */
-export function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
+export async function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
   const query = `
     SELECT 
       p.id as player_id,
@@ -138,10 +146,10 @@ export function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
       p.owner_id
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
-    WHERE ABS(COALESCE(p.price_increment, 0)) >= ?
+    WHERE ABS(COALESCE(p.price_increment, 0)) >= $1
     ORDER BY ABS(price_increment) DESC
     LIMIT 5
   `;
 
-  return db.prepare(query).all(minChange);
+  return (await db.query(query, [minChange])).rows;
 }

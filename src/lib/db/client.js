@@ -1,9 +1,8 @@
 /**
- * Database access layer using better-sqlite3
+ * Database access layer using pg (PostgreSQL)
  */
-import Database from 'better-sqlite3';
-import fs from 'fs';
-import path from 'path';
+import pg from 'pg';
+const { Pool } = pg;
 
 import { CONFIG } from '../config.js';
 
@@ -15,27 +14,30 @@ let db;
 if (skipDb) {
   // Create a mock database object for builds without a real database
   db = {
-    prepare: () => ({
-      get: () => null,
-      all: () => [],
-      run: () => ({ changes: 0 }),
-    }),
-    pragma: () => {},
+    query: async () => ({ rows: [], rowCount: 0 }),
+    connect: async () => ({ release: () => {} }),
+    end: async () => {},
   };
 } else {
-  // Connect to the LOCAL database
-  const dbPath = CONFIG.DB.PATH;
+  // Connect to the POSTGRES database
+  // Defaults match docker-compose.yml
+  const pool = new Pool({
+    user: process.env.POSTGRES_USER || 'user',
+    password: process.env.POSTGRES_PASSWORD || 'password',
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+    database: process.env.POSTGRES_DB || 'biwenger',
+    max: 10, // Max clients in pool
+    idleTimeoutMillis: 30000,
+  });
 
-  // Ensure data directory exists
-  const dataDir = path.dirname(dbPath);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
+  // Test connection
+  pool.on('error', (err, client) => {
+    console.error('Unexpected error on idle client', err);
+    process.exit(-1);
+  });
 
-  db = new Database(dbPath);
-
-  // Enable WAL mode for better concurrency
-  db.pragma('journal_mode = WAL');
+  db = pool;
 }
 
 export { db };

@@ -3,15 +3,6 @@ import { prepareUserMutations } from '../../../db/mutations/users.js';
 
 /**
  * Syncs lineups for finished rounds.
- * @param {import('better-sqlite3').Database} db - Database instance
- * @param {Object} round - Round object
- * @param {Set<number>} existingLineupRounds - Set of round IDs already synced
- * @param {number} lastLineupRoundId - ID of the last synced round
- * @param {Object} playersList - Map of player IDs to player objects
- * @returns {Promise<number>} - Number of lineups inserted
- */
-/**
- * Syncs lineups for finished rounds.
  * @param {import('./manager').SyncManager} manager
  * @param {Object} round - Round object
  * @param {Set<number>} existingLineupRounds - Set of round IDs already synced
@@ -51,66 +42,63 @@ export async function run(manager, round, playersListInput) {
       // Initialize Mutations
       const mutations = prepareUserMutations(db);
 
-      db.transaction(() => {
-        for (const user of standings) {
-          // Insert user info
-          // Used to be INSERT OR IGNORE, now UPSERT but minimal impact
-          mutations.upsertUser.run({
-            id: user.id.toString(),
-            name: user.name,
-            icon: null, // We don't have icon here usually, prevent overwriting with null if possible?
-            // Wait, upsertUser uses COALESCE(excluded.icon, users.icon) so passing null is safe.
-          });
+      for (const user of standings) {
+        // Insert user info
+        await mutations.upsertUser({
+          id: user.id.toString(),
+          name: user.name,
+          icon: null, // We don't have icon here usually
+        });
 
-          // Insert User Round Score (only for FINISHED rounds to avoid 0-point entries)
-          if (user.lineup && status === 'finished') {
-            try {
-              const participated = user.lineup.count ? 1 : 0;
-              const alineacion = user.lineup.type || null;
-              mutations.upsertUserRound.run(
-                user.id.toString(),
-                dbRoundId,
-                roundName,
-                user.lineup.points || 0,
-                participated,
-                alineacion
-              );
-            } catch (e) {
-              manager.error(`Error inserting user_round for ${user.name}: ${e.message}`);
-            }
-          }
-
-          // Insert Lineup (ALWAYS)
-          if (user.lineup && user.lineup.players) {
-            const captainId = user.lineup.captain ? user.lineup.captain.id : null;
-
-            user.lineup.players.forEach((playerId, index) => {
-              try {
-                let role = 'suplente';
-                if (index < 5) role = 'titular';
-                else if (index === 5) role = '6th_man';
-                // Check if player exists in our list
-                if (!playersList[playerId]) {
-                  // console.warn(`   Skipping lineup for unknown player ${playerId}`);
-                  return; // Use return for forEach to skip current iteration
-                }
-
-                mutations.upsertLineup.run({
-                  user_id: user.id.toString(),
-                  round_id: dbRoundId,
-                  round_name: roundName,
-                  player_id: playerId,
-                  is_captain: playerId === captainId ? 1 : 0,
-                  role: role,
-                });
-                insertedCount++;
-              } catch (e) {
-                // Ignore duplicates
-              }
+        // Insert User Round Score (only for FINISHED rounds to avoid 0-point entries)
+        if (user.lineup && status === 'finished') {
+          try {
+            const participated = user.lineup.count ? 1 : 0;
+            const alineacion = user.lineup.type || null;
+            await mutations.upsertUserRound({
+              user_id: user.id.toString(),
+              round_id: dbRoundId,
+              round_name: roundName,
+              points: user.lineup.points || 0,
+              participated: participated,
+              alineacion: alineacion,
             });
+          } catch (e) {
+            manager.error(`Error inserting user_round for ${user.name}: ${e.message}`);
           }
         }
-      })();
+
+        // Insert Lineup (ALWAYS)
+        if (user.lineup && user.lineup.players) {
+          const captainId = user.lineup.captain ? user.lineup.captain.id : null;
+
+          // Sequential loop for async
+          for (let index = 0; index < user.lineup.players.length; index++) {
+            const playerId = user.lineup.players[index];
+            try {
+              let role = 'suplente';
+              if (index < 5) role = 'titular';
+              else if (index === 5) role = '6th_man';
+              // Check if player exists in our list
+              if (!playersList[playerId]) {
+                continue;
+              }
+
+              await mutations.upsertLineup({
+                user_id: user.id.toString(),
+                round_id: dbRoundId,
+                round_name: roundName,
+                player_id: playerId,
+                is_captain: playerId === captainId ? 1 : 0,
+                role: role,
+              });
+              insertedCount++;
+            } catch (e) {
+              // Ignore duplicates
+            }
+          }
+        }
+      }
       manager.log(`   -> Synced standings/lineups for ${standings.length} users.`);
     }
   } else {

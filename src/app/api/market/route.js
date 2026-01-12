@@ -33,7 +33,7 @@ export async function GET(request) {
       return errorResponse(limitValidation.error, 400);
     }
 
-    const data = getMarketPageData();
+    const data = await getMarketPageData();
 
     return successResponse(data, CACHE_DURATIONS.MEDIUM);
   } catch (error) {

@@ -13,7 +13,7 @@ export async function GET(request) {
       return errorResponse(userIdValidation.error, 400);
     }
 
-    const data = fetchCaptainRecommendations(userIdValidation.value, 6);
+    const data = await fetchCaptainRecommendations(userIdValidation.value, 6);
     return successResponse(data, CACHE_DURATIONS.SHORT);
   } catch (error) {
     console.error('Error fetching captain suggestions:', error);

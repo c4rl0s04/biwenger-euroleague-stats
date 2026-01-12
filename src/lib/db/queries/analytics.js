@@ -4,9 +4,9 @@ import { db } from '../client.js';
  * Calculates the actual performance of initial squads based on lineup usage.
  * Appreciation: Starter (1.0), 6th Man (0.75), Bench (0.5).
  *
- * @returns {Array} List of users with their total weighted points.
+ * @returns {Promise<Array>} List of users with their total weighted points.
  */
-export function getInitialSquadActualPerformance() {
+export async function getInitialSquadActualPerformance() {
   const query = `
     SELECT 
       users.name as user_name,
@@ -23,18 +23,18 @@ export function getInitialSquadActualPerformance() {
     JOIN lineups l ON isq.player_id = l.player_id AND isq.user_id = l.user_id
     JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
     JOIN users ON isq.user_id = users.id
-    GROUP BY isq.user_id
+    GROUP BY isq.user_id, users.name, users.color_index
     ORDER BY total_points DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Calculates the theoretical maximum points of initial squads if they were never sold or benched.
  *
- * @returns {Array} List of users with their potential total points.
+ * @returns {Promise<Array>} List of users with their potential total points.
  */
-export function getInitialSquadTheoreticalPotential() {
+export async function getInitialSquadTheoreticalPotential() {
   const query = `
     SELECT 
       u.name as user_name,
@@ -43,16 +43,16 @@ export function getInitialSquadTheoreticalPotential() {
     FROM initial_squads isq
     JOIN users u ON isq.user_id = u.id
     JOIN player_round_stats prs ON isq.player_id = prs.player_id
-    GROUP BY u.name
+    GROUP BY u.name, u.color_index
     ORDER BY potential_points DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get detailed potential breakdown by player for a specific user (or all if null)
  */
-export function getTheoreticalBreakdown() {
+export async function getTheoreticalBreakdown() {
   const query = `
     SELECT 
       u.name as user_name,
@@ -63,8 +63,8 @@ export function getTheoreticalBreakdown() {
     JOIN users u ON isq.user_id = u.id
     JOIN players p ON isq.player_id = p.id
     JOIN player_round_stats prs ON isq.player_id = prs.player_id
-    GROUP BY u.name, p.name
+    GROUP BY u.name, u.color_index, p.name
     ORDER BY u.name, player_total_points DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }

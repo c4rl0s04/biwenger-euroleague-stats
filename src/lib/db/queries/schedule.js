@@ -1,55 +1,47 @@
-import { db } from '@/lib/db/client';
+import { db } from '../client.js';
 import { NEXT_ROUND_CTE } from '../sql_utils.js';
 
-export function getScheduleRounds() {
+export async function getScheduleRounds() {
   try {
-    return db
-      .prepare(
-        `
+    const query = `
       SELECT DISTINCT round_id, round_name 
       FROM matches 
       ORDER BY date ASC
-    `
-      )
-      .all();
+    `;
+    return (await db.query(query)).rows;
   } catch (error) {
     console.error('Error in getScheduleRounds:', error);
     return [];
   }
 }
 
-export function getUserSchedule(userId, targetRoundId = null) {
+export async function getUserSchedule(userId, targetRoundId = null) {
   try {
     let targetRound;
 
     // 1. Determine which round to show
     if (targetRoundId) {
-      targetRound = db
-        .prepare('SELECT DISTINCT round_id, round_name FROM matches WHERE round_id = ?')
-        .get(targetRoundId);
+      const targetQuery = 'SELECT DISTINCT round_id, round_name FROM matches WHERE round_id = $1';
+      targetRound = (await db.query(targetQuery, [targetRoundId])).rows[0];
     }
 
     // Fallback: Find the ID of the next upcoming round
     if (!targetRound) {
-      targetRound = db
-        .prepare(
-          `
+      const nextRoundQuery = `
         ${NEXT_ROUND_CTE}
         SELECT m.round_id, m.round_name 
         FROM matches m
         JOIN NextRoundStart nr ON m.round_id = nr.round_id
-        GROUP BY m.round_id
-      `
-        )
-        .get();
+        GROUP BY m.round_id, m.round_name
+      `;
+      targetRound = (await db.query(nextRoundQuery)).rows[0];
     }
 
     // If still no round (e.g., season over), maybe get the last played round?
     // For now, if no future matches and no ID provided, try getting the LAST round
     if (!targetRound) {
-      targetRound = db
-        .prepare('SELECT round_id, round_name FROM matches ORDER BY date DESC LIMIT 1')
-        .get();
+      const lastRoundQuery = 'SELECT round_id, round_name FROM matches ORDER BY date DESC LIMIT 1';
+      targetRound = (await db.query(lastRoundQuery)).rows[0];
     }
 
     if (!targetRound) {
@@ -57,9 +49,7 @@ export function getUserSchedule(userId, targetRoundId = null) {
     }
 
     // 2. Get all matches for this round, ordered by date
-    const matches = db
-      .prepare(
-        `
+    const matchesQuery = `
       SELECT 
         m.id as match_id,
         m.date,
@@ -70,16 +60,13 @@ export function getUserSchedule(userId, targetRoundId = null) {
       FROM matches m
       LEFT JOIN teams th ON m.home_id = th.id
       LEFT JOIN teams ta ON m.away_id = ta.id
-      WHERE m.round_id = ?
+      WHERE m.round_id = $1
       ORDER BY m.date ASC
-    `
-      )
-      .all(targetRound.round_id);
+    `;
+    const matches = (await db.query(matchesQuery, [targetRound.round_id])).rows;
 
     // 3. Get the user's players
-    const userPlayers = db
-      .prepare(
-        `
+    const userPlayersQuery = `
       SELECT 
         p.id,
         p.name,
@@ -90,10 +77,9 @@ export function getUserSchedule(userId, targetRoundId = null) {
         p.img
       FROM players p
       LEFT JOIN teams t ON p.team_id = t.id
-      WHERE p.owner_id = ?
-    `
-      )
-      .all(userId);
+      WHERE p.owner_id = $1
+    `;
+    const userPlayers = (await db.query(userPlayersQuery, [userId])).rows;
 
     if (userPlayers.length === 0) {
       return {

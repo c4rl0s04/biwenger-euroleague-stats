@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
-    const data = fetchStandingsPreview();
+    const data = await fetchStandingsPreview();
     return successResponse(data, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching standings with winner:', error);

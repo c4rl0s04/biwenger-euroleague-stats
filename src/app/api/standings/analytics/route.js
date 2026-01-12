@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const analytics = fetchInitialSquadAnalytics();
+    const analytics = await fetchInitialSquadAnalytics();
     return successResponse(analytics, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching analytics:', error);

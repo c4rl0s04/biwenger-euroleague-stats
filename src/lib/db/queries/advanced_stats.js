@@ -8,9 +8,9 @@ import { db } from '../client';
 /**
  * Get Heat Check Stats
  * Compares average points in last 5 rounds vs season average
- * @returns {Array<{user_id, name, icon, last5Avg, seasonAvg, diff, status}>}
+ * @returns {Promise<Array<{user_id, name, icon, last5Avg, seasonAvg, diff, status}>>}
  */
-export function getHeatCheckStats() {
+export async function getHeatCheckStats() {
   try {
     const sql = `
       WITH UserParticipation AS (
@@ -19,7 +19,7 @@ export function getHeatCheckStats() {
           points,
           ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY round_id DESC) as rn
         FROM user_rounds
-        WHERE participated = 1
+        WHERE participated = TRUE
       ),
       RecentStats AS (
         SELECT 
@@ -32,9 +32,9 @@ export function getHeatCheckStats() {
       SeasonStats AS (
         SELECT 
           user_id, 
-          CAST(SUM(points) AS FLOAT) / COUNT(*) as season_avg
+          CAST(SUM(points) AS NUMERIC) / COUNT(*) as season_avg
         FROM user_rounds
-        WHERE participated = 1
+        WHERE participated = TRUE
         GROUP BY user_id
       )
       SELECT 
@@ -51,13 +51,13 @@ export function getHeatCheckStats() {
       ORDER BY diff DESC
     `;
 
-    return db
-      .prepare(sql)
-      .all()
-      .map((stat) => ({
-        ...stat,
-        status: stat.diff > 10 ? 'fire' : stat.diff < -10 ? 'ice' : 'neutral',
-      }));
+    return (await db.query(sql)).rows.map((stat) => ({
+      ...stat,
+      last5_avg: parseFloat(stat.last5_avg) || 0,
+      season_avg: parseFloat(stat.season_avg) || 0,
+      diff: parseFloat(stat.diff) || 0,
+      status: stat.diff > 10 ? 'fire' : stat.diff < -10 ? 'ice' : 'neutral',
+    }));
   } catch (error) {
     console.error('Error in getHeatCheckStats:', error);
     return [];
@@ -68,28 +68,27 @@ export function getHeatCheckStats() {
  * Get "The Hunter" Stats
  * Points gained/lost vs leader in last 5 rounds
  */
-export function getHunterStats() {
+export async function getHunterStats() {
   try {
     // Get current leader ID
-    const extendedStandings = db
-      .prepare(
-        `
+    const extendedStandings = (
+      await db.query(`
       SELECT user_id, SUM(points) as total 
       FROM user_rounds 
       GROUP BY user_id 
       ORDER BY total DESC 
       LIMIT 1
-    `
-      )
-      .get();
+    `)
+    ).rows[0];
 
     if (!extendedStandings) return [];
     const leaderId = extendedStandings.user_id;
+    // We don't use 'total' here, but it's good practice to know it's unparsed if we did.
 
     // Get last 5 rounds
-    const rounds = db
-      .prepare('SELECT DISTINCT round_id FROM user_rounds ORDER BY round_id DESC LIMIT 5')
-      .all();
+    const rounds = (
+      await db.query('SELECT DISTINCT round_id FROM user_rounds ORDER BY round_id DESC LIMIT 5')
+    ).rows;
     if (rounds.length === 0) return [];
     const minRoundId = rounds[rounds.length - 1].round_id;
 
@@ -97,16 +96,19 @@ export function getHunterStats() {
       SELECT 
         u.id as user_id, 
         u.name, 
-        u.icon,
+        u.icon, 
         u.color_index,
         SUM(ur.points) as recent_points
       FROM users u
       JOIN user_rounds ur ON u.id = ur.user_id
-      WHERE ur.round_id >= ?
+      WHERE ur.round_id >= $1
       GROUP BY u.id
     `;
 
-    const recentPoints = db.prepare(sql).all(minRoundId);
+    const recentPoints = (await db.query(sql, [minRoundId])).rows.map((p) => ({
+      ...p,
+      recent_points: parseInt(p.recent_points) || 0,
+    }));
     const leaderStats = recentPoints.find((p) => p.user_id === leaderId);
 
     if (!leaderStats) return [];
@@ -127,27 +129,28 @@ export function getHunterStats() {
 /**
  * Get Rolling Average (3 rounds)
  */
-export function getRollingAverageStats() {
+export async function getRollingAverageStats() {
   try {
-    const rounds = db
-      .prepare('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
-      .all();
-    const users = db.prepare('SELECT id, name, color_index FROM users').all();
+    const rounds = (
+      await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
+    ).rows;
+    const users = (await db.query('SELECT id, name, color_index FROM users')).rows;
 
     const result = [];
 
     // Calculate rolling avg for each user
     for (const user of users) {
-      const userPoints = db
-        .prepare(
+      const userPoints = (
+        await db.query(
           `
         SELECT round_id, points 
         FROM user_rounds 
-        WHERE user_id = ? 
+        WHERE user_id = $1 
         ORDER BY round_id ASC
-      `
+      `,
+          [user.id]
         )
-        .all(user.id);
+      ).rows;
 
       const dataPoints = [];
 
@@ -186,25 +189,30 @@ export function getRollingAverageStats() {
 /**
  * Get Floor & Ceiling Stats
  */
-export function getFloorCeilingStats() {
+export async function getFloorCeilingStats() {
   try {
     const sql = `
       SELECT 
         u.id as user_id, 
         u.name, 
-        u.icon,
+        u.icon, 
         u.color_index,
         MIN(ur.points) as floor,
         MAX(ur.points) as ceiling,
         CAST(AVG(ur.points) as INTEGER) as avg
       FROM users u
       JOIN user_rounds ur ON u.id = ur.user_id
-      WHERE ur.participated = 1
+      WHERE ur.participated = TRUE
       GROUP BY u.id
       ORDER BY ceiling DESC
     `;
 
-    return db.prepare(sql).all();
+    return (await db.query(sql)).rows.map((row) => ({
+      ...row,
+      floor: parseInt(row.floor) || 0,
+      ceiling: parseInt(row.ceiling) || 0,
+      avg: parseInt(row.avg) || 0,
+    }));
   } catch (error) {
     console.error('Error in getFloorCeilingStats:', error);
     return [];
@@ -214,27 +222,24 @@ export function getFloorCeilingStats() {
 /**
  * Get Reliability Stats (% Rounds > Average)
  */
-export function getReliabilityStats() {
+export async function getReliabilityStats() {
   try {
     // 1. Calculate Average per Round
-    const roundAvgs = db
-      .prepare(
-        `
+    const roundAvgs = (
+      await db.query(`
       SELECT round_id, AVG(points) as avg_pts
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY round_id
-    `
-      )
-      .all();
+    `)
+    ).rows;
 
     const roundAvgMap = {};
-    roundAvgs.forEach((r) => (roundAvgMap[r.round_id] = r.avg_pts));
+    roundAvgs.forEach((r) => (roundAvgMap[r.round_id] = parseFloat(r.avg_pts) || 0));
 
     // 2. Get all User Scores
-    const userScores = db
-      .prepare(
-        `
+    const userScores = (
+      await db.query(`
       SELECT 
         u.id as user_id,
         u.name,
@@ -244,10 +249,9 @@ export function getReliabilityStats() {
         ur.points
       FROM users u
       JOIN user_rounds ur ON u.id = ur.user_id
-      WHERE ur.participated = 1
-    `
-      )
-      .all();
+      WHERE ur.participated = TRUE
+    `)
+    ).rows;
 
     // 3. Aggregate
     const userStats = {};
@@ -285,18 +289,20 @@ export function getReliabilityStats() {
 /**
  * Get Volatility Stats (Standard Deviation)
  */
-export function getVolatilityStats() {
+export async function getVolatilityStats() {
   try {
     // SQLite doesn't have STDDEV, calculate manually or with complex query
     // Using avg diff squared approach
-    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
+    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
     const result = [];
 
     for (const user of users) {
-      const points = db
-        .prepare('SELECT points FROM user_rounds WHERE user_id = ? AND participated = 1')
-        .all(user.id)
-        .map((r) => r.points);
+      const points = (
+        await db.query(
+          'SELECT points FROM user_rounds WHERE user_id = $1 AND participated = TRUE',
+          [user.id]
+        )
+      ).rows.map((r) => r.points);
 
       if (points.length < 2) continue;
 
@@ -324,9 +330,9 @@ export function getVolatilityStats() {
 /**
  * Get Point Distribution (Histogram)
  */
-export function getPointDistributionStats() {
+export async function getPointDistributionStats() {
   try {
-    const users = db.prepare('SELECT id, name, color_index FROM users').all();
+    const users = (await db.query('SELECT id, name, color_index FROM users')).rows;
     const buckets = [
       { range: '90-135', min: 90, max: 135 },
       { range: '136-170', min: 136, max: 170 },
@@ -340,9 +346,12 @@ export function getPointDistributionStats() {
       const distribution = {};
       buckets.forEach((b) => (distribution[b.range] = 0));
 
-      const rounds = db
-        .prepare('SELECT points FROM user_rounds WHERE user_id = ? AND participated = 1')
-        .all(user.id);
+      const rounds = (
+        await db.query(
+          'SELECT points FROM user_rounds WHERE user_id = $1 AND participated = TRUE',
+          [user.id]
+        )
+      ).rows;
 
       rounds.forEach((r) => {
         const p = r.points;
@@ -370,13 +379,13 @@ export function getPointDistributionStats() {
 /**
  * Get All-Play-All Record (Virtual League)
  */
-export function getAllPlayAllStats() {
+export async function getAllPlayAllStats() {
   try {
     // Get all rounds
-    const rounds = db
-      .prepare('SELECT DISTINCT round_id FROM user_rounds WHERE participated = 1')
-      .all();
-    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
+    const rounds = (
+      await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
+    ).rows;
+    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
 
     const standings = {};
     users.forEach((u) => {
@@ -392,9 +401,11 @@ export function getAllPlayAllStats() {
     });
 
     for (const round of rounds) {
-      const roundScores = db
-        .prepare('SELECT user_id, points FROM user_rounds WHERE round_id = ?')
-        .all(round.round_id);
+      const roundScores = (
+        await db.query('SELECT user_id, points FROM user_rounds WHERE round_id = $1', [
+          round.round_id,
+        ])
+      ).rows;
 
       // Compare everyone against everyone
       for (let i = 0; i < roundScores.length; i++) {
@@ -434,11 +445,10 @@ export function getAllPlayAllStats() {
 /**
  * Get Dominance Stats (Margin of Victory)
  */
-export function getDominanceStats() {
+export async function getDominanceStats() {
   try {
-    const result = db
-      .prepare(
-        `
+    const result = (
+      await db.query(`
       WITH RoundWinners AS (
         SELECT 
           round_id,
@@ -446,7 +456,7 @@ export function getDominanceStats() {
           points,
           RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as rnk
         FROM user_rounds
-        WHERE participated = 1
+        WHERE participated = TRUE
       )
       SELECT 
         w.user_id,
@@ -459,13 +469,16 @@ export function getDominanceStats() {
       JOIN RoundWinners runner ON w.round_id = runner.round_id AND runner.rnk = 2
       JOIN users u ON w.user_id = u.id
       WHERE w.rnk = 1
-      GROUP BY w.user_id
+      GROUP BY w.user_id, u.name, u.icon, u.color_index
       ORDER BY avg_margin DESC
-    `
-      )
-      .all();
+    `)
+    ).rows;
 
-    return result;
+    return result.map((row) => ({
+      ...row,
+      wins: parseInt(row.wins) || 0,
+      avg_margin: parseFloat(row.avg_margin) || 0,
+    }));
   } catch (error) {
     console.error('Error in getDominanceStats:', error);
     return [];
@@ -475,27 +488,24 @@ export function getDominanceStats() {
 /**
  * Get Theoretical Gap Stats (Distance from perfect season)
  */
-export function getTheoreticalGapStats() {
+export async function getTheoreticalGapStats() {
   try {
     // Calculate Perfect Season Total
-    const perfectTotalResult = db
-      .prepare(
-        `
+    const perfectTotalResult = (
+      await db.query(`
       WITH MaxPoints AS (
         SELECT MAX(points) as max_pts FROM user_rounds GROUP BY round_id
       )
       SELECT SUM(max_pts) as total FROM MaxPoints
-    `
-      )
-      .get();
+    `)
+    ).rows[0];
 
     if (!perfectTotalResult || perfectTotalResult.total === null) return [];
-    const perfectTotal = perfectTotalResult.total;
+    const perfectTotal = parseInt(perfectTotalResult.total) || 0;
 
     // Get User Totals
-    const userTotals = db
-      .prepare(
-        `
+    const userTotals = (
+      await db.query(`
       SELECT 
         u.id as user_id,
         u.name,
@@ -504,20 +514,22 @@ export function getTheoreticalGapStats() {
         SUM(ur.points) as current_points
       FROM user_rounds ur
       JOIN users u ON ur.user_id = u.id
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY u.id
-
-    `
-      )
-      .all();
+    `)
+    ).rows;
 
     return userTotals
-      .map((u) => ({
-        ...u,
-        perfectTotal,
-        gap: perfectTotal - u.current_points,
-        pct: (u.current_points / perfectTotal) * 100,
-      }))
+      .map((u) => {
+        const current_points = parseInt(u.current_points) || 0;
+        return {
+          ...u,
+          current_points,
+          perfectTotal,
+          gap: perfectTotal - current_points,
+          pct: (current_points / perfectTotal) * 100,
+        };
+      })
       .sort((a, b) => a.gap - b.gap); // Smallest gap is best
   } catch (error) {
     console.error('Error in getTheoreticalGapStats:', error);
@@ -528,26 +540,24 @@ export function getTheoreticalGapStats() {
 /**
  * Get Round-by-Round Heatmap Stats
  */
-export function getHeatmapStats() {
+export async function getHeatmapStats() {
   try {
     // Get all rounds to ensure column structure
-    const rounds = db
-      .prepare('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
-      .all();
+    const rounds = (
+      await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
+    ).rows;
 
     // Get all users
-    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
+    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
 
     // Get all scores
-    const scores = db
-      .prepare(
-        `
+    const scores = (
+      await db.query(`
       SELECT user_id, round_id, points 
       FROM user_rounds 
-      WHERE participated = 1
-    `
-      )
-      .all();
+      WHERE participated = TRUE
+    `)
+    ).rows;
 
     // Map scores for O(1) access: scoreMap[userId][roundId] = points
     const scoreMap = {};
@@ -558,7 +568,10 @@ export function getHeatmapStats() {
 
     // Build grid
     return {
-      rounds: rounds.map((r) => ({ id: r.round_id, name: r.round_name.replace('Jornada ', 'J') })),
+      rounds: rounds.map((r) => ({
+        id: r.round_id,
+        name: r.round_name.replace('Jornada ', 'J'),
+      })),
       users: users.map((u) => ({
         id: u.id,
         name: u.name,
@@ -577,18 +590,18 @@ export function getHeatmapStats() {
  * Get Position Changes Stats (Evolution Heatmap)
  * Tracks rank changes round-by-round
  */
-export function getPositionChangesStats() {
+export async function getPositionChangesStats() {
   try {
-    const rounds = db
-      .prepare('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
-      .all();
-    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
+    const rounds = (
+      await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
+    ).rows;
+    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
     // Get all scores ordered by round
-    const scores = db
-      .prepare(
-        'SELECT user_id, round_id, points FROM user_rounds WHERE participated = 1 ORDER BY round_id ASC'
+    const scores = (
+      await db.query(
+        'SELECT user_id, round_id, points FROM user_rounds WHERE participated = TRUE ORDER BY round_id ASC'
       )
-      .all();
+    ).rows;
 
     // Map scores by round: roundScores[roundId][userId] = points
     const roundScores = {};
@@ -664,7 +677,10 @@ export function getPositionChangesStats() {
     });
 
     return {
-      rounds: rounds.map((r) => ({ id: r.round_id, name: r.round_name.replace('Jornada ', 'J') })),
+      rounds: rounds.map((r) => ({
+        id: r.round_id,
+        name: r.round_name.replace('Jornada ', 'J'),
+      })),
       users: usersEvolution,
       valid: rounds.length > 1,
       stats: { biggestClimber, biggestFaller },
@@ -679,12 +695,12 @@ export function getPositionChangesStats() {
  * Get Rivalry Matrix Stats
  * Head-to-Head record for every user pair
  */
-export function getRivalryMatrixStats() {
+export async function getRivalryMatrixStats() {
   try {
-    const users = db.prepare('SELECT id, name, icon, color_index FROM users').all();
-    const rounds = db
-      .prepare('SELECT DISTINCT round_id FROM user_rounds WHERE participated = 1')
-      .all();
+    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+    const rounds = (
+      await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
+    ).rows;
 
     // Initialize matrix
     // Structure: { [userId]: { [opponentId]: { wins: 0, losses: 0, ties: 0 } } }
@@ -699,9 +715,12 @@ export function getRivalryMatrixStats() {
     });
 
     for (const round of rounds) {
-      const roundScores = db
-        .prepare('SELECT user_id, points FROM user_rounds WHERE round_id = ? AND participated = 1')
-        .all(round.round_id);
+      const roundScores = (
+        await db.query(
+          'SELECT user_id, points FROM user_rounds WHERE round_id = $1 AND participated = TRUE',
+          [round.round_id]
+        )
+      ).rows;
 
       // Compare everyone against everyone
       for (let i = 0; i < roundScores.length; i++) {
@@ -745,7 +764,7 @@ export function getRivalryMatrixStats() {
  * Get Captain Fantastic Stats
  * Best performing captains
  */
-export function getCaptainStats() {
+export async function getCaptainStats() {
   try {
     const sql = `
       SELECT 
@@ -757,37 +776,22 @@ export function getCaptainStats() {
         SUM(prs.points) as raw_captain_points,
         SUM(CASE 
           WHEN prs.fantasy_points IS NOT NULL THEN prs.fantasy_points 
-          ELSE prs.points * 2 /* Fallback/Simplification if fantasy points not synced? No, Biwenger usually doubles it in the final score? Actually, let's use raw points and simulate the bonus */
+          ELSE prs.points * 2 
         END) as weighted_points,
-        /* Calculate how many times the captain was actually the highest scorer in the lineup */
         AVG(prs.points) as avg_captain_points
       FROM lineups l
       JOIN users u ON l.user_id = u.id
       JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
-      WHERE l.is_captain = 1
-      GROUP BY l.user_id
+      WHERE l.is_captain = TRUE
+      GROUP BY l.user_id, u.name, u.icon, u.color_index
       ORDER BY raw_captain_points DESC
     `;
 
-    // NOTE: 'points' in player_round_stats is raw stats points (e.g. 15).
-    // In Biwenger, captain usually doubles the score.
-    // If 'fantasy_points' column exists and is populated, it might already include the doubling?
-    // Let's assume we want to track the BASE performance of the player chosen as captain.
-    // "Captain Points" usually means: How many points did your captain CONTRIBUTE? (Base x 2).
-    // Or "Accuracy": Did you pick the best player?
-
-    // Let's refine the query to be more "Best Choices":
-    // 1. Get Base Points of Captains.
-
-    return db
-      .prepare(sql)
-      .all()
-      .map((u) => ({
-        ...u,
-        total_bonus: u.raw_captain_points, // If raw points is 15, bonus is +15. So Total Gain = 15.
-        // Wait, if Captain gets 20 pts (10 base + 10 bonus), then "raw_points" is 10.
-        // So the "Value Added" by the captaincy choice is exactly equal to the Base Points.
-      }));
+    return (await db.query(sql)).rows.map((u) => ({
+      ...u,
+      total_bonus: parseInt(u.raw_captain_points) || 0,
+      avg_captain_points: parseFloat(u.avg_captain_points) || 0,
+    }));
   } catch (error) {
     console.error('Error in getCaptainStats:', error);
     return [];

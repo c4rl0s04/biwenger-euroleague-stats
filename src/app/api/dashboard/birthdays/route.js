@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const birthdays = fetchPlayerBirthdays();
+    const birthdays = await fetchPlayerBirthdays();
     return successResponse(birthdays, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching birthdays:', error);

@@ -7,14 +7,6 @@ import { CONFIG } from '../../../config.js';
  * Syncs matches (games) for a specific round using Biwenger API.
  * Uses fetchRoundGames to retrieve match schedule, scores, and status.
  *
- * @param {import('better-sqlite3').Database} db - Database instance
- * @param {Object} round - Round object (id, name, status)
- * @param {Object} playersList - Map of player IDs to player objects (unused explicitly but kept for signature consistency)
- */
-/**
- * Syncs matches (games) for a specific round using Biwenger API.
- * Uses fetchRoundGames to retrieve match schedule, scores, and status.
- *
  * @param {import('./manager').SyncManager} manager
  * @param {Object} round - Round object (id, name, status)
  * @param {Object} playersList - Map of player IDs to player objects (unused explicitly but kept for signature consistency)
@@ -27,9 +19,12 @@ export async function run(manager, round, playersList = {}) {
 
   manager.log(`   🌍 Syncing Matches for Round ${roundName} (using Biwenger API)...`);
 
+  const mutations = prepareMatchMutations(db);
+
   // --- Euroleague Data Setup ---
   // Fetch team codes from DB
-  const teams = db.prepare('SELECT id, code FROM teams WHERE code IS NOT NULL').all();
+  // Use mutation helper instead of raw SQL
+  const teams = await mutations.getMappedTeams();
   const teamCodeMap = new Map(teams.map((t) => [t.id, t.code]));
 
   // Fetch Euroleague Schedule for Game Code mapping
@@ -64,28 +59,13 @@ export async function run(manager, round, playersList = {}) {
     return { success: false, message: e.message, error: e };
   }
 
-  // Check the structure based on inspection:
-  // It seems games can be in root 'games' array or 'data.games'.
-  // Based on inspection output for Round 2, it was inside 'next.games' but fetchRoundGames likely returns the specific round data directly.
-  // Let's assume fetchRoundGames(roundId) returns the object containing 'data.games' or 'games'.
-  // Our inspect-biwenger-keys.js output showed:
-  // "Top level keys: [ 'data' ]" -> "data keys: [ 'score', 'games', ... ]"
-  // So the structure is likely response.data.games
-  // However, the helper might unwrap it? Let's check biwenger-client.js
-  // fetchRoundGames just calls biwengerFetch, which returns response.json().
-  // So likely: response.data.games
-
   let games = [];
   if (gamesData.data && Array.isArray(gamesData.data.games)) {
     games = gamesData.data.games;
   } else if (Array.isArray(gamesData.games)) {
     games = gamesData.games;
   } else {
-    // Maybe checking 'content' or other fields?
-    // Based on previous step 118 output: "Found 10 games in data.games" (deduced from context, actually step 118 didn't show logs but implied success).
-    // wait, step 114 output showed "data keys: ... games". So yes, gamesData.data.games.
     manager.error(`   ⚠️ No 'games' array found in response for round ${roundId}`);
-    // return { success: false, message: 'No games array found' }; // Optional: suppress error return if we want to continue
     return { success: true, message: `No matches found for round ${roundName}`, data: [] };
   }
 
@@ -96,14 +76,11 @@ export async function run(manager, round, playersList = {}) {
 
   manager.log(`   -> Found ${games.length} games.`);
 
-  // Prepare DB mutations
-  const mutations = prepareMatchMutations(db);
   let syncedCount = 0;
 
   for (const game of games) {
     try {
       // Map Teams
-      // Biwenger returns objects: { id, name, slug, score }
       const homeTeam = game.home;
       const awayTeam = game.away;
 
@@ -117,8 +94,6 @@ export async function run(manager, round, playersList = {}) {
       const awayId = awayTeam.id;
 
       // Status Mapping
-      // Biwenger status: 'finished', 'pending', 'playing'?
-      // We map to: 'finished', 'scheduled', 'live'
       let status = 'scheduled';
       if (game.status === 'finished') {
         status = 'finished';
@@ -127,7 +102,6 @@ export async function run(manager, round, playersList = {}) {
       }
 
       // Date Handling
-      // Biwenger returns unix timestamp (seconds) in 'date' field
       let matchDate = null;
       if (game.date) {
         matchDate = new Date(game.date * 1000).toISOString();
@@ -137,7 +111,6 @@ export async function run(manager, round, playersList = {}) {
       const awayScore = typeof awayTeam.score === 'number' ? awayTeam.score : 0;
 
       // Calculate regular time scores (excluding overtime)
-      // Try to fetch from Euroleague Header API if match is finished
       let homeScoreRegtime = null;
       let awayScoreRegtime = null;
       let homeQ1 = null,
@@ -152,11 +125,9 @@ export async function run(manager, round, playersList = {}) {
         awayOT = null;
 
       // Determine if we should fetch Euroleague Data
-      // 1. Status is explicitly finished or live
-      // 2. Status is scheduled, but current time is past start time (or close to it)
       const now = Date.now();
       const gameTimeMs = game.date * 1000;
-      const isPastStartTime = matchDate && now > gameTimeMs - 15 * 60 * 1000; // Check 15m before just in case
+      const isPastStartTime = matchDate && now > gameTimeMs - 15 * 60 * 1000;
 
       const shouldFetchEuroleague =
         (status === 'finished' ||
@@ -186,12 +157,9 @@ export async function run(manager, round, playersList = {}) {
                   status !== 'finished' &&
                   (parseInt(header.ScoreA) > 0 || parseInt(header.ScoreB) > 0)
                 ) {
-                  // If not live, but has scores, assume finished (if Biwenger didn't say so yet)
                   status = 'finished';
                 }
 
-                // Extract Quarter Scores (Cumulative from API)
-                // Keys: ScoreQuarter1A, ScoreQuarter2A, etc.
                 const getCumulative = (q, team) => {
                   return parseInt(header[`ScoreQuarter${q}${team}`] ?? 0);
                 };
@@ -217,7 +185,6 @@ export async function run(manager, round, playersList = {}) {
                   homeQ2 = Math.max(0, homeQ2);
                   homeQ3 = Math.max(0, homeQ3);
                   homeQ4 = Math.max(0, homeQ4);
-                  // ... same for away
                 }
 
                 awayQ1 = aQ1_cum;
@@ -230,17 +197,12 @@ export async function run(manager, round, playersList = {}) {
                 awayScoreRegtime = aQ4_cum;
 
                 // OT Score is Total - Regular
-                // Use Euroleague provided total scores (ScoreA/ScoreB)
                 const totalHome = parseInt(header.ScoreA ?? 0);
                 const totalAway = parseInt(header.ScoreB ?? 0);
 
-                // If live, total score might be Q1+Q2.. etc.
                 if (status === 'live') {
-                  // During live, Regtime is current total.
                   homeScoreRegtime = totalHome;
                   awayScoreRegtime = totalAway;
-                  // OT logic is tricky during live. Let's rely on total-regtime ONLY if Q4 is done?
-                  // For simplicity: during live, just store totals.
                   homeOT = 0;
                   awayOT = 0;
                 } else {
@@ -272,7 +234,7 @@ export async function run(manager, round, playersList = {}) {
         awayScoreRegtime = awayScore;
       }
 
-      mutations.upsertMatch.run({
+      await mutations.upsertMatch({
         round_id: dbRoundId,
         round_name: roundName,
         home_id: homeId,
@@ -301,7 +263,6 @@ export async function run(manager, round, playersList = {}) {
     }
   }
 
-  // manager.log(`   -> Synced ${syncedCount} matches.`);
   return { success: true, message: `Synced ${syncedCount} matches for ${roundName}.`, data: games };
 }
 

@@ -19,11 +19,28 @@ const parseBiwengerDate = (dateInt) => {
 };
 
 // Helper: 250918 -> "2025-09-18" (para precios)
+// Helper: 260120 -> "2020-01-26" (Handling YYDDMM edge case if Month > 12)
 const parsePriceDate = (dateInt) => {
   const str = dateInt.toString();
-  const year = '20' + str.substring(0, 2);
-  const month = str.substring(2, 4);
-  const day = str.substring(4, 6);
+  let year = '20' + str.substring(0, 2);
+  let month = str.substring(2, 4);
+  let day = str.substring(4, 6);
+
+  // Fallback for weird Biwenger formats where Day/Month might be swapped
+  // If Month > 12, it must be the Day
+  if (parseInt(month) > 12) {
+    const temp = month;
+    month = day;
+    day = temp;
+  }
+
+  // Double check robustness
+  if (parseInt(month) > 12) {
+    // If still invalid, default to Jan 1st to avoid crash
+    console.warn(`Invalid date encountered: ${dateInt}. Defaulting to ${year}-01-01`);
+    return `${year}-01-01`;
+  }
+
   return `${year}-${month}-${day}`;
 };
 
@@ -62,29 +79,22 @@ export async function run(manager) {
   const teams = manager.context.teams;
 
   // Optimized: Get existing player IDs to avoid redundant API calls
-  const existingPlayerIds = new Set(
-    db
-      .prepare('SELECT id FROM players')
-      .all()
-      .map((p) => p.id)
-  );
+  const resExisting = await db.query('SELECT id FROM players');
+  const existingPlayerIds = new Set(resExisting.rows.map((p) => p.id));
   manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing players in DB.`);
 
   // --- 1.1 SYNC TEAMS ---
   manager.log('Syncing Teams...');
 
-  const teamTx = db.transaction(() => {
-    for (const [teamId, teamData] of Object.entries(teams)) {
-      mutations.upsertTeam({
-        id: parseInt(teamId),
-        name: teamData.name,
-        short_name: getShortTeamName(teamData.name),
-        img: teamData.img || `https://cdn.biwenger.com/teams/${teamId}.png`, // Fallback
-      });
-    }
-  });
-  teamTx();
-  // manager.log(`✅ Synced ${Object.keys(teams).length} teams.`); // Let manager handle success log
+  // Async Loop for Teams (No Transaction in PG Pool without client checkout, sequential is fine)
+  for (const [teamId, teamData] of Object.entries(teams)) {
+    await mutations.upsertTeam({
+      id: parseInt(teamId),
+      name: teamData.name,
+      short_name: getShortTeamName(teamData.name),
+      img: teamData.img || `https://cdn.biwenger.com/teams/${teamId}.png`, // Fallback
+    });
+  }
 
   // --- 2. PROCESSING ---
   let newPlayersCount = 0;
@@ -94,7 +104,7 @@ export async function run(manager) {
     const playerId = parseInt(id);
 
     // A) Basic Insertion (Always update basics like status, points, price)
-    mutations.upsertPlayer({
+    await mutations.upsertPlayer({
       id: playerId,
       name: player.name,
       team_id: player.teamID,
@@ -119,7 +129,7 @@ export async function run(manager) {
     const todayInt = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD (Biwenger format)
     const priceDate = parsePriceDate(todayInt); // Returns YYYY-MM-DD
 
-    mutations.insertMarketValue({
+    await mutations.insertMarketValue({
       player_id: playerId,
       price: player.price || 0,
       date: priceDate,
@@ -141,7 +151,7 @@ export async function run(manager) {
           const d = details.data;
 
           // C.1 Update physical data
-          mutations.updatePlayerDetails({
+          await mutations.updatePlayerDetails({
             id: playerId,
             birth_date: parseBiwengerDate(d.birthday),
             height: d.height || null,
@@ -150,17 +160,15 @@ export async function run(manager) {
 
           // C.2 Insert FULL market value history (only for new players)
           if (d.prices && Array.isArray(d.prices)) {
-            const insertHistory = db.transaction((prices) => {
-              for (const [dateInt, price] of prices) {
-                const dateStr = parsePriceDate(dateInt);
-                mutations.insertMarketValue({
-                  player_id: playerId,
-                  price: price,
-                  date: dateStr,
-                });
-              }
-            });
-            insertHistory(d.prices);
+            // Sequential insert loop
+            for (const [dateInt, price] of d.prices) {
+              const dateStr = parsePriceDate(dateInt);
+              await mutations.insertMarketValue({
+                player_id: playerId,
+                price: price,
+                date: dateStr,
+              });
+            }
           }
         }
       } catch (e) {
@@ -180,8 +188,6 @@ export async function run(manager) {
     `   ⏩ Existing Players: ${skippedDetailsCount} (Skipped details fetch, updated price)`
   );
 
-  // Legacy return to maintain potential compatibility if called directly (though index.js will use manager)
-  // But for manager pattern, we return success object
   return {
     success: true,
     message: `Players synced. (${Object.keys(teams).length} teams, ${Object.keys(playersList).length} players)`,

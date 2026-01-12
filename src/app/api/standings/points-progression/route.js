@@ -3,9 +3,11 @@ import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/res
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const progression = fetchPointsProgression(50);
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit')) || 10;
+    const progression = await fetchPointsProgression(limit);
     return successResponse(progression, CACHE_DURATIONS.SHORT);
   } catch (error) {
     console.error('Error fetching points progression:', error);

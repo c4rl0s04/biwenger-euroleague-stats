@@ -29,32 +29,33 @@ export default function UserSelector() {
         <>
           <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 mt-2 w-48 bg-[hsl(220,18%,10%)] border border-border rounded-lg shadow-2xl z-[70] overflow-hidden">
-            {users.map((user) => (
-              <button
-                key={user.user_id}
-                onClick={() => {
-                  selectUser(user.user_id);
-                  setIsOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[hsl(220,18%,15%)] transition-colors text-left ${
-                  currentUser.id === user.user_id ? 'bg-[hsl(220,18%,15%)]' : ''
-                }`}
-              >
-                <UserAvatar src={user.icon} alt={user.name} size={24} className="flex-shrink-0" />
-                <span
-                  className={`text-sm truncate ${
-                    currentUser.id === user.user_id
-                      ? 'text-primary font-medium'
-                      : 'text-muted-foreground'
+            {Array.isArray(users) &&
+              users.map((user) => (
+                <button
+                  key={user.user_id}
+                  onClick={() => {
+                    selectUser(user.user_id);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[hsl(220,18%,15%)] transition-colors text-left ${
+                    currentUser.id === user.user_id ? 'bg-[hsl(220,18%,15%)]' : ''
                   }`}
                 >
-                  {user.name}
-                </span>
-                {currentUser.id === user.user_id && (
-                  <div className="ml-auto text-primary text-xs">✓</div>
-                )}
-              </button>
-            ))}
+                  <UserAvatar src={user.icon} alt={user.name} size={24} className="flex-shrink-0" />
+                  <span
+                    className={`text-sm truncate ${
+                      currentUser.id === user.user_id
+                        ? 'text-primary font-medium'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {user.name}
+                  </span>
+                  {currentUser.id === user.user_id && (
+                    <div className="ml-auto text-primary text-xs">✓</div>
+                  )}
+                </button>
+              ))}
           </div>
         </>
       )}

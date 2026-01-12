@@ -24,43 +24,43 @@ export async function GET(request) {
 
     switch (type) {
       case 'heat-check':
-        data = fetchHeatCheckStats();
+        data = await fetchHeatCheckStats();
         break;
       case 'hunter':
-        data = fetchHunterStats();
+        data = await fetchHunterStats();
         break;
       case 'rolling-avg':
-        data = fetchRollingAverageStats();
+        data = await fetchRollingAverageStats();
         break;
       case 'floor-ceiling':
-        data = fetchFloorCeilingStats();
+        data = await fetchFloorCeilingStats();
         break;
       case 'volatility':
-        data = fetchVolatilityStats();
+        data = await fetchVolatilityStats();
         break;
       case 'distribution':
-        data = fetchPointDistributionStats();
+        data = await fetchPointDistributionStats();
         break;
       case 'all-play-all':
-        data = fetchAllPlayAllStats();
+        data = await fetchAllPlayAllStats();
         break;
       case 'dominance':
-        data = fetchDominanceStats();
+        data = await fetchDominanceStats();
         break;
       case 'theoretical-gap':
-        data = fetchTheoreticalGapStats();
+        data = await fetchTheoreticalGapStats();
         break;
       case 'heatmap':
-        data = fetchHeatmapStats();
+        data = await fetchHeatmapStats();
         break;
       case 'position-evolution':
-        data = fetchPositionChangesStats();
+        data = await fetchPositionChangesStats();
         break;
       case 'reliability':
-        data = fetchReliabilityStats();
+        data = await fetchReliabilityStats();
         break;
       case 'rivalry-matrix':
-        data = fetchRivalryMatrixStats();
+        data = await fetchRivalryMatrixStats();
         break;
       default:
         return NextResponse.json({ error: 'Invalid stat type' }, { status: 400 });

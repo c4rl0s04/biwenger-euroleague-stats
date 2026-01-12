@@ -4,9 +4,9 @@ import { FUTURE_MATCH_CONDITION } from '../sql_utils.js';
 /**
  * Get upcoming matches
  * @param {number} limit - Number of matches to return
- * @returns {Array} List of upcoming matches
+ * @returns {Promise<Array>} List of upcoming matches
  */
-export function getUpcomingMatches(limit = 5) {
+export async function getUpcomingMatches(limit = 5) {
   const query = `
     SELECT 
       m.id,
@@ -20,17 +20,17 @@ export function getUpcomingMatches(limit = 5) {
     WHERE m.status = 'scheduled' 
       AND ${FUTURE_MATCH_CONDITION('m.date')}
     ORDER BY m.date ASC
-    LIMIT ?
+    LIMIT $1
   `;
-  return db.prepare(query).all(limit);
+  return (await db.query(query, [limit])).rows;
 }
 
 /**
  * Get finished matches from the last 24 hours
  * @param {number} limit
- * @returns {Array}
+ * @returns {Promise<Array>}
  */
-export function getRecentResults(limit = 5) {
+export async function getRecentResults(limit = 5) {
   const query = `
       SELECT 
         m.id,
@@ -44,7 +44,7 @@ export function getRecentResults(limit = 5) {
       LEFT JOIN teams ta ON m.away_id = ta.id
       WHERE m.status = 'finished'
       ORDER BY m.date DESC
-      LIMIT ?
+      LIMIT $1
     `;
-  return db.prepare(query).all(limit);
+  return (await db.query(query, [limit])).rows;
 }

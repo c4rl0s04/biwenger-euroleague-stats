@@ -8,7 +8,7 @@ export async function GET(request) {
     const type = searchParams.get('type') || 'points';
 
     // 2. Fetch data from DB
-    const data = getStatLeaders(type);
+    const data = await getStatLeaders(type);
 
     // 3. Return JSON with success wrapper
     return NextResponse.json({ success: true, data });

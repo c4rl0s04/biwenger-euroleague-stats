@@ -33,29 +33,29 @@ import {
 // ============ DIRECT WRAPPERS ============
 // These wrap query functions 1:1 for consistent service layer usage
 
-export function fetchCaptainStats(userId) {
-  return getUserCaptainStats(userId);
+export async function fetchCaptainStats(userId) {
+  return await getUserCaptainStats(userId);
 }
 
-export function fetchHomeAwayStats(userId) {
-  return getUserHomeAwayStats(userId);
+export async function fetchHomeAwayStats(userId) {
+  return await getUserHomeAwayStats(userId);
 }
 
-export function fetchLeagueAveragePoints() {
-  return getLeagueAveragePoints();
+export async function fetchLeagueAveragePoints() {
+  return await getLeagueAveragePoints();
 }
 
-export function fetchLastRoundMVPs() {
-  return getLastRoundMVPs();
+export async function fetchLastRoundMVPs() {
+  return await getLastRoundMVPs();
 }
 
-export function fetchRisingStars() {
-  return getRisingStars();
+export async function fetchRisingStars() {
+  return await getRisingStars();
 }
 
-export function fetchStandingsPreview() {
-  const standings = getStandings();
-  const lastRoundWinner = getLastRoundWinner();
+export async function fetchStandingsPreview() {
+  const [standings, lastRoundWinner] = await Promise.all([getStandings(), getLastRoundWinner()]);
+
   return {
     standings: standings, // Show all users instead of top 5
     totalUsers: standings.length,
@@ -63,36 +63,36 @@ export function fetchStandingsPreview() {
   };
 }
 
-export function fetchLeaderComparison(userId) {
-  return getLeaderComparison(userId);
+export async function fetchLeaderComparison(userId) {
+  return await getLeaderComparison(userId);
 }
 
-export function fetchTopPlayers() {
-  return getTopPlayers();
+export async function fetchTopPlayers() {
+  return await getTopPlayers();
 }
 
-export function fetchPlayerBirthdays() {
-  return getPlayersBirthday();
+export async function fetchPlayerBirthdays() {
+  return await getPlayersBirthday();
 }
 
-export function fetchLastRoundStats(userId) {
-  return getLastRoundStats(userId);
+export async function fetchLastRoundStats() {
+  return await getLastRoundStats();
 }
 
-export function fetchTopPlayersByForm(limit = 5, rounds = 3) {
-  return getTopPlayersByForm(limit, rounds);
+export async function fetchTopPlayersByForm(limit = 5, rounds = 3) {
+  return await getTopPlayersByForm(limit, rounds);
 }
 
-export function fetchCaptainRecommendations(userId, limit = 6) {
-  return getCaptainRecommendations(userId, limit);
+export async function fetchCaptainRecommendations(userId, limit = 6) {
+  return await getCaptainRecommendations(userId, limit);
 }
 
-export function fetchMarketOpportunities(limit = 6) {
-  return getMarketOpportunities(limit);
+export async function fetchMarketOpportunities(limit = 6) {
+  return await getMarketOpportunities(limit);
 }
 
-export function fetchNextRound() {
-  return getNextRound();
+export async function fetchNextRound() {
+  return await getNextRound();
 }
 
 // ============ AGGREGATED FUNCTIONS ============
@@ -100,47 +100,71 @@ export function fetchNextRound() {
 /**
  * Get next round preparation data
  * @param {string} [userId] - Optional user ID for personalized recommendations
- * @returns {Object} Next round data bundle
+ * @returns {Promise<Object>} Next round data bundle
  */
-export function getNextRoundData(userId = null) {
+export async function getNextRoundData(userId = null) {
+  const [nextRound, topPlayersForm, captainRecommendations, marketOpportunities] =
+    await Promise.all([
+      getNextRound(),
+      getTopPlayersByForm(5, 3),
+      userId ? getCaptainRecommendations(userId, 6) : [],
+      getMarketOpportunities(6),
+    ]);
+
   return {
-    nextRound: getNextRound(),
-    topPlayersForm: getTopPlayersByForm(5, 3),
-    captainRecommendations: userId ? getCaptainRecommendations(userId, 6) : [],
-    marketOpportunities: getMarketOpportunities(6),
+    nextRound,
+    topPlayersForm,
+    captainRecommendations,
+    marketOpportunities,
   };
 }
 
 /**
  * Get user's personal dashboard data
  * @param {string} userId - User ID
- * @returns {Object} Personalized dashboard data
+ * @returns {Promise<Object>} Personalized dashboard data
  */
-export function getUserDashboardData(userId) {
+export async function getUserDashboardData(userId) {
   if (!userId) {
     return { error: 'User ID required' };
   }
 
+  const [seasonStats, captainStats, homeAwayStats, alerts, squadDetails, leaderGap] =
+    await Promise.all([
+      getUserSeasonStats(userId),
+      getUserCaptainStats(userId),
+      getUserHomeAwayStats(userId),
+      getPersonalizedAlerts(userId, 5),
+      getUserSquadDetails(userId),
+      getLeaderComparison(userId),
+    ]);
+
   return {
-    seasonStats: getUserSeasonStats(userId),
-    captainStats: getUserCaptainStats(userId),
-    homeAwayStats: getUserHomeAwayStats(userId),
-    alerts: getPersonalizedAlerts(userId, 5),
-    squadDetails: getUserSquadDetails(userId),
-    leaderGap: getLeaderComparison(userId),
+    seasonStats,
+    captainStats,
+    homeAwayStats,
+    alerts,
+    squadDetails,
+    leaderGap,
   };
 }
 
 /**
  * Get league-wide dashboard widgets data
- * @returns {Object} League dashboard data
+ * @returns {Promise<Object>} League dashboard data
  */
-export function getLeagueDashboardData() {
-  const streaks = getStreakStats();
+export async function getLeagueDashboardData() {
+  const [streaks, leagueAverage, roundMVPs, upcomingBirthdays] = await Promise.all([
+    getStreakStats(),
+    getLeagueAveragePoints(),
+    getLastRoundMVPs(5),
+    getPlayersBirthday(),
+  ]);
+
   return {
-    leagueAverage: getLeagueAveragePoints(),
-    roundMVPs: getLastRoundMVPs(5),
-    upcomingBirthdays: getPlayersBirthday(),
+    leagueAverage,
+    roundMVPs,
+    upcomingBirthdays,
     hotStreaks: streaks.hot?.slice(0, 3) || [],
     coldStreaks: streaks.cold?.slice(0, 3) || [],
   };
@@ -150,10 +174,10 @@ export function getLeagueDashboardData() {
  * Get streak data for a specific type
  * @param {'hot' | 'cold'} type - Streak type
  * @param {number} [limit=5] - Number of results
- * @returns {Array} Streak data
+ * @returns {Promise<Array>} Streak data
  */
-export function getStreakData(type, limit = 5) {
-  const streaks = getStreakStats();
+export async function getStreakData(type, limit = 5) {
+  const streaks = await getStreakStats();
   const data = type === 'hot' ? streaks.hot : streaks.cold;
   return data?.slice(0, limit) || [];
 }
@@ -161,13 +185,20 @@ export function getStreakData(type, limit = 5) {
 /**
  * Get recent activity data for dashboard
  * @param {string} [userId] - Optional user ID for personalized alerts
- * @returns {Object} Recent activity data
+ * @returns {Promise<Object>} Recent activity data
  */
-export function getRecentActivityData(userId = null) {
+export async function getRecentActivityData(userId = null) {
+  const [recentTransfers, priceChanges, recentRecords, personalizedAlerts] = await Promise.all([
+    getRecentTransfers(8),
+    getSignificantPriceChanges(24, 500000),
+    getRecentRecords(),
+    userId ? getPersonalizedAlerts(userId, 5) : [],
+  ]);
+
   return {
-    recentTransfers: getRecentTransfers(8),
-    priceChanges: getSignificantPriceChanges(24, 500000),
-    recentRecords: getRecentRecords(),
-    personalizedAlerts: userId ? getPersonalizedAlerts(userId, 5) : [],
+    recentTransfers,
+    priceChanges,
+    recentRecords,
+    personalizedAlerts,
   };
 }

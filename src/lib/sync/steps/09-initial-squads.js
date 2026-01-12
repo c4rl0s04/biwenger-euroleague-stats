@@ -20,33 +20,29 @@ export async function run(manager) {
   const mutations = prepareUserMutations(db);
 
   // 0. Clear existing data
-  mutations.clearInitialSquads.run();
+  await mutations.clearInitialSquads();
   manager.log('   🧹 Cleared previous initial squads data.');
 
   // 1. Load All Users and their CURRENT Squads
   // Step 8 must have run before this to populate `players.owner_id`
-  const users = mutations.getAllUsers.all();
+  const usersRes = await mutations.getAllUsers();
+  const users = usersRes.all();
   const userSquads = new Map(); // UserId -> Set<PlayerId>
   const userNameToId = new Map(); // "All Stars" -> "13207868"
 
   for (const user of users) {
-    const currentParams = mutations.getPlayersOwnedByUser.all(user.id);
+    const currentParams = await mutations.getPlayersOwnedByUser(user.id);
     const currentIds = new Set(currentParams.map((p) => p.player_id));
     userSquads.set(String(user.id), currentIds);
     userNameToId.set(user.name, String(user.id));
   }
   manager.log(`   📊 Loaded current squads and name mappings for ${users.length} users.`);
-  // manager.log(`   🔍 Tracking Users: ${Array.from(userSquads.keys()).join(', ')}`);
 
   // 2. Load Complete Transfer History (Newest First)
-  // We only care about timestamp, player_id, seller, buyer
-  // 2. Load Complete Transfer History (Newest First)
-  // We only care about timestamp, player_id, seller, buyer
-  const transfers = mutations.getTransfersForBacktracking.all();
+  const transfers = await mutations.getTransfersForBacktracking();
   manager.log(`   📜 Processing ${transfers.length} transfers backwards...`);
 
   // 3. Backtracking Simulation
-  // let logCount = 0;
   for (const tx of transfers) {
     const playerId = tx.player_id;
     // Resolve Names to IDs
@@ -56,7 +52,6 @@ export async function run(manager) {
     const sellerId = userNameToId.get(sellerName) || sellerName; // Fallback to raw if not found
     const buyerId = userNameToId.get(buyerName) || buyerName;
 
-    // Debug Log only for known users to avoid noise
     const isBuyerTracked = userSquads.has(buyerId);
     const isSellerTracked = userSquads.has(sellerId);
 
@@ -64,30 +59,31 @@ export async function run(manager) {
       const squad = userSquads.get(buyerId);
       if (squad.has(playerId)) {
         squad.delete(playerId);
-        // manager.log(`      [undo-buy] User ${buyerId} bought P:${playerId}. Removing from initial squad. (Count: ${squad.size})`);
       }
     }
 
     if (isSellerTracked) {
       const squad = userSquads.get(sellerId);
       squad.add(playerId);
-      // manager.log(`      [undo-sell] User ${sellerId} sold P:${playerId}. Adding back to initial squad. (Count: ${squad.size})`);
     }
   }
 
   // 4. Persist Final State (which is actually Initial State)
-  const insertStmt = mutations.insertInitialSquad;
   const SEASON_START_DATE = CONFIG.LEAGUE.START_DATE;
   let totalInferred = 0;
 
-  const insertInitial = db.transaction((user, squadSet) => {
-    for (const playerId of squadSet) {
+  for (const user of users) {
+    const initialSet = userSquads.get(String(user.id));
+    manager.log(`      -> User ${user.name}: Start State has ${initialSet.size} players.`);
+
+    // Async Insert Loop
+    for (const playerId of initialSet) {
       // Get price at season start
-      const priceParams = mutations.getInitialPrice.get(playerId, SEASON_START_DATE);
+      const priceParams = await mutations.getInitialPrice(playerId, SEASON_START_DATE);
       const price = priceParams ? priceParams.price : 0;
 
       try {
-        insertStmt.run({
+        await mutations.insertInitialSquad({
           user_id: user.id,
           player_id: playerId,
           price: price,
@@ -97,12 +93,6 @@ export async function run(manager) {
         // Ignore duplicates
       }
     }
-  });
-
-  for (const user of users) {
-    const initialSet = userSquads.get(String(user.id));
-    manager.log(`      -> User ${user.name}: Start State has ${initialSet.size} players.`);
-    insertInitial(user, initialSet);
   }
 
   return {

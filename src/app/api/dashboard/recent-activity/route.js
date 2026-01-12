@@ -19,7 +19,7 @@ export async function GET(request) {
       userId = String(validation.value);
     }
 
-    const data = getRecentActivityData(userId);
+    const data = await getRecentActivityData(userId);
     return successResponse(data, CACHE_DURATIONS.SHORT);
   } catch (error) {
     console.error('Error fetching recent activity:', error);

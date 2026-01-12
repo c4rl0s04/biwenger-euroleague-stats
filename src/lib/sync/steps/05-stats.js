@@ -20,11 +20,9 @@ export async function run(manager) {
     competition?.data?.data?.season?.rounds;
   if (!rounds) throw new Error('Competition rounds data missing.');
 
-  if (!rounds) throw new Error('Competition rounds data missing.');
-
   // Prepare Mappings
   const mutations = prepareEuroleagueMutations(db);
-  const teams = mutations.getTeamsWithCode.all();
+  const teams = await mutations.getTeamsWithCode();
   const teamCodeMap = new Map(teams.map((t) => [t.id, t.code]));
 
   // Fetch Euroleague Schedule Map (HOME_AWAY -> GameCode)
@@ -64,8 +62,7 @@ export async function run(manager) {
     // 1. Sync Euroleague Boxscores (Robust Schedule-Based Sync)
 
     // Fetch Matches for this round from DB
-    // Fetch Matches for this round from DB
-    const dbMatches = mutations.getMatchesByRound.all(round.dbId || round.id);
+    const dbMatches = await mutations.getMatchesByRound(round.dbId || round.id);
 
     if (dbMatches.length === 0) {
       manager.log(`   ⚠️ No matches found in DB for ${baseName}. Run Step 3 first?`);

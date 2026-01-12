@@ -50,7 +50,9 @@ export default function CaptainStatsCard() {
               <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Promedio
               </div>
-              <div className="text-xl font-bold text-orange-400">{stats.avg_points.toFixed(1)}</div>
+              <div className="text-xl font-bold text-orange-400">
+                {Number(stats.avg_points).toFixed(1)}
+              </div>
             </div>
           </div>
 
@@ -89,7 +91,7 @@ export default function CaptainStatsCard() {
                     </div>
                     <div className="text-right">
                       <div className="text-green-400 font-semibold">
-                        {captain.avg_as_captain.toFixed(1)}
+                        {Number(captain.avg_as_captain).toFixed(1)}
                       </div>
                       <div className="text-slate-500 text-[9px]">media</div>
                     </div>

@@ -6,10 +6,10 @@
 // Find the earliest round where the *first match* hasn't started yet.
 export const NEXT_ROUND_CTE = `
   WITH NextRoundStart AS (
-    SELECT round_id, MIN(datetime(date)) as start_time
+    SELECT round_id, MIN(date) as start_time
     FROM matches
     GROUP BY round_id
-    HAVING start_time > datetime('now')
+    HAVING MIN(date) > NOW()
     ORDER BY start_time ASC
     LIMIT 1
   )
@@ -18,4 +18,4 @@ export const NEXT_ROUND_CTE = `
 // 2. Future Match Condition
 // Robust comparison using datetime() to handle ISO8601 strings vs 'now'
 // Usage: WHERE ${FUTURE_MATCH_CONDITION('m.date')}
-export const FUTURE_MATCH_CONDITION = (column = 'date') => `datetime(${column}) > datetime('now')`;
+export const FUTURE_MATCH_CONDITION = (column = 'date') => `${column} > NOW()`;

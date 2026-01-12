@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const bottlers = fetchBottlerStats();
+    const bottlers = await fetchBottlerStats();
     return successResponse(bottlers, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching bottler stats:', error);

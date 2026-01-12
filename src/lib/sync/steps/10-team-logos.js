@@ -37,11 +37,7 @@ export async function run(manager) {
     for (const club of clubs) {
       // 1. Prepare Codes
       const officialName = club.name;
-
-      // FOR URL: Needs to be lowercase (e.g. 'mad')
       const urlCode = club.code.toLowerCase();
-
-      // FOR DB: Needs to be Uppercase (e.g. 'MAD')
       const dbCode = club.code.toUpperCase();
 
       const slug = officialName
@@ -55,13 +51,11 @@ export async function run(manager) {
       const url = CONFIG.ENDPOINTS.EUROLEAGUE_WEBSITE.OFFICIAL_TEAM_PROFILE(slug, urlCode);
 
       // 2. Fetch Logo
-      // manager.log(`   🔗 Accessing: ${url}`);
       let imgUrl = null;
 
       try {
         const res = await fetch(url);
         if (!res.ok) {
-          // manager.log(`      ⚠️ HTTP ${res.status} (skipping)`);
           errorCount++;
           continue;
         }
@@ -76,7 +70,6 @@ export async function run(manager) {
 
           if (nextMatch && nextMatch[1]) {
             const jsonData = JSON.parse(nextMatch[1]);
-            // Navigate to the club data. Structure usually: props.pageProps.club
             const pageProps = jsonData.props?.pageProps || {};
             const clubData = pageProps.club || pageProps.data?.club;
 
@@ -85,7 +78,7 @@ export async function run(manager) {
             }
           }
         } catch (parseErr) {
-          // manager.log(`      ⚠️ JSON Parse failed for ${dbCode}, falling back to regex...`);
+          // Fallback
         }
 
         // STRATEGY B: Proximity Regex (Fallback)
@@ -100,7 +93,7 @@ export async function run(manager) {
           }
         }
 
-        // STRATEGY C: Old Regex (Last Resort - dangerous)
+        // STRATEGY C: Old Regex
         if (!imgUrl) {
           const simpleRegex = /"crest":"(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/;
           const match3 = html.match(simpleRegex);
@@ -114,16 +107,10 @@ export async function run(manager) {
 
       // 3. Update DB if image found
       if (imgUrl) {
-        const result = mutations.updateTeamImage.run(imgUrl, dbCode);
-
-        if (result.changes > 0) {
-          updatedCount++;
-          manager.log(`      ✅ Updated [${dbCode}]: ${imgUrl}`);
-        } else {
-          skippedCount++;
-        }
+        await mutations.updateTeamImage(imgUrl, dbCode);
+        updatedCount++;
+        manager.log(`      ✅ Updated [${dbCode}]: ${imgUrl}`);
       } else {
-        // manager.log(`      ⚠️ No logo found for ${officialName}`);
         errorCount++;
       }
 
@@ -133,7 +120,7 @@ export async function run(manager) {
 
     return {
       success: true,
-      message: `Updated ${updatedCount} team logos. (Skipped: ${skippedCount}, Errors: ${errorCount})`,
+      message: `Updated ${updatedCount} team logos. (Errors/Missing: ${errorCount})`,
     };
   } catch (e) {
     return { success: false, error: e };

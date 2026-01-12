@@ -1,13 +1,13 @@
-import Database from 'better-sqlite3';
+import { db } from '../db/client.js';
 import { CONFIG } from '../config.js';
 import { ensureSchema } from '../db/schema.js';
 
 export class SyncManager {
   constructor(dbPath) {
-    this.dbPath = dbPath;
+    this.dbPath = dbPath; // Unused for Postgres, kept for signature compat
     this.steps = [];
     this.context = {
-      db: null,
+      db: null, // Will hold the Postgres Pool
       playersList: {},
       teams: {},
       competition: { data: { data: { players: {}, teams: {} } } },
@@ -38,13 +38,19 @@ export class SyncManager {
   }
 
   async run() {
-    this.log('🚀 Starting Data Sync (Manager Mode)...');
+    this.log('🚀 Starting Data Sync (Postgres Manager Mode)...');
 
-    this.context.db = new Database(this.dbPath);
+    // Use the singleton pool from client.js
+    this.context.db = db;
 
-    // Ensure Schema Exists
+    // Ensure Schema Exists (Async now)
     this.log('   🔨 Verifying/Creating Database Schema...');
-    ensureSchema(this.context.db);
+    try {
+      await ensureSchema(this.context.db);
+    } catch (e) {
+      this.error('❌ Failed to verify schema:', e);
+      process.exit(1);
+    }
 
     try {
       for (const step of this.steps) {
@@ -73,9 +79,10 @@ export class SyncManager {
     } catch (err) {
       this.error('❌ Sync Critical Failure:', err);
     } finally {
-      if (this.context.db) {
-        this.context.db.close();
-        this.log('\n🔒 Database closed.');
+      if (this.context.db && typeof this.context.db.end === 'function') {
+        this.log('\n🔒 Closing Database connection...');
+        await this.context.db.end();
+        this.log('🔒 Database closed.');
       }
       this.log(`\n🏁 Sync finished ${this.hasErrors ? 'with errors ⚠️' : 'successfully ✅'}`);
     }

@@ -31,7 +31,7 @@ export async function POST(req) {
           description: 'Get the current league standings (classification)',
           parameters: z.object({}),
           execute: async () => {
-            const standings = getExtendedStandings();
+            const standings = await getExtendedStandings();
             return standings.map((s) => ({
               rank: s.position,
               user: s.name,
@@ -48,21 +48,22 @@ export async function POST(req) {
           }),
           execute: async ({ name }) => {
             // 1. Search for player ID by name
-            const searchStmt = db.prepare(`
+            const searchStmt = `
               SELECT id, name, team_id 
               FROM players 
-              WHERE name LIKE ? 
+              WHERE name ILIKE $1 
               ORDER BY puntos DESC 
               LIMIT 1
-            `);
-            const player = searchStmt.get(`%${name}%`);
+            `;
+            const playerRes = await db.query(searchStmt, [`%${name}%`]);
+            const player = playerRes.rows[0];
 
             if (!player) {
               return { error: `Player '${name}' not found.` };
             }
 
             // 2. Get detailed stats
-            const details = getPlayerDetails(player.id);
+            const details = await getPlayerDetails(player.id);
 
             if (!details) return { error: 'Could not fetch details.' };
 

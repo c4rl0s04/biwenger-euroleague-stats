@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const placements = fetchPlacementStats();
+    const placements = await fetchPlacementStats();
     return successResponse(placements, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching placements:', error);

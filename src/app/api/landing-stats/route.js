@@ -6,11 +6,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     // 1. Get User Count
-    const standings = getStandings();
+    const standings = await getStandings();
     const userCount = standings.length;
 
     // 2. Get Current Round & Playoff Calc
-    const nextRound = getNextRound();
+    const nextRound = await getNextRound();
     let roundNumber = 0;
 
     if (nextRound && nextRound.round_name) {

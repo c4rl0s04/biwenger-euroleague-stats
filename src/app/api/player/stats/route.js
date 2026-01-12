@@ -14,7 +14,7 @@ export const GET = withApiHandler(async (request) => {
     throw error;
   }
 
-  const stats = fetchUserSeasonStats(userIdValidation.value);
+  const stats = await fetchUserSeasonStats(userIdValidation.value);
 
   // Return data for successResponse({ stats })
   // We can also pass cache duration

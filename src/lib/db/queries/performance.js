@@ -2,20 +2,18 @@ import { db } from '../client.js';
 
 /**
  * Get volatility stats (Standard Deviation of points)
- * @returns {Array} Users sorted by consistency (lower std_dev is better)
+ * @returns {Promise<Array>} Users sorted by consistency (lower std_dev is better)
  */
-export function getVolatilityStats() {
+export async function getVolatilityStats() {
   const query = `
     WITH Stats AS (
       SELECT 
         user_id,
         AVG(points) as avg_points,
-        -- SQLite doesn't have a native STDEV function in older versions, 
-        -- so we calculate it manually: SQRT(AVG(points*points) - AVG(points)*AVG(points))
-        -- Or using the extension if available, but manual is safer here.
-        SQRT(AVG(points*points) - AVG(points)*AVG(points)) as std_dev
+        -- Postgres has STDDEV, but for consistency with previous manual calculation logic:
+        STDDEV(points) as std_dev
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY user_id
     )
     SELECT 
@@ -29,14 +27,19 @@ export function getVolatilityStats() {
     JOIN Stats s ON u.id = s.user_id
     ORDER BY s.std_dev ASC
   `;
-  return db.prepare(query).all();
+  // Note: Postgres `STDDEV` returns numeric/float, `ROUND` works fine.
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    avg_points: parseFloat(row.avg_points) || 0,
+    std_dev: parseFloat(row.std_dev) || 0,
+  }));
 }
 
 /**
  * Get placement stats (Top 3 vs Bottom 3 finishes)
- * @returns {Array} Users with their podium and relegation zone counts
+ * @returns {Promise<Array>} Users with their podium and relegation zone counts
  */
-export function getPlacementStats() {
+export async function getPlacementStats() {
   const query = `
     WITH RoundRanks AS (
       SELECT 
@@ -45,7 +48,7 @@ export function getPlacementStats() {
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position,
         COUNT(*) OVER (PARTITION BY round_id) as total_participants
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
     )
     SELECT 
       u.id as user_id,
@@ -60,21 +63,21 @@ export function getPlacementStats() {
     GROUP BY u.id
     ORDER BY top_3_count DESC, bottom_3_count ASC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get league comparison stats (Rounds above/below league average)
- * @returns {Array} Users with counts of above/below average rounds
+ * @returns {Promise<Array>} Users with counts of above/below average rounds
  */
-export function getLeagueComparisonStats() {
+export async function getLeagueComparisonStats() {
   const query = `
     WITH RoundAverages AS (
       SELECT 
         round_id,
         AVG(points) as league_avg
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY round_id
     )
     SELECT 
@@ -88,24 +91,27 @@ export function getLeagueComparisonStats() {
     FROM users u
     JOIN user_rounds ur ON u.id = ur.user_id
     JOIN RoundAverages ra ON ur.round_id = ra.round_id
-    WHERE ur.participated = 1
+    WHERE ur.participated = TRUE
     GROUP BY u.id
     ORDER BY above_avg_count DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    avg_diff: parseFloat(row.avg_diff) || 0,
+  }));
 }
 
 /**
  * Get efficiency stats (Points per Million)
  * Uses current team value as a proxy.
- * @returns {Array} Users sorted by ROI
+ * @returns {Promise<Array>} Users sorted by ROI
  */
-export function getEfficiencyStats() {
+export async function getEfficiencyStats() {
   const query = `
     WITH UserPoints AS (
       SELECT user_id, SUM(points) as total_points
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY user_id
     ),
     UserValue AS (
@@ -122,21 +128,21 @@ export function getEfficiencyStats() {
       up.total_points,
       COALESCE(uv.team_value, 0) as team_value,
       -- Calculate Points per 1M value
-      ROUND(CAST(up.total_points AS FLOAT) / (CAST(uv.team_value AS FLOAT) / 1000000), 2) as points_per_million
+      ROUND(CAST(up.total_points AS NUMERIC) / NULLIF((CAST(uv.team_value AS NUMERIC) / 1000000), 0), 2) as points_per_million
     FROM users u
     JOIN UserPoints up ON u.id = up.user_id
     LEFT JOIN UserValue uv ON u.id = uv.owner_id
     WHERE uv.team_value > 0
     ORDER BY points_per_million DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get streak stats (Consecutive rounds with 175+ points)
- * @returns {Array} Users with their longest 175+ point streak
+ * @returns {Promise<Array>} Users with their longest 175+ point streak
  */
-export function getStreakStats() {
+export async function getStreakStats() {
   const query = `
     WITH Scores AS (
       SELECT 
@@ -144,7 +150,7 @@ export function getStreakStats() {
         round_id, 
         CASE WHEN points >= 175 THEN 1 ELSE 0 END as is_high_score
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
     ),
     Streaks AS (
       SELECT 
@@ -174,23 +180,23 @@ export function getStreakStats() {
     GROUP BY u.id
     ORDER BY longest_streak DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get "Bottler" stats (High placed finishes without winning)
  * "Bottler Score" = (2nd_places * 3) + (3rd_places * 1) - (1st_places * 2)
  * High score means lots of near misses and few wins.
- * @returns {Array} Users sorted by bottler score
+ * @returns {Promise<Array>} Users sorted by bottler score
  */
-export function getBottlerStats() {
+export async function getBottlerStats() {
   const query = `
     WITH RoundRanks AS (
       SELECT 
         user_id,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
     )
     SELECT 
       u.id as user_id,
@@ -203,56 +209,21 @@ export function getBottlerStats() {
       (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) * 3 + 
        SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) * 1) - 
        (SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) * 2)
-      as bottler_score
+       as bottler_score
     FROM users u
     JOIN RoundRanks r ON u.id = r.user_id
     GROUP BY u.id
-    HAVING (seconds > 0 OR thirds > 0)
+    HAVING (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) > 0 OR SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) > 0)
     ORDER BY bottler_score DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get Heartbreaker stats (Total margin of defeat in 2nd place finishes)
- * @returns {Array} Users sorted by total points missed by
+ * @returns {Promise<Array>} Users sorted by total points missed by
  */
-export function getHeartbreakerStats() {
-  const query = `
-    WITH RoundScores AS (
-      SELECT round_id, MAX(points) as winning_points
-      FROM user_rounds
-      WHERE participated = 1
-      GROUP BY round_id
-    ),
-    UserDiffs AS (
-      SELECT 
-        ur.user_id,
-        ur.round_id,
-        ur.points,
-        rs.winning_points,
-        (rs.winning_points - ur.points) as diff
-      FROM user_rounds ur
-      JOIN RoundScores rs ON ur.round_id = rs.round_id
-      WHERE ur.participated = 1
-    )
-    SELECT 
-      u.id as user_id,
-      u.name,
-      u.icon,
-      COUNT(ud.round_id) as heartbreaking_losses,
-      SUM(ud.diff) as total_margin
-    FROM users u
-    JOIN UserDiffs ud ON u.id = ud.user_id
-    WHERE ud.diff > 0 AND ud.diff < 10 -- Only count "close" losses (e.g. less than 10 pts)
-    -- Actually, user asked for "Sum of points you missed winning by". 
-    -- Let's stick to the user's logic: "if winner has 100 and you have 98, that's +2 bad luck".
-    -- I will filter for 2nd place explicitly to be more precise about "almost winning".
-    GROUP BY u.id
-    ORDER BY total_margin ASC -- Maybe DESC? "Bad Luck score" = total missed. So HIGH is bad luck.
-  `;
-
-  // Revised query to be stricter: You must be 2nd place.
+export async function getHeartbreakerStats() {
   const refinedQuery = `
     WITH RoundRanks AS (
       SELECT 
@@ -262,7 +233,7 @@ export function getHeartbreakerStats() {
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position,
         MAX(points) OVER (PARTITION BY round_id) as winner_points
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
     ),
     HeartbreakEvents AS (
       SELECT 
@@ -281,18 +252,18 @@ export function getHeartbreakerStats() {
       COALESCE(SUM(he.diff), 0) as total_diff
     FROM users u
     LEFT JOIN HeartbreakEvents he ON u.id = he.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = 1) -- Only active users
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = TRUE) -- Only active users
     GROUP BY u.id
-    ORDER BY (CASE WHEN total_diff = 0 THEN 1 ELSE 0 END) ASC, total_diff ASC
+    ORDER BY (CASE WHEN COALESCE(SUM(he.diff), 0) = 0 THEN 1 ELSE 0 END) ASC, total_diff ASC
   `;
-  return db.prepare(refinedQuery).all();
+  return (await db.query(refinedQuery)).rows;
 }
 
 /**
  * Get "No Glory" stats (Total points in non-winning rounds)
- * @returns {Array} Users sorted by points scored without winning
+ * @returns {Promise<Array>} Users sorted by points scored without winning
  */
-export function getNoGloryStats() {
+export async function getNoGloryStats() {
   const query = `
     WITH RoundRanks AS (
       SELECT 
@@ -301,7 +272,7 @@ export function getNoGloryStats() {
         points,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
     ),
     NoGloryEvents AS (
       SELECT 
@@ -319,18 +290,18 @@ export function getNoGloryStats() {
       COUNT(nge.points) as rounds_count
     FROM users u
     LEFT JOIN NoGloryEvents nge ON u.id = nge.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = 1)
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = TRUE)
     GROUP BY u.id
     ORDER BY total_points_no_glory DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get "Jinx" stats (Above avg score but bottom half rank)
- * @returns {Array} Users sorted by count of "jinxed" rounds
+ * @returns {Promise<Array>} Users sorted by count of "jinxed" rounds
  */
-export function getJinxStats() {
+export async function getJinxStats() {
   const query = `
     WITH RoundStats AS (
       SELECT 
@@ -338,7 +309,7 @@ export function getJinxStats() {
         AVG(points) as league_avg,
         COUNT(user_id) as participant_count
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY round_id
     ),
     UserRoundsWithRank AS (
@@ -348,7 +319,7 @@ export function getJinxStats() {
         ur.points,
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
-      WHERE participated = 1
+      WHERE participated = TRUE
     ),
     JinxEvents AS (
       SELECT 
@@ -367,9 +338,9 @@ export function getJinxStats() {
       COUNT(je.round_id) as jinxed_count
     FROM users u
     LEFT JOIN JinxEvents je ON u.id = je.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = 1)
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = TRUE)
     GROUP BY u.id
     ORDER BY jinxed_count DESC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }

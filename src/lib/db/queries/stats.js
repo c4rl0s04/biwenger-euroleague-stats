@@ -2,9 +2,9 @@ import { db } from '../client.js';
 
 /**
  * Get Market KPIs
- * @returns {Object} Market statistics
+ * @returns {Promise<Object>} Market statistics
  */
-export function getMarketKPIs() {
+export async function getMarketKPIs() {
   const query = `
     SELECT 
       COUNT(*) as total_transfers,
@@ -16,21 +16,30 @@ export function getMarketKPIs() {
     FROM fichajes
   `;
 
-  return db.prepare(query).get();
+  const kpis = (await db.query(query)).rows[0];
+  return {
+    ...kpis,
+    total_transfers: parseInt(kpis?.total_transfers) || 0,
+    avg_value: parseFloat(kpis?.avg_value) || 0,
+    active_buyers: parseInt(kpis?.active_buyers) || 0,
+    active_sellers: parseInt(kpis?.active_sellers) || 0,
+    max_value: parseInt(kpis?.max_value) || 0,
+    min_value: parseInt(kpis?.min_value) || 0,
+  };
 }
 
 /**
  * Get league standings (Latest)
- * @returns {Array} Current standings with user details
+ * @returns {Promise<Array>} Current standings with user details
  */
-export function getStandings() {
+export async function getStandings() {
   const query = `
     WITH UserTotals AS (
       SELECT 
         user_id,
         SUM(points) as total_points
       FROM user_rounds
-      WHERE participated = 1
+      WHERE participated = TRUE
       GROUP BY user_id
     )
     SELECT 
@@ -55,27 +64,29 @@ export function getStandings() {
     ) sq ON u.id = sq.owner_id
     ORDER BY position ASC
   `;
-  return db.prepare(query).all();
+  return (await db.query(query)).rows;
 }
 
 /**
  * Get comparison with league leader
  * @param {string} userId - User ID
- * @returns {Object} Leader comparison
+ * @returns {Promise<Object>} Leader comparison
  */
-export function getLeaderComparison(userId) {
-  const standings = getStandings();
+export async function getLeaderComparison(userId) {
+  const standings = await getStandings();
   const leader = standings[0];
   const secondPlace = standings[1];
-  const user = standings.find((u) => u.user_id === userId);
+  // Ensure we compare strings properly if IDs are mixed types in DB/JS
+  const user = standings.find((u) => String(u.user_id) === String(userId));
 
   if (!user || !leader) return null;
 
   const gap = leader.total_points - user.total_points;
-  const roundsNeeded = user.position > 1 ? Math.ceil(gap / 10) : 0;
+  // If user.position is string (e.g. from bigInt), convert. But here it's from RANK so it's number/string.
+  const pos = parseInt(user.position);
+  const roundsNeeded = pos > 1 ? Math.ceil(gap / 10) : 0;
 
-  const gapToSecond =
-    user.position === 1 && secondPlace ? user.total_points - secondPlace.total_points : 0;
+  const gapToSecond = pos === 1 && secondPlace ? user.total_points - secondPlace.total_points : 0;
 
   return {
     leader_name: leader.name,
@@ -84,30 +95,30 @@ export function getLeaderComparison(userId) {
     gap: gap,
     gap_to_second: gapToSecond,
     rounds_needed: roundsNeeded,
-    is_leader: user.position === 1,
+    is_leader: pos === 1,
   };
 }
 
 /**
  * Get league average points per round
- * @returns {number} Average points
+ * @returns {Promise<number>} Average points
  */
-export function getLeagueAveragePoints() {
+export async function getLeagueAveragePoints() {
   const query = `
     SELECT ROUND(AVG(points), 1) as avg_points
     FROM user_rounds
-    WHERE participated = 1
+    WHERE participated = TRUE
   `;
 
-  const result = db.prepare(query).get();
-  return result.avg_points || 0;
+  const result = (await db.query(query)).rows[0];
+  return result ? parseFloat(result.avg_points) : 0;
 }
 
 /**
  * Get recent records broken
- * @returns {Array} Recent league records
+ * @returns {Promise<Array>} Recent league records
  */
-export function getRecentRecords() {
+export async function getRecentRecords() {
   const records = [];
 
   const highestRoundQuery = `
@@ -118,11 +129,11 @@ export function getRecentRecords() {
       ur.points
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
-    WHERE ur.participated = 1
+    WHERE ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1
   `;
-  const highestRound = db.prepare(highestRoundQuery).get();
+  const highestRound = (await db.query(highestRoundQuery)).rows[0];
   if (highestRound) {
     records.push({
       type: 'highest_round',
@@ -144,12 +155,12 @@ export function getRecentRecords() {
     ORDER BY f.precio DESC
     LIMIT 1
   `;
-  const highestTransfer = db.prepare(highestTransferQuery).get();
+  const highestTransfer = (await db.query(highestTransferQuery)).rows[0];
   if (highestTransfer) {
     records.push({
       type: 'highest_transfer',
       label: 'Fichaje más caro',
-      description: `${highestTransfer.player_name} - ${(highestTransfer.precio / 1000000).toFixed(2)}M€ (${highestTransfer.comprador})`,
+      description: `${highestTransfer.player_name} - ${(parseInt(highestTransfer.precio) / 1000000).toFixed(2)}M€ (${highestTransfer.comprador})`,
       user_name: highestTransfer.comprador,
       value: highestTransfer.precio,
     });
@@ -166,12 +177,12 @@ export function getRecentRecords() {
     ORDER BY price_increment DESC
     LIMIT 1
   `;
-  const biggestGain = db.prepare(biggestGainQuery).get();
+  const biggestGain = (await db.query(biggestGainQuery)).rows[0];
   if (biggestGain && biggestGain.price_increment > 0) {
     records.push({
       type: 'biggest_gain',
       label: 'Mayor revalorización',
-      description: `${biggestGain.name} +${(biggestGain.price_increment / 1000000).toFixed(2)}M€`,
+      description: `${biggestGain.name} +${(parseInt(biggestGain.price_increment) / 1000000).toFixed(2)}M€`,
       player_name: biggestGain.name,
       value: biggestGain.price_increment,
     });
@@ -183,9 +194,9 @@ export function getRecentRecords() {
 /**
  * Get stat leaders (Top 5)
  * @param {string} type - Stat type (real_points, rebounds, assists, pir)
- * @returns {Array} List of top players for the stat
+ * @returns {Promise<Array>} List of top players for the stat
  */
-export function getStatLeaders(type = 'points') {
+export async function getStatLeaders(type = 'points') {
   const columnMap = {
     real_points: 'points',
     points: 'points',
@@ -196,6 +207,7 @@ export function getStatLeaders(type = 'points') {
 
   const column = columnMap[type] || 'points';
 
+  // Sanitize column name to prevent SQL injection (though key is mapped above)
   const query = `
     SELECT 
       p.id as player_id,
@@ -212,14 +224,18 @@ export function getStatLeaders(type = 'points') {
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
-    GROUP BY p.id
-    HAVING value > 0
+    GROUP BY p.id, p.name, t.id, t.name, p.owner_id, u.name, u.color_index
+    HAVING SUM(prs.${column}) > 0
     ORDER BY value DESC
     LIMIT 5
   `;
 
   try {
-    return db.prepare(query).all();
+    return (await db.query(query)).rows.map((row) => ({
+      ...row,
+      value: parseFloat(row.value) || 0,
+      avg_value: parseFloat(row.avg_value) || 0,
+    }));
   } catch (error) {
     console.error('Error fetching stat leaders:', error);
     return [];
