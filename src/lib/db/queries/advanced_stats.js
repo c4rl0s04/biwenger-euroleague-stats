@@ -302,7 +302,7 @@ export async function getVolatilityStats() {
           'SELECT points FROM user_rounds WHERE user_id = $1 AND participated = TRUE',
           [user.id]
         )
-      ).rows.map((r) => r.points);
+      ).rows.map((r) => parseFloat(r.points) || 0);
 
       if (points.length < 2) continue;
 
@@ -315,12 +315,12 @@ export async function getVolatilityStats() {
         name: user.name,
         icon: user.icon,
         color_index: user.color_index,
-        stdDev: parseFloat(stdDev.toFixed(1)),
-        mean: parseFloat(mean.toFixed(1)),
+        std_dev: parseFloat(stdDev.toFixed(1)),
+        avg_points: parseFloat(mean.toFixed(1)),
       });
     }
 
-    return result.sort((a, b) => b.stdDev - a.stdDev);
+    return result.sort((a, b) => b.std_dev - a.std_dev);
   } catch (error) {
     console.error('Error in getVolatilityStats:', error);
     return [];
