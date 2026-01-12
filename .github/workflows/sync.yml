@@ -38,4 +38,4 @@ jobs:
           BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
           BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
           BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
-        run: npm run sync
+        run: npm run sync:daily
