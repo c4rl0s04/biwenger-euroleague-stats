@@ -24,22 +24,30 @@ if (skipDb) {
   const isProduction = process.env.NODE_ENV === 'production';
   const isRemote = process.env.POSTGRES_HOST && process.env.POSTGRES_HOST !== 'localhost';
 
+  // Prioritize DATABASE_URL if provided, otherwise use individual vars
+  const connectionString = process.env.DATABASE_URL;
+
+  const poolConfig = connectionString
+    ? {
+        connectionString,
+        ssl: isProduction || isRemote ? { rejectUnauthorized: false } : false,
+      }
+    : {
+        user: process.env.POSTGRES_USER || 'user',
+        password: process.env.POSTGRES_PASSWORD || 'password',
+        host: process.env.POSTGRES_HOST || 'localhost',
+        port: parseInt(process.env.POSTGRES_PORT || '5432'),
+        database: process.env.POSTGRES_DB || 'biwenger',
+        ssl: isProduction || isRemote ? { rejectUnauthorized: false } : false,
+      };
+
   const pool = new Pool({
-    user: process.env.POSTGRES_USER || 'user',
-    password: process.env.POSTGRES_PASSWORD || 'password',
-    host: process.env.POSTGRES_HOST || 'localhost',
-    port: parseInt(process.env.POSTGRES_PORT || '5432'),
-    database: process.env.POSTGRES_DB || 'biwenger',
+    ...poolConfig,
     max: 10,
     idleTimeoutMillis: 30000,
-    // Enable SSL for remote connections (Supabase requires it)
-    ssl:
-      isProduction || isRemote
-        ? {
-            rejectUnauthorized: false,
-          }
-        : false,
   });
+
+  console.log(`🔌 Database connecting to: ${connectionString ? 'DATABASE_URL' : poolConfig.host}`);
 
   // Test connection
   pool.on('error', (err, client) => {
