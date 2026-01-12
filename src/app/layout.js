@@ -16,6 +16,7 @@ export const metadata = {
     apple: '/brand-logo.png', // Keep the nicer one for Apple Touch Icon
   },
 };
+export const dynamic = 'force-dynamic';
 
 // Start of the application
 // We fetch server-side data here to pass to the client context
