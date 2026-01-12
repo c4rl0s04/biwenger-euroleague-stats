@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { BarChart3, Users, TrendingUp, Crown, Zap, Flame } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function LeagueStatsCard() {
@@ -28,7 +28,9 @@ export default function LeagueStatsCard() {
                   Participantes
                 </span>
               </div>
-              <div className="text-2xl font-bold text-white">{stats.total_users}</div>
+              <div className="text-2xl font-bold text-white">
+                <AnimatedNumber value={stats.total_users} duration={1.5} />
+              </div>
               <div className="text-xs text-slate-500">{stats.total_rounds} jornadas</div>
             </div>
 
@@ -40,7 +42,9 @@ export default function LeagueStatsCard() {
                   Total Puntos
                 </span>
               </div>
-              <div className="text-2xl font-bold text-orange-400">{stats.total_points}</div>
+              <div className="text-2xl font-bold text-orange-400">
+                <AnimatedNumber value={stats.total_points} duration={2} />
+              </div>
               <div className="text-xs text-slate-500">Media: {stats.avg_round_points}/jornada</div>
             </div>
 
@@ -93,7 +97,7 @@ export default function LeagueStatsCard() {
                     <span className="text-slate-400 text-xs uppercase tracking-wider">Récord</span>
                   </div>
                   <div className="text-2xl font-bold text-purple-400">
-                    {stats.round_record.points} pts
+                    <AnimatedNumber value={stats.round_record.points} duration={1.5} /> pts
                   </div>
                   <div className="text-xs text-slate-500 truncate transition-colors group-hover:text-purple-400">
                     {stats.round_record.name}
@@ -108,7 +112,9 @@ export default function LeagueStatsCard() {
                 <Flame className="w-5 h-5 text-orange-400" />
                 <span className="text-slate-400 text-xs uppercase tracking-wider">Racha Líder</span>
               </div>
-              <div className="text-2xl font-bold text-orange-400">{stats.leader_streak || 0}</div>
+              <div className="text-2xl font-bold text-orange-400">
+                <AnimatedNumber value={stats.leader_streak || 0} duration={1} />
+              </div>
               <div className="text-xs text-slate-500">Consecutivas</div>
             </div>
           </div>

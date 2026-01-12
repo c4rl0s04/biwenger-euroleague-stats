@@ -20,7 +20,14 @@ export async function getPorrasStats() {
     ORDER BY total_hits DESC
   `;
 
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    total_rounds: parseInt(row.total_rounds) || 0,
+    total_hits: parseInt(row.total_hits) || 0,
+    avg_hits: parseFloat(row.avg_hits) || 0,
+    best_round: parseInt(row.best_round) || 0,
+    worst_round: parseInt(row.worst_round) || 0,
+  }));
 }
 
 /**
@@ -186,7 +193,11 @@ export async function getUserRecentRounds(userId, limit = 10) {
     ORDER BY ar.round_id DESC
   `;
 
-  const rounds = (await db.query(query, [limit, userId])).rows;
+  const rounds = (await db.query(query, [limit, userId])).rows.map((row) => ({
+    ...row,
+    points: parseInt(row.points) || 0,
+    position: parseInt(row.position) || 0,
+  }));
 
   // Count total rounds where user participated
   const countQuery = `
@@ -195,7 +206,7 @@ export async function getUserRecentRounds(userId, limit = 10) {
     WHERE user_id = $1 AND participated = TRUE
   `;
   const countRes = await db.query(countQuery, [userId]);
-  const total_played = countRes.rows[0]?.total_played || 0;
+  const total_played = parseInt(countRes.rows[0]?.total_played) || 0;
 
   // Count total rounds in the season (distinct round_ids)
   const totalRoundsQuery = `
@@ -203,7 +214,7 @@ export async function getUserRecentRounds(userId, limit = 10) {
     FROM user_rounds
   `;
   const totalRoundsRes = await db.query(totalRoundsQuery);
-  const total_rounds = totalRoundsRes.rows[0]?.total_rounds || 0;
+  const total_rounds = parseInt(totalRoundsRes.rows[0]?.total_rounds) || 0;
 
   return { rounds, total_played, total_rounds };
 }

@@ -42,7 +42,12 @@ export async function getSquadStats() {
     ORDER BY total_points DESC
   `;
 
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    squad_size: parseInt(row.squad_size) || 0,
+    total_value: parseInt(row.total_value) || 0,
+    total_points: parseInt(row.total_points) || 0,
+  }));
 }
 
 /**
@@ -67,7 +72,12 @@ export async function getUserSquad(userId) {
     ORDER BY p.puntos DESC
   `;
 
-  return (await db.query(query, [userId])).rows;
+  return (await db.query(query, [userId])).rows.map((row) => ({
+    ...row,
+    average: parseFloat(row.average) || 0,
+    points: parseInt(row.points) || 0,
+    price: parseInt(row.price) || 0,
+  }));
 }
 
 /**
@@ -144,11 +154,25 @@ export async function getUserSeasonStats(userId) {
   return {
     name: user?.name || 'Desconocido',
     color_index: user?.color_index ?? 0,
-    ...stats,
+
+    // Stats Parsing
+    total_points: parseInt(stats?.total_points) || 0,
+    best_round: parseInt(stats?.best_round) || 0,
+    worst_round: parseInt(stats?.worst_round) || 0,
     average_points: parseFloat(stats?.average_points) || 0,
-    ...positions,
+    rounds_played: parseInt(stats?.rounds_played) || 0,
+
+    // Positions Parsing
+    best_position: parseInt(positions?.best_position) || 0,
+    worst_position: parseInt(positions?.worst_position) || 0,
     average_position: parseFloat(positions?.average_position) || 0,
-    ...transfers,
+    victories: parseInt(positions?.victories) || 0,
+    podiums: parseInt(positions?.podiums) || 0,
+
+    // Transfers Parsing
+    purchases: parseInt(transfers?.purchases) || 0,
+    sales: parseInt(transfers?.sales) || 0,
+
     position: userStanding?.position || 0,
     team_value: userStanding?.team_value || 0,
     price_trend: userStanding?.price_trend || 0,

@@ -3,9 +3,10 @@
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { Card } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/constants/colors';
+import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
 export default function MarketActivityCard() {
   const { currentUser, isReady } = useClientUser();
@@ -38,24 +39,21 @@ export default function MarketActivityCard() {
       actionRight={actionLink}
       className="card-glow"
     >
-      <div className="space-y-0">
+      <div className="flex flex-col">
         {recentTransfers && recentTransfers.length > 0 ? (
           recentTransfers.slice(0, 5).map((transfer) => (
-            <div
+            <DashboardPlayerRow
               key={transfer.id}
-              className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors"
-            >
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-foreground shrink-0 border border-border">
-                {transfer.player_name?.charAt(0) || '?'}
-              </div>
-              <div className="flex-grow min-w-0">
-                <Link
-                  href={`/player/${transfer.player_id}`}
-                  className="font-medium text-foreground text-base hover:text-pink-400 transition-colors block truncate"
-                >
-                  {transfer.player_name}
-                </Link>
-                <div className="text-sm text-muted-foreground flex items-center flex-wrap gap-1 mt-0.5">
+              playerId={transfer.player_id}
+              name={transfer.player_name}
+              color="pink"
+              avatar={
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-foreground shrink-0 border border-border">
+                  {transfer.player_name?.charAt(0) || '?'}
+                </div>
+              }
+              subtitle={
+                <div className="flex items-center flex-wrap gap-1 text-xs">
                   {transfer.vendedor_id ? (
                     (() => {
                       const sellerColor = getColorForUser(
@@ -75,7 +73,7 @@ export default function MarketActivityCard() {
                   ) : (
                     <span className="text-red-400">{transfer.vendedor || 'Mercado'}</span>
                   )}
-                  <ArrowRight className="w-3 h-3 shrink-0" />
+                  <ArrowRight className="w-3 h-3 shrink-0 text-muted-foreground" />
                   {transfer.comprador_id ? (
                     (() => {
                       const buyerColor = getColorForUser(
@@ -96,16 +94,18 @@ export default function MarketActivityCard() {
                     <span className="text-green-400">{transfer.comprador}</span>
                   )}
                 </div>
-              </div>
-              <div className="text-right shrink-0">
-                <div className="font-bold text-foreground text-base">
-                  {new Intl.NumberFormat('es-ES').format(transfer.precio)}€
+              }
+              rightContent={
+                <div className="flex flex-col items-end">
+                  <div className="font-bold text-foreground text-sm">
+                    <AnimatedNumber value={transfer.precio} suffix="€" duration={0.8} />
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {new Date(transfer.timestamp * 1000).toLocaleDateString()}
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground/70">
-                  {new Date(transfer.timestamp * 1000).toLocaleDateString()}
-                </div>
-              </div>
-            </div>
+              }
+            />
           ))
         ) : (
           <div className="text-center text-muted-foreground py-8">No hay fichajes recientes</div>

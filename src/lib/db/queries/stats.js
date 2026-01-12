@@ -64,7 +64,12 @@ export async function getStandings() {
     ) sq ON u.id = sq.owner_id
     ORDER BY position ASC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    total_points: parseInt(row.total_points) || 0,
+    team_value: parseInt(row.team_value) || 0,
+    price_trend: parseInt(row.price_trend) || 0,
+  }));
 }
 
 /**

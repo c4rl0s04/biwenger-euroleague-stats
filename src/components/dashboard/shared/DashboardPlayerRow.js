@@ -15,6 +15,7 @@ export default function DashboardPlayerRow({
   ownerColorIndex, // New prop for user colors
   avatar,
   rightContent,
+  subtitle, // New prop for custom subtitle content
   color = 'primary', // Default to primary (orange)
 }) {
   const hoverMap = {
@@ -52,19 +53,20 @@ export default function DashboardPlayerRow({
           {name}
         </Link>
 
-        {/* Line 2: Team Name */}
-        {teamId ? (
-          <Link
-            href={`/team/${teamId}`}
-            className={`text-xs text-muted-foreground truncate leading-tight mb-0.5 ${hoverClass} transition-colors block`}
-          >
-            {getShortTeamName(team)}
-          </Link>
-        ) : (
-          <div className="text-xs text-muted-foreground truncate leading-tight mb-0.5">
-            {getShortTeamName(team)}
-          </div>
-        )}
+        {/* Line 2: Team Name or Custom Subtitle */}
+        {subtitle ||
+          (teamId ? (
+            <Link
+              href={`/team/${teamId}`}
+              className={`text-xs text-muted-foreground truncate leading-tight mb-0.5 ${hoverClass} transition-colors block`}
+            >
+              {getShortTeamName(team)}
+            </Link>
+          ) : (
+            <div className="text-xs text-muted-foreground truncate leading-tight mb-0.5">
+              {getShortTeamName(team)}
+            </div>
+          ))}
 
         <div className="h-4 flex items-center">
           {owner ? (

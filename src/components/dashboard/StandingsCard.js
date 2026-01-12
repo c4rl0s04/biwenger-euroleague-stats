@@ -19,18 +19,24 @@ export default function StandingsCard() {
   return (
     <Card
       title="Clasificación"
-      icon={Trophy} // Changed icon
-      color="yellow" // Changed color
-      className="lg:col-span-1 card-glow h-full" // Added card-glow h-full
+      icon={Trophy}
+      color="yellow"
+      className="lg:col-span-1 card-glow h-full flex flex-col"
       actionRight={actionLink}
       loading={loading}
     >
       {!loading && (
-        <>
-          <StandingsTable standings={standings} />
+        <div className="flex flex-col h-full min-h-0">
+          {/* ADDED STYLES HERE:
+            - [&_tr]:h-14  -> Forces every table row to be at least 3.5rem (56px) high.
+            - [&_td]:py-3  -> Adds vertical padding to table cells for centering and air.
+            - [&_table]:border-separate [&_table]:border-spacing-y-1 -> Optional: Use this if you want actual gaps between row backgrounds.
+          */}
+          <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] [&_tr]:h-14 [&_td]:py-3">
+            <StandingsTable standings={standings} />
+          </div>
 
-          {/* League Insights Footer */}
-          <div className="mt-6 pt-5 border-t border-border/50">
+          <div className="flex-none mt-auto pt-4 border-t border-border/50">
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
@@ -38,9 +44,10 @@ export default function StandingsCard() {
                 </div>
                 <div className="text-lg font-bold text-orange-400">
                   {standings.length > 0
-                    ? Math.round(
-                        standings.reduce((acc, u) => acc + u.total_points, 0) / standings.length
-                      )
+                    ? (
+                        standings.reduce((acc, u) => acc + (parseInt(u.total_points) || 0), 0) /
+                        standings.length
+                      ).toFixed(2)
                     : 0}
                 </div>
               </div>
@@ -49,12 +56,15 @@ export default function StandingsCard() {
                   Valor Liga
                 </div>
                 <div className="text-lg font-bold text-blue-400">
-                  {(standings.reduce((acc, u) => acc + u.team_value, 0) / 1000000).toFixed(1)}M€
+                  {(
+                    standings.reduce((acc, u) => acc + (parseInt(u.team_value) || 0), 0) / 1000000
+                  ).toFixed(1)}
+                  M€
                 </div>
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </Card>
   );

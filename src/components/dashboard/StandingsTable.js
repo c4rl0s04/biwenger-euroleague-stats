@@ -84,9 +84,7 @@ function StandingsTable({ standings }) {
                       href={`/user/${user_id}`}
                       className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
                     >
-                      <div
-                        className={`rounded-full p-0.5 ${color.bg} ${color.text.replace('text-', 'bg-').replace('500', '500/10')}`}
-                      >
+                      <div className="rounded-full p-0.5 border border-border/50">
                         <UserAvatar src={user.icon} alt={name} size={20} />
                       </div>
                       <span

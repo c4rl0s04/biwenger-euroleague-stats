@@ -2,10 +2,11 @@
 
 import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { Card } from '@/components/ui';
+
+import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/constants/colors';
+import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
 export default function TopPlayersCard() {
   const { data: topPlayers = [], loading } = useApiData('/api/dashboard/top-players');
@@ -25,88 +26,54 @@ export default function TopPlayersCard() {
       actionRight={actionLink}
       className="card-glow"
     >
-      <div className="space-y-0">
-        {topPlayers.length > 0 ? (
+      <div className="flex flex-col">
+        {!loading && topPlayers.length > 0 ? (
           topPlayers.slice(0, 5).map((player, index) => {
             const getRankStyles = (idx) => {
-              if (idx === 0)
-                return {
-                  rank: 'bg-yellow-500 text-slate-900 border-yellow-400',
-                  hoverText: 'hover:text-yellow-400',
-                };
-              if (idx === 1)
-                return {
-                  rank: 'bg-slate-300 text-slate-900 border-slate-200',
-                  hoverText: 'hover:text-slate-300',
-                };
-              if (idx === 2)
-                return {
-                  rank: 'bg-amber-700 text-white border-amber-600',
-                  hoverText: 'hover:text-amber-600',
-                };
-              return {
-                rank: 'bg-secondary text-foreground border-border',
-                hoverText: 'hover:text-primary',
-              };
+              if (idx === 0) return 'bg-yellow-500 text-slate-900 border-yellow-400';
+              if (idx === 1) return 'bg-slate-300 text-slate-900 border-slate-200';
+              if (idx === 2) return 'bg-amber-700 text-white border-amber-600';
+              return 'bg-secondary text-foreground border-border';
             };
 
-            const styles = getRankStyles(index);
+            const getTextStyles = (idx) => {
+              if (idx === 0) return 'text-yellow-400';
+              if (idx === 1) return 'text-slate-300';
+              if (idx === 2) return 'text-amber-500';
+              return 'text-emerald-400';
+            };
 
             return (
-              <div
+              <DashboardPlayerRow
                 key={player.id}
-                className="flex items-center gap-4 py-3 border-b border-border/50 last:border-0 group/item transition-colors"
-              >
-                {/* Increased size to w-10 h-10 and text to text-base */}
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold border ${styles.rank} shrink-0`}
-                >
-                  {index + 1}
-                </div>
-                <div className="flex-grow min-w-0">
-                  <Link
-                    href={`/player/${player.id}`}
-                    // Increased to text-base
-                    className={`font-medium truncate transition-colors block text-base ${styles.hoverText} ${index < 3 ? 'text-foreground' : 'text-muted-foreground'}`}
+                playerId={player.id}
+                name={player.name}
+                team={player.team}
+                teamId={player.team_id}
+                owner={player.owner_name}
+                ownerId={player.owner_id}
+                ownerColorIndex={player.owner_color_index}
+                color="emerald"
+                avatar={
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 ${getRankStyles(
+                      index
+                    )}`}
                   >
-                    {player.name}
-                  </Link>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {/* Increased to text-sm */}
-                    <Link
-                      href={`/team/${player.team_id}`}
-                      className="text-sm text-muted-foreground truncate hover:text-emerald-400 transition-colors"
-                    >
-                      {getShortTeamName(player.team)}
-                    </Link>
-                    {player.owner_name &&
-                      (() => {
-                        const color = getColorForUser(
-                          player.owner_id,
-                          player.owner_name,
-                          player.owner_color_index
-                        );
-                        return (
-                          <>
-                            <span className="text-border mx-1">|</span>
-                            <Link
-                              href={`/user/${player.owner_id}`}
-                              className={`text-xs truncate transition-colors ${color.text} hover:opacity-80`}
-                            >
-                              👤 {player.owner_name}
-                            </Link>
-                          </>
-                        );
-                      })()}
+                    {index + 1}
                   </div>
-                </div>
-                <div className="text-right shrink-0">
-                  {/* Increased to text-base */}
-                  <div className="font-bold text-base text-foreground">{player.points} pts</div>
-                  {/* Increased to text-xs */}
-                  <div className="text-xs text-muted-foreground">Avg: {player.average}</div>
-                </div>
-              </div>
+                }
+                rightContent={
+                  <div className="flex flex-col items-end">
+                    <div className={`font-bold text-base ${getTextStyles(index)}`}>
+                      <AnimatedNumber value={player.average} decimals={1} duration={0.8} /> pts
+                    </div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                      Promedio
+                    </div>
+                  </div>
+                }
+              />
             );
           })
         ) : (

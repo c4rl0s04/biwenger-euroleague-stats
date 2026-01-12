@@ -310,7 +310,10 @@ export async function getPointsProgression(limit = 10) {
     WHERE ur.round_id IN (SELECT round_id FROM RecentRounds)
     ORDER BY ur.round_id ASC, ur.points DESC
   `;
-  return (await db.query(query, [limit])).rows;
+  return (await db.query(query, [limit])).rows.map((row) => ({
+    ...row,
+    cumulative_points: parseInt(row.cumulative_points) || 0,
+  }));
 }
 
 /**
