@@ -16,16 +16,18 @@ describe('syncMatches', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    runMock = vi.fn();
-    prepareMock = vi.fn(() => ({
-      run: runMock,
-      all: vi.fn(() => []),
-    }));
-    transactionMock = vi.fn((cb) => cb);
-
     db = {
-      prepare: prepareMock,
-      transaction: transactionMock,
+      query: vi.fn(async (sql, params) => {
+        // Mock getMappedTeams response
+        if (sql.includes && sql.includes('SELECT id, code, name FROM teams')) {
+          return { rows: [] };
+        }
+        return { rows: [], rowCount: 1 };
+      }),
+      connect: async () => ({
+        query: vi.fn(),
+        release: vi.fn(),
+      }),
     };
   });
 
@@ -53,14 +55,10 @@ describe('syncMatches', () => {
     expect(client.fetchRoundGames).toHaveBeenCalledWith(4746);
 
     // Verify Match Upsert
-    expect(runMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        home_id: 10,
-        away_id: 20,
-        home_score: 85,
-        away_score: 80,
-        status: 'finished',
-      })
+    // Verify Match Upsert (checking SQL text roughly)
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO matches'),
+      expect.arrayContaining([10, 20, 85, 80, 'finished'])
     );
   });
 
@@ -71,6 +69,7 @@ describe('syncMatches', () => {
     await syncMatches(db, round);
 
     // Check that it didn't crash but likely logged error
-    expect(runMock).not.toHaveBeenCalled();
+    // Check that it didn't crash but likely logged error
+    expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('INSERT INTO matches'));
   });
 });

@@ -26,14 +26,22 @@ describe('syncPlayers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    runMock = vi.fn();
-    getMock = vi.fn(() => ({ last_date: null })); // Return null so all prices are considered new
-    prepareMock = vi.fn(() => ({ run: runMock, get: getMock }));
-    transactionMock = vi.fn((cb) => cb);
-
     db = {
-      prepare: prepareMock,
-      transaction: transactionMock,
+      query: vi.fn(async (sql, params) => {
+        // Mock existing players query
+        if (sql === 'SELECT id FROM players') {
+          return { rows: [] };
+        }
+        // Mock last price date check
+        if (sql.includes('SELECT date FROM market_values')) {
+          return { rows: [], rowCount: 0 };
+        }
+        return { rows: [], rowCount: 1 };
+      }),
+      connect: async () => ({
+        query: vi.fn(),
+        release: vi.fn(),
+      }),
     };
   });
 
@@ -72,17 +80,13 @@ describe('syncPlayers', () => {
     await syncPlayers(db);
 
     // Verify DB prepare was called (we don't check exact count as it depends on prepared statements bundle)
-    expect(db.prepare).toHaveBeenCalled();
+    // Verify DB query was called
+    expect(db.query).toHaveBeenCalled();
 
     // Verify Player Insert
-    expect(runMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 101,
-        name: 'Campazzo',
-        team_id: 5,
-        position: 'Base',
-        puntos: 150,
-      })
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO players'),
+      expect.arrayContaining([101, 'Campazzo', 5, 'Base', 150])
     );
   });
 });
