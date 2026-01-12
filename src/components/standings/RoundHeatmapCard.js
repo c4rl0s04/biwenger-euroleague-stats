@@ -17,12 +17,12 @@ export default function RoundHeatmapCard() {
 
     // Red -> Yellow -> Green Scale
     if (score >= 210)
-      return 'bg-emerald-950/95 text-emerald-50 shadow-[0_0_15px_rgba(6,78,59,0.7)] font-black border border-emerald-800/50'; // Elite (Deep Pine - Emerald 950)
+      return 'bg-emerald-900/90 text-white shadow-[0_0_15px_rgba(6,78,59,0.6)] font-black border border-emerald-700/50'; // Elite (Dark Pine - Emerald 900)
 
     if (score >= 185)
-      return 'bg-cyan-900/85 text-cyan-50 shadow-[0_0_10px_rgba(22,78,99,0.5)] font-bold border border-cyan-700/50'; // Great (Petrol - Cyan 900)
+      return 'bg-teal-700/85 text-white shadow-[0_0_10px_rgba(15,118,110,0.4)] font-bold border border-teal-600/50'; // Great (Dark Teal - Teal 700)
 
-    if (score >= 160) return 'bg-lime-800/85 text-lime-50 font-bold border border-lime-700/50'; // Good (Moss - Lime 800)
+    if (score >= 160) return 'bg-green-600/80 text-white font-bold border border-green-500/50'; // Good (Forest Green - Green 600)
 
     if (score >= 135) return 'bg-yellow-500/80 text-white border border-yellow-400/50'; // Average
 
