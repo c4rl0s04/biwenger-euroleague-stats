@@ -33,9 +33,19 @@ export default function PlayerIdentityCard({ player }) {
       <div className="relative flex flex-col md:flex-row h-full">
         {/* Owner Badge (Absolute Top Right) */}
         {player.owner_id && (
-          <div className="absolute top-4 right-4 z-30 flex items-center gap-2 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-border/50 shadow-lg">
+          <div
+            className={`absolute top-4 right-4 z-30 flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-lg backdrop-blur-md ${
+              getColorForUser(player.owner_id, player.owner_name, player.owner_color_index)
+                .bg.replace('bg-', 'bg-')
+                .replace('/10', '/90') +
+              ' ' +
+              getColorForUser(player.owner_id, player.owner_name, player.owner_color_index).border +
+              ' ' +
+              getColorForUser(player.owner_id, player.owner_name, player.owner_color_index).text
+            }`}
+          >
             {player.owner_icon ? (
-              <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border">
+              <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/20">
                 <Image
                   src={player.owner_icon}
                   alt={player.owner_name}
@@ -44,22 +54,18 @@ export default function PlayerIdentityCard({ player }) {
                 />
               </div>
             ) : (
-              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                <User size={14} className="text-primary" />
+              <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center border border-white/10">
+                <User size={14} className="text-current" />
               </div>
             )}
-            <span
-              className={`text-sm font-bold ${
-                getColorForUser(player.owner_id, player.owner_name, player.owner_color_index).text
-              }`}
-            >
+            <span className="text-sm font-bold opacity-100 mix-blend-hard-light text-white shadow-black drop-shadow-md">
               {player.owner_name}
             </span>
           </div>
         )}
 
         {/* Left: Player Image (Cutout Style) */}
-        <div className="w-full md:w-5/12 lg:w-4/12 relative min-h-[350px] md:min-h-[450px] self-end order-1 md:order-1 flex items-end justify-center">
+        <div className="w-full md:w-5/12 lg:w-4/12 relative min-h-[250px] md:min-h-[350px] self-end order-1 md:order-1 flex items-end justify-start pl-8">
           {/* Gradient behind image for depth */}
           <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-background to-transparent z-0 opacity-50" />
 
