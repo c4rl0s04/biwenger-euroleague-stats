@@ -39,6 +39,7 @@ async function syncData() {
 
   if (isDaily) {
     console.log('📅 Daily Sync Mode Active: Skipping heavy steps (9-12).');
+    manager.context.isDaily = true;
   }
 
   // Register Pipeline Steps

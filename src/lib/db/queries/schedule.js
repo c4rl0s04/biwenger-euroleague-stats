@@ -4,11 +4,34 @@ import { NEXT_ROUND_CTE } from '../sql_utils.js';
 export async function getScheduleRounds() {
   try {
     const query = `
-      SELECT DISTINCT round_id, round_name 
+      SELECT round_id, round_name 
       FROM matches 
-      ORDER BY date ASC
+      GROUP BY round_id, round_name
+      ORDER BY MIN(date) ASC
     `;
-    return (await db.query(query)).rows;
+    const rows = (await db.query(query)).rows;
+
+    // Deduplicate rounds
+    // If "Jornada 14" and "Jornada 14 (aplazada)" exist, keep only one.
+    // Preference: The one with "(aplazada)" (usually latest info)
+    const roundMap = new Map();
+
+    for (const r of rows) {
+      // Normalize name: "Jornada 14 (aplazada)" -> "Jornada 14"
+      const baseName = r.round_name.replace(/\s*\(.*\)/, '').trim();
+
+      if (!roundMap.has(baseName)) {
+        roundMap.set(baseName, { ...r, round_name: baseName });
+      } else {
+        // If we found a duplicate (e.g. we have "Jornada 14", now found "Jornada 14 (aplazada)")
+        // logic: if current row has 'aplazada', overwrite.
+        if (r.round_name.toLowerCase().includes('aplazada')) {
+          roundMap.set(baseName, { ...r, round_name: baseName });
+        }
+      }
+    }
+
+    return Array.from(roundMap.values());
   } catch (error) {
     console.error('Error in getScheduleRounds:', error);
     return [];

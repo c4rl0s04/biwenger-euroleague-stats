@@ -39,6 +39,8 @@ export async function run(manager) {
     const cleanCode = player.euroleague_code.toString().replace(/\D/g, '');
     const paddedId = cleanCode.padStart(6, '0');
 
+    // NOTE: Euroleague website routing prioritizes the ID over the slug.
+    // Even if the name slug has typos (e.g. "sahsa-vezenkov"), it redirects correctly as long as the ID is valid.
     const url = CONFIG.ENDPOINTS.EUROLEAGUE_WEBSITE.OFFICIAL_PLAYER_PROFILE(slug, paddedId);
 
     try {

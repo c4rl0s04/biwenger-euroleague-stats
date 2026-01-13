@@ -48,7 +48,22 @@ export async function run(manager, playersListInput, teamsInput) {
     }
 
     // Process Items Sequentially
+    let reachedCutoff = false;
+    const cutoffDate = manager.context.isDaily
+      ? new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+      : new Date(0); // Beginning of time
+
     for (const t of items) {
+      // Check date limit for daily optimization
+      const itemDate = new Date(t.date * 1000);
+      if (itemDate < cutoffDate) {
+        reachedCutoff = true;
+        // We can stop processing this batch if sorted desc (default),
+        // but mixed content might exist, so safe to break loop?
+        // Biwenger board is typically reverse chronological.
+        break;
+      }
+
       // Filter for relevant types
       if (
         ![
@@ -208,7 +223,10 @@ export async function run(manager, playersListInput, teamsInput) {
       }
     }
 
-    if (items.length < limit) {
+    if (reachedCutoff && manager.context.isDaily) {
+      manager.log('   🛑 Reached cutoff date (Daily Mode). Stopping history fetch.');
+      moreTransfers = false;
+    } else if (items.length < limit) {
       moreTransfers = false;
     } else {
       offset += limit;

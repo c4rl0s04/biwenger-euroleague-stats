@@ -11,8 +11,8 @@ import PlayersTable from '@/components/players-list/PlayersTable';
 
 export const dynamic = 'force-dynamic';
 
-export default function PlayersPage() {
-  const players = getAllPlayers();
+export default async function PlayersPage() {
+  const players = await getAllPlayers();
 
   return (
     <div className="min-h-screen bg-background pb-20">

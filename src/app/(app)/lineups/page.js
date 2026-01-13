@@ -12,19 +12,20 @@ import {
   ChevronRight,
   ChevronLeft,
 } from 'lucide-react';
+import RoundSelector from '@/components/lineups/RoundSelector';
 
 export default async function SchedulePage({ searchParams }) {
   // Await searchParams for Next.js 15+ compatibility
   const params = await searchParams;
-  const users = getAllUsers();
-  const rounds = getScheduleRounds();
+  const users = await getAllUsers();
+  const rounds = await getScheduleRounds();
 
   // Default to first user if none selected
   const userId = params?.userId || (users.length > 0 ? users[0].id : null);
   const roundId = params?.roundId ? parseInt(params.roundId) : null;
 
   const schedule = userId
-    ? getUserSchedule(userId, roundId)
+    ? await getUserSchedule(userId, roundId)
     : { found: false, message: 'No user selected' };
 
   // Helper to group matches by date
@@ -91,89 +92,11 @@ export default async function SchedulePage({ searchParams }) {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
               Jornada
             </span>
-            <div className="flex items-center gap-2">
-              {/* Prev Round Arrow */}
-              {(() => {
-                const currentRoundIndex = rounds.findIndex(
-                  (r) => r.round_id === (schedule.found ? schedule.round.round_id : -1)
-                );
-                const prevRound = currentRoundIndex > 0 ? rounds[currentRoundIndex - 1] : null;
-
-                return (
-                  <Link
-                    href={
-                      prevRound ? `/lineups?userId=${userId}&roundId=${prevRound.round_id}` : '#'
-                    }
-                    scroll={false}
-                    className={`
-                      p-2 rounded-md border text-slate-400
-                      ${
-                        prevRound
-                          ? 'bg-slate-900 border-slate-800 hover:border-slate-600 hover:text-white'
-                          : 'bg-slate-900/50 border-slate-800/50 opacity-50 cursor-not-allowed'
-                      }
-                    `}
-                    aria-disabled={!prevRound}
-                  >
-                    <ChevronLeft size={14} />
-                  </Link>
-                );
-              })()}
-
-              <div className="flex-1 flex overflow-x-auto pb-2 gap-1 scrollbar-hide mask-fade-right">
-                {rounds.map((r) => {
-                  const isActive = schedule.found && schedule.round.round_id === r.round_id;
-                  return (
-                    <Link
-                      key={r.round_id}
-                      href={`/lineups?userId=${userId}&roundId=${r.round_id}`}
-                      scroll={false}
-                      className={`
-                        min-w-[3rem] px-2 py-1.5 rounded-md text-xs font-mono font-medium text-center transition-colors border flex-shrink-0
-                        ${
-                          isActive
-                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/20'
-                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-600 hover:text-slate-200'
-                        }
-                      `}
-                    >
-                      {r.round_name.replace('Jornada ', 'J')}
-                    </Link>
-                  );
-                })}
-              </div>
-
-              {/* Next Round Arrow */}
-              {(() => {
-                const currentRoundIndex = rounds.findIndex(
-                  (r) => r.round_id === (schedule.found ? schedule.round.round_id : -1)
-                );
-                const nextRound =
-                  currentRoundIndex !== -1 && currentRoundIndex < rounds.length - 1
-                    ? rounds[currentRoundIndex + 1]
-                    : null;
-
-                return (
-                  <Link
-                    href={
-                      nextRound ? `/lineups?userId=${userId}&roundId=${nextRound.round_id}` : '#'
-                    }
-                    scroll={false}
-                    className={`
-                      p-2 rounded-md border text-slate-400
-                      ${
-                        nextRound
-                          ? 'bg-slate-900 border-slate-800 hover:border-slate-600 hover:text-white'
-                          : 'bg-slate-900/50 border-slate-800/50 opacity-50 cursor-not-allowed'
-                      }
-                    `}
-                    aria-disabled={!nextRound}
-                  >
-                    <ChevronRight size={14} />
-                  </Link>
-                );
-              })()}
-            </div>
+            <RoundSelector
+              rounds={rounds}
+              currentRoundId={schedule.found ? schedule.round.round_id : null}
+              userId={userId}
+            />
           </div>
         </div>
       </div>
