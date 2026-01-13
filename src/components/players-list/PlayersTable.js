@@ -1,9 +1,21 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, SortAsc, SortDesc, Users, ChevronLeft, ChevronRight, X, Euro } from 'lucide-react';
+import {
+  Search,
+  SortAsc,
+  SortDesc,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Euro,
+  LayoutGrid,
+  List,
+} from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
-import PlayerCard from './PlayerCard'; // Import the new component
+import PlayerCard from './PlayerCard';
+import PlayersList from './PlayersList';
 
 // 21 items to fit perfectly in a 3-column grid (7 rows x 3 cols)
 const ITEMS_PER_PAGE = 21;
@@ -17,6 +29,7 @@ export default function PlayersTable({ initialPlayers }) {
   const [maxPrice, setMaxPrice] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'total_points', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   // --- FILTER OPTIONS LOGIC ---
   const teams = useMemo(() => {
@@ -137,34 +150,63 @@ export default function PlayersTable({ initialPlayers }) {
       <div className="relative z-20 bg-card/50 backdrop-blur-sm p-4 rounded-xl border border-border/50">
         <div className="flex flex-col xl:flex-row gap-4 items-end">
           {/* Search */}
-          <div className="w-full xl:w-72 shrink-0 space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground ml-1">Buscar</span>
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Nombre, equipo..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full h-[40px] bg-secondary/50 border border-border/50 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm"
-              />
-              {search && (
-                <button
-                  onClick={() => {
-                    setSearch('');
+          <div className="w-full xl:w-72 shrink-0 space-y-1.5 flex gap-2 items-end">
+            <div className="relative w-full">
+              <span className="text-xs font-medium text-muted-foreground ml-1 mb-1.5 block">
+                Buscar
+              </span>
+              <div className="relative">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  placeholder="Nombre, equipo..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                >
-                  <X size={16} />
-                </button>
-              )}
+                  className="w-full h-[40px] bg-secondary/50 border border-border/50 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm"
+                />
+                {search && (
+                  <button
+                    onClick={() => {
+                      setSearch('');
+                      setCurrentPage(1);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+            {/* View Toggle */}
+            <div className="flex bg-secondary/50 rounded-lg p-1 border border-border/50 shrink-0 h-[40px] items-center">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Vista Cuadrícula"
+              >
+                <LayoutGrid size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  viewMode === 'list'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Vista Lista"
+              >
+                <List size={18} />
+              </button>
             </div>
           </div>
 
@@ -332,11 +374,16 @@ export default function PlayersTable({ initialPlayers }) {
       </div>
 
       {/* --- CARD GRID --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginatedPlayers.map((player) => (
-          <PlayerCard key={player.id} player={player} />
-        ))}
-      </div>
+      {/* --- CONTENT --- */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedPlayers.map((player) => (
+            <PlayerCard key={player.id} player={player} />
+          ))}
+        </div>
+      ) : (
+        <PlayersList players={paginatedPlayers} sortConfig={sortConfig} onSort={handleSort} />
+      )}
 
       {/* --- EMPTY STATE --- */}
       {filteredPlayers.length === 0 && (
