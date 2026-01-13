@@ -500,6 +500,7 @@ export async function getAllPlayers() {
        p.img,
        p.position,
        p.price,
+       p.price_increment,
        p.team_id,
        t.name as team_name,
        t.short_name as team_short_name,

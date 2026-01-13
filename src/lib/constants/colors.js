@@ -1,12 +1,12 @@
 import { CONFIG } from '@/lib/config';
 
 export const USER_COLORS = [
-  // ... (colors remain unchanged) ...
   {
     bg: 'from-blue-500/20 to-blue-600/10',
     border: 'border-blue-500/30',
     text: 'text-blue-400',
     hover: 'hover:text-blue-400',
+    groupHover: 'group-hover:text-blue-400',
     stroke: '#60a5fa',
   },
   {
@@ -14,6 +14,7 @@ export const USER_COLORS = [
     border: 'border-yellow-500/30',
     text: 'text-yellow-400',
     hover: 'hover:text-yellow-400',
+    groupHover: 'group-hover:text-yellow-400',
     stroke: '#facc15',
   },
   {
@@ -21,6 +22,7 @@ export const USER_COLORS = [
     border: 'border-emerald-500/30',
     text: 'text-emerald-400',
     hover: 'hover:text-emerald-400',
+    groupHover: 'group-hover:text-emerald-400',
     stroke: '#34d399',
   },
   {
@@ -28,6 +30,7 @@ export const USER_COLORS = [
     border: 'border-pink-500/30',
     text: 'text-pink-400',
     hover: 'hover:text-pink-400',
+    groupHover: 'group-hover:text-pink-400',
     stroke: '#f472b6',
   },
   {
@@ -35,6 +38,7 @@ export const USER_COLORS = [
     border: 'border-cyan-500/30',
     text: 'text-cyan-400',
     hover: 'hover:text-cyan-400',
+    groupHover: 'group-hover:text-cyan-400',
     stroke: '#22d3ee',
   },
   {
@@ -42,6 +46,7 @@ export const USER_COLORS = [
     border: 'border-orange-500/30',
     text: 'text-orange-400',
     hover: 'hover:text-orange-400',
+    groupHover: 'group-hover:text-orange-400',
     stroke: '#fb923c',
   },
   {
@@ -49,6 +54,7 @@ export const USER_COLORS = [
     border: 'border-purple-500/30',
     text: 'text-purple-400',
     hover: 'hover:text-purple-400',
+    groupHover: 'group-hover:text-purple-400',
     stroke: '#c084fc',
   },
   {
@@ -56,6 +62,7 @@ export const USER_COLORS = [
     border: 'border-red-500/30',
     text: 'text-red-400',
     hover: 'hover:text-red-400',
+    groupHover: 'group-hover:text-red-400',
     stroke: '#f87171',
   },
   {
@@ -63,6 +70,7 @@ export const USER_COLORS = [
     border: 'border-amber-500/30',
     text: 'text-amber-400',
     hover: 'hover:text-amber-400',
+    groupHover: 'group-hover:text-amber-400',
     stroke: '#fbbf24',
   },
   {
@@ -70,6 +78,7 @@ export const USER_COLORS = [
     border: 'border-indigo-500/30',
     text: 'text-indigo-400',
     hover: 'hover:text-indigo-400',
+    groupHover: 'group-hover:text-indigo-400',
     stroke: '#818cf8',
   },
   {
@@ -77,6 +86,7 @@ export const USER_COLORS = [
     border: 'border-teal-500/30',
     text: 'text-teal-400',
     hover: 'hover:text-teal-400',
+    groupHover: 'group-hover:text-teal-400',
     stroke: '#2dd4bf',
   },
   {
@@ -84,6 +94,7 @@ export const USER_COLORS = [
     border: 'border-lime-500/30',
     text: 'text-lime-400',
     hover: 'hover:text-lime-400',
+    groupHover: 'group-hover:text-lime-400',
     stroke: '#a3e635',
   },
   {
@@ -91,6 +102,7 @@ export const USER_COLORS = [
     border: 'border-fuchsia-500/30',
     text: 'text-fuchsia-400',
     hover: 'hover:text-fuchsia-400',
+    groupHover: 'group-hover:text-fuchsia-400',
     stroke: '#e879f9',
   },
 ];

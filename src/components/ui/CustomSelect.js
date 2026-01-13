@@ -44,7 +44,7 @@ export default function CustomSelect({
 
       {isOpen && (
         <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 origin-top">
-          <div className="max-h-60 overflow-y-auto p-1 py-1.5 space-y-0.5">
+          <div className="max-h-60 overflow-y-auto p-1 py-1.5 space-y-0.5 sidebar-scroll">
             {options.map((option) => (
               <button
                 key={option.value}

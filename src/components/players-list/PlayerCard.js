@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { User } from 'lucide-react';
+import { User, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 import { getScoreColor } from '@/lib/utils/format';
 
@@ -79,14 +79,21 @@ export default function PlayerCard({ player }) {
           <div>
             <div className="flex justify-between items-start mb-1">
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded border ${getPositionColor(player.position)}`}
+                className={`text-xs font-bold px-2.5 py-1 rounded border ${getPositionColor(player.position)}`}
               >
                 {player.position}
               </span>
             </div>
 
             <div className="block">
-              <h3 className="font-display font-bold text-lg leading-tight tracking-tight group-hover:text-primary transition-colors line-clamp-2 mb-1 min-h-[1.5rem]">
+              <h3
+                className={`font-display font-bold text-xl leading-tigher tracking-tight transition-colors line-clamp-2 mb-1.5 min-h-[1.75rem] ${
+                  player.owner_id
+                    ? getColorForUser(player.owner_id, player.owner_name, player.owner_color_index)
+                        .groupHover
+                    : 'group-hover:text-primary'
+                }`}
+              >
                 {player.name}
               </h3>
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1">
@@ -101,7 +108,9 @@ export default function PlayerCard({ player }) {
                     />
                   </div>
                 )}
-                <span className="truncate">{player.team_short_name || player.team_name}</span>
+                <span className="truncate text-xs">
+                  {player.team_short_name || player.team_name}
+                </span>
               </div>
             </div>
           </div>
@@ -127,7 +136,7 @@ export default function PlayerCard({ player }) {
                       <User size={9} className="text-primary" />
                     </div>
                   )}
-                  <span className="text-[11px] font-medium truncate text-foreground/90 max-w-[100px]">
+                  <span className="text-xs font-medium text-foreground/90">
                     {player.owner_name}
                   </span>
                 </>
@@ -138,21 +147,34 @@ export default function PlayerCard({ player }) {
 
             {/* Stats Rows */}
             <div className="flex justify-between items-end border-b border-border/50 pb-1">
-              <span className="text-[10px] text-muted-foreground">Puntos</span>
-              <span className="font-bold text-xs text-primary tabular-nums">
+              <span className="text-xs text-muted-foreground">Puntos</span>
+              <span className="font-bold text-base text-primary tabular-nums">
                 {player.total_points || 0}
               </span>
             </div>
             <div className="flex justify-between items-end border-b border-border/50 pb-1">
-              <span className="text-[10px] text-muted-foreground">Valor</span>
-              <span className="font-medium text-xs tabular-nums text-foreground">
-                {formatMoney(player.price)}
+              <span className="text-xs text-muted-foreground">Valor</span>
+              <div className="flex items-center gap-1">
+                {player.price_increment > 0 && <TrendingUp size={12} className="text-green-500" />}
+                {player.price_increment < 0 && <TrendingDown size={12} className="text-red-500" />}
+                {(!player.price_increment || player.price_increment === 0) && (
+                  <Minus size={12} className="text-muted-foreground" />
+                )}
+                <span className="font-medium text-sm tabular-nums text-foreground">
+                  {formatMoney(player.price)}
+                </span>
+              </div>
+            </div>
+            <div className="flex justify-between items-end border-b border-border/50 pb-1">
+              <span className="text-xs text-muted-foreground">Partidos</span>
+              <span className="font-medium text-sm tabular-nums text-foreground">
+                {player.played || 0}
               </span>
             </div>
             <div className="flex justify-between items-end">
-              <span className="text-[10px] text-muted-foreground">Media</span>
+              <span className="text-xs text-muted-foreground">Media</span>
               <div
-                className={`font-bold text-xs tabular-nums ${
+                className={`font-bold text-base tabular-nums ${
                   player.average >= 5
                     ? 'text-green-400'
                     : player.average >= 3
@@ -166,16 +188,16 @@ export default function PlayerCard({ player }) {
 
             {/* Form (Recent Scores) */}
             {player.recent_scores && (
-              <div className="flex flex-col border-t border-border/50 pt-1 mt-1">
-                <span className="text-[10px] text-muted-foreground mb-0.5">Forma</span>
-                <div className="flex gap-1 flex-wrap">
+              <div className="flex justify-between items-center border-t border-border/50 pt-1 mt-1">
+                <span className="text-xs text-muted-foreground">Forma</span>
+                <div className="flex gap-1">
                   {player.recent_scores
                     .split(',')
                     .slice(0, 5)
                     .map((score, i) => (
                       <span
                         key={i}
-                        className={`text-[9px] px-1 py-px rounded border ${getScoreColor(score)}`}
+                        className={`text-[10px] px-1.5 py-0.5 rounded border ${getScoreColor(score)}`}
                       >
                         {score}
                       </span>
