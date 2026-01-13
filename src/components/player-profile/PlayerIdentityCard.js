@@ -145,7 +145,7 @@ export default function PlayerIdentityCard({ player }) {
 
             <StatItem
               label="Nat."
-              value="ES" // Placeholder for nationality code
+              value={player.country || '-'}
               icon={<Globe size={12} className="opacity-50" />}
             />
           </div>
