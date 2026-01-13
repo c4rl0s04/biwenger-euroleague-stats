@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export default async function TeamPage({ params }) {
   const { id } = await params;
   const teamId = parseInt(id, 10);
-  const team = getTeamById(teamId);
+  const team = await getTeamById(teamId);
 
   // Handle case where team is not found
   if (!team) {

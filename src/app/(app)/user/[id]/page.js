@@ -12,7 +12,7 @@ export default async function UserProfilePage({ params }) {
   // User ID is TEXT in DB, we must check it as a string, not number
   const userId = id;
 
-  const stats = getUserSeasonStats(userId);
+  const stats = await getUserSeasonStats(userId);
   const userName = stats?.name || 'Usuario';
 
   return (
