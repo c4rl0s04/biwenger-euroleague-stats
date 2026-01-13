@@ -19,7 +19,7 @@ const SortIcon = ({ column, sortConfig }) => {
   return sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
 };
 
-export default function PlayersList({ players, sortConfig, onSort }) {
+export default function PlayersList({ players, sortConfig, onSort, startIndex = 0 }) {
   // Helper: Format currency
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-ES', {
@@ -93,7 +93,9 @@ export default function PlayersList({ players, sortConfig, onSort }) {
           <tbody className="divide-y divide-border/30">
             {players.map((player, index) => (
               <tr key={player.id} className="group hover:bg-secondary/20 transition-colors">
-                <td className="px-4 py-3 text-muted-foreground text-xs">{index + 1}</td>
+                <td className="px-4 py-3 text-muted-foreground text-xs">
+                  {startIndex + index + 1}
+                </td>
                 <td className="px-4 py-3">
                   <Link href={`/player/${player.id}`} className="flex items-center gap-3">
                     <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary border border-border">

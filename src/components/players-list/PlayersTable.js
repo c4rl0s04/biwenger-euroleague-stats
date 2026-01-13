@@ -382,7 +382,12 @@ export default function PlayersTable({ initialPlayers }) {
           ))}
         </div>
       ) : (
-        <PlayersList players={paginatedPlayers} sortConfig={sortConfig} onSort={handleSort} />
+        <PlayersList
+          players={paginatedPlayers}
+          sortConfig={sortConfig}
+          onSort={handleSort}
+          startIndex={(currentPage - 1) * ITEMS_PER_PAGE}
+        />
       )}
 
       {/* --- EMPTY STATE --- */}
