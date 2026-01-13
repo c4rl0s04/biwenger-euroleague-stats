@@ -26,6 +26,8 @@ services:
       - BIWENGER_TOKEN=${BIWENGER_TOKEN}
       - BIWENGER_LEAGUE_ID=${BIWENGER_LEAGUE_ID}
       - BIWENGER_USER_ID=${BIWENGER_USER_ID}
+      - ACCESS_PASSWORD=${ACCESS_PASSWORD}
+      - AUTH_SECRET=${AUTH_SECRET}
     depends_on:
       - postgres
 
