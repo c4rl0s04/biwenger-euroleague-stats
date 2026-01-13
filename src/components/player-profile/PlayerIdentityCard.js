@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Twitter, Instagram, Globe, User } from 'lucide-react';
+import { User, Globe } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 
 function calculateAge(birthDate) {
@@ -18,34 +18,39 @@ function calculateAge(birthDate) {
 
 export default function PlayerIdentityCard({ player }) {
   const age = calculateAge(player.birth_date);
-  // Placeholder for social links - in a real app these would come from DB
-  const socialLinks = [
-    // { icon: Twitter, href: '#' },
-    // { icon: Instagram, href: '#' }
-  ];
+
+  // Helper to extract color strings cleanly based on your constants utils
+  // Assuming getColorForUser returns strings like { bg: 'bg-blue-500/10', text: 'text-blue-500', ... }
+  const ownerColors = player.owner_id
+    ? getColorForUser(player.owner_id, player.owner_name, player.owner_color_index)
+    : { bg: 'bg-gray-500', border: 'border-gray-500', text: 'text-white' };
+
+  // Determine the halo color class based on the owner text color
+  // It takes 'text-color-500' and converts it to 'bg-color-500/5'
+  const haloColorClass =
+    player.owner_id && ownerColors.text
+      ? `${ownerColors.text.replace('text-', 'bg-')}/5`
+      : 'bg-primary/5'; // Fallback if no owner
 
   return (
-    <div className="relative w-full bg-card border border-border/50 rounded-xl overflow-hidden shadow-sm">
-      {/* Background with Team Colors/Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-secondary/20 pointer-events-none" />
+    <div className="relative w-full bg-card border border-border/40 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 group">
+      {/* 1. Subtle Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-background to-background z-0" />
 
-      {/* Content Container */}
-      <div className="relative flex flex-col md:flex-row h-full">
-        {/* Owner Badge (Absolute Top Right) */}
+      {/* THE HALO EFFECT - Now using dynamic color */}
+      <div
+        className={`absolute -right-20 -top-20 w-64 h-64 rounded-full blur-3xl z-0 ${haloColorClass}`}
+      />
+
+      {/* 2. Main Layout Container */}
+      <div className="relative flex flex-col sm:flex-row h-full z-10">
+        {/* --- OWNER BADGE (Top Right) --- */}
         {player.owner_id && (
           <div
-            className={`absolute top-4 right-4 z-30 flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-lg backdrop-blur-md ${
-              getColorForUser(player.owner_id, player.owner_name, player.owner_color_index)
-                .bg.replace('bg-', 'bg-')
-                .replace('/10', '/90') +
-              ' ' +
-              getColorForUser(player.owner_id, player.owner_name, player.owner_color_index).border +
-              ' ' +
-              getColorForUser(player.owner_id, player.owner_name, player.owner_color_index).text
-            }`}
+            className={`absolute top-3 right-3 z-30 flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border shadow-sm backdrop-blur-md transition-transform hover:scale-105 ${ownerColors.bg.replace('/10', '/80')} ${ownerColors.border} ${ownerColors.text}`}
           >
             {player.owner_icon ? (
-              <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/20">
+              <div className="relative w-5 h-5 rounded-full overflow-hidden border border-white/30">
                 <Image
                   src={player.owner_icon}
                   alt={player.owner_name}
@@ -54,20 +59,21 @@ export default function PlayerIdentityCard({ player }) {
                 />
               </div>
             ) : (
-              <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center border border-white/10">
-                <User size={14} className="text-current" />
+              <div className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center border border-white/20">
+                <User size={12} className="text-current" />
               </div>
             )}
-            <span className="text-sm font-bold opacity-100 mix-blend-hard-light text-white shadow-black drop-shadow-md">
+            <span className="text-xs font-bold drop-shadow-sm tracking-wide">
               {player.owner_name}
             </span>
           </div>
         )}
 
-        {/* Left: Player Image (Cutout Style) */}
-        <div className="w-full md:w-5/12 lg:w-4/12 relative min-h-[250px] md:min-h-[350px] self-end order-1 md:order-1 flex items-end justify-start pl-8">
-          {/* Gradient behind image for depth */}
-          <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-background to-transparent z-0 opacity-50" />
+        {/* --- LEFT: PLAYER IMAGE --- */}
+        {/* Adjusted width to 35% on desktop to prevent empty space issues */}
+        <div className="w-full sm:w-[35%] relative min-h-[220px] sm:min-h-[280px] flex items-end justify-center sm:justify-end overflow-hidden">
+          {/* Mobile-only background gradient for image separation */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent sm:hidden z-10" />
 
           {player.img ? (
             <Image
@@ -75,100 +81,93 @@ export default function PlayerIdentityCard({ player }) {
               alt={player.name}
               fill
               unoptimized={true}
-              className="object-contain object-bottom z-10 drop-shadow-2xl"
-              sizes="(max-width: 768px) 100vw, 500px"
+              className="object-contain object-bottom z-0 transition-transform duration-500 group-hover:scale-105 origin-bottom"
+              sizes="(max-width: 768px) 100vw, 300px"
               priority
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-secondary/30 z-10">
-              <span className="text-6xl">👤</span>
+            <div className="w-full h-full flex items-end justify-center bg-secondary/10 pb-8">
+              <User size={80} className="text-muted-foreground/30" />
             </div>
           )}
         </div>
 
-        {/* Right: Info & Stats */}
-        <div className="w-full md:w-7/12 lg:w-8/12 p-6 md:p-10 flex flex-col justify-center order-2 md:order-2 relative z-20">
-          {/* Top Row: Name & Team Logo */}
-          <div className="flex justify-between items-start mb-8 md:mb-12">
-            <div className="space-y-2">
-              {/* Team Name Small Label */}
-              <div className="flex items-center gap-2 mb-2">
-                {player.team_img && (
-                  <div className="relative w-8 h-8 opacity-90">
-                    <Image
-                      src={player.team_img}
-                      alt={player.team}
-                      fill
-                      className="object-contain"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                <span className="text-xl md:text-2xl font-bold text-muted-foreground/80 tracking-wide uppercase">
-                  {player.team}
-                </span>
-              </div>
+        {/* --- RIGHT: INFO CONTENT --- */}
+        <div className="w-full sm:w-[65%] p-5 flex flex-col justify-center relative">
+          {/* Header Section: Team & Name */}
+          <div className="space-y-1 mb-6">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              {player.team_img && (
+                <div className="relative w-5 h-5 opacity-90 grayscale group-hover:grayscale-0 transition-all">
+                  <Image
+                    src={player.team_img}
+                    alt={player.team}
+                    fill
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+              )}
+              <span className="text-xs font-bold tracking-widest uppercase opacity-70">
+                {player.team}
+              </span>
+            </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-8xl font-black text-foreground tracking-tighter uppercase leading-[0.85]">
+            <div className="flex flex-col items-start gap-2">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-none uppercase">
                 {player.name}
               </h1>
-              <div className="text-2xl md:text-3xl text-primary font-bold pt-2">
-                {/* You might want to parse number if available in name string or DB */}
-                <span>{player.position}</span>
-              </div>
+              {/* Position Badge */}
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider">
+                {player.position || 'N/A'}
+              </span>
             </div>
           </div>
 
           {/* Divider */}
-          <hr className="border-border/60 my-6 w-full opacity-50" />
+          <div className="h-px w-full bg-gradient-to-r from-border to-transparent mb-5" />
 
-          {/* Bio Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {/* Nationality/Team */}
-            <div>
-              <span className="block text-sm uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-                Nacionalidad
-              </span>
-              <div className="text-2xl font-bold text-foreground">
-                {/* Placeholder as we don't have nationality in DB yet usually */}
-                Spain
-              </div>
-            </div>
+          {/* Compact Stats Row */}
+          <div className="grid grid-cols-4 gap-2 md:gap-4 divide-x divide-border/60">
+            <StatItem
+              label="Edad"
+              value={age ? age : '-'}
+              sub={player.birth_date ? new Date(player.birth_date).getFullYear() : ''}
+            />
 
-            {/* Height */}
-            <div>
-              <span className="block text-sm uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-                Altura
-              </span>
-              <div className="text-2xl font-bold text-foreground">
-                {player.height ? `${(player.height / 100).toFixed(2)} m` : '-'}
-              </div>
-            </div>
+            <StatItem
+              label="Altura"
+              value={player.height ? (player.height / 100).toFixed(2) : '-'}
+              unit="m"
+            />
 
-            {/* Age / Born */}
-            <div>
-              <span className="block text-sm uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-                Nacimiento
-              </span>
-              <div className="text-2xl font-bold text-foreground">{age ? `${age} años` : '-'}</div>
-              {player.birth_date && (
-                <span className="text-sm text-muted-foreground">
-                  {new Date(player.birth_date).getFullYear()}
-                </span>
-              )}
-            </div>
+            <StatItem label="Peso" value={player.weight || '-'} unit={player.weight ? 'kg' : ''} />
 
-            {/* Weight */}
-            <div>
-              <span className="block text-sm uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-                Peso
-              </span>
-              <div className="text-2xl font-bold text-foreground">
-                {player.weight ? `${player.weight} kg` : '-'}
-              </div>
-            </div>
+            <StatItem
+              label="Nat."
+              value="ES" // Placeholder for nationality code
+              icon={<Globe size={12} className="opacity-50" />}
+            />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Sub-component for cleaner stats code
+function StatItem({ label, value, unit, sub, icon }) {
+  return (
+    <div className="pl-3 first:pl-0 flex flex-col justify-between h-full">
+      <span className="text-[10px] uppercase font-semibold text-muted-foreground/70 mb-1 flex items-center gap-1">
+        {label} {icon}
+      </span>
+      <div className="flex flex-col leading-none">
+        <span className="text-lg md:text-xl font-bold text-foreground tabular-nums tracking-tight">
+          {value}
+          <span className="text-xs font-medium text-muted-foreground ml-0.5">{unit}</span>
+        </span>
+        {sub && <span className="text-[10px] text-muted-foreground mt-0.5">{sub}</span>}
       </div>
     </div>
   );
