@@ -16,9 +16,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.6",
-    "@ai-sdk/react": "^3.0.23",
-    "ai": "^6.0.23",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

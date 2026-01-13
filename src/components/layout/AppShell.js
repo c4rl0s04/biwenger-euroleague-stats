@@ -56,11 +56,6 @@ export default function AppShell({ children }) {
                         Mercado
                       </Link>
                     </li>
-                    <li>
-                      <Link href="/ai" className="hover:text-indigo-400 transition-colors">
-                        Asistente IA
-                      </Link>
-                    </li>
                   </ul>
                 </div>
 
