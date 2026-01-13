@@ -11,7 +11,6 @@ export { default as PlayerProfileClient } from './PlayerProfileClient';
 
 // Identity & Bio
 export { default as PlayerIdentityCard } from './PlayerIdentityCard';
-export { default as PlayerBioCard } from './PlayerBioCard';
 
 // Stats
 export { default as PlayerStatsCard } from './PlayerStatsCard';

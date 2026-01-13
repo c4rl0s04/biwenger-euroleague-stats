@@ -8,7 +8,6 @@ import {
   PlayerMarketCard,
   PlayerStatsCard,
   PlayerHistoryCard,
-  PlayerBioCard,
   PlayerNextMatchCard,
   PlayerPriceHistoryCard,
   PlayerAdvancedStatsCard,
@@ -34,33 +33,31 @@ export default function PlayerProfileClient({ player }) {
         </div>
       </FadeIn>
 
-      {/* Row 1: Identity (2), Bio (1), Next Match (1) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="md:col-span-2">
-          <FadeIn delay={100} className="h-full">
-            <PlayerIdentityCard player={player} />
-          </FadeIn>
+      {/* Row 1: Hero Card (Identity merged with Bio) */}
+      <FadeIn delay={100}>
+        <div className="w-full">
+          <PlayerIdentityCard player={player} />
         </div>
-        <div className="md:col-span-1">
-          <FadeIn delay={150} className="h-full">
-            <PlayerBioCard player={player} />
-          </FadeIn>
-        </div>
-        <div className="md:col-span-1">
-          <FadeIn delay={200} className="h-full">
-            <PlayerNextMatchCard nextMatch={player.nextMatch} playerTeam={player.team} />
-          </FadeIn>
-        </div>
+      </FadeIn>
+
+      {/* Row 2: Next Match, Market, Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <FadeIn delay={150} className="h-full">
+          <PlayerNextMatchCard nextMatch={player.nextMatch} playerTeam={player.team} />
+        </FadeIn>
+
+        <FadeIn delay={200} className="h-full">
+          <PlayerMarketCard player={player} />
+        </FadeIn>
+
+        <FadeIn delay={250} className="h-full">
+          <PlayerStatsCard player={player} />
+        </FadeIn>
       </div>
 
       {/* Row 2: Market & Price Graph */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <FadeIn delay={250} className="h-full">
-            <PlayerMarketCard player={player} />
-          </FadeIn>
-        </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <FadeIn delay={300} className="h-full">
             <PlayerPriceHistoryCard priceHistory={player.priceHistory} />
           </FadeIn>
@@ -69,12 +66,7 @@ export default function PlayerProfileClient({ player }) {
 
       {/* Row 3: Performance & Advanced Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <FadeIn delay={350} className="h-full">
-            <PlayerStatsCard player={player} />
-          </FadeIn>
-        </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <FadeIn delay={400} className="h-full">
             <PlayerAdvancedStatsCard advancedStats={player.advancedStats} />
           </FadeIn>
