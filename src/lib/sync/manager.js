@@ -1,6 +1,7 @@
 import { db } from '../db/client.js';
 import { CONFIG } from '../config.js';
 import { ensureSchema } from '../db/schema.js';
+import { clearCache } from '../utils/cache.js';
 
 export class SyncManager {
   constructor(dbPath) {
@@ -79,6 +80,11 @@ export class SyncManager {
     } catch (err) {
       this.error('❌ Sync Critical Failure:', err);
     } finally {
+      // Clear in-memory cache after sync to invalidate stale data
+      if (!this.hasErrors) {
+        clearCache();
+      }
+      
       if (this.context.db && typeof this.context.db.end === 'function') {
         this.log('\n🔒 Closing Database connection...');
         await this.context.db.end();

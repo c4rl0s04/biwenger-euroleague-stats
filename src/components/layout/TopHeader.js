@@ -32,12 +32,10 @@ export default function TopHeader({ onMobileMenuClick }) {
           <Link href="/" className="flex items-center gap-3 group">
             {/* Logo icon */}
             <div className="relative w-20 h-20">
-              <Image
+              <img
                 src="/brand-logo.png"
                 alt="Biwenger Stats Logo"
-                fill
-                className="object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"
-                priority
+                className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"
               />
             </div>
             <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">

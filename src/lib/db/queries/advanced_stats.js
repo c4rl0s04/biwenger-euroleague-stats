@@ -4,6 +4,7 @@
  */
 
 import { db } from '../client';
+import { cached, CACHE_TTL } from '../../utils/cache';
 
 /**
  * Get Heat Check Stats
@@ -378,8 +379,10 @@ export async function getPointDistributionStats() {
 
 /**
  * Get All-Play-All Record (Virtual League)
+ * CACHED: This is an O(n * m²) operation, cache for 15 minutes
  */
 export async function getAllPlayAllStats() {
+  return cached('advanced:all-play-all', CACHE_TTL.LONG, async () => {
   try {
     // Get all rounds
     const rounds = (
@@ -440,6 +443,7 @@ export async function getAllPlayAllStats() {
     console.error('Error in getAllPlayAllStats:', error);
     return [];
   }
+  });
 }
 
 /**
@@ -539,8 +543,10 @@ export async function getTheoreticalGapStats() {
 
 /**
  * Get Round-by-Round Heatmap Stats
+ * CACHED: Aggregates all scores, cache for 15 minutes
  */
 export async function getHeatmapStats() {
+  return cached('advanced:heatmap', CACHE_TTL.LONG, async () => {
   try {
     // Get all rounds to ensure column structure
     const rounds = (
@@ -584,13 +590,16 @@ export async function getHeatmapStats() {
     console.error('Error in getHeatmapStats:', error);
     return { rounds: [], users: [] };
   }
+  });
 }
 
 /**
  * Get Position Changes Stats (Evolution Heatmap)
  * Tracks rank changes round-by-round
+ * CACHED: Replays entire season history, cache for 15 minutes
  */
 export async function getPositionChangesStats() {
+  return cached('advanced:position-changes', CACHE_TTL.LONG, async () => {
   try {
     const rounds = (
       await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
@@ -689,13 +698,16 @@ export async function getPositionChangesStats() {
     console.error('Error in getPositionChangesStats:', error);
     return { rounds: [], users: [], valid: false };
   }
+  });
 }
 
 /**
  * Get Rivalry Matrix Stats
  * Head-to-Head record for every user pair
+ * CACHED: O(n * m²) operation, cache for 15 minutes
  */
 export async function getRivalryMatrixStats() {
+  return cached('advanced:rivalry-matrix', CACHE_TTL.LONG, async () => {
   try {
     const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
     const rounds = (
@@ -758,6 +770,7 @@ export async function getRivalryMatrixStats() {
     console.error('Error in getRivalryMatrixStats:', error);
     return { users: [], matrix: {} };
   }
+  });
 }
 
 /**
