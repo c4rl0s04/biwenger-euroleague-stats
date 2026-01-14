@@ -385,60 +385,60 @@ export async function getAllPlayAllStats() {
   return cached('advanced:all-play-all', CACHE_TTL.LONG, async () => {
     try {
       // Get all rounds
-    const rounds = (
-      await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
-    ).rows;
-    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
-
-    const standings = {};
-    users.forEach((u) => {
-      standings[u.id] = {
-        user_id: u.id,
-        name: u.name,
-        icon: u.icon,
-        color_index: u.color_index,
-        wins: 0,
-        losses: 0,
-        ties: 0,
-      };
-    });
-
-    for (const round of rounds) {
-      const roundScores = (
-        await db.query('SELECT user_id, points FROM user_rounds WHERE round_id = $1', [
-          round.round_id,
-        ])
+      const rounds = (
+        await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
       ).rows;
+      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
 
-      // Compare everyone against everyone
-      for (let i = 0; i < roundScores.length; i++) {
-        for (let j = i + 1; j < roundScores.length; j++) {
-          const u1 = roundScores[i];
-          const u2 = roundScores[j];
+      const standings = {};
+      users.forEach((u) => {
+        standings[u.id] = {
+          user_id: u.id,
+          name: u.name,
+          icon: u.icon,
+          color_index: u.color_index,
+          wins: 0,
+          losses: 0,
+          ties: 0,
+        };
+      });
 
-          // Safety check: ensure both users exist in our reference list
-          if (!standings[u1.user_id] || !standings[u2.user_id]) continue;
+      for (const round of rounds) {
+        const roundScores = (
+          await db.query('SELECT user_id, points FROM user_rounds WHERE round_id = $1', [
+            round.round_id,
+          ])
+        ).rows;
 
-          if (u1.points > u2.points) {
-            standings[u1.user_id].wins++;
-            standings[u2.user_id].losses++;
-          } else if (u2.points > u1.points) {
-            standings[u2.user_id].wins++;
-            standings[u1.user_id].losses++;
-          } else {
-            standings[u1.user_id].ties++;
-            standings[u2.user_id].ties++;
+        // Compare everyone against everyone
+        for (let i = 0; i < roundScores.length; i++) {
+          for (let j = i + 1; j < roundScores.length; j++) {
+            const u1 = roundScores[i];
+            const u2 = roundScores[j];
+
+            // Safety check: ensure both users exist in our reference list
+            if (!standings[u1.user_id] || !standings[u2.user_id]) continue;
+
+            if (u1.points > u2.points) {
+              standings[u1.user_id].wins++;
+              standings[u2.user_id].losses++;
+            } else if (u2.points > u1.points) {
+              standings[u2.user_id].wins++;
+              standings[u1.user_id].losses++;
+            } else {
+              standings[u1.user_id].ties++;
+              standings[u2.user_id].ties++;
+            }
           }
         }
       }
-    }
 
-    return Object.values(standings)
-      .map((s) => ({
-        ...s,
-        pct: (s.wins / (s.wins + s.losses + s.ties)) * 100,
-      }))
-      .sort((a, b) => b.pct - a.pct);
+      return Object.values(standings)
+        .map((s) => ({
+          ...s,
+          pct: (s.wins / (s.wins + s.losses + s.ties)) * 100,
+        }))
+        .sort((a, b) => b.pct - a.pct);
     } catch (error) {
       console.error('Error in getAllPlayAllStats:', error);
       return [];
@@ -549,43 +549,45 @@ export async function getHeatmapStats() {
   return cached('advanced:heatmap', CACHE_TTL.LONG, async () => {
     try {
       // Get all rounds to ensure column structure
-    const rounds = (
-      await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
-    ).rows;
+      const rounds = (
+        await db.query(
+          'SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC'
+        )
+      ).rows;
 
-    // Get all users
-    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+      // Get all users
+      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
 
-    // Get all scores
-    const scores = (
-      await db.query(`
+      // Get all scores
+      const scores = (
+        await db.query(`
       SELECT user_id, round_id, points 
       FROM user_rounds 
       WHERE participated = TRUE
     `)
-    ).rows;
+      ).rows;
 
-    // Map scores for O(1) access: scoreMap[userId][roundId] = points
-    const scoreMap = {};
-    scores.forEach((s) => {
-      if (!scoreMap[s.user_id]) scoreMap[s.user_id] = {};
-      scoreMap[s.user_id][s.round_id] = s.points;
-    });
+      // Map scores for O(1) access: scoreMap[userId][roundId] = points
+      const scoreMap = {};
+      scores.forEach((s) => {
+        if (!scoreMap[s.user_id]) scoreMap[s.user_id] = {};
+        scoreMap[s.user_id][s.round_id] = s.points;
+      });
 
-    // Build grid
-    return {
-      rounds: rounds.map((r) => ({
-        id: r.round_id,
-        name: r.round_name.replace('Jornada ', 'J'),
-      })),
-      users: users.map((u) => ({
-        id: u.id,
-        name: u.name,
-        icon: u.icon,
-        color_index: u.color_index,
-        scores: rounds.map((r) => scoreMap[u.id]?.[r.round_id] ?? null),
-      })),
-    };
+      // Build grid
+      return {
+        rounds: rounds.map((r) => ({
+          id: r.round_id,
+          name: r.round_name.replace('Jornada ', 'J'),
+        })),
+        users: users.map((u) => ({
+          id: u.id,
+          name: u.name,
+          icon: u.icon,
+          color_index: u.color_index,
+          scores: rounds.map((r) => scoreMap[u.id]?.[r.round_id] ?? null),
+        })),
+      };
     } catch (error) {
       console.error('Error in getHeatmapStats:', error);
       return { rounds: [], users: [] };
@@ -600,100 +602,102 @@ export async function getHeatmapStats() {
  */
 export async function getPositionChangesStats() {
   return cached('advanced:position-changes', CACHE_TTL.LONG, async () => {
-  try {
-    const rounds = (
-      await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
-    ).rows;
-    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
-    // Get all scores ordered by round
-    const scores = (
-      await db.query(
-        'SELECT user_id, round_id, points FROM user_rounds WHERE participated = TRUE ORDER BY round_id ASC'
-      )
-    ).rows;
+    try {
+      const rounds = (
+        await db.query(
+          'SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC'
+        )
+      ).rows;
+      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+      // Get all scores ordered by round
+      const scores = (
+        await db.query(
+          'SELECT user_id, round_id, points FROM user_rounds WHERE participated = TRUE ORDER BY round_id ASC'
+        )
+      ).rows;
 
-    // Map scores by round: roundScores[roundId][userId] = points
-    const roundScores = {};
-    scores.forEach((s) => {
-      if (!roundScores[s.round_id]) roundScores[s.round_id] = {};
-      roundScores[s.round_id][s.user_id] = s.points;
-    });
-
-    // Tracking state
-    const userTotals = {}; // { userId: currentTotal }
-    users.forEach((u) => (userTotals[u.id] = 0));
-
-    const history = []; // [{ round_id, ranks: { userId: rank } }]
-
-    // Replay history
-    for (const round of rounds) {
-      // update totals
-      const currentRoundScores = roundScores[round.round_id] || {};
-      users.forEach((u) => {
-        userTotals[u.id] += currentRoundScores[u.id] || 0;
+      // Map scores by round: roundScores[roundId][userId] = points
+      const roundScores = {};
+      scores.forEach((s) => {
+        if (!roundScores[s.round_id]) roundScores[s.round_id] = {};
+        roundScores[s.round_id][s.user_id] = s.points;
       });
 
-      // calculate ranks for this round
-      // sort users by total points desc
-      const sortedUsers = [...users].sort((a, b) => userTotals[b.id] - userTotals[a.id]);
+      // Tracking state
+      const userTotals = {}; // { userId: currentTotal }
+      users.forEach((u) => (userTotals[u.id] = 0));
 
-      const currentRanks = {};
-      sortedUsers.forEach((u, index) => {
-        currentRanks[u.id] = index + 1;
-      });
+      const history = []; // [{ round_id, ranks: { userId: rank } }]
 
-      history.push({
-        round_id: round.round_id,
-        round_name: round.round_name,
-        ranks: currentRanks,
-      });
-    }
+      // Replay history
+      for (const round of rounds) {
+        // update totals
+        const currentRoundScores = roundScores[round.round_id] || {};
+        users.forEach((u) => {
+          userTotals[u.id] += currentRoundScores[u.id] || 0;
+        });
 
-    // specific stats
-    let biggestClimber = { name: '', change: 0, round: '' };
-    let biggestFaller = { name: '', change: 0, round: '' };
+        // calculate ranks for this round
+        // sort users by total points desc
+        const sortedUsers = [...users].sort((a, b) => userTotals[b.id] - userTotals[a.id]);
 
-    // Format output: evolutions per user
-    const usersEvolution = users.map((user) => {
-      const historyData = history.map((h, index) => {
-        const currRank = h.ranks[user.id];
+        const currentRanks = {};
+        sortedUsers.forEach((u, index) => {
+          currentRanks[u.id] = index + 1;
+        });
 
-        if (index === 0) {
-          return { position: currRank, change: 0 };
-        }
+        history.push({
+          round_id: round.round_id,
+          round_name: round.round_name,
+          ranks: currentRanks,
+        });
+      }
 
-        const prevRank = history[index - 1].ranks[user.id];
+      // specific stats
+      let biggestClimber = { name: '', change: 0, round: '' };
+      let biggestFaller = { name: '', change: 0, round: '' };
 
-        // If rank decreases (e.g. 5 -> 3), it's a climb (positive change)
-        const change = prevRank - currRank;
+      // Format output: evolutions per user
+      const usersEvolution = users.map((user) => {
+        const historyData = history.map((h, index) => {
+          const currRank = h.ranks[user.id];
 
-        // Update records (only if there is a change)
-        if (change > biggestClimber.change)
-          biggestClimber = { name: user.name, change, round: h.round_name };
-        if (change < biggestFaller.change)
-          biggestFaller = { name: user.name, change, round: h.round_name };
+          if (index === 0) {
+            return { position: currRank, change: 0 };
+          }
 
-        return { position: currRank, change };
+          const prevRank = history[index - 1].ranks[user.id];
+
+          // If rank decreases (e.g. 5 -> 3), it's a climb (positive change)
+          const change = prevRank - currRank;
+
+          // Update records (only if there is a change)
+          if (change > biggestClimber.change)
+            biggestClimber = { name: user.name, change, round: h.round_name };
+          if (change < biggestFaller.change)
+            biggestFaller = { name: user.name, change, round: h.round_name };
+
+          return { position: currRank, change };
+        });
+
+        return {
+          id: user.id,
+          name: user.name,
+          icon: user.icon,
+          color_index: user.color_index,
+          history: historyData, // Renamed from 'changes' to 'history' to reflect richer data
+        };
       });
 
       return {
-        id: user.id,
-        name: user.name,
-        icon: user.icon,
-        color_index: user.color_index,
-        history: historyData, // Renamed from 'changes' to 'history' to reflect richer data
+        rounds: rounds.map((r) => ({
+          id: r.round_id,
+          name: r.round_name.replace('Jornada ', 'J'),
+        })),
+        users: usersEvolution,
+        valid: rounds.length > 1,
+        stats: { biggestClimber, biggestFaller },
       };
-    });
-
-    return {
-      rounds: rounds.map((r) => ({
-        id: r.round_id,
-        name: r.round_name.replace('Jornada ', 'J'),
-      })),
-      users: usersEvolution,
-      valid: rounds.length > 1,
-      stats: { biggestClimber, biggestFaller },
-    };
     } catch (error) {
       console.error('Error in getPositionChangesStats:', error);
       return { rounds: [], users: [], valid: false };
@@ -710,62 +714,62 @@ export async function getRivalryMatrixStats() {
   return cached('advanced:rivalry-matrix', CACHE_TTL.LONG, async () => {
     try {
       const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
-    const rounds = (
-      await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
-    ).rows;
-
-    // Initialize matrix
-    // Structure: { [userId]: { [opponentId]: { wins: 0, losses: 0, ties: 0 } } }
-    const matrix = {};
-    users.forEach((u) => {
-      matrix[u.id] = {};
-      users.forEach((opp) => {
-        if (u.id !== opp.id) {
-          matrix[u.id][opp.id] = { wins: 0, losses: 0, ties: 0 };
-        }
-      });
-    });
-
-    for (const round of rounds) {
-      const roundScores = (
-        await db.query(
-          'SELECT user_id, points FROM user_rounds WHERE round_id = $1 AND participated = TRUE',
-          [round.round_id]
-        )
+      const rounds = (
+        await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
       ).rows;
 
-      // Compare everyone against everyone
-      for (let i = 0; i < roundScores.length; i++) {
-        for (let j = i + 1; j < roundScores.length; j++) {
-          const u1 = roundScores[i];
-          const u2 = roundScores[j];
+      // Initialize matrix
+      // Structure: { [userId]: { [opponentId]: { wins: 0, losses: 0, ties: 0 } } }
+      const matrix = {};
+      users.forEach((u) => {
+        matrix[u.id] = {};
+        users.forEach((opp) => {
+          if (u.id !== opp.id) {
+            matrix[u.id][opp.id] = { wins: 0, losses: 0, ties: 0 };
+          }
+        });
+      });
 
-          // Ensure both users exist in our matrix (safety check)
-          if (!matrix[u1.user_id] || !matrix[u2.user_id]) continue;
+      for (const round of rounds) {
+        const roundScores = (
+          await db.query(
+            'SELECT user_id, points FROM user_rounds WHERE round_id = $1 AND participated = TRUE',
+            [round.round_id]
+          )
+        ).rows;
 
-          if (u1.points > u2.points) {
-            matrix[u1.user_id][u2.user_id].wins++;
-            matrix[u2.user_id][u1.user_id].losses++;
-          } else if (u2.points > u1.points) {
-            matrix[u2.user_id][u1.user_id].wins++;
-            matrix[u1.user_id][u2.user_id].losses++;
-          } else {
-            matrix[u1.user_id][u2.user_id].ties++;
-            matrix[u2.user_id][u1.user_id].ties++;
+        // Compare everyone against everyone
+        for (let i = 0; i < roundScores.length; i++) {
+          for (let j = i + 1; j < roundScores.length; j++) {
+            const u1 = roundScores[i];
+            const u2 = roundScores[j];
+
+            // Ensure both users exist in our matrix (safety check)
+            if (!matrix[u1.user_id] || !matrix[u2.user_id]) continue;
+
+            if (u1.points > u2.points) {
+              matrix[u1.user_id][u2.user_id].wins++;
+              matrix[u2.user_id][u1.user_id].losses++;
+            } else if (u2.points > u1.points) {
+              matrix[u2.user_id][u1.user_id].wins++;
+              matrix[u1.user_id][u2.user_id].losses++;
+            } else {
+              matrix[u1.user_id][u2.user_id].ties++;
+              matrix[u2.user_id][u1.user_id].ties++;
+            }
           }
         }
       }
-    }
 
-    return {
-      users: users.map((u) => ({
-        id: u.id,
-        name: u.name,
-        icon: u.icon,
-        color_index: u.color_index,
-      })),
-      matrix,
-    };
+      return {
+        users: users.map((u) => ({
+          id: u.id,
+          name: u.name,
+          icon: u.icon,
+          color_index: u.color_index,
+        })),
+        matrix,
+      };
     } catch (error) {
       console.error('Error in getRivalryMatrixStats:', error);
       return { users: [], matrix: {} };
