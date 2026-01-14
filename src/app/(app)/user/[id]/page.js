@@ -1,5 +1,7 @@
 import { getUserSeasonStats } from '@/lib/db';
 
+import { BackButton } from '@/components/ui';
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -19,6 +21,9 @@ export default async function UserProfilePage({ params }) {
     <div className="min-h-screen bg-background pb-20">
       <main className="container mx-auto px-4 py-12 relative z-10">
         <div className="max-w-6xl mx-auto">
+          <div className="mb-6">
+            <BackButton />
+          </div>
           <h1 className="text-4xl md:text-5xl font-display mb-4 flex items-center gap-4">
             <span className="w-1.5 h-10 bg-primary rounded-full"></span>
             <span className="text-foreground">{`Perfil de ${userName}`}</span>

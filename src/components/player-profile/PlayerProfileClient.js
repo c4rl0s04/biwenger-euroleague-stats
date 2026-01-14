@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { FadeIn } from '@/components/ui';
+import { FadeIn, BackButton } from '@/components/ui';
 import {
   PlayerIdentityCard,
   PlayerMarketCard,
@@ -23,13 +23,8 @@ export default function PlayerProfileClient({ player }) {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header / Back Link */}
       <FadeIn delay={0}>
-        <div>
-          <Link
-            href="/dashboard"
-            className="text-slate-400 hover:text-white flex items-center gap-2 mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" /> Volver al dashboard
-          </Link>
+        <div className="mb-4">
+          <BackButton />
         </div>
       </FadeIn>
 

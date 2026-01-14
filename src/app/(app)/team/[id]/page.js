@@ -1,6 +1,6 @@
 import { getTeamById } from '@/lib/db';
 import { Construction } from 'lucide-react';
-import Link from 'next/link';
+import { BackButton } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,9 +17,7 @@ export default async function TeamPage({ params }) {
         <p className="text-muted-foreground mb-6">
           No hemos podido encontrar el equipo que buscas.
         </p>
-        <Link href="/dashboard" className="text-primary hover:underline">
-          Volver al Dashboard
-        </Link>
+        <BackButton label="Volver atrás" className="text-primary hover:underline" />
       </div>
     );
   }
@@ -66,12 +64,13 @@ export default async function TeamPage({ params }) {
         </div>
 
         {/* Actions */}
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/20"
-        >
-          Volver al Dashboard
-        </Link>
+        <div className="flex justify-center">
+          <BackButton
+            className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 hover:text-primary-foreground"
+            label="Volver al Dashboard"
+            iconSize={20}
+          />
+        </div>
       </div>
     </div>
   );

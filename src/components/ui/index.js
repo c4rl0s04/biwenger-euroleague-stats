@@ -29,3 +29,4 @@ export { default as UserAvatar } from './UserAvatar';
 
 // Theme
 export { default as ThemeBackground } from './ThemeBackground';
+export { default as BackButton } from './BackButton';
