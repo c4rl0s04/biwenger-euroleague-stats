@@ -84,7 +84,7 @@ export class SyncManager {
       if (!this.hasErrors) {
         clearCache();
       }
-      
+
       if (this.context.db && typeof this.context.db.end === 'function') {
         this.log('\n🔒 Closing Database connection...');
         await this.context.db.end();

@@ -383,8 +383,8 @@ export async function getPointDistributionStats() {
  */
 export async function getAllPlayAllStats() {
   return cached('advanced:all-play-all', CACHE_TTL.LONG, async () => {
-  try {
-    // Get all rounds
+    try {
+      // Get all rounds
     const rounds = (
       await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
     ).rows;
@@ -439,10 +439,10 @@ export async function getAllPlayAllStats() {
         pct: (s.wins / (s.wins + s.losses + s.ties)) * 100,
       }))
       .sort((a, b) => b.pct - a.pct);
-  } catch (error) {
-    console.error('Error in getAllPlayAllStats:', error);
-    return [];
-  }
+    } catch (error) {
+      console.error('Error in getAllPlayAllStats:', error);
+      return [];
+    }
   });
 }
 
@@ -547,8 +547,8 @@ export async function getTheoreticalGapStats() {
  */
 export async function getHeatmapStats() {
   return cached('advanced:heatmap', CACHE_TTL.LONG, async () => {
-  try {
-    // Get all rounds to ensure column structure
+    try {
+      // Get all rounds to ensure column structure
     const rounds = (
       await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
     ).rows;
@@ -586,10 +586,10 @@ export async function getHeatmapStats() {
         scores: rounds.map((r) => scoreMap[u.id]?.[r.round_id] ?? null),
       })),
     };
-  } catch (error) {
-    console.error('Error in getHeatmapStats:', error);
-    return { rounds: [], users: [] };
-  }
+    } catch (error) {
+      console.error('Error in getHeatmapStats:', error);
+      return { rounds: [], users: [] };
+    }
   });
 }
 
@@ -694,10 +694,10 @@ export async function getPositionChangesStats() {
       valid: rounds.length > 1,
       stats: { biggestClimber, biggestFaller },
     };
-  } catch (error) {
-    console.error('Error in getPositionChangesStats:', error);
-    return { rounds: [], users: [], valid: false };
-  }
+    } catch (error) {
+      console.error('Error in getPositionChangesStats:', error);
+      return { rounds: [], users: [], valid: false };
+    }
   });
 }
 
@@ -708,8 +708,8 @@ export async function getPositionChangesStats() {
  */
 export async function getRivalryMatrixStats() {
   return cached('advanced:rivalry-matrix', CACHE_TTL.LONG, async () => {
-  try {
-    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+    try {
+      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
     const rounds = (
       await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
     ).rows;
@@ -766,10 +766,10 @@ export async function getRivalryMatrixStats() {
       })),
       matrix,
     };
-  } catch (error) {
-    console.error('Error in getRivalryMatrixStats:', error);
-    return { users: [], matrix: {} };
-  }
+    } catch (error) {
+      console.error('Error in getRivalryMatrixStats:', error);
+      return { users: [], matrix: {} };
+    }
   });
 }
 
