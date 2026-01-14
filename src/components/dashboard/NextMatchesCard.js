@@ -86,17 +86,25 @@ function DayMatchRow({ dayName, matches, roundName }) {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                 {/* Top: Time */}
-                <div className="bg-muted/30 py-3 text-center border-b border-white/5 group-hover:bg-blue-500/5 transition-colors">
-                  <span className="text-2xl font-bold text-foreground font-mono tracking-tight block">
-                    {time}
-                  </span>
-                  {/* Optional: Show score if match is live/finished instead of time, or below? 
-                        For "Next Matches", usually no score, but let's handle it if it exists 
-                    */}
-                  {match.home_score !== null && (
-                    <div className="text-xs font-bold text-blue-400 mt-1">
-                      {match.home_score} - {match.away_score}
+                {/* Top: Time OR Score */}
+                <div className="bg-muted/30 py-3 text-center border-b border-white/5 group-hover:bg-blue-500/5 transition-colors relative">
+                  {match.home_score !== null && match.status !== 'scheduled' ? (
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      <span className="text-3xl font-bold text-foreground font-mono tracking-tight leading-none group-hover:scale-110 transition-transform duration-300">
+                        {match.home_score} - {match.away_score}
+                      </span>
+                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                        {match.status === 'finished' ? 'Finalizado' : 'En Juego'}
+                      </span>
+                      {/* Floating Time for reference */}
+                      <div className="absolute top-2 right-2 text-[10px] text-muted-foreground/50 font-mono">
+                        {time}
+                      </div>
                     </div>
+                  ) : (
+                    <span className="text-2xl font-bold text-foreground font-mono tracking-tight block">
+                      {time}
+                    </span>
                   )}
                 </div>
 

@@ -54,14 +54,20 @@ export async function getAllPorrasRounds() {
 export async function getNextRound() {
   // Find the round of the upcoming match, then get its full details (true start date)
   const query = `
-    ${NEXT_ROUND_CTE}
+    WITH TargetRound AS (
+      SELECT round_id 
+      FROM matches 
+      WHERE date > NOW() - INTERVAL '12 hours'
+      ORDER BY date ASC 
+      LIMIT 1
+    )
     SELECT 
       m.round_id,
       m.round_name,
       MIN(m.date) as start_date,
       MAX(m.date) as end_date
     FROM matches m
-    JOIN NextRoundStart nr ON m.round_id = nr.round_id
+    JOIN TargetRound tr ON m.round_id = tr.round_id
     GROUP BY m.round_id, m.round_name
   `;
   const roundRes = await db.query(query);
