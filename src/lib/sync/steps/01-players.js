@@ -55,6 +55,24 @@ export async function run(manager) {
   manager.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
 
+  // --- 0. PREPARE ROUND MAPPING (Fix Duplicate Rounds) ---
+  const rounds = competition.data.rounds || competition.data.season?.rounds || [];
+  if (rounds.length > 0) {
+    manager.log('   🔄 Building Canonical Round Map...');
+    for (const r of rounds) {
+      const baseName = manager.normalizeRoundName(r.name);
+
+      // If baseName not in map OR we found a lower ID, update map
+      // We want the LOWEST ID to be the canonical one
+      if (!manager.roundNameMap.has(baseName) || r.id < manager.roundNameMap.get(baseName)) {
+        manager.roundNameMap.set(baseName, r.id);
+      }
+    }
+    manager.log(
+      `      Found ${manager.roundNameMap.size} unique rounds from ${rounds.length} total.`
+    );
+  }
+
   const playersList = competition.data.data
     ? competition.data.data.players
     : competition.data.players;

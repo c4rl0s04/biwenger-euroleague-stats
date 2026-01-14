@@ -37,7 +37,7 @@ export async function run(manager) {
     // OPTIMIZATION: In Daily Mode, skip rounds that finished long ago
     // Since the `round` object from Step 1 lacks dates, we query our own DB.
     if (manager.context.isDaily) {
-      const roundId = round.dbId || round.id;
+      const roundId = manager.resolveRoundId(round);
 
       // Check local DB for this round's matches
       try {

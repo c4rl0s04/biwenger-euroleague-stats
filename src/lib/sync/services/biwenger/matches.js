@@ -14,7 +14,7 @@ import { CONFIG } from '../../../config.js';
 export async function run(manager, round, playersList = {}) {
   const db = manager.context.db;
   const roundId = round.id;
-  const dbRoundId = round.dbId || round.id;
+  const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id;
   const roundName = round.name;
 
   manager.log(`   🌍 Syncing Matches for Round ${roundName} (using Biwenger API)...`);

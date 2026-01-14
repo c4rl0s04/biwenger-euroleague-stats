@@ -33,7 +33,7 @@ export async function run(manager) {
 
     // OPTIMIZATION: Daily Mode
     if (manager.context.isDaily) {
-      const roundId = round.dbId || round.id;
+      const roundId = manager.resolveRoundId(round);
       try {
         const res = await manager.context.db.query(
           `SELECT 

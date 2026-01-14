@@ -59,7 +59,7 @@ export async function run(manager) {
 
     // OPTIMIZATION: Daily Mode
     if (manager.context.isDaily) {
-      const roundId = round.dbId || round.id;
+      const roundId = manager.resolveRoundId(round);
       try {
         const res = await manager.context.db.query(
           `SELECT 
@@ -96,7 +96,8 @@ export async function run(manager) {
     // 1. Sync Euroleague Boxscores (Robust Schedule-Based Sync)
 
     // Fetch Matches for this round from DB
-    const dbMatches = await mutations.getMatchesByRound(round.dbId || round.id);
+    const roundId = manager.resolveRoundId(round);
+    const dbMatches = await mutations.getMatchesByRound(roundId);
 
     if (dbMatches.length === 0) {
       manager.log(`   ⚠️ No matches found in DB for ${baseName}. Run Step 3 first?`);
@@ -116,7 +117,7 @@ export async function run(manager) {
       const gameCode = gameCodeMap.get(gameKey);
 
       if (gameCode) {
-        await syncEuroleagueStats.runGame(manager, gameCode, round.dbId || round.id, round.name);
+        await syncEuroleagueStats.runGame(manager, gameCode, roundId, round.name);
         syncedGames++;
       }
     }

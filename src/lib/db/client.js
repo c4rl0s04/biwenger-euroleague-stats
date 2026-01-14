@@ -33,11 +33,11 @@ if (skipDb) {
         ssl: isRemote ? { rejectUnauthorized: false } : false,
       }
     : {
-        user: process.env.POSTGRES_USER || 'user',
-        password: process.env.POSTGRES_PASSWORD || 'password',
-        host: process.env.POSTGRES_HOST || 'localhost',
-        port: parseInt(process.env.POSTGRES_PORT || '5432'),
-        database: process.env.POSTGRES_DB || 'biwenger',
+        user: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASSWORD,
+        host: process.env.POSTGRES_HOST,
+        port: parseInt(process.env.POSTGRES_PORT),
+        database: process.env.POSTGRES_DB,
         ssl: isRemote ? { rejectUnauthorized: false } : false,
       };
 

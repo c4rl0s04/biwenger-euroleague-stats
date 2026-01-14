@@ -15,7 +15,7 @@ export async function run(manager, round, playersListInput) {
   const playersList = playersListInput || manager.context.playersList || {};
 
   const roundId = round.id;
-  const dbRoundId = round.dbId || round.id; // Use mapped ID for DB if present
+  const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id; // Use mapped ID for DB if present
   const roundName = round.name;
   const status = round.status;
   let insertedCount = 0;

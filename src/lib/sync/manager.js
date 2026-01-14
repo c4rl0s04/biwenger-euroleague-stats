@@ -16,6 +16,34 @@ export class SyncManager {
     };
     this.logs = [];
     this.hasErrors = false;
+    this.roundNameMap = new Map(); // Store canonical round mapping (normalized name -> id)
+  }
+
+  /**
+   * Helper to normalize round names (remove "aplazada")
+   */
+  normalizeRoundName(name) {
+    if (!name) return '';
+    return name.replace(/\s*\(aplazada\)\s*/i, '').trim();
+  }
+
+  /**
+   * Resolves the canonical round ID for a given round.
+   * If a round has a duplicate with a lower ID (the original round), returns that ID.
+   * @param {Object} round - The round object (id, name)
+   * @returns {number} The canonical round ID
+   */
+  resolveRoundId(round) {
+    const baseName = this.normalizeRoundName(round.name);
+
+    // If we have a canonical ID for this name, use it.
+    // Logic: In Step 1 we will populate this map with the LOWEST ID for each name.
+    if (this.roundNameMap.has(baseName)) {
+      return this.roundNameMap.get(baseName);
+    }
+
+    // Fallback if map not populated (shouldn't happen if Step 1 runs)
+    return round.id;
   }
 
   /**
