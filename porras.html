@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porras - Biwenger Stats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Barlow', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .sortable th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sortable th:hover {
+            background: #1e293b;
+        }
+
+        .sortable th::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            vertical-align: middle;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8 9l4-4 4 4m0 6l-4 4-4-4' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.3;
+        }
+
+        .sortable th.asc::after {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f8fafc' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M5 15l7-7 7 7' /%3E%3C/svg%3E");
+            opacity: 1;
+        }
+
+        .sortable th.desc::after {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f8fafc' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <nav class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <h1 class="text-2xl font-extrabold tracking-tight text-white">
+                            Biwenger<span class="text-orange-500">Stats</span>
+                        </h1>
+                    </a>
+                </div>
+
+                <!-- Navigation Menu -->
+                <div class="flex gap-2">
+                    <a href="/"
+                        class="px-4 py-2 rounded-lg text-slate-300 font-bold hover:bg-slate-800 hover:text-white transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Inicio
+                    </a>
+                    <a href="/market"
+                        class="px-6 py-2 rounded-lg bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 hover:text-white transition-colors border border-slate-700 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                            </path>
+                        </svg>
+                        Mercado
+                    </a>
+                    <a href="/porras"
+                        class="px-6 py-2 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        Porras
+                    </a>
+                    <a href="/usuarios"
+                        class="px-6 py-2 rounded-lg bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 hover:text-white transition-colors border border-slate-700 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                        </svg>
+                        Usuarios
+                    </a>
+                </div>
+
+                <div class="w-24"></div> <!-- Spacer for alignment -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Consolidated Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Top Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Row 1: Key Metrics Cards -->
+            
+            <!-- Perfect 10 Achievements -->
+            {% if achievements and achievements.perfect_10 %}
+            <div class="bg-gradient-to-br from-yellow-900/30 to-amber-900/30 rounded-xl border border-yellow-700/30 p-4 shadow-lg h-full">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
+                    <h3 class="text-sm font-bold text-yellow-300 uppercase tracking-wider">Perfect 10</h3>
+                </div>
+                <div class="space-y-1 max-h-32 overflow-y-auto">
+                    {% for p in achievements.perfect_10[:5] %}
+                    <div class="flex justify-between items-center text-xs bg-yellow-500/10 rounded px-2 py-1">
+                        <span class="text-yellow-100 font-medium">{{ p.usuario }}</span>
+                        <span class="text-yellow-400">{{ p.jornada }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if achievements.perfect_10|length > 5 %}
+                <p class="text-xs text-yellow-500/70 mt-2">+{{ achievements.perfect_10|length - 5 }} más</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 p-4 shadow-lg h-full">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Perfect 10</h3>
+                </div>
+                <p class="text-xs text-slate-500">Nadie ha logrado un 10/10 todavía</p>
+            </div>
+            {% endif %}
+
+            <!-- Blanked (0 hits) -->
+            {% if achievements and achievements.blanked %}
+            <div class="bg-gradient-to-br from-red-900/30 to-pink-900/30 rounded-xl border border-red-700/30 p-4 shadow-lg h-full">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-sm font-bold text-red-300 uppercase tracking-wider">Blanked</h3>
+                </div>
+                <div class="space-y-1 max-h-32 overflow-y-auto">
+                    {% for b in achievements.blanked[:5] %}
+                    <div class="flex justify-between items-center text-xs bg-red-500/10 rounded px-2 py-1">
+                        <span class="text-red-100 font-medium">{{ b.usuario }}</span>
+                        <span class="text-red-400">{{ b.jornada }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if achievements.blanked|length > 5 %}
+                <p class="text-xs text-red-500/70 mt-2">+{{ achievements.blanked|length - 5 }} más</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 p-4 shadow-lg h-full">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Blanked</h3>
+                </div>
+                <p class="text-xs text-slate-500">Nadie ha tenido 0 aciertos aún</p>
+            </div>
+            {% endif %}
+
+            <!-- Clutch Player -->
+            {% if clutch_stats and clutch_stats|length > 0 %}
+            <div onclick="showClutchDetails()"
+                class="bg-slate-800 rounded-xl border border-slate-700 p-4 shadow-lg cursor-pointer hover:border-cyan-500 transition-colors h-full">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <h3 class="text-sm font-bold text-cyan-300 uppercase tracking-wider">Clutch Player</h3>
+                </div>
+                <div class="text-center">
+                    <p class="text-xl font-bold text-cyan-100">{{ clutch_stats[0].usuario }}</p>
+                    <p class="text-2xl font-extrabold text-cyan-400 my-1">{{ "%.2f"|format(clutch_stats[0].avg_last_3) }}
+                    </p>
+                    <p class="text-xs text-cyan-600">Promedio últimas 3 jornadas</p>
+                </div>
+                <p class="text-xs text-cyan-700 mt-2 flex items-center gap-1">
+                    Click para ver detalles 
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Most Victorias (Moved from bottom) -->
+            {% if porra_stats.victorias %}
+            <div onclick="toggleVictoriasModal()" class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg h-full flex flex-col justify-between cursor-pointer hover:border-purple-500 transition-colors">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-sm font-bold text-purple-300 uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            Más Victorias
+                        </h3>
+                        <p class="text-2xl font-extrabold text-purple-100">{{ porra_stats.victorias[0].usuario }}</p>
+                        <p class="text-lg text-purple-400 font-bold">{{ porra_stats.victorias[0].victorias }} victorias</p>
+                    </div>
+                    <div class="p-2 bg-purple-500/10 rounded-lg">
+                        <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs text-purple-500/70 flex items-center gap-1">
+                    Click para ver detalles 
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Row 2: Participation Chart & Other Stats -->
+
+            <!-- Participation Chart (Span 2 cols) -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-lg col-span-1 sm:col-span-2 h-full flex flex-col">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Participación
+                </h2>
+                <div class="relative flex-grow min-h-[200px]">
+                    <canvas id="participationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Mejor Jornada -->
+            {% if porra_stats.mejor_jornada and porra_stats.mejor_jornada|length > 0 %}
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg h-full flex flex-col justify-between">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                    <h3 class="text-sm font-bold text-yellow-300 uppercase tracking-wider">Mejor Jornada</h3>
+                </div>
+                <div class="flex-grow flex flex-col items-center justify-center text-center">
+                    <p class="text-3xl font-extrabold text-yellow-400 mb-2">{{ porra_stats.mejor_jornada[0].aciertos }}</p>
+                    <p class="text-xs text-yellow-500/70 uppercase tracking-wide mb-3">Aciertos</p>
+                    <div class="flex flex-col gap-2 w-full px-4">
+                        {% for entry in porra_stats.mejor_jornada %}
+                        <div class="bg-slate-900/80 border border-yellow-500/20 rounded-lg py-2 px-4 shadow-sm flex items-center justify-center gap-2 group hover:border-yellow-500/50 transition-colors">
+                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                            <span class="text-yellow-100 font-bold text-sm tracking-wide">{{ entry.usuario }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <p class="text-xs text-yellow-500/70 text-center mt-2">{{ porra_stats.mejor_jornada[0].jornada }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Mejor Promedio -->
+            {% if porra_stats.promedios %}
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl border border-slate-700 shadow-lg h-full flex flex-col justify-between group hover:border-emerald-500/50 transition-all">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Mejor Promedio
+                        </h3>
+                        <p class="text-2xl font-extrabold text-white group-hover:text-emerald-100 transition-colors">{{ porra_stats.promedios[0].usuario }}</p>
+                    </div>
+                    <div class="p-2 bg-emerald-500/10 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
+                        <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between items-end mb-1">
+                        <span class="text-3xl font-black text-emerald-400">{{ "%.2f"|format(porra_stats.promedios[0].promedio) }}</span>
+                        <span class="text-xs text-emerald-600 font-bold mb-1.5">aciertos/jornada</span>
+                    </div>
+                    
+                    <!-- Visual Progress Bar Simulation -->
+                    <div class="w-full bg-slate-700/50 rounded-full h-2 mb-2 overflow-hidden">
+                        <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full" style="width: {{ (porra_stats.promedios[0].promedio / 10) * 100 }}%"></div>
+                    </div>
+                    
+                    <p class="text-xs text-slate-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        En {{ porra_stats.promedios[0].jornadas_jugadas }} jornadas jugadas
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Performance Chart Section (Middle) -->
+        <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-lg">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4">
+                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+                Evolución de Aciertos
+            </h2>
+            <div class="overflow-x-auto pb-2">
+                <div id="performanceChartContainer" class="relative h-[500px] min-w-full">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Statistics Table -->
+        {% if porra_stats.promedios %}
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg">
+            <div class="p-6 bg-slate-900/50 border-b border-slate-700">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Estadísticas Detalladas
+                </h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table id="statsTable" class="w-full text-sm text-left">
+                    <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 sortable">
+                        <tr>
+                            <th class="px-6 py-3" onclick="sortTable(0)">Jugador</th>
+                            <th class="px-6 py-3 text-center" onclick="sortTable(1)">Promedio</th>
+                            <th class="px-6 py-3 text-center" onclick="sortTable(2)">Mediana</th>
+                            <th class="px-6 py-3 text-center" onclick="sortTable(3)">Jornadas</th>
+                            <th class="px-6 py-3 text-center" onclick="sortTable(4)">Total</th>
+                            <th class="px-6 py-3 text-center" onclick="sortTable(5)">Mejor</th>
+                            <th class="px-6 py-3 text-center" onclick="sortTable(6)">Peor</th>
+                            <th class="px-6 py-3 text-center">Forma</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        {% for row in porra_stats.promedios %}
+                        {% set promedio = row.promedio %}
+                        {% set color_class = '' %}
+                        {% if promedio >= 6 %}{% set color_class = 'text-green-400' %}
+                        {% elif promedio >= 5 %}{% set color_class = 'text-emerald-400' %}
+                        {% elif promedio >= 4 %}{% set color_class = 'text-yellow-400' %}
+                        {% elif promedio >= 3 %}{% set color_class = 'text-orange-400' %}
+                        {% else %}{% set color_class = 'text-red-400' %}
+                        {% endif %}
+                        {% set median_data = median_stats|selectattr('usuario', 'equalto', row.usuario)|first %}
+                        <tr class="hover:bg-slate-700/50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-white">{{ row.usuario }}</td>
+                            <td class="px-6 py-4 text-center font-mono {{ color_class }} font-bold">{{
+                                "%.2f"|format(row.promedio) }}</td>
+                            <td class="px-6 py-4 text-center text-slate-300 font-mono">
+                                {% if median_data %}{{ "%.1f"|format(median_data.median) }}{% else %}-{% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-center text-slate-400">{{ row.jornadas_jugadas }}</td>
+                            <td class="px-6 py-4 text-center text-slate-300 font-mono">{{ row.total_aciertos }}</td>
+                            <td class="px-6 py-4 text-center text-blue-400 font-mono">{{ row.mejor_jornada }}</td>
+                            <td class="px-6 py-4 text-center text-red-400 font-mono">{{ row.peor_jornada }}</td>
+                            <td class="px-6 py-4 text-center">
+                                {% if form_guide and form_guide[row.usuario] %}
+                                    {% set trend = form_guide[row.usuario].trend %}
+                                    {% if trend == 'up' %}
+                                    <svg class="w-6 h-6 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                    {% elif trend == 'down' %}
+                                    <svg class="w-6 h-6 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                                    </svg>
+                                    {% else %}
+                                    <svg class="w-6 h-6 text-slate-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                                    </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-slate-600">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    <!-- Historical Table -->
+        {% if porra_history and porra_history.jornadas %}
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg">
+            <div class="p-6 bg-slate-900/50 border-b border-slate-700">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Histórico por Jornadas
+                </h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 sticky top-0">
+                        <tr>
+                            <th class="px-6 py-3">Jornada</th>
+                            {% for user in porra_history.users %}
+                            <th class="px-6 py-3 text-center">{{ user }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        {% for row in porra_history.jornadas %}
+                        <tr class="hover:bg-slate-700/30 transition-colors">
+                            <td class="px-6 py-4 font-medium text-slate-300 whitespace-nowrap">{{ row.name }}</td>
+                            {% for user in porra_history.users %}
+                            {% set score = row.scores[user] %}
+                            <td class="px-6 py-4 text-center font-mono">
+                                {% if score is not none %}
+                                <span
+                                    class="{% if score >= 7 %}text-green-400 font-bold{% elif score >= 5 %}text-yellow-400 font-bold{% elif score >= 3 %}text-orange-400{% else %}text-red-400{% endif %}">
+                                    {{ score }}
+                                </span>
+                                {% else %}
+                                <span class="text-slate-700">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+
+
+    </div>
+
+    <footer class="border-t border-slate-800 bg-slate-900 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
+            <p>BiwengerStats &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        // Chart.js Configuration
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Barlow', sans-serif";
+
+        // Performance Chart
+        const perfCtx = document.getElementById('performanceChart').getContext('2d');
+        const perfDataRaw = {{ porras_performance | tojson }};
+        
+        // Process data for multi-series line chart
+        const rounds = [...new Set(perfDataRaw.map(d => d.jornada))];
+        // Sort rounds numerically
+        rounds.sort((a, b) => {
+            const numA = parseInt(a.replace(/\D/g, '')) || 0;
+            const numB = parseInt(b.replace(/\D/g, '')) || 0;
+            return numA - numB;
+        });
+
+        // Dynamic Width for Performance Chart
+        // Dynamic Width for Performance Chart
+        const chartContainer = document.getElementById('performanceChartContainer');
+        const minWidthPerRound = 50; // px per round
+        const contentWidth = rounds.length * minWidthPerRound;
+        
+        // Set min-width to ensure scrolling if content is large
+        chartContainer.style.minWidth = `${contentWidth}px`;
+        // Ensure it fills the container if content is small
+        chartContainer.style.width = '100%';
+
+        const users = [...new Set(perfDataRaw.map(d => d.usuario))];
+        
+        // Generate consistent colors for users
+        const userColors = [
+            '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', 
+            '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#06b6d4'
+        ];
+
+        const datasets = users.map((user, index) => {
+            const userData = rounds.map(round => {
+                const entry = perfDataRaw.find(d => d.usuario === user && d.jornada === round);
+                return entry ? entry.aciertos : null;
+            });
+            
+            return {
+                label: user,
+                data: userData,
+                borderColor: userColors[index % userColors.length],
+                backgroundColor: userColors[index % userColors.length],
+                tension: 0.3,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                spanGaps: true
+            };
+        });
+
+        new Chart(perfCtx, {
+            type: 'line',
+            data: {
+                labels: rounds,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 10, padding: 10, color: '#cbd5e1' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        grid: { color: '#334155' },
+                        title: { display: true, text: 'Aciertos' }
+                    },
+                    x: {
+                        grid: { color: '#334155' }
+                    }
+                }
+            }
+        });
+
+        // Participation Chart
+        const partCtx = document.getElementById('participationChart').getContext('2d');
+        const partData = {{ participation | tojson }};
+        
+        // Sort participation data by round
+        partData.sort((a, b) => {
+            const numA = parseInt(a.jornada.replace(/\D/g, '')) || 0;
+            const numB = parseInt(b.jornada.replace(/\D/g, '')) || 0;
+            return numA - numB;
+        });
+
+        new Chart(partCtx, {
+            type: 'bar',
+            data: {
+                labels: partData.map(d => d.jornada),
+                datasets: [{
+                    label: 'Participantes',
+                    data: partData.map(d => d.count),
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 },
+                        grid: { color: '#334155' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        let sortDirections = [true, true, true, true, true, true];
+
+        function sortTable(columnIndex) {
+            const table = document.getElementById('statsTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const headers = table.querySelectorAll('th');
+
+            // Remove all sort indicators
+            headers.forEach(h => h.classList.remove('asc', 'desc'));
+
+            // Determine sort direction
+            const isAscending = sortDirections[columnIndex];
+            sortDirections[columnIndex] = !isAscending;
+
+            // Add appropriate class
+            headers[columnIndex].classList.add(isAscending ? 'asc' : 'desc');
+
+            rows.sort((a, b) => {
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+
+                // Parse numbers if applicable
+                if (columnIndex > 0) {
+                    aValue = parseFloat(aValue) || 0;
+                    bValue = parseFloat(bValue) || 0;
+                }
+
+                if (aValue < bValue) return isAscending ? -1 : 1;
+                if (aValue > bValue) return isAscending ? 1 : -1;
+                return 0;
+            });
+
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function toggleVictoriasModal() {
+            const modal = document.getElementById('victoriasModal');
+            if (modal.classList.contains('opacity-0')) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100');
+                document.body.classList.add('overflow-hidden');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.remove('opacity-100');
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        function showClutchDetails() {
+            const modal = document.getElementById('clutchModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function toggleClutchModal() {
+            const modal = document.getElementById('clutchModal');
+            if (modal.classList.contains('opacity-0')) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100');
+                document.body.classList.add('overflow-hidden');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.remove('opacity-100');
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+    </script>
+
+    <!-- Clutch Player Modal -->
+    {% if clutch_stats %}
+    <div id="clutchModal"
+        class="opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div class="absolute w-full h-full bg-gray-900 opacity-75" onclick="toggleClutchModal()"></div>
+        <div
+            class="bg-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto border border-slate-700 transform transition-all max-h-[80vh]">
+            <div class="p-6">
+                <div class="flex justify-between items-center pb-4 border-b border-slate-700">
+                    <h3 class="text-2xl font-bold text-cyan-400 flex items-center gap-2">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Ranking Clutch
+                    </h3>
+                    <div class="cursor-pointer text-slate-400 hover:text-white transition-colors" onclick="toggleClutchModal()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2 mb-4">Promedio de aciertos en las últimas 3 jornadas</p>
+                <div class="py-2 space-y-2">
+                    {% for c in clutch_stats %}
+                    <div
+                        class="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg hover:bg-slate-700/50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            {% if loop.index == 1 %}
+                            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {% elif loop.index == 2 %}
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {% elif loop.index == 3 %}
+                            <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {% else %}
+                            <span class="text-lg text-slate-600 font-bold w-8 text-center">{{ loop.index }}</span>
+                            {% endif %}
+                            <span class="font-medium text-white">{{ c.usuario }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-bold text-cyan-400">{{ "%.2f"|format(c.avg_last_3) }}</span>
+                            <span class="text-xs text-slate-500">promedio</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Victorias Modal -->
+    {% if porra_stats.victorias %}
+    <div id="victoriasModal"
+        class="opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div class="absolute w-full h-full bg-gray-900 opacity-75" onclick="toggleVictoriasModal()"></div>
+        <div
+            class="bg-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto border border-slate-700 transform transition-all">
+            <div class="p-6">
+                <div class="flex justify-between items-center pb-4 border-b border-slate-700">
+                    <h3 class="text-2xl font-bold text-purple-400 flex items-center gap-2">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                        Ranking de Victorias
+                    </h3>
+                    <div class="cursor-pointer text-slate-400 hover:text-white transition-colors"
+                        onclick="toggleVictoriasModal()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </div>
+                </div>
+                <div class="py-4 space-y-2">
+                    {% for v in porra_stats.victorias %}
+                    <div
+                        class="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg hover:bg-slate-700/50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            {% if loop.index == 1 %}
+                            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {% elif loop.index == 2 %}
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {% elif loop.index == 3 %}
+                            <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {% else %}
+                            <span class="text-lg text-slate-600 font-bold w-8 text-center">{{ loop.index }}</span>
+                            {% endif %}
+                            <span class="font-medium text-white">{{ v.usuario }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-bold text-purple-400">{{ v.victorias }}</span>
+                            <span class="text-xs text-slate-500">victorias</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>
