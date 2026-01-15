@@ -9,7 +9,7 @@ export default function BackButton({ label = 'Volver', className = '', iconSize 
   return (
     <button
       onClick={() => router.back()}
-      className={`inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors ${className}`}
+      className={`inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer ${className}`}
       aria-label="Go back"
     >
       <ArrowLeft size={iconSize} />
