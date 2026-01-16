@@ -17,6 +17,7 @@ export default function ElegantCard({
   loading = false,
   className = '',
   actionRight = null,
+  ...rest
 }) {
   // Icon colors based on semantic color prop
   const iconColors = {
@@ -31,6 +32,7 @@ export default function ElegantCard({
     pink: 'text-pink-500',
     rose: 'text-rose-500',
     green: 'text-green-500',
+    teal: 'text-teal-500',
   };
 
   const iconColor = iconColors[color] || iconColors.primary;
@@ -43,6 +45,7 @@ export default function ElegantCard({
           rounded-lg p-6 h-full flex flex-col animate-pulse
           ${className}
         `}
+        {...rest}
       >
         <div className="flex items-center gap-3 mb-6">
           <div className="w-5 h-5 rounded bg-muted"></div>
@@ -65,6 +68,7 @@ export default function ElegantCard({
         transition-all duration-200
         ${className}
       `}
+      {...rest}
     >
       {/* Header */}
       {(title || actionRight) && (

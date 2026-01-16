@@ -13,20 +13,22 @@ export default async function PredictionsPage() {
   const stats = await fetchPredictionsStats();
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <main className="container mx-auto px-4 py-12 relative z-10">
+    <div className="min-h-screen bg-background">
+      {/* Header Section */}
+      <div className="container mx-auto px-4 pt-12 pb-2 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-display mb-4 flex items-center gap-4">
-            <span className="w-1.5 h-10 bg-primary rounded-full"></span>
-            <span className="text-foreground">Porras</span>
+          <h1 className="text-5xl md:text-6xl font-display mb-4 flex items-center gap-4">
+            <span className="w-1.5 h-12 bg-gradient-to-b from-primary to-orange-400 rounded-full"></span>
+            <span className="text-gradient">Porras</span>
           </h1>
-          <p className="text-muted-foreground text-lg mb-10 w-full border-b border-border/50 pb-6">
+          <p className="text-muted-foreground text-lg w-full border-b border-border/50 pb-6">
             Predicciones de la temporada: logros, estadísticas y clasificación en tiempo real.
           </p>
-
-          <PredictionsClient stats={stats} />
         </div>
-      </main>
+      </div>
+
+      {/* Main Content - Full Width Sections */}
+      <PredictionsClient stats={stats} />
     </div>
   );
 }

@@ -55,6 +55,18 @@ const LeaguePerformanceCard = dynamic(
 export default function ClasificacionPage() {
   return (
     <div>
+      {/* Header Section */}
+      <div className="container mx-auto px-4 pt-12 pb-2 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-display mb-4 flex items-center gap-4">
+            <span className="w-1.5 h-12 bg-gradient-to-b from-primary to-orange-400 rounded-full"></span>
+            <span className="text-gradient">Clasificación</span>
+          </h1>
+          <p className="text-muted-foreground text-lg w-full border-b border-border/50 pb-6">
+            Análisis detallado de la clasificación, tendencias y estadísticas de rendimiento.
+          </p>
+        </div>
+      </div>
       {/* Section: Overview and Standings */}
       <Section title="Clasificación General" delay={0} background="section-base">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

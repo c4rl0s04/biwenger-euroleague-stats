@@ -48,16 +48,14 @@ export default async function SchedulePage({ searchParams }) {
       {/* Search Controls Container */}
       <div className="flex flex-col gap-6 border-b border-white/10 pb-6">
         {/* Header Title */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Calendar className="text-primary" size={24} />
-              Alineaciones
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              {schedule.found ? schedule.round.round_name : 'Selecciona una jornada'}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-5xl md:text-6xl font-display mb-4 flex items-center gap-4">
+            <span className="w-1.5 h-12 bg-gradient-to-b from-primary to-orange-400 rounded-full"></span>
+            <span className="text-gradient">Alineaciones</span>
+          </h1>
+          <p className="text-muted-foreground text-lg w-full border-b border-border/50 pb-6">
+            {schedule.found ? schedule.round.round_name : 'Selecciona una jornada'}
+          </p>
         </div>
 
         {/* Controls: User & Round Selectors */}

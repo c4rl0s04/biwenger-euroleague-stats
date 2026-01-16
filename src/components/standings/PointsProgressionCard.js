@@ -183,6 +183,7 @@ export default function PointsProgressionCard() {
                   tickLine={false}
                   axisLine={false}
                   width={45}
+                  padding={{ top: 20, bottom: 10 }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend
@@ -200,15 +201,15 @@ export default function PointsProgressionCard() {
                   return (
                     <Line
                       key={user.id}
-                      type="monotone"
+                      type="natural"
                       dataKey={user.id}
                       name={user.name}
                       stroke={colors.stroke}
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 6, strokeWidth: 0 }}
-                      connectNulls
-                      isAnimationActive={false}
+                      connectNulls={true}
+                      isAnimationActive={true}
                       hide={!isSelected}
                       legendType="circle"
                     />

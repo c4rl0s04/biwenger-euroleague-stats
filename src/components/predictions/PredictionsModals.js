@@ -2,6 +2,8 @@
 
 import { X, Trophy, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getColorForUser } from '@/lib/constants/colors';
+import Link from 'next/link';
 
 function ModalBase({ isOpen, onClose, title, icon, children }) {
   if (!isOpen) return null;
@@ -39,57 +41,55 @@ export function ClutchModal({ isOpen, onClose, stats }) {
       title="Ranking Clutch"
       icon={<Zap className="w-6 h-6 text-blue-500" />}
     >
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-muted-foreground mb-6">
         Promedio de aciertos en las últimas 3 jornadas. Jugadores que rinden bajo presión.
       </p>
-      <div className="space-y-3">
+      <div className="flex flex-col">
         {stats.map((c, idx) => {
-          let iconColor = 'text-muted-foreground';
-          let rankClass = 'text-muted-foreground font-bold';
-          let cardClass = 'bg-card border-border/50';
+          const colorInfo = getColorForUser(c.user_id, c.usuario, c.color_index);
+          const userColor = colorInfo.text;
+
+          let rankColor = 'text-muted-foreground/50';
+          let rowClass = 'border-b border-border/40 hover:bg-muted/30';
 
           if (idx === 0) {
-            iconColor = 'text-yellow-500';
-            cardClass = 'bg-yellow-500/5 border-yellow-500/20';
+            rankColor = 'text-yellow-500';
+            rowClass = 'border-b border-border/40 bg-yellow-500/5 hover:bg-yellow-500/10';
           } else if (idx === 1) {
-            iconColor = 'text-slate-400';
-            cardClass = 'bg-slate-500/5 border-slate-500/20';
+            rankColor = 'text-slate-400';
+            rowClass = 'border-b border-border/40 bg-slate-500/5 hover:bg-slate-500/10';
           } else if (idx === 2) {
-            iconColor = 'text-orange-500';
-            cardClass = 'bg-orange-500/5 border-orange-500/20';
+            rankColor = 'text-orange-500';
+            rowClass = 'border-b border-border/40 bg-orange-500/5 hover:bg-orange-500/10';
+          } else if (idx === stats.length - 1) {
+            rankColor = 'text-red-500';
           }
 
           return (
             <div
               key={idx}
               className={cn(
-                'flex items-center justify-between p-4 border rounded-xl transition-colors hover:border-border',
-                cardClass
+                'flex items-center justify-between py-3 px-4 transition-colors first:rounded-t-lg last:rounded-b-lg last:border-0',
+                rowClass
               )}
             >
               <div className="flex items-center gap-4">
-                <div className="w-8 flex justify-center">
-                  {idx < 3 ? (
-                    <Trophy className={cn('w-6 h-6', iconColor)} />
-                  ) : (
-                    <span className="text-lg font-bold text-muted-foreground/50">{idx + 1}</span>
-                  )}
-                </div>
-                <span className="font-bold text-lg text-foreground">{c.usuario}</span>
-              </div>
-              <div className="flex flex-col items-end">
-                <span
+                <span className={cn('text-lg font-bold w-6 text-center tabular-nums', rankColor)}>
+                  {idx + 1}
+                </span>
+                <Link
+                  href={`/user/${c.user_id}`}
                   className={cn(
-                    'text-2xl font-black',
-                    idx === 0 ? 'text-blue-500' : 'text-foreground'
+                    'font-black text-lg hover:opacity-80 transition-opacity',
+                    userColor
                   )}
                 >
-                  {parseFloat(c.avg_last_3).toFixed(2)}
-                </span>
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-                  Promedio
-                </span>
+                  {c.usuario}
+                </Link>
               </div>
+              <span className={cn('text-xl font-bold tabular-nums tracking-tight', userColor)}>
+                {parseFloat(c.avg_last_3).toFixed(2)}
+              </span>
             </div>
           );
         })}
@@ -106,56 +106,55 @@ export function VictoriasModal({ isOpen, onClose, victorias }) {
       title="Ranking de Victorias"
       icon={<Trophy className="w-6 h-6 text-purple-500" />}
     >
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-muted-foreground mb-6">
         Número total de jornadas ganadas por cada participante.
       </p>
-      <div className="space-y-3">
+      <div className="flex flex-col">
         {victorias.map((v, idx) => {
-          let iconColor = 'text-muted-foreground';
-          let cardClass = 'bg-card border-border/50';
+          const colorInfo = getColorForUser(v.user_id, v.usuario, v.color_index);
+          const userColor = colorInfo.text;
+
+          let rankColor = 'text-muted-foreground/50';
+          let rowClass = 'border-b border-border/40 hover:bg-muted/30';
 
           if (idx === 0) {
-            iconColor = 'text-yellow-500';
-            cardClass = 'bg-yellow-500/5 border-yellow-500/20';
+            rankColor = 'text-yellow-500';
+            rowClass = 'border-b border-border/40 bg-yellow-500/5 hover:bg-yellow-500/10';
           } else if (idx === 1) {
-            iconColor = 'text-slate-400';
-            cardClass = 'bg-slate-500/5 border-slate-500/20';
+            rankColor = 'text-slate-400';
+            rowClass = 'border-b border-border/40 bg-slate-500/5 hover:bg-slate-500/10';
           } else if (idx === 2) {
-            iconColor = 'text-orange-500';
-            cardClass = 'bg-orange-500/5 border-orange-500/20';
+            rankColor = 'text-orange-500';
+            rowClass = 'border-b border-border/40 bg-orange-500/5 hover:bg-orange-500/10';
+          } else if (idx === victorias.length - 1) {
+            rankColor = 'text-red-500';
           }
 
           return (
             <div
               key={idx}
               className={cn(
-                'flex items-center justify-between p-4 border rounded-xl transition-colors hover:border-border',
-                cardClass
+                'flex items-center justify-between py-3 px-4 transition-colors first:rounded-t-lg last:rounded-b-lg last:border-0',
+                rowClass
               )}
             >
               <div className="flex items-center gap-4">
-                <div className="w-8 flex justify-center">
-                  {idx < 3 ? (
-                    <Trophy className={cn('w-6 h-6', iconColor)} />
-                  ) : (
-                    <span className="text-lg font-bold text-muted-foreground/50">{idx + 1}</span>
-                  )}
-                </div>
-                <span className="font-bold text-lg text-foreground">{v.usuario}</span>
-              </div>
-              <div className="flex flex-col items-end">
-                <span
+                <span className={cn('text-lg font-bold w-6 text-center tabular-nums', rankColor)}>
+                  {idx + 1}
+                </span>
+                <Link
+                  href={`/user/${v.user_id}`}
                   className={cn(
-                    'text-2xl font-black',
-                    idx === 0 ? 'text-purple-500' : 'text-foreground'
+                    'font-black text-lg hover:opacity-80 transition-opacity',
+                    userColor
                   )}
                 >
-                  {v.victorias}
-                </span>
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-                  Victorias
-                </span>
+                  {v.usuario}
+                </Link>
               </div>
+              <span className={cn('text-xl font-bold tabular-nums tracking-tight', userColor)}>
+                {v.victorias}
+              </span>
             </div>
           );
         })}

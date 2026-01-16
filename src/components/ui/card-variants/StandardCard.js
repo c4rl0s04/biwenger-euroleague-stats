@@ -84,6 +84,7 @@ export default function StandardCard({
   loading = false,
   className = '',
   actionRight = null,
+  ...rest
 }) {
   const styles = colorVariants[color] || colorVariants.indigo;
 
@@ -91,6 +92,7 @@ export default function StandardCard({
     return (
       <div
         className={`bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-pulse h-full ${className}`}
+        {...rest}
       >
         <div className="h-6 bg-slate-700/50 rounded w-1/2 mb-4"></div>
         <div className="space-y-3">
@@ -104,6 +106,7 @@ export default function StandardCard({
   return (
     <div
       className={`bg-gradient-to-br ${styles.gradient} backdrop-blur-md border ${styles.border} rounded-2xl p-6 relative overflow-hidden group ${styles.hoverBorder} transition-all duration-300 h-full flex flex-col ${className}`}
+      {...rest}
     >
       {/* Background decoration */}
       <div className="absolute -top-6 -right-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">

@@ -7,7 +7,7 @@ const ThemeContext = createContext({
   setTheme: () => {},
   toggleTheme: () => {},
   // New properties
-  showSnow: true,
+  showSnow: false,
   toggleSnow: () => {},
 });
 
@@ -45,12 +45,12 @@ function getStoredTheme() {
 
 // Get initial snow preference (default to true)
 function getStoredSnow() {
-  if (typeof window === 'undefined') return true;
+  if (typeof window === 'undefined') return false;
   try {
     const stored = localStorage.getItem('showSnow');
     if (stored !== null) return stored === 'true';
   } catch {}
-  return true;
+  return false;
 }
 
 export function ThemeProvider({ children }) {
