@@ -36,6 +36,7 @@ export default async function SchedulePage({ searchParams }) {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
+          timeZone: 'Europe/Madrid',
         });
         if (!acc[dateKey]) acc[dateKey] = [];
         acc[dateKey].push(match);
@@ -115,6 +116,7 @@ export default async function SchedulePage({ searchParams }) {
                   const timeStr = date.toLocaleTimeString('es-ES', {
                     hour: '2-digit',
                     minute: '2-digit',
+                    timeZone: 'Europe/Madrid',
                   });
 
                   return (
