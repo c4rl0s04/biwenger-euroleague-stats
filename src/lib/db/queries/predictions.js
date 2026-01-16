@@ -16,6 +16,7 @@ export async function getPorrasStats() {
 
   const clutch = await getClutchStats(); // Dependent on identifying recent rounds? No, usually standalone logic.
   const victories = await getVictorias();
+  const predictable = await getPredictableTeams();
 
   return {
     achievements,
@@ -27,6 +28,7 @@ export async function getPorrasStats() {
     porra_stats: {
       // Grouping common stats under the structure expected by the UI if needed
       victorias: victories,
+      predictable_teams: predictable,
       promedios: tableStats, // Refers to the main leaderboard table
       mejor_jornada: await getBestRoundStat(),
     },
@@ -35,7 +37,7 @@ export async function getPorrasStats() {
 
 async function getAchievements() {
   const perfect10Query = `
-    SELECT p.aciertos, p.round_name as jornada, u.name as usuario
+    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id
     FROM porras p
     JOIN users u ON p.user_id = u.id
     WHERE p.aciertos = 10
@@ -43,10 +45,13 @@ async function getAchievements() {
   `;
 
   const blankedQuery = `
-    SELECT p.aciertos, p.round_name as jornada, u.name as usuario
+    WITH MinScore AS (
+        SELECT MIN(aciertos) as val FROM porras
+    )
+    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id
     FROM porras p
     JOIN users u ON p.user_id = u.id
-    WHERE p.aciertos = 0
+    WHERE p.aciertos = (SELECT val FROM MinScore)
     ORDER BY p.round_id DESC
   `;
 
@@ -74,9 +79,10 @@ async function getParticipation() {
 
 async function getPerformanceData() {
   const query = `
-    SELECT p.round_name as jornada, u.name as usuario, p.aciertos
+    SELECT p.round_name as jornada, u.name as usuario, p.aciertos, p.user_id, u.color_index
     FROM porras p
     JOIN users u ON p.user_id = u.id
+    WHERE p.aciertos IS NOT NULL
     ORDER BY p.round_id ASC
   `;
   const res = await db.query(query);
@@ -90,6 +96,7 @@ async function getTableStats() {
         SELECT 
             p.user_id,
             u.name as usuario,
+            u.color_index,
             COUNT(p.round_id) as jornadas_jugadas,
             SUM(p.aciertos) as total_aciertos,
             AVG(p.aciertos) as promedio,
@@ -97,7 +104,7 @@ async function getTableStats() {
             MIN(p.aciertos) as peor_jornada
         FROM porras p
         JOIN users u ON p.user_id = u.id
-        GROUP BY p.user_id, u.name
+        GROUP BY p.user_id, u.name, u.color_index
     )
     SELECT * FROM UserStats
     ORDER BY promedio DESC
@@ -118,14 +125,15 @@ async function getClutchStats() {
   const query = `
     SELECT 
         u.name as usuario,
+        p.user_id,
+        u.color_index,
         AVG(p.aciertos) as avg_last_3
     FROM porras p
     JOIN users u ON p.user_id = u.id
     WHERE p.round_id = ANY($1::int[])
-    GROUP BY p.user_id, u.name
+    GROUP BY p.user_id, u.name, u.color_index
     HAVING COUNT(p.round_id) >= 1
     ORDER BY avg_last_3 DESC
-    LIMIT 5
   `;
 
   const res = await db.query(query, [roundIds]);
@@ -149,11 +157,99 @@ async function getVictorias() {
     )
     SELECT 
         u.name as usuario,
+        w.user_id,
+        u.color_index,
         COUNT(w.round_id) as victorias
     FROM Winners w
     JOIN users u ON w.user_id = u.id
-    GROUP BY w.user_id, u.name
+    GROUP BY w.user_id, u.name, u.color_index
     ORDER BY victorias DESC
+  `;
+
+  const res = await db.query(query);
+  return res.rows;
+}
+
+async function getPredictableTeams() {
+  const query = `
+    WITH MatchOutcomes AS (
+        SELECT 
+            round_id,
+            home_id,
+            away_id,
+            CASE 
+                WHEN home_score > away_score THEN '1'
+                WHEN away_score > home_score THEN '2'
+                ELSE 'X'
+            END as outcome,
+            ROW_NUMBER() OVER (PARTITION BY round_id ORDER BY id ASC) as match_idx
+        FROM matches
+        WHERE NOT (home_score = 0 AND away_score = 0)
+    ),
+    UserPredictions AS (
+        SELECT 
+            p.user_id,
+            p.round_id,
+            p.aciertos,
+            unnest(string_to_array(p.result, '-')) as pred,
+            generate_subscripts(string_to_array(p.result, '-'), 1) as match_idx
+        FROM porras p
+        WHERE p.aciertos IS NOT NULL
+    ),
+    PredictionResults AS (
+        SELECT 
+            up.user_id,
+            mo.home_id,
+            mo.away_id,
+            mo.outcome,
+            up.pred,
+            (mo.outcome = up.pred) as is_correct
+        FROM MatchOutcomes mo
+        JOIN UserPredictions up ON mo.round_id = up.round_id AND mo.match_idx = up.match_idx
+    ),
+    TeamStats AS (
+        -- Home Games
+        SELECT 
+            home_id as team_id,
+            COUNT(*) as total_predictions,
+            SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_predictions,
+            SUM(CASE WHEN pred = '1' THEN 1 ELSE 0 END) as predicted_wins,
+            SUM(CASE WHEN pred = '2' THEN 1 ELSE 0 END) as predicted_losses,
+            SUM(CASE WHEN is_correct AND pred = '1' THEN 1 ELSE 0 END) as correct_wins,
+            SUM(CASE WHEN is_correct AND pred = '2' THEN 1 ELSE 0 END) as correct_losses
+        FROM PredictionResults
+        GROUP BY home_id
+        
+        UNION ALL
+        
+        -- Away Games
+        SELECT 
+            away_id as team_id,
+            COUNT(*) as total_predictions,
+            SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_predictions,
+            SUM(CASE WHEN pred = '2' THEN 1 ELSE 0 END) as predicted_wins,
+            SUM(CASE WHEN pred = '1' THEN 1 ELSE 0 END) as predicted_losses,
+            SUM(CASE WHEN is_correct AND pred = '2' THEN 1 ELSE 0 END) as correct_wins,
+            SUM(CASE WHEN is_correct AND pred = '1' THEN 1 ELSE 0 END) as correct_losses
+        FROM PredictionResults
+        GROUP BY away_id
+    )
+    SELECT 
+        t.id,
+        t.name,
+        t.img,
+        SUM(ts.total_predictions) as total,
+        SUM(ts.correct_predictions) as correct,
+        SUM(ts.predicted_wins) as predicted_wins,
+        SUM(ts.predicted_losses) as predicted_losses,
+        SUM(ts.correct_wins) as correct_wins,
+        SUM(ts.correct_losses) as correct_losses,
+        ROUND((SUM(ts.correct_predictions)::decimal / NULLIF(SUM(ts.total_predictions), 0)) * 100, 1) as percentage
+    FROM TeamStats ts
+    JOIN teams t ON ts.team_id = t.id
+    GROUP BY t.id, t.name, t.img
+    HAVING SUM(ts.total_predictions) > 0
+    ORDER BY percentage DESC
   `;
 
   const res = await db.query(query);
@@ -176,15 +272,16 @@ async function getBestRoundStat() {
 async function getHistoryPivot() {
   // Get all rounds first
   const roundsRes = await db.query(
-    'SELECT DISTINCT round_id, round_name FROM porras ORDER BY round_id DESC'
+    'SELECT DISTINCT round_id, round_name FROM porras ORDER BY round_id ASC'
   );
   const rounds = roundsRes.rows;
 
   // Get all users
   const usersRes = await db.query(
-    'SELECT DISTINCT u.name FROM users u JOIN porras p ON p.user_id = u.id ORDER BY u.name'
+    'SELECT DISTINCT u.id, u.name, u.color_index FROM users u JOIN porras p ON p.user_id = u.id ORDER BY u.name'
   );
-  const users = usersRes.rows.map((r) => r.name);
+  // users will now be an array of objects { id, name, color_index }
+  const users = usersRes.rows;
 
   // Get all scores
   const scoresQuery = `
@@ -203,15 +300,17 @@ async function getHistoryPivot() {
     };
 
     users.forEach((user) => {
-      const match = scoresRes.rows.find((s) => s.round_id === round.round_id && s.usuario === user);
-      row.scores[user] = match ? match.aciertos : null;
+      const match = scoresRes.rows.find(
+        (s) => s.round_id === round.round_id && s.usuario === user.name
+      );
+      row.scores[user.name] = match ? match.aciertos : null;
     });
 
     return row;
   });
 
   return {
-    users,
+    users, // Now array of { name, color_index }
     jornadas: pivotData,
   };
 }
