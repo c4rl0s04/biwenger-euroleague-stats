@@ -15,18 +15,18 @@ const parser = new XMLParser({
   parseAttributeValue: false, // Prevent "00123" -> 123
 });
 
-/**
- * Fetch all teams and their rosters
- * Returns deeply nested structure: { clubs: { club: [ { code: "MAD", name: "Real Madrid", members: { member: [...] } } ] } }
- * @param {string} season - Season code
- * @returns {Promise<Object>} Parsed XML object
- */
+const HEADERS = {
+  'User-Agent':
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  Accept: '*/*',
+};
+
 export async function fetchTeams(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   // V1 API uses api-live domain
   const url = `${API_V1_URL}/v1/teams?seasonCode=${season}&competitionCode=E`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: HEADERS });
     if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
 
     const xml = await response.text();
@@ -38,16 +38,11 @@ export async function fetchTeams(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   }
 }
 
-/**
- * Fetch season schedule (all games, past and future)
- * @param {string} season - Season code
- * @returns {Promise<Object>} Parsed XML object with schedule
- */
 export async function fetchSchedule(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   const url = `${API_V1_URL}/v1/schedules?seasonCode=${season}&competitionCode=E`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: HEADERS });
     if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
 
     const xml = await response.text();
@@ -65,18 +60,12 @@ export async function fetchSchedule(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   }
 }
 
-/**
- * Fetch box score for a game (player stats)
- * @param {number} gameCode - Game number in the season (1, 2, 3...)
- * @param {string} season - Season code (e.g., 'E2024' for 2024-25 Euroleague)
- * @returns {Promise<Object|null>} Box score with player stats, or null if game doesn't exist
- */
 export async function fetchBoxScore(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   // Legacy API uses live.euroleague.net domain
   const url = `${API_LEGACY_URL}/Boxscore?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: HEADERS });
 
     if (!response.ok) {
       throw new Error(`Euroleague API error: ${response.status}`);
@@ -97,22 +86,17 @@ export async function fetchBoxScore(gameCode, season = CONFIG.EUROLEAGUE.SEASON_
     }
   } catch (error) {
     console.error(`Error fetching box score for game ${gameCode}:`, error);
+    console.error('Game URL:', url); // Added log for debug
     throw error;
   }
 }
 
-/**
- * Fetch game header (metadata: teams, scores, date, round)
- * @param {number} gameCode - Game number in the season
- * @param {string} season - Season code
- * @returns {Promise<Object|null>} Game header info, or null if game doesn't exist
- */
 export async function fetchGameHeader(gameCode, season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   // Legacy API uses live.euroleague.net domain
   const url = `${API_LEGACY_URL}/Header?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: HEADERS });
 
     if (!response.ok) {
       throw new Error(`Euroleague API error: ${response.status}`);
