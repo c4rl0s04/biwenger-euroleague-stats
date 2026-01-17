@@ -1,0 +1,42 @@
+name: Live Fantasy Sync
+
+on:
+  schedule:
+    # Run every 5 minutes during Euroleague Game Windows
+    # Times are in UTC. Euroleague usually plays 18:00-23:00 CET (17:00-22:00 UTC)
+    # Days: Tuesday (2) to Friday (5)
+    - cron: '*/5 16-22 * * 2-5'
+
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  live-sync:
+    name: 🏀 Live Euroleague Sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5 # Good practice to prevent stuck jobs
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Live Sync
+        run: npm run sync:live
+        env:
+          # Database Connection (Individual components, matching local setup)
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+          # Configuration
+          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE || 'E2025' }}

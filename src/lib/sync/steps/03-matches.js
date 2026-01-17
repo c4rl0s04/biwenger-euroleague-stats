@@ -33,8 +33,6 @@ export async function run(manager) {
     }
 
     // OPTIMIZATION: In Daily Mode, skip rounds that finished long ago
-    // OPTIMIZATION: In Daily Mode, skip rounds that finished long ago
-    // OPTIMIZATION: In Daily Mode, skip rounds that finished long ago
     // Since the `round` object from Step 1 lacks dates, we query our own DB.
     if (manager.context.isDaily) {
       const roundId = manager.resolveRoundId(round);

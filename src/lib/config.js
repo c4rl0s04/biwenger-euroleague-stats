@@ -34,7 +34,7 @@ export const CONFIG = {
    * Euroleague Specific Settings
    */
   EUROLEAGUE: {
-    SEASON_CODE: 'E2025',
+    SEASON_CODE: process.env.EUROLEAGUE_SEASON_CODE,
     API_V1_URL: 'https://api-live.euroleague.net',
     API_LEGACY_URL: 'https://live.euroleague.net/api',
   },
@@ -43,7 +43,7 @@ export const CONFIG = {
    * League Settings
    */
   LEAGUE: {
-    START_DATE: '2025-09-25',
+    START_DATE: process.env.LEAGUE_START_DATE,
   },
 
   /**

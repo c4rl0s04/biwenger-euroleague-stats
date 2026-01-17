@@ -76,8 +76,12 @@ export async function run(manager) {
         if (row && row.match_count > 0) {
           const now = new Date();
 
-          // 1. Skip if Completed
-          if (row.all_finished) {
+          // 1. Skip if Completed AND Old (older than 24h)
+          // We must run if it JUST finished to get final stats.
+          const lastMatchTime = row.last_match_date ? new Date(row.last_match_date).getTime() : 0;
+          const isRecent = now.getTime() - lastMatchTime < 24 * 60 * 60 * 1000;
+
+          if (row.all_finished && !isRecent) {
             continue;
           }
 
