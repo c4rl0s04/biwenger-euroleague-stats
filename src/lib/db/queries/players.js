@@ -41,6 +41,7 @@ export async function getTopPlayers(limit = 6) {
       p.id, p.name, t.id as team_id, t.name as team, p.position, p.price,
       p.puntos as points, 
       ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
+      p.owner_id,
       u.name as owner_name, u.color_index as owner_color_index,
       rs.recent_scores
     FROM players p

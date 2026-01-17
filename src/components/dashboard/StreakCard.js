@@ -66,6 +66,8 @@ export default function StreakCard({ type = 'hot' }) {
               name={player.name}
               team={player.team}
               owner={player.owner_name}
+              ownerId={player.owner_id}
+              ownerColorIndex={player.owner_color_index}
               color={cfg.color}
               avatar={
                 <div
