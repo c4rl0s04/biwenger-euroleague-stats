@@ -9,9 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write src/",
-    "sync": "node src/lib/sync/index.js",
-    "sync:daily": "node src/lib/sync/index.js --daily",
-    "sync:live": "node src/lib/sync/live.js",
+    "sync": "node -r dotenv/config src/lib/sync/index.js",
+    "sync:daily": "node -r dotenv/config src/lib/sync/index.js --daily",
+    "sync:live": "node -r dotenv/config src/lib/sync/live.js",
     "test": "vitest",
     "analyze": "ANALYZE=true next build --webpack",
     "prepare": "husky"
