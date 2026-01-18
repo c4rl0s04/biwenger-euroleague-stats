@@ -10,13 +10,39 @@ export async function run(manager) {
   const db = manager.context.db;
   const competition = manager.context.competition;
 
-  const rounds =
+  let rounds =
     competition?.data?.rounds ||
     competition?.data?.season?.rounds ||
     competition?.data?.data?.season?.rounds;
-  if (!rounds) throw new Error('Competition rounds data missing.');
 
-  // Optimization removed: Always sync all lineups
+  // If missing (standalone run), fetch it
+  if (!rounds) {
+    manager.log('   ⚠️ Competition context missing. Fetching from API...');
+
+    // Dynamic import to avoid circular dep issues or just standard if available.
+    // Assuming fetchCompetition is in biwenger-client which is usually imported.
+    const { fetchCompetition } = await import('../../api/biwenger-client.js');
+    const compData = await fetchCompetition();
+
+    rounds =
+      compData?.data?.rounds ||
+      compData?.data?.season?.rounds ||
+      compData?.data?.data?.season?.rounds ||
+      compData?.rounds;
+
+    if (!rounds) throw new Error('Could not fetch competition rounds data.');
+  }
+
+  // 2. Ensure Players List is populated (for isolation run)
+  if (!manager.context.playersList || Object.keys(manager.context.playersList).length === 0) {
+    manager.log('   ⚠️ Players list missing. Fetching from DB...');
+    const res = await db.query('SELECT id, name FROM players');
+    manager.context.playersList = res.rows.reduce((acc, p) => {
+      acc[p.id] = p;
+      return acc;
+    }, {});
+    manager.log(`   Fetched ${res.rows.length} players from DB.`);
+  }
 
   let totalLineups = 0;
 

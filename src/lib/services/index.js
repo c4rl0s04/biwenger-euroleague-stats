@@ -74,3 +74,6 @@ export {
 
 // Team Service
 export { fetchTeamProfile } from './teamService.js';
+
+// Rounds Service
+export { fetchRoundsList, fetchUserLineup } from './roundsService.js';

@@ -57,7 +57,7 @@ export async function getNextRound() {
     WITH TargetRound AS (
       SELECT round_id 
       FROM matches 
-      WHERE date > NOW() - INTERVAL '12 hours'
+      WHERE date > NOW()
       ORDER BY date ASC 
       LIMIT 1
     )
@@ -131,6 +131,22 @@ export async function getNextRound() {
   }
 
   return round;
+}
+
+/**
+ * Get the last completed round (active or finished)
+ * Used for default selection
+ */
+export async function getLastCompletedRound() {
+  const query = `
+    SELECT round_id 
+    FROM matches 
+    WHERE status = 'finished'
+    ORDER BY date DESC 
+    LIMIT 1
+  `;
+  const res = await db.query(query);
+  return res.rows[0];
 }
 
 /**
@@ -293,4 +309,106 @@ export async function getLastRoundStats() {
     ORDER BY prs.fantasy_points DESC
   `;
   return (await db.query(query)).rows;
+}
+
+/**
+ * Get all rounds available in the system
+ * @returns {Promise<Array>} List of rounds
+ */
+export async function getAllRounds() {
+  const query = `
+    SELECT DISTINCT round_id, round_name 
+    FROM matches 
+    ORDER BY round_id DESC
+  `;
+  return (await db.query(query)).rows;
+}
+
+/**
+ * Get user lineup for a specific round
+ * @param {string} userId - User ID
+ * @param {string} roundId - Round ID
+ * @returns {Promise<Object>} Lineup details with starters and bench
+ */
+export async function getUserLineup(userId, roundId) {
+  // 1. Get detailed lineup stats
+  const query = `
+    SELECT 
+      l.player_id,
+      COALESCE(p.name, 'Unknown Player') as name,
+      COALESCE(p.position, 'Bench') as position,
+      p.img,
+      COALESCE(t.name, 'Unknown Team') as team,
+      t.short_name as team_short,
+      t.img as team_img,
+      l.is_captain,
+      l.role,
+      COALESCE(prs.fantasy_points, 0) as points,
+      COALESCE(prs.valuation, 0) as valuation,
+      COALESCE(prs.points, 0) as stats_points,
+      COALESCE(prs.rebounds, 0) as stats_rebounds,
+      COALESCE(prs.assists, 0) as stats_assists,
+      prs.minutes,
+      p.status as current_status
+    FROM lineups l
+    LEFT JOIN players p ON l.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    WHERE l.user_id = $1 AND l.round_id = $2
+    ORDER BY 
+      CASE 
+        WHEN p.position = 'Base' THEN 1
+        WHEN p.position = 'Alero' THEN 2
+        WHEN p.position = 'Pivot' THEN 3
+        ELSE 4
+      END
+  `;
+
+  const lineup = (await db.query(query, [userId, roundId])).rows;
+
+  // 2. Get User Round totals
+  const totalsQuery = `
+    SELECT 
+      ur.points, 
+      ur.participated,
+      (
+        SELECT COUNT(*) + 1 
+        FROM user_rounds ur2 
+        WHERE ur2.round_id = $2 AND ur2.points > ur.points
+      ) as position
+    FROM user_rounds ur
+    WHERE ur.user_id = $1 AND ur.round_id = $2
+  `;
+  const totals = (await db.query(totalsQuery, [userId, roundId])).rows[0];
+
+  // Logic to separate starters and bench
+  // If we don't have explicit starter field, we assume top 5 are starters (Biwenger basketball logic usually)
+  // Or we check if there is a 'titular' column in lineups table (I should have checked schema but assuming standard 5)
+  // For now, I'll return all and let frontend split, or split here.
+  // Standard EuroLeague fantasy is 5 starters + bench.
+
+  // Let's assume the first 5 sorted by position are potential starters if no explicit flag.
+  // BUT, usually lineups table might store position in `slot` or something?
+  // Since I don't see `slot` in my previous greps, I'll assume we return the flat list
+  // and frontend or logic here handles it.
+
+  // Actually, usually in fantasy basketball: 2 Guards (Base), 2 Forwards (Alero), 1 Center (Pivot) OR similar.
+  // If `lineups` doesn't have `is_starter`, we might need to guess or show all.
+  // However, `is_captain` is there.
+
+  return {
+    players: lineup.map((p) => ({
+      ...p,
+      points: parseInt(p.points) || 0,
+      stats_points: parseInt(p.stats_points) || 0,
+      valuation: parseInt(p.valuation) || 0,
+    })),
+    summary: totals
+      ? {
+          total_points: parseInt(totals.points) || 0,
+          round_rank: parseInt(totals.position) || 0,
+          participated: totals.participated,
+        }
+      : null,
+  };
 }

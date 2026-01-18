@@ -1,4 +1,4 @@
-'use client';
+import RoundsPageClient from '@/components/rounds/RoundsPageClient';
 
 /**
  * Lineups Page
@@ -21,13 +21,7 @@ export default function LineupsPage() {
             Gestión de plantilla y análisis de alineaciones
           </p>
 
-          {/* Placeholder for future implementation */}
-          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-12 text-center">
-            <p className="text-muted-foreground text-lg">🚧 Página en construcción</p>
-            <p className="text-muted-foreground/70 text-sm mt-2">
-              Próximamente: alineación actual, análisis y puntos perdidos.
-            </p>
-          </div>
+          <RoundsPageClient />
         </div>
       </main>
     </div>

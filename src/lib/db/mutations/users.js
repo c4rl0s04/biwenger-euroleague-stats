@@ -114,6 +114,11 @@ export function prepareUserMutations(db) {
       ]);
     },
 
+    deleteUserLineup: async (params) => {
+      const sql = `DELETE FROM lineups WHERE user_id = $1 AND round_id = $2`;
+      await db.query(sql, [params.user_id, params.round_id]);
+    },
+
     upsertUserRound: async (params) => {
       // SQLite params were array [val, val...] in .run()
       // Now we use named params in object for consistency or array?

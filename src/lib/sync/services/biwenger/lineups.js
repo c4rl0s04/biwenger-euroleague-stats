@@ -70,6 +70,14 @@ export async function run(manager, round, playersListInput) {
 
         // Insert Lineup (ALWAYS)
         if (user.lineup && user.lineup.players) {
+          // Clear previous lineup to avoid duplicates/ghosts on re-sync
+          if (mutations.deleteUserLineup) {
+            await mutations.deleteUserLineup({
+              user_id: user.id.toString(),
+              round_id: dbRoundId,
+            });
+          }
+
           const captainId = user.lineup.captain ? user.lineup.captain.id : null;
 
           // Sequential loop for async
@@ -79,10 +87,52 @@ export async function run(manager, round, playersListInput) {
               let role = 'suplente';
               if (index < 5) role = 'titular';
               else if (index === 5) role = '6th_man';
-              // Check if player exists in our list
+
+              // Handle missing players (e.g. left the league)
               if (!playersList[playerId]) {
-                continue;
+                try {
+                  manager.log(`      ⚠️ Player ${playerId} not in list. Fetching details...`);
+                  // Dynamic import to avoid circular dependency
+                  const { fetchPlayerDetails } = await import('../../../api/biwenger-client.js');
+                  const pData = await fetchPlayerDetails(playerId);
+
+                  if (pData && pData.data) {
+                    const player = pData.data;
+                    // Insert into DB as "inactive" or minimal record
+                    await mutations.updatePlayerOwner({
+                      // Using existing mutation or raw query
+                      owner_id: null,
+                      player_id: playerId,
+                    });
+
+                    // Actually we need a proper upsert for player.
+                    // Since we don't have a generic upsertPlayer in `users.js` mutations (it's in `01-players` step logic),
+                    // we might just insert a placeholder or do a quick raw insert if detailed mutation is unavailable.
+                    // Checking schema: id, name, position, price, etc.
+
+                    await db.query(
+                      `
+                     INSERT INTO players (id, name, position, img, price, status)
+                     VALUES ($1, $2, $3, $4, $5, 'active')
+                     ON CONFLICT(id) DO NOTHING
+                   `,
+                      [player.id, player.name, player.position, player.img, player.price]
+                    );
+
+                    // Add to local list so we don't fetch again
+                    playersList[playerId] = player;
+                  }
+                } catch (err) {
+                  manager.error(
+                    `      ❌ Could not fetch/insert missing player ${playerId}: ${err.message}`
+                  );
+                  // If we can't find them, we can't insert stats/lineup properly usually, or we insert with nulls.
+                  // For now, if we can't fetch, we might still want to insert the lineup entry if the DB allows it (no FK).
+                }
               }
+
+              // Proceed even if not in list (table has no FK constraint on player_id based on schema.js check)
+              // But if we want names in UI, we needed the fetch above.
 
               await mutations.upsertLineup({
                 user_id: user.id.toString(),
