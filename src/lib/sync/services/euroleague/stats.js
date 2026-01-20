@@ -179,45 +179,8 @@ export async function runBiwengerPoints(manager, round, playersListInput) {
 
           // Handle missing players (e.g. left the league)
           if (!playersList[playerId]) {
-            try {
-              manager.log(`      ⚠️ Player ${playerId} (Stats) not in list. Fetching details...`);
-              // Dynamic import to avoid circular dependency
-              const { fetchPlayerDetails } = await import('../../../api/biwenger-client.js');
-              const pData = await fetchPlayerDetails(playerId);
-
-              if (pData && pData.data) {
-                // FALLBACK: If API doesn't return ID/Name (inactive player), construct it manually
-                const player = pData.data.id ? pData.data : {
-                    ...pData.data,
-                    id: playerId,
-                    name: pData.data.name || `Unknown Player ${playerId}`,
-                    position: pData.data.position || 5,
-                    price: pData.data.price || 0,
-                    img: pData.data.img || null
-                };
-
-                // Insert into DB as "inactive" or minimal record
-                await db.query(
-                  `
-                   INSERT INTO players (id, name, position, img, price, status)
-                   VALUES ($1, $2, $3, $4, $5, 'active')
-                   ON CONFLICT(id) DO NOTHING
-                 `,
-                  [player.id, player.name, player.position, player.img, player.price]
-                );
-
-                // Add to local list so we don't fetch again
-                playersList[playerId] = player;
-              }
-            } catch (err) {
-              // manager.error(`      ❌ Could not fetch/insert missing player ${playerId}: ${err.message}`);
-              // Proceed anyway, maybe updateFantasyPoints works if ID constraints allow (unlikely if FK)
-              // ACTUALLY: schema says no FK on player_round_stats(player_id) -> lineups yes?
-              // Schema check:
-              // 128: CREATE TABLE IF NOT EXISTS player_round_stats ( ... player_id INTEGER ... )
-              // No foreign key definition in the snippet I saw for table creation, only indexes.
-              // So it *might* work even if insert fails.
-            }
+             manager.log(`      ⚠️ Player ${playerId} (Stats) not in list. Skipping details fetch.`);
+             // Proceed to insert stats for ghost player
           }
 
           if (!playersList[playerId]) {
