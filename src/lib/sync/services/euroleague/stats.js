@@ -177,17 +177,7 @@ export async function runBiwengerPoints(manager, round, playersListInput) {
           const playerId = report.player?.id;
           if (!playerId) continue;
 
-          // Handle missing players (e.g. left the league)
-          if (!playersList[playerId]) {
-             manager.log(`      ⚠️ Player ${playerId} (Stats) not in list. Skipping details fetch.`);
-             // Proceed to insert stats for ghost player
-          }
 
-          if (!playersList[playerId]) {
-            // If still missing (fetch failed), we try to insert stats anyway.
-            // If DB has FK, it will fail. If not, it works.
-            // Based on schema.js viewing earlier, I didn't see explicit FK constraint on player_round_stats.player_id.
-          }
 
           await mutations.updateFantasyPoints({
             fantasy_points: report.points || 0,
