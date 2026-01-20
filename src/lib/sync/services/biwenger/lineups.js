@@ -90,9 +90,11 @@ export async function run(manager, round, playersListInput) {
 
               // Handle missing players (e.g. left the league)
               if (!playersList[playerId]) {
-                 manager.log(`      ⚠️ Player ${playerId} not in list. Skipping details fetch (User requested).`);
-                 // We do NOT fetch/insert into players table.
-                 // We proceed to insert the lineup row with the ID (Ghost Player).
+                manager.log(
+                  `      ⚠️ Player ${playerId} not in list. Skipping details fetch (User requested).`
+                );
+                // We do NOT fetch/insert into players table.
+                // We proceed to insert the lineup row with the ID (Ghost Player).
               }
 
               // Proceed even if not in list (table has no FK constraint on player_id based on schema.js check)
