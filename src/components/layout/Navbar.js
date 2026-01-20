@@ -10,7 +10,7 @@ import { useCardTheme } from '@/contexts/CardThemeContext';
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Clasificación', href: '/standings', icon: Trophy },
-  { name: 'Alineaciones', href: '/lineups', icon: Users },
+  { name: 'Alineaciones', href: '/schedule', icon: Users },
   { name: 'Jugadores', href: '/players', icon: User },
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },

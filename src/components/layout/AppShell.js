@@ -47,7 +47,7 @@ export default function AppShell({ children }) {
                       </Link>
                     </li>
                     <li>
-                      <Link href="/lineups" className="hover:text-indigo-400 transition-colors">
+                      <Link href="/schedule" className="hover:text-indigo-400 transition-colors">
                         Alineaciones
                       </Link>
                     </li>

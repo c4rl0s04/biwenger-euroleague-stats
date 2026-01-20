@@ -66,7 +66,7 @@ export default function Home() {
       title: 'Alineaciones',
       description: 'Sugerencias de alineación por IA',
       icon: Users,
-      href: '/lineups',
+      href: '/schedule',
       color: 'purple',
       delay: '0.6s',
       disabled: false,

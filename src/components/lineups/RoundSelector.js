@@ -48,7 +48,7 @@ export default function RoundSelector({ rounds, currentRoundId, userId }) {
           return (
             <Link
               key={r.round_id}
-              href={`/lineups?userId=${userId}&roundId=${r.round_id}`}
+              href={`/schedule?userId=${userId}&roundId=${r.round_id}`}
               scroll={false}
               data-active={isActive}
               className={`

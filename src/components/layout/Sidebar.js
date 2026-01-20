@@ -34,7 +34,7 @@ const navItems = [
   { name: 'Jugadores', href: '/players', icon: User },
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },
-  { name: 'Alineaciones', href: '/lineups', icon: Users },
+  { name: 'Alineaciones', href: '/schedule', icon: Users },
   { name: 'Jornadas', href: '/rounds', icon: Clock },
   { name: 'Porras', href: '/predictions', icon: Target },
 ];

@@ -34,7 +34,7 @@ export default function CommandPalette() {
     { name: 'Clasificación', href: '/standings', icon: TrendingUp, keywords: ['ranking', 'tabla'] },
     { name: 'Mercado', href: '/market', icon: ShoppingBag, keywords: ['fichajes', 'compras'] },
     { name: 'Partidos', href: '/matches', icon: Calendar, keywords: ['jornada', 'calendario'] },
-    { name: 'Alineaciones', href: '/lineups', icon: Shirt, keywords: ['equipos', 'onues'] },
+    { name: 'Alineaciones', href: '/schedule', icon: Shirt, keywords: ['equipos', 'onues'] },
     { name: 'Porras', href: '/predictions', icon: Vote, keywords: ['apuestas', 'predicciones'] },
   ];
 

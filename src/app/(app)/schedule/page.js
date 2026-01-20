@@ -70,7 +70,7 @@ export default async function SchedulePage({ searchParams }) {
               {users.map((u) => (
                 <Link
                   key={u.id}
-                  href={`/lineups?userId=${u.id}${roundId ? `&roundId=${roundId}` : ''}`}
+                  href={`/schedule?userId=${u.id}${roundId ? `&roundId=${roundId}` : ''}`}
                   className={`
                     px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors border
                     ${
