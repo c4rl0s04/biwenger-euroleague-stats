@@ -113,5 +113,7 @@ export async function fetchRoundGames(roundId) {
 
 // This is the new function you added
 export async function fetchPlayerDetails(playerId) {
-  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.PLAYER_DETAILS(playerId));
+  return biwengerFetch(
+    CONFIG.ENDPOINTS.BIWENGER.PLAYER_DETAILS(playerId)
+  );
 }
