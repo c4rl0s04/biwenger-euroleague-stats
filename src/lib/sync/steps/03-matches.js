@@ -63,10 +63,11 @@ export async function run(manager) {
             continue;
           }
 
-          // 2. Skip if Future (Not started yet)
-          if (row.first_match_date && new Date(row.first_match_date) > now) {
-            continue;
-          }
+          // 2. Skip if Future (Not started yet) -> REMOVED
+          // We want to force sync future rounds to catch schedule changes (time/date updates)
+          // if (row.first_match_date && new Date(row.first_match_date) > now) {
+          //   continue;
+          // }
         }
         // If no data in DB, or active, we sync.
       } catch (err) {
