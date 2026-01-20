@@ -177,8 +177,6 @@ export async function runBiwengerPoints(manager, round, playersListInput) {
           const playerId = report.player?.id;
           if (!playerId) continue;
 
-
-
           await mutations.updateFantasyPoints({
             fantasy_points: report.points || 0,
             player_id: playerId,
