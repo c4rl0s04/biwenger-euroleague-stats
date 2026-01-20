@@ -186,7 +186,16 @@ export async function runBiwengerPoints(manager, round, playersListInput) {
               const pData = await fetchPlayerDetails(playerId);
 
               if (pData && pData.data) {
-                const player = pData.data;
+                // FALLBACK: If API doesn't return ID/Name (inactive player), construct it manually
+                const player = pData.data.id ? pData.data : {
+                    ...pData.data,
+                    id: playerId,
+                    name: pData.data.name || `Unknown Player ${playerId}`,
+                    position: pData.data.position || 5,
+                    price: pData.data.price || 0,
+                    img: pData.data.img || null
+                };
+
                 // Insert into DB as "inactive" or minimal record
                 await db.query(
                   `
