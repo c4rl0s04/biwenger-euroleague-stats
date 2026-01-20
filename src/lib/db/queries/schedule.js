@@ -1,5 +1,6 @@
 import { db } from '../client.js';
 import { NEXT_ROUND_CTE } from '../sql_utils.js';
+import { getTeamColor } from '@/lib/constants/teamColors.js';
 
 export async function getScheduleRounds() {
   try {
@@ -79,7 +80,9 @@ export async function getUserSchedule(userId, targetRoundId = null) {
         m.home_id,
         m.away_id,
         th.short_name as home_team,
-        ta.short_name as away_team
+        ta.short_name as away_team,
+        th.code as home_code,
+        ta.code as away_code
       FROM matches m
       LEFT JOIN teams th ON m.home_id = th.id
       LEFT JOIN teams ta ON m.away_id = ta.id
@@ -95,9 +98,11 @@ export async function getUserSchedule(userId, targetRoundId = null) {
         p.name,
         p.team_id,
         t.short_name as team_name,
+        t.code as team_code,
         p.position,
         p.price,
-        p.img
+        p.img,
+        p.puntos
       FROM players p
       LEFT JOIN teams t ON p.team_id = t.id
       WHERE p.owner_id = $1
@@ -122,10 +127,16 @@ export async function getUserSchedule(userId, targetRoundId = null) {
           ...p,
           is_home: p.team_id === match.home_id,
           opponent: p.team_id === match.home_id ? match.away_team : match.home_team,
-        }));
+          // Calculate team color
+          team_color: getTeamColor(p.team_code),
+        }))
+        // Sort by fantasy points (descending)
+        .sort((a, b) => (b.puntos || 0) - (a.puntos || 0));
 
       return {
         ...match,
+        home_team_color: getTeamColor(match.home_code),
+        away_team_color: getTeamColor(match.away_code),
         user_players: matchPlayers,
         has_players: matchPlayers.length > 0,
       };

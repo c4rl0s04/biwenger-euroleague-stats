@@ -32,12 +32,17 @@ export function UserProvider({ children, users }) {
       };
       setCurrentUser(userData);
       localStorage.setItem('selectedUser', JSON.stringify(userData));
+
+      // Sync to cookie for server-side access (1 year expiry)
+      document.cookie = `NEXT_USER_ID=${user.user_id}; path=/; max-age=31536000; SameSite=Lax`;
     }
   };
 
   const clearUser = () => {
     setCurrentUser(null);
     localStorage.removeItem('selectedUser');
+    // Clear cookie
+    document.cookie = 'NEXT_USER_ID=; path=/; max-age=0; SameSite=Lax';
   };
 
   return (

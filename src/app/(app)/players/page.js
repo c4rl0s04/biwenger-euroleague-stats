@@ -16,13 +16,13 @@ export default async function PlayersPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <main className="container mx-auto px-4 py-12 relative z-10">
+      <main className="w-full px-4 sm:px-6 lg:px-8 pt-12 pb-2 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-display mb-4 flex items-center gap-4">
-            <span className="w-1.5 h-10 bg-primary rounded-full"></span>
-            <span className="text-foreground">Jugadores</span>
+          <h1 className="text-5xl md:text-6xl font-display mb-4 flex items-center gap-4">
+            <span className="w-1.5 h-12 bg-gradient-to-b from-primary to-orange-400 rounded-full"></span>
+            <span className="text-gradient">Jugadores</span>
           </h1>
-          <p className="text-muted-foreground text-lg mb-10">
+          <p className="text-muted-foreground text-lg w-full border-b border-border/50 pb-6 mb-10">
             Explora todos los jugadores de la liga, sus valores y estadísticas.
           </p>
 
