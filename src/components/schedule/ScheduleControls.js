@@ -23,15 +23,15 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
   // Logic for Next/Prev Round Arrows
   const handlePrevRound = () => {
     const idx = rounds.findIndex((r) => String(r.round_id) === String(activeRoundId));
-    if (idx < rounds.length - 1) {
-      updateParams(null, rounds[idx + 1].round_id);
+    if (idx > 0) {
+      updateParams(null, rounds[idx - 1].round_id);
     }
   };
 
   const handleNextRound = () => {
     const idx = rounds.findIndex((r) => String(r.round_id) === String(activeRoundId));
-    if (idx > 0) {
-      updateParams(null, rounds[idx - 1].round_id);
+    if (idx < rounds.length - 1) {
+      updateParams(null, rounds[idx + 1].round_id);
     }
   };
 
