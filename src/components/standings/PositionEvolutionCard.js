@@ -4,6 +4,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getColorForUser } from '@/lib/constants/colors';
 
 // --- Helper function for dynamic cell styling ---
@@ -193,11 +194,15 @@ export default function PositionEvolutionCard() {
                         className={`w-48 flex-shrink-0 flex items-center gap-2.5 px-2 sticky left-0 z-10 py-1 rounded-l-md bg-slate-900/0 group-hover:bg-slate-900/0 transition-all`}
                       >
                         {user.icon ? (
-                          <img
-                            src={user.icon}
-                            alt={user.name}
-                            className="w-5 h-5 rounded-full object-cover border border-slate-700 ring-1 ring-black/20"
-                          />
+                          <div className="relative w-5 h-5 shrink-0">
+                            <Image
+                              src={user.icon}
+                              alt={user.name}
+                              fill
+                              className="rounded-full object-cover border border-slate-700 ring-1 ring-black/20"
+                              sizes="20px"
+                            />
+                          </div>
                         ) : (
                           <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[9px] font-bold text-slate-400 border border-slate-700">
                             {user.name.charAt(0)}

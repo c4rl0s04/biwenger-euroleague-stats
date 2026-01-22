@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/utils/format';
@@ -117,10 +118,12 @@ function DayMatchRow({ dayName, matches, roundName }) {
                   >
                     {match.home_logo && (
                       <div className="relative w-12 h-12 transition-transform group-hover/home:scale-110 duration-200">
-                        <img
+                        <Image
                           src={match.home_logo}
                           alt={match.home_team}
-                          className="w-full h-full object-contain drop-shadow-md"
+                          fill
+                          className="object-contain drop-shadow-md"
+                          sizes="48px"
                           onError={(e) => (e.target.style.display = 'none')}
                         />
                       </div>
@@ -144,10 +147,12 @@ function DayMatchRow({ dayName, matches, roundName }) {
                   >
                     {match.away_logo && (
                       <div className="relative w-12 h-12 transition-transform group-hover/away:scale-110 duration-200">
-                        <img
+                        <Image
                           src={match.away_logo}
                           alt={match.away_team}
-                          className="w-full h-full object-contain drop-shadow-md"
+                          fill
+                          className="object-contain drop-shadow-md"
+                          sizes="48px"
                           onError={(e) => (e.target.style.display = 'none')}
                         />
                       </div>

@@ -4,6 +4,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Crown } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getColorForUser } from '@/lib/constants/colors';
 
 export default function DominanceCard() {
@@ -30,11 +31,15 @@ export default function DominanceCard() {
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <span className="text-slate-500 font-mono text-xs w-4">#{index + 1}</span>
                   {user.icon ? (
-                    <img
-                      src={user.icon}
-                      alt={user.name}
-                      className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
-                    />
+                    <div className="relative w-10 h-10 shrink-0">
+                      <Image
+                        src={user.icon}
+                        alt={user.name}
+                        fill
+                        className="rounded-full object-cover ring-2 ring-white/10"
+                        sizes="40px"
+                      />
+                    </div>
                   ) : (
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ring-2 ring-white/10"

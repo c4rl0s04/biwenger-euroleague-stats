@@ -7,6 +7,7 @@ import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { getColorForUser } from '@/lib/constants/colors';
 
 export default function FullStandingsCard() {
@@ -119,11 +120,15 @@ export default function FullStandingsCard() {
                         className="flex items-center gap-2 group hover:opacity-100"
                       >
                         {user.icon ? (
-                          <img
-                            src={user.icon}
-                            alt={user.name}
-                            className="w-8 h-8 rounded-full transition-opacity group-hover:opacity-80"
-                          />
+                          <div className="relative w-8 h-8 shrink-0">
+                            <Image
+                              src={user.icon}
+                              alt={user.name}
+                              fill
+                              className="rounded-full transition-opacity group-hover:opacity-80 object-cover"
+                              sizes="32px"
+                            />
+                          </div>
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium transition-opacity group-hover:opacity-80">
                             {user.name.charAt(0)}

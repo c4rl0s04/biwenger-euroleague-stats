@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Trophy } from 'lucide-react';
 import { useMemo } from 'react';
 import { Card } from '@/components/ui';
@@ -28,11 +29,15 @@ export default function RoundWinnersCard() {
                   </div>
                   <div className="flex justify-center mb-1">
                     {winner.icon ? (
-                      <img
+                    <div className="relative w-8 h-8 shrink-0">
+                      <Image
                         src={winner.icon}
                         alt={winner.name}
-                        className="w-8 h-8 rounded-full ring-2 ring-white/20 transition-transform group-hover:scale-105"
+                        fill
+                        className="rounded-full ring-2 ring-white/20 transition-transform group-hover:scale-105 object-cover"
+                        sizes="32px"
                       />
+                    </div>
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-medium text-white transition-transform group-hover:scale-105">
                         {winner.name.charAt(0)}

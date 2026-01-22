@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import Image from 'next/image';
 
 // Section 7.2: The Player Token UI
 // "A circular avatar with a colored border indicating position."
@@ -50,15 +51,21 @@ export default function PlayerCourtCard({ player, onClick }) {
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none z-30" />
 
         {!imgError ? (
-          <img
-            src={
-              player.img ||
-              `https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/${player.player_id}.png`
-            }
-            alt={player.name}
-            className="w-full h-full object-cover object-top pt-2 scale-110" // scalable image
-            onError={handleImageError}
-          />
+          <div className="relative w-full h-full pt-2 scale-110">
+            <Image
+              src={
+                !imgError
+                  ? player.img ||
+                    `https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/${player.player_id}.png`
+                  : '/placeholder.png' // Fallback handled by onError mostly but good practice
+              }
+              alt={player.name}
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onError={handleImageError}
+            />
+          </div>
         ) : (
           // Fallback: Initials on Jersey color background
           <div className="w-full h-full flex items-center justify-center bg-slate-800 text-white text-base font-bold">

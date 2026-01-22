@@ -52,8 +52,9 @@ export default function IdealLineupCard() {
                   owner={player.owner_name}
                   avatar={
                     <div
-                      className={`w-10 h-10 rounded-full overflow-hidden border-2 ${color} bg-secondary flex items-center justify-center`}
+                      className={`relative w-10 h-10 rounded-full overflow-hidden border-2 ${color} bg-secondary flex items-center justify-center`}
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={player.img}
                         alt={player.name}

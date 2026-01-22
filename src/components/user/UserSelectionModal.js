@@ -1,6 +1,7 @@
 'use client';
 
 import { useClientUser } from '@/lib/hooks/useClientUser';
+import Image from 'next/image';
 
 export default function UserSelectionModal() {
   const { currentUser, selectUser, users, isClient } = useClientUser();
@@ -24,7 +25,9 @@ export default function UserSelectionModal() {
               className="w-full flex items-center gap-3 p-3 bg-[hsl(220,18%,10%)] hover:bg-[hsl(220,18%,15%)] border border-border hover:border-primary rounded-xl transition-all cursor-pointer"
             >
               {user.icon ? (
-                <img src={user.icon} alt={user.name} className="w-8 h-8 rounded-full" />
+                <div className="relative w-8 h-8 shrink-0">
+                  <Image src={user.icon} alt={user.name} fill className="rounded-full object-cover" sizes="32px" />
+                </div>
               ) : (
                 <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-white">
                   {user.name.charAt(0)}

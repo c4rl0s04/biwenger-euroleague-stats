@@ -2,6 +2,7 @@
 
 import { History, ArrowRight, ShoppingCart, User, Wallet, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui';
+import Image from 'next/image';
 
 export default function PlayerOwnershipCard({ transfers, className = '' }) {
   if (!transfers || transfers.length === 0) {
@@ -101,11 +102,15 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
                     {/* FROM */}
                     <div className="flex items-center gap-2 overflow-hidden justify-start">
                       {t.from_img ? (
-                        <img
-                          src={t.from_img}
-                          alt={t.from_name}
-                          className="w-6 h-6 rounded-full border border-slate-700 object-cover shrink-0"
-                        />
+                        <div className="relative w-6 h-6 shrink-0">
+                          <Image
+                            src={t.from_img}
+                            alt={t.from_name}
+                            fill
+                            className="rounded-full border border-slate-700 object-cover"
+                            sizes="24px"
+                          />
+                        </div>
                       ) : (
                         <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-slate-400 border border-slate-600 shrink-0">
                           {t.from_name.charAt(0)}
@@ -127,11 +132,15 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
                         {t.to_name}
                       </div>
                       {t.to_img ? (
-                        <img
-                          src={t.to_img}
-                          alt={t.to_name}
-                          className="w-6 h-6 rounded-full border border-slate-700 object-cover shrink-0"
-                        />
+                        <div className="relative w-6 h-6 shrink-0">
+                          <Image
+                            src={t.to_img}
+                            alt={t.to_name}
+                            fill
+                            className="rounded-full border border-slate-700 object-cover"
+                            sizes="24px"
+                          />
+                        </div>
                       ) : (
                         <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-slate-400 border border-slate-600 shrink-0">
                           {t.to_name.charAt(0)}

@@ -20,7 +20,8 @@ export default function RoundsPageClient() {
     if (lists?.rounds?.length > 0 && !selectedRoundId) {
       setSelectedRoundId(lists.defaultRoundId || lists.rounds[0].round_id);
     }
-  }, [lists, selectedRoundId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lists]);
 
   // Initialize User
   useEffect(() => {
@@ -28,7 +29,8 @@ export default function RoundsPageClient() {
       const globalUser = currentUser && lists.users.find((u) => u.id === currentUser.id);
       setSelectedUserId(globalUser ? globalUser.id : lists.users[0].id);
     }
-  }, [lists, currentUser, selectedUserId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lists, currentUser]);
 
   // Fetch Lineup
   const { data: lineupData, loading: lineupLoading } = useApiData(

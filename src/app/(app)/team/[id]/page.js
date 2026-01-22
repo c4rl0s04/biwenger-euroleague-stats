@@ -1,5 +1,6 @@
 import { getTeamById } from '@/lib/db';
 import { Construction } from 'lucide-react';
+import Image from 'next/image';
 import { BackButton } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
@@ -35,7 +36,14 @@ export default async function TeamPage({ params }) {
         <div className="mb-8 flex flex-col items-center">
           {team.logo ? (
             <div className="w-32 h-32 relative mb-6 drop-shadow-2xl">
-              <img src={team.logo} alt={team.name} className="w-full h-full object-contain" />
+              <Image
+                src={team.logo}
+                alt={team.name}
+                fill
+                className="object-contain"
+                sizes="128px"
+                priority // Important for LCP
+              />
             </div>
           ) : (
             <div className="w-32 h-32 bg-secondary/50 rounded-full flex items-center justify-center mb-6">
