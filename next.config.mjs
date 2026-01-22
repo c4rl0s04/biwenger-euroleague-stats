@@ -41,6 +41,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ak-static.cms.nba.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

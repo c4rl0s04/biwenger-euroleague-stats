@@ -9,7 +9,7 @@ export async function GET(request) {
     const roundId = searchParams.get('roundId');
 
     if (!roundId) {
-        return errorResponse('Missing roundId', 400);
+      return errorResponse('Missing roundId', 400);
     }
 
     const data = await fetchRoundStandings(roundId);

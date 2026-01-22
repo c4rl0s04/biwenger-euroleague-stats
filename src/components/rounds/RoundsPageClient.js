@@ -40,41 +40,37 @@ export default function RoundsPageClient() {
     { dependencies: [selectedRoundId, selectedUserId] }
   );
 
-  if (listsLoading) return <div className="text-center py-20 animate-pulse text-zinc-500">Cargando...</div>;
+  if (listsLoading)
+    return <div className="text-center py-20 animate-pulse text-zinc-500">Cargando...</div>;
 
   return (
     <div className="space-y-8">
       {/* 1. HEADER CONTROLS */}
-      <RoundControls 
-         lists={lists} 
-         selectedRoundId={selectedRoundId} 
-         onChangeRound={setSelectedRoundId} 
-         lineupSummary={lineupData?.summary} 
+      <RoundControls
+        lists={lists}
+        selectedRoundId={selectedRoundId}
+        onChangeRound={setSelectedRoundId}
+        lineupSummary={lineupData?.summary}
       />
-      
+
       {/* 2. MAIN LAYOUT - Standard Flex Columns */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        
         {/* LEFT COLUMN (Standings) 
             - No 'sticky', no 'top-0'. 
             - It behaves like a normal div.
         */}
         <div className="w-full lg:w-[550px] shrink-0">
-             <RoundStandings 
-                roundId={selectedRoundId} 
-                selectedUserId={selectedUserId} 
-                onSelectUser={setSelectedUserId}
-             />
+          <RoundStandings
+            roundId={selectedRoundId}
+            selectedUserId={selectedUserId}
+            onSelectUser={setSelectedUserId}
+          />
         </div>
 
         {/* RIGHT COLUMN (Lineup) */}
         <div className="flex-1 min-w-0 w-full">
-          <RoundLineupView 
-             players={lineupData?.players || []} 
-             loading={lineupLoading}
-          />
+          <RoundLineupView players={lineupData?.players || []} loading={lineupLoading} />
         </div>
-
       </div>
     </div>
   );

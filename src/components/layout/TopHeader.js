@@ -36,6 +36,8 @@ export default function TopHeader({ onMobileMenuClick }) {
                 src="/brand-logo.png"
                 alt="Biwenger Stats Logo"
                 fill
+                priority
+                unoptimized
                 className="object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"
                 sizes="80px"
               />

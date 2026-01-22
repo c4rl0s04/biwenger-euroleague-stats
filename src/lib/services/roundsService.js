@@ -18,8 +18,8 @@ import { getAllUsers } from '../db/queries/users.js';
  * Fetch standings for a specific round with fallback logic
  * 1. Try to get OFFICIAL standings (user_rounds) if available.
  * 2. If not, calculate LIVE standings from lineups + player stats.
- * 
- * @param {string} roundId 
+ *
+ * @param {string} roundId
  * @returns {Promise<Array>}
  */
 export async function fetchRoundStandings(roundId) {

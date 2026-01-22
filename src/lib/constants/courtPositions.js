@@ -9,7 +9,7 @@ export const getFormation = (starters) => {
   const groups = {
     Pivot: [], // TOP LEVEL (Near Basket)
     Alero: [], // MIDDLE LEVEL (Wings/Elbows)
-    Base:  []  // BOTTOM LEVEL (Perimeter/Halfcourt)
+    Base: [], // BOTTOM LEVEL (Perimeter/Halfcourt)
   };
 
   starters.forEach((player, index) => {
@@ -26,7 +26,7 @@ export const getFormation = (starters) => {
   const LEVEL_Y = {
     Pivot: 10, // Deep in paint / Low block
     Alero: 24, // Free throw line extended
-    Base:  38  // Top of key / Logo area
+    Base: 38, // Top of key / Logo area
   };
 
   // 3. Define "X" Spacing Logic (Horizontal Distribution)
@@ -34,28 +34,28 @@ export const getFormation = (starters) => {
   const getXPositions = (count, role) => {
     // PIVOTS: Keep them tight (Paint area)
     if (role === 'Pivot') {
-      if (count === 1) return [25];              // Center
-      if (count === 2) return [17, 33];          // Low Blocks
-      if (count === 3) return [15, 25, 35];      // Wall
-      return [12, 20, 30, 38];                   // Crowd
+      if (count === 1) return [25]; // Center
+      if (count === 2) return [17, 33]; // Low Blocks
+      if (count === 3) return [15, 25, 35]; // Wall
+      return [12, 20, 30, 38]; // Crowd
     }
 
     // ALEROS: Spread them out (Wings/Corners)
     if (role === 'Alero') {
-      if (count === 1) return [25];              // High Post
-      if (count === 2) return [8, 42];           // Wings
-      if (count === 3) return [5, 25, 45];       // Corner - High - Corner
-      return [5, 18, 32, 45];                    // 4-out look
+      if (count === 1) return [25]; // High Post
+      if (count === 2) return [8, 42]; // Wings
+      if (count === 3) return [5, 25, 45]; // Corner - High - Corner
+      return [5, 18, 32, 45]; // 4-out look
     }
 
     // BASES: Standard Guard Slots
     if (role === 'Base') {
-      if (count === 1) return [25];              // Point Guard
-      if (count === 2) return [16, 34];          // Guard Slots
-      if (count === 3) return [12, 25, 38];      // 3-guard front
-      return [10, 20, 30, 40];                   // Press break
+      if (count === 1) return [25]; // Point Guard
+      if (count === 2) return [16, 34]; // Guard Slots
+      if (count === 3) return [12, 25, 38]; // 3-guard front
+      return [10, 20, 30, 40]; // Press break
     }
-    
+
     return [25]; // Fallback
   };
 

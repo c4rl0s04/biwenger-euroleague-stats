@@ -29,15 +29,15 @@ export default function RoundWinnersCard() {
                   </div>
                   <div className="flex justify-center mb-1">
                     {winner.icon ? (
-                    <div className="relative w-8 h-8 shrink-0">
-                      <Image
-                        src={winner.icon}
-                        alt={winner.name}
-                        fill
-                        className="rounded-full ring-2 ring-white/20 transition-transform group-hover:scale-105 object-cover"
-                        sizes="32px"
-                      />
-                    </div>
+                      <div className="relative w-8 h-8 shrink-0">
+                        <Image
+                          src={winner.icon}
+                          alt={winner.name}
+                          fill
+                          className="rounded-full ring-2 ring-white/20 transition-transform group-hover:scale-105 object-cover"
+                          sizes="32px"
+                        />
+                      </div>
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-medium text-white transition-transform group-hover:scale-105">
                         {winner.name.charAt(0)}

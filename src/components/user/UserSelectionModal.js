@@ -26,7 +26,13 @@ export default function UserSelectionModal() {
             >
               {user.icon ? (
                 <div className="relative w-8 h-8 shrink-0">
-                  <Image src={user.icon} alt={user.name} fill className="rounded-full object-cover" sizes="32px" />
+                  <Image
+                    src={user.icon}
+                    alt={user.name}
+                    fill
+                    className="rounded-full object-cover"
+                    sizes="32px"
+                  />
                 </div>
               ) : (
                 <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-white">

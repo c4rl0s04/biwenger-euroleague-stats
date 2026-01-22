@@ -6,7 +6,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 export default function RoundControls({ lists, selectedRoundId, onChangeRound, lineupSummary }) {
   if (!lists?.rounds) return null;
 
-  const currentRoundIndex = lists.rounds.findIndex(r => r.round_id === selectedRoundId);
+  const currentRoundIndex = lists.rounds.findIndex((r) => r.round_id === selectedRoundId);
   const isFirst = currentRoundIndex === 0;
   const isLast = currentRoundIndex === lists.rounds.length - 1;
 
@@ -39,9 +39,7 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
             value={selectedRoundId}
             onChange={onChangeRound}
             options={
-              lists.rounds
-                .map((r) => ({ value: r.round_id, label: r.round_name }))
-                .reverse() || []
+              lists.rounds.map((r) => ({ value: r.round_id, label: r.round_name })).reverse() || []
             }
             className="w-[350px] mx-auto"
             buttonClassName="h-16 text-4xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10"
@@ -50,14 +48,12 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
           <div className="text-sm text-muted-foreground -mt-1">
             {lineupSummary ? (
               <>
-                <span className="text-primary font-bold">
-                  {lineupSummary.total_points} pts
-                </span>
+                <span className="text-primary font-bold">{lineupSummary.total_points} pts</span>
                 <span className="mx-2">•</span>
                 <span>Posición {lineupSummary.round_rank}</span>
               </>
             ) : (
-                'Sin participación'
+              'Sin participación'
             )}
           </div>
         </div>
