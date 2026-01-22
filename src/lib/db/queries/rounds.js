@@ -490,9 +490,9 @@ export async function getLivingStandings(roundId) {
     ORDER BY points DESC, u.name ASC
   `;
   
-  return (await db.query(query, [roundId])).rows.map(row => ({
+  return (await db.query(query, [roundId])).rows.map((row) => ({
     ...row,
     points: Math.round(parseFloat(row.points) || 0),
-    participated: !!row.participated
+    participated: !!row.participated,
   }));
 }

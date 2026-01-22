@@ -39,7 +39,9 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
             value={selectedRoundId}
             onChange={onChangeRound}
             options={
-              lists.rounds.map((r) => ({ value: r.round_id, label: r.round_name })).reverse() || []
+              lists.rounds
+                .map((r) => ({ value: r.round_id, label: r.round_name }))
+                .reverse() || []
             }
             className="w-[350px] mx-auto"
             buttonClassName="h-16 text-4xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10"

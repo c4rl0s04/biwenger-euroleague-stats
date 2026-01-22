@@ -23,16 +23,16 @@ import { getAllUsers } from '../db/queries/users.js';
  * @returns {Promise<Array>}
  */
 export async function fetchRoundStandings(roundId) {
-    if (!roundId) return [];
-    
-    // Check if official stats exist
-    const isOfficial = await hasOfficialStats(roundId);
-    
-    if (isOfficial) {
-        return await getOfficialStandings(roundId);
-    } else {
-        return await getLivingStandings(roundId);
-    }
+  if (!roundId) return [];
+
+  // Check if official stats exist
+  const isOfficial = await hasOfficialStats(roundId);
+
+  if (isOfficial) {
+    return await getOfficialStandings(roundId);
+  } else {
+    return await getLivingStandings(roundId);
+  }
 }
 
 /**
