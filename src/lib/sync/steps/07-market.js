@@ -129,7 +129,7 @@ export async function run(manager, playersListInput, teamsInput) {
 
       // Handle Betting Pool (Porras) - REMOVED: Now handled in step 13-porras.js
       if (t.type === 'bettingPool') {
-         continue;
+        continue;
       }
 
       // Handle Transfers

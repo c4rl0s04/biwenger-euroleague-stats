@@ -46,10 +46,10 @@ async function syncData() {
   const shouldRun = (num) => {
     if (onlyStep) return String(onlyStep) === String(num);
     if (isDaily) {
-       // Daily mode: Skip steps 9 (Initial Squads), 10 (Logos), 11 (Images), 12 (Colors)
-       // But Allow steps <= 8 AND Step 13 (Porras)
-       if (num >= 9 && num <= 12) return false;
-       return true;
+      // Daily mode: Skip steps 9 (Initial Squads), 10 (Logos), 11 (Images), 12 (Colors)
+      // But Allow steps <= 8 AND Step 13 (Porras)
+      if (num >= 9 && num <= 12) return false;
+      return true;
     }
     return true;
   };
