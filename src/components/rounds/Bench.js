@@ -1,32 +1,29 @@
 'use client';
 
-import StandupPlayerCard from './StandupPlayerCard';
 import PlayerCourtCard from './PlayerCourtCard';
 
-export default function Bench({ players = [], viewMode = 'broadcast', onPlayerClick }) {
+export default function Bench({ players = [], onPlayerClick }) {
   if (!players || players.length === 0) return null;
 
   return (
-    <div className="h-full py-4">
-      <div className="grid grid-cols-2 gap-x-2 place-items-center h-full content-around">
-        {players.map((player, index) => (
-          <div
-            key={player.player_id}
-            className={`flex justify-center ${index === 0 ? 'col-span-2' : ''}`}
-          >
-            {viewMode === 'broadcast' ? (
-              <StandupPlayerCard player={player} onClick={onPlayerClick} />
-            ) : (
-              // PlayerCourtCard expects to be absolute positioned relative to a container,
-              // so we provide a container of similar size to StandupPlayerCard to keep grid consistent
-              <div className="relative w-32 h-32">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    // Changed py-4 to py-2 to reduce outer spacing
+    <div className="w-full py-2">
+      <div className="w-full px-4">
+        {/* Changed pt-8 -> pt-2 
+           This significantly pulls the players up closer to the title.
+           We keep pb-12 to ensure the '6th Man' badge doesn't get cut off.
+        */}
+        <div className="flex items-center justify-around gap-2 pt-2 pb-12 w-full">
+          {players.map((player) => (
+            <div key={player.player_id} className="relative flex flex-col items-center group">
+               
+               {/* Player Card */}
+               <div className="transition-transform duration-200 hover:scale-110 hover:-translate-y-2 cursor-pointer z-10">
                   <PlayerCourtCard player={player} onClick={onPlayerClick} />
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+               </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

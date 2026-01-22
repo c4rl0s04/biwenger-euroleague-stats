@@ -8,8 +8,32 @@ import {
   getUserLineup,
   getNextRound,
   getLastCompletedRound,
+  hasOfficialStats,
+  getOfficialStandings,
+  getLivingStandings,
 } from '../db/queries/rounds.js';
 import { getAllUsers } from '../db/queries/users.js';
+
+/**
+ * Fetch standings for a specific round with fallback logic
+ * 1. Try to get OFFICIAL standings (user_rounds) if available.
+ * 2. If not, calculate LIVE standings from lineups + player stats.
+ * 
+ * @param {string} roundId 
+ * @returns {Promise<Array>}
+ */
+export async function fetchRoundStandings(roundId) {
+    if (!roundId) return [];
+    
+    // Check if official stats exist
+    const isOfficial = await hasOfficialStats(roundId);
+    
+    if (isOfficial) {
+        return await getOfficialStandings(roundId);
+    } else {
+        return await getLivingStandings(roundId);
+    }
+}
 
 /**
  * Fetch all necessary data for the Rounds list/selector

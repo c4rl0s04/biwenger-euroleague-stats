@@ -44,7 +44,7 @@ export default function PlayerCourtCard({ player, onClick }) {
     >
       {/* 1. The Avatar Token */}
       <div
-        className={`relative w-20 h-20 md:w-28 md:h-28 rounded-full border-[4px] ${colors.border} shadow-[0_6px_16px_rgba(0,0,0,0.6)] bg-slate-900 overflow-hidden z-20`}
+        className={`relative w-16 h-16 md:w-24 md:h-24 rounded-full border-[3px] md:border-[4px] ${colors.border} shadow-[0_6px_16px_rgba(0,0,0,0.6)] bg-slate-900 overflow-hidden z-20`}
       >
         {/* Glossy Reflection overlay */}
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none z-30" />
