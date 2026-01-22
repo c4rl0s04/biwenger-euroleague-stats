@@ -228,11 +228,27 @@ export async function getPlayerDetails(playerId) {
   const initialOwner = initialOwnerRes.rows[0];
 
   if (initialOwner) {
-    let initialDate = new Date(CONFIG.LEAGUE.START_DATE).toISOString();
+    let initialDate;
+    try {
+      const LeagueStartDate = new Date(CONFIG.LEAGUE.START_DATE);
+      if (!isNaN(LeagueStartDate.getTime())) {
+        initialDate = LeagueStartDate.toISOString();
+      } else {
+        initialDate = new Date().toISOString();
+      }
+    } catch (e) {
+      initialDate = new Date().toISOString();
+    }
+
     if (transfers.length > 0) {
-      const oldestTransfer = new Date(transfers[transfers.length - 1].date);
-      oldestTransfer.setHours(oldestTransfer.getHours() - 24);
-      initialDate = oldestTransfer.toISOString();
+      const lastTransfer = transfers[transfers.length - 1];
+      if (lastTransfer && lastTransfer.date) {
+        const oldestTransfer = new Date(lastTransfer.date);
+        if (!isNaN(oldestTransfer.getTime())) {
+          oldestTransfer.setHours(oldestTransfer.getHours() - 24);
+          initialDate = oldestTransfer.toISOString();
+        }
+      }
     }
 
     transfers.push({

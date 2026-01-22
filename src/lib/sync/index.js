@@ -45,7 +45,12 @@ async function syncData() {
   // Register Pipeline Steps
   const shouldRun = (num) => {
     if (onlyStep) return String(onlyStep) === String(num);
-    if (isDaily && num > 8) return false; // Daily mode skips initial squads, images, colors
+    if (isDaily) {
+       // Daily mode: Skip steps 9 (Initial Squads), 10 (Logos), 11 (Images), 12 (Colors)
+       // But Allow steps <= 8 AND Step 13 (Porras)
+       if (num >= 9 && num <= 12) return false;
+       return true;
+    }
     return true;
   };
 
@@ -69,6 +74,10 @@ async function syncData() {
   // New User Color Step
   const stepColors = await import('./steps/12-user-colors.js'); // Step 12
   if (shouldRun(12)) manager.addStep('Sync User Colors', stepColors.run);
+
+  // New Porras Step
+  const stepPorras = await import('./steps/13-porras.js'); // Step 13
+  if (shouldRun(13)) manager.addStep('Sync Porras', stepPorras.run);
 
   // Execute
   await manager.run();

@@ -50,7 +50,7 @@ export async function run(manager, playersListInput, teamsInput) {
     // Process Items Sequentially
     let reachedCutoff = false;
     const cutoffDate = manager.context.isDaily
-      ? new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+      ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago
       : new Date(0); // Beginning of time
 
     for (const t of items) {
@@ -127,39 +127,9 @@ export async function run(manager, playersListInput, teamsInput) {
         continue;
       }
 
-      // Handle Betting Pool (Porras)
+      // Handle Betting Pool (Porras) - REMOVED: Now handled in step 13-porras.js
       if (t.type === 'bettingPool') {
-        const pool = t.content.pool;
-        if (!pool || !pool.responses) continue;
-
-        const roundId = pool.round ? pool.round.id : null;
-        const roundName = pool.round ? pool.round.name : 'Unknown Round';
-
-        for (const response of pool.responses) {
-          try {
-            const userId = response.id;
-            let result = response.response;
-            if (Array.isArray(result)) {
-              result = result.join('-');
-            }
-
-            const hits = response.hits !== undefined ? response.hits : null;
-
-            if (userId && roundId) {
-              await mutations.insertPorra({
-                user_id: userId.toString(),
-                round_id: roundId,
-                round_name: roundName,
-                result: result || '',
-                aciertos: hits,
-              });
-              totalPorras++;
-            }
-          } catch (e) {
-            // console.error('Error processing porra:', e);
-          }
-        }
-        continue;
+         continue;
       }
 
       // Handle Transfers
