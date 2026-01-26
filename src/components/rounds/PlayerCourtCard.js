@@ -6,22 +6,23 @@ import Image from 'next/image';
 
 // Section 7.2: The Player Token UI
 // "A circular avatar with a colored border indicating position."
-export default function PlayerCourtCard({ player, onClick }) {
+export default function PlayerCourtCard({ player, onClick, size = 'base' }) {
   const [imgError, setImgError] = useState(false);
 
   // Fallback for missing headshots (Section 5.2)
   const handleImageError = () => setImgError(true);
 
   // Map position to "Team/Role Colors" (Section 7.1 Dynamic Theming)
+  // Map position to "Team/Role Colors" (Section 7.1 Dynamic Theming)
   const positionColors = {
-    PG: { border: 'border-blue-500', bg: 'bg-blue-600' },
-    Base: { border: 'border-blue-500', bg: 'bg-blue-600' },
-    SG: { border: 'border-blue-500', bg: 'bg-blue-600' },
-    SF: { border: 'border-green-500', bg: 'bg-green-600' },
-    Alero: { border: 'border-green-500', bg: 'bg-green-600' },
-    PF: { border: 'border-green-500', bg: 'bg-green-600' },
-    C: { border: 'border-red-500', bg: 'bg-red-600' },
-    Pivot: { border: 'border-red-500', bg: 'bg-red-600' },
+    PG: { border: 'border-blue-500', bg: 'bg-slate-900' },
+    Base: { border: 'border-blue-500', bg: 'bg-slate-900' },
+    SG: { border: 'border-blue-500', bg: 'bg-slate-900' },
+    SF: { border: 'border-green-500', bg: 'bg-slate-900' },
+    Alero: { border: 'border-green-500', bg: 'bg-slate-900' },
+    PF: { border: 'border-green-500', bg: 'bg-slate-900' },
+    C: { border: 'border-red-500', bg: 'bg-slate-900' },
+    Pivot: { border: 'border-red-500', bg: 'bg-slate-900' },
   };
 
   const getPointsBg = (pts) => {
@@ -34,24 +35,56 @@ export default function PlayerCourtCard({ player, onClick }) {
   };
 
   const ptsBg = getPointsBg(player.points);
-  const colors = positionColors[player.position] || { border: 'border-white', bg: 'bg-slate-900' };
+
+  // CAPTAIN LOGIC: Override border and add glow
+  const isCaptain = player.is_captain;
+  const baseColors = positionColors[player.position] || {
+    border: 'border-white',
+    bg: 'bg-slate-900',
+  };
+
+  const colors = {
+    ...baseColors,
+    border: isCaptain ? 'border-yellow-400' : baseColors.border, // Gold border for captain
+  };
+
+  // Size configurations
+  const sizes = {
+    base: {
+      avatar: 'w-12 h-12 md:w-16 md:h-16',
+      border: 'border-[2px] md:border-[3px]',
+      nameText: 'text-[10px] md:text-xs',
+      namePad: 'px-2 py-0.5 md:px-3 md:py-1',
+      ptsText: 'text-xs md:text-sm',
+    },
+    large: {
+      avatar: 'w-16 h-16 md:w-24 md:h-24',
+      border: 'border-[3px] md:border-[4px]',
+      nameText: 'text-xs md:text-sm',
+      namePad: 'px-3 py-1 md:px-4 md:py-1.5',
+      ptsText: 'text-sm md:text-base',
+    },
+  };
+
+  const s = sizes[size] || sizes.base;
 
   return (
     <motion.div
       className="relative group cursor-pointer"
       onClick={() => onClick && onClick(player)}
-      whileHover={{ scale: 1.15, zIndex: 50 }}
+      whileHover={{ scale: 1.05, zIndex: 50 }}
       whileTap={{ scale: 0.95 }}
     >
-      {/* 1. The Avatar Token */}
       <div
-        className={`relative w-16 h-16 md:w-24 md:h-24 rounded-full border-[3px] md:border-[4px] ${colors.border} shadow-[0_6px_16px_rgba(0,0,0,0.6)] bg-slate-900 overflow-hidden z-20`}
+        className={`relative ${s.avatar} rounded-full ${s.border} ${colors.border} 
+          ${isCaptain ? 'shadow-[0_0_30px_rgba(250,204,21,0.9),0_0_60px_rgba(250,204,21,0.6)]' : 'shadow-[0_6px_16px_rgba(0,0,0,0.6)]'} 
+          bg-slate-900 overflow-hidden z-20`}
       >
         {/* Glossy Reflection overlay */}
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none z-30" />
 
         {!imgError ? (
-          <div className="relative w-full h-full pt-2 scale-110">
+          <div className="relative w-full h-full pt-2 scale-[1.7] origin-top">
             <Image
               src={
                 !imgError
@@ -78,14 +111,18 @@ export default function PlayerCourtCard({ player, onClick }) {
       <div className="absolute top-[85%] left-1/2 -translate-x-1/2 z-30">
         <div className="flex flex-col items-center">
           <span
-            className={`${colors.bg} text-xs md:text-sm text-white px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-white/20 shadow-md whitespace-nowrap font-bold tracking-wider backdrop-blur-md max-w-[200px] truncate`}
+            className={`${colors.bg} ${s.nameText} text-white ${s.namePad} rounded-full border border-white/20 shadow-md whitespace-nowrap font-bold tracking-wider backdrop-blur-md max-w-[150px] truncate`}
           >
-            {player.name || 'Player ' + player.player_id}
+            {player.name
+              ? player.name.length > 12
+                ? player.name.substring(0, 12) + '...'
+                : player.name
+              : 'Player ' + player.player_id}
           </span>
 
           {/* Stat Badge (Points) */}
           <span
-            className={`mt-1 text-sm md:text-base text-white ${ptsBg} font-mono font-black px-2 py-0.5 rounded border border-white/20 shadow-sm`}
+            className={`mt-0.5 ${s.ptsText} text-white ${ptsBg} font-mono font-black px-1.5 py-0 rounded border border-white/20 shadow-sm`}
           >
             {player.points !== undefined ? `${player.points} pts` : '-'}
           </span>

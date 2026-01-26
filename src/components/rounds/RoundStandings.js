@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { User, Medal } from 'lucide-react';
+import { User, Medal, Trophy, ListOrdered } from 'lucide-react';
+import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { cn } from '@/lib/utils';
 
@@ -28,11 +29,13 @@ export default function RoundStandings({ roundId, selectedUserId, onSelectUser }
   if (!standings || standings.length === 0) return null;
 
   return (
-    <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-4 sticky top-6 max-h-[calc(100vh-50px)] overflow-y-auto custom-scrollbar">
-      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4 px-2">
-        Clasificación
-      </h3>
-      <div className="w-full max-w-2xl mx-auto px-4">
+    <ElegantCard
+      title="Clasificación"
+      icon={ListOrdered}
+      color="orange"
+      className="sticky top-6 h-[650px] overflow-y-auto custom-scrollbar"
+    >
+      <div className="w-full mx-auto px-1">
         {/* Table Header */}
         <div className="flex items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 mb-2">
           <div className="w-8 text-center">#</div>
@@ -150,6 +153,6 @@ export default function RoundStandings({ roundId, selectedUserId, onSelectUser }
           })}
         </div>
       </div>
-    </div>
+    </ElegantCard>
   );
 }

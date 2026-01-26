@@ -1,11 +1,20 @@
 'use client';
 
-import { Trophy, User } from 'lucide-react';
+import { Trophy, User, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import BasketballCourt from './BasketballCourt';
 import Bench from './Bench';
 
 export default function RoundLineupView({ players = [], loading = false }) {
+  const router = useRouter();
+
+  // Handle navigation to player page
+  const handlePlayerClick = (player) => {
+    if (player?.player_id) {
+      router.push(`/player/${player.player_id}`);
+    }
+  };
   // Split lineup into starters and bench based on role
   let starters = players.filter((p) => p.role === 'titular');
   let bench = players.filter((p) => p.role !== 'titular');
@@ -32,12 +41,12 @@ export default function RoundLineupView({ players = [], loading = false }) {
       {players.length > 0 ? (
         <>
           {/* Court Section */}
-          <ElegantCard title="Quinteto Inicial" icon={Trophy} className="w-full" color="orange">
+          <ElegantCard title="Quinteto Inicial" icon={Star} className="w-full" color="orange">
             {/* Responsive Container for Court */}
-            <div className="w-full aspect-[4/3] lg:aspect-video min-h-[500px]">
+            <div className="w-full aspect-[4/3] lg:aspect-[16/10] min-h-[550px]">
               <BasketballCourt
                 players={starters}
-                onPlayerClick={(p) => console.log(p)}
+                onPlayerClick={handlePlayerClick}
                 className="h-full w-full"
               />
             </div>
@@ -45,7 +54,7 @@ export default function RoundLineupView({ players = [], loading = false }) {
 
           {/* Bench Section */}
           <ElegantCard title="Banquillo" icon={User} className="w-full" color="blue">
-            <Bench players={bench} viewMode="tactical" onPlayerClick={(p) => console.log(p)} />
+            <Bench players={bench} viewMode="tactical" onPlayerClick={handlePlayerClick} />
           </ElegantCard>
         </>
       ) : (

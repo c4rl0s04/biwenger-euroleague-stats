@@ -24,9 +24,9 @@ export const getFormation = (starters) => {
 
   // 2. Define "Y" Levels (Distance from Baseline Y=0)
   const LEVEL_Y = {
-    Pivot: 10, // Deep in paint / Low block
-    Alero: 24, // Free throw line extended
-    Base: 38, // Top of key / Logo area
+    Pivot: 8, // Deep in paint / Low block (Moved up)
+    Alero: 21, // Free throw line extended (Moved up to space out)
+    Base: 34, // Top of key / Logo area
   };
 
   // 3. Define "X" Spacing Logic (Horizontal Distribution)
@@ -37,23 +37,23 @@ export const getFormation = (starters) => {
       if (count === 1) return [25]; // Center
       if (count === 2) return [17, 33]; // Low Blocks
       if (count === 3) return [15, 25, 35]; // Wall
-      return [12, 20, 30, 38]; // Crowd
+      return [15, 22, 28, 35]; // Crowd (Compressed from 12-38)
     }
 
     // ALEROS: Spread them out (Wings/Corners)
     if (role === 'Alero') {
       if (count === 1) return [25]; // High Post
-      if (count === 2) return [8, 42]; // Wings
-      if (count === 3) return [5, 25, 45]; // Corner - High - Corner
-      return [5, 18, 32, 45]; // 4-out look
+      if (count === 2) return [10, 40]; // Wings (Compressed from 8-42)
+      if (count === 3) return [8, 25, 42]; // Corner - High - Corner (Compressed from 5-45)
+      return [8, 19, 31, 42]; // 4-out look (Compressed from 5-45)
     }
 
     // BASES: Standard Guard Slots
     if (role === 'Base') {
       if (count === 1) return [25]; // Point Guard
       if (count === 2) return [16, 34]; // Guard Slots
-      if (count === 3) return [12, 25, 38]; // 3-guard front
-      return [10, 20, 30, 40]; // Press break
+      if (count === 3) return [14, 25, 36]; // 3-guard front (Compressed from 12-38)
+      return [12, 21, 29, 38]; // Press break (Compressed from 10-40)
     }
 
     return [25]; // Fallback

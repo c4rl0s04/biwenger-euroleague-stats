@@ -51,102 +51,145 @@ export async function getAllPorrasRounds() {
  * Get the next upcoming round
  * @returns {Promise<Object>} Next round details
  */
-export async function getNextRound() {
-  // Find the round of the upcoming match, then get its full details (true start date)
+/**
+ * Get the state of current and next rounds
+ * Unified logic to determine what is "Current" (Live or Last Finished) and "Next"
+ */
+export async function getCurrentRoundState() {
+  // 1. Get all round schedules to determine sequence
   const query = `
-    WITH TargetRound AS (
-      SELECT round_id 
-      FROM matches 
-      WHERE date > NOW()
-      ORDER BY date ASC 
-      LIMIT 1
+    WITH RoundStats AS (
+      SELECT 
+        round_id,
+        MAX(round_name) as round_name,
+        MIN(date) as start_date,
+        MAX(date) as end_date,
+        COUNT(*) as total_matches,
+        SUM(CASE WHEN status = 'finished' THEN 1 ELSE 0 END) as finished_matches
+      FROM matches
+      GROUP BY round_id
     )
-    SELECT 
-      m.round_id,
-      m.round_name,
-      MIN(m.date) as start_date,
-      MAX(m.date) as end_date
-    FROM matches m
-    JOIN TargetRound tr ON m.round_id = tr.round_id
-    GROUP BY m.round_id, m.round_name
+    SELECT *,
+      CASE 
+        WHEN finished_matches < total_matches AND NOW() >= start_date THEN 'live'
+        WHEN finished_matches = total_matches AND NOW() >= start_date THEN 'finished'
+        ELSE 'upcoming'
+      END as status_calc
+    FROM RoundStats
+    ORDER BY start_date ASC
   `;
-  const roundRes = await db.query(query);
+
+  const rows = (await db.query(query)).rows;
+  const now = new Date();
+
+  // Find Current Round: The latest round that has started (start_date <= NOW)
+  // This handles postponed matches correctly because we don't look for "pending" matches in old rounds,
+  // we just look for the most recent round start.
+  // Exception: If we are substantially past the "end" of the round, and it's not fully finished?
+  // User logic: "If no round is live ... last finished round should be returned"
+  // If Round 18 starts Jan 1. Round 19 starts Jan 8.
+  // Now is Jan 4. Round 18 is latest filtered. It is returned.
+  // If Now is Jan 10. Round 19 is latest filtered. Round 19 returned.
+
+  // Filter rounds that have started
+  const startedRounds = rows.filter((r) => new Date(r.start_date) <= now);
+
+  let currentRound = startedRounds.length > 0 ? startedRounds[startedRounds.length - 1] : null;
+
+  // Find Next Round: The first round that has NOT started
+  const futureRounds = rows.filter((r) => new Date(r.start_date) > now);
+  let nextRound = futureRounds.length > 0 ? futureRounds[0] : null;
+
+  return { currentRound, nextRound };
+}
+
+/**
+ * Get full details for a specific round (matches, standings, etc.)
+ * @param {string} roundId
+ */
+export async function getRoundDetails(roundId) {
+  if (!roundId) return null;
+
+  // Basic info
+  const basicQuery = `
+    SELECT 
+      round_id,
+      round_name,
+      MIN(date) as start_date,
+      MAX(date) as end_date
+    FROM matches
+    WHERE round_id = $1
+    GROUP BY round_id, round_name
+  `;
+  const roundRes = await db.query(basicQuery, [roundId]);
   const round = roundRes.rows[0];
 
-  if (round) {
-    // 1. Get all finished matches to calculate standings
-    // Include regular time scores (excluding OT) for Article 19.4 compliance
-    const allFinishedMatchesQuery = `
-      SELECT 
-        home_id,
-        away_id,
-        home_score,
-        away_score,
-        home_score_regtime,
-        away_score_regtime,
-        status
-      FROM matches
-      WHERE status = 'finished'
-        AND home_score IS NOT NULL
-        AND away_score IS NOT NULL
-    `;
+  if (!round) return null;
 
-    let positionMap = new Map();
-    try {
-      const allFinishedMatches = (await db.query(allFinishedMatchesQuery)).rows;
-      // Use the standings utility to calculate positions properly (handles draws, tie-breaking, etc.)
-      positionMap = getTeamPositions(allFinishedMatches);
-    } catch (err) {
-      console.warn('Could not calculate standings:', err);
-    }
+  // 1. Get all finished matches for standings (Global context, not just this round)
+  const allFinishedMatchesQuery = `
+    SELECT 
+      home_id, away_id, home_score, away_score, 
+      home_score_regtime, away_score_regtime, status
+    FROM matches
+    WHERE status = 'finished' 
+      AND home_score IS NOT NULL 
+      AND away_score IS NOT NULL
+  `;
 
-    // 2. Get Matches
-    const matchesQuery = `
-      SELECT 
-        m.home_id,
-        m.away_id,
-        t1.name as home_team, 
-        t2.name as away_team, 
-        m.date, 
-        m.status,
-        m.home_score,
-        m.away_score,
-        t1.img as home_logo,
-        t1.short_name as home_short,
-        t2.img as away_logo,
-        t2.short_name as away_short
-      FROM matches m
-      LEFT JOIN teams t1 ON m.home_id = t1.id
-      LEFT JOIN teams t2 ON m.away_id = t2.id
-      WHERE m.round_id = $1
-      ORDER BY m.date ASC
-    `;
-
-    const matchesRes = await db.query(matchesQuery, [round.round_id]);
-    round.matches = matchesRes.rows.map((match) => ({
-      ...match,
-      home_position: positionMap.get(match.home_id) || null,
-      away_position: positionMap.get(match.away_id) || null,
-    }));
+  let positionMap = new Map();
+  try {
+    const allFinishedMatches = (await db.query(allFinishedMatchesQuery)).rows;
+    positionMap = getTeamPositions(allFinishedMatches);
+  } catch (err) {
+    console.warn('Could not calculate standings:', err);
   }
+
+  // 2. Get Matches for this round
+  const matchesQuery = `
+    SELECT 
+      m.home_id, m.away_id,
+      t1.name as home_team, t2.name as away_team, 
+      m.date, m.status,
+      m.home_score, m.away_score,
+      t1.img as home_logo, t1.short_name as home_short,
+      t2.img as away_logo, t2.short_name as away_short
+    FROM matches m
+    LEFT JOIN teams t1 ON m.home_id = t1.id
+    LEFT JOIN teams t2 ON m.away_id = t2.id
+    WHERE m.round_id = $1
+    ORDER BY m.date ASC
+  `;
+
+  const matchesRes = await db.query(matchesQuery, [roundId]);
+  round.matches = matchesRes.rows.map((match) => ({
+    ...match,
+    home_position: positionMap.get(match.home_id) || null,
+    away_position: positionMap.get(match.away_id) || null,
+  }));
 
   return round;
 }
 
 /**
- * Get the last completed round (active or finished)
- * Used for default selection
+ * Get the next upcoming round
+ * @deprecated Use getCurrentRoundState() instead
+ * @returns {Promise<Object>} Next round details
+ */
+export async function getNextRound() {
+  const { nextRound } = await getCurrentRoundState();
+  if (!nextRound) return null;
+  return await getRoundDetails(nextRound.round_id);
+}
+
+/**
+ * Get the current active or last completed round
+ * Updated to use unified logic: returns the "Current" round (Live or Finished)
+ * @returns {Promise<Object>} Round object
  */
 export async function getLastCompletedRound() {
-  const query = `
-    SELECT round_id 
-    FROM matches 
-    WHERE status = 'finished'
-    ORDER BY date DESC 
-    LIMIT 1
-  `;
-  const res = await db.query(query);
-  return res.rows[0];
+  const { currentRound } = await getCurrentRoundState();
+  return currentRound;
 }
 
 /**

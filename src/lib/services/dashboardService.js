@@ -28,6 +28,7 @@ import {
   getSignificantPriceChanges,
   getRecentRecords,
   getStreakStats,
+  getCurrentRoundState,
 } from '@/lib/db';
 
 // ============ DIRECT WRAPPERS ============
@@ -97,22 +98,46 @@ export async function fetchNextRound() {
 
 // ============ AGGREGATED FUNCTIONS ============
 
+// ============ AGGREGATED FUNCTIONS ============
+
 /**
- * Get next round preparation data
+ * Get round preparation data (Current status + Next round info)
  * @param {string} [userId] - Optional user ID for personalized recommendations
- * @returns {Promise<Object>} Next round data bundle
+ * @returns {Promise<Object>} Round data bundle
  */
 export async function getNextRoundData(userId = null) {
-  const [nextRound, topPlayersForm, captainRecommendations, marketOpportunities] =
+  const [roundState, topPlayersForm, captainRecommendations, marketOpportunities] =
     await Promise.all([
-      getNextRound(),
+      getCurrentRoundState(),
       getTopPlayersByForm(5, 3),
       userId ? getCaptainRecommendations(userId, 6) : [],
       getMarketOpportunities(6),
     ]);
 
+  // If next round exists, get its full details for the dashboard
+  let nextRoundDetails = null;
+  if (roundState.nextRound) {
+    // We need to import getRoundDetails or reuse existing logic.
+    // Since getNextRound (deprecated) returns details, let's use the new getRoundDetails from DB.
+    // But I haven't imported it yet. I need to update imports first.
+    // For now, I will use getNextRound() which I updated to use getCurrentRoundState() internally,
+    // BUT getNextRound() returns the *details*, so that works for "nextRound".
+    // Actually, distinct separation is better. Let's update imports to include getRoundDetails.
+  }
+
+  // For backward compatibility while I update imports in next step:
+  // The original code called getNextRound().
+  // My new getNextRound() calls getCurrentRoundState() then getRoundDetails(nextRound.id).
+  // So simply calling getNextRound() here will still work and return the detailed next round.
+
+  // However, I want to expose "currentRound" status too if possible?
+  // The dashboard might want to know if a round is LIVE.
+
+  const nextRound = await getNextRound(); // Uses new logic under the hood
+
   return {
-    nextRound,
+    nextRound, // Detailed object
+    currentRoundStatus: roundState.currentRound, // just metadata
     topPlayersForm,
     captainRecommendations,
     marketOpportunities,

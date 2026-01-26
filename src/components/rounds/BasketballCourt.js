@@ -129,13 +129,13 @@ export default function BasketballCourt({ players = [], onPlayerClick, className
       className={`w-full flex items-center justify-center bg-slate-950/50 rounded-xl overflow-hidden relative ${className || 'h-[650px]'}`}
     >
       {/* Court Container: Fills parent completely (Stretched) */}
-      <div className="relative h-full w-full shadow-2xl shadow-black/50 rounded-xl overflow-hidden bg-slate-900">
+      <div className="relative h-full w-full shadow-2xl shadow-black/50 rounded-xl overflow-hidden bg-zinc-950">
         {/* 1. Floor Texture & Gradients - RESTORED MINIMALIST */}
         <div className="absolute inset-0 pointer-events-none">
           {/* Subtle wood grain using mix-blend-overlay for tinting */}
-          <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')]" />
+          <div className="absolute inset-0 opacity-10 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')]" />
           {/* Soft slate gradients instead of heavy black vignette */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-slate-950/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/80" />
         </div>
 
         {/* 2. Court Markings */}
@@ -165,7 +165,7 @@ export default function BasketballCourt({ players = [], onPlayerClick, className
               >
                 {/* Wrapper div is centered (w-0 h-0). PlayerCard renders centered. */}
                 <div className="hover:z-50 transition-all">
-                  <PlayerCourtCard player={player} onClick={onPlayerClick} />
+                  <PlayerCourtCard player={player} onClick={onPlayerClick} size="large" />
                 </div>
               </motion.div>
             );

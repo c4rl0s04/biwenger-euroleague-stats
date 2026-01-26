@@ -17,7 +17,7 @@ export default function Bench({ players = [], onPlayerClick }) {
           {players.map((player) => (
             <div key={player.player_id} className="relative flex flex-col items-center group">
               {/* Player Card */}
-              <div className="transition-transform duration-200 hover:scale-110 hover:-translate-y-2 cursor-pointer z-10">
+              <div className="z-10">
                 <PlayerCourtCard player={player} onClick={onPlayerClick} />
               </div>
             </div>

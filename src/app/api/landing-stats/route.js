@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStandings, getNextRound } from '@/lib/db';
+import { getStandings, getCurrentRoundState } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,12 +10,12 @@ export async function GET() {
     const userCount = standings.length;
 
     // 2. Get Current Round & Playoff Calc
-    const nextRound = await getNextRound();
+    const { currentRound } = await getCurrentRoundState();
     let roundNumber = 0;
 
-    if (nextRound && nextRound.round_name) {
+    if (currentRound && currentRound.round_name) {
       // Extract number from "Jornada 18"
-      const match = nextRound.round_name.match(/\d+/);
+      const match = currentRound.round_name.match(/\d+/);
       if (match) {
         roundNumber = parseInt(match[0], 10);
       }
@@ -31,7 +31,7 @@ export async function GET() {
 
     return NextResponse.json({
       userCount,
-      currentRound: nextRound?.round_name || 'Pre-Season',
+      currentRound: currentRound?.round_name || 'Pre-Season',
       weeksToPlayoffs,
       playoffStartRound: PLAYOFF_START_ROUND,
     });

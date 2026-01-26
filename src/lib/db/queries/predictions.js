@@ -114,8 +114,14 @@ async function getTableStats() {
 }
 
 async function getClutchStats() {
-  // Get the last 3 rounds IDs
-  const roundsQuery = `SELECT DISTINCT round_id FROM porras ORDER BY round_id DESC LIMIT 3`;
+  // Get the last 3 rounds with collected scores
+  const roundsQuery = `
+    SELECT DISTINCT round_id 
+    FROM porras 
+    WHERE aciertos IS NOT NULL 
+    ORDER BY round_id DESC 
+    LIMIT 3
+  `;
   const roundsRes = await db.query(roundsQuery);
 
   if (roundsRes.rows.length === 0) return [];
@@ -270,9 +276,9 @@ async function getBestRoundStat() {
 }
 
 async function getHistoryPivot() {
-  // Get all rounds first
+  // Get all rounds that have scores
   const roundsRes = await db.query(
-    'SELECT DISTINCT round_id, round_name FROM porras ORDER BY round_id ASC'
+    'SELECT DISTINCT round_id, round_name FROM porras WHERE aciertos IS NOT NULL ORDER BY round_id ASC'
   );
   const rounds = roundsRes.rows;
 

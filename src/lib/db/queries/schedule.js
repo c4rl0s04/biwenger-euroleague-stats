@@ -1,6 +1,7 @@
 import { db } from '../client.js';
 import { NEXT_ROUND_CTE } from '../sql_utils.js';
 import { getTeamColor } from '@/lib/constants/teamColors.js';
+import { getCurrentRoundState } from './rounds.js';
 
 export async function getScheduleRounds() {
   try {
@@ -49,16 +50,30 @@ export async function getUserSchedule(userId, targetRoundId = null) {
       targetRound = (await db.query(targetQuery, [targetRoundId])).rows[0];
     }
 
-    // Fallback: Find the ID of the next upcoming round
+    // Fallback: Custom Logic for Schedule Page
+    // "I want to see the next round and if theres a round live, then the current one"
     if (!targetRound) {
-      const nextRoundQuery = `
-        ${NEXT_ROUND_CTE}
-        SELECT m.round_id, m.round_name 
-        FROM matches m
-        JOIN NextRoundStart nr ON m.round_id = nr.round_id
-        GROUP BY m.round_id, m.round_name
-      `;
-      targetRound = (await db.query(nextRoundQuery)).rows[0];
+      const { currentRound, nextRound } = await getCurrentRoundState();
+
+      if (currentRound && currentRound.status_calc === 'live') {
+        // Priority 1: A round is currently being played
+        targetRound = {
+          round_id: currentRound.round_id,
+          round_name: currentRound.round_name,
+        };
+      } else if (nextRound) {
+        // Priority 2: No active round, show upcoming round (Planning mode)
+        targetRound = {
+          round_id: nextRound.round_id,
+          round_name: nextRound.round_name,
+        };
+      } else if (currentRound) {
+        // Priority 3: Season finished, show last round
+        targetRound = {
+          round_id: currentRound.round_id,
+          round_name: currentRound.round_name,
+        };
+      }
     }
 
     // If still no round (e.g., season over), maybe get the last played round?
