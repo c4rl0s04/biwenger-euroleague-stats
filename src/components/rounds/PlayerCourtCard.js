@@ -58,11 +58,11 @@ export default function PlayerCourtCard({ player, onClick, size = 'base' }) {
       ptsText: 'text-xs md:text-sm',
     },
     large: {
-      avatar: 'w-16 h-16 md:w-24 md:h-24',
-      border: 'border-[3px] md:border-[4px]',
-      nameText: 'text-xs md:text-sm',
-      namePad: 'px-3 py-1 md:px-4 md:py-1.5',
-      ptsText: 'text-sm md:text-base',
+      avatar: 'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24',
+      border: 'border-[2px] md:border-[3px] xl:border-[4px]',
+      nameText: 'text-[9px] sm:text-[10px] md:text-xs xl:text-sm',
+      namePad: 'px-2 py-0.5 md:px-3 md:py-1',
+      ptsText: 'text-[10px] md:text-xs xl:text-sm',
     },
   };
 

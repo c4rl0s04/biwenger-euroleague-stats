@@ -178,9 +178,9 @@ export default function RoundsPageClient() {
         </ElegantCard>
 
         {/* MAIN GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
           {/* COLUMN 1: STANDINGS (3 cols) */}
-          <div className="lg:col-span-3">
+          <div className="xl:col-span-3">
             <RoundStandings
               roundId={selectedRoundId}
               selectedUserId={selectedUserId}
@@ -190,7 +190,7 @@ export default function RoundsPageClient() {
           </div>
 
           {/* COLUMN 2: COURT (6 cols) */}
-          <div className="lg:col-span-6 space-y-4">
+          <div className="xl:col-span-6 space-y-4">
             {/* View Toggles */}
             <div className="flex p-1 bg-zinc-900/50 rounded-lg border border-white/5 w-fit mx-auto">
               <button
@@ -249,7 +249,7 @@ export default function RoundsPageClient() {
           </div>
 
           {/* COLUMN 3: STATS (3 cols) */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="xl:col-span-3 space-y-6">
             <RoundStatsSidebar
               stats={statsData}
               loading={dataLoading}
