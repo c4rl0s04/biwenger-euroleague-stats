@@ -16,7 +16,7 @@ An advanced analytics dashboard for Euroleague fantasy managers on Biwenger. Thi
 | --------- | ----------------------- |
 | Framework | Next.js 16 (App Router) |
 | Language  | JavaScript / Node.js    |
-| Database  | SQLite (better-sqlite3) |
+| Database  | PostgreSQL (via pg)     |
 | Styling   | Tailwind CSS            |
 | Charts    | Recharts                |
 | Testing   | Vitest (79 tests)       |
@@ -57,12 +57,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Documentation
 
-| Document                                             | Description                         |
-| ---------------------------------------------------- | ----------------------------------- |
-| [API.md](./API.md)                                   | API endpoints reference (32 routes) |
-| [DATABASE.md](./DATABASE.md)                         | Database schema and ERD             |
-| [COMPONENTS.md](./COMPONENTS.md)                     | Component usage examples            |
-| [IMPROVEMENTS_ROADMAP.md](./IMPROVEMENTS_ROADMAP.md) | Development roadmap                 |
+| Document                                  | Description                                     |
+| ----------------------------------------- | ----------------------------------------------- |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical overview, schema, APIs, and structure |
+| [FEATURES.md](./docs/FEATURES.md)         | Catalog of all stats and features               |
+| [DATA_SYNC.md](./docs/DATA_SYNC.md)       | Guide to data synchronization scripts           |
+| [ROADMAP.md](./docs/ROADMAP.md)           | Future features and improvements                |
 
 ## Project Structure
 

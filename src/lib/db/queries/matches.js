@@ -1,4 +1,5 @@
 import { db } from '../client';
+import { getCurrentRoundState } from './rounds';
 
 export async function getMatchesGroupedByRound() {
   const query = `
@@ -8,6 +9,7 @@ export async function getMatchesGroupedByRound() {
       m.home_score,
       m.away_score,
       m.date,
+      m.status,
       
       -- Home Team
       th.id as home_id,
@@ -44,6 +46,7 @@ export async function getMatchesGroupedByRound() {
     acc[roundId].matches.push({
       id: match.id,
       date: match.date,
+      status: match.status,
       home: {
         id: match.home_id,
         name: match.home_name,
@@ -79,37 +82,25 @@ export async function getMatchesGroupedByRound() {
     round.round_index = index + 1;
   });
 
-  // Calculate "Next Round" or "Current Round" using Unified Logic
-  // We import the logic to ensure consistency across the app
-  // But to avoid circular dependencies (if any), we can re-implement the lightweight check
-  // OR just assume the caller handles it?
-  // No, the caller `MatchesPage` needs `currentRoundId`.
-
-  // Let's rely on the data we already have here (roundsArr) which is the source of truth for matches.
-  // The unified logic is:
-  // Current = Rounds with start_date <= NOW. Pick the last one (latest start).
-
-  const now = new Date();
-
-  // Filter rounds that have started
-  const startedRounds = roundsArr.filter((r) => {
-    // We sorted roundsArr by date already.
-    // r.matches is array.
-    const start = r.matches[0]?.date ? new Date(r.matches[0].date) : new Date(0);
-    return start <= now;
-  });
+  // Use unified round logic: Show next round unless current round is Live
+  const { currentRound, nextRound } = await getCurrentRoundState();
 
   let currentRoundId;
 
-  if (startedRounds.length > 0) {
-    // The last started round is the "Current" one (Live or Finished)
-    currentRoundId = startedRounds[startedRounds.length - 1].round_id;
+  if (currentRound && currentRound.status_calc === 'live') {
+    // A round is currently being played - show it
+    currentRoundId = currentRound.round_id;
+  } else if (nextRound) {
+    // No live round - show the next upcoming round
+    currentRoundId = nextRound.round_id;
+  } else if (currentRound) {
+    // Season finished - show the last round
+    currentRoundId = currentRound.round_id;
   } else {
-    // No rounds started? Default to first.
+    // Fallback to first round
     currentRoundId = roundsArr[0]?.round_id;
   }
 
-  // Use the calculated currentRoundId
   return {
     rounds: roundsArr,
     currentRoundId,

@@ -5,6 +5,7 @@ import { Calendar, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { MatchCard } from './MatchCard';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Section } from '@/components/layout';
 
 function Dropdown({ icon, label, children, align = 'left', fullWidth = false }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +58,22 @@ function Dropdown({ icon, label, children, align = 'left', fullWidth = false }) 
   );
 }
 
+// Helper to group matches by date
+function groupMatchesByDate(matches) {
+  return matches.reduce((acc, match) => {
+    const date = new Date(match.date);
+    const dateKey = date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      timeZone: 'Europe/Madrid',
+    });
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(match);
+    return acc;
+  }, {});
+}
+
 export default function MatchesClient({ rounds, defaultRoundId }) {
   // Default to the provided defaultRoundId, or the first round if not found
   const [selectedRoundId, setSelectedRoundId] = useState(
@@ -65,32 +82,33 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
 
   const activeRound = rounds.find((r) => r.round_id === selectedRoundId);
   const matches = activeRound ? activeRound.matches : [];
+  const groupedMatches = groupMatchesByDate(matches);
 
   const handlePrevRound = () => {
-    const idx = rounds.findIndex((r) => r.round_id === selectedRoundId);
-    if (idx < rounds.length - 1) {
-      setSelectedRoundId(rounds[idx + 1].round_id);
-    }
-  };
-
-  const handleNextRound = () => {
     const idx = rounds.findIndex((r) => r.round_id === selectedRoundId);
     if (idx > 0) {
       setSelectedRoundId(rounds[idx - 1].round_id);
     }
   };
 
+  const handleNextRound = () => {
+    const idx = rounds.findIndex((r) => r.round_id === selectedRoundId);
+    if (idx < rounds.length - 1) {
+      setSelectedRoundId(rounds[idx + 1].round_id);
+    }
+  };
+
   if (!activeRound) return null;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="space-y-0">
       {/* Top Bar: Round Selector */}
-      <div className="sticky top-4 z-30 flex items-center justify-center">
+      <div className="sticky top-4 z-30 flex items-center justify-center px-4">
         <div className="flex items-center p-1 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-md">
           {/* Prev Arrow */}
           <button
             onClick={handlePrevRound}
-            disabled={rounds.findIndex((r) => r.round_id === selectedRoundId) >= rounds.length - 1}
+            disabled={rounds.findIndex((r) => r.round_id === selectedRoundId) <= 0}
             className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             title="Previous Round"
           >
@@ -140,7 +158,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
           {/* Next Arrow */}
           <button
             onClick={handleNextRound}
-            disabled={rounds.findIndex((r) => r.round_id === selectedRoundId) <= 0}
+            disabled={rounds.findIndex((r) => r.round_id === selectedRoundId) >= rounds.length - 1}
             className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             title="Next Round"
           >
@@ -149,7 +167,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
         </div>
       </div>
 
-      {/* Matches List with Animation */}
+      {/* Matches grouped by day */}
       <AnimatePresence mode="wait">
         <motion.div
           key={selectedRoundId}
@@ -157,14 +175,24 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="grid gap-3"
         >
-          {matches.map((match) => (
-            <MatchCard key={match.id} match={match} />
+          {Object.entries(groupedMatches).map(([dateKey, dayMatches], index) => (
+            <Section
+              key={dateKey}
+              title={dateKey}
+              background={index % 2 === 0 ? 'section-base' : 'section-raised'}
+              delay={index * 100}
+            >
+              <div className="grid gap-3">
+                {dayMatches.map((match) => (
+                  <MatchCard key={match.id} match={match} />
+                ))}
+              </div>
+            </Section>
           ))}
 
-          {matches.length === 0 && (
-            <div className="py-20 text-center text-zinc-500 bg-zinc-900/20 rounded-2xl border border-dashed border-zinc-800">
+          {Object.keys(groupedMatches).length === 0 && (
+            <div className="py-20 text-center text-zinc-500 bg-zinc-900/20 rounded-2xl border border-dashed border-zinc-800 mx-4">
               No hay partidos disponibles para esta jornada.
             </div>
           )}

@@ -478,6 +478,7 @@ export async function hasOfficialStats(roundId) {
 
 /**
  * Get OFFICIAL standings from user_rounds (Final/Official results)
+ * Returns both round points and cumulative (total) points up to the selected round.
  * @param {string} roundId
  * @returns {Promise<Array>}
  */
@@ -488,15 +489,24 @@ export async function getOfficialStandings(roundId) {
       u.name, 
       u.icon, 
       u.color_index,
-      COALESCE(ur.points, 0) as points,
+      COALESCE(ur.points, 0) as round_points,
+      COALESCE(
+        (SELECT SUM(ur2.points) 
+         FROM user_rounds ur2 
+         WHERE ur2.user_id = u.id 
+           AND ur2.round_id <= $1), 
+        0
+      ) as total_points,
       ur.participated
     FROM users u
     LEFT JOIN user_rounds ur ON u.id = ur.user_id AND ur.round_id = $1
-    ORDER BY points DESC, u.name ASC
+    ORDER BY round_points DESC, u.name ASC
   `;
   return (await db.query(query, [roundId])).rows.map((row) => ({
     ...row,
-    points: parseInt(row.points) || 0,
+    points: parseInt(row.round_points) || 0,
+    round_points: parseInt(row.round_points) || 0,
+    total_points: parseInt(row.total_points) || 0,
     participated: !!row.participated,
   }));
 }
@@ -504,6 +514,7 @@ export async function getOfficialStandings(roundId) {
 /**
  * Get LIVE/VIRTUAL standings calculated from lineups + player stats
  * Used when official stats are not yet available.
+ * Returns both calculated round points and cumulative total_points from past rounds.
  * @param {string} roundId
  * @returns {Promise<Array>}
  */
@@ -524,18 +535,31 @@ export async function getLivingStandings(roundId) {
             ELSE 0.5
           END
         ), 
-      0) as points,
+      0) as round_points,
+      COALESCE(
+        (SELECT SUM(ur2.points) 
+         FROM user_rounds ur2 
+         WHERE ur2.user_id = u.id 
+           AND ur2.round_id < $1), 
+        0
+      ) as past_total,
       MAX(CASE WHEN l.player_id IS NOT NULL THEN 1 ELSE 0 END) as participated
     FROM users u
     LEFT JOIN lineups l ON u.id = l.user_id AND l.round_id = $1
     LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND prs.round_id = $1
     GROUP BY u.id
-    ORDER BY points DESC, u.name ASC
+    ORDER BY round_points DESC, u.name ASC
   `;
 
-  return (await db.query(query, [roundId])).rows.map((row) => ({
-    ...row,
-    points: Math.round(parseFloat(row.points) || 0),
-    participated: !!row.participated,
-  }));
+  return (await db.query(query, [roundId])).rows.map((row) => {
+    const round_points = Math.round(parseFloat(row.round_points) || 0);
+    const past_total = parseInt(row.past_total) || 0;
+    return {
+      ...row,
+      points: round_points,
+      round_points: round_points,
+      total_points: past_total + round_points,
+      participated: !!row.participated,
+    };
+  });
 }

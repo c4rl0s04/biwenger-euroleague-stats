@@ -1,22 +1,41 @@
 'use client';
 
-import { Card } from '@/components/ui';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export function MatchCard({ match }) {
-  const isPlayed = match.home.score !== null && match.away.score !== null;
+  // Use status to determine if match has been played (not score, since unplayed matches have 0-0)
+  const isPlayed = match.status === 'finished';
 
-  // Determine winner for highlighting (optional)
+  // Determine if match is currently live (started but not finished)
+  const matchDate = match.date ? new Date(match.date) : null;
+  const now = new Date();
+  const isLive = matchDate && matchDate <= now && !isPlayed;
+
+  // Determine winner for highlighting
   const homeWinner = isPlayed && match.home.score > match.away.score;
   const awayWinner = isPlayed && match.away.score > match.home.score;
 
+  // Format time only (date is now in Section title)
+  const formattedTime = matchDate
+    ? matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+    : null;
+
   return (
-    <div className="flex items-center justify-between p-4 bg-card/40 border border-border/40 rounded-xl hover:bg-card/60 transition-colors">
+    <div
+      className={cn(
+        'flex items-center justify-between p-4 bg-card/40 border rounded-xl hover:bg-card/60 transition-colors',
+        isLive ? 'border-red-500/50 bg-red-500/5' : 'border-border/40'
+      )}
+    >
       {/* Home Team */}
-      <div className="flex items-center gap-3 flex-1 justify-start min-w-0">
+      <Link
+        href={`/team/${match.home.id}`}
+        className="flex items-center gap-3 flex-1 justify-start min-w-0 group"
+      >
         <span
           className={cn(
-            'font-bold text-sm sm:text-base truncate text-right w-full',
+            'font-bold text-sm sm:text-base truncate text-right w-full group-hover:text-primary transition-colors',
             homeWinner ? 'text-primary' : 'text-foreground'
           )}
         >
@@ -30,11 +49,23 @@ export function MatchCard({ match }) {
             className="w-full h-full object-contain"
           />
         </div>
-      </div>
+      </Link>
 
-      {/* Score / Time */}
+      {/* Score / Time / Live */}
       <div className="flex flex-col items-center justify-center px-4 shrink-0 min-w-[80px]">
-        {isPlayed ? (
+        {isLive ? (
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              <span className="text-red-500 text-[10px] font-bold uppercase tracking-wider">
+                En vivo
+              </span>
+            </div>
+          </div>
+        ) : isPlayed ? (
           <div className="flex items-center gap-2 font-mono text-xl sm:text-2xl font-black tracking-tight">
             <span className={cn(homeWinner ? 'text-primary' : 'text-foreground')}>
               {match.home.score}
@@ -45,14 +76,15 @@ export function MatchCard({ match }) {
             </span>
           </div>
         ) : (
-          <span className="text-muted-foreground text-xs font-medium bg-muted/20 px-2 py-1 rounded-md">
-            VS
-          </span>
+          <span className="text-muted-foreground text-sm font-medium">{formattedTime || 'VS'}</span>
         )}
       </div>
 
       {/* Away Team */}
-      <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
+      <Link
+        href={`/team/${match.away.id}`}
+        className="flex items-center gap-3 flex-1 justify-end min-w-0 group"
+      >
         <div className="relative w-8 h-8 sm:w-10 sm:h-10 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -63,13 +95,13 @@ export function MatchCard({ match }) {
         </div>
         <span
           className={cn(
-            'font-bold text-sm sm:text-base truncate text-left w-full',
+            'font-bold text-sm sm:text-base truncate text-left w-full group-hover:text-primary transition-colors',
             awayWinner ? 'text-primary' : 'text-foreground'
           )}
         >
           {match.away.name}
         </span>
-      </div>
+      </Link>
     </div>
   );
 }

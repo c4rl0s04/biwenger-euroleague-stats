@@ -1,16 +1,32 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { User, Medal, Trophy, ListOrdered } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { User, Medal, ListOrdered, ArrowUpDown } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { cn } from '@/lib/utils';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function RoundStandings({ roundId, selectedUserId, onSelectUser }) {
+  const router = useRouter();
+  const [sortBy, setSortBy] = useState('round'); // 'round' or 'total'
+
   const { data: standings, loading } = useApiData(
     roundId ? `/api/rounds/standings?roundId=${roundId}` : null,
     { dependencies: [roundId] }
   );
+
+  // Sort standings based on selected column
+  const sortedStandings = useMemo(() => {
+    if (!standings) return [];
+    return [...standings].sort((a, b) => {
+      const aVal = sortBy === 'round' ? a.round_points || a.points : a.total_points || 0;
+      const bVal = sortBy === 'round' ? b.round_points || b.points : b.total_points || 0;
+      return bVal - aVal;
+    });
+  }, [standings, sortBy]);
 
   // 1. Skeleton Loading State
   if (loading) {
@@ -33,30 +49,51 @@ export default function RoundStandings({ roundId, selectedUserId, onSelectUser }
       title="Clasificación"
       icon={ListOrdered}
       color="orange"
-      className="sticky top-6 h-[650px] overflow-y-auto custom-scrollbar"
+      className="sticky top-6 h-[800px] overflow-y-auto custom-scrollbar"
     >
       <div className="w-full mx-auto px-1">
         {/* Table Header */}
-        <div className="flex items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 mb-2">
-          <div className="w-8 text-center">#</div>
-          <div className="flex-1 ml-4">Manager</div>
-          <div className="w-20 text-right">Puntos</div>
+        <div className="flex items-center text-[10px] font-bold uppercase tracking-widest px-4 mb-2">
+          <div className="w-8 text-center text-muted-foreground">#</div>
+          <div className="flex-1 ml-4 text-muted-foreground">Manager</div>
+          <button
+            onClick={() => setSortBy('round')}
+            className={cn(
+              'w-14 text-right flex items-center justify-end gap-1 cursor-pointer transition-colors',
+              sortBy === 'round'
+                ? 'text-orange-400'
+                : 'text-muted-foreground hover:text-orange-400/70'
+            )}
+          >
+            Jornada
+            {sortBy === 'round' && <ArrowUpDown size={10} />}
+          </button>
+          <button
+            onClick={() => setSortBy('total')}
+            className={cn(
+              'w-16 text-right flex items-center justify-end gap-1 cursor-pointer transition-colors',
+              sortBy === 'total' ? 'text-cyan-400' : 'text-muted-foreground hover:text-cyan-400/70'
+            )}
+          >
+            Total
+            {sortBy === 'total' && <ArrowUpDown size={10} />}
+          </button>
         </div>
 
         {/* Leaderboard Rows */}
-        <div className="flex flex-col gap-2">
-          {standings.map((user, index) => {
+        <div className="flex flex-col">
+          {sortedStandings.map((user, index) => {
             const isSelected = String(user.id) === String(selectedUserId);
+            const isLast = index === sortedStandings.length - 1;
             const rank = index + 1;
 
             // Dynamic Styling for Top 3
             let rankColor = 'text-zinc-500';
-            let rowBg = 'bg-zinc-900/40 hover:bg-zinc-800/60';
+            let rowBg = 'hover:bg-zinc-800/40';
             let icon = null;
 
             if (rank === 1) {
               rankColor = 'text-yellow-400'; // Gold
-              rowBg = 'bg-gradient-to-r from-yellow-500/10 to-zinc-900/40 border-yellow-500/20';
               icon = <Medal size={16} className="text-yellow-500 fill-yellow-500/20" />;
             } else if (rank === 2) {
               rankColor = 'text-zinc-300'; // Silver
@@ -66,20 +103,22 @@ export default function RoundStandings({ roundId, selectedUserId, onSelectUser }
               icon = <Medal size={16} className="text-amber-700 fill-amber-700/20" />;
             }
 
+            // Get user's characteristic color for hover effect
+            const userColor = getColorForUser(user.id, user.name, user.color_index);
+
             return (
               <button
                 key={user.id}
                 onClick={() => onSelectUser(user.id)}
                 className={cn(
-                  'relative group flex items-center w-full px-4 py-3 rounded-xl transition-all duration-200 border text-left',
-                  // Background & Border Logic
+                  'relative group flex items-center w-full px-4 py-3 transition-all duration-200 text-left cursor-pointer',
+                  // Separator (border-b for all except last)
+                  !isLast && 'border-b border-white/10',
+                  // Background Logic
                   rowBg,
                   // Active State (Overrides everything)
-                  isSelected
-                    ? 'bg-primary/10 border-primary ring-1 ring-primary/50 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] z-10 scale-[1.02]'
-                    : 'border-white/5',
-                  // Hover effect for non-selected
-                  !isSelected && 'hover:border-white/20 hover:scale-[1.01]'
+                  isSelected &&
+                    'bg-primary/10 ring-1 ring-primary/50 rounded-lg shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] z-10 border-transparent'
                 )}
               >
                 {/* Rank Column */}
@@ -113,10 +152,12 @@ export default function RoundStandings({ roundId, selectedUserId, onSelectUser }
                   {/* Name & Team */}
                   <div className="flex flex-col leading-none truncate">
                     <span
-                      className={cn(
-                        'text-sm font-medium truncate transition-colors',
-                        isSelected ? 'text-white' : 'text-zinc-300 group-hover:text-white'
-                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/user/${user.id}`);
+                      }}
+                      className="text-sm font-medium truncate transition-colors cursor-pointer hover:brightness-125"
+                      style={{ color: userColor.stroke }}
                     >
                       {user.name}
                     </span>
@@ -129,17 +170,28 @@ export default function RoundStandings({ roundId, selectedUserId, onSelectUser }
                   </div>
                 </div>
 
-                {/* Points Column */}
-                <div className="w-24 text-right shrink-0">
+                {/* Points Columns */}
+                <div className="w-14 text-right shrink-0">
                   <span
                     className={cn(
-                      'text-xl font-bold tracking-tight',
-                      isSelected ? 'text-primary' : 'text-white'
+                      'text-lg font-bold tracking-tight',
+                      isSelected ? 'text-orange-300' : 'text-orange-400'
                     )}
                   >
-                    {user.points}
+                    {user.round_points || user.points}
                   </span>
-                  <span className="text-[10px] text-zinc-500 block -mt-1 font-medium">PTS</span>
+                  <span className="text-[9px] text-orange-400/50 block -mt-1 font-medium">PTS</span>
+                </div>
+                <div className="w-16 text-right shrink-0">
+                  <span
+                    className={cn(
+                      'text-lg font-bold tracking-tight',
+                      isSelected ? 'text-cyan-300' : 'text-cyan-400'
+                    )}
+                  >
+                    {user.total_points || 0}
+                  </span>
+                  <span className="text-[9px] text-cyan-400/50 block -mt-1 font-medium">TOTAL</span>
                 </div>
 
                 {/* Desktop Visual Cue (Arrow) */}

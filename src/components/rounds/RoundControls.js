@@ -28,7 +28,7 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={handlePrev}
-          className="p-2 rounded-full hover:bg-white/10 transition-colors disabled:opacity-50"
+          className="p-2 rounded-full hover:bg-white/10 transition-colors disabled:opacity-50 cursor-pointer"
           disabled={isLast}
         >
           <ChevronLeft size={24} />
@@ -42,10 +42,10 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
               lists.rounds.map((r) => ({ value: r.round_id, label: r.round_name })).reverse() || []
             }
             className="w-[350px] mx-auto"
-            buttonClassName="h-16 text-4xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10"
+            buttonClassName="h-16 text-5xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10 cursor-pointer"
             placeholder="Selecciona Jornada"
           />
-          <div className="text-sm text-muted-foreground -mt-1">
+          <div className="text-xl text-muted-foreground mt-1">
             {lineupSummary ? (
               <>
                 <span className="text-primary font-bold">{lineupSummary.total_points} pts</span>
@@ -60,7 +60,7 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
 
         <button
           onClick={handleNext}
-          className="p-2 rounded-full hover:bg-white/10 transition-colors disabled:opacity-50"
+          className="p-2 rounded-full hover:bg-white/10 transition-colors disabled:opacity-50 cursor-pointer"
           disabled={isFirst}
         >
           <ChevronRight size={24} />
