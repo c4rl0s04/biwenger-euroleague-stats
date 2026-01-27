@@ -161,43 +161,16 @@ async function runLiveSync() {
         continue;
       }
 
-      // Check if game is actually live/finished in Euroleague Check
-      // We can update match score/status here too!
-      // Euroleague boxscore usually has "Quarter" or "Status" info?
-      // boxscore structure is complex, let's look at stats first.
+      const playerStats = parseBoxScoreStats(boxscore);
+      console.log(`      📊 Found stats for ${playerStats.length} players.`);
 
       // B. Update Match Score
-      // Extract scores from boxscore (usually in Header or by summing points)
-      // Best way: re-fetch GameHeader? Or use what we have.
-      // Boxscore usually has: <TeamA points="X">...
-
-      // Let's assume we can fetch header lightly or rely on boxscore parsing.
-      // But fetchBoxScore result is JSON (from XML parser).
-      // Let's inspect the structure from `fetchBoxScore`.
-      // Actually, `parseBoxScoreStats` ignores team totals.
-
-      // We will perform a quick sum of points from player stats as a fallback
-      // OR better: fetchGameHeader (it's fast).
-
-      /* 
-         NOTE: fetchBoxScore actually returns the full object.
-         Its structure: { game: { team: [ { @codeteam: "A", score: "88" }, ... ] } }
-         Let's try to extract it directly.
-      */
-
-      let homeScore = 0;
-      let awayScore = 0;
-
-      // Safe extraction from typical Euroleague XML->JSON structure
-      // Usually: boxscore.game refers to the root.
-      // We need to know which team is Home and Away from the match object context.
-
       // Strategy: Sum player points. Ideally matches team score perfectly.
       const homePlayers = playerStats.filter((p) => p.team_code === match.home_code);
       const awayPlayers = playerStats.filter((p) => p.team_code === match.away_code);
 
-      homeScore = homePlayers.reduce((acc, p) => acc + (p.points || 0), 0);
-      awayScore = awayPlayers.reduce((acc, p) => acc + (p.points || 0), 0);
+      const homeScore = homePlayers.reduce((acc, p) => acc + (p.points || 0), 0);
+      const awayScore = awayPlayers.reduce((acc, p) => acc + (p.points || 0), 0);
 
       // Update Match in DB
       if (homeScore > 0 || awayScore > 0) {
@@ -216,9 +189,6 @@ async function runLiveSync() {
           `      ⚽ Match Score Updated: ${match.home_code} ${homeScore} - ${awayScore} ${match.away_code}`
         );
       }
-
-      const playerStats = parseBoxScoreStats(boxscore);
-      console.log(`      📊 Found stats for ${playerStats.length} players.`);
 
       let updatedPlayers = 0;
 
