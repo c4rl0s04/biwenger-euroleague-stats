@@ -86,11 +86,11 @@ export default function RoundStandings({
       color="orange"
       className="sticky top-6 h-[800px] overflow-y-auto custom-scrollbar"
     >
-      <div className="w-full mx-auto px-2">
+      <div className="w-full mx-auto px-1">
         {/* Table Header - Simplified & Sortable */}
-        <div className="grid grid-cols-[2rem_1fr_3rem_3rem_3rem] gap-2 items-center text-[10px] font-bold uppercase tracking-widest px-4 mb-2 select-none">
+        <div className="grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem_2.5rem] gap-1 items-center text-[10px] font-bold uppercase tracking-widest px-2 mb-2 select-none">
           <div className="text-center text-muted-foreground">#</div>
-          <div className="text-center text-muted-foreground">Manager</div>
+          <div className="text-center text-muted-foreground">Mgr</div>
 
           {/* Sort by Efficiency */}
           <button
@@ -155,124 +155,121 @@ export default function RoundStandings({
             />
           </button>
         </div>
+        <div className="flex-1 w-full overflow-hidden relative">
+          <div className="flex flex-col space-y-1 pt-2">
+            {sortedStandings.map((user, index) => {
+              const isSelected = String(user.id) === String(selectedUserId);
+              const rank = index + 1;
 
-        {/* Leaderboard Rows */}
-        <div className="flex flex-col">
-          {sortedStandings.map((user, index) => {
-            const isSelected = String(user.id) === String(selectedUserId);
-            const isLast = index === sortedStandings.length - 1;
-            const rank = index + 1;
+              // Dynamic Styling for Top 3
+              let rankColor = 'text-zinc-500';
+              let rowBg = 'hover:bg-zinc-800/40 bg-zinc-900/40 rounded-lg'; // Added default bg and rounding
+              let icon = null;
 
-            // Dynamic Styling for Top 3
-            let rankColor = 'text-zinc-500';
-            let rowBg = 'hover:bg-zinc-800/40';
-            let icon = null;
+              if (rank === 1) {
+                rankColor = 'text-yellow-400';
+                icon = <Medal size={14} className="text-yellow-500 fill-yellow-500/20" />;
+              } else if (rank === 2) {
+                rankColor = 'text-zinc-300';
+                icon = <Medal size={14} className="text-zinc-300 fill-zinc-300/20" />;
+              } else if (rank === 3) {
+                rankColor = 'text-amber-700';
+                icon = <Medal size={14} className="text-amber-700 fill-amber-700/20" />;
+              }
 
-            if (rank === 1) {
-              rankColor = 'text-yellow-400';
-              icon = <Medal size={16} className="text-yellow-500 fill-yellow-500/20" />;
-            } else if (rank === 2) {
-              rankColor = 'text-zinc-300';
-              icon = <Medal size={16} className="text-zinc-300 fill-zinc-300/20" />;
-            } else if (rank === 3) {
-              rankColor = 'text-amber-700';
-              icon = <Medal size={16} className="text-amber-700 fill-amber-700/20" />;
-            }
+              // Calculate Efficiency
+              const actual = user.round_points || user.points || 0;
+              const ideal = user.ideal_points || 0;
+              const eff = ideal > 0 ? (actual / ideal) * 100 : 0;
 
-            // Calculate Efficiency
-            const actual = user.round_points || user.points || 0;
-            const ideal = user.ideal_points || 0;
-            const eff = ideal > 0 ? (actual / ideal) * 100 : 0;
+              // Color Coding for Efficiency
+              let effColor = 'text-red-400';
+              if (eff >= 90) effColor = 'text-emerald-400';
+              else if (eff >= 80) effColor = 'text-blue-400';
+              else if (eff >= 70) effColor = 'text-orange-400';
 
-            // Color Coding for Efficiency
-            let effColor = 'text-red-400';
-            if (eff >= 90) effColor = 'text-emerald-400';
-            else if (eff >= 80) effColor = 'text-blue-400';
-            else if (eff >= 70) effColor = 'text-orange-400';
-
-            return (
-              <button
-                key={user.id}
-                onClick={() => onSelectUser(user.id)}
-                className={cn(
-                  'relative group grid grid-cols-[2rem_1fr_3rem_3rem_3rem] gap-2 items-center w-full min-w-fit px-4 py-3 transition-all duration-200 cursor-pointer text-left',
-                  // Separator
-                  !isLast && 'border-b border-white/10',
-                  rowBg,
-                  isSelected &&
-                    'bg-primary/10 ring-1 ring-primary/50 rounded-lg shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] z-10 border-transparent'
-                )}
-              >
-                {/* 1. Rank */}
-                <div
+              return (
+                <button
+                  key={user.id}
+                  onClick={() => onSelectUser(user.id)}
                   className={cn(
-                    'font-mono font-bold text-lg flex justify-center shrink-0',
-                    rankColor
+                    'relative group grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem_2.5rem] gap-1 items-center w-full px-2 py-2 transition-all duration-200 cursor-pointer text-left',
+                    rowBg,
+                    isSelected &&
+                      'bg-primary/10 ring-1 ring-primary/50 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] z-10'
                   )}
                 >
-                  {icon || rank}
-                </div>
-
-                {/* 2. Manager Image */}
-                <div className="flex justify-center w-full">
+                  {/* 1. Rank */}
                   <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/user/${user.id}`);
-                    }}
                     className={cn(
-                      'relative w-10 h-10 rounded-full overflow-hidden border-2 shrink-0 cursor-pointer hover:scale-110 transition-transform shadow-lg',
-                      isSelected ? 'border-primary' : 'border-zinc-700'
+                      'font-mono font-bold text-sm flex justify-center shrink-0',
+                      rankColor
                     )}
                   >
-                    {user.icon ? (
-                      <Image src={user.icon} alt={user.name} fill className="object-cover" />
-                    ) : (
-                      <div className="flex items-center justify-center w-full h-full bg-zinc-800 text-zinc-500">
-                        <User size={18} />
-                      </div>
-                    )}
+                    {icon || rank}
                   </div>
-                </div>
 
-                {/* 3. Efficiency Column */}
-                <div className="flex justify-center shrink-0">
-                  <span className={cn('text-sm font-bold', effColor)}>{Math.round(eff)}%</span>
-                </div>
-
-                {/* 4. Actual Points */}
-                <div className="flex justify-center shrink-0">
-                  <span
-                    className={cn(
-                      'text-lg font-bold tracking-tight',
-                      isSelected ? 'text-orange-300' : 'text-orange-400'
-                    )}
-                  >
-                    {Math.round(actual)}
-                  </span>
-                </div>
-
-                {/* 5. Ideal Points */}
-                <div className="flex justify-center shrink-0">
-                  <span
-                    className={cn(
-                      'text-lg font-bold tracking-tight',
-                      isSelected ? 'text-emerald-300' : 'text-emerald-400'
-                    )}
-                  >
-                    {Math.round(ideal)}
-                  </span>
-                </div>
-
-                {/* Desktop Visual Cue (Arrow) */}
-                {isSelected && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 hidden lg:block">
-                    <div className="w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]" />
+                  {/* 2. Manager Image */}
+                  <div className="flex justify-center w-full">
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/user/${user.id}`);
+                      }}
+                      className={cn(
+                        'relative w-8 h-8 rounded-full overflow-hidden border-2 shrink-0 cursor-pointer hover:scale-110 transition-transform shadow-lg z-10',
+                        isSelected ? 'border-primary' : 'border-zinc-700'
+                      )}
+                    >
+                      {user.icon ? (
+                        <Image src={user.icon} alt={user.name} fill className="object-cover" />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-zinc-800 text-zinc-500">
+                          <User size={14} />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </button>
-            );
-          })}
+
+                  {/* 3. Efficiency Column */}
+                  <div className="flex justify-center shrink-0">
+                    <span className={cn('text-xs font-bold', effColor)}>{Math.round(eff)}%</span>
+                  </div>
+
+                  {/* 4. Actual Points */}
+                  <div className="flex justify-center shrink-0">
+                    <span
+                      className={cn(
+                        'text-sm font-bold tracking-tight',
+                        isSelected ? 'text-orange-300' : 'text-orange-400'
+                      )}
+                    >
+                      {Math.round(actual)}
+                    </span>
+                  </div>
+
+                  {/* 5. Ideal Points */}
+                  <div className="flex justify-center shrink-0">
+                    <span
+                      className={cn(
+                        'text-sm font-bold tracking-tight',
+                        isSelected ? 'text-emerald-300' : 'text-emerald-400'
+                      )}
+                    >
+                      {Math.round(ideal)}
+                    </span>
+                  </div>
+
+                  {/* Desktop Visual Cue (Arrow) */}
+                  {isSelected && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 hidden lg:block">
+                      <div className="w-1 h-4 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </ElegantCard>

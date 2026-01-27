@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CardThemeProvider } from '@/contexts/CardThemeContext';
 
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <CardThemeProvider>{children}</CardThemeProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
