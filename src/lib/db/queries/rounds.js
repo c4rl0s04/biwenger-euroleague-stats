@@ -877,12 +877,38 @@ export async function getPlayersLeftOut(userId, roundId) {
  * @param {string} roundId
  */
 export async function getCoachRating(userId, roundId) {
-  // 1. Get Actual Score
+  // 1. Get Actual Score (Official vs Live)
   const actualRes = await db.query(
     `SELECT points FROM user_rounds WHERE user_id = $1 AND round_id = $2`,
     [userId, roundId]
   );
-  const actualScore = parseInt(actualRes.rows[0]?.points) || 0;
+
+  let actualScore = 0;
+
+  // A. Use Official Score if available
+  if (actualRes.rows.length > 0) {
+    actualScore = parseInt(actualRes.rows[0].points) || 0;
+  }
+  // B. Calculate Live Score if no official stats (Round in progress)
+  else {
+    const liveQuery = `
+      SELECT 
+        SUM(
+          COALESCE(prs.fantasy_points, 0) * 
+          CASE 
+            WHEN l.is_captain::int = 1 THEN 2.0
+            WHEN l.role = 'titular' THEN 1.0
+            WHEN l.role = '6th_man' THEN 0.75
+            ELSE 0.5
+          END
+        ) as live_points
+      FROM lineups l
+      LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND prs.round_id = $2
+      WHERE l.user_id = $1 AND l.round_id = $2
+    `;
+    const liveRes = await db.query(liveQuery, [userId, roundId]);
+    actualScore = Math.round(parseFloat(liveRes.rows[0]?.live_points) || 0);
+  }
 
   // 2. Get Historic Squad
   const historicSquadIds = await getHistoricSquad(userId, roundId);

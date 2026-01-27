@@ -261,6 +261,7 @@ export default function RoundsPageClient() {
       </div>
 
       {/* SECTION: PLAYER STATS */}
+      <div className="h-12" />
       <Section title="Estadísticas de Jugadores" background="section-raised">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="h-full">

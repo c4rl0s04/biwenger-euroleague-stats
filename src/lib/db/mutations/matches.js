@@ -65,6 +65,15 @@ export function prepareMatchMutations(db) {
       await db.query(sql, values);
     },
 
+    updateMatchScore: async ({ id, home_score, away_score, status }) => {
+      const sql = `
+        UPDATE matches 
+        SET home_score = $2, away_score = $3, status = $4
+        WHERE id = $1
+      `;
+      await db.query(sql, [id, home_score, away_score, status]);
+    },
+
     // --- Round Cleanup (Merging duplicates) ---
 
     findDuplicateRounds: async () => {
