@@ -90,9 +90,26 @@ src/
 
 ## Docker Support
 
+The project runs on a full Docker stack: **App + PostgreSQL + Auto-Sync Worker**.
+
+1. Create a `.env` file with your credentials:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Start the stack:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. Access the application at [http://localhost:3000](http://localhost:3000).
+
+The `sync` service runs automatically every 6 hours. You can restart it to force an update:
+
 ```bash
-docker build -t biwengerstats .
-docker run -p 3000:3000 -v $(pwd)/data:/app/data --env-file .env.local biwengerstats
+docker-compose restart sync
 ```
 
 ## Development
