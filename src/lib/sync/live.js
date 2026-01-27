@@ -1,5 +1,6 @@
 import { db } from '../db/client.js';
 import { CONFIG } from '../config.js';
+import { run as runSyncLineups } from './services/biwenger/lineups.js';
 import {
   fetchSchedule,
   fetchBoxScore,
@@ -108,6 +109,44 @@ async function runLiveSync() {
         `   ⚠️ No Euroleague game code found for ${match.home_code} vs ${match.away_code}`
       );
       continue;
+    }
+
+    // Check for lineups (One-time check per round)
+    // We do this inside the loop but guarding with a Set to run once per round_id
+    if (!global.lineupsChecked) global.lineupsChecked = new Set();
+
+    if (!global.lineupsChecked.has(match.round_id)) {
+      global.lineupsChecked.add(match.round_id);
+
+      const hasLineups =
+        (await db.query('SELECT 1 FROM lineups WHERE round_id = $1 LIMIT 1', [match.round_id]))
+          .rowCount > 0;
+
+      if (!hasLineups) {
+        console.log(`   ⚠️ Lineups missing for Round ${match.round_id}. Syncing...`);
+
+        // Convert array to map for lineup service
+        const playersList = allPlayers.reduce((acc, p) => {
+          acc[p.id] = p;
+          return acc;
+        }, {});
+
+        const mockManager = {
+          context: { db },
+          log: (msg) => console.log(`      [Lineups] ${msg}`),
+          error: (msg) => console.error(`      [Lineups] ❌ ${msg}`),
+        };
+
+        try {
+          await runSyncLineups(
+            mockManager,
+            { id: match.round_id, name: match.round_name, status: 'active' },
+            playersList
+          );
+        } catch (e) {
+          console.error(`      ❌ Failed to sync lineups: ${e.message}`);
+        }
+      }
     }
 
     console.log(
