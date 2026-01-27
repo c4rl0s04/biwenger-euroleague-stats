@@ -86,32 +86,38 @@ export default function RoundStandings({
       color="orange"
       className="sticky top-6 h-[800px] overflow-y-auto custom-scrollbar"
     >
-      <div className="w-full mx-auto px-1">
+      <div className="w-full mx-auto px-2">
         {/* Table Header - Simplified & Sortable */}
-        <div className="flex items-center text-[10px] font-bold uppercase tracking-widest px-4 mb-2 select-none">
-          <div className="w-8 text-center text-muted-foreground">#</div>
-          <div className="flex-1 text-center text-muted-foreground">Manager</div>
+        <div className="grid grid-cols-[2rem_1fr_3rem_3rem_3rem] gap-2 items-center text-[10px] font-bold uppercase tracking-widest px-4 mb-2 select-none">
+          <div className="text-center text-muted-foreground">#</div>
+          <div className="text-center text-muted-foreground">Manager</div>
 
-          {/* Sort by Efficiency */}
           {/* Sort by Efficiency */}
           <button
             onClick={() => setSortBy('efficiency')}
             className={cn(
-              'w-12 text-right flex items-center justify-end gap-1 transition-all cursor-pointer',
+              'flex items-center justify-center relative transition-all cursor-pointer group',
               sortBy === 'efficiency'
                 ? 'text-blue-400 opacity-100'
                 : 'text-muted-foreground hover:text-blue-400 opacity-50 hover:opacity-100'
             )}
             title="Ordenar por Eficiencia"
           >
-            %{sortBy === 'efficiency' && <ArrowUpDown size={10} />}
+            %
+            <ArrowUpDown
+              size={10}
+              className={cn(
+                'absolute right-0 opacity-0 transition-opacity',
+                sortBy === 'efficiency' && 'opacity-100'
+              )}
+            />
           </button>
 
           {/* Sort by Round Points */}
           <button
             onClick={() => setSortBy('round')}
             className={cn(
-              'w-12 text-right flex items-center justify-end gap-1 transition-all cursor-pointer',
+              'flex items-center justify-center relative transition-all cursor-pointer group',
               sortBy === 'round'
                 ? 'text-orange-400 opacity-100'
                 : 'text-muted-foreground hover:text-orange-400 opacity-50 hover:opacity-100'
@@ -119,14 +125,20 @@ export default function RoundStandings({
             title="Ordenar por Puntos Jornada"
           >
             Pts
-            {sortBy === 'round' && <ArrowUpDown size={10} />}
+            <ArrowUpDown
+              size={10}
+              className={cn(
+                'absolute right-0 opacity-0 transition-opacity',
+                sortBy === 'round' && 'opacity-100'
+              )}
+            />
           </button>
 
           {/* Sort by Ideal Points */}
           <button
             onClick={() => setSortBy('ideal')}
             className={cn(
-              'w-12 text-right flex items-center justify-end gap-1 transition-all cursor-pointer',
+              'flex items-center justify-center relative transition-all cursor-pointer group',
               sortBy === 'ideal'
                 ? 'text-emerald-400 opacity-100'
                 : 'text-muted-foreground hover:text-emerald-400 opacity-50 hover:opacity-100'
@@ -134,7 +146,13 @@ export default function RoundStandings({
             title="Ordenar por Puntos Ideales"
           >
             Max
-            {sortBy === 'ideal' && <ArrowUpDown size={10} />}
+            <ArrowUpDown
+              size={10}
+              className={cn(
+                'absolute right-0 opacity-0 transition-opacity',
+                sortBy === 'ideal' && 'opacity-100'
+              )}
+            />
           </button>
         </div>
 
@@ -177,7 +195,7 @@ export default function RoundStandings({
                 key={user.id}
                 onClick={() => onSelectUser(user.id)}
                 className={cn(
-                  'relative group flex items-center w-full px-4 py-3 transition-all duration-200 cursor-pointer',
+                  'relative group grid grid-cols-[2rem_1fr_3rem_3rem_3rem] gap-2 items-center w-full min-w-fit px-4 py-3 transition-all duration-200 cursor-pointer text-left',
                   // Separator
                   !isLast && 'border-b border-white/10',
                   rowBg,
@@ -188,7 +206,7 @@ export default function RoundStandings({
                 {/* 1. Rank */}
                 <div
                   className={cn(
-                    'w-8 font-mono font-bold text-lg flex justify-center shrink-0',
+                    'font-mono font-bold text-lg flex justify-center shrink-0',
                     rankColor
                   )}
                 >
@@ -196,7 +214,7 @@ export default function RoundStandings({
                 </div>
 
                 {/* 2. Manager Image */}
-                <div className="flex-1 flex justify-center">
+                <div className="flex justify-center w-full">
                   <div
                     onClick={(e) => {
                       e.stopPropagation();
@@ -218,12 +236,12 @@ export default function RoundStandings({
                 </div>
 
                 {/* 3. Efficiency Column */}
-                <div className="w-12 text-right shrink-0">
+                <div className="flex justify-center shrink-0">
                   <span className={cn('text-sm font-bold', effColor)}>{Math.round(eff)}%</span>
                 </div>
 
                 {/* 4. Actual Points */}
-                <div className="w-12 text-right shrink-0">
+                <div className="flex justify-center shrink-0">
                   <span
                     className={cn(
                       'text-lg font-bold tracking-tight',
@@ -235,7 +253,7 @@ export default function RoundStandings({
                 </div>
 
                 {/* 5. Ideal Points */}
-                <div className="w-12 text-right shrink-0">
+                <div className="flex justify-center shrink-0">
                   <span
                     className={cn(
                       'text-lg font-bold tracking-tight',

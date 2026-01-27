@@ -2,7 +2,6 @@
 
 import ScoreOverviewCard from './stats/ScoreOverviewCard'; // New import
 import CoachRatingCard from './stats/CoachRatingCard';
-import RoundMVPCard from './stats/RoundMVPCard';
 import GradaCard from './stats/GradaCard';
 import OptimizationTips from './stats/OptimizationTips';
 
@@ -27,7 +26,6 @@ export default function RoundStatsSidebar({ stats, loading, summary, viewMode })
       {stats && (
         <>
           <CoachRatingCard user={user} />
-          <RoundMVPCard global={global} />
           <GradaCard user={user} />
           <OptimizationTips user={user} />
         </>

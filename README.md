@@ -21,6 +21,10 @@ An advanced analytics dashboard for Euroleague fantasy managers on Biwenger. Thi
 | Charts    | Recharts                |
 | Testing   | Vitest (79 tests)       |
 
+## Architecture
+
+![Biwenger Stats Architecture](./public/assets/architecture.png)
+
 ## Quick Start
 
 ```bash

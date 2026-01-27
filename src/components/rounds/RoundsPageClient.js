@@ -12,6 +12,9 @@ import RoundControls from './RoundControls';
 import BasketballCourt from './BasketballCourt';
 import Bench from './Bench';
 import RoundStatsSidebar from './RoundStatsSidebar';
+import RoundMVPCard from './stats/RoundMVPCard';
+import { Section } from '@/components/layout';
+import { Activity } from 'lucide-react';
 
 export default function RoundsPageClient() {
   const router = useRouter();
@@ -157,98 +160,114 @@ export default function RoundsPageClient() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* HEADER & CONTROLS */}
-      <ElegantCard title="Panel de Jornada" icon={Settings} className="relative z-20" color="zinc">
-        <RoundControls
-          lists={lists}
-          selectedRoundId={selectedRoundId}
-          onChangeRound={setSelectedRoundId}
-          lineupSummary={currentSummary}
-        />
-      </ElegantCard>
-
-      {/* MAIN GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* COLUMN 1: STANDINGS (3 cols) */}
-        <div className="lg:col-span-3">
-          <RoundStandings
-            roundId={selectedRoundId}
-            selectedUserId={selectedUserId}
-            onSelectUser={setSelectedUserId}
-            standings={fullRoundData?.users} // PASS PROPS DOWN
+    <div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* HEADER & CONTROLS */}
+        <ElegantCard
+          title="Panel de Jornada"
+          icon={Settings}
+          className="relative z-20"
+          color="zinc"
+        >
+          <RoundControls
+            lists={lists}
+            selectedRoundId={selectedRoundId}
+            onChangeRound={setSelectedRoundId}
+            lineupSummary={currentSummary}
           />
-        </div>
+        </ElegantCard>
 
-        {/* COLUMN 2: COURT (6 cols) */}
-        <div className="lg:col-span-6 space-y-4">
-          {/* View Toggles */}
-          <div className="flex p-1 bg-zinc-900/50 rounded-lg border border-white/5 w-fit mx-auto">
-            <button
-              onClick={() => setViewMode('user')}
-              className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'user' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
-            >
-              <User size={12} /> Alineación
-            </button>
-            <button
-              onClick={() => setViewMode('user_ideal')}
-              className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
-            >
-              <BrainCircuit size={12} /> Mi Ideal
-            </button>
-            <button
-              onClick={() => setViewMode('ideal')}
-              className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
-            >
-              <Star size={12} /> Global
-            </button>
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* COLUMN 1: STANDINGS (3 cols) */}
+          <div className="lg:col-span-3">
+            <RoundStandings
+              roundId={selectedRoundId}
+              selectedUserId={selectedUserId}
+              onSelectUser={setSelectedUserId}
+              standings={fullRoundData?.users} // PASS PROPS DOWN
+            />
           </div>
 
-          <ElegantCard title={title} icon={icon} color={color} className="w-full">
-            <div className="w-full aspect-[4/3] lg:aspect-[16/10] min-h-[600px]">
-              {isCourtLoading ? (
-                <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
-                  Cargando datos...
-                </div>
-              ) : (
-                <BasketballCourt
-                  players={currentStarters}
-                  onPlayerClick={handlePlayerClick}
-                  className="h-full w-full"
-                />
-              )}
-            </div>
-          </ElegantCard>
-
-          {/* Bench */}
-          {isBenchVisible && currentBench.length > 0 && (
-            <div className="mt-4">
-              <ElegantCard
-                title="Banquillo"
-                icon={Users}
-                className="w-full opacity-90"
-                color="blue"
+          {/* COLUMN 2: COURT (6 cols) */}
+          <div className="lg:col-span-6 space-y-4">
+            {/* View Toggles */}
+            <div className="flex p-1 bg-zinc-900/50 rounded-lg border border-white/5 w-fit mx-auto">
+              <button
+                onClick={() => setViewMode('user')}
+                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'user' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
               >
-                <Bench
-                  players={currentBench}
-                  viewMode="tactical"
-                  onPlayerClick={handlePlayerClick}
-                />
-              </ElegantCard>
+                <User size={12} /> Alineación
+              </button>
+              <button
+                onClick={() => setViewMode('user_ideal')}
+                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+              >
+                <BrainCircuit size={12} /> Mi Ideal
+              </button>
+              <button
+                onClick={() => setViewMode('ideal')}
+                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+              >
+                <Star size={12} /> Global
+              </button>
             </div>
-          )}
-        </div>
 
-        {/* COLUMN 3: STATS (3 cols) */}
-        <div className="lg:col-span-3 space-y-6">
-          <RoundStatsSidebar
-            stats={statsData}
-            loading={dataLoading}
-            summary={currentSummary}
-            viewMode={viewMode}
-          />
+            <ElegantCard title={title} icon={icon} color={color} className="w-full">
+              <div className="w-full aspect-[4/3] lg:aspect-[16/10] min-h-[600px]">
+                {isCourtLoading ? (
+                  <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
+                    Cargando datos...
+                  </div>
+                ) : (
+                  <BasketballCourt
+                    players={currentStarters}
+                    onPlayerClick={handlePlayerClick}
+                    className="h-full w-full"
+                  />
+                )}
+              </div>
+            </ElegantCard>
+
+            {/* Bench */}
+            {isBenchVisible && currentBench.length > 0 && (
+              <div className="mt-4">
+                <ElegantCard
+                  title="Banquillo"
+                  icon={Users}
+                  className="w-full opacity-90"
+                  color="blue"
+                >
+                  <Bench
+                    players={currentBench}
+                    viewMode="tactical"
+                    onPlayerClick={handlePlayerClick}
+                  />
+                </ElegantCard>
+              </div>
+            )}
+          </div>
+
+          {/* COLUMN 3: STATS (3 cols) */}
+          <div className="lg:col-span-3 space-y-6">
+            <RoundStatsSidebar
+              stats={statsData}
+              loading={dataLoading}
+              summary={currentSummary}
+              viewMode={viewMode}
+            />
+          </div>
         </div>
       </div>
+
+      {/* SECTION: PLAYER STATS */}
+      <Section title="Estadísticas de Jugadores" background="section-raised">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="h-full">
+            <RoundMVPCard global={statsData?.global} />
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }
