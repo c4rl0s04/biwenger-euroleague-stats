@@ -563,3 +563,428 @@ export async function getLivingStandings(roundId) {
     };
   });
 }
+/**
+ * Get detailed statistics for a specific round
+ * @param {string} roundId
+ */
+export async function getRoundGlobalStats(roundId) {
+  // 1. Round MVP
+  const mvpQuery = `
+    SELECT 
+      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      prs.fantasy_points as points, prs.valuation
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE prs.round_id = $1
+    ORDER BY prs.fantasy_points DESC
+    LIMIT 1
+  `;
+
+  // 2. Average Score
+  const avgQuery = `
+    SELECT ROUND(AVG(points), 1) as avg_score
+    FROM user_rounds
+    WHERE round_id = $1 AND participated = TRUE
+  `;
+
+  // 3. Highest Score (Round Winner)
+  const winnerQuery = `
+    SELECT u.name, ur.points, u.icon
+    FROM user_rounds ur
+    JOIN users u ON ur.user_id = u.id
+    WHERE ur.round_id = $1 AND ur.participated = TRUE
+    ORDER BY ur.points DESC
+    LIMIT 1
+  `;
+
+  const [mvpRes, avgRes, winnerRes] = await Promise.all([
+    db.query(mvpQuery, [roundId]),
+    db.query(avgQuery, [roundId]),
+    db.query(winnerQuery, [roundId]),
+  ]);
+
+  return {
+    mvp: mvpRes.rows[0] || null,
+    avgScore: parseFloat(avgRes.rows[0]?.avg_score) || 0,
+    winner: winnerRes.rows[0] || null,
+  };
+}
+
+/**
+ * Get the Ideal Lineup (Best 5 players) for a round
+ * @param {string} roundId
+ */
+export async function getIdealLineup(roundId) {
+  // Fetch top 50 to ensure we have enough for valid formations
+  const query = `
+    SELECT 
+      p.id as player_id, p.name, p.position, p.img, p.team_id,
+      t.short_name as team_short, t.img as team_img,
+      prs.fantasy_points as points, prs.valuation
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE prs.round_id = $1
+    ORDER BY prs.fantasy_points DESC
+    LIMIT 50
+  `;
+
+  const allStats = (await db.query(query, [roundId])).rows;
+
+  // LOGIC: Valid Formation Greedy Algorithm (Same as Coach Rating)
+  // - Starts: 5 players. Max 3 per position (Base, Alero, Pivot).
+  // - Bench: Next 5 best players.
+
+  const starters = [];
+  const bench = [];
+  const rolesCount = { Base: 0, Alero: 0, Pivot: 0 };
+  const usedIds = new Set();
+
+  // A. Select Starters
+  for (const p of allStats) {
+    if (starters.length >= 5) break;
+
+    const pos = p.position || 'Base';
+    if ((rolesCount[pos] || 0) < 3) {
+      starters.push(p);
+      rolesCount[pos] = (rolesCount[pos] || 0) + 1;
+      usedIds.add(p.player_id);
+    }
+  }
+
+  // B. Select Bench (Next 5)
+  for (const p of allStats) {
+    if (bench.length >= 5) break;
+    if (!usedIds.has(p.player_id)) {
+      bench.push(p);
+      usedIds.add(p.player_id);
+    }
+  }
+
+  const idealLineupRaw = [...starters, ...bench];
+
+  // Map to "Lineup" format with Multipliers
+  return idealLineupRaw.map((p, index) => {
+    let multiplier = 0;
+    let role = 'bench';
+    let is_captain = false;
+
+    // Starters
+    if (index < 5) {
+      role = 'titular';
+      if (index === 0) {
+        multiplier = 2.0;
+        is_captain = true;
+      } else {
+        multiplier = 1.0;
+      }
+    }
+    // Bench
+    else {
+      role = index === 5 ? '6th_man' : 'bench';
+      multiplier = index === 5 ? 0.75 : 0.5;
+    }
+
+    return {
+      ...p,
+      role,
+      is_captain,
+      stats_points: p.points,
+      multiplier,
+    };
+  });
+}
+
+/**
+ * HELPER: Reconstruct the user's squad at the start of a specific round.
+ * Uses current ownership + transfer history replay.
+ * @param {string} userId
+ * @param {string} roundId
+ * @returns {Promise<Set<number>>} Set of Player IDs owned at round start
+ */
+async function getHistoricSquad(userId, roundId) {
+  try {
+    // 1. Get User Name (fichajes table stores names, not IDs)
+    const userRes = await db.query('SELECT name FROM users WHERE id = $1', [userId]);
+    if (userRes.rows.length === 0) return new Set();
+    const userName = userRes.rows[0].name;
+
+    // 2. Get Round Start Date (Lock Time)
+    const roundRes = await db.query(
+      'SELECT MIN(date) as start_date FROM matches WHERE round_id = $1',
+      [roundId]
+    );
+    if (!roundRes.rows[0]?.start_date) return new Set();
+
+    // Ensure we compare timestamps correctly (Postgres Date -> JS Timestamp)
+    // fichajes.timestamp is in SECONDS (BigInt), matches.date is Date object.
+    const roundTs = Math.floor(new Date(roundRes.rows[0].start_date).getTime() / 1000);
+
+    // 3. Get Current Squad
+    const squadRes = await db.query('SELECT id FROM players WHERE owner_id = $1', [userId]);
+    const squad = new Set(squadRes.rows.map((r) => r.id));
+
+    // 4. Fetch Transfers that happened AFTER the round start
+    // We need to reverse these actions to get back to the state at round_start.
+    const transfersRes = await db.query(
+      `
+      SELECT player_id, vendedor, comprador, timestamp
+      FROM fichajes 
+      WHERE timestamp > $1 
+        AND (vendedor = $2 OR comprador = $2)
+      ORDER BY timestamp DESC
+    `,
+      [roundTs, userName]
+    );
+
+    // 5. Replay Logic (Backwards)
+    for (const t of transfersRes.rows) {
+      // If I BOUGHT the player AFTER the round, I didn't have him during the round.
+      if (t.comprador === userName) {
+        squad.delete(t.player_id);
+      }
+      // If I SOLD the player AFTER the round, I actually HAD him during the round.
+      else if (t.vendedor === userName) {
+        squad.add(t.player_id);
+      }
+    }
+
+    return squad;
+  } catch (error) {
+    console.error('getHistoricSquad Error:', error);
+    // Fallback: Return empty set? Or Current Squad?
+    // If we return empty set, everything becomes empty.
+    // Better to fallback to current squad (ignore transfers).
+    // To do that, we need current squad query here safely.
+    try {
+      const fallbackRes = await db.query('SELECT id FROM players WHERE owner_id = $1', [userId]);
+      return new Set(fallbackRes.rows.map((r) => r.id));
+    } catch (e) {
+      return new Set();
+    }
+  }
+}
+
+/**
+ * Calculate User Optimization stats (Points missed, Coach Rating)
+ * @param {string} userId
+ * @param {string} roundId
+ */
+export async function getUserOptimization(userId, roundId) {
+  // 1. Get Historic Squad Stats
+  const historicSquadIds = await getHistoricSquad(userId, roundId);
+  if (historicSquadIds.size === 0) return null;
+
+  const squadStats = (
+    await db.query(
+      `
+    SELECT p.id, p.name, COALESCE(prs.fantasy_points, 0) as points
+    FROM players p
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.round_id = $2
+    WHERE p.id = ANY($1::int[])
+  `,
+      [[...historicSquadIds], roundId]
+    )
+  ).rows;
+
+  // 2. Find Actual Captain
+  const lineupRes = await db.query(
+    `
+    SELECT l.player_id, is_captain, role, COALESCE(prs.fantasy_points, 0) as points
+    FROM lineups l
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND prs.round_id = $2
+    WHERE l.user_id = $1 AND l.round_id = $2
+  `,
+    [userId, roundId]
+  );
+
+  const captain = lineupRes.rows.find((p) => p.is_captain);
+  const captainPoints = captain ? captain.points : 0;
+
+  // 3. Find Best Possible Player (who user OWNED)
+  const bestPlayer = squadStats.reduce((max, p) => (p.points > max.points ? p : max), {
+    points: -Infinity,
+  });
+
+  // 4. Calculate Bench Points (In lineup but not titular)
+  // Note: Lineups table has everyone in the roster submitted to Biwenger.
+  // We sum points of players in lineup who are NOT titular.
+  const benchPoints = lineupRes.rows
+    .filter((p) => p.role !== 'titular')
+    .reduce((sum, p) => sum + p.points, 0);
+
+  const captainOpportunityLost =
+    bestPlayer.points > captainPoints
+      ? bestPlayer.points - captainPoints // Difference in base points (captain adds 1x base)
+      : 0;
+
+  return {
+    captainOpportunityLost: Math.max(0, captainOpportunityLost),
+    benchPoints,
+    bestPlayerName: bestPlayer.name || 'N/A',
+  };
+}
+
+/**
+ * Get players owned by the user at round start but NOT in the lineup.
+ * Correctly handles historical ownership.
+ * @param {string} userId
+ * @param {string} roundId
+ */
+export async function getPlayersLeftOut(userId, roundId) {
+  // 1. Get Historic Squad
+  const historicSquadIds = await getHistoricSquad(userId, roundId);
+  if (historicSquadIds.size === 0) return [];
+
+  // 2. Get Actual Lineup
+  const lineupRes = await db.query(
+    'SELECT player_id FROM lineups WHERE user_id = $1 AND round_id = $2',
+    [userId, roundId]
+  );
+  const lineupIds = new Set(lineupRes.rows.map((r) => r.player_id));
+
+  // 3. Find Left Out (In Squad BUT NOT in Lineup)
+  const leftOutIds = [];
+  for (const id of historicSquadIds) {
+    if (!lineupIds.has(id)) {
+      leftOutIds.push(id);
+    }
+  }
+
+  if (leftOutIds.length === 0) return [];
+
+  // 4. Fetch Details & Stats
+  const query = `
+    SELECT 
+      p.id, p.name, p.position, p.img, 
+      t.short_name as team_short, t.img as team_img,
+      COALESCE(prs.fantasy_points, 0) as points,
+      COALESCE(prs.valuation, 0) as valuation
+    FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.round_id = $2
+    WHERE p.id = ANY($1::int[])
+    ORDER BY points DESC
+  `;
+
+  return (await db.query(query, [leftOutIds, roundId])).rows;
+}
+
+/**
+ * Calculate Coach Rating and Optimization Stats based on Historic Squad
+ * @param {string} userId
+ * @param {string} roundId
+ */
+export async function getCoachRating(userId, roundId) {
+  // 1. Get Actual Score
+  const actualRes = await db.query(
+    `SELECT points FROM user_rounds WHERE user_id = $1 AND round_id = $2`,
+    [userId, roundId]
+  );
+  const actualScore = parseInt(actualRes.rows[0]?.points) || 0;
+
+  // 2. Get Historic Squad
+  const historicSquadIds = await getHistoricSquad(userId, roundId);
+  if (historicSquadIds.size === 0) return { rating: 0, maxScore: 0, actualScore, diff: 0 };
+
+  // 3. Get Stats for ALL players in the historic squad
+  // We need to find the theoretical MAX score from this set.
+  const statsQuery = `
+    SELECT 
+      p.id as player_id, p.name, p.position, p.img, p.team_id,
+      COALESCE(prs.fantasy_points, 0) as points
+    FROM players p
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.round_id = $2
+    WHERE p.id = ANY($1::int[])
+  `;
+
+  const squadStats = (await db.query(statsQuery, [[...historicSquadIds], roundId])).rows;
+
+  // 4. Calculate Max Possible Score (Ideal Lineup)
+  // Logic: Valid Formation Greedy Algorithm
+  // - Starts: 5 players. Max 3 per position (Base, Alero, Pivot).
+  // - Bench: Next 5 best players (unconstrained).
+
+  // Sort ALL historical players by points descending
+  // (We use all of them because we might need to dig deep if top players are all same pos)
+  const allSorted = squadStats.sort((a, b) => b.points - a.points);
+
+  const starters = [];
+  const bench = [];
+  const rolesCount = { Base: 0, Alero: 0, Pivot: 0 };
+  const usedIds = new Set();
+
+  // A. Select Starters
+  for (const p of allSorted) {
+    if (starters.length >= 5) break;
+
+    const pos = p.position || 'Base'; // Fallback
+    // Check constraint: Max 3 per position
+    if ((rolesCount[pos] || 0) < 3) {
+      starters.push(p);
+      rolesCount[pos] = (rolesCount[pos] || 0) + 1;
+      usedIds.add(p.player_id);
+    }
+  }
+
+  // B. Select Bench (Next best 5, no position constraints)
+  for (const p of allSorted) {
+    if (bench.length >= 5) break;
+    if (!usedIds.has(p.player_id)) {
+      bench.push(p);
+      usedIds.add(p.player_id);
+    }
+  }
+
+  // Combine for calculation
+  const idealLineupRaw = [...starters, ...bench];
+  let maxScore = 0;
+
+  // Map to "Lineup" format for frontend
+  const idealLineup = idealLineupRaw.map((p, index) => {
+    let multiplier = 0;
+    let role = 'bench';
+    let is_captain = false;
+
+    // Indices 0-4 are Starters (from our starter selection step)
+    if (index < 5) {
+      role = 'titular';
+      if (index === 0) {
+        // Best Starter is Captain
+        multiplier = 2.0;
+        is_captain = true;
+      } else {
+        multiplier = 1.0;
+      }
+    }
+    // Indices 5-9 are Bench
+    else {
+      role = index === 5 ? '6th_man' : 'bench'; // First bench player is 6th man
+      multiplier = index === 5 ? 0.75 : 0.5;
+    }
+
+    maxScore += p.points * multiplier;
+
+    // Return object compatible with PlayerCard/Court
+    return {
+      ...p,
+      role,
+      is_captain,
+      stats_points: p.points,
+      multiplier,
+    };
+  });
+
+  // 5. Calculate Rating
+  // (Actual / Ideal) * 100 with 2 decimals
+  const rating = maxScore > 0 ? (actualScore / maxScore) * 100 : 0;
+
+  return {
+    rating: parseFloat(rating.toFixed(2)), // Keep 2 decimals
+    maxScore: Math.round(maxScore), // Round to nearest integer
+    actualScore,
+    diff: parseFloat((maxScore - actualScore).toFixed(2)),
+    idealLineup, // <--- Added this to allow frontend "Mi Ideal" view
+  };
+}

@@ -29,14 +29,15 @@ const GeometricLayer = () => {
     <svg
       viewBox={`0 0 ${COURT_WIDTH} ${COURT_HEIGHT}`}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ overflow: 'hidden' }}
+      style={{ overflow: 'visible' }}
+      preserveAspectRatio="xMidYMid slice"
     >
-      {/* 1. The Paint (Key) - 16ft x 19ft */}
+      {/* 1. The Paint (Key) - Extended to cover top gap */}
       <rect
         x={CENTER_X - KEY_WIDTH_HALF}
-        y="0"
+        y="-50"
         width={KEY_WIDTH_HALF * 2}
-        height="19"
+        height="69"
         fill={PAINT_COLOR}
         fillOpacity={PAINT_OPACITY}
         stroke="none"
@@ -58,13 +59,13 @@ const GeometricLayer = () => {
         strokeDasharray="0.8,0.8"
       />
 
-      {/* 3. Three Point Line */}
+      {/* 3. Three Point Line (Extended verticals) */}
       <path
         d={`
-          M ${THREE_POINT_SIDE_MARGIN},0 
+          M ${THREE_POINT_SIDE_MARGIN},-50 
           V ${TP_BREAK_Y} 
           A ${THREE_POINT_RADIUS},${THREE_POINT_RADIUS} 0 0 0 ${50 - THREE_POINT_SIDE_MARGIN},${TP_BREAK_Y} 
-          V 0
+          V -50
         `}
         fill="none"
         stroke={LINE_COLOR}
@@ -78,6 +79,7 @@ const GeometricLayer = () => {
         stroke={LINE_COLOR}
         strokeWidth="0.2"
       />
+      {/* ... rest of SVG ... */}
 
       {/* 5. The Hoop & Backboard */}
       {/* Backboard */}
@@ -108,9 +110,9 @@ const GeometricLayer = () => {
         strokeWidth="0.2"
       />
 
-      {/* 7. Main Key Border (Drawn last to be on top of paint fill) */}
+      {/* 7. Main Key Border (Extended) */}
       <path
-        d={`M ${CENTER_X - KEY_WIDTH_HALF},0 V 19 H ${CENTER_X + KEY_WIDTH_HALF} V 0`}
+        d={`M ${CENTER_X - KEY_WIDTH_HALF},-50 V 19 H ${CENTER_X + KEY_WIDTH_HALF} V -50`}
         fill="none"
         stroke={LINE_COLOR}
         strokeWidth="0.2"

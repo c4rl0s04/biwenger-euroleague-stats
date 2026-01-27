@@ -50,3 +50,7 @@ Planned features and ideas to enhance the application.
 
 - **Compare Users**: Side-by-side view of two managers (H2H record, trophy cabinet, season stats).
 - **Season Awards**: Automated end-of-season badges (MVP, Rookie of the Year, Best Manager).
+
+## 🚢 DevOps & Infrastructure
+
+- **GitHub Packages Support**: Automate building and publishing Docker images to valid GitHub Container Registry (ghcr.io) on every release to simplify deployment.

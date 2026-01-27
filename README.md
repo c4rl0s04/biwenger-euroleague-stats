@@ -57,12 +57,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Documentation
 
-| Document                                  | Description                                     |
-| ----------------------------------------- | ----------------------------------------------- |
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical overview, schema, APIs, and structure |
-| [FEATURES.md](./docs/FEATURES.md)         | Catalog of all stats and features               |
-| [DATA_SYNC.md](./docs/DATA_SYNC.md)       | Guide to data synchronization scripts           |
-| [ROADMAP.md](./docs/ROADMAP.md)           | Future features and improvements                |
+| Document                                        | Description                                     |
+| ----------------------------------------------- | ----------------------------------------------- |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md)       | Technical overview, schema, APIs, and structure |
+| [FEATURES.md](./docs/FEATURES.md)               | Catalog of all stats and features               |
+| [DATA_SYNC.md](./docs/DATA_SYNC.md)             | Guide to data synchronization scripts           |
+| [API_INTEGRATION.md](./docs/API_INTEGRATION.md) | Deep dive into API endpoints & extraction logic |
+| [ROADMAP.md](./docs/ROADMAP.md)                 | Future features and improvements                |
 
 ## Project Structure
 

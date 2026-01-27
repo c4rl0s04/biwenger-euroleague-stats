@@ -45,17 +45,7 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
             buttonClassName="h-16 text-5xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10 cursor-pointer"
             placeholder="Selecciona Jornada"
           />
-          <div className="text-xl text-muted-foreground mt-1">
-            {lineupSummary ? (
-              <>
-                <span className="text-primary font-bold">{lineupSummary.total_points} pts</span>
-                <span className="mx-2">•</span>
-                <span>Posición {lineupSummary.round_rank}</span>
-              </>
-            ) : (
-              'Sin participación'
-            )}
-          </div>
+          {/* Points display moved to Sidebar ScoreOverviewCard */}
         </div>
 
         <button

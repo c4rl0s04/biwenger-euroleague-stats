@@ -38,11 +38,13 @@ services:
     command: >
       sh -c "
         echo 'Starting sync service...'
+        echo '[Sync] Running initial full sync...'
+        npm run sync || echo '[Sync] Initial sync failed'
         while true; do
-          echo '[Sync] Starting scheduled sync at $(date)'
-          npm run sync || echo '[Sync] Failed'
-          echo '[Sync] Finished. Sleeping for 6 hours...'
+          echo '[Sync] Sync complete. Sleeping for 6 hours...'
           sleep 21600
+          echo '[Sync] Starting scheduled daily sync at $(date)'
+          npm run sync:daily || echo '[Sync] Failed'
         done
       "
     environment:
