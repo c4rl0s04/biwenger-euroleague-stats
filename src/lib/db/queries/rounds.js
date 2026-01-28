@@ -1009,6 +1009,8 @@ export async function getCoachRating(userId, roundId) {
 
   // 3. Get Stats for ALL players in the historic squad
   // We need to find the theoretical MAX score from this set.
+  // 3. Get Stats for ALL players in the historic squad
+  // We need to find the theoretical MAX score from this set.
   const statsQuery = `
     SELECT 
       p.id as player_id, p.name, p.position, p.img, p.team_id,
@@ -1019,6 +1021,58 @@ export async function getCoachRating(userId, roundId) {
   `;
 
   const squadStats = (await db.query(statsQuery, [[...historicSquadIds], roundId])).rows;
+
+  // [NEW] GHOST PLAYER HANDLING
+  // Fetch lineup to check for missing players who left the competition
+  const ghostLineupQuery = `
+    SELECT 
+      l.player_id, 
+      l.role, 
+      l.is_captain, 
+      p.id as player_exists,
+      COALESCE(prs.fantasy_points, 0) as points
+    FROM lineups l
+    LEFT JOIN players p ON l.player_id = p.id
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    WHERE l.user_id = $1 AND l.round_id = $2
+  `;
+
+  const lineupRows = (await db.query(ghostLineupQuery, [userId, roundId])).rows;
+
+  // Identify ghost players (no player_exists AND no stats)
+  const ghostPlayers = lineupRows.filter((p) => !p.player_exists && p.points === 0);
+
+  if (ghostPlayers.length === 1 && actualScore > 0) {
+    const ghost = ghostPlayers[0];
+
+    // Calculate known points
+    const knownPlayers = lineupRows.filter((p) => p.player_id !== ghost.player_id);
+    const knownSum = calculateWeightedSum(knownPlayers); // Uses helper from module scope
+
+    // Calculate ghost points
+    const ghostWeighted = actualScore - knownSum;
+
+    // Determine multiplier to get base points
+    const mult = ghost.is_captain
+      ? 2.0
+      : ghost.role === 'titular'
+        ? 1.0
+        : ghost.role === '6th_man'
+          ? 0.75
+          : 0.5;
+
+    const calculatedPoints = Math.round(ghostWeighted / mult);
+
+    // Inject into squadStats for ideal calculation
+    // We infer position as 'Alero' (safe default) or 'Base'
+    squadStats.push({
+      player_id: ghost.player_id,
+      name: 'Unknown Player',
+      position: 'Alero', // Defaulting to Alero (Forward)
+      team_id: null,
+      points: calculatedPoints,
+    });
+  }
 
   // 4. Calculate Max Possible Score (Ideal Lineup)
   // Logic: Valid Formation Greedy Algorithm

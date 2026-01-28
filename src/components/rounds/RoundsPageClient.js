@@ -34,12 +34,10 @@ import PersonalBreakdownTable from './stats/history/PersonalBreakdownTable';
 import LeagueLeaderboard from './stats/history/LeagueLeaderboard';
 import EfficiencyHeatmap from './stats/history/EfficiencyHeatmap';
 import ConsistencyRanking from './stats/history/ConsistencyRanking';
-import TrendAnalysis from './stats/history/TrendAnalysis';
-import LostPointsChart from './stats/history/LostPointsChart';
 import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import { Section } from '@/components/layout';
 import { usePerformanceStats } from '@/lib/hooks/usePerformanceStats';
-import { Activity, BarChart3, Grid, Ruler, Minus } from 'lucide-react';
+import { Activity, BarChart3, Grid, Ruler } from 'lucide-react';
 
 export default function RoundsPageClient() {
   const router = useRouter();
@@ -595,47 +593,42 @@ export default function RoundsPageClient() {
           />
         </ElegantCard>
 
-        {/* Row 2: 2x2 Grid of stat cards */}
+        {/* Row 2: Split Layout - Heatmap & Stacked Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ElegantCard title="Mapa de Calor de Eficiencia" icon={Grid} color="indigo">
-            <EfficiencyHeatmap
-              allUsersHistory={allHistoryData?.allUsersHistory || []}
-              users={lists?.users || []}
-              loading={allHistoryLoading}
-            />
-          </ElegantCard>
+          {/* Left: Heatmap */}
+          <div className="h-full">
+            <ElegantCard
+              title="Mapa de Calor de Eficiencia"
+              icon={Grid}
+              color="indigo"
+              className="h-full"
+            >
+              <EfficiencyHeatmap
+                allUsersHistory={allHistoryData?.allUsersHistory || []}
+                users={lists?.users || []}
+                loading={allHistoryLoading}
+              />
+            </ElegantCard>
+          </div>
 
-          <ElegantCard title="Consistencia" icon={Ruler} color="cyan">
-            <ConsistencyRanking
-              allUsersHistory={allHistoryData?.allUsersHistory || []}
-              users={lists?.users || []}
-              loading={allHistoryLoading}
-            />
-          </ElegantCard>
+          {/* Right: Stacked Cards */}
+          <div className="flex flex-col gap-6">
+            <ElegantCard title="Consistencia" icon={Ruler} color="cyan">
+              <ConsistencyRanking
+                allUsersHistory={allHistoryData?.allUsersHistory || []}
+                users={lists?.users || []}
+                loading={allHistoryLoading}
+              />
+            </ElegantCard>
 
-          <ElegantCard title="¿Quién Mejora?" icon={TrendingUp} color="emerald">
-            <TrendAnalysis
-              allUsersHistory={allHistoryData?.allUsersHistory || []}
-              users={lists?.users || []}
-              loading={allHistoryLoading}
-            />
-          </ElegantCard>
-
-          <ElegantCard title="Puntos Perdidos" icon={Minus} color="red">
-            <LostPointsChart
-              leaderboardData={leaderboardData?.leaderboard || []}
-              users={lists?.users || []}
-              loading={leaderboardLoading}
-            />
-          </ElegantCard>
-
-          <ElegantCard title="Jornadas Perfectas" icon={Star} color="amber">
-            <PerfectRoundsCard
-              allUsersHistory={allHistoryData?.allUsersHistory || []}
-              users={lists?.users || []}
-              loading={allHistoryLoading}
-            />
-          </ElegantCard>
+            <ElegantCard title="Jornadas Perfectas" icon={Star} color="amber">
+              <PerfectRoundsCard
+                allUsersHistory={allHistoryData?.allUsersHistory || []}
+                users={lists?.users || []}
+                loading={allHistoryLoading}
+              />
+            </ElegantCard>
+          </div>
         </div>
       </Section>
     </div>

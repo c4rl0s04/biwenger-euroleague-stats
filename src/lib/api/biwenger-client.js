@@ -18,18 +18,66 @@ const getRandomDelay = (min = 2000, max = 5000) => {
  * @param {object} options - Internal options for retries
  * @returns {Promise<any>} - JSON response
  */
+// --- Version Caching State ---
+let cachedVersion = null;
+const DEFAULT_VERSION = 630; // Fallback
+
+/**
+ * Ensures we have the API version.
+ * Fetches from /account if not cached.
+ */
+async function ensureApiVersion() {
+  if (cachedVersion) return cachedVersion;
+
+  try {
+    // Determine recursive call by checking if we are already fetching account
+    // (This is handled in biwengerFetch by checking the endpoint arg)
+    const res = await biwengerFetch('/account', { skipVersionCheck: true });
+    if (res.version) {
+      cachedVersion = res.version;
+      console.log(`✅ Biwenger API Version Detected: ${cachedVersion}`);
+    } else {
+      cachedVersion = DEFAULT_VERSION;
+    }
+  } catch (e) {
+    console.warn(`⚠️ Failed to detect API version, using fallback: ${DEFAULT_VERSION}`);
+    cachedVersion = DEFAULT_VERSION;
+  }
+  return cachedVersion;
+}
+
+/**
+ * Generic fetch wrapper for Biwenger API with Retry Logic and Version Injection
+ * @param {string} endpoint - API endpoint (relative to BASE_URL)
+ * @param {object} options - Internal options for retries and behaviors
+ * @returns {Promise<any>} - JSON response
+ */
 export async function biwengerFetch(endpoint, options = {}) {
   const tokenRaw = CONFIG.API.TOKEN;
   const leagueId = CONFIG.API.LEAGUE_ID;
   const userId = CONFIG.API.USER_ID;
 
   // Default retry configuration
-  const { retries = 3, retryDelay = 5000 } = options;
+  const { retries = 3, retryDelay = 5000, skipVersionCheck = false } = options;
 
   if (!tokenRaw) throw new Error('BIWENGER_TOKEN is missing');
   if (!leagueId) throw new Error('BIWENGER_LEAGUE_ID is missing');
 
-  const url = `${CONFIG.API.BASE_URL}${endpoint}`;
+  // --- DYNAMIC VERSION INJECTION ---
+  let finalEndpoint = endpoint;
+
+  // Recursion Guard: Don't check version if we are fetching the account/version itself
+  if (!skipVersionCheck && endpoint !== '/account') {
+    const v = await ensureApiVersion();
+    if (v) {
+      // Append param intelligently
+      const separator = finalEndpoint.includes('?') ? '&' : '?';
+      finalEndpoint = `${finalEndpoint}${separator}v=${v}`;
+    }
+  }
+  // ---------------------------------
+
+  const url = `${CONFIG.API.BASE_URL}${finalEndpoint}`;
   const token = tokenRaw.startsWith('Bearer ') ? tokenRaw : `Bearer ${tokenRaw}`;
 
   const headers = {

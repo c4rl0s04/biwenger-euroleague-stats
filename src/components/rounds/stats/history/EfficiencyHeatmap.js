@@ -92,7 +92,7 @@ export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], lo
   }
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col h-full">
       {/* Header Row (Users) */}
       <div className="flex w-full mb-1 py-1 flex-shrink-0">
         <div className="w-10 flex-shrink-0 font-bold text-[10px] text-muted-foreground flex items-end justify-center pb-1">
@@ -136,7 +136,7 @@ export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], lo
       {/* Round Rows */}
       <div className="flex-1 flex flex-col gap-[1px] min-h-0 overflow-visible">
         {rounds.map((round, roundIndex) => (
-          <div key={round.id} className="flex w-full items-center min-h-[1.5rem]">
+          <div key={round.id} className="flex w-full items-center flex-1 min-h-[1.5rem]">
             {/* Round Label */}
             <div className="w-10 flex-shrink-0 font-mono text-[9px] text-muted-foreground text-center">
               J{round.number}
