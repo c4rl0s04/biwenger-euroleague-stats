@@ -581,8 +581,6 @@ export default function RoundsPageClient() {
           <LeagueLeaderboard
             leaderboardData={leaderboardData?.leaderboard || []}
             users={lists?.users || []}
-            comparisonUserIds={comparisonUserIds}
-            onToggleUser={toggleUserInComparison}
             loading={leaderboardLoading}
           />
         </ElegantCard>

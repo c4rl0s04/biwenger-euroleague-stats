@@ -368,7 +368,27 @@ export async function getAllRounds() {
 }
 
 /**
+ * Helper: Calculate weighted sum of fantasy points for lineup players
+ * Uses Biwenger multipliers: Captain 2x, Titular 1x, 6th Man 0.75x, Bench 0.5x
+ * @param {Array} players - Array of player objects with points, is_captain, role
+ * @returns {number} Weighted sum
+ */
+function calculateWeightedSum(players) {
+  return players.reduce((sum, p) => {
+    const mult = p.is_captain
+      ? 2.0
+      : p.role === 'titular'
+        ? 1.0
+        : p.role === '6th_man'
+          ? 0.75
+          : 0.5;
+    return sum + (p.points || 0) * mult;
+  }, 0);
+}
+
+/**
  * Get user lineup for a specific round
+ * Includes dynamic calculation of missing player stats (players who left competition)
  * @param {string} userId - User ID
  * @param {string} roundId - Round ID
  * @returns {Promise<Object>} Lineup details with starters and bench
@@ -386,13 +406,14 @@ export async function getUserLineup(userId, roundId) {
       t.img as team_img,
       l.is_captain,
       l.role,
-      COALESCE(prs.fantasy_points, 0) as points,
+      prs.fantasy_points as raw_points,
       COALESCE(prs.valuation, 0) as valuation,
       COALESCE(prs.points, 0) as stats_points,
       COALESCE(prs.rebounds, 0) as stats_rebounds,
       COALESCE(prs.assists, 0) as stats_assists,
       prs.minutes,
-      p.status as current_status
+      p.status as current_status,
+      p.id as player_exists
     FROM lineups l
     LEFT JOIN players p ON l.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
@@ -407,7 +428,7 @@ export async function getUserLineup(userId, roundId) {
       END
   `;
 
-  const lineup = (await db.query(query, [userId, roundId])).rows;
+  const rawLineup = (await db.query(query, [userId, roundId])).rows;
 
   // 2. Get User Round totals
   const totalsQuery = `
@@ -424,28 +445,52 @@ export async function getUserLineup(userId, roundId) {
   `;
   const totals = (await db.query(totalsQuery, [userId, roundId])).rows[0];
 
-  // Logic to separate starters and bench
-  // If we don't have explicit starter field, we assume top 5 are starters (Biwenger basketball logic usually)
-  // Or we check if there is a 'titular' column in lineups table (I should have checked schema but assuming standard 5)
-  // For now, I'll return all and let frontend split, or split here.
-  // Standard EuroLeague fantasy is 5 starters + bench.
+  // 3. Process lineup and detect missing players (ghost players)
+  // A missing player has: player_exists = null (not in players table)
+  const lineup = rawLineup.map((p) => ({
+    ...p,
+    points: parseInt(p.raw_points) || 0,
+    stats_points: parseInt(p.stats_points) || 0,
+    valuation: parseInt(p.valuation) || 0,
+    is_missing: p.player_exists === null, // Flag missing players
+    calculated: false,
+  }));
 
-  // Let's assume the first 5 sorted by position are potential starters if no explicit flag.
-  // BUT, usually lineups table might store position in `slot` or something?
-  // Since I don't see `slot` in my previous greps, I'll assume we return the flat list
-  // and frontend or logic here handles it.
+  // 4. Calculate missing player fantasy points dynamically
+  // Only works if exactly 1 player is missing stats
+  const missingPlayers = lineup.filter((p) => p.is_missing && p.raw_points === null);
+  const knownPlayers = lineup.filter((p) => !p.is_missing || p.raw_points !== null);
 
-  // Actually, usually in fantasy basketball: 2 Guards (Base), 2 Forwards (Alero), 1 Center (Pivot) OR similar.
-  // If `lineups` doesn't have `is_starter`, we might need to guess or show all.
-  // However, `is_captain` is there.
+  if (missingPlayers.length === 1 && totals?.points) {
+    const missing = missingPlayers[0];
+    const totalPoints = parseInt(totals.points) || 0;
+    const knownSum = calculateWeightedSum(knownPlayers);
+
+    // Calculate the weighted contribution of the missing player
+    let missingWeightedContribution = totalPoints - knownSum;
+
+    // Derive base fantasy points by dividing by the player's multiplier
+    const mult = missing.is_captain
+      ? 2.0
+      : missing.role === 'titular'
+        ? 1.0
+        : missing.role === '6th_man'
+          ? 0.75
+          : 0.5;
+
+    const calculatedPoints = Math.round(missingWeightedContribution / mult);
+
+    // Update the missing player's points
+    missing.points = calculatedPoints;
+    missing.calculated = true; // Flag that this was calculated, not from DB
+  } else if (missingPlayers.length > 1) {
+    console.warn(
+      `[getUserLineup] Multiple missing players for user ${userId} round ${roundId}. Cannot calculate individual points.`
+    );
+  }
 
   return {
-    players: lineup.map((p) => ({
-      ...p,
-      points: parseInt(p.points) || 0,
-      stats_points: parseInt(p.stats_points) || 0,
-      valuation: parseInt(p.valuation) || 0,
-    })),
+    players: lineup,
     summary: totals
       ? {
           total_points: parseInt(totals.points) || 0,

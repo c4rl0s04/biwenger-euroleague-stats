@@ -20,6 +20,10 @@ export function calculateStats(history) {
     (best, r) => (r.efficiency > best.efficiency ? r : best),
     history[0]
   );
+  const worstEffRound = history.reduce(
+    (worst, r) => (r.efficiency < worst.efficiency ? r : worst),
+    history[0]
+  );
   const worstRound = history.reduce(
     (worst, r) => (r.actual_points < worst.actual_points ? r : worst),
     history[0]
@@ -33,6 +37,7 @@ export function calculateStats(history) {
     bestRound,
     bestEffRound,
     worstRound,
+    worstEffRound,
     roundsPlayed: history.length,
   };
 }

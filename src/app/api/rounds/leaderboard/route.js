@@ -32,6 +32,10 @@ export async function GET() {
               totalLost: 0,
               bestActual: 0,
               worstActual: 0,
+              bestEfficiency: 0,
+              bestEffRound: null,
+              worstEfficiency: 0,
+              worstEffRound: null,
               roundsPlayed: 0,
             };
           }
@@ -42,6 +46,10 @@ export async function GET() {
             totalLost: stats.totalLost,
             bestActual: stats.bestRound?.actual_points || 0,
             worstActual: stats.worstRound?.actual_points || 0,
+            bestEfficiency: stats.bestEffRound?.efficiency || 0,
+            bestEffRound: stats.bestEffRound?.round_number || null,
+            worstEfficiency: stats.worstEffRound?.efficiency || 0,
+            worstEffRound: stats.worstEffRound?.round_number || null,
             roundsPlayed: stats.roundsPlayed,
           };
         } catch (err) {
@@ -52,6 +60,10 @@ export async function GET() {
             totalLost: 0,
             bestActual: 0,
             worstActual: 0,
+            bestEfficiency: 0,
+            bestEffRound: null,
+            worstEfficiency: 0,
+            worstEffRound: null,
             roundsPlayed: 0,
           };
         }

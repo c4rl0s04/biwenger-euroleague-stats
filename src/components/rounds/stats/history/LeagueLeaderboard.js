@@ -1,20 +1,31 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Plus, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import { getColorForUser } from '@/lib/constants/colors';
+
+/**
+ * Returns a color class based on efficiency value (0-100)
+ * Creates a gradient from red (low) to yellow (mid) to green (high)
+ */
+function getEfficiencyColor(efficiency) {
+  const eff = parseFloat(efficiency) || 0;
+  if (eff >= 95) return 'text-emerald-400';
+  if (eff >= 90) return 'text-emerald-500';
+  if (eff >= 85) return 'text-lime-400';
+  if (eff >= 80) return 'text-yellow-400';
+  if (eff >= 75) return 'text-amber-400';
+  if (eff >= 70) return 'text-orange-400';
+  return 'text-red-400';
+}
 
 /**
  * LeagueLeaderboard - Aggregated stats for all users with sorting
- * Shows: Rank, User, Avg Efficiency, Total Lost, Best Round, Worst Round
- * Clicking a row adds user to comparison
+ * Shows: Rank, User, Avg Efficiency, Total Lost, Best/Worst Points, Best/Worst Efficiency
  */
-export default function LeagueLeaderboard({
-  leaderboardData = [],
-  users = [],
-  comparisonUserIds = [],
-  onToggleUser = () => {},
-  loading = false,
-}) {
+export default function LeagueLeaderboard({ leaderboardData = [], users = [], loading = false }) {
+  const router = useRouter();
   const [sortKey, setSortKey] = useState('avgEfficiency');
   const [sortDir, setSortDir] = useState('desc');
 
@@ -25,6 +36,10 @@ export default function LeagueLeaderboard({
       setSortKey(key);
       setSortDir('desc');
     }
+  };
+
+  const handleUserClick = (userId) => {
+    router.push(`/user/${userId}`);
   };
 
   const sortedData = useMemo(() => {
@@ -44,15 +59,16 @@ export default function LeagueLeaderboard({
     return data;
   }, [leaderboardData, sortKey, sortDir]);
 
-  const renderSortHeader = (label, sortKeyName, align = 'left') => {
+  const renderSortHeader = (label, sortKeyName, width, align = 'right') => {
     const isActive = sortKey === sortKeyName;
     return (
       <th
         key={sortKeyName}
+        style={{ width }}
         className={`py-3 px-2 font-semibold text-muted-foreground cursor-pointer hover:text-foreground transition-colors ${align === 'right' ? 'text-right' : 'text-left'}`}
         onClick={() => handleSort(sortKeyName)}
       >
-        <span className="inline-flex items-center gap-1">
+        <span className="inline-flex items-center gap-1 justify-end">
           {label}
           {isActive && (sortDir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
         </span>
@@ -80,37 +96,46 @@ export default function LeagueLeaderboard({
 
   return (
     <div className="overflow-x-auto custom-scrollbar">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm table-fixed">
         <thead>
           <tr className="border-b border-border">
-            <th className="py-3 px-2 font-semibold text-muted-foreground text-left w-12">#</th>
-            <th className="py-3 px-2 font-semibold text-muted-foreground text-left">Usuario</th>
-            {renderSortHeader('Eficiencia', 'avgEfficiency', 'right')}
-            {renderSortHeader('Perdidos', 'totalLost', 'right')}
-            {renderSortHeader('Mejor', 'bestActual', 'right')}
-            {renderSortHeader('Peor', 'worstActual', 'right')}
-            <th className="py-3 px-2 w-10"></th>
+            <th
+              style={{ width: '40px' }}
+              className="py-3 px-2 font-semibold text-muted-foreground text-left"
+            >
+              #
+            </th>
+            <th
+              style={{ width: '140px' }}
+              className="py-3 px-2 font-semibold text-muted-foreground text-left"
+            >
+              Usuario
+            </th>
+            {renderSortHeader('Eficiencia', 'avgEfficiency', '80px')}
+            {renderSortHeader('Perdidos', 'totalLost', '70px')}
+            {renderSortHeader('Mejor Pts', 'bestActual', '70px')}
+            {renderSortHeader('Peor Pts', 'worstActual', '70px')}
+            {renderSortHeader('Mejor Eff', 'bestEfficiency', '100px')}
+            {renderSortHeader('Peor Eff', 'worstEfficiency', '100px')}
           </tr>
         </thead>
         <tbody>
           {sortedData.map((row, index) => {
             const user = users.find((u) => u.id === row.userId);
-            const isInComparison = comparisonUserIds.includes(row.userId);
-            const effColor =
-              parseFloat(row.avgEfficiency) >= 90
-                ? 'text-emerald-400'
-                : parseFloat(row.avgEfficiency) >= 75
-                  ? 'text-yellow-400'
-                  : 'text-red-400';
+            const userColor = getColorForUser(row.userId, user?.name, user?.color_index);
+            const effColor = getEfficiencyColor(row.avgEfficiency);
 
             return (
               <tr
                 key={row.userId}
-                className={`border-b border-border/50 transition-colors ${isInComparison ? 'bg-blue-500/10' : 'hover:bg-white/5'}`}
+                className="border-b border-border/50 transition-colors hover:bg-white/5"
               >
                 <td className="py-2.5 px-2 text-muted-foreground font-medium">{index + 1}</td>
                 <td className="py-2.5 px-2">
-                  <div className="flex items-center gap-2">
+                  <div
+                    className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+                    onClick={() => handleUserClick(row.userId)}
+                  >
                     <div className="w-6 h-6 rounded-full bg-zinc-700 overflow-hidden flex-shrink-0">
                       {user?.icon && (
                         <img
@@ -120,7 +145,7 @@ export default function LeagueLeaderboard({
                         />
                       )}
                     </div>
-                    <span className="text-foreground font-medium truncate">
+                    <span className={`font-medium truncate ${userColor.text}`}>
                       {user?.name || 'Usuario'}
                     </span>
                   </div>
@@ -131,18 +156,21 @@ export default function LeagueLeaderboard({
                 <td className="py-2.5 px-2 text-right text-red-400">-{row.totalLost}</td>
                 <td className="py-2.5 px-2 text-right text-emerald-400">{row.bestActual}</td>
                 <td className="py-2.5 px-2 text-right text-orange-400">{row.worstActual}</td>
-                <td className="py-2.5 px-2">
-                  <button
-                    onClick={() => onToggleUser(row.userId)}
-                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                      isInComparison
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-zinc-700 text-zinc-400 hover:bg-zinc-600'
-                    }`}
-                    title={isInComparison ? 'Quitar de comparación' : 'Añadir a comparación'}
-                  >
-                    {isInComparison ? <Check size={12} /> : <Plus size={12} />}
-                  </button>
+                <td className="py-2.5 px-2 text-right">
+                  <span className="text-emerald-400">{row.bestEfficiency}%</span>
+                  {row.bestEffRound && (
+                    <span className="text-muted-foreground text-xs ml-1">
+                      (J{row.bestEffRound})
+                    </span>
+                  )}
+                </td>
+                <td className="py-2.5 px-2 text-right">
+                  <span className="text-orange-400">{row.worstEfficiency}%</span>
+                  {row.worstEffRound && (
+                    <span className="text-muted-foreground text-xs ml-1">
+                      (J{row.worstEffRound})
+                    </span>
+                  )}
                 </td>
               </tr>
             );
