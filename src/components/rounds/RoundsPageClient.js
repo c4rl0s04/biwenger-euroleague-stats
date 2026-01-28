@@ -20,6 +20,7 @@ import {
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { Subheading } from '@/components/ui';
 import RoundStandings from './RoundStandings';
 import RoundControls from './RoundControls';
 import BasketballCourt from './BasketballCourt';
@@ -29,9 +30,11 @@ import RoundMVPCard from './stats/RoundMVPCard';
 import StatLeaderCard from './stats/StatLeaderCard';
 import PerformanceChart from './stats/history/PerformanceChart';
 import HistoryStatCard from './stats/history/HistoryStatCard';
+import PersonalBreakdownTable from './stats/history/PersonalBreakdownTable';
+import LeagueLeaderboard from './stats/history/LeagueLeaderboard';
 import { Section } from '@/components/layout';
 import { usePerformanceStats } from '@/lib/hooks/usePerformanceStats';
-import { Activity } from 'lucide-react';
+import { Activity, BarChart3 } from 'lucide-react';
 
 export default function RoundsPageClient() {
   const router = useRouter();
@@ -95,6 +98,10 @@ export default function RoundsPageClient() {
   );
   const userHistory = historyData?.history || [];
   const historyStats = usePerformanceStats(userHistory);
+
+  // --- 3b. FETCH LEADERBOARD (All Users Aggregated Stats) ---
+  const { data: leaderboardData, loading: leaderboardLoading } =
+    useApiData('/api/rounds/leaderboard');
 
   // --- 4. FETCH HISTORY (Comparison Users - For Chart) ---
   // This effect fetches history for any user in comparisonUserIds that we don't have yet.
@@ -515,39 +522,70 @@ export default function RoundsPageClient() {
             />
 
             {historyStats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <HistoryStatCard
-                  title="Eficiencia Media"
-                  value={historyStats.avgEfficiency}
-                  subValue={`${historyStats.roundsPlayed} jornadas jugadas`}
-                  icon={Target}
-                  color="blue"
-                />
-                <HistoryStatCard
-                  title="Puntos Perdidos"
-                  value={`-${historyStats.totalLost}`}
-                  subValue={`de ${historyStats.totalIdeal} posibles`}
-                  icon={TrendingDown}
-                  color="red"
-                />
-                <HistoryStatCard
-                  title="Mejor Jornada"
-                  value={historyStats.bestRound?.actual_points}
-                  subValue={`Jornada ${historyStats.bestRound?.round_number}`}
-                  icon={Trophy}
-                  color="yellow"
-                />
-                <HistoryStatCard
-                  title="Mayor Eficiencia"
-                  value={`${historyStats.bestEffRound?.efficiency}%`}
-                  subValue={`Jornada ${historyStats.bestEffRound?.round_number}`}
-                  icon={Target}
-                  color="emerald"
-                />
+              <div className="space-y-3">
+                <Subheading>
+                  Estadísticas personales de{' '}
+                  <span className="text-white font-semibold">
+                    {lists?.users?.find((u) => u.id === selectedUserId)?.name || 'Usuario'}
+                  </span>
+                </Subheading>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <HistoryStatCard
+                    title="Eficiencia Media"
+                    value={historyStats.avgEfficiency}
+                    subValue={`${historyStats.roundsPlayed} jornadas jugadas`}
+                    icon={Target}
+                    color="blue"
+                  />
+                  <HistoryStatCard
+                    title="Puntos Perdidos"
+                    value={`-${historyStats.totalLost}`}
+                    subValue={`de ${historyStats.totalIdeal} posibles`}
+                    icon={TrendingDown}
+                    color="red"
+                  />
+                  <HistoryStatCard
+                    title="Mejor Jornada"
+                    value={historyStats.bestRound?.actual_points}
+                    subValue={`Jornada ${historyStats.bestRound?.round_number}`}
+                    icon={Trophy}
+                    color="yellow"
+                  />
+                  <HistoryStatCard
+                    title="Mayor Eficiencia"
+                    value={`${historyStats.bestEffRound?.efficiency}%`}
+                    subValue={`Jornada ${historyStats.bestEffRound?.round_number}`}
+                    icon={Target}
+                    color="emerald"
+                  />
+                </div>
+
+                {/* Personal Breakdown Table */}
+                <ElegantCard
+                  title="Desglose por Jornada"
+                  icon={BarChart3}
+                  color="indigo"
+                  className="mt-4"
+                >
+                  <PersonalBreakdownTable history={userHistory} />
+                </ElegantCard>
               </div>
             )}
           </div>
         )}
+      </Section>
+
+      {/* SECTION: COMPARATIVA DE LIGA */}
+      <Section title="Comparativa de Liga" delay={300} background="section-raised">
+        <ElegantCard title="Clasificación por Eficiencia" icon={Trophy} color="yellow">
+          <LeagueLeaderboard
+            leaderboardData={leaderboardData?.leaderboard || []}
+            users={lists?.users || []}
+            comparisonUserIds={comparisonUserIds}
+            onToggleUser={toggleUserInComparison}
+            loading={leaderboardLoading}
+          />
+        </ElegantCard>
       </Section>
     </div>
   );
