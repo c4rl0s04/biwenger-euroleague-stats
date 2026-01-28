@@ -70,8 +70,6 @@ export default function RoundsPageClient() {
   );
   const userHistory = historyData?.history || [];
   const historyStats = usePerformanceStats(userHistory);
-  console.log('RoundsPageClient userHistory:', userHistory);
-  console.log('RoundsPageClient historyStats:', historyStats);
 
   const handlePlayerClick = (player) => {
     if (player?.player_id) router.push(`/player/${player.player_id}`);

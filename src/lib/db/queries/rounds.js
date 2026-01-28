@@ -1064,19 +1064,22 @@ export async function getCoachRating(userId, roundId) {
 }
 
 /**
- * Get user's performance history across all finished rounds
- * Returns actual points, calculated ideal points, and efficiency for each round
+ * DAO: Fetch raw round history for a user
+ * Returns basic round info + actual points.
+ * Does NOT calculate ideal points or efficiency (that's Service layer job).
+ *
  * @param {string} userId
- * @returns {Promise<Array>} Array of { round_id, round_number, actual_points, ideal_points, efficiency }
  */
-export async function getUserPerformanceHistory(userId) {
-  // Get all finished rounds with user participation
-  // Note: 'rounds' table doesn't exist, so we derive status from 'matches'
+export async function getUserRoundsHistoryDAO(userId) {
+  if (!userId) return [];
+
+  // Query: Get all finished rounds where user participated
+  // Only rounds where ALL matches are finished
   const query = `
     WITH RoundStatus AS (
       SELECT 
-        round_id,
-        MIN(date) as start_date,
+        round_id, 
+        min(date) as start_date,
         COUNT(*) as total_matches,
         SUM(CASE WHEN status = 'finished' THEN 1 ELSE 0 END) as finished_matches
       FROM matches
@@ -1091,48 +1094,10 @@ export async function getUserPerformanceHistory(userId) {
     JOIN RoundStatus rs ON ur.round_id = rs.round_id
     WHERE ur.user_id = $1 
       AND ur.participated = true
-      AND rs.finished_matches = rs.total_matches
+      AND rs.finished_matches > 0 -- Ensure at least one match started/finished
     ORDER BY rs.start_date ASC
   `;
 
-  const rounds = (await db.query(query, [userId])).rows;
-
-  // For each round, calculate the ideal lineup (max possible points)
-  const historyWithIdeal = await Promise.all(
-    rounds.map(async (round) => {
-      // Extract round number from name (e.g. "Regular Season Round 18" -> 18)
-      const roundNumberMatch = round.round_name.match(/(\d+)$/);
-      const roundNumber = roundNumberMatch ? parseInt(roundNumberMatch[1]) : 0;
-
-      try {
-        // Get coach rating for this specific round (contains maxScore)
-        const coachRating = await getCoachRating(userId, round.round_id);
-
-        const actualPoints = parseFloat(round.actual_points) || 0;
-        const idealPoints = coachRating?.maxScore || actualPoints;
-        const efficiency = idealPoints > 0 ? (actualPoints / idealPoints) * 100 : 100;
-
-        return {
-          round_id: round.round_id,
-          round_number: roundNumber,
-          round_name: round.round_name,
-          actual_points: actualPoints,
-          ideal_points: idealPoints,
-          efficiency: parseFloat(efficiency.toFixed(1)),
-        };
-      } catch (err) {
-        console.error(`Error calculating ideal for round ${round.round_id}:`, err);
-        return {
-          round_id: round.round_id,
-          round_number: roundNumber,
-          round_name: round.round_name,
-          actual_points: parseFloat(round.actual_points) || 0,
-          ideal_points: parseFloat(round.actual_points) || 0,
-          efficiency: 100,
-        };
-      }
-    })
-  );
-
-  return historyWithIdeal;
+  const rows = (await db.query(query, [userId])).rows;
+  return rows;
 }

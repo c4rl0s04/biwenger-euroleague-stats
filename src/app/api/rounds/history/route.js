@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getUserPerformanceHistory } from '@/lib/db/queries/rounds';
+import { getUserPerformanceHistoryService } from '@/lib/services/roundsService';
+import { successResponse, errorResponse } from '@/lib/utils/response';
 
 /**
  * GET /api/rounds/history?userId=X
@@ -11,14 +12,15 @@ export async function GET(request) {
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+      return errorResponse('userId is required', 400);
     }
 
-    const history = await getUserPerformanceHistory(userId);
+    const history = await getUserPerformanceHistoryService(userId);
 
-    return NextResponse.json({ history });
+    // Return encapsulated data object typical for useApiData
+    return successResponse({ history });
   } catch (error) {
     console.error('Error fetching performance history:', error);
-    return NextResponse.json({ error: 'Failed to fetch history' }, { status: 500 });
+    return errorResponse('Failed to fetch history');
   }
 }
