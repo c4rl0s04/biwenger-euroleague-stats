@@ -2,12 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 
 /**
  * Returns a color class based on efficiency value (0-100)
- * Creates a gradient from red (low) to yellow (mid) to green (high)
  */
 function getEfficiencyColor(efficiency) {
   const eff = parseFloat(efficiency) || 0;
@@ -48,7 +48,6 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
       let aVal = a[sortKey];
       let bVal = b[sortKey];
 
-      // Handle string values
       if (typeof aVal === 'string') {
         aVal = parseFloat(aVal) || 0;
         bVal = parseFloat(bVal) || 0;
@@ -59,13 +58,13 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
     return data;
   }, [leaderboardData, sortKey, sortDir]);
 
-  const renderSortHeader = (label, sortKeyName, width, align = 'right') => {
+  const renderSortHeader = (label, sortKeyName, width) => {
     const isActive = sortKey === sortKeyName;
     return (
       <th
         key={sortKeyName}
         style={{ width }}
-        className={`py-3 px-2 font-semibold text-muted-foreground cursor-pointer hover:text-foreground transition-colors ${align === 'right' ? 'text-right' : 'text-left'}`}
+        className="py-3 px-2 font-semibold text-muted-foreground cursor-pointer hover:text-foreground transition-colors text-right"
         onClick={() => handleSort(sortKeyName)}
       >
         <span className="inline-flex items-center gap-1 justify-end">
@@ -100,23 +99,23 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
         <thead>
           <tr className="border-b border-border">
             <th
-              style={{ width: '40px' }}
+              style={{ width: '36px' }}
               className="py-3 px-2 font-semibold text-muted-foreground text-left"
             >
               #
             </th>
             <th
-              style={{ width: '140px' }}
+              style={{ width: '130px' }}
               className="py-3 px-2 font-semibold text-muted-foreground text-left"
             >
               Usuario
             </th>
-            {renderSortHeader('Eficiencia', 'avgEfficiency', '80px')}
-            {renderSortHeader('Perdidos', 'totalLost', '70px')}
-            {renderSortHeader('Mejor Pts', 'bestActual', '70px')}
-            {renderSortHeader('Peor Pts', 'worstActual', '70px')}
-            {renderSortHeader('Mejor Eff', 'bestEfficiency', '100px')}
-            {renderSortHeader('Peor Eff', 'worstEfficiency', '100px')}
+            {renderSortHeader('Eff', 'avgEfficiency', '60px')}
+            {renderSortHeader('Perdidos', 'totalLost', '65px')}
+            {renderSortHeader('Mejor', 'bestActual', '55px')}
+            {renderSortHeader('Peor', 'worstActual', '55px')}
+            {renderSortHeader('Mejor Eff', 'bestEfficiency', '85px')}
+            {renderSortHeader('Peor Eff', 'worstEfficiency', '85px')}
           </tr>
         </thead>
         <tbody>
@@ -130,44 +129,47 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
                 key={row.userId}
                 className="border-b border-border/50 transition-colors hover:bg-white/5"
               >
-                <td className="py-2.5 px-2 text-muted-foreground font-medium">{index + 1}</td>
-                <td className="py-2.5 px-2">
+                <td className="py-2 px-2 text-muted-foreground font-medium text-sm">{index + 1}</td>
+                <td className="py-2 px-2">
                   <div
                     className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
                     onClick={() => handleUserClick(row.userId)}
                   >
                     <div className="w-6 h-6 rounded-full bg-zinc-700 overflow-hidden flex-shrink-0">
                       {user?.icon && (
-                        <img
+                        <Image
                           src={user.icon}
                           alt={user.name}
+                          width={24}
+                          height={24}
+                          unoptimized
                           className="w-full h-full object-cover"
                         />
                       )}
                     </div>
-                    <span className={`font-medium truncate ${userColor.text}`}>
+                    <span className={`font-medium truncate text-sm ${userColor.text}`}>
                       {user?.name || 'Usuario'}
                     </span>
                   </div>
                 </td>
-                <td className={`py-2.5 px-2 text-right font-medium ${effColor}`}>
+                <td className={`py-2 px-2 text-right font-medium text-sm ${effColor}`}>
                   {row.avgEfficiency}%
                 </td>
-                <td className="py-2.5 px-2 text-right text-red-400">-{row.totalLost}</td>
-                <td className="py-2.5 px-2 text-right text-emerald-400">{row.bestActual}</td>
-                <td className="py-2.5 px-2 text-right text-orange-400">{row.worstActual}</td>
-                <td className="py-2.5 px-2 text-right">
+                <td className="py-2 px-2 text-right text-red-400 text-sm">-{row.totalLost}</td>
+                <td className="py-2 px-2 text-right text-emerald-400 text-sm">{row.bestActual}</td>
+                <td className="py-2 px-2 text-right text-orange-400 text-sm">{row.worstActual}</td>
+                <td className="py-2 px-2 text-right text-sm">
                   <span className="text-emerald-400">{row.bestEfficiency}%</span>
                   {row.bestEffRound && (
-                    <span className="text-muted-foreground text-xs ml-1">
+                    <span className="text-muted-foreground text-[10px] ml-0.5">
                       (J{row.bestEffRound})
                     </span>
                   )}
                 </td>
-                <td className="py-2.5 px-2 text-right">
+                <td className="py-2 px-2 text-right text-sm">
                   <span className="text-orange-400">{row.worstEfficiency}%</span>
                   {row.worstEffRound && (
-                    <span className="text-muted-foreground text-xs ml-1">
+                    <span className="text-muted-foreground text-[10px] ml-0.5">
                       (J{row.worstEffRound})
                     </span>
                   )}

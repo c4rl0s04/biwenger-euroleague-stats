@@ -32,9 +32,14 @@ import PerformanceChart from './stats/history/PerformanceChart';
 import HistoryStatCard from './stats/history/HistoryStatCard';
 import PersonalBreakdownTable from './stats/history/PersonalBreakdownTable';
 import LeagueLeaderboard from './stats/history/LeagueLeaderboard';
+import EfficiencyHeatmap from './stats/history/EfficiencyHeatmap';
+import ConsistencyRanking from './stats/history/ConsistencyRanking';
+import TrendAnalysis from './stats/history/TrendAnalysis';
+import LostPointsChart from './stats/history/LostPointsChart';
+import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import { Section } from '@/components/layout';
 import { usePerformanceStats } from '@/lib/hooks/usePerformanceStats';
-import { Activity, BarChart3 } from 'lucide-react';
+import { Activity, BarChart3, Grid, Ruler, Minus } from 'lucide-react';
 
 export default function RoundsPageClient() {
   const router = useRouter();
@@ -102,6 +107,10 @@ export default function RoundsPageClient() {
   // --- 3b. FETCH LEADERBOARD (All Users Aggregated Stats) ---
   const { data: leaderboardData, loading: leaderboardLoading } =
     useApiData('/api/rounds/leaderboard');
+
+  // --- 3c. FETCH ALL USERS HISTORY (For Efficiency Heatmap) ---
+  const { data: allHistoryData, loading: allHistoryLoading } =
+    useApiData('/api/rounds/all-history');
 
   // --- 4. FETCH HISTORY (Comparison Users - For Chart) ---
   // This effect fetches history for any user in comparisonUserIds that we don't have yet.
@@ -577,6 +586,7 @@ export default function RoundsPageClient() {
 
       {/* SECTION: COMPARATIVA DE LIGA */}
       <Section title="Comparativa de Liga" delay={300} background="section-raised">
+        {/* Row 1: Leaderboard full width */}
         <ElegantCard title="Clasificación por Eficiencia" icon={Trophy} color="yellow">
           <LeagueLeaderboard
             leaderboardData={leaderboardData?.leaderboard || []}
@@ -584,6 +594,49 @@ export default function RoundsPageClient() {
             loading={leaderboardLoading}
           />
         </ElegantCard>
+
+        {/* Row 2: 2x2 Grid of stat cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ElegantCard title="Mapa de Calor de Eficiencia" icon={Grid} color="indigo">
+            <EfficiencyHeatmap
+              allUsersHistory={allHistoryData?.allUsersHistory || []}
+              users={lists?.users || []}
+              loading={allHistoryLoading}
+            />
+          </ElegantCard>
+
+          <ElegantCard title="Consistencia" icon={Ruler} color="cyan">
+            <ConsistencyRanking
+              allUsersHistory={allHistoryData?.allUsersHistory || []}
+              users={lists?.users || []}
+              loading={allHistoryLoading}
+            />
+          </ElegantCard>
+
+          <ElegantCard title="¿Quién Mejora?" icon={TrendingUp} color="emerald">
+            <TrendAnalysis
+              allUsersHistory={allHistoryData?.allUsersHistory || []}
+              users={lists?.users || []}
+              loading={allHistoryLoading}
+            />
+          </ElegantCard>
+
+          <ElegantCard title="Puntos Perdidos" icon={Minus} color="red">
+            <LostPointsChart
+              leaderboardData={leaderboardData?.leaderboard || []}
+              users={lists?.users || []}
+              loading={leaderboardLoading}
+            />
+          </ElegantCard>
+
+          <ElegantCard title="Jornadas Perfectas" icon={Star} color="amber">
+            <PerfectRoundsCard
+              allUsersHistory={allHistoryData?.allUsersHistory || []}
+              users={lists?.users || []}
+              loading={allHistoryLoading}
+            />
+          </ElegantCard>
+        </div>
       </Section>
     </div>
   );

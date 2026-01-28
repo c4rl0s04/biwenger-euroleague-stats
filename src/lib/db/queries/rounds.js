@@ -624,7 +624,7 @@ export async function getRoundGlobalStats(roundId) {
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE prs.round_id = $1
-    ORDER BY prs.fantasy_points DESC
+    ORDER BY prs.fantasy_points DESC NULLS LAST
     LIMIT 1
   `;
 
@@ -637,7 +637,7 @@ export async function getRoundGlobalStats(roundId) {
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE prs.round_id = $1
-    ORDER BY prs.points DESC
+    ORDER BY prs.points DESC NULLS LAST
     LIMIT 1
   `;
 
@@ -650,7 +650,7 @@ export async function getRoundGlobalStats(roundId) {
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE prs.round_id = $1
-    ORDER BY prs.rebounds DESC
+    ORDER BY prs.rebounds DESC NULLS LAST
     LIMIT 1
   `;
 
@@ -663,7 +663,7 @@ export async function getRoundGlobalStats(roundId) {
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE prs.round_id = $1
-    ORDER BY prs.assists DESC
+    ORDER BY prs.assists DESC NULLS LAST
     LIMIT 1
   `;
 
