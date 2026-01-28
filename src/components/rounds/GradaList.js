@@ -12,7 +12,7 @@ export default function GradaList({ players }) {
 
   return (
     <div className="space-y-1">
-      <div className="grid grid-cols-1 gap-1 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+      <div className="grid grid-cols-1 gap-1 max-h-[200px] overflow-y-auto custom-scrollbar pr-1">
         {sorted.map((player) => {
           return (
             <div

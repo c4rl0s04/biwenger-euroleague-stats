@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Star, User, Users, BrainCircuit } from 'lucide-react';
+import {
+  Settings,
+  Star,
+  User,
+  Users,
+  BrainCircuit,
+  TrendingDown,
+  Target,
+  Trophy,
+} from 'lucide-react';
 
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
@@ -13,7 +22,11 @@ import BasketballCourt from './BasketballCourt';
 import Bench from './Bench';
 import RoundStatsSidebar from './RoundStatsSidebar';
 import RoundMVPCard from './stats/RoundMVPCard';
+import StatLeaderCard from './stats/StatLeaderCard';
+import PerformanceChart from './stats/history/PerformanceChart';
+import HistoryStatCard from './stats/history/HistoryStatCard';
 import { Section } from '@/components/layout';
+import { usePerformanceStats } from '@/lib/hooks/usePerformanceStats';
 import { Activity } from 'lucide-react';
 
 export default function RoundsPageClient() {
@@ -48,6 +61,17 @@ export default function RoundsPageClient() {
     selectedRoundId ? `/api/rounds/stats?roundId=${selectedRoundId}&mode=full` : null,
     { dependencies: [selectedRoundId] }
   );
+
+  // --- 3. FETCH HISTORY (For the new section) ---
+  // --- 3. FETCH HISTORY (For the new section) ---
+  const { data: historyData, loading: historyLoading } = useApiData(
+    selectedUserId ? `/api/rounds/history?userId=${selectedUserId}` : null,
+    { dependencies: [selectedUserId] }
+  );
+  const userHistory = historyData?.history || [];
+  const historyStats = usePerformanceStats(userHistory);
+  console.log('RoundsPageClient userHistory:', userHistory);
+  console.log('RoundsPageClient historyStats:', historyStats);
 
   const handlePlayerClick = (player) => {
     if (player?.player_id) router.push(`/player/${player.player_id}`);
@@ -161,7 +185,8 @@ export default function RoundsPageClient() {
 
   return (
     <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      {/* SECTION: ESTADISTICAS DE LA RONDA */}
+      <Section title="Estadísticas de la Ronda" delay={0} background="section-base">
         {/* HEADER & CONTROLS */}
         <ElegantCard
           title="Panel de Jornada"
@@ -177,20 +202,36 @@ export default function RoundsPageClient() {
           />
         </ElegantCard>
 
-        {/* MAIN GRID */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          {/* COLUMN 1: STANDINGS (3 cols) */}
-          <div className="xl:col-span-3">
+        {/* MAIN LAYOUT - 2 COLUMNS ON XL (Flexbox for equal height) */}
+        <div className="flex flex-col xl:flex-row gap-6">
+          {/* LEFT COLUMN: STANDINGS + STATS (1/3 width) */}
+          <div className="xl:w-1/3 flex flex-col justify-between gap-6">
             <RoundStandings
               roundId={selectedRoundId}
               selectedUserId={selectedUserId}
               onSelectUser={setSelectedUserId}
               standings={fullRoundData?.users} // PASS PROPS DOWN
             />
+
+            {/* Moved Stats Sidebar here to fill vertical space */}
+            <RoundStatsSidebar
+              stats={statsData}
+              loading={dataLoading}
+              roundId={selectedRoundId}
+              userId={selectedUserId}
+              leftOutPlayers={statsData?.user?.leftOut || []}
+              coachRating={statsData?.user?.coachRating}
+              currentRoundStatus={
+                lists?.rounds?.find((r) => String(r.round_id) === String(selectedRoundId))
+                  ?.status || 'finished'
+              }
+              summary={currentSummary}
+              viewMode={viewMode}
+            />
           </div>
 
-          {/* COLUMN 2: COURT (6 cols) */}
-          <div className="xl:col-span-6 space-y-4">
+          {/* RIGHT COLUMN: COURT + BENCH (2/3 width) */}
+          <div className="xl:w-2/3 flex flex-col gap-4">
             {/* View Toggles */}
             <div className="flex p-1 bg-zinc-900/50 rounded-lg border border-white/5 w-fit mx-auto">
               <button
@@ -214,7 +255,7 @@ export default function RoundsPageClient() {
             </div>
 
             <ElegantCard title={title} icon={icon} color={color} className="w-full">
-              <div className="w-full aspect-[4/3] lg:aspect-[16/10] min-h-[600px]">
+              <div className="w-full aspect-[4/3] lg:aspect-[16/10] min-h-[500px] xl:min-h-[600px]">
                 {isCourtLoading ? (
                   <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
                     Cargando datos...
@@ -247,27 +288,89 @@ export default function RoundsPageClient() {
               </div>
             )}
           </div>
-
-          {/* COLUMN 3: STATS (3 cols) */}
-          <div className="xl:col-span-3 space-y-6">
-            <RoundStatsSidebar
-              stats={statsData}
-              loading={dataLoading}
-              summary={currentSummary}
-              viewMode={viewMode}
-            />
-          </div>
         </div>
-      </div>
+      </Section>
 
       {/* SECTION: PLAYER STATS */}
-      <div className="h-12" />
-      <Section title="Estadísticas de Jugadores" background="section-raised">
+      <Section title="Estadísticas de Jugadores" delay={100} background="section-raised">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="h-full">
-            <RoundMVPCard global={statsData?.global} />
-          </div>
+          {/* MVP - Fantasy Points Leader */}
+          <StatLeaderCard
+            player={statsData?.global?.mvp}
+            statType="mvp"
+            statValue={statsData?.global?.mvp?.points}
+          />
+          {/* Top Scorer - Real Points */}
+          <StatLeaderCard
+            player={statsData?.global?.topScorer}
+            statType="points"
+            statValue={statsData?.global?.topScorer?.stat_value}
+          />
+          {/* Top Rebounder */}
+          <StatLeaderCard
+            player={statsData?.global?.topRebounder}
+            statType="rebounds"
+            statValue={statsData?.global?.topRebounder?.stat_value}
+          />
+          {/* Top Assister */}
+          <StatLeaderCard
+            player={statsData?.global?.topAssister}
+            statType="assists"
+            statValue={statsData?.global?.topAssister?.stat_value}
+          />
         </div>
+      </Section>
+
+      {/* SECTION: HISTORIAL DE RENDIMIENTO */}
+      <Section title="Historial de Rendimiento" delay={200} background="section-base">
+        {historyLoading ? (
+          <div className="animate-pulse space-y-4">
+            <div className="h-64 bg-white/5 rounded-xl" />
+            <div className="grid grid-cols-4 gap-4">
+              <div className="h-24 bg-white/5 rounded-xl" />
+              <div className="h-24 bg-white/5 rounded-xl" />
+              <div className="h-24 bg-white/5 rounded-xl" />
+              <div className="h-24 bg-white/5 rounded-xl" />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <PerformanceChart history={userHistory} />
+
+            {historyStats && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <HistoryStatCard
+                  title="Eficiencia Media"
+                  value={historyStats.avgEfficiency}
+                  subValue={`${historyStats.roundsPlayed} jornadas jugadas`}
+                  icon={Target}
+                  color="blue"
+                />
+                <HistoryStatCard
+                  title="Puntos Perdidos"
+                  value={`-${historyStats.totalLost}`}
+                  subValue={`de ${historyStats.totalIdeal} posibles`}
+                  icon={TrendingDown}
+                  color="red"
+                />
+                <HistoryStatCard
+                  title="Mejor Jornada"
+                  value={historyStats.bestRound?.actual_points}
+                  subValue={`Jornada ${historyStats.bestRound?.round_number}`}
+                  icon={Trophy}
+                  color="yellow"
+                />
+                <HistoryStatCard
+                  title="Mayor Eficiencia"
+                  value={`${historyStats.bestEffRound?.efficiency}%`}
+                  subValue={`Jornada ${historyStats.bestEffRound?.round_number}`}
+                  icon={Target}
+                  color="emerald"
+                />
+              </div>
+            )}
+          </div>
+        )}
       </Section>
     </div>
   );

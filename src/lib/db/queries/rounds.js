@@ -494,7 +494,8 @@ export async function getOfficialStandings(roundId) {
         (SELECT SUM(ur2.points) 
          FROM user_rounds ur2 
          WHERE ur2.user_id = u.id 
-           AND ur2.round_id <= $1), 
+           AND ur2.round_id <= $1
+           AND ur2.participated = true), 
         0
       ) as total_points,
       ur.participated
@@ -540,7 +541,8 @@ export async function getLivingStandings(roundId) {
         (SELECT SUM(ur2.points) 
          FROM user_rounds ur2 
          WHERE ur2.user_id = u.id 
-           AND ur2.round_id < $1), 
+           AND ur2.round_id < $1
+           AND ur2.participated = true), 
         0
       ) as past_total,
       MAX(CASE WHEN l.player_id IS NOT NULL THEN 1 ELSE 0 END) as participated
@@ -568,7 +570,7 @@ export async function getLivingStandings(roundId) {
  * @param {string} roundId
  */
 export async function getRoundGlobalStats(roundId) {
-  // 1. Round MVP
+  // 1. Round MVP (Fantasy Points Leader)
   const mvpQuery = `
     SELECT 
       p.id, p.name, p.img, p.position, t.short_name as team_name,
@@ -581,14 +583,53 @@ export async function getRoundGlobalStats(roundId) {
     LIMIT 1
   `;
 
-  // 2. Average Score
+  // 2. Top Scorer (Real Points Leader)
+  const topScorerQuery = `
+    SELECT 
+      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      prs.points as stat_value
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE prs.round_id = $1
+    ORDER BY prs.points DESC
+    LIMIT 1
+  `;
+
+  // 3. Top Rebounder
+  const topRebounderQuery = `
+    SELECT 
+      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      prs.rebounds as stat_value
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE prs.round_id = $1
+    ORDER BY prs.rebounds DESC
+    LIMIT 1
+  `;
+
+  // 4. Top Assister
+  const topAssisterQuery = `
+    SELECT 
+      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      prs.assists as stat_value
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE prs.round_id = $1
+    ORDER BY prs.assists DESC
+    LIMIT 1
+  `;
+
+  // 5. Average Score
   const avgQuery = `
     SELECT ROUND(AVG(points), 1) as avg_score
     FROM user_rounds
     WHERE round_id = $1 AND participated = TRUE
   `;
 
-  // 3. Highest Score (Round Winner)
+  // 6. Highest Score (Round Winner)
   const winnerQuery = `
     SELECT u.name, ur.points, u.icon
     FROM user_rounds ur
@@ -598,14 +639,21 @@ export async function getRoundGlobalStats(roundId) {
     LIMIT 1
   `;
 
-  const [mvpRes, avgRes, winnerRes] = await Promise.all([
-    db.query(mvpQuery, [roundId]),
-    db.query(avgQuery, [roundId]),
-    db.query(winnerQuery, [roundId]),
-  ]);
+  const [mvpRes, topScorerRes, topRebounderRes, topAssisterRes, avgRes, winnerRes] =
+    await Promise.all([
+      db.query(mvpQuery, [roundId]),
+      db.query(topScorerQuery, [roundId]),
+      db.query(topRebounderQuery, [roundId]),
+      db.query(topAssisterQuery, [roundId]),
+      db.query(avgQuery, [roundId]),
+      db.query(winnerQuery, [roundId]),
+    ]);
 
   return {
     mvp: mvpRes.rows[0] || null,
+    topScorer: topScorerRes.rows[0] || null,
+    topRebounder: topRebounderRes.rows[0] || null,
+    topAssister: topAssisterRes.rows[0] || null,
     avgScore: parseFloat(avgRes.rows[0]?.avg_score) || 0,
     winner: winnerRes.rows[0] || null,
   };
@@ -1013,4 +1061,78 @@ export async function getCoachRating(userId, roundId) {
     diff: parseFloat((maxScore - actualScore).toFixed(2)),
     idealLineup, // <--- Added this to allow frontend "Mi Ideal" view
   };
+}
+
+/**
+ * Get user's performance history across all finished rounds
+ * Returns actual points, calculated ideal points, and efficiency for each round
+ * @param {string} userId
+ * @returns {Promise<Array>} Array of { round_id, round_number, actual_points, ideal_points, efficiency }
+ */
+export async function getUserPerformanceHistory(userId) {
+  // Get all finished rounds with user participation
+  // Note: 'rounds' table doesn't exist, so we derive status from 'matches'
+  const query = `
+    WITH RoundStatus AS (
+      SELECT 
+        round_id,
+        MIN(date) as start_date,
+        COUNT(*) as total_matches,
+        SUM(CASE WHEN status = 'finished' THEN 1 ELSE 0 END) as finished_matches
+      FROM matches
+      GROUP BY round_id
+    )
+    SELECT 
+      ur.round_id,
+      ur.round_name,
+      ur.points as actual_points,
+      ur.participated
+    FROM user_rounds ur
+    JOIN RoundStatus rs ON ur.round_id = rs.round_id
+    WHERE ur.user_id = $1 
+      AND ur.participated = true
+      AND rs.finished_matches = rs.total_matches
+    ORDER BY rs.start_date ASC
+  `;
+
+  const rounds = (await db.query(query, [userId])).rows;
+
+  // For each round, calculate the ideal lineup (max possible points)
+  const historyWithIdeal = await Promise.all(
+    rounds.map(async (round) => {
+      // Extract round number from name (e.g. "Regular Season Round 18" -> 18)
+      const roundNumberMatch = round.round_name.match(/(\d+)$/);
+      const roundNumber = roundNumberMatch ? parseInt(roundNumberMatch[1]) : 0;
+
+      try {
+        // Get coach rating for this specific round (contains maxScore)
+        const coachRating = await getCoachRating(userId, round.round_id);
+
+        const actualPoints = parseFloat(round.actual_points) || 0;
+        const idealPoints = coachRating?.maxScore || actualPoints;
+        const efficiency = idealPoints > 0 ? (actualPoints / idealPoints) * 100 : 100;
+
+        return {
+          round_id: round.round_id,
+          round_number: roundNumber,
+          round_name: round.round_name,
+          actual_points: actualPoints,
+          ideal_points: idealPoints,
+          efficiency: parseFloat(efficiency.toFixed(1)),
+        };
+      } catch (err) {
+        console.error(`Error calculating ideal for round ${round.round_id}:`, err);
+        return {
+          round_id: round.round_id,
+          round_number: roundNumber,
+          round_name: round.round_name,
+          actual_points: parseFloat(round.actual_points) || 0,
+          ideal_points: parseFloat(round.actual_points) || 0,
+          efficiency: 100,
+        };
+      }
+    })
+  );
+
+  return historyWithIdeal;
 }

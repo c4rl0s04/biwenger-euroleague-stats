@@ -1,7 +1,7 @@
 'use client';
 
 import ScoreOverviewCard from './stats/ScoreOverviewCard'; // New import
-import CoachRatingCard from './stats/CoachRatingCard';
+// import CoachRatingCard from './stats/CoachRatingCard'; // Removed - info in standings table
 import GradaCard from './stats/GradaCard';
 import OptimizationTips from './stats/OptimizationTips';
 
@@ -20,12 +20,12 @@ export default function RoundStatsSidebar({ stats, loading, summary, viewMode })
   const { global, user } = stats || {};
 
   return (
-    <div className="space-y-6">
-      <ScoreOverviewCard summary={summary} viewMode={viewMode} />
+    <div className="flex-1 flex flex-col gap-6">
+      <ScoreOverviewCard summary={summary} viewMode={viewMode} user={user} />
 
       {stats && (
         <>
-          <CoachRatingCard user={user} />
+          {/* <CoachRatingCard user={user} /> */}
           <GradaCard user={user} />
           <OptimizationTips user={user} />
         </>

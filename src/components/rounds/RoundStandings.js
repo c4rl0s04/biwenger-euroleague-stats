@@ -84,11 +84,11 @@ export default function RoundStandings({
       title="Clasificación"
       icon={ListOrdered}
       color="orange"
-      className="sticky top-6 h-[800px] overflow-y-auto custom-scrollbar"
+      className="h-full flex flex-col overflow-hidden"
     >
-      <div className="w-full mx-auto px-1">
+      <div className="w-full mx-auto px-1 flex-1 flex flex-col min-h-0">
         {/* Table Header - Simplified & Sortable */}
-        <div className="grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem_2.5rem] gap-1 items-center text-[10px] font-bold uppercase tracking-widest px-2 mb-2 select-none">
+        <div className="grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem_2.5rem_2.5rem] gap-1 items-center text-[10px] font-bold uppercase tracking-widest px-2 mb-2 select-none">
           <div className="text-center text-muted-foreground">#</div>
           <div className="text-center text-muted-foreground">Mgr</div>
 
@@ -154,9 +154,30 @@ export default function RoundStandings({
               )}
             />
           </button>
+
+          {/* Sort by Total Points */}
+          <button
+            onClick={() => setSortBy('total')}
+            className={cn(
+              'flex items-center justify-center relative transition-all cursor-pointer group',
+              sortBy === 'total'
+                ? 'text-yellow-400 opacity-100'
+                : 'text-muted-foreground hover:text-yellow-400 opacity-50 hover:opacity-100'
+            )}
+            title="Ordenar por Puntos Totales"
+          >
+            Tot
+            <ArrowUpDown
+              size={10}
+              className={cn(
+                'absolute right-0 opacity-0 transition-opacity',
+                sortBy === 'total' && 'opacity-100'
+              )}
+            />
+          </button>
         </div>
-        <div className="flex-1 w-full overflow-hidden relative">
-          <div className="flex flex-col space-y-1 pt-2">
+        <div className="flex-1 w-full overflow-y-auto custom-scrollbar relative">
+          <div className="flex flex-col justify-between min-h-full py-2">
             {sortedStandings.map((user, index) => {
               const isSelected = String(user.id) === String(selectedUserId);
               const rank = index + 1;
@@ -193,7 +214,7 @@ export default function RoundStandings({
                   key={user.id}
                   onClick={() => onSelectUser(user.id)}
                   className={cn(
-                    'relative group grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem_2.5rem] gap-1 items-center w-full px-2 py-2 transition-all duration-200 cursor-pointer text-left',
+                    'relative group grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem_2.5rem_2.5rem] gap-1 items-center w-full px-2 py-2 transition-all duration-200 cursor-pointer text-left',
                     rowBg,
                     isSelected &&
                       'bg-primary/10 ring-1 ring-primary/50 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] z-10'
@@ -257,6 +278,18 @@ export default function RoundStandings({
                       )}
                     >
                       {Math.round(ideal)}
+                    </span>
+                  </div>
+
+                  {/* 6. Total Points */}
+                  <div className="flex justify-center shrink-0">
+                    <span
+                      className={cn(
+                        'text-sm font-bold tracking-tight',
+                        isSelected ? 'text-yellow-300' : 'text-yellow-400'
+                      )}
+                    >
+                      {Math.round(user.total_points || 0)}
                     </span>
                   </div>
 
