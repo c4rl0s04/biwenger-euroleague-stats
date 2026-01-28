@@ -57,7 +57,7 @@ function CustomTooltip({ active, payload, label, metrics }) {
 export default function PerformanceChart({
   histories,
   comparisonUsers = [],
-  metrics = { actual: true, ideal: false },
+  metrics = { actual: true, ideal: true },
 }) {
   const chartData = useMemo(() => {
     if (!histories || Object.keys(histories).length === 0) return [];

@@ -127,16 +127,16 @@ export async function getUserPerformanceHistoryService(userId) {
 
   if (!rawRounds || rawRounds.length === 0) return [];
 
-  // 2. Iterate direct results (DAO now returns all rounds including non-participated)
+  // 2. Iterate direct results (Trust user_rounds points regardless of participation)
   const historyWithIdeal = await Promise.all(
     rawRounds.map(async (round) => {
       // Extract round number from name
       const roundNumberMatch = round.round_name.match(/(\d+)$/);
       const roundNumber = roundNumberMatch ? parseInt(roundNumberMatch[1]) : 0;
 
-      // If not participated, actual is 0. If participated, use stored points.
+      // Always use the stored points, even if they didn't "participate" (e.g. general rounds)
       const participated = round.participated;
-      const actualPoints = participated ? parseFloat(round.actual_points) || 0 : 0;
+      const actualPoints = parseFloat(round.actual_points) || 0;
 
       try {
         // Business Logic: Calculate ideal points

@@ -47,7 +47,7 @@ export default function RoundsPageClient() {
   // --- NEW: Multi-User Comparison State ---
   const [comparisonUserIds, setComparisonUserIds] = useState([]);
   const [comparisonHistories, setComparisonHistories] = useState({});
-  const [chartMetrics, setChartMetrics] = useState({ actual: true, ideal: false });
+  const [chartMetrics, setChartMetrics] = useState({ actual: true, ideal: true });
   const [isCompareSelectorOpen, setIsCompareSelectorOpen] = useState(false);
 
   // Initialize Round & User
