@@ -122,45 +122,54 @@ export async function fetchRoundCompleteData(roundId) {
  * @param {string} userId
  */
 export async function getUserPerformanceHistoryService(userId) {
-  // 1. Get raw history from DAO
+  // 1. Get raw history from DAO (includes non-participated)
   const rawRounds = await getUserRoundsHistoryDAO(userId);
 
   if (!rawRounds || rawRounds.length === 0) return [];
 
-  // 2. Enrich with Business Logic (Ideal Points Calculation)
+  // 2. Iterate direct results (DAO now returns all rounds including non-participated)
   const historyWithIdeal = await Promise.all(
     rawRounds.map(async (round) => {
-      // Extract round number from name (e.g. "Regular Season Round 18" -> 18)
+      // Extract round number from name
       const roundNumberMatch = round.round_name.match(/(\d+)$/);
       const roundNumber = roundNumberMatch ? parseInt(roundNumberMatch[1]) : 0;
 
+      // If not participated, actual is 0. If participated, use stored points.
+      const participated = round.participated;
+      const actualPoints = participated ? parseFloat(round.actual_points) || 0 : 0;
+
       try {
-        // Logic: Calculate ideal points for this specific round
-        // This is business logic, so it belongs in the service layer orchestration
+        // Business Logic: Calculate ideal points
         const coachRating = await getCoachRating(userId, round.round_id);
 
-        const actualPoints = parseFloat(round.actual_points) || 0;
         const idealPoints = coachRating?.maxScore || actualPoints;
-        const efficiency = idealPoints > 0 ? (actualPoints / idealPoints) * 100 : 100;
 
-        return {
-          round_id: round.round_id,
-          round_number: roundNumber, // Parsed number for sorting/charts
-          round_name: round.round_name,
-          actual_points: actualPoints,
-          ideal_points: idealPoints,
-          efficiency: parseFloat(efficiency.toFixed(1)),
-        };
-      } catch (err) {
-        console.error(`Error calculating ideal for round ${round.round_id}:`, err);
-        // Fallback: assume 100% efficiency
+        let efficiency = 0;
+        if (idealPoints > 0) {
+          efficiency = (actualPoints / idealPoints) * 100;
+        } else if (actualPoints > 0) {
+          efficiency = 100;
+        }
+
         return {
           round_id: round.round_id,
           round_number: roundNumber,
           round_name: round.round_name,
-          actual_points: parseFloat(round.actual_points) || 0,
-          ideal_points: parseFloat(round.actual_points) || 0,
-          efficiency: 100,
+          actual_points: actualPoints,
+          ideal_points: idealPoints,
+          efficiency: parseFloat(efficiency.toFixed(1)),
+          participated: participated,
+        };
+      } catch (err) {
+        console.error(`Error calculating ideal for round ${round.round_id}:`, err);
+        return {
+          round_id: round.round_id,
+          round_number: roundNumber,
+          round_name: round.round_name,
+          actual_points: actualPoints,
+          ideal_points: actualPoints, // Fallback
+          efficiency: participated ? 100 : 0,
+          participated: participated,
         };
       }
     })

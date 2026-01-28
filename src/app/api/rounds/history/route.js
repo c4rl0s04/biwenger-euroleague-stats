@@ -18,7 +18,8 @@ export async function GET(request) {
     const history = await getUserPerformanceHistoryService(userId);
 
     // Return encapsulated data object typical for useApiData
-    return successResponse({ history });
+    // Cache set to 0 to ensure non-participating rounds updates are seen immediately
+    return successResponse({ history }, 0);
   } catch (error) {
     console.error('Error fetching performance history:', error);
     return errorResponse('Failed to fetch history');

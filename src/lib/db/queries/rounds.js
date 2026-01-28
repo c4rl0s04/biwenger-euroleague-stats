@@ -1093,7 +1093,6 @@ export async function getUserRoundsHistoryDAO(userId) {
     FROM user_rounds ur
     JOIN RoundStatus rs ON ur.round_id = rs.round_id
     WHERE ur.user_id = $1 
-      AND ur.participated = true
       AND rs.finished_matches > 0 -- Ensure at least one match started/finished
     ORDER BY rs.start_date ASC
   `;

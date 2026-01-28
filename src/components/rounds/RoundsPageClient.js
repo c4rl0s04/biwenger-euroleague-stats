@@ -11,6 +11,10 @@ import {
   TrendingDown,
   Target,
   Trophy,
+  Plus,
+  X,
+  Check,
+  TrendingUp,
 } from 'lucide-react';
 
 import { useApiData } from '@/lib/hooks/useApiData';
@@ -40,6 +44,12 @@ export default function RoundsPageClient() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [viewMode, setViewMode] = useState('user'); // 'user', 'ideal', 'user_ideal'
 
+  // --- NEW: Multi-User Comparison State ---
+  const [comparisonUserIds, setComparisonUserIds] = useState([]);
+  const [comparisonHistories, setComparisonHistories] = useState({});
+  const [chartMetrics, setChartMetrics] = useState({ actual: true, ideal: false });
+  const [isCompareSelectorOpen, setIsCompareSelectorOpen] = useState(false);
+
   // Initialize Round & User
   useEffect(() => {
     if (lists?.rounds?.length > 0 && !selectedRoundId) {
@@ -51,10 +61,26 @@ export default function RoundsPageClient() {
   useEffect(() => {
     if (lists?.users?.length > 0 && !selectedUserId) {
       const globalUser = currentUser && lists.users.find((u) => u.id === currentUser.id);
-      setSelectedUserId(globalUser ? globalUser.id : lists.users[0].id);
+      const initialId = globalUser ? globalUser.id : lists.users[0].id;
+      setSelectedUserId(initialId);
+
+      // Initialize comparison with the primary user
+      setComparisonUserIds((prev) => (prev.length === 0 ? [initialId] : prev));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lists, currentUser]);
+
+  // Sync: When user selects a DIFFERENT primary user (e.g. from Standings table),
+  // optionally add them to the comparison list if it only contains 1 user.
+  useEffect(() => {
+    if (
+      selectedUserId &&
+      comparisonUserIds.length <= 1 &&
+      !comparisonUserIds.includes(selectedUserId)
+    ) {
+      setComparisonUserIds([selectedUserId]);
+    }
+  }, [selectedUserId]);
 
   // --- 2. MEGA FETCH (One-Shot for everything in the round) ---
   const { data: fullRoundData, loading: dataLoading } = useApiData(
@@ -62,8 +88,7 @@ export default function RoundsPageClient() {
     { dependencies: [selectedRoundId] }
   );
 
-  // --- 3. FETCH HISTORY (For the new section) ---
-  // --- 3. FETCH HISTORY (For the new section) ---
+  // --- 3. FETCH HISTORY (Primary User - For Stats Cards) ---
   const { data: historyData, loading: historyLoading } = useApiData(
     selectedUserId ? `/api/rounds/history?userId=${selectedUserId}` : null,
     { dependencies: [selectedUserId] }
@@ -71,8 +96,46 @@ export default function RoundsPageClient() {
   const userHistory = historyData?.history || [];
   const historyStats = usePerformanceStats(userHistory);
 
+  // --- 4. FETCH HISTORY (Comparison Users - For Chart) ---
+  // This effect fetches history for any user in comparisonUserIds that we don't have yet.
+  useEffect(() => {
+    const fetchMissingHistories = async () => {
+      const missingIds = comparisonUserIds.filter((id) => !comparisonHistories[id]);
+
+      if (missingIds.length === 0) return;
+
+      const newHistories = { ...comparisonHistories };
+
+      // Parallel fetch for all missing IDs
+      await Promise.all(
+        missingIds.map(async (id) => {
+          try {
+            const res = await fetch(`/api/rounds/history?userId=${id}`);
+            const data = await res.json();
+            if (data.success) {
+              newHistories[id] = data.data.history;
+            }
+          } catch (e) {
+            console.error(`Failed to fetch history for user ${id}`, e);
+          }
+        })
+      );
+
+      setComparisonHistories(newHistories);
+    };
+
+    fetchMissingHistories();
+  }, [comparisonUserIds, comparisonHistories]);
+
+  // Handlers
   const handlePlayerClick = (player) => {
     if (player?.player_id) router.push(`/player/${player.player_id}`);
+  };
+
+  const toggleUserInComparison = (userId) => {
+    setComparisonUserIds((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
   };
 
   if (listsLoading)
@@ -83,6 +146,9 @@ export default function RoundsPageClient() {
     );
 
   // --- 3. DERIVE DATA FOR CHILDREN ---
+
+  // Prepare Comparison Users objects
+  const comparisonUsersList = lists?.users?.filter((u) => comparisonUserIds.includes(u.id)) || [];
 
   // A. Current User Context
   // Find selected user within the mega list
@@ -333,7 +399,120 @@ export default function RoundsPageClient() {
           </div>
         ) : (
           <div className="space-y-6">
-            <PerformanceChart history={userHistory} />
+            {/* COMPARISON CONTROLS */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-zinc-900/50 p-4 rounded-xl border border-white/5">
+              {/* Left: Metric Toggles */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-400">Métricas:</span>
+                  <button
+                    onClick={() => setChartMetrics((p) => ({ ...p, actual: !p.actual }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                      chartMetrics.actual
+                        ? 'bg-orange-500/10 border-orange-500/50 text-orange-400'
+                        : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                    }`}
+                  >
+                    Puntos Reales
+                  </button>
+                  <button
+                    onClick={() => setChartMetrics((p) => ({ ...p, ideal: !p.ideal }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                      chartMetrics.ideal
+                        ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
+                        : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                    }`}
+                  >
+                    Puntos Ideales
+                  </button>
+                </div>
+              </div>
+
+              {/* Right: User Selector */}
+              <div className="flex flex-wrap items-center justify-end gap-2 max-w-full">
+                {comparisonUserIds.map((id) => {
+                  const u = lists?.users?.find((user) => user.id === id);
+                  if (!u) return null;
+                  return (
+                    <div
+                      key={id}
+                      className="flex items-center gap-1.5 bg-zinc-800 pl-1.5 pr-2 py-1 rounded-full border border-white/5"
+                    >
+                      <div className="w-4 h-4 rounded-full bg-zinc-700 overflow-hidden">
+                        {u.icon && (
+                          <img src={u.icon} alt={u.name} className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      <span className="text-xs text-zinc-300">{u.name}</span>
+                      {comparisonUserIds.length > 1 && (
+                        <button
+                          onClick={() => toggleUserInComparison(id)}
+                          className="text-zinc-500 hover:text-red-400 transition-colors ml-1 cursor-pointer"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+
+                <div className="relative">
+                  <button
+                    onClick={() => setIsCompareSelectorOpen(!isCompareSelectorOpen)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors shadow-lg cursor-pointer"
+                    title="Añadir usuario a comparar"
+                  >
+                    <Plus size={16} />
+                  </button>
+
+                  {isCompareSelectorOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setIsCompareSelectorOpen(false)}
+                      />
+                      <div className="absolute right-0 top-full mt-2 w-48 max-h-60 overflow-y-auto bg-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 p-1 custom-scrollbar">
+                        {lists?.users?.map((user) => {
+                          const isSelected = comparisonUserIds.includes(user.id);
+                          return (
+                            <button
+                              key={user.id}
+                              onClick={() => {
+                                toggleUserInComparison(user.id);
+                                setIsCompareSelectorOpen(false);
+                              }}
+                              className={`w-full text-left px-3 py-2 rounded-md text-xs flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer ${
+                                isSelected ? 'text-blue-400 bg-blue-500/10' : 'text-zinc-400'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 rounded-full bg-zinc-800 overflow-hidden">
+                                  {user.icon && (
+                                    <img
+                                      src={user.icon}
+                                      alt={user.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  )}
+                                </div>
+                                <span>{user.name}</span>
+                              </div>
+                              {isSelected && <Check size={12} />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <PerformanceChart
+              histories={comparisonHistories}
+              comparisonUsers={comparisonUsersList}
+              metrics={chartMetrics}
+            />
 
             {historyStats && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
