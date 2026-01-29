@@ -168,17 +168,39 @@ export async function getStreakStats() {
       FROM Streaks
       WHERE is_high_score = 1
       GROUP BY user_id, grp
+    ),
+    RecentFailures AS (
+      -- Find the most recent round where the user failed to score >= 175
+      SELECT 
+        user_id,
+        MAX(round_id) as last_failure_round
+      FROM user_rounds
+      WHERE participated = TRUE AND points < 175
+      GROUP BY user_id
+    ),
+    CurrentStreakCalc AS (
+       -- Count rounds since the last failure
+       SELECT
+         ur.user_id,
+         COUNT(*) as current_streak
+       FROM user_rounds ur
+       LEFT JOIN RecentFailures rf ON ur.user_id = rf.user_id
+       WHERE ur.participated = TRUE 
+         AND (rf.last_failure_round IS NULL OR ur.round_id > rf.last_failure_round)
+       GROUP BY ur.user_id
     )
     SELECT 
       u.id as user_id,
       u.name,
       u.icon,
       u.color_index,
-      MAX(gs.streak_length) as longest_streak
+      COALESCE(MAX(gs.streak_length), 0) as longest_streak,
+      COALESCE(csc.current_streak, 0) as current_streak
     FROM users u
-    JOIN GroupedStreaks gs ON u.id = gs.user_id
-    GROUP BY u.id
-    ORDER BY longest_streak DESC
+    LEFT JOIN GroupedStreaks gs ON u.id = gs.user_id
+    LEFT JOIN CurrentStreakCalc csc ON u.id = csc.user_id
+    GROUP BY u.id, u.name, u.icon, u.color_index, csc.current_streak
+    ORDER BY longest_streak DESC, current_streak DESC
   `;
   return (await db.query(query)).rows;
 }

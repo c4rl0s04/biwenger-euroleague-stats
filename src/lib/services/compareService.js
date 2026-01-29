@@ -106,7 +106,7 @@ export async function getComparisonData() {
       participation: porrasData?.participation || [],
     },
     advancedStats: {
-      streaks: streakStats?.streaks || [],
+      streaks: streakStats || [],
       heatCheck: heatCheckStats || [], // heatCheckStats returns array directly too? checked code: yes .map()
       hunter: hunterStats || [], // getHunterStats returns array
       bottler: bottlerStats || [], // getBottlerStats returns array

@@ -115,7 +115,16 @@ export async function biwengerFetch(endpoint, options = {}) {
     // ------------------------------------
 
     if (!response.ok) {
-      throw new Error(`Biwenger API Error: ${response.status} ${response.statusText}`);
+      let errorDetails = '';
+      try {
+        const errorData = await response.text(); // Use text() to be safe if not JSON
+        errorDetails = ` - Details: ${errorData}`;
+      } catch (e) {
+        // Ignore read error
+      }
+      throw new Error(
+        `Biwenger API Error: ${response.status} ${response.statusText}${errorDetails}`
+      );
     }
 
     const data = await response.json();
@@ -161,4 +170,12 @@ export async function fetchRoundGames(roundId) {
 
 export async function fetchPlayerDetails(playerId) {
   return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.PLAYER_DETAILS(playerId));
+}
+
+export async function fetchHome() {
+  return biwengerFetch('/home');
+}
+
+export async function fetchTournament(tournamentId) {
+  return biwengerFetch(`/tournaments/${tournamentId}`);
 }

@@ -1,0 +1,300 @@
+{
+  "status": 200,
+  "data": {
+    "id": 130626,
+    "competition": "euroleague",
+    "name": "Eliminatoria #2",
+    "icon": "img/tournament.png",
+    "created": 1769079613,
+    "parent": {
+      "name": "Euroliga",
+      "type": "league",
+      "mode": "league",
+      "cover": "",
+      "created": 1758791320,
+      "id": 2028379,
+      "marketMode": "normal",
+      "scoreID": 1,
+      "icon": ""
+    },
+    "activeRound": {
+      "index": 2,
+      "type": "quarterFinal",
+      "leg": "away"
+    },
+    "config": {
+      "mode": "playoff",
+      "participants": {
+        "order": "manual"
+      },
+      "league": {
+        "advances": 1,
+        "groups": 1,
+        "twoLegged": false
+      },
+      "playoff": {
+        "twoLegged": true,
+        "twoLeggedFinal": false
+      },
+      "rewards": {
+        "fixture": 0,
+        "phase": 0,
+        "winners": []
+      },
+      "rounds": {
+        "disableRedo": false
+      },
+      "score": "points"
+    },
+    "phases": [],
+    "teams": [
+      {
+        "id": 13207868,
+        "name": "All Stars",
+        "icon": "icons/28.png"
+      },
+      {
+        "id": 13207924,
+        "name": "ask72",
+        "icon": "icons/41.png"
+      },
+      {
+        "id": 13208960,
+        "name": "Cactus Team 🌵",
+        "icon": "i/t/571.png"
+      },
+      {
+        "id": 13207974,
+        "name": "Nonameyet",
+        "icon": "icons/9.png"
+      },
+      {
+        "id": 13208192,
+        "name": "Real Madrid Basket",
+        "icon": "i/t/579.png"
+      },
+      {
+        "id": 13207910,
+        "name": "June",
+        "icon": "icons/45.png"
+      }
+    ],
+    "rounds": [
+      {
+        "index": 1,
+        "type": "quarterFinal",
+        "leg": "home",
+        "round": {
+          "id": 4769,
+          "name": "Round 24",
+          "short": "R24"
+        },
+        "fixtures": [
+          {
+            "id": 1,
+            "home": {
+              "id": 13207868,
+              "score": 198
+            },
+            "away": {
+              "id": 13207924,
+              "score": 211
+            }
+          },
+          {
+            "id": 2,
+            "home": {
+              "id": 13208960,
+              "score": 153
+            },
+            "away": {
+              "id": 13207974,
+              "score": 159
+            }
+          },
+          {
+            "id": 3,
+            "home": {
+              "id": 13208192,
+              "score": 194
+            },
+            "away": {
+              "id": 13207910,
+              "score": 233
+            }
+          },
+          {
+            "id": 4,
+            "home": {
+              "id": 0
+            },
+            "away": {
+              "id": 0
+            }
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "type": "quarterFinal",
+        "leg": "away",
+        "round": {
+          "id": 4770,
+          "name": "Round 25",
+          "short": "R25"
+        },
+        "fixtures": [
+          {
+            "id": 5,
+            "home": {
+              "id": 13207924
+            },
+            "away": {
+              "id": 13207868
+            }
+          },
+          {
+            "id": 6,
+            "home": {
+              "id": 13207974
+            },
+            "away": {
+              "id": 13208960
+            }
+          },
+          {
+            "id": 7,
+            "home": {
+              "id": 13207910
+            },
+            "away": {
+              "id": 13208192
+            }
+          },
+          {
+            "id": 8,
+            "home": {
+              "id": 0
+            },
+            "away": {
+              "id": 0
+            }
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "type": "semiFinal",
+        "leg": "home",
+        "round": {
+          "id": 4771,
+          "name": "Round 26",
+          "short": "R26"
+        },
+        "fixtures": [
+          {
+            "id": 9,
+            "home": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 1
+              }
+            },
+            "away": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 2
+              }
+            }
+          },
+          {
+            "id": 10,
+            "home": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 3
+              }
+            },
+            "away": {
+              "id": 0
+            }
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "type": "semiFinal",
+        "leg": "away",
+        "round": {
+          "id": 4772,
+          "name": "Round 27",
+          "short": "R27"
+        },
+        "fixtures": [
+          {
+            "id": 11,
+            "home": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 2
+              }
+            },
+            "away": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 1
+              }
+            }
+          },
+          {
+            "id": 12,
+            "home": {
+              "id": 0
+            },
+            "away": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 3
+              }
+            }
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "type": "final",
+        "leg": "unique",
+        "round": {
+          "id": 4773,
+          "name": "Round 28",
+          "short": "R28"
+        },
+        "fixtures": [
+          {
+            "id": 13,
+            "home": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 9
+              }
+            },
+            "away": {
+              "id": null,
+              "source": {
+                "from": "fixture",
+                "id": 3
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

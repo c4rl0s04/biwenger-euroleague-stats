@@ -79,6 +79,10 @@ async function syncData() {
   const stepPorras = await import('./steps/13-porras.js'); // Step 13
   if (shouldRun(13)) manager.addStep('Sync Porras', stepPorras.run);
 
+  // New Tournaments Step
+  const stepTournaments = await import('./steps/14-tournaments.js'); // Step 14
+  if (shouldRun(14)) manager.addStep('Sync Tournaments', stepTournaments.run);
+
   // Execute
   await manager.run();
 

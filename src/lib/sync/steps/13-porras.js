@@ -21,10 +21,10 @@ export async function run(manager) {
     manager.log(`   > Fetching board history (Offset: ${offset})...`);
 
     // Construct URL manually to add type filter if not in config helper
-    const url = `${CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(leagueId, offset, limit)}&type=bettingPool`;
+    const url = `${CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(leagueId, offset, limit)}`;
 
     try {
-      const response = await biwengerFetch(url);
+      const response = await biwengerFetch(url, { skipVersionCheck: true });
       const items = response.data;
 
       if (!items || items.length === 0) {

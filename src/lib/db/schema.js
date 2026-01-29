@@ -227,6 +227,68 @@ export async function ensureSchema(db) {
     )
   `);
 
+  // 15. Tournaments Table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tournaments (
+      id INTEGER PRIMARY KEY,
+      league_id INTEGER,
+      name TEXT,
+      type TEXT,
+      status TEXT,
+      data_json TEXT,
+      updated_at INTEGER
+    )
+  `);
+
+  // 16. Tournament Phases Table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tournament_phases (
+      id SERIAL PRIMARY KEY,
+      tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+      name TEXT,
+      type TEXT,
+      order_index INTEGER,
+      UNIQUE(tournament_id, order_index)
+    )
+  `);
+
+  // 17. Tournament Fixtures Table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tournament_fixtures (
+      id INTEGER PRIMARY KEY,
+      tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+      phase_id INTEGER REFERENCES tournament_phases(id) ON DELETE CASCADE,
+      round_name TEXT,
+      round_id INTEGER, -- Link to global round
+      group_name TEXT,
+      home_user_id TEXT,
+      away_user_id TEXT,
+      home_score INTEGER,
+      away_score INTEGER,
+      date INTEGER,
+      status TEXT
+    )
+  `);
+
+  // 18. Tournament Standings Table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tournament_standings (
+      id SERIAL PRIMARY KEY,
+      tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+      phase_name TEXT,
+      group_name TEXT,
+      user_id TEXT,
+      position INTEGER,
+      points INTEGER,
+      won INTEGER,
+      lost INTEGER,
+      drawn INTEGER,
+      scored INTEGER,
+      against INTEGER,
+      UNIQUE(tournament_id, phase_name, group_name, user_id)
+    )
+  `);
+
   // --- INDEXES ---
   const indexes = [
     // User rounds
@@ -265,6 +327,11 @@ export async function ensureSchema(db) {
 
     // Finances
     'CREATE INDEX IF NOT EXISTS idx_finances_user_id ON finances(user_id)',
+
+    // Tournaments
+    'CREATE INDEX IF NOT EXISTS idx_tournament_fixtures_tournament ON tournament_fixtures(tournament_id)',
+    'CREATE INDEX IF NOT EXISTS idx_tournament_fixtures_round ON tournament_fixtures(round_id)',
+    'CREATE INDEX IF NOT EXISTS idx_tournament_standings_tournament ON tournament_standings(tournament_id)',
   ];
 
   for (const indexSql of indexes) {
