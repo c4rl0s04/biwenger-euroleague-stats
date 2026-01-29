@@ -1,7 +1,7 @@
 import { getTeamById } from '@/lib/db';
 import { Construction } from 'lucide-react';
 import Image from 'next/image';
-import { BackButton } from '@/components/ui';
+import { BackButton, PageHeader } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 

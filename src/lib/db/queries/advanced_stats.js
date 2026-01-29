@@ -3,8 +3,8 @@
  * Complex analytics for the standings page
  */
 
-import { db } from '../client';
-import { cached, CACHE_TTL } from '../../utils/cache';
+import { db } from '../client.js';
+import { cached, CACHE_TTL } from '../../utils/cache.js';
 
 /**
  * Get Heat Check Stats

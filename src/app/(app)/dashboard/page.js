@@ -1,5 +1,5 @@
 import nextDynamic from 'next/dynamic';
-import { CardSkeleton } from '@/components/ui';
+import { CardSkeleton, PageHeader } from '@/components/ui';
 import { Section } from '@/components/layout';
 import {
   StandingsCard,
@@ -84,17 +84,10 @@ export default function Dashboard() {
   return (
     <div>
       {/* Header Section */}
-      <div className="container mx-auto px-4 pt-12 pb-2 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-display mb-4 flex items-center gap-4">
-            <span className="w-1.5 h-12 bg-gradient-to-b from-primary to-orange-400 rounded-full"></span>
-            <span className="text-gradient">Dashboard</span>
-          </h1>
-          <p className="text-muted-foreground text-lg w-full border-b border-border/50 pb-6">
-            Visión general de tu temporada, estadísticas clave y comparativas de la liga.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Visión general de tu temporada, estadísticas clave y comparativas de la liga."
+      />
       {/* Hero Section */}
       {/* Hero Section Removed - Moved to Home Page */}
 

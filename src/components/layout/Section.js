@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import { useSections } from './SectionContext';
 import { FadeIn } from '@/components/ui';
 
@@ -13,21 +13,34 @@ import { FadeIn } from '@/components/ui';
  * @param {number} delay - Animation delay in ms
  * @param {string} background - CSS class for background (e.g., 'section-base', 'section-raised')
  */
-export default function Section({ title, id, subtitle, children, delay = 0, background = '' }) {
+export default function Section({
+  title,
+  id,
+  subtitle,
+  children,
+  delay = 0,
+  background = '',
+  className = '',
+}) {
   const { registerSection, unregisterSection } = useSections();
-  const words = title.split(' ');
-  const firstWord = words[0];
+  const reactId = useId();
+
+  // Handle empty title gracefully
+  const words = title ? title.split(' ') : [];
+  const firstWord = words[0] || '';
   const restWords = words.slice(1).join(' ');
 
   // Generate ID from title if not provided
   const sectionId =
     id ||
-    title
-      .toLowerCase()
-      .replace(/\s+/g, '-') // Replace spaces with -
-      .replace(/[^\w\u00C0-\u00FF-]/g, '') // Remove non-word chars (keeping accents)
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, ''); // Remove accents
+    (title
+      ? title
+          .toLowerCase()
+          .replace(/\s+/g, '-') // Replace spaces with -
+          .replace(/[^\w\u00C0-\u00FF-]/g, '') // Remove non-word chars (keeping accents)
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      : 'section-' + reactId);
 
   // Register section on mount
   useEffect(() => {
@@ -37,7 +50,10 @@ export default function Section({ title, id, subtitle, children, delay = 0, back
 
   return (
     <FadeIn delay={delay}>
-      <section id={sectionId} className={`${background} px-4 sm:px-6 lg:px-8 py-10 scroll-mt-16`}>
+      <section
+        id={sectionId}
+        className={`${background} px-4 sm:px-6 lg:px-8 py-10 scroll-mt-16 ${className}`}
+      >
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="space-y-1">
             <h2 className="font-display text-5xl tracking-wide">

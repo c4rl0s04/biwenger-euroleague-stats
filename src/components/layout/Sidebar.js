@@ -19,6 +19,7 @@ import {
   Home,
   Sparkles,
   Clock,
+  Scale,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useClientUser } from '@/lib/hooks/useClientUser';
@@ -36,6 +37,7 @@ const navItems = [
   { name: 'Partidos', href: '/matches', icon: Calendar },
   { name: 'Alineaciones', href: '/schedule', icon: Users },
   { name: 'Jornadas', href: '/rounds', icon: Clock },
+  { name: 'Comparativa', href: '/compare', icon: Scale },
   { name: 'Porras', href: '/predictions', icon: Target },
 ];
 

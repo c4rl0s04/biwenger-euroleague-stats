@@ -8,6 +8,7 @@
 
 import { getAllPlayers } from '@/lib/db/queries/players';
 import PlayersTable from '@/components/players-list/PlayersTable';
+import { PageHeader } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 

@@ -31,3 +31,4 @@ export { default as UserAvatar } from './UserAvatar';
 export { default as ThemeBackground } from './ThemeBackground';
 export { default as BackButton } from './BackButton';
 export { default as Subheading } from './Subheading';
+export { default as PageHeader } from './PageHeader';

@@ -1,6 +1,6 @@
 import { getUserSeasonStats } from '@/lib/db';
 
-import { BackButton } from '@/components/ui';
+import { BackButton, PageHeader } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,11 +24,11 @@ export default async function UserProfilePage({ params }) {
           <div className="mb-6">
             <BackButton />
           </div>
-          <h1 className="text-4xl md:text-5xl font-display mb-4 flex items-center gap-4">
-            <span className="w-1.5 h-10 bg-primary rounded-full"></span>
-            <span className="text-foreground">{`Perfil de ${userName}`}</span>
-          </h1>
-          <p className="text-muted-foreground text-lg mb-10">Estadísticas y plantilla</p>
+          <PageHeader
+            title={`Perfil de ${userName}`}
+            description="Estadísticas y plantilla"
+            className="px-0 pb-10"
+          />
 
           {/* Placeholder for future implementation */}
           <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-12 text-center">

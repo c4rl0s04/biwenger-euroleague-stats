@@ -5,6 +5,7 @@ import ScheduleControls from '@/components/schedule/ScheduleControls';
 import MatchCard from '@/components/schedule/MatchCard';
 import RoundSummary from '@/components/schedule/RoundSummary';
 import { Section } from '@/components/layout';
+import { PageHeader } from '@/components/ui';
 
 import { cookies } from 'next/headers';
 
@@ -54,16 +55,13 @@ export default async function SchedulePage({ searchParams }) {
   return (
     <div className="min-h-screen">
       {/* Page Header */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-12 pb-2 relative z-10">
-        <div className="max-w-7xl mx-auto space-y-2">
-          <h1 className="text-5xl md:text-6xl font-display mb-4 flex items-center gap-4">
-            <span className="w-1.5 h-12 bg-gradient-to-b from-primary to-orange-400 rounded-full"></span>
-            <span className="text-gradient">Alineaciones</span>
-          </h1>
-          <p className="text-muted-foreground text-lg w-full border-b border-border/50 pb-6">
-            {schedule.found ? schedule.round.round_name : 'Selecciona una jornada'}
-          </p>
+      <PageHeader
+        title="Alineaciones"
+        description={schedule.found ? schedule.round.round_name : 'Selecciona una jornada'}
+      />
 
+      <div className="container mx-auto px-4 md:px-8 pb-6">
+        <div className="max-w-7xl mx-auto">
           <div className="pt-4 flex flex-col lg:flex-row gap-6 items-stretch">
             <div className="w-full lg:max-w-md shrink-0">
               <ScheduleControls

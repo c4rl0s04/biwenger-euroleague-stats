@@ -530,12 +530,10 @@ export default function RoundsPageClient() {
 
             {historyStats && (
               <div className="space-y-3">
-                <Subheading>
-                  Estadísticas personales de{' '}
-                  <span className="text-white font-semibold">
-                    {lists?.users?.find((u) => u.id === selectedUserId)?.name || 'Usuario'}
-                  </span>
-                </Subheading>
+                <Subheading
+                  title={`Estadísticas personales de ${lists?.users?.find((u) => u.id === selectedUserId)?.name || 'Usuario'}`}
+                  className="mb-2"
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <HistoryStatCard
                     title="Eficiencia Media"
