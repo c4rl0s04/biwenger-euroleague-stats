@@ -1007,21 +1007,6 @@ export async function getCoachRating(userId, roundId) {
   const historicSquadIds = await getHistoricSquad(userId, roundId);
   if (historicSquadIds.size === 0) return { rating: 0, maxScore: 0, actualScore, diff: 0 };
 
-  // 3. Get Stats for ALL players in the historic squad
-  // We need to find the theoretical MAX score from this set.
-  // 3. Get Stats for ALL players in the historic squad
-  // We need to find the theoretical MAX score from this set.
-  const statsQuery = `
-    SELECT 
-      p.id as player_id, p.name, p.position, p.img, p.team_id,
-      COALESCE(prs.fantasy_points, 0) as points
-    FROM players p
-    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.round_id = $2
-    WHERE p.id = ANY($1::int[])
-  `;
-
-  const squadStats = (await db.query(statsQuery, [[...historicSquadIds], roundId])).rows;
-
   // [NEW] GHOST PLAYER HANDLING
   // Fetch lineup to check for missing players who left the competition
   const ghostLineupQuery = `
@@ -1038,6 +1023,25 @@ export async function getCoachRating(userId, roundId) {
   `;
 
   const lineupRows = (await db.query(ghostLineupQuery, [userId, roundId])).rows;
+
+  // [UNION FIX] Merge Historic Squad + Actual Lineup
+  // This ensures that:
+  // 1. We include players found in transfer history.
+  // 2. We include players currently in the lineup (even if transfer history missed them).
+  const lineupPlayerIds = lineupRows.map((p) => p.player_id);
+  const completeSquadIds = new Set([...historicSquadIds, ...lineupPlayerIds]);
+
+  // 3. Get Stats for ALL players in the combined pool
+  const statsQuery = `
+    SELECT 
+      p.id as player_id, p.name, p.position, p.img, p.team_id,
+      COALESCE(prs.fantasy_points, 0) as points
+    FROM players p
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.round_id = $2
+    WHERE p.id = ANY($1::int[])
+  `;
+
+  const squadStats = (await db.query(statsQuery, [[...completeSquadIds], roundId])).rows;
 
   // Identify ghost players (no player_exists AND no stats)
   const ghostPlayers = lineupRows.filter((p) => !p.player_exists && p.points === 0);

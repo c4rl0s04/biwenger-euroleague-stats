@@ -4,8 +4,40 @@
  */
 
 import { db } from '@/lib/db/client';
-import { getExtendedStandings as getStandings, getPorrasStats } from '@/lib/db';
+import { getExtendedStandings as getStandings } from '@/lib/db/queries/standings';
+import { getPorrasStats } from '@/lib/db/queries/predictions';
 import { getUserPerformanceHistoryService } from '@/lib/services/roundsService';
+
+/**
+ * Helper: Get User Squad (Inlined to avoid circular dependency issues)
+ */
+async function getUserSquad(userId) {
+  const query = `
+    SELECT 
+      p.id,
+      p.name,
+      p.position,
+      t.name as team,
+      p.price,
+      COALESCE(SUM(prs.fantasy_points), 0) as points,
+      ROUND(AVG(COALESCE(prs.fantasy_points, 0)), 1) as average,
+      p.status
+    FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id
+    WHERE p.owner_id = $1
+    GROUP BY p.id, p.name, p.position, t.name, p.price, p.status
+    ORDER BY points DESC
+  `;
+
+  const rows = (await db.query(query, [userId])).rows;
+  return rows.map((row) => ({
+    ...row,
+    average: parseFloat(row.average) || 0,
+    points: parseInt(row.points) || 0,
+    price: parseInt(row.price) || 0,
+  }));
+}
 import {
   fetchStreakStats,
   fetchHeatCheckStats,
@@ -75,17 +107,33 @@ export async function getComparisonData() {
   // Fetch full history for each user in parallel using the expert service
   const allUsersHistory = await Promise.all(
     usersResult.rows.map(async (user) => {
-      const [history, captain, homeAway] = await Promise.all([
+      const [history, captain, homeAway, squad] = await Promise.all([
         getUserPerformanceHistoryService(user.id),
         fetchCaptainStats(user.id),
         fetchHomeAwayStats(user.id),
+        getUserSquad(user.id),
       ]);
+
+      // Calculate Squad Stats
+      const validSquad = squad.filter((p) => p.points > 0);
+      const avgPlayerPoints =
+        validSquad.length > 0
+          ? validSquad.reduce((sum, p) => sum + p.points, 0) / validSquad.length
+          : 0;
+
+      const bestPlayer = squad.length > 0 ? squad[0] : null; // squad is ordered by points DESC in query
 
       return {
         userId: user.id,
         history,
         captain,
         homeAway,
+        squadStats: {
+          avgPlayerPoints,
+          bestPlayer: bestPlayer
+            ? { name: bestPlayer.name, points: bestPlayer.points }
+            : { name: '-', points: 0 },
+        },
       };
     })
   );

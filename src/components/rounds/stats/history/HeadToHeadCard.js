@@ -2,7 +2,17 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { ChevronDown, Trophy, Zap, Activity, Brain, Target, Banknote, Flame } from 'lucide-react';
+import {
+  ChevronDown,
+  Trophy,
+  Zap,
+  Activity,
+  Brain,
+  Target,
+  Banknote,
+  Flame,
+  MapPin,
+} from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
@@ -33,16 +43,83 @@ export default function HeadToHeadCard({
   const stats = useMemo(() => {
     if (!currentUser || !rivalId || !allUsersHistory.length) return null;
 
-    const userFullData = allUsersHistory.find((u) => String(u.userId) === String(currentUser.id));
-    const rivalFullData = allUsersHistory.find((u) => String(u.userId) === String(rivalId));
+    // Retrieve full data objects
+    const userFullData =
+      allUsersHistory.find((h) => String(h.userId) === String(currentUser.id)) || {};
+    const rivalFullData = allUsersHistory.find((h) => String(h.userId) === String(rivalId)) || {};
 
-    const userHistory = userFullData?.history || [];
-    const rivalHistory = rivalFullData?.history || [];
-    const rivalUser = usersList.find((u) => String(u.id) === String(rivalId));
+    // Extract history arrays
+    const userHistory = userFullData.history || [];
+    const rivalHistory = rivalFullData.history || [];
 
-    if (!rivalUser) return null;
+    // Identify rival user object
+    const rivalUser = usersList.find((u) => String(u.id) === String(rivalId)) || {
+      name: 'Rival',
+      id: rivalId,
+    };
 
-    // --- 1. Rounds History Logic & Consistency ---
+    // --- HELPER: Pre-calculate metrics for all users to determine ranks ---
+    const allMetrics = allUsersHistory.map((h) => {
+      const history = h.history || [];
+      // Use FULL history for consistency with Dashboard (Avg includes 0s if missed)
+      const validHistory = history;
+
+      const perfect = validHistory.filter((r) => (r.efficiency || 0) >= 95).length;
+
+      const totalActual = validHistory.reduce((sum, r) => sum + r.actual_points, 0);
+      const totalIdeal = validHistory.reduce((sum, r) => sum + (r.ideal_points || 0), 0);
+      const pointsLost = totalIdeal - totalActual;
+
+      // Avg Player Points from squadStats (added in backend)
+      const avgPlayer = h.squadStats?.avgPlayerPoints || 0;
+
+      // New Metrics for Ranking
+      const avgEff =
+        validHistory.length > 0
+          ? validHistory.reduce((sum, r) => sum + (r.efficiency || 0), 0) / validHistory.length
+          : 0;
+      const best =
+        validHistory.length > 0 ? Math.max(...validHistory.map((r) => r.actual_points)) : 0;
+
+      const form =
+        validHistory.length > 0
+          ? [...validHistory]
+              .sort((a, b) => b.round_number - a.round_number)
+              .slice(0, 5)
+              .reduce((sum, r) => sum + r.actual_points, 0) / 5
+          : 0;
+
+      const avgCaptain = parseFloat(h.captain?.avg_points || 0);
+      const extraCaptain = parseFloat(h.captain?.extra_points || 0);
+
+      return {
+        id: String(h.userId),
+        perfect,
+        pointsLost,
+        avgPlayer,
+        avgEff,
+        best,
+        form,
+        avgCaptain,
+        extraCaptain,
+      };
+    });
+
+    const getDynamicRank = (metric, uid, inverse = false) => {
+      const sorted = [...allMetrics].sort((a, b) =>
+        inverse ? a[metric] - b[metric] : b[metric] - a[metric]
+      );
+
+      const userItem = sorted.find((m) => m.id === String(uid));
+      if (!userItem) return null;
+      const userVal = userItem[metric];
+
+      // Tie-aware Rank: Index of first item with same value + 1
+      const index = sorted.findIndex((m) => m[metric] === userVal);
+      return index !== -1 ? index + 1 : null;
+    };
+
+    // --- 1. Rounds History (Wins, Losses, Stats) ---
     let wins = 0;
     let losses = 0;
     let ties = 0;
@@ -57,78 +134,115 @@ export default function HeadToHeadCard({
       }
     });
 
-    const calculateHistoryStats = (hist) => {
+    const calculateHistoryStats = (hist, uid) => {
       if (!hist.length)
-        return { best: 0, avgEff: 0, totalRounds: 0, pointsLost: 0, perfectRounds: 0 };
+        return {
+          best: 0,
+          avgEff: 0,
+          totalRounds: 0,
+          pointsLost: { value: 0, rank: null },
+          perfectRounds: { value: 0, rank: null },
+        };
 
-      const avgEff = hist.reduce((sum, r) => sum + (r.efficiency || 0), 0) / hist.length;
-      const best = Math.max(...hist.map((r) => r.actual_points));
+      // Use FULL history for consistency
+      const validHistory = hist;
+      if (!validHistory.length)
+        return {
+          best: { value: 0, rank: null },
+          avgEff: { value: 0, rank: null },
+          totalRounds: 0,
+          pointsLost: { value: 0, rank: null },
+          perfectRounds: { value: 0, rank: null },
+        };
 
-      // New calc: Points Lost
-      const pointsLost = hist.reduce(
-        (sum, r) => sum + Math.max(0, (r.ideal_points || 0) - r.actual_points),
-        0
-      );
+      const avgEff =
+        validHistory.reduce((sum, r) => sum + (r.efficiency || 0), 0) / validHistory.length;
+      const best = Math.max(...validHistory.map((r) => r.actual_points));
 
-      // New calc: Perfect Rounds (>99% efficiency & participated)
-      const perfectRounds = hist.filter((r) => (r.efficiency || 0) >= 99 && r.participated).length;
+      const totalActual = validHistory.reduce((sum, r) => sum + r.actual_points, 0);
+      const totalIdeal = validHistory.reduce((sum, r) => sum + (r.ideal_points || 0), 0);
+      const pointsLostVal = totalIdeal - totalActual;
 
-      return { best, avgEff, totalRounds: hist.length, pointsLost, perfectRounds };
+      const perfectRoundsVal = validHistory.filter((r) => (r.efficiency || 0) >= 95).length;
+
+      return {
+        best: { value: best, rank: uid ? getDynamicRank('best', uid) : null },
+        avgEff: { value: avgEff, rank: uid ? getDynamicRank('avgEff', uid) : null },
+        totalRounds: hist.length,
+        pointsLost: {
+          value: pointsLostVal,
+          rank: uid ? getDynamicRank('pointsLost', uid, true) : null,
+        },
+        perfectRounds: {
+          value: perfectRoundsVal,
+          rank: uid ? getDynamicRank('perfect', uid) : null,
+        },
+      };
     };
 
-    const userRounds = calculateHistoryStats(userHistory);
-    const rivalRounds = calculateHistoryStats(rivalHistory);
+    const userRounds = calculateHistoryStats(userHistory, currentUser.id);
+    const rivalRounds = calculateHistoryStats(rivalHistory, rivalId);
 
-    // Current Form (Last 5)
-    const userForm =
-      [...userHistory]
-        .sort((a, b) => b.round_number - a.round_number)
-        .slice(0, 5)
-        .reduce((sum, r) => sum + r.actual_points, 0) / 5;
-    const rivalForm =
-      [...rivalHistory]
-        .sort((a, b) => b.round_number - a.round_number)
-        .slice(0, 5)
-        .reduce((sum, r) => sum + r.actual_points, 0) / 5;
+    // Form (Last 5)
+    // Use actual_points for form calculation to match displayed points
+    const getForm = (hist) => {
+      return (
+        [...hist]
+          .sort((a, b) => b.round_number - a.round_number)
+          .slice(0, 5)
+          .reduce((sum, r) => sum + r.actual_points, 0) / 5
+      );
+    };
+    const userForm = getForm(userHistory);
+    const rivalForm = getForm(rivalHistory);
 
-    // Helper to calculate rank from a list
+    // --- 2. General Stats (Standings) ---
     const getRank = (list, key, uid, descending = true) => {
       if (!list || !list.length) return null;
-      // Sort a copy
+      // Sort first to establish order
       const sorted = [...list].sort((a, b) => {
         const valA = parseFloat(a[key] || 0);
         const valB = parseFloat(b[key] || 0);
         return descending ? valB - valA : valA - valB;
       });
-      const index = sorted.findIndex((item) => String(item.user_id) === String(uid));
-      return index !== -1 ? index + 1 : null;
+
+      // Find user's value
+      const userItem = sorted.find((item) => String(item.user_id) === String(uid));
+      if (!userItem) return null;
+
+      const userValue = parseFloat(userItem[key] || 0);
+
+      // Find rank: Index of first item with same value + 1 (Standard Competition Ranking: 1, 1, 3)
+      const rankIndex = sorted.findIndex((item) => {
+        const val = parseFloat(item[key] || 0);
+        return val === userValue;
+      });
+
+      return rankIndex !== -1 ? rankIndex + 1 : null;
     };
 
-    // --- 2. Standings Logic (General Stats) ---
-    const getStandingsStats = (uid) => {
+    const getGeneral = (uid, fullData) => {
       const u = String(uid);
       const row = standings.find((s) => String(s.user_id) === u);
       return {
         totalPoints: { value: row?.total_points || 0, rank: getRank(standings, 'total_points', u) },
+        avgPoints: {
+          value: parseFloat(row?.avg_points || 0),
+          rank: getRank(standings, 'avg_points', u),
+        },
         teamValue: { value: row?.team_value || 0, rank: getRank(standings, 'team_value', u) },
         titles: { value: row?.titles || 0, rank: null },
+        avgPlayer: {
+          value: fullData?.squadStats?.avgPlayerPoints || 0,
+          rank: getDynamicRank('avgPlayer', u),
+        },
+        bestPlayer: fullData?.squadStats?.bestPlayer || { name: '-', points: 0 },
       };
     };
-    const userGeneral = getStandingsStats(currentUser.id);
-    const rivalGeneral = getStandingsStats(rivalId);
+    const userGeneral = getGeneral(currentUser.id, userFullData);
+    const rivalGeneral = getGeneral(rivalId, rivalFullData);
 
-    // --- 2b. Captain & Home/Away Stats ---
-    // (Assume no ranking needed for private stats like Captain usage for now, or difficult to calculate without full list)
-    const getExtraStats = (data) => {
-      return {
-        captain: data?.captain || {},
-        homeAway: data?.homeAway || {},
-      };
-    };
-    const userExtras = getExtraStats(userFullData);
-    const rivalExtras = getExtraStats(rivalFullData);
-
-    // --- 3. Predictions Logic (Porras) ---
+    // --- 3. Predictions ---
     const getPredictionStats = (uid) => {
       const u = String(uid);
       const row = predictions.promedios?.find((p) => String(p.user_id) === u);
@@ -166,8 +280,7 @@ export default function HeadToHeadCard({
     const userPreds = getPredictionStats(currentUser.id);
     const rivalPreds = getPredictionStats(rivalId);
 
-    // --- 4. ADVANCED STATS LOGIC ---
-    // Most advanced stats lists come pre-sorted from DB, so index is rank
+    // --- 4. Advanced Stats ---
     const getAdvanced = (uid) => {
       const u = String(uid);
       const findStat = (dataset, key = 'user_id') => {
@@ -176,14 +289,27 @@ export default function HeadToHeadCard({
         return { ...item, rank: index !== -1 ? index + 1 : null };
       };
 
+      const streakItem = findStat(advancedStats.streaks);
+      // Calculate specific rank for current_streak (as list might be sorted by longest)
+      streakItem.currentRank = getRank(advancedStats.streaks, 'current_streak', u);
+      // Ensure longest rank handles ties too if using the generic findStat rank isn't enough (findStat uses index)
+      // Actually, let's explicitely calc longest rank too for consistency
+      streakItem.rank = getRank(advancedStats.streaks, 'longest_streak', u);
+
+      const jinxItem = findStat(advancedStats.jinx);
+      jinxItem.rank = getRank(advancedStats.jinx, 'jinxed_count', u);
+
+      const heartbreakerItem = findStat(advancedStats.heartbreaker);
+      heartbreakerItem.rank = getRank(advancedStats.heartbreaker, 'total_diff', u);
+
       return {
-        streak: findStat(advancedStats.streaks),
+        streak: streakItem,
         heat: findStat(advancedStats.heatCheck),
         hunter: findStat(advancedStats.hunter),
         bottler: findStat(advancedStats.bottler),
-        heartbreaker: findStat(advancedStats.heartbreaker),
+        heartbreaker: heartbreakerItem,
         noGlory: findStat(advancedStats.noGlory),
-        jinx: findStat(advancedStats.jinx),
+        jinx: jinxItem,
         floorCeiling: findStat(advancedStats.floorCeiling),
         volatility: findStat(advancedStats.volatility),
         dominance: findStat(advancedStats.dominance),
@@ -192,9 +318,16 @@ export default function HeadToHeadCard({
         leaguePerf: findStat(advancedStats.leagueComparison),
       };
     };
-
     const userAdv = getAdvanced(currentUser.id);
     const rivalAdv = getAdvanced(rivalId);
+
+    // --- 5. Extras ---
+    const getExtraStats = (data) => ({
+      captain: data?.captain || {},
+      homeAway: data?.homeAway || {},
+    });
+    const userExtras = getExtraStats(userFullData);
+    const rivalExtras = getExtraStats(rivalFullData);
 
     // --- 5. Official H2H Matrix Logic ---
     let recordToUse = { wins, losses, ties };
@@ -210,9 +343,41 @@ export default function HeadToHeadCard({
       rival: rivalUser,
       record: recordToUse,
       general: { user: userGeneral, rival: rivalGeneral },
-      extras: { user: userExtras, rival: rivalExtras },
+      extras: {
+        user: {
+          ...userExtras,
+          captain: {
+            ...userExtras.captain,
+            avg_points: {
+              value: userExtras.captain?.avg_points || 0,
+              rank: getDynamicRank('avgCaptain', currentUser.id),
+            },
+            extra_points: {
+              value: userExtras.captain?.extra_points || 0,
+              rank: getDynamicRank('extraCaptain', currentUser.id),
+            },
+          },
+        },
+        rival: {
+          ...rivalExtras,
+          captain: {
+            ...rivalExtras.captain,
+            avg_points: {
+              value: rivalExtras.captain?.avg_points || 0,
+              rank: getDynamicRank('avgCaptain', rivalId),
+            },
+            extra_points: {
+              value: rivalExtras.captain?.extra_points || 0,
+              rank: getDynamicRank('extraCaptain', rivalId),
+            },
+          },
+        },
+      },
       rounds: { user: userRounds, rival: rivalRounds },
-      form: { user: userForm, rival: rivalForm },
+      form: {
+        user: { value: userForm, rank: getDynamicRank('form', currentUser.id) },
+        rival: { value: rivalForm, rank: getDynamicRank('form', rivalId) },
+      },
       preds: { user: userPreds, rival: rivalPreds },
       adv: { user: userAdv, rival: rivalAdv },
     };
@@ -232,6 +397,8 @@ export default function HeadToHeadCard({
     valueB,
     rankA,
     rankB,
+    nameA,
+    nameB,
     format = (v) => v,
     inverse = false,
     highlightColor = 'text-indigo-400',
@@ -244,17 +411,20 @@ export default function HeadToHeadCard({
       : parseFloat(valueB) > parseFloat(valueA);
     const tie = parseFloat(valueA) === parseFloat(valueB);
 
-    const maxVal = Math.max(parseFloat(valueA) || 0, parseFloat(valueB) || 0);
-    const total = (parseFloat(valueA) || 0) + (parseFloat(valueB) || 0);
+    const absA = Math.abs(parseFloat(valueA) || 0);
+    const absB = Math.abs(parseFloat(valueB) || 0);
+    // Use total of absolute values to treat negative stats (like Hunter) as magnitude
+    const total = absA + absB;
 
-    let widthA = 50;
-    let widthB = 50;
+    let widthA = 0;
+    let widthB = 0;
 
     if (total > 0) {
-      widthA = ((parseFloat(valueA) || 0) / total) * 100;
-      widthB = ((parseFloat(valueB) || 0) / total) * 100;
-      widthA = Math.max(5, Math.min(95, widthA));
-      widthB = Math.max(5, Math.min(95, widthB));
+      widthA = (absA / total) * 100;
+      widthB = (absB / total) * 100;
+      // Don't enforce min 5% if it's actually 0 or close to 0
+      if (absA > 0) widthA = Math.max(2, Math.min(98, widthA));
+      if (absB > 0) widthB = Math.max(2, Math.min(98, widthB));
     }
 
     // New Helper: Render Highlighted Info
@@ -273,14 +443,15 @@ export default function HeadToHeadCard({
       });
     };
 
-    const RankBadge = ({ rank }) => {
+    const RankBadge = ({ rank, colorClass }) => {
       if (!rank) return null;
       let color = 'text-zinc-600';
       if (rank === 1) color = 'text-yellow-500';
       if (rank === 2) color = 'text-zinc-400';
       if (rank === 3) color = 'text-amber-700';
 
-      return <span className={`text-xs font-black ml-2 ${color}`}>#{rank}</span>;
+      // Allow passing external margins/classes if needed, but default is just color + font
+      return <span className={`text-xs font-black ${color} ${colorClass || ''}`}>#{rank}</span>;
     };
 
     return (
@@ -310,10 +481,17 @@ export default function HeadToHeadCard({
         <div className="flex items-center gap-4">
           {/* USER A VALUE */}
           <div
-            className={`w-32 text-right font-bold text-sm flex items-center justify-end ${winA ? userColor.text : 'text-zinc-500'}`}
+            className={`w-32 text-right font-bold text-sm flex items-center justify-end gap-3 ${winA ? userColor.text : 'text-zinc-500'}`}
           >
             <RankBadge rank={rankA} />
-            <span className="ml-2 tabular-nums">{format(valueA)}</span>
+            <div className="flex flex-col items-end">
+              {nameA && (
+                <span className="text-xs font-bold text-white/90 leading-tight mb-0.5 max-w-[120px] truncate">
+                  {nameA}
+                </span>
+              )}
+              <span className="tabular-nums">{format(valueA)}</span>
+            </div>
           </div>
 
           {/* BAR */}
@@ -343,9 +521,16 @@ export default function HeadToHeadCard({
 
           {/* USER B VALUE */}
           <div
-            className={`w-32 text-left font-bold text-sm flex items-center justify-start ${winB ? rivalColor.text : 'text-zinc-500'}`}
+            className={`w-32 text-left font-bold text-sm flex items-center justify-start gap-3 ${winB ? rivalColor.text : 'text-zinc-500'}`}
           >
-            <span className="mr-2 tabular-nums">{format(valueB)}</span>
+            <div className="flex flex-col items-start">
+              {nameB && (
+                <span className="text-xs font-bold text-white/90 leading-tight mb-0.5 max-w-[120px] truncate">
+                  {nameB}
+                </span>
+              )}
+              <span className="tabular-nums">{format(valueB)}</span>
+            </div>
             <RankBadge rank={rankB} />
           </div>
         </div>
@@ -514,6 +699,25 @@ export default function HeadToHeadCard({
               <SectionHeader title="Estadísticas Generales" icon={Trophy} color="text-yellow-400" />
               <div className="space-y-0.5">
                 <ComparisonRow
+                  label="Victorias de Jornada"
+                  info="Número total de jornadas *ganadas* (1º puesto)"
+                  valueA={stats.adv.user.dominance?.wins || 0}
+                  rankA={stats.adv.user.dominance?.rank}
+                  valueB={stats.adv.rival.dominance?.wins || 0}
+                  rankB={stats.adv.rival.dominance?.rank}
+                  highlightColor="text-yellow-400"
+                />
+                <ComparisonRow
+                  label="Media de Puntos"
+                  info="Promedio de puntos obtenidos por jornada"
+                  valueA={stats.general.user.avgPoints.value}
+                  rankA={stats.general.user.avgPoints.rank}
+                  valueB={stats.general.rival.avgPoints.value}
+                  rankB={stats.general.rival.avgPoints.rank}
+                  format={(v) => v.toFixed(1)}
+                  highlightColor="text-yellow-400"
+                />
+                <ComparisonRow
                   label="Puntos Totales"
                   info="Puntos fantasy *acumulados* en toda la temporada"
                   valueA={stats.general.user.totalPoints.value}
@@ -533,6 +737,16 @@ export default function HeadToHeadCard({
                   format={(v) => (v / 1000000).toFixed(1) + 'M'}
                   highlightColor="text-yellow-400"
                 />
+
+                <ComparisonRow
+                  label="Mejor Jugador"
+                  info="Jugador de la plantilla actual con *más puntos*"
+                  valueA={stats.general.user.bestPlayer.points}
+                  nameA={stats.general.user.bestPlayer.name}
+                  valueB={stats.general.rival.bestPlayer.points}
+                  nameB={stats.general.rival.bestPlayer.name}
+                  highlightColor="text-yellow-400"
+                />
               </div>
             </div>
 
@@ -546,24 +760,30 @@ export default function HeadToHeadCard({
                 <ComparisonRow
                   label="Eficiencia Media"
                   info="Porcentaje medio de puntos obtenidos sobre el *máximo posible (Ideal)*"
-                  valueA={stats.rounds.user.avgEff}
-                  valueB={stats.rounds.rival.avgEff}
+                  valueA={stats.rounds.user.avgEff.value}
+                  rankA={stats.rounds.user.avgEff.rank}
+                  valueB={stats.rounds.rival.avgEff.value}
+                  rankB={stats.rounds.rival.avgEff.rank}
                   format={(v) => v.toFixed(1) + '%'}
                   highlightColor="text-blue-400"
                 />
                 <ComparisonRow
                   label="Mejor Puntuación"
                   info="*Máxima puntuación* conseguida en una sola jornada"
-                  valueA={stats.rounds.user.best}
-                  valueB={stats.rounds.rival.best}
+                  valueA={stats.rounds.user.best.value}
+                  rankA={stats.rounds.user.best.rank}
+                  valueB={stats.rounds.rival.best.value}
+                  rankB={stats.rounds.rival.best.rank}
                   highlightColor="text-blue-400"
                 />
                 <ComparisonRow
                   label="Forma Reciente"
                   subLabel="Media ult. 5"
                   info="Promedio de puntos en las *últimas 5 jornadas*"
-                  valueA={stats.form.user}
-                  valueB={stats.form.rival}
+                  valueA={stats.form.user.value}
+                  rankA={stats.form.user.rank}
+                  valueB={stats.form.rival.value}
+                  rankB={stats.form.rival.rank}
                   format={(v) => v.toFixed(1)}
                   highlightColor="text-blue-400"
                 />
@@ -600,6 +820,7 @@ export default function HeadToHeadCard({
                 )}
                 <ComparisonRow
                   label="Jornadas Ganadas"
+                  info="Veces que has obtenido la *mayor puntuación* en la porra de una jornada"
                   valueA={stats.preds.user.victories.value}
                   rankA={stats.preds.user.victories.rank}
                   valueB={stats.preds.rival.victories.value}
@@ -637,39 +858,27 @@ export default function HeadToHeadCard({
             </div>
 
             <div>
-              <SectionHeader title="Capitán y Localía" icon={Banknote} color="text-emerald-400" />
+              <SectionHeader title="Gestión de Capitán" icon={Brain} color="text-pink-400" />
               <div className="space-y-0.5">
                 <ComparisonRow
                   label="Puntos de Capitán"
                   subLabel="Total Extra"
                   info="Puntos *extra* generados por el *bonus de capitán*"
-                  valueA={stats.extras.user.captain.extra_points || 0}
-                  valueB={stats.extras.rival.captain.extra_points || 0}
-                  highlightColor="text-emerald-400"
+                  valueA={stats.extras.user.captain.extra_points.value || 0}
+                  rankA={stats.extras.user.captain.extra_points.rank}
+                  valueB={stats.extras.rival.captain.extra_points.value || 0}
+                  rankB={stats.extras.rival.captain.extra_points.rank}
+                  highlightColor="text-pink-400"
                 />
                 <ComparisonRow
                   label="Media Capitán"
                   info="Promedio total *(base + bonus)* del jugador capitán"
-                  valueA={stats.extras.user.captain.avg_points || 0}
-                  valueB={stats.extras.rival.captain.avg_points || 0}
+                  valueA={stats.extras.user.captain.avg_points.value || 0}
+                  rankA={stats.extras.user.captain.avg_points.rank}
+                  valueB={stats.extras.rival.captain.avg_points.value || 0}
+                  rankB={stats.extras.rival.captain.avg_points.rank}
                   format={(v) => v.toFixed(1)}
-                  highlightColor="text-emerald-400"
-                />
-                <ComparisonRow
-                  label="Media en Casa"
-                  info="Rendimiento promedio de tu plantilla actual jugando como *LOCAL*"
-                  valueA={stats.extras.user.homeAway.avg_home || 0}
-                  valueB={stats.extras.rival.homeAway.avg_home || 0}
-                  format={(v) => v.toFixed(1)}
-                  highlightColor="text-emerald-400"
-                />
-                <ComparisonRow
-                  label="Media Fuera"
-                  info="Rendimiento promedio de tu plantilla actual jugando como *VISITANTE*"
-                  valueA={stats.extras.user.homeAway.avg_away || 0}
-                  valueB={stats.extras.rival.homeAway.avg_away || 0}
-                  format={(v) => v.toFixed(1)}
-                  highlightColor="text-emerald-400"
+                  highlightColor="text-pink-400"
                 />
               </div>
             </div>
@@ -682,10 +891,12 @@ export default function HeadToHeadCard({
               <div className="space-y-0.5">
                 <ComparisonRow
                   label="Jornadas Perfectas"
-                  subLabel="Eficiencia > 99%"
-                  info="Rondas donde obtuviste el *99% o más* de tus puntos posibles"
-                  valueA={stats.rounds.user.perfectRounds}
-                  valueB={stats.rounds.rival.perfectRounds}
+                  subLabel="Eficiencia > 95%"
+                  info="Rondas donde obtuviste el *95% o más* de tus puntos posibles"
+                  valueA={stats.rounds.user.perfectRounds.value}
+                  rankA={stats.rounds.user.perfectRounds.rank}
+                  valueB={stats.rounds.rival.perfectRounds.value}
+                  rankB={stats.rounds.rival.perfectRounds.rank}
                   highlightColor="text-orange-400"
                 />
                 <ComparisonRow
@@ -715,8 +926,10 @@ export default function HeadToHeadCard({
                   label="Puntos Perdidos"
                   subLabel="Menos es mejor"
                   info="Total de puntos dejados en el *banquillo* (Ideal - Actual)"
-                  valueA={stats.rounds.user.pointsLost}
-                  valueB={stats.rounds.rival.pointsLost}
+                  valueA={stats.rounds.user.pointsLost.value}
+                  rankA={stats.rounds.user.pointsLost.rank}
+                  valueB={stats.rounds.rival.pointsLost.value}
+                  rankB={stats.rounds.rival.pointsLost.rank}
                   inverse={true}
                   format={(v) => Math.round(v)}
                   highlightColor="text-orange-400"
@@ -744,7 +957,7 @@ export default function HeadToHeadCard({
             </div>
 
             <div>
-              <SectionHeader title="Dominio y Competitividad" icon={Zap} color="text-rose-400" />
+              <SectionHeader title="Dominio y Competitividad" icon={Zap} color="text-emerald-400" />
               <div className="space-y-0.5">
                 <ComparisonRow
                   label="Margen de Victoria"
@@ -755,7 +968,7 @@ export default function HeadToHeadCard({
                   valueB={parseFloat(stats.adv.rival.dominance?.avg_margin || 0)}
                   rankB={stats.adv.rival.dominance?.rank}
                   format={(v) => '+' + v.toFixed(1)}
-                  highlightColor="text-rose-400"
+                  highlightColor="text-emerald-400"
                 />
                 <ComparisonRow
                   label="Rendimiento vs Liga"
@@ -766,7 +979,7 @@ export default function HeadToHeadCard({
                   valueB={parseFloat(stats.adv.rival.leaguePerf?.avg_diff || 0)}
                   rankB={stats.adv.rival.leaguePerf?.rank}
                   format={(v) => (v > 0 ? '+' : '') + v.toFixed(1)}
-                  highlightColor="text-rose-400"
+                  highlightColor="text-emerald-400"
                 />
                 <ComparisonRow
                   label="Gap Teórico"
@@ -777,7 +990,7 @@ export default function HeadToHeadCard({
                   valueB={parseFloat(stats.adv.rival.gap?.pct || 0)}
                   rankB={stats.adv.rival.gap?.rank}
                   format={(v) => v.toFixed(1) + '%'}
-                  highlightColor="text-rose-400"
+                  highlightColor="text-emerald-400"
                 />
               </div>
             </div>
@@ -789,7 +1002,9 @@ export default function HeadToHeadCard({
                   label="Racha Actual"
                   info="Jornadas consecutivas (ACTIVAS) sumando más de *175 puntos*"
                   valueA={stats.adv.user.streak?.current_streak || 0}
+                  rankA={stats.adv.user.streak?.currentRank}
                   valueB={stats.adv.rival.streak?.current_streak || 0}
+                  rankB={stats.adv.rival.streak?.currentRank}
                   highlightColor="text-red-400"
                 />
                 <ComparisonRow
@@ -823,13 +1038,33 @@ export default function HeadToHeadCard({
                 />
                 <ComparisonRow
                   label="Pecho Frío (Bottler)"
-                  subLabel="Score (Menos es mejor)"
-                  info="Índice que mide *segundas y terceras posiciones* sin victorias"
+                  subLabel="Score"
+                  info="Índice que mide *segundas y terceras posiciones* sin victorias (Menos es mejor)"
                   valueA={stats.adv.user.bottler?.bottler_score || 0}
                   rankA={stats.adv.user.bottler?.rank}
                   valueB={stats.adv.rival.bottler?.bottler_score || 0}
                   rankB={stats.adv.rival.bottler?.rank}
                   inverse={true}
+                  highlightColor="text-red-400"
+                />
+                <ComparisonRow
+                  label="El Pupas (Jinx)"
+                  subLabel="Rondas Malditas"
+                  info="Rondas con puntuación *superior a la media* pero acabando en la *mitad inferior*"
+                  valueA={stats.adv.user.jinx?.jinxed_count || 0}
+                  rankA={stats.adv.user.jinx?.rank}
+                  valueB={stats.adv.rival.jinx?.jinxed_count || 0}
+                  rankB={stats.adv.rival.jinx?.rank}
+                  highlightColor="text-red-400"
+                />
+                <ComparisonRow
+                  label="Rompecorazones"
+                  subLabel="Pts Perdidos"
+                  info="Puntos perdidos en jornadas donde quedaste *2º o 3º* (Casi ganas)"
+                  valueA={stats.adv.user.heartbreaker?.total_diff || 0}
+                  rankA={stats.adv.user.heartbreaker?.rank}
+                  valueB={stats.adv.rival.heartbreaker?.total_diff || 0}
+                  rankB={stats.adv.rival.heartbreaker?.rank}
                   highlightColor="text-red-400"
                 />
                 <ComparisonRow
