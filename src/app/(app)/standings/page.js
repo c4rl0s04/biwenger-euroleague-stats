@@ -61,7 +61,12 @@ export default function ClasificacionPage() {
         description="Análisis detallado de la clasificación, tendencias y estadísticas de rendimiento."
       />
       {/* Section: Overview and Standings */}
-      <Section title="Clasificación General" delay={0} background="section-base">
+      <Section
+        title="Clasificación General"
+        id="general-standings"
+        delay={0}
+        background="section-base"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <FullStandingsCard />
           <LeagueStatsCard />
@@ -69,23 +74,41 @@ export default function ClasificacionPage() {
       </Section>
 
       {/* Section: Round Winners */}
-      <Section title="Ganadores de Jornada" delay={100} background="section-raised">
+      <Section
+        title="Ganadores de Jornada"
+        id="round-winners"
+        delay={100}
+        background="section-raised"
+      >
         <div className="space-y-6">
           <RoundWinnersCard />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DominanceCard />
+            <div id="dominance-card">
+              <DominanceCard />
+            </div>
             <RoundHeatmapCard />
           </div>
         </div>
       </Section>
 
       {/* Section: Trends & Momentum */}
-      <Section title="Tendencias y Momento (Trends)" delay={150} background="section-base">
+      <Section
+        title="Tendencias y Momento (Trends)"
+        id="trends"
+        delay={150}
+        background="section-base"
+      >
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <HeatCheckCard />
-            <TheHunterCard />
-            <StreaksCard />
+            <div id="heat-check-card">
+              <HeatCheckCard />
+            </div>
+            <div id="hunter-card">
+              <TheHunterCard />
+            </div>
+            <div id="streaks-card">
+              <StreaksCard />
+            </div>
           </div>
           <PositionEvolutionCard />
           <RollingAverageCard />
@@ -101,40 +124,75 @@ export default function ClasificacionPage() {
       </Section>
 
       {/* Section: Performance Analysis */}
-      <Section title="Análisis de Rendimiento" delay={250} background="section-base">
+      <Section
+        title="Análisis de Rendimiento"
+        id="performance"
+        delay={250}
+        background="section-base"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          <FloorCeilingCard />
-          <VolatilityCard />
+          <div id="floor-ceiling-card">
+            <FloorCeilingCard />
+          </div>
+          <div id="volatility-card">
+            <VolatilityCard />
+          </div>
           <PointDistributionCard />
-          <LeaguePerformanceCard />
+          <div id="league-perf-card">
+            <LeaguePerformanceCard />
+          </div>
         </div>
       </Section>
 
       {/* Section: Efficiency & Consistency */}
-      <Section title="Eficiencia y Consistencia" delay={300} background="section-raised">
+      <Section
+        title="Eficiencia y Consistencia"
+        id="efficiency"
+        delay={300}
+        background="section-raised"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <TheoreticalGapCard />
-          <ReliabilityCard />
+          <div id="gap-card">
+            <TheoreticalGapCard />
+          </div>
+          <div id="reliability-card">
+            <ReliabilityCard />
+          </div>
           <EfficiencyCard />
         </div>
       </Section>
 
       {/* Section: League Stats */}
-      <Section title="Estadísticas de Liga" delay={350} background="section-base">
+      <Section title="Estadísticas de Liga" id="league-stats" delay={350} background="section-base">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           <PlacementStatsCard />
           <AllPlayAllCard />
-          <RivalryMatrixCard />
+          <div id="rivalry-matrix-card" className="md:col-span-2 lg:col-span-2">
+            <RivalryMatrixCard />
+          </div>
         </div>
       </Section>
 
       {/* Section: Bad Luck */}
-      <Section title="Mala Suerte y Curiosidades" delay={400} background="section-raised">
+      <Section
+        title="Mala Suerte y Curiosidades"
+        id="bad-luck"
+        delay={400}
+        background="section-raised"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <HeartbreakersCard />
-          <NoGloryCard />
-          <JinxCard />
-          <BottlerCard />
+          <div id="heartbreaker-card">
+            <HeartbreakersCard />
+          </div>
+          <div id="no-glory-card">
+            <NoGloryCard />
+          </div>
+          <div id="jinx-card">
+            <JinxCard />
+          </div>
+          <div id="bottler-card">
+            <BottlerCard />
+          </div>
         </div>
       </Section>
     </div>

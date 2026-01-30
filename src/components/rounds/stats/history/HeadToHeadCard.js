@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   ChevronDown,
   Trophy,
@@ -12,6 +13,7 @@ import {
   Banknote,
   Flame,
   MapPin,
+  ArrowUpRight,
 } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
@@ -402,6 +404,7 @@ export default function HeadToHeadCard({
     format = (v) => v,
     inverse = false,
     highlightColor = 'text-indigo-400',
+    href = null,
   }) => {
     const winA = inverse
       ? parseFloat(valueA) < parseFloat(valueB)
@@ -443,6 +446,19 @@ export default function HeadToHeadCard({
       });
     };
 
+    // Label Element - wrapped in Link if href exists
+    const LabelElement = () => (
+      <div className="flex items-center gap-1 group/link cursor-pointer">
+        <span className="text-xs uppercase tracking-wider text-zinc-500 font-bold">{label}</span>
+        {href && (
+          <ArrowUpRight
+            size={10}
+            className="text-zinc-600 group-hover/link:text-zinc-300 transition-colors opacity-0 group-hover/link:opacity-100"
+          />
+        )}
+      </div>
+    );
+
     const RankBadge = ({ rank, colorClass }) => {
       if (!rank) return null;
       let color = 'text-zinc-600';
@@ -458,16 +474,30 @@ export default function HeadToHeadCard({
       <div className="py-2 border-b border-white/5 last:border-0 px-4 rounded-lg hover:bg-white/5 transition-colors group">
         {/* UPPER LABEL AREA */}
         <div className="flex flex-col items-center justify-center mb-1 relative">
-          <div className="flex items-center gap-1.5 justify-center group/label cursor-help">
-            <span className="text-[11px] uppercase tracking-wider text-white font-bold group-hover:text-white transition-colors text-center">
-              {label}
-            </span>
+          <div className="flex items-center gap-1.5 justify-center group/label cursor-help relative z-10">
+            {href ? (
+              <Link
+                href={href}
+                className="flex items-center gap-1 group/link hover:opacity-80 transition-opacity"
+              >
+                <span className="text-[11px] uppercase tracking-wider text-white font-bold transition-colors text-center">
+                  {label}
+                </span>
+                <ArrowUpRight
+                  size={10}
+                  className="text-zinc-400 group-hover/link:text-white transition-colors"
+                />
+              </Link>
+            ) : (
+              <span className="text-[11px] uppercase tracking-wider text-white font-bold group-hover:text-white transition-colors text-center">
+                {label}
+              </span>
+            )}
+
             {info && (
-              <div className="relative">
-                <div className="opacity-0 group-hover/label:opacity-100 transition-opacity absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-zinc-950 border border-white/10 rounded-xl p-4 text-xs text-zinc-300 shadow-2xl pointer-events-none z-50 text-center leading-relaxed">
-                  {renderInfo(info)}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-zinc-950" />
-                </div>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-zinc-950 border border-white/10 rounded-xl p-4 text-xs text-zinc-300 shadow-2xl opacity-0 group-hover/label:opacity-100 pointer-events-none transition-opacity z-50 text-center leading-relaxed">
+                {renderInfo(info)}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-zinc-950" />
               </div>
             )}
           </div>
@@ -706,6 +736,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.dominance?.wins || 0}
                   rankB={stats.adv.rival.dominance?.rank}
                   highlightColor="text-yellow-400"
+                  href="/standings#round-winners"
                 />
                 <ComparisonRow
                   label="Media de Puntos"
@@ -716,6 +747,7 @@ export default function HeadToHeadCard({
                   rankB={stats.general.rival.avgPoints.rank}
                   format={(v) => v.toFixed(1)}
                   highlightColor="text-yellow-400"
+                  href="/standings#general-standings"
                 />
                 <ComparisonRow
                   label="Puntos Totales"
@@ -726,6 +758,7 @@ export default function HeadToHeadCard({
                   rankB={stats.general.rival.totalPoints.rank}
                   format={(v) => v.toLocaleString()}
                   highlightColor="text-yellow-400"
+                  href="/standings#general-standings"
                 />
                 <ComparisonRow
                   label="Valor de Plantilla"
@@ -736,6 +769,7 @@ export default function HeadToHeadCard({
                   rankB={stats.general.rival.teamValue.rank}
                   format={(v) => (v / 1000000).toFixed(1) + 'M'}
                   highlightColor="text-yellow-400"
+                  href="/standings#general-standings"
                 />
 
                 <ComparisonRow
@@ -766,6 +800,7 @@ export default function HeadToHeadCard({
                   rankB={stats.rounds.rival.avgEff.rank}
                   format={(v) => v.toFixed(1) + '%'}
                   highlightColor="text-blue-400"
+                  href="/standings#efficiency"
                 />
                 <ComparisonRow
                   label="Mejor Puntuación"
@@ -775,6 +810,7 @@ export default function HeadToHeadCard({
                   valueB={stats.rounds.rival.best.value}
                   rankB={stats.rounds.rival.best.rank}
                   highlightColor="text-blue-400"
+                  href="/rounds"
                 />
                 <ComparisonRow
                   label="Forma Reciente"
@@ -786,6 +822,7 @@ export default function HeadToHeadCard({
                   rankB={stats.form.rival.rank}
                   format={(v) => v.toFixed(1)}
                   highlightColor="text-blue-400"
+                  href="/rounds"
                 />
               </div>
             </div>
@@ -804,6 +841,7 @@ export default function HeadToHeadCard({
                   valueB={stats.preds.rival.hits.value}
                   rankB={stats.preds.rival.hits.rank}
                   highlightColor="text-purple-400"
+                  href="/predictions"
                 />
                 {/* Only show accuracy if both have participated */}
                 {stats.preds.user.participations > 0 && stats.preds.rival.participations > 0 && (
@@ -816,6 +854,7 @@ export default function HeadToHeadCard({
                     rankB={stats.preds.rival.accuracy.rank}
                     format={(v) => v.toFixed(2)}
                     highlightColor="text-purple-400"
+                    href="/predictions"
                   />
                 )}
                 <ComparisonRow
@@ -826,6 +865,7 @@ export default function HeadToHeadCard({
                   valueB={stats.preds.rival.victories.value}
                   rankB={stats.preds.rival.victories.rank}
                   highlightColor="text-purple-400"
+                  href="/predictions"
                 />
                 <ComparisonRow
                   label="Factor Clutch"
@@ -837,6 +877,7 @@ export default function HeadToHeadCard({
                   rankB={stats.preds.rival.clutch.rank}
                   format={(v) => v.toFixed(1)}
                   highlightColor="text-purple-400"
+                  href="/predictions"
                 />
                 <ComparisonRow
                   label="Plenos (10/10)"
@@ -844,6 +885,7 @@ export default function HeadToHeadCard({
                   valueA={stats.preds.user.perfect10s}
                   valueB={stats.preds.rival.perfect10s}
                   highlightColor="text-purple-400"
+                  href="/predictions"
                 />
                 <ComparisonRow
                   label="Roscos (Último)"
@@ -853,6 +895,7 @@ export default function HeadToHeadCard({
                   valueB={stats.preds.rival.roscos}
                   inverse={true}
                   highlightColor="text-purple-400"
+                  href="/predictions"
                 />
               </div>
             </div>
@@ -869,6 +912,7 @@ export default function HeadToHeadCard({
                   valueB={stats.extras.rival.captain.extra_points.value || 0}
                   rankB={stats.extras.rival.captain.extra_points.rank}
                   highlightColor="text-pink-400"
+                  href="/dashboard"
                 />
                 <ComparisonRow
                   label="Media Capitán"
@@ -879,6 +923,7 @@ export default function HeadToHeadCard({
                   rankB={stats.extras.rival.captain.avg_points.rank}
                   format={(v) => v.toFixed(1)}
                   highlightColor="text-pink-400"
+                  href="/dashboard"
                 />
               </div>
             </div>
@@ -898,6 +943,7 @@ export default function HeadToHeadCard({
                   valueB={stats.rounds.rival.perfectRounds.value}
                   rankB={stats.rounds.rival.perfectRounds.rank}
                   highlightColor="text-orange-400"
+                  href="/rounds"
                 />
                 <ComparisonRow
                   label="Fiabilidad"
@@ -909,6 +955,7 @@ export default function HeadToHeadCard({
                   rankB={stats.adv.rival.reliability?.rank}
                   format={(v) => v.toFixed(1) + '%'}
                   highlightColor="text-orange-400"
+                  href="/standings#reliability-card"
                 />
                 <ComparisonRow
                   label="Consistencia (Desviación)"
@@ -921,6 +968,7 @@ export default function HeadToHeadCard({
                   inverse={true}
                   format={(v) => v.toFixed(1)}
                   highlightColor="text-orange-400"
+                  href="/standings#volatility-card"
                 />
                 <ComparisonRow
                   label="Puntos Perdidos"
@@ -933,6 +981,7 @@ export default function HeadToHeadCard({
                   inverse={true}
                   format={(v) => Math.round(v)}
                   highlightColor="text-orange-400"
+                  href="/rounds"
                 />
                 <div className="pt-2"></div>
                 <ComparisonRow
@@ -943,6 +992,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.floorCeiling?.floor || 0}
                   rankB={stats.adv.rival.floorCeiling?.rank}
                   highlightColor="text-orange-400"
+                  href="/standings#floor-ceiling-card"
                 />
                 <ComparisonRow
                   label="Techo (Puntuación Máxima)"
@@ -952,6 +1002,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.floorCeiling?.ceiling || 0}
                   rankB={stats.adv.rival.floorCeiling?.rank}
                   highlightColor="text-orange-400"
+                  href="/standings#floor-ceiling-card"
                 />
               </div>
             </div>
@@ -969,6 +1020,7 @@ export default function HeadToHeadCard({
                   rankB={stats.adv.rival.dominance?.rank}
                   format={(v) => '+' + v.toFixed(1)}
                   highlightColor="text-emerald-400"
+                  href="/standings#dominance-card"
                 />
                 <ComparisonRow
                   label="Rendimiento vs Liga"
@@ -980,6 +1032,7 @@ export default function HeadToHeadCard({
                   rankB={stats.adv.rival.leaguePerf?.rank}
                   format={(v) => (v > 0 ? '+' : '') + v.toFixed(1)}
                   highlightColor="text-emerald-400"
+                  href="/standings#league-perf-card"
                 />
                 <ComparisonRow
                   label="Gap Teórico"
@@ -991,6 +1044,7 @@ export default function HeadToHeadCard({
                   rankB={stats.adv.rival.gap?.rank}
                   format={(v) => v.toFixed(1) + '%'}
                   highlightColor="text-emerald-400"
+                  href="/standings#gap-card"
                 />
               </div>
             </div>
@@ -1006,6 +1060,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.streak?.current_streak || 0}
                   rankB={stats.adv.rival.streak?.currentRank}
                   highlightColor="text-red-400"
+                  href="/standings#streaks-card"
                 />
                 <ComparisonRow
                   label="Racha Histórica (Mejor)"
@@ -1015,6 +1070,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.streak?.longest_streak || 0}
                   rankB={stats.adv.rival.streak?.rank}
                   highlightColor="text-red-400"
+                  href="/standings#streaks-card"
                 />
                 <ComparisonRow
                   label="Racha de Fuego"
@@ -1025,6 +1081,7 @@ export default function HeadToHeadCard({
                   rankB={stats.adv.rival.heat?.rank}
                   format={(v) => v.toFixed(0)}
                   highlightColor="text-red-400"
+                  href="/standings#heat-check-card"
                 />
                 <ComparisonRow
                   label="Cazador (vs Líder)"
@@ -1035,6 +1092,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.hunter?.gained || 0}
                   rankB={stats.adv.rival.hunter?.rank}
                   highlightColor="text-red-400"
+                  href="/standings#hunter-card"
                 />
                 <ComparisonRow
                   label="Pecho Frío (Bottler)"
@@ -1046,6 +1104,7 @@ export default function HeadToHeadCard({
                   rankB={stats.adv.rival.bottler?.rank}
                   inverse={true}
                   highlightColor="text-red-400"
+                  href="/standings#bottler-card"
                 />
                 <ComparisonRow
                   label="El Pupas (Jinx)"
@@ -1056,6 +1115,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.jinx?.jinxed_count || 0}
                   rankB={stats.adv.rival.jinx?.rank}
                   highlightColor="text-red-400"
+                  href="/standings#jinx-card"
                 />
                 <ComparisonRow
                   label="Rompecorazones"
@@ -1066,6 +1126,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.heartbreaker?.total_diff || 0}
                   rankB={stats.adv.rival.heartbreaker?.rank}
                   highlightColor="text-red-400"
+                  href="/standings#heartbreaker-card"
                 />
                 <ComparisonRow
                   label="Mala Suerte (No Glory)"
@@ -1076,6 +1137,7 @@ export default function HeadToHeadCard({
                   valueB={stats.adv.rival.noGlory?.total_points_no_glory || 0}
                   rankB={stats.adv.rival.noGlory?.rank}
                   highlightColor="text-red-400"
+                  href="/standings#no-glory-card"
                 />
               </div>
             </div>
