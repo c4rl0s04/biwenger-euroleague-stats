@@ -114,4 +114,3 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
     </div>
   );
 }
-
