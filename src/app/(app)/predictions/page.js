@@ -1,4 +1,4 @@
-import { fetchPredictionsStats } from '@/lib/services/predictionsService';
+import { fetchPredictionsStats } from '@/lib/services/features/predictionsService';
 import PredictionsClient from '@/components/predictions/PredictionsClient';
 import { PageHeader } from '@/components/ui';
 
