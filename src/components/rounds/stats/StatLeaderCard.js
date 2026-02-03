@@ -86,7 +86,10 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
 
           {/* Player Info */}
           <div className="flex-1 flex flex-col justify-center my-1">
-            <div className="text-base font-bold text-white leading-tight line-clamp-2 break-words" title={player.name}>
+            <div
+              className="text-base font-bold text-white leading-tight line-clamp-2 break-words"
+              title={player.name}
+            >
               {player.name}
             </div>
             <div className="text-[11px] text-white/50">{player.team_name}</div>
