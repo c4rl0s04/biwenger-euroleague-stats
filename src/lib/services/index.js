@@ -86,13 +86,13 @@ export {
 export { fetchTeamProfile } from './core/teamService.js';
 
 // Rounds Service
-export { 
-  fetchRoundsList, 
-  fetchUserLineup, 
-  getCurrentRoundState, 
+export {
+  fetchRoundsList,
+  fetchUserLineup,
+  getCurrentRoundState,
   getUserPerformanceHistoryService,
   fetchRoundStandings,
-  fetchRoundCompleteData
+  fetchRoundCompleteData,
 } from './core/roundsService.js';
 
 // Compare Service

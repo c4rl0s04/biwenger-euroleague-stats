@@ -4,12 +4,7 @@
  */
 
 import { getCurrentRoundState } from '../core/roundsService.js';
-import { 
-  getRoundById, 
-  getLastRound,
-  fetchMatchesForRound, 
-  fetchUserPlayers 
-} from '../../db';
+import { getRoundById, getLastRound, fetchMatchesForRound, fetchUserPlayers } from '../../db';
 import { getTeamColor } from '../../constants/teamColors.js';
 
 export async function getUserScheduleService(userId, targetRoundId = null) {
@@ -46,7 +41,7 @@ export async function getUserScheduleService(userId, targetRoundId = null) {
     // 2. Fetch Data in Parallel (Optimization)
     const [matches, userPlayers] = await Promise.all([
       fetchMatchesForRound(targetRound.round_id),
-      fetchUserPlayers(userId)
+      fetchUserPlayers(userId),
     ]);
 
     if (userPlayers.length === 0) {
@@ -89,7 +84,6 @@ export async function getUserScheduleService(userId, targetRoundId = null) {
       matches: schedule,
       total_players: schedule.reduce((acc, m) => acc + m.user_players.length, 0),
     };
-
   } catch (error) {
     console.error('Error in getUserScheduleService:', error);
     return { found: false, message: error.message };

@@ -3,7 +3,6 @@
  * Business logic layer for comparison-related operations
  */
 
-
 import { db } from '@/lib/db/client';
 import { getExtendedStandings as getStandings, getPorrasStats } from '@/lib/db';
 import { getUserPerformanceHistoryService } from '@/lib/services/core/roundsService';
@@ -54,7 +53,6 @@ import {
   fetchTheoreticalGapStats,
   fetchRivalryMatrixStats,
   fetchLeagueComparisonStats,
-
 } from '@/lib/services/app/standingsService';
 import { fetchCaptainStats, fetchHomeAwayStats } from '@/lib/services/app/dashboardService';
 

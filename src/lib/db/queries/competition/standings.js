@@ -426,7 +426,7 @@ export async function getSimpleStandings() {
  * @returns {Promise<Object>} Leader comparison
  */
 export async function getLeaderComparison(userId) {
-  // Use the extended standings for better data, or simple if sufficient. 
+  // Use the extended standings for better data, or simple if sufficient.
   // Original Used getStandings (Simple). Let's use getSimpleStandings here to match logic exactly.
   const standings = await getSimpleStandings();
   const leader = standings[0];
@@ -468,4 +468,3 @@ export async function getLeagueAveragePoints() {
   const result = (await db.query(query)).rows[0];
   return result ? parseFloat(result.avg_points) : 0;
 }
-

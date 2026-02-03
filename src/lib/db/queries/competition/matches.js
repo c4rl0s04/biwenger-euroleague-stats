@@ -1,6 +1,5 @@
 import { db } from '../../client.js';
 
-
 export async function getMatchesGroupedByRound() {
   const query = `
     SELECT 

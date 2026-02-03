@@ -618,4 +618,3 @@ export async function getStatLeaders(type = 'points') {
     return [];
   }
 }
-

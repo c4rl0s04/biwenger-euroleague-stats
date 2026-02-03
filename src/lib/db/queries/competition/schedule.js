@@ -1,7 +1,6 @@
 import { db } from '../../client.js';
 import { NEXT_ROUND_CTE } from '../../sql_utils.js';
 
-
 export async function getScheduleRounds() {
   try {
     const query = `
@@ -38,7 +37,6 @@ export async function getScheduleRounds() {
     return [];
   }
 }
-
 
 // Helper DAO: Get round by ID
 export async function getRoundById(roundId) {
@@ -92,4 +90,3 @@ export async function fetchUserPlayers(userId) {
   `;
   return (await db.query(query, [userId])).rows;
 }
-
