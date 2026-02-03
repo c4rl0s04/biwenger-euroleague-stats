@@ -52,11 +52,11 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
   if (!player) {
     return (
       <div
-        className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${config.gradient} ${config.border} border p-4 h-full opacity-50`}
+        className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${config.gradient} ${config.border} border p-3 h-full opacity-50`}
       >
         <div className={`flex items-center gap-2 ${config.iconColor} mb-2`}>
           <Icon size={16} />
-          <span className="text-xs font-bold uppercase tracking-wider">{config.title}</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">{config.title}</span>
         </div>
         <div className="text-sm text-white/30 italic">Sin datos disponibles</div>
       </div>
@@ -74,34 +74,34 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
   return (
     <div
       onClick={handleClick}
-      className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${config.gradient} ${config.border} border p-4 h-full cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg`}
+      className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${config.gradient} ${config.border} border p-3 h-full cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg`}
     >
-      <div className="flex items-start justify-between h-full">
-        <div className="flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between h-full gap-2">
+        <div className="flex flex-col justify-between h-full flex-1 min-w-0">
           {/* Header */}
           <div className={`flex items-center gap-2 ${config.iconColor} mb-1`}>
-            <Icon size={16} />
-            <span className="text-xs font-bold uppercase tracking-wider">{config.title}</span>
+            <Icon size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">{config.title}</span>
           </div>
 
           {/* Player Info */}
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="text-lg font-bold text-white leading-tight truncate max-w-[140px]">
+          <div className="flex-1 flex flex-col justify-center my-1">
+            <div className="text-base font-bold text-white leading-tight line-clamp-2 break-words" title={player.name}>
               {player.name}
             </div>
-            <div className="text-xs text-white/50 mb-2">{player.team_name}</div>
+            <div className="text-[11px] text-white/50">{player.team_name}</div>
           </div>
 
           {/* Stat Value */}
           <div className="flex items-baseline gap-1">
-            <span className={`text-3xl font-bold ${config.valueColor}`}>{displayValue}</span>
-            <span className={`text-xs ${config.iconColor}/70`}>{config.unit}</span>
+            <span className={`text-2xl font-bold ${config.valueColor}`}>{displayValue}</span>
+            <span className={`text-[10px] ${config.iconColor}/70`}>{config.unit}</span>
           </div>
         </div>
 
         {/* Player Image - Cropped to show head (same as PlayerCourtCard) */}
         {player.img && (
-          <div className="relative w-16 h-16 rounded-full border-2 border-white/10 overflow-hidden shrink-0 shadow-lg bg-slate-900">
+          <div className="relative w-12 h-12 rounded-full border-2 border-white/10 overflow-hidden shrink-0 shadow-lg bg-slate-900 self-center">
             <div className="relative w-full h-full pt-1 scale-[1.7] origin-top">
               <Image src={player.img} alt={player.name} fill className="object-cover object-top" />
             </div>
@@ -111,3 +111,4 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
     </div>
   );
 }
+
