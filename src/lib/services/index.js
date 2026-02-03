@@ -10,10 +10,7 @@
 export {
   getFullStandings,
   getLeagueOverview,
-  getStandingsPageData,
-  getUserPositionData,
   fetchRoundWinners,
-  fetchPointsProgression,
   fetchValueRanking,
   fetchStreakStats,
   fetchVolatilityStats,
@@ -25,7 +22,20 @@ export {
   fetchJinxStats,
   fetchInitialSquadAnalytics,
   fetchLeagueComparisonStats,
-} from './standingsService.js';
+  fetchPointsProgression,
+  fetchHeatCheckStats,
+  fetchHunterStats,
+  fetchRollingAverageStats,
+  fetchFloorCeilingStats,
+  fetchPointDistributionStats,
+  fetchAllPlayAllStats,
+  fetchDominanceStats,
+  fetchTheoreticalGapStats,
+  fetchHeatmapStats,
+  fetchPositionChangesStats,
+  fetchReliabilityStats,
+  fetchRivalryMatrixStats,
+} from './app/standingsService.js';
 
 // Dashboard Service
 export {
@@ -47,7 +57,7 @@ export {
   fetchTopPlayersByForm,
   fetchCaptainRecommendations,
   fetchNextRound,
-} from './dashboardService.js';
+} from './app/dashboardService.js';
 
 // Player Service
 export {
@@ -59,7 +69,7 @@ export {
   fetchUserRecentRounds,
   fetchUserSquadDetails,
   fetchPlayerStreaks,
-} from './playerService.js';
+} from './core/playerService.js';
 
 // Market Service
 export {
@@ -70,10 +80,26 @@ export {
   fetchMarketTrends,
   fetchRecentTransfers,
   fetchMarketOpportunities,
-} from './marketService.js';
+} from './features/marketService.js';
 
 // Team Service
-export { fetchTeamProfile } from './teamService.js';
+export { fetchTeamProfile } from './core/teamService.js';
 
 // Rounds Service
-export { fetchRoundsList, fetchUserLineup } from './roundsService.js';
+export { 
+  fetchRoundsList, 
+  fetchUserLineup, 
+  getCurrentRoundState, 
+  getUserPerformanceHistoryService,
+  fetchRoundStandings,
+  fetchRoundCompleteData
+} from './core/roundsService.js';
+
+// Compare Service
+export { getCompareData } from './features/compareService.js';
+
+// Matches Service
+export { fetchMatchesGrouped } from './app/matchesService.js';
+
+// Schedule Service
+export { getUserScheduleService } from './app/scheduleService.js';

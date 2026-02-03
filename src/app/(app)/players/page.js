@@ -6,7 +6,7 @@
  * See PAGE_ARCHITECTURE.md section 3 for full layout specification.
  */
 
-import { getAllPlayers } from '@/lib/db/queries/players';
+import { getAllPlayers } from '@/lib/db';
 import PlayersTable from '@/components/players-list/PlayersTable';
 import { PageHeader } from '@/components/ui';
 

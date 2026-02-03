@@ -1,4 +1,4 @@
-import { globalSearch } from '@/lib/db/queries/search';
+import { globalSearch } from '@/lib/db';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export async function GET(request) {

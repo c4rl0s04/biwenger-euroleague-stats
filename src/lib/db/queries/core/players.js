@@ -1,6 +1,6 @@
-import { db } from '../client.js';
-import { CONFIG } from '../../config.js';
-import { FUTURE_MATCH_CONDITION } from '../sql_utils.js';
+import { db } from '../../client.js';
+import { CONFIG } from '../../../config.js';
+import { FUTURE_MATCH_CONDITION } from '../../sql_utils.js';
 
 /**
  * Get top performing players
@@ -29,7 +29,7 @@ export async function getTopPlayers(limit = 6) {
     RecentScores AS (
       SELECT 
         player_id,
-        STRING_AGG(CAST(round_points AS TEXT), ',') as recent_scores
+        STRING_AGG(CAST(round_points AS TEXT), ',' ORDER BY round_id DESC) as recent_scores
       FROM (
         SELECT player_id, round_id, round_points
         FROM PlayerRoundScores
@@ -93,7 +93,7 @@ export async function getTopPlayersByForm(limit = 5, rounds = 3) {
         SUM(os.fantasy_points) as total_points,
         ROUND(SUM(os.fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount), 1) as avg_points,
         COUNT(*) as games_played,
-        STRING_AGG(CAST(os.fantasy_points AS TEXT), ',') as recent_scores
+        STRING_AGG(CAST(os.fantasy_points AS TEXT), ',' ORDER BY os.round_id DESC) as recent_scores
       FROM OrderedStats os
       JOIN players p ON os.player_id = p.id
       LEFT JOIN teams t ON p.team_id = t.id
@@ -497,16 +497,34 @@ export async function getAllPlayers() {
          fantasy_points
        FROM player_round_stats
      ),
+     PlayerAggregates AS (
+       SELECT 
+         player_id,
+         COUNT(*) as played_count,
+         COALESCE(SUM(fantasy_points), 0) as total_points,
+         ROUND(AVG(fantasy_points), 1) as calculated_avg
+       FROM player_round_stats
+       GROUP BY player_id
+     ),
+     RoundDates AS (
+       SELECT round_id, MIN(date) as round_date
+       FROM matches
+       WHERE date IS NOT NULL
+       GROUP BY round_id
+     ),
      RecentScores AS (
        SELECT 
          player_id,
-         STRING_AGG(CAST(fantasy_points AS TEXT), ',') as recent_scores
+         STRING_AGG(CAST(fantasy_points AS TEXT), ',' ORDER BY round_date DESC) as recent_scores
        FROM (
          SELECT 
-           player_id, 
-           fantasy_points,
-           ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY round_id DESC) as rn
-         FROM PlayerRoundScores
+           prs.player_id, 
+           prs.fantasy_points,
+           prs.round_id,
+           rd.round_date,
+           ROW_NUMBER() OVER (PARTITION BY prs.player_id ORDER BY rd.round_date DESC, prs.round_id DESC) as rn
+         FROM PlayerRoundScores prs
+         LEFT JOIN RoundDates rd ON prs.round_id = rd.round_id
        ) sub
        WHERE rn <= 5
        GROUP BY player_id
@@ -526,19 +544,78 @@ export async function getAllPlayers() {
        p.owner_id,
        u.name as owner_name, u.color_index as owner_color_index,
        u.icon as owner_icon,
-       p.puntos as total_points,
-       p.partidos_jugados as played,
-       ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
+       
+       -- Use aggregated stats from player_round_stats as requested
+       COALESCE(pa.total_points, 0) as total_points,
+       COALESCE(pa.played_count, 0) as played,
+       COALESCE(pa.calculated_avg, 0) as average,
+       
        p.status,
        rs.recent_scores
      FROM players p
      LEFT JOIN teams t ON p.team_id = t.id
      LEFT JOIN users u ON p.owner_id = u.id
+     LEFT JOIN PlayerAggregates pa ON p.id = pa.player_id
      LEFT JOIN RecentScores rs ON p.id = rs.player_id
-     ORDER BY p.puntos DESC
+     ORDER BY COALESCE(pa.total_points, 0) DESC
   `;
   return (await db.query(query)).rows.map((p) => ({
     ...p,
+    total_points: parseFloat(p.total_points) || 0,
+    played: parseInt(p.played) || 0,
     average: parseFloat(p.average) || 0,
+    price: parseInt(p.price) || 0,
   }));
 }
+
+/**
+ * Get stat leaders (Top 5)
+ * @param {string} type - Stat type (real_points, rebounds, assists, pir)
+ * @returns {Promise<Array>} List of top players for the stat
+ */
+export async function getStatLeaders(type = 'points') {
+  const columnMap = {
+    real_points: 'points',
+    points: 'points',
+    rebounds: 'rebounds',
+    assists: 'assists',
+    pir: 'valuation',
+  };
+
+  const column = columnMap[type] || 'points';
+
+  // Sanitize column name to prevent SQL injection (though key is mapped above)
+  const query = `
+    SELECT 
+      p.id as player_id,
+      p.name,
+      t.id as team_id,
+      t.name as team,
+      p.owner_id,
+      u.name as owner_name,
+      u.color_index as owner_color_index,
+      SUM(prs.${column}) as value,
+      COUNT(prs.id) as games_played,
+      ROUND(AVG(prs.${column}), 1) as avg_value
+    FROM player_round_stats prs
+    JOIN players p ON prs.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN users u ON p.owner_id = u.id
+    GROUP BY p.id, p.name, t.id, t.name, p.owner_id, u.name, u.color_index
+    HAVING SUM(prs.${column}) > 0
+    ORDER BY value DESC
+    LIMIT 5
+  `;
+
+  try {
+    return (await db.query(query)).rows.map((row) => ({
+      ...row,
+      value: parseFloat(row.value) || 0,
+      avg_value: parseFloat(row.avg_value) || 0,
+    }));
+  } catch (error) {
+    console.error('Error fetching stat leaders:', error);
+    return [];
+  }
+}
+

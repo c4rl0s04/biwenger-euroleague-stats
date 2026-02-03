@@ -1,5 +1,6 @@
-import { getUserSchedule, getScheduleRounds } from '@/lib/db/queries/schedule';
-import { getAllUsers } from '@/lib/db/queries/users';
+import { getScheduleRounds } from '@/lib/db';
+import { getUserScheduleService } from '@/lib/services';
+import { getAllUsers } from '@/lib/db';
 import { AlertCircle } from 'lucide-react';
 import ScheduleControls from '@/components/schedule/ScheduleControls';
 import MatchCard from '@/components/schedule/MatchCard';
@@ -25,7 +26,7 @@ export default async function SchedulePage({ searchParams }) {
   const roundId = params?.roundId ? parseInt(params.roundId) : null;
 
   const schedule = userId
-    ? await getUserSchedule(userId, roundId)
+    ? await getUserScheduleService(userId, roundId)
     : { found: false, message: 'No user selected' };
 
   // Helper to group matches by date

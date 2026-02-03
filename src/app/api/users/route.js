@@ -1,4 +1,4 @@
-import { getAllUsers } from '@/lib/db/queries/users';
+import { getAllUsers } from '@/lib/db';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

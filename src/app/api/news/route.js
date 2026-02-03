@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic'; // Always fetch fresh data
 
 import { NextResponse } from 'next/server';
-import { getRecentTransfers, getSignificantPriceChanges } from '@/lib/db/queries/market';
-import { getUpcomingMatches, getRecentResults } from '@/lib/db/queries/matches';
+import { getRecentTransfers, getSignificantPriceChanges } from '@/lib/db';
+import { getUpcomingMatches, getRecentResults } from '@/lib/db';
 
 export async function GET() {
   try {

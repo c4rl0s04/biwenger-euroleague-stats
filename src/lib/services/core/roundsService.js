@@ -16,8 +16,9 @@ import {
   getIdealLineup, // Import
   getPlayersLeftOut, // Import
   getUserRoundsHistoryDAO, // New DAO for raw history
-} from '../db/queries/rounds.js';
-import { getAllUsers } from '../db/queries/users.js';
+  getCurrentRoundState as fetchCurrentRoundState, // Import Query
+} from '../../db';
+import { getAllUsers } from '../../db';
 
 /**
  * Fetch standings for a specific round with fallback logic
@@ -209,4 +210,13 @@ export async function fetchRoundsList() {
  */
 export async function fetchUserLineup(userId, roundId) {
   return await getUserLineup(userId, roundId);
+}
+
+/**
+ * Service: Get the state of current and next rounds
+ * Wraps the DB query to expose unified round state
+ * @returns {Promise<Object>} { currentRound, nextRound }
+ */
+export async function getCurrentRoundState() {
+  return await fetchCurrentRoundState();
 }

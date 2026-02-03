@@ -1,11 +1,11 @@
 import { successResponse, errorResponse } from '@/lib/utils/response';
-import { getComparisonData } from '@/lib/services/compareService';
+import { getCompareData } from '@/lib/services';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   try {
-    const data = await getComparisonData();
+    const data = await getCompareData();
     return successResponse(data);
   } catch (error) {
     console.error('[API] /compare/data failed:', error);

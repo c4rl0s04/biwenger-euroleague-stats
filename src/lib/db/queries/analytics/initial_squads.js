@@ -1,4 +1,4 @@
-import { db } from '../client.js';
+import { db } from '../../client.js';
 
 /**
  * Calculates the actual performance of initial squads based on lineup usage.

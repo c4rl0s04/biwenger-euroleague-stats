@@ -1,11 +1,11 @@
-import { getMatchesGroupedByRound } from '@/lib/db/queries/matches';
+import { fetchMatchesGrouped } from '@/lib/services';
 import MatchesClient from '@/components/matches/MatchesClient';
 import { PageHeader } from '@/components/ui';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function MatchesPage() {
-  const { rounds, currentRoundId } = await getMatchesGroupedByRound();
+  const { rounds, currentRoundId } = await fetchMatchesGrouped();
 
   return (
     <div className="min-h-screen">

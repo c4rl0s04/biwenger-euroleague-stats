@@ -1,4 +1,4 @@
-import { fetchRoundStandings } from '@/lib/services/roundsService';
+import { fetchRoundStandings } from '@/lib/services';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

@@ -3,10 +3,10 @@
  * Business logic layer for comparison-related operations
  */
 
+
 import { db } from '@/lib/db/client';
-import { getExtendedStandings as getStandings } from '@/lib/db/queries/standings';
-import { getPorrasStats } from '@/lib/db/queries/predictions';
-import { getUserPerformanceHistoryService } from '@/lib/services/roundsService';
+import { getExtendedStandings as getStandings, getPorrasStats } from '@/lib/db';
+import { getUserPerformanceHistoryService } from '@/lib/services/core/roundsService';
 
 /**
  * Helper: Get User Squad (Inlined to avoid circular dependency issues)
@@ -54,14 +54,15 @@ import {
   fetchTheoreticalGapStats,
   fetchRivalryMatrixStats,
   fetchLeagueComparisonStats,
-} from '@/lib/services/standingsService';
-import { fetchCaptainStats, fetchHomeAwayStats } from '@/lib/services/dashboardService';
+
+} from '@/lib/services/app/standingsService';
+import { fetchCaptainStats, fetchHomeAwayStats } from '@/lib/services/app/dashboardService';
 
 /**
  * Aggregates all necessary data for the comparison page
  * @returns {Promise<Object>} users, history, standings, porras
  */
-export async function getComparisonData() {
+export async function getCompareData() {
   const usersQuery = `SELECT id, name, icon, color_index FROM users ORDER BY name ASC`;
 
   const [

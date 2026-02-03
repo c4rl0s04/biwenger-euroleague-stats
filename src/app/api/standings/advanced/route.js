@@ -13,7 +13,7 @@ import {
   fetchPositionChangesStats,
   fetchReliabilityStats,
   fetchRivalryMatrixStats,
-} from '@/lib/services/standingsService';
+} from '@/lib/services';
 
 export async function GET(request) {
   try {

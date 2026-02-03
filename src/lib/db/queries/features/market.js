@@ -1,4 +1,4 @@
-import { db } from '../client.js';
+import { db } from '../../client.js';
 
 /**
  * Get all transfers with pagination
@@ -152,4 +152,32 @@ export async function getSignificantPriceChanges(hoursAgo = 24, minChange = 5000
   `;
 
   return (await db.query(query, [minChange])).rows;
+}
+
+/**
+ * Get Market KPIs
+ * @returns {Promise<Object>} Market statistics
+ */
+export async function getMarketKPIs() {
+  const query = `
+    SELECT 
+      COUNT(*) as total_transfers,
+      ROUND(AVG(precio), 2) as avg_value,
+      MAX(precio) as max_value,
+      MIN(precio) as min_value,
+      COUNT(DISTINCT comprador) as active_buyers,
+      COUNT(DISTINCT vendedor) as active_sellers
+    FROM fichajes
+  `;
+
+  const kpis = (await db.query(query)).rows[0];
+  return {
+    ...kpis,
+    total_transfers: parseInt(kpis?.total_transfers) || 0,
+    avg_value: parseFloat(kpis?.avg_value) || 0,
+    active_buyers: parseInt(kpis?.active_buyers) || 0,
+    active_sellers: parseInt(kpis?.active_sellers) || 0,
+    max_value: parseInt(kpis?.max_value) || 0,
+    min_value: parseInt(kpis?.min_value) || 0,
+  };
 }

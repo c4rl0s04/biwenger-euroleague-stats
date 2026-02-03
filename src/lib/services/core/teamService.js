@@ -3,7 +3,7 @@
  * Business logic layer for team-related operations
  */
 
-import { getTeamById } from '../db';
+import { getTeamById } from '../../db';
 
 /**
  * Get full team profile by ID

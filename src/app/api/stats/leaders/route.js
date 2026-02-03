@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStatLeaders } from '@/lib/db/queries/stats';
+import { getStatLeaders } from '@/lib/db';
 
 export async function GET(request) {
   try {

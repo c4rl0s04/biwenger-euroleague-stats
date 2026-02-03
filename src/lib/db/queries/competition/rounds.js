@@ -1,6 +1,6 @@
-import { db } from '../client.js';
-import { getTeamPositions } from '../../utils/standings.js';
-import { NEXT_ROUND_CTE } from '../sql_utils.js';
+import { db } from '../../client.js';
+import { getTeamPositions } from '../../../logic/standings.js';
+import { NEXT_ROUND_CTE } from '../../sql_utils.js';
 
 /**
  * Get Porras statistics

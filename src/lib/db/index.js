@@ -1,14 +1,17 @@
-export * from './queries/users';
-export * from './queries/players';
-export * from './queries/teams';
-export * from './queries/rounds';
-export * from './queries/stats';
-export * from './queries/market';
-export * from './queries/standings';
-export * from './queries/performance'; // New analytics
-export * from './queries/matches';
-export * from './queries/search';
-export * from './queries/analytics';
-export * from './queries/advanced_stats'; // New Advanced Stats
-export * from './queries/schedule';
-export * from './queries/predictions';
+export * from './queries/core/users';
+export * from './queries/core/players';
+export * from './queries/core/teams';
+
+export * from './queries/competition/rounds';
+export * from './queries/competition/matches';
+export * from './queries/competition/schedule';
+export * from './queries/competition/standings';
+
+export * from './queries/analytics/performance';
+export * from './queries/analytics/advanced_stats';
+export * from './queries/analytics/initial_squads';
+export * from './queries/analytics/records';
+
+export * from './queries/features/market';
+export * from './queries/features/search';
+export * from './queries/features/predictions';

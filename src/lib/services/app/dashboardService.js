@@ -18,7 +18,7 @@ import {
   getLeagueAveragePoints,
   getLastRoundMVPs,
   getRisingStars,
-  getStandings,
+  getSimpleStandings as getStandings,
   getLastRoundWinner,
   getLeaderComparison,
   getTopPlayers,

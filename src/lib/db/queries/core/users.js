@@ -3,13 +3,13 @@
  * Provides functions for fetching user data, squads, and personalized stats
  */
 
-import { db } from '../client.js';
-import { getStandings } from './stats.js';
+import { db } from '../../client.js';
+import { getSimpleStandings as getStandings } from '../competition/standings.js';
 
 // Import shared type definitions for IDE support
-/** @typedef {import('../types.js').User} User */
-/** @typedef {import('../types.js').Player} Player */
-/** @typedef {import('../types.js').UserSeasonStats} UserSeasonStats */
+/** @typedef {import('../../types.js').User} User */
+/** @typedef {import('../../types.js').Player} Player */
+/** @typedef {import('../../types.js').UserSeasonStats} UserSeasonStats */
 
 /**
  * Get all users with their basic info

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserPerformanceHistoryService } from '@/lib/services/roundsService';
+import { getUserPerformanceHistoryService } from '@/lib/services';
 import { calculateStats } from '@/lib/hooks/usePerformanceStats';
 import { successResponse, errorResponse } from '@/lib/utils/response';
 import { db } from '@/lib/db/client';

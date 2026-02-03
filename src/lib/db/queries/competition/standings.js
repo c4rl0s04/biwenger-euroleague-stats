@@ -3,13 +3,13 @@
  * Provides functions for fetching league standings and rankings
  */
 
-import { db } from '../client.js';
+import { db } from '../../client.js';
 
 // Import shared type definitions for IDE support
-/** @typedef {import('../types.js').UserStanding} UserStanding */
-/** @typedef {import('../types.js').RoundWinner} RoundWinner */
-/** @typedef {import('../types.js').LeagueTotals} LeagueTotals */
-/** @typedef {import('../types.js').PointsProgression} PointsProgression */
+/** @typedef {import('../../types.js').UserStanding} UserStanding */
+/** @typedef {import('../../types.js').RoundWinner} RoundWinner */
+/** @typedef {import('../../types.js').LeagueTotals} LeagueTotals */
+/** @typedef {import('../../types.js').PointsProgression} PointsProgression */
 
 /**
  * Get extended standings with additional statistics
@@ -374,3 +374,98 @@ export async function getWinCounts() {
     wins: parseInt(row.wins) || 0,
   }));
 }
+
+/**
+ * Get league standings (Simple version from legacy stats.js)
+ * RENAMED to avoid conflict, but kept for compatibility during refactor
+ * @returns {Promise<Array>} Current standings with user details
+ */
+export async function getSimpleStandings() {
+  const query = `
+    WITH UserTotals AS (
+      SELECT 
+        user_id,
+        SUM(points) as total_points
+      FROM user_rounds
+      WHERE participated = TRUE
+      GROUP BY user_id
+    )
+    SELECT 
+      u.id as user_id,
+      u.name,
+      u.icon,
+      u.color_index,
+      COALESCE(ut.total_points, 0) as total_points,
+      COALESCE(sq.team_value, 0) as team_value,
+      COALESCE(sq.price_trend, 0) as price_trend,
+      RANK() OVER (ORDER BY COALESCE(ut.total_points, 0) DESC) as position
+    FROM users u
+    LEFT JOIN UserTotals ut ON u.id = ut.user_id
+    LEFT JOIN (
+      SELECT 
+        owner_id, 
+        SUM(price) as team_value,
+        SUM(price_increment) as price_trend
+      FROM players
+      WHERE owner_id IS NOT NULL
+      GROUP BY owner_id
+    ) sq ON u.id = sq.owner_id
+    ORDER BY position ASC
+  `;
+  return (await db.query(query)).rows.map((row) => ({
+    ...row,
+    total_points: parseInt(row.total_points) || 0,
+    team_value: parseInt(row.team_value) || 0,
+    price_trend: parseInt(row.price_trend) || 0,
+  }));
+}
+
+/**
+ * Get comparison with league leader
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} Leader comparison
+ */
+export async function getLeaderComparison(userId) {
+  // Use the extended standings for better data, or simple if sufficient. 
+  // Original Used getStandings (Simple). Let's use getSimpleStandings here to match logic exactly.
+  const standings = await getSimpleStandings();
+  const leader = standings[0];
+  const secondPlace = standings[1];
+  // Ensure we compare strings properly if IDs are mixed types in DB/JS
+  const user = standings.find((u) => String(u.user_id) === String(userId));
+
+  if (!user || !leader) return null;
+
+  const gap = leader.total_points - user.total_points;
+  // If user.position is string (e.g. from bigInt), convert. But here it's from RANK so it's number/string.
+  const pos = parseInt(user.position);
+  const roundsNeeded = pos > 1 ? Math.ceil(gap / 10) : 0;
+
+  const gapToSecond = pos === 1 && secondPlace ? user.total_points - secondPlace.total_points : 0;
+
+  return {
+    leader_name: leader.name,
+    leader_points: leader.total_points,
+    user_points: user.total_points,
+    gap: gap,
+    gap_to_second: gapToSecond,
+    rounds_needed: roundsNeeded,
+    is_leader: pos === 1,
+  };
+}
+
+/**
+ * Get league average points per round
+ * @returns {Promise<number>} Average points
+ */
+export async function getLeagueAveragePoints() {
+  const query = `
+    SELECT ROUND(AVG(points), 1) as avg_points
+    FROM user_rounds
+    WHERE participated = TRUE
+  `;
+
+  const result = (await db.query(query)).rows[0];
+  return result ? parseFloat(result.avg_points) : 0;
+}
+
