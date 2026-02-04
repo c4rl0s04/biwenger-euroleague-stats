@@ -1198,3 +1198,37 @@ export async function getUserRoundsHistoryDAO(userId) {
   const rows = (await db.query(query, [userId])).rows;
   return rows;
 }
+
+/**
+ * Get Lineup Usage Statistics (Most Used Formations)
+ * @returns {Promise<{
+ *   global: Array<{alineacion: string, count: number}>,
+ *   byUser: Array<{user_id: string, alineacion: string, count: number}>
+ * }>}
+ */
+export async function getLineupUsageStats() {
+  // 1. Global Usage
+  const globalQuery = `
+    SELECT alineacion, COUNT(*) as count 
+    FROM user_rounds 
+    WHERE participated = TRUE AND alineacion IS NOT NULL
+    GROUP BY alineacion 
+    ORDER BY count DESC
+  `;
+
+  // 2. Per User Usage (All data, processed in service/frontend to find favorite)
+  const userQuery = `
+    SELECT user_id, alineacion, COUNT(*) as count
+    FROM user_rounds
+    WHERE participated = TRUE AND alineacion IS NOT NULL
+    GROUP BY user_id, alineacion
+    ORDER BY user_id, count DESC
+  `;
+
+  const [globalRes, userRes] = await Promise.all([db.query(globalQuery), db.query(userQuery)]);
+
+  return {
+    global: globalRes.rows.map((r) => ({ ...r, count: parseInt(r.count) })),
+    byUser: userRes.rows.map((r) => ({ ...r, count: parseInt(r.count) })),
+  };
+}

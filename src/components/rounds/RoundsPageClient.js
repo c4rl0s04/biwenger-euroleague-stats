@@ -36,9 +36,10 @@ import LeagueLeaderboard from './stats/history/LeagueLeaderboard';
 import EfficiencyHeatmap from './stats/history/EfficiencyHeatmap';
 import ConsistencyRanking from './stats/history/ConsistencyRanking';
 import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
+import LineupStatsCard from './stats/general/LineupStatsCard';
 import { Section } from '@/components/layout';
 import { usePerformanceStats } from '@/lib/hooks/usePerformanceStats';
-import { Activity, BarChart3, Grid, Ruler } from 'lucide-react';
+import { Activity, BarChart3, Grid, Ruler, Layout } from 'lucide-react';
 
 export default function RoundsPageClient() {
   const router = useRouter();
@@ -110,6 +111,11 @@ export default function RoundsPageClient() {
   // --- 3c. FETCH ALL USERS HISTORY (For Efficiency Heatmap) ---
   const { data: allHistoryData, loading: allHistoryLoading } =
     useApiData('/api/rounds/all-history');
+
+  // --- 3d. FETCH LINEUP STATS ---
+  const { data: lineupStatsData, loading: lineupStatsLoading } = useApiData(
+    '/api/rounds/lineup-stats'
+  );
 
   // --- 4. FETCH HISTORY (Comparison Users - For Chart) ---
   // This effect fetches history for any user in comparisonUserIds that we don't have yet.
@@ -627,6 +633,16 @@ export default function RoundsPageClient() {
               />
             </ElegantCard>
           </div>
+        </div>
+
+        {/* Row 3: Lineup Stats */}
+        <div className="mt-6">
+          <ElegantCard title="Alineaciones Preferidas" icon={Layout} color="purple">
+            <LineupStatsCard
+              globalStats={lineupStatsData?.global || []}
+              userStats={lineupStatsData?.users || []}
+            />
+          </ElegantCard>
         </div>
       </Section>
     </div>

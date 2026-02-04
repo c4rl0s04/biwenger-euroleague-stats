@@ -18,6 +18,7 @@ import {
   getUserRoundsHistoryDAO, // New DAO for raw history
   getUserOptimization, // Import
   getCurrentRoundState as fetchCurrentRoundState, // Import Query
+  getLineupUsageStats, // Import
 } from '../../db';
 import { getAllUsers } from '../../db';
 
@@ -370,5 +371,55 @@ export async function fetchUserRoundDetails(roundId, userId) {
       idealLineup: coachRating?.idealLineup,
       leftOut,
     },
+  };
+}
+
+/**
+ * Service: Get Lineup Usage Statistics (Favorites & Global)
+ * Processes raw DB data into consumable format (percentages, favorites)
+ */
+export async function fetchLineupStats() {
+  const { global, byUser } = await getLineupUsageStats();
+  const users = await getAllUsers();
+
+  // 1. Calculate Global Percentages
+  const totalGlobalRounds = global.reduce((sum, item) => sum + item.count, 0);
+  const globalStats = global.map((item) => ({
+    formation: item.alineacion,
+    count: item.count,
+    percentage: totalGlobalRounds > 0 ? (item.count / totalGlobalRounds) * 100 : 0,
+  }));
+
+  // 2. Process User Favorites
+  // byUser is already sorted by count DESC per user, so first entry per user is their favorite
+  const userStats = users
+    .map((user) => {
+      const userEntries = byUser.filter((u) => u.user_id === user.id);
+      const totalUserRounds = userEntries.reduce((sum, item) => sum + item.count, 0);
+
+      // Find favorite (highest count)
+      const favorite = userEntries.length > 0 ? userEntries[0] : null;
+
+      return {
+        userId: user.id,
+        name: user.name,
+        icon: user.icon, // Needed for UI
+        color_index: user.color_index, // Needed for UI
+        favorite: favorite
+          ? {
+              formation: favorite.alineacion,
+              count: favorite.count,
+              percentage: totalUserRounds > 0 ? (favorite.count / totalUserRounds) * 100 : 0,
+            }
+          : null,
+        totalRounds: totalUserRounds,
+      };
+    })
+    .filter((u) => u.favorite !== null) // Exclude users with no data
+    .sort((a, b) => b.totalRounds - a.totalRounds); // Sort by activity? Or maybe by favorite %?
+
+  return {
+    global: globalStats,
+    users: userStats,
   };
 }
