@@ -3,34 +3,6 @@ import { getTeamPositions } from '../../../logic/standings.js';
 import { NEXT_ROUND_CTE } from '../../sql_utils.js';
 
 /**
- * Get Porras statistics
- * @returns {Promise<Array>} User statistics from prediction game
- */
-export async function getPorrasStats() {
-  const query = `
-    SELECT 
-      usuario,
-      COUNT(*) as total_rounds,
-      SUM(aciertos) as total_hits,
-      ROUND(AVG(aciertos), 2) as avg_hits,
-      MAX(aciertos) as best_round,
-      MIN(aciertos) as worst_round
-    FROM porras
-    GROUP BY usuario
-    ORDER BY total_hits DESC
-  `;
-
-  return (await db.query(query)).rows.map((row) => ({
-    ...row,
-    total_rounds: parseInt(row.total_rounds) || 0,
-    total_hits: parseInt(row.total_hits) || 0,
-    avg_hits: parseFloat(row.avg_hits) || 0,
-    best_round: parseInt(row.best_round) || 0,
-    worst_round: parseInt(row.worst_round) || 0,
-  }));
-}
-
-/**
  * Get all Porras rounds
  * @returns {Promise<Array>} All rounds with results
  */
