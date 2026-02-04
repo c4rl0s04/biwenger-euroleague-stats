@@ -71,10 +71,10 @@ export default async function SchedulePage({ searchParams }) {
               />
             </div>
 
-            {/* Summary Section */}
-            {allActivePlayers.length > 0 && (
+            {/* Summary Section: Show TOTAL squad points, regardless of schedule */}
+            {(schedule.userPlayers?.length > 0 || allActivePlayers.length > 0) && (
               <div className="w-full lg:flex-1 min-w-0">
-                <RoundSummary players={allActivePlayers} />
+                <RoundSummary players={schedule.userPlayers || allActivePlayers} />
               </div>
             )}
           </div>

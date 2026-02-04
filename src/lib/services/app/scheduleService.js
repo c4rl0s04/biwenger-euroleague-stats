@@ -93,6 +93,8 @@ export async function getUserScheduleService(userId, targetRoundId = null) {
       round: targetRound,
       matches: schedule,
       total_players: schedule.reduce((acc, m) => acc + m.user_players.length, 0),
+      // Return all user players so the frontend can summarize TOTAL squad points
+      userPlayers: userPlayers.sort((a, b) => (b.puntos || 0) - (a.puntos || 0)),
     };
   } catch (error) {
     console.error('Error in getUserScheduleService:', error);
