@@ -349,7 +349,7 @@ export default function RoundsPageClient() {
             </ElegantCard>
 
             {/* Bench */}
-            {isBenchVisible && currentBench.length > 0 && (
+            {isBenchVisible && (
               <div className="mt-4">
                 <ElegantCard
                   title="Banquillo"

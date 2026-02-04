@@ -3,7 +3,8 @@
 import PlayerCourtCard from './PlayerCourtCard';
 
 export default function Bench({ players = [], onPlayerClick }) {
-  if (!players || players.length === 0) return null;
+  // Always render to maintain layout stability
+  // The min-h-[140px] class ensures the card has volume even when empty
 
   return (
     // Changed py-4 to py-2 to reduce outer spacing
@@ -13,7 +14,7 @@ export default function Bench({ players = [], onPlayerClick }) {
            This significantly pulls the players up closer to the title.
            We keep pb-12 to ensure the '6th Man' badge doesn't get cut off.
         */}
-        <div className="flex items-center justify-around gap-2 pt-2 pb-12 w-full">
+        <div className="flex items-center justify-around gap-2 pt-2 pb-12 w-full min-h-[140px]">
           {players.map((player) => (
             <div key={player.player_id} className="relative flex flex-col items-center group">
               {/* Player Card */}
