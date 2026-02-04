@@ -64,10 +64,24 @@ export async function fetchRoundStandings(roundId) {
 }
 
 /**
- * Fetch EVERYTHING for the Rounds Page in one go.
- * Calculated once to ensure consistency between Standings & Individual Cards.
+ * Fetch ALL data required for the Rounds Page for a specific round.
+ * Optimizes fetching by parallelizing global stats and detailed user stats.
  *
- * @param {string} roundId
+ * @param {string} roundId - The ID of the round to fetch
+ * @returns {Promise<{
+ *   global: Object,
+ *   idealLineup: Array,
+ *   users: Array<{
+ *     id: string,
+ *     name: string,
+ *     points: number,
+ *     ideal_points: number,
+ *     lineup: Object,
+ *     idealLineup: Array,
+ *     coachRating: Object,
+ *     leftOut: Array
+ *   }>
+ * }>} Complete round data object
  */
 export async function fetchRoundCompleteData(roundId) {
   if (!roundId) return null;
@@ -119,9 +133,19 @@ export async function fetchRoundCompleteData(roundId) {
 }
 
 /**
- * Service: Get Full Performance History
- * Orchestrates DAO fetch + Logic calculation (Ideal Points)
- * @param {string} userId
+ * Service: Get Full Performance History for a User
+ * Orchestrates DAO fetch + Logic calculation (Ideal Points & Efficiency)
+ *
+ * @param {string} userId - The user ID to fetch history for
+ * @returns {Promise<Array<{
+ *   round_id: number,
+ *   round_number: number,
+ *   round_name: string,
+ *   actual_points: number,
+ *   ideal_points: number,
+ *   efficiency: number,
+ *   participated: boolean
+ * }>>} Chronological list of user performance per round
  */
 export async function getUserPerformanceHistoryService(userId) {
   // 1. Get raw history from DAO (includes non-participated)
@@ -182,8 +206,14 @@ export async function getUserPerformanceHistoryService(userId) {
 }
 
 /**
- * Fetch all necessary data for the Rounds list/selector
- * @returns {Promise<Object>} { rounds, users, defaultRoundId }
+ * Fetch all necessary data for the Rounds list/selector.
+ * Useful for initializing the rounds page dropdowns.
+ *
+ * @returns {Promise<{
+ *   rounds: Array,
+ *   users: Array,
+ *   defaultRoundId: string|number
+ * }>} Initial data for rounds context
  */
 export async function fetchRoundsList() {
   const [rounds, users, lastCompleted] = await Promise.all([
@@ -227,8 +257,19 @@ export async function getCurrentRoundState() {
 import { calculateStats } from '../../logic/performance';
 
 /**
- * Service: Get Leaderboard Data (Aggregated Stats for all users)
- * Replaces logic in api/rounds/leaderboard
+ * Service: Get Leaderboard Data (Aggregated Stats for all users).
+ * Calculates average efficiency, total points lost, and best/worst performances.
+ * Replaces logic in api/rounds/leaderboard.
+ *
+ * @returns {Promise<Array<{
+ *   userId: string,
+ *   avgEfficiency: string,
+ *   totalLost: number,
+ *   bestActual: number,
+ *   worstActual: number,
+ *   bestEfficiency: number,
+ *   roundsPlayed: number
+ * }>>} Leaderboard sorted by average efficiency (descending)
  */
 export async function fetchRoundLeaderboard() {
   const users = await getAllUsers();

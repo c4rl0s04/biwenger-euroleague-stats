@@ -44,114 +44,159 @@ import {
 // ============ DIRECT WRAPPERS ============
 // These wrap query functions 1:1 for consistent service layer usage
 
-/** @returns {Promise<UserStanding[]>} */
+/**
+ * Get full extended standings with detailed breakdown
+ * @returns {Promise<UserStanding[]>}
+ */
 export async function getFullStandings() {
   return await getExtendedStandings();
 }
 
-/** @returns {Promise<LeagueTotals>} */
+/**
+ * Get overall league statistical overview
+ * @returns {Promise<LeagueTotals>}
+ */
 export async function getLeagueOverview() {
   return await getLeagueTotals();
 }
 
+/**
+ * Fetch users who have won the most rounds
+ * @param {number} [limit=15]
+ * @returns {Promise<Array>}
+ */
 export async function fetchRoundWinners(limit = 15) {
   return await getRoundWinners(limit);
 }
 
+/**
+ * Fetch week-by-week points progression for graph
+ * @param {number} [limit=50]
+ * @returns {Promise<Array>}
+ */
 export async function fetchPointsProgression(limit = 50) {
   return await getPointsProgression(limit);
 }
 
+/**
+ * Fetch ranking of teams by squad value/budget
+ * @returns {Promise<Array>}
+ */
 export async function fetchValueRanking() {
   return await getValueRanking();
 }
 
+/** @returns {Promise<Object>} Hot and Cold streaks */
 export async function fetchStreakStats() {
   return await getStreakStats();
 }
 
+/** @returns {Promise<Array>} Volatility (Standard Deviation) stats */
 export async function fetchVolatilityStats() {
   return await getVolatilityStats();
 }
 
+/** @returns {Promise<Array>} Efficiency ratings */
 export async function fetchEfficiencyStats() {
   return await getEfficiencyStats();
 }
 
+/** @returns {Promise<Array>} Average placement stats */
 export async function fetchPlacementStats() {
   return await getPlacementStats();
 }
 
+/** @returns {Promise<Array>} Users who lose big leads */
 export async function fetchBottlerStats() {
   return await getBottlerStats();
 }
 
+/** @returns {Promise<Array>} Users who lose by small margins */
 export async function fetchHeartbreakerStats() {
   return await getHeartbreakerStats();
 }
 
+/** @returns {Promise<Array>} High scores that didn't win rounds */
 export async function fetchNoGloryStats() {
   return await getNoGloryStats();
 }
 
+/** @returns {Promise<Array>} Users who score low but win against low scorers */
 export async function fetchJinxStats() {
   return await getJinxStats();
 }
 
+/** @returns {Promise<Array>} Performance of original draft squads */
 export async function fetchInitialSquadAnalytics() {
   return await getInitialSquadActualPerformance();
 }
 
+/**
+ * Compare a user against league averages
+ * @param {string} userId
+ */
 export async function fetchLeagueComparisonStats(userId) {
   return await getLeagueComparisonStats(userId);
 }
 
 // ============ ADVANCED STATS WRAPPERS ============
 
+/** @returns {Promise<Object>} Heat Check (Overperformance) stats */
 export async function fetchHeatCheckStats() {
   return await getHeatCheckStats();
 }
 
+/** @returns {Promise<Array>} Hunter (Chasing leader) stats */
 export async function fetchHunterStats() {
   return await getHunterStats();
 }
 
+/** @returns {Promise<Array>} Rolling average points stats */
 export async function fetchRollingAverageStats() {
   return await getRollingAverageStats();
 }
 
+/** @returns {Promise<Array>} Floor vs Ceiling analysis */
 export async function fetchFloorCeilingStats() {
   return await getFloorCeilingStats();
 }
 
+/** @returns {Promise<Object>} Point distribution (Standard Deviation etc.) */
 export async function fetchPointDistributionStats() {
   return await getPointDistributionStats();
 }
 
+/** @returns {Promise<Object>} All-Play-All league table */
 export async function fetchAllPlayAllStats() {
   return await getAllPlayAllStats();
 }
 
+/** @returns {Promise<Array>} Dominance metrics */
 export async function fetchDominanceStats() {
   return await getDominanceStats();
 }
 
+/** @returns {Promise<Object>} Theoretical max points analysis */
 export async function fetchTheoreticalGapStats() {
   return await getTheoreticalGapStats();
 }
 
+/** @returns {Promise<Object>} Heatmap grid data */
 export async function fetchHeatmapStats() {
   return await getHeatmapStats();
 }
 
+/** @returns {Promise<Array>} Position change volatility */
 export async function fetchPositionChangesStats() {
   return await getPositionChangesStats();
 }
 
+/** @returns {Promise<Array>} Consistency ratings */
 export async function fetchReliabilityStats() {
   return await getReliabilityStats();
 }
 
+/** @returns {Promise<Object>} Head-to-head rivalry matrix */
 export async function fetchRivalryMatrixStats() {
   return await getRivalryMatrixStats();
 }

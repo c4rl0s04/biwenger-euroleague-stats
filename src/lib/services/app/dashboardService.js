@@ -147,7 +147,8 @@ export async function getNextRoundData(userId = null) {
 }
 
 /**
- * Fetch stats for the landing page (User count, current round, playoffs)
+ * Fetch statistics for the public landing page
+ * @returns {Promise<Object>} { userCount, currentRound, weeksToPlayoffs, playoffStartRound }
  */
 export async function fetchLandingStats() {
   const standings = await getStandings();
@@ -178,7 +179,9 @@ export async function fetchLandingStats() {
 }
 
 /**
- * Fetch aggregated news feed (Transfers, Prices, Matches, Results)
+ * Fetch aggregated news feed for the ticker
+ * Combines recent transfers, price changes, upcoming matches, and recent results.
+ * @returns {Promise<Array<{type: string, text: string, timestamp: number}>>} Sorted list of news items
  */
 export async function fetchNewsFeed() {
   const news = [];
