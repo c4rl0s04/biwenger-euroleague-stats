@@ -292,6 +292,8 @@ export default function PlayersTable({ initialPlayers }) {
                   { value: 'average', label: 'Media' },
                   { value: 'price', label: 'Valor' },
                   { value: 'name', label: 'Nombre' },
+                  { value: 'best_score', label: 'Mejor Partido' },
+                  { value: 'worst_score', label: 'Peor Partido' },
                 ]}
               />
             </div>
@@ -378,7 +380,7 @@ export default function PlayersTable({ initialPlayers }) {
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedPlayers.map((player) => (
-            <PlayerCard key={player.id} player={player} />
+            <PlayerCard key={player.id} player={player} sortConfig={sortConfig} />
           ))}
         </div>
       ) : (

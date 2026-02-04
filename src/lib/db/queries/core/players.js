@@ -502,7 +502,9 @@ export async function getAllPlayers() {
          player_id,
          COUNT(*) as played_count,
          COALESCE(SUM(fantasy_points), 0) as total_points,
-         ROUND(AVG(fantasy_points), 1) as calculated_avg
+         ROUND(AVG(fantasy_points), 1) as calculated_avg,
+         MAX(fantasy_points) as best_score,
+         MIN(fantasy_points) as worst_score
        FROM player_round_stats
        GROUP BY player_id
      ),
@@ -549,6 +551,8 @@ export async function getAllPlayers() {
        COALESCE(pa.total_points, 0) as total_points,
        COALESCE(pa.played_count, 0) as played,
        COALESCE(pa.calculated_avg, 0) as average,
+       COALESCE(pa.best_score, 0) as best_score,
+       COALESCE(pa.worst_score, 0) as worst_score,
        
        p.status,
        rs.recent_scores
@@ -564,6 +568,8 @@ export async function getAllPlayers() {
     total_points: parseFloat(p.total_points) || 0,
     played: parseInt(p.played) || 0,
     average: parseFloat(p.average) || 0,
+    best_score: parseFloat(p.best_score) || 0,
+    worst_score: parseFloat(p.worst_score) || 0,
     price: parseInt(p.price) || 0,
   }));
 }

@@ -83,7 +83,12 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 onClick={() => onSort('average')}
               >
                 <div className="flex items-center justify-center gap-1">
-                  Med <SortIcon column="average" sortConfig={sortConfig} />
+                  {sortConfig.key === 'best_score'
+                    ? 'Mejor'
+                    : sortConfig.key === 'worst_score'
+                      ? 'Peor'
+                      : 'Med'}{' '}
+                  <SortIcon column="average" sortConfig={sortConfig} />
                 </div>
               </th>
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">Forma</th>
@@ -174,14 +179,22 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 <td className="px-4 py-3 text-center font-medium tabular-nums">
                   <span
                     className={
-                      player.average >= 5
-                        ? 'text-green-400 font-bold'
-                        : player.average >= 3
-                          ? 'text-yellow-400'
-                          : 'text-muted-foreground'
+                      sortConfig.key === 'best_score'
+                        ? 'text-emerald-400 font-bold'
+                        : sortConfig.key === 'worst_score'
+                          ? 'text-red-400 font-bold'
+                          : player.average >= 5
+                            ? 'text-green-400 font-bold'
+                            : player.average >= 3
+                              ? 'text-yellow-400'
+                              : 'text-muted-foreground'
                     }
                   >
-                    {player.average}
+                    {sortConfig.key === 'best_score'
+                      ? player.best_score
+                      : sortConfig.key === 'worst_score'
+                        ? player.worst_score
+                        : player.average}
                   </span>
                 </td>
                 <td className="px-4 py-3">

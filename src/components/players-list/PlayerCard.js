@@ -6,7 +6,7 @@ import { User, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 import { getScoreColor } from '@/lib/utils/format';
 
-export default function PlayerCard({ player }) {
+export default function PlayerCard({ player, sortConfig }) {
   // Helper: Format currency
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-ES', {
@@ -172,17 +172,31 @@ export default function PlayerCard({ player }) {
               </span>
             </div>
             <div className="flex justify-between items-end">
-              <span className="text-xs text-muted-foreground">Media</span>
+              <span className="text-xs text-muted-foreground">
+                {sortConfig?.key === 'best_score'
+                  ? 'Mejor'
+                  : sortConfig?.key === 'worst_score'
+                    ? 'Peor'
+                    : 'Media'}
+              </span>
               <div
                 className={`font-bold text-base tabular-nums ${
-                  player.average >= 5
-                    ? 'text-green-400'
-                    : player.average >= 3
-                      ? 'text-yellow-400'
-                      : 'text-red-400'
+                  sortConfig?.key === 'best_score'
+                    ? 'text-emerald-400'
+                    : sortConfig?.key === 'worst_score'
+                      ? 'text-red-400'
+                      : player.average >= 5
+                        ? 'text-green-400'
+                        : player.average >= 3
+                          ? 'text-yellow-400'
+                          : 'text-red-400'
                 }`}
               >
-                {player.average || '0.0'}
+                {sortConfig?.key === 'best_score'
+                  ? player.best_score
+                  : sortConfig?.key === 'worst_score'
+                    ? player.worst_score
+                    : player.average || '0.0'}
               </div>
             </div>
 
