@@ -1020,39 +1020,57 @@ export async function getCoachRating(userId, roundId) {
 
   const squadStats = (await db.query(statsQuery, [[...completeSquadIds], roundId])).rows;
 
-  // Identify ghost players (no player_exists AND no stats)
-  const ghostPlayers = lineupRows.filter((p) => !p.player_exists && p.points === 0);
+  // [NEW] GHOST PLAYER HANDLING
+  // Identify ghost players (no player_exists)
+  // These are players who were in the lineup but are deleted from the players table.
+  const ghostPlayers = lineupRows.filter((p) => !p.player_exists);
 
-  if (ghostPlayers.length === 1 && actualScore > 0) {
-    const ghost = ghostPlayers[0];
+  // We need to inject these ghosts into squadStats so the greedy algorithm considers them.
+  for (const ghost of ghostPlayers) {
+    let finalPoints = parseInt(ghost.points) || 0;
 
-    // Calculate known points
-    const knownPlayers = lineupRows.filter((p) => p.player_id !== ghost.player_id);
-    const knownSum = calculateWeightedSum(knownPlayers); // Uses helper from module scope
+    // Logic to recover points if missing (0)
+    // Only proceed if exactly 1 ambiguous player found (to avoid misattribution)
+    // And we have a valid actualScore to work backwards from.
+    if (finalPoints === 0 && ghostPlayers.length === 1 && actualScore > 0) {
+      // Calculate known points
+      const knownPlayers = lineupRows.filter((p) => p.player_id !== ghost.player_id);
+      const knownSum = calculateWeightedSum(knownPlayers);
 
-    // Calculate ghost points
-    const ghostWeighted = actualScore - knownSum;
+      // Calculate ghost points gap
+      const ghostWeighted = actualScore - knownSum;
 
-    // Determine multiplier to get base points
-    const mult = ghost.is_captain
-      ? 2.0
-      : ghost.role === 'titular'
-        ? 1.0
-        : ghost.role === '6th_man'
-          ? 0.75
-          : 0.5;
+      if (ghostWeighted > 0) {
+        // Determine multiplier to get base points
+        const mult = ghost.is_captain
+          ? 2.0
+          : ghost.role === 'titular'
+            ? 1.0
+            : ghost.role === '6th_man'
+              ? 0.75
+              : 0.5;
 
-    const calculatedPoints = Math.round(ghostWeighted / mult);
+        finalPoints = Math.round(ghostWeighted / mult);
+      }
+    }
 
     // Inject into squadStats for ideal calculation
-    // We infer position as 'Alero' (safe default) or 'Base'
-    squadStats.push({
-      player_id: ghost.player_id,
-      name: 'Unknown Player',
-      position: 'Alero', // Defaulting to Alero (Forward)
-      team_id: null,
-      points: calculatedPoints,
-    });
+    // We must provide UI fields (img, team) to avoid frontend crash
+    // Check if this ghost is ALREADY in squadStats (unlikely if they don't exist, but safety first)
+    if (!squadStats.find((s) => s.player_id === ghost.player_id)) {
+      squadStats.push({
+        player_id: ghost.player_id || -1, // Use original ID if available from lineup
+        id: ghost.player_id || -1,
+        name: 'Unknown Player',
+        position: 'Alero', // Default to Alero (safest bet for flexibility)
+        team_id: null,
+        team_short: '???', // UI Fallback
+        team_img: null, // UI Fallback
+        img: null, // No image to avoid 404s
+        points: finalPoints,
+        calculated: true,
+      });
+    }
   }
 
   // 4. Calculate Max Possible Score (Ideal Lineup)

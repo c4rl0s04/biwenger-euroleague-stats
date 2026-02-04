@@ -83,15 +83,10 @@ export default function PlayerCourtCard({ player, onClick, size = 'base' }) {
         {/* Glossy Reflection overlay */}
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none z-30" />
 
-        {!imgError ? (
+        {player.img && !imgError ? (
           <div className="relative w-full h-full pt-2 scale-[1.7] origin-top">
             <Image
-              src={
-                !imgError
-                  ? player.img ||
-                    `https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/${player.player_id}.png`
-                  : '/placeholder.png' // Fallback handled by onError mostly but good practice
-              }
+              src={player.img}
               alt={player.name}
               fill
               className="object-cover object-top"
