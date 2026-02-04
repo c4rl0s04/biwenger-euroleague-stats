@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { formatMatchDate, formatMatchTime } from '@/lib/utils/date';
 import { CalendarClock, MapPin } from 'lucide-react';
 import { Card } from '@/components/ui';
 
@@ -21,16 +23,10 @@ export default function PlayerNextMatchCard({ nextMatch, playerTeam, className =
 
   const isHome = nextMatch.home_team === playerTeam;
   const opponent = isHome ? nextMatch.away_team : nextMatch.home_team;
-  const dateObj = new Date(nextMatch.date);
 
-  // Format Date: "Lun 21 Oct"
-  const dateStr = dateObj.toLocaleDateString('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-  // Format Time: "20:45"
-  const timeStr = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  // Format date and time using standardized utility (Madrid Time)
+  const dateStr = formatMatchDate(nextMatch.date);
+  const timeStr = formatMatchTime(nextMatch.date);
 
   return (
     <Card

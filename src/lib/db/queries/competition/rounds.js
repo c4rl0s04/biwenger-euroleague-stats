@@ -814,6 +814,11 @@ async function getHistoricSquad(userId, roundId) {
     // fichajes.timestamp is in SECONDS (BigInt), matches.date is Date object.
     const roundTs = Math.floor(new Date(roundRes.rows[0].start_date).getTime() / 1000);
 
+    // [TIMEZONE FIX] User reports DB dates are 1 hour early (e.g. 15:00 UTC vs actual 17:00 Madrid/16:00 UTC).
+    // Adding 1 hour (3600 seconds) buffer to align with reality.
+    // This ensures transfers that happened "before" the real match (but after the wrong DB time) are kept.
+    const adjustedRoundTs = roundTs + 3600;
+
     // 3. Get Current Squad
     const squadRes = await db.query('SELECT id FROM players WHERE owner_id = $1', [userId]);
     const squad = new Set(squadRes.rows.map((r) => r.id));
@@ -828,7 +833,7 @@ async function getHistoricSquad(userId, roundId) {
         AND (vendedor = $2 OR comprador = $2)
       ORDER BY timestamp DESC
     `,
-      [roundTs, userName]
+      [adjustedRoundTs, userName]
     );
 
     // 5. Replay Logic (Backwards)

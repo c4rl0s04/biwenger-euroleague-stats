@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/utils/format';
+import { getCorrectedMatchDate, formatMatchTime } from '@/lib/utils/date';
 
 function DayMatchRow({ dayName, matches, roundName }) {
   const scrollContainerRef = useRef(null);
@@ -75,8 +76,7 @@ function DayMatchRow({ dayName, matches, roundName }) {
           className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-4 px-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {matches.map((match, idx) => {
-            const date = new Date(match.date);
-            const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const time = formatMatchTime(match.date);
 
             return (
               <div
@@ -200,7 +200,7 @@ export default function NextMatchesCard() {
 
   // Group matches by day
   const matchesByDay = nextRound.matches.reduce((acc, match) => {
-    const date = new Date(match.date);
+    const date = getCorrectedMatchDate(match.date);
     const dateKey = date.toLocaleDateString('es-ES'); // Grouping key
 
     if (!acc[dateKey]) {

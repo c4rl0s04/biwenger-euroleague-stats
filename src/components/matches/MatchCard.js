@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { getCorrectedMatchDate, formatMatchTime } from '@/lib/utils/date';
 
 export function MatchCard({ match }) {
   // Use status to determine if match has been played (not score, since unplayed matches have 0-0)
   const isPlayed = match.status === 'finished';
 
-  // Determine if match is currently live (started but not finished)
-  const matchDate = match.date ? new Date(match.date) : null;
+  // Use corrected date for live checking
+  const matchDate = getCorrectedMatchDate(match.date);
   const now = new Date();
   const isLive = matchDate && matchDate <= now && !isPlayed;
 
@@ -17,9 +18,7 @@ export function MatchCard({ match }) {
   const awayWinner = isPlayed && match.away.score > match.home.score;
 
   // Format time only (date is now in Section title)
-  const formattedTime = matchDate
-    ? matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-    : null;
+  const formattedTime = formatMatchTime(match.date);
 
   return (
     <div

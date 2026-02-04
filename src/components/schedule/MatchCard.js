@@ -1,18 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { clsx } from 'clsx';
+import { formatMatchTime } from '@/lib/utils/date';
 import PlayerChip from './PlayerChip';
 
 export default function MatchCard({ match }) {
   const hasPlayers = match.user_players.length > 0;
 
   // Format time safely
-  const date = new Date(match.date);
-  const timeStr = date.toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Europe/Madrid',
-  });
+  // Format time using standardized utility (adds +1h correction)
+  const timeStr = formatMatchTime(match.date);
 
   return (
     <div
