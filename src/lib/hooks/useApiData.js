@@ -1,5 +1,7 @@
 'use client';
 
+import { apiClient } from '@/lib/api-client';
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
@@ -66,15 +68,17 @@ export function useApiData(endpoint, options = {}) {
         return;
       }
 
-      const response = await fetch(url);
+      const response = await apiClient.get(url);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // apiClient.get returns the parsed JSON (or the data inside it)
+      // Our apiClient convention might return the full object { success: true, data: ... } or just data
+      // Let's assume apiClient returns the raw JSON for now to be safe with this hook's logic
 
-      const result = await response.json();
+      // Adaptation: checks if apiClient returns { success, data } or just data
+      const result = response;
 
-      if (!result.success) {
+      if (result.success === false) {
+        // Explicit check for success: false
         throw new Error(result.error || 'API returned unsuccessful response');
       }
 

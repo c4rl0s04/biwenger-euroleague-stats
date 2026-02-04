@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Search, User, Users, Trophy, X, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api-client';
 
 /**
  * SearchDropdown - Global search with dropdown results
@@ -29,8 +30,7 @@ export default function SearchDropdown({ onClose }) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
+        const data = await apiClient.get(`/api/search?q=${encodeURIComponent(query)}`);
         setResults(data.data || { players: [], teams: [], users: [] });
         setIsOpen(true);
         setActiveIndex(-1);
@@ -56,13 +56,32 @@ export default function SearchDropdown({ onClose }) {
   }, []);
 
   // Build flat list for keyboard navigation
-  const allResults = [
-    ...results.players.map((p) => ({ type: 'player', ...p })),
-    ...results.teams.map((t) => ({ type: 'team', ...t })),
-    ...results.users.map((u) => ({ type: 'user', ...u })),
-  ];
+  const allResults = useMemo(
+    () => [
+      ...results.players.map((p) => ({ type: 'player', ...p })),
+      ...results.teams.map((t) => ({ type: 'team', ...t })),
+      ...results.users.map((u) => ({ type: 'user', ...u })),
+    ],
+    [results]
+  );
 
   // Keyboard navigation
+  const handleSelect = useCallback(
+    (item) => {
+      setIsOpen(false);
+      setQuery('');
+      if (item.type === 'player') {
+        router.push(`/player/${item.id}`);
+      } else if (item.type === 'team') {
+        router.push(`/team/${item.id}`);
+      } else if (item.type === 'user') {
+        router.push(`/user/${item.id}`);
+      }
+      onClose?.();
+    },
+    [router, onClose]
+  );
+
   const handleKeyDown = useCallback(
     (e) => {
       if (!isOpen) return;
@@ -82,21 +101,8 @@ export default function SearchDropdown({ onClose }) {
         onClose?.();
       }
     },
-    [isOpen, activeIndex, allResults, onClose]
+    [isOpen, activeIndex, allResults, onClose, handleSelect]
   );
-
-  const handleSelect = (item) => {
-    setIsOpen(false);
-    setQuery('');
-    if (item.type === 'player') {
-      router.push(`/player/${item.id}`);
-    } else if (item.type === 'team') {
-      router.push(`/team/${item.id}`);
-    } else if (item.type === 'user') {
-      router.push(`/user/${item.id}`);
-    }
-    onClose?.();
-  };
 
   const hasResults = allResults.length > 0;
 

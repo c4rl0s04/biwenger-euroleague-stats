@@ -1,25 +1,21 @@
 import { fetchUserSeasonStats } from '@/lib/services';
-import { CACHE_DURATIONS } from '@/lib/utils/response';
+import { CACHE_DURATIONS, successResponse, errorResponse } from '@/lib/utils/response';
 import { validateUserId } from '@/lib/utils/validation';
-import { withApiHandler } from '@/lib/utils/api-wrapper';
 
-export const GET = withApiHandler(async (request) => {
-  const { searchParams } = new URL(request.url);
-  const userIdValidation = validateUserId(searchParams.get('userId'));
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userIdValidation = validateUserId(searchParams.get('userId'));
 
-  if (!userIdValidation.valid) {
-    // Throwing error with status -> handled by wrapper
-    const error = new Error(userIdValidation.error);
-    error.status = 400;
-    throw error;
+    if (!userIdValidation.valid) {
+      return errorResponse(userIdValidation.error, 400);
+    }
+
+    const stats = await fetchUserSeasonStats(userIdValidation.value);
+
+    return successResponse({ stats }, CACHE_DURATIONS.MEDIUM);
+  } catch (error) {
+    console.error('Error fetching player season stats:', error);
+    return errorResponse(error.message || 'Internal Server Error', 500);
   }
-
-  const stats = await fetchUserSeasonStats(userIdValidation.value);
-
-  // Return data for successResponse({ stats })
-  // We can also pass cache duration
-  return {
-    data: { stats },
-    cache: CACHE_DURATIONS.MEDIUM,
-  };
-});
+}

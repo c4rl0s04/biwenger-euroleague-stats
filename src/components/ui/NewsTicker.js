@@ -1,5 +1,7 @@
 'use client';
 
+import { motion, AnimatePresence } from 'framer-motion';
+import { useApiData } from '@/lib/hooks/useApiData';
 import { useEffect, useState } from 'react';
 import Marquee from 'react-fast-marquee';
 import {
@@ -12,27 +14,15 @@ import {
 } from 'lucide-react';
 
 export default function NewsTicker() {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(true);
+  /*
+   * using useApiData hook for standardized fetching
+   * transforming data to ensure it is an array
+   */
+  const { data: news, loading } = useApiData('/api/news', {
+    transform: (data) => (Array.isArray(data) ? data : []),
+  });
 
-  useEffect(() => {
-    async function fetchNews() {
-      try {
-        const res = await fetch('/api/news');
-        if (res.ok) {
-          const data = await res.json();
-          setNews(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch ticker news', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchNews();
-  }, []);
-
-  if (loading || news.length === 0) return null;
+  if (loading || !news || news.length === 0) return null;
 
   const getIcon = (type) => {
     switch (type) {

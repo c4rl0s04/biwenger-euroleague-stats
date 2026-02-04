@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
+import { apiClient } from '@/lib/api-client';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
@@ -124,8 +125,7 @@ export default function RoundsPageClient() {
       await Promise.all(
         missingIds.map(async (id) => {
           try {
-            const res = await fetch(`/api/rounds/history?userId=${id}`);
-            const data = await res.json();
+            const data = await apiClient.get(`/api/rounds/history?userId=${id}`);
             if (data.success) {
               newHistories[id] = data.data.history;
             }

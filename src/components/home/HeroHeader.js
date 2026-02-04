@@ -1,25 +1,18 @@
 'use client';
 
+import Link from 'next/link';
+import { useApiData } from '@/lib/hooks/useApiData';
 import { Trophy, TrendingUp, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const HeroHeader = () => {
-  const [stats, setStats] = useState({
-    userCount: 0,
-    currentRound: 'Loading...',
-    weeksToPlayoffs: 0,
-  });
+  const { data } = useApiData('/api/landing-stats');
 
-  useEffect(() => {
-    fetch('/api/landing-stats')
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.error) {
-          setStats(data);
-        }
-      })
-      .catch((err) => console.error('Failed to load landing stats', err));
-  }, []);
+  const stats = data || {
+    userCount: 0,
+    currentRound: 'Pre-Season',
+    weeksToPlayoffs: 0,
+  };
 
   return (
     <header className="relative overflow-hidden hero-gradient border-b border-border/30">

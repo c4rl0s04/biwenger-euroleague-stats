@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Command } from 'cmdk';
 import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api-client';
 import {
   Search,
   User,
@@ -70,8 +71,7 @@ export default function CommandPalette() {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
+        const data = await apiClient.get(`/api/search?q=${encodeURIComponent(query)}`);
         setResults(data.data || { players: [], teams: [], users: [] });
       } catch (error) {
         console.error(error);
