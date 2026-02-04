@@ -4,8 +4,18 @@
  */
 
 import { getCurrentRoundState } from '../core/roundsService.js';
-import { getRoundById, getLastRound, fetchMatchesForRound, fetchUserPlayers } from '../../db';
+import {
+  getRoundById,
+  getLastRound,
+  fetchMatchesForRound,
+  fetchUserPlayers,
+  getScheduleRounds,
+} from '../../db';
 import { getTeamColor } from '../../constants/teamColors.js';
+
+export async function fetchScheduleRounds() {
+  return await getScheduleRounds();
+}
 
 export async function getUserScheduleService(userId, targetRoundId = null) {
   try {

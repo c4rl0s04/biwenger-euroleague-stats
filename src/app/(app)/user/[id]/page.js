@@ -1,4 +1,4 @@
-import { getUserSeasonStats } from '@/lib/db';
+import { fetchUserSeasonStats } from '@/lib/services';
 
 import { BackButton, PageHeader } from '@/components/ui';
 
@@ -14,7 +14,7 @@ export default async function UserProfilePage({ params }) {
   // User ID is TEXT in DB, we must check it as a string, not number
   const userId = id;
 
-  const stats = await getUserSeasonStats(userId);
+  const stats = await fetchUserSeasonStats(userId);
   const userName = stats?.name || 'Usuario';
 
   return (

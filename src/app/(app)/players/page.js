@@ -6,14 +6,14 @@
  * See PAGE_ARCHITECTURE.md section 3 for full layout specification.
  */
 
-import { getAllPlayers } from '@/lib/db';
+import { fetchAllPlayers } from '@/lib/services';
 import PlayersTable from '@/components/players-list/PlayersTable';
 import { PageHeader } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PlayersPage() {
-  const players = await getAllPlayers();
+  const players = await fetchAllPlayers();
 
   return (
     <div className="min-h-screen bg-background pb-20">

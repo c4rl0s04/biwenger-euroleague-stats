@@ -1,6 +1,4 @@
-import { getScheduleRounds } from '@/lib/db';
-import { getUserScheduleService } from '@/lib/services';
-import { getAllUsers } from '@/lib/db';
+import { getUserScheduleService, fetchScheduleRounds, fetchAllUsers } from '@/lib/services';
 import { AlertCircle } from 'lucide-react';
 import ScheduleControls from '@/components/schedule/ScheduleControls';
 import MatchCard from '@/components/schedule/MatchCard';
@@ -16,7 +14,7 @@ export default async function SchedulePage({ searchParams }) {
   const cookieStore = await cookies();
 
   // Fetch data in parallel
-  const [users, rounds] = await Promise.all([getAllUsers(), getScheduleRounds()]);
+  const [users, rounds] = await Promise.all([fetchAllUsers(), fetchScheduleRounds()]);
 
   // Priority: 1. URL Param, 2. Cookie Preference, 3. First User in DB
   const cookieUserId = cookieStore.get('NEXT_USER_ID')?.value;

@@ -16,6 +16,7 @@ import {
   getIdealLineup, // Import
   getPlayersLeftOut, // Import
   getUserRoundsHistoryDAO, // New DAO for raw history
+  getUserOptimization, // Import
   getCurrentRoundState as fetchCurrentRoundState, // Import Query
 } from '../../db';
 import { getAllUsers } from '../../db';
@@ -219,4 +220,114 @@ export async function fetchUserLineup(userId, roundId) {
  */
 export async function getCurrentRoundState() {
   return await fetchCurrentRoundState();
+}
+
+// --- New Methods for API Support (Strict Layer Enforcement) ---
+
+import { calculateStats } from '../../logic/performance';
+
+/**
+ * Service: Get Leaderboard Data (Aggregated Stats for all users)
+ * Replaces logic in api/rounds/leaderboard
+ */
+export async function fetchRoundLeaderboard() {
+  const users = await getAllUsers();
+  if (!users || users.length === 0) return [];
+
+  const leaderboardData = await Promise.all(
+    users.map(async (user) => {
+      try {
+        const history = await getUserPerformanceHistoryService(user.id);
+        const stats = calculateStats(history);
+
+        if (!stats) return generateEmptyStats(user.id);
+
+        return {
+          userId: user.id,
+          avgEfficiency: stats.avgEfficiency,
+          totalLost: stats.totalLost,
+          bestActual: stats.bestRound?.actual_points || 0,
+          worstActual: stats.worstRound?.actual_points || 0,
+          bestEfficiency: stats.bestEffRound?.efficiency || 0,
+          bestEffRound: stats.bestEffRound?.round_number || null,
+          worstEfficiency: stats.worstEffRound?.efficiency || 0,
+          worstEffRound: stats.worstEffRound?.round_number || null,
+          roundsPlayed: stats.roundsPlayed,
+        };
+      } catch (err) {
+        console.error(`Error fetching stats for user ${user.id}:`, err);
+        return generateEmptyStats(user.id);
+      }
+    })
+  );
+
+  // Default sort by efficiency
+  return leaderboardData.sort((a, b) => parseFloat(b.avgEfficiency) - parseFloat(a.avgEfficiency));
+}
+
+function generateEmptyStats(userId) {
+  return {
+    userId,
+    avgEfficiency: '0.0',
+    totalLost: 0,
+    bestActual: 0,
+    worstActual: 0,
+    bestEfficiency: 0,
+    round_number: null,
+    worstEfficiency: 0,
+    worstEffRound: null,
+    roundsPlayed: 0,
+  };
+}
+
+/**
+ * Service: Get All Users History (for Heatmap)
+ * Replaces logic in api/rounds/all-history
+ */
+export async function fetchAllUsersPerformanceHistory() {
+  const users = await getAllUsers();
+  if (!users) return [];
+
+  return await Promise.all(
+    users.map(async (user) => {
+      try {
+        const history = await getUserPerformanceHistoryService(user.id);
+        return {
+          userId: user.id,
+          history: history || [],
+        };
+      } catch (err) {
+        console.error(`Error fetching history for user ${user.id}`, err);
+        return { userId: user.id, history: [] };
+      }
+    })
+  );
+}
+
+/**
+ * Service: Get Specific User Round Stats (Legacy Mode)
+ * Replaces logic in api/rounds/stats (legacy path)
+ */
+export async function fetchUserRoundDetails(roundId, userId) {
+  const [globalStats, idealLineup, userStats, leftOut, coachRating] = await Promise.all([
+    getRoundGlobalStats(roundId),
+    getIdealLineup(roundId),
+    userId ? getUserOptimization(userId, roundId) : null,
+    userId ? getPlayersLeftOut(userId, roundId) : [],
+    userId ? getCoachRating(userId, roundId) : null,
+  ]);
+  // Dynamic import above for getUserOptimization to avoid circular dep if it's not exported in index properly,
+  // but let's assume imports at top are fine. Wait, getUserOptimization wasn't imported at top.
+  // I need to add getUserOptimization to top imports.
+
+  return {
+    global: globalStats,
+    idealLineup,
+    user: {
+      ...(userStats || {}),
+      coachRating,
+      idealLineup: coachRating?.idealLineup,
+      leftOut,
+    },
+  };
 }

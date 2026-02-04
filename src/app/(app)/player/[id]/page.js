@@ -1,4 +1,4 @@
-import { getPlayerDetails } from '@/lib/db';
+import { getPlayerProfile } from '@/lib/services';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { PlayerProfileClient } from '@/components/player-profile';
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function PlayerPage({ params }) {
   const { id } = await params;
-  const player = await getPlayerDetails(id);
+  const player = await getPlayerProfile(id);
 
   if (!player) {
     return (

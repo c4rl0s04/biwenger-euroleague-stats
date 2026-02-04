@@ -1,4 +1,4 @@
-import { globalSearch } from '@/lib/db';
+import { performGlobalSearch } from '@/lib/services';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export async function GET(request) {
@@ -10,7 +10,7 @@ export async function GET(request) {
       return successResponse({ players: [], teams: [], users: [] }, CACHE_DURATIONS.SHORT);
     }
 
-    const results = await globalSearch(query);
+    const results = await performGlobalSearch(query);
     return successResponse(results, CACHE_DURATIONS.SHORT);
   } catch (error) {
     console.error('Search API Error:', error);

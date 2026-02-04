@@ -29,6 +29,8 @@ import {
   getRecentRecords,
   getStreakStats,
   getCurrentRoundState,
+  getUpcomingMatches,
+  getRecentResults,
 } from '@/lib/db';
 
 // ============ DIRECT WRAPPERS ============
@@ -136,12 +138,123 @@ export async function getNextRoundData(userId = null) {
   const nextRound = await getNextRound(); // Uses new logic under the hood
 
   return {
-    nextRound, // Detailed object
-    currentRoundStatus: roundState.currentRound, // just metadata
+    nextRound,
+    currentRoundStatus: roundState.currentRound,
     topPlayersForm,
     captainRecommendations,
     marketOpportunities,
   };
+}
+
+/**
+ * Fetch stats for the landing page (User count, current round, playoffs)
+ */
+export async function fetchLandingStats() {
+  const standings = await getStandings();
+  const userCount = standings.length;
+
+  const { currentRound } = await getCurrentRoundState();
+  let roundNumber = 0;
+
+  if (currentRound && currentRound.round_name) {
+    const match = currentRound.round_name.match(/\d+/);
+    if (match) {
+      roundNumber = parseInt(match[0], 10);
+    }
+  }
+
+  const PLAYOFF_START_ROUND = 39;
+  let weeksToPlayoffs = 0;
+  if (roundNumber > 0) {
+    weeksToPlayoffs = Math.max(0, PLAYOFF_START_ROUND - roundNumber);
+  }
+
+  return {
+    userCount,
+    currentRound: currentRound?.round_name || 'Pre-Season',
+    weeksToPlayoffs,
+    playoffStartRound: PLAYOFF_START_ROUND,
+  };
+}
+
+/**
+ * Fetch aggregated news feed (Transfers, Prices, Matches, Results)
+ */
+export async function fetchNewsFeed() {
+  const news = [];
+
+  // 1. Transfers
+  try {
+    const transfers = await getRecentTransfers(5);
+    transfers.forEach((t) => {
+      const amount = new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0,
+      }).format(t.precio);
+      news.push({
+        type: 'transfer',
+        text: `FICHAJE: ${t.player_name} (${t.position}) pasa de ${t.vendedor || 'Mercado'} a ${t.comprador || 'Mercado'} por ${amount}`,
+        timestamp: t.timestamp,
+      });
+    });
+  } catch (e) {
+    console.error('Error fetching transfers:', e);
+  }
+
+  // 2. Price Changes
+  try {
+    const priceChanges = await getSignificantPriceChanges(24, 200000);
+    priceChanges.forEach((c) => {
+      const amount = new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0,
+      }).format(Math.abs(c.price_increment));
+      const direction = c.price_increment > 0 ? 'sube' : 'baja';
+      news.push({
+        type: c.price_increment > 0 ? 'price_up' : 'price_down',
+        text: `MERCADO: ${c.name} ${direction} ${amount} hoy`,
+        timestamp: Date.now(),
+      });
+    });
+  } catch (e) {
+    console.error('Error fetching price changes:', e);
+  }
+
+  // 3. Upcoming Matches (3)
+  try {
+    const matches = await getUpcomingMatches(3);
+    matches.forEach((m) => {
+      const date = new Date(m.date);
+      const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      const day = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+      news.push({
+        type: 'match',
+        text: `PRÓXIMO: ${m.home_team} vs ${m.away_team} (${day} ${time})`,
+        timestamp: new Date(m.date).getTime(),
+      });
+    });
+  } catch (e) {
+    console.error('Error fetching upcoming matches:', e);
+  }
+
+  // 4. Recent Results (3)
+  try {
+    const results = await getRecentResults(3);
+    results.forEach((m) => {
+      news.push({
+        type: 'result',
+        text: `RESULTADO: ${m.home_team} ${m.home_score} - ${m.away_score} ${m.away_team}`,
+        timestamp: new Date(m.date).getTime(),
+      });
+    });
+  } catch (e) {
+    console.error('Error fetching results:', e);
+  }
+
+  // Random shuffle
+  return news.sort(() => 0.5 - Math.random());
 }
 
 /**

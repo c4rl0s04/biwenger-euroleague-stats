@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStatLeaders } from '@/lib/db';
+import { fetchStatLeaders } from '@/lib/services';
 
 export async function GET(request) {
   try {
@@ -7,8 +7,8 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'points';
 
-    // 2. Fetch data from DB
-    const data = await getStatLeaders(type);
+    // 2. Fetch data from Service
+    const data = await fetchStatLeaders(type);
 
     // 3. Return JSON with success wrapper
     return NextResponse.json({ success: true, data });

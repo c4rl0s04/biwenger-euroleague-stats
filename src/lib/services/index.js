@@ -65,10 +65,8 @@ export {
   getPlayerPerformanceSummary,
   searchPlayers,
   getTopPerformers,
-  fetchUserSeasonStats,
-  fetchUserRecentRounds,
-  fetchUserSquadDetails,
   fetchPlayerStreaks,
+  fetchAllPlayers,
 } from './core/playerService.js';
 
 // Market Service
@@ -82,6 +80,14 @@ export {
   fetchMarketOpportunities,
 } from './features/marketService.js';
 
+// User Service
+export {
+  fetchAllUsers,
+  fetchUserSeasonStats,
+  fetchUserRecentRounds,
+  fetchUserSquadDetails,
+} from './core/userService.js';
+
 // Team Service
 export { fetchTeamProfile } from './core/teamService.js';
 
@@ -93,6 +99,9 @@ export {
   getUserPerformanceHistoryService,
   fetchRoundStandings,
   fetchRoundCompleteData,
+  fetchRoundLeaderboard,
+  fetchAllUsersPerformanceHistory,
+  fetchUserRoundDetails,
 } from './core/roundsService.js';
 
 // Compare Service
@@ -102,4 +111,13 @@ export { getCompareData } from './features/compareService.js';
 export { fetchMatchesGrouped } from './app/matchesService.js';
 
 // Schedule Service
-export { getUserScheduleService } from './app/scheduleService.js';
+export { getUserScheduleService, fetchScheduleRounds } from './app/scheduleService.js';
+
+// Search Service
+export { performGlobalSearch } from './features/searchService.js';
+
+// Player Service Extensions
+export { fetchStatLeaders } from './core/playerService.js';
+
+// Dashboard Extensions
+export { fetchLandingStats, fetchNewsFeed } from './app/dashboardService.js';

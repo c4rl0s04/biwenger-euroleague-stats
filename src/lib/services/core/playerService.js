@@ -9,29 +9,23 @@ import {
   getPlayerDetails,
   getTopPlayers,
   getTopPlayersByForm,
-  getUserSeasonStats,
-  getUserRecentRounds,
-  getUserSquadDetails,
   getPlayerStreaks,
   getPlayersBirthday,
+  getAllPlayers,
+  getStatLeaders, // Added missing import
 } from '@/lib/db';
 
 // ============ DIRECT WRAPPERS ============
 
-export async function fetchUserSeasonStats(userId) {
-  return await getUserSeasonStats(userId);
-}
-
-export async function fetchUserRecentRounds(userId) {
-  return await getUserRecentRounds(userId);
-}
-
-export async function fetchUserSquadDetails(userId) {
-  return await getUserSquadDetails(userId);
-}
-
 export async function fetchPlayerStreaks(playerId) {
   return await getPlayerStreaks(playerId);
+}
+
+/**
+ * Fetch all players in the system
+ */
+export async function fetchAllPlayers() {
+  return await getAllPlayers();
 }
 
 // ============ AGGREGATED FUNCTIONS ============
@@ -98,4 +92,13 @@ export async function searchPlayers(filters = {}) {
  */
 export async function getTopPerformers(limit = 10) {
   return await getTopPlayers(limit);
+}
+
+/**
+ * Fetch statistical leaders for a specific category
+ * @param {string} type - 'points', 'rebounds', 'assists', 'valuation'
+ * @returns {Promise<Array>} List of top players
+ */
+export async function fetchStatLeaders(type = 'points') {
+  return await getStatLeaders(type);
 }

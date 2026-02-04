@@ -1,11 +1,4 @@
-import {
-  getRoundGlobalStats,
-  getIdealLineup,
-  getUserOptimization,
-  getPlayersLeftOut,
-  getCoachRating,
-} from '@/lib/db';
-import { fetchRoundCompleteData } from '@/lib/services'; // Import aggregator
+import { fetchRoundCompleteData, fetchUserRoundDetails } from '@/lib/services'; // Import aggregator
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
@@ -26,27 +19,10 @@ export async function GET(request) {
     }
 
     // LEGACY: Specific User fetch (Keep for now or if light fetch needed)
-    const [globalStats, idealLineup, userStats, leftOut, coachRating] = await Promise.all([
-      getRoundGlobalStats(roundId),
-      getIdealLineup(roundId),
-      userId ? getUserOptimization(userId, roundId) : null,
-      userId ? getPlayersLeftOut(userId, roundId) : [],
-      userId ? getCoachRating(userId, roundId) : null,
-    ]);
+    // LEGACY: Specific User fetch
+    const data = await fetchUserRoundDetails(roundId, userId);
 
-    return successResponse(
-      {
-        global: globalStats,
-        idealLineup,
-        user: {
-          ...userStats,
-          coachRating, // { rating, maxScore, diff }
-          idealLineup: coachRating?.idealLineup, // Flatten structure for UI
-          leftOut, // List of players
-        },
-      },
-      CACHE_DURATIONS.MEDIUM
-    );
+    return successResponse(data, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching round stats:', error);
     return errorResponse('Failed to fetch round stats');

@@ -1,4 +1,4 @@
-import { getTeamById } from '@/lib/db';
+import { fetchTeamProfile } from '@/lib/services';
 import { Construction } from 'lucide-react';
 import Image from 'next/image';
 import { BackButton, PageHeader } from '@/components/ui';
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export default async function TeamPage({ params }) {
   const { id } = await params;
   const teamId = parseInt(id, 10);
-  const team = await getTeamById(teamId);
+  const team = await fetchTeamProfile(teamId);
 
   // Handle case where team is not found
   if (!team) {
