@@ -11,7 +11,7 @@ import {
   Calendar,
   Target,
   Clock,
-  Sparkles,
+  Activity,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -64,7 +64,7 @@ export default function Home() {
     },
     {
       title: 'Alineaciones',
-      description: 'Sugerencias de alineación por IA',
+      description: 'Gestión de tu alineación',
       icon: Users,
       href: '/schedule',
       color: 'purple',
@@ -90,10 +90,10 @@ export default function Home() {
       disabled: false,
     },
     {
-      title: 'Assistant',
-      description: 'Tu asistente inteligente de Biwenger',
-      icon: Sparkles,
-      href: '/ai',
+      title: 'Comparador',
+      description: 'Cara a cara entre usuarios',
+      icon: Activity,
+      href: '/compare',
       color: 'indigo',
       delay: '0.9s',
       disabled: false,
