@@ -1,6 +1,7 @@
 'use client';
 
 import { createElement } from 'react';
+import { Info } from 'lucide-react';
 
 /**
  * ElegantCard - Minimal, clean card design
@@ -8,6 +9,7 @@ import { createElement } from 'react';
  * - Left border accent in primary color
  * - Simple border on other sides
  * - Subtle border color change on hover
+ * - Added `info` prop for tooltips
  */
 export default function ElegantCard({
   children,
@@ -17,6 +19,7 @@ export default function ElegantCard({
   loading = false,
   className = '',
   actionRight = null,
+  info = null, // New prop for explanation text
   ...rest
 }) {
   // Icon colors based on semantic color prop
@@ -27,6 +30,7 @@ export default function ElegantCard({
     purple: 'text-purple-500',
     blue: 'text-blue-500',
     orange: 'text-primary',
+    amber: 'text-amber-500',
     cyan: 'text-cyan-500',
     yellow: 'text-yellow-500',
     pink: 'text-pink-500',
@@ -78,8 +82,18 @@ export default function ElegantCard({
               createElement(icon, {
                 className: `w-4 h-4 ${iconColor}`,
               })}
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
               {title}
+              {info && (
+                <div className="group/info relative cursor-help">
+                  <Info size={14} className="text-zinc-600 hover:text-zinc-400 transition-colors" />
+                  {/* Tooltip */}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs normal-case leading-relaxed rounded shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-10 pointer-events-none text-center">
+                    {info}
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-zinc-800/50"></div>
+                  </div>
+                </div>
+              )}
             </span>
           </div>
           {actionRight}
