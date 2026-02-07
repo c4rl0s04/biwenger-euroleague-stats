@@ -1,25 +1,23 @@
 'use client';
 
-import { ThumbsDown, Calculator } from 'lucide-react';
+import { ThumbsDown } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
-import { getColorForUser } from '@/lib/constants/colors';
-
 export default function WorstValueCard({ player }) {
-  if (!player) return null;
+  if (!player || !Array.isArray(player) || player.length === 0) return null;
 
-  const userColor = getColorForUser(player.user_id || 0, player.user_name, player.user_color_index);
+  const winner = player[0];
+  const runnerUps = player.slice(1);
 
   const formatNumber = (val) => {
-    return val.toLocaleString('es-ES', { maximumFractionDigits: 1 });
+    return val?.toLocaleString('es-ES', { maximumFractionDigits: 1 });
   };
 
   const formatEuro = (val) => {
-    if (val >= 1000000) {
-      return (val / 1000000).toFixed(1) + 'M';
-    }
-    return (val / 1000).toFixed(0) + 'k';
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+    return val?.toLocaleString('es-ES');
   };
 
   return (
@@ -30,57 +28,50 @@ export default function WorstValueCard({ player }) {
         color="red"
         info="Peor Rentabilidad. Puntos por millón más bajos entre jugadores caros (>2M). La gran decepción."
       >
-        <div className="flex flex-col h-full justify-between">
+        <div className="flex flex-col h-full">
+          {/* Winner Section */}
           <div className="mt-2 text-center">
-            <div className="text-sm text-red-500 uppercase tracking-widest font-black mb-2">
+            <div className="text-xs text-red-500 uppercase tracking-widest font-black mb-1">
               LA DECEPCIÓN
             </div>
 
-            <div className="text-2xl md:text-3xl font-black text-red-500 truncate px-2 leading-tight">
-              {player.player_name}
+            <div className="text-xl md:text-2xl font-black text-red-500 truncate px-2 leading-tight">
+              {winner.player_name}
             </div>
 
-            <div className="text-2xl md:text-3xl font-black text-white mt-2">
-              {formatNumber(player.points_per_million)}{' '}
-              <span className="text-lg md:text-xl font-bold text-zinc-500">pts/M€</span>
+            <div className="text-xl md:text-2xl font-black text-white mt-1">
+              {formatNumber(winner.points_per_million)}{' '}
+              <span className="text-sm md:text-base font-bold text-zinc-500">pts/M€</span>
             </div>
 
-            <div className="flex justify-center mt-2 mb-2">
-              <Link href={`/user/${player.user_id}`} className="group flex items-center">
-                <span
-                  className={`text-sm font-bold ${userColor.text} group-hover:brightness-110 transition-all`}
-                >
-                  {player.user_name}
-                </span>
-              </Link>
-            </div>
+            <Link href={`/user/${winner.user_id}`} className="group">
+              <span className="text-xs font-bold text-red-400 group-hover:brightness-110 transition-all">
+                {winner.user_name}
+              </span>
+            </Link>
           </div>
 
-          <div className="mt-4 flex justify-center">
-            <div className="inline-flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm p-2 pr-5 rounded-full">
-              <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700 text-zinc-400">
-                <Calculator size={18} />
-              </div>
-              <div className="text-left">
-                <div className="flex justify-between gap-4">
-                  <div>
-                    <p className="text-[10px] text-zinc-500 uppercase font-bold leading-none mb-1">
-                      Coste
-                    </p>
-                    <p className="text-sm font-bold text-white">
-                      {formatEuro(player.purchase_price)} €
-                    </p>
+          {/* Runner-ups List */}
+          {runnerUps.length > 0 && (
+            <div className="mt-3 border-t border-zinc-800 pt-2 max-h-32 overflow-y-auto">
+              <div className="space-y-1">
+                {runnerUps.map((item, index) => (
+                  <div
+                    key={item.player_id + '-' + index}
+                    className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-500 font-bold w-4">{index + 2}.</span>
+                      <span className="text-zinc-300 truncate">{item.player_name}</span>
+                    </div>
+                    <span className="text-red-400 font-semibold">
+                      {formatNumber(item.points_per_million)}
+                    </span>
                   </div>
-                  <div className="border-l border-zinc-700 pl-4">
-                    <p className="text-[10px] text-zinc-500 uppercase font-bold leading-none mb-1">
-                      Puntos
-                    </p>
-                    <p className="text-sm font-bold text-white">{player.total_points}</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </ElegantCard>
     </div>

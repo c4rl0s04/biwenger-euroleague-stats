@@ -1,14 +1,19 @@
 'use client';
 
-import { Search, ArrowRight, Trophy, XCircle } from 'lucide-react';
+import { Search, Trophy, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 export default function BiggestStealCard({ data }) {
-  if (!data) return null;
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
+
+  const winner = data[0];
+  const runnerUps = data.slice(1);
 
   const formatEuro = (val) => {
-    return val?.toLocaleString('es-ES', { maximumFractionDigits: 0 });
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+    return val?.toLocaleString('es-ES');
   };
 
   return (
@@ -19,70 +24,61 @@ export default function BiggestStealCard({ data }) {
         color="cyan"
         info="El fichaje ganado por la mínima diferencia respecto a la segunda puja más alta."
       >
-        <div className="flex flex-col justify-between h-full">
-          <div className="mt-1">
-            {/* Main Stat: Diff */}
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-2xl md:text-3xl font-black text-cyan-400 tracking-tight">
-                +{formatEuro(data.price_diff)} €
-              </span>
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wide">
-                Diferencia
-              </span>
+        <div className="flex flex-col h-full">
+          {/* Winner Section */}
+          <div className="mt-2 text-center">
+            <div className="text-xs text-cyan-500 uppercase tracking-widest font-black mb-1">
+              MÍNIMA DIFERENCIA
             </div>
 
-            {/* Player Name */}
-            <div className="mb-4">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">
-                Jugador
-              </span>
-              <span className="text-sm font-black text-white truncate block">
-                {data.player_name}
-              </span>
-            </div>
-
-            {/* Comparison Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Left: Winner */}
-              <div className="bg-cyan-900/10 border border-cyan-500/20 rounded-lg p-2">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Trophy size={10} className="text-cyan-400" />
-                  <span className="text-[10px] text-cyan-400 uppercase font-black">Ganador</span>
-                </div>
-                <div className="text-xs font-bold text-white truncate mb-0.5">{data.winner}</div>
-                <div className="text-[10px] text-zinc-400">{formatEuro(data.winning_price)} €</div>
+            <Link href={`/player/${winner.player_id}`} className="block group">
+              <div className="text-xl md:text-2xl font-black text-cyan-500 group-hover:text-cyan-400 transition-colors truncate px-2 leading-tight">
+                {winner.player_name}
               </div>
+            </Link>
 
-              {/* Right: Loser */}
-              <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-2">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <XCircle size={10} className="text-zinc-500" />
-                  <span className="text-[10px] text-zinc-500 uppercase font-black">2º Lugar</span>
-                </div>
-                <div className="text-xs font-bold text-zinc-300 truncate mb-0.5">
-                  {data.second_bidder_name || 'Desconocido'}
-                </div>
-                <div className="text-[10px] text-zinc-500">
-                  {formatEuro(data.second_highest_bid)} €
+            <div className="text-xl md:text-2xl font-black text-white mt-1">
+              +{formatEuro(winner.price_diff)} €
+            </div>
+
+            {/* Comparison */}
+            <div className="grid grid-cols-2 gap-2 mt-2 px-2">
+              <div className="bg-cyan-900/10 border border-cyan-500/20 rounded-lg p-1.5">
+                <Trophy size={10} className="text-cyan-400 inline mr-1" />
+                <span className="text-[9px] text-cyan-400 uppercase font-black">Ganador</span>
+                <div className="text-[10px] font-bold text-white truncate">{winner.winner}</div>
+              </div>
+              <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-1.5">
+                <XCircle size={10} className="text-zinc-500 inline mr-1" />
+                <span className="text-[9px] text-zinc-500 uppercase font-black">2º Lugar</span>
+                <div className="text-[10px] font-bold text-zinc-300 truncate">
+                  {winner.second_bidder_name || 'Desconocido'}
                 </div>
               </div>
             </div>
           </div>
 
-          <Link
-            href={`/player/${data.player_id}`}
-            className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center group"
-          >
-            <span className="text-xs text-cyan-400 font-semibold uppercase tracking-wide group-hover:text-cyan-300 transition-colors">
-              Ver Jugador
-            </span>
-            <div className="w-6 h-6 rounded-full bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
-              <ArrowRight
-                size={12}
-                className="text-cyan-400 group-hover:translate-x-0.5 transition-transform"
-              />
+          {/* Runner-ups List */}
+          {runnerUps.length > 0 && (
+            <div className="mt-3 border-t border-zinc-800 pt-2 max-h-28 overflow-y-auto">
+              <div className="space-y-1">
+                {runnerUps.map((item, index) => (
+                  <div
+                    key={item.transfer_id || index}
+                    className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-500 font-bold w-4">{index + 2}.</span>
+                      <span className="text-zinc-300 truncate">{item.player_name}</span>
+                    </div>
+                    <span className="text-cyan-400 font-semibold">
+                      +{formatEuro(item.price_diff)}€
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </Link>
+          )}
         </div>
       </ElegantCard>
     </div>

@@ -1,68 +1,69 @@
 'use client';
 
-import { TrendingUp, User } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import UserAvatar from '@/components/ui/UserAvatar';
-import { getColorForUser } from '@/lib/constants/colors';
 
 export default function RecordTransferCard({ record }) {
-  if (!record) return null;
+  if (!record || !Array.isArray(record) || record.length === 0) return null;
+
+  const winner = record[0];
+  const runnerUps = record.slice(1);
 
   const formatEuro = (val) => {
-    return val.toLocaleString('es-ES', { maximumFractionDigits: 0 });
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+    return val?.toLocaleString('es-ES');
   };
-
-  // Resolve Buyer Color
-  // We'll use buyer_color if available, otherwise fallback.
-  const buyerColor = getColorForUser(record.buyer_id || 0, record.buyer_name, record.buyer_color);
 
   return (
     <div className="h-full hover:scale-[1.02] transition-transform duration-200">
       <ElegantCard title="Récord Histórico" icon={TrendingUp} color="rose">
-        <div className="flex flex-col h-full justify-between">
+        <div className="flex flex-col h-full">
+          {/* Winner Section */}
           <div className="mt-2 text-center">
-            <div className="text-sm text-rose-500 uppercase tracking-widest font-black mb-2">
+            <div className="text-xs text-rose-500 uppercase tracking-widest font-black mb-1">
               TRASPASO MÁS CARO
             </div>
 
-            <Link href={`/player/${record.player_id}`} className="block group">
-              <div className="text-2xl md:text-3xl font-black text-rose-500 group-hover:text-rose-400 transition-colors truncate px-2 leading-tight">
-                {record.player_name || 'Desconocido'}
+            <Link href={`/player/${winner.player_id}`} className="block group">
+              <div className="text-xl md:text-2xl font-black text-rose-500 group-hover:text-rose-400 transition-colors truncate px-2 leading-tight">
+                {winner.player_name || 'Desconocido'}
               </div>
             </Link>
 
-            <div className="text-2xl md:text-3xl font-black text-white mt-2">
-              {record.precio ? formatEuro(record.precio) : '0'} €
+            <div className="text-xl md:text-2xl font-black text-white mt-1">
+              {formatEuro(winner.precio)} €
             </div>
+            <p className="text-[10px] text-zinc-500 font-bold">
+              Comprador: {winner.buyer_name || winner.comprador}
+            </p>
           </div>
 
-          <div className="mt-6 flex justify-center">
-            <Link
-              href={`/user/${record.buyer_id || ''}`}
-              className="inline-flex items-center gap-3 bg-zinc-900/50 hover:bg-zinc-800/80 border border-zinc-800 backdrop-blur-sm p-2 pr-5 rounded-full transition-all group/user"
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${buyerColor.border} overflow-hidden bg-zinc-800`}
-              >
-                {record.buyer_icon ? (
-                  <UserAvatar src={record.buyer_icon} alt={record.buyer_name} size={40} />
-                ) : (
-                  <User size={18} className={buyerColor.text} />
-                )}
+          {/* Runner-ups List */}
+          {runnerUps.length > 0 && (
+            <div className="mt-3 border-t border-zinc-800 pt-2 max-h-32 overflow-y-auto">
+              <div className="space-y-1">
+                {runnerUps.map((item, index) => (
+                  <div
+                    key={item.id || index}
+                    className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-500 font-bold w-4">{index + 2}.</span>
+                      <Link
+                        href={`/player/${item.player_id}`}
+                        className="text-zinc-300 hover:text-rose-400 truncate"
+                      >
+                        {item.player_name}
+                      </Link>
+                    </div>
+                    <span className="text-zinc-400 font-semibold">{formatEuro(item.precio)}€</span>
+                  </div>
+                ))}
               </div>
-              <div className="text-left">
-                <p className="text-[10px] text-zinc-500 uppercase font-bold leading-none mb-1">
-                  Comprador
-                </p>
-                <p
-                  className={`text-sm font-bold ${buyerColor.text} group-hover/user:brightness-110 transition-colors`}
-                >
-                  {record.buyer_name || record.comprador}
-                </p>
-              </div>
-            </Link>
-          </div>
+            </div>
+          )}
         </div>
       </ElegantCard>
     </div>

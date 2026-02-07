@@ -2,7 +2,7 @@
 
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { User, Activity, Euro } from 'lucide-react';
+import { User, Euro } from 'lucide-react';
 
 const COLORS = {
   Unknown: '#64748b',
@@ -33,7 +33,7 @@ function CustomTooltip({ active, payload }) {
 export default function PositionAnalysisGrid({ positionStats }) {
   if (!positionStats || !positionStats.distribution.length) return null;
 
-  const { mostSigned, distribution } = positionStats;
+  const { distribution } = positionStats;
   const processedDist = distribution.map((d) => ({
     ...d,
     color: COLORS[d.position] || COLORS.Unknown,
@@ -44,25 +44,9 @@ export default function PositionAnalysisGrid({ positionStats }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* 1. Stats Column */}
-      <div className="lg:col-span-1 space-y-6">
-        {/* Most Signed Position */}
-        {mostSigned && (
-          <ElegantCard title="Posición Más Fichada" icon={Activity} color="orange">
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-4xl font-extrabold text-white">{mostSigned.position}</span>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-orange-400 leading-none">
-                  {mostSigned.count}
-                </p>
-                <p className="text-[10px] text-zinc-500 uppercase font-bold mt-1">Fichajes</p>
-              </div>
-            </div>
-          </ElegantCard>
-        )}
-
-        {/* Price by Position Table */}
-        <ElegantCard title="Precio Medio" icon={Euro} color="emerald">
+      {/* 1. Price by Position Table */}
+      <div className="lg:col-span-1">
+        <ElegantCard title="Precio Medio" icon={Euro} color="emerald" className="h-full">
           <div className="space-y-3 mt-2">
             {distribution.map((pos) => (
               <div
@@ -91,7 +75,7 @@ export default function PositionAnalysisGrid({ positionStats }) {
           color="blue"
           className="h-full min-h-[300px]"
         >
-          <div className="h-full w-full">
+          <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

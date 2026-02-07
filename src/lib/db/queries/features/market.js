@@ -240,16 +240,16 @@ export async function getTopTransferredPlayer() {
     WHERE f.precio > 0
     GROUP BY f.player_id, p.name, p.img
     ORDER BY transfer_count DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  if (!result.rows.length) return null;
+  if (!result.rows.length) return [];
 
-  return {
-    ...result.rows[0],
-    transfer_count: parseInt(result.rows[0].transfer_count),
-    avg_price: parseInt(result.rows[0].avg_price),
-  };
+  return result.rows.map((row) => ({
+    ...row,
+    transfer_count: parseInt(row.transfer_count),
+    avg_price: parseInt(row.avg_price),
+  }));
 }
 
 /**
@@ -270,14 +270,14 @@ export async function getRecordTransfer() {
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN users u ON f.comprador = u.name
     ORDER BY f.precio DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  if (!result.rows[0]) return null;
-  return {
-    ...result.rows[0],
-    precio: parseInt(result.rows[0].precio),
-  };
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    precio: parseInt(row.precio),
+  }));
 }
 
 /**
@@ -294,16 +294,15 @@ export async function getBigSpender() {
     WHERE comprador != 'Mercado'
     GROUP BY comprador
     ORDER BY total_spent DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        total_spent: parseInt(result.rows[0].total_spent),
-        purchases_count: parseInt(result.rows[0].purchases_count),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    total_spent: parseInt(row.total_spent),
+    purchases_count: parseInt(row.purchases_count),
+  }));
 }
 
 /**
@@ -325,19 +324,18 @@ export async function getRecordBid() {
     LEFT JOIN players p ON f.player_id = p.id
     GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, p.name, p.img
     ORDER BY bid_count DESC
-    LIMIT 1
+    LIMIT 10
   `;
   try {
     const result = await db.query(query);
-    return result.rows[0]
-      ? {
-          ...result.rows[0],
-          bid_count: parseInt(result.rows[0].bid_count),
-        }
-      : null;
+    if (!result.rows.length) return [];
+    return result.rows.map((row) => ({
+      ...row,
+      bid_count: parseInt(row.bid_count),
+    }));
   } catch (error) {
     console.warn('Could not fetch record bid:', error.message);
-    return null;
+    return [];
   }
 }
 
@@ -387,7 +385,9 @@ export async function getPositionAnalysis() {
       SUM(f.precio) as total_volume
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
-    WHERE f.precio > 0
+    WHERE f.vendedor = 'Mercado'
+      AND f.comprador != 'Mercado'
+      AND f.precio > 0
     GROUP BY p.position
     ORDER BY count DESC
   `;
@@ -548,17 +548,16 @@ export async function getBestSeller() {
     WHERE s.vendedor != 'Mercado' -- Only check user sales
     GROUP BY s.vendedor
     ORDER BY net_profit DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        total_sales: parseInt(result.rows[0].total_sales),
-        net_profit: parseInt(result.rows[0].net_profit),
-        sales_count: parseInt(result.rows[0].sales_count),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    total_sales: parseInt(row.total_sales),
+    net_profit: parseInt(row.net_profit),
+    sales_count: parseInt(row.sales_count),
+  }));
 }
 
 /**
@@ -588,17 +587,16 @@ export async function getBestRevaluation() {
       ORDER BY timestamp DESC LIMIT 1
     )
     ORDER BY revaluation DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        current_price: parseInt(result.rows[0].current_price),
-        purchase_price: parseInt(result.rows[0].purchase_price),
-        revaluation: parseInt(result.rows[0].revaluation),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    current_price: parseInt(row.current_price),
+    purchase_price: parseInt(row.purchase_price),
+    revaluation: parseInt(row.revaluation),
+  }));
 }
 
 /**
@@ -674,18 +672,17 @@ export async function getBestValuePlayer() {
       AND f.comprador != 'Mercado'
 
     ORDER BY points_per_million DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        total_points: parseInt(result.rows[0].total_points),
-        purchase_price: parseInt(result.rows[0].purchase_price),
-        points_per_million: parseFloat(result.rows[0].points_per_million),
-        transfer_id: result.rows[0].transfer_id,
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    total_points: parseInt(row.total_points),
+    purchase_price: parseInt(row.purchase_price),
+    points_per_million: parseFloat(row.points_per_million),
+    transfer_id: row.transfer_id,
+  }));
 }
 
 /**
@@ -836,18 +833,17 @@ export async function getWorstValuePlayer() {
       )
 
     ORDER BY points_per_million ASC, purchase_price DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        total_points: parseInt(result.rows[0].total_points),
-        purchase_price: parseInt(result.rows[0].purchase_price),
-        points_per_million: parseFloat(result.rows[0].points_per_million),
-        transfer_id: result.rows[0].transfer_id,
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    total_points: parseInt(row.total_points),
+    purchase_price: parseInt(row.purchase_price),
+    points_per_million: parseFloat(row.points_per_million),
+    transfer_id: row.transfer_id,
+  }));
 }
 
 /**
@@ -866,15 +862,14 @@ export async function getTheThief() {
       AND tb.bidder_name != f.comprador -- Bid was from someone else
     GROUP BY f.comprador
     ORDER BY stolen_count DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        stolen_count: parseInt(result.rows[0].stolen_count),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    stolen_count: parseInt(row.stolen_count),
+  }));
 }
 
 /**
@@ -913,17 +908,16 @@ export async function getBiggestSteal() {
         LIMIT 1
     ) second_bid
     ORDER BY price_diff ASC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        winning_price: parseInt(result.rows[0].winning_price),
-        second_highest_bid: parseInt(result.rows[0].second_highest_bid),
-        price_diff: parseInt(result.rows[0].price_diff),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    winning_price: parseInt(row.winning_price),
+    second_highest_bid: parseInt(row.second_highest_bid),
+    price_diff: parseInt(row.price_diff),
+  }));
 }
 
 /**
@@ -941,15 +935,14 @@ export async function getTheVictim() {
       AND tb.bidder_name != 'Mercado' -- Exclude system
     GROUP BY tb.bidder_name
     ORDER BY failed_bids_count DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        failed_bids_count: parseInt(result.rows[0].failed_bids_count),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    failed_bids_count: parseInt(row.failed_bids_count),
+  }));
 }
 
 /**
@@ -989,17 +982,16 @@ export async function getBestSingleFlip() {
     
     WHERE purchase.comprador != 'Mercado'
     ORDER BY profit DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        purchase_price: parseInt(result.rows[0].purchase_price),
-        sale_price: parseInt(result.rows[0].sale_price),
-        profit: parseInt(result.rows[0].profit),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    purchase_price: parseInt(row.purchase_price),
+    sale_price: parseInt(row.sale_price),
+    profit: parseInt(row.profit),
+  }));
 }
 
 /**
@@ -1042,17 +1034,16 @@ export async function getBestPercentageGain() {
       AND f.precio > 150000 -- Avoid trivial gains on min price players
 
     ORDER BY percentage_gain DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        current_price: parseInt(result.rows[0].current_price),
-        purchase_price: parseInt(result.rows[0].purchase_price),
-        percentage_gain: parseFloat(result.rows[0].percentage_gain),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    current_price: parseInt(row.current_price),
+    purchase_price: parseInt(row.purchase_price),
+    percentage_gain: parseFloat(row.percentage_gain),
+  }));
 }
 
 /**
@@ -1072,13 +1063,12 @@ export async function getMostOwnersPlayer() {
     WHERE f.comprador != 'Mercado'
     GROUP BY p.id, p.name, p.img
     ORDER BY distinct_owners_count DESC
-    LIMIT 1
+    LIMIT 10
   `;
   const result = await db.query(query);
-  return result.rows[0]
-    ? {
-        ...result.rows[0],
-        distinct_owners_count: parseInt(result.rows[0].distinct_owners_count),
-      }
-    : null;
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    distinct_owners_count: parseInt(row.distinct_owners_count),
+  }));
 }

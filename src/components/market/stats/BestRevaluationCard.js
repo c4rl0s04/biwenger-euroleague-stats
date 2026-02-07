@@ -1,19 +1,20 @@
 'use client';
 
-import { Telescope, TrendingUp } from 'lucide-react';
+import { Telescope } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { getColorForUser } from '@/lib/constants/colors';
 
 export default function BestRevaluationCard({ data }) {
-  if (!data) return null;
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
+
+  const winner = data[0];
+  const runnerUps = data.slice(1);
 
   const formatEuro = (val) => {
-    return val.toLocaleString('es-ES', { maximumFractionDigits: 0 });
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+    return val?.toLocaleString('es-ES');
   };
-
-  // Resolve User Color
-  const userColor = getColorForUser(data.user_id || 0, data.user_name, data.user_color_index);
 
   return (
     <div className="h-full hover:scale-[1.02] transition-transform duration-200">
@@ -23,48 +24,56 @@ export default function BestRevaluationCard({ data }) {
         color="purple"
         info="Mayor incremento de valor de un jugador desde su fichaje hasta hoy. (Valor Actual - Precio Compra)"
       >
-        <div className="flex flex-col h-full justify-between">
+        <div className="flex flex-col h-full">
+          {/* Winner Section */}
           <div className="mt-2 text-center">
-            <div className="text-sm text-purple-500 uppercase tracking-widest font-black mb-2">
+            <div className="text-xs text-purple-500 uppercase tracking-widest font-black mb-1">
               MAYOR REVALORIZACIÓN
             </div>
 
-            <Link href={`/player/${data.player_id}`} className="block group">
-              <div className="text-2xl md:text-3xl font-black text-purple-400 group-hover:text-purple-300 transition-colors truncate px-2 leading-tight">
-                {data.player_name}
+            <Link href={`/player/${winner.player_id}`} className="block group">
+              <div className="text-xl md:text-2xl font-black text-purple-400 group-hover:text-purple-300 transition-colors truncate px-2 leading-tight">
+                {winner.player_name}
               </div>
             </Link>
 
-            <div className="text-2xl md:text-3xl font-black text-white mt-2">
-              +{formatEuro(data.revaluation)} €
+            <div className="text-xl md:text-2xl font-black text-white mt-1">
+              +{formatEuro(winner.revaluation)} €
             </div>
-          </div>
 
-          <div className="flex justify-center mt-2 mb-2">
-            <Link href={`/user/${data.user_id}`} className="group flex items-center">
-              <span
-                className={`text-sm font-bold ${userColor.text} group-hover:brightness-110 transition-all`}
-              >
-                {data.user_name}
+            <Link href={`/user/${winner.user_id}`} className="group">
+              <span className="text-xs font-bold text-purple-400 group-hover:brightness-110 transition-all">
+                {winner.user_name}
               </span>
             </Link>
           </div>
 
-          <div className="w-full px-4">
-            <div className="flex justify-between items-center text-xs text-zinc-400 uppercase font-bold mb-1">
-              <span>Compra</span>
-              <span>Actual</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg">
-              <div className="text-base font-bold text-white">
-                {formatEuro(data.purchase_price)}
+          {/* Runner-ups List */}
+          {runnerUps.length > 0 && (
+            <div className="mt-3 border-t border-zinc-800 pt-2 max-h-32 overflow-y-auto">
+              <div className="space-y-1">
+                {runnerUps.map((item, index) => (
+                  <div
+                    key={item.player_id + '-' + index}
+                    className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-500 font-bold w-4">{index + 2}.</span>
+                      <Link
+                        href={`/player/${item.player_id}`}
+                        className="text-zinc-300 hover:text-purple-400 truncate"
+                      >
+                        {item.player_name}
+                      </Link>
+                    </div>
+                    <span className="text-purple-400 font-semibold">
+                      +{formatEuro(item.revaluation)}€
+                    </span>
+                  </div>
+                ))}
               </div>
-              <TrendingUp size={16} className="text-purple-500 mx-2" />
-              <div className="text-base font-bold text-purple-400">
-                {formatEuro(data.current_price)}
-              </div>
             </div>
-          </div>
+          )}
         </div>
       </ElegantCard>
     </div>

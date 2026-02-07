@@ -8,80 +8,97 @@ import BestValueDetailModal from './BestValueDetailModal';
 
 export default function BestValueCard({ player }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTransferId, setSelectedTransferId] = useState(null);
 
-  if (!player) return null;
+  if (!player || !Array.isArray(player) || player.length === 0) return null;
+
+  const winner = player[0];
+  const runnerUps = player.slice(1);
 
   const formatNumber = (val) => {
-    return val.toLocaleString('es-ES', { maximumFractionDigits: 1 });
+    return val?.toLocaleString('es-ES', { maximumFractionDigits: 1 });
   };
 
   const formatEuro = (val) => {
-    if (val >= 1000000) {
-      return (val / 1000000).toFixed(1) + 'M';
-    }
-    return (val / 1000).toFixed(0) + 'k';
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+    return val?.toLocaleString('es-ES');
+  };
+
+  const handleOpenModal = (transferId) => {
+    setSelectedTransferId(transferId);
+    setIsModalOpen(true);
   };
 
   return (
     <>
-      <div
-        onClick={() => setIsModalOpen(true)}
-        className="h-full cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-      >
+      <div className="h-full hover:scale-[1.02] transition-transform duration-200">
         <ElegantCard
           title="El Chollo"
           icon={Tag}
           color="amber"
           info="Rentabilidad. Puntos conseguidos por el jugador MIENTRAS PERTENECÍA al usuario, dividido por el precio de compra (Puntos / Millón €). Haz clic para ver detalles."
         >
-          <div className="flex flex-col h-full justify-between pointer-events-none">
-            {' '}
-            {/* Disable pointer events inside to treat card as button */}
-            <div className="mt-2 text-center pointer-events-auto">
-              {' '}
-              {/* Re-enable for links if needed, but here we cover whole card */}
-              <div className="text-sm text-amber-500 uppercase tracking-widest font-black mb-2">
+          <div className="flex flex-col h-full">
+            {/* Winner Section - Clickable */}
+            <div
+              onClick={() => handleOpenModal(winner.transfer_id)}
+              className="mt-2 text-center cursor-pointer"
+            >
+              <div className="text-xs text-amber-500 uppercase tracking-widest font-black mb-1">
                 CALIDAD / PRECIO
               </div>
-              <div className="text-2xl md:text-3xl font-black text-amber-500 group-hover:text-amber-400 transition-colors truncate px-2 leading-tight">
-                {player.player_name}
+
+              <div className="text-xl md:text-2xl font-black text-amber-500 hover:text-amber-400 transition-colors truncate px-2 leading-tight">
+                {winner.player_name}
               </div>
-              <div className="text-2xl md:text-3xl font-black text-white mt-2">
-                {player.points_per_million.toFixed(1)}{' '}
-                <span className="text-lg md:text-xl font-bold text-zinc-500">pts/M</span>
+
+              <div className="text-xl md:text-2xl font-black text-white mt-1">
+                {winner.points_per_million?.toFixed(1)}{' '}
+                <span className="text-sm md:text-base font-bold text-zinc-500">pts/M</span>
               </div>
+
+              <Link
+                href={`/user/${winner.user_id}`}
+                className="group"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="text-xs font-bold text-amber-400 group-hover:brightness-110 transition-all">
+                  {winner.user_name}
+                </span>
+              </Link>
             </div>
-            <div className="mt-6 flex justify-center">
-              <div className="inline-flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm p-2 pr-5 rounded-full">
-                <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700 text-zinc-400">
-                  <Calculator size={18} />
-                </div>
-                <div className="text-left">
-                  <div className="flex justify-between gap-4">
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold leading-none mb-1">
-                        Coste
-                      </p>
-                      <p className="text-sm font-bold text-white">
-                        {formatEuro(player.purchase_price)} €
-                      </p>
+
+            {/* Runner-ups List */}
+            {runnerUps.length > 0 && (
+              <div className="mt-3 border-t border-zinc-800 pt-2 max-h-32 overflow-y-auto">
+                <div className="space-y-1">
+                  {runnerUps.map((item, index) => (
+                    <div
+                      key={item.transfer_id || index}
+                      onClick={() => handleOpenModal(item.transfer_id)}
+                      className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-zinc-500 font-bold w-4">{index + 2}.</span>
+                        <span className="text-zinc-300 hover:text-amber-400 truncate">
+                          {item.player_name}
+                        </span>
+                      </div>
+                      <span className="text-amber-400 font-semibold">
+                        {item.points_per_million?.toFixed(1)}
+                      </span>
                     </div>
-                    <div className="border-l border-zinc-700 pl-4">
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold leading-none mb-1">
-                        Puntos
-                      </p>
-                      <p className="text-sm font-bold text-white">{player.total_points}</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </ElegantCard>
       </div>
 
       <BestValueDetailModal
-        transferId={player.transfer_id}
+        transferId={selectedTransferId}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

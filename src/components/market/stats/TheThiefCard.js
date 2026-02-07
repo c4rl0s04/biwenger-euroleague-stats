@@ -5,7 +5,10 @@ import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 export default function TheThiefCard({ data }) {
-  if (!data) return null;
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
+
+  const winner = data[0];
+  const runnerUps = data.slice(1);
 
   return (
     <div className="h-full hover:scale-[1.02] transition-transform duration-200">
@@ -15,32 +18,49 @@ export default function TheThiefCard({ data }) {
         color="red"
         info="El usuario que ha ganado más fichajes habiendo otras pujas de rivales."
       >
-        <div className="flex flex-col h-full justify-between">
-          <div className="mt-4 text-center">
-            <div className="text-sm text-red-500 uppercase tracking-widest font-black mb-2">
+        <div className="flex flex-col h-full">
+          {/* Winner Section */}
+          <div className="mt-2 text-center">
+            <div className="text-xs text-red-500 uppercase tracking-widest font-black mb-1">
               MÁS ROBOS
             </div>
 
-            <Link href={`/user/${data.id}`} className="block group">
-              <div className="text-2xl md:text-3xl font-black text-red-500 group-hover:text-red-400 transition-colors truncate px-2 leading-tight">
-                {data.name}
+            <Link href={`/user/${winner.id}`} className="block group">
+              <div className="text-xl md:text-2xl font-black text-red-500 group-hover:text-red-400 transition-colors truncate px-2 leading-tight">
+                {winner.name}
               </div>
             </Link>
 
-            <div className="text-2xl md:text-3xl font-black text-white mt-2">
-              {data.stolen_count}{' '}
-              <span className="text-lg md:text-xl font-bold text-zinc-500">fichajes</span>
+            <div className="text-xl md:text-2xl font-black text-white mt-1">
+              {winner.stolen_count}{' '}
+              <span className="text-sm md:text-base font-bold text-zinc-500">fichajes</span>
             </div>
           </div>
 
-          <div className="mt-6 flex justify-center">
-            <div className="inline-flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm px-4 py-2 rounded-full">
-              <Swords size={16} className="text-red-400" />
-              <span className="text-sm text-zinc-300">
-                Ganados con <strong>competencia</strong>
-              </span>
+          {/* Runner-ups List */}
+          {runnerUps.length > 0 && (
+            <div className="mt-3 border-t border-zinc-800 pt-2 max-h-32 overflow-y-auto">
+              <div className="space-y-1">
+                {runnerUps.map((item, index) => (
+                  <div
+                    key={item.id || index}
+                    className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-500 font-bold w-4">{index + 2}.</span>
+                      <Link
+                        href={`/user/${item.id}`}
+                        className="text-zinc-300 hover:text-red-400 truncate"
+                      >
+                        {item.name}
+                      </Link>
+                    </div>
+                    <span className="text-zinc-400 font-semibold">{item.stolen_count}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </ElegantCard>
     </div>

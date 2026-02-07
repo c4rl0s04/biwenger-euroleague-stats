@@ -80,7 +80,7 @@ export default function MarketPageClient() {
 
       {/* Section: Inversiones */}
       <Section title="Inversiones y Plusvalías" delay={150} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <BestValueCard player={marketStats.bestValue} />
           <BestFlipCard flip={marketStats.bestFlip} />
           <BestRevaluationCard data={marketStats.bestRevaluation} />
@@ -90,7 +90,7 @@ export default function MarketPageClient() {
 
       {/* Section: Pujas */}
       <Section title="Pujas y Subastas" delay={200} background="section-raised">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <TheThiefCard data={marketStats.theThief} />
           <BiggestStealCard data={marketStats.biggestSteal} />
           <RecordBidCard record={marketStats.recordBid} />

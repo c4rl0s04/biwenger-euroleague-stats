@@ -1,68 +1,70 @@
 'use client';
 
-import { Gavel, ArrowRight } from 'lucide-react';
+import { Gavel } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 export default function RecordBidCard({ record }) {
-  if (!record) return null;
+  if (!record || !Array.isArray(record) || record.length === 0) return null;
+
+  const winner = record[0];
+  const runnerUps = record.slice(1);
+
+  const formatEuro = (val) => {
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+    return val?.toLocaleString('es-ES');
+  };
 
   return (
     <div className="h-full hover:scale-[1.02] transition-transform duration-200">
       <ElegantCard title="Récord Pujas" icon={Gavel} color="purple">
-        <div className="flex flex-col justify-between h-full">
-          <div className="mt-1">
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-2xl md:text-3xl font-black text-purple-400 tracking-tight">
-                {record.bid_count}
-              </span>
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wide">
-                Pujas
-              </span>
+        <div className="flex flex-col h-full">
+          {/* Winner Section */}
+          <div className="mt-2 text-center">
+            <div className="text-xs text-purple-500 uppercase tracking-widest font-black mb-1">
+              MÁS PUJAS
             </div>
 
-            <div className="space-y-1 mt-2">
-              <div className="flex justify-between items-end border-b border-white/5 pb-1.5 border-dashed">
-                <span className="text-[10px] md:text-xs text-zinc-500 uppercase font-bold">
-                  Jugador
-                </span>
-                <span className="text-xs md:text-sm font-bold text-white truncate max-w-[120px] text-right">
-                  {record.player_name}
-                </span>
+            <Link href={`/player/${winner.player_id}`} className="block group">
+              <div className="text-xl md:text-2xl font-black text-purple-500 group-hover:text-purple-400 transition-colors truncate px-2 leading-tight">
+                {winner.player_name}
               </div>
-              <div className="flex justify-between items-end pt-0.5">
-                <span className="text-[10px] md:text-xs text-zinc-500 uppercase font-bold">
-                  Ganador
-                </span>
-                <span className="text-xs md:text-sm font-bold text-purple-300 truncate max-w-[120px] text-right">
-                  {record.comprador}
-                </span>
-              </div>
-              <div className="flex justify-between items-end pt-0.5 border-t border-white/5 mt-1 border-dashed">
-                <span className="text-[10px] md:text-xs text-zinc-500 uppercase font-bold">
-                  Precio
-                </span>
-                <span className="text-xs md:text-sm font-bold text-white text-right">
-                  {record.precio?.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €
-                </span>
-              </div>
+            </Link>
+
+            <div className="text-xl md:text-2xl font-black text-white mt-1">
+              {winner.bid_count}{' '}
+              <span className="text-sm md:text-base font-bold text-zinc-500">pujas</span>
             </div>
+            <p className="text-[10px] text-zinc-500 font-bold">
+              Ganador: {winner.comprador} • {formatEuro(winner.precio)}€
+            </p>
           </div>
 
-          <Link
-            href={`/player/${record.player_id}`}
-            className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center group"
-          >
-            <span className="text-xs text-purple-400 font-semibold uppercase tracking-wide group-hover:text-purple-300 transition-colors">
-              Ver Subasta
-            </span>
-            <div className="w-6 h-6 rounded-full bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-              <ArrowRight
-                size={12}
-                className="text-purple-400 group-hover:translate-x-0.5 transition-transform"
-              />
+          {/* Runner-ups List */}
+          {runnerUps.length > 0 && (
+            <div className="mt-3 border-t border-zinc-800 pt-2 max-h-32 overflow-y-auto">
+              <div className="space-y-1">
+                {runnerUps.map((item, index) => (
+                  <div
+                    key={item.transfer_id || index}
+                    className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-500 font-bold w-4">{index + 2}.</span>
+                      <Link
+                        href={`/player/${item.player_id}`}
+                        className="text-zinc-300 hover:text-purple-400 truncate"
+                      >
+                        {item.player_name}
+                      </Link>
+                    </div>
+                    <span className="text-zinc-400 font-semibold">{item.bid_count} pujas</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </Link>
+          )}
         </div>
       </ElegantCard>
     </div>
