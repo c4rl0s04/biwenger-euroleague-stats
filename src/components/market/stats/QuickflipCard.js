@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Gem, ChevronDown, ChevronUp } from 'lucide-react';
+import { Zap, ChevronDown, ChevronUp, Timer } from 'lucide-react';
 import Link from 'next/link';
 import PlayerImage from '@/components/ui/PlayerImage';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
@@ -15,7 +15,7 @@ const formatEuro = (amount) => {
   }).format(amount);
 };
 
-export default function BestPercentageCard({ data }) {
+export default function QuickflipCard({ data }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -25,23 +25,35 @@ export default function BestPercentageCard({ data }) {
   const restRunnerUps = data.slice(3);
   const winnerColor = getColorForUser(winner.user_id, winner.user_name, winner.user_color_index);
 
+  const formatEuro = (val) => {
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+    return val?.toLocaleString('es-ES');
+  };
+
+  const formatTime = (hours) => {
+    if (hours < 1) return `${Math.round(hours * 60)}min`;
+    if (hours < 24) return `${hours.toFixed(1)}h`;
+    return `${(hours / 24).toFixed(1)}d`;
+  };
+
   return (
     <div className="hover:scale-[1.02] transition-transform duration-200">
       <ElegantCard
-        title="Diamante en Bruto"
-        icon={Gem}
-        color="cyan"
-        info="Mayor Revalorización (%). El jugador que más ha multiplicado su valor desde su compra."
+        title="El Quickflip"
+        icon={Zap}
+        color="orange"
+        info="La operación de compraventa más rápida con beneficio. Velocidad máxima."
       >
         <div className="flex flex-col">
           {/* Hero Section */}
           <div className="relative mt-2">
-            {/* Player Image with Sparkle Effect */}
+            {/* Player Image with Speed Ring */}
             <div className="flex justify-center mb-3">
               <div className="relative">
-                {/* Glow Effect */}
-                <div className="absolute inset-0 w-20 h-20 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 opacity-20 blur-md" />
-                <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-cyan-500/50 shadow-lg shadow-cyan-500/30 relative">
+                {/* Animated Speed Ring */}
+                <div className="absolute inset-0 w-20 h-20 rounded-full animate-pulse bg-gradient-to-r from-orange-500 to-yellow-500 opacity-30" />
+                <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-orange-500/60 shadow-lg shadow-orange-500/30 relative">
                   <PlayerImage
                     src={winner.player_img}
                     alt={winner.player_name}
@@ -57,26 +69,34 @@ export default function BestPercentageCard({ data }) {
             {/* Player Name */}
             <div className="text-center">
               <Link href={`/player/${winner.player_id}`} className="group">
-                <span className="text-lg font-black text-white group-hover:text-cyan-400 transition-colors">
+                <span className="text-lg font-black text-white group-hover:text-orange-400 transition-colors">
                   {winner.player_name}
                 </span>
               </Link>
             </div>
 
-            {/* Percentage Display */}
+            {/* Time Display - Centerpiece */}
             <div className="mt-3 text-center">
-              <span className="text-2xl font-black text-cyan-400">
-                +{winner.percentage_gain?.toFixed(0)}%
-              </span>
-              <div className="flex justify-center gap-4 text-xs mt-1">
-                <div className="flex flex-col items-center">
-                  <span className="text-zinc-500 font-medium">Compra</span>
-                  <span className="text-zinc-300">{formatEuro(winner.purchase_price)}€</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-zinc-500 font-medium">Valor</span>
-                  <span className="text-zinc-300">{formatEuro(winner.current_price)}€</span>
-                </div>
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 px-4 py-2 rounded-xl border border-orange-500/30">
+                <Timer className="w-5 h-5 text-orange-400" />
+                <span className="text-2xl font-black text-orange-400">
+                  {formatTime(winner.hours_held)}
+                </span>
+              </div>
+              <div className="text-emerald-400 text-sm font-bold mt-1">
+                +{formatEuro(winner.profit)}€
+              </div>
+            </div>
+
+            {/* Price Flow */}
+            <div className="flex justify-center gap-4 text-xs mt-2">
+              <div className="flex flex-col items-center">
+                <span className="text-zinc-500 font-medium">Compra</span>
+                <span className="text-zinc-300">{formatEuro(winner.purchase_price)}€</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-zinc-500 font-medium">Venta</span>
+                <span className="text-zinc-300">{formatEuro(winner.sale_price)}€</span>
               </div>
             </div>
 
@@ -132,13 +152,13 @@ export default function BestPercentageCard({ data }) {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/player/${item.player_id}`}
-                          className="text-xs font-medium text-zinc-200 truncate hover:text-cyan-400 transition-colors block"
+                          className="text-xs font-medium text-zinc-200 truncate hover:text-orange-400 transition-colors block"
                         >
                           {item.player_name}
                         </Link>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-cyan-400 font-bold">
-                            +{item.percentage_gain?.toFixed(0)}%
+                          <span className="text-xs text-orange-400 font-bold">
+                            {formatTime(item.hours_held)}
                           </span>
                           <Link
                             href={`/user/${item.user_id}`}
@@ -159,7 +179,7 @@ export default function BestPercentageCard({ data }) {
           {restRunnerUps.length > 0 && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-3 flex items-center justify-center gap-1 text-[10px] text-zinc-500 hover:text-cyan-400 transition-colors py-1 border-t border-zinc-800 cursor-pointer"
+              className="mt-3 flex items-center justify-center gap-1 text-[10px] text-zinc-500 hover:text-orange-400 transition-colors py-1 border-t border-zinc-800 cursor-pointer"
             >
               {isExpanded ? (
                 <>
@@ -196,7 +216,7 @@ export default function BestPercentageCard({ data }) {
                         </span>
                         <Link
                           href={`/player/${item.player_id}`}
-                          className="text-zinc-300 truncate hover:text-cyan-400 transition-colors"
+                          className="text-zinc-300 truncate hover:text-orange-400 transition-colors"
                         >
                           {item.player_name}
                         </Link>
@@ -207,8 +227,8 @@ export default function BestPercentageCard({ data }) {
                           {item.user_name}
                         </Link>
                       </div>
-                      <span className="text-cyan-400 font-semibold whitespace-nowrap ml-2">
-                        +{item.percentage_gain?.toFixed(0)}%
+                      <span className="text-orange-400 font-semibold whitespace-nowrap ml-2">
+                        {formatTime(item.hours_held)}
                       </span>
                     </div>
                   );

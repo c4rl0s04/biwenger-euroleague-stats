@@ -995,6 +995,55 @@ export async function getBestSingleFlip() {
 }
 
 /**
+ * Get Worst Single Flip (Buy High, Sell Low)
+ * "El Fiasco"
+ * - Biggest loss from a single transaction
+ */
+export async function getWorstSingleFlip() {
+  const query = `
+    SELECT 
+      u.id as user_id,
+      u.name as user_name,
+      u.color_index as user_color_index,
+      
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      
+      purchase.precio as purchase_price,
+      sale.precio as sale_price,
+      (sale.precio - purchase.precio) as profit
+      
+    FROM fichajes purchase
+    JOIN users u ON purchase.comprador = u.name
+    JOIN players p ON purchase.player_id = p.id
+    
+    -- Join with the sale
+    JOIN LATERAL (
+        SELECT precio, timestamp
+        FROM fichajes s
+        WHERE s.player_id = purchase.player_id 
+          AND s.vendedor = purchase.comprador
+          AND s.timestamp > purchase.timestamp
+        ORDER BY s.timestamp ASC
+        LIMIT 1
+    ) sale ON true
+    
+    WHERE purchase.comprador != 'Mercado'
+    ORDER BY profit ASC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    purchase_price: parseInt(row.purchase_price),
+    sale_price: parseInt(row.sale_price),
+    profit: parseInt(row.profit),
+  }));
+}
+
+/**
  * Get Best Unrealized Percentage Gain
  * "El Diamante en Bruto"
  * - (Current Value - Purchase Price) / Purchase Price
@@ -1070,5 +1119,319 @@ export async function getMostOwnersPlayer() {
   return result.rows.map((row) => ({
     ...row,
     distinct_owners_count: parseInt(row.distinct_owners_count),
+  }));
+}
+
+/**
+ * Get Missed Opportunity (Sold too early)
+ * "El Impaciente"
+ * - Users who sold players that later went up significantly in value
+ * - Shows (Current Price - Sale Price) as missed profit
+ */
+export async function getMissedOpportunity() {
+  const query = `
+    SELECT 
+      u.id as user_id,
+      u.name as user_name,
+      u.color_index as user_color_index,
+      
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      p.price as current_price,
+      
+      sale.precio as sale_price,
+      (p.price - sale.precio) as missed_profit
+      
+    FROM fichajes sale
+    JOIN users u ON sale.vendedor = u.name
+    JOIN players p ON sale.player_id = p.id
+    
+    WHERE sale.vendedor != 'Mercado'
+      AND p.price > sale.precio
+    ORDER BY missed_profit DESC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    current_price: parseInt(row.current_price),
+    sale_price: parseInt(row.sale_price),
+    missed_profit: parseInt(row.missed_profit),
+  }));
+}
+
+/**
+ * Get Top Trader (Most Buy-Sell Cycles)
+ * "El Especulador"
+ * - User with the most completed buy→sell transactions
+ */
+export async function getTopTrader() {
+  const query = `
+    SELECT 
+      u.id as user_id,
+      u.name as user_name,
+      u.color_index as user_color_index,
+      COUNT(*) as trade_count,
+      SUM(sale.precio - purchase.precio) as total_profit
+      
+    FROM fichajes purchase
+    JOIN users u ON purchase.comprador = u.name
+    
+    -- Join with the subsequent sale
+    JOIN LATERAL (
+        SELECT precio, timestamp
+        FROM fichajes s
+        WHERE s.player_id = purchase.player_id 
+          AND s.vendedor = purchase.comprador
+          AND s.timestamp > purchase.timestamp
+        ORDER BY s.timestamp ASC
+        LIMIT 1
+    ) sale ON true
+    
+    WHERE purchase.comprador != 'Mercado'
+    GROUP BY u.id, u.name, u.color_index
+    ORDER BY trade_count DESC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    trade_count: parseInt(row.trade_count),
+    total_profit: parseInt(row.total_profit),
+  }));
+}
+
+/**
+ * Get Most Profitable Player (across all owners)
+ * "La Gallina de los Huevos de Oro"
+ * - Player that has generated the most combined profit for all owners
+ */
+export async function getProfitablePlayer() {
+  const query = `
+    SELECT 
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      COUNT(*) as trade_count,
+      SUM(sale.precio - purchase.precio) as total_profit
+      
+    FROM fichajes purchase
+    JOIN players p ON purchase.player_id = p.id
+    
+    JOIN LATERAL (
+        SELECT precio, timestamp
+        FROM fichajes s
+        WHERE s.player_id = purchase.player_id 
+          AND s.vendedor = purchase.comprador
+          AND s.timestamp > purchase.timestamp
+        ORDER BY s.timestamp ASC
+        LIMIT 1
+    ) sale ON true
+    
+    WHERE purchase.comprador != 'Mercado'
+    GROUP BY p.id, p.name, p.img
+    HAVING SUM(sale.precio - purchase.precio) > 0
+    ORDER BY total_profit DESC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    trade_count: parseInt(row.trade_count),
+    total_profit: parseInt(row.total_profit),
+  }));
+}
+
+/**
+ * Get Most Lossy Player (across all owners)
+ * "El Ruinoso"
+ * - Player that has caused the most combined losses for all owners
+ */
+export async function getLossyPlayer() {
+  const query = `
+    SELECT 
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      COUNT(*) as trade_count,
+      SUM(sale.precio - purchase.precio) as total_loss
+      
+    FROM fichajes purchase
+    JOIN players p ON purchase.player_id = p.id
+    
+    JOIN LATERAL (
+        SELECT precio, timestamp
+        FROM fichajes s
+        WHERE s.player_id = purchase.player_id 
+          AND s.vendedor = purchase.comprador
+          AND s.timestamp > purchase.timestamp
+        ORDER BY s.timestamp ASC
+        LIMIT 1
+    ) sale ON true
+    
+    WHERE purchase.comprador != 'Mercado'
+    GROUP BY p.id, p.name, p.img
+    HAVING SUM(sale.precio - purchase.precio) < 0
+    ORDER BY total_loss ASC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    trade_count: parseInt(row.trade_count),
+    total_loss: parseInt(row.total_loss),
+  }));
+}
+
+/**
+ * Get Quickest Profitable Flip
+ * "El Quickflip"
+ * - Fastest buy→sell with profit (shortest time between transactions)
+ */
+export async function getQuickestFlip() {
+  const query = `
+    SELECT 
+      u.id as user_id,
+      u.name as user_name,
+      u.color_index as user_color_index,
+      
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      
+      purchase.precio as purchase_price,
+      sale.precio as sale_price,
+      (sale.precio - purchase.precio) as profit,
+      (sale.timestamp - purchase.timestamp) / 3600.0 as hours_held
+      
+    FROM fichajes purchase
+    JOIN users u ON purchase.comprador = u.name
+    JOIN players p ON purchase.player_id = p.id
+    
+    JOIN LATERAL (
+        SELECT precio, timestamp
+        FROM fichajes s
+        WHERE s.player_id = purchase.player_id 
+          AND s.vendedor = purchase.comprador
+          AND s.timestamp > purchase.timestamp
+        ORDER BY s.timestamp ASC
+        LIMIT 1
+    ) sale ON true
+    
+    WHERE purchase.comprador != 'Mercado'
+      AND (sale.precio - purchase.precio) > 0
+    ORDER BY (sale.timestamp - purchase.timestamp) ASC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    purchase_price: parseInt(row.purchase_price),
+    sale_price: parseInt(row.sale_price),
+    profit: parseInt(row.profit),
+    hours_held: parseFloat(row.hours_held),
+  }));
+}
+
+/**
+ * Get Longest Profitable Hold
+ * "El Hold"
+ * - Longest ownership period that still resulted in profit
+ */
+export async function getLongestProfitableHold() {
+  const query = `
+    SELECT 
+      u.id as user_id,
+      u.name as user_name,
+      u.color_index as user_color_index,
+      
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      
+      purchase.precio as purchase_price,
+      sale.precio as sale_price,
+      (sale.precio - purchase.precio) as profit,
+      (sale.timestamp - purchase.timestamp) / 86400.0 as days_held
+      
+    FROM fichajes purchase
+    JOIN users u ON purchase.comprador = u.name
+    JOIN players p ON purchase.player_id = p.id
+    
+    JOIN LATERAL (
+        SELECT precio, timestamp
+        FROM fichajes s
+        WHERE s.player_id = purchase.player_id 
+          AND s.vendedor = purchase.comprador
+          AND s.timestamp > purchase.timestamp
+        ORDER BY s.timestamp ASC
+        LIMIT 1
+    ) sale ON true
+    
+    WHERE purchase.comprador != 'Mercado'
+      AND (sale.precio - purchase.precio) > 0
+    ORDER BY (sale.timestamp - purchase.timestamp) DESC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    purchase_price: parseInt(row.purchase_price),
+    sale_price: parseInt(row.sale_price),
+    profit: parseInt(row.profit),
+    days_held: parseFloat(row.days_held),
+  }));
+}
+
+/**
+ * Get Worst Unrealized Revaluation
+ * "El Depreciado"
+ * - Currently owned players with biggest unrealized losses
+ */
+export async function getWorstRevaluation() {
+  const query = `
+    SELECT 
+      u.id as user_id,
+      u.name as user_name,
+      u.color_index as user_color_index,
+      
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      p.price as current_price,
+      
+      purchase.precio as purchase_price,
+      (p.price - purchase.precio) as devaluation
+      
+    FROM fichajes purchase
+    JOIN users u ON purchase.comprador = u.name
+    JOIN players p ON purchase.player_id = p.id
+    
+    -- Ensure player is still owned (no sale after purchase)
+    WHERE purchase.comprador != 'Mercado'
+      AND NOT EXISTS (
+          SELECT 1 FROM fichajes s
+          WHERE s.player_id = purchase.player_id 
+            AND s.vendedor = purchase.comprador
+            AND s.timestamp > purchase.timestamp
+      )
+      AND p.price < purchase.precio
+    ORDER BY devaluation ASC
+    LIMIT 10
+  `;
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+  return result.rows.map((row) => ({
+    ...row,
+    current_price: parseInt(row.current_price),
+    purchase_price: parseInt(row.purchase_price),
+    devaluation: parseInt(row.devaluation),
   }));
 }

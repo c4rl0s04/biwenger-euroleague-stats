@@ -1,21 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Gem, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import PlayerImage from '@/components/ui/PlayerImage';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
 
-const formatEuro = (amount) => {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'decimal',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
-
-export default function BestPercentageCard({ data }) {
+export default function MissedOpportunityCard({ data }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -25,23 +17,31 @@ export default function BestPercentageCard({ data }) {
   const restRunnerUps = data.slice(3);
   const winnerColor = getColorForUser(winner.user_id, winner.user_name, winner.user_color_index);
 
+  const maxMissed = Math.max(...data.map((d) => d.missed_profit));
+
+  const formatEuro = (amount) => {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <div className="hover:scale-[1.02] transition-transform duration-200">
       <ElegantCard
-        title="Diamante en Bruto"
-        icon={Gem}
-        color="cyan"
-        info="Mayor Revalorización (%). El jugador que más ha multiplicado su valor desde su compra."
+        title="El Impaciente"
+        icon={Clock}
+        color="amber"
+        info="El que vendió demasiado pronto. Diferencia entre el precio de venta y el valor actual del jugador."
       >
         <div className="flex flex-col">
           {/* Hero Section */}
           <div className="relative mt-2">
-            {/* Player Image with Sparkle Effect */}
+            {/* Player Image */}
             <div className="flex justify-center mb-3">
               <div className="relative">
-                {/* Glow Effect */}
-                <div className="absolute inset-0 w-20 h-20 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 opacity-20 blur-md" />
-                <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-cyan-500/50 shadow-lg shadow-cyan-500/30 relative">
+                <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-amber-500/50 shadow-lg shadow-amber-500/20">
                   <PlayerImage
                     src={winner.player_img}
                     alt={winner.player_name}
@@ -57,24 +57,24 @@ export default function BestPercentageCard({ data }) {
             {/* Player Name */}
             <div className="text-center">
               <Link href={`/player/${winner.player_id}`} className="group">
-                <span className="text-lg font-black text-white group-hover:text-cyan-400 transition-colors">
+                <span className="text-lg font-black text-white group-hover:text-amber-400 transition-colors">
                   {winner.player_name}
                 </span>
               </Link>
             </div>
 
-            {/* Percentage Display */}
+            {/* Missed Profit Display */}
             <div className="mt-3 text-center">
-              <span className="text-2xl font-black text-cyan-400">
-                +{winner.percentage_gain?.toFixed(0)}%
+              <span className="text-2xl font-black text-amber-400">
+                +{formatEuro(winner.missed_profit)}€
               </span>
               <div className="flex justify-center gap-4 text-xs mt-1">
                 <div className="flex flex-col items-center">
-                  <span className="text-zinc-500 font-medium">Compra</span>
-                  <span className="text-zinc-300">{formatEuro(winner.purchase_price)}€</span>
+                  <span className="text-zinc-500 font-medium">Venta</span>
+                  <span className="text-zinc-300">{formatEuro(winner.sale_price)}€</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-zinc-500 font-medium">Valor</span>
+                  <span className="text-zinc-500 font-medium">Actual</span>
                   <span className="text-zinc-300">{formatEuro(winner.current_price)}€</span>
                 </div>
               </div>
@@ -132,13 +132,13 @@ export default function BestPercentageCard({ data }) {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/player/${item.player_id}`}
-                          className="text-xs font-medium text-zinc-200 truncate hover:text-cyan-400 transition-colors block"
+                          className="text-xs font-medium text-zinc-200 truncate hover:text-amber-400 transition-colors block"
                         >
                           {item.player_name}
                         </Link>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-cyan-400 font-bold">
-                            +{item.percentage_gain?.toFixed(0)}%
+                          <span className="text-xs text-amber-400 font-bold">
+                            +{formatEuro(item.missed_profit)}€
                           </span>
                           <Link
                             href={`/user/${item.user_id}`}
@@ -159,7 +159,7 @@ export default function BestPercentageCard({ data }) {
           {restRunnerUps.length > 0 && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-3 flex items-center justify-center gap-1 text-[10px] text-zinc-500 hover:text-cyan-400 transition-colors py-1 border-t border-zinc-800 cursor-pointer"
+              className="mt-3 flex items-center justify-center gap-1 text-[10px] text-zinc-500 hover:text-amber-400 transition-colors py-1 border-t border-zinc-800 cursor-pointer"
             >
               {isExpanded ? (
                 <>
@@ -196,7 +196,7 @@ export default function BestPercentageCard({ data }) {
                         </span>
                         <Link
                           href={`/player/${item.player_id}`}
-                          className="text-zinc-300 truncate hover:text-cyan-400 transition-colors"
+                          className="text-zinc-300 truncate hover:text-amber-400 transition-colors"
                         >
                           {item.player_name}
                         </Link>
@@ -207,8 +207,8 @@ export default function BestPercentageCard({ data }) {
                           {item.user_name}
                         </Link>
                       </div>
-                      <span className="text-cyan-400 font-semibold whitespace-nowrap ml-2">
-                        +{item.percentage_gain?.toFixed(0)}%
+                      <span className="text-amber-400 font-semibold whitespace-nowrap ml-2">
+                        +{formatEuro(item.missed_profit)}€
                       </span>
                     </div>
                   );

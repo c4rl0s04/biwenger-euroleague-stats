@@ -60,7 +60,7 @@ export default function BiggestStealCard({ data }) {
 
           {/* Runner-ups List */}
           {runnerUps.length > 0 && (
-            <div className="mt-3 border-t border-zinc-800 pt-2 max-h-28 overflow-y-auto">
+            <div className="mt-3 border-t border-zinc-800 pt-2">
               <div className="space-y-1">
                 {runnerUps.map((item, index) => (
                   <div
