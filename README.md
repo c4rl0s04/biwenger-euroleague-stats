@@ -10,8 +10,7 @@
 
 ## 📸 Screeenshot
 
-![Biwenger Stats Dashboard](./public/assets/dashboard.png)
-_(Please add a screenshot of your dashboard here)_
+![Biwenger Stats Dashboard](./public/assets/home.png)
 
 ## 🚀 Overview
 
