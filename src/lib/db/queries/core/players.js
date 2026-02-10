@@ -394,7 +394,7 @@ export async function getPlayerStreaks(minGames = 3) {
       prf.owner_color_index,
       COALESCE(sa.season_avg, 0) as season_avg,
       ROUND(prf.recent_avg - COALESCE(sa.season_avg, 0), 1) as avg_diff,
-      ROUND((prf.recent_avg - COALESCE(sa.season_avg, 0)) / NULLIF(sa.season_avg, 1) * 100, 1) as trend_pct
+      ROUND((prf.recent_avg - COALESCE(sa.season_avg, 0)) / NULLIF(sa.season_avg, 0) * 100, 1) as trend_pct
     FROM PlayerRecentForm prf
     LEFT JOIN SeasonAvg sa ON prf.player_id = sa.player_id
     ORDER BY ABS(prf.recent_avg - COALESCE(sa.season_avg, 0)) DESC
@@ -462,7 +462,7 @@ export async function getRisingStars(limit = 5) {
       rp.recent_avg,
       COALESCE(ep.earlier_avg, 0) as earlier_avg,
       ROUND(rp.recent_avg - COALESCE(ep.earlier_avg, 0), 1) as improvement,
-      ROUND((rp.recent_avg - COALESCE(ep.earlier_avg, 0)) / NULLIF(ep.earlier_avg, 1) * 100, 1) as improvement_pct,
+      ROUND((rp.recent_avg - COALESCE(ep.earlier_avg, 0)) / NULLIF(ep.earlier_avg, 0) * 100, 1) as improvement_pct,
       u.name as owner_name, u.color_index as owner_color_index
     FROM RecentPerformance rp
     JOIN players p ON rp.player_id = p.id
