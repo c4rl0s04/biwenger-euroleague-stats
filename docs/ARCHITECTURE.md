@@ -89,6 +89,16 @@ We use **PostgreSQL** for detailed relational data.
 
 ---
 
+## 3.5 Service Layer Pattern
+
+To avoid bloated API handlers and duplicated logic, we use a dedicated **Service Layer** (`src/lib/services/`).
+
+- **Architecture Flow**: `API Route` -> `Service` -> `DAO (Data Access Object)` -> `Database`.
+- **Responsibility**: Services handle business rules, data aggregation, and transformation.
+- **Example**: `marketService.js` executes 20+ parallel queries (Best Flip, Big Spender, etc.) and enriches the results with user metadata before returning a unified object to the frontend.
+
+---
+
 ## 4. Internal API
 
 The application exposes a read-only API for the frontend, located in `src/app/api/`.

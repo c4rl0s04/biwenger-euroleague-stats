@@ -1,159 +1,107 @@
-# Biwenger Stats - Euroleague Analytics
+# 🏀 Biwenger Stats - Euroleague Analytics
 
-An advanced analytics dashboard for Euroleague fantasy managers on Biwenger. This application synchronizes data directly from Biwenger and provides insights, statistics, and tools to help you win your league.
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Features
+> **Advanced financial analytics and performance tracking for Biwenger Euroleague fantasy managers.**
 
-- **Dashboard**: Overview of your team, market trends, and league standings
-- **Player Analysis**: Detailed stats, hot/cold streaks, and form analysis
-- **Market Intelligence**: Track price changes, undervalued players, and transfer history
-- **League Stats**: Standings, round winners, and points progression charts
-- **Tools**: Ideal lineup calculator and captain recommendations
+---
 
-## Tech Stack
+## 📸 Screeenshot
 
-| Category  | Technology              |
-| --------- | ----------------------- |
-| Framework | Next.js 16 (App Router) |
-| Language  | JavaScript / Node.js    |
-| Database  | PostgreSQL (via pg)     |
-| Styling   | Tailwind CSS            |
-| Charts    | Recharts                |
-| Testing   | Vitest (79 tests)       |
+![Biwenger Stats Dashboard](./public/assets/dashboard.png)
+_(Please add a screenshot of your dashboard here)_
 
-## Architecture
+## 🚀 Overview
 
-![Biwenger Stats Architecture](./public/assets/architecture.png)
+**Biwenger Stats** is a powerful companion app for fantasy basketball managers. It synchronizes data from Biwenger and Euroleague APIs to provide deep insights that the native platform misses. From identifying undervalued players ("Sniper Mode") to tracking your exact profit on every trade, this tool gives you the data-driven edge to win your league.
 
-## Quick Start
+## ✨ Key Features
 
-```bash
-# 1. Clone and install
-git clone https://github.com/yourusername/biwengerstats-next.git
-cd biwengerstats-next
-npm install
+### 📊 Dashboard & Analytics
 
-# 2. Configure environment
-cp .env.example .env.local
-# Edit .env.local with your Biwenger credentials
+- **Live Scoring**: Real-time fantasy points updates during Euroleague games.
+- **Squad Value Tracking**: Visualize your team's financial growth over the season.
+- **Ideal Lineup**: Algorithm that calculates the maximum possible score for every round.
 
-# 3. Sync data from Biwenger
-npm run sync
+### 💰 Market Intelligence
 
-# 4. Start development server
-npm run dev
-```
+- **Sniper Mode**: Identify undervalued players currently on the market.
+- **Trade Analysis**: Track your best and worst transfers by profit margin.
+- **Price Trends**: Interactive charts showing player value history (1W, 1M, Season).
+- **Big Spender**: See who is investing the most cash in the market.
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### 🏆 Tournaments
 
-## Available Scripts
+- **Custom Brackets**: Support for Cup/Playoff formats alongside the regular league.
+- **Head-to-Head**: Direct comparison tools for player vs. player stats.
 
-| Script            | Description                 |
-| ----------------- | --------------------------- |
-| `npm run dev`     | Start development server    |
-| `npm run build`   | Build for production        |
-| `npm run start`   | Start production server     |
-| `npm run sync`    | Sync data from Biwenger API |
-| `npm test`        | Run test suite (79 tests)   |
-| `npm run lint`    | Run ESLint                  |
-| `npm run format`  | Format code with Prettier   |
-| `npm run analyze` | Analyze bundle size         |
+## 🛠️ Tech Stack
 
-## Documentation
+- **Framework**: Next.js 16 (App Router)
+- **Database**: PostgreSQL (via `pg`)
+- **Styling**: Tailwind CSS v4
+- **Charts**: Recharts & Chart.js
+- **Validation**: Zod
+- **Testing**: Vitest
 
-| Document                                        | Description                                     |
-| ----------------------------------------------- | ----------------------------------------------- |
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md)       | Technical overview, schema, APIs, and structure |
-| [FEATURES.md](./docs/FEATURES.md)               | Catalog of all stats and features               |
-| [DATA_SYNC.md](./docs/DATA_SYNC.md)             | Guide to data synchronization scripts           |
-| [API_INTEGRATION.md](./docs/API_INTEGRATION.md) | Deep dive into API endpoints & extraction logic |
-| [ROADMAP.md](./docs/ROADMAP.md)                 | Future features and improvements                |
+## 🏁 Getting Started
 
-## Project Structure
+### Prerequisites
 
-```
-src/
-├── app/                 # Next.js pages and API routes
-│   ├── api/             # 32 API endpoints
-│   ├── dashboard/       # Dashboard page
-│   ├── standings/       # Standings page
-│   └── player/[id]/     # Player profile page
-├── components/          # React components
-│   ├── dashboard/       # Dashboard cards
-│   ├── standings/       # Standings cards
-│   ├── players-list/    # Player list components
-│   ├── player-profile/  # Player profile components
-│   └── ui/              # Shared UI components
-└── lib/                 # Utilities and database
-    ├── db/              # Database layer
-    │   ├── queries/     # Query functions
-    │   └── types.js     # JSDoc type definitions
-    ├── hooks/           # Custom React hooks
-    ├── sync/            # Data sync scripts
-    └── utils/           # Utilities (validation, response)
-```
+- Node.js 18+
+- Docker & Docker Compose
 
-## Docker Support
+### Installation
 
-The project runs on a full Docker stack: **App + PostgreSQL + Auto-Sync Worker**.
+1.  **Clone the repository**
 
-1. Create a `.env` file with your credentials:
+    ```bash
+    git clone https://github.com/yourusername/biwengerstats-next.git
+    cd biwengerstats-next
+    ```
 
-   ```bash
-   cp .env.example .env
-   ```
+2.  **Configure Environment**
 
-2. Start the stack:
+    ```bash
+    cp .env.example .env
+    # Add your BIWENGER_TOKEN and league credentials
+    ```
 
-   ```bash
-   docker-compose up -d
-   ```
+3.  **Run with Docker**
 
-3. Access the application at [http://localhost:3000](http://localhost:3000).
+    ```bash
+    docker-compose up -d
+    ```
 
-The `sync` service runs automatically every 6 hours. You can restart it to force an update:
+4.  **Access the App**
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🔄 Data Synchronization
+
+The app uses a robust ETL pipeline to keep data fresh.
+
+- **Full Sync**: `npm run sync` (Updates players, market, and stats)
+- **Live Sync**: `npm run sync:live` (Fast updates for live games)
+- **Daily Sync**: `npm run sync:daily` (Scheduled maintenance)
+
+See [DATA_SYNC.md](./docs/DATA_SYNC.md) for details.
+
+## 📚 Documentation
+
+- [Features Guide](./docs/FEATURES.md)
+- [Architecture Overview](./docs/ARCHITECTURE.md)
+- [API Reference](./docs/API_INTEGRATION.md)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please run the test suite before submitting a PR:
 
 ```bash
-docker-compose restart sync
+npm test
 ```
 
-## Development
+## 📄 License
 
-### Pre-commit Hooks
-
-This project uses Husky + lint-staged for automatic code formatting:
-
-```bash
-git commit -m "Your message"
-# Automatically runs Prettier and ESLint on staged files
-```
-
-### Testing
-
-```bash
-npm test           # Run all tests
-npm test -- --ui   # Run with Vitest UI
-```
-
-### CI/CD
-
-GitHub Actions runs on every push/PR:
-
-- Lint check
-- Test suite
-- Build verification
-- Format check
-
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `npm test`
-5. Submit a pull request
-
-## License
-
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

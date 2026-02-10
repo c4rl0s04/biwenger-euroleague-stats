@@ -28,10 +28,17 @@ The sync is an idempotent pipeline orchestrated by `src/lib/sync/index.js`. It r
 1.  **`01-players.js`**: Fetches master player list from Biwenger. Updates prices and positions.
 2.  **`02-master-data.js`**: Syncs Euroleague teams and round info.
 3.  **`03-matches.js`**: Updates the full season schedule and live scores.
-4.  **`05-stats.js`**: Downloads official boxscores (Points, Rebounds, etc.) for finished games and processes fantasy points.
-5.  **`06-lineups.js`**: Records the actual lineups used by managers in past rounds.
-6.  **`07-market.js`**: Processes the "Board" (news feed) to track transfers and bids.
-7.  **`13-porras.js`**: Syncs user predictions from the league minigame.
+4.  **`04-standings.js`**: Calculates league tables, efficiency, and advanced metrics.
+5.  **`05-stats.js`**: Downloads official boxscores (Points, Rebounds, etc.) for finished games and processes fantasy points.
+6.  **`06-lineups.js`**: Records the actual lineups used by managers in past rounds.
+7.  **`07-market.js`**: Processes the "Board" (news feed) to track transfers and bids.
+8.  **`08-squads.js`**: Updates current user rosters (ownership).
+9.  **`09-initial-squads.js`**: Captures initial team assignments for tracking original drafts.
+10. **`10-team-logos.js`**: Utility to ensure all Euroleague team assets are up to date.
+11. **`11-official-images.js`**: Fetches high-res player portraits from official sources.
+12. **`12-user-colors.js`**: Assigns UI themes based on user preferences.
+13. **`13-porras.js`**: Syncs user predictions from the league minigame.
+14. **`14-tournaments.js`**: Syncs Cup/Playoff brackets, fixtures, and standings.
 
 ### "Live" Mode
 

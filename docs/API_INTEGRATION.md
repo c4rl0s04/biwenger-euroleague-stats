@@ -156,6 +156,23 @@
 
 ---
 
+---
+
+### 1.5. Tournaments & Standings
+
+**Endpoint**: `GET /context` (Derived from Home/Board/Tournament endpoints)
+**Context**: `src/lib/sync/steps/14-tournaments.js`
+**Purpose**: Syncs tournament metadata, phases, fixtures, and tables.
+
+**Database Mapping**:
+
+- `tournaments`: ID, Name, Type, Status
+- `tournament_phases`: Group Stage, Playoffs, etc.
+- `tournament_fixtures`: Individual matches (Home vs Away user)
+- `tournament_standings`: Group tables (W-L-D)
+
+---
+
 ## 2. Euroleague API
 
 **Base URL**: `https://live.euroleague.net/api`

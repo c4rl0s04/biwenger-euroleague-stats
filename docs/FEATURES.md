@@ -60,7 +60,45 @@ Comprehensive league analysis divided into categories.
 - **Efficiency**: ROI.
   - _Formula_: `Total_Points / Current_Squad_Value`. Measures points per million Euro spent.
 
-## 📅 Matches (`/matches`)
+## 💰 Money & Market (`/market`)
+
+    Advanced financial analytics to help you win the transfer market.
+
+    ### 1. Flipping & Trading
+
+    - **Best Flip**: Top profits made from a single player (Buy Low -> Sell High).
+    - **Worst Flip**: Biggest losses on a single player.
+    - **Quick Flip**: Highest profit generated in the shortest ownership time (< 7 days).
+    - **Top Trader**: Users with the highest volume of profitable trades.
+
+    ### 2. Valuation & Growth
+
+    - **Revaluation**: Current squad members who have increased (or decreased) most in value since purchase.
+    - **Big Spender**: Tracks who spends the most money in the market.
+    - **Profitable Player**: Players who have generated the most value (Points + Price Increase) for their owners.
+
+    ### 3. Scouting & Opportunities
+
+    - **Sniper Mode**: Highlights players currently on the market who are undervalued based on their recent performance.
+    - **The Steal**: Players bought for cheap who exploded in value/points immediately after.
+    - **Missed Opportunity**: Players you sold right before they started performing well.
+    - **Market Trends**: Interactive charts showing market spending and player value history with customizable time ranges (1W, 1M, Season).
+
+    ### 4. Ownership & Behavior
+
+    - **The Thief**: Managers who frequently buy players that were previously owned by others.
+    - **The Victim**: Managers who often sell players that immediately shine elsewhere.
+    - **Longest Hold**: Players kept in a squad for the longest consecutive duration.
+
+    ## 🏆 Tournaments & Cups
+
+    Support for secondary competitions running alongside the main league.
+
+    - **Custom Brackets**: Support for Playoffs, Final Four, and Group Phases.
+    - **Cup Standings**: Separate points tracking for tournament rounds.
+    - **Fixtures**: Head-to-Head matchups specific to tournament rules.
+
+    ## 📅 Matches (`/matches`)
 
 - **Live Scores**: Real-time updates matches in progress.
 - **Round Selector**: Navigate through past and future rounds.
