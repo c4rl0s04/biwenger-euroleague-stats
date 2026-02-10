@@ -43,7 +43,7 @@ Be respectful and constructive. We're all here to learn and improve.
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/biwengerstats-next.git
+git clone https://github.com/c4rl0s04/biwengerstats-next.git
 cd biwengerstats-next
 
 # Install dependencies
