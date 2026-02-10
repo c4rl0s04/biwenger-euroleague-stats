@@ -10,7 +10,10 @@
 
 ## 📸 Screeenshot
 
-![Biwenger Stats Dashboard](./public/assets/home.png)
+<div align="center">
+  <img src="./public/assets/home.png" width="45%" alt="Home Page" />
+  <img src="./public/assets/dashboard.png" width="45%" alt="Dashboard" />
+</div>
 
 ## 🚀 Overview
 

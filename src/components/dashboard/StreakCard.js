@@ -33,7 +33,7 @@ export default function StreakCard({ type = 'hot' }) {
   const cfg = config[type] || config.hot;
   const TrendIcon = cfg.TrendIcon;
 
-  const { data: players, loading } = useApiData('/api/player/streaks', {
+  const { data: players = [], loading } = useApiData('/api/player/streaks', {
     transform: (d) => d?.[cfg.dataKey] || [],
     dependencies: [cfg.dataKey],
   });
