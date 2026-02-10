@@ -19,7 +19,8 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - POSTGRES_HOST=postgres
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres}
       - POSTGRES_USER=${POSTGRES_USER:-user}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
       - POSTGRES_DB=${POSTGRES_DB:-biwenger}
@@ -37,18 +38,26 @@ services:
     # Run sync on start, then loop every 6 hours (21600 seconds)
     command: >
       sh -c "
-        echo 'Starting sync service...'
-        echo '[Sync] Running initial full sync...'
-        npm run sync || echo '[Sync] Initial sync failed'
-        while true; do
-          echo '[Sync] Sync complete. Sleeping for 6 hours...'
-          sleep 21600
-          echo '[Sync] Starting scheduled daily sync at $(date)'
-          npm run sync:daily || echo '[Sync] Failed'
-        done
+        if [ -n \"$DATABASE_URL\" ]; then
+          echo '[Sync] Remote Database detected (DATABASE_URL is set).'
+          echo '[Sync] Skipping automatic sync to avoid conflicts with production.'
+          echo '[Sync] Sleeping indefinitely...'
+          tail -f /dev/null
+        else
+          echo 'Starting sync service...'
+          echo '[Sync] Running initial full sync...'
+          npm run sync || echo '[Sync] Initial sync failed'
+          while true; do
+            echo '[Sync] Sync complete. Sleeping for 6 hours...'
+            sleep 21600
+            echo '[Sync] Starting scheduled daily sync at $(date)'
+            npm run sync:daily || echo '[Sync] Failed'
+          done
+        fi
       "
     environment:
-      - POSTGRES_HOST=postgres
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres}
       - POSTGRES_USER=${POSTGRES_USER:-user}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
       - POSTGRES_DB=${POSTGRES_DB:-biwenger}
