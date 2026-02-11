@@ -309,42 +309,49 @@ graph LR
 
 ---
 
-#### User Lineup (Active Formation)
+#### Round Standings & Lineups (Historical)
 
-**Endpoint**: `GET /user/{id}?fields=lineup`  
-**Purpose**: Fetch user's active lineup and captain selection  
+**Endpoint**: `GET /rounds/league/{roundId}`  
+**Purpose**: Fetch user standings and lineups for a specific finished round  
 **Sync Step**: `06-lineups.js`  
-**Frequency**: Every sync for all users
+**Frequency**: For each finished round
 
 <details>
 <summary><strong>Response Sample</strong></summary>
 
 ```json
 {
-  "status": 200,
   "data": {
-    "lineup": {
-      "type": "3-1-1",
-      "count": 1,
-      "position": 0,
-      "captain": { "id": 28228 },
-      "striker": null,
-      "coach": null,
-      "date": 1770304415,
-      "round": null,
-      "players": [
+    "round": {
+      "id": 4773,
+      "name": "Round 28",
+      "status": "finished",
+      "standings": [
         {
-          "id": 27670,
-          "name": "Aleksa Avramovic",
-          "position": 1,
-          "price": 3400000,
-          "fitness": [27, 28, 14, 27, 11],
-          "status": "ok"
+          "id": 13207868,
+          "name": "All Stars",
+          "lineup": {
+            "type": "3-1-1",
+            "count": 1,
+            "points": 150,
+            "captain": { "id": 28228 },
+            "players": [27670, 39172, 28228, 41, 52],
+            "playersID": [27670, 39172, 28228, 41, 52]
+          }
+        },
+        {
+          "id": 13207910,
+          "name": "June",
+          "lineup": {
+            "type": "3-1-1",
+            "count": 1,
+            "points": 142,
+            "captain": { "id": 39172 },
+            "players": [28228, 41, 52, 27670, 39172],
+            "playersID": [28228, 41, 52, 27670, 39172]
+          }
         }
-      ],
-      "playersID": [27670, 39172, 28228],
-      "reserves": [null, null, null],
-      "reservesID": [null, null, null]
+      ]
     }
   }
 }
@@ -354,9 +361,14 @@ graph LR
 
 **Database Transformation**:
 
-- `lineup.playersID` → `user_lineups` table (user_id, round_id, player_ids as JSON array)
-- `captain.id` → `user_lineups.captain_id`
-- Used for calculating ideal lineup and efficiency ratings
+- `standings[].lineup.players` → `user_lineups` table (user_id, round_id, player_id, role)
+  - First 5 players → `role: 'titular'` (starters)
+  - 6th player → `role: '6th_man'`
+  - Remaining → `role: 'suplente'` (bench)
+- `lineup.captain.id` → `user_lineups.is_captain = 1`
+- `lineup.points` → `user_rounds.points` (total score for that round)
+- `lineup.type` → `user_rounds.alineacion` (formation used)
+- **Note**: This endpoint is called for **each finished round** to build historical lineup data
 
 ---
 
