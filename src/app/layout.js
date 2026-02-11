@@ -7,7 +7,7 @@ import { CardThemeProvider } from '@/contexts/CardThemeContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  metadataBase: new URL('http://localhost:3000'), // Replace with production URL when deployed
+  metadataBase: new URL('https://advanced-euroleague-biwenger-stats.vercel.app'),
   title: {
     default: 'Biwenger Stats - Euroleague Analytics',
     template: '%s | Biwenger Stats',
