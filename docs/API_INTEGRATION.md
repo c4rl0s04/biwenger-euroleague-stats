@@ -501,11 +501,13 @@ graph LR
 
 ### 1.4. Biwenger Match & Stats Data
 
-#### Round Games (Match Results)
+---
+
+#### Round Stats (Fantasy Points)
 
 **Endpoint**: `GET /rounds/euroleague/{roundId}?score=1`  
-**Purpose**: Fetch match results and basic stats for a round  
-**Sync Step**: `05-stats.js`  
+**Purpose**: Fetch match results and player fantasy points (reports)  
+**Sync Step**: `05-stats.js` (via `runBiwengerPoints`)  
 **Frequency**: For each finished round
 
 <details>
@@ -521,13 +523,25 @@ graph LR
         "status": "finished",
         "home": {
           "id": 560,
-          "name": "Anadolu Efes Istanbul",
-          "score": 85
+          "name": "Anadolu Efes",
+          "score": 85,
+          "reports": {
+            "41": {
+              "points": 12,
+              "player": { "id": 41, "name": "Niels Giffey" }
+            }
+          }
         },
         "away": {
           "id": 645,
-          "name": "Virtus Segafredo Bologna",
-          "score": 78
+          "name": "Virtus Bologna",
+          "score": 78,
+          "reports": {
+            "52": {
+              "points": 8,
+              "player": { "id": 52, "name": "Other Player" }
+            }
+          }
         }
       }
     ]
@@ -539,44 +553,9 @@ graph LR
 
 **Database Transformation**:
 
-- `games` → `matches` table (id, round_id, home_id, away_id, home_score, away_score, status, date)
-
----
-
-#### Round Stats (Player Fantasy Points)
-
-**Endpoint**: `GET /rounds/league/{roundId}` or `/rounds/league` (latest)  
-**Purpose**: Fetch fantasy points for all players in a round  
-**Sync Step**: `05-stats.js`  
-**Frequency**: For each finished round
-
-<details>
-<summary><strong>Response Sample</strong></summary>
-
-```json
-{
-  "data": {
-    "12345": {
-      "points": 25,
-      "matches": 1,
-      "stats": [25]
-    },
-    "67890": {
-      "points": 12,
-      "matches": 1,
-      "stats": [12]
-    }
-  }
-}
-```
-
-</details>
-
-**Database Transformation**:
-
-- `data[playerId].points` → `player_round_stats.fantasy_points`
-- `data[playerId].matches` → Number of games played
-- Combined with Euroleague Boxscore for detailed stats
+- `games[].home/away.reports[].points` → `player_round_stats.fantasy_points`
+- Updates existing rows created by Euroleague Boxscore sync
+- **Note**: This endpoint is used specifically to get the official Biwenger fantasy points, which may differ slightly from raw stat calculations.
 
 ---
 
