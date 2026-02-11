@@ -82,8 +82,8 @@ export default function SettingsDropdown() {
             </div>
           </div>
 
-          {/* Effects Section (New) */}
-          <div className="p-2 border-t border-border/30">
+          {/* Effects Section (Hidden for now) */}
+          {/* <div className="p-2 border-t border-border/30">
             <div className="text-xs text-muted-foreground uppercase tracking-wider px-2 py-1 mb-1">
               Efectos
             </div>
@@ -112,7 +112,7 @@ export default function SettingsDropdown() {
                 />
               </div>
             </button>
-          </div>
+          </div> */}
 
           {/* Language Section */}
           <div className="p-2 border-t border-border/30">
