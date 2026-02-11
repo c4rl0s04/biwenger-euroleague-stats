@@ -1,43 +1,42 @@
 # Biwenger Stats - API Integration Reference
 
-> **Technical Reference for Data Ingestion & Application APIs**
-> This document details the external APIs consumed by the ETL pipeline and the internal APIs provided by the Next.js backend for the frontend.
+> **Complete External API Documentation**  
+> This document details **all** external APIs consumed during data synchronization, including endpoints, response structures, and database transformations.
 
 ## 🔄 Data Architecture
 
-The application follows a **Local-First** architecture. The frontend **never** calls external APIs directly. All data is synchronized to a local PostgreSQL database via background jobs, and the frontend consumes this data via internal API routes.
+The application follows a **Local-First** architecture:
 
 ```mermaid
 graph LR
     Biwenger[Biwenger API] -->|Sync Scripts| DB[(PostgreSQL)]
     Euroleague[Euroleague API] -->|Sync Scripts| DB
-    DB -->|Queries| InternalAPI[Internal Next.js API]
-    InternalAPI -->|JSON| Frontend[React Components]
+    DB -->|Service Layer| Pages[Next.js Pages]
+    Pages -->|Props| Frontend[React Components]
 ```
+
+**Key Principles:**
+
+- Frontend **never** calls external APIs directly
+- All data synced to local PostgreSQL via `src/lib/sync/`
+- Pages fetch data via Service Layer (`src/lib/services/`)
+- Internal HTTP APIs (`/api/*`) used only for client-side data fetching
 
 ---
 
-## 1. External APIs (Ingestion Source)
+## 1. External APIs (Data Ingestion)
 
-These endpoints are used **only** by the synchronization scripts in `src/lib/sync/`.
+### 1.1. Biwenger Core Data
 
-### 1.1. Biwenger API
+#### Master Data (Players & Teams)
 
-**Base URL**: `https://biwenger.as.com/api/v2`
-**Auth**: `Authorization: Bearer <TOKEN>` + headers
-
-| Resource         | Endpoint                        | Purpose                    | Sync Step       |
-| ---------------- | ------------------------------- | -------------------------- | --------------- |
-| **Master Data**  | `/competitions/euroleague/data` | Players, Teams, Prices     | `01-players.js` |
-| **League Board** | `/league/{id}/board`            | Transfers, Market Listings | `07-market.js`  |
-| **Round Stats**  | `/rounds/league?scoreID={id}`   | Player points per round    | `05-stats.js`   |
-| **User Lineups** | `/user/{id}?fields=lineup`      | Active user formations     | `06-lineups.js` |
-| **Standings**    | `/league/{id}?fields=standings` | League table               | `04-rounds.js`  |
-
-#### 📄 Response Samples
+**Endpoint**: `GET /competitions/euroleague/data?lang=es`  
+**Purpose**: Fetch all players, teams, and current round information  
+**Sync Step**: `01-players.js`, `02-master-data.js`  
+**Frequency**: Every sync (daily/manual)
 
 <details>
-<summary><strong>Master Data (Players & Teams)</strong></summary>
+<summary><strong>Response Sample</strong></summary>
 
 ```json
 {
@@ -50,8 +49,17 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
         "teamID": 572,
         "position": 2,
         "price": 150000,
+        "fantasyPrice": 15000000,
+        "number": 5,
+        "status": "ok",
+        "priceIncrement": 0,
+        "playedHome": 13,
+        "playedAway": 10,
         "fitness": [12, 12, 6, 7, -1],
-        "points": 141
+        "points": 141,
+        "pointsHome": 89,
+        "pointsAway": 52,
+        "pointsLastSeason": 198
       }
     },
     "teams": {
@@ -63,8 +71,403 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
           {
             "id": 49953,
             "date": 1770917400,
-            "home": { "id": 560 },
-            "away": { "id": 645 }
+            "round": { "id": 4773 },
+            "home": { "id": 560, "score": null },
+            "away": { "id": 645, "score": null }
+          }
+        ]
+      }
+    },
+    "rounds": []
+  }
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- `players` → `players` table (id, name, team_id, position, price, status)
+- `teams` → `teams` table (id, name, slug)
+- `rounds` → Used for determining current/next round
+
+---
+
+#### Player Details (Individual Metadata)
+
+**Endpoint**: `GET /players/euroleague/{id}?lang=es&fields=id,name,position,prices,birthday,height,weight,img`  
+**Purpose**: Fetch detailed player metadata (height, weight, birthday, image)  
+**Sync Step**: `01-players.js`  
+**Frequency**: On-demand for missing player data
+
+<details>
+<summary><strong>Response Sample</strong></summary>
+
+```json
+{
+  "status": 200,
+  "data": {
+    "id": 41,
+    "name": "Niels Giffey",
+    "slug": "giffey",
+    "position": 2,
+    "birthday": 19900620,
+    "height": 201,
+    "weight": 96,
+    "img": "https://cdn.biwenger.com/players/euroleague/41.png",
+    "prices": [{ "date": 1770304415, "price": 150000 }]
+  }
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- `birthday` → `players.birth_date` (converted to DATE)
+- `height` → `players.height` (cm)
+- `weight` → `players.weight` (kg)
+- `img` → `players.img` (URL)
+
+---
+
+#### League Standings
+
+**Endpoint**: `GET /league/{id}?fields=standings`  
+**Purpose**: Current league table with user rankings  
+**Sync Step**: `04-standings.js`  
+**Frequency**: Every sync
+
+<details>
+<summary><strong>Response Sample</strong></summary>
+
+```json
+{
+  "data": {
+    "standings": [
+      {
+        "id": 13207868,
+        "name": "All Stars",
+        "icon": "icons/28.png",
+        "points": 5030,
+        "position": 1
+      },
+      {
+        "id": 13207910,
+        "name": "June",
+        "icon": "icons/45.png",
+        "points": 4890,
+        "position": 2
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- `standings` → `users` table (id, name, icon)
+- `points` → Stored for historical tracking
+- `position` → Current league rank
+
+---
+
+### 1.2. Biwenger Market & Transfers
+
+#### League Board (Market Activity)
+
+**Endpoint**: `GET /league/{id}/board?offset={offset}&limit={limit}`  
+**Purpose**: Fetch market activity (transfers, predictions, bonuses, announcements)  
+**Sync Step**: `07-market.js`, `13-porras.js`  
+**Frequency**: Paginated fetch (50 items per page)
+
+<details>
+<summary><strong>Response Sample (Multiple Types)</strong></summary>
+
+```json
+{
+  "data": [
+    {
+      "type": "bettingPool",
+      "content": {
+        "pool": {
+          "id": 600885,
+          "mode": "1x2",
+          "games": [
+            {
+              "id": 49953,
+              "home": { "name": "Anadolu Efes" },
+              "away": { "name": "Virtus Bologna" }
+            }
+          ],
+          "prizes": [0, 0, 5000, 20000],
+          "responses": [
+            {
+              "id": 13207868,
+              "name": "User A",
+              "response": ["1", "X", "2"]
+            }
+          ]
+        }
+      },
+      "date": 1770730000
+    },
+    {
+      "type": "transfer",
+      "content": [
+        {
+          "player": 41,
+          "amount": 5000000,
+          "from": { "id": 123, "name": "User A" },
+          "to": { "id": 456, "name": "User B" },
+          "bids": [{ "user": { "id": 789, "name": "User C" }, "amount": 4800000 }]
+        }
+      ],
+      "date": 1770746411
+    },
+    {
+      "type": "roundFinished",
+      "content": {
+        "round": { "id": 4773, "name": "Round 28" },
+        "results": [
+          {
+            "user": { "id": 123, "name": "User A" },
+            "points": 150,
+            "bonus": 200000
+          }
+        ]
+      },
+      "date": 1770720000
+    },
+    {
+      "type": "adminTransfer",
+      "content": {
+        "to": { "id": 456, "name": "User B" },
+        "amount": 1000000,
+        "text": "Corrective bonus"
+      },
+      "date": 1770710000
+    }
+  ]
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- `type: "transfer"` → `fichajes` table (player_id, precio, vendedor, comprador, timestamp)
+- `type: "transfer"` + `bids` → `bids` table (transfer_id, bidder_id, amount)
+- `type: "bettingPool"` → `porras` table (user_id, round_id, result, aciertos)
+- `type: "roundFinished"` + `bonus` → `finances` table (user_id, type: 'round_bonus', amount)
+- `type: "adminTransfer"` → `finances` table (user_id, type: 'admin_bonus', amount)
+
+---
+
+#### User Squad (Ownership)
+
+**Endpoint**: `GET /user/{id}?fields=players`  
+**Purpose**: Fetch current player ownership for a user  
+**Sync Step**: `08-squads.js`, `09-initial-squads.js`  
+**Frequency**: Every sync for all users
+
+<details>
+<summary><strong>Response Sample</strong></summary>
+
+```json
+{
+  "status": 200,
+  "data": {
+    "players": [
+      {
+        "id": 27670,
+        "name": "Aleksa Avramovic",
+        "position": 1,
+        "price": 3400000,
+        "team": { "id": 786, "name": "Dubai Basketball" }
+      },
+      {
+        "id": 39172,
+        "name": "Mckinley Wright IV",
+        "position": 1,
+        "price": 8910000,
+        "team": { "id": 786, "name": "Dubai Basketball" }
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- `players[].id` → Update `players.owner_id` to user ID
+- First sync → Store in `initial_squads` table for historical reference
+
+---
+
+#### User Lineup (Active Formation)
+
+**Endpoint**: `GET /user/{id}?fields=lineup`  
+**Purpose**: Fetch user's active lineup and captain selection  
+**Sync Step**: `06-lineups.js`  
+**Frequency**: Every sync for all users
+
+<details>
+<summary><strong>Response Sample</strong></summary>
+
+```json
+{
+  "status": 200,
+  "data": {
+    "lineup": {
+      "type": "3-1-1",
+      "count": 1,
+      "position": 0,
+      "captain": { "id": 28228 },
+      "striker": null,
+      "coach": null,
+      "date": 1770304415,
+      "round": null,
+      "players": [
+        {
+          "id": 27670,
+          "name": "Aleksa Avramovic",
+          "position": 1,
+          "price": 3400000,
+          "fitness": [27, 28, 14, 27, 11],
+          "status": "ok"
+        }
+      ],
+      "playersID": [27670, 39172, 28228],
+      "reserves": [null, null, null],
+      "reservesID": [null, null, null]
+    }
+  }
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- `lineup.playersID` → `user_lineups` table (user_id, round_id, player_ids as JSON array)
+- `captain.id` → `user_lineups.captain_id`
+- Used for calculating ideal lineup and efficiency ratings
+
+---
+
+### 1.3. Biwenger Tournaments & Competitions
+
+#### Home/Dashboard (Tournament Discovery)
+
+**Endpoint**: `GET /home`  
+**Purpose**: Discover active tournaments, events, and user fixtures  
+**Sync Step**: `14-tournaments.js`  
+**Frequency**: Every sync
+
+<details>
+<summary><strong>Response Sample</strong></summary>
+
+```json
+{
+  "data": {
+    "events": [
+      {
+        "type": "round",
+        "round": { "id": 4773, "name": "Round 28" },
+        "fixtures": [
+          {
+            "id": 123456,
+            "tournament": { "id": 129035, "name": "Eliminatoria #2" },
+            "home": { "id": 13207868, "name": "All Stars", "score": null },
+            "away": { "id": 13207910, "name": "June", "score": null },
+            "date": 1770917400,
+            "status": "scheduled"
+          }
+        ]
+      }
+    ],
+    "league": {
+      "id": 2028379,
+      "name": "My League",
+      "board": [
+        {
+          "type": "tournament",
+          "content": {
+            "tournament": { "id": 129035, "name": "Eliminatoria #2" }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- Extract `tournament.id` from events/fixtures
+- Used to trigger detailed tournament sync
+
+---
+
+#### Tournament Details (Phases, Fixtures, Standings)
+
+**Endpoint**: `GET /tournaments/{id}`  
+**Purpose**: Fetch complete tournament structure  
+**Sync Step**: `14-tournaments.js`  
+**Frequency**: For each discovered tournament
+
+<details>
+<summary><strong>Response Sample</strong></summary>
+
+```json
+{
+  "data": {
+    "id": 129035,
+    "name": "Eliminatoria #2",
+    "type": "knockout",
+    "status": "active",
+    "rounds": [
+      {
+        "index": 0,
+        "type": "quarterfinals",
+        "name": "Cuartos de Final",
+        "round": { "id": 4773, "name": "Round 28" },
+        "fixtures": [
+          {
+            "id": 123456,
+            "home": { "id": 13207868, "name": "All Stars", "score": 150 },
+            "away": { "id": 13207910, "name": "June", "score": 142 },
+            "date": 1770917400,
+            "status": "finished",
+            "group": null
+          }
+        ]
+      }
+    ],
+    "phases": {
+      "knockout": {
+        "name": "Eliminatorias",
+        "groups": [
+          {
+            "name": null,
+            "standings": [
+              {
+                "team": { "id": 13207868, "name": "All Stars" },
+                "position": 1,
+                "points": 3,
+                "won": 1,
+                "lost": 0,
+                "scored": 150,
+                "against": 142
+              }
+            ]
           }
         ]
       }
@@ -75,55 +478,81 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
 
 </details>
 
+**Database Transformation**:
+
+- `tournament` → `tournaments` table (id, name, type, status)
+- `phases` → `tournament_phases` table (tournament_id, name, type, order_index)
+- `rounds[].fixtures` → `tournament_fixtures` table (id, tournament_id, phase_id, home_user_id, away_user_id, home_score, away_score, status)
+- `phases[].groups[].standings` → `tournament_standings` table (tournament_id, phase_name, user_id, position, points, won, lost)
+
+---
+
+### 1.4. Biwenger Match & Stats Data
+
+#### Round Games (Match Results)
+
+**Endpoint**: `GET /rounds/euroleague/{roundId}?score=1`  
+**Purpose**: Fetch match results and basic stats for a round  
+**Sync Step**: `05-stats.js`  
+**Frequency**: For each finished round
+
 <details>
-<summary><strong>League Board (Market & Transfers)</strong></summary>
+<summary><strong>Response Sample</strong></summary>
 
 ```json
 {
-  "data": [
-    {
-      "type": "transfer",
-      "content": {
-        "amount": 5000000,
-        "player": { "id": 41, "name": "Niels Giffey" },
-        "from": { "id": 123, "name": "User A" },
-        "to": { "id": 456, "name": "User B" }
-      },
-      "date": 1770746411
-    },
-    {
-      "type": "market",
-      "content": {
-        "player": { "id": 28228, "name": "Carsen Edwards" },
-        "price": 4540000
-      },
-      "date": 1770740000
-    }
-  ]
+  "data": {
+    "games": [
+      {
+        "id": 49953,
+        "date": 1770917400,
+        "status": "finished",
+        "home": {
+          "id": 560,
+          "name": "Anadolu Efes Istanbul",
+          "score": 85
+        },
+        "away": {
+          "id": 645,
+          "name": "Virtus Segafredo Bologna",
+          "score": 78
+        }
+      }
+    ]
+  }
 }
 ```
 
 </details>
 
+**Database Transformation**:
+
+- `games` → `matches` table (id, round_id, home_id, away_id, home_score, away_score, status, date)
+
+---
+
+#### Round Stats (Player Fantasy Points)
+
+**Endpoint**: `GET /rounds/league/{roundId}` or `/rounds/league` (latest)  
+**Purpose**: Fetch fantasy points for all players in a round  
+**Sync Step**: `05-stats.js`  
+**Frequency**: For each finished round
+
 <details>
-<summary><strong>User Lineup</strong></summary>
+<summary><strong>Response Sample</strong></summary>
 
 ```json
 {
   "data": {
-    "lineup": {
-      "type": "3-1-1",
-      "captain": { "id": 28228 },
-      "players": [
-        {
-          "id": 27670,
-          "name": "Aleksa Avramovic",
-          "position": 1,
-          "price": 3400000,
-          "fitness": [27, 28, 14, 27, 11],
-          "status": "ok"
-        }
-      ]
+    "12345": {
+      "points": 25,
+      "matches": 1,
+      "stats": [25]
+    },
+    "67890": {
+      "points": 12,
+      "matches": 1,
+      "stats": [12]
     }
   }
 }
@@ -131,20 +560,63 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
 
 </details>
 
-### 1.2. Euroleague API
+**Database Transformation**:
 
-**Base URL**: `https://live.euroleague.net/api`
-**Auth**: Public
+- `data[playerId].points` → `player_round_stats.fantasy_points`
+- `data[playerId].matches` → Number of games played
+- Combined with Euroleague Boxscore for detailed stats
 
-| Resource     | Endpoint                      | Purpose                        | Sync Step       |
-| ------------ | ----------------------------- | ------------------------------ | --------------- |
-| **Boxscore** | `/Header?gamecode={code}`     | Detailed stats (rebounds, etc) | `05-stats.js`   |
-| **Schedule** | `/Schedules?seasoncode=E2025` | Season calendar                | `03-matches.js` |
+---
 
-#### 📄 Response Samples
+### 1.5. Euroleague Official API
+
+#### Schedule (Season Calendar)
+
+**Endpoint**: `GET https://live.euroleague.net/api/Schedules?seasoncode=E2025`  
+**Purpose**: Fetch full season match schedule  
+**Sync Step**: `03-matches.js`  
+**Frequency**: Once per season, updated weekly
 
 <details>
-<summary><strong>Boxscore (Player Stats)</strong></summary>
+<summary><strong>Response Sample</strong></summary>
+
+```json
+{
+  "gamedays": [
+    {
+      "round": 28,
+      "games": [
+        {
+          "gamecode": "E2025-28-AEF-VIR",
+          "date": "2026-02-11T19:00:00Z",
+          "home": { "code": "AEF", "name": "Anadolu Efes Istanbul" },
+          "away": { "code": "VIR", "name": "Virtus Segafredo Bologna" },
+          "status": "scheduled"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+**Database Transformation**:
+
+- `games` → `matches` table (euroleague_game_code, date, home_id, away_id, round_id)
+- `gamecode` → Used to fetch detailed boxscore
+
+---
+
+#### Boxscore (Detailed Player Stats)
+
+**Endpoint**: `GET https://live.euroleague.net/api/Boxscore?gamecode={code}&seasoncode=E2025`  
+**Purpose**: Fetch detailed player statistics (rebounds, assists, etc.)  
+**Sync Step**: `05-stats.js`  
+**Frequency**: After each match finishes
+
+<details>
+<summary><strong>Response Sample</strong></summary>
 
 ```json
 {
@@ -160,7 +632,16 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
           "TotalRebounds": 2,
           "Assistances": 7,
           "Steals": 2,
-          "Valuation": 20
+          "Blocks": 1,
+          "Turnovers": 3,
+          "FoulsCommited": 2,
+          "Valuation": 20,
+          "FieldGoalsMade2": 3,
+          "FieldGoalsAttempted2": 5,
+          "FieldGoalsMade3": 2,
+          "FieldGoalsAttempted3": 4,
+          "FreeThrowsMade": 3,
+          "FreeThrowsAttempted": 3
         }
       ]
     }
@@ -170,80 +651,161 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
 
 </details>
 
+**Database Transformation**:
+
+- `PlayersStats` → `player_round_stats` table
+- `Player_ID` → Mapped to internal player ID via name matching
+- `Points` → `player_round_stats.points`
+- `TotalRebounds` → `player_round_stats.rebounds`
+- `Assistances` → `player_round_stats.assists`
+- `Steals` → `player_round_stats.steals`
+- `Blocks` → `player_round_stats.blocks`
+- `Turnovers` → `player_round_stats.turnovers`
+- `Valuation` → `player_round_stats.valuation` (PIR)
+- `FieldGoalsMade2/3` → `player_round_stats.two_points_made/three_points_made`
+- `FreeThrowsMade` → `player_round_stats.free_throws_made`
+
 ---
 
-## 2. Internal API (Application Backend)
+#### Header (Match Metadata)
 
-These endpoints are provided by the `src/app/api` directory and are consumed by the frontend components.
+**Endpoint**: `GET https://live.euroleague.net/api/Header?gamecode={code}&seasoncode=E2025`  
+**Purpose**: Fetch match metadata and team statistics  
+**Sync Step**: `05-stats.js`  
+**Frequency**: After each match finishes
 
-**Base URL**: `/api`
-**Response Format**:
+<details>
+<summary><strong>Response Sample</strong></summary>
 
 ```json
 {
-  "success": true,
-  "data": { ... },
-  "error": null // Only present on failure
+  "CodeTeamA": "MAD",
+  "CodeTeamB": "BAR",
+  "ScoreTeamA": "85",
+  "ScoreTeamB": "78",
+  "Round": "28",
+  "Date": "2026-02-11T19:00:00Z",
+  "Status": "finished"
 }
 ```
 
-### 2.1. Dashboard Endpoints
+</details>
 
-Located in `src/app/api/dashboard/`
+**Database Transformation**:
 
-| Endpoint                   | Method | Description               | Data Returned          |
-| -------------------------- | ------ | ------------------------- | ---------------------- |
-| `/dashboard/mvps`          | `GET`  | Last round's best players | Top 3 MVP cards        |
-| `/dashboard/next-matches`  | `GET`  | Upcoming fixtures         | Grouped by day         |
-| `/dashboard/ideal-lineup`  | `GET`  | Best possible team        | Players & total points |
-| `/dashboard/rising-stars`  | `GET`  | Players improving form    | "Rising Stars" card    |
-| `/dashboard/falling-stars` | `GET`  | Players losing form       | "Cold Streaks" card    |
-
-### 2.2. Player & Market Analysis
-
-Located in `src/app/api/player/` and `src/app/api/market/`
-
-| Endpoint          | Method | Params               | Description                               |
-| ----------------- | ------ | -------------------- | ----------------------------------------- |
-| `/player/streaks` | `GET`  | -                    | Hot/Cold lists based on recent avg        |
-| `/market/trends`  | `GET`  | `player_id`          | Price history graph data                  |
-| `/market/snipers` | `GET`  | -                    | Undervalued players (High form/Low price) |
-| `/stats/leaders`  | `GET`  | `type` (points, etc) | Statistical leaders board                 |
-
-### 2.3. User & League Data
-
-Located in `src/app/api/users/` and `src/app/api/standings/`
-
-| Endpoint              | Method | Description                          |
-| --------------------- | ------ | ------------------------------------ |
-| `/users`              | `GET`  | List of all league members           |
-| `/users/{id}/history` | `GET`  | User's performance history per round |
-| `/standings`          | `GET`  | Current league table                 |
-| `/compare/data`       | `GET`  | Head-to-head comparison data         |
-
-### 2.4. Authentication
-
-Located in `src/app/api/auth/`
-
-| Endpoint        | Method | Description            |
-| --------------- | ------ | ---------------------- |
-| `/auth/login`   | `POST` | Admin login            |
-| `/auth/session` | `GET`  | Verify current session |
-| `/auth/logout`  | `POST` | Destroy session        |
+- `ScoreTeamA/B` → `matches.home_score/away_score`
+- `Status` → `matches.status`
+- Used to verify match completion before fetching boxscore
 
 ---
 
-## 3. Database Schema Mapping
+## 2. Database Schema Mapping
 
-Key tables populated by the sync process:
+### Core Tables
 
-| Table                | Source                                     | Description                             |
-| -------------------- | ------------------------------------------ | --------------------------------------- |
-| `players`            | Biwenger Master Data                       | Static player info, team, current price |
-| `player_round_stats` | Biwenger Round Stats + Euroleague Boxscore | Performance data per game               |
-| `matches`            | Euroleague Schedule                        | Game dates, teams, results              |
-| `market_entries`     | Biwenger Board                             | Daily market price snapshots            |
-| `fichajes`           | Biwenger Board                             | Transfer history between users          |
-| `users`              | Biwenger League                            | League participants info                |
+| Table                | Primary Source       | Secondary Source        | Purpose                          |
+| -------------------- | -------------------- | ----------------------- | -------------------------------- |
+| `players`            | Biwenger Master Data | Biwenger Player Details | Player roster, prices, ownership |
+| `teams`              | Biwenger Master Data | -                       | Team information                 |
+| `users`              | Biwenger Standings   | Biwenger Board          | League participants              |
+| `matches`            | Euroleague Schedule  | Biwenger Round Games    | Match calendar and results       |
+| `player_round_stats` | Euroleague Boxscore  | Biwenger Round Stats    | Detailed player performance      |
 
-For detailed schema, see `src/lib/db/schema.sql`.
+### Market Tables
+
+| Table           | Source                                            | Purpose                     |
+| --------------- | ------------------------------------------------- | --------------------------- |
+| `fichajes`      | Biwenger Board (`type: transfer`)                 | Transfer history            |
+| `bids`          | Biwenger Board (`transfer.bids`)                  | Auction bid history         |
+| `market_values` | Biwenger Master Data (historical)                 | Price evolution tracking    |
+| `finances`      | Biwenger Board (`roundFinished`, `adminTransfer`) | User financial transactions |
+
+### Competition Tables
+
+| Table                  | Source                               | Purpose                                 |
+| ---------------------- | ------------------------------------ | --------------------------------------- |
+| `tournaments`          | Biwenger Tournaments                 | Tournament metadata                     |
+| `tournament_phases`    | Biwenger Tournaments                 | Tournament structure (groups, knockout) |
+| `tournament_fixtures`  | Biwenger Tournaments                 | Tournament matches                      |
+| `tournament_standings` | Biwenger Tournaments                 | Tournament rankings                     |
+| `porras`               | Biwenger Board (`type: bettingPool`) | Match prediction pools                  |
+
+### User Data Tables
+
+| Table            | Source                           | Purpose                     |
+| ---------------- | -------------------------------- | --------------------------- |
+| `user_lineups`   | Biwenger User Lineup             | Active formations per round |
+| `initial_squads` | Biwenger User Squad (first sync) | Starting rosters            |
+
+---
+
+## 3. Sync Process Flow
+
+```mermaid
+graph TD
+    A[Start Sync] --> B[01: Fetch Master Data]
+    B --> C[02: Update Players & Teams]
+    C --> D[03: Fetch Euroleague Schedule]
+    D --> E[04: Fetch Standings & Users]
+    E --> F[05: Fetch Round Stats & Boxscores]
+    F --> G[06: Fetch User Lineups]
+    G --> H[07: Fetch Market Board]
+    H --> I[08: Update Squad Ownership]
+    I --> J[09: Store Initial Squads]
+    J --> K[10-12: Fetch Images & Metadata]
+    K --> L[13: Fetch Betting Pools]
+    L --> M[14: Fetch Tournaments]
+    M --> N[End Sync]
+```
+
+**Execution Order**:
+
+1. **Core Data** (01-04): Players, teams, matches, users
+2. **Performance Data** (05-06): Stats, lineups
+3. **Market Data** (07-09): Transfers, ownership
+4. **Metadata** (10-12): Images, colors
+5. **Competitions** (13-14): Predictions, tournaments
+
+---
+
+## 4. Rate Limiting & Best Practices
+
+### Biwenger API
+
+- **Rate Limit**: ~60 requests/minute
+- **Strategy**: Random delay (2-5s) between requests
+- **Retry Logic**: Exponential backoff on 429 errors
+- **Version Parameter**: Auto-injected via `/account` endpoint
+
+### Euroleague API
+
+- **Rate Limit**: No official limit (use responsibly)
+- **Strategy**: 1-2s delay between requests
+- **Caching**: Schedule fetched once per week
+
+---
+
+## 5. Error Handling
+
+### Common Issues
+
+1. **Player Name Mismatches** (Euroleague ↔ Biwenger)
+   - **Solution**: Fuzzy matching algorithm in `05-stats.js`
+   - **Fallback**: Manual mapping table
+
+2. **Missing Boxscore Data**
+   - **Solution**: Retry after 1 hour (match may still be processing)
+   - **Fallback**: Use Biwenger Round Stats only
+
+3. **Tournament Not Found**
+   - **Solution**: Tournament may have ended, skip gracefully
+   - **Log**: Warning message, continue sync
+
+4. **Rate Limit Exceeded**
+   - **Solution**: Exponential backoff (5s → 10s → 20s)
+   - **Max Retries**: 3 attempts
+
+---
+
+For detailed schema definitions, see `src/lib/db/schema.sql`.  
+For sync implementation, see `src/lib/sync/steps/`.

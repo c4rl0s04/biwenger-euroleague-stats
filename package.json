@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write src/",
+    "setup": "node scripts/setup.js",
     "sync": "node -r dotenv/config src/lib/sync/index.js",
     "sync:daily": "node -r dotenv/config src/lib/sync/index.js --daily",
     "sync:live": "node -r dotenv/config src/lib/sync/live.js",

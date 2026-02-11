@@ -66,10 +66,98 @@
 
 2.  **Configure Environment**
 
+    **🎯 Recommended: Use the Setup Wizard**
+
+    Run the interactive setup wizard to automatically configure your credentials:
+
+    ```bash
+    npm run setup
+    ```
+
+    The wizard will:
+    1. Ask you to paste your Biwenger token (from browser Developer Tools)
+    2. Automatically fetch all your leagues and let you select one
+    3. Extract your League ID and User ID automatically
+    4. Prompt you to set an admin password
+    5. Auto-generate a secure session encryption key
+    6. Create your `.env` file with all required configuration
+
+    **That's it!** No manual JSON inspection needed.
+
+    <details>
+    <summary><strong>Advanced: Manual Configuration</strong></summary>
+
+    If you prefer to configure manually, copy the example environment file:
+
     ```bash
     cp .env.example .env
-    # Add your BIWENGER_TOKEN and league credentials
     ```
+
+    Then open `.env` and fill in the following **required** credentials:
+
+    ### Required Credentials
+
+    #### `BIWENGER_TOKEN`
+
+    Your personal authentication token from Biwenger.
+
+    **How to get it:**
+    1. Log into [Biwenger](https://biwenger.as.com) in your browser
+    2. Open Developer Tools (F12)
+    3. Go to the **Network** tab
+    4. Refresh the page
+    5. Look for a request to `https://biwenger.as.com/api/v2/`
+    6. In the **Headers** section, find `Authorization: Bearer <YOUR_TOKEN>`
+    7. Copy the token (everything after `Bearer `)
+
+    #### `BIWENGER_LEAGUE_ID`
+
+    Your league's unique identifier.
+
+    **How to get it:**
+    1. In Developer Tools (Network tab), look for a request to `/api/v2/league`
+    2. Click on the request and go to the **Response** or **Preview** tab
+    3. Find the `id` field in the JSON response
+    4. Copy that number as your `BIWENGER_LEAGUE_ID`
+
+    #### `BIWENGER_USER_ID`
+
+    Your user ID within Biwenger.
+
+    **How to get it:**
+    1. In Developer Tools (Network tab), look for a request to `/api/v2/user`
+    2. Click on the request and go to the **Response** or **Preview** tab
+    3. Find the `id` field in the JSON response
+    4. Copy that number as your `BIWENGER_USER_ID`
+
+    #### `ACCESS_PASSWORD`
+
+    A password you create to protect the admin/sync dashboard.
+
+    **How to set it:**
+    - Choose any secure password (e.g., `"mySecretPassword123"`)
+
+    #### `AUTH_SECRET`
+
+    A random string for encrypting user sessions.
+
+    **How to generate it:**
+
+    ```bash
+    openssl rand -base64 32
+    ```
+
+    Copy the output into your `.env` file.
+
+    ### Optional: Remote Database
+
+    By default, Docker creates a local PostgreSQL database. To use **Supabase** or another remote database:
+
+    ```bash
+    DATABASE_URL="postgresql://user:password@host:port/database"
+    ```
+
+    </details>
 
 3.  **Run with Docker**
 

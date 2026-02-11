@@ -168,6 +168,100 @@ async function run() {
     }
   }
 
+  // 7. Home/Dashboard (Tournament Discovery)
+  const homeData = await fetchBiwenger('/home');
+  if (homeData && homeData.data) {
+    samples.home = {
+      data: {
+        events: homeData.data.events ? homeData.data.events.slice(0, 1) : [],
+        league: homeData.data.league
+          ? {
+              ...homeData.data.league,
+              board: homeData.data.league.board ? homeData.data.league.board.slice(0, 2) : [],
+            }
+          : null,
+      },
+    };
+
+    // Extract tournament ID if available
+    let tournamentId = null;
+    if (homeData.data.events && homeData.data.events.length > 0) {
+      const event = homeData.data.events[0];
+      if (event.fixtures && event.fixtures.length > 0) {
+        tournamentId = event.fixtures[0].tournament?.id;
+      }
+    }
+
+    // 8. Tournament Details
+    if (tournamentId) {
+      const tournamentData = await fetchBiwenger(`/tournaments/${tournamentId}`);
+      if (tournamentData && tournamentData.data) {
+        samples.tournament = {
+          data: {
+            id: tournamentData.data.id,
+            name: tournamentData.data.name,
+            type: tournamentData.data.type,
+            status: tournamentData.data.status,
+            rounds: tournamentData.data.rounds
+              ? tournamentData.data.rounds.slice(0, 1).map((r) => ({
+                  ...r,
+                  fixtures: r.fixtures ? r.fixtures.slice(0, 2) : [],
+                }))
+              : [],
+            phases: tournamentData.data.phases,
+          },
+        };
+      }
+    }
+  }
+
+  // 9. User Squad (Ownership)
+  const squadUrl = `/user/${CONFIG.API.USER_ID}?fields=players`;
+  const userSquad = await fetchBiwenger(squadUrl);
+  if (userSquad && userSquad.data && userSquad.data.players) {
+    samples.userSquad = {
+      data: {
+        players: userSquad.data.players.slice(0, 3),
+      },
+    };
+  }
+
+  // 10. Player Details (Individual Metadata)
+  if (compData && compData.data && compData.data.players) {
+    const samplePlayerId = Object.keys(compData.data.players)[0];
+    const playerDetailsUrl = CONFIG.ENDPOINTS.BIWENGER.PLAYER_DETAILS(samplePlayerId);
+    const playerDetails = await fetchBiwenger(playerDetailsUrl);
+    if (playerDetails && playerDetails.data) {
+      samples.playerDetails = playerDetails;
+    }
+  }
+
+  // 11. Round Games (Match Results)
+  if (finishedRoundId) {
+    const roundGamesUrl = CONFIG.ENDPOINTS.BIWENGER.ROUND_GAMES(finishedRoundId);
+    const roundGames = await fetchBiwenger(roundGamesUrl);
+    if (roundGames && roundGames.data) {
+      samples.roundGames = {
+        data: {
+          games: roundGames.data.games ? roundGames.data.games.slice(0, 2) : [],
+        },
+      };
+    }
+  }
+
+  // 12. Euroleague Header (Match Metadata)
+  if (scheduleData && scheduleData.gamedays) {
+    const firstGame = scheduleData.gamedays.find((g) => g.games && g.games.length > 0)?.games[0];
+    if (firstGame) {
+      const gameCode = firstGame.gamecode;
+      const headerUrl = `${CONFIG.EUROLEAGUE.API_LEGACY_URL}/Header?gamecode=${gameCode}&seasoncode=${CONFIG.EUROLEAGUE.SEASON_CODE}`;
+      const headerData = await fetchEuroleague(headerUrl);
+      if (headerData) {
+        samples.header = headerData;
+      }
+    }
+  }
+
   await fs.writeFile('api_samples_output.json', JSON.stringify(samples, null, 2));
   console.log('Samples saved to api_samples_output.json');
 }
