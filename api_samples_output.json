@@ -1,0 +1,811 @@
+{
+  "masterData": {
+    "data": {
+      "players": {
+        "41": {
+          "id": 41,
+          "name": "Niels Giffey",
+          "slug": "giffey",
+          "teamID": 572,
+          "position": 2,
+          "price": 150000,
+          "fantasyPrice": 15000000,
+          "number": 5,
+          "status": "ok",
+          "priceIncrement": 0,
+          "playedHome": 13,
+          "playedAway": 10,
+          "fitness": [12, 12, 6, 7, -1],
+          "points": 141,
+          "pointsHome": 89,
+          "pointsAway": 52,
+          "pointsLastSeason": 198
+        }
+      },
+      "teams": {
+        "560": {
+          "id": 560,
+          "name": "Anadolu Efes Istanbul",
+          "slug": "anadolu-efes-istanbul",
+          "nextGames": [
+            {
+              "id": 49953,
+              "date": 1770917400,
+              "round": {
+                "id": 4773
+              },
+              "home": {
+                "id": 560,
+                "score": null
+              },
+              "away": {
+                "id": 645,
+                "score": null
+              }
+            }
+          ]
+        }
+      },
+      "rounds": []
+    }
+  },
+  "leagueBoard": {
+    "data": [
+      {
+        "type": "bettingPool",
+        "title": "",
+        "content": {
+          "pool": {
+            "id": 600885,
+            "until": 1770917400,
+            "expired": false,
+            "mode": "1x2",
+            "games": [
+              {
+                "id": 49953,
+                "date": 1770917400,
+                "status": "preview",
+                "home": {
+                  "id": 560,
+                  "name": "Anadolu Efes Istanbul",
+                  "slug": "anadolu-efes-istanbul",
+                  "score": null
+                },
+                "away": {
+                  "id": 645,
+                  "name": "Virtus Segafredo Bologna",
+                  "slug": "virtus-segafredo-bologna",
+                  "score": null
+                }
+              },
+              {
+                "id": 49954,
+                "date": 1770923100,
+                "status": "preview",
+                "home": {
+                  "id": 576,
+                  "name": "Maccabi Playtika Tel Aviv",
+                  "slug": "maccabi-playtika-tel-aviv",
+                  "score": null
+                },
+                "away": {
+                  "id": 572,
+                  "name": "FC Bayern Munich",
+                  "slug": "fc-bayern-munich",
+                  "score": null
+                }
+              },
+              {
+                "id": 49955,
+                "date": 1770923700,
+                "status": "preview",
+                "home": {
+                  "id": 577,
+                  "name": "Olympiacos Piraeus",
+                  "slug": "olympiacos-piraeus",
+                  "score": null
+                },
+                "away": {
+                  "id": 569,
+                  "name": "Crvena Zvezda Meridianbet Belgrade",
+                  "slug": "crvena-zvezda-meridianbet-belgrade",
+                  "score": null
+                }
+              },
+              {
+                "id": 49956,
+                "date": 1770924600,
+                "status": "preview",
+                "home": {
+                  "id": 571,
+                  "name": "FC Barcelona",
+                  "slug": "fc-barcelona",
+                  "score": null
+                },
+                "away": {
+                  "id": 713,
+                  "name": "Paris Basketball",
+                  "slug": "paris-basketball",
+                  "score": null
+                }
+              },
+              {
+                "id": 49957,
+                "date": 1770924600,
+                "status": "preview",
+                "home": {
+                  "id": 581,
+                  "name": "Valencia Basket",
+                  "slug": "valencia-basket",
+                  "score": null
+                },
+                "away": {
+                  "id": 575,
+                  "name": "LDLC ASVEL Villeurbanne",
+                  "slug": "ldlc-asvel-villeurbanne",
+                  "score": null
+                }
+              },
+              {
+                "id": 49958,
+                "date": 1771005600,
+                "status": "preview",
+                "home": {
+                  "id": 582,
+                  "name": "Zalgiris Kaunas",
+                  "slug": "zalgiris-kaunas",
+                  "score": null
+                },
+                "away": {
+                  "id": 785,
+                  "name": "Hapoel IBI Tel Aviv",
+                  "slug": "hapoel-ibi-tel-aviv",
+                  "score": null
+                }
+              },
+              {
+                "id": 49959,
+                "date": 1771007400,
+                "status": "preview",
+                "home": {
+                  "id": 598,
+                  "name": "AS Monaco",
+                  "slug": "as-monaco",
+                  "score": null
+                },
+                "away": {
+                  "id": 580,
+                  "name": "Baskonia Vitoria-Gasteiz",
+                  "slug": "baskonia-vitoria-gasteiz",
+                  "score": null
+                }
+              },
+              {
+                "id": 49960,
+                "date": 1771010100,
+                "status": "preview",
+                "home": {
+                  "id": 578,
+                  "name": "Panathinaikos Athens",
+                  "slug": "panathinaikos-athens",
+                  "score": null
+                },
+                "away": {
+                  "id": 573,
+                  "name": "Fenerbahce Beko Istanbul",
+                  "slug": "fenerbahce-beko-istanbul",
+                  "score": null
+                }
+              },
+              {
+                "id": 49961,
+                "date": 1771011000,
+                "status": "preview",
+                "home": {
+                  "id": 568,
+                  "name": "EA7 Emporio Armani Milan",
+                  "slug": "ea7-emporio-armani-milan",
+                  "score": null
+                },
+                "away": {
+                  "id": 786,
+                  "name": "Dubai Basketball",
+                  "slug": "dubai-basketball",
+                  "score": null
+                }
+              },
+              {
+                "id": 49962,
+                "date": 1771011000,
+                "status": "preview",
+                "home": {
+                  "id": 642,
+                  "name": "Partizan Mozzart Bet Belgrade",
+                  "slug": "partizan-mozzart-bet-belgrade",
+                  "score": null
+                },
+                "away": {
+                  "id": 579,
+                  "name": "Real Madrid",
+                  "slug": "real-madrid",
+                  "score": null
+                }
+              }
+            ],
+            "prizes": [0, 0, 0, 0, 0, 0, 5000, 20000, 100000, 500000, 1000000],
+            "competition": "euroleague",
+            "round": {
+              "id": 4773,
+              "name": "Round 28",
+              "short": "R28",
+              "season": {
+                "id": "2026",
+                "name": "2025-26 season",
+                "slug": "2025-2026"
+              }
+            },
+            "responses": [
+              {
+                "id": 13207868,
+                "name": "All Stars",
+                "icon": "icons/28.png",
+                "response": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "2"],
+                "hits": null
+              },
+              {
+                "id": 13207910,
+                "name": "June",
+                "icon": "icons/45.png",
+                "response": ["1", "2", "2", "1", "1", "1", "1", "2", "1", "2"],
+                "hits": null
+              }
+            ]
+          }
+        },
+        "date": 1770746411,
+        "fixed": true,
+        "author": null
+      },
+      {
+        "type": "adminText",
+        "title": "¡VII Copa Gurú Biwenger!",
+        "content": "<p><span style=\"font-weight: 400;\">🚨 Plazas </span><strong>limitadas a 16.384</strong><span style=\"font-weight: 400;\"> participantes, con solo </span><strong>1 campe&oacute;n </strong><span style=\"font-weight: 400;\">🏆</span></p>\r\n<p><span style=\"font-weight: 400;\">🎁 &iexcl;Premio para los </span><strong>4 mejores m&aacute;nager</strong><span style=\"font-weight: 400;\">!</span></p>\r\n<p><span style=\"font-weight: 400;\">🗓️</span><span style=\"font-weight: 400;\"> </span><span style=\"font-weight: 400;\">Desde la </span><strong>jornada 24 hasta la 37</strong></p>\r\n<p><span style=\"font-weight: 400;\">📲 </span><a href=\"https://biwenger.as.com/join/copa-guru?utm_source=tablon&amp;utm_medium=app&amp;utm_campaign=copa-guru-25-26\"><strong>Entra ya</strong></a><span style=\"font-weight: 400;\"> y encuentra m&aacute;s informaci&oacute;n </span><a href=\"https://biwenger.as.com/blog/tenemos-vii-edicion-de-la-copa-guru-biwenger/\"><strong>en nuestro blog</strong></a><span style=\"font-weight: 400;\"> 📝</span></p>\r\n<p style=\"text-align: center;\">[button url=\"https://biwenger.as.com/join/copa-guru?utm_source=tablon&amp;utm_medium=app&amp;utm_campaign=copa-guru-25-26\" class=\"black\"]&iexcl;AP&Uacute;NTATE![/button]</p>\r\n<p style=\"text-align: center;\"><a href=\"https://biwenger.as.com/join/copa-guru?utm_source=tablon&amp;utm_medium=app&amp;utm_campaign=copa-guru-25-26\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/copa-guru-25-26/tablon.jpg\" alt=\"\" /></a></p>",
+        "date": 1770729360,
+        "fixed": true,
+        "author": null
+      }
+    ]
+  },
+  "userLineup": {
+    "status": 200,
+    "data": {
+      "lineup": {
+        "type": "3-1-1",
+        "count": 1,
+        "position": 0,
+        "captain": {
+          "id": 28228
+        },
+        "striker": null,
+        "coach": null,
+        "date": 1770304415,
+        "round": null,
+        "players": [
+          {
+            "id": 27670,
+            "name": "Aleksa Avramovic",
+            "slug": "avramovic-a",
+            "position": 1,
+            "price": 3400000,
+            "fantasyPrice": 10000000,
+            "country": "RS",
+            "number": 4,
+            "birthday": 19941025,
+            "status": "ok",
+            "priceIncrement": 150000,
+            "team": {
+              "id": 786,
+              "name": "Dubai Basketball",
+              "slug": "dubai-basketball",
+              "nextGames": [
+                {
+                  "id": 49961,
+                  "date": 1771011000,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 568,
+                    "name": "EA7 Emporio Armani Milan",
+                    "slug": "ea7-emporio-armani-milan",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 786,
+                    "name": "Dubai Basketball",
+                    "slug": "dubai-basketball",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [27, 28, 14, 27, 11],
+            "points": 246,
+            "playedHome": 7,
+            "playedAway": 7,
+            "pointsHome": 133,
+            "pointsAway": 113,
+            "pointsLastSeason": null
+          },
+          {
+            "id": 39172,
+            "name": "Mckinley Wright IV",
+            "slug": "wright-iv-mckinley",
+            "position": 1,
+            "price": 8910000,
+            "fantasyPrice": 8000000,
+            "country": "US",
+            "number": 25,
+            "birthday": 19981025,
+            "status": "ok",
+            "priceIncrement": 0,
+            "team": {
+              "id": 786,
+              "name": "Dubai Basketball",
+              "slug": "dubai-basketball",
+              "nextGames": [
+                {
+                  "id": 49961,
+                  "date": 1771011000,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 568,
+                    "name": "EA7 Emporio Armani Milan",
+                    "slug": "ea7-emporio-armani-milan",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 786,
+                    "name": "Dubai Basketball",
+                    "slug": "dubai-basketball",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [24, 29, 24, 17, 31],
+            "points": 621,
+            "playedHome": 13,
+            "playedAway": 14,
+            "pointsHome": 336,
+            "pointsAway": 285,
+            "pointsLastSeason": null
+          },
+          {
+            "id": 28228,
+            "name": "Carsen Edwards",
+            "slug": "edwards-carsen-2",
+            "position": 1,
+            "price": 4540000,
+            "fantasyPrice": 47000000,
+            "country": "US",
+            "number": 3,
+            "birthday": 19980312,
+            "status": "ok",
+            "priceIncrement": -70000,
+            "team": {
+              "id": 645,
+              "name": "Virtus Segafredo Bologna",
+              "slug": "virtus-segafredo-bologna",
+              "nextGames": [
+                {
+                  "id": 49953,
+                  "date": 1770917400,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 560,
+                    "name": "Anadolu Efes Istanbul",
+                    "slug": "anadolu-efes-istanbul",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 645,
+                    "name": "Virtus Segafredo Bologna",
+                    "slug": "virtus-segafredo-bologna",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [7, 20, "injured", 16, 37],
+            "points": 445,
+            "playedHome": 12,
+            "playedAway": 13,
+            "pointsHome": 243,
+            "pointsAway": 202,
+            "pointsLastSeason": 796
+          },
+          {
+            "id": 34797,
+            "name": "Arijan Lakic",
+            "slug": "lakic-arijan",
+            "position": 2,
+            "price": 170000,
+            "fantasyPrice": 8000000,
+            "country": "RS",
+            "number": 19,
+            "birthday": 20000120,
+            "status": "ok",
+            "priceIncrement": -10000,
+            "team": {
+              "id": 642,
+              "name": "Partizan Mozzart Bet Belgrade",
+              "slug": "partizan-mozzart-bet-belgrade",
+              "nextGames": [
+                {
+                  "id": 49962,
+                  "date": 1771011000,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 642,
+                    "name": "Partizan Mozzart Bet Belgrade",
+                    "slug": "partizan-mozzart-bet-belgrade",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 579,
+                    "name": "Real Madrid",
+                    "slug": "real-madrid",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [0, 6, 17, 27, 4],
+            "points": 88,
+            "playedHome": 7,
+            "playedAway": 7,
+            "pointsHome": 54,
+            "pointsAway": 34,
+            "pointsLastSeason": 45
+          },
+          {
+            "id": 35807,
+            "name": "Bruno Fernando",
+            "slug": "fernando-bruno",
+            "position": 3,
+            "price": 1800000,
+            "fantasyPrice": 10000000,
+            "country": "AO",
+            "number": 24,
+            "birthday": 19980815,
+            "status": "ok",
+            "priceIncrement": 0,
+            "team": {
+              "id": 642,
+              "name": "Partizan Mozzart Bet Belgrade",
+              "slug": "partizan-mozzart-bet-belgrade",
+              "nextGames": [
+                {
+                  "id": 49962,
+                  "date": 1771011000,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 642,
+                    "name": "Partizan Mozzart Bet Belgrade",
+                    "slug": "partizan-mozzart-bet-belgrade",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 579,
+                    "name": "Real Madrid",
+                    "slug": "real-madrid",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [16, 33, -4, 26, 12],
+            "points": 305,
+            "playedHome": 13,
+            "playedAway": 13,
+            "pointsHome": 151,
+            "pointsAway": 154,
+            "pointsLastSeason": 92
+          },
+          {
+            "id": 36527,
+            "name": "Daniel Theis",
+            "slug": "theis",
+            "position": 3,
+            "price": 5830000,
+            "fantasyPrice": 12000000,
+            "country": "DE",
+            "number": 10,
+            "birthday": 19920404,
+            "status": "ok",
+            "priceIncrement": -50000,
+            "team": {
+              "id": 598,
+              "name": "AS Monaco",
+              "slug": "as-monaco",
+              "nextGames": [
+                {
+                  "id": 49959,
+                  "date": 1771007400,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 598,
+                    "name": "AS Monaco",
+                    "slug": "as-monaco",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 580,
+                    "name": "Baskonia Vitoria-Gasteiz",
+                    "slug": "baskonia-vitoria-gasteiz",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [12, 20, 15, 16, 16],
+            "points": 442,
+            "playedHome": 12,
+            "playedAway": 14,
+            "pointsHome": 191,
+            "pointsAway": 251,
+            "pointsLastSeason": 252
+          },
+          {
+            "id": 33716,
+            "name": "Justin Robinson",
+            "slug": "robinson-justin",
+            "position": 1,
+            "price": 3340000,
+            "fantasyPrice": 10000000,
+            "country": "US",
+            "number": 5,
+            "birthday": 19971012,
+            "status": "ok",
+            "priceIncrement": 0,
+            "team": {
+              "id": 713,
+              "name": "Paris Basketball",
+              "slug": "paris-basketball",
+              "nextGames": [
+                {
+                  "id": 49956,
+                  "date": 1770924600,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 571,
+                    "name": "FC Barcelona",
+                    "slug": "fc-barcelona",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 713,
+                    "name": "Paris Basketball",
+                    "slug": "paris-basketball",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [13, 18, 21, 23, 27],
+            "points": 443,
+            "playedHome": 13,
+            "playedAway": 11,
+            "pointsHome": 230,
+            "pointsAway": 213,
+            "pointsLastSeason": null
+          },
+          {
+            "id": 27656,
+            "name": "Darius Thompson",
+            "slug": "thompson-darius",
+            "position": 1,
+            "price": 6270000,
+            "fantasyPrice": 41000000,
+            "country": "IT",
+            "number": 13,
+            "birthday": 19950504,
+            "status": "ok",
+            "priceIncrement": 0,
+            "team": {
+              "id": 581,
+              "name": "Valencia Basket",
+              "slug": "valencia-basket",
+              "nextGames": [
+                {
+                  "id": 49957,
+                  "date": 1770924600,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 581,
+                    "name": "Valencia Basket",
+                    "slug": "valencia-basket",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 575,
+                    "name": "LDLC ASVEL Villeurbanne",
+                    "slug": "ldlc-asvel-villeurbanne",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [23, 16, 4, 15, 13],
+            "points": 493,
+            "playedHome": 13,
+            "playedAway": 14,
+            "pointsHome": 227,
+            "pointsAway": 266,
+            "pointsLastSeason": 701
+          },
+          {
+            "id": 24791,
+            "name": "Wade Baldwin",
+            "slug": "wade-baldwin",
+            "position": 1,
+            "price": 8010000,
+            "fantasyPrice": 17000000,
+            "country": "US",
+            "number": 2,
+            "birthday": 19960329,
+            "status": "ok",
+            "priceIncrement": 0,
+            "team": {
+              "id": 573,
+              "name": "Fenerbahce Beko Istanbul",
+              "slug": "fenerbahce-beko-istanbul",
+              "nextGames": [
+                {
+                  "id": 49960,
+                  "date": 1771010100,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 578,
+                    "name": "Panathinaikos Athens",
+                    "slug": "panathinaikos-athens",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 573,
+                    "name": "Fenerbahce Beko Istanbul",
+                    "slug": "fenerbahce-beko-istanbul",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [26, 31, 23, 11, "injured"],
+            "points": 559,
+            "playedHome": 14,
+            "playedAway": 11,
+            "pointsHome": 276,
+            "pointsAway": 283,
+            "pointsLastSeason": 429
+          },
+          {
+            "id": 39158,
+            "name": "Jean Montero",
+            "slug": "montero-berroa-jean-claudio",
+            "position": 1,
+            "price": 6870000,
+            "fantasyPrice": 8000000,
+            "country": "DO",
+            "number": 8,
+            "birthday": 20030703,
+            "status": "ok",
+            "priceIncrement": 0,
+            "team": {
+              "id": 581,
+              "name": "Valencia Basket",
+              "slug": "valencia-basket",
+              "nextGames": [
+                {
+                  "id": 49957,
+                  "date": 1770924600,
+                  "status": "preview",
+                  "round": {
+                    "id": 4773,
+                    "name": "Round 28",
+                    "short": "R28"
+                  },
+                  "home": {
+                    "id": 581,
+                    "name": "Valencia Basket",
+                    "slug": "valencia-basket",
+                    "score": null
+                  },
+                  "away": {
+                    "id": 575,
+                    "name": "LDLC ASVEL Villeurbanne",
+                    "slug": "ldlc-asvel-villeurbanne",
+                    "score": null
+                  }
+                }
+              ]
+            },
+            "fitness": [40, 16, 30, 24, 22],
+            "points": 465,
+            "playedHome": 11,
+            "playedAway": 11,
+            "pointsHome": 216,
+            "pointsAway": 249,
+            "pointsLastSeason": null
+          }
+        ],
+        "playersID": [27670, 39172, 28228, 34797, 35807, 36527, 33716, 27656, 24791, 39158],
+        "reserves": [null, null, null],
+        "reservesID": [null, null, null]
+      }
+    }
+  },
+  "standings": {
+    "data": {
+      "standings": [
+        {
+          "id": 13207868,
+          "name": "All Stars",
+          "icon": "icons/28.png",
+          "points": 5030,
+          "position": 1
+        },
+        {
+          "id": 13207924,
+          "name": "ask72",
+          "icon": "icons/41.png",
+          "points": 4728,
+          "position": 2
+        }
+      ]
+    }
+  }
+}

@@ -34,6 +34,103 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
 | **User Lineups** | `/user/{id}?fields=lineup`      | Active user formations     | `06-lineups.js` |
 | **Standings**    | `/league/{id}?fields=standings` | League table               | `04-rounds.js`  |
 
+#### 📄 Response Samples
+
+<details>
+<summary><strong>Master Data (Players & Teams)</strong></summary>
+
+```json
+{
+  "data": {
+    "players": {
+      "41": {
+        "id": 41,
+        "name": "Niels Giffey",
+        "slug": "giffey",
+        "teamID": 572,
+        "position": 2,
+        "price": 150000,
+        "fitness": [12, 12, 6, 7, -1],
+        "points": 141
+      }
+    },
+    "teams": {
+      "560": {
+        "id": 560,
+        "name": "Anadolu Efes Istanbul",
+        "slug": "anadolu-efes-istanbul",
+        "nextGames": [
+          {
+            "id": 49953,
+            "date": 1770917400,
+            "home": { "id": 560 },
+            "away": { "id": 645 }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>League Board (Market & Transfers)</strong></summary>
+
+```json
+{
+  "data": [
+    {
+      "type": "transfer",
+      "content": {
+        "amount": 5000000,
+        "player": { "id": 41, "name": "Niels Giffey" },
+        "from": { "id": 123, "name": "User A" },
+        "to": { "id": 456, "name": "User B" }
+      },
+      "date": 1770746411
+    },
+    {
+      "type": "market",
+      "content": {
+        "player": { "id": 28228, "name": "Carsen Edwards" },
+        "price": 4540000
+      },
+      "date": 1770740000
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+<summary><strong>User Lineup</strong></summary>
+
+```json
+{
+  "data": {
+    "lineup": {
+      "type": "3-1-1",
+      "captain": { "id": 28228 },
+      "players": [
+        {
+          "id": 27670,
+          "name": "Aleksa Avramovic",
+          "position": 1,
+          "price": 3400000,
+          "fitness": [27, 28, 14, 27, 11],
+          "status": "ok"
+        }
+      ]
+    }
+  }
+}
+```
+
+</details>
+
 ### 1.2. Euroleague API
 
 **Base URL**: `https://live.euroleague.net/api`
@@ -43,6 +140,35 @@ These endpoints are used **only** by the synchronization scripts in `src/lib/syn
 | ------------ | ----------------------------- | ------------------------------ | --------------- |
 | **Boxscore** | `/Header?gamecode={code}`     | Detailed stats (rebounds, etc) | `05-stats.js`   |
 | **Schedule** | `/Schedules?seasoncode=E2025` | Season calendar                | `03-matches.js` |
+
+#### 📄 Response Samples
+
+<details>
+<summary><strong>Boxscore (Player Stats)</strong></summary>
+
+```json
+{
+  "Stats": [
+    {
+      "Team": "MAD",
+      "PlayersStats": [
+        {
+          "Player": "Facundo Campazzo",
+          "Player_ID": "P005517",
+          "Minutes": "25:30",
+          "Points": 15,
+          "TotalRebounds": 2,
+          "Assistances": 7,
+          "Steals": 2,
+          "Valuation": 20
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
 
 ---
 
