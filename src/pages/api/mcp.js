@@ -4,18 +4,22 @@ import { registerResources } from '@/lib/mcp/resources';
 import { registerTools } from '@/lib/mcp/tools';
 import { registerPrompts } from '@/lib/mcp/prompts';
 
-// Inicializar Servidor MCP
+// Initialize MCP Server
+// Capabilities:
+// - resources: Context (Rules, Schema)
+// - tools: Actions (DB Queries, Logic)
+// - prompts: Instructions (Standard Operating Procedures)
 const server = new McpServer({
-  name: 'BiwengerStats',
-  version: '1.0.0',
+  name: 'Biwenger Euroleague MCP',
+  version: '2.0.0',
 });
 
-// Registrar Recursos, Herramientas y Prompts (Modules)
+// Register Modules
 registerResources(server);
 registerTools(server);
 registerPrompts(server);
 
-// Configuración de transporte SSE (Server-Sent Events)
+// API Handler (SSE Transport)
 let transport;
 
 export default async function handler(req, res) {

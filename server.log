@@ -1,0 +1,98 @@
+
+> biwengerstats-next@0.1.0 dev
+> next dev --turbopack
+
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.68:3000
+- Environments: .env
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 5.5s
+⨯ ./src/lib/mcp/tools.js:34:22
+Parsing ecmascript source code failed
+[0m [90m 32 |[39m             p[33m.[39mprice_increment[33m,[39m
+ [90m 33 |[39m             p[33m.[39mstatus[33m,[39m
+[31m[1m>[22m[39m[90m 34 |[39m             p[33m.[39mpuntos [36mas[39m total_points[33m,[39m
+ [90m    |[39m                      [31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 35 |[39m             p[33m.[39mpartidos_jugados [36mas[39m played_games[33m,[39m
+ [90m 36 |[39m             t[33m.[39mname [36mas[39m team_name[33m,[39m
+ [90m 37 |[39m             ([0m
+
+Expected ';', '}' or <eof>
+
+Import trace:
+  Route:
+    ./src/lib/mcp/tools.js
+    ./src/pages/api/mcp.js
+
+
+ GET /api/mcp 500 in 1222ms (compile: 903ms, render: 319ms)
+🔌 Database connecting to: DATABASE_URL
+📦 Registrando Recursos (Contexto)...
+🛠️ Registrando Herramientas (Acciones)...
+🤖 Registrando Prompts (Instrucciones)...
+[MCP API] Request received: GET
+[MCP API] Initializing SSE Transport...
+[MCP API] Connecting server to transport...
+[MCP API] Connection successful.
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 37ms (compile: 1840µs, render: 35ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 26ms (compile: 2ms, render: 24ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 8ms (compile: 3ms, render: 6ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 8ms (compile: 1756µs, render: 6ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 33ms (compile: 2ms, render: 31ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 7ms (compile: 3ms, render: 4ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 5ms (compile: 1966µs, render: 3ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 35ms (compile: 4ms, render: 31ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 4ms (compile: 930µs, render: 3ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 5ms (compile: 1185µs, render: 4ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 18ms (compile: 9ms, render: 9ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 19ms (compile: 3ms, render: 16ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 4ms (compile: 1196µs, render: 3ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 12ms (compile: 1474µs, render: 10ms)
+[MCP API] Request received: POST
+[MCP API] Handling POST message...
+ POST /api/mcp?sessionId=dcf10eca-6266-4dac-8f44-b68b9417f527 202 in 4ms (compile: 787µs, render: 3ms)
+ GET /api/mcp 200 in 2.8s (compile: 856ms, render: 1956ms)
+🔌 Database connecting to: DATABASE_URL
+📦 Registrando Recursos (Contexto)...
+🛠️ Registrando Herramientas (Acciones)...
+🤖 Registrando Prompts (Instrucciones)...
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 46ms (compile: 735µs, render: 45ms)
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 4ms (compile: 3ms, render: 1387µs)
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 4ms (compile: 1483µs, render: 2ms)
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 22ms (compile: 1261µs, render: 21ms)
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 2ms (compile: 666µs, render: 1641µs)
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 6ms (compile: 549µs, render: 6ms)
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 1669µs (compile: 427µs, render: 1242µs)
+ POST /api/mcp?sessionId=b7c67e3d-989c-4059-ab7c-95a8d69d8e38 202 in 15ms (compile: 443µs, render: 14ms)
+ GET /api/mcp 200 in 1329ms (compile: 334ms, render: 995ms)

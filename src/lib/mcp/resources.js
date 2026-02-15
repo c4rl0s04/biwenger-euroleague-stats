@@ -1,13 +1,14 @@
 import { db } from '@/lib/db/client';
-import { formatLibraryAsText } from '@/lib/mcp/query_library';
 
 /**
- * Registers all resources to the MCP server instance.
- * @param {import("@modelcontextprotocol/sdk/server/mcp.js").McpServer} server
+ * Registers all static resources to the MCP server.
+ * Resources provide context (Rules, Glossary, Schema) to the AI.
  */
 export function registerResources(server) {
+  console.log('📦 Registrando Recursos (Contexto)...');
+
   // ---------------------------------------------------------
-  // 📖 RECURSOS (Contexto)
+  // RECURSO 1: GUÍA DE PUNTUACIÓN (Contexto de Reglas)
   // ---------------------------------------------------------
 
   server.resource(
@@ -168,23 +169,5 @@ export function registerResources(server) {
         return { contents: [{ uri: uri.href, text: `Error de Esquema: ${error.message}` }] };
       }
     }
-  );
-
-  server.resource(
-    'queries',
-    'db://queries/library',
-    {
-      name: 'Biblioteca de Consultas SQL',
-      description: 'Plantillas SQL optimizadas para análisis rápido y seguro.',
-    },
-    async (uri) => ({
-      contents: [
-        {
-          uri: uri.href,
-          mimeType: 'text/plain',
-          text: formatLibraryAsText(),
-        },
-      ],
-    })
   );
 }

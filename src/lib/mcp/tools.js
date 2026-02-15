@@ -1,14 +1,17 @@
 import { z } from 'zod';
 import { db } from '@/lib/db/client';
+import * as marketQueries from '@/lib/db/queries/features/market';
 
 /**
- * Registers all tools (executable actions) to the MCP server instance.
- * @param {import("@modelcontextprotocol/sdk/server/mcp.js").McpServer} server
+ * Registers all tools (executable actions) to the MCP server.
+ * Tools allow the AI to interact with the database and perform logic.
  */
 export function registerTools(server) {
-  // ---------------------------------------------------------
-  // 🛠️ HERRAMIENTAS (Acciones)
-  // ---------------------------------------------------------
+  console.log('🛠️ Registrando Herramientas (Acciones)...');
+
+  // ------------------------------------------------------------------
+  // HERRAMIENTA 1: BÚSQUEDA DE JUGADORES (Utility)
+  // ------------------------------------------------------------------
 
   server.tool(
     'search_players',
@@ -277,5 +280,85 @@ ${scheduleText}`;
     async () => ({
       content: [{ type: 'text', text: '✅ Servidor Online y Esquema Cargado' }],
     })
+  );
+  // ------------------------------------------------------------------
+  // HERRAMIENTA 4: OPORTUNIDADES DE MERCADO (Lógica de Negocio)
+  // ------------------------------------------------------------------
+  server.tool(
+    'get_market_opportunities',
+    "Identifica jugadores infravalorados con buena forma reciente ('Chollos').",
+    {
+      limit: z.number().optional().describe('Número de oportunidades (default: 3)'),
+    },
+    async ({ limit = 3 }) => {
+      try {
+        const opps = await marketQueries.getMarketOpportunities(limit);
+        if (!opps.length)
+          return { content: [{ type: 'text', text: 'No se encontraron oportunidades claras.' }] };
+
+        const text = opps
+          .map(
+            (p) =>
+              `- **${p.name}** (${p.team}) | Precio: €${p.price.toLocaleString()} (${p.price_trend >= 0 ? '↗' : '↘'})
+   📊 Puntos Recientes: ${p.recent_scores} (Media: ${p.avg_recent_points.toFixed(1)})
+   💎 Value Score: ${p.value_score.toFixed(1)}`
+          )
+          .join('\n\n');
+
+        return { content: [{ type: 'text', text: `💰 OPORTUNIDADES DE MERCADO:\n\n${text}` }] };
+      } catch (error) {
+        return { content: [{ type: 'text', text: `Error: ${error.message}` }], isError: true };
+      }
+    }
+  );
+
+  server.tool(
+    'get_market_trends',
+    'Analiza las tendencias de precios (subidas/bajadas significativas en 24h).',
+    {
+      min_change: z.number().optional().describe('Cambio mínimo de precio (default: 100,000)'),
+    },
+    async ({ min_change = 100000 }) => {
+      try {
+        const changes = await marketQueries.getSignificantPriceChanges(24, min_change);
+        if (!changes.length)
+          return { content: [{ type: 'text', text: 'Sin cambios significativos hoy.' }] };
+
+        const text = changes
+          .map(
+            (p) =>
+              `- ${p.name}: €${p.price.toLocaleString()} (${p.price_increment > 0 ? '🟢' : '🔴'} ${p.price_increment >= 0 ? '+' : ''}€${p.price_increment.toLocaleString()})`
+          )
+          .join('\n');
+
+        return { content: [{ type: 'text', text: `📈 TENDENCIAS DE MERCADO (24h):\n\n${text}` }] };
+      } catch (error) {
+        return { content: [{ type: 'text', text: `Error: ${error.message}` }], isError: true };
+      }
+    }
+  );
+
+  server.tool(
+    'get_top_transfers',
+    'Muestra los jugadores más fichados del mercado recientemente.',
+    {},
+    async () => {
+      try {
+        const tops = await marketQueries.getTopTransferredPlayer();
+        if (!tops.length)
+          return { content: [{ type: 'text', text: 'No hay datos de fichajes recientes.' }] };
+
+        const text = tops
+          .map(
+            (t) =>
+              `- **${t.name}**: ${t.transfer_count} fichajes (Precio medio: €${t.avg_price.toLocaleString()})`
+          )
+          .join('\n');
+
+        return { content: [{ type: 'text', text: `🔥 JUGADORES MÁS FICHADOS:\n\n${text}` }] };
+      } catch (error) {
+        return { content: [{ type: 'text', text: `Error: ${error.message}` }], isError: true };
+      }
+    }
   );
 }

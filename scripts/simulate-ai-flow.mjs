@@ -74,24 +74,25 @@ async function simulateAgent() {
       name: "analizar-mercado",
       arguments: {} 
     });
-    console.log("📄 Instrucciones Recibidas. Paso 1: Leer biblioteca.");
+    // 2. Agente lee las instrucciones (que ahora dicen "Usa get_market_trends")
+    console.log("📄 Instrucciones Recibidas: 'Usa get_market_trends y get_market_opportunities'");
 
-    // 2. Agente lee la biblioteca (simulado, ya que el prompt lo dice)
-    // En una app real, el LLM leería el recurso. Aquí saltamos directo a la acción sugerida.
-
-    // 3. Agente ejecuta consulta de "Top Subidas"
-    console.log("\n🛠️ Agente: Ejecutando consulta SQL 'Top 5 Subidas' (Tool: read_sql_query)...");
-    
-    // SQL extraído "mentalmente" de la biblioteca por el agente
-    const sqlQuery = `SELECT p.name, p.price, (p.price - (SELECT price FROM market_values WHERE player_id = p.id ORDER BY date ASC LIMIT 1)) as increase FROM players p WHERE p.status = 'ok' ORDER BY increase DESC LIMIT 3;`;
-    
-    const queryResult = await client.callTool({
-      name: "read_sql_query",
-      arguments: { query: sqlQuery }
+    // 3. Agente ejecuta "Tendencias"
+    console.log("\n🛠️ Agente: Ejecutando tool 'get_market_trends'...");
+    const trendsResult = await client.callTool({
+      name: "get_market_trends",
+      arguments: {}
     });
-    
-    console.log("📄 Datos de Mercado:");
-    console.log(queryResult.content[0].text);
+    console.log("📄 Tendencias (Extracto):", trendsResult.content[0].text.split("\n")[2]);
+
+    // 4. Agente ejecuta "Oportunidades"
+    console.log("\n🛠️ Agente: Ejecutando tool 'get_market_opportunities'...");
+    const oppsResult = await client.callTool({
+      name: "get_market_opportunities",
+      arguments: { limit: 2 }
+    });
+    console.log("📄 Oportunidades:");
+    console.log(oppsResult.content[0].text);
 
     console.log("\n✅✅ SIMULACIÓN COMPLETADA CON ÉXITO ✅✅");
 

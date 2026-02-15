@@ -2,10 +2,11 @@ import { z } from 'zod';
 
 /**
  * Registers prompts (instruction templates) to the MCP server.
- * Prompts guide the AI on how to perform complex tasks using available tools and resources.
- * @param {import("@modelcontextprotocol/sdk/server/mcp.js").McpServer} server
+ * Prompts guide the AI on how to combine tools and resources for complex tasks.
  */
 export function registerPrompts(server) {
+  console.log('🤖 Registrando Prompts (Instrucciones)...');
+
   // ---------------------------------------------------------
   // PROMPT 1: ANALIZAR JUGADOR (Player Analysis Strategy)
   // ---------------------------------------------------------

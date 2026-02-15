@@ -156,28 +156,7 @@ async function main() {
       console.log("   ❌ FAIL: La consulta falló o no devolvió los jugadores esperados.");
     }
 
-    // --- TEST 8: RECURSO DE BIBLIOTECA SQL ---
-    console.log("\n" + "=".repeat(50));
-    console.log("📖 [TEST 8] Verificando Biblioteca de Consultas...");
-    const libraryResource = resources.find(r => r.name === "Biblioteca de Consultas SQL"); // Check if name matches implementation? Wait, implementation uses default name from template? 
-    // Actually implementation uses: server.resource("queries", ...) which maps to name? No, SDK maps it.
-    // Let's check listResources output in main loop or just fetch by URI directly.
-    
-    // Better: Fetch by URI directly to be safe
-    console.log(`   Recurso esperado: db://queries/library`);
-    const libContent = await client.readResource({ uri: "db://queries/library" });
-    const libText = libContent.contents[0].text;
 
-    console.log("\n--- CONTENIDO DE LA BIBLIOTECA ---");
-    console.log(libText);
-    console.log("----------------------------------\n");
-    
-    if (libText.includes("SELECT") && libText.includes("MERCADO")) {
-      console.log("   ✅ PASS: La biblioteca de consultas contiene SQL útil.");
-    } else {
-      console.error("   ❌ FAIL: La biblioteca no parece contener las plantillas esperadas.");
-      process.exit(1);
-    }
 
     // --- TEST 9: PROMPTS ---
     console.log("\n" + "=".repeat(50));
