@@ -2,8 +2,11 @@
  * Date Utilities
  * Handles timezone corrections and standardized formatting for the application.
  *
- * PROBLEM: The database stores match dates 1 hour earlier than reality (e.g., 15:00 UTC instead of 16:00 UTC).
- * SOLUTION: We apply a global +1 hour offset to all match dates before display or logic.
+ * PROBLEM: The database stores match dates 1 hour earlier than reality (e.g., 16:45 UTC for a match at 17:45 UTC).
+ * This appears to be a systematic error in the data source or ingestion process.
+ *
+ * SOLUTION: We manually apply a +1 hour correction to the database time.
+ * This ensures that when formatted with 'Europe/Madrid' timezone, it displays the correct local time.
  */
 
 // 1 Hour in milliseconds
@@ -13,8 +16,8 @@ const TIMEZONE_OFFSET_MS = 3600 * 1000;
  * Returns a Date object corrected for the database's 1-hour lag.
  * Use this INSTEAD of new Date(match.date) whenever converting DB data for display.
  *
- * @param {string|Date} dateInput - The raw date from the database (e.g. "2026-02-03T15:00:00.000Z")
- * @returns {Date} Corrected Date object (e.g. represents 16:00 UTC)
+ * @param {string|Date} dateInput - The raw date from the database
+ * @returns {Date} Corrected Date object (+1 Hour)
  */
 export function getCorrectedMatchDate(dateInput) {
   if (!dateInput) return null;
