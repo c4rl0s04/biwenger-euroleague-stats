@@ -2,45 +2,40 @@
  * Date Utilities
  * Handles timezone corrections and standardized formatting for the application.
  *
- * PROBLEM: The database stores match dates 1 hour earlier than reality (e.g., 16:45 UTC for a match at 17:45 UTC).
- * This appears to be a systematic error in the data source or ingestion process.
+ * PROBLEM: The database stores match dates as 'timestamp without time zone'.
+ * Localhost (CET) parses "18:00" as 17:00 UTC.
+ * Server (UTC) parses "18:00" as 18:00 UTC.
  *
- * SOLUTION: We manually apply a +1 hour correction to the database time.
- * IMPORTANT: valid for both Localhost (CET) and Vercel (UTC) by forcing UTC interpretation.
+ * SOLUTION: Force interpretation as UTC everywhere.
+ * DB "18:00" -> Always treated as "18:00 UTC".
+ * This matches the real event time (e.g. Zalgiris 19:00 CET = 18:00 UTC).
  */
 
-// 1 Hour in milliseconds
-const TIMEZONE_OFFSET_MS = 3600 * 1000;
-
 /**
- * Returns a Date object corrected for the database's 1-hour lag.
+ * Returns a Date object from the database inputs.
  * Forces the DB string to be treated as UTC regardless of server timezone.
  *
  * @param {string|Date} dateInput - The raw date from the database
- * @returns {Date} Corrected Date object (+1 Hour)
+ * @returns {Date} Date object (UTC-normalized)
  */
 export function getCorrectedMatchDate(dateInput) {
   if (!dateInput) return null;
 
   const date = new Date(dateInput);
 
-  // 1. Force UTC Interpretation
+  // Force UTC Interpretation
   // When DB is "timestamp without time zone", 'pg' driver uses local system time.
-  // - Localhost (CET): "16:45" -> 16:45 CET (15:45 UTC) -> getHours() = 16
-  // - Vercel (UTC): "16:45" -> 16:45 UTC -> getHours() = 16
-  // By using local getters (getHours, etc.) and feeding them into Date.UTC,
-  // we "hoist" the time to be UTC in both environments.
-  const intendedUTC = Date.UTC(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    date.getHours(),
-    date.getMinutes(),
-    date.getSeconds()
+  // By using local getters and feeding them into Date.UTC, we normalize this.
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds()
+    )
   );
-
-  // 2. Apply Data Correction (+1 Hour)
-  return new Date(intendedUTC + TIMEZONE_OFFSET_MS);
 }
 
 /**
