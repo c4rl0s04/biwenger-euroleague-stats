@@ -6,7 +6,7 @@
  * This appears to be a systematic error in the data source or ingestion process.
  *
  * SOLUTION: We manually apply a +1 hour correction to the database time.
- * This ensures that when formatted with 'Europe/Madrid' timezone, it displays the correct local time.
+ * IMPORTANT: valid for both Localhost (CET) and Vercel (UTC) by forcing UTC interpretation.
  */
 
 // 1 Hour in milliseconds
@@ -14,15 +14,33 @@ const TIMEZONE_OFFSET_MS = 3600 * 1000;
 
 /**
  * Returns a Date object corrected for the database's 1-hour lag.
- * Use this INSTEAD of new Date(match.date) whenever converting DB data for display.
+ * Forces the DB string to be treated as UTC regardless of server timezone.
  *
  * @param {string|Date} dateInput - The raw date from the database
  * @returns {Date} Corrected Date object (+1 Hour)
  */
 export function getCorrectedMatchDate(dateInput) {
   if (!dateInput) return null;
-  const originalDate = new Date(dateInput);
-  return new Date(originalDate.getTime() + TIMEZONE_OFFSET_MS);
+
+  const date = new Date(dateInput);
+
+  // 1. Force UTC Interpretation
+  // When DB is "timestamp without time zone", 'pg' driver uses local system time.
+  // - Localhost (CET): "16:45" -> 16:45 CET (15:45 UTC) -> getHours() = 16
+  // - Vercel (UTC): "16:45" -> 16:45 UTC -> getHours() = 16
+  // By using local getters (getHours, etc.) and feeding them into Date.UTC,
+  // we "hoist" the time to be UTC in both environments.
+  const intendedUTC = Date.UTC(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds()
+  );
+
+  // 2. Apply Data Correction (+1 Hour)
+  return new Date(intendedUTC + TIMEZONE_OFFSET_MS);
 }
 
 /**
