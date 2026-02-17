@@ -126,41 +126,45 @@ export function StatsTable({ data, title, type = 'global' }) {
                   <div
                     className={`flex items-center gap-1 ${col.className.includes('text-right') ? 'justify-end' : col.className.includes('text-center') ? 'justify-center' : 'justify-start'}`}
                   >
-                    {/* For right-aligned columns, put arrow on left to keep label right-aligned */}
-                    {col.key !== 'index' && col.className.includes('text-right') && (
-                      <span
-                        className={`transition-opacity ${sortConfig.key === col.key ? `opacity-100 ${col.activeColor}` : 'opacity-0 group-hover/col:opacity-30'}`}
-                      >
-                        {sortConfig.key === col.key ? (
-                          sortConfig.direction === 'asc' ? (
-                            <ArrowUp size={12} />
+                    {/* For right/center-aligned columns, put arrow on left */}
+                    {col.key !== 'index' &&
+                      (col.className.includes('text-right') ||
+                        col.className.includes('text-center')) && (
+                        <span
+                          className={`transition-opacity ${sortConfig.key === col.key ? `opacity-100 ${col.activeColor}` : 'opacity-0 group-hover/col:opacity-30'}`}
+                        >
+                          {sortConfig.key === col.key ? (
+                            sortConfig.direction === 'asc' ? (
+                              <ArrowUp size={12} />
+                            ) : (
+                              <ArrowDown size={12} />
+                            )
                           ) : (
-                            <ArrowDown size={12} />
-                          )
-                        ) : (
-                          <ArrowUpDown size={12} />
-                        )}
-                      </span>
-                    )}
+                            <ArrowUpDown size={12} />
+                          )}
+                        </span>
+                      )}
 
                     {col.label}
 
-                    {/* For other columns (left/center), put arrow on right */}
-                    {col.key !== 'index' && !col.className.includes('text-right') && (
-                      <span
-                        className={`transition-opacity ${sortConfig.key === col.key ? `opacity-100 ${col.activeColor}` : 'opacity-0 group-hover/col:opacity-30'}`}
-                      >
-                        {sortConfig.key === col.key ? (
-                          sortConfig.direction === 'asc' ? (
-                            <ArrowUp size={12} />
+                    {/* For left-aligned columns, put arrow on right */}
+                    {col.key !== 'index' &&
+                      !col.className.includes('text-right') &&
+                      !col.className.includes('text-center') && (
+                        <span
+                          className={`transition-opacity ${sortConfig.key === col.key ? `opacity-100 ${col.activeColor}` : 'opacity-0 group-hover/col:opacity-30'}`}
+                        >
+                          {sortConfig.key === col.key ? (
+                            sortConfig.direction === 'asc' ? (
+                              <ArrowUp size={12} />
+                            ) : (
+                              <ArrowDown size={12} />
+                            )
                           ) : (
-                            <ArrowDown size={12} />
-                          )
-                        ) : (
-                          <ArrowUpDown size={12} />
-                        )}
-                      </span>
-                    )}
+                            <ArrowUpDown size={12} />
+                          )}
+                        </span>
+                      )}
                   </div>
                 </th>
               ))}
