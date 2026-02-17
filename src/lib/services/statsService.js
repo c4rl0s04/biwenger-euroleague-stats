@@ -65,6 +65,7 @@ export async function getGlobalTournamentStats() {
         form: [], // Will store W, D, L
         currentStreak: 0,
         longestStreak: 0,
+        signedStreak: 0,
       };
     }
   };
@@ -103,6 +104,7 @@ export async function getGlobalTournamentStats() {
         stats.points += 3;
         stats.form.push('W');
         stats.currentStreak++;
+        stats.signedStreak = stats.signedStreak > 0 ? stats.signedStreak + 1 : 1;
         if (stats.currentStreak > stats.longestStreak) {
           stats.longestStreak = stats.currentStreak;
         }
@@ -111,10 +113,12 @@ export async function getGlobalTournamentStats() {
         stats.points += 1;
         stats.form.push('D');
         stats.currentStreak = 0;
+        stats.signedStreak = 0;
       } else {
         stats.lost++;
         stats.form.push('L');
         stats.currentStreak = 0;
+        stats.signedStreak = stats.signedStreak < 0 ? stats.signedStreak - 1 : -1;
       }
     }
 
@@ -131,6 +135,7 @@ export async function getGlobalTournamentStats() {
         stats.points += 3;
         stats.form.push('W');
         stats.currentStreak++;
+        stats.signedStreak = stats.signedStreak > 0 ? stats.signedStreak + 1 : 1;
         if (stats.currentStreak > stats.longestStreak) {
           stats.longestStreak = stats.currentStreak;
         }
@@ -139,10 +144,12 @@ export async function getGlobalTournamentStats() {
         stats.points += 1;
         stats.form.push('D');
         stats.currentStreak = 0;
+        stats.signedStreak = 0;
       } else {
         stats.lost++;
         stats.form.push('L');
         stats.currentStreak = 0;
+        stats.signedStreak = stats.signedStreak < 0 ? stats.signedStreak - 1 : -1;
       }
     }
   });

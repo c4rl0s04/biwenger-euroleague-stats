@@ -22,9 +22,10 @@ export function StatsTable({ data, title, type = 'global' }) {
       },
       {
         key: 'form',
-        label: 'RACHA',
+        label: 'Racha',
         title: 'Últimos 5 partidos (Izq: Antiguo → Der: Reciente)',
         className: 'text-center hidden md:table-cell cursor-help',
+        getValue: (row) => row.signedStreak,
         activeColor: 'text-zinc-400',
       },
       { key: 'played', label: 'PJ', className: 'text-right text-white', activeColor: 'text-white' },
