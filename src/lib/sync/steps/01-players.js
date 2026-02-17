@@ -96,8 +96,9 @@ export async function run(manager) {
   const positions = CONFIG.POSITIONS; // Position map
   const teams = manager.context.teams;
 
-  // Optimized: Get existing player IDs to avoid redundant API calls
-  const resExisting = await db.query('SELECT id FROM players');
+  // Optimized: Get existing player IDs and Points to avoid overwriting valid data with 0s
+  const resExisting = await db.query('SELECT id, puntos, points_home, points_away FROM players');
+  const existingPlayerMap = new Map(resExisting.rows.map((p) => [p.id, p]));
   const existingPlayerIds = new Set(resExisting.rows.map((p) => p.id));
   manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing players in DB.`);
 
@@ -120,6 +121,27 @@ export async function run(manager) {
 
   for (const [id, player] of Object.entries(playersList)) {
     const playerId = parseInt(id);
+    const existing = existingPlayerMap.get(playerId);
+
+    // DATA PRESERVATION LOGIC:
+    // If API returns 0 or null for points, but we have a non-zero value in DB, PRESERVE IT.
+    // This fixes issues where Biwenger API occasionally returns incomplete data for stats.
+    let finalPoints = player.points || 0;
+    let finalPointsHome = player.pointsHome || 0;
+    let finalPointsAway = player.pointsAway || 0;
+
+    if (existing) {
+      if (finalPoints === 0 && existing.puntos > 0) {
+        finalPoints = existing.puntos;
+        // manager.log(`      🛡️ Preserving points for ${player.name}: API=0, DB=${existing.puntos}`);
+      }
+      if (finalPointsHome === 0 && existing.points_home > 0) {
+        finalPointsHome = existing.points_home;
+      }
+      if (finalPointsAway === 0 && existing.points_away > 0) {
+        finalPointsAway = existing.points_away;
+      }
+    }
 
     // A) Basic Insertion (Always update basics like status, points, price)
     await mutations.upsertPlayer({
@@ -127,12 +149,12 @@ export async function run(manager) {
       name: player.name,
       team_id: player.teamID,
       position: positions[player.position] || 'Unknown',
-      puntos: player.points || 0,
+      puntos: finalPoints,
       partidos_jugados: (player.playedHome || 0) + (player.playedAway || 0),
       played_home: player.playedHome || 0,
       played_away: player.playedAway || 0,
-      points_home: player.pointsHome || 0,
-      points_away: player.pointsAway || 0,
+      points_home: finalPointsHome,
+      points_away: finalPointsAway,
       points_last_season: player.pointsLastSeason || 0,
       status: player.status || 'ok',
       price_increment: player.priceIncrement || 0,
