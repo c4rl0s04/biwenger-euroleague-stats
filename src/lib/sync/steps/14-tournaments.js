@@ -103,7 +103,7 @@ export async function run() {
         id: data.id,
         league_id: CONFIG.API.LEAGUE_ID,
         name: data.name,
-        type: data.type || 'unknown',
+        type: data.config?.mode || data.type || 'unknown',
         status: status,
         data_json: JSON.stringify(data),
         updated_at: Math.floor(Date.now() / 1000),

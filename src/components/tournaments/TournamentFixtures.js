@@ -45,7 +45,11 @@ export default function TournamentFixtures({ fixtures }) {
                   <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary border border-white/10 shrink-0">
                     {fixture.home_user_icon ? (
                       <img
-                        src={`https://biwenger.as.com/api/v2${fixture.home_user_icon}`}
+                        src={
+                          fixture.home_user_icon.startsWith('http')
+                            ? fixture.home_user_icon
+                            : `https://cdn.biwenger.com/${fixture.home_user_icon}`
+                        }
                         alt=""
                         className="w-full h-full object-cover"
                       />
@@ -77,7 +81,11 @@ export default function TournamentFixtures({ fixtures }) {
                   <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary border border-white/10 shrink-0">
                     {fixture.away_user_icon ? (
                       <img
-                        src={`https://biwenger.as.com/api/v2${fixture.away_user_icon}`}
+                        src={
+                          fixture.away_user_icon.startsWith('http')
+                            ? fixture.away_user_icon
+                            : `https://cdn.biwenger.com/${fixture.away_user_icon}`
+                        }
                         alt=""
                         className="w-full h-full object-cover"
                       />

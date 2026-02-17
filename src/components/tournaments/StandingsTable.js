@@ -38,7 +38,11 @@ export default function StandingsTable({ standings }) {
                   <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary border border-white/10">
                     {row.user_icon ? (
                       <img
-                        src={`https://biwenger.as.com/api/v2${row.user_icon}`}
+                        src={
+                          row.user_icon.startsWith('http')
+                            ? row.user_icon
+                            : `https://cdn.biwenger.com/${row.user_icon}`
+                        }
                         alt={row.user_name}
                         className="w-full h-full object-cover"
                       />

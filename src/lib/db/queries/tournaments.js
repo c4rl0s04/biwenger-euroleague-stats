@@ -38,6 +38,7 @@ export async function getTournamentById(id) {
   if (rows.length === 0) return null;
 
   const t = rows[0];
+
   return {
     ...t,
     data: t.data_json ? JSON.parse(t.data_json) : null,
