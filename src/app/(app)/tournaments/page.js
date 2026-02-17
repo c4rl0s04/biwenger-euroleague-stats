@@ -2,7 +2,12 @@ import { Section } from '@/components/layout';
 import { PageHeader } from '@/components/ui';
 import { getAllTournaments } from '@/lib/services/tournamentService';
 import { getGlobalTournamentStats } from '@/lib/services/statsService';
-import { ActiveTournamentsSection, HallOfFame, StatsTable } from '@/components/tournaments';
+import {
+  ActiveTournamentsSection,
+  HallOfFame,
+  StatsTable,
+  RecordsSection,
+} from '@/components/tournaments';
 
 export default async function TournamentsPage() {
   const [tournamentsData, statsData] = await Promise.all([
@@ -11,7 +16,7 @@ export default async function TournamentsPage() {
   ]);
 
   const { active, finished } = tournamentsData;
-  const { hallOfFame, globalStats, leagueStats } = statsData;
+  const { hallOfFame, globalStats, leagueStats, records } = statsData;
 
   return (
     <div>
@@ -48,6 +53,7 @@ export default async function TournamentsPage() {
       {/* Global Stats */}
       {globalStats.length > 0 && (
         <Section title="Récord Global" id="global-stats" delay={300} background="section-raised">
+          <RecordsSection records={records} />
           <StatsTable data={globalStats} title="Histórico Completo" type="global" />
         </Section>
       )}

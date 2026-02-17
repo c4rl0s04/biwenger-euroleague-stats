@@ -17,8 +17,13 @@ export function StatsTable({ data, title, type = 'global' }) {
       {
         key: 'points',
         label: 'Pts',
-        className: 'text-right font-black text-indigo-400 group-hover/col:text-indigo-300',
         activeColor: 'text-indigo-400',
+      },
+      {
+        key: 'form',
+        label: 'Racha',
+        className: 'text-center hidden md:table-cell',
+        activeColor: 'text-zinc-400',
       },
       { key: 'played', label: 'PJ', className: 'text-right text-white', activeColor: 'text-white' },
       {
@@ -205,6 +210,27 @@ export function StatsTable({ data, title, type = 'global' }) {
 
                   <td className="px-4 py-3 text-right font-black text-indigo-400 font-mono text-base">
                     {row.points}
+                  </td>
+
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <div className="flex items-center justify-center gap-1">
+                      {row.form &&
+                        row.form.map((result, i) => (
+                          <div
+                            key={i}
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              result === 'W'
+                                ? 'bg-green-500'
+                                : result === 'D'
+                                  ? 'bg-zinc-500'
+                                  : 'bg-red-500'
+                            }`}
+                            title={
+                              result === 'W' ? 'Victoria' : result === 'D' ? 'Empate' : 'Derrota'
+                            }
+                          />
+                        ))}
+                    </div>
                   </td>
 
                   <td className="px-4 py-3 text-right text-white font-bold">{row.played}</td>

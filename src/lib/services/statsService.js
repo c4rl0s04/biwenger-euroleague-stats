@@ -39,11 +39,14 @@ export async function getGlobalTournamentStats() {
   // Convert to array and sort by titles DESC
   const hallOfFameList = Object.values(hallOfFame).sort((a, b) => b.titles - a.titles);
 
-  // 2. Global Record (W-D-L from ALL fixtures)
-  // We need a map of all users first to ensure we have names/icons
+  // 2. Global Record (W-D-L from ALL fixtures) & Records
   const userMap = {};
 
-  // Initialize userMap from standings (which has user info) or fixtures
+  // Records Containers
+  let biggestWin = { diff: 0, match: null };
+  let highestScoring = { total: 0, match: null };
+  const longestStreakGlobal = { count: 0, user: null };
+
   // Helper to init user stats
   const initUser = (id, name, icon, colorIndex) => {
     if (!userMap[id]) {
@@ -58,33 +61,60 @@ export async function getGlobalTournamentStats() {
         lost: 0,
         gf: 0,
         ga: 0,
-        points: 0, // Virtual points (W=3, D=1)
+        points: 0, // W=3, D=1
+        form: [], // Will store W, D, L
+        currentStreak: 0,
+        longestStreak: 0,
       };
     }
   };
 
-  fixtures.forEach((f) => {
+  // Sort fixtures chronologically (ASC) for streak calculation
+  const sortedFixtures = [...fixtures].sort((a, b) => a.date - b.date);
+
+  sortedFixtures.forEach((f) => {
     if (f.status !== 'finished' && !f.home_score && !f.away_score) return;
 
-    // Skip fixtures with "Ghost" users (id=0 or null) unless we want them?
-    // Usually valid users have IDs.
+    const homeScore = f.home_score || 0;
+    const awayScore = f.away_score || 0;
+    const totalPoints = homeScore + awayScore;
+    const diff = Math.abs(homeScore - awayScore);
+
+    // Track Highest Scoring Match
+    if (totalPoints > highestScoring.total) {
+      highestScoring = { total: totalPoints, match: f };
+    }
+
+    // Track Biggest Win
+    if (diff > biggestWin.diff) {
+      biggestWin = { diff, match: f };
+    }
 
     // Process Home
     if (f.home_user_id) {
       initUser(f.home_user_id, f.home_user_name, f.home_user_icon, f.home_user_color);
       const stats = userMap[f.home_user_id];
       stats.played++;
-      stats.gf += f.home_score || 0;
-      stats.ga += f.away_score || 0;
+      stats.gf += homeScore;
+      stats.ga += awayScore;
 
-      if ((f.home_score || 0) > (f.away_score || 0)) {
+      if (homeScore > awayScore) {
         stats.won++;
         stats.points += 3;
-      } else if ((f.home_score || 0) === (f.away_score || 0)) {
+        stats.form.push('W');
+        stats.currentStreak++;
+        if (stats.currentStreak > stats.longestStreak) {
+          stats.longestStreak = stats.currentStreak;
+        }
+      } else if (homeScore === awayScore) {
         stats.drawn++;
         stats.points += 1;
+        stats.form.push('D');
+        stats.currentStreak = 0;
       } else {
         stats.lost++;
+        stats.form.push('L');
+        stats.currentStreak = 0;
       }
     }
 
@@ -93,29 +123,99 @@ export async function getGlobalTournamentStats() {
       initUser(f.away_user_id, f.away_user_name, f.away_user_icon, f.away_user_color);
       const stats = userMap[f.away_user_id];
       stats.played++;
-      stats.gf += f.away_score || 0;
-      stats.ga += f.home_score || 0;
+      stats.gf += awayScore;
+      stats.ga += homeScore;
 
-      if ((f.away_score || 0) > (f.home_score || 0)) {
+      if (awayScore > homeScore) {
         stats.won++;
         stats.points += 3;
-      } else if ((f.away_score || 0) === (f.home_score || 0)) {
+        stats.form.push('W');
+        stats.currentStreak++;
+        if (stats.currentStreak > stats.longestStreak) {
+          stats.longestStreak = stats.currentStreak;
+        }
+      } else if (awayScore === homeScore) {
         stats.drawn++;
         stats.points += 1;
+        stats.form.push('D');
+        stats.currentStreak = 0;
       } else {
         stats.lost++;
+        stats.form.push('L');
+        stats.currentStreak = 0;
       }
     }
   });
 
-  const globalStatsList = Object.values(userMap).sort((a, b) => {
-    // Sort by Points, then GD, then GF
-    if (b.points !== a.points) return b.points - a.points;
-    const gdA = a.gf - a.ga;
-    const gdB = b.gf - b.ga;
-    if (gdB !== gdA) return gdB - gdA;
-    return b.gf - a.gf;
-  });
+  // Final Processing for Global Stats
+  const globalStatsList = Object.values(userMap)
+    .map((user) => {
+      // Keep only last 5 form results
+      user.form = user.form.slice(-5);
+
+      // Update global longest streak record
+      if (user.longestStreak > longestStreakGlobal.count) {
+        longestStreakGlobal.count = user.longestStreak;
+        longestStreakGlobal.user = {
+          id: user.id,
+          name: user.name,
+          icon: user.icon,
+          colorIndex: user.colorIndex,
+        };
+      }
+
+      return user;
+    })
+    .sort((a, b) => {
+      // Sort by Points, then GD, then GF
+      if (b.points !== a.points) return b.points - a.points;
+      const gdA = a.gf - a.ga;
+      const gdB = b.gf - b.ga;
+      if (gdB !== gdA) return gdB - gdA;
+      return b.gf - a.gf;
+    });
+
+  const records = {
+    biggestWin: biggestWin.match
+      ? {
+          diff: biggestWin.diff,
+          match: biggestWin.match,
+          winner:
+            biggestWin.match.home_score > biggestWin.match.away_score
+              ? {
+                  name: biggestWin.match.home_user_name,
+                  icon: biggestWin.match.home_user_icon,
+                  colorIndex: biggestWin.match.home_user_color,
+                }
+              : {
+                  name: biggestWin.match.away_user_name,
+                  icon: biggestWin.match.away_user_icon,
+                  colorIndex: biggestWin.match.away_user_color,
+                },
+          loser:
+            biggestWin.match.home_score > biggestWin.match.away_score
+              ? {
+                  name: biggestWin.match.away_user_name,
+                  icon: biggestWin.match.away_user_icon,
+                  colorIndex: biggestWin.match.away_user_color,
+                }
+              : {
+                  name: biggestWin.match.home_user_name,
+                  icon: biggestWin.match.home_user_icon,
+                  colorIndex: biggestWin.match.home_user_color,
+                },
+          score: `${Math.max(biggestWin.match.home_score, biggestWin.match.away_score)} - ${Math.min(biggestWin.match.home_score, biggestWin.match.away_score)}`,
+        }
+      : null,
+    highestScoring: highestScoring.match
+      ? {
+          total: highestScoring.total,
+          match: highestScoring.match,
+          score: `${highestScoring.match.home_score} - ${highestScoring.match.away_score}`,
+        }
+      : null,
+    longestStreak: longestStreakGlobal.count > 0 ? longestStreakGlobal : null,
+  };
 
   // 3. League Classification (Only League Tournaments)
   // We can trust our "type" field now!
@@ -164,5 +264,6 @@ export async function getGlobalTournamentStats() {
     hallOfFame: hallOfFameList,
     globalStats: globalStatsList,
     leagueStats: leagueStatsList,
+    records,
   };
 }
