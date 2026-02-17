@@ -49,14 +49,43 @@ export default function TournamentCard({ tournament }) {
       </div>
 
       {/* Footer Info */}
-      <div className="relative z-10 grid grid-cols-2 gap-4 pt-4 border-t border-border/30">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users size={16} />
-          <span>Participantes</span>
-        </div>
-        <div className="flex items-center justify-end text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-          Ver Detalles <ArrowRight size={16} className="ml-1" />
-        </div>
+      <div className="relative z-10 pt-4 border-t border-border/30">
+        {!isActive && data.winner ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Ganador
+              </span>
+              <div className="flex items-center gap-2 bg-secondary/30 pr-3 pl-1 py-1 rounded-full border border-border/50">
+                {/* Winner Avatar */}
+                <div className="relative w-6 h-6 rounded-full overflow-hidden border border-amber-500/50 shadow-sm">
+                  {data.winner.icon ? (
+                    <img
+                      src={`https://biwenger.as.com/api/v2${data.winner.icon}`}
+                      alt={data.winner.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-amber-500/20 flex items-center justify-center">
+                      <Trophy size={12} className="text-amber-500" />
+                    </div>
+                  )}
+                </div>
+                <span className="text-sm font-medium text-foreground">{data.winner.name}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Users size={16} />
+              <span>Participantes</span>
+            </div>
+            <div className="flex items-center justify-end text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              Ver Detalles <ArrowRight size={16} className="ml-1" />
+            </div>
+          </div>
+        )}
       </div>
     </Link>
   );

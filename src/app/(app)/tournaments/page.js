@@ -1,13 +1,10 @@
 import { Section } from '@/components/layout';
 import { PageHeader } from '@/components/ui';
-import { getTournaments } from '@/lib/db';
+import { getAllTournaments } from '@/lib/services/tournamentService';
 import { ActiveTournamentsSection } from '@/components/tournaments';
 
 export default async function TournamentsPage() {
-  const allTournaments = await getTournaments();
-
-  const activeTournaments = allTournaments.filter((t) => t.status === 'active');
-  const finishedTournaments = allTournaments.filter((t) => t.status !== 'active');
+  const { active, finished } = await getAllTournaments();
 
   return (
     <div>
@@ -19,18 +16,18 @@ export default async function TournamentsPage() {
 
       {/* Active Tournaments */}
       <Section title="Torneos Activos" id="active-tournaments" delay={0} background="section-base">
-        <ActiveTournamentsSection tournaments={activeTournaments} />
+        <ActiveTournamentsSection tournaments={active} />
       </Section>
 
       {/* Finished Tournaments */}
-      {finishedTournaments.length > 0 && (
+      {finished.length > 0 && (
         <Section
           title="Histórico de Torneos"
           id="finished-tournaments"
           delay={100}
           background="section-raised"
         >
-          <ActiveTournamentsSection tournaments={finishedTournaments} />
+          <ActiveTournamentsSection tournaments={finished} />
         </Section>
       )}
     </div>
