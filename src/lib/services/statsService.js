@@ -183,11 +183,13 @@ export async function getGlobalTournamentStats() {
           winner:
             biggestWin.match.home_score > biggestWin.match.away_score
               ? {
+                  id: biggestWin.match.home_user_id,
                   name: biggestWin.match.home_user_name,
                   icon: biggestWin.match.home_user_icon,
                   colorIndex: biggestWin.match.home_user_color,
                 }
               : {
+                  id: biggestWin.match.away_user_id,
                   name: biggestWin.match.away_user_name,
                   icon: biggestWin.match.away_user_icon,
                   colorIndex: biggestWin.match.away_user_color,
@@ -195,11 +197,13 @@ export async function getGlobalTournamentStats() {
           loser:
             biggestWin.match.home_score > biggestWin.match.away_score
               ? {
+                  id: biggestWin.match.away_user_id,
                   name: biggestWin.match.away_user_name,
                   icon: biggestWin.match.away_user_icon,
                   colorIndex: biggestWin.match.away_user_color,
                 }
               : {
+                  id: biggestWin.match.home_user_id,
                   name: biggestWin.match.home_user_name,
                   icon: biggestWin.match.home_user_icon,
                   colorIndex: biggestWin.match.home_user_color,
@@ -210,7 +214,21 @@ export async function getGlobalTournamentStats() {
     highestScoring: highestScoring.match
       ? {
           total: highestScoring.total,
-          match: highestScoring.match,
+          match: {
+            ...highestScoring.match,
+            home_user: {
+              id: highestScoring.match.home_user_id,
+              name: highestScoring.match.home_user_name,
+              icon: highestScoring.match.home_user_icon,
+              colorIndex: highestScoring.match.home_user_color,
+            },
+            away_user: {
+              id: highestScoring.match.away_user_id,
+              name: highestScoring.match.away_user_name,
+              icon: highestScoring.match.away_user_icon,
+              colorIndex: highestScoring.match.away_user_color,
+            },
+          },
           score: `${highestScoring.match.home_score} - ${highestScoring.match.away_score}`,
         }
       : null,
