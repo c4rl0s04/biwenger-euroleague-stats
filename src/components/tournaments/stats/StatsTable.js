@@ -17,6 +17,7 @@ export function StatsTable({ data, title, type = 'global' }) {
       {
         key: 'points',
         label: 'Pts',
+        className: 'text-right font-black text-indigo-400 group-hover/col:text-indigo-300',
         activeColor: 'text-indigo-400',
       },
       {
