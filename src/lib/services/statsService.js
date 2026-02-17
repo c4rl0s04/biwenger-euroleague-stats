@@ -85,8 +85,8 @@ export async function getGlobalTournamentStats() {
       highestScoring = { total: totalPoints, match: f };
     }
 
-    // Track Biggest Win
-    if (diff > biggestWin.diff) {
+    // Track Biggest Win (Only if both scored > 0 to avoid ghost matches)
+    if (diff > biggestWin.diff && homeScore > 0 && awayScore > 0) {
       biggestWin = { diff, match: f };
     }
 
