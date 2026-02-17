@@ -40,17 +40,21 @@ export default function TournamentRow({ tournament }) {
             <Trophy size={24} strokeWidth={1.5} />
           </div>
 
-          <div className="flex flex-col min-w-0">
-            <h3 className="text-lg font-black font-display tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all truncate">
+          <div className="flex flex-row items-center gap-3 min-w-0">
+            <h3 className="text-lg font-black font-display tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all truncate shrink-0 max-w-[50%]">
               {tournament.name}
             </h3>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0 overflow-hidden text-ellipsis whitespace-nowrap">
               <span
                 className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-amber-500' : 'bg-slate-500'}`}
               />
-              {tournament.type === 'league' ? 'Liga' : 'Eliminatoria'}
+              <span className="truncate">
+                {tournament.type === 'league' ? 'Liga' : 'Eliminatoria'}
+              </span>
               <span className="text-zinc-600">•</span>
-              <span className={`${isActive ? 'text-amber-500/80 font-medium' : 'text-zinc-500'}`}>
+              <span
+                className={`truncate ${isActive ? 'text-amber-500/80 font-medium' : 'text-zinc-500'}`}
+              >
                 {statusLabel}
               </span>
             </div>
