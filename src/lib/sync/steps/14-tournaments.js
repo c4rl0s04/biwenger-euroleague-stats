@@ -1,62 +1,59 @@
-import { fetchHome, fetchTournament } from '../../api/biwenger-client.js';
+import { fetchTournament, fetchRoundsLeague, fetchCompetition } from '../../api/biwenger-client.js';
 import * as tournamentMutations from '../../db/mutations/tournaments.js';
 import { CONFIG } from '../../config.js';
 
 export async function run() {
   console.log('🏆 Starting Tournament Sync...');
 
-  // 1. Discovery: Fetch Home to find active tournaments
-  console.log('   > Discovering tournaments from Dashboard...');
-  const homeData = await fetchHome();
-  const events = homeData.data ? homeData.data.events || [] : [];
+  // 1. Discovery: Scan FULL SEASON to find all tournaments (Active & Finished)
+  console.log('   > Discovering tournaments from Full Season Schedule...');
 
-  // Extract unique tournament IDs from the events feed
   const tournamentIds = new Set();
 
-  // Method A: Deep search in events -> fixtures
-  // The 'events' array usually contains the current round (e.g. Round 25).
-  // Inside that round object, there is a 'fixtures' array containing the user's matches.
-  // These fixtures may belong to 'tournaments'.
+  try {
+    // A. Get the list of all rounds in the season
+    const compData = await fetchCompetition();
+    const allRounds = compData.data?.season?.rounds || [];
 
-  for (const event of events) {
-    // 1. Direct tournament on event (rare, but possible)
-    if (event.tournament && event.tournament.id) {
-      tournamentIds.add(event.tournament.id);
+    if (allRounds.length === 0) {
+      console.warn('   > Warning: No rounds found in competition data.');
+    } else {
+      console.log(`   > Scanning ${allRounds.length} rounds for tournament fixtures...`);
     }
 
-    // 2. Nested fixtures in the event (Common for active rounds)
-    if (event.fixtures && Array.isArray(event.fixtures)) {
-      for (const fixture of event.fixtures) {
-        if (fixture.tournament && fixture.tournament.id) {
-          tournamentIds.add(fixture.tournament.id);
-          console.log(
-            `   > Discovered tournament info for "${fixture.tournament.name}" (ID: ${fixture.tournament.id})`
-          );
+    // B. Iterate through all rounds to find tournaments
+    // We process sequentially to avoid rate limits, but could parallelize with caution
+    for (const round of allRounds) {
+      // Optimization: We could skip 'pending' rounds if we only want past/active,
+      // but checking future rounds might reveal upcoming tournaments.
+      // Let's stick to finished/active/pending to be thorough.
+
+      try {
+        const roundDetail = await fetchRoundsLeague(round.id);
+        if (roundDetail.data && roundDetail.data.fixtures) {
+          for (const fixture of roundDetail.data.fixtures) {
+            if (fixture.tournament && fixture.tournament.id) {
+              const tId = fixture.tournament.id;
+              if (!tournamentIds.has(tId)) {
+                tournamentIds.add(tId);
+                console.log(
+                  `   > 🎯 Discovered "${fixture.tournament.name}" (ID: ${tId}) in Round ${round.name}`
+                );
+              }
+            }
+          }
         }
+      } catch (err) {
+        // Suppress 404s or minor errors for individual rounds
+        // console.warn(`   > Failed to scan Round ${round.id}: ${err.message}`);
       }
     }
-
-    // 3. Nested games (sometimes called games instead of fixtures)
-    if (event.games && Array.isArray(event.games)) {
-      for (const game of event.games) {
-        if (game.tournament && game.tournament.id) {
-          tournamentIds.add(game.tournament.id);
-        }
-      }
-    }
-  }
-
-  // Method B: From league.board
-  if (homeData.data.league && homeData.data.league.board) {
-    for (const item of homeData.data.league.board) {
-      if (item.type === 'tournament' && item.content && item.content.tournament) {
-        tournamentIds.add(item.content.tournament.id);
-      }
-    }
+  } catch (e) {
+    console.warn('   > Warning: Failed to scan season for tournaments:', e.message);
   }
 
   if (tournamentIds.size === 0) {
-    console.log('   > No active tournaments found.');
+    console.log('   > No tournaments found in any round.');
     return;
   }
 
