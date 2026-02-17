@@ -54,7 +54,7 @@ export default function TournamentCard({ tournament }) {
 
         {/* Title & Info */}
         <div className="mb-6 flex-grow">
-          <h3 className="text-2xl font-black font-display tracking-tight text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all">
+          <h3 className="text-3xl font-black font-display tracking-tight text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all">
             {tournament.name}
           </h3>
           <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -66,28 +66,23 @@ export default function TournamentCard({ tournament }) {
         {/* Footer Info */}
         <div className="pt-4 border-t border-white/5">
           {!isActive && data.winner ? (
-            <div className="flex flex-col gap-3 mt-2">
-              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest text-center">
-                🏆 Campeón 🏆
-              </span>
-              <div className="flex items-center gap-4 bg-gradient-to-r from-amber-500/10 to-transparent p-3 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] group-hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-shadow">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-amber-500 shadow-lg shrink-0">
-                  {data.winner.icon ? (
-                    <img
-                      src={`https://cdn.biwenger.com/${data.winner.icon}`}
-                      alt={data.winner.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-                      <Trophy size={20} className="text-zinc-400" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-lg font-bold text-white truncate">{data.winner.name}</span>
-                  <span className="text-xs text-amber-500/80 font-medium">Ganador del Torneo</span>
-                </div>
+            <div className="mt-4 flex items-center gap-4 bg-gradient-to-r from-amber-500/10 to-transparent p-3 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] group-hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-shadow">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-amber-500 shadow-lg shrink-0">
+                {data.winner.icon ? (
+                  <img
+                    src={`https://cdn.biwenger.com/${data.winner.icon}`}
+                    alt={data.winner.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                    <Trophy size={20} className="text-zinc-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-lg font-bold text-white truncate">{data.winner.name}</span>
+                <span className="text-xs text-amber-500/80 font-medium">Ganador del Torneo</span>
               </div>
             </div>
           ) : (

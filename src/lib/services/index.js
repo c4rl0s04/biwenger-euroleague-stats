@@ -88,6 +88,12 @@ export {
   fetchUserSquadDetails,
 } from './core/userService.js';
 
+// Tournament Service
+export * from './tournamentService';
+
+// Stats Service
+export * from './statsService';
+
 // Team Service
 export { fetchTeamProfile } from './core/teamService.js';
 

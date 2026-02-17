@@ -1,10 +1,17 @@
 import { Section } from '@/components/layout';
 import { PageHeader } from '@/components/ui';
 import { getAllTournaments } from '@/lib/services/tournamentService';
-import { ActiveTournamentsSection } from '@/components/tournaments';
+import { getGlobalTournamentStats } from '@/lib/services/statsService';
+import { ActiveTournamentsSection, HallOfFame, StatsTable } from '@/components/tournaments';
 
 export default async function TournamentsPage() {
-  const { active, finished } = await getAllTournaments();
+  const [tournamentsData, statsData] = await Promise.all([
+    getAllTournaments(),
+    getGlobalTournamentStats(),
+  ]);
+
+  const { active, finished } = tournamentsData;
+  const { hallOfFame, globalStats, leagueStats } = statsData;
 
   return (
     <div>
@@ -28,6 +35,32 @@ export default async function TournamentsPage() {
           background="section-raised"
         >
           <ActiveTournamentsSection tournaments={finished} />
+        </Section>
+      )}
+
+      {/* Hall of Fame */}
+      {hallOfFame.length > 0 && (
+        <Section title="Salón de la Fama" id="hall-of-fame" delay={200} background="section-base">
+          <HallOfFame winners={hallOfFame} />
+        </Section>
+      )}
+
+      {/* Global Stats */}
+      {globalStats.length > 0 && (
+        <Section title="Récord Global" id="global-stats" delay={300} background="section-raised">
+          <StatsTable data={globalStats} title="Histórico Completo" type="global" />
+        </Section>
+      )}
+
+      {/* League Stats */}
+      {leagueStats.length > 0 && (
+        <Section
+          title="Clasificación Ligas"
+          id="league-stats"
+          delay={400}
+          background="section-base"
+        >
+          <StatsTable data={leagueStats} title="Torneos de Liga" type="league" />
         </Section>
       )}
     </div>

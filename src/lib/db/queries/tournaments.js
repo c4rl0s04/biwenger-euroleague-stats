@@ -55,7 +55,7 @@ export async function getTournamentStandings(tournamentId) {
             u.color_index as user_color
         FROM tournament_standings ts
         LEFT JOIN users u ON ts.user_id = u.id
-        WHERE ts.tournament_id = $1
+        WHERE ($1::int IS NULL OR ts.tournament_id = $1)
         ORDER BY ts.position ASC
     `,
     [tournamentId]
@@ -75,7 +75,7 @@ export async function getTournamentFixtures(tournamentId) {
         FROM tournament_fixtures tf
         LEFT JOIN users uh ON tf.home_user_id = uh.id
         LEFT JOIN users ua ON tf.away_user_id = ua.id
-        WHERE tf.tournament_id = $1
+        WHERE ($1::int IS NULL OR tf.tournament_id = $1)
         ORDER BY tf.date DESC
     `,
     [tournamentId]
