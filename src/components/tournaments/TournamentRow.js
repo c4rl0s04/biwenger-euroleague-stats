@@ -71,7 +71,6 @@ export default function TournamentRow({ tournament }) {
               <div className="flex items-center gap-2">
                 <div className="relative w-8 h-8 rounded-full overflow-hidden border border-amber-500/50 shadow-sm">
                   {data.winner.icon ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={
                         data.winner.icon.startsWith('http')
