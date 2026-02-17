@@ -22,8 +22,9 @@ export function StatsTable({ data, title, type = 'global' }) {
       },
       {
         key: 'form',
-        label: 'Racha',
-        className: 'text-center hidden md:table-cell',
+        label: 'RACHA',
+        title: 'Últimos 5 partidos (Izq: Antiguo → Der: Reciente)',
+        className: 'text-center hidden md:table-cell cursor-help',
         activeColor: 'text-zinc-400',
       },
       { key: 'played', label: 'PJ', className: 'text-right text-white', activeColor: 'text-white' },
@@ -118,6 +119,7 @@ export function StatsTable({ data, title, type = 'global' }) {
               {columns.map((col) => (
                 <th
                   key={col.key}
+                  title={col.title}
                   className={`px-4 py-3 font-medium cursor-pointer transition-colors hover:text-white group/col ${col.className}`}
                   onClick={() => col.key !== 'index' && handleSort(col.key)}
                 >
