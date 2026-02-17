@@ -68,13 +68,43 @@ export async function run() {
       const tData = await fetchTournament(tId);
       const data = tData.data;
 
+      // -- Determine Status --
+      let status = data.status || 'active';
+
+      // 1. If explicitly has a winner, it's finished
+      if (data.winner) {
+        status = 'finished';
+      }
+      // 2. If no explicit status, check if all matches are finished
+      else if (status === 'active' && data.rounds && Array.isArray(data.rounds)) {
+        let allFinished = true;
+        let hasmatches = false;
+
+        for (const round of data.rounds) {
+          if (round.fixtures) {
+            for (const f of round.fixtures) {
+              hasmatches = true;
+              if (f.status !== 'finished' && !f.home?.score && !f.away?.score) {
+                allFinished = false;
+                break;
+              }
+            }
+          }
+          if (!allFinished) break;
+        }
+
+        if (hasmatches && allFinished) {
+          status = 'finished';
+        }
+      }
+
       // -- A. Upsert Tournament --
       await tournamentMutations.upsertTournament({
         id: data.id,
         league_id: CONFIG.API.LEAGUE_ID,
         name: data.name,
         type: data.type || 'unknown',
-        status: data.status || 'active',
+        status: status,
         data_json: JSON.stringify(data),
         updated_at: Math.floor(Date.now() / 1000),
       });

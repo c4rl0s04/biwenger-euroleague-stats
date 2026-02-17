@@ -1,4 +1,5 @@
-export * from './queries/core/users';
+export * from './queries/tournaments.js';
+export * from './queries/core/users.js';
 export * from './queries/core/players';
 export * from './queries/core/teams';
 
