@@ -1,4 +1,4 @@
-import TournamentCard from './TournamentCard';
+import TournamentRow from './TournamentRow';
 
 export default function ActiveTournamentsSection({ tournaments }) {
   if (!tournaments || tournaments.length === 0) {
@@ -10,9 +10,9 @@ export default function ActiveTournamentsSection({ tournaments }) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="flex flex-col gap-3">
       {tournaments.map((tournament) => (
-        <TournamentCard key={tournament.id} tournament={tournament} />
+        <TournamentRow key={tournament.id} tournament={tournament} />
       ))}
     </div>
   );
