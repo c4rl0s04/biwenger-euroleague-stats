@@ -45,12 +45,13 @@ export async function getGlobalTournamentStats() {
 
   // Initialize userMap from standings (which has user info) or fixtures
   // Helper to init user stats
-  const initUser = (id, name, icon) => {
+  const initUser = (id, name, icon, colorIndex) => {
     if (!userMap[id]) {
       userMap[id] = {
         id,
         name,
         icon,
+        colorIndex,
         played: 0,
         won: 0,
         drawn: 0,
@@ -70,7 +71,7 @@ export async function getGlobalTournamentStats() {
 
     // Process Home
     if (f.home_user_id) {
-      initUser(f.home_user_id, f.home_user_name, f.home_user_icon);
+      initUser(f.home_user_id, f.home_user_name, f.home_user_icon, f.home_user_color);
       const stats = userMap[f.home_user_id];
       stats.played++;
       stats.gf += f.home_score || 0;
@@ -89,7 +90,7 @@ export async function getGlobalTournamentStats() {
 
     // Process Away
     if (f.away_user_id) {
-      initUser(f.away_user_id, f.away_user_name, f.away_user_icon);
+      initUser(f.away_user_id, f.away_user_name, f.away_user_icon, f.away_user_color);
       const stats = userMap[f.away_user_id];
       stats.played++;
       stats.gf += f.away_score || 0;
@@ -131,6 +132,8 @@ export async function getGlobalTournamentStats() {
         id: s.user_id,
         name: s.user_name,
         icon: s.user_icon,
+        colorIndex: s.user_color,
+        played: 0,
         points: 0,
         won: 0,
         drawn: 0,
@@ -145,6 +148,7 @@ export async function getGlobalTournamentStats() {
     st.won += s.won;
     st.drawn += s.drawn;
     st.lost += s.lost;
+    st.played += s.won + s.drawn + s.lost;
     st.scored += s.scored;
     st.against += s.against;
   });

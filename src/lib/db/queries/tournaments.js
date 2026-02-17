@@ -70,8 +70,10 @@ export async function getTournamentFixtures(tournamentId) {
             tf.*,
             uh.name as home_user_name,
             uh.icon as home_user_icon,
+            uh.color_index as home_user_color,
             ua.name as away_user_name,
-            ua.icon as away_user_icon
+            ua.icon as away_user_icon,
+            ua.color_index as away_user_color
         FROM tournament_fixtures tf
         LEFT JOIN users uh ON tf.home_user_id = uh.id
         LEFT JOIN users ua ON tf.away_user_id = ua.id
