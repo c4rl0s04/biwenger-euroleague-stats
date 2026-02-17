@@ -12,6 +12,7 @@ import {
   Target,
   Clock,
   Activity,
+  Medal,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -78,6 +79,15 @@ export default function Home() {
       href: '/rounds',
       color: 'orange',
       delay: '0.7s',
+      disabled: false,
+    },
+    {
+      title: 'Torneos',
+      description: 'Historial de Copas y Eliminatorias',
+      icon: Medal,
+      href: '/tournaments',
+      color: 'amber',
+      delay: '0.75s',
       disabled: false,
     },
     {
