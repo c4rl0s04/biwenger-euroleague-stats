@@ -1,4 +1,9 @@
-import { getTournaments } from '@/lib/db';
+import {
+  getTournaments,
+  getTournamentById,
+  getTournamentStandings,
+  getTournamentFixtures,
+} from '@/lib/db';
 
 /**
  * Fetch all tournaments and categorize them into active and finished.
@@ -17,4 +22,28 @@ export async function getAllTournaments() {
     finished: finishedTournaments,
     all: allTournaments,
   };
+}
+
+/**
+ * Fetch details for a specific tournament
+ */
+export async function getTournamentDetails(id) {
+  const tournament = await getTournamentById(id);
+  return tournament;
+}
+
+/**
+ * Fetch standings for a specific tournament
+ */
+export async function getStandings(id) {
+  const standings = await getTournamentStandings(id);
+  return standings;
+}
+
+/**
+ * Fetch fixtures for a specific tournament
+ */
+export async function getFixtures(id) {
+  const fixtures = await getTournamentFixtures(id);
+  return fixtures;
 }
