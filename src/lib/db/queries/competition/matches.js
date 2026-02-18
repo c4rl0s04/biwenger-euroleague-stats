@@ -121,7 +121,7 @@ export async function getRecentResults(limit = 5) {
     FROM matches m
     JOIN teams t1 ON m.home_id = t1.id
     JOIN teams t2 ON m.away_id = t2.id
-    WHERE m.status = 'finished' OR (m.home_score IS NOT NULL)
+    WHERE m.status = 'finished'
     ORDER BY m.date DESC
     LIMIT $1
   `;
