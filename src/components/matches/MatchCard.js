@@ -2,14 +2,23 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { getCorrectedMatchDate, formatMatchTime } from '@/lib/utils/date';
+
+function formatTime(dateInput) {
+  if (!dateInput) return '';
+  const date = new Date(dateInput);
+  return date.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Madrid',
+  });
+}
 
 export function MatchCard({ match }) {
   // Use status to determine if match has been played (not score, since unplayed matches have 0-0)
   const isPlayed = match.status === 'finished';
 
-  // Use corrected date for live checking
-  const matchDate = getCorrectedMatchDate(match.date);
+  // Drizzle returns correct UTC date, so we use it directly unlike legacy code
+  const matchDate = match.date ? new Date(match.date) : null;
   const now = new Date();
   const isLive = matchDate && matchDate <= now && !isPlayed;
 
@@ -18,7 +27,7 @@ export function MatchCard({ match }) {
   const awayWinner = isPlayed && match.away.score > match.home.score;
 
   // Format time only (date is now in Section title)
-  const formattedTime = formatMatchTime(match.date);
+  const formattedTime = formatTime(match.date);
 
   return (
     <div

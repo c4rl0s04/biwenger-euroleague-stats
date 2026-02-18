@@ -12,30 +12,16 @@
  */
 
 /**
- * Returns a Date object from the database inputs.
- * Forces the DB string to be treated as UTC regardless of server timezone.
+ * Returns a Date object.
+ * Simple wrapper now that Drizzle handles UTC correctly.
+ * Kept for backward compatibility during refactor.
  *
- * @param {string|Date} dateInput - The raw date from the database
- * @returns {Date} Date object (UTC-normalized)
+ * @param {string|Date} dateInput
+ * @returns {Date}
  */
 export function getCorrectedMatchDate(dateInput) {
   if (!dateInput) return null;
-
-  const date = new Date(dateInput);
-
-  // Force UTC Interpretation
-  // When DB is "timestamp without time zone", 'pg' driver uses local system time.
-  // By using local getters and feeding them into Date.UTC, we normalize this.
-  return new Date(
-    Date.UTC(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    )
-  );
+  return new Date(dateInput);
 }
 
 /**
@@ -46,8 +32,8 @@ export function getCorrectedMatchDate(dateInput) {
  * @returns {string} Formatted time string
  */
 export function formatMatchTime(dateInput) {
-  const date = getCorrectedMatchDate(dateInput);
-  if (!date) return '';
+  if (!dateInput) return '';
+  const date = new Date(dateInput);
 
   return date.toLocaleTimeString('es-ES', {
     hour: '2-digit',
@@ -63,15 +49,13 @@ export function formatMatchTime(dateInput) {
  * @returns {string}
  */
 export function formatMatchDate(dateInput) {
-  const date = getCorrectedMatchDate(dateInput);
-  if (!date) return '';
+  if (!dateInput) return '';
+  const date = new Date(dateInput);
 
   return date.toLocaleDateString('es-ES', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
     timeZone: 'Europe/Madrid',
   });
 }

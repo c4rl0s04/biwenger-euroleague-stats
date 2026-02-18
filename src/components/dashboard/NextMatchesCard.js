@@ -200,8 +200,8 @@ export default function NextMatchesCard() {
 
   // Group matches by day
   const matchesByDay = nextRound.matches.reduce((acc, match) => {
-    const date = getCorrectedMatchDate(match.date);
-    const dateKey = date.toLocaleDateString('es-ES'); // Grouping key
+    const date = match.date ? new Date(match.date) : new Date();
+    const dateKey = date.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' }); // Grouping key
 
     if (!acc[dateKey]) {
       acc[dateKey] = {
