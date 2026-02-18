@@ -40,32 +40,32 @@ export default function StandingsTable({ standings }) {
       {
         key: 'won',
         label: 'V',
-        className: 'text-center hidden sm:table-cell text-green-400',
+        className: 'text-right hidden sm:table-cell text-green-400',
         activeColor: 'text-green-400',
       },
       {
         key: 'drawn',
         label: 'E',
-        className: 'text-center hidden sm:table-cell text-zinc-400',
+        className: 'text-right hidden sm:table-cell text-zinc-400',
         getValue: (row) => row.drawn || 0,
         activeColor: 'text-zinc-400',
       },
       {
         key: 'lost',
         label: 'D',
-        className: 'text-center hidden sm:table-cell text-red-400',
+        className: 'text-right hidden sm:table-cell text-red-400',
         activeColor: 'text-red-400',
       },
       {
         key: 'scored',
         label: 'GF',
-        className: 'text-center hidden md:table-cell text-zinc-400',
+        className: 'text-right hidden md:table-cell text-zinc-400',
         activeColor: 'text-zinc-400',
       },
       {
         key: 'against',
         label: 'GC',
-        className: 'text-center hidden md:table-cell text-zinc-500',
+        className: 'text-right hidden md:table-cell text-zinc-500',
         activeColor: 'text-zinc-500',
       },
       {
@@ -114,7 +114,7 @@ export default function StandingsTable({ standings }) {
   }
 
   return (
-    <ElegantCard className="w-full">
+    <ElegantCard className="w-full" title="Clasificación" icon={Trophy}>
       <div className="overflow-x-auto -mx-6">
         <table className="w-full text-sm">
           <thead>
@@ -229,7 +229,7 @@ export default function StandingsTable({ standings }) {
                         </div>
                         <span
                           className={`font-medium transition-colors truncate max-w-[150px] sm:max-w-none ${
-                            getColorForUser(row.user_id, row.user_name).text
+                            getColorForUser(row.user_id, row.user_name, row.user_color).text
                           } group-hover/user:opacity-80`}
                         >
                           {row.user_name}
@@ -243,20 +243,20 @@ export default function StandingsTable({ standings }) {
                   </td>
 
                   <td className="px-4 py-3 text-right text-white font-bold">{played}</td>
-                  <td className="px-4 py-3 text-center hidden sm:table-cell text-green-400/90 font-medium">
+                  <td className="px-4 py-3 text-right hidden sm:table-cell text-green-400/90 font-medium">
                     {row.won}
                   </td>
-                  <td className="px-4 py-3 text-center hidden sm:table-cell text-zinc-400/90 font-medium">
+                  <td className="px-4 py-3 text-right hidden sm:table-cell text-zinc-400/90 font-medium">
                     {row.drawn || 0}
                   </td>
-                  <td className="px-4 py-3 text-center hidden sm:table-cell text-red-400/90 font-medium">
+                  <td className="px-4 py-3 text-right hidden sm:table-cell text-red-400/90 font-medium">
                     {row.lost}
                   </td>
 
-                  <td className="px-4 py-3 text-center text-zinc-400 hidden md:table-cell">
+                  <td className="px-4 py-3 text-right text-zinc-400 hidden md:table-cell">
                     {row.scored}
                   </td>
-                  <td className="px-4 py-3 text-center text-zinc-500 hidden md:table-cell">
+                  <td className="px-4 py-3 text-right text-zinc-500 hidden md:table-cell">
                     {row.against}
                   </td>
 
