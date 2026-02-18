@@ -45,23 +45,21 @@ export default function TournamentRow({ tournament }) {
               {tournament.name}
             </h3>
             <div className="flex items-center gap-2 text-xs shrink-0 overflow-hidden text-ellipsis whitespace-nowrap">
-              {/* Type Badge */}
+              {/* Type Badge - Minimal */}
               <span
-                className={`px-2 py-0.5 rounded-md border text-[10px] uppercase font-bold tracking-wide ${
-                  tournament.type === 'league'
-                    ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                    : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                className={`text-[10px] uppercase font-bold tracking-wider ${
+                  tournament.type === 'league' ? 'text-blue-400' : 'text-purple-400'
                 }`}
               >
                 {tournament.type === 'league' ? 'Liga' : 'Eliminatoria'}
               </span>
 
-              {/* Status Badge */}
+              <span className="text-zinc-600">•</span>
+
+              {/* Status Badge - Minimal */}
               <span
-                className={`px-2 py-0.5 rounded-md border text-[10px] uppercase font-bold tracking-wide truncate ${
-                  isActive
-                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                className={`text-[10px] uppercase font-bold tracking-wider truncate ${
+                  isActive ? 'text-amber-500' : 'text-zinc-500'
                 }`}
               >
                 {statusLabel}
@@ -73,12 +71,18 @@ export default function TournamentRow({ tournament }) {
         {/* Right Side: Winner or Action */}
         <div className="flex items-center gap-4 shrink-0">
           {!isActive && data.winner ? (
-            <div className="hidden sm:flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5 group-hover:border-amber-500/20 transition-colors">
-              <span className="text-xs text-amber-500/80 font-medium text-right hidden md:block">
-                Ganador
-              </span>
-              <div className="flex items-center gap-2">
-                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-amber-500/50 shadow-sm">
+            <div className="hidden sm:flex items-center gap-4">
+              <div className="flex flex-col items-end mr-1">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500/90 mb-0.5">
+                  Ganador
+                </span>
+                <span className="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 max-w-[150px] truncate leading-none">
+                  {data.winner.name}
+                </span>
+              </div>
+              <div className="relative group/winner">
+                <div className="absolute -inset-2 bg-amber-500/20 rounded-full blur-md opacity-0 group-hover/winner:opacity-100 transition-opacity duration-500" />
+                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-amber-500/50 shadow-lg shadow-amber-900/20 group-hover/winner:border-amber-400 transition-colors">
                   {data.winner.icon ? (
                     <img
                       src={
@@ -91,21 +95,21 @@ export default function TournamentRow({ tournament }) {
                     />
                   ) : (
                     <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-                      <Trophy size={14} className="text-zinc-400" />
+                      <Trophy size={16} className="text-amber-500" />
                     </div>
                   )}
                 </div>
-                <span className="text-sm font-bold text-white max-w-[100px] truncate">
-                  {data.winner.name}
-                </span>
+                <div className="absolute -top-1 -right-1 bg-amber-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm border border-amber-400">
+                  <Trophy size={8} fill="currentColor" />
+                </div>
               </div>
             </div>
           ) : (
             <div
-              className={`hidden sm:flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${
+              className={`hidden sm:flex items-center gap-2 text-xs font-medium transition-colors ${
                 isActive
-                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                  : 'bg-white/5 text-zinc-400 border-white/5'
+                  ? 'text-amber-400/80 group-hover:text-amber-400'
+                  : 'text-zinc-500 group-hover:text-zinc-300'
               }`}
             >
               <Users size={14} />
