@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Rounds Service
  * Handles business logic for rounds, lineups, and round navigation.

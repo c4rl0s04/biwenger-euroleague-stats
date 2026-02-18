@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Compare Service
  * Business logic layer for comparison-related operations

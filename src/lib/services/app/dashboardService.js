@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Dashboard Service
  * Business logic layer for dashboard-related operations

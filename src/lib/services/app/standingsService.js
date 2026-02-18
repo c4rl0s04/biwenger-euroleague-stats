@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Standings Service
  * Business logic layer for standings-related operations
@@ -46,10 +48,13 @@ import {
 
 /**
  * Get full extended standings with detailed breakdown
+ * @param {Object} options - Configuration options
+ * @param {string} [options.sortBy] - Sort column
+ * @param {string} [options.direction] - Sort direction
  * @returns {Promise<UserStanding[]>}
  */
-export async function getFullStandings() {
-  return await getExtendedStandings();
+export async function getFullStandings(options = {}) {
+  return await getExtendedStandings(options);
 }
 
 /**

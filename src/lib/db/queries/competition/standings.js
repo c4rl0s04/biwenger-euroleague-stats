@@ -13,9 +13,31 @@ import { db } from '../../client.js';
 
 /**
  * Get extended standings with additional statistics
+ * @param {Object} options - Sorting options
+ * @param {string} [options.sortBy='total_points'] - Column to sort by
+ * @param {string} [options.direction='desc'] - Sort direction (asc/desc)
  * @returns {Promise<UserStanding[]>} Full standings with wins, averages, and team values
  */
-export async function getExtendedStandings() {
+export async function getExtendedStandings(options = {}) {
+  const { sortBy = 'total_points', direction = 'desc' } = options;
+
+  // Validate sort column to prevent SQL injection
+  const validSortColumns = [
+    'position',
+    'total_points',
+    'avg_points',
+    'round_wins',
+    'team_value',
+    'price_trend',
+    'rounds_played',
+    'best_round',
+    'worst_round',
+    'name',
+  ];
+
+  const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'total_points';
+  const sortDirection = direction.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
   const query = `
     WITH UserTotals AS (
       SELECT 
@@ -70,7 +92,7 @@ export async function getExtendedStandings() {
       WHERE owner_id IS NOT NULL
       GROUP BY owner_id
     ) sq ON u.id = sq.owner_id
-    ORDER BY position ASC
+    ORDER BY ${sortColumn} ${sortDirection} NULLS LAST
   `;
   return (await db.query(query)).rows.map((row) => ({
     ...row,

@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { getAllTournaments } from './tournamentService';
 import { getTournamentFixtures, getTournamentStandings } from '@/lib/db';
 

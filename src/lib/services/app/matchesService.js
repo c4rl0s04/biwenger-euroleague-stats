@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Matches Service
  * Business logic for match display and grouping

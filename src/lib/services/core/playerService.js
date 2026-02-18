@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Player Service
  * Business logic layer for player-related operations

@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Predictions Service
  * Business logic layer for predictions-related operations

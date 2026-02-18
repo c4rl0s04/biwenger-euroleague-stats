@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Market Service
  * Business logic layer for market-related operations

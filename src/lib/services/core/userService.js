@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Core Service for User Operations
  * Handles business logic related to users/participants

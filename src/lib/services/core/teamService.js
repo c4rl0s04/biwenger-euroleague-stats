@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Team Service
  * Business logic layer for team-related operations

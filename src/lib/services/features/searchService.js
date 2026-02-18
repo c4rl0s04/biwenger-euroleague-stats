@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Feature Service for Search Operations
  */

@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Schedule Service
  * Business logic for the User Schedule page.

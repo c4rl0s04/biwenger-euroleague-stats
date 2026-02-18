@@ -26,11 +26,13 @@ export default function FullStandingsCard() {
     const aVal = a[sortConfig.key];
     const bVal = b[sortConfig.key];
 
-    if (sortConfig.direction === 'asc') {
-      return aVal > bVal ? 1 : -1;
-    } else {
-      return aVal < bVal ? 1 : -1;
+    if (aVal < bVal) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
     }
+    if (aVal > bVal) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
   });
 
   const getSortIndicator = (key) => {
@@ -55,7 +57,7 @@ export default function FullStandingsCard() {
     return new Intl.NumberFormat('es-ES').format(price);
   };
 
-  const leader = standings[0];
+  const leader = sortedStandings[0];
 
   return (
     <Card
