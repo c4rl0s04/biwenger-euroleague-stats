@@ -121,13 +121,16 @@ function MatchCard({ match, isFinal }) {
       />
 
       {/* Status tag */}
-      {!isFinished && (
-        <div className="absolute bottom-1 right-2">
-          <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-600">
-            Pendiente
-          </span>
-        </div>
-      )}
+      {!isFinished &&
+        (match.home_user_id || match.away_user_id) &&
+        !(match.home_user_id && !match.away_user_id && match.home_score !== null) &&
+        !(!match.home_user_id && match.away_user_id && match.away_score !== null) && (
+          <div className="absolute bottom-1 right-2">
+            <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-600">
+              Pendiente
+            </span>
+          </div>
+        )}
     </div>
   );
 }
