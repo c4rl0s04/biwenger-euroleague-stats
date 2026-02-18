@@ -58,10 +58,27 @@ export default function AllPlayAllCard() {
 
                       {/* Increased Avatar size */}
                       <div
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs text-white flex-shrink-0 transition-all"
-                        style={{ backgroundColor: colors.stroke }}
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs text-white flex-shrink-0 transition-all overflow-hidden border-2"
+                        style={{
+                          backgroundColor: user.icon ? 'transparent' : colors.stroke,
+                          borderColor: colors.fill,
+                        }}
                       >
-                        {user.name.substring(0, 2).toUpperCase()}
+                        {user.icon ? (
+                          <img
+                            src={user.icon}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = user.name
+                                .substring(0, 2)
+                                .toUpperCase();
+                            }}
+                          />
+                        ) : (
+                          user.name.substring(0, 2).toUpperCase()
+                        )}
                       </div>
 
                       <Link

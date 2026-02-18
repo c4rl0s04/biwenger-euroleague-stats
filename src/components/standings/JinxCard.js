@@ -43,10 +43,27 @@ export default function JinxCard() {
                         <span className="text-sm font-bold w-4 text-slate-500">{index + 1}</span>
 
                         <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[10px] text-white"
-                          style={{ backgroundColor: colors.stroke }}
+                          className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[10px] text-white overflow-hidden border-2"
+                          style={{
+                            backgroundColor: user.icon ? 'transparent' : colors.stroke,
+                            borderColor: colors.fill,
+                          }}
                         >
-                          {user.name.substring(0, 2).toUpperCase()}
+                          {user.icon ? (
+                            <img
+                              src={user.icon}
+                              alt={user.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = user.name
+                                  .substring(0, 2)
+                                  .toUpperCase();
+                              }}
+                            />
+                          ) : (
+                            user.name.substring(0, 2).toUpperCase()
+                          )}
                         </div>
 
                         <Link

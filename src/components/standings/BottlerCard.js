@@ -45,11 +45,25 @@ export default function BottlerCard() {
                           <div
                             className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-[10px] border-2"
                             style={{
-                              backgroundColor: colors.stroke,
+                              backgroundColor: user.icon ? 'transparent' : colors.stroke,
                               borderColor: colors.fill,
                             }}
                           >
-                            {user.name.substring(0, 2).toUpperCase()}
+                            {user.icon ? (
+                              <img
+                                src={user.icon}
+                                alt={user.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML = user.name
+                                    .substring(0, 2)
+                                    .toUpperCase();
+                                }}
+                              />
+                            ) : (
+                              user.name.substring(0, 2).toUpperCase()
+                            )}
                           </div>
                           {index === 0 && (
                             <div className="absolute -top-1.5 -right-1.5 bg-pink-500 text-white p-0.5 rounded-full shadow-lg">
