@@ -44,16 +44,25 @@ export default function TournamentRow({ tournament }) {
             <h3 className="text-lg font-black font-display tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all truncate shrink-0 max-w-[50%]">
               {tournament.name}
             </h3>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0 overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="flex items-center gap-2 text-xs shrink-0 overflow-hidden text-ellipsis whitespace-nowrap">
+              {/* Type Badge */}
               <span
-                className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-amber-500' : 'bg-slate-500'}`}
-              />
-              <span className="truncate">
+                className={`px-2 py-0.5 rounded-md border text-[10px] uppercase font-bold tracking-wide ${
+                  tournament.type === 'league'
+                    ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                    : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                }`}
+              >
                 {tournament.type === 'league' ? 'Liga' : 'Eliminatoria'}
               </span>
-              <span className="text-zinc-600">•</span>
+
+              {/* Status Badge */}
               <span
-                className={`truncate ${isActive ? 'text-amber-500/80 font-medium' : 'text-zinc-500'}`}
+                className={`px-2 py-0.5 rounded-md border text-[10px] uppercase font-bold tracking-wide truncate ${
+                  isActive
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                    : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                }`}
               >
                 {statusLabel}
               </span>
