@@ -118,7 +118,7 @@
   --glass-surface: rgba(255, 255, 255, 0.8);
 
   /* Section depth backgrounds for light */
-  --section-raised: 0 0% 100%;
+  --section-raised: 220 14% 98%;
   --section-sunken: 220 14% 96%;
 }
 

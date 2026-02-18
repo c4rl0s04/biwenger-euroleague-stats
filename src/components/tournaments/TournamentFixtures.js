@@ -79,7 +79,7 @@ export default function TournamentFixtures({ fixtures }) {
         <button
           onClick={handlePrevRound}
           disabled={rounds.indexOf(selectedRound) === 0}
-          className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white"
+          className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
         >
           <ChevronLeft size={20} />
         </button>
@@ -96,7 +96,7 @@ export default function TournamentFixtures({ fixtures }) {
         <button
           onClick={handleNextRound}
           disabled={rounds.indexOf(selectedRound) === rounds.length - 1}
-          className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white"
+          className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
         >
           <ChevronRight size={20} />
         </button>
@@ -141,7 +141,9 @@ export default function TournamentFixtures({ fixtures }) {
                     {/* Home Team */}
                     <Link
                       href={`/user/${fixture.home_user_id}`}
-                      className={`flex-1 flex flex-col items-center sm:items-end gap-2 text-center sm:text-right group/home transition-all hover:opacity-80 ${isFinished && !homeWon && !isDraw ? 'opacity-50 grayscale' : ''}`}
+                      className={`flex-1 flex flex-col items-center sm:items-end gap-2 text-center sm:text-right group/home transition-all hover:opacity-80 ${
+                        isFinished && !homeWon && !isDraw ? 'opacity-50' : ''
+                      }`}
                     >
                       <div
                         className={`sm:hidden text-sm truncate w-full px-2 ${isFinished && homeWon ? 'font-black text-white' : 'font-medium text-zinc-300'}`}
@@ -150,7 +152,9 @@ export default function TournamentFixtures({ fixtures }) {
                       </div>
                       <div className="flex items-center gap-3">
                         <span
-                          className={`hidden sm:block text-sm transition-colors ${isFinished && homeWon ? 'font-black text-white' : 'font-medium'} ${!isFinished || homeWon || isDraw ? getColorForUser(fixture.home_user_id, fixture.home_user_name, fixture.home_user_color).text : 'text-zinc-500'}`}
+                          className={`hidden sm:block text-sm transition-colors ${
+                            isFinished && homeWon ? 'font-black' : 'font-medium'
+                          } ${getColorForUser(fixture.home_user_id, fixture.home_user_name, fixture.home_user_color).text}`}
                         >
                           {fixture.home_user_name}
                         </span>
@@ -196,7 +200,9 @@ export default function TournamentFixtures({ fixtures }) {
                     {/* Away Team */}
                     <Link
                       href={`/user/${fixture.away_user_id}`}
-                      className={`flex-1 flex flex-col items-center sm:items-start gap-2 text-center sm:text-left group/away transition-all hover:opacity-80 ${isFinished && !awayWon && !isDraw ? 'opacity-50 grayscale' : ''}`}
+                      className={`flex-1 flex flex-col items-center sm:items-start gap-2 text-center sm:text-left group/away transition-all hover:opacity-80 ${
+                        isFinished && !awayWon && !isDraw ? 'opacity-50' : ''
+                      }`}
                     >
                       <div
                         className={`sm:hidden text-sm truncate w-full px-2 ${isFinished && awayWon ? 'font-black text-white' : 'font-medium text-zinc-300'}`}
@@ -205,7 +211,9 @@ export default function TournamentFixtures({ fixtures }) {
                       </div>
                       <div className="flex items-center gap-3 flex-row-reverse sm:flex-row">
                         <span
-                          className={`hidden sm:block text-sm transition-colors ${isFinished && awayWon ? 'font-black text-white' : 'font-medium'} ${!isFinished || awayWon || isDraw ? getColorForUser(fixture.away_user_id, fixture.away_user_name, fixture.away_user_color).text : 'text-zinc-500'}`}
+                          className={`hidden sm:block text-sm transition-colors ${
+                            isFinished && awayWon ? 'font-black' : 'font-medium'
+                          } ${getColorForUser(fixture.away_user_id, fixture.away_user_name, fixture.away_user_color).text}`}
                         >
                           {fixture.away_user_name}
                         </span>

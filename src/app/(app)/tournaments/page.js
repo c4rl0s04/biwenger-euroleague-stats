@@ -27,7 +27,13 @@ export default async function TournamentsPage() {
       />
 
       {/* Active Tournaments */}
-      <Section title="Torneos Activos" id="active-tournaments" delay={0} background="section-base">
+      <Section
+        title="Torneos Activos"
+        id="active-tournaments"
+        delay={0}
+        background="section-base"
+        className="!pt-2"
+      >
         <ActiveTournamentsSection tournaments={active} />
       </Section>
 
@@ -55,18 +61,6 @@ export default async function TournamentsPage() {
         <Section title="Récord Global" id="global-stats" delay={300} background="section-raised">
           <RecordsSection records={records} />
           <StatsTable data={globalStats} title="Histórico Completo" type="global" />
-        </Section>
-      )}
-
-      {/* League Stats */}
-      {leagueStats.length > 0 && (
-        <Section
-          title="Clasificación Ligas"
-          id="league-stats"
-          delay={400}
-          background="section-base"
-        >
-          <StatsTable data={leagueStats} title="Torneos de Liga" type="league" />
         </Section>
       )}
     </div>

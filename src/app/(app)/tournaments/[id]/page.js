@@ -22,7 +22,7 @@ export default async function TournamentDetailsPage({ params }) {
   const data = tournament.data || {};
 
   return (
-    <div className="space-y-6">
+    <div>
       <PageHeader
         title={tournament.name}
         description={
@@ -30,25 +30,8 @@ export default async function TournamentDetailsPage({ params }) {
             ? 'Liga - Fase de grupos y clasificación'
             : 'Eliminatoria - Cuadro de enfrentamientos'
         }
-        backHref="/tournaments"
-      >
-        <div className="flex items-center gap-3 mt-4">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium border ${
-              isActive
-                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
-            }`}
-          >
-            {isActive ? 'En Curso' : 'Finalizado'}
-          </span>
-          {data.currentPhase && (
-            <span className="px-3 py-1 rounded-full text-xs font-medium border border-border/50 bg-secondary/50 text-muted-foreground">
-              {data.currentPhase}
-            </span>
-          )}
-        </div>
-      </PageHeader>
+        className="!pb-0"
+      />
 
       {/* Winner Banner (if finished) */}
       {!isActive && data.winner && (
@@ -57,7 +40,11 @@ export default async function TournamentDetailsPage({ params }) {
             <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
               {data.winner.icon ? (
                 <img
-                  src={`https://biwenger.as.com/api/v2${data.winner.icon}`}
+                  src={
+                    data.winner.icon.startsWith('http')
+                      ? data.winner.icon
+                      : `https://cdn.biwenger.com/${data.winner.icon}`
+                  }
                   alt={data.winner.name}
                   className="w-full h-full object-cover"
                 />
@@ -80,18 +67,18 @@ export default async function TournamentDetailsPage({ params }) {
 
       {/* Content based on type */}
       {tournament.type === 'league' ? (
-        <Section title="Clasificación" delay={100}>
+        <Section title="Clasificación" delay={100} background="section-base">
           <StandingsTable standings={standings} />
         </Section>
       ) : (
-        <Section title="Cuadro" delay={100}>
+        <Section title="Cuadro" delay={100} background="section-base">
           <div className="p-4 rounded-xl border border-border/50 bg-card/50">
             <p>Cuadro de eliminatorias aquí</p>
           </div>
         </Section>
       )}
 
-      <Section title="Resultados" delay={200}>
+      <Section title="Resultados" delay={200} background="section-raised">
         <TournamentFixtures fixtures={fixtures} />
       </Section>
     </div>
