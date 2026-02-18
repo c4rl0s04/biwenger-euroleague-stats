@@ -6,8 +6,8 @@ import { User, Trophy } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 
 // ─── Layout constants ────────────────────────────────────────────────────────
-const CARD_HEIGHT = 76; // px – height of a match card
-const CARD_WIDTH = 192; // px – width of each column / card
+const CARD_HEIGHT = 82; // px – height of a match card
+const CARD_WIDTH = 200; // px – width of each column / card
 const COL_GAP = 52; // px – horizontal gap between columns (connector zone)
 const MIN_SLOT_H = 104; // px – minimum vertical slot per match
 
@@ -51,8 +51,10 @@ function PlayerRow({ userId, icon, name, score, won, isFinished, userColor }) {
           className={[
             'text-[11px] truncate transition-colors duration-150',
             won
-              ? `font-semibold text-white ${color.text}`
-              : `font-medium text-zinc-500 ${color.text}`,
+              ? `font-semibold ${color.text}`
+              : isFinished
+                ? 'font-medium text-zinc-500'
+                : `font-medium ${color.text}`,
           ].join(' ')}
         >
           {name ?? 'TBD'}
