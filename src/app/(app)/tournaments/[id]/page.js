@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { PageHeader } from '@/components/ui';
 import { Section } from '@/components/layout';
 import { getTournamentDetails, getStandings, getFixtures } from '@/lib/services/tournamentService';
-import { StandingsTable, TournamentFixtures } from '@/components/tournaments';
+import { StandingsTable, TournamentFixtures, TournamentBracket } from '@/components/tournaments';
 import { Trophy } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -72,9 +72,7 @@ export default async function TournamentDetailsPage({ params }) {
         </Section>
       ) : (
         <Section title="Cuadro" delay={100} background="section-base">
-          <div className="p-4 rounded-xl border border-border/50 bg-card/50">
-            <p>Cuadro de eliminatorias aquí</p>
-          </div>
+          <TournamentBracket fixtures={fixtures} />
         </Section>
       )}
 
