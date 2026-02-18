@@ -4,7 +4,7 @@
  */
 
 import { db } from '../../client.js';
-import { getSimpleStandings as getStandings } from '../competition/standings.js';
+import { getSimpleStandings as getStandings } from '../competition/standings';
 
 // Import shared type definitions for IDE support
 /** @typedef {import('../../types.js').User} User */

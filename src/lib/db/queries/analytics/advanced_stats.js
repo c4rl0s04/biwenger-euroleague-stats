@@ -288,47 +288,6 @@ export async function getReliabilityStats() {
 }
 
 /**
- * Get Volatility Stats (Standard Deviation)
- */
-export async function getVolatilityStats() {
-  try {
-    // SQLite doesn't have STDDEV, calculate manually or with complex query
-    // Using avg diff squared approach
-    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
-    const result = [];
-
-    for (const user of users) {
-      const points = (
-        await db.query(
-          'SELECT points FROM user_rounds WHERE user_id = $1 AND participated = TRUE',
-          [user.id]
-        )
-      ).rows.map((r) => parseFloat(r.points) || 0);
-
-      if (points.length < 2) continue;
-
-      const mean = points.reduce((a, b) => a + b, 0) / points.length;
-      const variance = points.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / points.length;
-      const stdDev = Math.sqrt(variance);
-
-      result.push({
-        user_id: user.id,
-        name: user.name,
-        icon: user.icon,
-        color_index: user.color_index,
-        std_dev: parseFloat(stdDev.toFixed(1)),
-        avg_points: parseFloat(mean.toFixed(1)),
-      });
-    }
-
-    return result.sort((a, b) => b.std_dev - a.std_dev);
-  } catch (error) {
-    console.error('Error in getVolatilityStats:', error);
-    return [];
-  }
-}
-
-/**
  * Get Point Distribution (Histogram)
  */
 export async function getPointDistributionStats() {

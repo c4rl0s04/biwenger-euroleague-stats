@@ -9,11 +9,16 @@ import 'server-only';
 
 import {
   getExtendedStandings,
-  getLeagueTotals,
   getRoundWinners,
+  getLeagueTotals,
   getPointsProgression,
   getValueRanking,
   getWinCounts,
+  // getSimpleStandings, // Not used in the provided code, keeping original imports
+  // getLeaderComparison, // Not used in the provided code, keeping original imports
+  // getLeagueAveragePoints, // Not used in the provided code, keeping original imports
+} from '../../db/queries/competition/standings.ts';
+import {
   getStreakStats,
   getVolatilityStats,
   getEfficiencyStats,
