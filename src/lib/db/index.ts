@@ -1,12 +1,8 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
-import pg from 'pg';
 import * as schema from './schema';
+import { db as clientDb } from './client'; // Shared pool from legacy client
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
-});
-
-export const db = drizzle(pool, { schema });
+export const db = drizzle(clientDb, { schema });
 
 // --- Exports from legacy index.js (Restored for backward compatibility) ---
 
@@ -17,7 +13,7 @@ export * from './queries/core/teams.js';   // Assuming teams.js exists
 
 export * from './queries/competition/rounds.js';
 export * from './queries/competition/matches';
-export * from './queries/competition/schedule.js';
+export * from './queries/competition/schedule';
 export * from './queries/competition/standings'; // This will resolve to standings.ts (the managed one)
 
 export * from './queries/analytics/performance.js';
