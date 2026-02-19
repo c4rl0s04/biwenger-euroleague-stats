@@ -18,4 +18,4 @@ export const NEXT_ROUND_CTE = `
 // 2. Future Match Condition
 // Robust comparison using datetime() to handle ISO8601 strings vs 'now'
 // Usage: WHERE ${FUTURE_MATCH_CONDITION('m.date')}
-export const FUTURE_MATCH_CONDITION = (column = 'date') => `${column} > NOW()`;
+export const FUTURE_MATCH_CONDITION = (column: string = 'date'): string => `${column} > NOW()`;

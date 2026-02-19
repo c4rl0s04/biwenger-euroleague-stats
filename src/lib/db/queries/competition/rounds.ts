@@ -1,6 +1,6 @@
 import { db } from '../../client';
 import { getTeamPositions } from '../../../logic/standings.js';
-import { NEXT_ROUND_CTE } from '../../sql_utils.js';
+import { NEXT_ROUND_CTE } from '../../sql_utils';
 
 export interface PorrasRound {
   jornada: number;

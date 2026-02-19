@@ -1,6 +1,6 @@
 import { db } from '../../client';
 import { CONFIG } from '../../../config.js';
-import { FUTURE_MATCH_CONDITION } from '../../sql_utils.js';
+import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
 
 
 export interface CorePlayer {
