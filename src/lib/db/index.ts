@@ -7,7 +7,7 @@ export const db = drizzle(clientDb as any, { schema });
 // --- Exports from legacy index.js (Restored for backward compatibility) ---
 
 export * from './queries/tournaments.js';
-export * from './queries/core/users.js';
+export * from './queries/core/users';
 
 export * from './queries/core/players';
  // Assuming players.js exists, step 605 said 'players' (no ext). I'll check dir.

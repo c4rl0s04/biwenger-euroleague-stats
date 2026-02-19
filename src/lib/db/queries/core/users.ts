@@ -1,29 +1,114 @@
-/**
- * @fileoverview User query functions
- * Provides functions for fetching user data, squads, and personalized stats
- */
-
 import { db } from '../../client';
 import { getSimpleStandings as getStandings } from '../competition/standings';
 
-// Import shared type definitions for IDE support
-/** @typedef {import('../../types.js').User} User */
-/** @typedef {import('../../types.js').Player} Player */
-/** @typedef {import('../../types.js').UserSeasonStats} UserSeasonStats */
+export interface User {
+  id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+}
+
+export interface SquadStats {
+  user_id: number;
+  squad_size: number;
+  total_value: number;
+  total_points: number;
+}
+
+export interface UserSquadPlayer {
+  id: number;
+  name: string;
+  position: string;
+  team: string;
+  price: number;
+  points: number;
+  average: number;
+  status?: string;
+}
+
+export interface UserSeasonStats {
+  name: string;
+  color_index: number;
+  total_points: number;
+  best_round: number;
+  worst_round: number;
+  average_points: number;
+  rounds_played: number;
+  best_position: number;
+  worst_position: number;
+  average_position: number;
+  victories: number;
+  podiums: number;
+  purchases: number;
+  sales: number;
+  position: number;
+  team_value: number;
+  price_trend: number;
+}
+
+export interface UserSquadDetails {
+  total_value: number;
+  price_trend: number;
+  total_points: number;
+  player_count: number;
+  top_rising: any[]; // refined below if needed
+  top_falling: any[];
+}
+
+export interface CaptainStats {
+  total_rounds: number;
+  extra_points: number;
+  avg_points: number;
+  most_used: {
+    player_id: number;
+    name: string;
+    times_captain: number;
+    avg_as_captain: number;
+    total_as_captain: number;
+  }[];
+  best_round: { name: string; points: number };
+  worst_round: { name: string; points: number };
+}
+
+export interface HomeAwayStats {
+  total_home: number;
+  total_away: number;
+  avg_home: number;
+  avg_away: number;
+  difference_pct: number;
+}
+
+export interface CaptainRecommendation {
+  player_id: number;
+  name: string;
+  position: string;
+  team_id: number;
+  team: string;
+  avg_recent_points: number;
+  recent_games: number;
+  recent_scores: string;
+  form_label: string;
+}
+
+export interface PersonalizedAlert {
+  type: string;
+  icon: string;
+  message: string;
+  severity: 'success' | 'warning' | 'info' | 'error';
+}
 
 /**
  * Get all users with their basic info
- * @returns {Promise<{id: number, name: string, icon: string}[]>} List of users
  */
-export async function getAllUsers() {
-  return (await db.query('SELECT id, name, icon, color_index FROM users ORDER BY name ASC')).rows;
+export async function getAllUsers(): Promise<User[]> {
+  const result = await db.query('SELECT id, name, icon, color_index FROM users ORDER BY name ASC');
+  return result.rows as User[];
 }
 
 /**
  * Get squad statistics for all users
- * @returns {Promise<{user_id: number, squad_size: number, total_value: number, total_points: number}[]>} Squad stats per user
  */
-export async function getSquadStats() {
+export async function getSquadStats(): Promise<SquadStats[]> {
   const query = `
     SELECT 
       p.owner_id as user_id,
@@ -42,7 +127,7 @@ export async function getSquadStats() {
     ORDER BY total_points DESC
   `;
 
-  return (await db.query(query)).rows.map((row) => ({
+  return (await db.query(query)).rows.map((row: any) => ({
     ...row,
     squad_size: parseInt(row.squad_size) || 0,
     total_value: parseInt(row.total_value) || 0,
@@ -52,10 +137,8 @@ export async function getSquadStats() {
 
 /**
  * Get user squad details (Current Squad)
- * @param {number} userId - User ID
- * @returns {Promise<Array>} Player details
  */
-export async function getUserSquad(userId) {
+export async function getUserSquad(userId: number | string): Promise<UserSquadPlayer[]> {
   const query = `
     SELECT 
       p.id,
@@ -72,7 +155,7 @@ export async function getUserSquad(userId) {
     ORDER BY p.puntos DESC
   `;
 
-  return (await db.query(query, [userId])).rows.map((row) => ({
+  return (await db.query(query, [userId])).rows.map((row: any) => ({
     ...row,
     average: parseFloat(row.average) || 0,
     points: parseInt(row.points) || 0,
@@ -82,10 +165,8 @@ export async function getUserSquad(userId) {
 
 /**
  * Get detailed season statistics for a specific user
- * @param {string} userId - User ID
- * @returns {Promise<Object>} User season statistics
  */
-export async function getUserSeasonStats(userId) {
+export async function getUserSeasonStats(userId: number | string): Promise<UserSeasonStats> {
   // First get user details for name
   const userRes = await db.query('SELECT name, color_index FROM users WHERE id = $1', [userId]);
   const user = userRes.rows[0];
@@ -149,7 +230,7 @@ export async function getUserSeasonStats(userId) {
 
   const standings = await getStandings();
   // Ensure ID type comparison safety
-  const userStanding = standings.find((u) => String(u.user_id) === String(userId));
+  const userStanding = standings.find((u: any) => String(u.user_id) === String(userId));
 
   return {
     name: user?.name || 'Desconocido',
@@ -170,21 +251,19 @@ export async function getUserSeasonStats(userId) {
     podiums: parseInt(positions?.podiums) || 0,
 
     // Transfers Parsing
-    purchases: parseInt(transfers?.purchases) || 0,
-    sales: parseInt(transfers?.sales) || 0,
+    purchases: Number(transfers?.purchases) || 0,
+    sales: Number(transfers?.sales) || 0,
 
-    position: userStanding?.position || 0,
-    team_value: userStanding?.team_value || 0,
-    price_trend: userStanding?.price_trend || 0,
+    position: Number((userStanding as any)?.position) || 0,
+    team_value: Number((userStanding as any)?.team_value) || 0,
+    price_trend: Number((userStanding as any)?.price_trend) || 0,
   };
 }
 
 /**
  * Get user's squad with price trends
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Squad details with trending players
  */
-export async function getUserSquadDetails(userId) {
+export async function getUserSquadDetails(userId: number | string): Promise<UserSquadDetails> {
   const squadQuery = `
     SELECT 
       p.id, p.name, p.position, t.name as team, p.price, p.price_increment, p.puntos as points
@@ -207,17 +286,17 @@ export async function getUserSquadDetails(userId) {
   const userPoints = userPointsRes.rows[0];
 
   // Convert to numbers explicitly to assume safety
-  const totalValue = squad.reduce((sum, p) => sum + (parseInt(p.price) || 0), 0);
-  const totalTrend = squad.reduce((sum, p) => sum + (parseInt(p.price_increment) || 0), 0);
+  const totalValue = squad.reduce((sum: number, p: any) => sum + (parseInt(p.price) || 0), 0);
+  const totalTrend = squad.reduce((sum: number, p: any) => sum + (parseInt(p.price_increment) || 0), 0);
 
   return {
     total_value: totalValue,
     price_trend: totalTrend,
     total_points: userPoints?.total_points || 0,
     player_count: squad.length,
-    top_rising: squad.filter((p) => (parseInt(p.price_increment) || 0) > 0).slice(0, 7),
+    top_rising: squad.filter((p: any) => (parseInt(p.price_increment) || 0) > 0).slice(0, 7),
     top_falling: squad
-      .filter((p) => (parseInt(p.price_increment) || 0) < 0)
+      .filter((p: any) => (parseInt(p.price_increment) || 0) < 0)
       .slice(-7)
       .reverse(),
   };
@@ -225,10 +304,8 @@ export async function getUserSquadDetails(userId) {
 
 /**
  * Get user's captain statistics
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Captain stats
  */
-export async function getUserCaptainStats(userId) {
+export async function getUserCaptainStats(userId: number | string): Promise<CaptainStats> {
   const overallQuery = `
     SELECT 
       COUNT(DISTINCT l.round_id) as total_rounds,
@@ -290,21 +367,21 @@ export async function getUserCaptainStats(userId) {
     total_rounds: overall ? parseInt(overall.total_rounds) : 0,
     extra_points: overall ? parseInt(overall.extra_points) : 0,
     avg_points: overall ? parseFloat(overall.avg_points) : 0,
-    most_used: mostUsed.map((m) => ({
+    most_used: mostUsed.map((m: any) => ({
       ...m,
       avg_as_captain: parseFloat(m.avg_as_captain) || 0,
+      times_captain: parseInt(m.times_captain) || 0,
+      total_as_captain: parseInt(m.total_as_captain) || 0
     })),
-    best_round: best ? { name: best.name, points: best.points } : { name: '', points: 0 },
-    worst_round: worst ? { name: worst.name, points: worst.points } : { name: '', points: 0 },
+    best_round: best ? { name: best.name, points: parseInt(best.points) || 0 } : { name: '', points: 0 },
+    worst_round: worst ? { name: worst.name, points: parseInt(worst.points) || 0 } : { name: '', points: 0 },
   };
 }
 
 /**
  * Get user's home/away performance
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Home/away stats
  */
-export async function getUserHomeAwayStats(userId) {
+export async function getUserHomeAwayStats(userId: number | string): Promise<HomeAwayStats> {
   const query = `
     SELECT 
       SUM(points_home) as total_home,
@@ -336,11 +413,8 @@ export async function getUserHomeAwayStats(userId) {
 
 /**
  * Get captain recommendations based on form and upcoming matches
- * @param {string} userId - User ID to get recommendations for
- * @param {number} limit - Number of recommendations
- * @returns {Promise<Array>} List of recommended captain picks
  */
-export async function getCaptainRecommendations(userId, limit = 3) {
+export async function getCaptainRecommendations(userId: number | string, limit: number = 3): Promise<CaptainRecommendation[]> {
   const query = `
     WITH FinishedRounds AS (
       SELECT m.round_id
@@ -402,17 +476,18 @@ export async function getCaptainRecommendations(userId, limit = 3) {
     LIMIT $2
   `;
 
-  return (await db.query(query, [userId, limit])).rows;
+  return (await db.query(query, [userId, limit])).rows.map((row: any) => ({
+    ...row,
+    avg_recent_points: parseFloat(row.avg_recent_points) || 0,
+    recent_games: parseInt(row.recent_games) || 0
+  }));
 }
 
 /**
  * Get personalized alerts for a user
- * @param {string} userId - User ID
- * @param {number} limit - Number of alerts
- * @returns {Promise<Array>} Personalized alerts
  */
-export async function getPersonalizedAlerts(userId, limit = 5) {
-  const alerts = [];
+export async function getPersonalizedAlerts(userId: number | string, limit: number = 5): Promise<PersonalizedAlert[]> {
+  const alerts: PersonalizedAlert[] = [];
 
   const priceGainsQuery = `
     SELECT 
@@ -424,7 +499,7 @@ export async function getPersonalizedAlerts(userId, limit = 5) {
     LIMIT 2
   `;
   const priceGains = (await db.query(priceGainsQuery, [userId])).rows;
-  priceGains.forEach((player) => {
+  priceGains.forEach((player: any) => {
     alerts.push({
       type: 'price_gain',
       icon: '📈',
@@ -443,7 +518,7 @@ export async function getPersonalizedAlerts(userId, limit = 5) {
     LIMIT 2
   `;
   const priceLosses = (await db.query(priceLossesQuery, [userId])).rows;
-  priceLosses.forEach((player) => {
+  priceLosses.forEach((player: any) => {
     alerts.push({
       type: 'price_loss',
       icon: '📉',
