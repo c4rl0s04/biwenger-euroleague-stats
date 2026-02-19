@@ -1,6 +1,287 @@
 import { db } from '../../client';
 
 // ==========================================
+// INTERFACES
+// ==========================================
+
+export interface Transfer {
+  id: number;
+  fecha: string;
+  player_id: number;
+  precio: number;
+  vendedor: string;
+  comprador: string;
+}
+
+export interface RecentTransfer extends Transfer {
+  player_name: string;
+  position: string;
+  vendedor_id: number | null;
+  vendedor_color_index: number | null;
+  comprador_id: number | null;
+  comprador_color_index: number | null;
+}
+
+export interface MarketTrend {
+  date: string;
+  count: number;
+  avg_value: number;
+}
+
+export interface MarketOpportunity {
+  player_id: number;
+  name: string;
+  position: string;
+  team_id: number | null;
+  team: string | null;
+  price: number;
+  price_trend: number;
+  avg_recent_points: number;
+  recent_scores: string;
+  value_score: number;
+}
+
+export interface PriceChange {
+  player_id: number;
+  name: string;
+  position: string;
+  team: string | null;
+  price: number;
+  price_increment: number;
+  owner_id: number | null;
+}
+
+export interface MarketKPIs {
+  total_transfers: number;
+  avg_value: number;
+  max_value: number;
+  min_value: number;
+  active_buyers: number;
+  active_sellers: number;
+}
+
+export interface MarketOverviewKPIs {
+  totalVolume: number;
+  totalOps: number;
+  avgPrice: number;
+  avgBids: number;
+}
+
+export interface TopTransferredPlayer {
+  player_id: number;
+  name: string;
+  img: string;
+  transfer_count: number;
+  avg_price: number;
+}
+
+export interface EnrichedTransfer extends Transfer {
+  player_name: string;
+  player_img: string;
+  buyer_id: number;
+  buyer_name: string;
+  buyer_icon: string;
+  buyer_color: number;
+}
+
+export interface BigSpender {
+  name: string;
+  total_spent: number;
+  purchases_count: number;
+}
+
+export interface RecordBid {
+  transfer_id: number;
+  bid_count: number;
+  player_id: number;
+  precio: number;
+  comprador: string;
+  player_name: string;
+  player_img: string;
+}
+
+export interface MarketAnalysisDay {
+  date: string;
+  volume: number;
+  avg_price: number;
+  ops_count: number;
+  transfers: { player_name: string; price: number }[];
+}
+
+export interface PositionAnalysis {
+  mostSigned: { position: string; count: number } | null;
+  distribution: {
+    position: string;
+    count: number;
+    avg_price: number;
+    total_volume: number;
+  }[];
+}
+
+export interface PaginatedTransfers {
+  transfers: (Transfer & {
+    player_name: string;
+    player_position: string;
+    player_img: string;
+    bids_count: number;
+  })[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface ManagerMarketStats {
+  user_name: string;
+  purchases_count: number;
+  purchases_total: number;
+  sales_count: number;
+  sales_total: number;
+  balance: number;
+}
+
+export interface BestSeller {
+  name: string;
+  net_profit: number;
+  total_sales: number;
+  sales_count: number;
+}
+
+export interface BestRevaluation {
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  current_price: number;
+  purchase_price: number;
+  revaluation: number;
+  user_id: number;
+  user_name: string;
+  user_color_index: number;
+}
+
+export interface BestValuePlayer {
+  user_id: number;
+  user_name: string;
+  user_color_index: number;
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  transfer_id: number;
+  purchase_price: number;
+  total_points: number;
+  points_per_million: number;
+}
+
+export interface BestValueDetail {
+  round_name: string;
+  date: string;
+  points: number;
+  opponent: string;
+  team_id: number;
+}
+
+export interface TheThief {
+  name: string;
+  stolen_count: number;
+}
+
+export interface BiggestSteal {
+  transfer_id: number;
+  winning_price: number;
+  winner: string;
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  second_highest_bid: number;
+  second_bidder_name: string;
+  price_diff: number;
+}
+
+export interface TheVictim {
+  name: string;
+  failed_bids_count: number;
+}
+
+export interface SingleFlip {
+  user_id: number;
+  user_name: string;
+  user_color_index: number;
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  purchase_price: number;
+  sale_price: number;
+  profit: number;
+}
+
+export interface PercentageGain {
+  user_id: number;
+  user_name: string;
+  user_color_index: number;
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  current_price: number;
+  purchase_price: number;
+  percentage_gain: number;
+}
+
+export interface MostOwnersPlayer {
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  distinct_owners_count: number;
+}
+
+export interface MissedOpportunity {
+  user_id: number;
+  user_name: string;
+  user_color_index: number;
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  current_price: number;
+  sale_price: number;
+  missed_profit: number;
+}
+
+export interface TopTrader {
+  user_id: number;
+  user_name: string;
+  user_color_index: number;
+  trade_count: number;
+  total_profit: number;
+}
+
+export interface PlayerProfitability {
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  trade_count: number;
+  total_profit?: number;
+  total_loss?: number;
+}
+
+export interface QuickFlip extends SingleFlip {
+  hours_held: number;
+}
+
+export interface LongHold extends SingleFlip {
+  days_held: number;
+}
+
+export interface Devaluation {
+  user_id: number;
+  user_name: string;
+  user_color_index: number;
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  current_price: number;
+  purchase_price: number;
+  devaluation: number;
+}
+
+// ==========================================
 // LEGACY QUERIES (Preserved for compatibility)
 // ==========================================
 
@@ -8,9 +289,9 @@ import { db } from '../../client';
  * Get all transfers with pagination
  * @param {number} limit - Number of results
  * @param {number} offset - Offset for pagination
- * @returns {Promise<Array>} List of transfers
+ * @returns {Promise<Transfer[]>} List of transfers
  */
-export async function getAllTransfers(limit = 100, offset = 0) {
+export async function getAllTransfers(limit = 100, offset = 0): Promise<Transfer[]> {
   const query = `
     SELECT 
       id,
@@ -30,9 +311,9 @@ export async function getAllTransfers(limit = 100, offset = 0) {
 /**
  * Get recent market activity
  * @param {number} limit - Number of transfers
- * @returns {Promise<Array>} Recent transfers
+ * @returns {Promise<RecentTransfer[]>} Recent transfers
  */
-export async function getRecentTransfers(limit = 5) {
+export async function getRecentTransfers(limit = 5): Promise<RecentTransfer[]> {
   const query = `
     SELECT 
       f.*,
@@ -55,9 +336,9 @@ export async function getRecentTransfers(limit = 5) {
 /**
  * Get market trends (Volume & Avg Price per day)
  * LEGACY VERSION - Returns count, avg_value
- * @returns {Promise<Array>} Daily market stats
+ * @returns {Promise<MarketTrend[]>} Daily market stats
  */
-export async function getMarketTrends() {
+export async function getMarketTrends(): Promise<MarketTrend[]> {
   const query = `
     SELECT 
       TO_CHAR(fecha::timestamp, 'YYYY-MM-DD') as date,
@@ -68,7 +349,7 @@ export async function getMarketTrends() {
     ORDER BY date ASC
     LIMIT 30
   `;
-  return (await db.query(query)).rows.map((row) => ({
+  return (await db.query(query)).rows.map((row: any) => ({
     ...row,
     count: parseInt(row.count) || 0,
     avg_value: parseFloat(row.avg_value) || 0,
@@ -78,9 +359,9 @@ export async function getMarketTrends() {
 /**
  * Get market opportunities (undervalued players with good form)
  * @param {number} limit - Number of opportunities to return
- * @returns {Promise<Array>} List of recommended buys
+ * @returns {Promise<MarketOpportunity[]>} List of recommended buys
  */
-export async function getMarketOpportunities(limit = 3) {
+export async function getMarketOpportunities(limit = 3): Promise<MarketOpportunity[]> {
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id
@@ -126,7 +407,7 @@ export async function getMarketOpportunities(limit = 3) {
     LIMIT $1
   `;
 
-  return (await db.query(query, [limit])).rows.map((row) => ({
+  return (await db.query(query, [limit])).rows.map((row: any) => ({
     ...row,
     avg_recent_points: parseFloat(row.avg_recent_points) || 0,
     value_score: parseFloat(row.value_score) || 0,
@@ -137,9 +418,9 @@ export async function getMarketOpportunities(limit = 3) {
  * Get significant price changes in the last period
  * @param {number} hoursAgo - Hours to look back
  * @param {number} minChange - Minimum price change threshold
- * @returns {Promise<Array>} Players with significant price changes
+ * @returns {Promise<PriceChange[]>} Players with significant price changes
  */
-export async function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000) {
+export async function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000): Promise<PriceChange[]> {
   const query = `
     SELECT 
       p.id as player_id,
@@ -162,9 +443,9 @@ export async function getSignificantPriceChanges(hoursAgo = 24, minChange = 5000
 /**
  * Get Market KPIs
  * LEGACY VERSION - Returns distinct buyer/seller counts
- * @returns {Promise<Object>} Market statistics
+ * @returns {Promise<MarketKPIs>} Market statistics
  */
-export async function getMarketKPIs() {
+export async function getMarketKPIs(): Promise<MarketKPIs> {
   const query = `
     SELECT 
       COUNT(*) as total_transfers,
@@ -198,7 +479,7 @@ export async function getMarketKPIs() {
  * - Total Operations (count)
  * - Average Price
  */
-export async function getMarketOverviewKPIs() {
+export async function getMarketOverviewKPIs(): Promise<MarketOverviewKPIs> {
   const query = `
     WITH BidStats AS (
       SELECT COUNT(*) as losing_bids FROM transfer_bids
@@ -227,7 +508,7 @@ export async function getMarketOverviewKPIs() {
  * Get Top Transferred Player (Most frequent transfers)
  * "El más fichado"
  */
-export async function getTopTransferredPlayer() {
+export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]> {
   const query = `
     SELECT 
       f.player_id,
@@ -245,7 +526,7 @@ export async function getTopTransferredPlayer() {
   const result = await db.query(query);
   if (!result.rows.length) return [];
 
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     transfer_count: parseInt(row.transfer_count),
     avg_price: parseInt(row.avg_price),
@@ -256,7 +537,7 @@ export async function getTopTransferredPlayer() {
  * Get Record Transfer (Highest Price)
  * "Récord Histórico"
  */
-export async function getRecordTransfer() {
+export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
   const query = `
     SELECT 
       f.*,
@@ -274,7 +555,7 @@ export async function getRecordTransfer() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     precio: parseInt(row.precio),
   }));
@@ -284,7 +565,7 @@ export async function getRecordTransfer() {
  * Get Big Spender (User who spent most)
  * "El Jeque"
  */
-export async function getBigSpender() {
+export async function getBigSpender(): Promise<BigSpender[]> {
   const query = `
     SELECT 
       comprador as name,
@@ -298,7 +579,7 @@ export async function getBigSpender() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     total_spent: parseInt(row.total_spent),
     purchases_count: parseInt(row.purchases_count),
@@ -309,7 +590,7 @@ export async function getBigSpender() {
  * Get Record Bid (Transfer with most bids)
  * "Récord Pujas"
  */
-export async function getRecordBid() {
+export async function getRecordBid(): Promise<RecordBid[]> {
   const query = `
     SELECT 
       t.transfer_id,
@@ -329,11 +610,11 @@ export async function getRecordBid() {
   try {
     const result = await db.query(query);
     if (!result.rows.length) return [];
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       ...row,
       bid_count: parseInt(row.bid_count),
     }));
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Could not fetch record bid:', error.message);
     return [];
   }
@@ -344,7 +625,7 @@ export async function getRecordBid() {
  * Series: Volume, Avg Price
  * NEW VERSION used in Market Page Charts
  */
-export async function getMarketTrendsAnalysis(days = 30) {
+export async function getMarketTrendsAnalysis(days = 30): Promise<MarketAnalysisDay[]> {
   const query = `
     SELECT 
       TO_CHAR(to_timestamp(f.timestamp), 'YYYY-MM-DD') as date,
@@ -362,7 +643,7 @@ export async function getMarketTrendsAnalysis(days = 30) {
     ORDER BY date ASC
   `;
   const result = await db.query(query);
-  return result.rows.map((r) => ({
+  return result.rows.map((r: any) => ({
     date: r.date,
     volume: parseInt(r.volume),
     avg_price: parseInt(r.avg_price),
@@ -376,7 +657,7 @@ export async function getMarketTrendsAnalysis(days = 30) {
  * - Most signed position
  * - Price Stats by position
  */
-export async function getPositionAnalysis() {
+export async function getPositionAnalysis(): Promise<PositionAnalysis> {
   const query = `
     SELECT 
       p.position,
@@ -401,13 +682,20 @@ export async function getPositionAnalysis() {
       position: rows[0].position,
       count: parseInt(rows[0].count),
     },
-    distribution: rows.map((r) => ({
+    distribution: rows.map((r: any) => ({
       position: r.position,
       count: parseInt(r.count),
       avg_price: parseInt(r.avg_price),
       total_volume: parseInt(r.total_volume),
     })),
   };
+}
+
+interface LiveMarketTransfersParams {
+  page?: number;
+  limit?: number;
+  buyer?: string;
+  seller?: string;
 }
 
 /**
@@ -418,11 +706,11 @@ export async function getLiveMarketTransfers({
   limit = 20,
   buyer = 'all',
   seller = 'all',
-}) {
+}: LiveMarketTransfersParams): Promise<PaginatedTransfers> {
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE f.precio > 0';
-  const params = [];
+  const params: any[] = [];
   let paramIndex = 1;
 
   if (buyer && buyer !== 'all' && buyer !== 'Todos') {
@@ -472,7 +760,7 @@ export async function getLiveMarketTransfers({
   ]);
 
   return {
-    transfers: rowsResult.rows.map((r) => ({
+    transfers: rowsResult.rows.map((r: any) => ({
       ...r,
       precio: parseInt(r.precio),
       bids_count: parseInt(r.bids_count),
@@ -486,7 +774,7 @@ export async function getLiveMarketTransfers({
 /**
  * Get Manager Finances (Purchases/Sales Balance)
  */
-export async function getManagerMarketStats() {
+export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
   const query = `
     WITH purchases AS (
       SELECT comprador as user_name, COUNT(*) as count, SUM(precio) as total 
@@ -512,7 +800,7 @@ export async function getManagerMarketStats() {
   `;
 
   const result = await db.query(query);
-  return result.rows.map((r) => ({
+  return result.rows.map((r: any) => ({
     user_name: r.user_name,
     purchases_count: parseInt(r.purchases_count),
     purchases_total: parseInt(r.purchases_total),
@@ -528,7 +816,7 @@ export async function getManagerMarketStats() {
  * - Calculates (Sale Price - Purchase Price) for players bought AND sold.
  * - Excludes unsold players (inventory) and initial team sales (no purchase price).
  */
-export async function getBestSeller() {
+export async function getBestSeller(): Promise<BestSeller[]> {
   const query = `
     SELECT 
       s.vendedor as name,
@@ -552,7 +840,7 @@ export async function getBestSeller() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     total_sales: parseInt(row.total_sales),
     net_profit: parseInt(row.net_profit),
@@ -565,7 +853,7 @@ export async function getBestSeller() {
  * "El Visionario"
  * - Finds active ownership where price increased most since purchase
  */
-export async function getBestRevaluation() {
+export async function getBestRevaluation(): Promise<BestRevaluation[]> {
   const query = `
     SELECT 
       p.id as player_id,
@@ -591,7 +879,7 @@ export async function getBestRevaluation() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     current_price: parseInt(row.current_price),
     purchase_price: parseInt(row.purchase_price),
@@ -600,18 +888,12 @@ export async function getBestRevaluation() {
 }
 
 /**
- * Get Best Value Deal (Points / Million Euro of Purchase Price)
- * "El Chollo"
- * - Logic: Total Points of player / Purchase Price (in Millions)
- * - Minimum price 100k, Max lookback 6 months
- */
-/**
  * Get Best Value Deal (Points Earned DURING OWNERSHIP / Million Euro of Purchase Price)
  * "El Chollo"
  * - Calculates points earned by the user *while they owned the player*.
  * - Logic: Sum(Points in ownership window) / Purchase Price (in Millions).
  */
-export async function getBestValuePlayer() {
+export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
   const query = `
     WITH RoundStarts AS (
       SELECT round_id, MIN(date) as start_date
@@ -676,7 +958,7 @@ export async function getBestValuePlayer() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     total_points: parseInt(row.total_points),
     purchase_price: parseInt(row.purchase_price),
@@ -688,7 +970,7 @@ export async function getBestValuePlayer() {
 /**
  * Get breakdown of points for a specific transfer ownership window
  */
-export async function getBestValueDetails(transferId) {
+export async function getBestValueDetails(transferId: number): Promise<BestValueDetail[]> {
   const query = `
     WITH purchase AS (
       SELECT 
@@ -745,7 +1027,7 @@ export async function getBestValueDetails(transferId) {
     ORDER BY m.date ASC
   `;
   const result = await db.query(query, [transferId]);
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     points: parseInt(row.points),
   }));
@@ -757,7 +1039,7 @@ export async function getBestValueDetails(transferId) {
  * - Same logic as Best Value but ordering by ASC
  * - Only considers players costing > 2M to identify true "flops"
  */
-export async function getWorstValuePlayer() {
+export async function getWorstValuePlayer(): Promise<BestValuePlayer[]> {
   const query = `
     WITH RoundStarts AS (
       SELECT round_id, MIN(date) as start_date
@@ -837,7 +1119,7 @@ export async function getWorstValuePlayer() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     total_points: parseInt(row.total_points),
     purchase_price: parseInt(row.purchase_price),
@@ -851,7 +1133,7 @@ export async function getWorstValuePlayer() {
  * User who has signed the most players that had bids from OTHER users.
  * i.e., "Stolen" under their noses.
  */
-export async function getTheThief() {
+export async function getTheThief(): Promise<TheThief[]> {
   const query = `
     SELECT 
       f.comprador as name,
@@ -866,7 +1148,7 @@ export async function getTheThief() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     stolen_count: parseInt(row.stolen_count),
   }));
@@ -876,11 +1158,7 @@ export async function getTheThief() {
  * Get "Mayor Robo" (Biggest Steal)
  * The transfer with the smallest difference between winning price and second highest bid.
  */
-/**
- * Get "Mayor Robo" (Biggest Steal)
- * The transfer with the smallest difference between winning price and second highest bid.
- */
-export async function getBiggestSteal() {
+export async function getBiggestSteal(): Promise<BiggestSteal[]> {
   const query = `
     WITH ValidTransfers AS (
       SELECT id, precio, comprador, player_id 
@@ -912,7 +1190,7 @@ export async function getBiggestSteal() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     winning_price: parseInt(row.winning_price),
     second_highest_bid: parseInt(row.second_highest_bid),
@@ -924,7 +1202,7 @@ export async function getBiggestSteal() {
  * Get "La Víctima" (The Victim)
  * User with the most failed bids (bids that did not result in a purchase).
  */
-export async function getTheVictim() {
+export async function getTheVictim(): Promise<TheVictim[]> {
   const query = `
     SELECT 
         tb.bidder_name as name,
@@ -939,7 +1217,7 @@ export async function getTheVictim() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     failed_bids_count: parseInt(row.failed_bids_count),
   }));
@@ -950,7 +1228,7 @@ export async function getTheVictim() {
  * "El Pelotazo"
  * - Highest realized profit from a single transaction
  */
-export async function getBestSingleFlip() {
+export async function getBestSingleFlip(): Promise<SingleFlip[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -986,7 +1264,7 @@ export async function getBestSingleFlip() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     purchase_price: parseInt(row.purchase_price),
     sale_price: parseInt(row.sale_price),
@@ -999,7 +1277,7 @@ export async function getBestSingleFlip() {
  * "El Fiasco"
  * - Biggest loss from a single transaction
  */
-export async function getWorstSingleFlip() {
+export async function getWorstSingleFlip(): Promise<SingleFlip[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -1035,7 +1313,7 @@ export async function getWorstSingleFlip() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     purchase_price: parseInt(row.purchase_price),
     sale_price: parseInt(row.sale_price),
@@ -1049,7 +1327,7 @@ export async function getWorstSingleFlip() {
  * - (Current Value - Purchase Price) / Purchase Price
  * - Only for currently owned players
  */
-export async function getBestPercentageGain() {
+export async function getBestPercentageGain(): Promise<PercentageGain[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -1087,7 +1365,7 @@ export async function getBestPercentageGain() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     current_price: parseInt(row.current_price),
     purchase_price: parseInt(row.purchase_price),
@@ -1099,7 +1377,7 @@ export async function getBestPercentageGain() {
  * Get Player with Most Unique Owners
  * "El Inquieto"
  */
-export async function getMostOwnersPlayer() {
+export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
   const query = `
     SELECT 
       p.id as player_id,
@@ -1116,7 +1394,7 @@ export async function getMostOwnersPlayer() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     distinct_owners_count: parseInt(row.distinct_owners_count),
   }));
@@ -1128,7 +1406,7 @@ export async function getMostOwnersPlayer() {
  * - Users who sold players that later went up significantly in value
  * - Shows (Current Price - Sale Price) as missed profit
  */
-export async function getMissedOpportunity() {
+export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -1154,7 +1432,7 @@ export async function getMissedOpportunity() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     current_price: parseInt(row.current_price),
     sale_price: parseInt(row.sale_price),
@@ -1167,7 +1445,7 @@ export async function getMissedOpportunity() {
  * "El Especulador"
  * - User with the most completed buy→sell transactions
  */
-export async function getTopTrader() {
+export async function getTopTrader(): Promise<TopTrader[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -1197,7 +1475,7 @@ export async function getTopTrader() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     trade_count: parseInt(row.trade_count),
     total_profit: parseInt(row.total_profit),
@@ -1209,7 +1487,7 @@ export async function getTopTrader() {
  * "La Gallina de los Huevos de Oro"
  * - Player that has generated the most combined profit for all owners
  */
-export async function getProfitablePlayer() {
+export async function getProfitablePlayer(): Promise<PlayerProfitability[]> {
   const query = `
     SELECT 
       p.id as player_id,
@@ -1239,7 +1517,7 @@ export async function getProfitablePlayer() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     trade_count: parseInt(row.trade_count),
     total_profit: parseInt(row.total_profit),
@@ -1251,7 +1529,7 @@ export async function getProfitablePlayer() {
  * "El Ruinoso"
  * - Player that has caused the most combined losses for all owners
  */
-export async function getLossyPlayer() {
+export async function getLossyPlayer(): Promise<PlayerProfitability[]> {
   const query = `
     SELECT 
       p.id as player_id,
@@ -1281,7 +1559,7 @@ export async function getLossyPlayer() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     trade_count: parseInt(row.trade_count),
     total_loss: parseInt(row.total_loss),
@@ -1293,7 +1571,7 @@ export async function getLossyPlayer() {
  * "El Quickflip"
  * - Fastest buy→sell with profit (shortest time between transactions)
  */
-export async function getQuickestFlip() {
+export async function getQuickestFlip(): Promise<QuickFlip[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -1330,7 +1608,7 @@ export async function getQuickestFlip() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     purchase_price: parseInt(row.purchase_price),
     sale_price: parseInt(row.sale_price),
@@ -1344,7 +1622,7 @@ export async function getQuickestFlip() {
  * "El Hold"
  * - Longest ownership period that still resulted in profit
  */
-export async function getLongestProfitableHold() {
+export async function getLongestProfitableHold(): Promise<LongHold[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -1381,7 +1659,7 @@ export async function getLongestProfitableHold() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     purchase_price: parseInt(row.purchase_price),
     sale_price: parseInt(row.sale_price),
@@ -1395,7 +1673,7 @@ export async function getLongestProfitableHold() {
  * "El Depreciado"
  * - Currently owned players with biggest unrealized losses
  */
-export async function getWorstRevaluation() {
+export async function getWorstRevaluation(): Promise<Devaluation[]> {
   const query = `
     SELECT 
       u.id as user_id,
@@ -1428,7 +1706,7 @@ export async function getWorstRevaluation() {
   `;
   const result = await db.query(query);
   if (!result.rows.length) return [];
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     current_price: parseInt(row.current_price),
     purchase_price: parseInt(row.purchase_price),
