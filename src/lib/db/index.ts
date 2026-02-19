@@ -24,5 +24,5 @@ export * from './queries/analytics/initial_squads';
 export * from './queries/analytics/records';
 
 export * from './queries/features/market';
-export * from './queries/features/search.js';
-export * from './queries/features/predictions.js';
+export * from './queries/features/search';
+export * from './queries/features/predictions';

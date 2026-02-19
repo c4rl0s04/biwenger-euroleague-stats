@@ -1,10 +1,117 @@
 import { db } from '../../client';
 
+// ==========================================
+// INTERFACES
+// ==========================================
+
+export interface Achievement {
+  aciertos: number;
+  jornada: string;
+  usuario: string;
+  user_id: number;
+}
+
+export interface ParticipationStat {
+  jornada: string;
+  count: number;
+}
+
+export interface PorraResult {
+  jornada: string;
+  usuario: string;
+  aciertos: number;
+  user_id: number;
+  color_index: number;
+}
+
+export interface TableStat {
+  user_id: number;
+  usuario: string;
+  color_index: number;
+  jornadas_jugadas: number;
+  total_aciertos: number;
+  promedio: number;
+  mejor_jornada: number;
+  peor_jornada: number;
+}
+
+export interface ClutchStat {
+  usuario: string;
+  user_id: number;
+  color_index: number;
+  avg_last_3: number;
+}
+
+export interface VictoryStat {
+  usuario: string;
+  user_id: number;
+  color_index: number;
+  victorias: number;
+}
+
+export interface PredictableTeam {
+  id: number;
+  name: string;
+  img: string;
+  total: number;
+  correct: number;
+  predicted_wins: number;
+  predicted_losses: number;
+  correct_wins: number;
+  correct_losses: number;
+  percentage: number;
+}
+
+export interface BestRoundStat {
+  usuario: string;
+  aciertos: number;
+  jornada: string;
+}
+
+export interface HistoryUser {
+  id: number;
+  name: string;
+  color_index: number;
+}
+
+export interface HistoryPivotRow {
+  id: number;
+  name: string;
+  scores: Record<string, number | null>;
+}
+
+export interface HistoryPivot {
+  users: HistoryUser[];
+  jornadas: HistoryPivotRow[];
+}
+
+export interface PorrasStats {
+  achievements: {
+    perfect_10: Achievement[];
+    blanked: Achievement[];
+  };
+  participation: ParticipationStat[];
+  table_stats: TableStat[];
+  performance: PorraResult[];
+  history: HistoryPivot;
+  clutch_stats: ClutchStat[];
+  porra_stats: {
+    victorias: VictoryStat[];
+    predictable_teams: PredictableTeam[];
+    promedios: TableStat[];
+    mejor_jornada: BestRoundStat[];
+  };
+}
+
+// ==========================================
+// MAIN FUNCTION
+// ==========================================
+
 /**
  * Fetches all statistics needed for the predictions dashboard.
  * Optimizes performance by using parallel queries where possible.
  */
-export async function getPorrasStats() {
+export async function getPorrasStats(): Promise<PorrasStats> {
   // Parallelize independent queries
   const [achievements, participation, tableStats, performance, history] = await Promise.all([
     getAchievements(),
@@ -14,9 +121,10 @@ export async function getPorrasStats() {
     getHistoryPivot(),
   ]);
 
-  const clutch = await getClutchStats(); // Dependent on identifying recent rounds? No, usually standalone logic.
+  const clutch = await getClutchStats();
   const victories = await getVictorias();
   const predictable = await getPredictableTeams();
+  const bestRound = await getBestRoundStat();
 
   return {
     achievements,
@@ -30,10 +138,14 @@ export async function getPorrasStats() {
       victorias: victories,
       predictable_teams: predictable,
       promedios: tableStats, // Refers to the main leaderboard table
-      mejor_jornada: await getBestRoundStat(),
+      mejor_jornada: bestRound,
     },
   };
 }
+
+// ==========================================
+// HELPER FUNCTIONS
+// ==========================================
 
 async function getAchievements() {
   const perfect10Query = `
@@ -61,12 +173,18 @@ async function getAchievements() {
   ]);
 
   return {
-    perfect_10: perfect10.rows,
-    blanked: blanked.rows,
+    perfect_10: perfect10.rows.map((row: any) => ({
+      ...row,
+      aciertos: parseInt(row.aciertos),
+    })),
+    blanked: blanked.rows.map((row: any) => ({
+      ...row,
+      aciertos: parseInt(row.aciertos),
+    })),
   };
 }
 
-async function getParticipation() {
+async function getParticipation(): Promise<ParticipationStat[]> {
   const query = `
     SELECT round_name as jornada, COUNT(DISTINCT user_id) as count
     FROM porras
@@ -74,10 +192,13 @@ async function getParticipation() {
     ORDER BY round_id ASC
   `;
   const res = await db.query(query);
-  return res.rows;
+  return res.rows.map((row: any) => ({
+    ...row,
+    count: parseInt(row.count),
+  }));
 }
 
-async function getPerformanceData() {
+async function getPerformanceData(): Promise<PorraResult[]> {
   const query = `
     SELECT p.round_name as jornada, u.name as usuario, p.aciertos, p.user_id, u.color_index
     FROM porras p
@@ -86,10 +207,13 @@ async function getPerformanceData() {
     ORDER BY p.round_id ASC
   `;
   const res = await db.query(query);
-  return res.rows;
+  return res.rows.map((row: any) => ({
+    ...row,
+    aciertos: parseInt(row.aciertos),
+  }));
 }
 
-async function getTableStats() {
+async function getTableStats(): Promise<TableStat[]> {
   // Calculates average, total, min, max, count for each user
   const query = `
     WITH UserStats AS (
@@ -110,10 +234,17 @@ async function getTableStats() {
     ORDER BY promedio DESC
   `;
   const res = await db.query(query);
-  return res.rows;
+  return res.rows.map((row: any) => ({
+    ...row,
+    jornadas_jugadas: parseInt(row.jornadas_jugadas),
+    total_aciertos: parseInt(row.total_aciertos),
+    promedio: parseFloat(row.promedio),
+    mejor_jornada: parseInt(row.mejor_jornada),
+    peor_jornada: parseInt(row.peor_jornada),
+  }));
 }
 
-async function getClutchStats() {
+async function getClutchStats(): Promise<ClutchStat[]> {
   // Get the last 3 rounds with collected scores
   const roundsQuery = `
     SELECT DISTINCT round_id 
@@ -126,7 +257,7 @@ async function getClutchStats() {
 
   if (roundsRes.rows.length === 0) return [];
 
-  const roundIds = roundsRes.rows.map((r) => r.round_id);
+  const roundIds = roundsRes.rows.map((r: any) => r.round_id);
 
   const query = `
     SELECT 
@@ -143,10 +274,13 @@ async function getClutchStats() {
   `;
 
   const res = await db.query(query, [roundIds]);
-  return res.rows;
+  return res.rows.map((row: any) => ({
+    ...row,
+    avg_last_3: parseFloat(row.avg_last_3),
+  }));
 }
 
-async function getVictorias() {
+async function getVictorias(): Promise<VictoryStat[]> {
   // 1. Calculate max score per round
   // 2. Count how many times each user achieved that max score
 
@@ -173,10 +307,13 @@ async function getVictorias() {
   `;
 
   const res = await db.query(query);
-  return res.rows;
+  return res.rows.map((row: any) => ({
+    ...row,
+    victorias: parseInt(row.victorias),
+  }));
 }
 
-async function getPredictableTeams() {
+async function getPredictableTeams(): Promise<PredictableTeam[]> {
   const query = `
     WITH MatchOutcomes AS (
         SELECT 
@@ -259,10 +396,19 @@ async function getPredictableTeams() {
   `;
 
   const res = await db.query(query);
-  return res.rows;
+  return res.rows.map((row: any) => ({
+    ...row,
+    total: parseInt(row.total),
+    correct: parseInt(row.correct),
+    predicted_wins: parseInt(row.predicted_wins),
+    predicted_losses: parseInt(row.predicted_losses),
+    correct_wins: parseInt(row.correct_wins),
+    correct_losses: parseInt(row.correct_losses),
+    percentage: parseFloat(row.percentage),
+  }));
 }
 
-async function getBestRoundStat() {
+async function getBestRoundStat(): Promise<BestRoundStat[]> {
   // Returns top single round performance of all time
   const query = `
     SELECT u.name as usuario, p.aciertos, p.round_name as jornada
@@ -272,10 +418,13 @@ async function getBestRoundStat() {
     LIMIT 5
   `;
   const res = await db.query(query);
-  return res.rows;
+  return res.rows.map((row: any) => ({
+    ...row,
+    aciertos: parseInt(row.aciertos),
+  }));
 }
 
-async function getHistoryPivot() {
+async function getHistoryPivot(): Promise<HistoryPivot> {
   // Get all rounds that have scores
   const roundsRes = await db.query(
     'SELECT DISTINCT round_id, round_name FROM porras WHERE aciertos IS NOT NULL ORDER BY round_id ASC'
@@ -287,7 +436,7 @@ async function getHistoryPivot() {
     'SELECT DISTINCT u.id, u.name, u.color_index FROM users u JOIN porras p ON p.user_id = u.id ORDER BY u.name'
   );
   // users will now be an array of objects { id, name, color_index }
-  const users = usersRes.rows;
+  const users = usersRes.rows as HistoryUser[];
 
   // Get all scores
   const scoresQuery = `
@@ -298,8 +447,8 @@ async function getHistoryPivot() {
   const scoresRes = await db.query(scoresQuery);
 
   // Pivot data in JS
-  const pivotData = rounds.map((round) => {
-    const row = {
+  const pivotData: HistoryPivotRow[] = rounds.map((round: any) => {
+    const row: HistoryPivotRow = {
       id: round.round_id,
       name: round.round_name,
       scores: {},
@@ -307,7 +456,7 @@ async function getHistoryPivot() {
 
     users.forEach((user) => {
       const match = scoresRes.rows.find(
-        (s) => s.round_id === round.round_id && s.usuario === user.name
+        (s: any) => s.round_id === round.round_id && s.usuario === user.name
       );
       row.scores[user.name] = match ? match.aciertos : null;
     });
