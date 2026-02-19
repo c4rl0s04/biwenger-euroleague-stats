@@ -1,7 +1,7 @@
 import { fetchAllPlayers, fetchPlayerDetails } from '../../api/biwenger-client.js';
 import { getShortTeamName } from '../../utils/format.js';
 import { CONFIG } from '../../config.js';
-import { preparePlayerMutations } from '../../db/mutations/players.js';
+import { preparePlayerMutations } from '../../db/mutations/players';
 
 const SLEEP_MS = 600; // Mantenemos la pausa segura para evitar el error 429
 
