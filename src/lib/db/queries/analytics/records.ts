@@ -1,11 +1,20 @@
 import { db } from '../../client';
 
+export interface RecordItem {
+  type: 'highest_round' | 'highest_transfer' | 'biggest_gain';
+  label: string;
+  description: string;
+  user_name?: string;
+  player_name?: string;
+  value: number | string;
+}
+
 /**
  * Get recent records broken
- * @returns {Promise<Array>} Recent league records
+ * @returns {Promise<RecordItem[]>} Recent league records
  */
-export async function getRecentRecords() {
-  const records = [];
+export async function getRecentRecords(): Promise<RecordItem[]> {
+  const records: RecordItem[] = [];
 
   const highestRoundQuery = `
     SELECT 

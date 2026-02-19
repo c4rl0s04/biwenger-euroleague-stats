@@ -21,7 +21,7 @@ export * from './queries/competition/standings'; // This will resolve to standin
 export * from './queries/analytics/performance';
 export * from './queries/analytics/advanced_stats';
 export * from './queries/analytics/initial_squads';
-export * from './queries/analytics/records.js';
+export * from './queries/analytics/records';
 
 export * from './queries/features/market.js';
 export * from './queries/features/search.js';
