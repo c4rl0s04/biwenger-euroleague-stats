@@ -1,8 +1,78 @@
+import { Pool } from 'pg';
+
+// Using a loose type for the db client to support both pg.Pool and the mock object
+export type DbClient = Pool | {
+  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
+};
+
+// ==========================================
+// INTERFACES
+// ==========================================
+
+export interface UpdatePlayerOwnerParams {
+  owner_id: string | null;
+  player_id: number;
+}
+
+export interface UpsertUserParams {
+  id: string; // text in schema
+  name: string;
+  icon: string | null;
+}
+
+export interface InsertInitialSquadParams {
+  user_id: string; // text in schema
+  player_id: number;
+  price: number;
+}
+
+export interface UpsertLineupParams {
+  user_id: string; // text in schema
+  round_id: number;
+  round_name: string; // Add round_name as it's used in the insert value list
+  player_id: number;
+  is_captain: boolean; // boolean in schema, sometimes integer is passed, let's keep boolean
+  role: string | null;
+}
+
+export interface DeleteUserLineupParams {
+  user_id: string;
+  round_id: number;
+}
+
+export interface UpsertUserRoundParams {
+  user_id: string;
+  round_id: number;
+  round_name: string; // Used in the values array
+  points: number;
+  participated: boolean; // boolean in schema
+  alineacion: number | null; // Changed to number or null based on actual data
+}
+
+export interface UserMutations {
+  resetAllOwners: () => Promise<void>;
+  getAllUsers: () => Promise<{ all: () => any[]; iterate: () => any[] }>;
+  updatePlayerOwner: (params: UpdatePlayerOwnerParams) => Promise<void>;
+  updateUserColor: (colorIndex: number, userId: string) => Promise<void>;
+  upsertUser: (params: UpsertUserParams) => Promise<void>;
+  insertInitialSquad: (params: InsertInitialSquadParams) => Promise<void>;
+  getInitialPrice: (playerId: number, date: string) => Promise<{ price: number } | undefined>;
+  getPlayersSoldByUser: (sellerName1: string, sellerName2: string) => Promise<{ player_id: number }[]>;
+  getPlayersOwnedByUser: (ownerId: string) => Promise<{ player_id: number }[]>;
+  getPurchasesByPlayerAndUser: (playerId: number, buyerName1: string, buyerName2: string) => Promise<{ timestamp: number; type: string }[]>;
+  getSalesByPlayerAndUser: (playerId: number, sellerName1: string, sellerName2: string) => Promise<{ timestamp: number; type: string }[]>;
+  upsertLineup: (params: UpsertLineupParams) => Promise<void>;
+  deleteUserLineup: (params: DeleteUserLineupParams) => Promise<void>;
+  upsertUserRound: (params: UpsertUserRoundParams) => Promise<void>;
+  clearInitialSquads: () => Promise<void>;
+  getTransfersForBacktracking: () => Promise<{ timestamp: number; player_id: number; vendedor: string; comprador: string }[]>;
+}
+
 /**
  * User & Squad Mutations (Postgres)
  * Handles Write operations for users, squads, lineups, and initial squad inference.
  */
-export function prepareUserMutations(db) {
+export function prepareUserMutations(db: DbClient): UserMutations {
   return {
     resetAllOwners: async () => {
       await db.query('UPDATE players SET owner_id = NULL');
@@ -17,18 +87,18 @@ export function prepareUserMutations(db) {
       };
     },
 
-    updatePlayerOwner: async (params) => {
+    updatePlayerOwner: async (params: UpdatePlayerOwnerParams) => {
       await db.query('UPDATE players SET owner_id = $1 WHERE id = $2', [
         params.owner_id,
         params.player_id,
       ]);
     },
 
-    updateUserColor: async (colorIndex, userId) => {
+    updateUserColor: async (colorIndex: number, userId: string) => {
       await db.query('UPDATE users SET color_index = $1 WHERE id = $2', [colorIndex, userId]);
     },
 
-    upsertUser: async (params) => {
+    upsertUser: async (params: UpsertUserParams) => {
       const sql = `
         INSERT INTO users (id, name, icon) VALUES ($1, $2, $3)
         ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=COALESCE(excluded.icon, users.icon)
@@ -36,7 +106,7 @@ export function prepareUserMutations(db) {
       await db.query(sql, [params.id, params.name, params.icon]);
     },
 
-    insertInitialSquad: async (params) => {
+    insertInitialSquad: async (params: InsertInitialSquadParams) => {
       const sql = `
         INSERT INTO initial_squads (user_id, player_id, price) 
         VALUES ($1, $2, $3)
@@ -45,7 +115,7 @@ export function prepareUserMutations(db) {
       await db.query(sql, [params.user_id, params.player_id, params.price]);
     },
 
-    getInitialPrice: async (playerId, date) => {
+    getInitialPrice: async (playerId: number, date: string) => {
       const sql = `
         SELECT price FROM market_values 
         WHERE player_id = $1 AND date <= $2
@@ -56,7 +126,7 @@ export function prepareUserMutations(db) {
       return res.rows[0];
     },
 
-    getPlayersSoldByUser: async (sellerName1, sellerName2) => {
+    getPlayersSoldByUser: async (sellerName1: string, sellerName2: string) => {
       // sellerName2 is same as 1 usually, logic copied from SQLite params
       const sql = `
         SELECT DISTINCT player_id 
@@ -67,14 +137,14 @@ export function prepareUserMutations(db) {
       return res.rows;
     },
 
-    getPlayersOwnedByUser: async (ownerId) => {
+    getPlayersOwnedByUser: async (ownerId: string) => {
       const res = await db.query('SELECT id as player_id FROM players WHERE owner_id = $1', [
         ownerId,
       ]);
       return res.rows;
     },
 
-    getPurchasesByPlayerAndUser: async (playerId, buyerName1, buyerName2) => {
+    getPurchasesByPlayerAndUser: async (playerId: number, buyerName1: string, buyerName2: string) => {
       const sql = `
         SELECT timestamp, 'buy' as type
         FROM fichajes
@@ -85,7 +155,7 @@ export function prepareUserMutations(db) {
       return res.rows;
     },
 
-    getSalesByPlayerAndUser: async (playerId, sellerName1, sellerName2) => {
+    getSalesByPlayerAndUser: async (playerId: number, sellerName1: string, sellerName2: string) => {
       const sql = `
         SELECT timestamp, 'sell' as type
         FROM fichajes
@@ -96,7 +166,7 @@ export function prepareUserMutations(db) {
       return res.rows;
     },
 
-    upsertLineup: async (params) => {
+    upsertLineup: async (params: UpsertLineupParams) => {
       const sql = `
         INSERT INTO lineups (user_id, round_id, round_name, player_id, is_captain, role)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -114,12 +184,12 @@ export function prepareUserMutations(db) {
       ]);
     },
 
-    deleteUserLineup: async (params) => {
+    deleteUserLineup: async (params: DeleteUserLineupParams) => {
       const sql = `DELETE FROM lineups WHERE user_id = $1 AND round_id = $2`;
       await db.query(sql, [params.user_id, params.round_id]);
     },
 
-    upsertUserRound: async (params) => {
+    upsertUserRound: async (params: UpsertUserRoundParams) => {
       // SQLite params were array [val, val...] in .run()
       // Now we use named params in object for consistency or array?
       // The calling code (06-lineups.js) passes: upsertUserRound.run(uid, rid, rname, pts, part, align)

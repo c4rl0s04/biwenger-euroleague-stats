@@ -1,6 +1,6 @@
 import { biwengerFetch } from '../../api/biwenger-client.js';
 import { CONFIG } from '../../config.js';
-import { prepareUserMutations } from '../../db/mutations/users.js';
+import { prepareUserMutations } from '../../db/mutations/users';
 
 /**
  * Syncs current squads (ownership) for all users.

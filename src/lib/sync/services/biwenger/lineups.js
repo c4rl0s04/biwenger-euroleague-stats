@@ -1,5 +1,5 @@
 import { fetchRoundsLeague } from '../../../api/biwenger-client.js';
-import { prepareUserMutations } from '../../../db/mutations/users.js';
+import { prepareUserMutations } from '../../../db/mutations/users';
 
 /**
  * Syncs lineups for finished rounds.

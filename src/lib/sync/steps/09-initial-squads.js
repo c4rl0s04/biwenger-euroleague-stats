@@ -1,4 +1,4 @@
-import { prepareUserMutations } from '../../db/mutations/users.js';
+import { prepareUserMutations } from '../../db/mutations/users';
 import { CONFIG } from '../../config.js';
 
 /**

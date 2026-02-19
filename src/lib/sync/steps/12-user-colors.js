@@ -1,4 +1,4 @@
-import { prepareUserMutations } from '../../db/mutations/users.js';
+import { prepareUserMutations } from '../../db/mutations/users';
 
 /**
  * Step 12: Assign User Colors
