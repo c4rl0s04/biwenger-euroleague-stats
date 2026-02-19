@@ -1,6 +1,60 @@
 import { db } from '../client';
 
-export async function upsertTournament(tournament) {
+// ==========================================
+// INTERFACES
+// ==========================================
+
+export interface UpsertTournamentParams {
+  id: number;
+  league_id: number;
+  name: string;
+  type: string;
+  status: string;
+  data_json: string | null;
+  updated_at: number;
+}
+
+export interface UpsertPhaseParams {
+  tournament_id: number;
+  name: string;
+  type: string;
+  order_index: number;
+}
+
+export interface UpsertFixtureParams {
+  id: number;
+  tournament_id: number;
+  phase_id: number | null;
+  round_name: string | null;
+  round_id: number | null;
+  group_name: string | null;
+  home_user_id: string | null; // text in schema
+  away_user_id: string | null; // text in schema
+  home_score: number | null;
+  away_score: number | null;
+  date: number | null; // stored as integer in schema for fixtures
+  status: string | null;
+}
+
+export interface UpsertStandingParams {
+  tournament_id: number;
+  phase_name: string | null;
+  group_name: string | null;
+  user_id: string | null; // text in schema
+  position: number | null;
+  points: number | null;
+  won: number | null;
+  lost: number | null;
+  drawn: number | null;
+  scored: number | null;
+  against: number | null;
+}
+
+// ==========================================
+// MUTATIONS
+// ==========================================
+
+export async function upsertTournament(tournament: UpsertTournamentParams): Promise<void> {
   const { id, league_id, name, type, status, data_json, updated_at } = tournament;
 
   await db.query(
@@ -19,7 +73,7 @@ export async function upsertTournament(tournament) {
   );
 }
 
-export async function upsertPhase(phase) {
+export async function upsertPhase(phase: UpsertPhaseParams): Promise<number> {
   const { tournament_id, name, type, order_index } = phase;
 
   // Note: We don't have a stable ID from API for phases usually,
@@ -37,10 +91,10 @@ export async function upsertPhase(phase) {
     [tournament_id, name, type, order_index]
   );
 
-  return res.rows[0].id;
+  return res.rows[0].id; // RETURNING clause ensures we get the ID
 }
 
-export async function upsertFixture(fixture) {
+export async function upsertFixture(fixture: UpsertFixtureParams): Promise<void> {
   const {
     id,
     tournament_id,
@@ -95,7 +149,7 @@ export async function upsertFixture(fixture) {
   );
 }
 
-export async function upsertStanding(standing) {
+export async function upsertStanding(standing: UpsertStandingParams): Promise<void> {
   const {
     tournament_id,
     phase_name,

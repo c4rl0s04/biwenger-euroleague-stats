@@ -1,5 +1,5 @@
 import { fetchTournament, fetchRoundsLeague, fetchCompetition } from '../../api/biwenger-client.js';
-import * as tournamentMutations from '../../db/mutations/tournaments.js';
+import * as tournamentMutations from '../../db/mutations/tournaments';
 import { CONFIG } from '../../config.js';
 
 export async function run() {
