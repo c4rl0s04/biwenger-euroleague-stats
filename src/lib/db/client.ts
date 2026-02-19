@@ -1,15 +1,15 @@
 /**
  * Database access layer using pg (PostgreSQL)
  */
-import pg from 'pg';
-const { Pool } = pg;
+import pg, { Pool, PoolConfig } from 'pg';
 
 import { CONFIG } from '../config.js';
 
 // Skip database connection in CI/build environment
 const skipDb = CONFIG.DB.SKIP;
 
-let db;
+// Use a union type to allow for the mock DB object
+let db: Pool | { query: () => Promise<{ rows: any[]; rowCount: number }>; connect: () => Promise<{ release: () => void }>; end: () => Promise<void> };
 
 if (skipDb) {
   // Create a mock database object for builds without a real database
@@ -21,13 +21,12 @@ if (skipDb) {
 } else {
   // Connect to the POSTGRES database
   // Defaults match docker-compose.yml
-  const isProduction = process.env.NODE_ENV === 'production';
   const isRemote = process.env.POSTGRES_HOST && process.env.POSTGRES_HOST !== 'localhost';
 
   // Prioritize DATABASE_URL if provided, otherwise use individual vars
   const connectionString = process.env.DATABASE_URL;
 
-  const poolConfig = connectionString
+  const poolConfig: PoolConfig = connectionString
     ? {
         connectionString,
         ssl: isRemote ? { rejectUnauthorized: false } : false,
@@ -36,12 +35,12 @@ if (skipDb) {
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
         host: process.env.POSTGRES_HOST,
-        port: parseInt(process.env.POSTGRES_PORT),
+        port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT, 10) : 5432,
         database: process.env.POSTGRES_DB,
         ssl: isRemote ? { rejectUnauthorized: false } : false,
       };
 
-  const pool = new Pool({
+  const pool = new pg.Pool({
     ...poolConfig,
     max: 10,
     idleTimeoutMillis: 30000,
@@ -50,7 +49,7 @@ if (skipDb) {
   console.log(`🔌 Database connecting to: ${connectionString ? 'DATABASE_URL' : poolConfig.host}`);
 
   // Test connection
-  pool.on('error', (err, client) => {
+  pool.on('error', (err: Error) => {
     console.error('Unexpected error on idle client', err);
     process.exit(-1);
   });

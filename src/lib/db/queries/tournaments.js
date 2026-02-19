@@ -1,4 +1,4 @@
-import { db } from '../client.js';
+import { db } from '../client';
 
 export async function getTournaments() {
   const { rows } = await db.query(`

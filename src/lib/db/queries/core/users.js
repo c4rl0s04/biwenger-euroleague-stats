@@ -3,7 +3,7 @@
  * Provides functions for fetching user data, squads, and personalized stats
  */
 
-import { db } from '../../client.js';
+import { db } from '../../client';
 import { getSimpleStandings as getStandings } from '../competition/standings';
 
 // Import shared type definitions for IDE support

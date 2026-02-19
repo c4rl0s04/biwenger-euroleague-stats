@@ -1,4 +1,4 @@
-import { db } from '../../client.js';
+import { db } from '../../client';
 
 /**
  * Fetches all statistics needed for the predictions dashboard.

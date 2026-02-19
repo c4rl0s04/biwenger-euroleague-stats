@@ -1,4 +1,4 @@
-import { db } from '../../client.js';
+import { db } from '../../client';
 
 /**
  * Get volatility stats (Standard Deviation of points)

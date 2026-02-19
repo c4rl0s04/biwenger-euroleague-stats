@@ -1,4 +1,4 @@
-import { db } from '../../client.js';
+import { db } from '../../client';
 import { CONFIG } from '../../../config.js';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils.js';
 

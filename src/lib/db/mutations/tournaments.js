@@ -1,4 +1,4 @@
-import { db } from '../client.js';
+import { db } from '../client';
 
 export async function upsertTournament(tournament) {
   const { id, league_id, name, type, status, data_json, updated_at } = tournament;
