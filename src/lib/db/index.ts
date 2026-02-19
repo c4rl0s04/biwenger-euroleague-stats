@@ -11,7 +11,7 @@ export * from './queries/core/users.js';
 export * from './queries/core/players.js'; // Assuming players.js exists, step 605 said 'players' (no ext). I'll check dir.
 export * from './queries/core/teams.js';   // Assuming teams.js exists
 
-export * from './queries/competition/rounds.js';
+export * from './queries/competition/rounds';
 export * from './queries/competition/matches';
 export * from './queries/competition/schedule';
 export * from './queries/competition/standings'; // This will resolve to standings.ts (the managed one)
