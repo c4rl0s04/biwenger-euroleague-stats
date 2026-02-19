@@ -2,7 +2,27 @@
  * Pure function to calculate stats from a history array.
  * Moved from hooks to Logic layer for shared usage (Service + UI).
  */
-export function calculateStats(history) {
+
+export interface RoundPerformance {
+  efficiency: number;
+  actual_points: number;
+  ideal_points: number;
+  [key: string]: any; // Allow other fields that might be passed
+}
+
+export interface CalculatedPerformanceStats {
+  avgEfficiency: string;
+  totalActual: number;
+  totalIdeal: number;
+  totalLost: number;
+  bestRound: RoundPerformance;
+  bestEffRound: RoundPerformance;
+  worstRound: RoundPerformance;
+  worstEffRound: RoundPerformance;
+  roundsPlayed: number;
+}
+
+export function calculateStats(history?: RoundPerformance[] | null): CalculatedPerformanceStats | null {
   if (!history || history.length === 0) return null;
 
   const avgEfficiency = history.reduce((sum, r) => sum + r.efficiency, 0) / history.length;

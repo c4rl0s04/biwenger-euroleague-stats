@@ -1,5 +1,5 @@
 import { db } from '../../client';
-import { getTeamPositions } from '../../../logic/standings.js';
+import { getTeamPositions } from '../../../logic/standings';
 import { NEXT_ROUND_CTE } from '../../sql_utils';
 
 export interface PorrasRound {
@@ -166,7 +166,7 @@ export async function getRoundDetails(roundId: string | number): Promise<Round |
   let positionMap = new Map<number, number>();
   try {
     const allFinishedMatches = (await db.query(allFinishedMatchesQuery)).rows;
-    // @ts-ignore - logic/standings.js is likely JS and untyped
+    // Get actual standings positions for this round
     positionMap = getTeamPositions(allFinishedMatches);
   } catch (err) {
     console.warn('Could not calculate standings:', err);

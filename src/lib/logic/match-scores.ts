@@ -3,13 +3,28 @@
  * Helper functions for calculating regular time scores (excluding overtime)
  */
 
+export interface EuroleagueHeader {
+  ScoreA?: number | string;
+  ScoreB?: number | string;
+  TeamA?: number | string;
+  TeamB?: number | string;
+  [key: string]: any; // Allow dynamic quarter keys like Q1ScoreA, OT1ScoreA
+}
+
+export interface MatchScoreSource {
+  home_score_regtime?: number | null;
+  away_score_regtime?: number | null;
+  home_score?: number | null;
+  away_score?: number | null;
+}
+
 /**
  * Calculate regular time score from quarter scores
  * Regular time = sum of Q1, Q2, Q3, Q4 (excludes overtime)
- * @param {Object} header - Euroleague Header API response
- * @returns {{homeScore: number|null, awayScore: number|null}} Regular time scores
+ * @param header - Euroleague Header API response
+ * @returns Regular time scores
  */
-export function calculateRegularTimeScores(header) {
+export function calculateRegularTimeScores(header?: EuroleagueHeader | null): { homeScore: number | null; awayScore: number | null } {
   if (!header) return { homeScore: null, awayScore: null };
 
   // Euroleague Header API structure typically has:
@@ -50,10 +65,10 @@ export function calculateRegularTimeScores(header) {
 /**
  * Get regular time scores from match data
  * Falls back to final scores if regular time scores are not available
- * @param {Object} match - Match object with scores
- * @returns {{homeScore: number, awayScore: number}} Scores to use for standings
+ * @param match - Match object with scores
+ * @returns Scores to use for standings
  */
-export function getStandingsScores(match) {
+export function getStandingsScores(match: MatchScoreSource): { homeScore: number; awayScore: number } {
   // Prefer regular time scores (excluding OT) if available
   if (match.home_score_regtime != null && match.away_score_regtime != null) {
     return {

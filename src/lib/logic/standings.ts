@@ -9,27 +9,52 @@
  * Note: Article 19.6 (20-0 forfeit handling) is not implemented as we don't track forfeits.
  */
 
-import { getStandingsScores } from './match-scores.js';
+import { getStandingsScores, MatchScoreSource } from './match-scores';
+
+export interface StandingsMatch extends MatchScoreSource {
+  home_id: number;
+  away_id: number;
+  status: string;
+}
+
+export interface TeamStats {
+  team_id: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  gamesPlayed: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  pointDifference: number;
+  position?: number;
+}
+
+interface H2HStats {
+  wins: number;
+  pointDifference: number;
+  pointsFor: number;
+  pointsAgainst: number;
+}
 
 /**
  * Calculate goal average (points for / points against) for a team
- * @param {number} pointsFor - Total points scored
- * @param {number} pointsAgainst - Total points conceded
- * @returns {number} Goal average (precision: 0.00001)
+ * @param pointsFor - Total points scored
+ * @param pointsAgainst - Total points conceded
+ * @returns Goal average (precision: 0.00001)
  */
-function calculateGoalAverage(pointsFor, pointsAgainst) {
+function calculateGoalAverage(pointsFor: number, pointsAgainst: number): number {
   if (pointsAgainst === 0) return pointsFor > 0 ? Infinity : 0;
   return Math.round((pointsFor / pointsAgainst) * 100000) / 100000;
 }
 
 /**
  * Count how many times teams have played each other
- * @param {Array} matches - All finished matches
- * @param {Set<number>} teamIds - Set of team IDs to check
- * @returns {Map<string, number>} Map of "team1-team2" to count of games
+ * @param matches - All finished matches
+ * @param teamIds - Set of team IDs to check
+ * @returns Map of "team1-team2" to count of games
  */
-function countHeadToHeadGames(matches, teamIds) {
-  const gameCounts = new Map();
+function countHeadToHeadGames(matches: StandingsMatch[], teamIds: Set<number>): Map<string, number> {
+  const gameCounts = new Map<string, number>();
 
   for (const match of matches) {
     const { home_id, away_id } = match;
@@ -47,11 +72,11 @@ function countHeadToHeadGames(matches, teamIds) {
 
 /**
  * Check if all tied teams have met twice (home and away)
- * @param {Array} matches - All finished matches
- * @param {Set<number>} tiedTeamIds - Set of tied team IDs
- * @returns {boolean} True if all teams have met twice
+ * @param matches - All finished matches
+ * @param tiedTeamIds - Set of tied team IDs
+ * @returns True if all teams have met twice
  */
-function haveAllTeamsMetTwice(matches, tiedTeamIds) {
+function haveAllTeamsMetTwice(matches: StandingsMatch[], tiedTeamIds: Set<number>): boolean {
   const teamIdsArray = Array.from(tiedTeamIds);
 
   // For each pair of teams, check if they've played twice
@@ -81,15 +106,15 @@ function haveAllTeamsMetTwice(matches, tiedTeamIds) {
 
 /**
  * Calculate head-to-head stats between tied teams
- * @param {Array} matches - All finished matches
- * @param {Set<number>} tiedTeamIds - Set of team IDs that are tied
- * @returns {Map<number, {wins: number, pointDifference: number, pointsFor: number, pointsAgainst: number}>} Map of team_id to h2h stats
+ * @param matches - All finished matches
+ * @param tiedTeamIds - Set of team IDs that are tied
+ * @returns Map of team_id to h2h stats
  */
-function calculateHeadToHead(matches, tiedTeamIds) {
-  const h2hStats = new Map();
+function calculateHeadToHead(matches: StandingsMatch[], tiedTeamIds: Set<number>): Map<number, H2HStats> {
+  const h2hStats = new Map<number, H2HStats>();
 
   // Initialize stats for all tied teams
-  for (const teamId of tiedTeamIds) {
+  for (const teamId of Array.from(tiedTeamIds)) {
     h2hStats.set(teamId, { wins: 0, pointDifference: 0, pointsFor: 0, pointsAgainst: 0 });
   }
 
@@ -102,8 +127,9 @@ function calculateHeadToHead(matches, tiedTeamIds) {
 
     // Only consider matches between tied teams
     if (tiedTeamIds.has(home_id) && tiedTeamIds.has(away_id)) {
-      const homeStats = h2hStats.get(home_id);
-      const awayStats = h2hStats.get(away_id);
+      // Use ! because we initialized it above
+      const homeStats = h2hStats.get(home_id)!;
+      const awayStats = h2hStats.get(away_id)!;
 
       // Update points
       homeStats.pointsFor += homeScore;
@@ -129,19 +155,25 @@ function calculateHeadToHead(matches, tiedTeamIds) {
 
 /**
  * Break tie for two teams (Article 19.5.2.I)
- * @param {Array} matches - All finished matches
- * @param {number} team1Id - First team ID
- * @param {number} team2Id - Second team ID
- * @param {Object} team1Stats - First team overall stats
- * @param {Object} team2Stats - Second team overall stats
- * @returns {number} Comparison result (-1, 0, or 1)
+ * @param matches - All finished matches
+ * @param team1Id - First team ID
+ * @param team2Id - Second team ID
+ * @param team1Stats - First team overall stats
+ * @param team2Stats - Second team overall stats
+ * @returns Comparison result (-1, 0, or 1)
  */
-function breakTieTwoTeams(matches, team1Id, team2Id, team1Stats, team2Stats) {
+function breakTieTwoTeams(
+  matches: StandingsMatch[],
+  team1Id: number,
+  team2Id: number,
+  team1Stats: TeamStats,
+  team2Stats: TeamStats
+): number {
   const tiedTeamIds = new Set([team1Id, team2Id]);
   const h2hStats = calculateHeadToHead(matches, tiedTeamIds);
 
-  const team1H2H = h2hStats.get(team1Id) || { wins: 0, pointDifference: 0 };
-  const team2H2H = h2hStats.get(team2Id) || { wins: 0, pointDifference: 0 };
+  const team1H2H = h2hStats.get(team1Id) || { wins: 0, pointDifference: 0, pointsFor: 0, pointsAgainst: 0 };
+  const team2H2H = h2hStats.get(team2Id) || { wins: 0, pointDifference: 0, pointsFor: 0, pointsAgainst: 0 };
 
   // a) Victories in games between them
   if (team2H2H.wins !== team1H2H.wins) {
@@ -171,12 +203,12 @@ function breakTieTwoTeams(matches, team1Id, team2Id, team1Stats, team2Stats) {
 
 /**
  * Break tie for multiple teams (Article 19.5.2.II)
- * @param {Array} matches - All finished matches
- * @param {Array} tiedTeams - Array of team objects with same wins
- * @param {Map<number, Object>} allTeamStats - Map of all team stats
- * @returns {Array} Sorted array of tied teams
+ * @param matches - All finished matches
+ * @param tiedTeams - Array of team objects with same wins
+ * @param allTeamStats - Map of all team stats
+ * @returns Sorted array of tied teams
  */
-function breakTieMultipleTeams(matches, tiedTeams, allTeamStats) {
+function breakTieMultipleTeams(matches: StandingsMatch[], tiedTeams: TeamStats[], allTeamStats: Map<number, TeamStats>): TeamStats[] {
   if (tiedTeams.length === 0) return [];
   if (tiedTeams.length === 1) return tiedTeams;
   if (tiedTeams.length === 2) {
@@ -186,8 +218,8 @@ function breakTieMultipleTeams(matches, tiedTeams, allTeamStats) {
       matches,
       team1.team_id,
       team2.team_id,
-      allTeamStats.get(team1.team_id),
-      allTeamStats.get(team2.team_id)
+      allTeamStats.get(team1.team_id)!,
+      allTeamStats.get(team2.team_id)!
     );
     return result > 0 ? [team2, team1] : [team1, team2];
   }
@@ -204,20 +236,20 @@ function breakTieMultipleTeams(matches, tiedTeams, allTeamStats) {
   });
 
   // Group by h2h wins
-  const groupsByH2HWins = new Map();
+  const groupsByH2HWins = new Map<number, TeamStats[]>();
   for (const team of sortedByH2HWins) {
     const h2h = h2hStats.get(team.team_id) || { wins: 0 };
     const key = h2h.wins;
     if (!groupsByH2HWins.has(key)) {
       groupsByH2HWins.set(key, []);
     }
-    groupsByH2HWins.get(key).push(team);
+    groupsByH2HWins.get(key)!.push(team);
   }
 
-  const result = [];
+  const result: TeamStats[] = [];
 
   // Process each group
-  for (const [h2hWins, group] of Array.from(groupsByH2HWins.entries()).sort(
+  for (const [_, group] of Array.from(groupsByH2HWins.entries()).sort(
     (a, b) => b[0] - a[0]
   )) {
     if (group.length === 1) {
@@ -229,8 +261,8 @@ function breakTieMultipleTeams(matches, tiedTeams, allTeamStats) {
         matches,
         team1.team_id,
         team2.team_id,
-        allTeamStats.get(team1.team_id),
-        allTeamStats.get(team2.team_id)
+        allTeamStats.get(team1.team_id)!,
+        allTeamStats.get(team2.team_id)!
       );
       if (tieResult > 0) {
         result.push(team2, team1);
@@ -250,18 +282,18 @@ function breakTieMultipleTeams(matches, tiedTeams, allTeamStats) {
       });
 
       // Group by h2h point difference
-      const groupsByH2HDiff = new Map();
+      const groupsByH2HDiff = new Map<number, TeamStats[]>();
       for (const team of sortedByH2HDiff) {
         const h2h = groupH2H.get(team.team_id) || { pointDifference: 0 };
         const key = h2h.pointDifference;
         if (!groupsByH2HDiff.has(key)) {
           groupsByH2HDiff.set(key, []);
         }
-        groupsByH2HDiff.get(key).push(team);
+        groupsByH2HDiff.get(key)!.push(team);
       }
 
       // Process each group by h2h diff
-      for (const [h2hDiff, diffGroup] of Array.from(groupsByH2HDiff.entries()).sort(
+      for (const [_, diffGroup] of Array.from(groupsByH2HDiff.entries()).sort(
         (a, b) => b[0] - a[0]
       )) {
         if (diffGroup.length === 1) {
@@ -269,8 +301,8 @@ function breakTieMultipleTeams(matches, tiedTeams, allTeamStats) {
         } else {
           // c) Overall goal difference, then points scored, then goal average
           const sortedByOverall = [...diffGroup].sort((a, b) => {
-            const aStats = allTeamStats.get(a.team_id);
-            const bStats = allTeamStats.get(b.team_id);
+            const aStats = allTeamStats.get(a.team_id)!;
+            const bStats = allTeamStats.get(b.team_id)!;
 
             // Overall goal difference
             if (bStats.pointDifference !== aStats.pointDifference) {
@@ -299,17 +331,17 @@ function breakTieMultipleTeams(matches, tiedTeams, allTeamStats) {
 
 /**
  * Calculate team standings from match results
- * @param {Array<{home_id: number, away_id: number, home_score: number, away_score: number, status: string}>} matches - Array of match objects
- * @returns {Map<number, {position: number, wins: number, gamesPlayed: number, draws: number, losses: number, pointsFor: number, pointsAgainst: number, pointDifference: number}>} Map of team_id to standings data
+ * @param matches - Array of match objects
+ * @returns Map of team_id to standings data
  */
-export function calculateTeamStandings(matches) {
+export function calculateTeamStandings(matches: StandingsMatch[]): Map<number, TeamStats> {
   // Filter only finished matches
   const finishedMatches = matches.filter(
     (m) => m.status === 'finished' && m.home_score != null && m.away_score != null
   );
 
   // Initialize team stats
-  const teamStats = new Map();
+  const teamStats = new Map<number, TeamStats>();
 
   // Process each match
   for (const match of finishedMatches) {
@@ -350,8 +382,8 @@ export function calculateTeamStandings(matches) {
       });
     }
 
-    const homeStats = teamStats.get(home_id);
-    const awayStats = teamStats.get(away_id);
+    const homeStats = teamStats.get(home_id)!;
+    const awayStats = teamStats.get(away_id)!;
 
     // Update points scored/conceded (Regular Time)
     homeStats.pointsFor += homeScore;
@@ -377,7 +409,7 @@ export function calculateTeamStandings(matches) {
   }
 
   // Calculate point differences (Regular Time)
-  for (const stats of teamStats.values()) {
+  for (const stats of Array.from(teamStats.values())) {
     stats.pointDifference = stats.pointsFor - stats.pointsAgainst;
   }
 
@@ -388,13 +420,13 @@ export function calculateTeamStandings(matches) {
   standingsArray.sort((a, b) => b.wins - a.wins);
 
   // Step 2: Apply tie-breaking for teams with same wins
-  const finalStandings = [];
+  const finalStandings: TeamStats[] = [];
   let i = 0;
 
   while (i < standingsArray.length) {
     // Find all teams with the same number of wins
     const currentWins = standingsArray[i].wins;
-    const tiedGroup = [];
+    const tiedGroup: TeamStats[] = [];
 
     while (i < standingsArray.length && standingsArray[i].wins === currentWins) {
       tiedGroup.push(standingsArray[i]);
@@ -406,19 +438,19 @@ export function calculateTeamStandings(matches) {
       finalStandings.push(tiedGroup[0]);
     } else {
       // Article 19.2: Teams with fewer games rank first
-      const teamsByGames = new Map();
+      const teamsByGames = new Map<number, TeamStats[]>();
       for (const team of tiedGroup) {
         const key = team.gamesPlayed;
         if (!teamsByGames.has(key)) {
           teamsByGames.set(key, []);
         }
-        teamsByGames.get(key).push(team);
+        teamsByGames.get(key)!.push(team);
       }
 
       // Sort groups by games played (fewer = better)
       const sortedGroups = Array.from(teamsByGames.entries()).sort((a, b) => a[0] - b[0]);
 
-      for (const [gamesPlayed, group] of sortedGroups) {
+      for (const [_, group] of sortedGroups) {
         if (group.length === 1) {
           finalStandings.push(group[0]);
         } else {
@@ -492,7 +524,7 @@ export function calculateTeamStandings(matches) {
   }
 
   // Calculate positions
-  const positionMap = new Map();
+  const positionMap = new Map<number, TeamStats>();
   let currentPosition = 1;
 
   for (let i = 0; i < finalStandings.length; i++) {
@@ -521,6 +553,7 @@ export function calculateTeamStandings(matches) {
       pointsFor: team.pointsFor,
       pointsAgainst: team.pointsAgainst,
       pointDifference: team.pointDifference,
+      team_id: team.team_id,
     });
   }
 
@@ -530,15 +563,17 @@ export function calculateTeamStandings(matches) {
 /**
  * Get standings as a simple position map (team_id -> position)
  * Useful for quick lookups
- * @param {Array} matches - Array of match objects
- * @returns {Map<number, number>} Map of team_id to position
+ * @param matches - Array of match objects
+ * @returns Map of team_id to position
  */
-export function getTeamPositions(matches) {
+export function getTeamPositions(matches: StandingsMatch[]): Map<number, number> {
   const standings = calculateTeamStandings(matches);
-  const positionMap = new Map();
+  const positionMap = new Map<number, number>();
 
-  for (const [teamId, stats] of standings.entries()) {
-    positionMap.set(teamId, stats.position);
+  for (const [teamId, stats] of Array.from(standings.entries())) {
+    if (stats.position !== undefined) {
+      positionMap.set(teamId, stats.position);
+    }
   }
 
   return positionMap;
@@ -546,10 +581,10 @@ export function getTeamPositions(matches) {
 
 /**
  * Get full standings array sorted by position
- * @param {Array} matches - Array of match objects
- * @returns {Array<{team_id: number, position: number, wins: number, gamesPlayed: number, draws: number, losses: number, pointsFor: number, pointsAgainst: number, pointDifference: number}>} Array of team standings
+ * @param matches - Array of match objects
+ * @returns Array of team standings
  */
-export function getStandingsArray(matches) {
+export function getStandingsArray(matches: StandingsMatch[]): TeamStats[] {
   const standings = calculateTeamStandings(matches);
-  return Array.from(standings.values()).sort((a, b) => a.position - b.position);
+  return Array.from(standings.values()).sort((a, b) => (a.position || 0) - (b.position || 0));
 }
