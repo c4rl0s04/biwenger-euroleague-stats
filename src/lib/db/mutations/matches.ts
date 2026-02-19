@@ -1,15 +1,76 @@
+import { Pool } from 'pg';
+
+// Using a loose type for the db client to support both pg.Pool and the mock object
+export type DbClient = Pool | {
+  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
+};
+
+// ==========================================
+// INTERFACES
+// ==========================================
+
+export interface UpsertMatchParams {
+  round_id: number;
+  round_name: string;
+  home_id: number;
+  away_id: number;
+  date: string; // timestamp or string date
+  status: string;
+  home_score: number | null;
+  away_score: number | null;
+  home_score_regtime: number | null;
+  away_score_regtime: number | null;
+  home_q1: number | null;
+  away_q1: number | null;
+  home_q2: number | null;
+  away_q2: number | null;
+  home_q3: number | null;
+  away_q3: number | null;
+  home_q4: number | null;
+  away_q4: number | null;
+  home_ot: number | null;
+  away_ot: number | null;
+}
+
+export interface UpdateMatchScoreParams {
+  id: number;
+  home_score: number | null;
+  away_score: number | null;
+  status: string;
+}
+
+export interface DuplicateRoundInfo {
+  base_name: string;
+  round_ids: string;
+  canonical_id: number;
+  count: string;
+}
+
+export interface MatchMutations {
+  getMappedTeams: () => Promise<{ id: number; code: string; name: string }[]>;
+  upsertMatch: (params: UpsertMatchParams) => Promise<void>;
+  updateMatchScore: (params: UpdateMatchScoreParams) => Promise<void>;
+  findDuplicateRounds: () => Promise<DuplicateRoundInfo[]>;
+  deleteMatchesByRound: (roundId: number) => Promise<void>;
+  deleteConflictingStats: (oldRoundId: number, newRoundId: number) => Promise<void>;
+  updateStatsRound: (oldRoundId: number, newRoundId: number) => Promise<void>;
+  mergeUserRoundPoints: (oldRoundId: number, newRoundId: number) => Promise<void>;
+  deleteUserRounds: (roundId: number) => Promise<void>;
+  deleteLineups: (roundId: number) => Promise<void>;
+}
+
 /**
  * Match & Round Mutations (Postgres)
  * Handles Write operations for matches, rounds, and legacy cleanup tasks.
  */
-export function prepareMatchMutations(db) {
+export function prepareMatchMutations(db: DbClient): MatchMutations {
   return {
     getMappedTeams: async () => {
       const res = await db.query('SELECT id, code, name FROM teams WHERE code IS NOT NULL');
       return res.rows;
     },
 
-    upsertMatch: async (params) => {
+    upsertMatch: async (params: UpsertMatchParams) => {
       const sql = `
         INSERT INTO matches (
           round_id, round_name, home_id, away_id, date, status, 
@@ -65,7 +126,7 @@ export function prepareMatchMutations(db) {
       await db.query(sql, values);
     },
 
-    updateMatchScore: async ({ id, home_score, away_score, status }) => {
+    updateMatchScore: async ({ id, home_score, away_score, status }: UpdateMatchScoreParams) => {
       const sql = `
         UPDATE matches 
         SET home_score = $2, away_score = $3, status = $4
@@ -94,11 +155,11 @@ export function prepareMatchMutations(db) {
       return res.rows;
     },
 
-    deleteMatchesByRound: async (roundId) => {
+    deleteMatchesByRound: async (roundId: number) => {
       await db.query('DELETE FROM matches WHERE round_id = $1', [roundId]);
     },
 
-    deleteConflictingStats: async (oldRoundId, newRoundId) => {
+    deleteConflictingStats: async (oldRoundId: number, newRoundId: number) => {
       await db.query(
         `
         DELETE FROM player_round_stats 
@@ -111,14 +172,14 @@ export function prepareMatchMutations(db) {
       );
     },
 
-    updateStatsRound: async (oldRoundId, newRoundId) => {
+    updateStatsRound: async (oldRoundId: number, newRoundId: number) => {
       await db.query('UPDATE player_round_stats SET round_id = $2 WHERE round_id = $1', [
         oldRoundId,
         newRoundId,
       ]);
     },
 
-    mergeUserRoundPoints: async (oldRoundId, newRoundId) => {
+    mergeUserRoundPoints: async (oldRoundId: number, newRoundId: number) => {
       await db.query(
         `
         UPDATE user_rounds 
@@ -132,11 +193,11 @@ export function prepareMatchMutations(db) {
       );
     },
 
-    deleteUserRounds: async (roundId) => {
+    deleteUserRounds: async (roundId: number) => {
       await db.query('DELETE FROM user_rounds WHERE round_id = $1', [roundId]);
     },
 
-    deleteLineups: async (roundId) => {
+    deleteLineups: async (roundId: number) => {
       await db.query('DELETE FROM lineups WHERE round_id = $1', [roundId]);
     },
   };

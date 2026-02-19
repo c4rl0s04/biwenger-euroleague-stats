@@ -8,7 +8,7 @@ import {
   normalizePlayerName,
 } from '../api/euroleague-client.js';
 import { prepareEuroleagueMutations } from '../db/mutations/euroleague';
-import { prepareMatchMutations } from '../db/mutations/matches.js';
+import { prepareMatchMutations } from '../db/mutations/matches';
 import { calculateBiwengerPoints } from '../utils/fantasy-scoring.js';
 import dotenv from 'dotenv';
 import path from 'path';

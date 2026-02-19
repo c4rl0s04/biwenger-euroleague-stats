@@ -7,7 +7,7 @@ import {
 import { CONFIG } from '../../../config.js';
 import { prepareEuroleagueMutations } from '../../../db/mutations/euroleague';
 import { calculateRegularTimeScores } from '../../../logic/match-scores.js';
-import { prepareMatchMutations } from '../../../db/mutations/matches.js';
+import { prepareMatchMutations } from '../../../db/mutations/matches';
 
 const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 

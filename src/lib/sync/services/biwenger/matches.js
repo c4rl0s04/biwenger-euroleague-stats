@@ -1,6 +1,6 @@
 import { fetchRoundGames } from '../../../api/biwenger-client.js';
 import { fetchGameHeader, fetchSchedule } from '../../../api/euroleague-client.js';
-import { prepareMatchMutations } from '../../../db/mutations/matches.js';
+import { prepareMatchMutations } from '../../../db/mutations/matches';
 import { CONFIG } from '../../../config.js';
 
 /**
