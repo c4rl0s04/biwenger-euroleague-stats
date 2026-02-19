@@ -8,7 +8,9 @@ export const db = drizzle(clientDb as any, { schema });
 
 export * from './queries/tournaments.js';
 export * from './queries/core/users.js';
-export * from './queries/core/players.js'; // Assuming players.js exists, step 605 said 'players' (no ext). I'll check dir.
+
+export * from './queries/core/players';
+ // Assuming players.js exists, step 605 said 'players' (no ext). I'll check dir.
 export * from './queries/core/teams.js';   // Assuming teams.js exists
 
 export * from './queries/competition/rounds';

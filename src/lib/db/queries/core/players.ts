@@ -2,12 +2,67 @@ import { db } from '../../client';
 import { CONFIG } from '../../../config.js';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils.js';
 
+
+export interface CorePlayer {
+  id: number;
+  name: string;
+  img: string;
+  position: string;
+  price: number;
+  price_increment?: number;
+  team_id: number;
+  team_name: string;
+  team_short_name?: string;
+  team_img?: string;
+  owner_id: number;
+  owner_name: string;
+  owner_color_index: number;
+  owner_icon?: string;
+  points: number;
+  average: number;
+  recent_scores?: string;
+  status?: string;
+  total_points?: number;
+  played?: number;
+  best_score?: number;
+  worst_score?: number;
+}
+
+
+export interface PlayerRecentForm extends CorePlayer {
+  games_played: number;
+  avg_points: number;
+  total_points: number;
+  recent_scores: string;
+  season_avg?: number;
+  avg_diff?: number;
+  trend_pct?: number;
+  games?: number; // Alias for games_played in some queries
+  recent_avg?: number; // Alias for avg_points in some queries
+}
+
+export interface RisingStar extends CorePlayer {
+  recent_avg: number;
+  earlier_avg: number;
+  improvement: number;
+  improvement_pct: number;
+}
+
+export interface PlayerDetails extends CorePlayer {
+  games_played: number;
+  season_avg: number;
+  total_points: number;
+  recentMatches: any[]; // Could type this further if useful
+  priceHistory: any[];
+  transfers: any[];
+  nextMatch: any;
+  advancedStats: any;
+}
+
 /**
  * Get top performing players
- * @param {number} limit - Number of players
- * @returns {Promise<Array>} List of top players
  */
-export async function getTopPlayers(limit = 6) {
+export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
   const query = `
     WITH FinishedRounds AS (
       SELECT m.round_id
@@ -38,7 +93,7 @@ export async function getTopPlayers(limit = 6) {
       GROUP BY player_id
     )
     SELECT 
-      p.id, p.name, t.id as team_id, t.name as team, p.position, p.price,
+      p.id, p.name, p.img, t.id as team_id, t.name as team_name, p.position, p.price,
       p.puntos as points, 
       ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
       p.owner_id,
@@ -51,7 +106,8 @@ export async function getTopPlayers(limit = 6) {
     ORDER BY p.puntos DESC 
     LIMIT $1
   `;
-  return (await db.query(query, [limit])).rows.map((row) => ({
+  // Note: Adjusted SELECT columns to match interface (team -> team_name) somewhat, or rely on loose mapping
+  return (await db.query(query, [limit])).rows.map((row: any) => ({
     ...row,
     average: parseFloat(row.average) || 0,
   }));
@@ -59,11 +115,8 @@ export async function getTopPlayers(limit = 6) {
 
 /**
  * Get top players by recent form (last N rounds)
- * @param {number} limit - Number of players to return
- * @param {number} rounds - Number of recent rounds to analyze
- * @returns {Promise<Array>} List of top performing players by form
  */
-export async function getTopPlayersByForm(limit = 5, rounds = 3) {
+export async function getTopPlayersByForm(limit: number = 5, rounds: number = 3): Promise<PlayerRecentForm[]> {
   const query = `
     WITH RecentRounds AS (
       SELECT m.round_id
@@ -87,7 +140,7 @@ export async function getTopPlayersByForm(limit = 5, rounds = 3) {
         p.name,
         p.position,
         t.id as team_id,
-        t.name as team,
+        t.name as team_name,
         p.owner_id,
         u.name as owner_name, u.color_index as owner_color_index,
         SUM(os.fantasy_points) as total_points,
@@ -102,11 +155,11 @@ export async function getTopPlayersByForm(limit = 5, rounds = 3) {
       HAVING COUNT(*) >= 2
     )
     SELECT 
-      player_id,
+      player_id as id,
       name,
       position,
       team_id,
-      team,
+      team_name,
       owner_id,
       owner_name,
       owner_color_index,
@@ -119,18 +172,16 @@ export async function getTopPlayersByForm(limit = 5, rounds = 3) {
     LIMIT $2
   `;
 
-  return (await db.query(query, [rounds, limit])).rows.map((row) => ({
+  return (await db.query(query, [rounds, limit])).rows.map((row: any) => ({
     ...row,
     avg_points: parseFloat(row.avg_points) || 0,
-  }));
+  })) as PlayerRecentForm[];
 }
 
 /**
  * Get detailed player information by ID
- * @param {number} playerId - Player ID
- * @returns {Promise<Object>} Player details including stats
  */
-export async function getPlayerDetails(playerId) {
+export async function getPlayerDetails(playerId: number | string): Promise<PlayerDetails | null> {
   // 1. Base Player Info
   const query = `
     SELECT 
@@ -140,7 +191,7 @@ export async function getPlayerDetails(playerId) {
       (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE player_id = p.id) as season_avg,
       (SELECT SUM(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as total_points,
       t.id as team_id,
-      t.name as team
+      t.name as team_name
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
@@ -230,7 +281,7 @@ export async function getPlayerDetails(playerId) {
   if (initialOwner) {
     let initialDate;
     try {
-      const LeagueStartDate = new Date(CONFIG.LEAGUE.START_DATE);
+      const LeagueStartDate = new Date(CONFIG.LEAGUE.START_DATE || '');
       if (!isNaN(LeagueStartDate.getTime())) {
         initialDate = LeagueStartDate.toISOString();
       } else {
@@ -282,7 +333,7 @@ export async function getPlayerDetails(playerId) {
 
   // 6. Advanced Stats Aggregates (Season Totals)
   const advancedStats = recentMatches.reduce(
-    (acc, m) => {
+    (acc: any, m: any) => {
       acc.two_points_made += m.two_points_made || 0;
       acc.two_points_attempted += m.two_points_attempted || 0;
       acc.three_points_made += m.three_points_made || 0;
@@ -314,20 +365,19 @@ export async function getPlayerDetails(playerId) {
     transfers,
     nextMatch,
     advancedStats,
-  };
+  } as PlayerDetails;
 }
 
 /**
  * Get players with birthdays today
- * @returns {Promise<Array>} Players celebrating birthdays
  */
-export async function getPlayersBirthday() {
+export async function getPlayersBirthday(): Promise<CorePlayer[]> {
   const query = `
     SELECT 
       p.id,
       p.name,
       t.id as team_id,
-      t.name as team,
+      t.name as team_name,
       p.position,
       p.birth_date,
       u.name as owner_name, u.color_index as owner_color_index
@@ -344,10 +394,8 @@ export async function getPlayersBirthday() {
 
 /**
  * Get players on hot or cold streaks
- * @param {number} minGames - Minimum games for streak
- * @returns {Promise<Object>} Hot and cold players
  */
-export async function getPlayerStreaks(minGames = 3) {
+export async function getPlayerStreaks(minGames: number = 3): Promise<{ hot: PlayerRecentForm[]; cold: PlayerRecentForm[] }> {
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id
@@ -357,10 +405,10 @@ export async function getPlayerStreaks(minGames = 3) {
     ),
     PlayerRecentForm AS (
       SELECT 
-        prs.player_id,
+        prs.player_id as id,
         p.name,
         t.id as team_id,
-        t.name as team,
+        t.name as team_name,
         p.position,
         COUNT(*) as games,
         AVG(prs.fantasy_points) as recent_avg,
@@ -382,10 +430,10 @@ export async function getPlayerStreaks(minGames = 3) {
       GROUP BY player_id
     )
     SELECT 
-      prf.player_id,
+      prf.id,
       prf.name,
       prf.team_id,
-      prf.team,
+      prf.team_name,
       prf.position,
       prf.games,
       prf.recent_avg,
@@ -396,12 +444,12 @@ export async function getPlayerStreaks(minGames = 3) {
       ROUND(prf.recent_avg - COALESCE(sa.season_avg, 0), 1) as avg_diff,
       ROUND((prf.recent_avg - COALESCE(sa.season_avg, 0)) / NULLIF(sa.season_avg, 0) * 100, 1) as trend_pct
     FROM PlayerRecentForm prf
-    LEFT JOIN SeasonAvg sa ON prf.player_id = sa.player_id
+    LEFT JOIN SeasonAvg sa ON prf.id = sa.player_id
     ORDER BY ABS(prf.recent_avg - COALESCE(sa.season_avg, 0)) DESC
     LIMIT 20
   `;
 
-  const allPlayers = (await db.query(query, [minGames])).rows.map((p) => ({
+  const allPlayers = (await db.query(query, [minGames])).rows.map((p: any) => ({
     ...p,
     recent_avg: parseFloat(p.recent_avg) || 0,
     season_avg: parseFloat(p.season_avg) || 0,
@@ -410,17 +458,15 @@ export async function getPlayerStreaks(minGames = 3) {
   }));
 
   return {
-    hot: allPlayers.filter((p) => p.trend_pct > 20).slice(0, 5),
-    cold: allPlayers.filter((p) => p.trend_pct < -20).slice(0, 5),
+    hot: allPlayers.filter((p: any) => p.trend_pct > 20).slice(0, 5),
+    cold: allPlayers.filter((p: any) => p.trend_pct < -20).slice(0, 5),
   };
 }
 
 /**
  * Get players showing improvement trend
- * @param {number} limit - Number of rising stars
- * @returns {Promise<Array>} Players with improving performance
  */
-export async function getRisingStars(limit = 5) {
+export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id
@@ -454,10 +500,10 @@ export async function getRisingStars(limit = 5) {
       GROUP BY player_id
     )
     SELECT 
-      p.id as player_id,
+      p.id,
       p.name,
       t.id as team_id,
-      t.name as team,
+      t.name as team_name,
       p.position,
       rp.recent_avg,
       COALESCE(ep.earlier_avg, 0) as earlier_avg,
@@ -475,7 +521,7 @@ export async function getRisingStars(limit = 5) {
     LIMIT $1
   `;
 
-  return (await db.query(query, [limit])).rows.map((row) => ({
+  return (await db.query(query, [limit])).rows.map((row: any) => ({
     ...row,
     recent_avg: parseFloat(row.recent_avg) || 0,
     earlier_avg: parseFloat(row.earlier_avg) || 0,
@@ -486,9 +532,8 @@ export async function getRisingStars(limit = 5) {
 
 /**
  * Get all players with basic stats for the players list
- * @returns {Promise<Array>} List of all players
  */
-export async function getAllPlayers() {
+export async function getAllPlayers(): Promise<CorePlayer[]> {
   const query = `
     WITH PlayerRoundScores AS (
        SELECT 
@@ -563,7 +608,7 @@ export async function getAllPlayers() {
      LEFT JOIN RecentScores rs ON p.id = rs.player_id
      ORDER BY COALESCE(pa.total_points, 0) DESC
   `;
-  return (await db.query(query)).rows.map((p) => ({
+  return (await db.query(query)).rows.map((p: any) => ({
     ...p,
     total_points: parseFloat(p.total_points) || 0,
     played: parseInt(p.played) || 0,
@@ -576,11 +621,9 @@ export async function getAllPlayers() {
 
 /**
  * Get stat leaders (Top 5)
- * @param {string} type - Stat type (real_points, rebounds, assists, pir)
- * @returns {Promise<Array>} List of top players for the stat
  */
-export async function getStatLeaders(type = 'points') {
-  const columnMap = {
+export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
+  const columnMap: Record<string, string> = {
     real_points: 'points',
     points: 'points',
     rebounds: 'rebounds',
@@ -596,7 +639,7 @@ export async function getStatLeaders(type = 'points') {
       p.id as player_id,
       p.name,
       t.id as team_id,
-      t.name as team,
+      t.name as team_name,
       p.owner_id,
       u.name as owner_name,
       u.color_index as owner_color_index,
@@ -614,7 +657,7 @@ export async function getStatLeaders(type = 'points') {
   `;
 
   try {
-    return (await db.query(query)).rows.map((row) => ({
+    return (await db.query(query)).rows.map((row: any) => ({
       ...row,
       value: parseFloat(row.value) || 0,
       avg_value: parseFloat(row.avg_value) || 0,
