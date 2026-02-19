@@ -1,11 +1,16 @@
 import { db } from '../../client';
 
+export interface Team {
+  id: number;
+  name: string;
+  short_name: string;
+  logo: string;
+}
+
 /**
  * Get team details by ID
- * @param {number} id - Team ID
- * @returns {Promise<Object>} Team details
  */
-export async function getTeamById(id) {
+export async function getTeamById(id: number | string): Promise<Team | undefined> {
   const query = `
     SELECT 
       id,
