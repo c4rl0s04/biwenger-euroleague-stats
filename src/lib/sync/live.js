@@ -7,7 +7,7 @@ import {
   parseBoxScoreStats,
   normalizePlayerName,
 } from '../api/euroleague-client.js';
-import { prepareEuroleagueMutations } from '../db/mutations/euroleague.js';
+import { prepareEuroleagueMutations } from '../db/mutations/euroleague';
 import { prepareMatchMutations } from '../db/mutations/matches.js';
 import { calculateBiwengerPoints } from '../utils/fantasy-scoring.js';
 import dotenv from 'dotenv';

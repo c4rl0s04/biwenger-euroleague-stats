@@ -5,7 +5,7 @@ import {
   normalizePlayerName,
 } from '../../../api/euroleague-client.js';
 import { CONFIG } from '../../../config.js';
-import { prepareEuroleagueMutations } from '../../../db/mutations/euroleague.js';
+import { prepareEuroleagueMutations } from '../../../db/mutations/euroleague';
 import { calculateRegularTimeScores } from '../../../logic/match-scores.js';
 import { prepareMatchMutations } from '../../../db/mutations/matches.js';
 

@@ -1,7 +1,7 @@
 import * as syncEuroleagueStats from '../services/euroleague/stats.js';
 import { fetchSchedule } from '../../api/euroleague-client.js';
 import { CONFIG } from '../../config.js';
-import { prepareEuroleagueMutations } from '../../db/mutations/euroleague.js';
+import { prepareEuroleagueMutations } from '../../db/mutations/euroleague';
 
 /**
  * Step 5: Sync Player Stats

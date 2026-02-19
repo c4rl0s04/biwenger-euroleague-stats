@@ -1,6 +1,6 @@
 import { fetchTeams } from '../../api/euroleague-client.js';
 import { CONFIG } from '../../config.js';
-import { prepareEuroleagueMutations } from '../../db/mutations/euroleague.js';
+import { prepareEuroleagueMutations } from '../../db/mutations/euroleague';
 import { PlayerMatcher } from '../services/euroleague/matcher.js';
 
 /**

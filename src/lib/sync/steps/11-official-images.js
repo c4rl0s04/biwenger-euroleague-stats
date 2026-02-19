@@ -1,5 +1,5 @@
 import { CONFIG } from '../../config.js';
-import { prepareEuroleagueMutations } from '../../db/mutations/euroleague.js';
+import { prepareEuroleagueMutations } from '../../db/mutations/euroleague';
 
 // Simple sleep to respect rate limits
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
