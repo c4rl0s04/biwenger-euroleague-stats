@@ -1,12 +1,29 @@
 import { db } from '../../client';
 
+export interface InitialSquadPerformance {
+  user_name: string;
+  user_color_index: number;
+  total_points: number;
+}
+
+export interface InitialSquadPotential {
+  user_name: string;
+  user_color_index: number;
+  potential_points: number;
+}
+
+export interface TheoreticalBreakdown {
+  user_name: string;
+  user_color_index: number;
+  player_name: string;
+  player_total_points: number;
+}
+
 /**
  * Calculates the actual performance of initial squads based on lineup usage.
  * Appreciation: Starter (1.0), 6th Man (0.75), Bench (0.5).
- *
- * @returns {Promise<Array>} List of users with their total weighted points.
  */
-export async function getInitialSquadActualPerformance() {
+export async function getInitialSquadActualPerformance(): Promise<InitialSquadPerformance[]> {
   const query = `
     SELECT 
       users.name as user_name,
@@ -26,15 +43,16 @@ export async function getInitialSquadActualPerformance() {
     GROUP BY isq.user_id, users.name, users.color_index
     ORDER BY total_points DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    total_points: parseFloat(row.total_points) || 0,
+  }));
 }
 
 /**
  * Calculates the theoretical maximum points of initial squads if they were never sold or benched.
- *
- * @returns {Promise<Array>} List of users with their potential total points.
  */
-export async function getInitialSquadTheoreticalPotential() {
+export async function getInitialSquadTheoreticalPotential(): Promise<InitialSquadPotential[]> {
   const query = `
     SELECT 
       u.name as user_name,
@@ -46,13 +64,16 @@ export async function getInitialSquadTheoreticalPotential() {
     GROUP BY u.name, u.color_index
     ORDER BY potential_points DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    potential_points: parseInt(row.potential_points) || 0,
+  }));
 }
 
 /**
  * Get detailed potential breakdown by player for a specific user (or all if null)
  */
-export async function getTheoreticalBreakdown() {
+export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]> {
   const query = `
     SELECT 
       u.name as user_name,
@@ -66,5 +87,8 @@ export async function getTheoreticalBreakdown() {
     GROUP BY u.name, u.color_index, p.name
     ORDER BY u.name, player_total_points DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    player_total_points: parseInt(row.player_total_points) || 0,
+  }));
 }
