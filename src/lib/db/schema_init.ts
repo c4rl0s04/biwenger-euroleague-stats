@@ -1,9 +1,14 @@
+import { Pool } from 'pg';
+
+export type DbClient = Pool | {
+  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
+};
+
 /**
  * Ensures that all necessary database tables exist and are up to date.
  * Handles migrations (e.g. adding columns).
- * @param {import('pg').Pool} db - Postgres Database Pool
  */
-export async function ensureSchema(db) {
+export async function ensureSchema(db: DbClient) {
   // 1. Users Table
   await db.query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -337,7 +342,7 @@ export async function ensureSchema(db) {
   for (const indexSql of indexes) {
     try {
       await db.query(indexSql);
-    } catch (e) {
+    } catch (e: any) {
       // Index might already exist
       console.warn(`Index creation warning: ${e.message}`);
     }
