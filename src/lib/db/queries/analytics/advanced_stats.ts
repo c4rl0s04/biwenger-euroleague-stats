@@ -4,14 +4,157 @@
  */
 
 import { db } from '../../client';
-import { cached, CACHE_TTL } from '../../../utils/cache.js';
+import { cached, CACHE_TTL } from '../../../utils/cache';
+
+export interface HeatCheckStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  last5_avg: number;
+  season_avg: number;
+  diff: number;
+  status: 'fire' | 'ice' | 'neutral';
+}
+
+export interface HunterStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  recent_points: number;
+  gained: number;
+}
+
+export interface RollingAverageStat {
+  user_id: number;
+  name: string;
+  color_index: number;
+  data: {
+    round: number;
+    round_name: string;
+    avg: number;
+  }[];
+}
+
+export interface FloorCeilingStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  floor: number;
+  ceiling: number;
+  avg: number;
+}
+
+export interface ReliabilityStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  total_rounds: number;
+  rounds_above: number;
+  pct: number;
+}
+
+export interface PointDistributionStat {
+  user_id: number;
+  name: string;
+  color_index: number;
+  distribution: {
+    [range: string]: number; // '90-135' | '136-170' | ...
+  };
+}
+
+export interface PlayAllStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  wins: number;
+  losses: number;
+  ties: number;
+  pct: number;
+}
+
+export interface DominanceStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  wins: number;
+  avg_margin: number;
+}
+
+export interface TheoreticalGapStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  current_points: number;
+  perfectTotal: number;
+  gap: number;
+  pct: number;
+}
+
+export interface HeatmapStat {
+  rounds: { id: number; name: string }[];
+  users: {
+    id: number;
+    name: string;
+    icon: string;
+    color_index: number;
+    scores: (number | null)[];
+  }[];
+}
+
+export interface PositionChangeStat {
+  rounds: { id: number; name: string }[];
+  users: {
+    id: number;
+    name: string;
+    icon: string;
+    color_index: number;
+    history: { position: number; change: number }[];
+  }[];
+  valid: boolean;
+  stats: {
+    biggestClimber: { name: string; change: number; round: string };
+    biggestFaller: { name: string; change: number; round: string };
+  };
+}
+
+export interface RivalryMatrixStat {
+  users: {
+    id: number;
+    name: string;
+    icon: string;
+    color_index: number;
+  }[];
+  matrix: {
+    [userId: number]: {
+      [opponentId: number]: { wins: number; losses: number; ties: number };
+    };
+  };
+}
+
+export interface CaptainStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  total_captains: number;
+  raw_captain_points: number;
+  total_bonus: number;
+  weighted_points: number;
+  avg_captain_points: number;
+}
 
 /**
  * Get Heat Check Stats
  * Compares average points in last 5 rounds vs season average
- * @returns {Promise<Array<{user_id, name, icon, last5Avg, seasonAvg, diff, status}>>}
  */
-export async function getHeatCheckStats() {
+export async function getHeatCheckStats(): Promise<HeatCheckStat[]> {
   try {
     const sql = `
       WITH UserParticipation AS (
@@ -52,7 +195,7 @@ export async function getHeatCheckStats() {
       ORDER BY diff DESC
     `;
 
-    return (await db.query(sql)).rows.map((stat) => ({
+    return (await db.query(sql)).rows.map((stat: any) => ({
       ...stat,
       last5_avg: parseFloat(stat.last5_avg) || 0,
       season_avg: parseFloat(stat.season_avg) || 0,
@@ -69,7 +212,7 @@ export async function getHeatCheckStats() {
  * Get "The Hunter" Stats
  * Points gained/lost vs leader in last 5 rounds
  */
-export async function getHunterStats() {
+export async function getHunterStats(): Promise<HunterStat[]> {
   try {
     // Get current leader ID
     const extendedStandings = (
@@ -84,7 +227,6 @@ export async function getHunterStats() {
 
     if (!extendedStandings) return [];
     const leaderId = extendedStandings.user_id;
-    // We don't use 'total' here, but it's good practice to know it's unparsed if we did.
 
     // Get last 5 rounds
     const rounds = (
@@ -106,21 +248,21 @@ export async function getHunterStats() {
       GROUP BY u.id
     `;
 
-    const recentPoints = (await db.query(sql, [minRoundId])).rows.map((p) => ({
+    const recentPoints = (await db.query(sql, [minRoundId])).rows.map((p: any) => ({
       ...p,
       recent_points: parseInt(p.recent_points) || 0,
     }));
-    const leaderStats = recentPoints.find((p) => p.user_id === leaderId);
+    const leaderStats = recentPoints.find((p: any) => p.user_id === leaderId);
 
     if (!leaderStats) return [];
 
     return recentPoints
-      .filter((p) => p.user_id !== leaderId)
-      .map((p) => ({
+      .filter((p: any) => p.user_id !== leaderId)
+      .map((p: any) => ({
         ...p,
         gained: p.recent_points - leaderStats.recent_points,
       }))
-      .sort((a, b) => b.gained - a.gained);
+      .sort((a: any, b: any) => b.gained - a.gained);
   } catch (error) {
     console.error('Error in getHunterStats:', error);
     return [];
@@ -130,14 +272,14 @@ export async function getHunterStats() {
 /**
  * Get Rolling Average (3 rounds)
  */
-export async function getRollingAverageStats() {
+export async function getRollingAverageStats(): Promise<RollingAverageStat[]> {
   try {
     const rounds = (
       await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
     ).rows;
     const users = (await db.query('SELECT id, name, color_index FROM users')).rows;
 
-    const result = [];
+    const result: RollingAverageStat[] = [];
 
     // Calculate rolling avg for each user
     for (const user of users) {
@@ -158,11 +300,11 @@ export async function getRollingAverageStats() {
       for (let i = 0; i < userPoints.length; i++) {
         // Get window of current + previous 2 rounds
         const window = userPoints.slice(Math.max(0, i - 2), i + 1);
-        const sum = window.reduce((acc, curr) => acc + curr.points, 0);
+        const sum = window.reduce((acc: number, curr: any) => acc + curr.points, 0);
         const avg = sum / window.length;
 
         // Find round name from pre-fetched rounds array
-        const roundInfo = rounds.find((r) => r.round_id === userPoints[i].round_id);
+        const roundInfo = rounds.find((r: any) => r.round_id === userPoints[i].round_id);
         const roundName = roundInfo ? roundInfo.round_name : `Jornada ${userPoints[i].round_id}`;
 
         dataPoints.push({
@@ -190,7 +332,7 @@ export async function getRollingAverageStats() {
 /**
  * Get Floor & Ceiling Stats
  */
-export async function getFloorCeilingStats() {
+export async function getFloorCeilingStats(): Promise<FloorCeilingStat[]> {
   try {
     const sql = `
       SELECT 
@@ -208,7 +350,7 @@ export async function getFloorCeilingStats() {
       ORDER BY ceiling DESC
     `;
 
-    return (await db.query(sql)).rows.map((row) => ({
+    return (await db.query(sql)).rows.map((row: any) => ({
       ...row,
       floor: parseInt(row.floor) || 0,
       ceiling: parseInt(row.ceiling) || 0,
@@ -223,7 +365,7 @@ export async function getFloorCeilingStats() {
 /**
  * Get Reliability Stats (% Rounds > Average)
  */
-export async function getReliabilityStats() {
+export async function getReliabilityStats(): Promise<ReliabilityStat[]> {
   try {
     // 1. Calculate Average per Round
     const roundAvgs = (
@@ -235,8 +377,8 @@ export async function getReliabilityStats() {
     `)
     ).rows;
 
-    const roundAvgMap = {};
-    roundAvgs.forEach((r) => (roundAvgMap[r.round_id] = parseFloat(r.avg_pts) || 0));
+    const roundAvgMap: Record<number, number> = {};
+    roundAvgs.forEach((r: any) => (roundAvgMap[r.round_id] = parseFloat(r.avg_pts) || 0));
 
     // 2. Get all User Scores
     const userScores = (
@@ -255,8 +397,8 @@ export async function getReliabilityStats() {
     ).rows;
 
     // 3. Aggregate
-    const userStats = {};
-    userScores.forEach((score) => {
+    const userStats: Record<number, any> = {};
+    userScores.forEach((score: any) => {
       if (!userStats[score.user_id]) {
         userStats[score.user_id] = {
           user_id: score.user_id,
@@ -276,11 +418,11 @@ export async function getReliabilityStats() {
     });
 
     return Object.values(userStats)
-      .map((u) => ({
+      .map((u: any) => ({
         ...u,
         pct: u.total_rounds > 0 ? (u.rounds_above / u.total_rounds) * 100 : 0,
       }))
-      .sort((a, b) => b.pct - a.pct);
+      .sort((a: any, b: any) => b.pct - a.pct);
   } catch (error) {
     console.error('Error in getReliabilityStats:', error);
     return [];
@@ -290,7 +432,7 @@ export async function getReliabilityStats() {
 /**
  * Get Point Distribution (Histogram)
  */
-export async function getPointDistributionStats() {
+export async function getPointDistributionStats(): Promise<PointDistributionStat[]> {
   try {
     const users = (await db.query('SELECT id, name, color_index FROM users')).rows;
     const buckets = [
@@ -300,10 +442,10 @@ export async function getPointDistributionStats() {
       { range: '206+', min: 206, max: 9999 },
     ];
 
-    const result = [];
+    const result: PointDistributionStat[] = [];
 
     for (const user of users) {
-      const distribution = {};
+      const distribution: Record<string, number> = {};
       buckets.forEach((b) => (distribution[b.range] = 0));
 
       const rounds = (
@@ -313,7 +455,7 @@ export async function getPointDistributionStats() {
         )
       ).rows;
 
-      rounds.forEach((r) => {
+      rounds.forEach((r: any) => {
         const p = r.points;
         if (p <= 135) distribution['90-135']++;
         else if (p <= 170) distribution['136-170']++;
@@ -340,7 +482,7 @@ export async function getPointDistributionStats() {
  * Get All-Play-All Record (Virtual League)
  * CACHED: This is an O(n * m²) operation, cache for 15 minutes
  */
-export async function getAllPlayAllStats() {
+export async function getAllPlayAllStats(): Promise<PlayAllStat[]> {
   return cached('advanced:all-play-all', CACHE_TTL.LONG, async () => {
     try {
       // Get all rounds
@@ -349,8 +491,8 @@ export async function getAllPlayAllStats() {
       ).rows;
       const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
 
-      const standings = {};
-      users.forEach((u) => {
+      const standings: Record<number, any> = {};
+      users.forEach((u: any) => {
         standings[u.id] = {
           user_id: u.id,
           name: u.name,
@@ -393,11 +535,11 @@ export async function getAllPlayAllStats() {
       }
 
       return Object.values(standings)
-        .map((s) => ({
+        .map((s: any) => ({
           ...s,
           pct: (s.wins / (s.wins + s.losses + s.ties)) * 100,
         }))
-        .sort((a, b) => b.pct - a.pct);
+        .sort((a: any, b: any) => b.pct - a.pct);
     } catch (error) {
       console.error('Error in getAllPlayAllStats:', error);
       return [];
@@ -408,7 +550,7 @@ export async function getAllPlayAllStats() {
 /**
  * Get Dominance Stats (Margin of Victory)
  */
-export async function getDominanceStats() {
+export async function getDominanceStats(): Promise<DominanceStat[]> {
   try {
     const result = (
       await db.query(`
@@ -437,7 +579,7 @@ export async function getDominanceStats() {
     `)
     ).rows;
 
-    return result.map((row) => ({
+    return result.map((row: any) => ({
       ...row,
       wins: parseInt(row.wins) || 0,
       avg_margin: parseFloat(row.avg_margin) || 0,
@@ -451,7 +593,7 @@ export async function getDominanceStats() {
 /**
  * Get Theoretical Gap Stats (Distance from perfect season)
  */
-export async function getTheoreticalGapStats() {
+export async function getTheoreticalGapStats(): Promise<TheoreticalGapStat[]> {
   try {
     // Calculate Perfect Season Total
     const perfectTotalResult = (
@@ -483,7 +625,7 @@ export async function getTheoreticalGapStats() {
     ).rows;
 
     return userTotals
-      .map((u) => {
+      .map((u: any) => {
         const current_points = parseInt(u.current_points) || 0;
         return {
           ...u,
@@ -493,7 +635,7 @@ export async function getTheoreticalGapStats() {
           pct: (current_points / perfectTotal) * 100,
         };
       })
-      .sort((a, b) => a.gap - b.gap); // Smallest gap is best
+      .sort((a: any, b: any) => a.gap - b.gap); // Smallest gap is best
   } catch (error) {
     console.error('Error in getTheoreticalGapStats:', error);
     return [];
@@ -504,7 +646,7 @@ export async function getTheoreticalGapStats() {
  * Get Round-by-Round Heatmap Stats
  * CACHED: Aggregates all scores, cache for 15 minutes
  */
-export async function getHeatmapStats() {
+export async function getHeatmapStats(): Promise<HeatmapStat> {
   return cached('advanced:heatmap', CACHE_TTL.LONG, async () => {
     try {
       // Get all rounds to ensure column structure
@@ -527,24 +669,24 @@ export async function getHeatmapStats() {
       ).rows;
 
       // Map scores for O(1) access: scoreMap[userId][roundId] = points
-      const scoreMap = {};
-      scores.forEach((s) => {
+      const scoreMap: Record<number, Record<number, number>> = {};
+      scores.forEach((s: any) => {
         if (!scoreMap[s.user_id]) scoreMap[s.user_id] = {};
         scoreMap[s.user_id][s.round_id] = s.points;
       });
 
       // Build grid
       return {
-        rounds: rounds.map((r) => ({
+        rounds: rounds.map((r: any) => ({
           id: r.round_id,
           name: r.round_name.replace('Jornada ', 'J'),
         })),
-        users: users.map((u) => ({
+        users: users.map((u: any) => ({
           id: u.id,
           name: u.name,
           icon: u.icon,
           color_index: u.color_index,
-          scores: rounds.map((r) => scoreMap[u.id]?.[r.round_id] ?? null),
+          scores: rounds.map((r: any) => scoreMap[u.id]?.[r.round_id] ?? null),
         })),
       };
     } catch (error) {
@@ -559,7 +701,7 @@ export async function getHeatmapStats() {
  * Tracks rank changes round-by-round
  * CACHED: Replays entire season history, cache for 15 minutes
  */
-export async function getPositionChangesStats() {
+export async function getPositionChangesStats(): Promise<PositionChangeStat> {
   return cached('advanced:position-changes', CACHE_TTL.LONG, async () => {
     try {
       const rounds = (
@@ -576,32 +718,36 @@ export async function getPositionChangesStats() {
       ).rows;
 
       // Map scores by round: roundScores[roundId][userId] = points
-      const roundScores = {};
-      scores.forEach((s) => {
+      const roundScores: Record<number, Record<number, number>> = {};
+      scores.forEach((s: any) => {
         if (!roundScores[s.round_id]) roundScores[s.round_id] = {};
         roundScores[s.round_id][s.user_id] = s.points;
       });
 
       // Tracking state
-      const userTotals = {}; // { userId: currentTotal }
-      users.forEach((u) => (userTotals[u.id] = 0));
+      const userTotals: Record<number, number> = {}; // { userId: currentTotal }
+      users.forEach((u: any) => (userTotals[u.id] = 0));
 
-      const history = []; // [{ round_id, ranks: { userId: rank } }]
+      const history: {
+        round_id: number;
+        round_name: string;
+        ranks: Record<number, number>;
+      }[] = [];
 
       // Replay history
       for (const round of rounds) {
         // update totals
         const currentRoundScores = roundScores[round.round_id] || {};
-        users.forEach((u) => {
+        users.forEach((u: any) => {
           userTotals[u.id] += currentRoundScores[u.id] || 0;
         });
 
         // calculate ranks for this round
         // sort users by total points desc
-        const sortedUsers = [...users].sort((a, b) => userTotals[b.id] - userTotals[a.id]);
+        const sortedUsers = [...users].sort((a: any, b: any) => userTotals[b.id] - userTotals[a.id]);
 
-        const currentRanks = {};
-        sortedUsers.forEach((u, index) => {
+        const currentRanks: Record<number, number> = {};
+        sortedUsers.forEach((u: any, index: number) => {
           currentRanks[u.id] = index + 1;
         });
 
@@ -617,7 +763,7 @@ export async function getPositionChangesStats() {
       let biggestFaller = { name: '', change: 0, round: '' };
 
       // Format output: evolutions per user
-      const usersEvolution = users.map((user) => {
+      const usersEvolution = users.map((user: any) => {
         const historyData = history.map((h, index) => {
           const currRank = h.ranks[user.id];
 
@@ -644,12 +790,12 @@ export async function getPositionChangesStats() {
           name: user.name,
           icon: user.icon,
           color_index: user.color_index,
-          history: historyData, // Renamed from 'changes' to 'history' to reflect richer data
+          history: historyData,
         };
       });
 
       return {
-        rounds: rounds.map((r) => ({
+        rounds: rounds.map((r: any) => ({
           id: r.round_id,
           name: r.round_name.replace('Jornada ', 'J'),
         })),
@@ -659,7 +805,15 @@ export async function getPositionChangesStats() {
       };
     } catch (error) {
       console.error('Error in getPositionChangesStats:', error);
-      return { rounds: [], users: [], valid: false };
+      return { 
+        rounds: [], 
+        users: [], 
+        valid: false, 
+        stats: { 
+          biggestClimber: { name: '', change: 0, round: '' }, 
+          biggestFaller: { name: '', change: 0, round: '' } 
+        } 
+      };
     }
   });
 }
@@ -669,7 +823,7 @@ export async function getPositionChangesStats() {
  * Head-to-Head record for every user pair
  * CACHED: O(n * m²) operation, cache for 15 minutes
  */
-export async function getRivalryMatrixStats() {
+export async function getRivalryMatrixStats(): Promise<RivalryMatrixStat> {
   return cached('advanced:rivalry-matrix', CACHE_TTL.LONG, async () => {
     try {
       const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
@@ -679,10 +833,10 @@ export async function getRivalryMatrixStats() {
 
       // Initialize matrix
       // Structure: { [userId]: { [opponentId]: { wins: 0, losses: 0, ties: 0 } } }
-      const matrix = {};
-      users.forEach((u) => {
+      const matrix: Record<number, Record<number, any>> = {};
+      users.forEach((u: any) => {
         matrix[u.id] = {};
-        users.forEach((opp) => {
+        users.forEach((opp: any) => {
           if (u.id !== opp.id) {
             matrix[u.id][opp.id] = { wins: 0, losses: 0, ties: 0 };
           }
@@ -721,7 +875,7 @@ export async function getRivalryMatrixStats() {
       }
 
       return {
-        users: users.map((u) => ({
+        users: users.map((u: any) => ({
           id: u.id,
           name: u.name,
           icon: u.icon,
@@ -740,7 +894,7 @@ export async function getRivalryMatrixStats() {
  * Get Captain Fantastic Stats
  * Best performing captains
  */
-export async function getCaptainStats() {
+export async function getCaptainStats(): Promise<CaptainStat[]> {
   try {
     const sql = `
       SELECT 
@@ -763,10 +917,12 @@ export async function getCaptainStats() {
       ORDER BY raw_captain_points DESC
     `;
 
-    return (await db.query(sql)).rows.map((u) => ({
+    return (await db.query(sql)).rows.map((u: any) => ({
       ...u,
       total_bonus: parseInt(u.raw_captain_points) || 0,
       avg_captain_points: parseFloat(u.avg_captain_points) || 0,
+      weighted_points: parseInt(u.weighted_points) || 0,
+      total_captains: parseInt(u.total_captains) || 0,
     }));
   } catch (error) {
     console.error('Error in getCaptainStats:', error);

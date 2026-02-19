@@ -1,7 +1,7 @@
 import { db } from '../db/client.js';
 import { CONFIG } from '../config.js';
 import { ensureSchema } from '../db/schema.js';
-import { clearCache } from '../utils/cache.js';
+import { clearCache } from '../utils/cache';
 
 export class SyncManager {
   constructor(dbPath) {

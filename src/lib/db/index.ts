@@ -19,7 +19,7 @@ export * from './queries/competition/schedule';
 export * from './queries/competition/standings'; // This will resolve to standings.ts (the managed one)
 
 export * from './queries/analytics/performance.js';
-export * from './queries/analytics/advanced_stats.js';
+export * from './queries/analytics/advanced_stats';
 export * from './queries/analytics/initial_squads.js';
 export * from './queries/analytics/records.js';
 
