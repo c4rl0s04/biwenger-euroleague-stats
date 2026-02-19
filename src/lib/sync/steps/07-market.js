@@ -1,6 +1,6 @@
 import { biwengerFetch } from '../../api/biwenger-client.js';
 import { CONFIG } from '../../config.js';
-import { prepareMarketMutations } from '../../db/mutations/market.js';
+import { prepareMarketMutations } from '../../db/mutations/market';
 
 /**
  * Syncs board history (transfers, porras, etc.) incrementally.

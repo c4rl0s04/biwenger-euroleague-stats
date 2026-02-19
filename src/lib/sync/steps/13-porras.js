@@ -1,6 +1,6 @@
 import { biwengerFetch } from '../../api/biwenger-client.js';
 import { CONFIG } from '../../config.js';
-import { prepareMarketMutations } from '../../db/mutations/market.js';
+import { prepareMarketMutations } from '../../db/mutations/market';
 
 export async function run(manager) {
   manager.log('\n🎱 Syncing Porras History (from Board)...');
