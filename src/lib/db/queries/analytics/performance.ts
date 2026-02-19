@@ -1,10 +1,95 @@
 import { db } from '../../client';
 
+export interface VolatilityStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  avg_points: number;
+  std_dev: number;
+}
+
+export interface PlacementStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  top_3_count: number;
+  bottom_3_count: number;
+  total_rounds: number;
+}
+
+export interface LeagueComparisonStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  above_avg_count: number;
+  below_avg_count: number;
+  avg_diff: number;
+}
+
+export interface EfficiencyStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  total_points: number;
+  team_value: number;
+  points_per_million: number;
+}
+
+export interface StreakStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  longest_streak: number;
+  current_streak: number;
+}
+
+export interface BottlerStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  wins: number;
+  seconds: number;
+  thirds: number;
+  bottler_score: number;
+}
+
+export interface HeartbreakerStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  count: number;
+  total_diff: number;
+}
+
+export interface NoGloryStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  total_points_no_glory: number;
+  rounds_count: number;
+}
+
+export interface JinxStat {
+  user_id: number;
+  name: string;
+  icon: string;
+  color_index: number;
+  jinxed_count: number;
+}
+
 /**
  * Get volatility stats (Standard Deviation of points)
- * @returns {Promise<Array>} Users sorted by consistency (lower std_dev is better)
+ * @returns {Promise<VolatilityStat[]>} Users sorted by consistency (lower std_dev is better)
  */
-export async function getVolatilityStats() {
+export async function getVolatilityStats(): Promise<VolatilityStat[]> {
   const query = `
     WITH Stats AS (
       SELECT 
@@ -28,7 +113,7 @@ export async function getVolatilityStats() {
     ORDER BY s.std_dev ASC
   `;
   // Note: Postgres `STDDEV` returns numeric/float, `ROUND` works fine.
-  return (await db.query(query)).rows.map((row) => ({
+  return (await db.query(query)).rows.map((row: any) => ({
     ...row,
     avg_points: parseFloat(row.avg_points) || 0,
     std_dev: parseFloat(row.std_dev) || 0,
@@ -37,9 +122,9 @@ export async function getVolatilityStats() {
 
 /**
  * Get placement stats (Top 3 vs Bottom 3 finishes)
- * @returns {Promise<Array>} Users with their podium and relegation zone counts
+ * @returns {Promise<PlacementStat[]>} Users with their podium and relegation zone counts
  */
-export async function getPlacementStats() {
+export async function getPlacementStats(): Promise<PlacementStat[]> {
   const query = `
     WITH RoundRanks AS (
       SELECT 
@@ -63,14 +148,19 @@ export async function getPlacementStats() {
     GROUP BY u.id
     ORDER BY top_3_count DESC, bottom_3_count ASC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    top_3_count: parseInt(row.top_3_count) || 0,
+    bottom_3_count: parseInt(row.bottom_3_count) || 0,
+    total_rounds: parseInt(row.total_rounds) || 0,
+  }));
 }
 
 /**
  * Get league comparison stats (Rounds above/below league average)
- * @returns {Promise<Array>} Users with counts of above/below average rounds
+ * @returns {Promise<LeagueComparisonStat[]>} Users with counts of above/below average rounds
  */
-export async function getLeagueComparisonStats() {
+export async function getLeagueComparisonStats(): Promise<LeagueComparisonStat[]> {
   const query = `
     WITH RoundAverages AS (
       SELECT 
@@ -95,8 +185,10 @@ export async function getLeagueComparisonStats() {
     GROUP BY u.id
     ORDER BY above_avg_count DESC
   `;
-  return (await db.query(query)).rows.map((row) => ({
+  return (await db.query(query)).rows.map((row: any) => ({
     ...row,
+    above_avg_count: parseInt(row.above_avg_count) || 0,
+    below_avg_count: parseInt(row.below_avg_count) || 0,
     avg_diff: parseFloat(row.avg_diff) || 0,
   }));
 }
@@ -104,9 +196,9 @@ export async function getLeagueComparisonStats() {
 /**
  * Get efficiency stats (Points per Million)
  * Uses current team value as a proxy.
- * @returns {Promise<Array>} Users sorted by ROI
+ * @returns {Promise<EfficiencyStat[]>} Users sorted by ROI
  */
-export async function getEfficiencyStats() {
+export async function getEfficiencyStats(): Promise<EfficiencyStat[]> {
   const query = `
     WITH UserPoints AS (
       SELECT user_id, SUM(points) as total_points
@@ -135,14 +227,19 @@ export async function getEfficiencyStats() {
     WHERE uv.team_value > 0
     ORDER BY points_per_million DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    total_points: parseInt(row.total_points) || 0,
+    team_value: parseInt(row.team_value) || 0,
+    points_per_million: parseFloat(row.points_per_million) || 0,
+  }));
 }
 
 /**
  * Get streak stats (Consecutive rounds with 175+ points)
- * @returns {Promise<Array>} Users with their longest 175+ point streak
+ * @returns {Promise<StreakStat[]>} Users with their longest 175+ point streak
  */
-export async function getStreakStats() {
+export async function getStreakStats(): Promise<StreakStat[]> {
   const query = `
     WITH Scores AS (
       SELECT 
@@ -202,16 +299,20 @@ export async function getStreakStats() {
     GROUP BY u.id, u.name, u.icon, u.color_index, csc.current_streak
     ORDER BY longest_streak DESC, current_streak DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    longest_streak: parseInt(row.longest_streak) || 0,
+    current_streak: parseInt(row.current_streak) || 0,
+  }));
 }
 
 /**
  * Get "Bottler" stats (High placed finishes without winning)
  * "Bottler Score" = (2nd_places * 3) + (3rd_places * 1) - (1st_places * 2)
  * High score means lots of near misses and few wins.
- * @returns {Promise<Array>} Users sorted by bottler score
+ * @returns {Promise<BottlerStat[]>} Users sorted by bottler score
  */
-export async function getBottlerStats() {
+export async function getBottlerStats(): Promise<BottlerStat[]> {
   const query = `
     WITH RoundRanks AS (
       SELECT 
@@ -238,14 +339,20 @@ export async function getBottlerStats() {
     HAVING (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) > 0 OR SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) > 0)
     ORDER BY bottler_score DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    wins: parseInt(row.wins) || 0,
+    seconds: parseInt(row.seconds) || 0,
+    thirds: parseInt(row.thirds) || 0,
+    bottler_score: parseInt(row.bottler_score) || 0,
+  }));
 }
 
 /**
  * Get Heartbreaker stats (Total margin of defeat in 2nd place finishes)
- * @returns {Promise<Array>} Users sorted by total points missed by
+ * @returns {Promise<HeartbreakerStat[]>} Users sorted by total points missed by
  */
-export async function getHeartbreakerStats() {
+export async function getHeartbreakerStats(): Promise<HeartbreakerStat[]> {
   const refinedQuery = `
     WITH RoundRanks AS (
       SELECT 
@@ -278,14 +385,18 @@ export async function getHeartbreakerStats() {
     GROUP BY u.id
     ORDER BY (CASE WHEN COALESCE(SUM(he.diff), 0) = 0 THEN 1 ELSE 0 END) ASC, total_diff ASC
   `;
-  return (await db.query(refinedQuery)).rows;
+  return (await db.query(refinedQuery)).rows.map((row: any) => ({
+    ...row,
+    count: parseInt(row.count) || 0,
+    total_diff: parseInt(row.total_diff) || 0,
+  }));
 }
 
 /**
  * Get "No Glory" stats (Total points in non-winning rounds)
- * @returns {Promise<Array>} Users sorted by points scored without winning
+ * @returns {Promise<NoGloryStat[]>} Users sorted by points scored without winning
  */
-export async function getNoGloryStats() {
+export async function getNoGloryStats(): Promise<NoGloryStat[]> {
   const query = `
     WITH RoundRanks AS (
       SELECT 
@@ -316,14 +427,18 @@ export async function getNoGloryStats() {
     GROUP BY u.id
     ORDER BY total_points_no_glory DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    total_points_no_glory: parseInt(row.total_points_no_glory) || 0,
+    rounds_count: parseInt(row.rounds_count) || 0,
+  }));
 }
 
 /**
  * Get "Jinx" stats (Above avg score but bottom half rank)
- * @returns {Promise<Array>} Users sorted by count of "jinxed" rounds
+ * @returns {Promise<JinxStat[]>} Users sorted by count of "jinxed" rounds
  */
-export async function getJinxStats() {
+export async function getJinxStats(): Promise<JinxStat[]> {
   const query = `
     WITH RoundStats AS (
       SELECT 
@@ -364,5 +479,8 @@ export async function getJinxStats() {
     GROUP BY u.id
     ORDER BY jinxed_count DESC
   `;
-  return (await db.query(query)).rows;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    jinxed_count: parseInt(row.jinxed_count) || 0,
+  }));
 }
