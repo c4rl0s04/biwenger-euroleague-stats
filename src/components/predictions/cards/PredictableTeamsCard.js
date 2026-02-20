@@ -106,7 +106,7 @@ export function PredictableTeamsCard({ teams }) {
             </tr>
             {/* Sub Header Row - Columns */}
             <tr className="text-[10px] text-muted-foreground border-b border-border/50">
-              <th className="py-2 pl-3"></th> {/* Spacer for Team Name */}
+              <th className="py-2 pl-3">{/* Spacer for Team Name */}</th>
               <SortableHeader
                 label="% Ac."
                 sortKey="percentage"
