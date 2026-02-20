@@ -5,8 +5,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Use relative imports for vitest compatibility
-import { successResponse, errorResponse, CACHE_DURATIONS } from '../../../lib/utils/response.js';
-import { validateNumber, validatePlayerId } from '../../../lib/utils/validation.js';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { validateNumber, validatePlayerId } from '@/lib/utils/validation';
 
 describe('API Response Structure', () => {
   describe('successResponse utility', () => {
