@@ -58,6 +58,7 @@ export interface InsertPlayerStatsParams {
   turnovers: number;
   fouls_committed: number;
   valuation: number;
+  is_mvp: boolean | number;
 }
 
 export interface UpdateFantasyPointsParams {

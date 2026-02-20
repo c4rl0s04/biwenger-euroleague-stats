@@ -27,7 +27,7 @@ export interface InsertBidParams {
 
 export interface InsertFinanceParams {
   user_id: string;
-  round_id: number;
+  round_id: number | null;
   date: string;
   type: string;
   amount: number;
