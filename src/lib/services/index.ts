@@ -72,12 +72,12 @@ export {
 // Market Service (Features)
 export {
   getMarketPageData,
-  // getMarketActivity, // Removed/Not present in features/marketService
-  // fetchMarketKPIs, // Removed/Not present in features/marketService
+  getMarketActivity,
+  fetchMarketKPIs,
   fetchAllTransfers,
   fetchMarketTrends,
-  // fetchRecentTransfers, // Removed/Not present in features/marketService
-  // fetchMarketOpportunities, // Removed/Not present in features/marketService
+  fetchRecentTransfers,
+  fetchMarketOpportunities,
 } from './features/marketService';
 
 // Market Service (Root)

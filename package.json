@@ -53,6 +53,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/node": "^25.2.3",
     "@types/pg": "^8.16.0",
+    "@types/prompts": "^2.4.9",
     "@types/react": "19.2.14",
     "drizzle-kit": "^0.31.9",
     "eslint": "^9",

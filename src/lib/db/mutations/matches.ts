@@ -14,7 +14,7 @@ export interface UpsertMatchParams {
   round_name: string;
   home_id: number;
   away_id: number;
-  date: string; // timestamp or string date
+  date: string | null; // timestamp or string date
   status: string;
   home_score: number | null;
   away_score: number | null;
