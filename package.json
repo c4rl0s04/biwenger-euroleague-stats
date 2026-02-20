@@ -10,9 +10,9 @@
     "lint": "eslint",
     "format": "prettier --write src/",
     "setup": "node scripts/setup.js",
-    "sync": "tsx -r dotenv/config src/lib/sync/index.js",
-    "sync:daily": "tsx -r dotenv/config src/lib/sync/index.js --daily",
-    "sync:live": "tsx -r dotenv/config src/lib/sync/live.js",
+    "sync": "tsx -r dotenv/config src/lib/sync/index.ts",
+    "sync:daily": "tsx -r dotenv/config src/lib/sync/index.ts --daily",
+    "sync:live": "tsx -r dotenv/config src/lib/sync/live.ts",
     "test": "vitest",
     "analyze": "ANALYZE=true next build --webpack",
     "prepare": "husky"
