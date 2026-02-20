@@ -17,8 +17,8 @@ import {
 
 // ============ DIRECT WRAPPERS ============
 
-export async function fetchPlayerStreaks(playerId: string | number) {
-  return await getPlayerStreaks(Number(playerId));
+export async function fetchPlayerStreaks(minGames?: number) {
+  return await getPlayerStreaks(minGames);
 }
 
 /**
