@@ -44,7 +44,7 @@ export default function ComparePageClient() {
       />
 
       {/* Main Comparison Component */}
-      <Section delay={100} background="none" className="pt-0">
+      <Section title="Cara a Cara" delay={100} background="none" className="pt-0">
         <HeadToHeadCard
           currentUser={activeUser}
           allUsersHistory={data.history}
