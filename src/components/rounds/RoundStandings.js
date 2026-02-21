@@ -8,6 +8,7 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { cn } from '@/lib/utils';
 import { getColorForUser } from '@/lib/constants/colors';
+import { calcEfficiency } from '@/lib/utils/efficiency';
 
 export default function RoundStandings({
   roundId,
@@ -45,11 +46,11 @@ export default function RoundStandings({
         // Calculate efficiency on the fly for sorting
         const aActual = a.round_points || a.points || 0;
         const aIdeal = a.ideal_points || 0;
-        const aEff = aIdeal > 0 ? aActual / aIdeal : 0;
+        const aEff = calcEfficiency(aActual, aIdeal);
 
         const bActual = b.round_points || b.points || 0;
         const bIdeal = b.ideal_points || 0;
-        const bEff = bIdeal > 0 ? bActual / bIdeal : 0;
+        const bEff = calcEfficiency(bActual, bIdeal);
 
         aVal = aEff;
         bVal = bEff;
@@ -201,7 +202,7 @@ export default function RoundStandings({
               // Calculate Efficiency
               const actual = user.round_points || user.points || 0;
               const ideal = user.ideal_points || 0;
-              const eff = ideal > 0 ? (actual / ideal) * 100 : 0;
+              const eff = calcEfficiency(actual, ideal);
 
               // Color Coding for Efficiency
               let effColor = 'text-red-400';

@@ -1,4 +1,5 @@
 import { db } from '../../client';
+import { calcEfficiency } from '@/lib/utils/efficiency';
 import { getTeamPositions } from '../../../logic/standings';
 import { NEXT_ROUND_CTE } from '../../sql_utils';
 
@@ -382,6 +383,54 @@ export async function getAllRounds(): Promise<any[]> {
     ORDER BY round_id DESC
   `;
   return (await db.query(query)).rows;
+}
+
+/**
+ * Helper: Infer a ghost player's position for the optimization pool.
+ *
+ * TITULAR ghost (starter in actual lineup):
+ *   A valid 5-starter formation has at most 3 players per position (Base/Alero/Pivot).
+ *   Knowing the other 4 starters' positions often uniquely identifies the ghost's position.
+ *   If multiple positions are valid, we pick the rarest to minimise cap conflicts.
+ *
+ * BENCH / 6TH_MAN ghost:
+ *   We can't determine their position from lineup structure (bench slots have no positional
+ *   constraint). Instead, we use the rarest position across the whole squad pool so the
+ *   ghost has the best chance of competing for an open starter slot in the ideal lineup.
+ */
+function inferGhostPosition(
+  allLineupPlayers: LineupPlayer[],
+  ghost: LineupPlayer,
+  squadPool?: any[]
+): string {
+  const POSITIONS = ['Base', 'Alero', 'Pivot'] as const;
+
+  if (ghost.role !== 'titular') {
+    // Bench / 6th_man ghost — position is unknown from lineup structure.
+    // Use the rarest position in the existing squad pool to maximise starter-slot availability.
+    const count: Record<string, number> = { Base: 0, Alero: 0, Pivot: 0 };
+    for (const p of squadPool ?? []) {
+      if (count[p.position] !== undefined) count[p.position]++;
+    }
+    return [...POSITIONS].sort((a, b) => count[a] - count[b])[0];
+  }
+
+  // Titular ghost — infer from the positions of the other 4 known starters.
+  const count: Record<string, number> = { Base: 0, Alero: 0, Pivot: 0 };
+  for (const p of allLineupPlayers) {
+    if (!p.is_missing && p.role === 'titular' && count[p.position] !== undefined) {
+      count[p.position]++;
+    }
+  }
+
+  // Valid positions: those still under the starter cap of 3.
+  const valid = POSITIONS.filter((pos) => count[pos] < 3);
+
+  if (valid.length === 0) return 'Base'; // Defensive fallback (shouldn't happen).
+  if (valid.length === 1) return valid[0]; // Uniquely determined.
+
+  // Multiple valid slots — pick the rarest to leave the most room for other players.
+  return [...valid].sort((a, b) => count[a] - count[b])[0];
 }
 
 /**
@@ -905,22 +954,53 @@ export async function getUserOptimization(userId: string, roundId: string | numb
   // 2. Get Stats for ALL squad players
   const statsQuery = `
     SELECT 
-      prs.player_id,
+      p.id as player_id,
       p.name,
       p.position,
       p.img,
       t.short_name as team_short,
       t.img as team_img,
-      prs.fantasy_points as points,
-      prs.valuation
-    FROM player_round_stats prs
-    JOIN players p ON prs.player_id = p.id
+      COALESCE(prs.fantasy_points, 0) as points,
+      COALESCE(prs.valuation, 0) as valuation
+    FROM players p
+    LEFT JOIN player_round_stats prs ON prs.player_id = p.id AND prs.round_id = $1
     LEFT JOIN teams t ON p.team_id = t.id
-    WHERE prs.round_id = $1 AND prs.player_id = ANY($2)
-    ORDER BY prs.fantasy_points DESC
+    WHERE p.id = ANY($2)
+    ORDER BY COALESCE(prs.fantasy_points, 0) DESC
   `;
 
   const squadStats = (await db.query(statsQuery, [roundId, Array.from(historicSquad)])).rows;
+
+  // 3. Inject ghost players (players in lineups but deleted from the players table).
+  //    getHistoricSquad cannot find them because it queries players.owner_id, and ghost
+  //    players have been removed from the players table entirely.
+  //    getUserLineup already back-calculates their points (total - known players weighted sum).
+  //    We inject them here so the greedy algorithm can include them in the optimal lineup,
+  //    which prevents actualScore > maxScore (efficiency > 100%).
+  const lineupForGhosts = await getUserLineup(userId, roundId);
+  if (lineupForGhosts) {
+    const knownIds = new Set(squadStats.map((s: any) => s.player_id));
+    for (const ghost of lineupForGhosts.players) {
+      if (ghost.is_missing && ghost.points > 0 && !knownIds.has(ghost.player_id)) {
+        squadStats.push({
+          player_id: ghost.player_id,
+          name: ghost.name || 'Unknown Player',
+        // Infer the ghost's actual position from the lineup context instead of
+          // defaulting to 'Base'. A wrong position can cause the greedy to bench a
+          // highly-scoring ghost player, underestimating potentialPoints.
+          position: inferGhostPosition(lineupForGhosts.players, ghost, squadStats),
+          img: ghost.img ?? null,
+          team_short: ghost.team_short ?? null,
+          team_img: ghost.team_img ?? null,
+          points: ghost.points,
+          valuation: 0,
+        });
+        knownIds.add(ghost.player_id);
+      }
+    }
+    // Re-sort by points descending so the greedy algorithm picks the best players first.
+    squadStats.sort((a: any, b: any) => (b.points || 0) - (a.points || 0));
+  }
 
   // 3. Logic: Valid Formation Greedy Algorithm (Reused from Ideal Lineup / Coach Rating)
   // - Starts: 5 players. Max 3 per position.
@@ -953,31 +1033,35 @@ export async function getUserOptimization(userId: string, roundId: string | numb
   }
 
   const optimalLineup = [...starters, ...bench];
-  const totalPoints = calculateWeightedSum(
-    optimalLineup.map((p, index) => {
-      let multiplier = 0;
-      let role = 'bench';
-      let is_captain = false;
 
-      if (index < 5) {
-        role = 'titular';
-        if (index === 0) {
-          multiplier = 2.0;
-          is_captain = true;
-        } else {
-          multiplier = 1.0;
-        }
+  // Build the role-mapped lineup ONCE — used for both score calculation and the return value.
+  // Previously the role mapping was done inline inside calculateWeightedSum and discarded,
+  // so the returned optimalLineup had no role/is_captain info → all players showed as bench.
+  const mappedLineup: LineupPlayer[] = optimalLineup.map((p, index) => {
+    let multiplier = 0;
+    let role = 'bench';
+    let is_captain = false;
+
+    if (index < 5) {
+      role = 'titular';
+      if (index === 0) {
+        multiplier = 2.0;
+        is_captain = true;
       } else {
-        role = index === 5 ? '6th_man' : 'bench';
-        multiplier = index === 5 ? 0.75 : 0.5;
+        multiplier = 1.0;
       }
+    } else {
+      role = index === 5 ? '6th_man' : 'bench';
+      multiplier = index === 5 ? 0.75 : 0.5;
+    }
 
-      return { ...p, role, is_captain, points: p.points } as LineupPlayer;
-    })
-  );
+    return { ...p, role, is_captain, points: p.points } as LineupPlayer;
+  });
+
+  const totalPoints = calculateWeightedSum(mappedLineup);
 
   return {
-    optimalLineup,
+    optimalLineup: mappedLineup,
     totalPoints,
   };
 }
@@ -1068,13 +1152,8 @@ export async function getCoachRating(userId: string, roundId: string | number) {
   const maxScore = optimization.totalPoints;
   const actualScore = userLineup.summary.total_points;
 
-  // Calculate efficiency 0-100%
-  let efficiency = 0;
-  if (maxScore > 0) {
-    efficiency = Math.round((actualScore / maxScore) * 100);
-  } else if (actualScore > 0) {
-    efficiency = 100; // If max is 0 but we got points (weird), assume 100%
-  }
+  // calcEfficiency is the single source of truth: actual/ideal, capped at 100.
+  const efficiency = calcEfficiency(actualScore, maxScore);
 
   return {
     actualScore,

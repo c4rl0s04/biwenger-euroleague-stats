@@ -24,6 +24,7 @@ import {
 } from '../../db';
 import { getAllUsers } from '../../db';
 import { calculateStats } from '../../logic/performance';
+import { calcEfficiency } from '@/lib/utils/efficiency';
 
 export interface UserRoundStandings {
   id: number;
@@ -167,12 +168,7 @@ export async function getUserPerformanceHistoryService(
 
         const idealPoints = coachRating?.maxScore || actualPoints;
 
-        let efficiency = 0;
-        if (idealPoints > 0) {
-          efficiency = (actualPoints / idealPoints) * 100;
-        } else if (actualPoints > 0) {
-          efficiency = 100;
-        }
+        const efficiency = calcEfficiency(actualPoints, idealPoints);
 
         return {
           round_id: round.round_id,
@@ -198,8 +194,11 @@ export async function getUserPerformanceHistoryService(
     })
   );
 
-  // 3. Ensure strict sorting
-  return historyWithIdeal.sort((a, b) => a.round_number - b.round_number);
+  // 3. Ensure strict sorting and filter out round 0 (round_name didn't match a number —
+  //    e.g. 'Jornada Regular' or null — and defaulted to 0, which is not a real round).
+  return historyWithIdeal
+    .filter((r) => r.round_number > 0)
+    .sort((a, b) => a.round_number - b.round_number);
 }
 
 /**
