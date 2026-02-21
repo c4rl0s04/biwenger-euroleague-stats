@@ -4,7 +4,9 @@ import { clearCache } from '../utils/cache';
 
 export interface SyncStep {
   name: string;
-  runFn: (manager: SyncManager) => Promise<{ success?: boolean; message?: string; error?: any; data?: any } | void>;
+  runFn: (
+    manager: SyncManager
+  ) => Promise<{ success?: boolean; message?: string; error?: any; data?: any } | void>;
 }
 
 export interface SyncContext {

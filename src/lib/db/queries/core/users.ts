@@ -287,7 +287,10 @@ export async function getUserSquadDetails(userId: number | string): Promise<User
 
   // Convert to numbers explicitly to assume safety
   const totalValue = squad.reduce((sum: number, p: any) => sum + (parseInt(p.price) || 0), 0);
-  const totalTrend = squad.reduce((sum: number, p: any) => sum + (parseInt(p.price_increment) || 0), 0);
+  const totalTrend = squad.reduce(
+    (sum: number, p: any) => sum + (parseInt(p.price_increment) || 0),
+    0
+  );
 
   return {
     total_value: totalValue,
@@ -371,10 +374,14 @@ export async function getUserCaptainStats(userId: number | string): Promise<Capt
       ...m,
       avg_as_captain: parseFloat(m.avg_as_captain) || 0,
       times_captain: parseInt(m.times_captain) || 0,
-      total_as_captain: parseInt(m.total_as_captain) || 0
+      total_as_captain: parseInt(m.total_as_captain) || 0,
     })),
-    best_round: best ? { name: best.name, points: parseInt(best.points) || 0 } : { name: '', points: 0 },
-    worst_round: worst ? { name: worst.name, points: parseInt(worst.points) || 0 } : { name: '', points: 0 },
+    best_round: best
+      ? { name: best.name, points: parseInt(best.points) || 0 }
+      : { name: '', points: 0 },
+    worst_round: worst
+      ? { name: worst.name, points: parseInt(worst.points) || 0 }
+      : { name: '', points: 0 },
   };
 }
 
@@ -414,7 +421,10 @@ export async function getUserHomeAwayStats(userId: number | string): Promise<Hom
 /**
  * Get captain recommendations based on form and upcoming matches
  */
-export async function getCaptainRecommendations(userId: number | string, limit: number = 3): Promise<CaptainRecommendation[]> {
+export async function getCaptainRecommendations(
+  userId: number | string,
+  limit: number = 3
+): Promise<CaptainRecommendation[]> {
   const query = `
     WITH FinishedRounds AS (
       SELECT m.round_id
@@ -479,14 +489,17 @@ export async function getCaptainRecommendations(userId: number | string, limit: 
   return (await db.query(query, [userId, limit])).rows.map((row: any) => ({
     ...row,
     avg_recent_points: parseFloat(row.avg_recent_points) || 0,
-    recent_games: parseInt(row.recent_games) || 0
+    recent_games: parseInt(row.recent_games) || 0,
   }));
 }
 
 /**
  * Get personalized alerts for a user
  */
-export async function getPersonalizedAlerts(userId: number | string, limit: number = 5): Promise<PersonalizedAlert[]> {
+export async function getPersonalizedAlerts(
+  userId: number | string,
+  limit: number = 5
+): Promise<PersonalizedAlert[]> {
   const alerts: PersonalizedAlert[] = [];
 
   const priceGainsQuery = `

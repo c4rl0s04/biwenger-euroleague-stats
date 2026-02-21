@@ -1,9 +1,11 @@
 import { Pool } from 'pg';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
-export type DbClient = Pool | {
-  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
-};
+export type DbClient =
+  | Pool
+  | {
+      query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
+    };
 
 // ==========================================
 // INTERFACES
@@ -76,7 +78,9 @@ export interface EuroleagueMutations {
   insertPlayerMapping: (params: InsertPlayerMappingParams) => Promise<void>;
   getBiwengerPlayers: () => Promise<{ id: number; name: string; team_id: number }[]>;
   getPlayerByEuroleagueCode: (code: string) => Promise<{ id: number; name: string } | undefined>;
-  getAllPlayers: () => Promise<{ id: number; name: string; team_id: number; euroleague_code: string }[]>;
+  getAllPlayers: () => Promise<
+    { id: number; name: string; team_id: number; euroleague_code: string }[]
+  >;
   updatePlayerEuroleagueCode: (params: UpdatePlayerEuroleagueCodeParams) => Promise<void>;
   insertPlayerStats: (params: InsertPlayerStatsParams) => Promise<void>;
   updateFantasyPoints: (params: UpdateFantasyPointsParams) => Promise<void>;
@@ -84,7 +88,11 @@ export interface EuroleagueMutations {
   updatePlayerImage: (img: string, id: number) => Promise<void>;
   getTeamsWithCode: () => Promise<{ id: number; code: string }[]>;
   getMatchesByRound: (roundId: number) => Promise<{ home_id: number; away_id: number }[]>;
-  checkFinishedMatch: (roundId: number, teamId1: number, teamId2: number) => Promise<{ status: string } | undefined>;
+  checkFinishedMatch: (
+    roundId: number,
+    teamId1: number,
+    teamId2: number
+  ) => Promise<{ status: string } | undefined>;
   checkStatsExist: (roundId: number) => Promise<{ c: string }>;
 }
 

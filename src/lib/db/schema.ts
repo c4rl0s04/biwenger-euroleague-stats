@@ -1,4 +1,14 @@
-import { pgTable, serial, text, integer, boolean, timestamp, doublePrecision, bigint, date } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  serial,
+  text,
+  integer,
+  boolean,
+  timestamp,
+  doublePrecision,
+  bigint,
+  date,
+} from 'drizzle-orm/pg-core';
 
 // 1. Users Table
 export const users = pgTable('users', {

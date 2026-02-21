@@ -17,7 +17,9 @@ export async function run(manager: SyncManager) {
     const usersRes = await mutations.getAllUsers();
     // Sort logic is inside the query (ORDER BY name) or implied?
     // In users.js: SELECT * FROM users ORDER BY name ASC
-    const users = Array.isArray(usersRes) ? usersRes : (usersRes as any).rows || (usersRes as any).all();
+    const users = Array.isArray(usersRes)
+      ? usersRes
+      : (usersRes as any).rows || (usersRes as any).all();
 
     if (!Array.isArray(users) || users.length === 0) {
       return { success: true, message: 'No users to colorize.' };

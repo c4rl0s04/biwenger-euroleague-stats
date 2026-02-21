@@ -40,7 +40,10 @@ export function cachedResponse(data: unknown, options: CachedResponseOptions = {
 /**
  * Creates a successful cached JSON response
  */
-export function successResponse(data: unknown, maxAge: number = CACHE_DURATIONS.MEDIUM): NextResponse {
+export function successResponse(
+  data: unknown,
+  maxAge: number = CACHE_DURATIONS.MEDIUM
+): NextResponse {
   return cachedResponse({ success: true, data }, { maxAge });
 }
 

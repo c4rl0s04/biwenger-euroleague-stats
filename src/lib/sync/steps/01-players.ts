@@ -78,7 +78,9 @@ export async function run(manager: SyncManager) {
   const positions: any = CONFIG.POSITIONS;
   const teams = manager.context.teams;
 
-  const resExisting = await (db as any).query('SELECT id, puntos, points_home, points_away FROM players');
+  const resExisting = await (db as any).query(
+    'SELECT id, puntos, points_home, points_away FROM players'
+  );
   const existingPlayerMap = new Map(resExisting.rows.map((p: any) => [p.id, p]));
   const existingPlayerIds = new Set(resExisting.rows.map((p: any) => p.id));
   manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing players in DB.`);

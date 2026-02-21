@@ -256,7 +256,8 @@ export async function getUserPositionData(userId: string | number) {
     position: user.position,
     totalPoints: user.total_points,
     gapToLeader: leader.total_points - user.total_points,
-    gapToNext: userIndex > 0 ? (standings[userIndex - 1] as any).total_points - user.total_points : 0,
+    gapToNext:
+      userIndex > 0 ? (standings[userIndex - 1] as any).total_points - user.total_points : 0,
     leadOverNext:
       userIndex < standings.length - 1
         ? user.total_points - (standings[userIndex + 1] as any).total_points

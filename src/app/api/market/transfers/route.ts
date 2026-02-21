@@ -10,7 +10,9 @@ export async function GET(request: NextRequest) {
   const offset = (page - 1) * limit;
 
   try {
-    const data = await fetchLiveMarketTransfers({ limit, offset } as Parameters<typeof fetchLiveMarketTransfers>[0]);
+    const data = await fetchLiveMarketTransfers({ limit, offset } as Parameters<
+      typeof fetchLiveMarketTransfers
+    >[0]);
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('Error fetching market transfers:', error);

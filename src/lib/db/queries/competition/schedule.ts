@@ -1,4 +1,3 @@
-
 import { db } from '../../index';
 import { matches, teams, players } from '../../schema';
 import { eq, desc, asc, min, max, sql } from 'drizzle-orm';
@@ -22,7 +21,7 @@ export async function getScheduleRounds() {
 
   for (const r of rows) {
     if (!r.round_name) continue;
-    
+
     // Normalize name: "Jornada 14 (aplazada)" -> "Jornada 14"
     const baseName = r.round_name.replace(/\s*\(.*\)/, '').trim();
 

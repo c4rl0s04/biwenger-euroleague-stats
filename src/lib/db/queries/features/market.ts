@@ -420,7 +420,10 @@ export async function getMarketOpportunities(limit = 3): Promise<MarketOpportuni
  * @param {number} minChange - Minimum price change threshold
  * @returns {Promise<PriceChange[]>} Players with significant price changes
  */
-export async function getSignificantPriceChanges(hoursAgo = 24, minChange = 500000): Promise<PriceChange[]> {
+export async function getSignificantPriceChanges(
+  hoursAgo = 24,
+  minChange = 500000
+): Promise<PriceChange[]> {
   const query = `
     SELECT 
       p.id as player_id,

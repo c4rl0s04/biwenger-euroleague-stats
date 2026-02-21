@@ -22,7 +22,9 @@ export interface CalculatedPerformanceStats {
   roundsPlayed: number;
 }
 
-export function calculateStats(history?: RoundPerformance[] | null): CalculatedPerformanceStats | null {
+export function calculateStats(
+  history?: RoundPerformance[] | null
+): CalculatedPerformanceStats | null {
   if (!history || history.length === 0) return null;
 
   const avgEfficiency = history.reduce((sum, r) => sum + r.efficiency, 0) / history.length;

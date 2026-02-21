@@ -30,7 +30,9 @@ export class PlayerMatcher {
     }
 
     // 2. Exact Name Match
-    const match = biwengerPlayers.find((p: any) => normalizePlayerName(p.name) === normalizedElName);
+    const match = biwengerPlayers.find(
+      (p: any) => normalizePlayerName(p.name) === normalizedElName
+    );
     if (match) return match;
 
     // 3. Interactive Mode (Fallback)
@@ -48,7 +50,10 @@ export class PlayerMatcher {
             `\n⚠️  Unmatched Euroleague Player: [${elCode}] ${elName} (Team ID: ${elTeamId})`
           );
 
-          const choices = candidates.map((c: any) => ({ title: `${c.name} (ID: ${c.id})`, value: c }));
+          const choices = candidates.map((c: any) => ({
+            title: `${c.name} (ID: ${c.id})`,
+            value: c,
+          }));
           choices.push({ title: 'Skip / No Match', value: null });
 
           const response = await prompts({

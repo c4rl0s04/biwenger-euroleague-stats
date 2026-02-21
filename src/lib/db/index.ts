@@ -10,8 +10,8 @@ export * from './queries/tournaments';
 export * from './queries/core/users';
 
 export * from './queries/core/players';
- // Assuming players.js exists, step 605 said 'players' (no ext). I'll check dir.
-export * from './queries/core/teams';   // Assuming teams.js exists
+// Assuming players.js exists, step 605 said 'players' (no ext). I'll check dir.
+export * from './queries/core/teams'; // Assuming teams.js exists
 
 export * from './queries/competition/rounds';
 export * from './queries/competition/matches';

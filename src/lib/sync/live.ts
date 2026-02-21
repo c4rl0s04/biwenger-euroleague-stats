@@ -120,7 +120,9 @@ async function runLiveSync() {
 
       const hasLineups =
         (await db.query('SELECT 1 FROM lineups WHERE round_id = $1 LIMIT 1', [match.round_id]))
-          .rowCount !== null && (await db.query('SELECT 1 FROM lineups WHERE round_id = $1 LIMIT 1', [match.round_id])).rowCount! > 0;
+          .rowCount !== null &&
+        (await db.query('SELECT 1 FROM lineups WHERE round_id = $1 LIMIT 1', [match.round_id]))
+          .rowCount! > 0;
 
       if (!hasLineups) {
         console.log(`   ⚠️ Lineups missing for Round ${match.round_id}. Syncing...`);

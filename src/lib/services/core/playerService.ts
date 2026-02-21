@@ -54,7 +54,8 @@ export async function getPlayerPerformanceSummary(playerId: string | number) {
   const recentGames = recentMatches.slice(0, 5);
   const recentAvg =
     recentGames.length > 0
-      ? recentGames.reduce((sum: number, m: any) => sum + (m.fantasy_points || 0), 0) / recentGames.length
+      ? recentGames.reduce((sum: number, m: any) => sum + (m.fantasy_points || 0), 0) /
+        recentGames.length
       : 0;
 
   let formStatus = 'average';

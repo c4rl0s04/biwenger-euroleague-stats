@@ -40,7 +40,7 @@ export interface UserRoundStandings {
  * 3. [NEW] Enrich with Ideal Lineup Points for everyone.
  *
  * @param roundId
- * @returns 
+ * @returns
  */
 export async function fetchRoundStandings(roundId: string | number): Promise<UserRoundStandings[]> {
   if (!roundId) return [];
@@ -142,7 +142,9 @@ export interface UserPerformanceHistory {
  * @param userId - The user ID to fetch history for
  * @returns Chronological list of user performance per round
  */
-export async function getUserPerformanceHistoryService(userId: string | number): Promise<UserPerformanceHistory[]> {
+export async function getUserPerformanceHistoryService(
+  userId: string | number
+): Promise<UserPerformanceHistory[]> {
   // 1. Get raw history from DAO (includes non-participated)
   const rawRounds = await getUserRoundsHistoryDAO(String(userId));
 

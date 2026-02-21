@@ -53,7 +53,10 @@ function calculateGoalAverage(pointsFor: number, pointsAgainst: number): number 
  * @param teamIds - Set of team IDs to check
  * @returns Map of "team1-team2" to count of games
  */
-function countHeadToHeadGames(matches: StandingsMatch[], teamIds: Set<number>): Map<string, number> {
+function countHeadToHeadGames(
+  matches: StandingsMatch[],
+  teamIds: Set<number>
+): Map<string, number> {
   const gameCounts = new Map<string, number>();
 
   for (const match of matches) {
@@ -110,7 +113,10 @@ function haveAllTeamsMetTwice(matches: StandingsMatch[], tiedTeamIds: Set<number
  * @param tiedTeamIds - Set of team IDs that are tied
  * @returns Map of team_id to h2h stats
  */
-function calculateHeadToHead(matches: StandingsMatch[], tiedTeamIds: Set<number>): Map<number, H2HStats> {
+function calculateHeadToHead(
+  matches: StandingsMatch[],
+  tiedTeamIds: Set<number>
+): Map<number, H2HStats> {
   const h2hStats = new Map<number, H2HStats>();
 
   // Initialize stats for all tied teams
@@ -172,8 +178,18 @@ function breakTieTwoTeams(
   const tiedTeamIds = new Set([team1Id, team2Id]);
   const h2hStats = calculateHeadToHead(matches, tiedTeamIds);
 
-  const team1H2H = h2hStats.get(team1Id) || { wins: 0, pointDifference: 0, pointsFor: 0, pointsAgainst: 0 };
-  const team2H2H = h2hStats.get(team2Id) || { wins: 0, pointDifference: 0, pointsFor: 0, pointsAgainst: 0 };
+  const team1H2H = h2hStats.get(team1Id) || {
+    wins: 0,
+    pointDifference: 0,
+    pointsFor: 0,
+    pointsAgainst: 0,
+  };
+  const team2H2H = h2hStats.get(team2Id) || {
+    wins: 0,
+    pointDifference: 0,
+    pointsFor: 0,
+    pointsAgainst: 0,
+  };
 
   // a) Victories in games between them
   if (team2H2H.wins !== team1H2H.wins) {
@@ -208,7 +224,11 @@ function breakTieTwoTeams(
  * @param allTeamStats - Map of all team stats
  * @returns Sorted array of tied teams
  */
-function breakTieMultipleTeams(matches: StandingsMatch[], tiedTeams: TeamStats[], allTeamStats: Map<number, TeamStats>): TeamStats[] {
+function breakTieMultipleTeams(
+  matches: StandingsMatch[],
+  tiedTeams: TeamStats[],
+  allTeamStats: Map<number, TeamStats>
+): TeamStats[] {
   if (tiedTeams.length === 0) return [];
   if (tiedTeams.length === 1) return tiedTeams;
   if (tiedTeams.length === 2) {
@@ -249,9 +269,7 @@ function breakTieMultipleTeams(matches: StandingsMatch[], tiedTeams: TeamStats[]
   const result: TeamStats[] = [];
 
   // Process each group
-  for (const [_, group] of Array.from(groupsByH2HWins.entries()).sort(
-    (a, b) => b[0] - a[0]
-  )) {
+  for (const [_, group] of Array.from(groupsByH2HWins.entries()).sort((a, b) => b[0] - a[0])) {
     if (group.length === 1) {
       result.push(group[0]);
     } else if (group.length === 2) {

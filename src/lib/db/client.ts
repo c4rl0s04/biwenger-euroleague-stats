@@ -9,7 +9,13 @@ import { CONFIG } from '../config.js';
 const skipDb = CONFIG.DB.SKIP;
 
 // Use a union type to allow for the mock DB object
-let db: Pool | { query: () => Promise<{ rows: any[]; rowCount: number }>; connect: () => Promise<{ release: () => void }>; end: () => Promise<void> };
+let db:
+  | Pool
+  | {
+      query: () => Promise<{ rows: any[]; rowCount: number }>;
+      connect: () => Promise<{ release: () => void }>;
+      end: () => Promise<void>;
+    };
 
 if (skipDb) {
   // Create a mock database object for builds without a real database

@@ -27,7 +27,7 @@ export interface TournamentStanding {
   drawn: number | null;
   scored: number | null;
   against: number | null;
-  
+
   // Joined fields from users table
   user_name: string | null;
   user_icon: string | null;
@@ -107,7 +107,9 @@ export async function getTournamentById(id: number): Promise<Tournament | null> 
   };
 }
 
-export async function getTournamentStandings(tournamentId: number | null): Promise<TournamentStanding[]> {
+export async function getTournamentStandings(
+  tournamentId: number | null
+): Promise<TournamentStanding[]> {
   const { rows } = await db.query(
     `
         SELECT 
@@ -122,22 +124,24 @@ export async function getTournamentStandings(tournamentId: number | null): Promi
     `,
     [tournamentId]
   );
-  
+
   return rows.map((row: any) => ({
-      ...row,
-      // Ensure numeric fields are typed correctly if DB returns strings (pg driver usually handles integers fine)
-      position: row.position, 
-      points: row.points,
-      won: row.won,
-      lost: row.lost,
-      drawn: row.drawn,
-      scored: row.scored,
-      against: row.against,
-      user_color: row.user_color ? parseInt(row.user_color) : null
+    ...row,
+    // Ensure numeric fields are typed correctly if DB returns strings (pg driver usually handles integers fine)
+    position: row.position,
+    points: row.points,
+    won: row.won,
+    lost: row.lost,
+    drawn: row.drawn,
+    scored: row.scored,
+    against: row.against,
+    user_color: row.user_color ? parseInt(row.user_color) : null,
   }));
 }
 
-export async function getTournamentFixtures(tournamentId: number | null): Promise<TournamentFixture[]> {
+export async function getTournamentFixtures(
+  tournamentId: number | null
+): Promise<TournamentFixture[]> {
   const { rows } = await db.query(
     `
         SELECT 
@@ -156,13 +160,13 @@ export async function getTournamentFixtures(tournamentId: number | null): Promis
     `,
     [tournamentId]
   );
-  
+
   return rows.map((row: any) => ({
-      ...row,
-      home_score: row.home_score,
-      away_score: row.away_score,
-      // Ensure color index is number
-      home_user_color: row.home_user_color ? parseInt(row.home_user_color) : null,
-      away_user_color: row.away_user_color ? parseInt(row.away_user_color) : null
+    ...row,
+    home_score: row.home_score,
+    away_score: row.away_score,
+    // Ensure color index is number
+    home_user_color: row.home_user_color ? parseInt(row.home_user_color) : null,
+    away_user_color: row.away_user_color ? parseInt(row.away_user_color) : null,
   }));
 }

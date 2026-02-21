@@ -953,29 +953,32 @@ export async function getUserOptimization(userId: string, roundId: string | numb
   }
 
   const optimalLineup = [...starters, ...bench];
-  const totalPoints = calculateWeightedSum(optimalLineup.map((p, index) => {
-    let multiplier = 0;
-    let role = 'bench';
-    let is_captain = false;
-    
-    if (index < 5) {
-      role = 'titular';
-      if (index === 0) {
-        multiplier = 2.0; is_captain = true;
+  const totalPoints = calculateWeightedSum(
+    optimalLineup.map((p, index) => {
+      let multiplier = 0;
+      let role = 'bench';
+      let is_captain = false;
+
+      if (index < 5) {
+        role = 'titular';
+        if (index === 0) {
+          multiplier = 2.0;
+          is_captain = true;
+        } else {
+          multiplier = 1.0;
+        }
       } else {
-        multiplier = 1.0;
+        role = index === 5 ? '6th_man' : 'bench';
+        multiplier = index === 5 ? 0.75 : 0.5;
       }
-    } else {
-      role = index === 5 ? '6th_man' : 'bench';
-      multiplier = index === 5 ? 0.75 : 0.5;
-    }
-    
-    return { ...p, role, is_captain, points: p.points } as LineupPlayer;
-  }));
+
+      return { ...p, role, is_captain, points: p.points } as LineupPlayer;
+    })
+  );
 
   return {
     optimalLineup,
-    totalPoints
+    totalPoints,
   };
 }
 
@@ -1018,7 +1021,7 @@ export async function getLineupUsageStats() {
     WHERE l.role = 'titular'
     GROUP BY l.round_id, l.user_id
   `;
-  
+
   // Wrap in outer query to group by formation
   const finalGlobalQuery = `
     WITH Formations AS (
@@ -1039,14 +1042,11 @@ export async function getLineupUsageStats() {
     ORDER BY user_id, count DESC
   `;
 
-  const [globalRes, userRes] = await Promise.all([
-    db.query(finalGlobalQuery),
-    db.query(userQuery)
-  ]);
+  const [globalRes, userRes] = await Promise.all([db.query(finalGlobalQuery), db.query(userQuery)]);
 
   return {
     global: globalRes.rows,
-    byUser: userRes.rows
+    byUser: userRes.rows,
   };
 }
 
@@ -1079,6 +1079,6 @@ export async function getCoachRating(userId: string, roundId: string | number) {
     actualScore,
     maxScore,
     efficiency,
-    idealLineup: optimization.optimalLineup
+    idealLineup: optimization.optimalLineup,
   };
 }

@@ -1,8 +1,10 @@
 import { Pool } from 'pg';
 
-export type DbClient = Pool | {
-  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
-};
+export type DbClient =
+  | Pool
+  | {
+      query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
+    };
 
 /**
  * Ensures that all necessary database tables exist and are up to date.

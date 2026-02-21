@@ -2,11 +2,13 @@ import { db } from '../../index';
 import { users, userRounds, players, matches } from '../../schema';
 import { sql } from 'drizzle-orm';
 
-export async function getExtendedStandings(options: { sortBy?: string; direction?: 'asc' | 'desc' } = {}) {
+export async function getExtendedStandings(
+  options: { sortBy?: string; direction?: 'asc' | 'desc' } = {}
+) {
   const { sortBy = 'total_points', direction = 'desc' } = options;
 
   const sortDir = direction === 'asc' ? sql`ASC` : sql`DESC`;
-  
+
   // Safe whitelist mapping for sort columns
   const sortMap: Record<string, any> = {
     position: sql`position`,
@@ -112,12 +114,13 @@ export async function getRoundWinners(limit = 15) {
     ORDER BY round_id DESC
     LIMIT ${limit}
   `);
-  
+
   return result.rows;
 }
 
 export async function getLeagueTotals() {
-  const pointsStats = (await db.execute(sql`
+  const pointsStats = (
+    await db.execute(sql`
     SELECT 
       SUM(points)::int as total_points,
       ROUND(AVG(points), 1)::float as avg_round_points,
@@ -125,9 +128,11 @@ export async function getLeagueTotals() {
       COUNT(DISTINCT user_id)::int as total_users
     FROM ${userRounds}
     WHERE participated = TRUE
-  `)).rows[0];
+  `)
+  ).rows[0];
 
-  const seasonRounds = (await db.execute(sql`
+  const seasonRounds = (
+    await db.execute(sql`
     SELECT COUNT(DISTINCT 
       CASE 
         WHEN round_name LIKE '%(aplazada)%' THEN TRIM(REPLACE(round_name, '(aplazada)', ''))
@@ -135,9 +140,11 @@ export async function getLeagueTotals() {
       END
     )::int as total_season_rounds
     FROM ${matches}
-  `)).rows[0];
+  `)
+  ).rows[0];
 
-  const valueStats = (await db.execute(sql`
+  const valueStats = (
+    await db.execute(sql`
     SELECT 
       SUM(sq.team_value)::bigint as total_league_value,
       MAX(sq.team_value)::bigint as max_team_value,
@@ -148,9 +155,11 @@ export async function getLeagueTotals() {
       WHERE owner_id IS NOT NULL
       GROUP BY owner_id
     ) sq
-  `)).rows[0];
+  `)
+  ).rows[0];
 
-  const mostValuable = (await db.execute(sql`
+  const mostValuable = (
+    await db.execute(sql`
     SELECT 
       u.name,
       u.icon,
@@ -162,9 +171,11 @@ export async function getLeagueTotals() {
     GROUP BY p.owner_id, u.name, u.icon, u.color_index
     ORDER BY team_value DESC
     LIMIT 1
-  `)).rows[0];
-  
-  const roundRecord = (await db.execute(sql`
+  `)
+  ).rows[0];
+
+  const roundRecord = (
+    await db.execute(sql`
     SELECT 
       ur.user_id,
       u.name,
@@ -177,7 +188,8 @@ export async function getLeagueTotals() {
     WHERE ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1
-  `)).rows[0];
+  `)
+  ).rows[0];
 
   // Leader Streak Logic
   let leaderStreak = { streak: 0 };
@@ -268,7 +280,7 @@ export async function getPointsProgression(limit = 10) {
     WHERE ur.round_id IN (SELECT round_id FROM RecentRounds)
     ORDER BY ur.round_id ASC, ur.points DESC
   `);
-  
+
   return result.rows;
 }
 
@@ -288,7 +300,7 @@ export async function getValueRanking() {
     GROUP BY u.id
     ORDER BY team_value DESC
   `);
-  
+
   return result.rows;
 }
 
@@ -313,7 +325,7 @@ export async function getWinCounts() {
     GROUP BY u.id
     ORDER BY wins DESC
   `);
-  
+
   return result.rows;
 }
 
@@ -349,7 +361,7 @@ export async function getSimpleStandings() {
     ) sq ON u.id = sq.owner_id
     ORDER BY position ASC
   `);
-  
+
   return result.rows;
 }
 
@@ -358,7 +370,7 @@ export async function getLeaderComparison(userId: string) {
   const standings = await getSimpleStandings();
   const leader = standings[0];
   const secondPlace = standings[1];
-  
+
   // Ensure we compare strings properly if IDs are mixed types in DB/JS
   // Drizzle result rows are untyped ‘any’ by default unless mapped, but we know the shape.
   const user = standings.find((u: any) => String(u.user_id) === String(userId));
@@ -368,7 +380,7 @@ export async function getLeaderComparison(userId: string) {
   // Cast for safety
   const leaderPoints = (leader as any).total_points;
   const userPoints = (user as any).total_points;
-  
+
   const gap = leaderPoints - userPoints;
   const pos = (user as any).position;
   const roundsNeeded = pos > 1 ? Math.ceil(gap / 10) : 0;
@@ -392,6 +404,6 @@ export async function getLeagueAveragePoints() {
     FROM ${userRounds}
     WHERE participated = TRUE
   `);
-  
+
   return result.rows[0] ? result.rows[0].avg_points : 0;
 }

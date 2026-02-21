@@ -2,7 +2,6 @@ import { db } from '../../client';
 import { CONFIG } from '../../../config.js';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
 
-
 export interface CorePlayer {
   id: number;
   name: string;
@@ -27,7 +26,6 @@ export interface CorePlayer {
   best_score?: number;
   worst_score?: number;
 }
-
 
 export interface PlayerRecentForm extends CorePlayer {
   games_played: number;
@@ -116,7 +114,10 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
 /**
  * Get top players by recent form (last N rounds)
  */
-export async function getTopPlayersByForm(limit: number = 5, rounds: number = 3): Promise<PlayerRecentForm[]> {
+export async function getTopPlayersByForm(
+  limit: number = 5,
+  rounds: number = 3
+): Promise<PlayerRecentForm[]> {
   const query = `
     WITH RecentRounds AS (
       SELECT m.round_id
@@ -395,7 +396,9 @@ export async function getPlayersBirthday(): Promise<CorePlayer[]> {
 /**
  * Get players on hot or cold streaks
  */
-export async function getPlayerStreaks(minGames: number = 3): Promise<{ hot: PlayerRecentForm[]; cold: PlayerRecentForm[] }> {
+export async function getPlayerStreaks(
+  minGames: number = 3
+): Promise<{ hot: PlayerRecentForm[]; cold: PlayerRecentForm[] }> {
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id

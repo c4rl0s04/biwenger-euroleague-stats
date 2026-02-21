@@ -1,9 +1,11 @@
 import { Pool } from 'pg';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
-export type DbClient = Pool | {
-  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
-};
+export type DbClient =
+  | Pool
+  | {
+      query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
+    };
 
 // ==========================================
 // INTERFACES
@@ -52,10 +54,11 @@ export interface PlayerMutations {
   updatePlayerDetails: (params: UpdatePlayerDetailsParams) => Promise<void>;
   insertMarketValue: (params: InsertMarketValueParams) => Promise<void>;
   getLastDate: (playerId: number) => Promise<{ last_date: Date | string } | undefined>;
-  getPlayerBioStatus: (playerId: number) => Promise<{ birth_date: string; height: number; weight: number } | undefined>;
+  getPlayerBioStatus: (
+    playerId: number
+  ) => Promise<{ birth_date: string; height: number; weight: number } | undefined>;
   upsertTeam: (params: UpsertTeamParams) => Promise<void>;
 }
-
 
 /**
  * Player Mutations (Postgres)

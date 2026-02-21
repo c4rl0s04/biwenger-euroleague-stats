@@ -101,7 +101,9 @@ export async function getGlobalTournamentStats() {
   };
 
   // Sort fixtures chronologically (ASC) for streak calculation
-  const sortedFixtures = [...fixtures].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedFixtures = [...fixtures].sort(
+    (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
 
   sortedFixtures.forEach((f: any) => {
     if (f.status !== 'finished' && !f.home_score && !f.away_score) return;
@@ -274,7 +276,9 @@ export async function getGlobalTournamentStats() {
 
   // 3. League Classification (Only League Tournaments)
   // We can trust our "type" field now!
-  const leagueTournaments = allTournaments.filter((t: any) => t.type === 'league').map((t: any) => t.id);
+  const leagueTournaments = allTournaments
+    .filter((t: any) => t.type === 'league')
+    .map((t: any) => t.id);
   const leagueIds = new Set(leagueTournaments);
 
   const leagueStatsMap: Record<number, GlobalUserStats> = {};

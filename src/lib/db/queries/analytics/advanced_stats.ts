@@ -744,7 +744,9 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
 
         // calculate ranks for this round
         // sort users by total points desc
-        const sortedUsers = [...users].sort((a: any, b: any) => userTotals[b.id] - userTotals[a.id]);
+        const sortedUsers = [...users].sort(
+          (a: any, b: any) => userTotals[b.id] - userTotals[a.id]
+        );
 
         const currentRanks: Record<number, number> = {};
         sortedUsers.forEach((u: any, index: number) => {
@@ -805,14 +807,14 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
       };
     } catch (error) {
       console.error('Error in getPositionChangesStats:', error);
-      return { 
-        rounds: [], 
-        users: [], 
-        valid: false, 
-        stats: { 
-          biggestClimber: { name: '', change: 0, round: '' }, 
-          biggestFaller: { name: '', change: 0, round: '' } 
-        } 
+      return {
+        rounds: [],
+        users: [],
+        valid: false,
+        stats: {
+          biggestClimber: { name: '', change: 0, round: '' },
+          biggestFaller: { name: '', change: 0, round: '' },
+        },
       };
     }
   });

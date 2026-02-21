@@ -72,7 +72,9 @@ export function validatePlayerId(id: string | number | null | undefined): Valida
 /**
  * Validates a user ID (positive integer)
  */
-export function validateUserId(id: string | number | null | undefined): ValidationResult<string | number> {
+export function validateUserId(
+  id: string | number | null | undefined
+): ValidationResult<string | number> {
   if (id === null || id === undefined || id === '') {
     return { valid: false, error: 'User ID is required' };
   }

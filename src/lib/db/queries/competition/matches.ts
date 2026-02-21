@@ -15,11 +15,11 @@ export async function getMatchesGroupedByRound() {
       away_score: matches.awayScore,
       date: matches.date,
       status: matches.status,
-      
+
       home_id: homeTeam.id,
       home_name: homeTeam.name,
       home_img: homeTeam.img,
-      
+
       away_id: awayTeam.id,
       away_name: awayTeam.name,
       away_img: awayTeam.img,
@@ -30,41 +30,44 @@ export async function getMatchesGroupedByRound() {
     .orderBy(matches.roundId, matches.date, matches.id);
 
   // Group by round
-  const grouped = rows.reduce((acc, match) => {
-    const roundId = match.round_id;
-    // Safety check for null roundId (though schema might say integer, it could be null in DB?)
-    // Schema says `integer('round_id')` without notNull(), so it can be null.
-    // The previous JS code didn't check.
-    if (!roundId) return acc; 
+  const grouped = rows.reduce(
+    (acc, match) => {
+      const roundId = match.round_id;
+      // Safety check for null roundId (though schema might say integer, it could be null in DB?)
+      // Schema says `integer('round_id')` without notNull(), so it can be null.
+      // The previous JS code didn't check.
+      if (!roundId) return acc;
 
-    if (!acc[roundId]) {
-      acc[roundId] = {
-        round_id: roundId,
-        round_name: `Jornada ${roundId}`, // Default name, can be enriched if round_name exists in schema
-        matches: [],
-      };
-    }
+      if (!acc[roundId]) {
+        acc[roundId] = {
+          round_id: roundId,
+          round_name: `Jornada ${roundId}`, // Default name, can be enriched if round_name exists in schema
+          matches: [],
+        };
+      }
 
-    acc[roundId].matches.push({
-      id: match.id,
-      date: match.date,
-      status: match.status,
-      home: {
-        id: match.home_id,
-        name: match.home_name,
-        img: match.home_img,
-        score: match.home_score,
-      },
-      away: {
-        id: match.away_id,
-        name: match.away_name,
-        img: match.away_img,
-        score: match.away_score,
-      },
-    });
+      acc[roundId].matches.push({
+        id: match.id,
+        date: match.date,
+        status: match.status,
+        home: {
+          id: match.home_id,
+          name: match.home_name,
+          img: match.home_img,
+          score: match.home_score,
+        },
+        away: {
+          id: match.away_id,
+          name: match.away_name,
+          img: match.away_img,
+          score: match.away_score,
+        },
+      });
 
-    return acc;
-  }, {} as Record<number, any>);
+      return acc;
+    },
+    {} as Record<number, any>
+  );
 
   // Convert to array
   const roundsArr = Object.values(grouped);

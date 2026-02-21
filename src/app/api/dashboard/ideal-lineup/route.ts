@@ -27,7 +27,8 @@ export async function GET() {
       const currentCount = positionCounts[pos] || 0;
 
       if (currentCount < 3) {
-        (player as Record<string, unknown>).img = `https://cdn.biwenger.com/players/euroleague/${player.player_id}.png`;
+        (player as Record<string, unknown>).img =
+          `https://cdn.biwenger.com/players/euroleague/${player.player_id}.png`;
 
         lineup.push(player);
         positionCounts[pos] = currentCount + 1;

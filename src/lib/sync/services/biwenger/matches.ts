@@ -159,7 +159,7 @@ export async function run(manager: SyncManager, round: any, playersList: any = {
                   status = 'finished';
                 }
 
-                const getCumulative = (q: number, team: 'A'|'B') => {
+                const getCumulative = (q: number, team: 'A' | 'B') => {
                   return parseInt(header[`ScoreQuarter${q}${team}`] ?? 0);
                 };
 

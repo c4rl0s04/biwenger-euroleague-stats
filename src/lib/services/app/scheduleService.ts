@@ -19,7 +19,10 @@ export async function fetchScheduleRounds() {
   return await getScheduleRounds();
 }
 
-export async function getUserScheduleService(userId: string | number, targetRoundId: string | number | null = null) {
+export async function getUserScheduleService(
+  userId: string | number,
+  targetRoundId: string | number | null = null
+) {
   try {
     let targetRound;
 

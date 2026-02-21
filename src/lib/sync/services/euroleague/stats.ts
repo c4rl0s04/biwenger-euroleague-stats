@@ -20,7 +20,13 @@ const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
  * @param roundName - Round name
  * @param options - { activeOnly: boolean }
  */
-export async function runGame(manager: SyncManager, gameCode: number, roundId: number, roundName: string, options: any = {}) {
+export async function runGame(
+  manager: SyncManager,
+  gameCode: number,
+  roundId: number,
+  roundName: string,
+  options: any = {}
+) {
   const db = manager.context.db;
   manager.log(`📊 Syncing Euroleague game ${gameCode} for round ${roundId}...`);
 
@@ -130,7 +136,13 @@ export async function runGame(manager: SyncManager, gameCode: number, roundId: n
 }
 
 // Legacy export
-export const syncEuroleagueGameStats = async (db: any, gameCode: number, roundId: number, roundName: string, options: any) => {
+export const syncEuroleagueGameStats = async (
+  db: any,
+  gameCode: number,
+  roundId: number,
+  roundName: string,
+  options: any
+) => {
   const mockManager = {
     context: { db },
     log: console.log,

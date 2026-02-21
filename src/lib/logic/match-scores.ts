@@ -24,7 +24,10 @@ export interface MatchScoreSource {
  * @param header - Euroleague Header API response
  * @returns Regular time scores
  */
-export function calculateRegularTimeScores(header?: EuroleagueHeader | null): { homeScore: number | null; awayScore: number | null } {
+export function calculateRegularTimeScores(header?: EuroleagueHeader | null): {
+  homeScore: number | null;
+  awayScore: number | null;
+} {
   if (!header) return { homeScore: null, awayScore: null };
 
   // Euroleague Header API structure typically has:
@@ -68,7 +71,10 @@ export function calculateRegularTimeScores(header?: EuroleagueHeader | null): { 
  * @param match - Match object with scores
  * @returns Scores to use for standings
  */
-export function getStandingsScores(match: MatchScoreSource): { homeScore: number; awayScore: number } {
+export function getStandingsScores(match: MatchScoreSource): {
+  homeScore: number;
+  awayScore: number;
+} {
   // Prefer regular time scores (excluding OT) if available
   if (match.home_score_regtime != null && match.away_score_regtime != null) {
     return {

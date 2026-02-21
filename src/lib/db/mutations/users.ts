@@ -1,9 +1,11 @@
 import { Pool } from 'pg';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
-export type DbClient = Pool | {
-  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
-};
+export type DbClient =
+  | Pool
+  | {
+      query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
+    };
 
 // ==========================================
 // INTERFACES
@@ -57,15 +59,28 @@ export interface UserMutations {
   upsertUser: (params: UpsertUserParams) => Promise<void>;
   insertInitialSquad: (params: InsertInitialSquadParams) => Promise<void>;
   getInitialPrice: (playerId: number, date: string) => Promise<{ price: number } | undefined>;
-  getPlayersSoldByUser: (sellerName1: string, sellerName2: string) => Promise<{ player_id: number }[]>;
+  getPlayersSoldByUser: (
+    sellerName1: string,
+    sellerName2: string
+  ) => Promise<{ player_id: number }[]>;
   getPlayersOwnedByUser: (ownerId: string) => Promise<{ player_id: number }[]>;
-  getPurchasesByPlayerAndUser: (playerId: number, buyerName1: string, buyerName2: string) => Promise<{ timestamp: number; type: string }[]>;
-  getSalesByPlayerAndUser: (playerId: number, sellerName1: string, sellerName2: string) => Promise<{ timestamp: number; type: string }[]>;
+  getPurchasesByPlayerAndUser: (
+    playerId: number,
+    buyerName1: string,
+    buyerName2: string
+  ) => Promise<{ timestamp: number; type: string }[]>;
+  getSalesByPlayerAndUser: (
+    playerId: number,
+    sellerName1: string,
+    sellerName2: string
+  ) => Promise<{ timestamp: number; type: string }[]>;
   upsertLineup: (params: UpsertLineupParams) => Promise<void>;
   deleteUserLineup: (params: DeleteUserLineupParams) => Promise<void>;
   upsertUserRound: (params: UpsertUserRoundParams) => Promise<void>;
   clearInitialSquads: () => Promise<void>;
-  getTransfersForBacktracking: () => Promise<{ timestamp: number; player_id: number; vendedor: string; comprador: string }[]>;
+  getTransfersForBacktracking: () => Promise<
+    { timestamp: number; player_id: number; vendedor: string; comprador: string }[]
+  >;
 }
 
 /**
@@ -144,7 +159,11 @@ export function prepareUserMutations(db: DbClient): UserMutations {
       return res.rows;
     },
 
-    getPurchasesByPlayerAndUser: async (playerId: number, buyerName1: string, buyerName2: string) => {
+    getPurchasesByPlayerAndUser: async (
+      playerId: number,
+      buyerName1: string,
+      buyerName2: string
+    ) => {
       const sql = `
         SELECT timestamp, 'buy' as type
         FROM fichajes
