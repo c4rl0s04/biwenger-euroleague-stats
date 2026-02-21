@@ -32,7 +32,7 @@ export default function ScoreOverviewCard({ summary, viewMode, user }) {
   const textColor = colorClasses[color] || colorClasses.zinc;
 
   // Coach rating styling
-  const rating = coachRating?.rating || 0;
+  const rating = coachRating?.efficiency ?? 0;
   let ratingColor = 'text-red-400';
   if (rating >= 90) ratingColor = 'text-emerald-400';
   else if (rating >= 70) ratingColor = 'text-yellow-400';
@@ -65,7 +65,7 @@ export default function ScoreOverviewCard({ summary, viewMode, user }) {
               <div className="flex items-center gap-1.5">
                 <TrendingDown size={12} className="text-red-400/50" />
                 <span className="text-lg font-bold font-mono text-red-400">
-                  -{Math.round(coachRating?.diff || 0)}
+                  -{Math.round((coachRating?.maxScore || 0) - (coachRating?.actualScore || 0))}
                 </span>
               </div>
             </div>

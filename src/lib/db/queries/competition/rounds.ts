@@ -1010,6 +1010,7 @@ export async function getUserRoundsHistoryDAO(userId: string) {
 export async function getLineupUsageStats() {
   const globalQuery = `
     SELECT 
+      l.user_id,
       CONCAT(
         COUNT(CASE WHEN p.position = 'Base' THEN 1 END), '-',
         COUNT(CASE WHEN p.position = 'Alero' THEN 1 END), '-',

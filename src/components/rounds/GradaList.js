@@ -16,7 +16,7 @@ export default function GradaList({ players }) {
         {sorted.map((player) => {
           return (
             <div
-              key={player.id}
+              key={player.player_id ?? player.id}
               onClick={() => router.push(`/player/${player.player_id || player.id}`)}
               className="group flex items-center justify-between p-1.5 rounded-lg bg-zinc-900/50 border border-white/5 hover:bg-zinc-800/50 transition-colors duration-200 cursor-pointer"
             >

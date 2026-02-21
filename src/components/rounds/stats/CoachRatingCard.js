@@ -4,7 +4,7 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 export default function CoachRatingCard({ user }) {
   if (!user || user.coachRating === undefined) return null;
 
-  const rating = user.coachRating?.rating || 0;
+  const rating = user.coachRating?.efficiency ?? 0;
 
   // Rating Color
   let ratingColor = 'text-red-500';
@@ -24,7 +24,7 @@ export default function CoachRatingCard({ user }) {
         <div className="text-right">
           <div className="text-xs text-zinc-400">Puntos Perdidos</div>
           <div className="text-lg font-bold text-red-400">
-            -{Math.round(user.coachRating?.diff || 0)}
+            -{Math.round((user.coachRating?.maxScore || 0) - (user.coachRating?.actualScore || 0))}
           </div>
         </div>
       </div>
