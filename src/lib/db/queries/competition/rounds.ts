@@ -985,7 +985,7 @@ export async function getUserOptimization(userId: string, roundId: string | numb
         squadStats.push({
           player_id: ghost.player_id,
           name: ghost.name || 'Unknown Player',
-        // Infer the ghost's actual position from the lineup context instead of
+          // Infer the ghost's actual position from the lineup context instead of
           // defaulting to 'Base'. A wrong position can cause the greedy to bench a
           // highly-scoring ghost player, underestimating potentialPoints.
           position: inferGhostPosition(lineupForGhosts.players, ghost, squadStats),
