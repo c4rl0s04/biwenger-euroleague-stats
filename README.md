@@ -1,197 +1,189 @@
-# 🏀 Biwenger Stats - Euroleague Analytics
+# 🏀 Biwenger Stats — Euroleague Analytics Platform
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-66%20passing-brightgreen)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-API%20Layer-blue)
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> **Advanced financial analytics and performance tracking for Biwenger Euroleague fantasy managers.**
+> **Advanced financial analytics and performance tracking for Biwenger Euroleague fantasy basketball managers.**
 
 ---
 
-## 📸 Screeenshot
+## 📸 Screenshots
 
 <div align="center">
   <img src="./public/assets/home.png" width="45%" alt="Home Page" />
   <img src="./public/assets/dashboard.png" width="45%" alt="Dashboard" />
 </div>
 
+---
+
 ## 🚀 Overview
 
-**Biwenger Stats** is a powerful companion app for fantasy basketball managers. It synchronizes data from Biwenger and Euroleague APIs to provide deep insights that the native platform misses. From identifying undervalued players ("Sniper Mode") to tracking your exact profit on every trade, this tool gives you the data-driven edge to win your league.
+**Biwenger Stats** is a full-stack companion app for fantasy basketball managers competing in Biwenger's Euroleague format. It syncs live data from the Biwenger private API and the official Euroleague API through a custom ETL pipeline, storing it in PostgreSQL for deep analytical querying.
+
+The platform provides insights unavailable in the native Biwenger app — from identifying undervalued market opportunities ("Sniper Mode") to tracking exact profit margins on every trade, calculating ideal lineups, and visualising squad growth over a season.
+
+---
 
 ## ✨ Key Features
 
 ### 📊 Dashboard & Analytics
 
-- **Live Scoring**: Real-time fantasy points updates during Euroleague games.
-- **Squad Value Tracking**: Visualize your team's financial growth over the season.
-- **Ideal Lineup**: Algorithm that calculates the maximum possible score for every round.
+- **Live Scoring** — Real-time fantasy points updates during Euroleague games via a polling live-sync service
+- **Ideal Lineup** — Algorithm that calculates maximum possible points for every past round (with ghost player handling)
+- **Squad Value Tracking** — Visualise your team's financial growth over the season
+- **Home vs Away Splits** — Performance breakdown by venue across the whole season
+- **Captain Analysis** — Stats on captaincy choices and recommendations for upcoming rounds
 
 ### 💰 Market Intelligence
 
-- **Sniper Mode**: Identify undervalued players currently on the market.
-- **Trade Analysis**: Track your best and worst transfers by profit margin.
-- **Price Trends**: Interactive charts showing player value history (1W, 1M, Season).
-- **Big Spender**: See who is investing the most cash in the market.
+- **Sniper Mode** — Identify undervalued players currently listed on the market
+- **Trade Analysis** — Track best/worst transfers by absolute profit and percentage return
+- **Price Trends** — Interactive charts showing player value history (1W, 1M, 3M, 6M, 1Y)
+- **Big Spender** — See who is investing the most across your league
+- **Missed Opportunities** — Players you sold that went on to appreciate in value
 
-### 🏆 Tournaments
+### 🏆 Standings & Advanced Stats
 
-- **Custom Brackets**: Support for Cup/Playoff formats alongside the regular league.
-- **Head-to-Head**: Direct comparison tools for player vs. player stats.
+- **Full Season Standings** — Sortable table with 10+ derived metrics per manager
+- **All-Play-All** — Simulated standings if every manager played every other every week
+- **Volatility Index** — Consistency vs variance analysis for each manager
+- **Heat Check** — Streak detection (hot/cold streaks) across recent rounds
+- **Dominance Score**, **Floor/Ceiling**, **Theoretical Gap**, **Rivalry Matrix**, and more
+
+### 🔮 Predictions & Compare
+
+- **Next-Round Predictability** — Which teams are easiest to predict based on historical scoring
+- **Head-to-Head Compare** — Side-by-side breakdown of any two managers
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 16 (App Router)
-- **Database**: PostgreSQL (via `pg`)
-- **Styling**: Tailwind CSS v4
-- **Charts**: Recharts & Chart.js
-- **Validation**: Zod
-- **Testing**: Vitest
+See [`docs/TECH_STACK.md`](./docs/TECH_STACK.md) for the full deep-dive with rationale for every choice.
+
+| Layer            | Technology                                               |
+| ---------------- | -------------------------------------------------------- |
+| **Framework**    | Next.js 16 (App Router, Server Components)               |
+| **Language**     | TypeScript (API + services) · JavaScript (UI components) |
+| **Database**     | PostgreSQL + Drizzle ORM                                 |
+| **Auth**         | Auth.js v5 (next-auth) with `proxy.js` guard             |
+| **Styling**      | Tailwind CSS v4 · clsx · tailwind-merge                  |
+| **Animation**    | Framer Motion                                            |
+| **Charts**       | Recharts · Chart.js                                      |
+| **Validation**   | Zod · custom typed validators                            |
+| **Testing**      | Vitest (66 tests, 7 suites)                              |
+| **DevOps**       | Docker · GitHub Actions CI/CD                            |
+| **Code Quality** | ESLint · Prettier · Husky · lint-staged                  |
+
+---
 
 ## 🏁 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- Docker & Docker Compose
+- Docker & Docker Compose (for the local database)
 
 ### Installation
 
-1.  **Clone the repository**
+1. **Clone the repository**
 
-    ```bash
-    git clone https://github.com/yourusername/biwengerstats-next.git
-    cd biwengerstats-next
-    ```
+   ```bash
+   git clone https://github.com/yourusername/biwengerstats-next.git
+   cd biwengerstats-next
+   ```
 
-2.  **Configure Environment**
+2. **Configure Environment**
 
-    **🎯 Recommended: Use the Setup Wizard**
+   **🎯 Recommended: Use the Setup Wizard**
 
-    Run the interactive setup wizard to automatically configure your credentials:
+   ```bash
+   npm run setup
+   ```
 
-    ```bash
-    npm run setup
-    ```
+   The wizard will:
+   1. Ask you to paste your Biwenger token (from browser Developer Tools)
+   2. Automatically fetch all your leagues and let you select one
+   3. Extract your League ID and User ID automatically
+   4. Prompt you to set an admin password
+   5. Auto-generate a secure session encryption key
+   6. Create your `.env` file with all required configuration
 
-    The wizard will:
-    1. Ask you to paste your Biwenger token (from browser Developer Tools)
-    2. Automatically fetch all your leagues and let you select one
-    3. Extract your League ID and User ID automatically
-    4. Prompt you to set an admin password
-    5. Auto-generate a secure session encryption key
-    6. Create your `.env` file with all required configuration
+   <details>
+   <summary><strong>Advanced: Manual Configuration</strong></summary>
 
-    **That's it!** No manual JSON inspection needed.
+   Copy the example environment file:
 
-    <details>
-    <summary><strong>Advanced: Manual Configuration</strong></summary>
+   ```bash
+   cp .env.example .env
+   ```
 
-    If you prefer to configure manually, copy the example environment file:
+   Fill in the required variables. See `.env.example` for full documentation of each variable.
 
-    ```bash
-    cp .env.example .env
-    ```
+   </details>
 
-    Then open `.env` and fill in the following **required** credentials:
+3. **Start the database & app**
 
-    ### Required Credentials
+   ```bash
+   docker-compose up -d
+   npm run dev
+   ```
 
-    #### `BIWENGER_TOKEN`
+4. **Run the initial data sync**
 
-    Your personal authentication token from Biwenger.
+   ```bash
+   npm run sync
+   ```
 
-    **How to get it:**
-    1. Log into [Biwenger](https://biwenger.as.com) in your browser
-    2. Open Developer Tools (F12)
-    3. Go to the **Network** tab
-    4. Refresh the page
-    5. Look for a request to `https://biwenger.as.com/api/v2/`
-    6. In the **Headers** section, find `Authorization: Bearer <YOUR_TOKEN>`
-    7. Copy the token (everything after `Bearer `)
+5. **Open the app**
 
-    #### `BIWENGER_LEAGUE_ID`
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-    Your league's unique identifier.
-
-    **How to get it:**
-    1. In Developer Tools (Network tab), look for a request to `/api/v2/league`
-    2. Click on the request and go to the **Response** or **Preview** tab
-    3. Find the `id` field in the JSON response
-    4. Copy that number as your `BIWENGER_LEAGUE_ID`
-
-    #### `BIWENGER_USER_ID`
-
-    Your user ID within Biwenger.
-
-    **How to get it:**
-    1. In Developer Tools (Network tab), look for a request to `/api/v2/user`
-    2. Click on the request and go to the **Response** or **Preview** tab
-    3. Find the `id` field in the JSON response
-    4. Copy that number as your `BIWENGER_USER_ID`
-
-    #### `ACCESS_PASSWORD`
-
-    A password you create to protect the admin/sync dashboard.
-
-    **How to set it:**
-    - Choose any secure password (e.g., `"mySecretPassword123"`)
-
-    #### `AUTH_SECRET`
-
-    A random string for encrypting user sessions.
-
-    **How to generate it:**
-
-    ```bash
-    openssl rand -base64 32
-    ```
-
-    Copy the output into your `.env` file.
-
-    ### Optional: Remote Database
-
-    By default, Docker creates a local PostgreSQL database. To use **Supabase** or another remote database:
-
-    ```bash
-    DATABASE_URL="postgresql://user:password@host:port/database"
-    ```
-
-    </details>
-
-3.  **Run with Docker**
-
-    ```bash
-    docker-compose up -d
-    ```
-
-4.  **Access the App**
-    Open [http://localhost:3000](http://localhost:3000) in your browser.
+---
 
 ## 🔄 Data Synchronization
 
-The app uses a robust ETL pipeline to keep data fresh.
+The app uses a staged ETL pipeline to keep data fresh from two external sources.
 
-- **Full Sync**: `npm run sync` (Updates players, market, and stats)
-- **Live Sync**: `npm run sync:live` (Fast updates for live games)
-- **Daily Sync**: `npm run sync:daily` (Scheduled maintenance)
+| Command              | Description                                 |
+| -------------------- | ------------------------------------------- |
+| `npm run sync`       | Full sync — players, market, stats, lineups |
+| `npm run sync:daily` | Daily maintenance sync                      |
+| `npm run sync:live`  | Fast polling sync during live games         |
 
-See [DATA_SYNC.md](./docs/DATA_SYNC.md) for details.
+See [`docs/DATA_SYNC.md`](./docs/DATA_SYNC.md) for the full pipeline documentation.
+
+---
+
+## 🧪 Testing
+
+```bash
+npm test          # Run all tests (watch mode)
+npm test -- --run # Single run
+```
+
+66 tests across 7 suites covering API response structure, validation utilities, sync logic, and service integration.
+
+---
 
 ## 📚 Documentation
 
-- [Features Guide](./docs/FEATURES.md)
-- [Architecture Overview](./docs/ARCHITECTURE.md)
-- [API Reference](./docs/API_INTEGRATION.md)
+| Document                                               | Description                                            |
+| ------------------------------------------------------ | ------------------------------------------------------ |
+| [`docs/TECH_STACK.md`](./docs/TECH_STACK.md)           | Deep-dive into every technology choice and why         |
+| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)       | System architecture, data flow, and request lifecycle  |
+| [`docs/PATTERNS.md`](./docs/PATTERNS.md)               | Design patterns and software engineering methodologies |
+| [`docs/FEATURES.md`](./docs/FEATURES.md)               | Full feature catalogue                                 |
+| [`docs/DATA_SYNC.md`](./docs/DATA_SYNC.md)             | ETL pipeline guide                                     |
+| [`docs/API_INTEGRATION.md`](./docs/API_INTEGRATION.md) | External API integration reference                     |
+| [`CONTRIBUTING.md`](./CONTRIBUTING.md)                 | Development workflow                                   |
 
-## 🤝 Contributing
-
-Contributions are welcome! Please run the test suite before submitting a PR:
-
-```bash
-npm test
-```
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE)

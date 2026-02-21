@@ -1,203 +1,281 @@
-# Biwenger Stats - Technical Architecture
+# Technical Architecture — Biwenger Stats
 
-> **Comprehensive guide to the technical design, patterns, and structure of the application.**
+> Comprehensive guide to the system design, data flow, and structural decisions of the application.
 
 ---
 
 ## 1. Directory Structure
 
-The project follows a modular, feature-based structure using Next.js 16 (App Router).
-
 ```
-src/
-├── app/                  # Next.js App Router (Routing & Pages)
-│   ├── api/              # Backend API Endpoints (Route Handlers)
-│   ├── dashboard/        # Dashboard Page Module
-│   ├── standings/        # Standings Page Module
-│   ├── schedule/         # Schedule Page Module
-│   ├── matches/          # Matches Page Module
-│   ├── player/[id]/      # Dynamic Player Profile
-│   └── globals.css       # Global Styles & Tailwind Directives
-│
-├── components/           # React Components
-│   ├── dashboard/        # Dashboard-specific cards/widgets
-│   ├── standings/        # Standings-specific analysis cards
-│   ├── matches/          # Match cards and round selectors
-│   ├── ui/               # Reusable UI (Buttons, Cards, Inputs)
-│   └── layout/           # Layout components (Navbar, Shell)
-│
-└── lib/                  # Core Business Logic & Utilities
-    ├── db/               # Database Access Layer
-    │   ├── client.js     # Singleton DB connection
-    │   └── queries/      # SQL queries organized by domain (users.js, stats.js)
-    ├── sync/             # Data Synchronization System
-    │   ├── manager.js    # Orchestrator for sync jobs
-    │   └── steps/        # Individual sync steps (01-players, 02-lineups...)
-    ├── hooks/            # Custom React Hooks (useApiData, etc.)
-    ├── services/         # Shared business logic
-    └── utils/            # Helpers (formatters, calculations)
+biwengerstats-next/
+├── .github/workflows/     # CI/CD: ci.yml, sync.yml, sync-live.yml
+├── .husky/                # Git hooks (pre-commit)
+├── __tests__/             # Integration tests
+├── docs/                  # Technical documentation
+├── public/assets/         # Static images (screenshots, logos)
+├── scripts/
+│   ├── setup.js           # Interactive setup wizard
+│   └── dev/               # Dev/debug utilities (not production)
+└── src/
+    ├── app/
+    │   ├── (app)/         # Authenticated route group
+    │   │   ├── dashboard/page.js
+    │   │   ├── standings/page.js
+    │   │   ├── market/page.js
+    │   │   ├── rounds/page.js
+    │   │   ├── player/[id]/page.js
+    │   │   ├── team/[id]/page.js
+    │   │   └── ...
+    │   ├── api/           # Backend route handlers (56 endpoints, all .ts)
+    │   │   ├── dashboard/ # Dashboard-specific endpoints
+    │   │   ├── market/    # Market intelligence endpoints
+    │   │   ├── standings/ # Standings & advanced stats
+    │   │   ├── player/    # Player profile endpoints
+    │   │   ├── rounds/    # Round history & lineup
+    │   │   └── ...
+    │   ├── login/page.js  # Public login page
+    │   └── layout.js      # Root layout (metadata, fonts)
+    ├── components/
+    │   ├── dashboard/     # Dashboard card widgets
+    │   ├── standings/     # Standings analysis cards
+    │   ├── market/        # Market page components
+    │   ├── ui/            # Reusable primitives (ErrorBoundary, CommandPalette...)
+    │   └── layout/        # App shell (Navbar, ClientWrapper, AppShell)
+    ├── contexts/          # React context providers (UserContext)
+    └── lib/
+        ├── db/
+        │   ├── index.ts   # Drizzle client singleton + schema export
+        │   ├── schema.ts  # Drizzle schema (all table definitions)
+        │   └── queries/   # DAO layer — SQL queries by domain
+        │       ├── core/  # users.ts, players.ts
+        │       └── features/ # market.ts, standings.ts, rounds.ts...
+        ├── hooks/         # Custom React hooks (useApiData, useTheme...)
+        ├── services/      # Business logic layer
+        │   ├── index.ts   # Barrel export
+        │   ├── marketService.ts
+        │   ├── standingsService.ts
+        │   ├── playerService.ts
+        │   └── ...
+        ├── sync/          # ETL pipeline
+        │   ├── index.ts   # Full sync orchestrator
+        │   ├── live.ts    # Live-mode polling entry
+        │   └── steps/     # 01-players.ts → 07-euroleague.ts
+        └── utils/         # Shared typed utilities
+            ├── response.ts    # API response helpers
+            ├── validation.ts  # Boundary validators
+            ├── analytics.ts   # Data processing
+            ├── date.ts        # Date formatting
+            ├── format.ts      # Display formatting
+            └── fantasy-scoring.ts # Points calculation
 ```
 
 ---
 
 ## 2. Technology Stack
 
-### Frontend
+| Layer      | Technology                             | Version     |
+| ---------- | -------------------------------------- | ----------- |
+| Framework  | Next.js (App Router)                   | ^16.1.1     |
+| Language   | TypeScript (backend) · JavaScript (UI) | —           |
+| Database   | PostgreSQL                             | —           |
+| ORM        | Drizzle ORM                            | ^0.45.1     |
+| Auth       | Auth.js v5 (next-auth)                 | ^5.0.0-beta |
+| Styling    | Tailwind CSS v4                        | ^4          |
+| Animation  | Framer Motion                          | ^12         |
+| Charts     | Recharts · Chart.js                    | ^3.7 · ^4.5 |
+| Validation | Zod + custom validators                | ^4.3        |
+| Testing    | Vitest                                 | ^4.0        |
+| CI/CD      | GitHub Actions                         | —           |
 
-- **Framework**: Next.js 16 (App Router, Server Components)
-- **Language**: JavaScript (ES6+ with JSDoc typing)
-- **Styling**: Tailwind CSS v4 + `clsx` + `tailwind-merge`
-- **Animation**: `framer-motion`
-- **Charts**: `recharts` & `chart.js`
-- **Icons**: `lucide-react`
-- **State**: React Query-like custom hook (`useApiData`)
-
-### Backend / Data
-
-- **Runtime**: Node.js
-- **Database**: PostgreSQL (via `pg`)
-- **Validation**: `zod`
-- **Testing**: `vitest`
-
-### Data Synchronization
-
-- **Scheduler**: GitHub Actions (Daily updates) + manual trigger
-- **Environment**: `dotenv` for configuration
+> See [`docs/TECH_STACK.md`](./TECH_STACK.md) for the full rationale behind each choice.
 
 ---
 
-## 3. Database Architecture
+## 3. Request Lifecycle
 
-We use **PostgreSQL** for detailed relational data.
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant P as proxy.js (Auth Guard)
+    participant R as app/page.js (RSC)
+    participant A as API Route (route.ts)
+    participant S as Service Layer
+    participant D as DAO (queries/)
+    participant DB as PostgreSQL
+
+    B->>P: GET /dashboard
+    P-->>B: 302 /login (if unauthenticated)
+    P->>R: Pass (authenticated)
+    R-->>B: Server-rendered HTML shell
+
+    B->>A: GET /api/dashboard/captain-stats?userId=1
+    Note over A: Validate params (validateUserId)
+    A->>S: fetchCaptainStats(userId)
+    S->>D: getCaptainStats(userId)
+    D->>DB: SQL query (Drizzle)
+    DB-->>D: Row data
+    D-->>S: Typed result
+    S-->>A: Transformed data
+    A-->>B: { success: true, data: {...} }
+```
+
+---
+
+## 4. Database Architecture
 
 ### Connection Strategy
 
-- **Singleton Pattern**: The database connection is established once in `src/lib/db/client.js` and reused.
-- **Connection Pooling**: Handled by `pg` pool to manage connections efficiently in a serverless/container environment.
-- **Query Organization**: Queries are NOT written inline in components. They are organized in `src/lib/db/queries/*.js` to promote reuse and separation of concerns.
+- **Singleton**: `src/lib/db/index.ts` creates the Drizzle client once using a `pg` connection pool and exports it as a module-level constant. This prevents pool exhaustion in long-lived server processes.
+- **Drizzle ORM**: All queries are written using Drizzle's composable query builder. The schema definition in `schema.ts` generates TypeScript types, so column names and types are validated at compile time.
+- **Connection Pooling**: Managed by `pg`'s built-in pool. Suitable for both long-running Docker deployments and serverless (Vercel) environments.
 
-### Key Tables
+### Schema Overview
 
-| Domain     | Table                | Description                               |
-| ---------- | -------------------- | ----------------------------------------- |
-| **Core**   | `users`              | League participants (Biwenger IDs)        |
-| **Core**   | `players`            | Official player registry with prices      |
-| **Stats**  | `player_round_stats` | Boxscores for every player in every game  |
-| **Stats**  | `user_rounds`        | The points each user scored in each round |
-| **Market** | `market_values`      | Daily price snapshots for analytics       |
-| **Logic**  | `lineups`            | Who started whom (and captains) per round |
-
----
-
-## 3.5 Service Layer Pattern
-
-To avoid bloated API handlers and duplicated logic, we use a dedicated **Service Layer** (`src/lib/services/`).
-
-- **Architecture Flow**: `API Route` -> `Service` -> `DAO (Data Access Object)` -> `Database`.
-- **Responsibility**: Services handle business rules, data aggregation, and transformation.
-- **Example**: `marketService.js` executes 20+ parallel queries (Best Flip, Big Spender, etc.) and enriches the results with user metadata before returning a unified object to the frontend.
+| Domain | Table                | Description                               |
+| ------ | -------------------- | ----------------------------------------- |
+| Core   | `users`              | League participants                       |
+| Core   | `players`            | Player registry with current prices       |
+| Core   | `teams`              | Euroleague team data                      |
+| Core   | `rounds`             | Season round definitions                  |
+| Stats  | `player_round_stats` | Boxscores per player per game             |
+| Stats  | `user_rounds`        | Fantasy points per user per round         |
+| Market | `market_values`      | Daily price snapshots                     |
+| Market | `transfers`          | Buy/sell history                          |
+| Logic  | `lineups`            | Who started (and captain picks) per round |
+| Logic  | `player_mappings`    | Biwenger ID ↔ Euroleague ID bridge table  |
 
 ---
 
-## 4. Internal API
+## 5. Service Layer Architecture
 
-The application exposes a read-only API for the frontend, located in `src/app/api/`.
+Every API route delegates all business logic to a dedicated service. The pattern is:
+
+```
+route.ts  (validate → call service → return response)
+    ↓
+*Service.ts  (orchestrate, aggregate, transform)
+    ↓
+queries/*.ts  (single-purpose SQL queries)
+    ↓
+PostgreSQL
+```
+
+**Example**: `GET /api/market` calls `getMarketPageData()` in `marketService.ts`, which concurrently executes 20+ queries to compute KPIs (total spend, biggest transaction, etc.) before returning one unified response object.
+
+---
+
+## 6. API Layer
+
+### Endpoint Count
+
+56 typed Route Handlers across the following feature areas:
+
+| Prefix             | Endpoints | Area                        |
+| ------------------ | --------- | --------------------------- |
+| `/api/dashboard/*` | 14        | Dashboard widgets           |
+| `/api/standings/*` | 6         | Standings & advanced stats  |
+| `/api/market/*`    | 5         | Market intelligence         |
+| `/api/rounds/*`    | 5         | Round history & lineups     |
+| `/api/player/*`    | 4         | Player profiles             |
+| `/api/team/*`      | 1         | Team profiles               |
+| `/api/stats/*`     | 1         | Stat leaders                |
+| `/api/auth/*`      | 1         | Auth.js handler             |
+| Other              | ~19       | Search, news, compare, etc. |
 
 ### Response Format
 
-All endpoints return a standard JSON envelope:
+All endpoints return:
 
 ```json
-{
-  "success": true,
-  "data": { ... },
-  "error": null
-}
+{ "success": true, "data": { ... } }
 ```
 
-### Core Endpoints
+or:
 
-- `GET /api/users`: List all league users
-- `GET /api/players`: List all players with current stats
-- `GET /api/teams`: List Euroleague teams
-- `GET /api/rounds`: List season rounds
+```json
+{ "success": false, "error": "Descriptive message" }
+```
 
-### Feature Endpoints
-
-- `GET /api/dashboard/summary`: KPIs for the user dashboard
-- `GET /api/standings`: Full league standings with extended stats
-- `GET /api/market/activity`: Recent transfers and bids
-- `GET /api/predictions`: User prediction stats
+The `successResponse()` and `errorResponse()` helpers in `src/lib/utils/response.ts` enforce this shape, including standardised `Cache-Control` headers.
 
 ---
 
-## 5. Data Synchronization System
-
-The application relies on a sync pipeline to mirror data from Biwenger and Euroleague APIs.
-
-> 📘 **See [DATA_SYNC.md](./DATA_SYNC.md) for the full guide on how to run and debug the sync process.**
-
-The sync logic resides in `src/lib/sync/` and is designed to be idempotent. It handles:
-
-- Updating player rosters and prices
-- Fetching match results and live scores
-- Processing the transfer market feed
-- Calculating fantasy points and user standings
-
----
-
-## 6. Frontend Architecture
+## 7. Frontend Architecture
 
 ### Server vs Client Components
 
-- **Page Layouts (`page.js`)**: Server Components. They serve the initial shell and SEO metadata.
-- **Client Wrappers**: Most dynamic dashboards use a `*Client.js` wrapper (e.g., `StandingsClient.js`) to handle interactivity and data fetching.
-- **Cards**: The UI is composed of "Cards" (e.g., `VolatilityCard`, `TeamValueCard`). Each card is responsible for rendering a specific metric.
+| Component Type | Rendering    | Purpose                                          |
+| -------------- | ------------ | ------------------------------------------------ |
+| `page.js`      | Server (RSC) | HTML shell, `<head>` metadata, auth-aware layout |
+| `*Client.js`   | Client       | Interactivity, state management, data fetching   |
+| `*Card.js`     | Client       | Individual data widget (uses `useApiData`)       |
 
-### Data Fetching Hook: `useApiData`
+### `useApiData` Hook
 
-We avoid `useEffect` fetch boilerplate by using a custom hook: `src/lib/hooks/useApiData.js`.
-
-- **Automatic Loading/Error States**: Simplifies UI logic.
-- **Dependency Tracking**: Refetches automatically when props (like `roundId`) change.
-- **Standardized Response**: Expects `{ success: true, data: ... }` from our internal API.
+The central data-fetching abstraction eliminates `useEffect` boilerplate across all client components:
 
 ```javascript
-// Example Usage
-const { data, loading } = useApiData(`/api/rounds/standings?round=${roundId}`, {
-  dependencies: [roundId],
+const { data, loading, error } = useApiData('/api/standings/full?sort=points', {
+  dependencies: [userId],
   immediate: true,
 });
 ```
 
-### Theme System
+It handles: loading/error state, dependency tracking, request cancellation on unmount.
 
-- Colors are centralization in `src/lib/utils/colors.js`.
-- Users have assigned "Identity Colors" based on their avatar/preference, which tint their dashboard UI.
+### Command Palette
 
----
-
-## 7. External APIs
-
-### 1. Biwenger API (Private)
-
-- **Role**: The source of truth for Fantasy Football/Basketball data.
-- **Auth**: Bearer Token (`BIWENGER_TOKEN`).
-- **Endpoints Used**:
-  - `/league/{id}/board`: Transfer market & news feed.
-  - `/competitions/euroleague/data`: Master data.
-  - `/rounds/euroleague/{id}`: Match results and scores.
-
-### 2. Euroleague API (Public/Private)
-
-- **Role**: Providing deep basketball statistics (beyond just fantasy points).
-- **Integration**: Mapped via `player_mappings` table to link specific Euroleague Player IDs to Biwenger IDs.
+A `cmdk`-powered command palette (⌘K) provides global search across players, teams, and users, with keyboard navigation.
 
 ---
 
-## 8. Performance & Optimization
+## 8. Authentication
 
-- **Bundle Analysis**: `npm run analyze` creates a visual treemap of the build.
-- **Image Optimization**: All player/team images use `next/image` with remote patterns configured in `next.config.mjs`.
-- **Database Indexing**: Critical columns (`player_id`, `round_id`, `date`) are indexed in Postgres for faster joins.
-- **Caching**: Heavy analytical queries (like "All-Play-All" standings) are cached at the database or API level where appropriate.
+Auth.js v5 provides session management. The `proxy.js` file is the authentication enforcement layer:
+
+```javascript
+// src/proxy.js — wraps every matched request
+export default auth; // Auth.js handler export
+
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|login).*)'],
+};
+```
+
+Unauthenticated requests to any page are redirected to `/login`. API routes (`/api/*`) are explicitly excluded from the matcher and handle their own session validation.
+
+---
+
+## 9. Data Synchronisation
+
+The ETL pipeline (`src/lib/sync/`) keeps the local database in sync with two external sources:
+
+| Source         | Data Extracted                                           |
+| -------------- | -------------------------------------------------------- |
+| Biwenger API   | Player prices, market transfers, fantasy scores, lineups |
+| Euroleague API | Real game statistics (pts, reb, ast, blocks per player)  |
+
+Steps run in numbered order because of data dependencies:
+
+```
+01-players → 02-users → 03-market → 04-rounds → 05-lineups → 06-matches → 07-euroleague
+```
+
+All operations use `INSERT ... ON CONFLICT DO UPDATE` (upsert) making the pipeline fully idempotent — safe to re-run without data corruption.
+
+---
+
+## 10. Performance & Optimisation
+
+| Technique              | Implementation                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| **Cache headers**      | `successResponse()` sets `Cache-Control: public, max-age=N, stale-while-revalidate=60` |
+| **Parallel queries**   | Services use `Promise.all()` for concurrent independent queries                        |
+| **DB indexing**        | `player_id`, `round_id`, `user_id`, `date` columns are indexed                         |
+| **Image optimisation** | `next/image` with remote patterns for CDN-hosted player images                         |
+| **Bundle analysis**    | `npm run analyze` generates a visual Webpack bundle treemap                            |
+| **Turbopack**          | Development builds use Turbopack for fast HMR                                          |
+
+---
+
+_For patterns applied in the codebase, see [`docs/PATTERNS.md`](./PATTERNS.md). For technology selection rationale, see [`docs/TECH_STACK.md`](./TECH_STACK.md)._
