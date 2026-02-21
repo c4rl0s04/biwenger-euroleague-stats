@@ -1,98 +1,32 @@
-# Contributing to BiwengerStats
+# Contributing
 
-First off, thank you for considering contributing! 🎉
+This is a personal portfolio project built and maintained by one person. That said, if you've found it useful or spotted something to improve, contributions are welcome.
 
-## 📋 Table of Contents
+## Found a bug?
 
-- [Code of Conduct](#code-of-conduct)
-- [How Can I Contribute?](#how-can-i-contribute)
-- [Development Setup](#development-setup)
-- [Pull Request Process](#pull-request-process)
-- [Style Guide](#style-guide)
+Open an [issue](https://github.com/c4rl0s04/biwengerstats-next/issues) using the bug report template. Include steps to reproduce and what you expected to happen.
 
-## Code of Conduct
+## Got a feature idea?
 
-Be respectful and constructive. We're all here to learn and improve.
+Open an issue with the `enhancement` label. Happy to discuss it.
 
-## How Can I Contribute?
+## Want to submit a PR?
 
-### 🐛 Reporting Bugs
+1. Fork the repo and create a branch (`feature/my-idea` or `fix/the-bug`)
+2. Make your changes
+3. Ensure tests pass: `npm test -- --run`
+4. Ensure formatting is clean: `npm run format`
+5. Open a PR — the template will guide you through the checklist
 
-1. Check if the bug already exists in [Issues](https://github.com/c4rl0s04/biwengerstats-next/issues)
-2. Create a new issue with:
-   - Clear title
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Screenshots if applicable
-
-### 💡 Suggesting Features
-
-1. Open an issue with the `enhancement` label
-2. Describe the feature and its use case
-3. Be open to discussion
-
-### 🔧 Code Contributions
-
-1. Look for issues labeled `good first issue` or `help wanted`
-2. Comment on the issue to claim it
-3. Fork and create a branch
-4. Make your changes
-5. Submit a PR
-
-## Development Setup
+## Running locally
 
 ```bash
-# Clone your fork
 git clone https://github.com/c4rl0s04/biwengerstats-next.git
 cd biwengerstats-next
-
-# Install dependencies
 npm install
-
-# Set up environment
-cp .env.example .env.local
-
-# Run tests
-npm test
-
-# Start dev server
+cp .env.example .env
+npm run setup   # interactive setup wizard
 npm run dev
 ```
 
-## Pull Request Process
-
-1. **Branch naming**: `feature/description` or `fix/description`
-2. **Commits**: Use clear, descriptive messages
-3. **Tests**: Add tests for new features
-4. **Documentation**: Update README if needed
-5. **Review**: Wait for maintainer review
-
-## Style Guide
-
-### JavaScript/React
-
-- Use functional components with hooks
-- Use `'use client'` directive for client components
-- Destructure props
-- Use meaningful variable names
-
-### CSS
-
-- Use Tailwind CSS utilities
-- Follow existing color schemes (slate, blue accents)
-- Mobile-first responsive design
-
-### Commits
-
-```
-feat: add player comparison feature
-fix: resolve standings calculation bug
-docs: update installation instructions
-style: format code with prettier
-refactor: simplify database queries
-test: add unit tests for sync module
-```
-
----
-
-Thank you for contributing! 🏀
+See [`README.md`](./README.md) for the full setup guide.
