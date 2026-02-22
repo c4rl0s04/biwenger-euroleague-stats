@@ -8,6 +8,7 @@ import {
   doublePrecision,
   bigint,
   date,
+  unique
 } from 'drizzle-orm/pg-core';
 
 // 1. Users Table
@@ -62,7 +63,9 @@ export const userRounds = pgTable('user_rounds', {
   points: integer('points'),
   participated: boolean('participated').default(true),
   alineacion: text('alineacion'), // JSON string?
-});
+}, (t) => ({
+  unq_user_round: unique('unique_user_round').on(t.userId, t.roundId),
+}));
 
 // 4. Fichajes (Transfers) Table
 export const fichajes = pgTable('fichajes', {
@@ -73,7 +76,9 @@ export const fichajes = pgTable('fichajes', {
   precio: integer('precio'),
   vendedor: text('vendedor'),
   comprador: text('comprador'),
-});
+}, (t) => ({
+  unq_fichaje: unique('unique_fichaje').on(t.timestamp, t.playerId, t.vendedor, t.comprador, t.precio),
+}));
 
 // 5. Lineups Table
 export const lineups = pgTable('lineups', {
@@ -84,7 +89,9 @@ export const lineups = pgTable('lineups', {
   playerId: integer('player_id'),
   isCaptain: boolean('is_captain'),
   role: text('role'),
-});
+}, (t) => ({
+  unq_lineup: unique('unique_lineup').on(t.userId, t.roundId, t.playerId),
+}));
 
 // 6. Matches Table
 export const matches = pgTable('matches', {
@@ -109,7 +116,9 @@ export const matches = pgTable('matches', {
   awayQ4: integer('away_q4'),
   homeOt: integer('home_ot'),
   awayOt: integer('away_ot'),
-});
+}, (t) => ({
+  unq_match: unique('unique_match').on(t.roundId, t.homeId, t.awayId),
+}));
 
 // 7. Player Round Stats Table
 export const playerRoundStats = pgTable('player_round_stats', {
@@ -132,7 +141,9 @@ export const playerRoundStats = pgTable('player_round_stats', {
   turnovers: integer('turnovers'),
   foulsCommitted: integer('fouls_committed'),
   valuation: integer('valuation'),
-});
+}, (t) => ({
+  unq_player_round_stat: unique('unique_player_round_stat').on(t.playerId, t.roundId),
+}));
 
 // 8. Porras Table
 export const porras = pgTable('porras', {
@@ -142,7 +153,9 @@ export const porras = pgTable('porras', {
   roundName: text('round_name'),
   result: text('result'),
   aciertos: integer('aciertos'),
-});
+}, (t) => ({
+  unq_porra: unique('unique_porra').on(t.userId, t.roundId),
+}));
 
 // 9. Market Values Table
 export const marketValues = pgTable('market_values', {
@@ -150,7 +163,9 @@ export const marketValues = pgTable('market_values', {
   playerId: integer('player_id'),
   price: integer('price'),
   date: date('date'), // Stored as DATE
-});
+}, (t) => ({
+  unq_player_date: unique('unique_player_date').on(t.playerId, t.date),
+}));
 
 // 10. Transfer Bids Table
 export const transferBids = pgTable('transfer_bids', {
@@ -167,7 +182,9 @@ export const initialSquads = pgTable('initial_squads', {
   userId: text('user_id'),
   playerId: integer('player_id'),
   price: integer('price'),
-});
+}, (t) => ({
+  unq_initial_squad: unique('unique_initial_squad').on(t.userId, t.playerId),
+}));
 
 // 12. Finances Table
 export const finances = pgTable('finances', {
@@ -212,7 +229,9 @@ export const tournamentPhases = pgTable('tournament_phases', {
   name: text('name'),
   type: text('type'),
   orderIndex: integer('order_index'),
-});
+}, (t) => ({
+  unq_tournament_phase: unique('unique_tournament_phase').on(t.tournamentId, t.orderIndex),
+}));
 
 // 17. Tournament Fixtures Table
 export const tournamentFixtures = pgTable('tournament_fixtures', {
@@ -228,7 +247,9 @@ export const tournamentFixtures = pgTable('tournament_fixtures', {
   awayScore: integer('away_score'),
   date: integer('date'),
   status: text('status'),
-});
+}, (t) => ({
+  unq_tournament_fixture: unique('unique_tournament_fixture').on(t.tournamentId, t.id),
+}));
 
 // 18. Tournament Standings Table
 export const tournamentStandings = pgTable('tournament_standings', {
@@ -244,4 +265,6 @@ export const tournamentStandings = pgTable('tournament_standings', {
   drawn: integer('drawn'),
   scored: integer('scored'),
   against: integer('against'),
-});
+}, (t) => ({
+  unq_tournament_standing: unique('unique_tournament_standing').on(t.tournamentId, t.phaseName, t.groupName, t.userId),
+}));

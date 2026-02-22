@@ -120,7 +120,7 @@ export async function upsertFixture(fixture: UpsertFixtureParams): Promise<void>
       date, status
     )
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    ON CONFLICT(tournament_id, id) DO UPDATE SET
+    ON CONFLICT(id) DO UPDATE SET
       phase_id = EXCLUDED.phase_id,
       round_name = EXCLUDED.round_name,
       round_id = EXCLUDED.round_id,
