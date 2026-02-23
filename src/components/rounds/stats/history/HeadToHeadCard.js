@@ -283,9 +283,28 @@ export default function HeadToHeadCard({
 
     // --- 4. Advanced Stats ---
     const getAdvanced = (uid) => {
+      if (!advancedStats) {
+        return {
+          streak: {},
+          heat: {},
+          hunter: {},
+          bottler: {},
+          heartbreaker: {},
+          noGlory: {},
+          jinx: {},
+          floorCeiling: {},
+          volatility: {},
+          dominance: {},
+          reliability: {},
+          gap: {},
+          leaguePerf: {},
+        };
+      }
+
       const u = String(uid);
       const findStat = (dataset, key = 'user_id') => {
-        const index = dataset?.findIndex((item) => String(item[key]) === u);
+        if (!dataset) return {};
+        const index = dataset.findIndex((item) => String(item[key]) === u);
         const item = index !== -1 ? dataset[index] : {};
         return { ...item, rank: index !== -1 ? index + 1 : null };
       };
@@ -333,6 +352,7 @@ export default function HeadToHeadCard({
     // --- 5. Official H2H Matrix Logic ---
     let recordToUse = { wins, losses, ties };
     if (
+      advancedStats &&
       advancedStats.rivalryMatrix &&
       advancedStats.rivalryMatrix[currentUser.id] &&
       advancedStats.rivalryMatrix[currentUser.id][rivalId]
@@ -885,201 +905,211 @@ export default function HeadToHeadCard({
           </div>
 
           {/* GROUP 3: ADVANCED */}
-          <div className="space-y-6">
-            <div>
-              <SectionHeader title="Gestión y Consistencia" icon={Target} color="text-orange-400" />
-              <div className="space-y-0.5">
-                <ComparisonRow
-                  label="Jornadas Perfectas"
-                  subLabel="Eficiencia > 95%"
-                  info="Rondas donde obtuviste el *95% o más* de tus puntos posibles"
-                  valueA={stats.rounds.user.perfectRounds.value}
-                  rankA={stats.rounds.user.perfectRounds.rank}
-                  valueB={stats.rounds.rival.perfectRounds.value}
-                  rankB={stats.rounds.rival.perfectRounds.rank}
-                  highlightColor="text-orange-400"
+          {advancedStats && (
+            <div className="space-y-6">
+              <div>
+                <SectionHeader
+                  title="Gestión y Consistencia"
+                  icon={Target}
+                  color="text-orange-400"
                 />
-                <ComparisonRow
-                  label="Fiabilidad"
-                  subLabel="% Rondas > Media"
-                  info="Porcentaje de jornadas *superando la media* de la liga"
-                  valueA={parseFloat(stats.adv.user.reliability?.pct || 0)}
-                  rankA={stats.adv.user.reliability?.rank}
-                  valueB={parseFloat(stats.adv.rival.reliability?.pct || 0)}
-                  rankB={stats.adv.rival.reliability?.rank}
-                  format={(v) => v.toFixed(1) + '%'}
-                  highlightColor="text-orange-400"
-                />
-                <ComparisonRow
-                  label="Consistencia (Desviación)"
-                  subLabel="Menos es mejor"
-                  info="*Desviación estándar*. Valores bajos indican puntuaciones estables"
-                  valueA={parseFloat(stats.adv.user.volatility?.std_dev || 0)}
-                  rankA={stats.adv.user.volatility?.rank}
-                  valueB={parseFloat(stats.adv.rival.volatility?.std_dev || 0)}
-                  rankB={stats.adv.rival.volatility?.rank}
-                  inverse={true}
-                  format={(v) => v.toFixed(1)}
-                  highlightColor="text-orange-400"
-                />
-                <ComparisonRow
-                  label="Puntos Perdidos"
-                  subLabel="Menos es mejor"
-                  info="Total de puntos dejados en el *banquillo* (Ideal - Actual)"
-                  valueA={stats.rounds.user.pointsLost.value}
-                  rankA={stats.rounds.user.pointsLost.rank}
-                  valueB={stats.rounds.rival.pointsLost.value}
-                  rankB={stats.rounds.rival.pointsLost.rank}
-                  inverse={true}
-                  format={(v) => Math.round(v)}
-                  highlightColor="text-orange-400"
-                />
-                <div className="pt-2"></div>
-                <ComparisonRow
-                  label="Suelo (Puntuación Mínima)"
-                  info="La *peor* puntuación obtenida en una jornada"
-                  valueA={stats.adv.user.floorCeiling?.floor || 0}
-                  rankA={stats.adv.user.floorCeiling?.rank}
-                  valueB={stats.adv.rival.floorCeiling?.floor || 0}
-                  rankB={stats.adv.rival.floorCeiling?.rank}
-                  highlightColor="text-orange-400"
-                />
-                <ComparisonRow
-                  label="Techo (Puntuación Máxima)"
-                  info="La *mejor* puntuación obtenida en una jornada"
-                  valueA={stats.adv.user.floorCeiling?.ceiling || 0}
-                  rankA={stats.adv.user.floorCeiling?.rank}
-                  valueB={stats.adv.rival.floorCeiling?.ceiling || 0}
-                  rankB={stats.adv.rival.floorCeiling?.rank}
-                  highlightColor="text-orange-400"
-                />
+                <div className="space-y-0.5">
+                  <ComparisonRow
+                    label="Jornadas Perfectas"
+                    subLabel="Eficiencia > 95%"
+                    info="Rondas donde obtuviste el *95% o más* de tus puntos posibles"
+                    valueA={stats.rounds.user.perfectRounds.value}
+                    rankA={stats.rounds.user.perfectRounds.rank}
+                    valueB={stats.rounds.rival.perfectRounds.value}
+                    rankB={stats.rounds.rival.perfectRounds.rank}
+                    highlightColor="text-orange-400"
+                  />
+                  <ComparisonRow
+                    label="Fiabilidad"
+                    subLabel="% Rondas > Media"
+                    info="Porcentaje de jornadas *superando la media* de la liga"
+                    valueA={parseFloat(stats.adv.user.reliability?.pct || 0)}
+                    rankA={stats.adv.user.reliability?.rank}
+                    valueB={parseFloat(stats.adv.rival.reliability?.pct || 0)}
+                    rankB={stats.adv.rival.reliability?.rank}
+                    format={(v) => v.toFixed(1) + '%'}
+                    highlightColor="text-orange-400"
+                  />
+                  <ComparisonRow
+                    label="Consistencia (Desviación)"
+                    subLabel="Menos es mejor"
+                    info="*Desviación estándar*. Valores bajos indican puntuaciones estables"
+                    valueA={parseFloat(stats.adv.user.volatility?.std_dev || 0)}
+                    rankA={stats.adv.user.volatility?.rank}
+                    valueB={parseFloat(stats.adv.rival.volatility?.std_dev || 0)}
+                    rankB={stats.adv.rival.volatility?.rank}
+                    inverse={true}
+                    format={(v) => v.toFixed(1)}
+                    highlightColor="text-orange-400"
+                  />
+                  <ComparisonRow
+                    label="Puntos Perdidos"
+                    subLabel="Menos es mejor"
+                    info="Total de puntos dejados en el *banquillo* (Ideal - Actual)"
+                    valueA={stats.rounds.user.pointsLost.value}
+                    rankA={stats.rounds.user.pointsLost.rank}
+                    valueB={stats.rounds.rival.pointsLost.value}
+                    rankB={stats.rounds.rival.pointsLost.rank}
+                    inverse={true}
+                    format={(v) => Math.round(v)}
+                    highlightColor="text-orange-400"
+                  />
+                  <div className="pt-2"></div>
+                  <ComparisonRow
+                    label="Suelo (Puntuación Mínima)"
+                    info="La *peor* puntuación obtenida en una jornada"
+                    valueA={stats.adv.user.floorCeiling?.floor || 0}
+                    rankA={stats.adv.user.floorCeiling?.rank}
+                    valueB={stats.adv.rival.floorCeiling?.floor || 0}
+                    rankB={stats.adv.rival.floorCeiling?.rank}
+                    highlightColor="text-orange-400"
+                  />
+                  <ComparisonRow
+                    label="Techo (Puntuación Máxima)"
+                    info="La *mejor* puntuación obtenida en una jornada"
+                    valueA={stats.adv.user.floorCeiling?.ceiling || 0}
+                    rankA={stats.adv.user.floorCeiling?.rank}
+                    valueB={stats.adv.rival.floorCeiling?.ceiling || 0}
+                    rankB={stats.adv.rival.floorCeiling?.rank}
+                    highlightColor="text-orange-400"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <SectionHeader title="Dominio y Competitividad" icon={Zap} color="text-emerald-400" />
-              <div className="space-y-0.5">
-                <ComparisonRow
-                  label="Margen de Victoria"
-                  subLabel="Promedio pts"
-                  info="Diferencia media de puntos sobre el *2do* cuando ganas la jornada"
-                  valueA={parseFloat(stats.adv.user.dominance?.avg_margin || 0)}
-                  rankA={stats.adv.user.dominance?.rank}
-                  valueB={parseFloat(stats.adv.rival.dominance?.avg_margin || 0)}
-                  rankB={stats.adv.rival.dominance?.rank}
-                  format={(v) => '+' + v.toFixed(1)}
-                  highlightColor="text-emerald-400"
+              <div>
+                <SectionHeader
+                  title="Dominio y Competitividad"
+                  icon={Zap}
+                  color="text-emerald-400"
                 />
-                <ComparisonRow
-                  label="Rendimiento vs Liga"
-                  subLabel="Diff Promedio"
-                  info="Diferencia media de tus puntos respecto a la *media de la liga*"
-                  valueA={parseFloat(stats.adv.user.leaguePerf?.avg_diff || 0)}
-                  rankA={stats.adv.user.leaguePerf?.rank}
-                  valueB={parseFloat(stats.adv.rival.leaguePerf?.avg_diff || 0)}
-                  rankB={stats.adv.rival.leaguePerf?.rank}
-                  format={(v) => (v > 0 ? '+' : '') + v.toFixed(1)}
-                  highlightColor="text-emerald-400"
-                />
-                <ComparisonRow
-                  label="Gap Teórico"
-                  subLabel="% de Puntos Posibles"
-                  info="Porcentaje de puntos obtenidos respecto a *ganar todas las jornadas* (puntuación perfecta)"
-                  valueA={parseFloat(stats.adv.user.gap?.pct || 0)}
-                  rankA={stats.adv.user.gap?.rank}
-                  valueB={parseFloat(stats.adv.rival.gap?.pct || 0)}
-                  rankB={stats.adv.rival.gap?.rank}
-                  format={(v) => v.toFixed(1) + '%'}
-                  highlightColor="text-emerald-400"
-                />
+                <div className="space-y-0.5">
+                  <ComparisonRow
+                    label="Margen de Victoria"
+                    subLabel="Promedio pts"
+                    info="Diferencia media de puntos sobre el *2do* cuando ganas la jornada"
+                    valueA={parseFloat(stats.adv.user.dominance?.avg_margin || 0)}
+                    rankA={stats.adv.user.dominance?.rank}
+                    valueB={parseFloat(stats.adv.rival.dominance?.avg_margin || 0)}
+                    rankB={stats.adv.rival.dominance?.rank}
+                    format={(v) => '+' + v.toFixed(1)}
+                    highlightColor="text-emerald-400"
+                  />
+                  <ComparisonRow
+                    label="Rendimiento vs Liga"
+                    subLabel="Diff Promedio"
+                    info="Diferencia media de tus puntos respecto a la *media de la liga*"
+                    valueA={parseFloat(stats.adv.user.leaguePerf?.avg_diff || 0)}
+                    rankA={stats.adv.user.leaguePerf?.rank}
+                    valueB={parseFloat(stats.adv.rival.leaguePerf?.avg_diff || 0)}
+                    rankB={stats.adv.rival.leaguePerf?.rank}
+                    format={(v) => (v > 0 ? '+' : '') + v.toFixed(1)}
+                    highlightColor="text-emerald-400"
+                  />
+                  <ComparisonRow
+                    label="Gap Teórico"
+                    subLabel="% de Puntos Posibles"
+                    info="Porcentaje de puntos obtenidos respecto a *ganar todas las jornadas* (puntuación perfecta)"
+                    valueA={parseFloat(stats.adv.user.gap?.pct || 0)}
+                    rankA={stats.adv.user.gap?.rank}
+                    valueB={parseFloat(stats.adv.rival.gap?.pct || 0)}
+                    rankB={stats.adv.rival.gap?.rank}
+                    format={(v) => v.toFixed(1) + '%'}
+                    highlightColor="text-emerald-400"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <SectionHeader title="Rachas e Hitos" icon={Flame} color="text-red-400" />
-              <div className="space-y-0.5">
-                <ComparisonRow
-                  label="Racha Actual"
-                  info="Jornadas consecutivas (ACTIVAS) sumando más de *175 puntos*"
-                  valueA={stats.adv.user.streak?.current_streak || 0}
-                  rankA={stats.adv.user.streak?.currentRank}
-                  valueB={stats.adv.rival.streak?.current_streak || 0}
-                  rankB={stats.adv.rival.streak?.currentRank}
-                  highlightColor="text-red-400"
-                />
-                <ComparisonRow
-                  label="Racha Histórica (Mejor)"
-                  info="Récord de jornadas consecutivas sumando más de *175 puntos*"
-                  valueA={stats.adv.user.streak?.longest_streak || 0}
-                  rankA={stats.adv.user.streak?.rank}
-                  valueB={stats.adv.rival.streak?.longest_streak || 0}
-                  rankB={stats.adv.rival.streak?.rank}
-                  highlightColor="text-red-400"
-                />
-                <ComparisonRow
-                  label="Racha de Fuego"
-                  info="Comparación de tu *media reciente (5J)* vs tu media de temporada. Positivo = En racha"
-                  valueA={parseFloat(stats.adv.user.heat?.diff || 0)}
-                  rankA={stats.adv.user.heat?.rank}
-                  valueB={parseFloat(stats.adv.rival.heat?.diff || 0)}
-                  rankB={stats.adv.rival.heat?.rank}
-                  format={(v) => v.toFixed(0)}
-                  highlightColor="text-red-400"
-                />
-                <ComparisonRow
-                  label="Cazador (vs Líder)"
-                  subLabel="Pts recortados (5J)"
-                  info="Puntos *recortados al líder* actual en las últimas 5 jornadas"
-                  valueA={stats.adv.user.hunter?.gained || 0}
-                  rankA={stats.adv.user.hunter?.rank}
-                  valueB={stats.adv.rival.hunter?.gained || 0}
-                  rankB={stats.adv.rival.hunter?.rank}
-                  highlightColor="text-red-400"
-                />
-                <ComparisonRow
-                  label="Pecho Frío (Bottler)"
-                  subLabel="Score"
-                  info="Índice que mide *segundas y terceras posiciones* sin victorias (Menos es mejor)"
-                  valueA={stats.adv.user.bottler?.bottler_score || 0}
-                  rankA={stats.adv.user.bottler?.rank}
-                  valueB={stats.adv.rival.bottler?.bottler_score || 0}
-                  rankB={stats.adv.rival.bottler?.rank}
-                  inverse={true}
-                  highlightColor="text-red-400"
-                />
-                <ComparisonRow
-                  label="El Pupas (Jinx)"
-                  subLabel="Rondas Malditas"
-                  info="Rondas con puntuación *superior a la media* pero acabando en la *mitad inferior*"
-                  valueA={stats.adv.user.jinx?.jinxed_count || 0}
-                  rankA={stats.adv.user.jinx?.rank}
-                  valueB={stats.adv.rival.jinx?.jinxed_count || 0}
-                  rankB={stats.adv.rival.jinx?.rank}
-                  highlightColor="text-red-400"
-                />
-                <ComparisonRow
-                  label="Rompecorazones"
-                  subLabel="Pts Perdidos"
-                  info="Puntos perdidos en jornadas donde quedaste *2º o 3º* (Casi ganas)"
-                  valueA={stats.adv.user.heartbreaker?.total_diff || 0}
-                  rankA={stats.adv.user.heartbreaker?.rank}
-                  valueB={stats.adv.rival.heartbreaker?.total_diff || 0}
-                  rankB={stats.adv.rival.heartbreaker?.rank}
-                  highlightColor="text-red-400"
-                />
-                <ComparisonRow
-                  label="Mala Suerte (No Glory)"
-                  subLabel="Pts sin ganar"
-                  info="Total de puntos sumados en jornadas donde *NO ganaste*"
-                  valueA={stats.adv.user.noGlory?.total_points_no_glory || 0}
-                  rankA={stats.adv.user.noGlory?.rank}
-                  valueB={stats.adv.rival.noGlory?.total_points_no_glory || 0}
-                  rankB={stats.adv.rival.noGlory?.rank}
-                  highlightColor="text-red-400"
-                />
+              <div>
+                <SectionHeader title="Rachas e Hitos" icon={Flame} color="text-red-400" />
+                <div className="space-y-0.5">
+                  <ComparisonRow
+                    label="Racha Actual"
+                    info="Jornadas consecutivas (ACTIVAS) sumando más de *175 puntos*"
+                    valueA={stats.adv.user.streak?.current_streak || 0}
+                    rankA={stats.adv.user.streak?.currentRank}
+                    valueB={stats.adv.rival.streak?.current_streak || 0}
+                    rankB={stats.adv.rival.streak?.currentRank}
+                    highlightColor="text-red-400"
+                  />
+                  <ComparisonRow
+                    label="Racha Histórica (Mejor)"
+                    info="Récord de jornadas consecutivas sumando más de *175 puntos*"
+                    valueA={stats.adv.user.streak?.longest_streak || 0}
+                    rankA={stats.adv.user.streak?.rank}
+                    valueB={stats.adv.rival.streak?.longest_streak || 0}
+                    rankB={stats.adv.rival.streak?.rank}
+                    highlightColor="text-red-400"
+                  />
+                  <ComparisonRow
+                    label="Racha de Fuego"
+                    info="Comparación de tu *media reciente (5J)* vs tu media de temporada. Positivo = En racha"
+                    valueA={parseFloat(stats.adv.user.heat?.diff || 0)}
+                    rankA={stats.adv.user.heat?.rank}
+                    valueB={parseFloat(stats.adv.rival.heat?.diff || 0)}
+                    rankB={stats.adv.rival.heat?.rank}
+                    format={(v) => v.toFixed(0)}
+                    highlightColor="text-red-400"
+                  />
+                  <ComparisonRow
+                    label="Cazador (vs Líder)"
+                    subLabel="Pts recortados (5J)"
+                    info="Puntos *recortados al líder* actual en las últimas 5 jornadas"
+                    valueA={stats.adv.user.hunter?.gained || 0}
+                    rankA={stats.adv.user.hunter?.rank}
+                    valueB={stats.adv.rival.hunter?.gained || 0}
+                    rankB={stats.adv.rival.hunter?.rank}
+                    highlightColor="text-red-400"
+                  />
+                  <ComparisonRow
+                    label="Pecho Frío (Bottler)"
+                    subLabel="Score"
+                    info="Índice que mide *segundas y terceras posiciones* sin victorias (Menos es mejor)"
+                    valueA={stats.adv.user.bottler?.bottler_score || 0}
+                    rankA={stats.adv.user.bottler?.rank}
+                    valueB={stats.adv.rival.bottler?.bottler_score || 0}
+                    rankB={stats.adv.rival.bottler?.rank}
+                    inverse={true}
+                    highlightColor="text-red-400"
+                  />
+                  <ComparisonRow
+                    label="El Pupas (Jinx)"
+                    subLabel="Rondas Malditas"
+                    info="Rondas con puntuación *superior a la media* pero acabando en la *mitad inferior*"
+                    valueA={stats.adv.user.jinx?.jinxed_count || 0}
+                    rankA={stats.adv.user.jinx?.rank}
+                    valueB={stats.adv.rival.jinx?.jinxed_count || 0}
+                    rankB={stats.adv.rival.jinx?.rank}
+                    highlightColor="text-red-400"
+                  />
+                  <ComparisonRow
+                    label="Rompecorazones"
+                    subLabel="Pts Perdidos"
+                    info="Puntos perdidos en jornadas donde quedaste *2º o 3º* (Casi ganas)"
+                    valueA={stats.adv.user.heartbreaker?.total_diff || 0}
+                    rankA={stats.adv.user.heartbreaker?.rank}
+                    valueB={stats.adv.rival.heartbreaker?.total_diff || 0}
+                    rankB={stats.adv.rival.heartbreaker?.rank}
+                    highlightColor="text-red-400"
+                  />
+                  <ComparisonRow
+                    label="Mala Suerte (No Glory)"
+                    subLabel="Pts sin ganar"
+                    info="Total de puntos sumados en jornadas donde *NO ganaste*"
+                    valueA={stats.adv.user.noGlory?.total_points_no_glory || 0}
+                    rankA={stats.adv.user.noGlory?.rank}
+                    valueB={stats.adv.rival.noGlory?.total_points_no_glory || 0}
+                    rankB={stats.adv.rival.noGlory?.rank}
+                    highlightColor="text-red-400"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </ElegantCard>

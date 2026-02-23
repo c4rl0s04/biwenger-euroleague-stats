@@ -114,7 +114,7 @@ export {
 } from './core/roundsService';
 
 // Compare Service
-export { getCompareData } from './features/compareService';
+export { getCompareData, getCompareDataLite } from './features/compareService';
 
 // Matches Service
 export { fetchMatchesGrouped } from './app/matchesService';

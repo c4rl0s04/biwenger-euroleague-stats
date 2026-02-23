@@ -14,25 +14,33 @@ import { useState, useEffect, useCallback, useRef } from 'react';
  * @param {function} options.transform - Optional transform function for data
  * @param {Array} options.dependencies - Dependencies to trigger refetch (default: [])
  * @param {boolean} options.skip - Skip fetching if true (useful for conditional fetching)
+ * @param {string} options.cacheKey - Optional cache key for sessionStorage caching
+ * @param {number} options.cacheTTL - Cache time-to-live in milliseconds (default: 5 minutes)
  * @returns {object} { data, loading, error, refetch }
  *
  * @example
  * // Simple usage
  * const { data, loading } = useApiData('/api/standings');
  *
+ * // With caching
+ * const { data } = useApiData('/api/compare/data', {
+ *   cacheKey: 'compare-lite-1-2'
+ * });
+ *
  * // With transform
  * const { data } = useApiData('/api/performance', {
  *   transform: (d) => d.volatility
  * });
- *
- * // Dynamic endpoint with dependencies
- * const { data } = useApiData(`/api/user/${userId}`, {
- *   dependencies: [userId],
- *   skip: !userId
- * });
  */
 export function useApiData(endpoint, options = {}) {
-  const { immediate = true, transform = null, dependencies = [], skip = false } = options;
+  const {
+    immediate = true,
+    transform = null,
+    dependencies = [],
+    skip = false,
+    cacheKey = null,
+    cacheTTL = 5 * 60 * 1000,
+  } = options;
 
   const [data, setData] = useState(undefined);
   const [loading, setLoading] = useState(immediate && !skip);
@@ -49,9 +57,63 @@ export function useApiData(endpoint, options = {}) {
   // Track if this is the initial mount
   const isMounted = useRef(true);
 
+  // Helper to get cached data
+  const getCachedData = useCallback(() => {
+    if (!cacheKey) return null;
+
+    try {
+      const cached = sessionStorage.getItem(`cache_${cacheKey}`);
+      if (!cached) return null;
+
+      const parsed = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check if cache has expired
+      if (parsed.expiresAt && now > parsed.expiresAt) {
+        sessionStorage.removeItem(`cache_${cacheKey}`);
+        return null;
+      }
+
+      return parsed.data;
+    } catch (err) {
+      console.warn('Error reading cache:', err);
+      return null;
+    }
+  }, [cacheKey]);
+
+  // Helper to set cached data
+  const setCachedData = useCallback(
+    (dataToCache) => {
+      if (!cacheKey) return;
+
+      try {
+        const cacheEntry = {
+          data: dataToCache,
+          expiresAt: Date.now() + cacheTTL,
+        };
+        sessionStorage.setItem(`cache_${cacheKey}`, JSON.stringify(cacheEntry));
+      } catch (err) {
+        console.warn('Error writing to cache:', err);
+      }
+    },
+    [cacheKey, cacheTTL]
+  );
+
   const fetchData = useCallback(async () => {
     if (skip) {
       setLoading(false);
+      return;
+    }
+
+    // Check cache first
+    const cachedData = getCachedData();
+    if (cachedData !== null) {
+      if (isMounted.current) {
+        const currentTransform = transformRef.current;
+        const processedData = currentTransform ? currentTransform(cachedData) : cachedData;
+        setData(processedData);
+        setLoading(false);
+      }
       return;
     }
 
@@ -87,6 +149,9 @@ export function useApiData(endpoint, options = {}) {
         const currentTransform = transformRef.current;
         const processedData = currentTransform ? currentTransform(result.data) : result.data;
         setData(processedData);
+
+        // Cache the data
+        setCachedData(result.data);
       }
     } catch (err) {
       console.error(`Error fetching data:`, err);
@@ -100,7 +165,7 @@ export function useApiData(endpoint, options = {}) {
     }
     // Only re-create fetchData when skip changes or dependencies change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [skip, ...dependencies]);
+  }, [skip, ...dependencies, getCachedData, setCachedData]);
 
   useEffect(() => {
     isMounted.current = true;

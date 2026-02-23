@@ -2,14 +2,18 @@
 
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
+import { useState } from 'react';
 import HeadToHeadCard from '@/components/rounds/stats/history/HeadToHeadCard';
+import LazyAdvancedStats from '@/components/compare/LazyAdvancedStats';
 import { Section } from '@/components/layout';
 import { Subheading, PageHeader } from '@/components/ui';
 import { Scale } from 'lucide-react';
 
 export default function ComparePageClient() {
   const { currentUser } = useClientUser();
-  const { data, loading, error } = useApiData('/api/compare/data');
+  const { data, loading, error } = useApiData('/api/compare/data/lite');
+  const [advancedStats, setAdvancedStats] = useState(null);
+  const [loadingAdvanced, setLoadingAdvanced] = useState(false);
 
   if (loading) {
     return (
@@ -51,9 +55,23 @@ export default function ComparePageClient() {
           usersList={data.users}
           standings={data.standings}
           predictions={data.predictions}
-          advancedStats={data.advancedStats}
+          advancedStats={advancedStats}
         />
       </Section>
+
+      {/* Lazy-loaded Advanced Stats */}
+      {advancedStats === null && (
+        <LazyAdvancedStats
+          onLoadAdvanced={() => {
+            setLoadingAdvanced(true);
+          }}
+          onAdvancedStatsLoaded={(stats) => {
+            setAdvancedStats(stats);
+            setLoadingAdvanced(false);
+          }}
+          isLoading={loadingAdvanced}
+        />
+      )}
 
       {/* Placeholder for future charts or deeper analysis */}
     </div>

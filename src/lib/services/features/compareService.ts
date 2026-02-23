@@ -104,6 +104,20 @@ export interface CompareDataResponse {
   };
 }
 
+export interface CompareDataLiteResponse {
+  users: any[];
+  history: any[];
+  standings: any[];
+  porras: any[];
+  predictions: {
+    achievements: any;
+    clutch: any[];
+    victorias: any[];
+    promedios: any[];
+    participation: any[];
+  };
+}
+
 /**
  * Aggregates all necessary data for the comparison page
  * @returns users, history, standings, porras
@@ -216,6 +230,69 @@ export async function getCompareData(): Promise<CompareDataResponse> {
       theoreticalGap: theoreticalGapStats || [],
       rivalryMatrix: rivalryMatrixStats?.matrix || {},
       leagueComparison: leagueComparisonStats || [],
+    },
+  };
+}
+
+/**
+ * Lightweight version of getCompareData - returns only essential data
+ * Excludes all advanced statistics for faster initial page load
+ * @returns users, history, standings, porras, predictions (no advanced stats)
+ */
+export async function getCompareDataLite(): Promise<CompareDataLiteResponse> {
+  const usersQuery = `SELECT id, name, icon, color_index FROM users ORDER BY name ASC`;
+
+  const [usersResult, standingsData, porrasData] = await Promise.all([
+    db.query(usersQuery),
+    getStandings(),
+    getPorrasStats(),
+  ]);
+
+  // Fetch full history for each user in parallel using the expert service
+  const allUsersHistory = await Promise.all(
+    usersResult.rows.map(async (user) => {
+      const [history, captain, homeAway, squad] = await Promise.all([
+        getUserPerformanceHistoryService(user.id),
+        fetchCaptainStats(user.id),
+        fetchHomeAwayStats(user.id),
+        getUserSquad(user.id),
+      ]);
+
+      // Calculate Squad Stats
+      const validSquad = squad.filter((p) => p.points > 0);
+      const avgPlayerPoints =
+        validSquad.length > 0
+          ? validSquad.reduce((sum, p) => sum + p.points, 0) / validSquad.length
+          : 0;
+
+      const bestPlayer = squad.length > 0 ? squad[0] : null; // squad is ordered by points DESC in query
+
+      return {
+        userId: user.id,
+        history,
+        captain,
+        homeAway,
+        squadStats: {
+          avgPlayerPoints,
+          bestPlayer: bestPlayer
+            ? { name: bestPlayer.name, points: bestPlayer.points }
+            : { name: '-', points: 0 },
+        },
+      };
+    })
+  );
+
+  return {
+    users: usersResult.rows,
+    history: allUsersHistory,
+    standings: standingsData || [],
+    porras: porrasData?.porra_stats?.promedios || [],
+    predictions: {
+      achievements: porrasData?.achievements || {},
+      clutch: porrasData?.clutch_stats || [],
+      victorias: porrasData?.porra_stats?.victorias || [],
+      promedios: porrasData?.porra_stats?.promedios || [],
+      participation: porrasData?.participation || [],
     },
   };
 }
