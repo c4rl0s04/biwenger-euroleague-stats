@@ -58,6 +58,9 @@ export default function RoundsPageClient() {
   const [chartMetrics, setChartMetrics] = useState({ actual: true, ideal: true });
   const [isCompareSelectorOpen, setIsCompareSelectorOpen] = useState(false);
 
+  // --- NEW: Background Loading State ---
+  const [loadBackgroundData, setLoadBackgroundData] = useState(false);
+
   // Initialize Round & User
   useEffect(() => {
     if (lists?.rounds?.length > 0 && !selectedRoundId) {
@@ -90,10 +93,20 @@ export default function RoundsPageClient() {
     }
   }, [selectedUserId]);
 
-  // --- 2. MEGA FETCH (One-Shot for everything in the round) ---
-  const { data: fullRoundData, loading: dataLoading } = useApiData(
-    selectedRoundId ? `/api/rounds/stats?roundId=${selectedRoundId}&mode=full` : null,
-    { dependencies: [selectedRoundId] }
+  // --- 2. QUICK FETCH (Only selected user's data) ---
+  const { data: quickRoundData, loading: quickDataLoading } = useApiData(
+    selectedRoundId && selectedUserId
+      ? `/api/rounds/stats?roundId=${selectedRoundId}&userId=${selectedUserId}&mode=quick`
+      : null,
+    { dependencies: [selectedRoundId, selectedUserId] }
+  );
+
+  // --- 2b. FULL FETCH (All users - Background load) ---
+  const { data: fullRoundData, loading: fullDataLoading } = useApiData(
+    selectedRoundId && loadBackgroundData
+      ? `/api/rounds/stats?roundId=${selectedRoundId}&mode=full`
+      : null,
+    { skip: !loadBackgroundData, dependencies: [selectedRoundId] }
   );
 
   // --- 3. FETCH HISTORY (Primary User - For Stats Cards) ---
@@ -104,18 +117,31 @@ export default function RoundsPageClient() {
   const userHistory = historyData?.history || [];
   const historyStats = usePerformanceStats(userHistory);
 
-  // --- 3b. FETCH LEADERBOARD (All Users Aggregated Stats) ---
-  const { data: leaderboardData, loading: leaderboardLoading } =
-    useApiData('/api/rounds/leaderboard');
-
-  // --- 3c. FETCH ALL USERS HISTORY (For Efficiency Heatmap) ---
-  const { data: allHistoryData, loading: allHistoryLoading } =
-    useApiData('/api/rounds/all-history');
-
-  // --- 3d. FETCH LINEUP STATS ---
-  const { data: lineupStatsData, loading: lineupStatsLoading } = useApiData(
-    '/api/rounds/lineup-stats'
+  // --- 3b. FETCH LEADERBOARD (All Users Aggregated Stats) - BACKGROUND ---
+  const { data: leaderboardData, loading: leaderboardLoading } = useApiData(
+    loadBackgroundData ? '/api/rounds/leaderboard' : null,
+    { skip: !loadBackgroundData }
   );
+
+  // --- 3c. FETCH ALL USERS HISTORY (For Efficiency Heatmap) - BACKGROUND ---
+  const { data: allHistoryData, loading: allHistoryLoading } = useApiData(
+    loadBackgroundData ? '/api/rounds/all-history' : null,
+    { skip: !loadBackgroundData }
+  );
+
+  // --- 3d. FETCH LINEUP STATS - BACKGROUND ---
+  const { data: lineupStatsData, loading: lineupStatsLoading } = useApiData(
+    loadBackgroundData ? '/api/rounds/lineup-stats' : null,
+    { skip: !loadBackgroundData }
+  );
+
+  // --- NEW: Trigger background loads after main content is ready ---
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoadBackgroundData(true);
+    }, 200); // 200ms delay ensures main UI renders first
+    return () => clearTimeout(timer);
+  }, []);
 
   // --- 4. FETCH HISTORY (Comparison Users - For Chart) ---
   // This effect fetches history for any user in comparisonUserIds that we don't have yet.
@@ -171,16 +197,15 @@ export default function RoundsPageClient() {
   const comparisonUsersList = lists?.users?.filter((u) => comparisonUserIds.includes(u.id)) || [];
 
   // A. Current User Context
-  // Find selected user within the mega list
-  const currentUserStats = fullRoundData?.users?.find(
-    (u) => String(u.id) === String(selectedUserId)
-  );
+  // Use quick data first (priority), fall back to full data when available
+  const roundData = fullRoundData || quickRoundData;
+  const currentUserStats = roundData?.users?.find((u) => String(u.id) === String(selectedUserId));
 
   // B. Construct props expected by children
   // Lineup Data (For Court)
   const lineupData = currentUserStats
     ? {
-        players: currentUserStats.lineup?.players || [], // Use lineup from mega payload
+        players: currentUserStats.lineup?.players || [], // Use lineup from quick or full payload
         summary: {
           total_points: currentUserStats.points,
           round_rank: null, // We could calculate rank dynamically from the list if needed
@@ -190,7 +215,7 @@ export default function RoundsPageClient() {
 
   // Stats Data (For Sidebar)
   const statsData = {
-    global: fullRoundData?.global,
+    global: roundData?.global,
     idealLineup: fullRoundData?.idealLineup,
     user: currentUserStats
       ? {
@@ -244,7 +269,7 @@ export default function RoundsPageClient() {
     color = 'emerald';
   }
 
-  const isCourtLoading = dataLoading; // Use master loading state
+  const isCourtLoading = quickDataLoading; // Use quick data loading state
 
   // 3. Dynamic Summary for Header
   let currentSummary = lineupData?.summary; // Default to User Actual
@@ -300,7 +325,7 @@ export default function RoundsPageClient() {
             {/* Moved Stats Sidebar here to fill vertical space */}
             <RoundStatsSidebar
               stats={statsData}
-              loading={dataLoading}
+              loading={quickDataLoading}
               roundId={selectedRoundId}
               userId={selectedUserId}
               leftOutPlayers={statsData?.user?.leftOut || []}

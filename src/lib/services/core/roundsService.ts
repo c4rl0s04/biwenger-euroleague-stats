@@ -81,9 +81,15 @@ export async function fetchRoundStandings(roundId: string | number): Promise<Use
  * Optimizes fetching by parallelizing global stats and detailed user stats.
  *
  * @param roundId - The ID of the round to fetch
+ * @param filterUserId - (Optional) If provided, only fetch data for this user (quick mode)
+ * @param excludeUserId - (Optional) If provided, exclude this user from results (for background loading)
  * @returns Complete round data object
  */
-export async function fetchRoundCompleteData(roundId: string | number) {
+export async function fetchRoundCompleteData(
+  roundId: string | number,
+  filterUserId?: string | number,
+  excludeUserId?: string | number
+) {
   if (!roundId) return null;
 
   // 1. Fetch Global Context
@@ -93,10 +99,19 @@ export async function fetchRoundCompleteData(roundId: string | number) {
     fetchRoundStandings(roundId), // Reuses the logic to get list + basic points + ideal points
   ]);
 
-  // 2. Fetch Detailed Data for EVERY User (Parallelized)
-  // This might be heavy (~20 users), but ensures instant switching on frontend.
+  // 2. Filter users based on mode
+  let usersToFetch = baseStandings || [];
+  if (filterUserId && usersToFetch.length > 0) {
+    // Quick mode: Only fetch this specific user
+    usersToFetch = usersToFetch.filter((u) => String(u.id) === String(filterUserId));
+  } else if (excludeUserId && usersToFetch.length > 0) {
+    // Background mode: Fetch all except the primary user (already loaded)
+    usersToFetch = usersToFetch.filter((u) => String(u.id) !== String(excludeUserId));
+  }
+
+  // 3. Fetch Detailed Data (Parallelized)
   const usersDetailed = await Promise.all(
-    baseStandings.map(async (user) => {
+    usersToFetch.map(async (user) => {
       try {
         const [lineup, coachRating, leftOut] = await Promise.all([
           getUserLineup(String(user.id), String(roundId)),
@@ -121,7 +136,7 @@ export async function fetchRoundCompleteData(roundId: string | number) {
   return {
     global: globalStats,
     idealLineup: globalIdealLineup,
-    users: usersDetailed, // The "Mega List" with everything
+    users: usersDetailed, // Filtered list based on mode
   };
 }
 
