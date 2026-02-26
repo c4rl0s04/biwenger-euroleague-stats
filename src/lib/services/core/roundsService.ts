@@ -387,27 +387,25 @@ export async function fetchLineupStats() {
   const userStats = users
     .map((user) => {
       const userEntries = byUser.filter((u: any) => u.user_id === user.id);
-      const totalUserRounds = userEntries.reduce(
-        (sum: number, item: any) => sum + toNumber(item.count),
-        0
-      );
+      const totalUserRounds = toNumber(userEntries[0]?.total_count);
 
-      // Find favorite (highest count)
-      const favorite = userEntries.length > 0 ? userEntries[0] : null;
+      // Build top formations (already ranked and limited to top-2 from query)
+      const topFormations = userEntries.map((entry: any) => ({
+        formation: entry.alineacion,
+        count: toNumber(entry.count),
+        percentage: totalUserRounds > 0 ? (toNumber(entry.count) / totalUserRounds) * 100 : 0,
+      }));
+
+      // Keep backward compatibility for UI paths still expecting a single favorite
+      const favorite = topFormations[0] || null;
 
       return {
         userId: user.id,
         name: user.name,
         icon: user.icon, // Needed for UI
         color_index: user.color_index, // Needed for UI
-        favorite: favorite
-          ? {
-              formation: favorite.alineacion,
-              count: toNumber(favorite.count),
-              percentage:
-                totalUserRounds > 0 ? (toNumber(favorite.count) / totalUserRounds) * 100 : 0,
-            }
-          : null,
+        favorite,
+        topFormations,
         totalRounds: totalUserRounds,
       };
     })

@@ -1121,11 +1121,25 @@ export async function getLineupUsageStats() {
   const userQuery = `
     WITH Formations AS (
       ${globalQuery}
+    ),
+    UserFormationCounts AS (
+      SELECT user_id, alineacion, COUNT(*)::int as count
+      FROM Formations
+      GROUP BY user_id, alineacion
+    ),
+    Ranked AS (
+      SELECT
+        user_id,
+        alineacion,
+        count,
+        SUM(count) OVER (PARTITION BY user_id)::int as total_count,
+        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY count DESC, alineacion ASC) as formation_rank
+      FROM UserFormationCounts
     )
-    SELECT user_id, alineacion, COUNT(*)::int as count
-    FROM Formations
-    GROUP BY user_id, alineacion
-    ORDER BY user_id, count DESC
+    SELECT user_id, alineacion, count, total_count, formation_rank
+    FROM Ranked
+    WHERE formation_rank <= 2
+    ORDER BY user_id, formation_rank
   `;
 
   const [globalRes, userRes] = await Promise.all([db.query(finalGlobalQuery), db.query(userQuery)]);

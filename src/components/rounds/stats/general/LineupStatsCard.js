@@ -56,6 +56,9 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {userStats.map((user) => {
               const color = getColorForUser(user.userId, user.name, user.color_index);
+              const topFormations = user.topFormations || (user.favorite ? [user.favorite] : []);
+              const primary = topFormations[0];
+              const secondary = topFormations[1];
 
               return (
                 <div
@@ -93,10 +96,15 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
                       {user.name}
                     </span>
                     <span className="text-lg font-black text-white leading-none tracking-tighter">
-                      {user.favorite.formation}
+                      {primary?.formation || '-'}
                     </span>
                     <span className="text-[9px] text-zinc-500 font-medium">
-                      {user.favorite.percentage.toFixed(0)}% de uso
+                      {primary ? `${primary.percentage.toFixed(0)}% de uso` : 'Sin datos'}
+                    </span>
+                    <span className="text-[9px] text-zinc-500 font-medium">
+                      {secondary
+                        ? `2ª: ${secondary.formation} · ${secondary.percentage.toFixed(0)}%`
+                        : '2ª: —'}
                     </span>
                   </div>
                 </div>
