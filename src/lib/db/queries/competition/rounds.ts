@@ -1093,18 +1093,32 @@ export async function getUserRoundsHistoryDAO(userId: string) {
  */
 export async function getLineupUsageStats() {
   const globalQuery = `
-    SELECT 
+    WITH PerRoundFormation AS (
+      SELECT
+        l.round_id,
+        l.user_id,
+        SUM(CASE WHEN p.position = 'Base' THEN 1 ELSE 0 END)::int as base_count,
+        SUM(CASE WHEN p.position = 'Alero' THEN 1 ELSE 0 END)::int as alero_count,
+        SUM(CASE WHEN p.position = 'Pivot' THEN 1 ELSE 0 END)::int as pivot_count,
+        COUNT(*)::int as starters_count,
+        SUM(CASE WHEN p.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END)::int as known_pos_count
+      FROM lineups l
+      LEFT JOIN players p ON l.player_id = p.id
+      WHERE l.role = 'titular'
+      GROUP BY l.round_id, l.user_id
+      HAVING COUNT(*) = 5
+         AND SUM(CASE WHEN p.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END) = 5
+    )
+    SELECT
       l.user_id,
       CONCAT(
-        COUNT(CASE WHEN p.position = 'Base' THEN 1 END), '-',
-        COUNT(CASE WHEN p.position = 'Alero' THEN 1 END), '-',
-        COUNT(CASE WHEN p.position = 'Pivot' THEN 1 END)
+        l.base_count, '-',
+        l.alero_count, '-',
+        l.pivot_count
       ) as alineacion,
       COUNT(*) as count
-    FROM lineups l
-    JOIN players p ON l.player_id = p.id
-    WHERE l.role = 'titular'
-    GROUP BY l.round_id, l.user_id
+    FROM PerRoundFormation l
+    GROUP BY l.round_id, l.user_id, l.base_count, l.alero_count, l.pivot_count
   `;
 
   // Wrap in outer query to group by formation
