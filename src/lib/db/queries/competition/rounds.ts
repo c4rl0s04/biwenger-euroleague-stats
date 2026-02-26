@@ -1112,7 +1112,7 @@ export async function getLineupUsageStats() {
     WITH Formations AS (
       ${globalQuery}
     )
-    SELECT alineacion, COUNT(*) as count
+    SELECT alineacion, COUNT(*)::int as count
     FROM Formations
     GROUP BY alineacion
     ORDER BY count DESC
@@ -1122,8 +1122,9 @@ export async function getLineupUsageStats() {
     WITH Formations AS (
       ${globalQuery}
     )
-    SELECT alineacion, count, user_id
+    SELECT user_id, alineacion, COUNT(*)::int as count
     FROM Formations
+    GROUP BY user_id, alineacion
     ORDER BY user_id, count DESC
   `;
 
@@ -1144,13 +1145,17 @@ export async function getCoachRating(userId: string, roundId: string | number) {
   const optimization = await getUserOptimization(userId, roundId);
   const userLineup = await getUserLineup(userId, roundId);
 
-  // If we can't get basic data, return null or safe defaults
-  if (!optimization || !userLineup || !userLineup.summary) {
+  // If we can't get optimization data, we cannot compute coach rating.
+  if (!optimization || !userLineup) {
     return null;
   }
 
   const maxScore = optimization.totalPoints;
-  const actualScore = userLineup.summary.total_points;
+  // In live rounds user_rounds rows may not exist yet, so summary can be null.
+  // Fall back to calculating the live score directly from lineup player stats.
+  const actualScore = userLineup.summary
+    ? userLineup.summary.total_points
+    : calculateWeightedSum(userLineup.players);
 
   // calcEfficiency is the single source of truth: actual/ideal, capped at 100.
   const efficiency = calcEfficiency(actualScore, maxScore);

@@ -372,13 +372,14 @@ export async function fetchUserRoundDetails(roundId: string | number, userId?: s
 export async function fetchLineupStats() {
   const { global, byUser } = await getLineupUsageStats();
   const users = await getAllUsers();
+  const toNumber = (value: any) => Number(value) || 0;
 
   // 1. Calculate Global Percentages
-  const totalGlobalRounds = global.reduce((sum: number, item: any) => sum + item.count, 0);
+  const totalGlobalRounds = global.reduce((sum: number, item: any) => sum + toNumber(item.count), 0);
   const globalStats = global.map((item: any) => ({
     formation: item.alineacion,
-    count: item.count,
-    percentage: totalGlobalRounds > 0 ? (item.count / totalGlobalRounds) * 100 : 0,
+    count: toNumber(item.count),
+    percentage: totalGlobalRounds > 0 ? (toNumber(item.count) / totalGlobalRounds) * 100 : 0,
   }));
 
   // 2. Process User Favorites
@@ -386,7 +387,10 @@ export async function fetchLineupStats() {
   const userStats = users
     .map((user) => {
       const userEntries = byUser.filter((u: any) => u.user_id === user.id);
-      const totalUserRounds = userEntries.reduce((sum: number, item: any) => sum + item.count, 0);
+      const totalUserRounds = userEntries.reduce(
+        (sum: number, item: any) => sum + toNumber(item.count),
+        0
+      );
 
       // Find favorite (highest count)
       const favorite = userEntries.length > 0 ? userEntries[0] : null;
@@ -399,8 +403,9 @@ export async function fetchLineupStats() {
         favorite: favorite
           ? {
               formation: favorite.alineacion,
-              count: favorite.count,
-              percentage: totalUserRounds > 0 ? (favorite.count / totalUserRounds) * 100 : 0,
+              count: toNumber(favorite.count),
+              percentage:
+                totalUserRounds > 0 ? (toNumber(favorite.count) / totalUserRounds) * 100 : 0,
             }
           : null,
         totalRounds: totalUserRounds,
