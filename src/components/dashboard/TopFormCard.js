@@ -22,14 +22,14 @@ export default function TopFormCard() {
         <div className="space-y-4 flex-1">
           {players && players.length > 0 ? (
             players.slice(0, 5).map((player, idx) => (
-              <div key={player.player_id} className="group/item">
+              <div key={player.id || player.player_id} className="group/item">
                 {/* Line 1: Name */}
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-muted-foreground font-mono text-xs w-4 shrink-0">
                     {idx + 1}.
                   </span>
                   <Link
-                    href={`/player/${player.player_id}`}
+                    href={`/player/${player.id || player.player_id}`}
                     className="text-foreground font-medium text-sm truncate hover:text-green-500 transition-colors"
                     title={player.name}
                   >
