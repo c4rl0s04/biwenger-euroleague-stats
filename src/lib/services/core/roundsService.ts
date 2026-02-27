@@ -375,7 +375,10 @@ export async function fetchLineupStats() {
   const toNumber = (value: any) => Number(value) || 0;
 
   // 1. Calculate Global Percentages
-  const totalGlobalRounds = global.reduce((sum: number, item: any) => sum + toNumber(item.count), 0);
+  const totalGlobalRounds = global.reduce(
+    (sum: number, item: any) => sum + toNumber(item.count),
+    0
+  );
   const globalStats = global.map((item: any) => ({
     formation: item.alineacion,
     count: toNumber(item.count),
