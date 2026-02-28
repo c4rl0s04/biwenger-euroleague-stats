@@ -62,7 +62,13 @@ export default function PlayerAnalysisModal({ isOpen, onClose, player }) {
           <div className="p-6 border-b border-zinc-800 flex justify-between items-start bg-zinc-900/50">
             <div className="flex items-center space-x-4">
               <div className="relative h-16 w-16 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700">
-                <Image src={player.img} alt={player.name} fill className="object-cover" />
+                {player.img ? (
+                  <Image src={player.img} alt={player.name} fill className="object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-600 font-bold text-2xl">
+                    ?
+                  </div>
+                )}
               </div>
               <div>
                 <h2 className="text-2xl font-black text-white">{player.name}</h2>
@@ -70,9 +76,9 @@ export default function PlayerAnalysisModal({ isOpen, onClose, player }) {
                   <span>{player.position}</span>
                   <span>•</span>
                   <div className="flex items-center space-x-1">
-                    {player.team_img && (
+                    {player.team_img ? (
                       <Image src={player.team_img} alt={player.team} width={16} height={16} />
-                    )}
+                    ) : null}
                     <span>{player.team}</span>
                   </div>
                 </div>
@@ -135,14 +141,14 @@ export default function PlayerAnalysisModal({ isOpen, onClose, player }) {
               {player.next_opponent_id ? (
                 <div className="flex items-center space-x-3">
                   <span className="text-zinc-300">vs</span>
-                  {player.next_opponent_img && (
+                  {player.next_opponent_img ? (
                     <Image
                       src={player.next_opponent_img}
                       alt={player.next_opponent_name}
                       width={24}
                       height={24}
                     />
-                  )}
+                  ) : null}
                   <span className="font-bold text-white">{player.next_opponent_name}</span>
                   <span className="text-xs text-zinc-500 ml-auto">
                     {new Date(player.next_match_date).toLocaleDateString('es-ES', {

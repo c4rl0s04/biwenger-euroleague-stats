@@ -53,13 +53,15 @@ export default function MarketPlayerCard({ player, onAnalyze }) {
           {player.seller_icon && player.seller_name !== 'Mercado' ? (
             <div className="flex items-center space-x-2 text-xs text-zinc-400 bg-zinc-800/50 px-2 py-1 rounded-full">
               <span className="capitalize">{player.seller_name}</span>
-              <Image
-                src={player.seller_icon}
-                alt={player.seller_name}
-                width={16}
-                height={16}
-                className="rounded-full"
-              />
+              {player.seller_icon ? (
+                <Image
+                  src={player.seller_icon}
+                  alt={player.seller_name}
+                  width={16}
+                  height={16}
+                  className="rounded-full"
+                />
+              ) : null}
             </div>
           ) : (
             <div className="flex flex-col items-center">
@@ -73,7 +75,19 @@ export default function MarketPlayerCard({ player, onAnalyze }) {
         {/* Middle: Player Profile & Team */}
         <div className="flex items-center space-x-3 mb-4 mt-2">
           <div className="relative h-14 w-14 rounded-full overflow-hidden bg-zinc-800 flex-shrink-0">
-            <Image src={player.img} alt={player.name} fill className="object-cover" sizes="56px" />
+            {player.img ? (
+              <Image
+                src={player.img}
+                alt={player.name}
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-zinc-600 font-bold text-xl">
+                ?
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-bold text-zinc-100 truncate" title={player.name}>
@@ -83,9 +97,9 @@ export default function MarketPlayerCard({ player, onAnalyze }) {
               <span>{player.position}</span>
               <span>•</span>
               <div className="flex items-center space-x-1">
-                {player.team_img && (
+                {player.team_img ? (
                   <Image src={player.team_img} alt={player.team} width={14} height={14} />
-                )}
+                ) : null}
                 <span className="truncate">{player.team}</span>
               </div>
             </div>
