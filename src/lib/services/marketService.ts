@@ -29,6 +29,7 @@ import {
   getQuickestFlip,
   getLongestProfitableHold,
   getWorstRevaluation,
+  getCurrentMarketListings,
 } from '../db'; // Import all from @/lib/db wrapper
 
 import { getAllUsers } from '../db'; // To Map user names to IDs/Icons if needed
@@ -98,6 +99,7 @@ export async function fetchMarketStats() {
     quickestFlip,
     longestHold,
     worstRevaluation,
+    currentMarketListings,
     allUsers,
   ] = await Promise.all([
     getMarketOverviewKPIs(),
@@ -126,6 +128,7 @@ export async function fetchMarketStats() {
     getQuickestFlip(),
     getLongestProfitableHold(),
     getWorstRevaluation(),
+    getCurrentMarketListings(),
     getAllUsers(),
   ]);
 
@@ -188,6 +191,7 @@ export async function fetchMarketStats() {
     quickestFlip,
     longestHold,
     worstRevaluation,
+    currentMarketListings,
     allUsers,
   };
 }

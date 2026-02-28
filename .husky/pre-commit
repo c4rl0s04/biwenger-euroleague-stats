@@ -1,1 +1,4 @@
+# Ensure Homebrew path is loaded for GUI Git clients (like VSCode, SourceTree)
+export PATH="/opt/homebrew/bin:$PATH"
+
 npx lint-staged

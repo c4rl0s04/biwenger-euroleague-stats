@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Star } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
@@ -30,8 +31,11 @@ import MarketTrendsChart from './stats/MarketTrendsChart';
 import PositionAnalysisGrid from './stats/PositionAnalysisGrid';
 import LiveMarketTable from './LiveMarketTable';
 import ManagerFinancesTable from './stats/ManagerFinancesTable';
+import MarketPlayerCard from './MarketPlayerCard';
+import PlayerAnalysisModal from './PlayerAnalysisModal';
 
 export default function MarketPageClient() {
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
   const { data: statsData, loading } = useApiData('/api/market/stats');
   const marketStats = statsData || {};
 
@@ -75,6 +79,21 @@ export default function MarketPageClient() {
           <MarketKPIs kpis={marketStats.kpis} />
         </div>
       </Section>
+
+      {/* NEW: Jugadores en el Mercado */}
+      {marketStats.currentMarketListings && marketStats.currentMarketListings.length > 0 && (
+        <Section title="Jugadores en el Mercado" delay={50} background="section-base">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {marketStats.currentMarketListings.map((player, index) => (
+              <MarketPlayerCard
+                key={`${player.player_id}-${player.seller_id}-${index}`}
+                player={player}
+                onAnalyze={setSelectedPlayer}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Section: Transacciones */}
       <Section title="Transacciones Destacadas" delay={100} background="section-raised">
@@ -163,6 +182,13 @@ export default function MarketPageClient() {
           </div>
         </div>
       </Section>
+
+      {/* Modal Integration */}
+      <PlayerAnalysisModal
+        isOpen={!!selectedPlayer}
+        onClose={() => setSelectedPlayer(null)}
+        player={selectedPlayer}
+      />
     </div>
   );
 }

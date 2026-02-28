@@ -4,6 +4,31 @@ import { db } from '../../client';
 // INTERFACES
 // ==========================================
 
+export interface CurrentMarketListing {
+  player_id: number;
+  name: string;
+  img: string;
+  position: string;
+  team_id: number | null;
+  team: string | null;
+  team_img: string | null;
+  price: number;
+  price_trend: number;
+  avg_recent_points: number;
+  recent_scores: string;
+  value_score: number;
+  total_points: number;
+  season_avg: number;
+  seller_id: string | null;
+  seller_name: string | null;
+  seller_icon: string | null;
+  seller_color: number | null;
+  next_opponent_id: number | null;
+  next_opponent_name: string | null;
+  next_opponent_img: string | null;
+  next_match_date: string | null;
+}
+
 export interface Transfer {
   id: number;
   fecha: string;
@@ -1714,5 +1739,112 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
     current_price: parseInt(row.current_price),
     purchase_price: parseInt(row.purchase_price),
     devaluation: parseInt(row.devaluation),
+  }));
+}
+
+/**
+ * Get the players that are currently on the market for today.
+ * Enriches them with recent form, full season stats, seller info, and next opponent info.
+ * @returns {Promise<CurrentMarketListing[]>}
+ */
+export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]> {
+  const query = `
+    WITH RecentRounds AS (
+      SELECT DISTINCT round_id
+      FROM player_round_stats
+      ORDER BY round_id DESC
+      LIMIT 3
+    ),
+    RoundCount AS (
+      SELECT COUNT(*) as total_rounds FROM RecentRounds
+    ),
+    PlayerForm AS (
+      SELECT 
+        player_id,
+        SUM(fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
+        STRING_AGG(CAST(fantasy_points AS TEXT), ',') as recent_scores
+      FROM (
+        SELECT player_id, fantasy_points
+        FROM player_round_stats
+        WHERE round_id IN (SELECT round_id FROM RecentRounds)
+        ORDER BY round_id DESC
+      ) sub
+      GROUP BY player_id
+    ),
+    PlayerTotals AS (
+      SELECT 
+        player_id,
+        (SELECT COUNT(*) FROM player_round_stats WHERE player_id = prs.player_id) as games_played,
+        ROUND(AVG(fantasy_points), 1) as season_avg,
+        SUM(fantasy_points) as total_points
+      FROM player_round_stats prs
+      GROUP BY player_id
+    ),
+    TeamNextMatch AS (
+      SELECT 
+        team_id,
+        opponent_id,
+        opponent_name,
+        opponent_img,
+        date
+      FROM (
+        SELECT 
+          t.id as team_id,
+          CASE WHEN m.home_id = t.id THEN m.away_id ELSE m.home_id END as opponent_id,
+          CASE WHEN m.home_id = t.id THEN ta.name ELSE th.name END as opponent_name,
+          CASE WHEN m.home_id = t.id THEN ta.img ELSE th.img END as opponent_img,
+          m.date,
+          ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date ASC) as rn
+        FROM teams t
+        JOIN matches m ON m.home_id = t.id OR m.away_id = t.id
+        LEFT JOIN teams th ON m.home_id = th.id
+        LEFT JOIN teams ta ON m.away_id = ta.id
+        WHERE m.date > NOW()
+      ) sub
+      WHERE rn = 1
+    )
+    SELECT 
+      ml.player_id,
+      p.name,
+      p.img,
+      p.position,
+      t.id as team_id,
+      t.name as team,
+      t.img as team_img,
+      ml.price,
+      COALESCE(p.price_increment, 0) as price_trend,
+      COALESCE(pf.avg_recent_points, 0) as avg_recent_points,
+      pf.recent_scores,
+      ROUND(COALESCE(pf.avg_recent_points, 0) * 1000000.0 / NULLIF(ml.price, 0), 2) as value_score,
+      COALESCE(pt.total_points, 0) as total_points,
+      COALESCE(pt.season_avg, 0) as season_avg,
+      ml.seller_id,
+      u.name as seller_name,
+      u.icon as seller_icon,
+      u.color_index as seller_color,
+      -- Next opponent logic
+      tnm.opponent_id as next_opponent_id,
+      tnm.opponent_name as next_opponent_name,
+      tnm.opponent_img as next_opponent_img,
+      tnm.date as next_match_date
+    FROM market_listings ml
+    JOIN players p ON ml.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN users u ON ml.seller_id::text = u.id::text
+    LEFT JOIN PlayerForm pf ON p.id = pf.player_id
+    LEFT JOIN PlayerTotals pt ON p.id = pt.player_id
+    LEFT JOIN TeamNextMatch tnm ON tnm.team_id = p.team_id
+    WHERE ml.listed_at = CURRENT_DATE
+    ORDER BY value_score DESC NULLS LAST, price_trend DESC, ml.price DESC
+  `;
+
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    price: parseInt(row.price),
+    price_trend: parseInt(row.price_trend),
+    avg_recent_points: parseFloat(row.avg_recent_points) || 0,
+    value_score: parseFloat(row.value_score) || 0,
+    total_points: parseFloat(row.total_points) || 0,
+    season_avg: parseFloat(row.season_avg) || 0,
   }));
 }
