@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Euro } from 'lucide-react';
 import { Section } from '@/components/layout';
 import MarketPlayerCard from './MarketPlayerCard';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 export default function MarketListingsSection({ listings = [], onAnalyze }) {
   const [filterOwner, setFilterOwner] = useState('all'); // 'all', 'free', 'owned'
@@ -60,88 +61,107 @@ export default function MarketListingsSection({ listings = [], onAnalyze }) {
 
   return (
     <Section title="Jugadores en el Mercado" delay={50} background="section-base">
-      {/* Filters Bar */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 flex flex-col xl:flex-row gap-4 xl:items-center justify-between shadow-sm">
-        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-          {/* Text Search */}
-          <div className="relative flex items-center bg-zinc-800 rounded-lg border border-zinc-700 w-full sm:w-56 focus-within:border-blue-500 transition-colors">
-            <div className="pl-3 py-2 text-zinc-400">
-              <Search size={16} />
+      {/* Filters Bar (Styled like PlayersTable) */}
+      <div className="relative z-20 bg-card/50 backdrop-blur-sm p-4 rounded-xl border border-border/50 mb-6 shadow-sm">
+        <div className="flex flex-col xl:flex-row gap-4 xl:items-end justify-between">
+          <div className="flex flex-row flex-wrap xl:flex-nowrap gap-3 w-full items-end">
+            {/* Text Search */}
+            <div className="w-full md:w-auto md:min-w-[200px] shrink-0 space-y-1.5 flex gap-2 items-end">
+              <div className="relative w-full">
+                <span className="text-xs font-medium text-muted-foreground ml-1 mb-1.5 block">
+                  Buscar
+                </span>
+                <div className="relative">
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={16}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Nombre..."
+                    className="w-full h-[40px] bg-secondary/50 border border-border/50 rounded-lg pl-9 pr-10 py-2 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            <input
-              type="text"
-              placeholder="Buscar jugador..."
-              className="bg-transparent text-sm text-white px-2 py-2 w-full focus:outline-none placeholder-zinc-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="pr-3 text-zinc-500 hover:text-zinc-300"
-              >
-                <X size={14} />
-              </button>
-            )}
+
+            {/* Owner Filter */}
+            <div className="w-[48%] md:w-auto md:min-w-[140px] shrink-0 space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground ml-1">Propiedad</span>
+              <CustomSelect
+                value={filterOwner}
+                onChange={setFilterOwner}
+                options={[
+                  { value: 'all', label: 'Todos' },
+                  { value: 'free', label: 'Libre' },
+                  { value: 'owned', label: 'De Usuarios' },
+                ]}
+                placeholder="Todos"
+              />
+            </div>
+
+            {/* Position Filter */}
+            <div className="w-[48%] md:w-auto md:min-w-[110px] shrink-0 space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground ml-1">Posición</span>
+              <CustomSelect
+                value={filterPosition}
+                onChange={setFilterPosition}
+                options={[
+                  { value: 'all', label: 'Todas' },
+                  ...availablePositions.map((pos) => ({ value: pos, label: pos })),
+                ]}
+                placeholder="Todas"
+              />
+            </div>
+
+            {/* Team Filter */}
+            <div className="w-[48%] md:w-auto md:min-w-[130px] shrink-0 space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground ml-1">Equipo</span>
+              <CustomSelect
+                value={filterTeam}
+                onChange={setFilterTeam}
+                options={[
+                  { value: 'all', label: 'Todos' },
+                  ...availableTeams.map((team) => ({ value: team, label: team })),
+                ]}
+                placeholder="Todos"
+              />
+            </div>
+
+            {/* Price Filter */}
+            <div className="w-[48%] md:w-auto md:min-w-[120px] shrink-0 space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground ml-1">Precio máx.</span>
+              <div className="relative">
+                <Euro
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  size={14}
+                />
+                <input
+                  type="number"
+                  placeholder="Sin límite"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className="w-full h-[40px] bg-secondary/50 border border-border/50 rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Owner Filter */}
-          <select
-            className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-2 outline-none focus:border-blue-500 transition-colors hover:bg-zinc-750 cursor-pointer"
-            value={filterOwner}
-            onChange={(e) => setFilterOwner(e.target.value)}
-          >
-            <option value="all">Propiedad (Todos)</option>
-            <option value="free">Solo Mercado (Libre)</option>
-            <option value="owned">De Usuarios</option>
-          </select>
-
-          {/* Position Filter */}
-          <select
-            className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-2 outline-none focus:border-blue-500 transition-colors hover:bg-zinc-750 cursor-pointer"
-            value={filterPosition}
-            onChange={(e) => setFilterPosition(e.target.value)}
-          >
-            <option value="all">Posición (Todas)</option>
-            {availablePositions.map((pos) => (
-              <option key={pos} value={pos}>
-                {pos}
-              </option>
-            ))}
-          </select>
-
-          {/* Team Filter */}
-          <select
-            className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-2 outline-none focus:border-blue-500 transition-colors hover:bg-zinc-750 max-w-[160px] truncate cursor-pointer"
-            value={filterTeam}
-            onChange={(e) => setFilterTeam(e.target.value)}
-          >
-            <option value="all">Equipo (Todos)</option>
-            {availableTeams.map((team) => (
-              <option key={team} value={team}>
-                {team}
-              </option>
-            ))}
-          </select>
-
-          {/* Price Filter */}
-          <select
-            className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-2 outline-none focus:border-blue-500 transition-colors hover:bg-zinc-750 cursor-pointer"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-          >
-            <option value="">Precio Máx (Cualquiera)</option>
-            <option value="1000000">&lt; 1.000.000 €</option>
-            <option value="3000000">&lt; 3.000.000 €</option>
-            <option value="5000000">&lt; 5.000.000 €</option>
-            <option value="10000000">&lt; 10.000.000 €</option>
-            <option value="15000000">&lt; 15.000.000 €</option>
-          </select>
-        </div>
-
-        {/* Counter */}
-        <div className="text-sm font-bold text-zinc-500 bg-zinc-950 px-3 py-1.5 rounded-lg border border-zinc-800 whitespace-nowrap self-start xl:self-auto">
-          {filteredListings.length} {filteredListings.length === 1 ? 'resultado' : 'resultados'}
+          {/* Counter */}
+          <div className="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-2 h-[40px] flex gap-1 items-center rounded-lg border border-border/50 whitespace-nowrap self-start xl:self-end mt-2 xl:mt-0 xl:min-w-fit">
+            <span className="font-bold text-foreground">{filteredListings.length}</span>
+            {filteredListings.length === 1 ? 'resultado' : 'resultados'}
+          </div>
         </div>
       </div>
 
@@ -157,12 +177,12 @@ export default function MarketListingsSection({ listings = [], onAnalyze }) {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 bg-zinc-900/40 rounded-2xl border border-zinc-800 border-dashed">
-          <div className="bg-zinc-800/50 p-4 rounded-full mb-4">
-            <Filter size={32} className="text-zinc-500" />
+        <div className="flex flex-col items-center justify-center p-12 bg-card/50 rounded-xl border border-border/50 backdrop-blur-sm text-center">
+          <div className="bg-secondary/50 p-4 rounded-full mb-4">
+            <Filter size={32} className="text-muted-foreground" />
           </div>
-          <h3 className="text-zinc-200 text-lg font-bold">No hay resultados</h3>
-          <p className="text-zinc-500 text-sm mt-1 max-w-sm text-center">
+          <h3 className="text-foreground text-lg font-bold">No hay resultados</h3>
+          <p className="text-muted-foreground text-sm mt-1 max-w-sm text-center">
             No se han encontrado jugadores que coincidan con los filtros aplicados en el mercado
             actual.
           </p>
@@ -174,7 +194,7 @@ export default function MarketListingsSection({ listings = [], onAnalyze }) {
               setMaxPrice('');
               setSearchQuery('');
             }}
-            className="mt-6 px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-semibold rounded-xl transition shadow-sm border border-zinc-700"
+            className="mt-6 px-5 py-2.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm font-medium rounded-lg transition-colors border border-border/50 cursor-pointer shadow-sm"
           >
             Limpiar todos los filtros
           </button>
