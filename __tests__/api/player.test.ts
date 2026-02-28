@@ -43,7 +43,7 @@ describe('GET /api/player/stats', () => {
 
   it('returns 200 with stats when userId is valid', async () => {
     const mockStats = [{ round: 1, points: 80 }];
-    vi.mocked(services.fetchUserSeasonStats).mockResolvedValue(mockStats);
+    vi.mocked(services.fetchUserSeasonStats).mockResolvedValue(mockStats as any);
 
     const { GET } = await import('@/app/api/player/stats/route');
     const request = makeRequest('http://localhost/api/player/stats', { userId: '42' });
@@ -79,7 +79,7 @@ describe('GET /api/player/rounds', () => {
 
   it('returns 200 with rounds data when userId is valid', async () => {
     const mockRounds = [{ round: 1, points: 75 }];
-    vi.mocked(services.fetchUserRecentRounds).mockResolvedValue(mockRounds);
+    vi.mocked(services.fetchUserRecentRounds).mockResolvedValue(mockRounds as any);
 
     const { GET } = await import('@/app/api/player/rounds/route');
     const request = makeRequest('http://localhost/api/player/rounds', { userId: '42' });
@@ -103,7 +103,7 @@ describe('GET /api/player/squad', () => {
   });
 
   it('returns 200 with squad data when userId is valid', async () => {
-    vi.mocked(services.fetchUserSquadDetails).mockResolvedValue({ players: [] });
+    vi.mocked(services.fetchUserSquadDetails).mockResolvedValue({ players: [] } as any);
 
     const { GET } = await import('@/app/api/player/squad/route');
     const request = makeRequest('http://localhost/api/player/squad', { userId: '42' });

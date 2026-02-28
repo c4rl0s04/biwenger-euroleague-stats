@@ -39,7 +39,7 @@ describe('GET /api/market', () => {
 
   it('returns 200 with market data', async () => {
     const mockData = { transfers: [], kpis: {} };
-    vi.mocked(services.getMarketPageData).mockResolvedValue(mockData);
+    vi.mocked(services.getMarketPageData).mockResolvedValue(mockData as any);
 
     const { GET } = await import('@/app/api/market/route');
     const request = makeRequest('http://localhost/api/market');
@@ -87,7 +87,7 @@ describe('GET /api/market/trends', () => {
 
   it('returns 200 with trend data for valid days param', async () => {
     const mockData = [{ date: '2025-01-01', count: 5, avg_value: 100000 }];
-    vi.mocked(dbLib.getMarketTrendsAnalysis).mockResolvedValue(mockData);
+    vi.mocked(dbLib.getMarketTrendsAnalysis).mockResolvedValue(mockData as any);
 
     const { GET } = await import('@/app/api/market/trends/route');
     const request = makeRequest('http://localhost/api/market/trends', { days: '30' });
@@ -113,7 +113,7 @@ describe('GET /api/market/transfers', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with transfers data', async () => {
-    vi.mocked(marketService.fetchLiveMarketTransfers).mockResolvedValue([{ id: 1 }]);
+    vi.mocked(marketService.fetchLiveMarketTransfers).mockResolvedValue([{ id: 1 }] as any);
 
     const { GET } = await import('@/app/api/market/transfers/route');
     const request = makeRequest('http://localhost/api/market/transfers');

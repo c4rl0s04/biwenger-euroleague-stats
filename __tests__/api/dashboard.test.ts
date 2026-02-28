@@ -37,7 +37,7 @@ describe('GET /api/dashboard/birthdays', () => {
 
   it('returns 200 with birthday data', async () => {
     const mockData = [{ name: 'Player A', birthday: '03-01' }];
-    vi.mocked(services.fetchPlayerBirthdays).mockResolvedValue(mockData);
+    vi.mocked(services.fetchPlayerBirthdays).mockResolvedValue(mockData as any);
 
     const { GET } = await import('@/app/api/dashboard/birthdays/route');
     const response = await GET();
@@ -66,7 +66,7 @@ describe('GET /api/dashboard/top-players', () => {
 
   it('returns 200 with top players data', async () => {
     const mockData = [{ id: 1, name: 'Player A', score: 30 }];
-    vi.mocked(services.fetchTopPlayers).mockResolvedValue(mockData);
+    vi.mocked(services.fetchTopPlayers).mockResolvedValue(mockData as any);
 
     const { GET } = await import('@/app/api/dashboard/top-players/route');
     const response = await GET();
@@ -92,7 +92,7 @@ describe('GET /api/dashboard/rising-stars', () => {
 
   it('returns 200 with rising stars data', async () => {
     const mockData = [{ id: 2, name: 'Rising Star' }];
-    vi.mocked(services.fetchRisingStars).mockResolvedValue(mockData);
+    vi.mocked(services.fetchRisingStars).mockResolvedValue(mockData as any);
 
     const { GET } = await import('@/app/api/dashboard/rising-stars/route');
     const response = await GET();
@@ -116,7 +116,7 @@ describe('GET /api/dashboard/standings-preview', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with standings preview', async () => {
-    vi.mocked(services.fetchStandingsPreview).mockResolvedValue([{ rank: 1, user: 'Alice' }]);
+    vi.mocked(services.fetchStandingsPreview).mockResolvedValue([{ rank: 1, user: 'Alice' }] as any);
 
     const { GET } = await import('@/app/api/dashboard/standings-preview/route');
     const response = await GET();
@@ -132,7 +132,7 @@ describe('GET /api/dashboard/top-form', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with top form data', async () => {
-    vi.mocked(services.fetchTopPlayersByForm).mockResolvedValue([{ id: 3, name: 'Hot Player' }]);
+    vi.mocked(services.fetchTopPlayersByForm).mockResolvedValue([{ id: 3, name: 'Hot Player' }] as any);
 
     const { GET } = await import('@/app/api/dashboard/top-form/route');
     const response = await GET();

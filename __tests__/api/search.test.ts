@@ -44,7 +44,7 @@ describe('GET /api/search', () => {
 
   it('calls service with valid query (2+ chars) and returns results', async () => {
     const mockResults = { players: [{ id: 1, name: 'Carlos' }], teams: [], users: [] };
-    vi.mocked(services.performGlobalSearch).mockResolvedValue(mockResults);
+    vi.mocked(services.performGlobalSearch).mockResolvedValue(mockResults as any);
 
     const { GET } = await import('@/app/api/search/route');
     const request = makeRequest('http://localhost/api/search', { q: 'Carlos' });
