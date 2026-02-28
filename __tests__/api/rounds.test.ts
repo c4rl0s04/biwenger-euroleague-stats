@@ -39,7 +39,7 @@ describe('GET /api/rounds/stats', () => {
   });
 
   it('returns 200 in default mode with roundId', async () => {
-    vi.mocked(services.fetchUserRoundDetails).mockResolvedValue({ round: {}, users: [] } as any);
+    vi.mocked(services.fetchUserRoundDetails).mockResolvedValue({ round: {}, users: [] });
 
     const { GET } = await import('@/app/api/rounds/stats/route');
     const request = makeRequest('http://localhost/api/rounds/stats', { roundId: '5' });
@@ -51,7 +51,7 @@ describe('GET /api/rounds/stats', () => {
   });
 
   it('returns 200 in quick mode with roundId and userId', async () => {
-    vi.mocked(services.fetchRoundCompleteData).mockResolvedValue({ round: {}, data: [] } as any);
+    vi.mocked(services.fetchRoundCompleteData).mockResolvedValue({ round: {}, data: [] });
 
     const { GET } = await import('@/app/api/rounds/stats/route');
     const request = makeRequest('http://localhost/api/rounds/stats', {
@@ -82,10 +82,11 @@ describe('GET /api/rounds/list', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with rounds list', async () => {
-    vi.mocked(services.fetchRoundsList).mockResolvedValue([{ id: 1, name: 'Round 1' }] as any);
+    vi.mocked(services.fetchRoundsList).mockResolvedValue([{ id: 1, name: 'Round 1' }]);
 
     const { GET } = await import('@/app/api/rounds/list/route');
-    const response = await GET();
+    const request = makeRequest('http://localhost/api/rounds/list');
+    const response = await GET(request);
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -96,7 +97,8 @@ describe('GET /api/rounds/list', () => {
     vi.mocked(services.fetchRoundsList).mockRejectedValue(new Error('DB error'));
 
     const { GET } = await import('@/app/api/rounds/list/route');
-    const response = await GET();
+    const request = makeRequest('http://localhost/api/rounds/list');
+    const response = await GET(request);
     expect(response.status).toBe(500);
   });
 });

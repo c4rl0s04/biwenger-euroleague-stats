@@ -34,7 +34,7 @@ describe('GET /api/standings/full', () => {
 
   it('returns 200 with standings data using default sort', async () => {
     const mockStandings = [{ user_id: 1, total_points: 800 }];
-    vi.mocked(services.getFullStandings).mockResolvedValue(mockStandings as any);
+    vi.mocked(services.getFullStandings).mockResolvedValue(mockStandings);
 
     const { GET } = await import('@/app/api/standings/full/route');
     const request = makeRequest('http://localhost/api/standings/full');
@@ -51,7 +51,7 @@ describe('GET /api/standings/full', () => {
   });
 
   it('passes custom sort and direction to service', async () => {
-    vi.mocked(services.getFullStandings).mockResolvedValue([] as any);
+    vi.mocked(services.getFullStandings).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/full/route');
     const request = makeRequest('http://localhost/api/standings/full', {
@@ -68,7 +68,7 @@ describe('GET /api/standings/full', () => {
   });
 
   it('defaults to desc for invalid direction param', async () => {
-    vi.mocked(services.getFullStandings).mockResolvedValue([] as any);
+    vi.mocked(services.getFullStandings).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/full/route');
     const request = makeRequest('http://localhost/api/standings/full', { dir: 'sideways' });
@@ -94,7 +94,7 @@ describe('GET /api/standings/round-winners', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with round winners', async () => {
-    vi.mocked(services.fetchRoundWinners).mockResolvedValue([{ user: 'Alice', wins: 5 }] as any);
+    vi.mocked(services.fetchRoundWinners).mockResolvedValue([{ user: 'Alice', wins: 5 }]);
 
     const { GET } = await import('@/app/api/standings/round-winners/route');
     const request = makeRequest('http://localhost/api/standings/round-winners');
@@ -120,10 +120,11 @@ describe('GET /api/standings/streaks', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with streak stats', async () => {
-    vi.mocked(services.fetchStreakStats).mockResolvedValue([] as any);
+    vi.mocked(services.fetchStreakStats).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/streaks/route');
-    const response = await GET();
+    const request = makeRequest('http://localhost/api/standings/streaks');
+    const response = await GET(request);
 
     expect(response.status).toBe(200);
     const json = await response.json();
@@ -136,10 +137,11 @@ describe('GET /api/standings/efficiency', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with efficiency stats', async () => {
-    vi.mocked(services.fetchEfficiencyStats).mockResolvedValue([] as any);
+    vi.mocked(services.fetchEfficiencyStats).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/efficiency/route');
-    const response = await GET();
+    const request = makeRequest('http://localhost/api/standings/efficiency');
+    const response = await GET(request);
 
     expect(response.status).toBe(200);
   });
@@ -150,10 +152,11 @@ describe('GET /api/standings/volatility', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with volatility data', async () => {
-    vi.mocked(services.fetchVolatilityStats).mockResolvedValue([] as any);
+    vi.mocked(services.fetchVolatilityStats).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/volatility/route');
-    const response = await GET();
+    const request = makeRequest('http://localhost/api/standings/volatility');
+    const response = await GET(request);
 
     expect(response.status).toBe(200);
   });
@@ -164,7 +167,7 @@ describe('GET /api/standings/points-progression', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with points progression data', async () => {
-    vi.mocked(services.fetchPointsProgression).mockResolvedValue([] as any);
+    vi.mocked(services.fetchPointsProgression).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/points-progression/route');
     const request = makeRequest('http://localhost/api/standings/points-progression');
