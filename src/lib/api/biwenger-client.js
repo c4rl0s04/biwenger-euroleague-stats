@@ -179,3 +179,7 @@ export async function fetchHome() {
 export async function fetchTournament(tournamentId) {
   return biwengerFetch(`/tournaments/${tournamentId}`);
 }
+
+export async function fetchMarketListings() {
+  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.MARKET(CONFIG.API.LEAGUE_ID));
+}

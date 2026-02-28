@@ -83,6 +83,10 @@ async function syncData() {
   const stepTournaments = await import('./steps/14-tournaments.js'); // Step 14
   if (shouldRun(14)) manager.addStep('Sync Tournaments', stepTournaments.run);
 
+  // Market Listings Snapshot Step
+  const stepMarketListings = await import('./steps/15-market-listings.js'); // Step 15
+  if (shouldRun(15)) manager.addStep('Sync Market Listings', stepMarketListings.run);
+
   // Execute
   await manager.run();
 

@@ -87,6 +87,7 @@ export const CONFIG = {
       PLAYER_DETAILS: (id) =>
         `/players/euroleague/${id}?lang=es&fields=id,name,position,prices,birthday,height,weight,img`,
       USER_PLAYERS: (id) => `/user/${id}?fields=players`,
+      MARKET: (leagueId) => `/market`,
     },
 
     /**

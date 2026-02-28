@@ -323,3 +323,20 @@ export const tournamentStandings = pgTable(
     ),
   })
 );
+
+// 19. Market Listings Table
+// Daily snapshot of players currently available on the fantasy market.
+// One row per player per sync date — idempotent via unique(player_id, listed_at).
+export const marketListings = pgTable(
+  'market_listings',
+  {
+    id: serial('id').primaryKey(),
+    playerId: integer('player_id'),
+    listedAt: date('listed_at'),
+    price: integer('price'),
+    sellerId: text('seller_id'),
+  },
+  (t) => ({
+    unq_market_listing: unique('unique_market_listing').on(t.playerId, t.listedAt),
+  })
+);

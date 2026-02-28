@@ -1,0 +1,1 @@
+ALTER TABLE "market_listings" DROP COLUMN "seller_name";

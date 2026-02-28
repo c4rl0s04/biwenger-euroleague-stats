@@ -8,6 +8,20 @@
       "when": 1771790196152,
       "tag": "0000_mushy_puck",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772215286465,
+      "tag": "0001_natural_the_enforcers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772279257568,
+      "tag": "0002_dry_blazing_skull",
+      "breakpoints": true
     }
   ]
 }
