@@ -26,9 +26,9 @@ async function main() {
         name: topUser.name,
         points: topUser.total_points,
         wins: topUser.round_wins,
-        team_value: topUser.team_value
+        team_value: topUser.team_value,
       });
-      
+
       // Validation: Check if critical fields are present (not null/undefined)
       if (topUser.total_points === undefined || topUser.total_points === null) {
         throw new Error('❌ "total_points" is missing or null!');
@@ -37,7 +37,6 @@ async function main() {
     } else {
       console.log('   ⚠️  Query returned 0 rows. (Is the DB empty?)');
     }
-
   } catch (error) {
     console.error('\n❌ Verification FAILED:', error);
     process.exit(1);

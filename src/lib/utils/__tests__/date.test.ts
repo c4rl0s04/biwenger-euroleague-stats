@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getCorrectedMatchDate,
-  formatMatchTime,
-  formatMatchDate,
-} from '@/lib/utils/date';
+import { getCorrectedMatchDate, formatMatchTime, formatMatchDate } from '@/lib/utils/date';
 
 describe('getCorrectedMatchDate', () => {
   it('returns null for null input', () => {

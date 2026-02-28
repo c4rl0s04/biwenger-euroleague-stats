@@ -25,7 +25,10 @@ vi.mock('@/lib/services', () => ({
 
 import * as services from '@/lib/services';
 
-function mockRequest(path = 'http://localhost/api/dashboard', params: Record<string, string> = {}): NextRequest {
+function mockRequest(
+  path = 'http://localhost/api/dashboard',
+  params: Record<string, string> = {}
+): NextRequest {
   const url = new URL(path);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   return new NextRequest(url.toString());
@@ -116,7 +119,9 @@ describe('GET /api/dashboard/standings-preview', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with standings preview', async () => {
-    vi.mocked(services.fetchStandingsPreview).mockResolvedValue([{ rank: 1, user: 'Alice' }] as any);
+    vi.mocked(services.fetchStandingsPreview).mockResolvedValue([
+      { rank: 1, user: 'Alice' },
+    ] as any);
 
     const { GET } = await import('@/app/api/dashboard/standings-preview/route');
     const response = await GET();
@@ -132,7 +137,9 @@ describe('GET /api/dashboard/top-form', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with top form data', async () => {
-    vi.mocked(services.fetchTopPlayersByForm).mockResolvedValue([{ id: 3, name: 'Hot Player' }] as any);
+    vi.mocked(services.fetchTopPlayersByForm).mockResolvedValue([
+      { id: 3, name: 'Hot Player' },
+    ] as any);
 
     const { GET } = await import('@/app/api/dashboard/top-form/route');
     const response = await GET();

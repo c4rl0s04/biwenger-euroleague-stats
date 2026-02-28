@@ -23,7 +23,7 @@ describe('GET /api/compare/data', () => {
 
   it('returns 200 with compare data', async () => {
     const mockData = { users: [], matchups: [] };
-    vi.mocked(services.getCompareData).mockResolvedValue(mockData);
+    vi.mocked(services.getCompareData).mockResolvedValue(mockData as any);
 
     const { GET } = await import('@/app/api/compare/data/route');
     const request = makeRequest('http://localhost/api/compare/data');
@@ -53,7 +53,7 @@ describe('GET /api/compare/data/lite', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with lite compare data', async () => {
-    vi.mocked(services.getCompareDataLite).mockResolvedValue({ users: [] });
+    vi.mocked(services.getCompareDataLite).mockResolvedValue({ users: [] } as any);
 
     const { GET } = await import('@/app/api/compare/data/lite/route');
     const request = makeRequest('http://localhost/api/compare/data/lite');

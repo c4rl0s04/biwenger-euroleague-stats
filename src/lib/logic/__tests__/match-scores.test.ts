@@ -22,10 +22,14 @@ describe('calculateRegularTimeScores', () => {
 
   it('sums Q1-Q4 to compute regular time scores', () => {
     const header = {
-      Q1ScoreA: 25, Q1ScoreB: 20,
-      Q2ScoreA: 22, Q2ScoreB: 18,
-      Q3ScoreA: 20, Q3ScoreB: 25,
-      Q4ScoreA: 23, Q4ScoreB: 22,
+      Q1ScoreA: 25,
+      Q1ScoreB: 20,
+      Q2ScoreA: 22,
+      Q2ScoreB: 18,
+      Q3ScoreA: 20,
+      Q3ScoreB: 25,
+      Q4ScoreA: 23,
+      Q4ScoreB: 22,
     };
     const result = calculateRegularTimeScores(header);
     expect(result.homeScore).toBe(90); // 25+22+20+23
@@ -34,11 +38,16 @@ describe('calculateRegularTimeScores', () => {
 
   it('ignores overtime when computing regular time', () => {
     const header = {
-      Q1ScoreA: 25, Q1ScoreB: 20,
-      Q2ScoreA: 22, Q2ScoreB: 18,
-      Q3ScoreA: 20, Q3ScoreB: 25,
-      Q4ScoreA: 20, Q4ScoreB: 24,
-      OT1ScoreA: 10, OT1ScoreB: 5, // overtime - not counted
+      Q1ScoreA: 25,
+      Q1ScoreB: 20,
+      Q2ScoreA: 22,
+      Q2ScoreB: 18,
+      Q3ScoreA: 20,
+      Q3ScoreB: 25,
+      Q4ScoreA: 20,
+      Q4ScoreB: 24,
+      OT1ScoreA: 10,
+      OT1ScoreB: 5, // overtime - not counted
     };
     const result = calculateRegularTimeScores(header);
     expect(result.homeScore).toBe(87);

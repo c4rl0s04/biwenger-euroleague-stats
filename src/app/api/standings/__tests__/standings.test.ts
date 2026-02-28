@@ -123,8 +123,7 @@ describe('GET /api/standings/streaks', () => {
     vi.mocked(services.fetchStreakStats).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/streaks/route');
-    const request = makeRequest('http://localhost/api/standings/streaks');
-    const response = await GET(request);
+    const response = await GET();
 
     expect(response.status).toBe(200);
     const json = await response.json();
@@ -140,8 +139,7 @@ describe('GET /api/standings/efficiency', () => {
     vi.mocked(services.fetchEfficiencyStats).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/efficiency/route');
-    const request = makeRequest('http://localhost/api/standings/efficiency');
-    const response = await GET(request);
+    const response = await GET();
 
     expect(response.status).toBe(200);
   });
@@ -155,8 +153,7 @@ describe('GET /api/standings/volatility', () => {
     vi.mocked(services.fetchVolatilityStats).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/standings/volatility/route');
-    const request = makeRequest('http://localhost/api/standings/volatility');
-    const response = await GET(request);
+    const response = await GET();
 
     expect(response.status).toBe(200);
   });

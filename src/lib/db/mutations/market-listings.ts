@@ -42,12 +42,7 @@ export function prepareMarketListingMutations(db: DbClient): MarketListingMutati
           price       = EXCLUDED.price,
           seller_id   = EXCLUDED.seller_id
       `;
-      await db.query(sql, [
-        params.player_id,
-        params.listed_at,
-        params.price,
-        params.seller_id,
-      ]);
+      await db.query(sql, [params.player_id, params.listed_at, params.price, params.seller_id]);
     },
   };
 }
