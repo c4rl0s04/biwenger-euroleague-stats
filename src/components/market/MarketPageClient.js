@@ -31,7 +31,7 @@ import MarketTrendsChart from './stats/MarketTrendsChart';
 import PositionAnalysisGrid from './stats/PositionAnalysisGrid';
 import LiveMarketTable from './LiveMarketTable';
 import ManagerFinancesTable from './stats/ManagerFinancesTable';
-import MarketPlayerCard from './MarketPlayerCard';
+import MarketListingsSection from './MarketListingsSection';
 import PlayerAnalysisModal from './PlayerAnalysisModal';
 
 export default function MarketPageClient() {
@@ -80,20 +80,11 @@ export default function MarketPageClient() {
         </div>
       </Section>
 
-      {/* NEW: Jugadores en el Mercado */}
-      {marketStats.currentMarketListings && marketStats.currentMarketListings.length > 0 && (
-        <Section title="Jugadores en el Mercado" delay={50} background="section-base">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {marketStats.currentMarketListings.map((player, index) => (
-              <MarketPlayerCard
-                key={`${player.player_id}-${player.seller_id}-${index}`}
-                player={player}
-                onAnalyze={setSelectedPlayer}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
+      {/* NEW: Jugadores en el Mercado (with filters) */}
+      <MarketListingsSection
+        listings={marketStats.currentMarketListings}
+        onAnalyze={setSelectedPlayer}
+      />
 
       {/* Section: Transacciones */}
       <Section title="Transacciones Destacadas" delay={100} background="section-raised">
