@@ -1760,16 +1760,13 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     ),
     PlayerForm AS (
       SELECT 
-        player_id,
-        SUM(fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
-        STRING_AGG(CAST(fantasy_points AS TEXT), ',') as recent_scores
-      FROM (
-        SELECT player_id, fantasy_points
-        FROM player_round_stats
-        WHERE round_id IN (SELECT round_id FROM RecentRounds)
-        ORDER BY round_id DESC
-      ) sub
-      GROUP BY player_id
+        ml.player_id,
+        SUM(prs.fantasy_points) * 1.0 / NULLIF((SELECT total_rounds FROM RoundCount), 0) as avg_recent_points,
+        STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rr.round_id DESC) as recent_scores
+      FROM (SELECT DISTINCT player_id FROM market_listings WHERE listed_at = (SELECT MAX(listed_at) FROM market_listings)) ml
+      CROSS JOIN RecentRounds rr
+      LEFT JOIN player_round_stats prs ON prs.player_id = ml.player_id AND prs.round_id = rr.round_id
+      GROUP BY ml.player_id
     ),
     PlayerTotals AS (
       SELECT 

@@ -39,8 +39,8 @@ const positionColors = {
 function ScoreBar({ score }) {
   if (score === null) {
     return (
-      <div className="flex-1 h-8 bg-white/3 border border-white/8 rounded flex items-center justify-center">
-        <span className="text-[10px] text-white/20 font-mono">—</span>
+      <div className="flex-1 h-8 bg-rose-950/50 border border-rose-900/50 rounded flex items-center justify-center">
+        <span className="text-sm text-rose-500 font-bold leading-none pb-0.5">×</span>
       </div>
     );
   }
@@ -89,7 +89,7 @@ export default function MarketPlayerCard({ player, onAnalyze }) {
     ? player.recent_scores
         .split(',')
         .filter((s) => s.trim() !== '')
-        .map((s) => parseInt(s, 10))
+        .map((s) => (s === 'X' ? null : parseInt(s, 10)))
     : [];
 
   // Ensure we always have exactly 5 elements mapped
