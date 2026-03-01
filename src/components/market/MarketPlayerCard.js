@@ -1,147 +1,285 @@
 import React from 'react';
 import Image from 'next/image';
-import { TrendingUp, TrendingDown, Info, ShieldAlert, Star } from 'lucide-react';
+import { TrendingUp, TrendingDown, Star, ShieldAlert, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Heuristic logic to determine badge
 function getPurchaseHeuristic(player) {
   const { value_score, price_trend } = player;
-
   if (value_score > 30 && price_trend > 0) {
     return {
       label: 'Compra Excelente',
-      color: 'bg-green-500/20 text-green-400',
-      icon: <TrendingUp size={14} className="mr-1" />,
+      color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+      dot: 'bg-emerald-400',
+      icon: <TrendingUp size={11} className="mr-1" />,
     };
   } else if (value_score < 10 || price_trend < 0) {
     return {
       label: 'Compra Arriesgada',
-      color: 'bg-red-500/20 text-red-400',
-      icon: <TrendingDown size={14} className="mr-1" />,
+      color: 'bg-red-500/15 text-red-400 border-red-500/30',
+      dot: 'bg-red-400',
+      icon: <TrendingDown size={11} className="mr-1" />,
     };
   } else {
     return {
       label: 'Compra Normal',
-      color: 'bg-yellow-500/20 text-yellow-400',
-      icon: <Star size={14} className="mr-1" />,
+      color: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+      dot: 'bg-amber-400',
+      icon: <Star size={11} className="mr-1" />,
     };
   }
 }
 
+const positionColors = {
+  Base: { text: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/30', initial: 'B' },
+  Alero: { text: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30', initial: 'A' },
+  Pívot: { text: 'text-red-400', bg: 'bg-red-400/10 border-red-400/30', initial: 'P' },
+  Pivot: { text: 'text-red-400', bg: 'bg-red-400/10 border-red-400/30', initial: 'P' },
+};
+
+function ScoreBar({ score }) {
+  if (score === null) {
+    return (
+      <div className="flex-1 h-8 bg-white/3 border border-white/8 rounded flex items-center justify-center">
+        <span className="text-[10px] text-white/20 font-mono">—</span>
+      </div>
+    );
+  }
+  const color =
+    score >= 20
+      ? 'bg-emerald-700 text-white border-emerald-600/50'
+      : score >= 10
+        ? 'bg-sky-700 text-white border-sky-600/50'
+        : score < 0
+          ? 'bg-rose-700 text-white border-rose-600/50'
+          : 'bg-white/10 text-white/80 border-white/10';
+
+  return (
+    <div
+      className={`flex-1 h-8 rounded flex items-center justify-center border shadow-inner ${color}`}
+    >
+      <span className="text-xs font-bold font-mono">{score}</span>
+    </div>
+  );
+}
+
+// Global user colors from Biwenger structure
+const userColors = [
+  '#f43f5e', // rose-500
+  '#3b82f6', // blue-500
+  '#10b981', // emerald-500
+  '#8b5cf6', // violet-500
+  '#f59e0b', // amber-500
+  '#ec4899', // pink-500
+  '#06b6d4', // cyan-500
+  '#84cc16', // lime-500
+  '#a855f7', // purple-500
+  '#14b8a6', // teal-500
+];
+
 export default function MarketPlayerCard({ player, onAnalyze }) {
   const heuristic = getPurchaseHeuristic(player);
+  const posStyle = positionColors[player.position] || {
+    text: 'text-white/60',
+    bg: 'bg-white/5 border-white/10',
+  };
+
+  // Parse up to 5 scores. The backend strings them chronologically (e.g. "5,12,0,22,-1").
+  // We reverse them so the most recent match appears on the LEFT of the visualizer.
+  const recentScores = player.recent_scores
+    ? player.recent_scores
+        .split(',')
+        .filter((s) => s.trim() !== '')
+        .map((s) => parseInt(s, 10))
+    : [];
+
+  // Ensure we always have exactly 5 elements mapped
+  const displayScores = Array(5)
+    .fill(null)
+    .map((_, i) => (recentScores[i] !== undefined ? recentScores[i] : null));
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl overflow-hidden shadow-sm flex flex-col hover:border-border transition-colors group"
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="relative bg-[#111318] border border-white/10 rounded-2xl overflow-hidden flex flex-col shadow-xl hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:-translate-y-0.5 group"
+      style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}
     >
-      <div className="p-4 flex-1 flex flex-col">
-        {/* Top Header: Price & Indicator */}
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex flex-col">
-            <span className="text-xl font-display font-bold text-foreground">
-              {new Intl.NumberFormat('es-ES').format(player.price)} €
-            </span>
-            <div
-              className={`mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${heuristic.color}`}
-            >
-              {heuristic.icon} {heuristic.label}
-            </div>
-          </div>
-          {player.seller_icon && player.seller_name !== 'Mercado' ? (
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded-full border border-border/30">
-              <span className="capitalize">{player.seller_name}</span>
-              {player.seller_icon ? (
-                <Image
-                  src={player.seller_icon}
-                  alt={player.seller_name}
-                  width={16}
-                  height={16}
-                  className="rounded-full"
-                />
-              ) : null}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center">
-              <span className="text-xs font-medium px-2 py-1 bg-secondary/50 rounded text-muted-foreground border border-border/30">
-                Biwenger
-              </span>
-            </div>
-          )}
-        </div>
+      {/* Subtle top accent line based on heuristic */}
+      <div
+        className={`h-0.5 w-full ${
+          heuristic.dot === 'bg-emerald-400'
+            ? 'bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent'
+            : heuristic.dot === 'bg-red-400'
+              ? 'bg-gradient-to-r from-transparent via-red-500/60 to-transparent'
+              : 'bg-gradient-to-r from-transparent via-amber-500/60 to-transparent'
+        }`}
+      />
 
-        {/* Middle: Player Profile & Team */}
-        <div className="flex items-center space-x-3 mb-4 mt-2">
-          <div className="relative h-14 w-14 rounded-full overflow-hidden bg-secondary flex-shrink-0 border flex items-center justify-center border-border/50">
+      <div className="p-4 flex-1 flex flex-col gap-4">
+        {/* ── ROW 1: Player identity ── */}
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex-shrink-0 flex items-center justify-center">
             {player.img ? (
               <Image
                 src={player.img}
                 alt={player.name}
                 fill
-                className="object-cover"
+                className="object-cover object-top scale-[1.8] origin-top translate-y-[10%]"
                 sizes="56px"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground font-bold text-xl">
-                ?
-              </div>
+              <span className="text-white/30 font-bold text-xl">?</span>
             )}
           </div>
+
+          {/* Name + team + position */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-foreground truncate" title={player.name}>
+            <h3 className="text-lg font-bold text-white leading-tight truncate" title={player.name}>
               {player.name}
             </h3>
-            <div className="flex items-center text-xs text-muted-foreground space-x-2 mt-0.5">
-              <span>{player.position}</span>
-              <span>•</span>
-              <div className="flex items-center space-x-1">
-                {player.team_img ? (
-                  <Image src={player.team_img} alt={player.team} width={14} height={14} />
-                ) : null}
-                <span className="truncate">{player.team}</span>
-              </div>
+            <div className="flex items-center gap-2 mt-1.5">
+              {player.position && (
+                <span
+                  className={`text-sm font-bold px-2 py-0.5 rounded border ${posStyle.text} ${posStyle.bg} uppercase tracking-wide flex-shrink-0 leading-none`}
+                >
+                  {posStyle.initial || player.position?.charAt(0)}
+                </span>
+              )}
+              {player.team_img && (
+                <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
+                  <Image
+                    src={player.team_img}
+                    alt={player.team || 'Team'}
+                    width={32}
+                    height={32}
+                    className="object-contain drop-shadow-md"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Bottom Stats: Points */}
-        <div className="grid grid-cols-2 gap-2 mt-auto">
-          <div className="bg-secondary/30 rounded-lg p-2 border border-border/30 flex flex-col items-center justify-center">
-            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-              Puntos
+        {/* ── DIVIDER ── */}
+        <div className="h-px bg-white/6" />
+
+        {/* ── ROW 2: Price ── */}
+        <div className="flex flex-col items-center justify-center">
+          <div>
+            <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mb-0.5 text-center">
+              Precio
+            </p>
+            <p className="text-2xl font-bold text-white tabular-nums leading-none text-center">
+              {new Intl.NumberFormat('es-ES').format(player.price)}
+              <span className="text-base text-white/40 font-normal ml-1">€</span>
+            </p>
+          </div>
+        </div>
+
+        {/* ── ROW 3: Stats row ── */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-white/4 border border-white/8 rounded-xl p-3 flex flex-col gap-0.5">
+            <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+              Total pts
             </span>
-            <span className="text-lg font-display font-medium text-emerald-400">
+            <span className="text-xl font-bold text-emerald-400 tabular-nums leading-none">
               {player.total_points}
             </span>
           </div>
-          <div className="bg-secondary/30 rounded-lg p-2 border border-border/30 flex flex-col items-center justify-center relative group">
-            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider flex items-center">
-              Media <Info size={10} className="ml-1 opacity-50" />
+          <div className="bg-white/4 border border-white/8 rounded-xl p-3 flex flex-col gap-0.5 relative">
+            <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold flex items-center gap-1">
+              Media <Info size={9} className="opacity-40" />
             </span>
-            <span className="text-lg font-display font-medium text-blue-400">
+            <span className="text-xl font-bold text-sky-400 tabular-nums leading-none">
               {player.season_avg}
             </span>
+          </div>
+        </div>
 
-            {/* Tooltip for recent form */}
-            <div className="hidden group-hover:block absolute bottom-full mb-2 bg-popover text-popover-foreground text-xs p-2.5 rounded-lg border border-border shadow-xl min-w-max z-20">
-              Últimos partidos: {player.recent_scores || 'N/A'}
-              <br />
-              Media reciente: {player.avg_recent_points?.toFixed(1) || '0.0'}
-            </div>
+        {/* ── ROW 4: Recent form ── */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+              Forma reciente
+            </span>
+            <span className="text-[10px] text-white/30 font-medium">
+              Media:{' '}
+              <span className="text-emerald-400 font-bold">
+                {player.avg_recent_points?.toFixed(1) || '0.0'}
+              </span>{' '}
+              pts
+            </span>
+          </div>
+          <div className="flex gap-1">
+            {displayScores.map((score, i) => (
+              <ScoreBar key={i} score={score} />
+            ))}
+          </div>
+        </div>
+
+        {/* ── ROW 5: Heuristic & Seller ── */}
+        <div className="flex items-center justify-between mt-1 pt-3 border-t border-white/6">
+          <div
+            className={`flex items-center text-[10px] font-semibold px-2 py-1 rounded border ${heuristic.color}`}
+          >
+            {heuristic.icon}
+            {heuristic.label}
+          </div>
+          <div className="flex-shrink-0 flex flex-col items-end">
+            {player.seller_icon && player.seller_name !== 'Mercado' ? (
+              <div
+                className="flex items-center gap-1.5 opacity-90 px-2 py-1 rounded-full border border-white/10"
+                style={{
+                  backgroundColor:
+                    player.seller_color !== undefined && player.seller_color !== null
+                      ? `${userColors[player.seller_color % userColors.length]}15` // 15% opacity background
+                      : 'rgba(255,255,255,0.05)',
+                  borderColor:
+                    player.seller_color !== undefined && player.seller_color !== null
+                      ? `${userColors[player.seller_color % userColors.length]}30`
+                      : 'rgba(255,255,255,0.1)',
+                }}
+              >
+                <span
+                  className="text-[10px] font-bold capitalize"
+                  style={{
+                    color:
+                      player.seller_color !== undefined && player.seller_color !== null
+                        ? userColors[player.seller_color % userColors.length]
+                        : 'rgba(255,255,255,0.6)',
+                  }}
+                >
+                  {player.seller_name}
+                </span>
+                {player.seller_icon && (
+                  <Image
+                    src={player.seller_icon}
+                    alt={player.seller_name}
+                    width={14}
+                    height={14}
+                    className="rounded-full"
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="opacity-80 px-2 py-1 rounded-full border border-white/10 bg-white/5">
+                <span className="text-[10px] text-white/40 font-medium">Biwenger</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Action Button */}
+      {/* ── ACTION BUTTON ── */}
       <button
         onClick={() => onAnalyze(player)}
-        className="w-full py-3 bg-secondary/60 hover:bg-secondary text-foreground text-sm font-semibold flex items-center justify-center transition-colors border-t border-border/50 cursor-pointer"
+        className="w-full py-3 bg-white/4 hover:bg-white/8 text-white/70 hover:text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 border-t border-white/8 cursor-pointer group/btn"
       >
         <ShieldAlert
-          size={16}
-          className="mr-2 opacity-70 group-hover:opacity-100 transition-opacity"
+          size={15}
+          className="opacity-60 group-hover/btn:opacity-100 transition-opacity"
         />
         Analizar Fichaje
       </button>

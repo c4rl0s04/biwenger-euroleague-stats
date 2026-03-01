@@ -1753,7 +1753,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       SELECT DISTINCT round_id
       FROM player_round_stats
       ORDER BY round_id DESC
-      LIMIT 3
+      LIMIT 5
     ),
     RoundCount AS (
       SELECT COUNT(*) as total_rounds FROM RecentRounds
@@ -1834,7 +1834,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     LEFT JOIN PlayerForm pf ON p.id = pf.player_id
     LEFT JOIN PlayerTotals pt ON p.id = pt.player_id
     LEFT JOIN TeamNextMatch tnm ON tnm.team_id = p.team_id
-    WHERE ml.listed_at = CURRENT_DATE
+    WHERE ml.listed_at = (SELECT MAX(listed_at) FROM market_listings)
     ORDER BY value_score DESC NULLS LAST, price_trend DESC, ml.price DESC
   `;
 
