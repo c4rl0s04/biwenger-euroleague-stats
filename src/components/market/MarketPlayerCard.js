@@ -45,13 +45,13 @@ function ScoreBar({ score }) {
     );
   }
   const color =
-    score >= 20
-      ? 'bg-emerald-700 text-white border-emerald-600/50'
-      : score >= 10
-        ? 'bg-sky-700 text-white border-sky-600/50'
-        : score < 0
-          ? 'bg-rose-700 text-white border-rose-600/50'
-          : 'bg-white/10 text-white/80 border-white/10';
+    score < 0
+      ? 'bg-rose-700 text-white border-rose-600/50'
+      : score < 6
+        ? 'bg-amber-700 text-white border-amber-600/50'
+        : score < 10
+          ? 'bg-emerald-700 text-white border-emerald-600/50'
+          : 'bg-sky-700 text-white border-sky-600/50';
 
   return (
     <div
