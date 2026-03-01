@@ -32,10 +32,8 @@ import PositionAnalysisGrid from './stats/PositionAnalysisGrid';
 import LiveMarketTable from './LiveMarketTable';
 import ManagerFinancesTable from './stats/ManagerFinancesTable';
 import MarketListingsSection from './MarketListingsSection';
-import PlayerAnalysisModal from './PlayerAnalysisModal';
 
 export default function MarketPageClient() {
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
   const { data: statsData, loading } = useApiData('/api/market/stats');
   const marketStats = statsData || {};
 
@@ -81,10 +79,7 @@ export default function MarketPageClient() {
       </Section>
 
       {/* NEW: Jugadores en el Mercado (with filters) */}
-      <MarketListingsSection
-        listings={marketStats.currentMarketListings}
-        onAnalyze={setSelectedPlayer}
-      />
+      <MarketListingsSection listings={marketStats.currentMarketListings} />
 
       {/* Section: Transacciones */}
       <Section title="Transacciones Destacadas" delay={100} background="section-raised">
@@ -173,13 +168,6 @@ export default function MarketPageClient() {
           </div>
         </div>
       </Section>
-
-      {/* Modal Integration */}
-      <PlayerAnalysisModal
-        isOpen={!!selectedPlayer}
-        onClose={() => setSelectedPlayer(null)}
-        player={selectedPlayer}
-      />
     </div>
   );
 }

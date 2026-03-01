@@ -4,12 +4,13 @@ import { Section } from '@/components/layout';
 import MarketPlayerCard from './MarketPlayerCard';
 import CustomSelect from '@/components/ui/CustomSelect';
 
-export default function MarketListingsSection({ listings = [], onAnalyze }) {
+export default function MarketListingsSection({ listings = [] }) {
   const [filterOwner, setFilterOwner] = useState('all'); // 'all', 'free', 'owned'
   const [filterPosition, setFilterPosition] = useState('all');
   const [filterTeam, setFilterTeam] = useState('all');
   const [maxPrice, setMaxPrice] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedPlayerId, setExpandedPlayerId] = useState(null);
 
   // Extract unique teams and positions
   const availableTeams = useMemo(() => {
@@ -172,7 +173,10 @@ export default function MarketListingsSection({ listings = [], onAnalyze }) {
             <MarketPlayerCard
               key={`${player.player_id}-${player.seller_id}-${index}`}
               player={player}
-              onAnalyze={onAnalyze}
+              isExpanded={expandedPlayerId === player.player_id}
+              onToggleExpand={() =>
+                setExpandedPlayerId(expandedPlayerId === player.player_id ? null : player.player_id)
+              }
             />
           ))}
         </div>

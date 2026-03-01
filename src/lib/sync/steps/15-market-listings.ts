@@ -13,15 +13,23 @@ export async function run(manager: SyncManager): Promise<void> {
     const db = manager.context.db;
     const mutations = prepareMarketListingMutations(db as any);
 
-    // Today's date as YYYY-MM-DD — used as the snapshot key
-    const today = new Date().toISOString().split('T')[0];
+    // Biwenger market rolls over at 5:00 AM (Spanish time)
+    // To handle syncs between 00:00 and 04:59, we subtract 5 hours from the current date.
+    // If it's currently March 1st 03:00, this correctly attributes it to February 28th.
+    const now = new Date();
+    const marketDate = new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-    manager.log(`   > Fetching active market listings for ${today}...`);
+    manager.log(`   > Fetching active market listings for market day ${marketDate}...`);
     const response = await fetchMarketListings();
 
     // The Biwenger market endpoint returns { data: [...] }
     // Each entry shape (observed): { player: { id, name, ... }, price, user: { id, name } | null }
     const items: any[] = response?.data?.sales ?? [];
+
+    console.log('\n--- DEBUG MARKET RESPONSE ---');
+    console.log('Total items fetched:', items?.length);
+    console.log('First 2 raw items from payload to verify structure:', JSON.stringify(items?.slice(0, 2), null, 2));
+    console.log('-----------------------------\n');
 
     if (!Array.isArray(items) || items.length === 0) {
       manager.log('   > No players currently listed on the market.');
@@ -51,10 +59,12 @@ export async function run(manager: SyncManager): Promise<void> {
 
       await mutations.upsertMarketListing({
         player_id: playerId,
-        listed_at: today,
+        listed_at: marketDate,
         price,
         seller_id: sellerId,
       });
+
+      console.log(`[DEBUG Syncing] Valid Player: ID=${playerId} | Price=${price} | Seller=${sellerId || 'Biwenger System'}`);
 
       upserted++;
     }
