@@ -134,7 +134,7 @@ export default function MarketPlayerCard({ player, onAnalyze }) {
             )}
           </div>
 
-          {/* Name + team + position */}
+          {/* Name + position */}
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-bold text-white leading-tight truncate" title={player.name}>
               {player.name}
@@ -147,19 +147,21 @@ export default function MarketPlayerCard({ player, onAnalyze }) {
                   {posStyle.initial || player.position?.charAt(0)}
                 </span>
               )}
-              {player.team_img && (
-                <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
-                  <Image
-                    src={player.team_img}
-                    alt={player.team || 'Team'}
-                    width={32}
-                    height={32}
-                    className="object-contain drop-shadow-md"
-                  />
-                </div>
-              )}
             </div>
           </div>
+
+          {/* Team logo right side */}
+          {player.team_img && (
+            <div className="w-12 h-12 ml-1 flex-shrink-0 flex items-center justify-center">
+              <Image
+                src={player.team_img}
+                alt={player.team || 'Team'}
+                width={48}
+                height={48}
+                className="object-contain drop-shadow-md"
+              />
+            </div>
+          )}
         </div>
 
         {/* ── DIVIDER ── */}
