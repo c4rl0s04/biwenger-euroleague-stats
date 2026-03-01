@@ -119,7 +119,10 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand })
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      transition={{
+        layout: { type: 'spring', bounce: 0.15, duration: 0.5 },
+        default: { duration: 0.3, ease: 'easeOut' },
+      }}
       className={`relative bg-[#111318] border border-white/10 rounded-2xl overflow-hidden flex flex-col shadow-xl hover:border-white/20 transition-all duration-300 hover:shadow-2xl group ${
         isExpanded
           ? 'md:col-span-2 lg:col-span-2 lg:flex-row ring-1 ring-emerald-500/50'
@@ -128,7 +131,8 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand })
       style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}
     >
       {/* ── LEFT / MAIN CONTENT CARD ── */}
-      <div
+      <motion.div
+        layout="size"
         className={`flex flex-col flex-1 min-w-0 ${isExpanded ? 'lg:w-[320px] lg:flex-none border-r border-white/10' : ''}`}
       >
         {/* Subtle top accent line based on heuristic */}
@@ -328,18 +332,23 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand })
             </>
           )}
         </button>
-      </div>
+      </motion.div>
 
       {/* ── RIGHT / EXPANDED ANALYTICS DRAWER ── */}
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
+            layout="size"
             initial={{ opacity: 0, width: 0, height: 0 }}
             animate={{ opacity: 1, width: 'auto', height: 'auto' }}
             exit={{ opacity: 0, width: 0, height: 0 }}
+            transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
             className="flex-1 bg-[#0b0c10] overflow-hidden flex flex-col"
           >
-            <div className="p-5 lg:p-6 overflow-y-auto">
+            <motion.div
+              layout="position"
+              className="p-5 lg:p-6 overflow-y-auto w-full min-w-[280px]"
+            >
               <h3 className="text-lg font-bold text-white mb-4">Análisis Detallado</h3>
 
               {/* Next Match Indicator */}
@@ -427,7 +436,7 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand })
                   Error cargando detalles.
                 </div>
               )}
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
