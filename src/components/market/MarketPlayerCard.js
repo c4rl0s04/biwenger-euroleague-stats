@@ -85,7 +85,7 @@ const userColors = [
   '#14b8a6', // teal-500
 ];
 
-export default function MarketPlayerCard({ player, isExpanded, onToggleExpand }) {
+export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, onExpandLevel2 }) {
   const heuristic = getPurchaseHeuristic(player);
   const posStyle = positionColors[player.position] || {
     text: 'text-white/60',
@@ -93,7 +93,8 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand })
   };
 
   return (
-    <div
+    <motion.div
+      layoutId={`player-card-${player.player_id}`}
       className={`relative group perspective-[1000px] hover:-translate-y-0.5 transition-transform duration-300 ${isExpanded ? 'z-50' : 'z-10'}`}
     >
       <motion.div
@@ -116,7 +117,12 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand })
           className="absolute inset-0 backface-hidden bg-[#0b0c10] border-2 border-emerald-500/50 rounded-2xl overflow-hidden flex flex-col shadow-2xl"
           style={{ transform: 'rotateY(180deg)' }}
         >
-          <CardBack player={player} isExpanded={isExpanded} onToggleExpand={onToggleExpand} />
+          <CardBack
+            player={player}
+            isExpanded={isExpanded}
+            onToggleExpand={onToggleExpand}
+            onExpandLevel2={onExpandLevel2}
+          />
         </div>
       </motion.div>
 
@@ -130,7 +136,7 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand })
           onToggleExpand={() => {}}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -306,7 +312,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
 }
 
 // ── BACK FACE COMPONENT ──
-function CardBack({ player, isExpanded, onToggleExpand }) {
+function CardBack({ player, isExpanded, onToggleExpand, onExpandLevel2 }) {
   const { data: detailsData, loading: detailsLoading } = useApiData(
     () => `/api/players/${player.player_id}/stats`,
     { skip: !isExpanded }
@@ -319,73 +325,71 @@ function CardBack({ player, isExpanded, onToggleExpand }) {
       className="flex flex-col h-full w-full"
       style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}
     >
-      <div className="p-5 flex-1 overflow-y-auto w-full flex flex-col">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center justify-between">
-          Análisis Detallado
-        </h3>
+      <div className="p-4 flex-1 overflow-hidden w-full flex flex-col justify-between">
+        <div className="flex-shrink-0">
+          <h3 className="text-sm font-bold text-white/80 uppercase tracking-wide mb-2">
+            Análisis Detallado
+          </h3>
 
-        {/* PRÓXIMO PARTIDO */}
-        <div className="mb-4 bg-blue-900/10 border border-blue-900/30 p-3 rounded-xl flex-shrink-0">
-          <h4 className="text-xs font-bold text-blue-400 uppercase flex items-center mb-1.5">
-            <Calendar size={12} className="mr-1" /> Próximo Partido
-          </h4>
-          {player.next_opponent_id ? (
-            <div className="flex items-center space-x-2">
-              <span className="text-white/50 text-xs">vs</span>
-              {player.next_opponent_img && (
-                <Image
-                  src={player.next_opponent_img}
-                  alt={player.next_opponent_name}
-                  width={16}
-                  height={16}
-                />
-              )}
-              <span className="font-bold text-white text-sm truncate">
-                {player.next_opponent_name}
-              </span>
-              <span className="text-[10px] text-white/50 ml-auto flex-shrink-0">
-                {new Date(player.next_match_date).toLocaleDateString('es-ES', {
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'short',
-                })}
-              </span>
-            </div>
-          ) : (
-            <div className="text-xs text-white/50">Sin partidos próximos.</div>
-          )}
+          {/* PRÓXIMO PARTIDO */}
+          <div className="mb-2 bg-blue-900/10 border border-blue-900/30 p-2 rounded-lg">
+            <h4 className="text-[10px] font-bold text-blue-400 uppercase flex items-center mb-1">
+              <Calendar size={10} className="mr-1" /> Próximo Partido
+            </h4>
+            {player.next_opponent_id ? (
+              <div className="flex items-center space-x-2">
+                <span className="text-white/50 text-[10px]">vs</span>
+                {player.next_opponent_img && (
+                  <Image
+                    src={player.next_opponent_img}
+                    alt={player.next_opponent_name}
+                    width={14}
+                    height={14}
+                  />
+                )}
+                <span className="font-bold text-white text-xs truncate">
+                  {player.next_opponent_name}
+                </span>
+                <span className="text-[9px] text-white/50 ml-auto flex-shrink-0">
+                  {new Date(player.next_match_date).toLocaleDateString('es-ES', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                  })}
+                </span>
+              </div>
+            ) : (
+              <div className="text-[10px] text-white/50">Sin partidos próximos.</div>
+            )}
+          </div>
         </div>
 
         {/* ESTADÍSTICAS */}
         {detailsLoading ? (
-          <div className="animate-pulse flex-1 flex flex-col gap-3">
-            <div className="h-4 w-1/2 bg-white/10 rounded"></div>
-            <div className="h-16 w-full bg-white/5 rounded-xl border border-white/5 mt-auto"></div>
+          <div className="animate-pulse flex-1 flex flex-col gap-2 mt-1">
+            <div className="h-3 w-1/2 bg-white/10 rounded"></div>
+            <div className="flex-1 w-full bg-white/5 rounded-lg border border-white/5"></div>
           </div>
         ) : details ? (
-          <div className="flex-1 flex flex-col">
-            <h4 className="text-[10px] font-bold text-white/50 uppercase mb-2 tracking-wider">
-              Desempeño & Mercado
-            </h4>
-
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div className="bg-white/5 border border-white/10 p-2.5 rounded-lg text-center flex flex-col justify-center">
-                <span className="text-[10px] text-white/50 uppercase">Partidos</span>
-                <span className="font-bold text-white text-base leading-none mt-1">
+          <div className="flex-1 flex flex-col justify-end">
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="bg-white/5 border border-white/10 p-2 rounded-lg text-center flex flex-col justify-center">
+                <span className="text-[9px] text-white/50 uppercase">Partidos</span>
+                <span className="font-bold text-white text-sm leading-none mt-0.5">
                   {details.games_played}
                 </span>
               </div>
-              <div className="bg-[#111318] border border-white/10 p-2.5 rounded-lg text-center flex flex-col justify-center shadow-inner">
-                <span className="text-[10px] text-white/50 uppercase">Value Score</span>
-                <span className="font-bold text-sky-400 text-base leading-none mt-1">
+              <div className="bg-[#111318] border border-white/10 p-2 rounded-lg text-center flex flex-col justify-center shadow-inner">
+                <span className="text-[9px] text-white/50 uppercase">Value Score</span>
+                <span className="font-bold text-sky-400 text-sm leading-none mt-0.5">
                   {(player.value_score || 0).toFixed(1)}
                 </span>
               </div>
             </div>
 
-            <div className="bg-[#111318] border border-white/10 p-3 rounded-xl text-xs text-white/70 shadow-inner mt-auto space-y-2">
+            <div className="bg-[#111318] border border-white/10 p-2 rounded-lg text-[10px] sm:text-[11px] text-white/70 shadow-inner mt-auto space-y-1">
               <div className="flex justify-between items-center">
-                <span>Tendencia Precio</span>
+                <span>Tendencia</span>
                 <strong
                   className={
                     player.price_trend > 0
@@ -406,15 +410,18 @@ function CardBack({ player, isExpanded, onToggleExpand }) {
               </div>
             </div>
 
-            <a
-              href={`/player/${player.player_id}`}
-              className="mt-3 flex items-center justify-center p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-[11px] font-bold uppercase tracking-widest transition-colors w-full border border-blue-500/20"
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onExpandLevel2) onExpandLevel2();
+              }}
+              className="mt-2 flex items-center justify-center py-1.5 rounded-md bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-[10px] font-bold uppercase tracking-widest transition-colors w-full border border-blue-500/20 relative z-50 cursor-pointer pointer-events-auto"
             >
-              Ver Perfil Completo <TrendingUp size={12} className="ml-1.5" />
-            </a>
+              Ver Análisis Completo <TrendingUp size={10} className="ml-1.5" />
+            </button>
           </div>
         ) : (
-          <div className="text-xs text-white/40 italic p-4 bg-[#111318] rounded-xl border border-white/10 text-center shadow-inner m-auto">
+          <div className="text-[10px] text-white/40 italic p-3 bg-[#111318] rounded-lg border border-white/10 text-center shadow-inner my-auto">
             Error cargando detalles.
           </div>
         )}
@@ -423,7 +430,7 @@ function CardBack({ player, isExpanded, onToggleExpand }) {
       {/* Botón Volver */}
       <button
         onClick={onToggleExpand}
-        className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 border-t border-red-500/20 cursor-pointer flex-shrink-0"
+        className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[13px] font-semibold flex items-center justify-center gap-2 transition-all duration-200 border-t border-red-500/20 cursor-pointer flex-shrink-0"
       >
         Cerrar Análisis
       </button>

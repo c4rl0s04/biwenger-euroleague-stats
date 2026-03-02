@@ -32,6 +32,7 @@ import PositionAnalysisGrid from './stats/PositionAnalysisGrid';
 import LiveMarketTable from './LiveMarketTable';
 import ManagerFinancesTable from './stats/ManagerFinancesTable';
 import MarketListingsSection from './MarketListingsSection';
+import AnalyticsDemoShowroom from './AnalyticsDemoShowroom';
 
 export default function MarketPageClient() {
   const { data: statsData, loading } = useApiData('/api/market/stats');

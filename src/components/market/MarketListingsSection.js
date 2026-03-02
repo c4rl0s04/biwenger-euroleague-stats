@@ -3,7 +3,8 @@ import { Search, Filter, X, Euro } from 'lucide-react';
 import { Section } from '@/components/layout';
 import MarketPlayerCard from './MarketPlayerCard';
 import CustomSelect from '@/components/ui/CustomSelect';
-
+import { AnimatePresence, LayoutGroup } from 'framer-motion';
+import ExpandedPlayerModal from './ExpandedPlayerModal';
 export default function MarketListingsSection({ listings = [] }) {
   const [filterOwner, setFilterOwner] = useState('all'); // 'all', 'free', 'owned'
   const [filterPosition, setFilterPosition] = useState('all');
@@ -11,6 +12,7 @@ export default function MarketListingsSection({ listings = [] }) {
   const [maxPrice, setMaxPrice] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedPlayerId, setExpandedPlayerId] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null); // For Level 2 Expansion
 
   // Extract unique teams and positions
   const availableTeams = useMemo(() => {
@@ -186,43 +188,55 @@ export default function MarketListingsSection({ listings = [] }) {
       </div>
 
       {/* Grid or Empty State */}
-      {filteredListings.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredListings.map((player, index) => (
-            <MarketPlayerCard
-              key={`${player.player_id}-${player.seller_id}-${index}`}
-              player={player}
-              isExpanded={expandedPlayerId === player.player_id}
-              onToggleExpand={() =>
-                setExpandedPlayerId(expandedPlayerId === player.player_id ? null : player.player_id)
-              }
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center p-12 bg-card/50 rounded-xl border border-border/50 backdrop-blur-sm text-center">
-          <div className="bg-secondary/50 p-4 rounded-full mb-4">
-            <Filter size={32} className="text-muted-foreground" />
+      <LayoutGroup>
+        {filteredListings.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
+            {filteredListings.map((player, index) => (
+              <MarketPlayerCard
+                key={`${player.player_id}-${player.seller_id}-${index}`}
+                player={player}
+                isExpanded={expandedPlayerId === player.player_id}
+                onToggleExpand={() =>
+                  setExpandedPlayerId(
+                    expandedPlayerId === player.player_id ? null : player.player_id
+                  )
+                }
+                onExpandLevel2={() => setSelectedPlayer(player)}
+              />
+            ))}
           </div>
-          <h3 className="text-foreground text-lg font-bold">No hay resultados</h3>
-          <p className="text-muted-foreground text-sm mt-1 max-w-sm text-center">
-            No se han encontrado jugadores que coincidan con los filtros aplicados en el mercado
-            actual.
-          </p>
-          <button
-            onClick={() => {
-              setFilterOwner('all');
-              setFilterPosition('all');
-              setFilterTeam('all');
-              setMaxPrice('');
-              setSearchQuery('');
-            }}
-            className="mt-6 px-5 py-2.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm font-medium rounded-lg transition-colors border border-border/50 cursor-pointer shadow-sm"
-          >
-            Limpiar todos los filtros
-          </button>
-        </div>
-      )}
+        ) : (
+          <div className="flex flex-col items-center justify-center p-12 bg-card/50 rounded-xl border border-border/50 backdrop-blur-sm text-center">
+            <div className="bg-secondary/50 p-4 rounded-full mb-4">
+              <Filter size={32} className="text-muted-foreground" />
+            </div>
+            <h3 className="text-foreground text-lg font-bold">No hay resultados</h3>
+            <p className="text-muted-foreground text-sm mt-1 max-w-sm text-center">
+              No se han encontrado jugadores que coincidan con los filtros aplicados en el mercado
+              actual.
+            </p>
+            <button
+              onClick={() => {
+                setFilterOwner('all');
+                setFilterPosition('all');
+                setFilterTeam('all');
+                setMaxPrice('');
+                setSearchQuery('');
+              }}
+              className="mt-6 px-5 py-2.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm font-medium rounded-lg transition-colors border border-border/50 cursor-pointer shadow-sm"
+            >
+              Limpiar todos los filtros
+            </button>
+          </div>
+        )}
+
+        {/* Level 2 Organic Hero Expansion Modal */}
+        <AnimatePresence>
+          {selectedPlayer && (
+            <ExpandedPlayerModal player={selectedPlayer} onClose={() => setSelectedPlayer(null)} />
+          )}
+        </AnimatePresence>
+      </LayoutGroup>
     </Section>
   );
 }
