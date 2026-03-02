@@ -28,7 +28,10 @@ export async function run(manager: SyncManager): Promise<void> {
 
     console.log('\n--- DEBUG MARKET RESPONSE ---');
     console.log('Total items fetched:', items?.length);
-    console.log('First 2 raw items from payload to verify structure:', JSON.stringify(items?.slice(0, 2), null, 2));
+    console.log(
+      'First 2 raw items from payload to verify structure:',
+      JSON.stringify(items?.slice(0, 2), null, 2)
+    );
     console.log('-----------------------------\n');
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -64,7 +67,9 @@ export async function run(manager: SyncManager): Promise<void> {
         seller_id: sellerId,
       });
 
-      console.log(`[DEBUG Syncing] Valid Player: ID=${playerId} | Price=${price} | Seller=${sellerId || 'Biwenger System'}`);
+      console.log(
+        `[DEBUG Syncing] Valid Player: ID=${playerId} | Price=${price} | Seller=${sellerId || 'Biwenger System'}`
+      );
 
       upserted++;
     }

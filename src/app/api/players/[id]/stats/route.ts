@@ -2,10 +2,7 @@ import { NextRequest } from 'next/server';
 import { getPlayerPerformanceSummary } from '@/lib/services';
 import { CACHE_DURATIONS, successResponse, errorResponse } from '@/lib/utils/response';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -20,12 +17,14 @@ export async function GET(
     }
 
     // Map camelCase to snake_case for the frontend modal
-    return successResponse({
-      ...stats,
-      total_points: stats.totalPoints,
-      games_played: stats.gamesPlayed,
-    }, CACHE_DURATIONS.MEDIUM);
-
+    return successResponse(
+      {
+        ...stats,
+        total_points: stats.totalPoints,
+        games_played: stats.gamesPlayed,
+      },
+      CACHE_DURATIONS.MEDIUM
+    );
   } catch (error) {
     console.error(`Error fetching player stats for ${params}:`, error);
     const message = error instanceof Error ? error.message : 'Internal Server Error';
