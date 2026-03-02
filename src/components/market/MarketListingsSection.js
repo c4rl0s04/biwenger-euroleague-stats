@@ -188,43 +188,16 @@ export default function MarketListingsSection({ listings = [] }) {
       {/* Grid or Empty State */}
       {filteredListings.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredListings.map((player, index) => {
-            const activeIndex = expandedPlayerId
-              ? filteredListings.findIndex((p) => p.player_id === expandedPlayerId)
-              : -1;
-
-            let hiddenIndex = -1;
-            if (activeIndex !== -1 && cols > 1) {
-              const isLastInRow = activeIndex % cols === cols - 1;
-              const isLastInArray = activeIndex === filteredListings.length - 1;
-
-              if (filteredListings.length > 1) {
-                if (isLastInRow || isLastInArray) {
-                  // Merge to the left
-                  hiddenIndex = activeIndex - 1;
-                } else {
-                  // Merge to the right
-                  hiddenIndex = activeIndex + 1;
-                }
+          {filteredListings.map((player, index) => (
+            <MarketPlayerCard
+              key={`${player.player_id}-${player.seller_id}-${index}`}
+              player={player}
+              isExpanded={expandedPlayerId === player.player_id}
+              onToggleExpand={() =>
+                setExpandedPlayerId(expandedPlayerId === player.player_id ? null : player.player_id)
               }
-            }
-
-            // Exclude the adjacent card from rendering so the expanded card can take its DOM slot naturally
-            if (index === hiddenIndex) return null;
-
-            return (
-              <MarketPlayerCard
-                key={`${player.player_id}-${player.seller_id}-${index}`}
-                player={player}
-                isExpanded={expandedPlayerId === player.player_id}
-                onToggleExpand={() =>
-                  setExpandedPlayerId(
-                    expandedPlayerId === player.player_id ? null : player.player_id
-                  )
-                }
-              />
-            );
-          })}
+            />
+          ))}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center p-12 bg-card/50 rounded-xl border border-border/50 backdrop-blur-sm text-center">

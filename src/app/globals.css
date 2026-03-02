@@ -178,6 +178,17 @@ h3,
    UTILITY CLASSES
    ======================================== */
 
+/* 3D Transform Utilities */
+.preserve-3d {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 /* Gradient text effect */
 .text-gradient {
   background-clip: text;

@@ -183,6 +183,9 @@ export async function getTopPlayersByForm(
  * Get detailed player information by ID
  */
 export async function getPlayerDetails(playerId: number | string): Promise<PlayerDetails | null> {
+  const numericPlayerId = Number(playerId);
+  if (isNaN(numericPlayerId)) return null;
+
   // 1. Base Player Info
   const query = `
     SELECT 
@@ -199,7 +202,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     WHERE p.id = $1
   `;
 
-  const playerRes = await db.query(query, [playerId]);
+  const playerRes = await db.query(query, [numericPlayerId]);
   const player = playerRes.rows[0];
 
   if (!player) return null;
@@ -239,7 +242,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     ORDER BY m.round_id DESC
   `;
 
-  const recentMatches = (await db.query(matchesQuery, [playerId])).rows;
+  const recentMatches = (await db.query(matchesQuery, [numericPlayerId])).rows;
 
   // 3. Price History
   const priceHistoryQuery = `
@@ -248,7 +251,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     WHERE player_id = $1 
     ORDER BY date ASC
   `;
-  const priceHistory = (await db.query(priceHistoryQuery, [playerId])).rows;
+  const priceHistory = (await db.query(priceHistoryQuery, [numericPlayerId])).rows;
 
   // 4. Ownership History (Transfers)
   const transfersQuery = `
@@ -265,7 +268,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     WHERE f.player_id = $1 
     ORDER BY f.timestamp DESC
   `;
-  const transfers = (await db.query(transfersQuery, [playerId])).rows;
+  const transfers = (await db.query(transfersQuery, [numericPlayerId])).rows;
 
   // Check for Initial Squad Assignment
   const initialSquadQuery = `
@@ -276,7 +279,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     JOIN users u ON s.user_id = u.id
     WHERE s.player_id = $1
   `;
-  const initialOwnerRes = await db.query(initialSquadQuery, [playerId]);
+  const initialOwnerRes = await db.query(initialSquadQuery, [numericPlayerId]);
   const initialOwner = initialOwnerRes.rows[0];
 
   if (initialOwner) {
