@@ -54,6 +54,7 @@ export interface PlayerDetails extends CorePlayer {
   priceHistory: any[];
   transfers: any[];
   nextMatch: any;
+  nextMatches: any[];
   advancedStats: any;
 }
 
@@ -215,6 +216,8 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       m.date as match_date,
       th.name as home_team,
       ta.name as away_team,
+      m.home_id,
+      m.away_id,
       m.home_score,
       m.away_score,
       prs.fantasy_points,
@@ -239,6 +242,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     LEFT JOIN player_round_stats prs ON m.round_id = prs.round_id AND prs.player_id = p.id
     WHERE (m.home_id = p.team_id OR m.away_id = p.team_id)
       AND m.date < NOW()
+      AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats)
     ORDER BY m.round_id DESC
   `;
 
@@ -316,13 +320,17 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     });
   }
 
-  // 5. Next Match
+  // 5. Next Matches
   // Use Postgres NOW()
   const nextMatchQuery = `
     SELECT 
       date, 
       th.name as home_team, 
       ta.name as away_team,
+      m.home_id,
+      m.away_id,
+      m.home_score,
+      m.away_score,
       round_name
     FROM matches m
     LEFT JOIN teams th ON m.home_id = th.id
@@ -330,10 +338,11 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     WHERE (m.home_id = $1 OR m.away_id = $2) 
       AND ${FUTURE_MATCH_CONDITION('date')} 
     ORDER BY date ASC 
-    LIMIT 1
+    LIMIT 3
   `;
   const nextMatchRes = await db.query(nextMatchQuery, [player.team_id, player.team_id]);
-  const nextMatch = nextMatchRes.rows[0];
+  const nextMatches = nextMatchRes.rows;
+  const nextMatch = nextMatches[0] || null;
 
   // 6. Advanced Stats Aggregates (Season Totals)
   const advancedStats = recentMatches.reduce(
@@ -368,6 +377,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     priceHistory,
     transfers,
     nextMatch,
+    nextMatches,
     advancedStats,
   } as PlayerDetails;
 }
