@@ -274,7 +274,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-4">
                     <span className="text-sm text-white/80 font-medium">% Asistencia</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-white">
@@ -282,6 +282,36 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       </span>
                       <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase">
                         Partidos
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center bg-white/5 rounded-lg p-2.5">
+                    <span className="text-sm font-semibold text-white/80 flex items-center gap-1.5">
+                      Prob. Playoffs
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-1.5 bg-black/40 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            (details.playoff_probability || 0) >= 70
+                              ? 'bg-emerald-400'
+                              : (details.playoff_probability || 0) >= 40
+                                ? 'bg-amber-400'
+                                : 'bg-rose-400'
+                          }`}
+                          style={{ width: `${details.playoff_probability || 0}%` }}
+                        />
+                      </div>
+                      <span
+                        className={`text-sm font-bold tabular-nums ${
+                          (details.playoff_probability || 0) >= 70
+                            ? 'text-emerald-400'
+                            : (details.playoff_probability || 0) >= 40
+                              ? 'text-amber-400'
+                              : 'text-rose-400'
+                        }`}
+                      >
+                        {details.playoff_probability || 0}%
                       </span>
                     </div>
                   </div>

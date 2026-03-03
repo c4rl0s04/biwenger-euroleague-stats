@@ -2,7 +2,8 @@ import { db } from '../../client';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
 import { getPlayerPriceHistory, getPlayerTransfers } from '../features/market';
 import { getTeamUpcomingMatches } from '../competition/matches';
-import { getTeamMatchesCount } from './teams';
+import { getTeamMatchesCount, getTeamPlayoffProbability } from './teams';
+
 export interface CorePlayer {
   id: number;
   name: string;
@@ -59,6 +60,7 @@ export interface PlayerDetails extends CorePlayer {
   nextMatch: any;
   nextMatches: any[];
   advancedStats: any;
+  playoff_probability: number;
 }
 
 /**
@@ -274,13 +276,15 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     transfers,
     nextMatches,
     team_total_matches,
-    player_total_matches
+    player_total_matches,
+    playoff_probability
   ] = await Promise.all([
     getPlayerPriceHistory(numericPlayerId),
     getPlayerTransfers(numericPlayerId),
     getTeamUpcomingMatches(player.team_id, 3),
     getTeamMatchesCount(player.team_id),
     getPlayerMatchesPlayed(numericPlayerId),
+    getTeamPlayoffProbability(player.team_id)
   ]);
 
   const nextMatch = nextMatches[0] || null;
@@ -322,6 +326,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     nextMatch,
     nextMatches,
     advancedStats,
+    playoff_probability
   } as PlayerDetails;
 }
 
