@@ -277,14 +277,14 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     nextMatches,
     team_total_matches,
     player_total_matches,
-    playoff_probability
+    playoff_probability,
   ] = await Promise.all([
     getPlayerPriceHistory(numericPlayerId),
     getPlayerTransfers(numericPlayerId),
     getTeamUpcomingMatches(player.team_id, 3),
     getTeamMatchesCount(player.team_id),
     getPlayerMatchesPlayed(numericPlayerId),
-    getTeamPlayoffProbability(player.team_id)
+    getTeamPlayoffProbability(player.team_id),
   ]);
 
   const nextMatch = nextMatches[0] || null;
@@ -326,7 +326,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     nextMatch,
     nextMatches,
     advancedStats,
-    playoff_probability
+    playoff_probability,
   } as PlayerDetails;
 }
 

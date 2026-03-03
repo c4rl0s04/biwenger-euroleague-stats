@@ -1945,7 +1945,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
 
   const [teamPlayoffProbs, teamMatchCounts] = await Promise.all([
     getAllTeamsPlayoffProbabilities(),
-    getAllTeamMatchesCount()
+    getAllTeamMatchesCount(),
   ]);
 
   const rows = (await db.query(query)).rows;
@@ -1975,13 +1975,13 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     // - Techo (15%) -> High ceilings (30+) get full points
     let techoScore = Math.min((max_points / 30) * 15, 15);
     totalScore += techoScore;
-    
+
     // - Promedio Absoluto (25%) -> Very important for high tier players like Vezenkov
     let avgScore = Math.min((season_avg / 16) * 25, 25); // 16+ avg = 25 pts
     totalScore += avgScore;
 
     // - Asistencia / Disponibilidad (10%)
-    let attendanceScore = (Math.min(games_played / Math.max(1, team_games_played), 1)) * 10;
+    let attendanceScore = Math.min(games_played / Math.max(1, team_games_played), 1) * 10;
     totalScore += Math.max(0, attendanceScore);
 
     // - Rentabilidad / Value (10%)
@@ -2054,7 +2054,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       recommendation_label: rec_label,
       recommendation_color: rec_color,
       recommendation_dot: rec_dot,
-      recommendation_icon: rec_icon
+      recommendation_icon: rec_icon,
     };
   });
 

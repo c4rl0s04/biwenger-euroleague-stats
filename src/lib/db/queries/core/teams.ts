@@ -109,10 +109,10 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
   `;
   const standingsRes = await db.query(standingsQuery);
   const standings = standingsRes.rows;
-  
-  const tenthPlace = standings.find(s => Number(s.position) === 10);
+
+  const tenthPlace = standings.find((s) => Number(s.position) === 10);
   const tenthWins = tenthPlace ? Number(tenthPlace.wins) : 0;
-  
+
   // 2. Fetch Form (Last 5 matches) for all teams
   const formQuery = `
     SELECT 
@@ -136,7 +136,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
     GROUP BY team_id
   `;
   const formRes = await db.query(formQuery);
-  const formData = new Map(formRes.rows.map(r => [Number(r.team_id), Number(r.recent_wins)]));
+  const formData = new Map(formRes.rows.map((r) => [Number(r.team_id), Number(r.recent_wins)]));
 
   // 3. Schedule Difficulty (Next 3 opponents average position) for all teams
   const nextMatchesQuery = `
@@ -174,14 +174,14 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
     let probability = 50; // Base 50%
     const teamPosition = Number(teamStanding.position);
     const teamWins = Number(teamStanding.wins);
-    
-    // Rule 1: Standings logic 
+
+    // Rule 1: Standings logic
     if (teamPosition <= 4) probability = 95;
     else if (teamPosition <= 6) probability = 80;
     else if (teamPosition <= 10) probability = 60;
     else {
       const winDiff = tenthWins - teamWins;
-      probability = 50 - (winDiff * 15);
+      probability = 50 - winDiff * 15;
     }
 
     // Rule 2: Form logic
@@ -197,12 +197,14 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
     const oppIds = nextOpponentsMap.get(numericTeamId) || [];
     if (oppIds.length > 0) {
       const oppPositions = standings
-        .filter(s => oppIds.includes(Number(s.team_id)))
-        .map(s => Number(s.position));
-      
+        .filter((s) => oppIds.includes(Number(s.team_id)))
+        .map((s) => Number(s.position));
+
       if (oppPositions.length > 0) {
-        const avgOppPosition = oppPositions.reduce((sum, pos) => sum + pos, 0) / oppPositions.length;
-        if (avgOppPosition <= 6) probability -= 12; // Hard schedule
+        const avgOppPosition =
+          oppPositions.reduce((sum, pos) => sum + pos, 0) / oppPositions.length;
+        if (avgOppPosition <= 6)
+          probability -= 12; // Hard schedule
         else if (avgOppPosition >= 13) probability += 12; // Easy schedule
       }
     }
@@ -213,7 +215,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
 
     result[numericTeamId] = Math.round(probability);
   }
-  
+
   return result;
 }
 

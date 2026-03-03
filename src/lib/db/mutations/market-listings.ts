@@ -48,7 +48,7 @@ export function prepareMarketListingMutations(db: DbClient): MarketListingMutati
       `;
       await db.query(sql, [params.player_id, params.listed_at, params.price, params.seller_id]);
     },
-    
+
     /**
      * Deletes listings for a given date that are NO LONGER actively on the market.
      */
@@ -61,25 +61,25 @@ export function prepareMarketListingMutations(db: DbClient): MarketListingMutati
         await db.query(`DELETE FROM market_listings WHERE listed_at = $1`, [listedAt]);
         return;
       }
-      
+
       // Delete any listing for this date that isn't exactly in our active list
       // Since SQL doesn't easily support NOT IN with pairs, we construct the query carefully
       // or we can fetch what's currently there and delete the diff
-      
+
       // Simpler approach for Postgres:
       // DELETE FROM market_listings WHERE listed_at = $1 AND (player_id, COALESCE(seller_id, '')) NOT IN ((p1, s1), (p2, s2)...)
-      
-      const values = activeListings.map(
-        (l) => `(${l.player_id}, '${l.seller_id || ''}')`
-      ).join(', ');
+
+      const values = activeListings
+        .map((l) => `(${l.player_id}, '${l.seller_id || ''}')`)
+        .join(', ');
 
       const sql = `
         DELETE FROM market_listings 
         WHERE listed_at = $1 
           AND (player_id, COALESCE(seller_id, '')) NOT IN (${values})
       `;
-      
+
       await db.query(sql, [listedAt]);
-    }
+    },
   };
 }

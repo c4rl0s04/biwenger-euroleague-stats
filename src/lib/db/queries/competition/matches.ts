@@ -152,7 +152,10 @@ export interface TeamUpcomingMatch {
 /**
  * Get the next upcoming matches for a specific team
  */
-export async function getTeamUpcomingMatches(teamId: number, limit = 3): Promise<TeamUpcomingMatch[]> {
+export async function getTeamUpcomingMatches(
+  teamId: number,
+  limit = 3
+): Promise<TeamUpcomingMatch[]> {
   const nextMatchQuery = `
     SELECT 
       date, 

@@ -281,7 +281,9 @@ export const tournamentFixtures = pgTable(
   'tournament_fixtures',
   {
     id: integer('id').notNull(),
-    tournamentId: integer('tournament_id').references(() => tournaments.id).notNull(),
+    tournamentId: integer('tournament_id')
+      .references(() => tournaments.id)
+      .notNull(),
     phaseId: integer('phase_id').references(() => tournamentPhases.id),
     roundName: text('round_name'),
     roundId: integer('round_id'),
