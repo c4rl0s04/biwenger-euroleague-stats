@@ -2,6 +2,8 @@ import { db } from '../../index';
 import { matches, teams } from '../../schema';
 import { eq, asc, desc, gt, and, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
+import { db as clientDb } from '../../client';
+import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
 
 export async function getMatchesGroupedByRound() {
   const homeTeam = alias(teams, 'homeTeam');
@@ -132,4 +134,41 @@ export async function getRecentResults(limit = 5) {
     .limit(limit);
 
   return rows;
+}
+
+export interface TeamUpcomingMatch {
+  date: string;
+  home_team: string;
+  away_team: string;
+  home_id: number;
+  away_id: number;
+  home_score: number | null;
+  away_score: number | null;
+  round_name: string;
+}
+
+/**
+ * Get the next upcoming matches for a specific team
+ */
+export async function getTeamUpcomingMatches(teamId: number, limit = 3): Promise<TeamUpcomingMatch[]> {
+  const nextMatchQuery = `
+    SELECT 
+      date, 
+      th.name as home_team, 
+      ta.name as away_team,
+      m.home_id,
+      m.away_id,
+      m.home_score,
+      m.away_score,
+      round_name
+    FROM matches m
+    LEFT JOIN teams th ON m.home_id = th.id
+    LEFT JOIN teams ta ON m.away_id = ta.id
+    WHERE (m.home_id = $1 OR m.away_id = $2) 
+      AND ${FUTURE_MATCH_CONDITION('date')} 
+    ORDER BY date ASC 
+    LIMIT $3
+  `;
+  const res = await clientDb.query(nextMatchQuery, [teamId, teamId, limit]);
+  return res.rows;
 }

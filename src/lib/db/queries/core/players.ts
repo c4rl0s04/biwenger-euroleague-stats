@@ -1,7 +1,8 @@
 import { db } from '../../client';
-import { CONFIG } from '../../../config.js';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
-
+import { getPlayerPriceHistory, getPlayerTransfers } from '../features/market';
+import { getTeamUpcomingMatches } from '../competition/matches';
+import { getTeamMatchesCount } from './teams';
 export interface CorePlayer {
   id: number;
   name: string;
@@ -50,12 +51,31 @@ export interface PlayerDetails extends CorePlayer {
   games_played: number;
   season_avg: number;
   total_points: number;
+  team_total_matches: number;
+  player_total_matches: number;
   recentMatches: any[]; // Could type this further if useful
   priceHistory: any[];
   transfers: any[];
   nextMatch: any;
   nextMatches: any[];
   advancedStats: any;
+}
+
+/**
+ * Get total matches played by a player (minutes > 0) in the current season
+ */
+export async function getPlayerMatchesPlayed(playerId: number | string): Promise<number> {
+  const numericPlayerId = Number(playerId);
+  if (isNaN(numericPlayerId)) return 0;
+
+  const query = `
+    SELECT COUNT(DISTINCT round_id) as count
+    FROM player_round_stats
+    WHERE player_id = $1 AND minutes > 0
+  `;
+
+  const res = await db.query(query, [numericPlayerId]);
+  return parseInt(res.rows[0]?.count || '0', 10);
 }
 
 /**
@@ -248,103 +268,24 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
 
   const recentMatches = (await db.query(matchesQuery, [numericPlayerId])).rows;
 
-  // 3. Price History
-  const priceHistoryQuery = `
-    SELECT date, price 
-    FROM market_values 
-    WHERE player_id = $1 
-    ORDER BY date ASC
-  `;
-  const priceHistory = (await db.query(priceHistoryQuery, [numericPlayerId])).rows;
+  // 3. Extracted modular queries
+  const [
+    priceHistory,
+    transfers,
+    nextMatches,
+    team_total_matches,
+    player_total_matches
+  ] = await Promise.all([
+    getPlayerPriceHistory(numericPlayerId),
+    getPlayerTransfers(numericPlayerId),
+    getTeamUpcomingMatches(player.team_id, 3),
+    getTeamMatchesCount(player.team_id),
+    getPlayerMatchesPlayed(numericPlayerId),
+  ]);
 
-  // 4. Ownership History (Transfers)
-  const transfersQuery = `
-    SELECT 
-      f.fecha as date, 
-      f.vendedor as from_name, 
-      f.comprador as to_name, 
-      f.precio as amount,
-      u1.icon as from_img,
-      u2.icon as to_img
-    FROM fichajes f
-    LEFT JOIN users u1 ON f.vendedor = u1.name
-    LEFT JOIN users u2 ON f.comprador = u2.name
-    WHERE f.player_id = $1 
-    ORDER BY f.timestamp DESC
-  `;
-  const transfers = (await db.query(transfersQuery, [numericPlayerId])).rows;
-
-  // Check for Initial Squad Assignment
-  const initialSquadQuery = `
-    SELECT 
-      u.name as owner_name, u.color_index as owner_color_index, 
-      u.icon as owner_img 
-    FROM initial_squads s
-    JOIN users u ON s.user_id = u.id
-    WHERE s.player_id = $1
-  `;
-  const initialOwnerRes = await db.query(initialSquadQuery, [numericPlayerId]);
-  const initialOwner = initialOwnerRes.rows[0];
-
-  if (initialOwner) {
-    let initialDate;
-    try {
-      const LeagueStartDate = new Date(CONFIG.LEAGUE.START_DATE || '');
-      if (!isNaN(LeagueStartDate.getTime())) {
-        initialDate = LeagueStartDate.toISOString();
-      } else {
-        initialDate = new Date().toISOString();
-      }
-    } catch (e) {
-      initialDate = new Date().toISOString();
-    }
-
-    if (transfers.length > 0) {
-      const lastTransfer = transfers[transfers.length - 1];
-      if (lastTransfer && lastTransfer.date) {
-        const oldestTransfer = new Date(lastTransfer.date);
-        if (!isNaN(oldestTransfer.getTime())) {
-          oldestTransfer.setHours(oldestTransfer.getHours() - 24);
-          initialDate = oldestTransfer.toISOString();
-        }
-      }
-    }
-
-    transfers.push({
-      date: initialDate,
-      from_name: 'Biwenger',
-      to_name: initialOwner.owner_name,
-      amount: 0,
-      from_img: null,
-      to_img: initialOwner.owner_img,
-    });
-  }
-
-  // 5. Next Matches
-  // Use Postgres NOW()
-  const nextMatchQuery = `
-    SELECT 
-      date, 
-      th.name as home_team, 
-      ta.name as away_team,
-      m.home_id,
-      m.away_id,
-      m.home_score,
-      m.away_score,
-      round_name
-    FROM matches m
-    LEFT JOIN teams th ON m.home_id = th.id
-    LEFT JOIN teams ta ON m.away_id = ta.id
-    WHERE (m.home_id = $1 OR m.away_id = $2) 
-      AND ${FUTURE_MATCH_CONDITION('date')} 
-    ORDER BY date ASC 
-    LIMIT 3
-  `;
-  const nextMatchRes = await db.query(nextMatchQuery, [player.team_id, player.team_id]);
-  const nextMatches = nextMatchRes.rows;
   const nextMatch = nextMatches[0] || null;
 
-  // 6. Advanced Stats Aggregates (Season Totals)
+  // 4. Advanced Stats Aggregates (Season Totals)
   const advancedStats = recentMatches.reduce(
     (acc: any, m: any) => {
       acc.two_points_made += m.two_points_made || 0;
@@ -373,6 +314,8 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
 
   return {
     ...player,
+    team_total_matches,
+    player_total_matches,
     recentMatches,
     priceHistory,
     transfers,

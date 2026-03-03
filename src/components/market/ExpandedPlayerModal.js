@@ -263,7 +263,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                     <span className="text-sm text-white/80 font-medium">% Asistencia</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-white">
-                        {details.games_played}/{details.recentMatches?.length || 0}
+                        {details.player_total_matches}/{details.team_total_matches}
                       </span>
                       <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase">
                         Partidos
