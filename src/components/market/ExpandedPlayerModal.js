@@ -524,7 +524,6 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               <div className="pt-2">
                 <a
                   href={`/player/${player.player_id}`}
-                  target="_blank"
                   className="flex justify-center items-center w-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 font-bold text-[11px] uppercase tracking-widest py-4 rounded-xl transition-colors group cursor-pointer"
                 >
                   Ver Informe Completo en BiwengerStats
