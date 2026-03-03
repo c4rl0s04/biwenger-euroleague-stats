@@ -1972,40 +1972,44 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     else if (min_points < 0) sueloScore = 0;
     totalScore += sueloScore;
 
-    // - Techo y Promedio (15%)
-    let maxAvgScore = (Math.min(max_points, 40) / 40) * 5 + (Math.min(season_avg, 20) / 20) * 10;
-    totalScore += maxAvgScore;
+    // - Techo (15%) -> High ceilings (30+) get full points
+    let techoScore = Math.min((max_points / 30) * 15, 15);
+    totalScore += techoScore;
+    
+    // - Promedio Absoluto (25%) -> Very important for high tier players like Vezenkov
+    let avgScore = Math.min((season_avg / 16) * 25, 25); // 16+ avg = 25 pts
+    totalScore += avgScore;
 
-    // - Asistencia (10%)
+    // - Asistencia / Disponibilidad (10%)
     let attendanceScore = (Math.min(games_played / Math.max(1, team_games_played), 1)) * 10;
     totalScore += Math.max(0, attendanceScore);
 
-    // - Rentabilidad (15%)
-    let profitabilityScore = Math.min(value_score / 35, 1) * 15;
+    // - Rentabilidad / Value (10%)
+    let profitabilityScore = Math.min(value_score / 35, 1) * 10;
     totalScore += Math.max(0, profitabilityScore);
 
-    // - Flujo Diario (10%)
-    let trendScore = 5; // neutral
-    if (price_trend > 50000) trendScore = 10;
-    else if (price_trend > 0) trendScore = 8;
+    // - Flujo Diario (5%)
+    let trendScore = 2; // neutral
+    if (price_trend > 50000) trendScore = 5;
+    else if (price_trend > 0) trendScore = 4;
     else if (price_trend < -50000) trendScore = 0;
-    else if (price_trend < 0) trendScore = 2;
+    else if (price_trend < 0) trendScore = 1;
     totalScore += trendScore;
 
-    // - Momento de Forma (20%)
-    let formScore = 10; // neutral
+    // - Momento de Forma (15%)
+    let formScore = 7.5; // neutral
     const formDiff = avg_recent_points - season_avg;
-    if (games_played < 3) formScore = 5; // penalize too little data
-    else if (formDiff >= 6) formScore = 20;
-    else if (formDiff >= 3) formScore = 16;
-    else if (formDiff >= 0) formScore = 12;
-    else if (formDiff > -3) formScore = 8;
-    else if (formDiff > -6) formScore = 4;
+    if (games_played < 3) formScore = 5;
+    else if (avg_recent_points >= 18 || formDiff >= 6) formScore = 15;
+    else if (avg_recent_points >= 14 || formDiff >= 3) formScore = 12;
+    else if (formDiff >= 0) formScore = 9;
+    else if (formDiff > -3) formScore = 6;
+    else if (formDiff > -6) formScore = 3;
     else formScore = 0;
     totalScore += formScore;
 
-    // - Contexto Equipo (20%), implicitly includes playoff prob and calendar
-    let teamContextScore = (team_prob / 100) * 20;
+    // - Contexto Equipo (10%), implicitly includes playoff prob and calendar
+    let teamContextScore = (team_prob / 100) * 10;
     totalScore += teamContextScore;
 
     // 3. Final Score
@@ -2016,7 +2020,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     let rec_dot = 'bg-rose-400';
     let rec_icon = 'TrendingDown';
 
-    if (finalScore >= 90) {
+    if (finalScore >= 85) {
       rec_label = 'Fichaje Obligatorio';
       rec_color = 'bg-fuchsia-500/15 text-fuchsia-400 border-fuchsia-500/30';
       rec_dot = 'bg-fuchsia-400';

@@ -74,7 +74,21 @@ export async function run(manager: SyncManager): Promise<void> {
       upserted++;
     }
 
-    manager.log(`✅ Market listings synced: ${upserted} upserted, ${skipped} skipped.`);
+    // Now delete any listings for today that are NO LONGER on the market (e.g. they were bought or expired)
+    const activeListings = items
+      .map(item => {
+        const pId = typeof item.player === 'object' ? item.player?.id : item.player;
+        const sId = item.user?.id ? String(item.user.id) : null;
+        return { player_id: pId, seller_id: sId };
+      })
+      .filter((l): l is { player_id: number; seller_id: string | null } => 
+        typeof l.player_id === 'number' && !isNaN(l.player_id)
+      );
+      
+    manager.log(`   > Cleaning up any stale listings for today...`);
+    await mutations.deleteStaleMarketListings(marketDate, activeListings);
+
+    manager.log(`✅ Market listings synced: ${upserted} upserted, ${skipped} skipped. Stale listings removed.`);
   } catch (error) {
     manager.log(`❌ Error syncing market listings: ${error}`);
     throw error;
