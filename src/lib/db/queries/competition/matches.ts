@@ -140,6 +140,8 @@ export interface TeamUpcomingMatch {
   date: string;
   home_team: string;
   away_team: string;
+  home_img: string;
+  away_img: string;
   home_id: number;
   away_id: number;
   home_score: number | null;
@@ -156,6 +158,8 @@ export async function getTeamUpcomingMatches(teamId: number, limit = 3): Promise
       date, 
       th.name as home_team, 
       ta.name as away_team,
+      th.img as home_img,
+      ta.img as away_img,
       m.home_id,
       m.away_id,
       m.home_score,
