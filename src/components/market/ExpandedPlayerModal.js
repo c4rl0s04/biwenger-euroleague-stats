@@ -109,10 +109,15 @@ export default function ExpandedPlayerModal({ player, onClose }) {
   // Ensure we always map 3 blocks even if empty
   const calendarBlocks = [0, 1, 2].map((i) => nextMatches[i] || null);
 
-  // Suggested Purchase
-  const targetPrice = Math.round(
-    player.price * (player.value_score > 20 ? 1.15 : player.value_score > 15 ? 1.05 : 0.95)
-  );
+  // Suggested Purchase based on the new recommendation score
+  let multiplier = 0.95; // Default lower target (Compra Arriesgada / Evitar)
+  if (player.recommendation_score >= 90)
+    multiplier = 1.3; // Fichaje Obligatorio
+  else if (player.recommendation_score >= 75)
+    multiplier = 1.15; // Compra Excelente
+  else if (player.recommendation_score >= 50) multiplier = 1.05; // Compra Normal
+
+  const targetPrice = Math.round(player.price * multiplier);
 
   const modalContent = (
     <motion.div

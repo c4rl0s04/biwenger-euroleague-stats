@@ -1,3 +1,4 @@
+import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '../core/teams';
 import { db } from '../../client';
 
 // ==========================================
@@ -1875,7 +1876,9 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
         player_id,
         (SELECT COUNT(*) FROM player_round_stats WHERE player_id = prs.player_id) as games_played,
         ROUND(AVG(fantasy_points), 1) as season_avg,
-        SUM(fantasy_points) as total_points
+        SUM(fantasy_points) as total_points,
+        MIN(fantasy_points) as min_points,
+        MAX(fantasy_points) as max_points
       FROM player_round_stats prs
       GROUP BY player_id
     ),
@@ -1917,6 +1920,9 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       ROUND(COALESCE(pf.avg_recent_points, 0) * 1000000.0 / NULLIF(ml.price, 0), 2) as value_score,
       COALESCE(pt.total_points, 0) as total_points,
       COALESCE(pt.season_avg, 0) as season_avg,
+      pt.min_points,
+      pt.max_points,
+      pt.games_played,
       ml.seller_id,
       u.name as seller_name,
       u.icon as seller_icon,
@@ -1937,13 +1943,125 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     ORDER BY value_score DESC NULLS LAST, price_trend DESC, ml.price DESC
   `;
 
-  return (await db.query(query)).rows.map((row: any) => ({
-    ...row,
-    price: parseInt(row.price),
-    price_trend: parseInt(row.price_trend),
-    avg_recent_points: parseFloat(row.avg_recent_points) || 0,
-    value_score: parseFloat(row.value_score) || 0,
-    total_points: parseFloat(row.total_points) || 0,
-    season_avg: parseFloat(row.season_avg) || 0,
-  }));
+  const [teamPlayoffProbs, teamMatchCounts] = await Promise.all([
+    getAllTeamsPlayoffProbabilities(),
+    getAllTeamMatchesCount()
+  ]);
+
+  const rows = (await db.query(query)).rows;
+
+  const mappedRows = rows.map((row: any) => {
+    // 1. Raw Stats
+    const min_points = parseInt(row.min_points) || 0;
+    const max_points = parseInt(row.max_points) || 0;
+    const games_played = parseInt(row.games_played) || 0;
+    const team_games_played = teamMatchCounts[parseInt(row.team_id)] || 1;
+    const season_avg = parseFloat(row.season_avg) || 0;
+    const avg_recent_points = parseFloat(row.avg_recent_points) || 0;
+    const value_score = parseFloat(row.value_score) || 0;
+    const price_trend = parseInt(row.price_trend) || 0;
+    const team_prob = teamPlayoffProbs[parseInt(row.team_id)] || 50;
+
+    let totalScore = 0;
+
+    // 2. Algorithm Weights
+    // - Suelo (10%)
+    let sueloScore = 0;
+    if (min_points >= 10) sueloScore = 10;
+    else if (min_points > 0) sueloScore = min_points;
+    else if (min_points < 0) sueloScore = 0;
+    totalScore += sueloScore;
+
+    // - Techo y Promedio (15%)
+    let maxAvgScore = (Math.min(max_points, 40) / 40) * 5 + (Math.min(season_avg, 20) / 20) * 10;
+    totalScore += maxAvgScore;
+
+    // - Asistencia (10%)
+    let attendanceScore = (Math.min(games_played / Math.max(1, team_games_played), 1)) * 10;
+    totalScore += Math.max(0, attendanceScore);
+
+    // - Rentabilidad (15%)
+    let profitabilityScore = Math.min(value_score / 35, 1) * 15;
+    totalScore += Math.max(0, profitabilityScore);
+
+    // - Flujo Diario (10%)
+    let trendScore = 5; // neutral
+    if (price_trend > 50000) trendScore = 10;
+    else if (price_trend > 0) trendScore = 8;
+    else if (price_trend < -50000) trendScore = 0;
+    else if (price_trend < 0) trendScore = 2;
+    totalScore += trendScore;
+
+    // - Momento de Forma (20%)
+    let formScore = 10; // neutral
+    const formDiff = avg_recent_points - season_avg;
+    if (games_played < 3) formScore = 5; // penalize too little data
+    else if (formDiff >= 6) formScore = 20;
+    else if (formDiff >= 3) formScore = 16;
+    else if (formDiff >= 0) formScore = 12;
+    else if (formDiff > -3) formScore = 8;
+    else if (formDiff > -6) formScore = 4;
+    else formScore = 0;
+    totalScore += formScore;
+
+    // - Contexto Equipo (20%), implicitly includes playoff prob and calendar
+    let teamContextScore = (team_prob / 100) * 20;
+    totalScore += teamContextScore;
+
+    // 3. Final Score
+    const finalScore = Math.round(Math.max(0, Math.min(100, totalScore)));
+
+    let rec_label = 'Evitar';
+    let rec_color = 'bg-rose-500/15 text-rose-400 border-rose-500/30';
+    let rec_dot = 'bg-rose-400';
+    let rec_icon = 'TrendingDown';
+
+    if (finalScore >= 90) {
+      rec_label = 'Fichaje Obligatorio';
+      rec_color = 'bg-fuchsia-500/15 text-fuchsia-400 border-fuchsia-500/30';
+      rec_dot = 'bg-fuchsia-400';
+      rec_icon = 'Star';
+    } else if (finalScore >= 75) {
+      rec_label = 'Compra Excelente';
+      rec_color = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      rec_dot = 'bg-emerald-400';
+      rec_icon = 'TrendingUp';
+    } else if (finalScore >= 50) {
+      rec_label = 'Compra Normal';
+      rec_color = 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+      rec_dot = 'bg-amber-400';
+      rec_icon = 'Activity';
+    } else if (finalScore >= 30) {
+      rec_label = 'Compra Arriesgada';
+      rec_color = 'bg-orange-500/15 text-orange-400 border-orange-500/30';
+      rec_dot = 'bg-orange-400';
+      rec_icon = 'TrendingDown';
+    }
+
+    return {
+      ...row,
+      price: parseInt(row.price),
+      price_trend,
+      avg_recent_points,
+      value_score,
+      total_points: parseFloat(row.total_points) || 0,
+      season_avg,
+      recommendation_score: finalScore,
+      recommendation_label: rec_label,
+      recommendation_color: rec_color,
+      recommendation_dot: rec_dot,
+      recommendation_icon: rec_icon
+    };
+  });
+
+  // Sort by the new advanced algorithm score descending, then by price trend, then by price
+  return mappedRows.sort((a, b) => {
+    if (b.recommendation_score !== a.recommendation_score) {
+      return b.recommendation_score - a.recommendation_score;
+    }
+    if (b.price_trend !== a.price_trend) {
+      return b.price_trend - a.price_trend;
+    }
+    return b.price - a.price;
+  });
 }

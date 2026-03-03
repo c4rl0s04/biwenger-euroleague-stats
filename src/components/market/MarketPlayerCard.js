@@ -5,6 +5,35 @@ import { motion } from 'framer-motion';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 function getPurchaseHeuristic(player) {
+  // Use the advanced 0-100 algorithm recommendation from backend if available
+  if (player.recommendation_label) {
+    const icons = { TrendingUp, TrendingDown, Star, Activity };
+    const IconCmp = icons[player.recommendation_icon] || Activity;
+
+    // Extract base color name (e.g. 'fuchsia', 'emerald', 'amber', 'orange', 'rose')
+    const colorMatch = player.recommendation_color?.match(/(?:bg|text|border)-([a-z]+)-/);
+    const baseColor = colorMatch ? colorMatch[1] : 'gray';
+
+    // Map explicit Tailwind classes so they aren't purged
+    const accentMap = {
+      fuchsia: 'via-fuchsia-500/60',
+      emerald: 'via-emerald-500/60',
+      amber: 'via-amber-500/60',
+      orange: 'via-orange-500/60',
+      rose: 'via-rose-500/60',
+    };
+
+    return {
+      label: player.recommendation_label,
+      score: player.recommendation_score,
+      color: player.recommendation_color,
+      accent: accentMap[baseColor] || 'via-gray-500/60',
+      dot: player.recommendation_dot,
+      icon: <IconCmp size={11} className="mr-1" />,
+    };
+  }
+
+  // Legacy fallback
   const { value_score, price_trend } = player;
   if (value_score > 30 && price_trend > 0) {
     return {
