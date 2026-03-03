@@ -87,7 +87,6 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, o
 
   return (
     <motion.div
-      layoutId={`player-card-${player.player_id}`}
       className={`relative group perspective-[1000px] hover:-translate-y-0.5 transition-transform duration-300 ${isExpanded ? 'z-50' : 'z-10'}`}
     >
       <motion.div

@@ -125,14 +125,17 @@ export default function ExpandedPlayerModal({ player, onClose }) {
       style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
       <motion.div
-        layoutId={`player-card-${player.player_id}`}
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
         onClick={(e) => e.stopPropagation()}
         className="bg-[#0b0c10] border border-white/10 rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] relative"
       >
         <div className="absolute top-4 right-4 z-20">
           <button
             onClick={onClose}
-            className="bg-black/40 backdrop-blur-md p-2 rounded-full hover:bg-white/20 text-white transition-colors border border-white/10"
+            className="bg-black/40 backdrop-blur-md p-2 rounded-full hover:bg-white/20 text-white transition-colors border border-white/10 cursor-pointer"
           >
             <X size={18} />
           </button>
