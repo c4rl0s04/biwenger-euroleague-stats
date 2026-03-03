@@ -259,21 +259,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       )}
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-white/80 font-medium">Promedio Puntos</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-white tabular-nums">
-                        {details.season_avg !== undefined && details.season_avg !== null
-                          ? Number(details.season_avg).toFixed(1)
-                          : player.average !== undefined
-                            ? Number(player.average).toFixed(1)
-                            : '-'}
-                      </span>
-                      <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase">
-                        Pts/Part
-                      </span>
-                    </div>
-                  </div>
+
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-sm text-white/80 font-medium">% Asistencia</span>
                     <div className="flex items-center gap-2">
@@ -323,10 +309,25 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                   <h4 className="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center mb-4">
                     <BarChart3 size={12} className="mr-1.5" /> Fiabilidad Biwenger
                   </h4>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm text-white/80 font-medium">Promedio Puntos</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white tabular-nums">
+                        {details.season_avg !== undefined && details.season_avg !== null
+                          ? Number(details.season_avg).toFixed(1)
+                          : player.average !== undefined
+                            ? Number(player.average).toFixed(1)
+                            : '-'}
+                      </span>
+                      <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase">
+                        Pts/Part
+                      </span>
+                    </div>
+                  </div>
                   <div className="flex items-end justify-between gap-4 mt-2">
                     <div className="flex-1 flex flex-col items-center bg-rose-500/5 border border-rose-500/10 rounded-lg p-3">
                       <span className="text-[10px] text-rose-400/70 font-bold uppercase tracking-wider mb-1">
-                        Suelo (Peor)
+                        Suelo
                       </span>
                       <span className="text-2xl font-black text-rose-400 leading-none">
                         {floor}
@@ -334,7 +335,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                     </div>
                     <div className="flex-1 flex flex-col items-center bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-3">
                       <span className="text-[10px] text-emerald-400/70 font-bold uppercase tracking-wider mb-1">
-                        Techo (Mejor)
+                        Techo
                       </span>
                       <span className="text-2xl font-black text-emerald-400 leading-none">
                         {ceiling}
