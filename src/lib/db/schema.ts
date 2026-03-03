@@ -9,6 +9,7 @@ import {
   bigint,
   date,
   unique,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 // 1. Users Table
@@ -279,8 +280,8 @@ export const tournamentPhases = pgTable(
 export const tournamentFixtures = pgTable(
   'tournament_fixtures',
   {
-    id: integer('id').primaryKey(),
-    tournamentId: integer('tournament_id').references(() => tournaments.id),
+    id: integer('id').notNull(),
+    tournamentId: integer('tournament_id').references(() => tournaments.id).notNull(),
     phaseId: integer('phase_id').references(() => tournamentPhases.id),
     roundName: text('round_name'),
     roundId: integer('round_id'),
@@ -293,7 +294,7 @@ export const tournamentFixtures = pgTable(
     status: text('status'),
   },
   (t) => ({
-    unq_tournament_fixture: unique('unique_tournament_fixture').on(t.tournamentId, t.id),
+    pk: primaryKey({ columns: [t.tournamentId, t.id] }),
   })
 );
 
