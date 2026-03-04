@@ -1,4 +1,4 @@
-import { fetchMarketListings } from './src/api/biwenger-client';
+import { fetchMarketListings } from './src/lib/api/biwenger-client';
 import { db } from './src/lib/db/client';
 
 async function check() {

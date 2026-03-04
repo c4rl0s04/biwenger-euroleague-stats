@@ -14,6 +14,7 @@ export interface CurrentMarketListing {
   team: string | null;
   team_img: string | null;
   price: number;
+  real_price: number;
   price_trend: number;
   avg_recent_points: number;
   recent_scores: string;
@@ -1914,6 +1915,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       t.name as team,
       t.img as team_img,
       ml.price,
+      p.price as real_price,
       COALESCE(p.price_increment, 0) as price_trend,
       COALESCE(pf.avg_recent_points, 0) as avg_recent_points,
       pf.recent_scores,

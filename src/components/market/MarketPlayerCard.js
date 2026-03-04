@@ -229,12 +229,18 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
         {/* Price */}
         <div className="flex flex-col items-center">
           <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mb-0.5">
-            Precio
+            Precio en Mercado
           </p>
           <p className="text-2xl font-bold text-white tabular-nums leading-none">
             {new Intl.NumberFormat('es-ES').format(player.price)}
             <span className="text-base text-white/40 font-normal ml-1">€</span>
           </p>
+          {player.real_price != null && (
+            <p className="text-xs text-white/40 tabular-nums leading-none mt-1.5">
+              Valor real: {new Intl.NumberFormat('es-ES').format(player.real_price)}
+              <span className="text-white/25 ml-0.5">€</span>
+            </p>
+          )}
         </div>
 
         {/* Form */}
