@@ -26,13 +26,7 @@ export async function run(manager: SyncManager): Promise<void> {
     // Each entry shape (observed): { player: { id, name, ... }, price, user: { id, name } | null }
     const items: any[] = response?.data?.sales ?? [];
 
-    console.log('\n--- DEBUG MARKET RESPONSE ---');
-    console.log('Total items fetched:', items?.length);
-    console.log(
-      'First 2 raw items from payload to verify structure:',
-      JSON.stringify(items?.slice(0, 2), null, 2)
-    );
-    console.log('-----------------------------\n');
+
 
     if (!Array.isArray(items) || items.length === 0) {
       manager.log('   > No players currently listed on the market.');
@@ -67,9 +61,6 @@ export async function run(manager: SyncManager): Promise<void> {
         seller_id: sellerId,
       });
 
-      console.log(
-        `[DEBUG Syncing] Valid Player: ID=${playerId} | Price=${price} | Seller=${sellerId || 'Biwenger System'}`
-      );
 
       upserted++;
     }
