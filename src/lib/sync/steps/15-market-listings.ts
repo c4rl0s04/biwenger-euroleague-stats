@@ -26,8 +26,6 @@ export async function run(manager: SyncManager): Promise<void> {
     // Each entry shape (observed): { player: { id, name, ... }, price, user: { id, name } | null }
     const items: any[] = response?.data?.sales ?? [];
 
-
-
     if (!Array.isArray(items) || items.length === 0) {
       manager.log('   > No players currently listed on the market.');
       return;
@@ -60,7 +58,6 @@ export async function run(manager: SyncManager): Promise<void> {
         price,
         seller_id: sellerId,
       });
-
 
       upserted++;
     }
