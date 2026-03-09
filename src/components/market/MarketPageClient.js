@@ -28,6 +28,9 @@ import TheThiefCard from './stats/TheThiefCard';
 import BiggestStealCard from './stats/BiggestStealCard';
 import TheVictimCard from './stats/TheVictimCard';
 import OverpayerManagerCard from './stats/OverpayerManagerCard';
+import BiddingDuelsMatrixCard from './stats/BiddingDuelsMatrixCard';
+import HottestRivalryCard from './stats/HottestRivalryCard';
+import BiggestDominanceCard from './stats/BiggestDominanceCard';
 import MarketTrendsChart from './stats/MarketTrendsChart';
 import PositionAnalysisGrid from './stats/PositionAnalysisGrid';
 import LiveMarketTable from './LiveMarketTable';
@@ -138,6 +141,20 @@ export default function MarketPageClient() {
               <TheThiefCard data={marketStats.theThief} />
               <TheVictimCard data={marketStats.theVictim} />
               <OverpayerManagerCard data={marketStats.overpayerManager} />
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-6 xl:items-stretch items-start">
+              <div className="xl:col-span-2 h-full">
+                <BiddingDuelsMatrixCard data={marketStats.biddingDuels} />
+              </div>
+              <div className="h-full flex flex-col gap-6">
+                <div className="flex-1">
+                  <HottestRivalryCard data={marketStats.biddingDuels?.hottestRivalry} />
+                </div>
+                <div className="flex-1">
+                  <BiggestDominanceCard data={marketStats.biddingDuels?.biggestDominance} />
+                </div>
+              </div>
             </div>
           </div>
 

@@ -244,6 +244,48 @@ export interface InflatedPlayer {
   avg_inflation: number;
 }
 
+export interface BidDuelUser {
+  id: number;
+  name: string;
+  icon: string | null;
+  color_index: number | null;
+}
+
+export interface BidDuelRecord {
+  wins: number;
+  losses: number;
+  duels: number;
+  total_margin: number;
+  avg_margin: number;
+}
+
+export interface BidDuelSummary {
+  user1_id: number;
+  user1_name: string;
+  user1_icon: string | null;
+  user1_color_index: number | null;
+  user2_id: number;
+  user2_name: string;
+  user2_icon: string | null;
+  user2_color_index: number | null;
+  wins1: number;
+  wins2: number;
+  duels: number;
+  total_margin: number;
+  avg_margin: number;
+  leader_id: number | null;
+  leader_name: string | null;
+  trailer_id: number | null;
+  trailer_name: string | null;
+}
+
+export interface BiddingDuelsStats {
+  users: BidDuelUser[];
+  matrix: Record<number, Record<number, BidDuelRecord>>;
+  hottestRivalry: BidDuelSummary | null;
+  biggestDominance: BidDuelSummary | null;
+}
+
 export interface SingleFlip {
   user_id: number;
   user_name: string;
@@ -1471,6 +1513,186 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
     total_inflation: parseInt(row.total_inflation),
     avg_inflation: parseFloat(row.avg_inflation),
   }));
+}
+
+/**
+ * Get bidding duels matrix and rivalry summaries
+ * Uses winner vs second-best bidder as the cleanest definition of a direct auction duel.
+ */
+export async function getBiddingDuelsStats(): Promise<BiddingDuelsStats> {
+  const [usersResult, duelsResult] = await Promise.all([
+    db.query('SELECT id, name, icon, color_index FROM users ORDER BY name ASC'),
+    db.query(`
+      SELECT
+        winner.id as winner_id,
+        winner.name as winner_name,
+        winner.icon as winner_icon,
+        winner.color_index as winner_color_index,
+        runner.id as runner_id,
+        runner.name as runner_name,
+        runner.icon as runner_icon,
+        runner.color_index as runner_color_index,
+        (f.precio - second_bid.amount) as margin
+      FROM fichajes f
+      JOIN users winner ON winner.name = f.comprador
+      JOIN LATERAL (
+        SELECT tb.bidder_name, tb.amount
+        FROM transfer_bids tb
+        WHERE tb.transfer_id = f.id
+          AND tb.bidder_name != f.comprador
+          AND tb.amount < f.precio
+        ORDER BY tb.amount DESC
+        LIMIT 1
+      ) second_bid ON true
+      JOIN users runner ON runner.name = second_bid.bidder_name
+      WHERE f.comprador != 'Mercado'
+    `),
+  ]);
+
+  const users = usersResult.rows.map((user: any) => ({
+    id: parseInt(user.id),
+    name: user.name,
+    icon: user.icon,
+    color_index: user.color_index !== null ? parseInt(user.color_index) : null,
+  }));
+
+  const matrix: Record<number, Record<number, BidDuelRecord>> = {};
+  users.forEach((user) => {
+    matrix[user.id] = {};
+    users.forEach((opponent) => {
+      if (user.id !== opponent.id) {
+        matrix[user.id][opponent.id] = {
+          wins: 0,
+          losses: 0,
+          duels: 0,
+          total_margin: 0,
+          avg_margin: 0,
+        };
+      }
+    });
+  });
+
+  const pairMap = new Map<string, BidDuelSummary>();
+
+  duelsResult.rows.forEach((duel: any) => {
+    const winnerId = parseInt(duel.winner_id);
+    const runnerId = parseInt(duel.runner_id);
+    const margin = parseInt(duel.margin) || 0;
+
+    if (!matrix[winnerId] || !matrix[runnerId]) return;
+
+    matrix[winnerId][runnerId].wins += 1;
+    matrix[winnerId][runnerId].duels += 1;
+    matrix[winnerId][runnerId].total_margin += margin;
+
+    matrix[runnerId][winnerId].losses += 1;
+    matrix[runnerId][winnerId].duels += 1;
+    matrix[runnerId][winnerId].total_margin += margin;
+
+    const user1Id = Math.min(winnerId, runnerId);
+    const user2Id = Math.max(winnerId, runnerId);
+    const pairKey = `${user1Id}-${user2Id}`;
+
+    if (!pairMap.has(pairKey)) {
+      const lowerUser = user1Id === winnerId ? duel.winner_name : duel.runner_name;
+      const higherUser = user2Id === winnerId ? duel.winner_name : duel.runner_name;
+      const lowerIcon = user1Id === winnerId ? duel.winner_icon : duel.runner_icon;
+      const higherIcon = user2Id === winnerId ? duel.winner_icon : duel.runner_icon;
+      const lowerColor = user1Id === winnerId ? duel.winner_color_index : duel.runner_color_index;
+      const higherColor = user2Id === winnerId ? duel.winner_color_index : duel.runner_color_index;
+
+      pairMap.set(pairKey, {
+        user1_id: user1Id,
+        user1_name: lowerUser,
+        user1_icon: lowerIcon,
+        user1_color_index: lowerColor !== null ? parseInt(lowerColor) : null,
+        user2_id: user2Id,
+        user2_name: higherUser,
+        user2_icon: higherIcon,
+        user2_color_index: higherColor !== null ? parseInt(higherColor) : null,
+        wins1: 0,
+        wins2: 0,
+        duels: 0,
+        total_margin: 0,
+        avg_margin: 0,
+        leader_id: null,
+        leader_name: null,
+        trailer_id: null,
+        trailer_name: null,
+      });
+    }
+
+    const pair = pairMap.get(pairKey)!;
+    pair.duels += 1;
+    pair.total_margin += margin;
+
+    if (winnerId === pair.user1_id) pair.wins1 += 1;
+    else pair.wins2 += 1;
+  });
+
+  Object.values(matrix).forEach((opponents) => {
+    Object.values(opponents).forEach((record) => {
+      if (record.duels > 0) {
+        record.avg_margin = record.total_margin / record.duels;
+      }
+    });
+  });
+
+  const pairs = Array.from(pairMap.values()).map((pair) => {
+    const avg_margin = pair.duels > 0 ? pair.total_margin / pair.duels : 0;
+    let leader_id: number | null = null;
+    let leader_name: string | null = null;
+    let trailer_id: number | null = null;
+    let trailer_name: string | null = null;
+
+    if (pair.wins1 > pair.wins2) {
+      leader_id = pair.user1_id;
+      leader_name = pair.user1_name;
+      trailer_id = pair.user2_id;
+      trailer_name = pair.user2_name;
+    } else if (pair.wins2 > pair.wins1) {
+      leader_id = pair.user2_id;
+      leader_name = pair.user2_name;
+      trailer_id = pair.user1_id;
+      trailer_name = pair.user1_name;
+    }
+
+    return {
+      ...pair,
+      avg_margin,
+      leader_id,
+      leader_name,
+      trailer_id,
+      trailer_name,
+    };
+  });
+
+  const hottestRivalry =
+    pairs.length > 0
+      ? [...pairs].sort((a, b) => {
+          if (b.duels !== a.duels) return b.duels - a.duels;
+          return a.avg_margin - b.avg_margin;
+        })[0]
+      : null;
+
+  const biggestDominance =
+    pairs.length > 0
+      ? [...pairs]
+          .filter((pair) => pair.duels >= 2)
+          .sort((a, b) => {
+            const diffA = Math.abs(a.wins1 - a.wins2);
+            const diffB = Math.abs(b.wins1 - b.wins2);
+            if (diffB !== diffA) return diffB - diffA;
+            return b.duels - a.duels;
+          })[0] || null
+      : null;
+
+  return {
+    users,
+    matrix,
+    hottestRivalry,
+    biggestDominance,
+  };
 }
 
 /**
