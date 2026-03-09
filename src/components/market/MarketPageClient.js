@@ -124,28 +124,35 @@ export default function MarketPageClient() {
         </div>
       </Section>
 
-      {/* Section: Pujas */}
-      <Section title="Pujas y Subastas" delay={200} background="section-raised">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <TheThiefCard data={marketStats.theThief} />
-          <BiggestStealCard data={marketStats.biggestSteal} />
-          <RecordBidCard record={marketStats.recordBid} />
-          <TheVictimCard data={marketStats.theVictim} />
-          <MostOwnersCard player={marketStats.mostOwners} />
-          <TopTransferredCard player={marketStats.topPlayer} />
-        </div>
-      </Section>
-
-      {/* 2d. The Flop Section (Optional or End) */}
-      {marketStats.worstValue && (
-        <Section delay={220}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-start-2">
-              <WorstValueCard player={marketStats.worstValue} />
+      {/* Section: Pujas + Mercado competitivo */}
+      <Section title="Pujas y Pulso del Mercado" delay={200} background="section-raised">
+        <div className="space-y-8">
+          <div>
+            <Subheading
+              title="Managers en la Subasta"
+              subtitle="Quién roba más operaciones disputadas y quién más veces se queda a las puertas"
+            />
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <TheThiefCard data={marketStats.theThief} />
+              <TheVictimCard data={marketStats.theVictim} />
             </div>
           </div>
-        </Section>
-      )}
+
+          <div>
+            <Subheading
+              title="Jugadores Bajo el Martillo"
+              subtitle="Los nombres que concentran pujas, rotación, robos ajustados y también grandes decepciones"
+            />
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+              <RecordBidCard record={marketStats.recordBid} />
+              <BiggestStealCard data={marketStats.biggestSteal} />
+              <TopTransferredCard player={marketStats.topPlayer} />
+              <MostOwnersCard player={marketStats.mostOwners} />
+              {marketStats.worstValue && <WorstValueCard player={marketStats.worstValue} />}
+            </div>
+          </div>
+        </div>
+      </Section>
 
       {/* 3. Charts Section */}
       <Section title="Tendencias y Análisis" delay={200} background="section-base">
