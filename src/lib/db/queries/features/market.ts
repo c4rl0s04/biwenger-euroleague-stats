@@ -1005,6 +1005,9 @@ export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
       GROUP BY f.vendedor
     )
     SELECT 
+      u.id as user_id,
+      u.icon as user_icon,
+      u.color_index as color_index,
       COALESCE(p.user_name, s.user_name) as user_name,
       COALESCE(p.count, 0) as purchases_count,
       COALESCE(p.total, 0) as purchases_total,
@@ -1012,11 +1015,15 @@ export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
       COALESCE(s.total, 0) as sales_total
     FROM purchases p
     FULL OUTER JOIN sales s ON p.user_name = s.user_name
+    JOIN users u ON u.name = COALESCE(p.user_name, s.user_name)
     ORDER BY (COALESCE(s.total, 0) - COALESCE(p.total, 0)) DESC
   `;
 
   const result = await db.query(query);
   return result.rows.map((r: any) => ({
+    user_id: r.user_id,
+    user_icon: r.user_icon,
+    color_index: r.color_index,
     user_name: r.user_name,
     purchases_count: parseInt(r.purchases_count),
     purchases_total: parseInt(r.purchases_total),

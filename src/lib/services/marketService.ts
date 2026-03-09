@@ -185,7 +185,7 @@ export async function fetchMarketStats() {
     recordBid: enrichedRecordBid,
     trends,
     positionStats,
-    managerStats,
+    managerStats, // Ya contiene user_id, user_icon, color_index
     bestSeller: enrichedBestSeller,
     bestRevaluation,
     bestValue,

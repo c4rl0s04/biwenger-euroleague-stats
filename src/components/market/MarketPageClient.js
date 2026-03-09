@@ -211,16 +211,11 @@ export default function MarketPageClient() {
 
       {/* 4. Live Market & Finances Section */}
       <Section title="Mercado y Fichajes" delay={300} background="section-raised">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Finances Column */}
-          <div className="xl:col-span-1">
-            <ManagerFinancesTable stats={marketStats.managerStats} />
-          </div>
-
-          {/* Live Market Column */}
-          <div className="xl:col-span-2">
-            <LiveMarketTable />
-          </div>
+        <div className="flex flex-col gap-8">
+          {/* Finanzas Managers arriba */}
+          <ManagerFinancesTable stats={marketStats.managerStats} />
+          {/* Mercado en Vivo debajo */}
+          <LiveMarketTable />
         </div>
       </Section>
     </div>
