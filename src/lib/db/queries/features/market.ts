@@ -985,17 +985,24 @@ export async function getLiveMarketTransfers({
  */
 export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
   const query = `
-    WITH purchases AS (
-      SELECT comprador as user_name, COUNT(*) as count, SUM(precio) as total 
-      FROM fichajes 
-      WHERE comprador != 'Mercado' 
-      GROUP BY comprador
+    WITH managers AS (
+      SELECT DISTINCT name as user_name
+      FROM users
+      WHERE name IS NOT NULL
+    ),
+    purchases AS (
+      SELECT f.comprador as user_name, COUNT(*) as count, SUM(f.precio) as total 
+      FROM fichajes f
+      JOIN managers m ON m.user_name = f.comprador
+      WHERE f.comprador != 'Mercado' 
+      GROUP BY f.comprador
     ),
     sales AS (
-      SELECT vendedor as user_name, COUNT(*) as count, SUM(precio) as total 
-      FROM fichajes 
-      WHERE vendedor != 'Mercado' 
-      GROUP BY vendedor
+      SELECT f.vendedor as user_name, COUNT(*) as count, SUM(f.precio) as total 
+      FROM fichajes f
+      JOIN managers m ON m.user_name = f.vendedor
+      WHERE f.vendedor != 'Mercado' 
+      GROUP BY f.vendedor
     )
     SELECT 
       COALESCE(p.user_name, s.user_name) as user_name,

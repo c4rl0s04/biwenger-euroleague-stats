@@ -19,6 +19,12 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
 
   // Initialize Mutations
   const mutations = prepareMarketMutations(db as any);
+  const usersResult = await (db as any).query(
+    "SELECT name FROM users WHERE name IS NOT NULL AND TRIM(name) != ''"
+  );
+  const validUserNames = new Set(
+    usersResult.rows.map((row: any) => row.name).filter((name: string | null) => Boolean(name))
+  );
 
   manager.log('Fetching full board history...');
 
@@ -28,6 +34,9 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
   let totalTransfers = 0;
   let totalPorras = 0;
   let totalFinances = 0;
+  let transfersWithMissingPlayer = 0;
+  let skippedInvalidActorTransfers = 0;
+  const teamNames = new Set(Object.values(teams).map((team: any) => team.name));
 
   // Helper to get league ID for raw fetch
   const leagueId = CONFIG.API.LEAGUE_ID;
@@ -141,11 +150,7 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
         const timestamp = t.date;
         const date = new Date(timestamp * 1000).toISOString();
         const playerId = content.player;
-
-        // Check if player exists, if not skip
-        if (!playersList[playerId]) {
-          continue;
-        }
+        const hasResolvedPlayer = Boolean(playersList[playerId]);
 
         // Determine From/To names safely
         let fromName = 'Mercado';
@@ -158,8 +163,19 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
         if (fromName === 'Mercado' && toName === 'Mercado') continue;
 
         // FILTER 2: Skip Real Teams
-        const teamNames = new Set(Object.values(teams).map((t: any) => t.name));
         if (teamNames.has(fromName) || teamNames.has(toName)) continue;
+
+        // FILTER 3: Keep only user/market interactions
+        const fromIsAllowed = fromName === 'Mercado' || validUserNames.has(fromName);
+        const toIsAllowed = toName === 'Mercado' || validUserNames.has(toName);
+        if (!fromIsAllowed || !toIsAllowed) {
+          skippedInvalidActorTransfers++;
+          continue;
+        }
+
+        if (!hasResolvedPlayer) {
+          transfersWithMissingPlayer++;
+        }
 
         const result = await mutations.insertTransfer({
           timestamp: timestamp,
@@ -203,6 +219,18 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
     } else {
       offset += limit;
     }
+  }
+
+  if (transfersWithMissingPlayer > 0) {
+    manager.log(
+      `   ⚠️ Inserted ${transfersWithMissingPlayer} transfers with players missing from playersList.`
+    );
+  }
+
+  if (skippedInvalidActorTransfers > 0) {
+    manager.log(
+      `   🧹 Skipped ${skippedInvalidActorTransfers} transfers involving actors outside users/market.`
+    );
   }
 
   return {

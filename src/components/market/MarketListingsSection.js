@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Filter, X, Euro } from 'lucide-react';
 import { Section } from '@/components/layout';
 import MarketPlayerCard from './MarketPlayerCard';
@@ -58,25 +58,6 @@ export default function MarketListingsSection({ listings = [] }) {
     });
   }, [listings, filterOwner, filterPosition, filterTeam, maxPrice, searchQuery]);
 
-  const [cols, setCols] = useState(1);
-
-  // Track the number of CSS Grid columns mathematically based on Tailwind breakpoints
-  useEffect(() => {
-    const updateCols = () => {
-      const w = window.innerWidth;
-      if (w >= 1280)
-        setCols(4); // xl
-      else if (w >= 1024)
-        setCols(3); // lg
-      else if (w >= 768)
-        setCols(2); // md
-      else setCols(1); // default
-    };
-    updateCols();
-    window.addEventListener('resize', updateCols);
-    return () => window.removeEventListener('resize', updateCols);
-  }, []);
-
   if (!listings || listings.length === 0) {
     return null;
   }
@@ -88,7 +69,7 @@ export default function MarketListingsSection({ listings = [] }) {
         <div className="flex flex-col xl:flex-row gap-4 xl:items-end justify-between">
           <div className="flex flex-row flex-wrap xl:flex-nowrap gap-3 w-full items-end">
             {/* Text Search */}
-            <div className="w-full md:w-auto md:min-w-[200px] shrink-0 space-y-1.5 flex gap-2 items-end">
+            <div className="flex w-full gap-2 items-end space-y-1.5 shrink-0 md:w-auto md:min-w-50">
               <div className="relative w-full">
                 <span className="text-xs font-medium text-muted-foreground ml-1 mb-1.5 block">
                   Buscar
@@ -101,7 +82,7 @@ export default function MarketListingsSection({ listings = [] }) {
                   <input
                     type="text"
                     placeholder="Nombre..."
-                    className="w-full h-[40px] bg-secondary/50 border border-border/50 rounded-lg pl-9 pr-10 py-2 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm"
+                    className="h-10 w-full rounded-lg border border-border/50 bg-secondary/50 py-2 pl-9 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -118,7 +99,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Owner Filter */}
-            <div className="w-[48%] md:w-auto md:min-w-[140px] shrink-0 space-y-1.5">
+            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-35">
               <span className="text-xs font-medium text-muted-foreground ml-1">Propiedad</span>
               <CustomSelect
                 value={filterOwner}
@@ -133,7 +114,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Position Filter */}
-            <div className="w-[48%] md:w-auto md:min-w-[110px] shrink-0 space-y-1.5">
+            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-27.5">
               <span className="text-xs font-medium text-muted-foreground ml-1">Posición</span>
               <CustomSelect
                 value={filterPosition}
@@ -147,7 +128,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Team Filter */}
-            <div className="w-[48%] md:w-auto md:min-w-[130px] shrink-0 space-y-1.5">
+            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-32.5">
               <span className="text-xs font-medium text-muted-foreground ml-1">Equipo</span>
               <CustomSelect
                 value={filterTeam}
@@ -161,7 +142,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Price Filter */}
-            <div className="w-[48%] md:w-auto md:min-w-[120px] shrink-0 space-y-1.5">
+            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-30">
               <span className="text-xs font-medium text-muted-foreground ml-1">Precio máx.</span>
               <div className="relative">
                 <Euro
@@ -173,14 +154,14 @@ export default function MarketListingsSection({ listings = [] }) {
                   placeholder="Sin límite"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full h-[40px] bg-secondary/50 border border-border/50 rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="h-10 w-full rounded-lg border border-border/50 bg-secondary/50 py-2 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Counter */}
-          <div className="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-2 h-[40px] flex gap-1 items-center rounded-lg border border-border/50 whitespace-nowrap self-start xl:self-end mt-2 xl:mt-0 xl:min-w-fit">
+          <div className="mt-2 flex h-10 items-center gap-1 self-start whitespace-nowrap rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm font-medium text-muted-foreground xl:mt-0 xl:min-w-fit xl:self-end">
             <span className="font-bold text-foreground">{filteredListings.length}</span>
             {filteredListings.length === 1 ? 'resultado' : 'resultados'}
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { apiClient } from '@/lib/api-client';
+import { useState } from 'react';
+import { useApiData } from '@/lib/hooks/useApiData';
 import {
   ArrowRight,
   Search,
@@ -24,36 +24,29 @@ const POS_COLORS = {
 };
 
 export default function LiveMarketTable({ initialData }) {
-  const [data, setData] = useState(initialData || { transfers: [], page: 1, totalPages: 1 });
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ buyer: '', seller: '' });
+  const [appliedFilters, setAppliedFilters] = useState({ buyer: '', seller: '' });
 
-  const fetchTransfers = async (newPage, currentFilters) => {
-    setLoading(true);
-    try {
+  const defaultData = initialData || { transfers: [], page: 1, totalPages: 1 };
+
+  const { data, loading, refetch } = useApiData(
+    () => {
       const query = new URLSearchParams({
-        page: newPage,
-        ...(currentFilters.buyer && { buyer: currentFilters.buyer }),
-        ...(currentFilters.seller && { seller: currentFilters.seller }),
+        page: String(page),
+        ...(appliedFilters.buyer && { buyer: appliedFilters.buyer }),
+        ...(appliedFilters.seller && { seller: appliedFilters.seller }),
       });
-      const res = await apiClient.get(`/api/market/transfers?${query.toString()}`);
-      if (res.success) {
-        setData(res.data);
-        setPage(newPage);
-      }
-    } catch (err) {
-      console.error('Failed to load transfers', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  // Initial load
-  useEffect(() => {
-    fetchTransfers(1, filters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      return `/api/market/transfers?${query.toString()}`;
+    },
+    {
+      dependencies: [page, appliedFilters.buyer, appliedFilters.seller],
+      cacheKey: `market-transfers-${page}-${appliedFilters.buyer || 'all'}-${appliedFilters.seller || 'all'}`,
+    }
+  );
+
+  const tableData = data || defaultData;
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -62,7 +55,27 @@ export default function LiveMarketTable({ initialData }) {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchTransfers(1, filters);
+
+    const nextFilters = {
+      buyer: filters.buyer.trim(),
+      seller: filters.seller.trim(),
+    };
+
+    const sameFilters =
+      nextFilters.buyer === appliedFilters.buyer && nextFilters.seller === appliedFilters.seller;
+
+    if (page !== 1) {
+      setPage(1);
+    }
+
+    if (!sameFilters) {
+      setAppliedFilters(nextFilters);
+      return;
+    }
+
+    if (page === 1) {
+      refetch();
+    }
   };
 
   const formatEuro = (val) => val.toLocaleString('es-ES', { maximumFractionDigits: 0 });
@@ -115,7 +128,7 @@ export default function LiveMarketTable({ initialData }) {
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-x-auto min-h-[400px] relative">
+        <div className="relative min-h-100 flex-1 overflow-x-auto">
           {loading && (
             <div className="absolute inset-0 bg-zinc-900/50 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-lg">
               <Loader2 className="animate-spin text-orange-500 w-6 h-6" />
@@ -131,7 +144,7 @@ export default function LiveMarketTable({ initialData }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {data.transfers.map((t) => (
+              {tableData.transfers.map((t) => (
                 <tr key={t.id} className="hover:bg-white/5 transition-colors group">
                   <td className="px-4 py-3 whitespace-nowrap text-xs text-zinc-500 font-mono">
                     {new Date(t.fecha).toLocaleDateString('es-ES', {
@@ -189,7 +202,7 @@ export default function LiveMarketTable({ initialData }) {
                   </td>
                 </tr>
               ))}
-              {!data.transfers.length && !loading && (
+              {!tableData.transfers.length && !loading && (
                 <tr>
                   <td colSpan="4" className="text-center py-8 text-zinc-500">
                     No se encontraron fichajes
@@ -204,19 +217,19 @@ export default function LiveMarketTable({ initialData }) {
         <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
           <span className="text-xs text-zinc-500">
             Página <span className="text-zinc-300 font-mono">{page}</span> de{' '}
-            <span className="text-zinc-300 font-mono">{data.totalPages}</span>
+            <span className="text-zinc-300 font-mono">{tableData.totalPages}</span>
           </span>
           <div className="flex gap-2">
             <button
-              onClick={() => fetchTransfers(page - 1, filters)}
+              onClick={() => setPage((currentPage) => currentPage - 1)}
               disabled={page <= 1 || loading}
               className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors"
             >
               <ArrowLeft size={14} />
             </button>
             <button
-              onClick={() => fetchTransfers(page + 1, filters)}
-              disabled={page >= data.totalPages || loading}
+              onClick={() => setPage((currentPage) => currentPage + 1)}
+              disabled={page >= tableData.totalPages || loading}
               className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors"
             >
               <ArrowNext size={14} />
