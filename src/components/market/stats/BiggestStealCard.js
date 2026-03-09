@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Trophy, XCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Trophy, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import PlayerImage from '@/components/ui/PlayerImage';
@@ -127,7 +127,17 @@ export default function BiggestStealCard({ data }) {
               onClick={() => setIsExpanded(!isExpanded)}
               className="mt-3 flex items-center justify-center gap-1 text-[10px] text-zinc-500 hover:text-cyan-400 transition-colors py-1 border-t border-zinc-800 cursor-pointer"
             >
-              {isExpanded ? 'Ocultar resto' : 'Ver 4º-10º'}
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="w-3 h-3" />
+                  Ocultar resto
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-3 h-3" />
+                  Ver 4º-10º
+                </>
+              )}
             </button>
           )}
 
