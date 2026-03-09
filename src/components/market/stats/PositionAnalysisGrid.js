@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { User, Euro, Crown } from 'lucide-react';
+import { User, Euro, BarChart3 } from 'lucide-react';
 
 const EMPTY_DISTRIBUTION = [];
 
@@ -74,7 +74,6 @@ function CustomTooltip({ active, payload, mode, totalValue }) {
 export default function PositionAnalysisGrid({ positionStats }) {
   const [distributionMode, setDistributionMode] = useState('count');
   const distribution = positionStats?.distribution ?? EMPTY_DISTRIBUTION;
-  const mostSigned = positionStats?.mostSigned ?? null;
   const processedDist = useMemo(
     () =>
       distribution.map((d) => ({
@@ -91,15 +90,6 @@ export default function PositionAnalysisGrid({ positionStats }) {
     return { totalTransfers, totalVolume };
   }, [processedDist]);
 
-  const leadingPosition = useMemo(() => {
-    if (mostSigned) {
-      const normalized = normalizePosition(mostSigned.position);
-      return processedDist.find((item) => item.displayPosition === normalized) || processedDist[0];
-    }
-
-    return processedDist[0] || null;
-  }, [mostSigned, processedDist]);
-
   const premiumPosition = useMemo(() => {
     if (processedDist.length === 0) return null;
     return [...processedDist].sort((a, b) => b.avg_price - a.avg_price)[0];
@@ -110,10 +100,15 @@ export default function PositionAnalysisGrid({ positionStats }) {
     return [...processedDist].sort((a, b) => a.avg_price - b.avg_price)[0];
   }, [processedDist]);
 
-  const liquidPosition = useMemo(() => {
-    if (processedDist.length === 0) return null;
-    return [...processedDist].sort((a, b) => b.total_volume - a.total_volume)[0];
-  }, [processedDist]);
+  const countRanking = useMemo(
+    () => [...processedDist].sort((a, b) => b.count - a.count),
+    [processedDist]
+  );
+
+  const volumeRanking = useMemo(
+    () => [...processedDist].sort((a, b) => b.total_volume - a.total_volume),
+    [processedDist]
+  );
 
   // Helper for currency
   const fmt = (val) => val.toLocaleString('es-ES', { maximumFractionDigits: 0 });
@@ -129,6 +124,42 @@ export default function PositionAnalysisGrid({ positionStats }) {
       (a, b) => b[distributionMetricKey] - a[distributionMetricKey]
     )[0];
   }, [distributionMetricKey, processedDist]);
+
+  const operationsLeader = countRanking[0] || null;
+  const operationsRunnerUp = countRanking[1] || null;
+  const volumeLeader = volumeRanking[0] || null;
+  const volumeRunnerUp = volumeRanking[1] || null;
+
+  const operationsGap = useMemo(() => {
+    if (!operationsLeader || !operationsRunnerUp || totals.totalTransfers === 0) return null;
+
+    return {
+      count: operationsLeader.count - operationsRunnerUp.count,
+      share: ((operationsLeader.count - operationsRunnerUp.count) / totals.totalTransfers) * 100,
+    };
+  }, [operationsLeader, operationsRunnerUp, totals.totalTransfers]);
+
+  const volumeGap = useMemo(() => {
+    if (!volumeLeader || !volumeRunnerUp || totals.totalVolume === 0) return null;
+
+    return {
+      amount: volumeLeader.total_volume - volumeRunnerUp.total_volume,
+      share: ((volumeLeader.total_volume - volumeRunnerUp.total_volume) / totals.totalVolume) * 100,
+    };
+  }, [volumeLeader, volumeRunnerUp, totals.totalVolume]);
+
+  const topTwoVolumeShare = useMemo(() => {
+    if (volumeRanking.length === 0 || totals.totalVolume === 0) return 0;
+    const topTwoVolume = volumeRanking
+      .slice(0, 2)
+      .reduce((sum, item) => sum + item.total_volume, 0);
+    return (topTwoVolume / totals.totalVolume) * 100;
+  }, [volumeRanking, totals.totalVolume]);
+
+  const ticketSpread = useMemo(() => {
+    if (!premiumPosition || !valuePosition) return null;
+    return premiumPosition.avg_price - valuePosition.avg_price;
+  }, [premiumPosition, valuePosition]);
 
   if (!positionStats || distribution.length === 0) return null;
 
@@ -221,7 +252,7 @@ export default function PositionAnalysisGrid({ positionStats }) {
               <button
                 type="button"
                 onClick={() => setDistributionMode('count')}
-                className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+                className={`cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors ${
                   distributionMode === 'count'
                     ? 'bg-blue-500 text-white'
                     : 'text-zinc-500 hover:text-zinc-300'
@@ -232,7 +263,7 @@ export default function PositionAnalysisGrid({ positionStats }) {
               <button
                 type="button"
                 onClick={() => setDistributionMode('volume')}
-                className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+                className={`cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors ${
                   distributionMode === 'volume'
                     ? 'bg-blue-500 text-white'
                     : 'text-zinc-500 hover:text-zinc-300'
@@ -329,50 +360,72 @@ export default function PositionAnalysisGrid({ positionStats }) {
 
       <div className="xl:col-span-3">
         <ElegantCard
-          title="Pulso por Posición"
-          icon={Crown}
+          title="Concentración"
+          icon={BarChart3}
           color="amber"
           className="h-full min-h-75"
-          info="Tres lecturas rapidas: quien mueve mas operaciones, quien concentra mas dinero y que posicion es la mas cara de fichar."
+          info="Resume cuanta distancia abre la posicion lider frente a la siguiente tanto en actividad como en dinero movilizado."
         >
           <div className="flex h-full flex-col">
             <div className="flex-1 pb-4">
               <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                Mas fichada
+                Ventaja en fichajes
               </div>
               <div className="mt-2 flex items-center gap-2">
                 <div
                   className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: leadingPosition?.color || COLORS.Unknown }}
+                  style={{ backgroundColor: operationsLeader?.color || COLORS.Unknown }}
                 />
                 <div className="text-lg font-black text-white">
-                  {leadingPosition?.displayPosition || 'Sin datos'}
+                  {operationsLeader?.displayPosition || 'Sin datos'}
                 </div>
               </div>
-              <div className="mt-1 text-xs text-zinc-400">
-                {leadingPosition ? `${leadingPosition.count} operaciones` : 'Sin actividad'}
+              <div className="mt-1 text-xs text-amber-300">
+                {operationsGap && operationsRunnerUp
+                  ? `+${operationsGap.count} ops frente a ${operationsRunnerUp.displayPosition} · ${operationsGap.share.toFixed(0)} pts`
+                  : 'Sin actividad'}
               </div>
             </div>
 
             <div className="flex-1 border-t border-white/6 py-4">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Mas cara</div>
-              <div className="mt-2 text-lg font-black text-white">
-                {premiumPosition?.displayPosition || 'Sin datos'}
+              <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                Ventaja en volumen
               </div>
-              <div className="mt-1 text-xs text-amber-300">
-                {premiumPosition ? `${fmt(premiumPosition.avg_price)} € de media` : 'Sin actividad'}
+              <div className="mt-2 text-lg font-black text-white">
+                {volumeLeader?.displayPosition || 'Sin datos'}
+              </div>
+              <div className="mt-1 text-xs text-zinc-400">
+                {volumeGap && volumeRunnerUp
+                  ? `+${fmtMillions(volumeGap.amount)} frente a ${volumeRunnerUp.displayPosition} · ${volumeGap.share.toFixed(0)} pts`
+                  : 'Sin actividad'}
               </div>
             </div>
 
             <div className="flex-1 border-t border-white/6 pt-4">
               <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-                Mayor volumen
+                Concentración del volumen
               </div>
               <div className="mt-2 text-lg font-black text-white">
-                {liquidPosition?.displayPosition || 'Sin datos'}
+                {topTwoVolumeShare.toFixed(0)}%
               </div>
               <div className="mt-1 text-xs text-emerald-300">
-                {liquidPosition ? fmtMillions(liquidPosition.total_volume) : 'Sin actividad'}
+                {volumeRanking.length >= 2
+                  ? `${volumeRanking[0].displayPosition} y ${volumeRanking[1].displayPosition} concentran la mayor parte del dinero`
+                  : 'Sin actividad'}
+              </div>
+            </div>
+
+            <div className="flex-1 border-t border-white/6 pt-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                Amplitud del ticket
+              </div>
+              <div className="mt-2 text-lg font-black text-white">
+                {ticketSpread ? `${fmt(ticketSpread)} €` : 'Sin datos'}
+              </div>
+              <div className="mt-1 text-xs text-emerald-300">
+                {premiumPosition && valuePosition
+                  ? `${premiumPosition.displayPosition} frente a ${valuePosition.displayPosition}`
+                  : 'Sin actividad'}
               </div>
             </div>
           </div>
