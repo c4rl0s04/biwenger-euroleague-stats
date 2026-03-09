@@ -29,6 +29,7 @@ import BiggestStealCard from './stats/BiggestStealCard';
 import TheVictimCard from './stats/TheVictimCard';
 import OverpayerManagerCard from './stats/OverpayerManagerCard';
 import BiddingDuelsMatrixCard from './stats/BiddingDuelsMatrixCard';
+import BiddingDuelDetailsCard from './stats/BiddingDuelDetailsCard';
 import HottestRivalryCard from './stats/HottestRivalryCard';
 import BiggestDominanceCard from './stats/BiggestDominanceCard';
 import MarketTrendsChart from './stats/MarketTrendsChart';
@@ -40,6 +41,7 @@ import AnalyticsDemoShowroom from './AnalyticsDemoShowroom';
 import InflatedPlayerCard from './stats/InflatedPlayerCard';
 
 export default function MarketPageClient() {
+  const [selectedDuel, setSelectedDuel] = useState(null);
   const { data: statsData, loading } = useApiData('/api/market/stats');
   const marketStats = statsData || {};
 
@@ -74,6 +76,19 @@ export default function MarketPageClient() {
       </div>
     );
   }
+
+  const handleSelectDuel = (duelSelection) => {
+    setSelectedDuel((currentSelection) => {
+      if (
+        currentSelection?.user?.id === duelSelection.user.id &&
+        currentSelection?.opponent?.id === duelSelection.opponent.id
+      ) {
+        return null;
+      }
+
+      return duelSelection;
+    });
+  };
 
   return (
     <div>
@@ -145,7 +160,11 @@ export default function MarketPageClient() {
 
             <div className="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-6 xl:items-stretch items-start">
               <div className="xl:col-span-2 h-full">
-                <BiddingDuelsMatrixCard data={marketStats.biddingDuels} />
+                <BiddingDuelsMatrixCard
+                  data={marketStats.biddingDuels}
+                  onSelectDuel={handleSelectDuel}
+                  selectedDuel={selectedDuel}
+                />
               </div>
               <div className="h-full flex flex-col gap-6">
                 <div className="flex-1">
@@ -155,6 +174,13 @@ export default function MarketPageClient() {
                   <BiggestDominanceCard data={marketStats.biddingDuels?.biggestDominance} />
                 </div>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <BiddingDuelDetailsCard
+                selectedDuel={selectedDuel}
+                onClear={() => setSelectedDuel(null)}
+              />
             </div>
           </div>
 

@@ -21,7 +21,7 @@ function formatEuro(value) {
   return Math.round(abs).toLocaleString('es-ES');
 }
 
-export default function BiddingDuelsMatrixCard({ data }) {
+export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDuel }) {
   const [hoveredCell, setHoveredCell] = useState(null);
 
   if (!data?.users?.length) return null;
@@ -107,13 +107,39 @@ export default function BiddingDuelsMatrixCard({ data }) {
                       const key = `${user.id}-${opponent.id}`;
                       const isHovered = hoveredCell === key;
                       const isMostCompetitive = isMostCompetitiveCell(record);
+                      const isSelected =
+                        selectedDuel?.user?.id === user.id &&
+                        selectedDuel?.opponent?.id === opponent.id;
 
                       return (
                         <div
                           key={key}
-                          className={`relative p-0.5 min-h-10.5 rounded-md border flex items-center justify-center transition-all duration-200 ${getCellColor(record)} ${record?.duels ? 'cursor-pointer hover:brightness-110' : ''} ${isMostCompetitive ? 'ring-2 ring-amber-400/80 shadow-[0_0_0_1px_rgba(251,191,36,0.25)]' : ''} ${isHovered ? 'z-120 scale-105 shadow-lg' : ''}`}
+                          className={`relative p-0.5 min-h-10.5 rounded-md border flex items-center justify-center transition-all duration-200 ${getCellColor(record)} ${record?.duels ? 'cursor-pointer hover:brightness-110' : ''} ${isMostCompetitive ? 'ring-2 ring-amber-400/80 shadow-[0_0_0_1px_rgba(251,191,36,0.25)]' : ''} ${isSelected ? 'ring-2 ring-sky-400/80 shadow-[0_0_0_1px_rgba(56,189,248,0.25)]' : ''} ${isHovered ? 'z-120 scale-105 shadow-lg' : ''}`}
                           onMouseEnter={() => record?.duels && setHoveredCell(key)}
                           onMouseLeave={() => setHoveredCell(null)}
+                          onClick={() =>
+                            record?.duels &&
+                            onSelectDuel?.({
+                              user,
+                              opponent,
+                              record,
+                            })
+                          }
+                          onKeyDown={(event) => {
+                            if (!record?.duels) return;
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              onSelectDuel?.({ user, opponent, record });
+                            }
+                          }}
+                          role={record?.duels ? 'button' : undefined}
+                          tabIndex={record?.duels ? 0 : undefined}
+                          aria-pressed={record?.duels ? isSelected : undefined}
+                          aria-label={
+                            record?.duels
+                              ? `${user.name} contra ${opponent.name}, ${record.wins} victorias, ${record.losses} derrotas y ${record.duels} duelos`
+                              : undefined
+                          }
                         >
                           {record?.duels ? (
                             <div className="flex items-center justify-center gap-1 font-mono text-sm opacity-90">

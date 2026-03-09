@@ -14,6 +14,7 @@ vi.mock('@/lib/services', () => ({
   fetchLiveMarketTransfers: vi.fn(),
   fetchMarketTrendsAnalysis: vi.fn(),
   fetchBestValueDetails: vi.fn(),
+  fetchBiddingDuelDetails: vi.fn(),
 }));
 
 import * as services from '@/lib/services';
@@ -161,5 +162,53 @@ describe('GET /api/market/transfers', () => {
     const request = makeRequest('http://localhost/api/market/transfers');
     const response = await GET(request);
     expect(response.status).toBe(500);
+  });
+});
+
+// --- /api/market/duels/details ---
+describe('GET /api/market/duels/details', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns 200 with duel details', async () => {
+    vi.mocked(services.fetchBiddingDuelDetails).mockResolvedValue([
+      { transfer_id: 1, player_name: 'Jugador', margin: 1000 },
+    ] as any);
+
+    const { GET } = await import('@/app/api/market/duels/details/route');
+    const request = makeRequest('http://localhost/api/market/duels/details', {
+      userId: '1',
+      opponentId: '2',
+    });
+    const response = await GET(request);
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual([{ transfer_id: 1, player_name: 'Jugador', margin: 1000 }]);
+  });
+
+  it('returns 400 when both users are the same', async () => {
+    const { GET } = await import('@/app/api/market/duels/details/route');
+    const request = makeRequest('http://localhost/api/market/duels/details', {
+      userId: '3',
+      opponentId: '3',
+    });
+    const response = await GET(request);
+
+    expect(response.status).toBe(400);
+  });
+
+  it('passes both ids to the service', async () => {
+    vi.mocked(services.fetchBiddingDuelDetails).mockResolvedValue([] as any);
+
+    const { GET } = await import('@/app/api/market/duels/details/route');
+    const request = makeRequest('http://localhost/api/market/duels/details', {
+      userId: '4',
+      opponentId: '7',
+    });
+
+    await GET(request);
+
+    expect(services.fetchBiddingDuelDetails).toHaveBeenCalledWith(4, 7);
   });
 });

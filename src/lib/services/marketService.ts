@@ -25,6 +25,7 @@ import {
   getOverpayerManager,
   getInflatedPlayer,
   getBiddingDuelsStats,
+  getBiddingDuelDetails,
   getMissedOpportunity,
   getTopTrader,
   getProfitablePlayer,
@@ -231,4 +232,8 @@ export async function fetchMarketTrendsAnalysis(days: number) {
 
 export async function fetchBestValueDetails(transferId: number) {
   return await getBestValueDetailsQuery(transferId);
+}
+
+export async function fetchBiddingDuelDetails(userId: number, opponentId: number) {
+  return await getBiddingDuelDetails(userId, opponentId);
 }

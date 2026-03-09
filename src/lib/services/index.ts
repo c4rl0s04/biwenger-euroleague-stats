@@ -86,6 +86,7 @@ export {
   fetchLiveMarketTransfers,
   fetchMarketTrendsAnalysis,
   fetchBestValueDetails,
+  fetchBiddingDuelDetails,
 } from './marketService';
 
 // User Service

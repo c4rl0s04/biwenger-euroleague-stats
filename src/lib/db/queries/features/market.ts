@@ -286,6 +286,25 @@ export interface BiddingDuelsStats {
   biggestDominance: BidDuelSummary | null;
 }
 
+export interface BidDuelDetail {
+  transfer_id: number;
+  transfer_date: string | null;
+  player_id: number;
+  player_name: string;
+  player_img: string | null;
+  winner_id: number;
+  winner_name: string;
+  winner_icon: string | null;
+  winner_color_index: number | null;
+  runner_id: number;
+  runner_name: string;
+  runner_icon: string | null;
+  runner_color_index: number | null;
+  winning_bid: number;
+  second_bid: number;
+  margin: number;
+}
+
 export interface SingleFlip {
   user_id: number;
   user_name: string;
@@ -1693,6 +1712,75 @@ export async function getBiddingDuelsStats(): Promise<BiddingDuelsStats> {
     hottestRivalry,
     biggestDominance,
   };
+}
+
+export async function getBiddingDuelDetails(
+  userId: number,
+  opponentId: number
+): Promise<BidDuelDetail[]> {
+  const normalizedUserId = Math.trunc(userId);
+  const normalizedOpponentId = Math.trunc(opponentId);
+
+  const query = `
+    SELECT
+      f.id as transfer_id,
+      f.fecha as transfer_date,
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      winner.id as winner_id,
+      winner.name as winner_name,
+      winner.icon as winner_icon,
+      winner.color_index as winner_color_index,
+      runner.id as runner_id,
+      runner.name as runner_name,
+      runner.icon as runner_icon,
+      runner.color_index as runner_color_index,
+      f.precio as winning_bid,
+      second_bid.amount as second_bid,
+      (f.precio - second_bid.amount) as margin
+    FROM fichajes f
+    JOIN users winner ON winner.name = f.comprador
+    JOIN LATERAL (
+      SELECT tb.bidder_name, tb.amount
+      FROM transfer_bids tb
+      WHERE tb.transfer_id = f.id
+        AND tb.bidder_name != f.comprador
+        AND tb.amount < f.precio
+      ORDER BY tb.amount DESC
+      LIMIT 1
+    ) second_bid ON true
+    JOIN users runner ON runner.name = second_bid.bidder_name
+    JOIN players p ON p.id = f.player_id
+    WHERE f.comprador != 'Mercado'
+      AND (
+        (winner.id = '${normalizedUserId}' AND runner.id = '${normalizedOpponentId}')
+        OR
+        (winner.id = '${normalizedOpponentId}' AND runner.id = '${normalizedUserId}')
+      )
+    ORDER BY f.timestamp DESC NULLS LAST, f.id DESC
+  `;
+
+  const result = await db.query(query);
+
+  return result.rows.map((row: any) => ({
+    transfer_id: parseInt(row.transfer_id),
+    transfer_date: row.transfer_date ?? null,
+    player_id: parseInt(row.player_id),
+    player_name: row.player_name,
+    player_img: row.player_img ?? null,
+    winner_id: parseInt(row.winner_id),
+    winner_name: row.winner_name,
+    winner_icon: row.winner_icon ?? null,
+    winner_color_index: row.winner_color_index !== null ? parseInt(row.winner_color_index) : null,
+    runner_id: parseInt(row.runner_id),
+    runner_name: row.runner_name,
+    runner_icon: row.runner_icon ?? null,
+    runner_color_index: row.runner_color_index !== null ? parseInt(row.runner_color_index) : null,
+    winning_bid: parseInt(row.winning_bid),
+    second_bid: parseInt(row.second_bid),
+    margin: parseInt(row.margin),
+  }));
 }
 
 /**
