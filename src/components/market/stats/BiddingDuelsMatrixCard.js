@@ -28,6 +28,16 @@ export default function BiddingDuelsMatrixCard({ data }) {
 
   const users = [...data.users].sort((a, b) => a.name.localeCompare(b.name));
   const matrix = data.matrix || {};
+  const competitiveMargins = Object.values(matrix)
+    .flatMap((opponents) => Object.values(opponents || {}))
+    .filter((record) => record?.duels >= 2 && record?.avg_margin > 0)
+    .map((record) => record.avg_margin);
+  const lowestAvgMargin = competitiveMargins.length > 0 ? Math.min(...competitiveMargins) : null;
+
+  const isMostCompetitiveCell = (record) => {
+    if (!record || record.duels < 2 || lowestAvgMargin === null) return false;
+    return Math.abs(record.avg_margin - lowestAvgMargin) < 0.01;
+  };
 
   return (
     <div className="h-full hover:scale-[1.01] transition-transform duration-200">
@@ -41,6 +51,11 @@ export default function BiddingDuelsMatrixCard({ data }) {
           <p className="text-xs text-zinc-400 italic px-1">
             Cada celda muestra <span className="text-emerald-400 font-bold">V</span>-
             <span className="text-red-400 font-bold">D</span> en duelos directos de subasta.
+            {lowestAvgMargin !== null ? (
+              <span className="ml-2 text-amber-400 not-italic font-semibold">
+                Borde dorado = menor margen medio (+{formatEuro(lowestAvgMargin)}€)
+              </span>
+            ) : null}
           </p>
 
           <div className="relative flex-1 overflow-visible pr-1 pb-1">
@@ -83,7 +98,7 @@ export default function BiddingDuelsMatrixCard({ data }) {
                       if (user.id === opponent.id) {
                         return (
                           <div key={`self-${user.id}`} className="p-0.5">
-                            <div className="w-full h-full min-h-[42px] bg-zinc-800/10 rounded-sm" />
+                            <div className="w-full h-full min-h-10.5 bg-zinc-800/10 rounded-sm" />
                           </div>
                         );
                       }
@@ -91,11 +106,12 @@ export default function BiddingDuelsMatrixCard({ data }) {
                       const record = matrix[user.id]?.[opponent.id];
                       const key = `${user.id}-${opponent.id}`;
                       const isHovered = hoveredCell === key;
+                      const isMostCompetitive = isMostCompetitiveCell(record);
 
                       return (
                         <div
                           key={key}
-                          className={`relative p-0.5 min-h-[42px] rounded-md border flex items-center justify-center transition-all duration-200 ${getCellColor(record)} ${record?.duels ? 'cursor-pointer hover:brightness-110' : ''} ${isHovered ? 'z-[120] scale-105 shadow-lg' : ''}`}
+                          className={`relative p-0.5 min-h-10.5 rounded-md border flex items-center justify-center transition-all duration-200 ${getCellColor(record)} ${record?.duels ? 'cursor-pointer hover:brightness-110' : ''} ${isMostCompetitive ? 'ring-2 ring-amber-400/80 shadow-[0_0_0_1px_rgba(251,191,36,0.25)]' : ''} ${isHovered ? 'z-120 scale-105 shadow-lg' : ''}`}
                           onMouseEnter={() => record?.duels && setHoveredCell(key)}
                           onMouseLeave={() => setHoveredCell(null)}
                         >
@@ -116,7 +132,7 @@ export default function BiddingDuelsMatrixCard({ data }) {
                           ) : null}
 
                           {isHovered && record?.duels ? (
-                            <div className="absolute z-[999] bottom-full mb-2 left-1/2 -translate-x-1/2 bg-zinc-950 text-zinc-200 text-xs p-3 rounded-lg shadow-2xl border border-zinc-700 whitespace-nowrap min-w-[150px]">
+                            <div className="absolute z-999 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-zinc-950 text-zinc-200 text-xs p-3 rounded-lg shadow-2xl border border-zinc-700 whitespace-nowrap min-w-37.5">
                               <div className="font-bold border-b border-zinc-700 pb-1 mb-1 text-center">
                                 {user.name} vs {opponent.name}
                               </div>
@@ -143,6 +159,11 @@ export default function BiddingDuelsMatrixCard({ data }) {
                               <div className="mt-2 text-center text-[10px] text-zinc-400">
                                 Margen medio: +{formatEuro(record.avg_margin)}€
                               </div>
+                              {isMostCompetitive ? (
+                                <div className="mt-1 text-center text-[10px] font-semibold text-amber-400">
+                                  Duelo mas ajustado
+                                </div>
+                              ) : null}
                             </div>
                           ) : null}
                         </div>
