@@ -10,8 +10,9 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { useApiData } from '@/lib/hooks/useApiData';
 
 const TIME_PERIODS = [
   { label: '1W', days: 7 },
@@ -61,29 +62,11 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function MarketTrendsChart() {
   const [period, setPeriod] = useState(TIME_PERIODS[1]); // Default 1M
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`/api/market/trends?days=${period.days}`);
-        const result = await res.json();
-        if (isMounted) {
-          setData(result.data || []);
-          setLoading(false);
-        }
-      } catch {
-        if (isMounted) setLoading(false);
-      }
-    };
-    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
-    fetchData();
-    return () => {
-      isMounted = false;
-    };
-  }, [period]);
+  const { data = [], loading } = useApiData(() => `/api/market/trends?days=${period.days}`, {
+    dependencies: [period.days],
+    cacheKey: `market-trends-${period.days}`,
+    transform: (result) => (Array.isArray(result) ? result : []),
+  });
 
   const formattedData = useMemo(() => {
     if (!data || !data.length) return [];
