@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Swords } from 'lucide-react';
+import { Swords, Sparkles } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
 
@@ -53,7 +53,7 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
             <span className="text-red-400 font-bold">D</span> en duelos directos de subasta.
             {lowestAvgMargin !== null ? (
               <span className="ml-2 text-amber-400 not-italic font-semibold">
-                Borde dorado = menor margen medio (+{formatEuro(lowestAvgMargin)}€)
+                Resplandor dorado = menor margen medio (+{formatEuro(lowestAvgMargin)}€)
               </span>
             ) : null}
           </p>
@@ -114,7 +114,7 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
                       return (
                         <div
                           key={key}
-                          className={`relative p-0.5 min-h-10.5 rounded-md border flex items-center justify-center transition-all duration-200 ${getCellColor(record)} ${record?.duels ? 'cursor-pointer hover:brightness-110' : ''} ${isMostCompetitive ? 'ring-2 ring-amber-400/80 shadow-[0_0_0_1px_rgba(251,191,36,0.25)]' : ''} ${isSelected ? 'ring-2 ring-sky-400/80 shadow-[0_0_0_1px_rgba(56,189,248,0.25)]' : ''} ${isHovered ? 'z-120 scale-105 shadow-lg' : ''}`}
+                          className={`relative p-0.5 min-h-10.5 overflow-hidden rounded-md border flex items-center justify-center transition-all duration-200 ${getCellColor(record)} ${record?.duels ? 'cursor-pointer hover:brightness-110' : ''} ${isMostCompetitive ? 'border-amber-300/45 shadow-[0_0_22px_rgba(251,191,36,0.24),inset_0_0_0_1px_rgba(251,191,36,0.16)]' : ''} ${isSelected ? 'ring-2 ring-sky-400/80 shadow-[0_0_0_1px_rgba(56,189,248,0.25)]' : ''} ${isHovered ? 'z-120 scale-105 shadow-lg' : ''}`}
                           onMouseEnter={() => record?.duels && setHoveredCell(key)}
                           onMouseLeave={() => setHoveredCell(null)}
                           onClick={() =>
@@ -141,8 +141,20 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
                               : undefined
                           }
                         >
+                          {isMostCompetitive ? (
+                            <>
+                              <div className="absolute inset-0 bg-linear-to-br from-amber-300/22 via-amber-400/8 to-transparent" />
+                              <div className="absolute inset-x-1 bottom-1 h-px bg-linear-to-r from-transparent via-amber-300/90 to-transparent" />
+                              <div className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-300/18 text-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.45)]">
+                                <Sparkles className="h-2 w-2" />
+                              </div>
+                            </>
+                          ) : null}
+
                           {record?.duels ? (
-                            <div className="flex items-center justify-center gap-1 font-mono text-sm opacity-90">
+                            <div
+                              className={`relative z-10 flex items-center justify-center gap-1 font-mono text-sm opacity-90 ${isMostCompetitive ? 'text-amber-50 drop-shadow-[0_0_10px_rgba(251,191,36,0.32)]' : ''}`}
+                            >
                               <span
                                 className={record.wins > record.losses ? 'font-bold text-base' : ''}
                               >
