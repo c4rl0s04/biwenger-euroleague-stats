@@ -30,6 +30,8 @@ import {
   getLongestProfitableHold,
   getWorstRevaluation,
   getCurrentMarketListings,
+  getMarketTrendsAnalysis as getMarketTrendsAnalysisQuery,
+  getBestValueDetails as getBestValueDetailsQuery,
 } from '../db'; // Import all from @/lib/db wrapper
 
 import { getAllUsers } from '../db'; // To Map user names to IDs/Icons if needed
@@ -197,15 +199,23 @@ export async function fetchMarketStats() {
 }
 
 export interface LiveMarketTransfersParams {
+  page?: number;
   limit?: number;
-  offset?: number;
+  buyer?: string;
+  seller?: string;
 }
 
 /**
  * Get paginated transfers list
  */
 export async function fetchLiveMarketTransfers(params: LiveMarketTransfersParams = {}) {
-  return await getLiveMarketTransfers(params as any);
+  return await getLiveMarketTransfers(params);
 }
 
-export { getBestValueDetails };
+export async function fetchMarketTrendsAnalysis(days: number) {
+  return await getMarketTrendsAnalysisQuery(days);
+}
+
+export async function fetchBestValueDetails(transferId: number) {
+  return await getBestValueDetailsQuery(transferId);
+}

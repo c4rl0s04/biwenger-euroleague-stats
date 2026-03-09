@@ -81,7 +81,12 @@ export {
 } from './features/marketService';
 
 // Market Service (Root)
-export { fetchMarketStats, fetchLiveMarketTransfers } from './marketService';
+export {
+  fetchMarketStats,
+  fetchLiveMarketTransfers,
+  fetchMarketTrendsAnalysis,
+  fetchBestValueDetails,
+} from './marketService';
 
 // User Service
 export {

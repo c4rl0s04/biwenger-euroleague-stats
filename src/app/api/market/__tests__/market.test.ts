@@ -11,21 +11,12 @@ vi.mock('@/lib/services', () => ({
   getMarketPageData: vi.fn(),
   fetchMarketStats: vi.fn(),
   fetchAllTransfers: vi.fn(),
-}));
-
-// trends route imports directly from @/lib/db
-vi.mock('@/lib/db', () => ({
-  getMarketTrendsAnalysis: vi.fn(),
-}));
-
-// transfers route imports directly from the service file (bypasses barrel)
-vi.mock('@/lib/services/marketService', () => ({
   fetchLiveMarketTransfers: vi.fn(),
+  fetchMarketTrendsAnalysis: vi.fn(),
+  fetchBestValueDetails: vi.fn(),
 }));
 
 import * as services from '@/lib/services';
-import * as dbLib from '@/lib/db';
-import * as marketService from '@/lib/services/marketService';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
@@ -87,7 +78,7 @@ describe('GET /api/market/trends', () => {
 
   it('returns 200 with trend data for valid days param', async () => {
     const mockData = [{ date: '2025-01-01', count: 5, avg_value: 100000 }];
-    vi.mocked(dbLib.getMarketTrendsAnalysis).mockResolvedValue(mockData as any);
+    vi.mocked(services.fetchMarketTrendsAnalysis).mockResolvedValue(mockData as any);
 
     const { GET } = await import('@/app/api/market/trends/route');
     const request = makeRequest('http://localhost/api/market/trends', { days: '30' });
@@ -98,8 +89,8 @@ describe('GET /api/market/trends', () => {
     expect(json.data).toEqual(mockData);
   });
 
-  it('returns 500 on DB error', async () => {
-    vi.mocked(dbLib.getMarketTrendsAnalysis).mockRejectedValue(new Error('fail'));
+  it('returns 500 on service error', async () => {
+    vi.mocked(services.fetchMarketTrendsAnalysis).mockRejectedValue(new Error('fail'));
 
     const { GET } = await import('@/app/api/market/trends/route');
     const request = makeRequest('http://localhost/api/market/trends', { days: '30' });
@@ -113,7 +104,12 @@ describe('GET /api/market/transfers', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with transfers data', async () => {
-    vi.mocked(marketService.fetchLiveMarketTransfers).mockResolvedValue([{ id: 1 }] as any);
+    vi.mocked(services.fetchLiveMarketTransfers).mockResolvedValue({
+      transfers: [{ id: 1 }],
+      total: 1,
+      page: 1,
+      totalPages: 1,
+    } as any);
 
     const { GET } = await import('@/app/api/market/transfers/route');
     const request = makeRequest('http://localhost/api/market/transfers');
@@ -124,8 +120,42 @@ describe('GET /api/market/transfers', () => {
     expect(json.success).toBe(true);
   });
 
+  it('passes page and filters to the service', async () => {
+    vi.mocked(services.fetchLiveMarketTransfers).mockResolvedValue({
+      transfers: [],
+      total: 0,
+      page: 2,
+      totalPages: 0,
+    } as any);
+
+    const { GET } = await import('@/app/api/market/transfers/route');
+    const request = makeRequest('http://localhost/api/market/transfers', {
+      page: '2',
+      buyer: 'Carlos',
+      seller: 'Mercado',
+      limit: '15',
+    });
+
+    await GET(request);
+
+    expect(services.fetchLiveMarketTransfers).toHaveBeenCalledWith({
+      page: 2,
+      limit: 15,
+      buyer: 'Carlos',
+      seller: 'Mercado',
+    });
+  });
+
+  it('returns 400 for invalid page parameter', async () => {
+    const { GET } = await import('@/app/api/market/transfers/route');
+    const request = makeRequest('http://localhost/api/market/transfers', { page: '0' });
+    const response = await GET(request);
+
+    expect(response.status).toBe(400);
+  });
+
   it('returns 500 on service error', async () => {
-    vi.mocked(marketService.fetchLiveMarketTransfers).mockRejectedValue(new Error('fail'));
+    vi.mocked(services.fetchLiveMarketTransfers).mockRejectedValue(new Error('fail'));
 
     const { GET } = await import('@/app/api/market/transfers/route');
     const request = makeRequest('http://localhost/api/market/transfers');

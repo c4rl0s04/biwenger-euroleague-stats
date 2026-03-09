@@ -1,21 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getBestValueDetails } from '@/lib/services/marketService';
+import { NextRequest } from 'next/server';
+import { fetchBestValueDetails } from '@/lib/services';
+import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { validateNumber } from '@/lib/utils/validation';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const transferId = searchParams.get('transferId');
+    const transferIdValidation = validateNumber(searchParams.get('transferId'), {
+      min: 1,
+      max: Number.MAX_SAFE_INTEGER,
+    });
 
-    if (!transferId) {
-      return NextResponse.json({ error: 'Transfer ID required' }, { status: 400 });
+    if (!transferIdValidation.valid) {
+      return errorResponse(transferIdValidation.error, 400);
     }
 
-    const details = await getBestValueDetails(Number(transferId));
-    return NextResponse.json(details);
+    const details = await fetchBestValueDetails(transferIdValidation.value);
+    return successResponse(details, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching best value details:', error);
-    return NextResponse.json({ error: 'Failed to fetch details' }, { status: 500 });
+    return errorResponse('Failed to fetch details');
   }
 }
