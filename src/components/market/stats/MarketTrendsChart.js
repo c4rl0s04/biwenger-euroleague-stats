@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
+import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 const TIME_PERIODS = [
   { label: '1W', days: 7 },
@@ -32,7 +33,7 @@ function CustomTooltip({ active, payload, label }) {
   };
 
   return (
-    <div className="bg-zinc-900/95 backdrop-blur-sm border border-white/10 rounded-lg p-3 shadow-xl z-50 min-w-[180px] max-w-[280px]">
+    <div className="bg-zinc-900/95 backdrop-blur-sm border border-white/10 rounded-lg p-3 shadow-xl z-50 min-w-45 max-w-70">
       <div className="flex items-center justify-between mb-2 border-b border-white/5 pb-1">
         <p className="text-xs text-zinc-400">{label}</p>
         <span className="text-xs font-mono font-bold text-orange-400">
@@ -44,7 +45,7 @@ function CustomTooltip({ active, payload, label }) {
         <div className="space-y-1.5">
           {transfers.map((t, idx) => (
             <div key={idx} className="flex items-center justify-between gap-2 text-xs">
-              <span className="text-zinc-300 truncate max-w-[150px]">{t.player_name}</span>
+              <span className="text-zinc-300 truncate max-w-37.5">{t.player_name}</span>
               <span className="font-mono text-white whitespace-nowrap">
                 {formatPrice(t.price)} €
               </span>
@@ -97,56 +98,49 @@ export default function MarketTrendsChart() {
     return data.reduce((sum, d) => sum + d.volume, 0);
   }, [data]);
 
+  const periodSelector = (
+    <div className="flex items-center gap-1 rounded-lg bg-zinc-800/50 p-1">
+      {TIME_PERIODS.map((p) => (
+        <button
+          key={p.label}
+          onClick={() => setPeriod(p)}
+          className={`cursor-pointer rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
+            period.label === p.label
+              ? 'bg-orange-500 text-white'
+              : 'text-zinc-400 hover:bg-zinc-700 hover:text-white'
+          }`}
+        >
+          {p.label}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-visible relative">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border-b border-zinc-800">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-orange-500/10">
-            <TrendingUp size={20} className="text-orange-500" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Volumen de Mercado</h3>
-            <p className="text-xs text-zinc-500">Gasto total en fichajes</p>
-          </div>
-        </div>
-
-        {/* Period Selector */}
-        <div className="flex items-center gap-1 bg-zinc-800/50 p-1 rounded-lg">
-          {TIME_PERIODS.map((p) => (
-            <button
-              key={p.label}
-              onClick={() => setPeriod(p)}
-              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
-                period.label === p.label
-                  ? 'bg-orange-500 text-white'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-700'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Total Volume Summary */}
-      <div className="px-4 pt-4 pb-2 flex justify-between items-center">
+    <ElegantCard
+      title="Volumen de Mercado"
+      icon={TrendingUp}
+      color="orange"
+      info="Gasto total en fichajes a lo largo del tiempo para el periodo seleccionado."
+      actionRight={periodSelector}
+      className="overflow-visible"
+    >
+      <div className="flex items-center justify-between px-1 pb-3">
         <p className="text-sm text-zinc-500">
-          Total en los últimos <span className="text-orange-400 font-bold">{period.days}</span> días
+          Total en los últimos <span className="font-bold text-orange-400">{period.days}</span> días
         </p>
         <p className="text-2xl font-black text-orange-400">
           {(totalVolume / 1000000).toFixed(1)}M €
         </p>
       </div>
 
-      {/* Chart */}
-      <div className="h-[280px] w-full px-2 pb-4">
+      <div className="h-70 w-full">
         {loading ? (
-          <div className="h-full flex items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <div className="animate-pulse text-zinc-500">Cargando...</div>
           </div>
         ) : formattedData.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <p className="text-zinc-500">No hay datos para este periodo.</p>
           </div>
         ) : (
@@ -192,6 +186,6 @@ export default function MarketTrendsChart() {
           </ResponsiveContainer>
         )}
       </div>
-    </div>
+    </ElegantCard>
   );
 }
