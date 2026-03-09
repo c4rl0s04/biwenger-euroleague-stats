@@ -178,7 +178,7 @@ export default function PositionAnalysisGrid({ positionStats }) {
               <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
                 Prima entre posiciones
               </div>
-              <div className="mt-2 text-[2rem] leading-none font-black text-white">
+              <div className="mt-2 text-[2rem] leading-none font-black text-emerald-400">
                 {premiumPosition && valuePosition
                   ? fmt(premiumPosition.avg_price - valuePosition.avg_price)
                   : '0'}{' '}
