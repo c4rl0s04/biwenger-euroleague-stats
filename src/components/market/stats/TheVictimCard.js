@@ -17,7 +17,7 @@ export default function TheVictimCard({ data }) {
   const winnerColor = getColorForUser(winner.id, winner.name, winner.color_index);
 
   return (
-    <div className="h-full hover:scale-[1.02] transition-transform duration-200">
+    <div className="hover:scale-[1.02] transition-transform duration-200">
       <ElegantCard title="La Víctima" icon={Frown} color="pink">
         <div className="flex flex-col h-full">
           <div className="mt-2 text-center">

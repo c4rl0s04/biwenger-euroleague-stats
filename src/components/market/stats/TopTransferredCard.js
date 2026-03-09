@@ -22,7 +22,7 @@ export default function TopTransferredCard({ player }) {
   };
 
   return (
-    <div className="h-full hover:scale-[1.02] transition-transform duration-200">
+    <div className="hover:scale-[1.02] transition-transform duration-200">
       <ElegantCard title="El más fichado" icon={Flame} color="orange">
         <div className="flex flex-col h-full">
           <div className="mt-2 text-center">

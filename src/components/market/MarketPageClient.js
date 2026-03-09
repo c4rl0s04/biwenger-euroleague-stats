@@ -27,12 +27,14 @@ import BestPercentageCard from './stats/BestPercentageCard';
 import TheThiefCard from './stats/TheThiefCard';
 import BiggestStealCard from './stats/BiggestStealCard';
 import TheVictimCard from './stats/TheVictimCard';
+import OverpayerManagerCard from './stats/OverpayerManagerCard';
 import MarketTrendsChart from './stats/MarketTrendsChart';
 import PositionAnalysisGrid from './stats/PositionAnalysisGrid';
 import LiveMarketTable from './LiveMarketTable';
 import ManagerFinancesTable from './stats/ManagerFinancesTable';
 import MarketListingsSection from './MarketListingsSection';
 import AnalyticsDemoShowroom from './AnalyticsDemoShowroom';
+import InflatedPlayerCard from './stats/InflatedPlayerCard';
 
 export default function MarketPageClient() {
   const { data: statsData, loading } = useApiData('/api/market/stats');
@@ -130,24 +132,26 @@ export default function MarketPageClient() {
           <div>
             <Subheading
               title="Managers en la Subasta"
-              subtitle="Quién roba más operaciones disputadas y quién más veces se queda a las puertas"
+              subtitle="Quién roba más operaciones disputadas, quién pierde más finales y quién termina pagando de más por ganar"
             />
-            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
               <TheThiefCard data={marketStats.theThief} />
               <TheVictimCard data={marketStats.theVictim} />
+              <OverpayerManagerCard data={marketStats.overpayerManager} />
             </div>
           </div>
 
           <div>
             <Subheading
               title="Jugadores Bajo el Martillo"
-              subtitle="Los nombres que concentran pujas, rotación, robos ajustados y también grandes decepciones"
+              subtitle="Los nombres que concentran pujas, rotación, sobreprecio, robos ajustados y también grandes decepciones"
             />
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
               <RecordBidCard record={marketStats.recordBid} />
               <BiggestStealCard data={marketStats.biggestSteal} />
               <TopTransferredCard player={marketStats.topPlayer} />
               <MostOwnersCard player={marketStats.mostOwners} />
+              <InflatedPlayerCard data={marketStats.inflatedPlayer} />
               {marketStats.worstValue && <WorstValueCard player={marketStats.worstValue} />}
             </div>
           </div>

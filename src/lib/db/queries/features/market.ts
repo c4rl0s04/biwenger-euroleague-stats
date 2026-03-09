@@ -228,6 +228,22 @@ export interface TheVictim {
   failed_bids_count: number;
 }
 
+export interface OverpayerManager {
+  name: string;
+  contested_wins: number;
+  total_overpay: number;
+  avg_overpay: number;
+}
+
+export interface InflatedPlayer {
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  trade_count: number;
+  total_inflation: number;
+  avg_inflation: number;
+}
+
 export interface SingleFlip {
   user_id: number;
   user_name: string;
@@ -1352,6 +1368,108 @@ export async function getTheVictim(): Promise<TheVictim[]> {
   return result.rows.map((row: any) => ({
     ...row,
     failed_bids_count: parseInt(row.failed_bids_count),
+  }));
+}
+
+/**
+ * Get Overpaying Manager
+ * "El Sobrepagador"
+ * - Managers who win contested auctions by paying well above the second-best bid
+ */
+export async function getOverpayerManager(): Promise<OverpayerManager[]> {
+  const query = `
+    WITH CompetitiveWins AS (
+      SELECT
+        f.id as transfer_id,
+        f.comprador as name,
+        f.precio as winning_price,
+        second_bid.amount as second_highest_bid,
+        (f.precio - second_bid.amount) as overpay
+      FROM fichajes f
+      JOIN LATERAL (
+        SELECT tb.amount
+        FROM transfer_bids tb
+        WHERE tb.transfer_id = f.id
+          AND tb.bidder_name != f.comprador
+          AND tb.amount < f.precio
+        ORDER BY tb.amount DESC
+        LIMIT 1
+      ) second_bid ON true
+      WHERE f.comprador != 'Mercado'
+    )
+    SELECT
+      name,
+      COUNT(*) as contested_wins,
+      SUM(overpay) as total_overpay,
+      AVG(overpay) as avg_overpay
+    FROM CompetitiveWins
+    WHERE overpay > 0
+    GROUP BY name
+    ORDER BY total_overpay DESC, avg_overpay DESC
+    LIMIT 10
+  `;
+
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+
+  return result.rows.map((row: any) => ({
+    ...row,
+    contested_wins: parseInt(row.contested_wins),
+    total_overpay: parseInt(row.total_overpay),
+    avg_overpay: parseFloat(row.avg_overpay),
+  }));
+}
+
+/**
+ * Get Inflated Player
+ * "El Inflado"
+ * - Players most often bought above their market value on the transfer day
+ */
+export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
+  const query = `
+    WITH TransferWithMarketValue AS (
+      SELECT
+        f.id as transfer_id,
+        p.id as player_id,
+        p.name as player_name,
+        p.img as player_img,
+        f.precio as purchase_price,
+        mv.price as market_price,
+        (f.precio - mv.price) as inflation
+      FROM fichajes f
+      JOIN players p ON p.id = f.player_id
+      JOIN LATERAL (
+        SELECT mv.price
+        FROM market_values mv
+        WHERE mv.player_id = f.player_id
+          AND mv.date <= to_timestamp(f.timestamp)::date
+        ORDER BY mv.date DESC
+        LIMIT 1
+      ) mv ON true
+      WHERE f.comprador != 'Mercado'
+        AND f.precio > mv.price
+    )
+    SELECT
+      player_id,
+      player_name,
+      player_img,
+      COUNT(*) as trade_count,
+      SUM(inflation) as total_inflation,
+      AVG(inflation) as avg_inflation
+    FROM TransferWithMarketValue
+    GROUP BY player_id, player_name, player_img
+    ORDER BY total_inflation DESC, avg_inflation DESC
+    LIMIT 10
+  `;
+
+  const result = await db.query(query);
+  if (!result.rows.length) return [];
+
+  return result.rows.map((row: any) => ({
+    ...row,
+    trade_count: parseInt(row.trade_count),
+    total_inflation: parseInt(row.total_inflation),
+    avg_inflation: parseFloat(row.avg_inflation),
   }));
 }
 

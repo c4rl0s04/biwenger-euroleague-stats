@@ -28,7 +28,7 @@ export default function WorstValueCard({ player }) {
   };
 
   return (
-    <div className="h-full hover:scale-[1.02] transition-transform duration-200">
+    <div className="hover:scale-[1.02] transition-transform duration-200">
       <ElegantCard
         title="El Flop"
         icon={ThumbsDown}

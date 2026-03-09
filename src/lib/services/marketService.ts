@@ -22,6 +22,8 @@ import {
   getTheThief,
   getBiggestSteal,
   getTheVictim,
+  getOverpayerManager,
+  getInflatedPlayer,
   getMissedOpportunity,
   getTopTrader,
   getProfitablePlayer,
@@ -94,6 +96,8 @@ export async function fetchMarketStats() {
     theThief,
     biggestSteal,
     theVictim,
+    overpayerManager,
+    inflatedPlayer,
     missedOpportunity,
     topTrader,
     profitablePlayer,
@@ -123,6 +127,8 @@ export async function fetchMarketStats() {
     getTheThief(),
     getBiggestSteal(),
     getTheVictim(),
+    getOverpayerManager(),
+    getInflatedPlayer(),
     getMissedOpportunity(),
     getTopTrader(),
     getProfitablePlayer(),
@@ -155,6 +161,7 @@ export async function fetchMarketStats() {
   const enrichedBestSeller = enrichUserArray(bestSeller, allUsers, 'name');
   const enrichedTheThief = enrichUserArray(theThief, allUsers, 'name');
   const enrichedTheVictim = enrichUserArray(theVictim, allUsers, 'name');
+  const enrichedOverpayerManager = enrichUserArray(overpayerManager, allUsers, 'name');
 
   // BiggestSteal needs double enrichment (winner + second bidder)
   const enrichedBiggestSteal = enrichUserArray(
@@ -186,6 +193,8 @@ export async function fetchMarketStats() {
     theThief: enrichedTheThief,
     biggestSteal: enrichedBiggestSteal,
     theVictim: enrichedTheVictim,
+    overpayerManager: enrichedOverpayerManager,
+    inflatedPlayer,
     missedOpportunity,
     topTrader,
     profitablePlayer,
