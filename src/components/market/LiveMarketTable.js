@@ -237,9 +237,13 @@ export default function LiveMarketTable({ initialData }) {
                               >
                                 {pos.label}
                               </span>
-                              <span className="font-bold text-zinc-100 text-xs truncate max-w-45 md:max-w-60">
+                              <a
+                                href={`/player/${t.player_id}`}
+                                className="font-bold text-zinc-100 text-xs truncate max-w-45 md:max-w-60 hover:text-orange-400 transition-colors"
+                                style={{ textDecoration: 'none' }}
+                              >
                                 {t.player_name}
-                              </span>
+                              </a>
                             </div>
                           </td>
                           {/* Operación con iconos */}

@@ -944,6 +944,7 @@ export async function getLiveMarketTransfers({
       f.comprador,
       v.id as vendedor_id,
       c.id as comprador_id,
+      f.player_id,
       p.name as player_name,
       p.position as player_position,
       p.img as player_img,
@@ -975,6 +976,7 @@ export async function getLiveMarketTransfers({
   return {
     transfers: rowsResult.rows.map((r: any) => ({
       ...r,
+      player_id: r.player_id,
       precio: parseInt(r.precio),
       bids_count: parseInt(r.bids_count),
       vendedor_id: r.vendedor_id || null,
