@@ -127,90 +127,208 @@ export default function LiveMarketTable({ initialData }) {
           </form>
         </div>
 
-        {/* Table */}
+        {/* Tabla compacta con iconografía */}
         <div className="relative min-h-100 flex-1 overflow-x-auto">
           {loading && (
-            <div className="absolute inset-0 bg-zinc-900/50 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-lg">
-              <Loader2 className="animate-spin text-orange-500 w-6 h-6" />
+            <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-xl">
+              <Loader2 className="animate-spin text-orange-400 w-7 h-7" />
             </div>
           )}
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-zinc-500 uppercase border-b border-white/5">
-              <tr>
-                <th className="px-4 py-3 font-medium">Fecha</th>
-                <th className="px-4 py-3 font-medium">Jugador</th>
-                <th className="px-4 py-3 font-medium">Operación</th>
-                <th className="px-4 py-3 font-medium text-right">Precio</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {tableData.transfers.map((t) => (
-                <tr key={t.id} className="hover:bg-white/5 transition-colors group">
-                  <td className="px-4 py-3 whitespace-nowrap text-xs text-zinc-500 font-mono">
-                    {new Date(t.fecha).toLocaleDateString('es-ES', {
-                      day: '2-digit',
-                      month: 'short',
-                    })}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden bg-zinc-800 border border-white/5">
-                        {t.player_img && (
-                          <Image
-                            src={t.player_img}
-                            alt={t.player_name}
-                            fill
-                            className="object-cover"
-                            sizes="32px"
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`inline-flex items-center justify-center w-4 h-4 rounded text-[9px] font-bold text-white shadow-sm ${POS_COLORS[t.player_position] || POS_COLORS.Unknown}`}
-                          >
-                            {t.player_position}
-                          </span>
-                          <span className="font-bold text-zinc-200 text-xs">{t.player_name}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span
-                        className={`font-medium ${t.vendedor === 'Mercado' ? 'text-orange-400' : 'text-red-400'}`}
+          {/* Agrupar transfers por día */}
+          {(() => {
+            // Utilidad para agrupar transfers por fecha (día)
+            const groupByDay = (arr) => {
+              return arr.reduce((acc, t) => {
+                const day = new Date(t.fecha).toLocaleDateString('es-ES', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                });
+                if (!acc[day]) acc[day] = [];
+                acc[day].push(t);
+                return acc;
+              }, {});
+            };
+            const grouped = groupByDay(tableData.transfers);
+            const dayKeys = Object.keys(grouped).sort((a, b) => {
+              // Más reciente primero
+              const da = new Date(a.split(' ').reverse().join('-'));
+              const db = new Date(b.split(' ').reverse().join('-'));
+              return db - da;
+            });
+            // Mapeo de posición a icono/estilo
+            const POS_ICON = {
+              Base: { color: 'bg-blue-500/90 border-blue-300', label: 'B' },
+              Alero: { color: 'bg-green-500/90 border-green-300', label: 'A' },
+              Pivot: { color: 'bg-red-500/90 border-red-300', label: 'P' },
+              Unknown: { color: 'bg-zinc-500/80 border-zinc-300', label: '?' },
+            };
+            return (
+              <table className="w-full text-sm text-left rounded-xl overflow-hidden border border-white/10 bg-transparent shadow-xl">
+                <thead className="text-xs text-zinc-400 uppercase border-b border-white/10 sticky top-0 bg-transparent z-10">
+                  <tr>
+                    <th className="px-3 py-3 font-semibold tracking-wide">Fecha</th>
+                    <th className="px-3 py-3 font-semibold tracking-wide">Jugador</th>
+                    <th className="px-3 py-3 font-semibold tracking-wide">Operación</th>
+                    <th className="px-3 py-3 font-semibold tracking-wide text-right">Precio</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10 bg-transparent">
+                  {dayKeys.map((day) => [
+                    <tr key={day} className="sticky top-8 z-5">
+                      <td
+                        colSpan="4"
+                        className="py-2 px-3 text-xs font-bold text-orange-200 tracking-wide sticky left-0 bg-transparent shadow-sm border-b border-orange-300/20"
                       >
-                        {t.vendedor}
-                      </span>
-                      <ArrowRight size={10} className="text-zinc-600" />
-                      <span
-                        className={`font-medium ${t.comprador === 'Mercado' ? 'text-orange-400' : 'text-emerald-400'}`}
-                      >
-                        {t.comprador}
-                      </span>
-                    </div>
-                    {t.bids_count > 1 && (
-                      <span className="text-[10px] text-purple-400 mt-0.5 block font-mono">
-                        🔥 {t.bids_count} pujas
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-right font-mono font-bold text-zinc-300 group-hover:text-white">
-                    {formatEuro(t.precio)} €
-                  </td>
-                </tr>
-              ))}
-              {!tableData.transfers.length && !loading && (
-                <tr>
-                  <td colSpan="4" className="text-center py-8 text-zinc-500">
-                    No se encontraron fichajes
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                        {day}
+                      </td>
+                    </tr>,
+                    ...grouped[day].map((t) => {
+                      const pos = POS_ICON[t.player_position] || POS_ICON.Unknown;
+                      return (
+                        <tr
+                          key={t.id}
+                          className="hover:bg-orange-900/10 transition-colors group bg-transparent"
+                        >
+                          {/* Fecha (vacío, ya está el header) */}
+                          <td className="px-3 py-3 whitespace-nowrap text-xs text-zinc-500 font-mono"></td>
+                          {/* Jugador */}
+                          <td className="px-3 py-3 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <div className="relative w-8 h-8 rounded-full overflow-hidden bg-zinc-800 border border-white/10 shadow-sm">
+                                {t.player_img && (
+                                  <Image
+                                    src={t.player_img}
+                                    alt={t.player_name}
+                                    fill
+                                    className="object-cover"
+                                    sizes="32px"
+                                  />
+                                )}
+                              </div>
+                              <span
+                                className={`inline-flex items-center justify-center w-5 h-5 rounded-full border text-[11px] font-bold text-white shadow-sm ${pos.color}`}
+                              >
+                                {pos.label}
+                              </span>
+                              <span className="font-bold text-zinc-100 text-xs truncate max-w-[180px] md:max-w-[240px]">
+                                {t.player_name}
+                              </span>
+                            </div>
+                          </td>
+                          {/* Operación con iconos */}
+                          <td className="px-3 py-3 whitespace-nowrap">
+                            <div className="flex items-center gap-2 text-xs">
+                              {/* Vendedor icono */}
+                              <span title={t.vendedor} className="flex items-center gap-1">
+                                {t.vendedor === 'Mercado' ? (
+                                  <span
+                                    className="bg-orange-400/10 rounded-full p-1 text-orange-400 border border-orange-300/30"
+                                    title="Mercado"
+                                  >
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                                      <path
+                                        d="M2 6l6-4 6 4v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                      />
+                                    </svg>
+                                  </span>
+                                ) : (
+                                  <span
+                                    className="bg-red-400/10 rounded-full p-1 text-red-400 border border-red-300/30"
+                                    title={t.vendedor}
+                                  >
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                                      <circle
+                                        cx="8"
+                                        cy="8"
+                                        r="6"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                      />
+                                      <path
+                                        d="M8 5v3l2 2"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                      />
+                                    </svg>
+                                  </span>
+                                )}
+                                <span className="hidden md:inline text-zinc-400">{t.vendedor}</span>
+                              </span>
+                              <ArrowRight size={12} className="text-zinc-500" />
+                              {/* Comprador icono */}
+                              <span title={t.comprador} className="flex items-center gap-1">
+                                {t.comprador === 'Mercado' ? (
+                                  <span
+                                    className="bg-orange-400/10 rounded-full p-1 text-orange-400 border border-orange-300/30"
+                                    title="Mercado"
+                                  >
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                                      <path
+                                        d="M2 6l6-4 6 4v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                      />
+                                    </svg>
+                                  </span>
+                                ) : (
+                                  <span
+                                    className="bg-emerald-400/10 rounded-full p-1 text-emerald-400 border border-emerald-300/30"
+                                    title={t.comprador}
+                                  >
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                                      <circle
+                                        cx="8"
+                                        cy="8"
+                                        r="6"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                      />
+                                      <path
+                                        d="M8 11V8l-2-2"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                      />
+                                    </svg>
+                                  </span>
+                                )}
+                                <span className="hidden md:inline text-zinc-400">
+                                  {t.comprador}
+                                </span>
+                              </span>
+                              {/* Badge pujas */}
+                              {t.bids_count > 1 && (
+                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-purple-900/60 text-purple-200 text-[10px] font-mono animate-pulse border border-purple-400/30">
+                                  🔥 {t.bids_count}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          {/* Precio */}
+                          <td className="px-3 py-3 whitespace-nowrap text-right font-mono font-bold text-orange-300 group-hover:text-orange-100 relative">
+                            <span className="transition-transform duration-150 group-hover:scale-110 cursor-pointer">
+                              {formatEuro(t.precio)} €
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    }),
+                  ])}
+                  {!tableData.transfers.length && !loading && (
+                    <tr>
+                      <td colSpan="4" className="text-center py-8 text-zinc-500">
+                        No se encontraron fichajes
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            );
+          })()}
         </div>
 
         {/* Pagination */}
