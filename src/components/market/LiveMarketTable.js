@@ -80,6 +80,32 @@ export default function LiveMarketTable({ initialData }) {
 
   const formatEuro = (val) => val.toLocaleString('es-ES', { maximumFractionDigits: 0 });
 
+  // Utilidad para asignar un color único a cada usuario (hash simple)
+  const userColor = (name) => {
+    if (!name || name === 'Mercado') return 'text-orange-400';
+    // Paleta de colores pastel
+    const palette = [
+      'text-blue-400',
+      'text-green-400',
+      'text-pink-400',
+      'text-yellow-400',
+      'text-purple-400',
+      'text-emerald-400',
+      'text-cyan-400',
+      'text-fuchsia-400',
+      'text-lime-400',
+      'text-sky-400',
+      'text-red-400',
+      'text-indigo-400',
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const idx = Math.abs(hash) % palette.length;
+    return palette[idx];
+  };
+
   return (
     <ElegantCard
       title="Mercado en Vivo"
@@ -211,7 +237,7 @@ export default function LiveMarketTable({ initialData }) {
                               >
                                 {pos.label}
                               </span>
-                              <span className="font-bold text-zinc-100 text-xs truncate max-w-[180px] md:max-w-[240px]">
+                              <span className="font-bold text-zinc-100 text-xs truncate max-w-45 md:max-w-60">
                                 {t.player_name}
                               </span>
                             </div>
@@ -256,7 +282,21 @@ export default function LiveMarketTable({ initialData }) {
                                     </svg>
                                   </span>
                                 )}
-                                <span className="hidden md:inline text-zinc-400">{t.vendedor}</span>
+                                <span className="hidden md:inline">
+                                  {t.vendedor !== 'Mercado' ? (
+                                    <a
+                                      href={`/user/${t.vendedor_id}`}
+                                      className={`${userColor(t.vendedor)} hover:brightness-125 font-semibold transition-colors`}
+                                      style={{ textDecoration: 'none' }}
+                                    >
+                                      {t.vendedor}
+                                    </a>
+                                  ) : (
+                                    <span className="text-orange-400 font-semibold">
+                                      {t.vendedor}
+                                    </span>
+                                  )}
+                                </span>
                               </span>
                               <ArrowRight size={12} className="text-zinc-500" />
                               {/* Comprador icono */}
@@ -296,8 +336,20 @@ export default function LiveMarketTable({ initialData }) {
                                     </svg>
                                   </span>
                                 )}
-                                <span className="hidden md:inline text-zinc-400">
-                                  {t.comprador}
+                                <span className="hidden md:inline">
+                                  {t.comprador !== 'Mercado' ? (
+                                    <a
+                                      href={`/user/${t.comprador_id}`}
+                                      className={`${userColor(t.comprador)} hover:brightness-125 font-semibold transition-colors`}
+                                      style={{ textDecoration: 'none' }}
+                                    >
+                                      {t.comprador}
+                                    </a>
+                                  ) : (
+                                    <span className="text-orange-400 font-semibold">
+                                      {t.comprador}
+                                    </span>
+                                  )}
                                 </span>
                               </span>
                               {/* Badge pujas */}

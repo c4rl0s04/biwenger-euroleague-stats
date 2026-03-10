@@ -942,12 +942,16 @@ export async function getLiveMarketTransfers({
       f.precio,
       f.vendedor,
       f.comprador,
+      v.id as vendedor_id,
+      c.id as comprador_id,
       p.name as player_name,
       p.position as player_position,
       p.img as player_img,
       (SELECT COUNT(*) FROM transfer_bids tb WHERE tb.transfer_id = f.id) as bids_count
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
+    LEFT JOIN users v ON v.name = f.vendedor
+    LEFT JOIN users c ON c.name = f.comprador
     ${whereClause}
     ORDER BY f.timestamp DESC
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -973,6 +977,8 @@ export async function getLiveMarketTransfers({
       ...r,
       precio: parseInt(r.precio),
       bids_count: parseInt(r.bids_count),
+      vendedor_id: r.vendedor_id || null,
+      comprador_id: r.comprador_id || null,
     })),
     total: parseInt(countResult.rows[0].total),
     page,
