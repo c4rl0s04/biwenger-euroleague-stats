@@ -251,7 +251,7 @@ export default function LiveMarketTable({ initialData }) {
                                     src={t.player_img}
                                     alt={t.player_name}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover object-top scale-[1.8] origin-top translate-y-[10%]"
                                     sizes="32px"
                                   />
                                 )}
@@ -390,7 +390,7 @@ export default function LiveMarketTable({ initialData }) {
                           </td>
                           {/* Precio */}
                           <td className="px-3 py-3 whitespace-nowrap text-right font-mono font-bold text-orange-300 group-hover:text-orange-100 relative">
-                            <span className="transition-transform duration-150 group-hover:scale-110 cursor-pointer">
+                            <span className="transition-transform duration-150 group-hover:scale-110">
                               {formatEuro(t.precio)} €
                             </span>
                           </td>
