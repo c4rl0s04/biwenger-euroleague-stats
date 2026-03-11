@@ -119,9 +119,33 @@ export default function LiveMarketTable({ initialData }) {
       }
     >
       <div className="flex flex-col h-full">
-        {/* Filters */}
-        <div className="mb-4">
-          <form onSubmit={handleSearch} className="flex gap-2">
+        {/* Top Controls: Pagination + Filters */}
+        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          {/* Pagination Top */}
+          <div className="flex items-center gap-3 order-2 md:order-1 justify-between md:justify-start">
+            <span className="text-xs text-zinc-500">
+              Página <span className="text-zinc-300 font-mono">{page}</span> de{' '}
+              <span className="text-zinc-300 font-mono">{tableData.totalPages}</span>
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((currentPage) => currentPage - 1)}
+                disabled={page <= 1 || loading}
+                className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+              >
+                <ArrowLeft size={14} />
+              </button>
+              <button
+                onClick={() => setPage((currentPage) => currentPage + 1)}
+                disabled={page >= tableData.totalPages || loading}
+                className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+              >
+                <ArrowNext size={14} />
+              </button>
+            </div>
+          </div>
+          {/* Filters */}
+          <form onSubmit={handleSearch} className="flex gap-2 order-1 md:order-2">
             <div className="relative flex-1">
               <Filter className="absolute left-2 top-2.5 text-zinc-500 w-3 h-3" />
               <input
@@ -387,7 +411,7 @@ export default function LiveMarketTable({ initialData }) {
           })()}
         </div>
 
-        {/* Pagination */}
+        {/* Pagination (bottom) */}
         <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
           <span className="text-xs text-zinc-500">
             Página <span className="text-zinc-300 font-mono">{page}</span> de{' '}
@@ -397,14 +421,14 @@ export default function LiveMarketTable({ initialData }) {
             <button
               onClick={() => setPage((currentPage) => currentPage - 1)}
               disabled={page <= 1 || loading}
-              className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors"
+              className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
             >
               <ArrowLeft size={14} />
             </button>
             <button
               onClick={() => setPage((currentPage) => currentPage + 1)}
               disabled={page >= tableData.totalPages || loading}
-              className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors"
+              className="p-1.5 rounded bg-zinc-800 text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
             >
               <ArrowNext size={14} />
             </button>
