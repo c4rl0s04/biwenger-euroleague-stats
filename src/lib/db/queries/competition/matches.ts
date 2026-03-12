@@ -13,6 +13,7 @@ export async function getMatchesGroupedByRound() {
     .select({
       id: matches.id,
       round_id: matches.roundId,
+      round_name: matches.roundName, // <-- Fetching official roundName
       home_score: matches.homeScore,
       away_score: matches.awayScore,
       date: matches.date,
@@ -35,15 +36,14 @@ export async function getMatchesGroupedByRound() {
   const grouped = rows.reduce(
     (acc, match) => {
       const roundId = match.round_id;
-      // Safety check for null roundId (though schema might say integer, it could be null in DB?)
-      // Schema says `integer('round_id')` without notNull(), so it can be null.
-      // The previous JS code didn't check.
+      // Safety check for null roundId
       if (!roundId) return acc;
 
       if (!acc[roundId]) {
         acc[roundId] = {
           round_id: roundId,
-          round_name: `Jornada ${roundId}`, // Default name, can be enriched if round_name exists in schema
+          // Use official name from DB, fallback if missing
+          round_name: match.round_name || `Jornada ${roundId}`,
           matches: [],
         };
       }
@@ -74,18 +74,13 @@ export async function getMatchesGroupedByRound() {
   // Convert to array
   const roundsArr = Object.values(grouped);
 
-  // Sort by date (earliest first) to assign correct round numbers 1-38
-  roundsArr.sort((a: any, b: any) => {
-    // get earliest date in each round
-    const dateA = a.matches[0]?.date ? new Date(a.matches[0].date) : new Date(0);
-    const dateB = b.matches[0]?.date ? new Date(b.matches[0].date) : new Date(0);
-    return dateA.getTime() - dateB.getTime();
-  });
+  // Sort by round_id to maintain official sequence (1 to 38)
+  // regardless of advanced or postponed match dates
+  roundsArr.sort((a: any, b: any) => a.round_id - b.round_id);
 
-  // Assign sequential names
+  // Assign sequential internal index just in case UI uses it for state,
+  // but DO NOT overwrite the official round_name.
   roundsArr.forEach((round: any, index: number) => {
-    round.round_name = `Jornada ${index + 1}`;
-    // Assign a logical index if round_id is arbitrary
     round.round_index = index + 1;
   });
 
