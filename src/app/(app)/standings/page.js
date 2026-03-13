@@ -14,8 +14,6 @@ import {
   HeartbreakersCard,
   NoGloryCard,
   JinxCard,
-  InitialSquadAnalysisCard,
-  // New Stats
   HeatCheckCard,
   TheHunterCard,
   RollingAverageCard,
