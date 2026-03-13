@@ -25,7 +25,6 @@ import {
   AllPlayAllCard,
   DominanceCard,
   TheoreticalGapCard,
-  PositionEvolutionCard,
   RivalryMatrixCard,
 } from '@/components/standings';
 
@@ -50,6 +49,11 @@ const PlacementStatsCard = dynamic(() => import('@/components/standings/Placemen
 const LeaguePerformanceCard = dynamic(
   () => import('@/components/standings/LeaguePerformanceCard'),
   { loading: () => <CardSkeleton />, ssr: false }
+);
+
+const PositionEvolutionCard = dynamic(
+  () => import('@/components/standings/PositionEvolutionCard'),
+  { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
 );
 
 export default function ClasificacionPage() {

@@ -3,71 +3,129 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useMemo } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from 'recharts';
 import { getColorForUser } from '@/lib/constants/colors';
 
-// --- Helper function for dynamic cell styling ---
-const getPositionCellClasses = (change, position) => {
-  const base =
-    'w-7 h-7 rounded flex items-center justify-center text-xs border tabular-nums transition-all hover:scale-110 hover:z-10 cursor-default font-bold shadow-sm';
+// --- Custom Tooltip ---
+const CustomTooltip = ({ active, payload, label, totalUsers }) => {
+  if (active && payload && payload.length) {
+    const sorted = [...payload].filter((p) => p.value != null).sort((a, b) => a.value - b.value); // ascending = rank 1 first
 
-  // --- PODIUM STYLES (Overrides Trends) ---
-
-  // 1. GOLD (Rank 1)
-  if (position === 1) {
-    return `${base} bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 text-yellow-300 border-yellow-500/60 shadow-[0_0_10px_rgba(234,179,8,0.3)] ring-1 ring-yellow-400/20 font-extrabold text-[13px]`;
+    return (
+      <div className="bg-slate-800/95 border border-slate-700 rounded-xl p-3 shadow-2xl z-50 pointer-events-none min-w-[160px]">
+        <p className="text-slate-400 text-xs mb-2.5 font-semibold tracking-wider uppercase">
+          {label}
+        </p>
+        <div className="space-y-1.5">
+          {sorted.map((entry, index) => {
+            const pos = entry.value;
+            const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : null;
+            return (
+              <div key={index} className="flex items-center gap-2 text-xs">
+                <div
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-slate-300 flex-1 truncate max-w-[100px]">{entry.name}</span>
+                <span className="font-bold text-white ml-auto flex items-center gap-1">
+                  {medal && <span className="text-[11px]">{medal}</span>}
+                  <span>#{pos}</span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   }
+  return null;
+};
 
-  // 2. SILVER (Rank 2)
-  if (position === 2) {
-    return `${base} bg-gradient-to-br from-slate-300/20 to-slate-400/10 text-slate-200 border-slate-400/60 shadow-[0_0_10px_rgba(148,163,184,0.2)] ring-1 ring-slate-300/20 font-extrabold`;
-  }
-
-  // 3. BRONZE (Rank 3)
-  if (position === 3) {
-    return `${base} bg-gradient-to-br from-orange-400/20 to-amber-600/10 text-amber-400 border-orange-500/60 shadow-[0_0_10px_rgba(249,115,22,0.2)] ring-1 ring-orange-400/20 font-extrabold`;
-  }
-
-  // --- TREND STYLES (Ranks 4+) ---
-
-  // No change
-  if (change === 0 || change === null) {
-    return `${base} bg-slate-800/80 text-slate-500 border-slate-700/50 font-normal`;
-  }
-
-  const magnitude = Math.abs(change);
-  const isUp = change > 0;
-
-  if (isUp) {
-    // Green Tiers
-    if (magnitude >= 5) {
-      // Massive Rise
-      return `${base} bg-emerald-500 text-emerald-950 border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)] font-extrabold`;
-    }
-    if (magnitude >= 3) {
-      // Good Rise
-      return `${base} bg-emerald-600 text-white border-emerald-500 font-bold`;
-    }
-    // Standard Rise
-    return `${base} bg-emerald-500/20 text-emerald-400 border-emerald-500/30`;
-  } else {
-    // Red Tiers
-    if (magnitude >= 5) {
-      // Massive Fall
-      return `${base} bg-red-600 text-red-50 border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)] font-extrabold`;
-    }
-    if (magnitude >= 3) {
-      // Bad Fall
-      return `${base} bg-red-700 text-white border-red-500 font-bold`;
-    }
-    // Standard Fall
-    return `${base} bg-red-500/20 text-red-400 border-red-500/30`;
-  }
+// --- Custom Y-Axis Tick (shows ordinal position) ---
+const PositionTick = ({ x, y, payload }) => {
+  const pos = payload.value;
+  const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : null;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={4}
+        textAnchor="end"
+        className="text-slate-400"
+        fill="#94a3b8"
+        fontSize={11}
+      >
+        {medal ? medal : `#${pos}`}
+      </text>
+    </g>
+  );
 };
 
 export default function PositionEvolutionCard() {
   const { data, loading } = useApiData('/api/standings/advanced?type=position-evolution');
+  const [selectedUsers, setSelectedUsers] = useState(new Set());
+
+  // Build chart data: [{ name: "J5", [userId]: position, ... }, ...]
+  const { chartData, users } = useMemo(() => {
+    if (!data?.users || !data?.rounds) return { chartData: [], users: [] };
+
+    const chartData = data.rounds.map((round, idx) => {
+      const entry = { name: round.name };
+      data.users.forEach((user) => {
+        const histItem = user.history[idx];
+        if (histItem) {
+          entry[String(user.id)] = histItem.position;
+        }
+      });
+      return entry;
+    });
+
+    // Sort users by their final position (ascending = best first)
+    const lastIdx = data.rounds.length - 1;
+    const sortedUsers = [...data.users].sort((a, b) => {
+      const posA = a.history[lastIdx]?.position ?? 999;
+      const posB = b.history[lastIdx]?.position ?? 999;
+      return posA - posB;
+    });
+
+    return { chartData, users: sortedUsers };
+  }, [data]);
+
+  const totalUsers = users.length;
+
+  // All selected by default
+  const initializedUsers = useMemo(() => new Set(users.map((u) => String(u.id))), [users]);
+  const effectiveSelected =
+    selectedUsers.size === 0 && users.length > 0 ? initializedUsers : selectedUsers;
+
+  const toggleUser = (userId) => {
+    const next = new Set(selectedUsers);
+    if (next.has(userId)) {
+      next.delete(userId);
+    } else {
+      next.add(userId);
+    }
+    setSelectedUsers(next);
+  };
+
+  const toggleAll = () => {
+    if (selectedUsers.size === users.length) {
+      setSelectedUsers(new Set());
+    } else {
+      setSelectedUsers(new Set(users.map((u) => String(u.id))));
+    }
+  };
 
   return (
     <Card
@@ -75,37 +133,17 @@ export default function PositionEvolutionCard() {
       icon={TrendingUp}
       color="cyan"
       loading={loading}
-      tooltip="Evolución de ranking jornada a jornada. Top 3 y grandes cambios destacados."
+      tooltip="Evolución del ranking global jornada a jornada. Cada línea representa un participante."
       className="h-full flex flex-col"
     >
       {!loading && data && data.users ? (
-        <div className="flex flex-col h-full gap-4">
-          {/* Legend */}
-          <div className="text-center space-y-1 px-2">
-            <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-400">
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-sm border border-yellow-500/60 bg-yellow-500/20 shadow-[0_0_4px_rgba(234,179,8,0.4)]" />
-                Podio
-              </span>
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-sm bg-emerald-500" />
-                Subida fuerte
-              </span>
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-sm bg-red-600" />
-                Caída fuerte
-              </span>
-            </div>
-          </div>
-
-          {/* Highlights Section */}
+        <div className="flex flex-col gap-4">
+          {/* Highlights: Mayor Subida / Mayor Caída */}
           {data.valid && (
             <div className="flex items-center gap-4 text-xs px-1">
               {/* Biggest Climber */}
               <div className="flex-1 bg-emerald-950/30 border border-emerald-900/50 rounded-xl p-3 flex items-center justify-between shadow-sm relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                {/* Name Container: flex-1 min-w-0 ensures it takes space but allows wrapping */}
                 <div className="flex items-center gap-2.5 relative z-10 flex-1 min-w-0">
                   <div className="flex-shrink-0 p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">
                     <TrendingUp size={16} strokeWidth={3} />
@@ -114,14 +152,11 @@ export default function PositionEvolutionCard() {
                     <span className="text-emerald-500/60 font-bold block text-[9px] uppercase tracking-wider">
                       Mayor Subida
                     </span>
-                    {/* Removed truncate and max-w, added leading-tight for multi-line support */}
                     <span className="block font-bold text-slate-200 text-sm leading-tight break-words pr-1">
                       {data.stats?.biggestClimber?.name || '-'}
                     </span>
                   </div>
                 </div>
-
-                {/* Number Badge */}
                 <div className="text-right flex items-center gap-1.5 relative z-10 flex-shrink-0">
                   <span className="px-2 py-1 rounded-md font-extrabold text-sm bg-emerald-500 text-emerald-950 min-w-[3ch] text-center shadow-[0_0_10px_rgba(16,185,129,0.3)]">
                     {data.stats?.biggestClimber?.change > 0
@@ -134,8 +169,6 @@ export default function PositionEvolutionCard() {
               {/* Biggest Faller */}
               <div className="flex-1 bg-red-950/30 border border-red-900/50 rounded-xl p-3 flex items-center justify-between shadow-sm relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                {/* Name Container */}
                 <div className="flex items-center gap-2.5 relative z-10 flex-1 min-w-0">
                   <div className="flex-shrink-0 p-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg">
                     <TrendingDown size={16} strokeWidth={3} />
@@ -144,14 +177,11 @@ export default function PositionEvolutionCard() {
                     <span className="text-red-500/60 font-bold block text-[9px] uppercase tracking-wider">
                       Mayor Caída
                     </span>
-                    {/* Removed truncate and max-w */}
                     <span className="block font-bold text-slate-200 text-sm leading-tight break-words pr-1">
                       {data.stats?.biggestFaller?.name || '-'}
                     </span>
                   </div>
                 </div>
-
-                {/* Number Badge */}
                 <div className="text-right flex items-center gap-1.5 relative z-10 flex-shrink-0">
                   <span className="px-2 py-1 rounded-md font-extrabold text-sm bg-red-600 text-red-50 min-w-[3ch] text-center shadow-[0_0_10px_rgba(239,68,68,0.3)]">
                     {data.stats?.biggestFaller?.change || '-'}
@@ -161,86 +191,107 @@ export default function PositionEvolutionCard() {
             </div>
           )}
 
-          {/* The Grid */}
-          <div className="w-full flex-1 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800/50 rounded-lg">
-            <div className="w-full min-w-max px-1">
-              {/* Header Row */}
-              <div className="flex items-center mb-2 border-b border-slate-800/50 pb-1">
-                {/* Maintained w-48 from previous fix to ensure list view also fits long names */}
-                <div className="w-48 flex-shrink-0 text-[10px] uppercase tracking-wider font-bold text-slate-500 px-2 sticky left-0 z-10">
-                  JUGADOR
-                </div>
-                {data.rounds.map((round) => (
+          {/* User Toggle Filter */}
+          <div className="flex flex-wrap gap-2 px-1">
+            <button
+              onClick={toggleAll}
+              className={`px-3 py-1 text-xs !rounded-full border transition-all cursor-pointer focus:outline-none overflow-hidden ${
+                effectiveSelected.size === users.length
+                  ? 'bg-slate-700 border-slate-600 text-white'
+                  : 'bg-transparent border-slate-700 text-slate-400 hover:border-slate-500'
+              }`}
+            >
+              Todos
+            </button>
+            {users.map((user) => {
+              const colors = getColorForUser(user.id, user.name, user.color_index);
+              const isSelected = effectiveSelected.has(String(user.id));
+              return (
+                <button
+                  key={user.id}
+                  onClick={() => toggleUser(String(user.id))}
+                  className={`px-3 py-1 text-xs !rounded-full border flex items-center gap-2 transition-all cursor-pointer focus:outline-none overflow-hidden ${
+                    isSelected
+                      ? 'bg-slate-800/50 border-slate-700 text-white'
+                      : 'bg-transparent border-slate-800 text-slate-500 opacity-50'
+                  }`}
+                  style={{
+                    borderColor: isSelected ? colors.stroke : undefined,
+                    boxShadow: isSelected ? `0 0 10px -4px ${colors.stroke}` : 'none',
+                  }}
+                >
                   <div
-                    key={round.id}
-                    className="flex-1 min-w-[2.75rem] text-center text-[10px] font-mono font-bold text-slate-500"
-                  >
-                    {round.name.replace('Jornada ', 'J')}
-                  </div>
-                ))}
-              </div>
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: isSelected ? colors.stroke : '#64748b' }}
+                  />
+                  {user.name}
+                </button>
+              );
+            })}
+          </div>
 
-              {/* User Rows */}
-              <div className="space-y-1.5">
-                {data.users.map((user) => {
-                  const userColor = getColorForUser(user.id, user.name, user.color_index);
+          {/* Line Chart */}
+          <div className="h-[420px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 10, right: 16, left: 8, bottom: 0 }}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#334155"
+                  opacity={0.3}
+                  vertical={false}
+                />
+                {/* Reference lines for podium cut */}
+                <ReferenceLine y={1} stroke="#eab308" strokeDasharray="4 3" opacity={0.25} />
+                <ReferenceLine y={3} stroke="#64748b" strokeDasharray="4 3" opacity={0.2} />
+                <XAxis
+                  dataKey="name"
+                  stroke="#cbd5e1"
+                  tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  reversed
+                  domain={[1, totalUsers || 10]}
+                  ticks={Array.from({ length: totalUsers || 10 }, (_, i) => i + 1)}
+                  tick={<PositionTick />}
+                  tickLine={false}
+                  axisLine={false}
+                  width={36}
+                />
+                <Tooltip
+                  content={<CustomTooltip totalUsers={totalUsers} />}
+                  cursor={{ stroke: '#475569', strokeWidth: 1, strokeDasharray: '4 3' }}
+                />
+                {users.map((user) => {
+                  const colors = getColorForUser(user.id, user.name, user.color_index);
+                  const isSelected = effectiveSelected.has(String(user.id));
                   return (
-                    <div
+                    <Line
                       key={user.id}
-                      className="flex items-center hover:bg-slate-800/50 rounded-md transition-colors group py-0.5"
-                    >
-                      <Link
-                        href={`/user/${user.id}`}
-                        className={`w-48 flex-shrink-0 flex items-center gap-2.5 px-2 sticky left-0 z-10 py-1 rounded-l-md bg-slate-900/0 group-hover:bg-slate-900/0 transition-all`}
-                      >
-                        {user.icon ? (
-                          <div className="relative w-5 h-5 shrink-0">
-                            <Image
-                              src={user.icon}
-                              alt={user.name}
-                              fill
-                              className="rounded-full object-cover border border-slate-700 ring-1 ring-black/20"
-                              sizes="20px"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[9px] font-bold text-slate-400 border border-slate-700">
-                            {user.name.charAt(0)}
-                          </div>
-                        )}
-                        <span
-                          className={`text-[11px] font-semibold ${userColor.text} opacity-80 group-hover:opacity-100 group-hover:text-white transition-all whitespace-nowrap`}
-                        >
-                          {user.name}
-                        </span>
-                      </Link>
-
-                      {user.history.map((historyItem, idx) => {
-                        const { position, change } = historyItem;
-
-                        // Pass position to helper to trigger Podium Colors
-                        const cellClasses = getPositionCellClasses(change, position);
-
-                        return (
-                          <div
-                            key={idx}
-                            className="flex-1 min-w-[2.75rem] flex items-center justify-center"
-                          >
-                            <div
-                              className={cellClasses}
-                              title={`J${data.rounds[idx].name}: Pos ${position}`}
-                            >
-                              {position}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                      type="monotone"
+                      dataKey={String(user.id)}
+                      name={user.name}
+                      stroke={colors.stroke}
+                      strokeWidth={isSelected ? 2.5 : 1}
+                      dot={false}
+                      activeDot={{ r: 5, strokeWidth: 0 }}
+                      connectNulls
+                      hide={!isSelected}
+                      isAnimationActive
+                      legendType="circle"
+                    />
                   );
                 })}
-              </div>
-            </div>
+              </LineChart>
+            </ResponsiveContainer>
           </div>
+
+          {/* Bottom note */}
+          <p className="text-center text-[10px] text-slate-600 pb-1">
+            Posición #1 = líder. El eje vertical está invertido (arriba = mejor posición).
+          </p>
         </div>
       ) : (
         !loading && <div className="text-center text-slate-500 py-12">Cargando datos...</div>
