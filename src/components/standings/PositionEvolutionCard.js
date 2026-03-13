@@ -22,7 +22,17 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
     const sorted = [...payload].filter((p) => p.value != null).sort((a, b) => a.value - b.value); // ascending = rank 1 first
 
     return (
-      <div className="bg-slate-800/95 border border-slate-700 rounded-xl p-3 shadow-2xl z-50 pointer-events-none min-w-[160px]">
+      <div
+        style={{
+          backgroundColor: '#1e293b',
+          border: '1px solid #334155',
+          borderRadius: '12px',
+          padding: '12px',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)',
+          minWidth: '160px',
+          pointerEvents: 'none',
+        }}
+      >
         <p className="text-slate-400 text-xs mb-2.5 font-semibold tracking-wider uppercase">
           {label}
         </p>
@@ -263,6 +273,12 @@ export default function PositionEvolutionCard() {
                 <Tooltip
                   content={<CustomTooltip totalUsers={totalUsers} />}
                   cursor={{ stroke: '#475569', strokeWidth: 1, strokeDasharray: '4 3' }}
+                  wrapperStyle={{
+                    background: 'transparent',
+                    border: 'none',
+                    boxShadow: 'none',
+                    outline: 'none',
+                  }}
                 />
                 {users.map((user) => {
                   const colors = getColorForUser(user.id, user.name, user.color_index);
