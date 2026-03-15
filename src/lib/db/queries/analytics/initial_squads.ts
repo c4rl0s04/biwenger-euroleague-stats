@@ -30,8 +30,8 @@ export interface BestInitialSquadPlayer {
 export interface InitialSquadRetainedPoints {
   user_name: string;
   user_color_index: number;
-  players_retained: number;
-  retained_points: number;
+  players_contributed: number;
+  total_points: number;
 }
 
 /**
@@ -99,36 +99,33 @@ export async function getBestInitialSquadPlayer(): Promise<BestInitialSquadPlaye
   return (await db.query(query)).rows.map((row: any) => ({
     ...row,
     player_id: parseInt(row.player_id),
-    total_fantasy_points: parseInt(row.total_fantasy_points) || 0,
+    total_fantasy_points: parseFloat(row.total_fantasy_points) || 0,
   }));
 }
 
 /**
- * Stat B: Per-user ranking by total fantasy_points accumulated from initial squad
- * players they have NEVER sold (confirmed via fichajes table).
+ * Stat B: Per-user total fantasy points from ALL initial squad players
+ * while they were in the user's lineup (regardless of whether they were later sold).
+ * Shows how many initial players contributed points.
  */
 export async function getInitialSquadRetainedPoints(): Promise<InitialSquadRetainedPoints[]> {
   const query = `
     SELECT
       u.name as user_name,
       u.color_index as user_color_index,
-      COUNT(DISTINCT isq.player_id) as players_retained,
-      COALESCE(SUM(prs.fantasy_points), 0) as retained_points
+      COUNT(DISTINCT isq.player_id) as players_contributed,
+      SUM(prs.fantasy_points) as total_points
     FROM initial_squads isq
     JOIN users u ON u.id = isq.user_id
-    JOIN player_round_stats prs ON prs.player_id = isq.player_id
-    WHERE NOT EXISTS (
-      SELECT 1 FROM fichajes f
-      WHERE f.player_id = isq.player_id
-        AND f.vendedor = u.name
-    )
+    JOIN lineups l ON l.player_id = isq.player_id AND l.user_id = isq.user_id
+    JOIN player_round_stats prs ON prs.player_id = l.player_id AND prs.round_id = l.round_id
     GROUP BY isq.user_id, u.name, u.color_index
-    ORDER BY retained_points DESC
+    ORDER BY total_points DESC
   `;
   return (await db.query(query)).rows.map((row: any) => ({
     ...row,
-    players_retained: parseInt(row.players_retained) || 0,
-    retained_points: parseInt(row.retained_points) || 0,
+    players_contributed: parseInt(row.players_contributed) || 0,
+    total_points: parseFloat(row.total_points) || 0,
   }));
 }
 

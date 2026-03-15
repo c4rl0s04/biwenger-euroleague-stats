@@ -62,7 +62,7 @@ export default function BestDraftPlayerCard() {
 
                     <div className="flex flex-col items-end">
                       <span className="font-black text-2xl text-amber-400">
-                        {user.total_fantasy_points.toLocaleString()}
+                        {(user.total_fantasy_points ?? 0).toLocaleString()}
                       </span>
                       <span className="text-[10px] uppercase tracking-wider text-slate-500">
                         pts

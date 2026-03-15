@@ -191,7 +191,7 @@ describe('GET /api/standings/initial-squad-stats', () => {
         },
       ],
       retainedRanking: [
-        { user_name: 'ask72', user_color_index: 0, players_retained: 5, retained_points: 1850 },
+        { user_name: 'ask72', user_color_index: 0, players_contributed: 7, total_points: 1600 },
       ],
     };
     vi.mocked(services.fetchInitialSquadStats).mockResolvedValue(mockStats);

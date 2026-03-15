@@ -7,8 +7,8 @@ import { useApiData } from '@/lib/hooks/useApiData';
 
 /**
  * DraftFidelityCard — Stat B
- * Ranks users by total fantasy points accumulated from initial squad players
- * they have NEVER sold throughout the season.
+ * Ranks users by total fantasy points from ALL initial squad players
+ * while those players were in their lineup (even if later sold).
  */
 export default function DraftFidelityCard() {
   const { data, loading, error } = useApiData('/api/standings/initial-squad-stats');
@@ -16,11 +16,12 @@ export default function DraftFidelityCard() {
   const retainedRanking = data?.retainedRanking ?? [];
 
   return (
-    <Card title="Fidelidad al Reparto" icon={Heart} color="emerald" loading={loading}>
+    <Card title="Rendimiento del Reparto" icon={Heart} color="emerald" loading={loading}>
       {!loading && (
         <div className="space-y-4 pr-2 mt-2">
           <p className="text-xs text-slate-400 italic px-2">
-            Puntos acumulados por jugadores del reparto que cada usuario nunca ha vendido
+            Puntos totales aportados por los jugadores del reparto inicial mientras estuvieron en
+            cada equipo
           </p>
 
           {error ? (
@@ -55,15 +56,15 @@ export default function DraftFidelityCard() {
                       <div>
                         <p className="font-bold text-slate-200">{user.user_name}</p>
                         <p className="text-[10px] text-slate-400 mt-0.5">
-                          {user.players_retained} jugador{user.players_retained !== 1 ? 'es' : ''}{' '}
-                          conservado{user.players_retained !== 1 ? 's' : ''}
+                          {user.players_contributed} jugador
+                          {user.players_contributed !== 1 ? 'es' : ''} del reparto
                         </p>
                       </div>
                     </div>
 
                     <div className="flex flex-col items-end">
                       <span className="font-black text-2xl text-emerald-400">
-                        {user.retained_points.toLocaleString()}
+                        {(user.total_points ?? 0).toLocaleString()}
                       </span>
                       <span className="text-[10px] uppercase tracking-wider text-slate-500">
                         pts
