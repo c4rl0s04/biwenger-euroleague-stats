@@ -21,8 +21,8 @@ export default function BestDraftPlayerCard() {
       {!loading && (
         <div className="space-y-4 pr-2 mt-2">
           <p className="text-xs text-slate-400 italic px-2">
-            El mejor jugador inicial de cada mánager, contando sólo los puntos que aportó mientras
-            estuvo en su equipo
+            El mejor jugador del reparto inicial para cada mánager, contando sólo los puntos reales
+            que aportó mientras estuvo en su equipo (sin ponderar por posición).
           </p>
 
           {error ? (

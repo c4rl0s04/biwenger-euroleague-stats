@@ -34,6 +34,12 @@ export interface InitialSquadRetainedPoints {
   total_points: number;
 }
 
+export interface InitialSquadPlayerBreakdown {
+  user_name: string;
+  player_name: string;
+  points: number;
+}
+
 /**
  * Calculates the actual performance of initial squads based on lineup usage.
  * Appreciation: Starter (1.0), 6th Man (0.75), Bench (0.5).
@@ -126,6 +132,29 @@ export async function getInitialSquadRetainedPoints(): Promise<InitialSquadRetai
     ...row,
     players_contributed: parseInt(row.players_contributed) || 0,
     total_points: parseFloat(row.total_points) || 0,
+  }));
+}
+
+/**
+ * Detailed breakdown of points for Stat B: points per player for each user.
+ */
+export async function getInitialSquadRetainedBreakdown(): Promise<InitialSquadPlayerBreakdown[]> {
+  const query = `
+    SELECT
+      u.name as user_name,
+      p.name as player_name,
+      SUM(prs.fantasy_points) as points
+    FROM initial_squads isq
+    JOIN users u ON u.id = isq.user_id
+    JOIN players p ON p.id = isq.player_id
+    JOIN lineups l ON l.player_id = isq.player_id AND l.user_id = isq.user_id
+    JOIN player_round_stats prs ON prs.player_id = l.player_id AND prs.round_id = l.round_id
+    GROUP BY isq.user_id, u.name, p.name
+    ORDER BY u.name, points DESC
+  `;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    points: parseFloat(row.points) || 0,
   }));
 }
 

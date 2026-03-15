@@ -10,8 +10,8 @@
 
 _Página: Clasificación → Sección "Análisis de Rendimiento" (ampliar `InitialSquadAnalysisCard`)_
 
-- [ ] **Mejor jugador del reparto inicial** — jugador con más puntos acumulados en la temporada que fue fichado en el reparto ✅
-- [ ] **Mayor puntuación producida por jugadores del reparto inicial** — ranking de usuarios: quién ha sacado más puntos de sus jugadores originales que aún conserva ✅
+- [x] **Mejor jugador del reparto inicial** — jugador con más puntos acumulados en la temporada que fue fichado en el reparto ✅
+- [x] **Mayor puntuación producida por jugadores del reparto inicial** — ranking de usuarios: quién ha sacado más puntos de sus jugadores originales que aún conserva ✅
 - [ ] **Mayor pérdida de puntos por deshacerse de jugadores del reparto inicial** — puntos que sumaron tus ex-jugadores del reparto después de que los vendieras _(requiere historial de transacciones con fechas)_
 
 ---

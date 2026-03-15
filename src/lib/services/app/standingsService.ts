@@ -40,6 +40,7 @@ import {
   getRivalryMatrixStats,
   getBestInitialSquadPlayer,
   getInitialSquadRetainedPoints,
+  getInitialSquadRetainedBreakdown,
 } from '../../db';
 
 export interface StandingsOptions {
@@ -135,11 +136,12 @@ export async function fetchInitialSquadAnalytics() {
 
 /** Stats A & B: Best draft player per user and retained-squad points ranking */
 export async function fetchInitialSquadStats() {
-  const [bestDraftPerUser, retainedRanking] = await Promise.all([
+  const [bestDraftPerUser, retainedRanking, retainedBreakdown] = await Promise.all([
     getBestInitialSquadPlayer(),
     getInitialSquadRetainedPoints(),
+    getInitialSquadRetainedBreakdown(),
   ]);
-  return { bestDraftPerUser, retainedRanking };
+  return { bestDraftPerUser, retainedRanking, retainedBreakdown };
 }
 
 /**
