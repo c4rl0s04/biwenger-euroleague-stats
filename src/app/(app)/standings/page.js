@@ -24,6 +24,9 @@ import {
   DominanceCard,
   TheoreticalGapCard,
   RivalryMatrixCard,
+  InitialSquadAnalysisCard,
+  BestDraftPlayerCard,
+  DraftFidelityCard,
 } from '@/components/standings';
 
 import RoundHeatmapCard from '@/components/standings/RoundHeatmapCard';
@@ -132,16 +135,23 @@ export default function ClasificacionPage() {
         delay={250}
         background="section-base"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          <div id="floor-ceiling-card">
-            <FloorCeilingCard />
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <InitialSquadAnalysisCard />
+            <BestDraftPlayerCard />
+            <DraftFidelityCard />
           </div>
-          <div id="volatility-card">
-            <VolatilityCard />
-          </div>
-          <PointDistributionCard />
-          <div id="league-perf-card">
-            <LeaguePerformanceCard />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            <div id="floor-ceiling-card">
+              <FloorCeilingCard />
+            </div>
+            <div id="volatility-card">
+              <VolatilityCard />
+            </div>
+            <PointDistributionCard />
+            <div id="league-perf-card">
+              <LeaguePerformanceCard />
+            </div>
           </div>
         </div>
       </Section>

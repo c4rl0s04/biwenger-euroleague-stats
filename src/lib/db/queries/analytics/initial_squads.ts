@@ -19,6 +19,21 @@ export interface TheoreticalBreakdown {
   player_total_points: number;
 }
 
+export interface BestInitialSquadPlayer {
+  user_name: string;
+  user_color_index: number;
+  player_name: string;
+  player_id: number;
+  total_fantasy_points: number;
+}
+
+export interface InitialSquadRetainedPoints {
+  user_name: string;
+  user_color_index: number;
+  players_retained: number;
+  retained_points: number;
+}
+
 /**
  * Calculates the actual performance of initial squads based on lineup usage.
  * Appreciation: Starter (1.0), 6th Man (0.75), Bench (0.5).
@@ -46,6 +61,74 @@ export async function getInitialSquadActualPerformance(): Promise<InitialSquadPe
   return (await db.query(query)).rows.map((row: any) => ({
     ...row,
     total_points: parseFloat(row.total_points) || 0,
+  }));
+}
+
+/**
+ * Stat A: For every user, their best performing initial squad player,
+ * measured by fantasy points scored ONLY while that player was in their lineup.
+ * Returns one row per user, sorted by points descending.
+ */
+export async function getBestInitialSquadPlayer(): Promise<BestInitialSquadPlayer[]> {
+  const query = `
+    WITH player_user_points AS (
+      SELECT
+        isq.user_id,
+        u.name as user_name,
+        u.color_index as user_color_index,
+        isq.player_id,
+        p.name as player_name,
+        SUM(prs.fantasy_points) as points_while_owned
+      FROM initial_squads isq
+      JOIN users u ON u.id = isq.user_id
+      JOIN players p ON p.id = isq.player_id
+      JOIN lineups l ON l.player_id = isq.player_id AND l.user_id = isq.user_id
+      JOIN player_round_stats prs ON prs.player_id = l.player_id AND prs.round_id = l.round_id
+      GROUP BY isq.user_id, u.name, u.color_index, isq.player_id, p.name
+    ),
+    ranked AS (
+      SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY points_while_owned DESC) as rn
+      FROM player_user_points
+    )
+    SELECT user_name, user_color_index, player_name, player_id, points_while_owned as total_fantasy_points
+    FROM ranked
+    WHERE rn = 1
+    ORDER BY total_fantasy_points DESC
+  `;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    player_id: parseInt(row.player_id),
+    total_fantasy_points: parseInt(row.total_fantasy_points) || 0,
+  }));
+}
+
+/**
+ * Stat B: Per-user ranking by total fantasy_points accumulated from initial squad
+ * players they have NEVER sold (confirmed via fichajes table).
+ */
+export async function getInitialSquadRetainedPoints(): Promise<InitialSquadRetainedPoints[]> {
+  const query = `
+    SELECT
+      u.name as user_name,
+      u.color_index as user_color_index,
+      COUNT(DISTINCT isq.player_id) as players_retained,
+      COALESCE(SUM(prs.fantasy_points), 0) as retained_points
+    FROM initial_squads isq
+    JOIN users u ON u.id = isq.user_id
+    JOIN player_round_stats prs ON prs.player_id = isq.player_id
+    WHERE NOT EXISTS (
+      SELECT 1 FROM fichajes f
+      WHERE f.player_id = isq.player_id
+        AND f.vendedor = u.name
+    )
+    GROUP BY isq.user_id, u.name, u.color_index
+    ORDER BY retained_points DESC
+  `;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    players_retained: parseInt(row.players_retained) || 0,
+    retained_points: parseInt(row.retained_points) || 0,
   }));
 }
 

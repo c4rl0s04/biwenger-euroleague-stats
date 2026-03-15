@@ -38,6 +38,8 @@ import {
   getPositionChangesStats,
   getReliabilityStats,
   getRivalryMatrixStats,
+  getBestInitialSquadPlayer,
+  getInitialSquadRetainedPoints,
 } from '../../db';
 
 export interface StandingsOptions {
@@ -126,9 +128,18 @@ export async function fetchJinxStats() {
   return await getJinxStats();
 }
 
-/** Performance of original draft squads */
+/** Performance of original draft squads (ROI) */
 export async function fetchInitialSquadAnalytics() {
   return await getInitialSquadActualPerformance();
+}
+
+/** Stats A & B: Best draft player per user and retained-squad points ranking */
+export async function fetchInitialSquadStats() {
+  const [bestDraftPerUser, retainedRanking] = await Promise.all([
+    getBestInitialSquadPlayer(),
+    getInitialSquadRetainedPoints(),
+  ]);
+  return { bestDraftPerUser, retainedRanking };
 }
 
 /**

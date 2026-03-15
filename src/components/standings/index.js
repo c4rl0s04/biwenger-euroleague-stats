@@ -30,6 +30,8 @@ export { default as JinxCard } from './JinxCard';
 
 // Analysis
 export { default as InitialSquadAnalysisCard } from './InitialSquadAnalysisCard';
+export { default as BestDraftPlayerCard } from './BestDraftPlayerCard';
+export { default as DraftFidelityCard } from './DraftFidelityCard';
 
 // Advanced Stats
 export { default as HeatCheckCard } from './HeatCheckCard';

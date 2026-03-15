@@ -18,6 +18,7 @@ vi.mock('@/lib/services', () => ({
   fetchJinxStats: vi.fn(),
   fetchLeagueComparisonStats: vi.fn(),
   fetchPointsProgression: vi.fn(),
+  fetchInitialSquadStats: vi.fn(),
 }));
 
 import * as services from '@/lib/services';
@@ -171,5 +172,47 @@ describe('GET /api/standings/points-progression', () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
+  });
+});
+
+// --- /api/standings/initial-squad-stats ---
+describe('GET /api/standings/initial-squad-stats', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns 200 with bestPlayer and retainedRanking', async () => {
+    const mockStats = {
+      bestDraftPerUser: [
+        {
+          user_name: 'ask72',
+          user_color_index: 0,
+          player_name: 'Coid Miller',
+          player_id: 31790,
+          total_fantasy_points: 697,
+        },
+      ],
+      retainedRanking: [
+        { user_name: 'ask72', user_color_index: 0, players_retained: 5, retained_points: 1850 },
+      ],
+    };
+    vi.mocked(services.fetchInitialSquadStats).mockResolvedValue(mockStats);
+
+    const { GET } = await import('@/app/api/standings/initial-squad-stats/route');
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data).toHaveProperty('bestDraftPerUser');
+    expect(json.data).toHaveProperty('retainedRanking');
+    expect(json.data.bestDraftPerUser[0].player_name).toBe('Coid Miller');
+    expect(json.data.retainedRanking).toHaveLength(1);
+  });
+
+  it('returns 500 on service error', async () => {
+    vi.mocked(services.fetchInitialSquadStats).mockRejectedValue(new Error('db fail'));
+
+    const { GET } = await import('@/app/api/standings/initial-squad-stats/route');
+    const response = await GET();
+    expect(response.status).toBe(500);
   });
 });

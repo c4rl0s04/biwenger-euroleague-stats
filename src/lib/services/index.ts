@@ -21,6 +21,7 @@ export {
   fetchNoGloryStats,
   fetchJinxStats,
   fetchInitialSquadAnalytics,
+  fetchInitialSquadStats,
   fetchLeagueComparisonStats,
   fetchPointsProgression,
   fetchHeatCheckStats,
