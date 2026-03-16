@@ -60,10 +60,28 @@ This document outlines the exact, step-by-step technical process for transitioni
     - Set/Reset a password for a specific manager.
     - Mark them as `is_registered = true`.
 
+## Security Architecture: The Two-Layer Gate
+
+To respect your existing `ACCESS_PASSWORD` restriction, the logic will work as a "Two-Layer" system:
+
+1.  **Layer 1: The League Gate (Existing)**
+    - The `ACCESS_PASSWORD` (shared code) remains as the primary wall.
+    - This ensures that no one outside your league can even see the dashboard.
+2.  **Layer 2: Manager Identity (New)**
+    - Once "inside" the gate, managers can choose to **"Identify as Manager"**.
+    - By entering their personal password, they unlock identity-based features (profile visits, personalized defaults).
+
+**How they converge in `src/auth.js`:**
+
+- The login page will accept **either** the global league code **or** a Manager/Password combo.
+- Loging in with the **League Code** gives "Guest/View Only" access.
+- Logging in with a **Manager Account** gives "Branded/Personalized" access.
+
 ---
 
 ## Technical Considerations
 
+- **Session Roles**: We will distinguish between `Role: GUEST` (authorized via league code) and `Role: MANAGER` (authorized via individual password).
 - **CSRF Protection**: Ensure all POST requests for visits are protected by the Next.js auth session.
 - **Performance**: Add an index to `profile_visits(target_id, visited_at)` for fast visitor lookups.
 - **Hydration**: Ensure `UserContext` handles the transition from "Checking session" to "Logged in" state without flashing incorrect UI.
