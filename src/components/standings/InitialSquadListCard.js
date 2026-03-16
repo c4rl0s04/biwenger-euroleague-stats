@@ -1,16 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import {
-  Users,
-  Shield,
-  Award,
-  TrendingUp,
-  DollarSign,
-  ChevronRight,
-  ChevronLeft,
-  Info,
-} from 'lucide-react';
+import { useState } from 'react';
+import { Users, Shield, Award, TrendingUp, DollarSign, Info } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -82,6 +73,9 @@ export default function InitialSquadListCard() {
   const managers = Object.values(squadsByManager).sort((a, b) => a.name.localeCompare(b.name));
 
   const activeManager = managers[activeManagerIdx];
+  // Sort players by points descending
+  const sortedPlayers =
+    activeManager?.players?.sort((a, b) => b.current_points - a.current_points) || [];
 
   return (
     <Card
@@ -144,38 +138,32 @@ export default function InitialSquadListCard() {
                       <div
                         className={`bg-gradient-to-br ${USER_GRADIENTS[activeManager.colorIndex % USER_GRADIENTS.length]} rounded-3xl p-6 shadow-2xl relative overflow-hidden group`}
                       >
-                        {/* Decorative Background Icon */}
-                        <Award
-                          size={120}
-                          className="absolute -bottom-8 -right-8 text-white/10 rotate-12 group-hover:rotate-6 transition-transform duration-700"
-                        />
-
                         <div className="relative z-10 space-y-6">
                           <div>
                             <span className="text-white/60 text-[10px] uppercase font-black tracking-widest">
                               MANAGER
                             </span>
-                            <h2 className="text-3xl font-black text-white drop-shadow-lg leading-none">
+                            <h2 className="text-4xl font-black text-white drop-shadow-lg leading-none">
                               {activeManager.name}
                             </h2>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
                             <div className="bg-blue-600/30 backdrop-blur-md rounded-2xl p-4 border border-blue-400/20 shadow-inner">
-                              <span className="text-blue-100/60 text-[9px] uppercase font-black block mb-1">
+                              <span className="text-blue-100/60 text-[10px] uppercase font-black block mb-1">
                                 Pts Totales
                               </span>
-                              <span className="text-xl font-black text-white">
+                              <span className="text-2xl font-black text-white">
                                 {activeManager.players
                                   .reduce((sum, p) => sum + p.current_points, 0)
                                   .toLocaleString()}
                               </span>
                             </div>
                             <div className="bg-emerald-600/30 backdrop-blur-md rounded-2xl p-4 border border-emerald-400/20 shadow-inner">
-                              <span className="text-emerald-100/60 text-[9px] uppercase font-black block mb-1">
+                              <span className="text-emerald-100/60 text-[10px] uppercase font-black block mb-1">
                                 Valor Draft
                               </span>
-                              <span className="text-xl font-black text-white">
+                              <span className="text-2xl font-black text-white">
                                 {(
                                   activeManager.players.reduce(
                                     (sum, p) => sum + p.current_price,
@@ -188,7 +176,7 @@ export default function InitialSquadListCard() {
                           </div>
 
                           <div className="pt-2">
-                            <div className="flex justify-between items-center text-white/80 text-[10px] font-bold uppercase mb-2">
+                            <div className="flex justify-between items-center text-white/80 text-xs font-bold uppercase mb-2">
                               <span>Fidelidad al Reparto</span>
                               <span>
                                 {Math.round(
@@ -201,7 +189,7 @@ export default function InitialSquadListCard() {
                                 %
                               </span>
                             </div>
-                            <div className="h-2 bg-black/20 rounded-full overflow-hidden border border-white/5 shadow-inner flex items-center">
+                            <div className="h-2.5 bg-black/20 rounded-full overflow-hidden border border-white/5 shadow-inner flex items-center">
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{
@@ -234,17 +222,17 @@ export default function InitialSquadListCard() {
                       <div className="bg-slate-900/40 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
                         <div className="bg-slate-800/50 p-4 border-b border-slate-800 flex justify-between items-center">
                           <span
-                            className={`text-xs font-black uppercase tracking-widest ${USER_TEXT_COLORS[activeManager.colorIndex % USER_TEXT_COLORS.length]}`}
+                            className={`text-sm font-black uppercase tracking-widest ${USER_TEXT_COLORS[activeManager.colorIndex % USER_TEXT_COLORS.length]}`}
                           >
                             SQUAD REPARTO INICIAL DE {activeManager.name}
                           </span>
-                          <span className="text-[10px] text-slate-500 font-bold">
+                          <span className="text-xs text-slate-500 font-bold">
                             {activeManager.players.length} JUGADORES
                           </span>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
-                          {activeManager.players.map((player, idx) => {
+                          {sortedPlayers.map((player, idx) => {
                             const isStillOwned = player.current_owner === activeManager.name;
                             const posStyles =
                               POSITION_COLORS[player.player_position] || POSITION_COLORS['G'];
@@ -267,40 +255,48 @@ export default function InitialSquadListCard() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.03 }}
-                                className="flex items-center justify-between p-3 bg-slate-800/20 rounded-2xl border border-slate-800/50 hover:border-slate-700 transition-colors group/item"
+                                className="flex items-center justify-between p-4 bg-slate-800/20 rounded-2xl border border-slate-800/50 hover:border-slate-700 transition-colors group/item"
                               >
-                                <div className="flex items-center gap-3 min-w-0">
+                                <div className="flex items-center gap-4 min-w-0">
                                   <div
-                                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-black ${posStyles} border text-xs shadow-inner`}
+                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${posStyles} border text-sm shadow-inner shrink-0`}
                                   >
                                     {player.player_position}
                                   </div>
                                   <div className="flex flex-col min-w-0">
-                                    <span className="text-xs font-bold text-slate-200 truncate group-hover/item:text-white transition-colors">
+                                    <span className="text-sm font-bold text-slate-200 truncate group-hover/item:text-white transition-colors">
                                       {player.player_name}
                                     </span>
-                                    <span className="text-[10px] text-slate-500 font-medium">
-                                      {player.current_points} pts •{' '}
-                                      {(player.current_price / 1000000).toFixed(1)}M
+                                    <span className="text-xs text-slate-400 font-bold mt-0.5">
+                                      <span className="text-slate-200">
+                                        {player.current_points}
+                                      </span>{' '}
+                                      <span className="text-[10px] text-slate-500 uppercase">
+                                        pts
+                                      </span>{' '}
+                                      •{' '}
+                                      <span className="text-emerald-400">
+                                        {(player.current_price / 1000000).toFixed(2)}M
+                                      </span>
                                     </span>
                                   </div>
                                 </div>
 
-                                <div className="flex items-center">
+                                <div className="flex items-center ml-2 shrink-0">
                                   {isStillOwned ? (
-                                    <div className="bg-emerald-500/10 p-2 rounded-xl text-emerald-500 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all duration-300 shadow-sm">
+                                    <div className="bg-emerald-500/10 p-2.5 rounded-xl text-emerald-500 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all duration-300 shadow-sm border border-emerald-500/20">
                                       <Shield
-                                        size={14}
+                                        size={18}
                                         fill={isStillOwned ? 'currentColor' : 'none'}
                                         fillOpacity={0.2}
                                       />
                                     </div>
                                   ) : (
                                     <div
-                                      className={`px-2 py-1 rounded-lg border min-w-[60px] text-center ${ownerBgClass}`}
+                                      className={`px-3 py-1.5 rounded-xl border min-w-[70px] text-center shadow-lg ${ownerBgClass}`}
                                     >
                                       <span
-                                        className={`text-[8px] font-black uppercase tracking-tighter truncate block ${ownerColorClass}`}
+                                        className={`text-[10px] font-black uppercase tracking-tighter truncate block ${ownerColorClass}`}
                                       >
                                         {player.current_owner || 'MERCADO'}
                                       </span>
