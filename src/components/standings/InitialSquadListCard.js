@@ -161,8 +161,8 @@ export default function InitialSquadListCard() {
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 shadow-inner">
-                              <span className="text-white/60 text-[9px] uppercase font-black block mb-1">
+                            <div className="bg-blue-600/30 backdrop-blur-md rounded-2xl p-4 border border-blue-400/20 shadow-inner">
+                              <span className="text-blue-100/60 text-[9px] uppercase font-black block mb-1">
                                 Pts Totales
                               </span>
                               <span className="text-xl font-black text-white">
@@ -171,8 +171,8 @@ export default function InitialSquadListCard() {
                                   .toLocaleString()}
                               </span>
                             </div>
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 shadow-inner">
-                              <span className="text-white/60 text-[9px] uppercase font-black block mb-1">
+                            <div className="bg-emerald-600/30 backdrop-blur-md rounded-2xl p-4 border border-emerald-400/20 shadow-inner">
+                              <span className="text-emerald-100/60 text-[9px] uppercase font-black block mb-1">
                                 Valor Draft
                               </span>
                               <span className="text-xl font-black text-white">
