@@ -27,6 +27,10 @@ export const teams = pgTable('teams', {
   shortName: text('short_name'),
   code: text('code'),
   img: text('img'),
+  city: text('city'),
+  arenaName: text('arena_name'),
+  latitude: doublePrecision('latitude'),
+  longitude: doublePrecision('longitude'),
 });
 
 // 2. Players Table

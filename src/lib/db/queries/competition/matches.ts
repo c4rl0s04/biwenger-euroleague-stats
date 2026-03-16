@@ -22,10 +22,18 @@ export async function getMatchesGroupedByRound() {
       home_id: homeTeam.id,
       home_name: homeTeam.name,
       home_img: homeTeam.img,
+      home_city: homeTeam.city,
+      home_arena: homeTeam.arenaName,
+      home_lat: homeTeam.latitude,
+      home_lng: homeTeam.longitude,
 
       away_id: awayTeam.id,
       away_name: awayTeam.name,
       away_img: awayTeam.img,
+      away_city: awayTeam.city,
+      away_arena: awayTeam.arenaName,
+      away_lat: awayTeam.latitude,
+      away_lng: awayTeam.longitude,
     })
     .from(matches)
     .innerJoin(homeTeam, eq(matches.homeId, homeTeam.id))
@@ -57,12 +65,20 @@ export async function getMatchesGroupedByRound() {
           name: match.home_name,
           img: match.home_img,
           score: match.home_score,
+          city: match.home_city,
+          arena: match.home_arena,
+          latitude: match.home_lat,
+          longitude: match.home_lng,
         },
         away: {
           id: match.away_id,
           name: match.away_name,
           img: match.away_img,
           score: match.away_score,
+          city: match.away_city,
+          arena: match.away_arena,
+          latitude: match.away_lat,
+          longitude: match.away_lng,
         },
       });
 

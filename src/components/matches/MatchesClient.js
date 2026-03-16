@@ -199,7 +199,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
               Object.keys(groupedMatches).length % 2 === 0 ? 'section-base' : 'section-raised'
             }
           >
-            <MatchesMap roundName={activeRound.round_name} matchCount={matches.length} />
+            <MatchesMap roundName={activeRound.round_name} matches={matches} />
           </Section>
 
           {Object.keys(groupedMatches).length === 0 && (

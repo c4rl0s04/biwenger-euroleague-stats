@@ -3,7 +3,10 @@
 import React from 'react';
 import { Map as MapIcon } from 'lucide-react';
 
-export default function MatchesMap({ roundName, matchCount }) {
+export default function MatchesMap({ roundName, matches = [] }) {
+  const venuesWithCoords = matches.filter((m) => m.home?.latitude && m.home?.longitude);
+  const matchCount = matches.length;
+
   return (
     <div className="w-full bg-zinc-900/40 border border-zinc-800/50 rounded-xl overflow-hidden relative group min-h-[400px] flex flex-col items-center justify-center p-8 text-center transition-all duration-500 hover:border-zinc-700/50">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
@@ -21,23 +24,31 @@ export default function MatchesMap({ roundName, matchCount }) {
           de la <span className="text-blue-400/80 font-medium">{roundName || 'jornada'}</span>.
         </p>
 
-        <div className="mt-8 flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-zinc-900 flex items-center justify-center"
-              >
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              {[1, 2, 3].map((i) => (
                 <div
-                  className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"
-                  style={{ animationDelay: `${i * 200}ms` }}
-                />
-              </div>
-            ))}
+                  key={i}
+                  className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-zinc-900 flex items-center justify-center"
+                >
+                  <div
+                    className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"
+                    style={{ animationDelay: `${i * 200}ms` }}
+                  />
+                </div>
+              ))}
+            </div>
+            <span className="text-zinc-500 text-sm font-medium">
+              Procesando {matchCount || 0} ubicaciones para este calendario...
+            </span>
           </div>
-          <span className="text-zinc-500 text-sm font-medium">
-            Procesando {matchCount || 0} ubicaciones para este calendario...
-          </span>
+
+          {venuesWithCoords.length > 0 && (
+            <div className="px-4 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider animate-in fade-in slide-in-from-top-2 duration-700">
+              ✨ {venuesWithCoords.length} sedes verificadas con coordenadas
+            </div>
+          )}
         </div>
       </div>
     </div>
