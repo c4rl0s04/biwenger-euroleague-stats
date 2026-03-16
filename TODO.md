@@ -2,8 +2,6 @@
 
 ## 🔍 Pendiente de confirmar
 
-> ⚠️ Verificar si la BD tiene tabla de **transacciones de mercado con fechas** antes de implementar los puntos 3 y 4 del reparto inicial y fichajes.
-
 ---
 
 ## 📊 Estadísticas de Reparto Inicial
@@ -12,7 +10,7 @@ _Página: Clasificación → Sección "Análisis de Rendimiento" (ampliar `Initi
 
 - [x] **Mejor jugador del reparto inicial** — jugador con más puntos acumulados en la temporada que fue fichado en el reparto ✅
 - [x] **Mayor puntuación producida por jugadores del reparto inicial** — ranking de usuarios: quién ha sacado más puntos de sus jugadores originales que aún conserva ✅
-- [ ] **Mayor pérdida de puntos por deshacerse de jugadores del reparto inicial** — puntos que sumaron tus ex-jugadores del reparto después de que los vendieras _(requiere historial de transacciones con fechas)_
+- [x] **Mayor pérdida de puntos por deshacerse de jugadores del reparto inicial** — puntos que sumaron tus ex-jugadores del reparto después de que los vendieras _(requiere historial de transacciones con fechas)_ ✅
 
 ---
 
