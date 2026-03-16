@@ -42,6 +42,13 @@ const POSITION_MAP = {
   C: { label: 'P', styles: 'text-red-500 bg-red-500/10 border-red-500/20 shadow-red-500/5' },
 };
 
+const getFidelityColor = (percent) => {
+  if (percent >= 80) return 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]';
+  if (percent >= 50) return 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]';
+  if (percent >= 25) return 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]';
+  return 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]';
+};
+
 export default function InitialSquadListCard() {
   const { data, loading, error } = useApiData('/api/standings/initial-squad-stats');
   const [activeManagerIdx, setActiveManagerIdx] = useState(0);
@@ -99,7 +106,7 @@ export default function InitialSquadListCard() {
                       key={manager.name}
                       onClick={() => setActiveManagerIdx(idx)}
                       className={`
-                        flex-shrink-0 px-4 py-2 rounded-xl border text-sm font-bold transition-all duration-300
+                        flex-shrink-0 px-4 py-2 rounded-xl border text-sm font-bold transition-all duration-300 cursor-pointer
                         ${
                           isActive
                             ? `bg-gradient-to-r ${managerGradient} text-white border-transparent shadow-lg shadow-black/40 scale-105`
@@ -190,7 +197,13 @@ export default function InitialSquadListCard() {
                                   width: `${(activeManager.players.filter((p) => p.current_owner === activeManager.name).length / activeManager.players.length) * 100}%`,
                                 }}
                                 transition={{ delay: 0.5, duration: 1 }}
-                                className="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                className={`h-full rounded-full transition-all duration-500 ${getFidelityColor(
+                                  (activeManager.players.filter(
+                                    (p) => p.current_owner === activeManager.name
+                                  ).length /
+                                    activeManager.players.length) *
+                                    100
+                                )}`}
                               />
                             </div>
                           </div>
