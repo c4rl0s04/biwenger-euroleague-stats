@@ -1,56 +1,88 @@
 'use client';
 
-import React from 'react';
-import { Map as MapIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
-export default function MatchesMap({ roundName, matches = [] }) {
+export default function MatchesMap({ matches = [] }) {
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
   const venuesWithCoords = matches.filter((m) => m.home?.latitude && m.home?.longitude);
-  const matchCount = matches.length;
+
+  useEffect(() => {
+    if (map.current) return;
+
+    // Initialize map with a very basic style
+    map.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: {
+        version: 8,
+        sources: {
+          osm: {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '© OpenStreetMap contributors',
+          },
+        },
+        layers: [
+          {
+            id: 'osm-layer',
+            type: 'raster',
+            source: 'osm',
+          },
+        ],
+      },
+      center: [10, 45],
+      zoom: 3,
+    });
+
+    map.current.on('load', () => setMapLoaded(true));
+
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    // Clear existing markers manually by tracking them or just clearing the DOM if simple
+    const container = mapContainer.current;
+    const existingMarkers = container.querySelectorAll('.maplibregl-marker');
+    existingMarkers.forEach((m) => m.remove());
+
+    if (venuesWithCoords.length === 0) return;
+
+    const bounds = new maplibregl.LngLatBounds();
+
+    venuesWithCoords.forEach((match) => {
+      const { latitude, longitude } = match.home;
+
+      // Use default marker
+      new maplibregl.Marker().setLngLat([longitude, latitude]).addTo(map.current);
+
+      bounds.extend([longitude, latitude]);
+    });
+
+    // Skip animation, just jump to bounds
+    map.current.fitBounds(bounds, { padding: 40, maxZoom: 5, animate: false });
+  }, [venuesWithCoords, mapLoaded]);
 
   return (
-    <div className="w-full bg-zinc-900/40 border border-zinc-800/50 rounded-xl overflow-hidden relative group min-h-[400px] flex flex-col items-center justify-center p-8 text-center transition-all duration-500 hover:border-zinc-700/50">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+    <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative min-h-[400px]">
+      <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
 
-      <div className="relative z-10 flex flex-col items-center">
-        <div className="mb-6 p-5 rounded-full bg-zinc-800/30 border border-zinc-700/50 shadow-2xl group-hover:scale-110 group-hover:bg-zinc-800/50 transition-all duration-700">
-          <MapIcon className="w-10 h-10 text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+      {!mapLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 text-zinc-500 text-sm">
+          Cargando mapa...
         </div>
-
-        <h3 className="text-2xl font-bold text-zinc-100 mb-3 tracking-tight">
-          Visualización Geográfica
-        </h3>
-        <p className="text-zinc-400 max-w-lg mx-auto leading-relaxed text-lg">
-          Estamos preparando una vista interactiva para que puedas ver dónde se juegan los partidos
-          de la <span className="text-blue-400/80 font-medium">{roundName || 'jornada'}</span>.
-        </p>
-
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex -space-x-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-zinc-900 flex items-center justify-center"
-                >
-                  <div
-                    className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"
-                    style={{ animationDelay: `${i * 200}ms` }}
-                  />
-                </div>
-              ))}
-            </div>
-            <span className="text-zinc-500 text-sm font-medium">
-              Procesando {matchCount || 0} ubicaciones para este calendario...
-            </span>
-          </div>
-
-          {venuesWithCoords.length > 0 && (
-            <div className="px-4 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider animate-in fade-in slide-in-from-top-2 duration-700">
-              ✨ {venuesWithCoords.length} sedes verificadas con coordenadas
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
