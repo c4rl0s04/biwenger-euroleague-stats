@@ -15,7 +15,7 @@ import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const USER_COLORS = [
+const USER_GRADIENTS = [
   'from-blue-500 to-cyan-400',
   'from-purple-500 to-pink-400',
   'from-amber-500 to-orange-400',
@@ -26,6 +26,32 @@ const USER_COLORS = [
   'from-pink-500 to-rose-400',
   'from-cyan-500 to-blue-400',
   'from-teal-500 to-emerald-400',
+];
+
+const USER_TEXT_COLORS = [
+  'text-blue-400',
+  'text-purple-400',
+  'text-amber-400',
+  'text-emerald-400',
+  'text-rose-400',
+  'text-indigo-400',
+  'text-orange-400',
+  'text-pink-400',
+  'text-cyan-400',
+  'text-teal-400',
+];
+
+const USER_BG_COLORS = [
+  'bg-blue-400/10 border-blue-400/20',
+  'bg-purple-400/10 border-purple-400/20',
+  'bg-amber-400/10 border-amber-400/20',
+  'bg-emerald-400/10 border-emerald-400/20',
+  'bg-rose-400/10 border-rose-400/20',
+  'bg-indigo-400/10 border-indigo-400/20',
+  'bg-orange-400/10 border-orange-400/20',
+  'bg-pink-400/10 border-pink-400/20',
+  'bg-cyan-400/10 border-cyan-400/20',
+  'bg-teal-400/10 border-teal-400/20',
 ];
 
 const POSITION_COLORS = {
@@ -81,7 +107,7 @@ export default function InitialSquadListCard() {
               <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
                 {managers.map((manager, idx) => {
                   const isActive = activeManagerIdx === idx;
-                  const managerColor = USER_COLORS[manager.colorIndex % USER_COLORS.length];
+                  const managerColor = USER_GRADIENTS[manager.colorIndex % USER_GRADIENTS.length];
 
                   return (
                     <button
@@ -116,7 +142,7 @@ export default function InitialSquadListCard() {
                     {/* Left Column: Summary and Stats Card */}
                     <div className="lg:col-span-4 space-y-4">
                       <div
-                        className={`bg-gradient-to-br ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length]} rounded-3xl p-6 shadow-2xl relative overflow-hidden group`}
+                        className={`bg-gradient-to-br ${USER_GRADIENTS[activeManager.colorIndex % USER_GRADIENTS.length]} rounded-3xl p-6 shadow-2xl relative overflow-hidden group`}
                       >
                         {/* Decorative Background Icon */}
                         <Award
@@ -175,7 +201,7 @@ export default function InitialSquadListCard() {
                                 %
                               </span>
                             </div>
-                            <div className="h-2 bg-black/20 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                            <div className="h-2 bg-black/20 rounded-full overflow-hidden border border-white/5 shadow-inner flex items-center">
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{
@@ -207,8 +233,10 @@ export default function InitialSquadListCard() {
                     <div className="lg:col-span-8">
                       <div className="bg-slate-900/40 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
                         <div className="bg-slate-800/50 p-4 border-b border-slate-800 flex justify-between items-center">
-                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                            SQUAD REPARTO INICIAL
+                          <span
+                            className={`text-xs font-black uppercase tracking-widest ${USER_TEXT_COLORS[activeManager.colorIndex % USER_TEXT_COLORS.length]}`}
+                          >
+                            SQUAD REPARTO INICIAL DE {activeManager.name}
                           </span>
                           <span className="text-[10px] text-slate-500 font-bold">
                             {activeManager.players.length} JUGADORES
@@ -220,6 +248,18 @@ export default function InitialSquadListCard() {
                             const isStillOwned = player.current_owner === activeManager.name;
                             const posStyles =
                               POSITION_COLORS[player.player_position] || POSITION_COLORS['G'];
+                            const ownerColorClass =
+                              player.current_owner_color_index !== null
+                                ? USER_TEXT_COLORS[
+                                    player.current_owner_color_index % USER_TEXT_COLORS.length
+                                  ]
+                                : 'text-slate-400';
+                            const ownerBgClass =
+                              player.current_owner_color_index !== null
+                                ? USER_BG_COLORS[
+                                    player.current_owner_color_index % USER_BG_COLORS.length
+                                  ]
+                                : 'bg-slate-800/80 border-slate-700/50';
 
                             return (
                               <motion.div
@@ -256,8 +296,12 @@ export default function InitialSquadListCard() {
                                       />
                                     </div>
                                   ) : (
-                                    <div className="px-2 py-1 bg-slate-800/80 rounded-lg border border-slate-700/50 min-w-[60px] text-center">
-                                      <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter truncate block">
+                                    <div
+                                      className={`px-2 py-1 rounded-lg border min-w-[60px] text-center ${ownerBgClass}`}
+                                    >
+                                      <span
+                                        className={`text-[8px] font-black uppercase tracking-tighter truncate block ${ownerColorClass}`}
+                                      >
                                         {player.current_owner || 'MERCADO'}
                                       </span>
                                     </div>
