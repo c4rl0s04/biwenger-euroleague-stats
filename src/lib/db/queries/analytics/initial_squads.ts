@@ -232,6 +232,7 @@ export interface InitialSquadDetailed {
   current_points: number;
   current_price: number;
   current_owner: string | null;
+  current_owner_color_index: number | null;
 }
 
 /**
@@ -342,7 +343,8 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
         p.puntos as current_points,
         p.price as current_price,
         p.position as player_position,
-        (SELECT name FROM users u2 WHERE u2.id = p.owner_id) as current_owner
+        (SELECT name FROM users u2 WHERE u2.id = p.owner_id) as current_owner,
+        (SELECT color_index FROM users u2 WHERE u2.id = p.owner_id) as current_owner_color_index
     FROM initial_squads isq
     JOIN users u ON u.id = isq.user_id
     JOIN players p ON p.id = isq.player_id
