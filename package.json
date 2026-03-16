@@ -14,6 +14,9 @@
     "sync:daily": "tsx -r dotenv/config src/lib/sync/index.ts --daily",
     "sync:live": "tsx -r dotenv/config src/lib/sync/live.ts",
     "test": "vitest",
+    "db:check": "tsx scripts/dev/db-check.ts",
+    "db:verify": "tsx scripts/dev/verify-db-connection.ts",
+    "db:verify:drizzle": "tsx scripts/dev/verify-drizzle.ts",
     "analyze": "ANALYZE=true next build --webpack",
     "prepare": "husky"
   },

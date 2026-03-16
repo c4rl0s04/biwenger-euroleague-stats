@@ -27,10 +27,12 @@ if (skipDb) {
 } else {
   // Connect to the POSTGRES database
   // Defaults match docker-compose.yml
-  const isRemote = process.env.POSTGRES_HOST && process.env.POSTGRES_HOST !== 'localhost';
-
-  // Prioritize DATABASE_URL if provided, otherwise use individual vars
   const connectionString = process.env.DATABASE_URL;
+  const isRemote =
+    (process.env.POSTGRES_HOST && process.env.POSTGRES_HOST !== 'localhost') ||
+    (connectionString &&
+      !connectionString.includes('localhost') &&
+      !connectionString.includes('127.0.0.1'));
 
   const poolConfig: PoolConfig = connectionString
     ? {
