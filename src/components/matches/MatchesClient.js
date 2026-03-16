@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { MatchCard } from './MatchCard';
+import MatchesMap from '@/components/schedule/MatchesMap';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Section } from '@/components/layout';
@@ -190,6 +191,16 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
               </div>
             </Section>
           ))}
+
+          {/* Map Section - Placed at the very end */}
+          <Section
+            title="Mapa de Sedes"
+            background={
+              Object.keys(groupedMatches).length % 2 === 0 ? 'section-base' : 'section-raised'
+            }
+          >
+            <MatchesMap roundName={activeRound.round_name} matchCount={matches.length} />
+          </Section>
 
           {Object.keys(groupedMatches).length === 0 && (
             <div className="py-20 text-center text-zinc-500 bg-zinc-900/20 rounded-2xl border border-dashed border-zinc-800 mx-4">
