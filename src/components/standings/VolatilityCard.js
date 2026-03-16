@@ -28,7 +28,8 @@ export default function VolatilityCard() {
           <div className="space-y-1">
             {data.slice(0, 8).map((user, index) => {
               // Visualize volatility with a bar proportional to max
-              const maxVol = data[0].std_dev;
+              // Data is sorted ascending, so max is at the end
+              const maxVol = data[data.length - 1].std_dev;
               const { user_id, name, color_index, std_dev, avg_points } = user;
               const pct = (std_dev / maxVol) * 100;
               const userColor = getColorForUser(user_id, name, color_index);
