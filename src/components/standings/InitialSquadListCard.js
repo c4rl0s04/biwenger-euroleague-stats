@@ -5,45 +5,27 @@ import { Users, Shield, Award, TrendingUp, DollarSign, Info } from 'lucide-react
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
+import { USER_COLORS } from '@/lib/constants/colors';
 
-const USER_GRADIENTS = [
-  'from-blue-500 to-cyan-400',
-  'from-purple-500 to-pink-400',
-  'from-amber-500 to-orange-400',
-  'from-emerald-500 to-teal-400',
-  'from-rose-500 to-red-400',
-  'from-indigo-500 to-blue-400',
-  'from-orange-500 to-yellow-400',
-  'from-pink-500 to-rose-400',
-  'from-cyan-500 to-blue-400',
-  'from-teal-500 to-emerald-400',
-];
-
-const USER_TEXT_COLORS = [
-  'text-blue-400',
-  'text-purple-400',
-  'text-amber-400',
-  'text-emerald-400',
-  'text-rose-400',
-  'text-indigo-400',
-  'text-orange-400',
-  'text-pink-400',
-  'text-cyan-400',
-  'text-teal-400',
-];
-
-const USER_BG_COLORS = [
-  'bg-blue-400/10 border-blue-400/20',
-  'bg-purple-400/10 border-purple-400/20',
-  'bg-amber-400/10 border-amber-400/20',
-  'bg-emerald-400/10 border-emerald-400/20',
-  'bg-rose-400/10 border-rose-400/20',
-  'bg-indigo-400/10 border-indigo-400/20',
-  'bg-orange-400/10 border-orange-400/20',
-  'bg-pink-400/10 border-pink-400/20',
-  'bg-cyan-400/10 border-cyan-400/20',
-  'bg-teal-400/10 border-teal-400/20',
-];
+// Helper to get vibrant gradient for headers/tabs based on official index
+const getVibrantGradient = (index) => {
+  const gradients = [
+    'from-blue-600 to-blue-400', // 0: Blue
+    'from-yellow-600 to-yellow-400', // 1: Yellow
+    'from-emerald-600 to-emerald-400', // 2: Emerald
+    'from-pink-600 to-pink-400', // 3: Pink
+    'from-cyan-600 to-cyan-400', // 4: Cyan
+    'from-orange-600 to-orange-400', // 5: Orange
+    'from-purple-600 to-purple-400', // 6: Purple
+    'from-red-600 to-red-400', // 7: Red
+    'from-amber-600 to-amber-400', // 8: Amber
+    'from-indigo-600 to-indigo-400', // 9: Indigo
+    'from-teal-600 to-teal-400', // 10: Teal
+    'from-lime-600 to-lime-400', // 11: Lime
+    'from-fuchsia-600 to-fuchsia-400', // 12: Fuchsia
+  ];
+  return gradients[index % gradients.length];
+};
 
 const POSITION_COLORS = {
   G: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
@@ -101,7 +83,7 @@ export default function InitialSquadListCard() {
               <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
                 {managers.map((manager, idx) => {
                   const isActive = activeManagerIdx === idx;
-                  const managerColor = USER_GRADIENTS[manager.colorIndex % USER_GRADIENTS.length];
+                  const managerGradient = getVibrantGradient(manager.colorIndex);
 
                   return (
                     <button
@@ -111,7 +93,7 @@ export default function InitialSquadListCard() {
                         flex-shrink-0 px-4 py-2 rounded-xl border text-sm font-bold transition-all duration-300
                         ${
                           isActive
-                            ? `bg-gradient-to-r ${managerColor} text-white border-transparent shadow-lg shadow-black/40 scale-105`
+                            ? `bg-gradient-to-r ${managerGradient} text-white border-transparent shadow-lg shadow-black/40 scale-105`
                             : 'bg-slate-800/40 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
                         }
                       `}
@@ -136,7 +118,7 @@ export default function InitialSquadListCard() {
                     {/* Left Column: Summary and Stats Card */}
                     <div className="lg:col-span-4 space-y-4">
                       <div
-                        className={`bg-gradient-to-br ${USER_GRADIENTS[activeManager.colorIndex % USER_GRADIENTS.length]} rounded-3xl p-6 shadow-2xl relative overflow-hidden group`}
+                        className={`bg-gradient-to-br ${getVibrantGradient(activeManager.colorIndex)} rounded-3xl p-6 shadow-2xl relative overflow-hidden group`}
                       >
                         <div className="relative z-10 space-y-6">
                           <div>
@@ -220,15 +202,17 @@ export default function InitialSquadListCard() {
                     {/* Right Column: Player Grid */}
                     <div className="lg:col-span-8">
                       <div className="bg-slate-900/40 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
-                        <div className="bg-slate-800/50 p-4 border-b border-slate-800 flex justify-between items-center">
-                          <span
-                            className={`text-sm font-black uppercase tracking-widest ${USER_TEXT_COLORS[activeManager.colorIndex % USER_TEXT_COLORS.length]}`}
-                          >
-                            SQUAD REPARTO INICIAL DE {activeManager.name}
-                          </span>
-                          <span className="text-xs text-slate-500 font-bold">
-                            {activeManager.players.length} JUGADORES
-                          </span>
+                        <div className="bg-slate-800/50 p-4 border-b border-slate-800 flex justify-between items-center text-center">
+                          <h3 className="w-full">
+                            <span className="text-sm font-black uppercase tracking-widest text-slate-400">
+                              SQUAD REPARTO INICIAL DE{' '}
+                            </span>
+                            <span
+                              className={`text-lg font-black uppercase tracking-widest ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
+                            >
+                              {activeManager.name}
+                            </span>
+                          </h3>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
@@ -236,18 +220,12 @@ export default function InitialSquadListCard() {
                             const isStillOwned = player.current_owner === activeManager.name;
                             const posStyles =
                               POSITION_COLORS[player.player_position] || POSITION_COLORS['G'];
-                            const ownerColorClass =
+
+                            // Official colors for current owner
+                            const ownerStyles =
                               player.current_owner_color_index !== null
-                                ? USER_TEXT_COLORS[
-                                    player.current_owner_color_index % USER_TEXT_COLORS.length
-                                  ]
-                                : 'text-slate-400';
-                            const ownerBgClass =
-                              player.current_owner_color_index !== null
-                                ? USER_BG_COLORS[
-                                    player.current_owner_color_index % USER_BG_COLORS.length
-                                  ]
-                                : 'bg-slate-800/80 border-slate-700/50';
+                                ? USER_COLORS[player.current_owner_color_index % USER_COLORS.length]
+                                : null;
 
                             return (
                               <motion.div
@@ -284,7 +262,13 @@ export default function InitialSquadListCard() {
 
                                 <div className="flex items-center ml-2 shrink-0">
                                   {isStillOwned ? (
-                                    <div className="bg-emerald-500/10 p-2.5 rounded-xl text-emerald-500 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all duration-300 shadow-sm border border-emerald-500/20">
+                                    <div
+                                      className={`
+                                        bg-emerald-500/10 p-2.5 rounded-xl text-emerald-500 
+                                        group-hover/item:bg-emerald-500 group-hover/item:text-white 
+                                        transition-all duration-300 shadow-sm border border-emerald-500/20
+                                      `}
+                                    >
                                       <Shield
                                         size={18}
                                         fill={isStillOwned ? 'currentColor' : 'none'}
@@ -293,10 +277,13 @@ export default function InitialSquadListCard() {
                                     </div>
                                   ) : (
                                     <div
-                                      className={`px-3 py-1.5 rounded-xl border min-w-[70px] text-center shadow-lg ${ownerBgClass}`}
+                                      className={`
+                                        px-3 py-1.5 rounded-xl border min-w-[70px] text-center shadow-lg transition-all duration-300
+                                        ${ownerStyles ? `bg-gradient-to-br ${ownerStyles.bg} ${ownerStyles.border}` : 'bg-slate-800/80 border-slate-700/50'}
+                                      `}
                                     >
                                       <span
-                                        className={`text-[10px] font-black uppercase tracking-tighter truncate block ${ownerColorClass}`}
+                                        className={`text-[10px] font-black uppercase tracking-tighter truncate block ${ownerStyles ? ownerStyles.text : 'text-slate-400'}`}
                                       >
                                         {player.current_owner || 'MERCADO'}
                                       </span>
