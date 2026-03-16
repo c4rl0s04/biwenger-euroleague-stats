@@ -40,6 +40,28 @@ export interface InitialSquadPlayerBreakdown {
   points: number;
 }
 
+export interface InitialSquadRegret {
+  user_name: string;
+  user_color_index: number;
+  points_lost: number;
+  top_regret_player: string;
+}
+
+export interface InitialSquadLoyalty {
+  user_name: string;
+  user_color_index: number;
+  retained_count: number;
+  initial_count: number;
+  loyalty_percentage: number;
+}
+
+export interface InitialSquadPotentialAdvanced {
+  user_name: string;
+  user_color_index: number;
+  total_points: number;
+  total_value: number;
+}
+
 /**
  * Calculates the actual performance of initial squads based on lineup usage.
  * Appreciation: Starter (1.0), 6th Man (0.75), Bench (0.5).
@@ -198,6 +220,102 @@ export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]>
   `;
   return (await db.query(query)).rows.map((row: any) => ({
     ...row,
-    player_total_points: parseInt(row.player_total_points) || 0,
+    points: parseFloat(row.points) || 0,
+  }));
+}
+
+/**
+ * Stat 1: Regret (El Arrepentimiento)
+ * Points scored by initial squad players during rounds where they were NOT in the owner's lineup.
+ */
+export async function getInitialSquadRegret(): Promise<InitialSquadRegret[]> {
+  const query = `
+    WITH regret_points AS (
+      SELECT
+        u.id as user_id,
+        u.name as user_name,
+        u.color_index as user_color_index,
+        p.name as player_name,
+        prs.fantasy_points
+      FROM initial_squads isq
+      JOIN users u ON u.id = isq.user_id
+      JOIN players p ON p.id = isq.player_id
+      JOIN player_round_stats prs ON prs.player_id = isq.player_id
+      LEFT JOIN lineups l ON l.player_id = isq.player_id 
+                         AND l.user_id = isq.user_id 
+                         AND l.round_id = prs.round_id
+      WHERE l.id IS NULL
+    ),
+    aggregated AS (
+      SELECT 
+        user_name,
+        user_color_index,
+        SUM(fantasy_points) as points_lost,
+        (
+          SELECT player_name 
+          FROM regret_points rp2 
+          WHERE rp2.user_name = regret_points.user_name 
+          GROUP BY player_name 
+          ORDER BY SUM(fantasy_points) DESC 
+          LIMIT 1
+        ) as top_regret_player
+      FROM regret_points
+      GROUP BY user_name, user_color_index
+    )
+    SELECT * FROM aggregated ORDER BY points_lost DESC
+  `;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    points_lost: parseFloat(row.points_lost) || 0,
+  }));
+}
+
+/**
+ * Stat 2: Loyalty (Fidelidad al ADN)
+ * % of initial squad players still owned by the user.
+ */
+export async function getInitialSquadLoyalty(): Promise<InitialSquadLoyalty[]> {
+  const query = `
+    SELECT
+      u.name as user_name,
+      u.color_index as user_color_index,
+      COUNT(*) FILTER (WHERE p.owner_id = isq.user_id) as retained_count,
+      COUNT(*) as initial_count,
+      ROUND(COUNT(*) FILTER (WHERE p.owner_id = isq.user_id) * 100.0 / COUNT(*), 1) as loyalty_percentage
+    FROM initial_squads isq
+    JOIN users u ON u.id = isq.user_id
+    JOIN players p ON p.id = isq.player_id
+    GROUP BY u.name, u.color_index
+    ORDER BY loyalty_percentage DESC
+  `;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    retained_count: parseInt(row.retained_count) || 0,
+    initial_count: parseInt(row.initial_count) || 0,
+    loyalty_percentage: parseFloat(row.loyalty_percentage) || 0,
+  }));
+}
+
+/**
+ * Stat 6: Potential (Potencial del Reparto)
+ * Total points and current market value of the initial squad.
+ */
+export async function getInitialSquadPotentialAdvanced(): Promise<InitialSquadPotentialAdvanced[]> {
+  const query = `
+    SELECT
+      u.name as user_name,
+      u.color_index as user_color_index,
+      SUM(p.puntos) as total_points,
+      SUM(p.price) as total_value
+    FROM initial_squads isq
+    JOIN users u ON u.id = isq.user_id
+    JOIN players p ON p.id = isq.player_id
+    GROUP BY u.name, u.color_index
+    ORDER BY total_points DESC
+  `;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    total_points: parseFloat(row.total_points) || 0,
+    total_value: parseFloat(row.total_value) || 0,
   }));
 }

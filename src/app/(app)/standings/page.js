@@ -29,6 +29,10 @@ import {
   DraftFidelityCard,
 } from '@/components/standings';
 
+import InitialSquadRegretCard from '@/components/standings/InitialSquadRegretCard';
+import InitialSquadLoyaltyCard from '@/components/standings/InitialSquadLoyaltyCard';
+import InitialSquadPotentialCard from '@/components/standings/InitialSquadPotentialCard';
+
 import RoundHeatmapCard from '@/components/standings/RoundHeatmapCard';
 
 // Dynamic imports for chart components - ssr: false excludes recharts from server bundle
@@ -140,6 +144,12 @@ export default function ClasificacionPage() {
             <InitialSquadAnalysisCard />
             <BestDraftPlayerCard />
             <DraftFidelityCard />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <InitialSquadRegretCard />
+            <InitialSquadLoyaltyCard />
+            <InitialSquadPotentialCard />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             <div id="floor-ceiling-card">

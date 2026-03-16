@@ -41,6 +41,9 @@ import {
   getBestInitialSquadPlayer,
   getInitialSquadRetainedPoints,
   getInitialSquadRetainedBreakdown,
+  getInitialSquadRegret,
+  getInitialSquadLoyalty,
+  getInitialSquadPotentialAdvanced,
 } from '../../db';
 
 export interface StandingsOptions {
@@ -134,14 +137,31 @@ export async function fetchInitialSquadAnalytics() {
   return await getInitialSquadActualPerformance();
 }
 
-/** Stats A & B: Best draft player per user and retained-squad points ranking */
+/** Stats A & B & Phase II: Best draft, retained points, regret, loyalty, and potential */
 export async function fetchInitialSquadStats() {
-  const [bestDraftPerUser, retainedRanking, retainedBreakdown] = await Promise.all([
+  const [
+    bestDraftPerUser,
+    retainedRanking,
+    retainedBreakdown,
+    regretRanking,
+    loyaltyRanking,
+    potentialRanking,
+  ] = await Promise.all([
     getBestInitialSquadPlayer(),
     getInitialSquadRetainedPoints(),
     getInitialSquadRetainedBreakdown(),
+    getInitialSquadRegret(),
+    getInitialSquadLoyalty(),
+    getInitialSquadPotentialAdvanced(),
   ]);
-  return { bestDraftPerUser, retainedRanking, retainedBreakdown };
+  return {
+    bestDraftPerUser,
+    retainedRanking,
+    retainedBreakdown,
+    regretRanking,
+    loyaltyRanking,
+    potentialRanking,
+  };
 }
 
 /**
