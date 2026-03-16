@@ -31,6 +31,9 @@ const POSITION_COLORS = {
   G: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
   F: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
   C: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
+  Base: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+  Alero: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
+  Pivot: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
 };
 
 export default function InitialSquadListCard() {
@@ -119,7 +122,7 @@ export default function InitialSquadListCard() {
                     <div className="lg:col-span-4 space-y-4">
                       {/* Active Manager Summary Badge */}
                       <div
-                        className={`bg-gradient-to-br ${getVibrantGradient(activeManager.colorIndex)} rounded-3xl p-6 shadow-2xl relative overflow-hidden group`}
+                        className={`bg-gradient-to-br ${getVibrantGradient(activeManager.colorIndex)} rounded-3xl p-6 shadow-2xl relative overflow-hidden group border border-white/10`}
                       >
                         <div className="relative z-10 space-y-6">
                           <div>
@@ -240,7 +243,7 @@ export default function InitialSquadListCard() {
                               >
                                 <div className="flex items-center gap-4 min-w-0">
                                   <div
-                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${posStyles} border text-sm shadow-inner shrink-0`}
+                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${posStyles} border text-[10px] shadow-inner shrink-0`}
                                   >
                                     {player.player_position}
                                   </div>
@@ -266,7 +269,7 @@ export default function InitialSquadListCard() {
                                 <div className="flex items-center ml-2 shrink-0">
                                   <div
                                     className={`
-                                      px-3 py-1.5 rounded-xl border min-w-[80px] text-center shadow-lg transition-all duration-300 flex items-center justify-center gap-2
+                                      px-3 py-1.5 rounded-xl border min-w-[90px] text-center shadow-lg transition-all duration-300 flex items-center justify-center gap-2
                                       ${ownerStyles ? `bg-gradient-to-br ${ownerStyles.bg} ${ownerStyles.border}` : 'bg-slate-800/80 border-slate-700/50'}
                                     `}
                                   >

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const stats = await fetchInitialSquadStats();
-    return successResponse(stats, CACHE_DURATIONS.LONG);
+    return successResponse(stats, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching initial squad stats:', error);
     return errorResponse('Internal Server Error');
