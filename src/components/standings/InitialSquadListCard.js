@@ -144,7 +144,7 @@ export default function InitialSquadListCard() {
                               MANAGER
                             </span>
                             <h2
-                              className={`text-4xl font-black drop-shadow-lg leading-none ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text} brightness-125`}
+                              className={`text-4xl font-black drop-shadow-lg leading-none ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
                             >
                               {activeManager.name}
                             </h2>
