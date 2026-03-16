@@ -226,6 +226,7 @@ export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]>
 
 export interface InitialSquadDetailed {
   manager_name: string;
+  manager_color_index: number;
   player_name: string;
   player_position: string;
   current_points: number;
@@ -336,6 +337,7 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
   const query = `
     SELECT 
         u.name as manager_name,
+        u.color_index as manager_color_index,
         p.name as player_name,
         p.puntos as current_points,
         p.price as current_price,
