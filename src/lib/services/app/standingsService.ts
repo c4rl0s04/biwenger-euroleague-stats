@@ -44,6 +44,7 @@ import {
   getInitialSquadRegret,
   getInitialSquadLoyalty,
   getInitialSquadPotentialAdvanced,
+  getInitialSquadsDetailed,
 } from '../../db';
 
 export interface StandingsOptions {
@@ -146,6 +147,7 @@ export async function fetchInitialSquadStats() {
     regretRanking,
     loyaltyRanking,
     potentialRanking,
+    detailedSquads,
   ] = await Promise.all([
     getBestInitialSquadPlayer(),
     getInitialSquadRetainedPoints(),
@@ -153,6 +155,7 @@ export async function fetchInitialSquadStats() {
     getInitialSquadRegret(),
     getInitialSquadLoyalty(),
     getInitialSquadPotentialAdvanced(),
+    getInitialSquadsDetailed(),
   ]);
   return {
     bestDraftPerUser,
@@ -161,6 +164,7 @@ export async function fetchInitialSquadStats() {
     regretRanking,
     loyaltyRanking,
     potentialRanking,
+    detailedSquads: detailedSquads || [],
   };
 }
 

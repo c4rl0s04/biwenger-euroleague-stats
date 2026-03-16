@@ -224,6 +224,15 @@ export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]>
   }));
 }
 
+export interface InitialSquadDetailed {
+  manager_name: string;
+  player_name: string;
+  player_position: string;
+  current_points: number;
+  current_price: number;
+  current_owner: string | null;
+}
+
 /**
  * Stat 1: Regret (El Arrepentimiento)
  * Points scored by initial squad players during rounds where they were NOT in the owner's lineup.
@@ -317,5 +326,36 @@ export async function getInitialSquadPotentialAdvanced(): Promise<InitialSquadPo
     ...row,
     total_points: parseFloat(row.total_points) || 0,
     total_value: parseFloat(row.total_value) || 0,
+  }));
+}
+
+/**
+ * Detailed view of all initial squads.
+ */
+export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]> {
+  const query = `
+    SELECT 
+        u.name as manager_name,
+        p.name as player_name,
+        p.puntos as current_points,
+        p.price as current_price,
+        p.position as player_position,
+        (SELECT name FROM users u2 WHERE u2.id = p.owner_id) as current_owner
+    FROM initial_squads isq
+    JOIN users u ON u.id = isq.user_id
+    JOIN players p ON p.id = isq.player_id
+    ORDER BY u.name, 
+             CASE p.position 
+               WHEN 'G' THEN 1 
+               WHEN 'F' THEN 2 
+               WHEN 'C' THEN 3 
+               ELSE 4 
+             END, 
+             p.price DESC
+  `;
+  return (await db.query(query)).rows.map((row: any) => ({
+    ...row,
+    current_points: parseFloat(row.current_points) || 0,
+    current_price: parseFloat(row.current_price) || 0,
   }));
 }

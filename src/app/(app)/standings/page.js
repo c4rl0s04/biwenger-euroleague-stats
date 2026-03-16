@@ -32,6 +32,7 @@ import {
 import InitialSquadRegretCard from '@/components/standings/InitialSquadRegretCard';
 import InitialSquadLoyaltyCard from '@/components/standings/InitialSquadLoyaltyCard';
 import InitialSquadPotentialCard from '@/components/standings/InitialSquadPotentialCard';
+import InitialSquadListCard from '@/components/standings/InitialSquadListCard';
 
 import RoundHeatmapCard from '@/components/standings/RoundHeatmapCard';
 
@@ -151,6 +152,9 @@ export default function ClasificacionPage() {
             <InitialSquadLoyaltyCard />
             <InitialSquadPotentialCard />
           </div>
+
+          <InitialSquadListCard />
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             <div id="floor-ceiling-card">
               <FloorCeilingCard />
