@@ -368,6 +368,8 @@ export function MapMarker({
 export function MarkerContent({ children, className }) {
   const { marker } = useMarkerContext();
 
+  if (!marker) return null;
+
   return createPortal(
     <div className={cn('relative cursor-pointer', className)}>
       {children || (
