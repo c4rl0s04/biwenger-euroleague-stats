@@ -59,9 +59,9 @@ export default function StreakCard({ type = 'hot' }) {
     >
       <div className="flex flex-col">
         {!loading && players.length > 0 ? (
-          players.map((player) => (
+          players.map((player, index) => (
             <DashboardPlayerRow
-              key={player.player_id}
+              key={`${player.player_id}-${index}`}
               playerId={player.player_id}
               name={player.name}
               team={player.team}
