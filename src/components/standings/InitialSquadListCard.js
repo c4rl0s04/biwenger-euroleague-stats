@@ -27,13 +27,19 @@ const getVibrantGradient = (index) => {
   return gradients[index % gradients.length];
 };
 
-const POSITION_COLORS = {
-  G: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-  F: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
-  C: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
-  Base: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-  Alero: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
-  Pivot: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
+const POSITION_MAP = {
+  Base: { label: 'B', styles: 'text-blue-400 bg-blue-400/10 border-blue-400/20 shadow-blue-400/5' },
+  Alero: {
+    label: 'A',
+    styles: 'text-green-500 bg-green-500/10 border-green-500/20 shadow-green-500/5',
+  },
+  Pivot: { label: 'P', styles: 'text-red-500 bg-red-500/10 border-red-500/20 shadow-red-500/5' },
+  G: { label: 'B', styles: 'text-blue-400 bg-blue-400/10 border-blue-400/20 shadow-blue-400/5' },
+  F: {
+    label: 'A',
+    styles: 'text-green-500 bg-green-500/10 border-green-500/20 shadow-green-500/5',
+  },
+  C: { label: 'P', styles: 'text-red-500 bg-red-500/10 border-red-500/20 shadow-red-500/5' },
 };
 
 export default function InitialSquadListCard() {
@@ -224,8 +230,10 @@ export default function InitialSquadListCard() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
                           {sortedPlayers.map((player, idx) => {
                             const isStillOwned = player.current_owner === activeManager.name;
-                            const posStyles =
-                              POSITION_COLORS[player.player_position] || POSITION_COLORS['G'];
+                            const posData = POSITION_MAP[player.player_position] || {
+                              label: '?',
+                              styles: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
+                            };
 
                             // Official colors for current owner
                             const ownerStyles =
@@ -243,9 +251,9 @@ export default function InitialSquadListCard() {
                               >
                                 <div className="flex items-center gap-4 min-w-0">
                                   <div
-                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${posStyles} border text-[10px] shadow-inner shrink-0`}
+                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${posData.styles} border text-lg shadow-inner shrink-0`}
                                   >
-                                    {player.player_position}
+                                    {posData.label}
                                   </div>
                                   <div className="flex flex-col min-w-0">
                                     <span className="text-sm font-bold text-slate-200 truncate group-hover/item:text-white transition-colors">
