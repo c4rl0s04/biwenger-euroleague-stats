@@ -1,88 +1,69 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import React, { useMemo } from 'react';
+import { Map, MapMarker, MarkerContent, MapControls } from '@/components/ui/map';
+import { getTeamColor } from '@/lib/constants/teamColors';
 
 export default function MatchesMap({ matches = [] }) {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const venuesWithCoords = useMemo(
+    () => matches.filter((m) => m.home?.latitude && m.home?.longitude),
+    [matches]
+  );
 
-  const venuesWithCoords = matches.filter((m) => m.home?.latitude && m.home?.longitude);
-
-  useEffect(() => {
-    if (map.current) return;
-
-    // Initialize map with a very basic style
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '© OpenStreetMap contributors',
-          },
-        },
-        layers: [
-          {
-            id: 'osm-layer',
-            type: 'raster',
-            source: 'osm',
-          },
-        ],
-      },
-      center: [10, 45],
-      zoom: 3,
-    });
-
-    map.current.on('load', () => setMapLoaded(true));
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!map.current || !mapLoaded) return;
-
-    // Clear existing markers manually by tracking them or just clearing the DOM if simple
-    const container = mapContainer.current;
-    const existingMarkers = container.querySelectorAll('.maplibregl-marker');
-    existingMarkers.forEach((m) => m.remove());
-
-    if (venuesWithCoords.length === 0) return;
-
-    const bounds = new maplibregl.LngLatBounds();
-
-    venuesWithCoords.forEach((match) => {
-      const { latitude, longitude } = match.home;
-
-      // Use default marker
-      new maplibregl.Marker().setLngLat([longitude, latitude]).addTo(map.current);
-
-      bounds.extend([longitude, latitude]);
-    });
-
-    // Skip animation, just jump to bounds
-    map.current.fitBounds(bounds, { padding: 40, maxZoom: 5, animate: false });
-  }, [venuesWithCoords, mapLoaded]);
+  // Default center if no venues
+  const center =
+    venuesWithCoords.length > 0
+      ? [venuesWithCoords[0].home.longitude, venuesWithCoords[0].home.latitude]
+      : [10, 45];
 
   return (
-    <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative min-h-[400px]">
-      <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+    <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative h-[400px]">
+      <Map
+        center={center}
+        zoom={3}
+        className="h-full w-full"
+        // mapcn by default uses Carto Dark Matter when document has .dark class
+        // Our project uses .dark on <html>, so it will pick it up automatically.
+      >
+        <MapControls position="bottom-right" />
 
-      {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 text-zinc-500 text-sm">
-          Cargando mapa...
-        </div>
-      )}
+        {venuesWithCoords.map((match) => {
+          const { latitude, longitude, code, id, name } = match.home;
+          const teamColor = getTeamColor(code);
+
+          return (
+            <MapMarker key={`${id}-${match.id}`} longitude={longitude} latitude={latitude}>
+              <MarkerContent>
+                <div
+                  className="group relative cursor-pointer"
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '50%',
+                    backgroundColor: teamColor,
+                    border: '2px solid white',
+                    boxShadow: `0 0 4px rgba(0,0,0,0.5), 0 0 10px ${teamColor}66`,
+                    transition: 'transform 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.3)';
+                    e.currentTarget.style.zIndex = '50';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.zIndex = '1';
+                  }}
+                >
+                  {/* Simple Tooltip on hover using peer or just basic title for now as requested simple */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-zinc-950 border border-zinc-800 px-2 py-1 rounded text-[10px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                    {name}
+                  </div>
+                </div>
+              </MarkerContent>
+            </MapMarker>
+          );
+        })}
+      </Map>
     </div>
   );
 }

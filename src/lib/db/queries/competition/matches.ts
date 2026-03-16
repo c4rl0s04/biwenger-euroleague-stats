@@ -21,6 +21,7 @@ export async function getMatchesGroupedByRound() {
 
       home_id: homeTeam.id,
       home_name: homeTeam.name,
+      home_code: homeTeam.code,
       home_img: homeTeam.img,
       home_city: homeTeam.city,
       home_arena: homeTeam.arenaName,
@@ -29,6 +30,7 @@ export async function getMatchesGroupedByRound() {
 
       away_id: awayTeam.id,
       away_name: awayTeam.name,
+      away_code: awayTeam.code,
       away_img: awayTeam.img,
       away_city: awayTeam.city,
       away_arena: awayTeam.arenaName,
@@ -63,6 +65,7 @@ export async function getMatchesGroupedByRound() {
         home: {
           id: match.home_id,
           name: match.home_name,
+          code: match.home_code,
           img: match.home_img,
           score: match.home_score,
           city: match.home_city,
@@ -73,6 +76,7 @@ export async function getMatchesGroupedByRound() {
         away: {
           id: match.away_id,
           name: match.away_name,
+          code: match.away_code,
           img: match.away_img,
           score: match.away_score,
           city: match.away_city,
