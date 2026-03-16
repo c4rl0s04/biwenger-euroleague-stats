@@ -117,6 +117,7 @@ export default function InitialSquadListCard() {
                   >
                     {/* Left Column: Summary and Stats Card */}
                     <div className="lg:col-span-4 space-y-4">
+                      {/* Active Manager Summary Badge */}
                       <div
                         className={`bg-gradient-to-br ${getVibrantGradient(activeManager.colorIndex)} rounded-3xl p-6 shadow-2xl relative overflow-hidden group`}
                       >
@@ -125,7 +126,9 @@ export default function InitialSquadListCard() {
                             <span className="text-white/60 text-[10px] uppercase font-black tracking-widest">
                               MANAGER
                             </span>
-                            <h2 className="text-4xl font-black text-white drop-shadow-lg leading-none">
+                            <h2
+                              className={`text-4xl font-black drop-shadow-lg leading-none ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text} brightness-125`}
+                            >
                               {activeManager.name}
                             </h2>
                           </div>
@@ -208,7 +211,7 @@ export default function InitialSquadListCard() {
                               SQUAD REPARTO INICIAL DE{' '}
                             </span>
                             <span
-                              className={`text-lg font-black uppercase tracking-widest ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
+                              className={`text-xl font-black uppercase tracking-widest ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
                             >
                               {activeManager.name}
                             </span>
@@ -246,14 +249,14 @@ export default function InitialSquadListCard() {
                                       {player.player_name}
                                     </span>
                                     <span className="text-xs text-slate-400 font-bold mt-0.5">
-                                      <span className="text-slate-200">
+                                      <span className="text-slate-200 text-sm">
                                         {player.current_points}
                                       </span>{' '}
                                       <span className="text-[10px] text-slate-500 uppercase">
                                         pts
                                       </span>{' '}
                                       •{' '}
-                                      <span className="text-emerald-400">
+                                      <span className="text-emerald-400 text-sm">
                                         {(player.current_price / 1000000).toFixed(2)}M
                                       </span>
                                     </span>
@@ -261,34 +264,26 @@ export default function InitialSquadListCard() {
                                 </div>
 
                                 <div className="flex items-center ml-2 shrink-0">
-                                  {isStillOwned ? (
-                                    <div
-                                      className={`
-                                        bg-emerald-500/10 p-2.5 rounded-xl text-emerald-500 
-                                        group-hover/item:bg-emerald-500 group-hover/item:text-white 
-                                        transition-all duration-300 shadow-sm border border-emerald-500/20
-                                      `}
-                                    >
+                                  <div
+                                    className={`
+                                      px-3 py-1.5 rounded-xl border min-w-[80px] text-center shadow-lg transition-all duration-300 flex items-center justify-center gap-2
+                                      ${ownerStyles ? `bg-gradient-to-br ${ownerStyles.bg} ${ownerStyles.border}` : 'bg-slate-800/80 border-slate-700/50'}
+                                    `}
+                                  >
+                                    {isStillOwned && (
                                       <Shield
-                                        size={18}
-                                        fill={isStillOwned ? 'currentColor' : 'none'}
+                                        size={12}
+                                        className={ownerStyles?.text || 'text-slate-400'}
+                                        fill="currentColor"
                                         fillOpacity={0.2}
                                       />
-                                    </div>
-                                  ) : (
-                                    <div
-                                      className={`
-                                        px-3 py-1.5 rounded-xl border min-w-[70px] text-center shadow-lg transition-all duration-300
-                                        ${ownerStyles ? `bg-gradient-to-br ${ownerStyles.bg} ${ownerStyles.border}` : 'bg-slate-800/80 border-slate-700/50'}
-                                      `}
+                                    )}
+                                    <span
+                                      className={`text-[10px] font-black uppercase tracking-tighter truncate block ${ownerStyles ? ownerStyles.text : 'text-slate-400'}`}
                                     >
-                                      <span
-                                        className={`text-[10px] font-black uppercase tracking-tighter truncate block ${ownerStyles ? ownerStyles.text : 'text-slate-400'}`}
-                                      >
-                                        {player.current_owner || 'MERCADO'}
-                                      </span>
-                                    </div>
-                                  )}
+                                      {player.current_owner || 'MERCADO'}
+                                    </span>
+                                  </div>
                                 </div>
                               </motion.div>
                             );
