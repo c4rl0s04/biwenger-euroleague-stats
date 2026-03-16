@@ -100,6 +100,7 @@ export default function InitialSquadListCard() {
                 {managers.map((manager, idx) => {
                   const isActive = activeManagerIdx === idx;
                   const managerGradient = getVibrantGradient(manager.colorIndex);
+                  const managerColor = USER_COLORS[manager.colorIndex % USER_COLORS.length];
 
                   return (
                     <button
@@ -110,7 +111,7 @@ export default function InitialSquadListCard() {
                         ${
                           isActive
                             ? `bg-gradient-to-r ${managerGradient} text-white border-transparent shadow-lg shadow-black/40 scale-105`
-                            : 'bg-slate-800/40 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
+                            : `bg-slate-800/40 ${managerColor.text} ${managerColor.border} hover:bg-slate-800/60 hover:border-slate-600`
                         }
                       `}
                     >
