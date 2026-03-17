@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { Map, MapMarker, MarkerContent, MapControls } from '@/components/ui/map';
 import { getTeamColor } from '@/lib/constants/teamColors';
+import { cn } from '@/lib/utils';
 
 const formatDate = (dateInput) => {
   if (!dateInput) return '';
