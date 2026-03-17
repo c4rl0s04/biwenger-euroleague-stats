@@ -17,7 +17,7 @@ export default function MatchesMap({ matches = [] }) {
       : [10, 45];
 
   return (
-    <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative h-[400px]">
+    <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative h-[600px]">
       <Map
         center={center}
         zoom={3}
