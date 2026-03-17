@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Map, MapControls, MarkerContent } from '@/components/ui/map';
+import { Map as MapComponent, MapControls, MarkerContent } from '@/components/ui/map';
 import { getTeamColor } from '@/lib/constants/teamColors';
 import { cn } from '@/lib/utils';
 import { TeamMarker } from './TeamMarker';
@@ -107,7 +107,7 @@ export default function MatchesMap({ matches = [] }) {
 
   return (
     <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative h-[600px]">
-      <Map bounds={bounds} padding={50} className="h-full w-full">
+      <MapComponent bounds={bounds} padding={50} className="h-full w-full">
         <MapControls position="bottom-right" />
 
         {groupedVenues.map((group, groupIdx) => {
@@ -224,7 +224,7 @@ export default function MatchesMap({ matches = [] }) {
             );
           });
         })}
-      </Map>
+      </MapComponent>
     </div>
   );
 }
