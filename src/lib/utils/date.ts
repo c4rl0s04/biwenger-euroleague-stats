@@ -50,3 +50,17 @@ export function formatMatchDate(dateInput: string | Date | null | undefined): st
     timeZone: 'Europe/Madrid',
   });
 }
+/**
+ * Formats a match date into a short string (e.g., "Mar 17 Oct")
+ */
+export function formatMatchDateShort(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return '';
+  const date = new Date(dateInput);
+
+  return date.toLocaleDateString('es-ES', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'Europe/Madrid',
+  });
+}

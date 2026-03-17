@@ -2,28 +2,14 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { formatMatchTime, formatMatchDateShort } from '@/lib/utils/date';
 
-function formatTime(dateInput) {
-  if (!dateInput) return '';
-  const date = new Date(dateInput);
-  return date.toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Europe/Madrid',
-  });
-}
-
-function formatDate(dateInput) {
-  if (!dateInput) return '';
-  const date = new Date(dateInput);
-  return date.toLocaleDateString('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    timeZone: 'Europe/Madrid',
-  });
-}
-
+/**
+ * MatchCard Component
+ * Displays a single match with teams, scores, live status, or schedule.
+ * @param {Object} props - Component props
+ * @param {Object} props.match - Match data
+ */
 export function MatchCard({ match }) {
   // Use status to determine if match has been played (not score, since unplayed matches have 0-0)
   const isPlayed = match.status === 'finished';
@@ -34,11 +20,14 @@ export function MatchCard({ match }) {
   const isLive = matchDate && matchDate <= now && !isPlayed;
 
   // Determine winner for highlighting
-  const homeWinner = isPlayed && match.home.score > match.away.score;
-  const awayWinner = isPlayed && match.away.score > match.home.score;
+  const homeScore = match.home?.score ?? match.home_score ?? 0;
+  const awayScore = match.away?.score ?? match.away_score ?? 0;
+  const homeWinner = isPlayed && homeScore > awayScore;
+  const awayWinner = isPlayed && awayScore > homeScore;
 
-  // Format time only (date is now in Section title)
-  const formattedTime = formatTime(match.date);
+  // Format date/time using centralized utils
+  const formattedTime = formatMatchTime(match.date);
+  const formattedDate = formatMatchDateShort(match.date);
 
   return (
     <div
@@ -86,22 +75,16 @@ export function MatchCard({ match }) {
           </div>
         ) : isPlayed ? (
           <div className="flex items-center gap-2 font-mono text-xl sm:text-2xl font-black tracking-tight">
-            <span className={cn(homeWinner ? 'text-primary' : 'text-foreground')}>
-              {match.home.score}
-            </span>
+            <span className={cn(homeWinner ? 'text-primary' : 'text-foreground')}>{homeScore}</span>
             <span className="text-muted-foreground/40 text-sm">-</span>
-            <span className={cn(awayWinner ? 'text-primary' : 'text-foreground')}>
-              {match.away.score}
-            </span>
+            <span className={cn(awayWinner ? 'text-primary' : 'text-foreground')}>{awayScore}</span>
           </div>
         ) : (
           <div className="flex flex-col items-center">
             <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider mb-0.5">
-              {formatDate(match.date)}
+              {formattedDate}
             </span>
-            <span className="text-foreground text-sm font-black">
-              {formatTime(match.date) || 'VS'}
-            </span>
+            <span className="text-foreground text-sm font-black">{formattedTime || 'VS'}</span>
           </div>
         )}
       </div>

@@ -10,24 +10,25 @@ import { Section } from '@/components/layout';
 
 import { RoundSelector } from './RoundSelector';
 import { TeamSelector } from './TeamSelector';
+import { formatMatchDate, formatMatchTime } from '@/lib/utils/date';
 
-// Helper to group matches by date
+/**
+ * Helper to group matches by date for standard round view.
+ * @param {Array} matches - List of matches
+ */
 function groupMatchesByDate(matches) {
   return matches.reduce((acc, match) => {
-    const date = new Date(match.date);
-    const dateKey = date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      timeZone: 'Europe/Madrid',
-    });
+    const dateKey = formatMatchDate(match.date);
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(match);
     return acc;
   }, {});
 }
 
-// New Helper to group matches by status (for Team Timeline)
+/**
+ * Helper to group matches by status for Team Timeline view.
+ * @param {Array} matches - List of matches
+ */
 function groupMatchesByStatus(matches) {
   return matches.reduce(
     (acc, match) => {
@@ -42,6 +43,11 @@ function groupMatchesByStatus(matches) {
   );
 }
 
+/**
+ * MatchesClient Component
+ * Main container for the matches page, handling round selection, team filtering,
+ * and switching between Round View and Team Timeline.
+ */
 export default function MatchesClient({ rounds, defaultRoundId }) {
   const [selectedRoundId, setSelectedRoundId] = useState(
     defaultRoundId || (rounds.length > 0 ? rounds[0].round_id : null)
