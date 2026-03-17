@@ -97,39 +97,39 @@ export default function MatchesMap({ matches = [] }) {
                   }}
                 >
                   {/* Persistent Label (Logos) */}
-                  <div className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-zinc-950/80 border border-zinc-800/50 px-2 py-1 rounded-full shadow-lg backdrop-blur-sm z-10 pointer-events-none group-hover:bg-zinc-900 transition-colors whitespace-nowrap">
+                  <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-2.5 py-1.5 rounded-xl shadow-2xl backdrop-blur-md z-10 pointer-events-none group-hover:bg-zinc-900 transition-all min-w-max ring-1 ring-white/5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={homeImg} alt={code} className="w-3.5 h-3.5 object-contain" />
-                    <span className="text-[7px] font-black text-zinc-500 uppercase leading-none">
+                    <img src={homeImg} alt={code} className="w-5 h-5 object-contain" />
+                    <span className="text-[8px] font-black text-zinc-500 uppercase leading-none tracking-tighter">
                       vs
                     </span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={awayImg} alt="Away" className="w-3.5 h-3.5 object-contain" />
+                    <img src={awayImg} alt="Away" className="w-5 h-5 object-contain" />
                   </div>
 
-                  {/* Enhanced Hover Tooltip (Detailed Info) */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-zinc-950 border border-zinc-800 p-2.5 rounded-xl text-white min-w-[180px] opacity-0 group-hover:opacity-100 transition-all transform scale-95 group-hover:scale-100 group-hover:-translate-y-1 pointer-events-none z-[1001] shadow-2xl overflow-hidden ring-1 ring-white/5">
+                  {/* Enhanced Hover Tooltip (Detailed Info) - Higher Z-Index than siblings */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-zinc-950 border border-zinc-800 p-3 rounded-2xl text-white min-w-[200px] opacity-0 group-hover:opacity-100 transition-all transform scale-90 group-hover:scale-100 group-hover:-translate-y-2 pointer-events-none z-[2000] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/10">
                     {/* Date/Time Header */}
-                    <div className="flex justify-between items-center gap-4 mb-2 pb-2 border-b border-zinc-900">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">
+                    <div className="flex justify-between items-center gap-4 mb-3 pb-2.5 border-b border-zinc-900">
+                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-tighter">
                         {formatDate(match.date)}
                       </span>
-                      <span className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded uppercase">
+                      <span className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg uppercase tracking-wider">
                         {formatTime(match.date)}
                       </span>
                     </div>
 
                     {/* Matchup with Logos */}
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={homeImg} className="w-5 h-5 object-contain" alt="" />
-                        <span className="text-xs font-bold truncate leading-none">{name}</span>
+                        <img src={homeImg} className="w-6 h-6 object-contain" alt="" />
+                        <span className="text-sm font-bold truncate tracking-tight">{name}</span>
                       </div>
-                      <div className="flex items-center gap-2 opacity-60">
+                      <div className="flex items-center gap-3 opacity-60">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={awayImg} className="w-5 h-5 object-contain" alt="" />
-                        <span className="text-xs font-medium truncate leading-none">
+                        <img src={awayImg} className="w-6 h-6 object-contain" alt="" />
+                        <span className="text-sm font-medium truncate tracking-tight">
                           {awayName}
                         </span>
                       </div>
