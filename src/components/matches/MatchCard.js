@@ -13,6 +13,17 @@ function formatTime(dateInput) {
   });
 }
 
+function formatDate(dateInput) {
+  if (!dateInput) return '';
+  const date = new Date(dateInput);
+  return date.toLocaleDateString('es-ES', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'Europe/Madrid',
+  });
+}
+
 export function MatchCard({ match }) {
   // Use status to determine if match has been played (not score, since unplayed matches have 0-0)
   const isPlayed = match.status === 'finished';
@@ -84,7 +95,14 @@ export function MatchCard({ match }) {
             </span>
           </div>
         ) : (
-          <span className="text-muted-foreground text-sm font-medium">{formattedTime || 'VS'}</span>
+          <div className="flex flex-col items-center">
+            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+              {formatDate(match.date)}
+            </span>
+            <span className="text-foreground text-sm font-black">
+              {formatTime(match.date) || 'VS'}
+            </span>
+          </div>
         )}
       </div>
 

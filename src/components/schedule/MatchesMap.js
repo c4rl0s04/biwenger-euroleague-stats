@@ -249,39 +249,91 @@ export default function MatchesMap({ matches = [], selectedTeamId = null }) {
         {isTourMode &&
           tourVenues.map((venue, idx) => {
             const { latitude, longitude, code, img: homeImg, match, sequence, isAway } = venue;
-            const { img: awayImg, code: awayCode } = match.away || {};
+            const { img: awayImg, name: awayName } = match.away || {};
             const teamColor = getTeamColor(code);
+
+            const isFinished = match.status === 'finished';
 
             return (
               <TeamMarker key={`tour-${match.id}`} longitude={longitude} latitude={latitude}>
                 <MarkerContent>
-                  <div
-                    className="group relative flex items-center justify-center pointer-events-auto cursor-pointer"
-                    style={{ width: '24px', height: '24px' }}
-                  >
-                    {/* Sequence Badge */}
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg border border-white/20 z-20">
+                  <div className="group relative pointer-events-auto cursor-pointer flex flex-col items-center">
+                    {/* Sequence Badge - Positioned vertically above the logo */}
+                    <div className="bg-blue-600 text-white text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-full shadow-lg border-2 border-zinc-900 z-20 transition-transform group-hover:scale-110 mb-[-8px]">
                       {sequence}
                     </div>
 
-                    {/* Pin */}
+                    {/* Pin - Always showing HOME team img (Venue) and larger */}
                     <div
-                      className="w-5 h-5 rounded-full border-2 border-white shadow-xl flex items-center justify-center overflow-hidden bg-zinc-950"
-                      style={{ ring: `2px solid ${teamColor}` }}
+                      className="w-10 h-10 rounded-full border-2 border-white shadow-2xl flex items-center justify-center overflow-hidden bg-zinc-950 transition-transform group-hover:scale-110 relative z-10"
+                      style={{ boxShadow: `0 0 20px ${teamColor}44` }}
                     >
-                      <img
-                        src={isAway ? awayImg : homeImg}
-                        alt=""
-                        className="w-3 h-3 object-contain"
-                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={homeImg} alt="" className="w-7 h-7 object-contain" />
                     </div>
 
-                    {/* Logo Tag */}
-                    <div className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-zinc-950/90 border border-zinc-800 px-2 py-1 rounded-lg backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-30">
-                      <span className="text-[9px] font-bold text-zinc-300">
-                        {isAway ? 'Visitando a ' : 'En Casa vs '}{' '}
-                        {isAway ? venue.name : match.away?.name}
-                      </span>
+                    {/* Enhanced Tooltip */}
+                    <div className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 p-3 rounded-2xl text-white min-w-[220px] opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 pointer-events-none z-[1100] shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10">
+                      <div className="flex justify-between items-center gap-4 mb-3 pb-2.5 border-b border-zinc-900">
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-tighter">
+                          {formatDate(match.date)}
+                        </span>
+                        {isFinished ? (
+                          <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg uppercase tracking-wider">
+                            Finalizado
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg uppercase tracking-wider">
+                            {formatTime(match.date)}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={homeImg} className="w-5 h-5 object-contain" alt="" />
+                            <span
+                              className={cn(
+                                'text-xs font-bold truncate',
+                                isAway ? 'opacity-60' : 'text-blue-400'
+                              )}
+                            >
+                              {venue.name}
+                            </span>
+                          </div>
+                          {isFinished && (
+                            <span className="text-xs font-black">
+                              {match.home?.score ?? match.home_score}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={awayImg} className="w-5 h-5 object-contain" alt="" />
+                            <span
+                              className={cn(
+                                'text-xs font-bold truncate',
+                                !isAway ? 'opacity-60' : 'text-blue-400'
+                              )}
+                            >
+                              {awayName}
+                            </span>
+                          </div>
+                          {isFinished && (
+                            <span className="text-xs font-black">
+                              {match.away?.score ?? match.away_score}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] text-zinc-500 flex items-center justify-center gap-1 font-medium italic">
+                        {venue.arenaName || 'Sede Local'}
+                      </div>
                     </div>
                   </div>
                 </MarkerContent>

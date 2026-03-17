@@ -21,7 +21,7 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
   return (
     <div
       className={cn(
-        'flex items-center p-1 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-md mx-auto',
+        'flex items-center p-1 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl shadow-black/50',
         className
       )}
     >

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { MatchCard } from './MatchCard';
 import MatchesMap from '@/components/schedule/MatchesMap';
@@ -29,11 +29,11 @@ function groupMatchesByDate(matches) {
 
 // New Helper to group matches by status (for Team Timeline)
 function groupMatchesByStatus(matches) {
-  const now = new Date();
   return matches.reduce(
     (acc, match) => {
-      const isPast = new Date(match.date) < now;
-      const key = isPast ? 'Partidos Completados' : 'Próximos Partidos';
+      // Use status as the source of truth for finished games
+      const isFinished = match.status === 'finished';
+      const key = isFinished ? 'Partidos Completados' : 'Próximos Partidos';
       if (!acc[key]) acc[key] = [];
       acc[key].push(match);
       return acc;
@@ -101,6 +101,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
             setSelectedTeamId(null); // Clear team filter when switching rounds
           }}
           className={cn(
+            'md:w-fit min-w-[300px]',
             isTeamMode && 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all'
           )}
         />
@@ -109,7 +110,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
           teams={allTeams}
           selectedTeamId={selectedTeamId}
           onTeamChange={setSelectedTeamId}
-          className="w-full md:w-auto"
+          className="md:w-fit min-w-[200px]"
         />
       </div>
 
