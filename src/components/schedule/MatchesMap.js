@@ -75,9 +75,23 @@ export default function MatchesMap({ matches = [] }) {
                     e.currentTarget.style.zIndex = '1';
                   }}
                 >
-                  {/* Simple Tooltip on hover using peer or just basic title for now as requested simple */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-zinc-950 border border-zinc-800 px-2 py-1 rounded text-[10px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                    {name}
+                  {/* Persistent Label (Home vs Away) */}
+                  <div className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 flex items-center gap-1 bg-zinc-950/80 border border-zinc-800/50 px-1.5 py-0.5 rounded shadow-lg backdrop-blur-sm z-10 pointer-events-none group-hover:bg-zinc-900 transition-colors">
+                    <span className="text-[9px] font-bold text-zinc-100 leading-none">
+                      {match.home.code}
+                    </span>
+                    <span className="text-[8px] font-light text-zinc-500 leading-none">vs</span>
+                    <span className="text-[9px] font-bold text-zinc-100 leading-none">
+                      {match.away?.code}
+                    </span>
+                  </div>
+
+                  {/* Enhanced Hover Tooltip (Full Names) */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-zinc-950 border border-zinc-800 px-2 py-1.5 rounded-md text-[10px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1 pointer-events-none z-50 shadow-2xl">
+                    <div className="font-bold border-b border-zinc-800 pb-1 mb-1 text-blue-400">
+                      {match.home.name}
+                    </div>
+                    <div className="text-[9px] text-zinc-400">vs {match.away?.name}</div>
                   </div>
                 </div>
               </MarkerContent>
