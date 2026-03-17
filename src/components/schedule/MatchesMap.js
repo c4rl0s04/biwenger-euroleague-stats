@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Map, MapMarker, MarkerContent, MapControls } from '@/components/ui/map';
+import { Map, MapControls, MarkerContent } from '@/components/ui/map';
 import { getTeamColor } from '@/lib/constants/teamColors';
 import { cn } from '@/lib/utils';
+import { TeamMarker } from './TeamMarker';
 
 const formatDate = (dateInput) => {
   if (!dateInput) return '';
@@ -27,53 +28,71 @@ const formatTime = (dateInput) => {
 };
 
 export default function MatchesMap({ matches = [] }) {
-  const venuesWithCoords = useMemo(
-    () => matches.filter((m) => m.home?.latitude && m.home?.longitude),
-    [matches]
-  );
+  // 1. Extract all unique teams currently playing or mentioned in the schedule
+  const teams = useMemo(() => {
+    const teamsMap = new Map();
+    matches.forEach((m) => {
+      if (m.home) teamsMap.set(m.home.id, { ...m.home, role: 'home', match: m });
+      if (m.away) teamsMap.set(m.away.id, { ...m.away, role: 'away', match: m });
+    });
+    return Array.from(teamsMap.values());
+  }, [matches]);
 
-  // Group venues by proximity to detect collisions
+  // 2. Group these teams by their TARGET venue (proximity based)
   const groupedVenues = useMemo(() => {
     const groups = [];
-    const PROXIMITY_THRESHOLD = 0.5; // roughly 50km
+    const PROXIMITY_THRESHOLD = 0.5;
 
-    venuesWithCoords.forEach((match) => {
+    teams.forEach((team) => {
+      // Use the venue address (the HOME team's coords for this match)
+      const targetLat = team.role === 'home' ? team.latitude : team.match.home.latitude;
+      const targetLng = team.role === 'home' ? team.longitude : team.match.home.longitude;
+
       let foundGroup = false;
       for (const group of groups) {
-        const firstMatch = group[0];
-        const distLat = Math.abs(match.home.latitude - firstMatch.home.latitude);
-        const distLng = Math.abs(match.home.longitude - firstMatch.home.longitude);
+        const firstMember = group[0];
+        const groupLat =
+          firstMember.role === 'home' ? firstMember.latitude : firstMember.match.home.latitude;
+        const groupLng =
+          firstMember.role === 'home' ? firstMember.longitude : firstMember.match.home.longitude;
+
+        const distLat = Math.abs(targetLat - groupLat);
+        const distLng = Math.abs(targetLng - groupLng);
 
         if (distLat < PROXIMITY_THRESHOLD && distLng < PROXIMITY_THRESHOLD) {
-          group.push(match);
+          group.push(team);
           foundGroup = true;
           break;
         }
       }
 
       if (!foundGroup) {
-        groups.push([match]);
+        groups.push([team]);
       }
     });
 
     return groups;
-  }, [venuesWithCoords]);
+  }, [teams]);
 
   // Calculate bounds to fit all markers
   const bounds = useMemo(() => {
-    if (venuesWithCoords.length === 0) return null;
+    const activeCoords = teams.map((t) => ({
+      lat: t.role === 'home' ? t.latitude : t.match.home.latitude,
+      lng: t.role === 'home' ? t.longitude : t.match.home.longitude,
+    }));
+
+    if (activeCoords.length === 0) return null;
     let minLng = Infinity,
       minLat = Infinity,
       maxLng = -Infinity,
       maxLat = -Infinity;
-    venuesWithCoords.forEach((m) => {
-      const { longitude, latitude } = m.home;
-      if (longitude < minLng) minLng = longitude;
-      if (latitude < minLat) minLat = latitude;
-      if (longitude > maxLng) maxLng = longitude;
-      if (latitude > maxLat) maxLat = latitude;
+    activeCoords.forEach((c) => {
+      if (c.lng < minLng) minLng = c.lng;
+      if (c.lat < minLat) minLat = c.lat;
+      if (c.lng > maxLng) maxLng = c.lng;
+      if (c.lat > maxLat) maxLat = c.lat;
     });
-    // Add a small buffer if there's only one point
+
     if (minLng === maxLng && minLat === maxLat) {
       return [
         [minLng - 0.01, minLat - 0.01],
@@ -84,39 +103,42 @@ export default function MatchesMap({ matches = [] }) {
       [minLng, minLat],
       [maxLng, maxLat],
     ];
-  }, [venuesWithCoords]);
+  }, [teams]);
 
   return (
     <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative h-[600px]">
       <Map bounds={bounds} padding={50} className="h-full w-full">
         <MapControls position="bottom-right" />
 
-        {groupedVenues.map((group) => {
-          // If multiple matches in same location, we'll need to offset them slightly
-          // but the user suggested tags on top/bottom, so we'll stay on same point
-          // and just position labels strategically.
-          return group.map((match, idx) => {
+        {groupedVenues.map((group, groupIdx) => {
+          // Identify matches in this location
+          const groupMatches = new Map();
+          group.forEach((t) => groupMatches.set(t.match.id, t.match));
+          const sessionMatches = Array.from(groupMatches.values());
+
+          return sessionMatches.map((match, idx) => {
             const { latitude, longitude, code, id, name, img: homeImg } = match.home;
-            const { name: awayName, img: awayImg } = match.away || {};
+            const { name: awayName, img: awayImg, code: awayCode } = match.away || {};
             const teamColor = getTeamColor(code);
 
-            // Alternate label position for collisions
+            // Alternate label position for regional collisions
             const isAlternate = idx % 2 === 1;
 
             return (
-              <MapMarker key={`${id}-${match.id}`} longitude={longitude} latitude={latitude}>
+              <TeamMarker
+                key={`${id}-${match.id}`}
+                longitude={longitude}
+                latitude={latitude}
+                // Delay based on index for "wave" effect
+                delay={idx * 150}
+              >
                 <MarkerContent>
                   <div
                     className="group relative flex items-center justify-center pointer-events-auto cursor-pointer"
-                    style={{
-                      width: '16px',
-                      height: '16px',
-                      zIndex: '10',
-                    }}
+                    style={{ width: '16px', height: '16px', zIndex: '10' }}
                     onMouseEnter={(e) => {
                       const markerEl = e.currentTarget.closest('.maplibregl-marker');
                       if (markerEl) markerEl.style.zIndex = '1000';
-                      // Scale the pin circle via ref or by finding it
                       const pin = e.currentTarget.querySelector('.pin-circle');
                       if (pin) pin.style.transform = 'scale(1.3)';
                     }}
@@ -136,7 +158,7 @@ export default function MatchesMap({ matches = [] }) {
                       }}
                     />
 
-                    {/* Invisible Hit Bridge - Ensures hover isn't lost between pin and tag */}
+                    {/* Invisible Hit Bridge */}
                     <div
                       className={cn(
                         'absolute w-20 h-20 -z-10 bg-transparent',
@@ -144,7 +166,7 @@ export default function MatchesMap({ matches = [] }) {
                       )}
                     />
 
-                    {/* Persistent Tag (Logos) - Positioned Top or Bottom */}
+                    {/* Persistent Tag (Logos) */}
                     <div
                       className={cn(
                         'absolute left-1/2 -translate-x-1/2 flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-2.5 py-1.5 rounded-xl shadow-2xl backdrop-blur-md z-10 transition-all min-w-max ring-1 ring-white/5 group-hover:bg-zinc-900 group-hover:border-zinc-700',
@@ -157,10 +179,10 @@ export default function MatchesMap({ matches = [] }) {
                         vs
                       </span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={awayImg} alt="Away" className="w-5 h-5 object-contain" />
+                      <img src={awayImg} alt={awayCode} className="w-5 h-5 object-contain" />
                     </div>
 
-                    {/* Hover Tooltip - Positioned opposite to tag or on top if tag is on top */}
+                    {/* Hover Tooltip */}
                     <div
                       className={cn(
                         'absolute left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 p-3 rounded-2xl text-white min-w-[200px] opacity-0 group-hover:opacity-100 transition-all transform pointer-events-none z-[1100] shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10',
@@ -198,7 +220,7 @@ export default function MatchesMap({ matches = [] }) {
                     </div>
                   </div>
                 </MarkerContent>
-              </MapMarker>
+              </TeamMarker>
             );
           });
         })}
