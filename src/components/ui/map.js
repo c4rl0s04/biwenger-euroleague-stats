@@ -101,6 +101,8 @@ export const Map = forwardRef(function Map(
     projection,
     viewport,
     onViewportChange,
+    bounds,
+    padding = 20,
     loading = false,
     ...props
   },
@@ -156,6 +158,10 @@ export const Map = forwardRef(function Map(
       ...props,
       ...viewport,
     });
+
+    if (bounds) {
+      map.fitBounds(bounds, { padding, animate: false });
+    }
 
     const styleDataHandler = () => {
       clearStyleTimeout();
@@ -216,6 +222,11 @@ export const Map = forwardRef(function Map(
     mapInstance.jumpTo(next);
     internalUpdateRef.current = false;
   }, [mapInstance, isControlled, viewport]);
+
+  useEffect(() => {
+    if (!mapInstance || !bounds) return;
+    mapInstance.fitBounds(bounds, { padding, duration: 1000 });
+  }, [mapInstance, bounds, padding]);
 
   useEffect(() => {
     if (!mapInstance || !resolvedTheme) return;

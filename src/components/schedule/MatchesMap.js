@@ -10,17 +10,38 @@ export default function MatchesMap({ matches = [] }) {
     [matches]
   );
 
-  // Default center if no venues
-  const center =
-    venuesWithCoords.length > 0
-      ? [venuesWithCoords[0].home.longitude, venuesWithCoords[0].home.latitude]
-      : [10, 45];
+  // Calculate bounds to fit all markers
+  const bounds = useMemo(() => {
+    if (venuesWithCoords.length === 0) return null;
+    let minLng = Infinity,
+      minLat = Infinity,
+      maxLng = -Infinity,
+      maxLat = -Infinity;
+    venuesWithCoords.forEach((m) => {
+      const { longitude, latitude } = m.home;
+      if (longitude < minLng) minLng = longitude;
+      if (latitude < minLat) minLat = latitude;
+      if (longitude > maxLng) maxLng = longitude;
+      if (latitude > maxLat) maxLat = latitude;
+    });
+    // Add a small buffer if there's only one point
+    if (minLng === maxLng && minLat === maxLat) {
+      return [
+        [minLng - 0.01, minLat - 0.01],
+        [maxLng + 0.01, maxLat + 0.01],
+      ];
+    }
+    return [
+      [minLng, minLat],
+      [maxLng, maxLat],
+    ];
+  }, [venuesWithCoords]);
 
   return (
     <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative h-[600px]">
       <Map
-        center={center}
-        zoom={3}
+        bounds={bounds}
+        padding={50}
         className="h-full w-full"
         // mapcn by default uses Carto Dark Matter when document has .dark class
         // Our project uses .dark on <html>, so it will pick it up automatically.
