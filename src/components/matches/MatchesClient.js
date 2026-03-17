@@ -73,26 +73,6 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
             </Section>
           ))}
 
-          {/* Map Section - Placed at the very end */}
-          <Section
-            title="Mapa de Sedes"
-            background={
-              Object.keys(groupedMatches).length % 2 === 0 ? 'section-base' : 'section-raised'
-            }
-          >
-            {/* Map Round Selector - Added for better UX with animations */}
-            <div className="mb-6 flex justify-center">
-              <RoundSelector
-                rounds={rounds}
-                selectedRoundId={selectedRoundId}
-                onRoundChange={setSelectedRoundId}
-                className="max-w-xs shadow-none border-white/5 bg-zinc-900/40"
-              />
-            </div>
-
-            <MatchesMap roundName={activeRound.round_name} matches={matches} />
-          </Section>
-
           {Object.keys(groupedMatches).length === 0 && (
             <div className="py-20 text-center text-zinc-500 bg-zinc-900/20 rounded-2xl border border-dashed border-zinc-800 mx-4">
               No hay partidos disponibles para esta jornada.
@@ -100,6 +80,25 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Map Section - Moved outside of AnimatePresence to keep it mounted for transitions */}
+      <Section
+        title="Mapa de Sedes"
+        background={
+          Object.keys(groupedMatches).length % 2 === 0 ? 'section-base' : 'section-raised'
+        }
+      >
+        <div className="mb-6 flex justify-center">
+          <RoundSelector
+            rounds={rounds}
+            selectedRoundId={selectedRoundId}
+            onRoundChange={setSelectedRoundId}
+            className="max-w-xs shadow-none border-white/5 bg-zinc-900/40"
+          />
+        </div>
+
+        <MatchesMap roundName={activeRound.round_name} matches={matches} />
+      </Section>
     </div>
   );
 }
