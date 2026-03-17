@@ -40,7 +40,7 @@ export function Dropdown({ icon, label, children, align = 'left', fullWidth = fa
       {isOpen && (
         <div
           className={cn(
-            'absolute top-full mt-2 z-[100] bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl shadow-black overflow-hidden min-w-[240px] animate-in fade-in zoom-in-95 duration-100',
+            'absolute top-full mt-2 z-[999] bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl shadow-black overflow-hidden min-w-[240px] animate-in fade-in zoom-in-95 duration-100',
             align === 'left'
               ? 'left-0'
               : align === 'right'

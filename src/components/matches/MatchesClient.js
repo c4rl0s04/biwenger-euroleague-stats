@@ -80,8 +80,8 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
               Object.keys(groupedMatches).length % 2 === 0 ? 'section-base' : 'section-raised'
             }
           >
-            {/* Map Round Selector - Added for better UX with animations */}
-            <div className="mb-6 flex justify-center">
+            {/* Map Round Selector - z-50 ensures dropdown is on top of map */}
+            <div className="mb-6 flex justify-center relative z-50">
               <RoundSelector
                 rounds={rounds}
                 selectedRoundId={selectedRoundId}
