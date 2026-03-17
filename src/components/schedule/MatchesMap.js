@@ -172,7 +172,6 @@ export default function MatchesMap({ matches = [], selectedTeamId = null }) {
                         className="pin-circle absolute w-4 h-4 rounded-full border-2 border-white shadow-xl transition-transform duration-200"
                         style={{
                           backgroundColor: teamColor,
-                          boxShadow: `0 0 10px ${teamColor}66`,
                         }}
                       />
 
@@ -258,18 +257,21 @@ export default function MatchesMap({ matches = [], selectedTeamId = null }) {
               <TeamMarker key={`tour-${match.id}`} longitude={longitude} latitude={latitude}>
                 <MarkerContent>
                   <div className="group relative pointer-events-auto cursor-pointer flex flex-col items-center">
-                    {/* Sequence Badge - Positioned vertically above the logo */}
-                    <div className="bg-blue-600 text-white text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-full shadow-lg border-2 border-zinc-900 z-20 transition-transform group-hover:scale-110 mb-[-8px]">
+                    {/* Sequence Badge - Positioned vertically above the pin */}
+                    <div className="bg-blue-600 text-white text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-full shadow-lg border-2 border-zinc-900 z-20 transition-transform group-hover:scale-110 mb-[-4px] relative">
                       {sequence}
                     </div>
 
-                    {/* Pin - Always showing HOME team img (Venue) and larger */}
+                    {/* The Pin Circle - Exactly the same as Round Mode */}
                     <div
-                      className="w-10 h-10 rounded-full border-2 border-white shadow-2xl flex items-center justify-center overflow-hidden bg-zinc-950 transition-transform group-hover:scale-110 relative z-10"
-                      style={{ boxShadow: `0 0 20px ${teamColor}44` }}
-                    >
+                      className="pin-circle w-4 h-4 rounded-full border-2 border-white shadow-xl relative z-10"
+                      style={{ backgroundColor: teamColor }}
+                    />
+
+                    {/* Logo Tag - Same style as Round Mode but with slightly larger Home logo and no shadow/border */}
+                    <div className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-zinc-950/40 p-1 rounded-lg backdrop-blur-md z-10 transition-all min-w-max group-hover:bg-zinc-900/60">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={homeImg} alt="" className="w-7 h-7 object-contain" />
+                      <img src={homeImg} alt="" className="w-6 h-6 object-contain" />
                     </div>
 
                     {/* Enhanced Tooltip */}
