@@ -186,10 +186,6 @@ function TourMarker({ venue, selectedTeamId }) {
                 {isFinished && <span className="text-xs font-black">{awayScore}</span>}
               </div>
             </div>
-
-            <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] text-zinc-500 flex items-center justify-center gap-1 font-medium italic">
-              {match.home.arenaName || 'Sede Local'}
-            </div>
           </div>
         </div>
       </MarkerContent>
