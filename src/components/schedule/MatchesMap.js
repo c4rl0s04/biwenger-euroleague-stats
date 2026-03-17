@@ -32,15 +32,31 @@ export default function MatchesMap({ matches = [] }) {
     [matches]
   );
 
-  // Group venues by their exact coordinates to detect collisions
+  // Group venues by proximity to detect collisions
   const groupedVenues = useMemo(() => {
-    const groups = {};
+    const groups = [];
+    const PROXIMITY_THRESHOLD = 0.5; // roughly 50km
+
     venuesWithCoords.forEach((match) => {
-      const key = `${match.home.latitude},${match.home.longitude}`;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(match);
+      let foundGroup = false;
+      for (const group of groups) {
+        const firstMatch = group[0];
+        const distLat = Math.abs(match.home.latitude - firstMatch.home.latitude);
+        const distLng = Math.abs(match.home.longitude - firstMatch.home.longitude);
+
+        if (distLat < PROXIMITY_THRESHOLD && distLng < PROXIMITY_THRESHOLD) {
+          group.push(match);
+          foundGroup = true;
+          break;
+        }
+      }
+
+      if (!foundGroup) {
+        groups.push([match]);
+      }
     });
-    return Object.values(groups);
+
+    return groups;
   }, [venuesWithCoords]);
 
   // Calculate bounds to fit all markers
