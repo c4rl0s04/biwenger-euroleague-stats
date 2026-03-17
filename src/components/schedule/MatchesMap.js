@@ -256,7 +256,18 @@ export default function MatchesMap({ matches = [], selectedTeamId = null }) {
             return (
               <TeamMarker key={`tour-${match.id}`} longitude={longitude} latitude={latitude}>
                 <MarkerContent>
-                  <div className="group relative pointer-events-auto cursor-pointer flex flex-col items-center">
+                  <div
+                    className="group relative pointer-events-auto cursor-pointer flex flex-col items-center"
+                    style={{ zIndex: '10' }}
+                    onMouseEnter={(e) => {
+                      const markerEl = e.currentTarget.closest('.maplibregl-marker');
+                      if (markerEl) markerEl.style.zIndex = '1000';
+                    }}
+                    onMouseLeave={(e) => {
+                      const markerEl = e.currentTarget.closest('.maplibregl-marker');
+                      if (markerEl) markerEl.style.zIndex = '';
+                    }}
+                  >
                     {/* Sequence Badge - Positioned vertically above the pin */}
                     <div className="bg-blue-600 text-white text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-full shadow-lg border-2 border-zinc-900 z-20 transition-transform group-hover:scale-110 mb-[-4px] relative">
                       {sequence}
