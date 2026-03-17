@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Section } from '@/components/layout';
 
 import { RoundSelector } from './RoundSelector';
+import { TeamSelector } from './TeamSelector';
 
 // Helper to group matches by date
 function groupMatchesByDate(matches) {
@@ -26,76 +27,148 @@ function groupMatchesByDate(matches) {
   }, {});
 }
 
+// New Helper to group matches by status (for Team Timeline)
+function groupMatchesByStatus(matches) {
+  const now = new Date();
+  return matches.reduce(
+    (acc, match) => {
+      const isPast = new Date(match.date) < now;
+      const key = isPast ? 'Partidos Completados' : 'Próximos Partidos';
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(match);
+      return acc;
+    },
+    { 'Partidos Completados': [], 'Próximos Partidos': [] }
+  );
+}
+
 export default function MatchesClient({ rounds, defaultRoundId }) {
-  // Default to the provided defaultRoundId, or the first round if not found
   const [selectedRoundId, setSelectedRoundId] = useState(
     defaultRoundId || (rounds.length > 0 ? rounds[0].round_id : null)
   );
+  const [selectedTeamId, setSelectedTeamId] = useState(null);
+
+  // Extract all unique teams from all rounds for the selector
+  const allTeams = useMemo(() => {
+    const teamsMap = new Map();
+    rounds.forEach((round) => {
+      round.matches.forEach((m) => {
+        if (m.home) teamsMap.set(m.home.id, m.home);
+        if (m.away) teamsMap.set(m.away.id, m.away);
+      });
+    });
+    return Array.from(teamsMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [rounds]);
+
+  // Derived data based on mode (Round vs Team)
+  const isTeamMode = selectedTeamId !== null;
 
   const activeRound = rounds.find((r) => r.round_id === selectedRoundId);
-  const matches = activeRound ? activeRound.matches : [];
-  const groupedMatches = groupMatchesByDate(matches);
 
-  if (!activeRound) return null;
+  // Get matches based on active filter
+  const matchesToDisplay = useMemo(() => {
+    if (isTeamMode) {
+      // Get ALL matches for this team across the entire season
+      const teamMatches = [];
+      rounds.forEach((r) => {
+        r.matches.forEach((m) => {
+          if (m.home?.id === selectedTeamId || m.away?.id === selectedTeamId) {
+            teamMatches.push(m);
+          }
+        });
+      });
+      // Sort by date chromologically
+      return teamMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+    return activeRound ? activeRound.matches : [];
+  }, [isTeamMode, selectedTeamId, activeRound, rounds]);
+
+  const groupedMatches = isTeamMode
+    ? groupMatchesByStatus(matchesToDisplay)
+    : groupMatchesByDate(matchesToDisplay);
+
+  if (!activeRound && !isTeamMode) return null;
 
   return (
     <div className="space-y-0">
-      {/* Top Bar: Round Selector */}
-      <div className="sticky top-4 z-30 flex items-center justify-center px-4">
+      {/* Top Bar: Dual Selectors */}
+      <div className="sticky top-4 z-30 flex flex-col md:flex-row items-center justify-center gap-3 px-4">
         <RoundSelector
           rounds={rounds}
           selectedRoundId={selectedRoundId}
-          onRoundChange={setSelectedRoundId}
+          onRoundChange={(id) => {
+            setSelectedRoundId(id);
+            setSelectedTeamId(null); // Clear team filter when switching rounds
+          }}
+          className={cn(
+            isTeamMode && 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all'
+          )}
+        />
+
+        <TeamSelector
+          teams={allTeams}
+          selectedTeamId={selectedTeamId}
+          onTeamChange={setSelectedTeamId}
+          className="w-full md:w-auto"
         />
       </div>
 
-      {/* Matches grouped by day */}
+      {/* Content Area */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={selectedRoundId}
+          key={isTeamMode ? `team-${selectedTeamId}` : `round-${selectedRoundId}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
         >
-          {Object.entries(groupedMatches).map(([dateKey, dayMatches], index) => (
-            <Section
-              key={dateKey}
-              title={dateKey}
-              background={index % 2 === 0 ? 'section-base' : 'section-raised'}
-              delay={index * 100}
-            >
-              <div className="grid gap-3">
-                {dayMatches.map((match) => (
-                  <MatchCard key={match.id} match={match} />
-                ))}
-              </div>
-            </Section>
-          ))}
+          {Object.entries(groupedMatches).map(([key, sectionMatches], index) => {
+            if (sectionMatches.length === 0) return null;
 
-          {/* Map Section - Placed at the very end */}
+            return (
+              <Section
+                key={key}
+                title={key}
+                background={index % 2 === 0 ? 'section-base' : 'section-raised'}
+                delay={index * 100}
+              >
+                <div className="grid gap-3">
+                  {sectionMatches.map((match) => (
+                    <MatchCard key={match.id} match={match} />
+                  ))}
+                </div>
+              </Section>
+            );
+          })}
+
+          {/* Map Section */}
           <Section
-            title="Mapa de Sedes"
+            title={isTeamMode ? 'European Tour' : 'Mapa de Sedes'}
             background={
               Object.keys(groupedMatches).length % 2 === 0 ? 'section-base' : 'section-raised'
             }
           >
-            {/* Map Round Selector - z-50 ensures dropdown is on top of map */}
-            <div className="mb-6 flex justify-center relative z-50">
-              <RoundSelector
-                rounds={rounds}
-                selectedRoundId={selectedRoundId}
-                onRoundChange={setSelectedRoundId}
-                className="max-w-xs shadow-none border-white/5 bg-zinc-900/40"
-              />
-            </div>
+            {!isTeamMode && (
+              <div className="mb-6 flex justify-center relative z-50">
+                <RoundSelector
+                  rounds={rounds}
+                  selectedRoundId={selectedRoundId}
+                  onRoundChange={setSelectedRoundId}
+                  className="max-w-xs shadow-none border-white/5 bg-zinc-900/40"
+                />
+              </div>
+            )}
 
-            <MatchesMap roundName={activeRound.round_name} matches={matches} />
+            <MatchesMap
+              roundName={activeRound?.round_name}
+              matches={matchesToDisplay}
+              selectedTeamId={selectedTeamId}
+            />
           </Section>
 
-          {Object.keys(groupedMatches).length === 0 && (
+          {matchesToDisplay.length === 0 && (
             <div className="py-20 text-center text-zinc-500 bg-zinc-900/20 rounded-2xl border border-dashed border-zinc-800 mx-4">
-              No hay partidos disponibles para esta jornada.
+              No hay partidos disponibles para esta selección.
             </div>
           )}
         </motion.div>
