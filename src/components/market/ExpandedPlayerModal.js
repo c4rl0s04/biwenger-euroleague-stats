@@ -125,9 +125,8 @@ export default function ExpandedPlayerModal({ player, onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[100] bg-[#0b0c10]/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
       onClick={onClose}
-      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -135,7 +134,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0b0c10] border border-white/10 rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] relative"
+        className="bg-background border border-border/50 rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl relative"
       >
         <div className="absolute top-4 right-4 z-20">
           <button
@@ -148,12 +147,12 @@ export default function ExpandedPlayerModal({ player, onClose }) {
 
         {/* 1. HERO HEADER */}
         <div
-          className="h-32 sm:h-40 relative flex items-end px-6 sm:px-8 pb-5"
-          style={{ backgroundColor: `${teamColor}30` }}
+          className="h-40 sm:h-52 relative flex items-end px-6 sm:px-8 pb-6"
+          style={{ backgroundColor: `${teamColor}20` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c10] via-[#0b0c10]/80 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
 
-          <div className="w-20 h-20 sm:w-28 sm:h-28 bg-[#151820] rounded-2xl overflow-hidden translate-y-6 sm:translate-y-8 border-4 border-[#0b0c10] shadow-2xl flex-shrink-0 relative">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-card rounded-2xl overflow-hidden translate-y-8 sm:translate-y-10 border-4 border-background shadow-2xl flex-shrink-0 relative">
             {player.img ? (
               <Image
                 src={player.img}
@@ -170,7 +169,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
 
           <div className="ml-5 sm:ml-6 mb-1 text-white flex-1 flex flex-col sm:flex-row justify-between sm:items-end relative z-10 gap-3">
             <div>
-              <h2 className="text-xl sm:text-3xl font-black tracking-tight leading-none mb-1.5">
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tighter leading-none mb-1 uppercase text-white drop-shadow-md">
                 {player.name}
               </h2>
               <div className="flex items-center gap-2">
@@ -199,15 +198,15 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                   <p className="text-[9px] text-white/50 uppercase tracking-widest font-bold mb-0.5 mt-0.5">
                     Rol Actual
                   </p>
-                  <p className="text-sm font-bold text-white flex items-center gap-1.5">
+                  <p className="text-sm font-bold text-white flex items-center gap-1.5 font-display tracking-wide">
                     <Clock size={12} className="text-sky-400" /> {roleLabel}
                   </p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 backdrop-blur-md">
-                  <p className="text-[9px] text-white/50 uppercase tracking-widest font-bold mb-0.5 mt-0.5">
+                  <p className="text-[9px] text-white/60 uppercase tracking-widest font-black mb-0.5 mt-0.5 font-display">
                     Minutos Prom.
                   </p>
-                  <p className="text-sm font-bold text-white tabular-nums">
+                  <p className="text-sm font-bold text-white tabular-nums font-display tracking-wide">
                     {avgMinutes} <span className="text-xs font-normal text-white/40">min</span>
                   </p>
                 </div>
@@ -217,7 +216,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
         </div>
 
         {/* 2. MAIN CONTENT AREA */}
-        <div className="p-5 sm:p-8 pt-10 sm:pt-14 flex-1 overflow-y-auto w-full bg-[#0b0c10] custom-scrollbar">
+        <div className="p-5 sm:p-8 pt-10 sm:pt-14 flex-1 overflow-y-auto w-full bg-background custom-scrollbar">
           {detailsLoading ? (
             <div className="flex items-center justify-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-sky-500"></div>
@@ -245,14 +244,16 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               {/* ROW 1: Context & Fantasy Performance */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Contexto del Equipo */}
-                <div className="bg-[#151820] border border-white/5 rounded-xl p-5 relative overflow-hidden group">
+                <div className="bg-card/50 border border-white/10 rounded-xl p-5 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <h4 className="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center mb-4">
-                    <Activity size={12} className="mr-1.5" /> Estado del Equipo
+                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
+                    <Activity size={12} className="mr-1.5 text-sky-400" /> Estado del Equipo
                   </h4>
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-white/80 font-medium">Racha Reciente</span>
-                    <div className="flex gap-1">
+                    <span className="text-sm text-white/80 font-medium font-display">
+                      Racha Reciente
+                    </span>
+                    <div className="flex gap-1 font-display">
                       {formArray.length > 0 ? (
                         formArray.map((res, i) => (
                           <span
@@ -312,40 +313,42 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                 </div>
 
                 {/* Fiabilidad / Techo y Suelo */}
-                <div className="bg-[#151820] border border-white/5 rounded-xl p-5 relative overflow-hidden group">
+                <div className="bg-card/50 border border-white/10 rounded-xl p-5 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-indigo-500/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <h4 className="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center mb-4">
-                    <BarChart3 size={12} className="mr-1.5" /> Fiabilidad Biwenger
+                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
+                    <BarChart3 size={12} className="mr-1.5 text-indigo-400" /> Fiabilidad Biwenger
                   </h4>
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-white/80 font-medium">Promedio Puntos</span>
+                    <span className="text-sm text-white/80 font-medium font-display uppercase tracking-tight">
+                      Promedio Puntos
+                    </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-white tabular-nums">
+                      <span className="text-sm font-bold text-white tabular-nums font-display">
                         {details.season_avg !== undefined && details.season_avg !== null
                           ? Number(details.season_avg).toFixed(1)
                           : player.average !== undefined
                             ? Number(player.average).toFixed(1)
                             : '-'}
                       </span>
-                      <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase">
+                      <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase font-display">
                         Pts/Part
                       </span>
                     </div>
                   </div>
                   <div className="flex items-end justify-between gap-4 mt-2">
                     <div className="flex-1 flex flex-col items-center bg-rose-500/5 border border-rose-500/10 rounded-lg p-3">
-                      <span className="text-[10px] text-rose-400/70 font-bold uppercase tracking-wider mb-1">
+                      <span className="text-[10px] text-rose-400/70 font-black uppercase tracking-wider mb-1 font-display">
                         Suelo
                       </span>
-                      <span className="text-2xl font-black text-rose-400 leading-none">
+                      <span className="text-3xl font-black text-rose-400 leading-none font-display">
                         {floor}
                       </span>
                     </div>
                     <div className="flex-1 flex flex-col items-center bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-3">
-                      <span className="text-[10px] text-emerald-400/70 font-bold uppercase tracking-wider mb-1">
+                      <span className="text-[10px] text-emerald-400/70 font-black uppercase tracking-wider mb-1 font-display">
                         Techo
                       </span>
-                      <span className="text-2xl font-black text-emerald-400 leading-none">
+                      <span className="text-3xl font-black text-emerald-400 leading-none font-display">
                         {ceiling}
                       </span>
                     </div>
@@ -353,12 +356,12 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                 </div>
 
                 {/* Volumen Ofensivo / Tiros */}
-                <div className="bg-[#151820] border border-white/5 rounded-xl p-5 relative overflow-hidden group md:col-span-2 lg:col-span-1">
+                <div className="bg-card/50 border border-white/10 rounded-xl p-5 relative overflow-hidden group md:col-span-2 lg:col-span-1">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-sky-500/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <h4 className="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center mb-4">
-                    <Target size={12} className="mr-1.5" /> Volumen Ofensivo (%)
+                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
+                    <Target size={12} className="mr-1.5 text-emerald-400" /> Volumen Ofensivo (%)
                   </h4>
-                  <div className="space-y-3">
+                  <div className="space-y-3 font-display">
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-white/50 w-6 font-bold">T2</span>
                       <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -402,9 +405,9 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               {/* ROW 2: Calendario y Mercado */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Calendario 3 Rivales */}
-                <div className="bg-[#151820] border border-white/5 rounded-xl p-5 flex flex-col">
-                  <h4 className="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center mb-4">
-                    <Calendar size={12} className="mr-1.5" /> Calendario FAS (Próx 3)
+                <div className="bg-card/50 border border-white/10 rounded-xl p-5 flex flex-col">
+                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
+                    <Calendar size={12} className="mr-1.5 text-amber-400" /> Calendario FAS (Próx 3)
                   </h4>
                   <div className="grid grid-cols-3 gap-2 flex-1">
                     {calendarBlocks.map((match, i) => {
@@ -438,7 +441,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       return (
                         <div
                           key={i}
-                          className="bg-[#111318] border border-white/10 rounded-lg p-2.5 flex flex-col items-center justify-center text-center relative overflow-hidden group"
+                          className="bg-background border border-border/50 rounded-lg p-2.5 flex flex-col items-center justify-center text-center relative overflow-hidden group"
                         >
                           <div
                             className={`absolute top-0 w-full h-1 ${isEasy ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`}
@@ -479,32 +482,32 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                 </div>
 
                 {/* Contexto Bursátil */}
-                <div className="bg-[#151820] border border-white/5 rounded-xl p-5 flex flex-col justify-between">
-                  <h4 className="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center mb-4">
-                    <TrendingUp size={12} className="mr-1.5" /> Mercado Bursátil
+                <div className="bg-card/50 border border-white/10 rounded-xl p-5 flex flex-col justify-between">
+                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
+                    <TrendingUp size={12} className="mr-1.5 text-sky-400" /> Mercado Bursátil
                   </h4>
-                  <div className="flex justify-between items-center bg-[#111318] rounded-xl border border-white/5 p-4 mb-4">
+                  <div className="flex justify-between items-center bg-background/50 backdrop-blur-sm rounded-xl border border-white/5 p-4 mb-4">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1.5">
+                      <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1.5 font-display">
                         Precio Actual
                       </span>
-                      <span className="text-2xl font-black text-white tabular-nums leading-none">
+                      <span className="text-4xl font-black text-white tabular-nums leading-none font-display drop-shadow-sm">
                         {new Intl.NumberFormat('es-ES').format(player.price)}{' '}
-                        <span className="text-sm font-normal text-white/40">€</span>
+                        <span className="text-lg font-normal text-white/40">€</span>
                       </span>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-[9px] font-bold text-sky-400/60 uppercase tracking-widest mb-1.5">
+                      <span className="text-[9px] font-black text-sky-400 uppercase tracking-widest mb-1.5 font-display">
                         Target sugerido
                       </span>
-                      <span className="text-2xl font-black text-sky-400 tabular-nums leading-none">
+                      <span className="text-4xl font-black text-sky-400 tabular-nums leading-none font-display drop-shadow-sm">
                         {new Intl.NumberFormat('es-ES').format(targetPrice)}{' '}
-                        <span className="text-sm font-normal text-sky-400/50">€</span>
+                        <span className="text-lg font-normal text-sky-400/50">€</span>
                       </span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center text-sm pt-3 border-t border-white/5 mt-auto">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-white/40">
+                  <div className="flex justify-between items-center text-sm pt-4 border-t border-white/5 mt-auto font-display">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-white/50">
                       Demanda (Ownership)
                     </span>
                     <div className="flex items-center gap-2">
@@ -532,12 +535,12 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               <div className="pt-2">
                 <a
                   href={`/player/${player.player_id}`}
-                  className="flex justify-center items-center w-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 font-bold text-[11px] uppercase tracking-widest py-4 rounded-xl transition-colors group cursor-pointer"
+                  className="flex justify-center items-center w-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-400 font-black text-[11px] uppercase tracking-[0.2em] py-5 rounded-xl transition-all group cursor-pointer font-display"
                 >
                   Ver Informe Completo en BiwengerStats
                   <TrendingUp
-                    size={14}
-                    className="ml-2 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all"
+                    size={16}
+                    className="ml-3 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all"
                   />
                 </a>
               </div>

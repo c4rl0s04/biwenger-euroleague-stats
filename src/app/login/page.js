@@ -54,9 +54,9 @@ function SpotlightCard({ children, className = '' }) {
 // --- Component: Background Mesh Animation ---
 function Background() {
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-neutral-950">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-600/20 blur-[120px] animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/10 blur-[120px] animate-pulse delay-700" />
+    <div className="fixed inset-0 z-0 overflow-hidden bg-background">
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-600/15 blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-zinc-800/10 blur-[120px] animate-pulse delay-700" />
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
     </div>
   );

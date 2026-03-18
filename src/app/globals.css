@@ -1,125 +1,102 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 /* ========================================
-   BIWENGER STATS - Sports Design System
+   BIWENGER STATS - Premium Sports Analytics
    Primary: #fa5001 (Sports Orange)
+   Typography: Outfit (Sans), Bebas Neue (Display)
    ======================================== */
 
 :root {
-  /* Dark sports theme backgrounds */
-  --background: 220 20% 6%;
-  --foreground: 0 0% 95%;
+  /* Midnight Obsidian - Pure Black/Slate base */
+  --background: 240 5% 2%;
+  --foreground: 0 0% 98%;
 
-  --card: 220 18% 7%;
-  --card-foreground: 0 0% 95%;
+  --card: 240 4% 7%;
+  --card-foreground: 0 0% 98%;
 
-  --popover: 220 18% 7%;
-  --popover-foreground: 0 0% 95%;
+  --popover: 240 4% 9%;
+  --popover-foreground: 0 0% 98%;
 
   /* Sports orange primary - #fa5001 */
   --primary: 19 99% 49%;
-  --primary-foreground: 0 0% 98%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 220 15% 15%;
-  --secondary-foreground: 0 0% 90%;
+  --secondary: 240 4% 12%;
+  --secondary-foreground: 0 0% 95%;
 
-  --muted: 220 15% 18%;
-  --muted-foreground: 220 10% 55%;
+  --muted: 240 4% 15%;
+  --muted-foreground: 240 5% 65%;
 
-  --accent: 19 90% 42%;
-  --accent-foreground: 0 0% 98%;
+  --accent: 19 99% 45%;
+  --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
 
-  --border: 220 15% 18%;
-  --input: 220 15% 20%;
+  --border: 240 5% 15%;
+  --input: 240 5% 15%;
   --ring: 19 99% 49%;
-  --radius: 0.75rem;
+  --radius: 1rem;
 
-  /* Custom glow and gradient tokens */
-  --glow-primary: 0 0 30px hsla(19, 99%, 49%, 0.4);
-  --glow-subtle: 0 0 60px hsla(19, 99%, 49%, 0.15);
-  --gradient-card: linear-gradient(145deg, hsl(220 18% 12%), hsl(220 18% 8%));
-  --gradient-hero: linear-gradient(180deg, hsl(220 20% 8%) 0%, hsl(220 20% 4%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(19 99% 49%), hsl(30 100% 50%));
+  /* Premium Glow & Glass Tokens */
+  --glow-primary: 0 0 40px hsla(19, 99%, 49%, 0.3);
+  --glow-subtle: 0 0 80px hsla(19, 99%, 49%, 0.08);
+  --glass-border: hsla(0, 0%, 100%, 0.06);
+  --glass-surface: hsla(240, 6%, 7%, 0.7);
+
+  --gradient-card: linear-gradient(165deg, hsla(240, 4%, 10%, 1), hsla(240, 5%, 2%, 1));
+  --gradient-accent: linear-gradient(135deg, #fa5001, #ff8c00);
+  --gradient-mesh:
+    radial-gradient(at 0% 0%, hsla(240, 5%, 15%, 0.1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(240, 4%, 20%, 0.08) 0, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(240, 5%, 10%, 0.05) 0, transparent 50%);
 
   /* Sidebar tokens */
-  --sidebar-background: 220 20% 8%;
-  --sidebar-foreground: 0 0% 90%;
+  --sidebar-background: 240 10% 2%;
+  --sidebar-foreground: 0 0% 95%;
   --sidebar-primary: 19 99% 49%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 220 15% 15%;
-  --sidebar-accent-foreground: 0 0% 90%;
-  --sidebar-border: 220 15% 18%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 6% 10%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 240 5% 12%;
   --sidebar-ring: 19 99% 49%;
-
-  /* Legacy glass tokens (kept for existing components) */
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-surface: rgba(15, 23, 42, 0.6);
-
-  /* Section depth backgrounds */
-  --section-raised: 220 18% 10%;
-  --section-sunken: 220 20% 4%;
 }
 
 /* Light theme */
 .light {
-  /* Light backgrounds */
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
+  /* Light backgrounds - Clean and crisp */
+  --background: 220 33% 98%;
+  --foreground: 224 71% 4%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 224 71% 4%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 224 71% 4%;
 
-  /* Sports orange primary - stays the same */
   --primary: 19 99% 49%;
-  --primary-foreground: 0 0% 98%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 220 14% 96%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary: 220 33% 92%;
+  --secondary-foreground: 224 71% 4%;
 
-  --muted: 220 14% 96%;
-  --muted-foreground: 220 9% 46%;
+  --muted: 220 33% 88%;
+  --muted-foreground: 224 20% 45%;
 
-  --accent: 19 90% 42%;
-  --accent-foreground: 0 0% 98%;
+  --accent: 19 99% 45%;
+  --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
+  --border: 220 33% 90%;
+  --input: 220 33% 90%;
   --ring: 19 99% 49%;
 
-  /* Custom glow and gradient tokens for light */
-  --glow-primary: 0 0 30px hsla(19, 99%, 49%, 0.25);
-  --glow-subtle: 0 0 60px hsla(19, 99%, 49%, 0.08);
-  --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14% 98%));
-  --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 14% 96%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(19 99% 49%), hsl(30 100% 50%));
+  --glow-primary: 0 0 30px hsla(19, 99%, 49%, 0.2);
+  --glow-subtle: 0 0 60px hsla(19, 99%, 49%, 0.05);
+  --glass-border: hsla(224, 71%, 4%, 0.08);
+  --glass-surface: hsla(0, 0%, 100%, 0.7);
 
-  /* Sidebar tokens for light */
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 222 47% 11%;
-  --sidebar-primary: 19 99% 49%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 220 14% 96%;
-  --sidebar-accent-foreground: 222 47% 11%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 19 99% 49%;
-
-  /* Light glass tokens */
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-surface: rgba(255, 255, 255, 0.8);
-
-  /* Section depth backgrounds for light */
-  --section-raised: 220 14% 98%;
-  --section-sunken: 220 14% 96%;
+  --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 33% 96%));
+  --sidebar-background: 0 0% 100%;
 }
 
 /* Tailwind v4 theme configuration */
@@ -142,8 +119,9 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Bebas Neue', sans-serif;
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
+  --font-display: var(--font-bebas), sans-serif;
+  --font-ui: var(--font-inter), sans-serif;
 }
 
 /* Base styles */
@@ -170,18 +148,27 @@ h2,
 h3,
 .stat-value,
 .font-display {
-  font-family: 'Bebas Neue', var(--font-display), cursive;
+  font-family: var(--font-bebas), cursive;
   letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* ========================================
    UTILITY CLASSES
    ======================================== */
 
-/* 3D Transform Utilities */
+/* Premium Glass Panel */
+.glass-panel {
+  background-color: var(--glass-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* 3D Flip Utilities */
 .preserve-3d {
   transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
 }
 
 .backface-hidden {
@@ -206,87 +193,41 @@ h3,
   box-shadow: var(--glow-subtle);
 }
 
-/* Gradient backgrounds */
-.card-gradient {
-  background: var(--gradient-card);
-}
-
-.hero-gradient {
-  background: var(--gradient-hero);
-}
-
-.accent-gradient {
-  background: var(--gradient-accent);
-}
-
-/* Legacy glass panel (kept for existing components) */
-.glass-panel {
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
 /* ========================================
    STAT CARD COMPONENT
    ======================================== */
 
-/* Base stat card - combines glow with gradient background */
+/* Premium stat card - Depth and Interactivity */
 .stat-card {
   position: relative;
   overflow: hidden;
-  border-radius: 0.75rem;
-  border: 1px solid hsl(var(--border) / 0.5);
-  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
   background: var(--gradient-card);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Reusable glow effect (can be applied to any card) */
-.card-glow,
-.stat-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.card-glow::before,
-.stat-card::before {
+.stat-card::after {
   content: '';
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  background: linear-gradient(135deg, hsl(19 99% 49% / 0.1), transparent);
+  background: radial-gradient(circle at top left, hsla(240, 5%, 30%, 0.03), transparent);
   pointer-events: none;
 }
 
-.card-glow:hover::before,
-.stat-card:hover::before {
-  opacity: 1;
-}
-
-.card-glow:hover,
 .stat-card:hover {
-  border-color: hsl(var(--primary) / 0.3);
-  box-shadow: var(--glow-subtle);
+  transform: translateY(-4px);
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: var(--glow-primary);
 }
 
 /* ========================================
    ELEGANT THEME - REMOVE INNER CARD BORDERS
    ======================================== */
 
-/* Remove inner stat boxes styling inside cards */
-.bg-card [class*='bg-slate-800'],
-.bg-card [class*='bg-gradient-to'] {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  backdrop-filter: none !important;
-}
-
 /* Keep the card outer border intact + hover glow */
 .bg-card {
-  border: 1px solid hsl(0 0% 30%) !important;
+  border: 1px solid hsla(0, 0%, 100%, 0.1) !important;
   transition: all 0.3s ease;
 }
 

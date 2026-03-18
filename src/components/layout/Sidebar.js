@@ -109,7 +109,7 @@ export default function Sidebar({ isOpen, onClose }) {
         className={`
           fixed md:sticky top-0 left-0 h-screen z-50
           ${sidebarWidth}
-          bg-[hsl(var(--sidebar-background))] border-r border-border/30
+          bg-card/40 backdrop-blur-xl border-r border-border/40
           flex flex-col
           transition-all duration-300 ease-in-out
           md:top-16 md:h-[calc(100vh-4rem)]
@@ -117,36 +117,40 @@ export default function Sidebar({ isOpen, onClose }) {
         `}
       >
         {/* Mobile Header (only visible on mobile) */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-border/30 md:hidden">
-          <Link href="/" className="flex items-center gap-3" onClick={onClose}>
-            <span className="text-lg font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent whitespace-nowrap">
-              Biwenger Stats
+        <div className="h-16 flex items-center justify-between px-4 border-b border-border/20 md:hidden">
+          <Link href="/" className="flex items-center gap-2" onClick={onClose}>
+            <span className="text-lg font-bold font-sans bg-gradient-to-br from-white via-white to-primary/80 bg-clip-text text-transparent tracking-tight">
+              Biwenger<span className="text-primary">Stats</span>
             </span>
           </Link>
 
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-secondary text-muted-foreground"
+            className="p-1.5 rounded-xl hover:bg-white/5 text-muted-foreground"
             aria-label="Close menu"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Desktop Header & Toggle */}
-        <div className="hidden md:flex items-center h-16 px-4 border-b border-white/5 justify-center">
+        {/* Desktop Toggle */}
+        <div className="hidden md:flex items-center h-14 px-4 border-b border-white/5 justify-center">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`p-1.5 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors cursor-pointer ${isCollapsed ? 'mx-auto' : ''}`}
+            className="p-2 rounded-xl hover:bg-white/5 text-muted-foreground transition-all duration-300 hover:text-foreground group cursor-pointer"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            {isCollapsed ? (
+              <ChevronRight size={18} className="group-hover:scale-110" />
+            ) : (
+              <ChevronLeft size={18} className="group-hover:scale-110" />
+            )}
           </button>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden sidebar-scroll">
-          <ul className="space-y-1.5 px-3">
+        <nav className="flex-1 py-6 overflow-y-auto overflow-x-hidden sidebar-scroll">
+          <ul className="space-y-1 px-3">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
               const hasSections = isActive && sections.length > 0;
@@ -158,30 +162,27 @@ export default function Sidebar({ isOpen, onClose }) {
                       href={item.href}
                       onClick={onClose}
                       className={`
-                        group flex-1 flex items-center gap-3 px-3 py-2.5 rounded-md
+                        group flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
                         transition-all duration-300 relative overflow-hidden
                         ${
                           isActive
-                            ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary font-medium shadow-[inset_2px_0_0_0_hsl(var(--primary))]'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                            ? 'bg-primary/10 text-primary font-semibold border border-primary/20 shadow-[0_4px_12px_rgba(250,80,1,0.15)] ring-1 ring-primary/20'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
                         }
                       `}
                       title={isCollapsed ? item.name : undefined}
                     >
-                      {/* Active Glow Effect */}
-                      {isActive && <div className="absolute inset-0 bg-primary/5 blur-xl -z-10" />}
-
                       <item.icon
                         size={20}
-                        className={`transition-colors duration-300 ${
+                        className={`transition-all duration-300 ${
                           isActive
-                            ? 'text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.4)]'
-                            : 'group-hover:text-foreground'
+                            ? 'text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.4)] scale-110'
+                            : 'group-hover:text-foreground group-hover:scale-110'
                         }`}
                       />
                       {!isCollapsed && (
                         <span
-                          className={`text-sm whitespace-nowrap transition-colors duration-300 ${isActive ? 'translate-x-1' : ''}`}
+                          className={`text-sm whitespace-nowrap transition-transform duration-300 ${isActive ? 'translate-x-0.5' : ''}`}
                         >
                           {item.name}
                         </span>
@@ -196,17 +197,12 @@ export default function Sidebar({ isOpen, onClose }) {
                           e.stopPropagation();
                           setIsSectionsVisible(!isSectionsVisible);
                         }}
-                        className={`
-                          absolute right-2 p-1 rounded-full 
-                          hover:bg-primary/20 text-primary/70 hover:text-primary 
-                          transition-all duration-200 cursor-pointer
-                        `}
+                        className="absolute right-2 p-1 rounded-full hover:bg-primary/20 text-primary/70 hover:text-primary transition-all duration-200 cursor-pointer"
                       >
-                        {isSectionsVisible ? (
-                          <ChevronLeft size={14} className="-rotate-90" />
-                        ) : (
-                          <ChevronLeft size={14} />
-                        )}
+                        <ChevronLeft
+                          size={14}
+                          className={`transition-transform duration-300 ${isSectionsVisible ? '-rotate-90' : 'rotate-0'}`}
+                        />
                       </button>
                     )}
                   </div>
@@ -233,26 +229,26 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* League Members Legend */}
-        <div className="px-4 py-2 border-t border-border/30">
+        <div className="px-4 py-3 border-t border-white/5">
           {!isCollapsed && (
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-black text-emerald-400 uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-black text-emerald-400 uppercase tracking-widest font-display">
                 Miembros
               </h3>
               <button
                 onClick={() => setIsMembersVisible(!isMembersVisible)}
-                className="p-1 rounded-full hover:bg-white/5 text-muted-foreground transition-colors cursor-pointer"
+                className="p-1 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors cursor-pointer"
               >
                 <ChevronLeft
                   size={12}
-                  className={`transition-transform duration-200 ${!isMembersVisible ? 'rotate-90' : '-rotate-90'}`}
+                  className={`transition-transform duration-300 ${!isMembersVisible ? 'rotate-90' : '-rotate-90'}`}
                 />
               </button>
             </div>
           )}
 
           <div
-            className={`space-y-1 overflow-hidden transition-all duration-300 ${isMembersVisible && !isCollapsed ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}
+            className={`space-y-1 overflow-hidden transition-all duration-300 ${isMembersVisible && !isCollapsed ? 'max-h-72 opacity-100' : 'max-h-0 opacity-0'}`}
           >
             {Array.isArray(users) &&
               users.map((member) => {
@@ -263,14 +259,14 @@ export default function Sidebar({ isOpen, onClose }) {
                   <Link
                     key={id}
                     href={`/user/${id}`}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors group"
+                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-white/5 transition-all group"
                   >
                     <div
-                      className={`w-2 h-2 rounded-full ring-2 ring-white/10 ${color.text.replace('text-', 'bg-')}`}
+                      className={`w-2 h-2 rounded-full ring-4 ring-white/5 ${color.text.replace('text-', 'bg-')}`}
                       style={{ backgroundColor: color.stroke }}
                     />
                     <span
-                      className={`text-xs font-medium transition-colors truncate ${color.text} opacity-90 group-hover:opacity-100`}
+                      className={`text-xs font-medium transition-colors truncate ${color.text} opacity-80 group-hover:opacity-100`}
                     >
                       {name}
                     </span>
@@ -282,52 +278,56 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Quick Stats Widget (only when expanded) */}
         {!isCollapsed && isReady && (
-          <div className="px-3 py-3 border-t border-border/30">
+          <div className="px-3 py-4 border-t border-white/5">
             <Link href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}>
-              <div className="card-glow bg-secondary/50 rounded-xl p-3 border border-border/30 transition-all duration-300 cursor-pointer">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                  <Wallet size={14} />
+              <div className="stat-card backdrop-blur-md bg-white/5 p-4 transition-all duration-500 hover:scale-[1.02] cursor-pointer group">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                  <Wallet size={12} className="text-primary/70" />
                   <span>Mi Plantilla</span>
                 </div>
                 {loading ? (
-                  <div className="h-7 w-24 bg-muted rounded animate-shimmer" />
+                  <div className="h-8 w-24 bg-white/5 rounded-lg animate-shimmer" />
                 ) : squadData ? (
                   <>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-bold text-foreground">
+                      <span className="text-2xl font-black text-white font-display tracking-tight">
                         {formatCompact(squadData.total_value)}
                       </span>
                       {trendPercent && (
                         <span
-                          className={`flex items-center text-xs ${isPositiveTrend ? 'text-green-400' : 'text-red-400'}`}
+                          className={`flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isPositiveTrend ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}
                         >
                           {isPositiveTrend ? (
-                            <TrendingUp size={12} className="mr-0.5" />
+                            <TrendingUp size={10} className="mr-1" />
                           ) : (
-                            <TrendingDown size={12} className="mr-0.5" />
+                            <TrendingDown size={10} className="mr-1" />
                           )}
                           {isPositiveTrend ? '+' : ''}
                           {trendPercent}%
                         </span>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-border/20">
+                    <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-white/5">
                       <div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-bold text-white font-sans">
                           {squadData.player_count || 0}
                         </div>
-                        <div className="text-[10px] text-slate-400">jugadores</div>
+                        <div className="text-[9px] uppercase font-black text-slate-500 tracking-tighter">
+                          jugadores
+                        </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-semibold text-primary">
+                        <div className="text-sm font-bold text-primary font-sans">
                           {new Intl.NumberFormat('es-ES').format(squadData.total_points || 0)}
                         </div>
-                        <div className="text-[10px] text-slate-400">puntos</div>
+                        <div className="text-[9px] uppercase font-black text-slate-500 tracking-tighter font-sans">
+                          puntos
+                        </div>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <div className="text-sm text-slate-500">Selecciona usuario</div>
+                  <div className="text-xs text-slate-500 italic py-2">Selecciona usuario</div>
                 )}
               </div>
             </Link>
@@ -336,15 +336,15 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Collapsed state: just icons for quick stats */}
         {isCollapsed && (
-          <div className="px-2 py-3 border-t border-border/30 space-y-2">
+          <div className="px-2 py-4 border-t border-white/5 space-y-2">
             <Link
               href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}
-              className="w-full p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
+              className="w-full p-2.5 rounded-xl hover:bg-white/5 text-muted-foreground hover:text-primary transition-all flex items-center justify-center group"
               title={
                 squadData ? `Mi Plantilla ${formatCompact(squadData.total_value)}` : 'Mi Plantilla'
               }
             >
-              <Wallet size={20} />
+              <Wallet size={20} className="group-hover:scale-110 transition-transform" />
             </Link>
           </div>
         )}

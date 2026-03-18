@@ -124,7 +124,7 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, o
         transition={{ type: 'spring', stiffness: 200, damping: 20 }}
       >
         {/* Front */}
-        <div className="absolute inset-0 backface-hidden">
+        <div className="absolute inset-0 backface-hidden h-full w-full">
           <CardFront
             player={player}
             heuristic={heuristic}
@@ -134,7 +134,10 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, o
         </div>
 
         {/* Back */}
-        <div className="absolute inset-0 backface-hidden" style={{ transform: 'rotateY(180deg)' }}>
+        <div
+          className="absolute inset-0 backface-hidden h-full w-full"
+          style={{ transform: 'rotateY(180deg)' }}
+        >
           <CardBack
             player={player}
             heuristic={heuristic}
@@ -145,13 +148,14 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, o
         </div>
       </motion.div>
 
-      {/* Invisible spacer */}
-      <div className="invisible pointer-events-none">
+      {/* Invisible spacer to maintain natural grid height */}
+      <div className="invisible pointer-events-none opacity-0">
         <CardFront
           player={player}
           heuristic={heuristic}
           posStyle={posStyle}
           onToggleExpand={() => {}}
+          isSpacer={true}
         />
       </div>
     </motion.div>
@@ -159,7 +163,7 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, o
 }
 
 // ── FRONT ─────────────────────────────────────────────────────────────────────
-function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
+function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = false }) {
   const recentScores = player.recent_scores
     ? player.recent_scores
         .split(',')
@@ -174,11 +178,10 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
 
   return (
     <div
-      className="bg-[#111318] border border-white/10 rounded-2xl overflow-hidden flex flex-col shadow-xl h-full w-full"
-      style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}
+      className={`bg-card backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden flex flex-col shadow-xl ${isSpacer ? '' : 'h-full w-full'} relative`}
     >
       <div
-        className={`h-0.5 w-full flex-shrink-0 bg-gradient-to-r from-transparent ${heuristic.accent} to-transparent`}
+        className={`h-1 w-full flex-shrink-0 bg-gradient-to-r from-transparent ${heuristic.accent} to-transparent opacity-80`}
       />
 
       <div className="p-4 flex-1 flex flex-col gap-4">
@@ -198,13 +201,16 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-white leading-tight truncate" title={player.name}>
+            <h3
+              className="text-lg font-black text-white leading-tight truncate tracking-tight uppercase"
+              title={player.name}
+            >
               {player.name}
             </h3>
             <div className="flex items-center gap-2 mt-1.5">
               {player.position && (
                 <span
-                  className={`text-sm font-bold px-2 py-0.5 rounded border ${posStyle.text} ${posStyle.bg} uppercase tracking-wide flex-shrink-0 leading-none`}
+                  className={`text-sm font-bold px-2 py-0.5 rounded border ${posStyle.text} ${posStyle.bg} uppercase tracking-wide flex-shrink-0 leading-none font-display`}
                 >
                   {posStyle.initial}
                 </span>
@@ -228,15 +234,15 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
 
         {/* Price */}
         <div className="flex flex-col items-center">
-          <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mb-0.5">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black mb-1">
             Precio en Mercado
           </p>
-          <p className="text-2xl font-bold text-white tabular-nums leading-none">
+          <p className="text-3xl font-display text-white tabular-nums leading-none tracking-tight">
             {new Intl.NumberFormat('es-ES').format(player.price)}
             <span className="text-base text-white/40 font-normal ml-1">€</span>
           </p>
           {player.real_price != null && (
-            <p className="text-xs text-white/40 tabular-nums leading-none mt-1.5">
+            <p className="text-[10px] text-muted-foreground/80 tabular-nums leading-none mt-2 font-bold uppercase tracking-wider">
               Valor real: {new Intl.NumberFormat('es-ES').format(player.real_price)}
               <span className="text-white/25 ml-0.5">€</span>
             </p>
@@ -246,10 +252,10 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
         {/* Form */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+            <span className="text-[10px] text-white/30 uppercase tracking-widest font-black">
               Forma reciente
             </span>
-            <span className="text-[10px] text-white/30 font-medium">
+            <span className="text-[10px] text-white/30 font-display">
               Media:{' '}
               <span className="text-emerald-400 font-bold">
                 {player.avg_recent_points?.toFixed(1) || '0.0'}
@@ -265,24 +271,24 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
         </div>
 
         {/* Heuristic + Seller */}
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/6">
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
           <div
-            className={`flex items-center text-[10px] font-semibold px-2 py-1 rounded border ${heuristic.color}`}
+            className={`flex items-center text-[10px] font-display uppercase tracking-wider px-2.5 py-1 rounded-lg border shadow-sm ${heuristic.color}`}
           >
             {heuristic.icon}
             {heuristic.label}
           </div>
           {player.seller_icon && player.seller_name !== 'Mercado' ? (
             <div
-              className="flex items-center gap-1.5 px-2 py-1 rounded-full border"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-full border shadow-sm"
               style={{
-                backgroundColor: sellerColor ? `${sellerColor}15` : 'rgba(255,255,255,0.05)',
-                borderColor: sellerColor ? `${sellerColor}30` : 'rgba(255,255,255,0.1)',
+                backgroundColor: sellerColor ? `${sellerColor}10` : 'rgba(255,255,255,0.03)',
+                borderColor: sellerColor ? `${sellerColor}20` : 'rgba(255,255,255,0.08)',
               }}
             >
               <span
-                className="text-[10px] font-bold capitalize"
-                style={{ color: sellerColor || 'rgba(255,255,255,0.6)' }}
+                className="text-[10px] font-display capitalize"
+                style={{ color: sellerColor || 'rgba(255,255,255,0.5)' }}
               >
                 {player.seller_name}
               </span>
@@ -295,8 +301,10 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
               />
             </div>
           ) : (
-            <div className="px-2 py-1 rounded-full border border-white/10 bg-white/5">
-              <span className="text-[10px] text-white/40 font-medium">Biwenger</span>
+            <div className="px-2.5 py-1 rounded-full border border-white/5 bg-white/5 shadow-sm">
+              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-tight font-display">
+                Biwenger
+              </span>
             </div>
           )}
         </div>
@@ -304,7 +312,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
 
       <button
         onClick={onToggleExpand}
-        className="w-full py-3 bg-white/4 hover:bg-white/8 text-sm font-semibold text-white/70 hover:text-white flex items-center justify-center gap-2 transition-all duration-200 border-t border-white/8 cursor-pointer flex-shrink-0"
+        className="w-full py-3.5 bg-white/5 hover:bg-primary/20 text-xs font-black font-display uppercase tracking-[0.2em] text-white/50 hover:text-white flex items-center justify-center gap-2 transition-all duration-300 border-t border-white/5 cursor-pointer flex-shrink-0 group-hover:bg-primary/10"
       >
         Analizar Fichaje
       </button>
@@ -313,10 +321,17 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand }) {
 }
 
 // ── BACK ──────────────────────────────────────────────────────────────────────
-function CardBack({ player, heuristic, isExpanded, onToggleExpand, onExpandLevel2 }) {
+function CardBack({
+  player,
+  heuristic,
+  isExpanded,
+  onToggleExpand,
+  onExpandLevel2,
+  isSpacer = false,
+}) {
   const { data: detailsData, loading: detailsLoading } = useApiData(
     () => `/api/players/${player.player_id}/stats`,
-    { skip: !isExpanded }
+    { skip: !isExpanded || isSpacer }
   );
   const details = detailsData;
 
@@ -325,19 +340,18 @@ function CardBack({ player, heuristic, isExpanded, onToggleExpand, onExpandLevel
 
   return (
     <div
-      className="bg-[#111318] border border-white/10 rounded-2xl overflow-hidden flex flex-col shadow-xl h-full w-full text-white"
-      style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}
+      className={`bg-card backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden flex flex-col shadow-2xl ${isSpacer ? '' : 'h-full w-full'} text-white relative`}
     >
       {/* Same accent as front — ties both faces together */}
       <div
-        className={`h-0.5 w-full flex-shrink-0 bg-gradient-to-r from-transparent ${heuristic.accent} to-transparent`}
+        className={`h-1 w-full flex-shrink-0 bg-gradient-to-r from-transparent ${heuristic.accent} to-transparent opacity-80`}
       />
 
       {/* Header */}
       <div className="px-3 py-2.5 flex items-center justify-between border-b border-white/6">
         <div className="flex items-center gap-2">
           <Activity size={13} className="text-emerald-400" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">
+          <span className="text-[10px] font-display uppercase tracking-[0.15em] text-white/40">
             Quick Stats
           </span>
         </div>
@@ -408,7 +422,7 @@ function CardBack({ player, heuristic, isExpanded, onToggleExpand, onExpandLevel
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
                   Calidad/Precio
                 </span>
-                <span className="text-xl font-bold text-sky-400 tabular-nums leading-none mt-0.5">
+                <span className="text-xl font-bold text-sky-400 tabular-nums leading-none mt-0.5 font-display">
                   {(player.value_score || 0).toFixed(1)}
                 </span>
               </div>
@@ -416,7 +430,7 @@ function CardBack({ player, heuristic, isExpanded, onToggleExpand, onExpandLevel
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
                   Partidos
                 </span>
-                <span className="text-xl font-bold text-white tabular-nums leading-none mt-0.5">
+                <span className="text-xl font-bold text-white tabular-nums leading-none mt-0.5 font-display">
                   {details.games_played}
                 </span>
               </div>
@@ -428,7 +442,7 @@ function CardBack({ player, heuristic, isExpanded, onToggleExpand, onExpandLevel
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
                   Total Pts
                 </span>
-                <span className="text-sm font-bold text-emerald-400 tabular-nums">
+                <span className="text-sm font-bold text-emerald-400 tabular-nums font-display">
                   {details.total_points}
                 </span>
               </div>
@@ -437,7 +451,7 @@ function CardBack({ player, heuristic, isExpanded, onToggleExpand, onExpandLevel
                   Flujo Diario
                 </span>
                 <span
-                  className={`text-sm font-bold tabular-nums ${priceTrendPositive ? 'text-emerald-400' : priceTrendNeutral ? 'text-white/50' : 'text-rose-400'}`}
+                  className={`text-sm font-bold tabular-nums font-display ${priceTrendPositive ? 'text-emerald-400' : priceTrendNeutral ? 'text-white/50' : 'text-rose-400'}`}
                 >
                   {priceTrendPositive ? '+' : ''}
                   {new Intl.NumberFormat('es-ES').format(player.price_trend)} €

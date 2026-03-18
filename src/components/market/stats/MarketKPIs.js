@@ -25,10 +25,10 @@ export default function MarketKPIs({ kpis }) {
       <ElegantCard title="Volumen Movido" icon={TrendingUp} color="emerald">
         <div className="flex flex-col justify-between h-full">
           <div>
-            <p className="text-4xl font-black text-emerald-400 mt-2 tracking-tight">
+            <p className="text-4xl font-black text-emerald-400 mt-2 tracking-tight font-display">
               {formatMillions(kpis.totalVolume)}M €
             </p>
-            <p className="text-[10px] uppercase font-bold text-zinc-500 mt-1">
+            <p className="text-[11px] uppercase font-black text-slate-500 mt-2 tracking-[0.15em] font-ui">
               Total Intercambiado
             </p>
           </div>
@@ -38,8 +38,12 @@ export default function MarketKPIs({ kpis }) {
       <ElegantCard title="Operaciones" icon={ArrowLeftRight} color="blue">
         <div className="flex flex-col justify-between h-full">
           <div>
-            <p className="text-4xl font-black text-blue-400 mt-2 tracking-tight">{kpis.totalOps}</p>
-            <p className="text-[10px] uppercase font-bold text-zinc-500 mt-1">Transacciones</p>
+            <p className="text-4xl font-black text-blue-400 mt-2 tracking-tight font-display">
+              {kpis.totalOps}
+            </p>
+            <p className="text-[11px] uppercase font-black text-slate-500 mt-2 tracking-[0.15em] font-ui">
+              Transacciones
+            </p>
           </div>
         </div>
       </ElegantCard>
@@ -47,10 +51,12 @@ export default function MarketKPIs({ kpis }) {
       <ElegantCard title="Precio Medio" icon={Scale} color="indigo">
         <div className="flex flex-col justify-between h-full">
           <div>
-            <p className="text-4xl font-black text-indigo-400 mt-2 tracking-tight">
+            <p className="text-4xl font-black text-indigo-400 mt-2 tracking-tight font-display">
               {formatEuro(kpis.avgPrice)} €
             </p>
-            <p className="text-[10px] uppercase font-bold text-zinc-500 mt-1">Coste Promedio</p>
+            <p className="text-[11px] uppercase font-black text-slate-500 mt-2 tracking-[0.15em] font-ui">
+              Coste Promedio
+            </p>
           </div>
         </div>
       </ElegantCard>
@@ -58,10 +64,12 @@ export default function MarketKPIs({ kpis }) {
       <ElegantCard title="Competitividad" icon={Swords} color="orange">
         <div className="flex flex-col justify-between h-full">
           <div>
-            <p className="text-4xl font-black text-orange-400 mt-2 tracking-tight">
+            <p className="text-4xl font-black text-orange-400 mt-2 tracking-tight font-display">
               {kpis.avgBids?.toFixed(1) || '0.0'}
             </p>
-            <p className="text-[10px] uppercase font-bold text-zinc-500 mt-1">Pujas por Fichaje</p>
+            <p className="text-[11px] uppercase font-black text-slate-500 mt-2 tracking-[0.15em] font-ui">
+              Pujas por Fichaje
+            </p>
           </div>
         </div>
       </ElegantCard>

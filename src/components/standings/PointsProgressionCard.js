@@ -20,16 +20,21 @@ import { useApiData } from '@/lib/hooks/useApiData';
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl z-50 pointer-events-none">
-        <p className="text-slate-400 text-xs mb-2 font-medium">{label}</p>
-        <div className="space-y-1">
+      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
+        <p className="text-slate-500 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+          {label}
+        </p>
+        <div className="space-y-1.5">
           {payload
             .sort((a, b) => b.value - a.value)
             .map((entry, index) => (
-              <div key={index} className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-slate-300 w-20 truncate">{entry.name}</span>
-                <span className="text-white font-bold ml-auto">{entry.value}</span>
+              <div key={index} className="flex items-center gap-2.5 text-xs">
+                <div
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-slate-300 flex-1 truncate max-w-[110px]">{entry.name}</span>
+                <span className="text-white font-bold ml-auto tabular-nums">{entry.value}</span>
               </div>
             ))}
         </div>
@@ -165,21 +170,34 @@ export default function PointsProgressionCard() {
               <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#334155"
-                  opacity={0.3}
+                  stroke="currentColor"
+                  className="text-white/5"
+                  opacity={1}
                   vertical={false}
                 />
                 <XAxis
                   dataKey="name"
-                  stroke="#cbd5e1"
-                  tick={{ fill: '#cbd5e1', fontSize: 12, fontWeight: 500 }}
+                  stroke="currentColor"
+                  className="text-slate-600"
+                  tick={{
+                    fill: 'currentColor',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-display)',
+                  }}
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"
                 />
                 <YAxis
-                  stroke="#cbd5e1"
-                  tick={{ fill: '#cbd5e1', fontSize: 12, fontWeight: 500 }}
+                  stroke="currentColor"
+                  className="text-slate-600"
+                  tick={{
+                    fill: 'currentColor',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-display)',
+                  }}
                   tickLine={false}
                   axisLine={false}
                   width={45}

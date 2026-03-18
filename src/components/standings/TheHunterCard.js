@@ -18,14 +18,14 @@ import { getColorForUser } from '@/lib/constants/colors';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
+    const val = payload[0].value;
     return (
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 shadow-xl z-50 text-xs">
-        <p className="font-bold text-slate-200">{label}</p>
-        <p className={payload[0].value > 0 ? 'text-green-400' : 'text-red-400'}>
-          {payload[0].value > 0
-            ? `Recortados: ${payload[0].value}`
-            : `Perdidos: ${Math.abs(payload[0].value)}`}{' '}
-          pts
+      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[150px]">
+        <p className="text-slate-500 text-[10px] mb-2 font-black tracking-[0.15em] uppercase font-display">
+          {label}
+        </p>
+        <p className={`text-xs font-bold ${val > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+          {val > 0 ? `Recortados: +${val}` : `Perdidos: ${val}`} pts
         </p>
       </div>
     );
@@ -88,8 +88,8 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
           y={0}
           textAnchor="end"
           fill={userColor.stroke}
-          fontSize={11}
-          className="group transition-transform hover:scale-110 origin-right"
+          fontSize={10}
+          className="group transition-all hover:scale-110 origin-right transition-colors"
           style={{ transformBox: 'fill-box' }}
         >
           {lines.map((line, index) => (
@@ -97,7 +97,7 @@ const CustomYAxisTick = ({ x, y, payload, data }) => {
               key={index}
               x={0}
               dy={index === 0 ? firstLineDy : lineHeight}
-              className="cursor-pointer font-medium"
+              className="cursor-pointer font-black uppercase font-display tracking-tight"
             >
               {line}
             </tspan>
@@ -148,12 +148,12 @@ export default function TheHunterCard() {
                   axisLine={false}
                   tickLine={false}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                <ReferenceLine x={0} stroke="#475569" />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                <ReferenceLine x={0} stroke="currentColor" className="text-white/20" />
                 {/* Changed: Used maxBarSize instead of barSize so bars scale down on small screens */}
-                <Bar dataKey="gained" radius={[4, 4, 4, 4]} maxBarSize={25}>
+                <Bar dataKey="gained" radius={[4, 4, 4, 4]} maxBarSize={20}>
                   {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.gained > 0 ? '#4ade80' : '#f87171'} />
+                    <Cell key={`cell-${index}`} fill={entry.gained > 0 ? '#10b981' : '#ef4444'} />
                   ))}
                 </Bar>
               </BarChart>

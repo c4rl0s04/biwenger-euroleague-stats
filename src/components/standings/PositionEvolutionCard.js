@@ -22,18 +22,8 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
     const sorted = [...payload].filter((p) => p.value != null).sort((a, b) => a.value - b.value); // ascending = rank 1 first
 
     return (
-      <div
-        style={{
-          backgroundColor: '#1e293b',
-          border: '1px solid #334155',
-          borderRadius: '12px',
-          padding: '12px',
-          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)',
-          minWidth: '160px',
-          pointerEvents: 'none',
-        }}
-      >
-        <p className="text-slate-400 text-xs mb-2.5 font-semibold tracking-wider uppercase">
+      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[180px] pointer-events-none ring-1 ring-white/5">
+        <p className="text-slate-500 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
           {label}
         </p>
         <div className="space-y-1.5">
@@ -72,9 +62,8 @@ const PositionTick = ({ x, y, payload }) => {
         y={0}
         dy={4}
         textAnchor="end"
-        className="text-slate-400"
-        fill="#94a3b8"
-        fontSize={11}
+        className="text-slate-500 font-bold font-display text-[10px]"
+        fill="currentColor"
       >
         {medal ? medal : `#${pos}`}
       </text>
@@ -143,7 +132,7 @@ export default function PositionEvolutionCard() {
       icon={TrendingUp}
       color="cyan"
       loading={loading}
-      tooltip="Evolución del ranking global jornada a jornada. Cada línea representa un participante."
+      info="Evolución del ranking global jornada a jornada. Cada línea representa un participante."
       className="h-full flex flex-col"
     >
       {!loading && data && data.users ? (
@@ -241,22 +230,29 @@ export default function PositionEvolutionCard() {
           </div>
 
           {/* Line Chart */}
-          <div className="h-[420px] w-full">
+          <div className="h-[420px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 16, left: 8, bottom: 0 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#334155"
-                  opacity={0.3}
+                  stroke="currentColor"
+                  className="text-white/5"
+                  opacity={1}
                   vertical={false}
                 />
                 {/* Reference lines for podium cut */}
-                <ReferenceLine y={1} stroke="#eab308" strokeDasharray="4 3" opacity={0.25} />
-                <ReferenceLine y={3} stroke="#64748b" strokeDasharray="4 3" opacity={0.2} />
+                <ReferenceLine y={1} stroke="#eab308" strokeDasharray="4 3" opacity={0.3} />
+                <ReferenceLine y={3} stroke="#94a3b8" strokeDasharray="4 3" opacity={0.2} />
                 <XAxis
                   dataKey="name"
-                  stroke="#cbd5e1"
-                  tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }}
+                  stroke="currentColor"
+                  className="text-slate-600"
+                  tick={{
+                    fill: 'currentColor',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-display)',
+                  }}
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"

@@ -22,21 +22,21 @@ export default function ElegantCard({
   info = null, // New prop for explanation text
   ...rest
 }) {
-  // Icon colors based on semantic color prop
+  // Icon colors mapping to premium color tokens
   const iconColors = {
-    primary: 'text-primary',
-    emerald: 'text-emerald-500',
-    indigo: 'text-indigo-500',
-    purple: 'text-purple-500',
-    blue: 'text-blue-500',
-    orange: 'text-primary',
-    amber: 'text-amber-500',
-    cyan: 'text-cyan-500',
-    yellow: 'text-yellow-500',
-    pink: 'text-pink-500',
-    rose: 'text-rose-500',
-    green: 'text-green-500',
-    teal: 'text-teal-500',
+    primary: 'text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.3)]',
+    emerald: 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]',
+    indigo: 'text-indigo-400 drop-shadow-[0_0_8px_rgba(129,140,248,0.3)]',
+    purple: 'text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.3)]',
+    blue: 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.3)]',
+    orange: 'text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.3)]',
+    amber: 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]',
+    cyan: 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]',
+    yellow: 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.3)]',
+    pink: 'text-pink-400 drop-shadow-[0_0_8px_rgba(244,114,182,0.3)]',
+    rose: 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.3)]',
+    green: 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]',
+    teal: 'text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.3)]',
   };
 
   const iconColor = iconColors[color] || iconColors.primary;
@@ -45,20 +45,20 @@ export default function ElegantCard({
     return (
       <div
         className={`
-          bg-card border border-border 
-          rounded-lg p-6 h-full flex flex-col animate-pulse
+          stat-card backdrop-blur-md bg-white/5 border border-white/5
+          p-6 h-full flex flex-col animate-pulse
           ${className}
         `}
         {...rest}
       >
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-5 h-5 rounded bg-muted"></div>
-          <div className="h-4 bg-muted rounded w-24"></div>
+          <div className="w-5 h-5 rounded-lg bg-white/10"></div>
+          <div className="h-4 bg-white/10 rounded-md w-24"></div>
         </div>
-        <div className="space-y-3 flex-1">
-          <div className="h-16 bg-muted/50 rounded-lg"></div>
-          <div className="h-12 bg-muted/50 rounded-lg"></div>
-          <div className="flex-1 bg-muted/50 rounded-lg"></div>
+        <div className="space-y-4 flex-1">
+          <div className="h-20 bg-white/5 rounded-xl"></div>
+          <div className="h-10 bg-white/5 rounded-xl w-3/4"></div>
+          <div className="flex-1 bg-white/5 rounded-xl"></div>
         </div>
       </div>
     );
@@ -67,41 +67,46 @@ export default function ElegantCard({
   return (
     <div
       className={`
-        bg-card border border-border 
-        rounded-lg p-6 h-full flex flex-col 
-        transition-all duration-200
+        stat-card backdrop-blur-lg border border-white/5
+        p-6 h-full flex flex-col group/card
+        transition-all duration-500 hover:scale-[1.01] hover:border-primary/20
         ${className}
       `}
       {...rest}
     >
+      {/* Premium Gradient Glow Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-primary/0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-700 pointer-events-none" />
+
       {/* Header */}
       {(title || actionRight) && (
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-center gap-2.5">
+        <div className="flex items-start justify-between mb-6 relative z-10">
+          <div className="flex items-center gap-3">
             {icon &&
               createElement(icon, {
-                className: `w-4 h-4 ${iconColor}`,
+                className: `w-4.5 h-4.5 transition-transform duration-500 group-hover/card:scale-110 ${iconColor}`,
               })}
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+            <span className="text-xs font-black font-ui text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2 group-hover/card:text-slate-300 transition-colors">
               {title}
               {info && (
                 <div className="group/info relative cursor-help">
-                  <Info size={14} className="text-zinc-600 hover:text-zinc-400 transition-colors" />
-                  {/* Tooltip */}
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs normal-case leading-relaxed rounded shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-10 pointer-events-none text-center">
+                  <Info size={14} className="text-slate-500 hover:text-primary transition-colors" />
+                  {/* Premium Glass Tooltip */}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-slate-900/90 backdrop-blur-xl border border-white/10 text-slate-300 text-xs normal-case font-sans leading-relaxed rounded-2xl shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all duration-300 z-50 text-center ring-1 ring-white/5">
                     {info}
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-zinc-800/50"></div>
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-slate-900/90"></div>
                   </div>
                 </div>
               )}
             </span>
           </div>
-          {actionRight}
+          <div className="transition-transform duration-300 hover:scale-105 active:scale-95">
+            {actionRight}
+          </div>
         </div>
       )}
 
       {/* Content */}
-      <div className="flex-1 flex flex-col">{children}</div>
+      <div className="flex-1 flex flex-col relative z-10">{children}</div>
     </div>
   );
 }

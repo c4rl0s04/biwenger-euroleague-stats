@@ -53,12 +53,12 @@ function StandingsTable({ standings }) {
 
   return (
     <table className="w-full text-sm text-left">
-      <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
+      <thead className="text-[10px] text-slate-500 uppercase bg-white/5 font-display tracking-[0.15em]">
         <tr>
-          <th className="px-2 py-2 rounded-l-lg">Pos</th>
-          <th className="px-2 py-2">Usuario</th>
+          <th className="px-3 py-3 rounded-l-xl font-black">Pos</th>
+          <th className="px-3 py-3 font-black">Usuario</th>
           <th
-            className="px-2 py-2 text-right cursor-pointer hover:text-foreground transition-colors rounded-r-lg whitespace-nowrap"
+            className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors rounded-r-xl whitespace-nowrap font-black"
             onClick={() => handleSort('total_points')}
           >
             Puntos {getSortIndicator('total_points')}
@@ -71,10 +71,12 @@ function StandingsTable({ standings }) {
           return (
             <tr
               key={user.user_id}
-              className="border-b border-border/50 last:border-0 hover:bg-secondary/30 transition-colors"
+              className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
             >
-              <td className="px-2 py-2 font-medium text-foreground text-xs">#{user.position}</td>
-              <td className="px-2 py-2">
+              <td className="px-3 py-4 font-black text-white/50 font-display text-sm tracking-tighter">
+                #{user.position}
+              </td>
+              <td className="px-3 py-4">
                 {(() => {
                   const { user_id, name, color_index } = user;
                   const color = getColorForUser(user_id, name, color_index);
@@ -96,12 +98,14 @@ function StandingsTable({ standings }) {
                   );
                 })()}
               </td>
-              <td className="px-2 py-2 text-right">
-                <div className="font-bold text-orange-500 text-sm">
+              <td className="px-3 py-4 text-right">
+                <div className="font-black text-orange-500 text-lg font-display tracking-tight leading-none">
                   <AnimatedNumber value={user.total_points} duration={1.2} />
                 </div>
                 {pointsGap !== null && (
-                  <div className="text-xs text-red-400 font-medium">-{pointsGap}</div>
+                  <div className="text-[10px] text-red-500/80 font-black font-display mt-0.5">
+                    -{pointsGap}
+                  </div>
                 )}
               </td>
             </tr>

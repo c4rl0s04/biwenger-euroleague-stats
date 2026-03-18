@@ -12,9 +12,9 @@ export default function TopHeader({ onMobileMenuClick }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <header className="h-16 bg-card/95 backdrop-blur-xl border-b border-b-[hsl(0_0%_30%)] sticky top-0 z-40">
-      {/* Subtle gradient line at top */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+    <header className="h-16 bg-card/60 backdrop-blur-xl border-b border-border/40 sticky top-0 z-40 transition-all duration-300">
+      {/* Subtle premium gradient line at top */}
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-70" />
 
       <div className="h-full flex items-center justify-between px-4 md:px-6">
         {/* Left: Mobile menu button + Logo */}
@@ -22,28 +22,31 @@ export default function TopHeader({ onMobileMenuClick }) {
           {/* Mobile Hamburger */}
           <button
             onClick={onMobileMenuClick}
-            className="md:hidden p-2 rounded-lg hover:bg-secondary text-muted-foreground"
+            className="md:hidden p-2 rounded-xl hover:bg-white/5 text-muted-foreground transition-colors"
             aria-label="Open menu"
           >
             <Menu size={24} />
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-2 group">
             {/* Logo icon */}
-            <div className="relative w-20 h-20">
+            <div className="relative w-14 h-14 md:w-16 md:h-16 transition-transform group-hover:scale-105 duration-500">
               <Image
                 src="/brand-logo.png"
                 alt="Biwenger Stats Logo"
                 fill
                 priority
                 unoptimized
-                className="object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"
-                sizes="80px"
+                className="object-contain drop-shadow-[0_0_12px_hsla(19,99%,49%,0.4)]"
+                sizes="64px"
               />
             </div>
-            <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
-              Biwenger Stats
+            <span className="hidden sm:block text-xl font-bold font-sans bg-gradient-to-br from-white via-white to-primary/80 bg-clip-text text-transparent tracking-tight">
+              Biwenger
+              <span className="text-primary group-hover:text-primary/90 transition-colors">
+                Stats
+              </span>
             </span>
           </Link>
         </div>

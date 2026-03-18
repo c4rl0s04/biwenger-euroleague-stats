@@ -47,57 +47,57 @@ export default function ManagerFinancesTable({ stats }) {
   return (
     <ElegantCard title="Finanzas Managers" icon={Wallet} color="emerald" className="h-full">
       <div className="overflow-x-auto">
-        <table className="w-full text-[15px] text-left">
-          <thead className="text-xs text-slate-400 uppercase bg-slate-800/50">
+        <table className="w-full text-sm text-left">
+          <thead className="text-[10px] text-slate-500 uppercase bg-white/5 font-display tracking-[0.15em]">
             <tr>
-              <th className="px-3 py-3 rounded-l-lg">Manager</th>
+              <th className="px-3 py-3 rounded-l-xl font-black">Manager</th>
               <th
-                className="px-3 py-3 text-center cursor-pointer hover:text-white transition-colors"
+                className="px-3 py-3 text-center cursor-pointer hover:text-white transition-colors font-black"
                 onClick={() => handleSort('purchases_count')}
               >
                 Compras {getSortIndicator('purchases_count')}
               </th>
               <th
-                className="px-3 py-3 text-center cursor-pointer hover:text-white transition-colors"
+                className="px-3 py-3 text-center cursor-pointer hover:text-white transition-colors font-black"
                 onClick={() => handleSort('sales_count')}
               >
                 Ventas {getSortIndicator('sales_count')}
               </th>
               <th
-                className="px-3 py-3 text-center cursor-pointer hover:text-white transition-colors"
+                className="px-3 py-3 text-center cursor-pointer hover:text-white transition-colors font-black"
                 onClick={() => handleSort('total_ops')}
               >
-                Total Ops {getSortIndicator('total_ops')}
+                Ops {getSortIndicator('total_ops')}
               </th>
               <th
-                className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors"
+                className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors font-black"
                 onClick={() => handleSort('purchases_total')}
               >
                 Gastado {getSortIndicator('purchases_total')}
               </th>
               <th
-                className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors"
+                className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors font-black"
                 onClick={() => handleSort('sales_total')}
               >
                 Ingresado {getSortIndicator('sales_total')}
               </th>
               <th
-                className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors rounded-r-lg"
+                className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors rounded-r-xl font-black"
                 onClick={() => handleSort('balance')}
               >
                 Balance {getSortIndicator('balance')}
               </th>
             </tr>
           </thead>
-          <tbody className="text-base">
+          <tbody className="text-sm">
             {sortedStats.map((row) => {
               const color = getColorForUser(row.user_id, row.user_name, row.color_index);
               return (
                 <tr
                   key={row.user_id || row.user_name}
-                  className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors group"
+                  className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group"
                 >
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-4">
                     <div className="flex items-center gap-2 group hover:opacity-100">
                       {row.user_icon ? (
                         <div className="relative w-8 h-8 shrink-0">
@@ -116,31 +116,30 @@ export default function ManagerFinancesTable({ stats }) {
                       )}
                       <div>
                         <div
-                          className={`font-medium transition-transform group-hover:scale-105 origin-left inline-block ${color.text}`}
+                          className={`font-black transition-transform group-hover:scale-105 origin-left inline-block font-display tracking-tight text-[13px] ${color.text}`}
                         >
                           {row.user_name}
                         </div>
-                        {/* Puedes agregar aquí info extra si lo deseas, como número de operaciones totales */}
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-center font-mono text-emerald-400">
+                  <td className="px-3 py-4 text-center font-display font-black text-emerald-400">
                     {row.purchases_count}
                   </td>
-                  <td className="px-3 py-3 text-center font-mono text-red-400">
+                  <td className="px-3 py-4 text-center font-display font-black text-red-400">
                     {row.sales_count}
                   </td>
-                  <td className="px-3 py-3 text-center font-mono text-blue-400 font-bold">
+                  <td className="px-3 py-4 text-center font-display font-black text-white px-2">
                     {row.purchases_count + row.sales_count}
                   </td>
-                  <td className="px-3 py-3 text-right font-mono text-red-400">
+                  <td className="px-3 py-4 text-right font-display font-black text-red-500 tabular-nums">
                     -{formatMillions(row.purchases_total)}
                   </td>
-                  <td className="px-3 py-3 text-right font-mono text-emerald-400">
+                  <td className="px-3 py-4 text-right font-display font-black text-emerald-500 tabular-nums">
                     +{formatMillions(row.sales_total)}
                   </td>
                   <td
-                    className={`px-3 py-3 text-right font-mono font-bold ${row.balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
+                    className={`px-3 py-4 text-right font-display font-black text-base tabular-nums ${row.balance >= 0 ? 'text-primary' : 'text-red-500'}`}
                   >
                     {formatMillions(row.balance, true)}
                   </td>

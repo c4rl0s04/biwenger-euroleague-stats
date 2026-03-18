@@ -19,15 +19,17 @@ import { getColorForUser } from '@/lib/constants/colors';
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl z-50">
-        <p className="text-slate-300 text-sm font-bold mb-2">{label}</p>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs text-yellow-400">
-            <Trophy size={12} />
+      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
+        <p className="text-slate-500 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+          {label}
+        </p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2.5 text-xs text-amber-400 font-bold">
+            <Trophy size={14} className="opacity-80" />
             <span>Top 3: {payload[0].value} veces</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-red-400">
-            <ArrowDownCircle size={12} />
+          <div className="flex items-center gap-2.5 text-xs text-red-500 font-bold">
+            <ArrowDownCircle size={14} className="opacity-80" />
             <span>Bottom 3: {payload[1].value} veces</span>
           </div>
         </div>
@@ -137,8 +139,9 @@ export default function PlacementStatsCard() {
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#334155"
-                      opacity={0.3}
+                      stroke="currentColor"
+                      className="text-white/5"
+                      opacity={1}
                       horizontal={false}
                     />
                     <XAxis type="number" hide />
@@ -150,8 +153,21 @@ export default function PlacementStatsCard() {
                       axisLine={false}
                       width={90}
                     />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                    <Tooltip
+                      content={<CustomTooltip />}
+                      cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                    />
+                    <Legend
+                      wrapperStyle={{
+                        fontSize: '10px',
+                        paddingTop: '10px',
+                        fontFamily: 'var(--font-display)',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                      formatter={(value) => <span className="text-slate-500 ml-1">{value}</span>}
+                    />
                     <Bar
                       dataKey="top_3_count"
                       name="Top 3"

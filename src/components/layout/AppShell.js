@@ -23,51 +23,75 @@ export default function AppShell({ children }) {
         <div className="flex-1 flex flex-col min-w-0">
           <NewsTicker />
           <main className="flex-grow w-full">{children}</main>
-          <footer className="border-t border-border mt-auto bg-card/30 backdrop-blur-sm">
-            <div className="max-w-7xl mx-auto px-6 py-12">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                {/* Brand */}
-                <div className="col-span-1 md:col-span-2 space-y-4">
-                  <h3 className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-                    BiwengerStats
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-                    Plataforma analítica avanzada para dominar tu liga fantasy de Euroliga. Datos en
-                    tiempo real, estadísticas profundas y herramientas de predicción.
+
+          {/* Premium Footer */}
+          <footer className="border-t border-white/5 mt-auto bg-card/20 backdrop-blur-md relative overflow-hidden">
+            {/* Subtle accent glow */}
+            <div className="absolute bottom-0 left-1/4 w-[500px] h-[200px] bg-primary/5 blur-[120px] rounded-full -z-10" />
+
+            <div className="max-w-7xl mx-auto px-6 py-16">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                {/* Brand Section */}
+                <div className="col-span-1 md:col-span-2 space-y-6">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-2xl font-black font-sans bg-gradient-to-br from-white via-white to-primary/80 bg-clip-text text-transparent tracking-tighter">
+                      Biwenger<span className="text-primary italic">Stats</span>
+                    </h3>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed max-w-sm font-sans">
+                    The ultimate analytical companion for Euroleague Biwenger managers. Master your
+                    league with real-time data, deep performance metrics, and elite-level visual
+                    tools.
                   </p>
                 </div>
 
-                {/* Quick Links */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-foreground">Explorar</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                {/* Navigation Columns */}
+                <div className="space-y-6">
+                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white/50 font-display">
+                    Project
+                  </h4>
+                  <ul className="space-y-3 text-sm font-medium text-slate-400">
                     <li>
-                      <Link href="/standings" className="hover:text-indigo-400 transition-colors">
+                      <Link
+                        href="/standings"
+                        className="hover:text-primary transition-all flex items-center gap-2 group"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/0 group-hover:bg-primary transition-all" />
                         Clasificación
                       </Link>
                     </li>
                     <li>
-                      <Link href="/schedule" className="hover:text-indigo-400 transition-colors">
+                      <Link
+                        href="/schedule"
+                        className="hover:text-primary transition-all flex items-center gap-2 group"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/0 group-hover:bg-primary transition-all" />
                         Alineaciones
                       </Link>
                     </li>
                     <li>
-                      <Link href="/market" className="hover:text-indigo-400 transition-colors">
+                      <Link
+                        href="/market"
+                        className="hover:text-primary transition-all flex items-center gap-2 group"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/0 group-hover:bg-primary transition-all" />
                         Mercado
                       </Link>
                     </li>
                   </ul>
                 </div>
 
-                {/* Socials */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-foreground">Comunidad</h4>
+                {/* Social & Version */}
+                <div className="space-y-6">
+                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white/50 font-display">
+                    Comunidad
+                  </h4>
                   <div className="flex gap-4">
                     <a
                       href="https://github.com/c4rl0s04/AdvancedEuroleagueBiwengerStats"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white hover:text-white/80 transition-colors"
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all hover:scale-110"
                     >
                       <Github className="w-5 h-5" />
                     </a>
@@ -75,7 +99,7 @@ export default function AppShell({ children }) {
                       href="https://twitter.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sky-400 hover:text-sky-300 transition-colors"
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-sky-400 transition-all hover:scale-110"
                     >
                       <Twitter className="w-5 h-5" />
                     </a>
@@ -83,27 +107,31 @@ export default function AppShell({ children }) {
                       href="https://instagram.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-pink-500 hover:text-pink-400 transition-colors"
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-pink-500 transition-all hover:scale-110"
                     >
                       <Instagram className="w-5 h-5" />
                     </a>
                   </div>
-                  <p className="text-xs text-muted-foreground pt-2">v2.0.0 • 2026 Edition</p>
+                  <div className="pt-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-md">
+                      v2.5.0 • Platinum Edition
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p className="text-xs text-muted-foreground">
-                  © 2026 BiwengerStats. Todos los derechos reservados.
+              <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p className="text-[11px] font-medium text-slate-500 font-sans tracking-wide">
+                  © 2026 BiwengerStats. Built for the European Basketball Community.
                 </p>
-                <div className="flex gap-6 text-xs text-muted-foreground">
-                  <span className="cursor-default hover:text-foreground transition-colors">
+                <div className="flex gap-8 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">
+                  <span className="cursor-pointer hover:text-white transition-colors">
                     Privacidad
                   </span>
-                  <span className="cursor-default hover:text-foreground transition-colors">
+                  <span className="cursor-pointer hover:text-white transition-colors">
                     Términos
                   </span>
-                  <span className="cursor-default hover:text-foreground transition-colors">
+                  <span className="cursor-pointer hover:text-white transition-colors">
                     Contacto
                   </span>
                 </div>

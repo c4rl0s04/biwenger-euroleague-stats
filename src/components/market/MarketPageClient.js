@@ -50,28 +50,28 @@ export default function MarketPageClient() {
       <div className="space-y-12 animate-pulse mt-10">
         {/* Section 1 Skeleton */}
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="h-8 w-48 bg-zinc-800 rounded mb-6" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="h-8 w-48 bg-white/10 rounded-lg mb-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 h-32 rounded-xl" />
+              <div key={i} className="bg-card/40 border border-white/5 h-32 rounded-2xl" />
             ))}
           </div>
         </div>
 
         {/* Section 2 Skeleton */}
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="h-8 w-48 bg-zinc-800 rounded mb-6" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="h-8 w-48 bg-white/10 rounded-lg mb-6" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 h-48 rounded-xl" />
+              <div key={i} className="bg-card/40 border border-white/5 h-48 rounded-2xl" />
             ))}
           </div>
         </div>
 
         {/* Section 3 Skeleton */}
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="h-8 w-48 bg-zinc-800 rounded mb-6" />
-          <div className="h-80 bg-zinc-900 border border-zinc-800 rounded-xl" />
+          <div className="h-8 w-48 bg-white/10 rounded-lg mb-6" />
+          <div className="h-80 bg-card/40 border border-white/5 rounded-2xl" />
         </div>
       </div>
     );

@@ -1,10 +1,16 @@
-import { Inter } from 'next/font/google';
+import { Outfit, Bebas_Neue, Inter } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CardThemeProvider } from '@/contexts/CardThemeContext';
 
-const inter = Inter({ subsets: ['latin'] });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const bebasNeue = Bebas_Neue({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-bebas',
+});
 
 export const metadata = {
   metadataBase: new URL('https://advanced-euroleague-biwenger-stats.vercel.app'),
@@ -50,7 +56,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`${inter.className} bg-background text-foreground min-h-screen`}>
+      <body
+        className={`${outfit.variable} ${inter.variable} ${bebasNeue.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
+      >
         <ThemeProvider>
           <CardThemeProvider>{children}</CardThemeProvider>
         </ThemeProvider>
