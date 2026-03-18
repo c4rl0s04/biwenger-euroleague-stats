@@ -47,7 +47,7 @@ export default function AppShell({ children }) {
 
                 {/* Navigation Columns */}
                 <div className="space-y-6">
-                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white/50 font-display">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.1em] text-white/40 font-sans">
                     Project
                   </h4>
                   <ul className="space-y-3 text-sm font-medium text-slate-400">
@@ -83,7 +83,7 @@ export default function AppShell({ children }) {
 
                 {/* Social & Version */}
                 <div className="space-y-6">
-                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white/50 font-display">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.1em] text-white/40 font-sans">
                     Comunidad
                   </h4>
                   <div className="flex gap-4">

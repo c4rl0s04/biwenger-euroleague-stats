@@ -166,8 +166,8 @@ export default function Sidebar({ isOpen, onClose }) {
                         transition-all duration-300 relative overflow-hidden
                         ${
                           isActive
-                            ? 'bg-primary/10 text-primary font-semibold border border-primary/20 shadow-[0_4px_12px_rgba(250,80,1,0.15)] ring-1 ring-primary/20'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
+                            ? 'bg-primary/10 text-primary font-semibold shadow-[0_4px_12px_rgba(250,80,1,0.1)]'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                         }
                       `}
                       title={isCollapsed ? item.name : undefined}
