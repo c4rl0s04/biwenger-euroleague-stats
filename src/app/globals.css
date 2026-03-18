@@ -17,6 +17,8 @@
   --popover: 240 4% 9%;
   --popover-foreground: 0 0% 98%;
 
+  --manager-card-bg: linear-gradient(165deg, hsla(240, 4%, 10%, 1), hsla(240, 5%, 2%, 1));
+
   /* Sports orange primary - #fa5001 */
   --primary: 19 99% 49%;
   --primary-foreground: 0 0% 100%;

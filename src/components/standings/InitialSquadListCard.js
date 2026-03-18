@@ -134,17 +134,19 @@ export default function InitialSquadListCard() {
                   >
                     {/* Left Column: Summary and Stats Card */}
                     <div className="lg:col-span-4 space-y-4">
-                      {/* Active Manager Summary Badge */}
+                      {/* Manager Summary Box - References CSS variable for background */}
                       <div
-                        className={`bg-gradient-to-br ${getVibrantGradient(activeManager.colorIndex)} rounded-3xl p-6 shadow-2xl relative overflow-hidden group border border-white/10`}
+                        className="rounded-3xl p-6 shadow-2xl relative overflow-hidden group border border-white/5"
+                        style={{ background: 'var(--manager-card-bg)' }}
                       >
+                        <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="relative z-10 space-y-6">
                           <div>
-                            <span className="text-white/60 text-[10px] uppercase font-black tracking-widest">
-                              MANAGER
+                            <span className="text-white/40 text-[10px] uppercase font-black tracking-[0.2em] font-display">
+                              MANAGER PROFILE
                             </span>
                             <h2
-                              className={`text-4xl font-black drop-shadow-lg leading-none ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
+                              className={`text-4xl font-black drop-shadow-lg leading-none tracking-tighter uppercase ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
                             >
                               {activeManager.name}
                             </h2>
@@ -228,13 +230,13 @@ export default function InitialSquadListCard() {
                     {/* Right Column: Player Grid */}
                     <div className="lg:col-span-8">
                       <div className="bg-slate-900/40 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
-                        <div className="bg-slate-800/50 p-4 border-b border-slate-800 flex justify-between items-center text-center">
-                          <h3 className="w-full">
-                            <span className="text-sm font-black uppercase tracking-widest text-slate-400">
-                              SQUAD REPARTO INICIAL DE{' '}
+                        <div className="bg-slate-800/30 p-5 border-b border-slate-800 flex justify-between items-center text-center">
+                          <h3 className="w-full flex items-center justify-center gap-3">
+                            <span className="text-lg font-normal uppercase tracking-widest text-slate-500 font-bebas">
+                              SQUAD REPARTO INICIAL DE
                             </span>
                             <span
-                              className={`text-xl font-black uppercase tracking-widest ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
+                              className={`text-3xl font-normal uppercase tracking-wider font-bebas drop-shadow-[0_2px_8px_rgba(250,80,1,0.2)] ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
                             >
                               {activeManager.name}
                             </span>
