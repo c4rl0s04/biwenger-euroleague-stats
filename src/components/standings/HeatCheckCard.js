@@ -18,37 +18,48 @@ export default function HeatCheckCard() {
       tooltip="Diferencia entre la media de las últimas 5 jornadas y la media de la temporada."
     >
       {!loading && data.length > 0 ? (
-        <div className="space-y-3">
+        <div className="divide-y divide-slate-800/50 -mx-1">
           {data.map((user, index) => {
             const userColor = getColorForUser(user.user_id, user.name, user.color_index);
             return (
               <div
                 key={user.user_id}
-                className="group flex items-center justify-between p-2 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-colors"
+                className="group flex items-center justify-between py-2.5 px-2 hover:bg-white/5 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-500 font-mono text-sm w-4">{index + 1}</span>
-                  <div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-slate-500 font-mono text-[10px] w-4 flex-shrink-0">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0">
                     <Link
                       href={`/user/${user.user_id}`}
-                      className={`font-semibold text-sm ${userColor.text} transition-transform group-hover:scale-105 origin-left inline-block`}
+                      className={`font-bold text-xs ${userColor.text} truncate block transition-transform group-hover:translate-x-0.5 origin-left`}
                     >
                       {user.name}
                     </Link>
-                    <div className="text-xs text-slate-400">
-                      L5: {user.last5_avg.toFixed(1)} | Season: {user.season_avg.toFixed(1)}
+                    <div className="text-[10px] text-slate-500 font-medium">
+                      L5: {user.last5_avg.toFixed(1)} <span className="mx-1 opacity-30">|</span>{' '}
+                      Season: {user.season_avg.toFixed(1)}
                     </div>
                   </div>
                 </div>
-                <div
-                  className={`flex items-center gap-1 font-bold ${user.diff > 0 ? 'text-green-400' : 'text-red-400'}`}
-                >
-                  {user.diff > 0 ? '+' : ''}
-                  {user.diff.toFixed(1)}
-                  {user.status === 'fire' && (
-                    <Flame size={14} className="text-orange-500 animate-pulse" />
-                  )}
-                  {user.status === 'ice' && <Snowflake size={14} className="text-blue-300" />}
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  <div
+                    className={`flex items-center gap-1 font-black text-xs ${user.diff > 0 ? 'text-emerald-400' : 'text-rose-400'}`}
+                  >
+                    {user.diff > 0 ? '+' : ''}
+                    {user.diff.toFixed(1)}
+                  </div>
+                  <div className="w-5 flex justify-center">
+                    {user.status === 'fire' && (
+                      <Flame
+                        size={14}
+                        className="text-orange-500 animate-pulse fill-orange-500/20"
+                      />
+                    )}
+                    {user.status === 'ice' && <Snowflake size={14} className="text-blue-300" />}
+                    {user.status === 'neutral' && <div className="w-[14px]" />}
+                  </div>
                 </div>
               </div>
             );
