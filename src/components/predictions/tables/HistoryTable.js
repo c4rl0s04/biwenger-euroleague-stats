@@ -6,6 +6,7 @@ import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { getShortRoundName } from '@/lib/utils/format';
 
 export function HistoryTable({ history }) {
   const [hoveredCell, setHoveredCell] = useState(null);
@@ -83,7 +84,7 @@ export function HistoryTable({ history }) {
             >
               {/* Round Name */}
               <div className="w-16 flex-shrink-0 font-mono text-[10px] text-slate-500 text-center mr-1">
-                {round.name.replace('Jornada ', 'J')}
+                {getShortRoundName(round.name)}
               </div>
 
               {/* User Scores */}

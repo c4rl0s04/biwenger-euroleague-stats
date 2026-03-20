@@ -3,6 +3,7 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Activity } from 'lucide-react';
+import { getShortRoundName } from '@/lib/utils/format';
 import {
   ResponsiveContainer,
   LineChart,
@@ -30,9 +31,7 @@ export default function RollingAverageCard() {
       user.data.forEach((point) => {
         if (!roundsMap.has(point.round)) {
           // Use J + number as requested
-          const label = point.round_name
-            ? point.round_name.replace('Jornada ', 'J')
-            : `J${point.round}`;
+          const label = point.round_name ? getShortRoundName(point.round_name) : `J${point.round}`;
 
           roundsMap.set(point.round, {
             round: point.round,

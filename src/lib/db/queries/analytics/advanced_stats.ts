@@ -5,6 +5,7 @@
 
 import { db } from '../../client';
 import { cached, CACHE_TTL } from '../../../utils/cache';
+import { getShortRoundName } from '../../../utils/format';
 
 export interface HeatCheckStat {
   user_id: number;
@@ -679,7 +680,7 @@ export async function getHeatmapStats(): Promise<HeatmapStat> {
       return {
         rounds: rounds.map((r: any) => ({
           id: r.round_id,
-          name: r.round_name.replace('Jornada ', 'J'),
+          name: getShortRoundName(r.round_name),
         })),
         users: users.map((u: any) => ({
           id: u.id,
@@ -799,7 +800,7 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
       return {
         rounds: rounds.map((r: any) => ({
           id: r.round_id,
-          name: r.round_name.replace('Jornada ', 'J'),
+          name: getShortRoundName(r.round_name),
         })),
         users: usersEvolution,
         valid: rounds.length > 1,

@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { getShortRoundName } from '@/lib/utils/format';
 
 export default function RoundWinnersCard() {
   const { data: winners = [], loading } = useApiData('/api/standings/round-winners?limit=100');
@@ -25,7 +26,7 @@ export default function RoundWinnersCard() {
                   className={`group flex-shrink-0 w-20 p-2 rounded-lg text-center transition-all bg-gradient-to-b ${colors.bg} border ${colors.border} ${colors.text} hover:scale-105 block`}
                 >
                   <div className="text-slate-400 text-[9px] font-medium mb-1">
-                    {winner.round_name.replace('Jornada ', 'J')}
+                    {getShortRoundName(winner.round_name)}
                   </div>
                   <div className="flex justify-center mb-1">
                     {winner.icon ? (

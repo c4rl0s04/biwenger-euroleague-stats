@@ -15,6 +15,7 @@ import {
 import { useMemo, useState } from 'react';
 import { Card } from '@/components/ui';
 import { House, Plane, TrendingUp, Trophy, Ban } from 'lucide-react';
+import { getShortRoundName } from '@/lib/utils/format';
 
 // Colors
 const HOME_COLOR = '#3b82f6'; // blue-500
@@ -115,7 +116,7 @@ export default function PlayerPointsGraph({ matches, playerTeam }) {
       }
 
       return {
-        name: match.round_name.replace('Jornada ', 'J'),
+        name: getShortRoundName(match.round_name),
         fullRound: match.round_name,
         points: match.fantasy_points !== null ? match.fantasy_points : 0,
         isDNP: match.fantasy_points === null,

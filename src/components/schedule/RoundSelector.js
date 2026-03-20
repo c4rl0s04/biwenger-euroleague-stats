@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getShortRoundName } from '@/lib/utils/format';
 
 export default function RoundSelector({ rounds, currentRoundId, userId }) {
   const scrollContainerRef = useRef(null);
@@ -60,7 +61,7 @@ export default function RoundSelector({ rounds, currentRoundId, userId }) {
                 }
               `}
             >
-              {r.round_name.replace('Jornada ', 'J')}
+              {getShortRoundName(r.round_name)}
             </Link>
           );
         })}

@@ -2,6 +2,7 @@
 
 import { X, Trophy } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { getShortRoundName } from '@/lib/utils/format';
 
 export default function BestValueDetailModal({ transferId, isOpen, onClose }) {
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ export default function BestValueDetailModal({ transferId, isOpen, onClose }) {
                 {matches.map((match, idx) => (
                   <tr key={idx} className="hover:bg-zinc-800/30">
                     <td className="px-3 py-1.5 text-zinc-400">
-                      {match.round_name?.replace('Jornada ', 'J')}
+                      {getShortRoundName(match.round_name)}
                     </td>
                     <td className="px-2 py-1.5 text-zinc-300 truncate max-w-[120px]">
                       {match.opponent}

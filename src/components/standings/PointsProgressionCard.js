@@ -15,6 +15,7 @@ import {
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { getShortRoundName } from '@/lib/utils/format';
 
 // Custom tooltip - defined outside component to avoid recreation on each render
 const CustomTooltip = ({ active, payload, label }) => {
@@ -68,7 +69,7 @@ export default function PointsProgressionCard() {
 
     // Pivot data
     const data = roundNames.map((round) => {
-      const entry = { name: round.replace('Jornada ', 'J') };
+      const entry = { name: getShortRoundName(round) };
       userMap.forEach((details, id) => {
         const stats = progression.find((p) => p.round_name === round && p.user_id === id);
         if (stats) {
