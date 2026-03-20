@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Sun, Moon, Check, Snowflake } from 'lucide-react'; // Added Snowflake
+import { Settings, Check, Snowflake } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
 export default function SettingsDropdown() {
@@ -10,7 +10,7 @@ export default function SettingsDropdown() {
   const dropdownRef = useRef(null);
 
   // Destructure new snow properties
-  const { theme, setTheme, showSnow, toggleSnow } = useTheme();
+  const { showSnow, toggleSnow } = useTheme();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -26,15 +26,6 @@ export default function SettingsDropdown() {
     { code: 'es', name: 'Español', flag: '🇪🇸' },
     { code: 'en', name: 'English', flag: '🇬🇧' },
   ];
-
-  const themes = [
-    { id: 'light', name: 'Claro', icon: Sun },
-    { id: 'dark', name: 'Oscuro', icon: Moon },
-  ];
-
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-  };
 
   const handleLanguageChange = (newLanguage) => {
     setLanguage(newLanguage);
@@ -57,29 +48,6 @@ export default function SettingsDropdown() {
         <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50">
           <div className="px-3 py-2 border-b border-border/30">
             <h3 className="text-sm font-semibold text-foreground">Configuración</h3>
-          </div>
-
-          {/* Theme Section */}
-          <div className="p-2">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider px-2 py-1 mb-1">
-              Tema
-            </div>
-            <div className="grid grid-cols-2 gap-1">
-              {themes.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => handleThemeChange(t.id)}
-                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer ${
-                    theme === t.id
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground border border-transparent'
-                  }`}
-                >
-                  <t.icon size={16} />
-                  <span className="text-sm">{t.name}</span>
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Effects Section (Hidden for now) */}

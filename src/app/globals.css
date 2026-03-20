@@ -64,43 +64,6 @@
   --sidebar-ring: 19 99% 49%;
 }
 
-/* Light theme */
-.light {
-  /* Light backgrounds - Clean and crisp */
-  --background: 220 33% 98%;
-  --foreground: 224 71% 4%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 224 71% 4%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 224 71% 4%;
-
-  --primary: 19 99% 49%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 220 33% 92%;
-  --secondary-foreground: 224 71% 4%;
-
-  --muted: 220 33% 88%;
-  --muted-foreground: 224 20% 45%;
-
-  --accent: 19 99% 45%;
-  --accent-foreground: 0 0% 100%;
-
-  --border: 220 33% 90%;
-  --input: 220 33% 90%;
-  --ring: 19 99% 49%;
-
-  --glow-primary: 0 0 30px hsla(19, 99%, 49%, 0.2);
-  --glow-subtle: 0 0 60px hsla(19, 99%, 49%, 0.05);
-  --glass-border: hsla(224, 71%, 4%, 0.08);
-  --glass-surface: hsla(0, 0%, 100%, 0.7);
-
-  --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 33% 96%));
-  --sidebar-background: 0 0% 100%;
-}
-
 /* Tailwind v4 theme configuration */
 @theme inline {
   --color-background: hsl(var(--background));

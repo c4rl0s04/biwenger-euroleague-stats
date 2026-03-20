@@ -5,7 +5,6 @@ import { createContext, useContext, useEffect, useState, useSyncExternalStore } 
 const ThemeContext = createContext({
   theme: 'dark',
   setTheme: () => {},
-  toggleTheme: () => {},
   // New properties
   showSnow: false,
   toggleSnow: () => {},
@@ -34,12 +33,6 @@ function getServerSnapshot() {
 
 // Get initial theme
 function getStoredTheme() {
-  if (typeof window === 'undefined') return 'dark';
-  try {
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
-  } catch {}
-  if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
   return 'dark';
 }
 
@@ -64,8 +57,8 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     if (!isClient) return;
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
+    root.classList.remove('light');
+    root.classList.add('dark');
     try {
       localStorage.setItem('theme', theme);
     } catch {}
@@ -80,7 +73,6 @@ export function ThemeProvider({ children }) {
   }, [showSnow, isClient]);
 
   const setTheme = (newTheme) => setThemeState(newTheme);
-  const toggleTheme = () => setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
   // New toggle function
   const toggleSnow = () => setShowSnowState((prev) => !prev);
@@ -88,7 +80,7 @@ export function ThemeProvider({ children }) {
   if (!isClient) return null;
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, showSnow, toggleSnow }}>
+    <ThemeContext.Provider value={{ theme, setTheme, showSnow, toggleSnow }}>
       {children}
     </ThemeContext.Provider>
   );
