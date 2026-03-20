@@ -24,14 +24,6 @@ export default function ThemeBackground() {
             {/* Animated Glow Orbs */}
             <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] rounded-full bg-zinc-500/3 blur-[120px] animate-blob" />
             <div className="absolute bottom-[-10%] left-[-5%] w-[35vw] h-[35vw] rounded-full bg-zinc-500/5 blur-[100px] animate-blob animation-delay-4000" />
-
-            {/* Subtle Grain/Noise Texture */}
-            <div
-              className="absolute inset-0 opacity-[0.03] pointer-events-none"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-              }}
-            />
           </div>
         );
 
@@ -43,7 +35,6 @@ export default function ThemeBackground() {
               <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-zinc-900/20 blur-[120px]" />
               <div className="absolute top-[40%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-primary/5 blur-[120px]" />
               <div className="absolute top-[80%] left-[10%] w-[60vw] h-[60vw] rounded-full bg-zinc-900/20 blur-[100px]" />
-              <div className="fixed inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
             </div>
           </div>
         );
@@ -82,15 +73,6 @@ export default function ThemeBackground() {
       case 'neo':
         return (
           <div className="fixed inset-0 z-[-1] bg-[#0A0A0A] transition-colors duration-700 pointer-events-none">
-            {/* Technical Grid Pattern */}
-            <div
-              className="absolute inset-0 h-[200vh]"
-              style={{
-                backgroundImage: `linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)`,
-                backgroundSize: '40px 40px',
-                opacity: 0.5,
-              }}
-            />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent h-[200vh]" />
           </div>
         );
@@ -100,23 +82,7 @@ export default function ThemeBackground() {
         return (
           <div className="fixed inset-0 z-[-1] bg-background transition-colors duration-700 pointer-events-none">
             <div className="absolute top-0 left-0 w-full h-[200vh] overflow-hidden">
-              {/* Noise Texture */}
-              <div
-                className="absolute inset-0 opacity-[0.04]"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`,
-                }}
-              />
-
               <div className="absolute inset-0 bg-gradient-to-br from-black/0 via-zinc-900/30 to-zinc-800/20" />
-
-              <div
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)`,
-                  backgroundSize: '60px 60px',
-                }}
-              />
 
               {/* Distributed Flares - Pure Neutral */}
               <div className="absolute top-[5vh] right-[-10%] w-[800px] h-[800px] bg-zinc-800/10 blur-[130px] rounded-full" />
