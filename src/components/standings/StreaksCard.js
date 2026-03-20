@@ -27,7 +27,10 @@ export default function StreaksCard() {
             </div>
 
             <StatsList
-              items={data}
+              items={data.map((user) => ({
+                ...user,
+                user_id: user.user_id, // Ensure consistency
+              }))}
               renderRight={(user) => (
                 <div className="flex flex-col items-end pl-2">
                   <div className="flex items-center gap-1">

@@ -29,7 +29,7 @@ export default function BestDraftPlayerCard() {
                 ...user,
                 name: user.user_name,
                 color_index: user.user_color_index,
-                user_id: null,
+                // user_id and icon are now provided by the updated API
                 subtitle: (
                   <span className="flex items-center gap-1">
                     <Star size={9} className="text-amber-400" fill="currentColor" />

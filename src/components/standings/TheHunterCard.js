@@ -24,7 +24,10 @@ export default function TheHunterCard() {
           </p>
 
           <StatsList
-            items={data}
+            items={data.map((user) => ({
+              ...user,
+              user_id: user.user_id, // Ensure consistency
+            }))}
             renderRight={(user) => (
               <div
                 className={`flex items-center gap-1 font-black text-sm ${user.gained > 0 ? 'text-emerald-400' : 'text-rose-400'}`}

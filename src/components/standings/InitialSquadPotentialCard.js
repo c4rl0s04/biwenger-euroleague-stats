@@ -29,7 +29,7 @@ export default function InitialSquadPotentialCard() {
                 ...user,
                 name: user.user_name,
                 color_index: user.user_color_index,
-                user_id: null,
+                // user_id and icon are now provided by the updated API
                 subtitle: `Valor: ${(user.total_value / 1000000).toFixed(1)}M €`,
               }))}
               renderRight={(user, index) => (

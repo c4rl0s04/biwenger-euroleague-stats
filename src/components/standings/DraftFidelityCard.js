@@ -33,7 +33,7 @@ export default function DraftFidelityCard() {
                 ...user,
                 name: user.user_name,
                 color_index: user.user_color_index,
-                user_id: null, // We don't have user_id here, StatsList handles it
+                // user_id and icon are now provided by the updated API
                 subtitle: (
                   <span className="flex items-center gap-1.5">
                     {user.players_contributed} jugador

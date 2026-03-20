@@ -64,7 +64,7 @@
   --sidebar-ring: 19 99% 49%;
 }
 
-/* Tailwind v4 theme configuration */
+/* Tailwind v4 theme configuration - Ignore "Unknown at rule @theme" lint warnings as this is a v4 feature */
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));

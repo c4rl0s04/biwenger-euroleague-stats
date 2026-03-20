@@ -278,7 +278,7 @@ export async function getRollingAverageStats(): Promise<RollingAverageStat[]> {
     const rounds = (
       await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
     ).rows;
-    const users = (await db.query('SELECT id, name, color_index FROM users')).rows;
+    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
 
     const result: RollingAverageStat[] = [];
 
@@ -318,6 +318,7 @@ export async function getRollingAverageStats(): Promise<RollingAverageStat[]> {
       result.push({
         user_id: user.id,
         name: user.name,
+        icon: user.icon,
         color_index: user.color_index,
         data: dataPoints,
       });
@@ -435,7 +436,7 @@ export async function getReliabilityStats(): Promise<ReliabilityStat[]> {
  */
 export async function getPointDistributionStats(): Promise<PointDistributionStat[]> {
   try {
-    const users = (await db.query('SELECT id, name, color_index FROM users')).rows;
+    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
     const buckets = [
       { range: '90-135', min: 90, max: 135 },
       { range: '136-170', min: 136, max: 170 },
@@ -467,6 +468,7 @@ export async function getPointDistributionStats(): Promise<PointDistributionStat
       result.push({
         user_id: user.id,
         name: user.name,
+        icon: user.icon,
         color_index: user.color_index,
         distribution,
       });

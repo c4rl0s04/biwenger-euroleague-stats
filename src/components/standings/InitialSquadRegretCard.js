@@ -29,7 +29,7 @@ export default function InitialSquadRegretCard() {
                 ...user,
                 name: user.user_name,
                 color_index: user.user_color_index,
-                user_id: null,
+                // user_id and icon are now provided by the updated API
                 subtitle: (
                   <span className="flex items-center gap-1">
                     <span className="text-red-400/80 italic">Top &quot;Pain&quot;:</span>

@@ -34,7 +34,7 @@ export default function InitialSquadAnalysisCard() {
                 ...user,
                 name: user.user_name,
                 color_index: user.user_color_index,
-                user_id: null,
+                // user_id and icon are now provided by the updated API
                 subtitle: (
                   <span className="flex gap-3">
                     <span>

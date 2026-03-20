@@ -16,7 +16,10 @@ export default function DominanceCard() {
     >
       {!loading && data.length > 0 ? (
         <StatsList
-          items={data}
+          items={data.map((user) => ({
+            ...user,
+            user_id: user.user_id, // Ensure consistency
+          }))}
           renderRight={(user) => (
             <>
               {/* Wins Column */}

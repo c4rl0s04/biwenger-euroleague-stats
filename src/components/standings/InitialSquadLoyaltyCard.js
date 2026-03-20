@@ -29,7 +29,7 @@ export default function InitialSquadLoyaltyCard() {
                 ...user,
                 name: user.user_name,
                 color_index: user.user_color_index,
-                user_id: null,
+                // user_id and icon are now provided by the updated API
                 subtitle: `${user.retained_count} de ${user.initial_count} jugadores iniciales`,
               }))}
               renderRight={(user, index) => (
