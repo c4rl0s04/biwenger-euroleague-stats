@@ -173,7 +173,7 @@ export default function PointDistributionCard() {
           </ResponsiveContainer>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">Sin datos</div>
+        !loading && <div className="text-center text-slate-400 py-4">Sin datos</div>
       )}
     </Card>
   );

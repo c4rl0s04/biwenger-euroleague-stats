@@ -14,7 +14,7 @@ export default function InitialSquadPotentialCard() {
     <Card title="Potencial del Reparto" icon={Zap} color="sky" loading={loading}>
       {!loading && (
         <div className="flex flex-col h-full overflow-hidden">
-          <p className="text-xs text-slate-400 italic px-2 mb-4 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             Rendimiento total histórico y valor de mercado actual de tus jugadores iniciales (hayan
             sido vendidos o no).
           </p>
@@ -22,7 +22,7 @@ export default function InitialSquadPotentialCard() {
           {error ? (
             <p className="text-red-400 text-center py-4 text-sm">{error}</p>
           ) : potentialRanking.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">No hay datos disponibles</p>
+            <p className="text-slate-400 text-center py-4 text-sm">No hay datos disponibles</p>
           ) : (
             <StatsList
               items={potentialRanking.map((user) => ({
@@ -40,7 +40,7 @@ export default function InitialSquadPotentialCard() {
                       {(user.total_points ?? 0).toLocaleString()}
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mt-1">
                     pts totales
                   </span>
                 </div>

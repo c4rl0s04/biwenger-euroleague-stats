@@ -20,7 +20,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
-        <p className="text-slate-500 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+        <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
           {label}
         </p>
         <div className="space-y-2">
@@ -121,7 +121,7 @@ export default function PlacementStatsCard() {
           <div className="flex flex-col h-full overflow-hidden">
             {/* Spacer to match the description height of other cards if needed, or just padding */}
             <div className="min-h-[40px] flex items-center mb-3 flex-shrink-0">
-              <p className="text-xs text-slate-400 italic px-2">
+              <p className="text-xs text-slate-300 font-medium italic px-2">
                 Frecuencia de aparición en el{' '}
                 <span className="text-amber-400 font-bold">Top 3</span> y{' '}
                 <span className="text-red-400 font-bold">Bottom 3</span>.
@@ -166,7 +166,7 @@ export default function PlacementStatsCard() {
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                       }}
-                      formatter={(value) => <span className="text-slate-500 ml-1">{value}</span>}
+                      formatter={(value) => <span className="text-slate-400 ml-1">{value}</span>}
                     />
                     <Bar
                       dataKey="top_3_count"
@@ -189,7 +189,7 @@ export default function PlacementStatsCard() {
             </div>
           </div>
         ) : (
-          <div className="text-center text-slate-500 py-8">No hay datos de posiciones</div>
+          <div className="text-center text-slate-400 py-8">No hay datos de posiciones</div>
         ))}
     </Card>
   );

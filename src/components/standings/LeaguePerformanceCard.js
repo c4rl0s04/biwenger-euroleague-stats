@@ -165,7 +165,7 @@ export default function LeaguePerformanceCard() {
             </div>
           </div>
         ) : (
-          <div className="text-center text-slate-500 py-8">No hay datos de rendimiento</div>
+          <div className="text-center text-slate-400 py-8">No hay datos de rendimiento</div>
         ))}
     </Card>
   );

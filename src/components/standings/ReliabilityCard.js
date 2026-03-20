@@ -21,7 +21,7 @@ export default function ReliabilityCard() {
       {!loading && data.length > 0 ? (
         <div className="flex flex-col h-full overflow-hidden">
           <div className="min-h-[40px] flex items-center mb-3 flex-shrink-0">
-            <p className="text-xs text-slate-400 italic px-2">
+            <p className="text-xs text-slate-300 font-medium italic px-2">
               Frecuencia con la que superas la{' '}
               <span className="text-green-400 font-bold not-italic">media</span>. &quot;Ganar el
               par&quot;.
@@ -42,7 +42,7 @@ export default function ReliabilityCard() {
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {/* Rank */}
                       <span
-                        className={`text-sm font-bold w-4 ${index < 3 ? 'text-yellow-400' : 'text-slate-500'}`}
+                        className={`text-sm font-bold w-4 ${index < 3 ? 'text-yellow-400' : 'text-slate-400'}`}
                       >
                         {index + 1}
                       </span>
@@ -82,7 +82,7 @@ export default function ReliabilityCard() {
                       >
                         {percentage.toFixed(0)}%
                       </span>
-                      <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400">
                         Reliability
                       </span>
                     </div>
@@ -94,7 +94,7 @@ export default function ReliabilityCard() {
         </div>
       ) : (
         !loading && (
-          <div className="text-center text-slate-500 py-8">No hay datos de fiabilidad</div>
+          <div className="text-center text-slate-400 py-8">No hay datos de fiabilidad</div>
         )
       )}
     </Card>

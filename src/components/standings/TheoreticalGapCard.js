@@ -106,7 +106,7 @@ export default function TheoreticalGapCard() {
       {!loading && data.length > 0 ? (
         <div className="flex flex-col h-full gap-4">
           {/* Explanation Text - Changed text-center to text-left */}
-          <p className="text-xs text-slate-400 italic px-2 text-left">
+          <p className="text-xs text-slate-300 font-medium italic px-2 text-left">
             Eficiencia comparada con la{' '}
             <span className="text-yellow-400 font-bold not-italic">Temporada Perfecta</span> (suma
             de todos los MVPs). El porcentaje indica cuántos puntos has capturado del máximo teórico
@@ -147,7 +147,7 @@ export default function TheoreticalGapCard() {
           </div>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">No hay datos</div>
+        !loading && <div className="text-center text-slate-400 py-4">No hay datos</div>
       )}
     </Card>
   );

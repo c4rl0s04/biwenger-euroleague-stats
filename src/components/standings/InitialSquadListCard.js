@@ -90,7 +90,7 @@ export default function InitialSquadListCard() {
               {error}
             </p>
           ) : managers.length === 0 ? (
-            <p className="text-slate-500 text-center py-12 text-sm bg-slate-800/20 rounded-2xl">
+            <p className="text-slate-400 text-center py-12 text-sm bg-slate-800/20 rounded-2xl">
               No hay datos disponibles
             </p>
           ) : (
@@ -215,10 +215,10 @@ export default function InitialSquadListCard() {
 
                       <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
                         <h4 className="text-slate-300 font-bold text-sm mb-4 flex items-center gap-2">
-                          <Info size={16} className="text-slate-500" />
+                          <Info size={16} className="text-slate-400" />
                           Nota Informativa
                         </h4>
-                        <p className="text-xs text-slate-500 leading-relaxed italic">
+                        <p className="text-xs text-slate-400 leading-relaxed italic">
                           Esta lista muestra exactamente los jugadores que recibió el manager en el
                           reparto inicial de la temporada. Se indica el dueño actual para ver quién
                           supo retener su talento y quién lo dejó escapar al mercado u otros
@@ -232,7 +232,7 @@ export default function InitialSquadListCard() {
                       <div className="bg-slate-900/40 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
                         <div className="bg-slate-800/30 p-5 border-b border-slate-800 flex justify-between items-center text-center">
                           <h3 className="w-full flex items-center justify-center gap-3">
-                            <span className="text-lg font-normal uppercase tracking-widest text-slate-500 font-bebas">
+                            <span className="text-lg font-normal uppercase tracking-widest text-slate-400 font-bebas">
                               SQUAD REPARTO INICIAL DE
                             </span>
                             <span
@@ -279,7 +279,7 @@ export default function InitialSquadListCard() {
                                       <span className="text-slate-200 text-sm">
                                         {player.current_points}
                                       </span>{' '}
-                                      <span className="text-[10px] text-slate-500 uppercase">
+                                      <span className="text-[10px] text-slate-400 uppercase">
                                         pts
                                       </span>{' '}
                                       •{' '}

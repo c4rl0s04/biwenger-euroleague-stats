@@ -57,7 +57,7 @@ export default function RivalryMatrixCard() {
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header Description */}
           <div className="min-h-[40px] flex items-center mb-3 flex-shrink-0">
-            <p className="text-xs text-slate-400 italic px-2">
+            <p className="text-xs text-slate-300 font-medium italic px-2">
               Resultados directos (<span className="text-green-400 font-bold">W</span>-
               <span className="text-slate-400 font-bold">D</span>-
               <span className="text-red-400 font-bold">L</span>).
@@ -163,7 +163,7 @@ export default function RivalryMatrixCard() {
                                 <span className="opacity-30 text-xs">-</span>
 
                                 {/* Ties */}
-                                <span className="text-slate-500 text-sm">{record.ties}</span>
+                                <span className="text-slate-400 text-sm">{record.ties}</span>
 
                                 <span className="opacity-30 text-xs">-</span>
 
@@ -185,7 +185,7 @@ export default function RivalryMatrixCard() {
                                 `}
                               >
                                 <div className="font-bold border-b border-slate-700 pb-1 mb-1 text-center">
-                                  {user.name} <span className="text-slate-500 font-normal">vs</span>{' '}
+                                  {user.name} <span className="text-slate-400 font-normal">vs</span>{' '}
                                   {opponent.name}
                                 </div>
                                 <div className="flex justify-between gap-3 text-[11px]">
@@ -193,19 +193,19 @@ export default function RivalryMatrixCard() {
                                     <span className="text-green-400 font-bold text-lg">
                                       {record.wins}
                                     </span>
-                                    <span className="text-slate-500 uppercase text-[9px]">Vic</span>
+                                    <span className="text-slate-400 uppercase text-[9px]">Vic</span>
                                   </div>
                                   <div className="flex flex-col items-center">
                                     <span className="text-slate-300 font-bold text-lg">
                                       {record.ties}
                                     </span>
-                                    <span className="text-slate-500 uppercase text-[9px]">Emp</span>
+                                    <span className="text-slate-400 uppercase text-[9px]">Emp</span>
                                   </div>
                                   <div className="flex flex-col items-center">
                                     <span className="text-red-400 font-bold text-lg">
                                       {record.losses}
                                     </span>
-                                    <span className="text-slate-500 uppercase text-[9px]">Der</span>
+                                    <span className="text-slate-400 uppercase text-[9px]">Der</span>
                                   </div>
                                 </div>
                               </div>
@@ -221,7 +221,7 @@ export default function RivalryMatrixCard() {
           </div>
         </div>
       ) : (
-        <div className="text-center text-slate-500 py-8">Cargando matriz de rivalidad...</div>
+        <div className="text-center text-slate-400 py-8">Cargando matriz de rivalidad...</div>
       )}
     </Card>
   );

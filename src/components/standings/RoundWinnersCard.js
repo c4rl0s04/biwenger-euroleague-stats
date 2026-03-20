@@ -53,7 +53,7 @@ export default function RoundWinnersCard() {
               );
             })
           ) : (
-            <div className="text-center text-slate-500 py-4 w-full">No hay datos de ganadores</div>
+            <div className="text-center text-slate-400 py-4 w-full">No hay datos de ganadores</div>
           )}
         </div>
       )}

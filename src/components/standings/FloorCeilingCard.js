@@ -137,7 +137,7 @@ export default function FloorCeilingCard() {
     >
       {!loading && chartData.length > 0 ? (
         <div className="space-y-4 flex flex-col h-full min-h-[200px]">
-          <p className="text-xs text-slate-400 italic px-2 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 flex-shrink-0">
             Rango de puntuación entre{' '}
             <span className="text-red-400 font-bold not-italic">Suelo</span> (min) y{' '}
             <span className="text-green-400 font-bold not-italic">Techo</span> (max). El{' '}
@@ -176,7 +176,7 @@ export default function FloorCeilingCard() {
           </div>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">Sin datos suficientes</div>
+        !loading && <div className="text-center text-slate-400 py-4">Sin datos suficientes</div>
       )}
     </Card>
   );

@@ -22,7 +22,7 @@ export default function AllPlayAllCard() {
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
           <div className="min-h-[40px] flex items-center mb-4 flex-shrink-0">
-            <p className="text-sm text-slate-400 italic px-2 leading-tight">
+            <p className="text-sm text-slate-300 font-medium italic px-2 leading-tight">
               Si jugaras contra <span className="text-yellow-400 font-bold not-italic">todos</span>{' '}
               los rivales cada jornada. Efectividad{' '}
               <span className="text-yellow-400 font-bold not-italic">H2H</span> real.
@@ -130,7 +130,7 @@ export default function AllPlayAllCard() {
         </div>
       ) : (
         !loading && (
-          <div className="flex h-full items-center justify-center text-slate-500 text-lg">
+          <div className="flex h-full items-center justify-center text-slate-400 text-lg">
             Calculando liga virtual...
           </div>
         )

@@ -85,11 +85,11 @@ export default function ElegantCard({
               createElement(icon, {
                 className: `w-4.5 h-4.5 transition-transform duration-500 group-hover/card:scale-110 ${iconColor}`,
               })}
-            <span className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-widest flex items-center gap-2 group-hover/card:text-slate-300 transition-colors">
+            <span className="text-[10px] font-black font-sans text-slate-300 uppercase tracking-widest flex items-center gap-2 group-hover/card:text-white transition-colors">
               {title}
               {info && (
                 <div className="group/info relative cursor-help">
-                  <Info size={14} className="text-slate-500 hover:text-primary transition-colors" />
+                  <Info size={14} className="text-slate-400 hover:text-primary transition-colors" />
                   {/* Premium Glass Tooltip */}
                   <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-slate-900/90 backdrop-blur-xl border border-white/10 text-slate-300 text-xs normal-case font-sans leading-relaxed rounded-2xl shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all duration-300 z-50 text-center ring-1 ring-white/5">
                     {info}

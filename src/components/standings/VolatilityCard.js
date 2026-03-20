@@ -19,7 +19,7 @@ export default function VolatilityCard() {
     >
       {!loading && data.length > 0 ? (
         <div className="flex flex-col gap-4 h-full">
-          <p className="text-xs text-slate-400 italic px-2">
+          <p className="text-xs text-slate-300 font-medium italic px-2">
             Mide la <span className="text-slate-200 font-bold not-italic">regularidad</span>.
             Valores <span className="text-pink-400 font-bold not-italic">Altos</span> indican
             resultados impredecibles (montaña rusa), valores{' '}
@@ -41,7 +41,7 @@ export default function VolatilityCard() {
                     className="flex items-center justify-between py-2 px-2 hover:bg-slate-800 rounded transition-colors z-10 relative"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-slate-500 font-mono w-4">{index + 1}</span>
+                      <span className="text-xs text-slate-400 font-mono w-4">{index + 1}</span>
                       <span
                         className={`text-sm font-medium ${userColor.text} transition-transform group-hover:scale-105 origin-left inline-block`}
                       >
@@ -50,7 +50,7 @@ export default function VolatilityCard() {
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-bold text-pink-400">{user.std_dev}</div>
-                      <div className="text-[10px] text-slate-500">Media: {user.avg_points}</div>
+                      <div className="text-[10px] text-slate-400">Media: {user.avg_points}</div>
                     </div>
                   </Link>
                   {/* Background Bar */}
@@ -64,7 +64,7 @@ export default function VolatilityCard() {
           </div>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">Calculando volatilidad...</div>
+        !loading && <div className="text-center text-slate-400 py-4">Calculando volatilidad...</div>
       )}
     </Card>
   );

@@ -54,7 +54,7 @@ export default function RollingAverageCard() {
     >
       {!loading && chartData.length > 0 ? (
         <div className="space-y-4">
-          <p className="text-[11px] text-slate-500 italic px-2 text-center font-medium">
+          <p className="text-[11px] text-slate-400 italic px-2 text-center font-medium">
             Media de puntos de las últimas 3 jornadas. Ayuda a identificar
             <span className="text-primary font-black not-italic ml-1 uppercase tracking-tighter">
               rachas
@@ -106,7 +106,7 @@ export default function RollingAverageCard() {
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
-                          <p className="text-slate-500 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+                          <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
                             {label}
                           </p>
                           <div className="space-y-1.5">
@@ -140,7 +140,7 @@ export default function RollingAverageCard() {
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                   }}
-                  formatter={(value) => <span className="text-slate-500 ml-1">{value}</span>}
+                  formatter={(value) => <span className="text-slate-400 ml-1">{value}</span>}
                   iconType="circle"
                 />
                 {data.map((user) => {
@@ -163,7 +163,7 @@ export default function RollingAverageCard() {
         </div>
       ) : (
         !loading && (
-          <div className="text-center text-slate-500 py-4">No hay historial suficiente</div>
+          <div className="text-center text-slate-400 py-4">No hay historial suficiente</div>
         )
       )}
     </Card>

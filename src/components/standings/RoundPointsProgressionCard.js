@@ -143,7 +143,7 @@ export default function RoundPointsProgressionCard() {
                   className={`px-3 py-1 text-xs !rounded-full border flex items-center gap-2 transition-all cursor-pointer focus:outline-none overflow-hidden ${
                     isSelected
                       ? 'bg-slate-800/50 border-slate-700 text-white'
-                      : 'bg-transparent border-slate-800 text-slate-500 opacity-50'
+                      : 'bg-transparent border-slate-800 text-slate-400 opacity-50'
                   }`}
                   style={{
                     borderColor: isSelected ? colors.stroke : undefined,

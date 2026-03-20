@@ -41,7 +41,7 @@ export default function HeatCheckCard() {
           )}
         />
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">No hay datos suficientes</div>
+        !loading && <div className="text-center text-slate-400 py-4">No hay datos suficientes</div>
       )}
     </Card>
   );

@@ -18,7 +18,7 @@ export default function DraftFidelityCard() {
     <Card title="Rendimiento del Reparto" icon={Heart} color="emerald" loading={loading}>
       {!loading && (
         <div className="flex flex-col h-full overflow-hidden">
-          <p className="text-xs text-slate-400 italic px-2 mb-4 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             Puntos totales aportados por los jugadores del reparto inicial (puntos reales, sin
             ponderar por posición).
           </p>
@@ -26,7 +26,7 @@ export default function DraftFidelityCard() {
           {error ? (
             <p className="text-red-400 text-center py-4 text-sm">{error}</p>
           ) : retainedRanking.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">No hay datos disponibles</p>
+            <p className="text-slate-400 text-center py-4 text-sm">No hay datos disponibles</p>
           ) : (
             <StatsList
               items={retainedRanking.map((user) => ({
@@ -38,7 +38,7 @@ export default function DraftFidelityCard() {
                   <span className="flex items-center gap-1.5">
                     {user.players_contributed} jugador
                     {user.players_contributed !== 1 ? 'es' : ''} del reparto
-                    <Info size={10} className="text-slate-500 group-hover:text-emerald-400" />
+                    <Info size={10} className="text-slate-400 group-hover:text-emerald-400" />
                   </span>
                 ),
               }))}
@@ -49,7 +49,7 @@ export default function DraftFidelityCard() {
                   <span className="font-black text-2xl text-emerald-400 leading-none">
                     {(user.total_points ?? 0).toLocaleString()}
                   </span>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mt-1">
                     pts
                   </span>
                 </div>
@@ -67,7 +67,7 @@ export default function DraftFidelityCard() {
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         className="absolute bottom-full left-0 right-0 mb-2 z-50 bg-slate-900 border border-slate-700 rounded-xl p-3 shadow-2xl backdrop-blur-md pointer-events-none"
                       >
-                        <p className="text-[10px] font-bold uppercase text-slate-500 mb-2 border-b border-slate-800 pb-1">
+                        <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 border-b border-slate-800 pb-1">
                           Aportación por Jugador
                         </p>
                         <div className="max-h-[160px] overflow-y-auto custom-scrollbar">

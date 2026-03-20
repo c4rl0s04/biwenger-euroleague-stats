@@ -17,7 +17,7 @@ export default function TheHunterCard() {
     >
       {!loading && data.length > 0 ? (
         <div className="flex flex-col h-full overflow-hidden">
-          <p className="text-xs text-slate-400 italic px-2 mb-4 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             Puntos recortados (<span className="text-emerald-400 font-bold not-italic">+</span>) o
             perdidos (<span className="text-rose-400 font-bold not-italic">-</span>) respecto al
             líder en las últimas 5 jornadas.
@@ -40,7 +40,7 @@ export default function TheHunterCard() {
         </div>
       ) : (
         !loading && (
-          <div className="text-center text-slate-500 py-4">No hay datos de persecución</div>
+          <div className="text-center text-slate-400 py-4">No hay datos de persecución</div>
         )
       )}
     </Card>

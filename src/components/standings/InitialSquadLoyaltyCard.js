@@ -14,7 +14,7 @@ export default function InitialSquadLoyaltyCard() {
     <Card title="Fidelidad al ADN" icon={Dna} color="indigo" loading={loading}>
       {!loading && (
         <div className="flex flex-col h-full overflow-hidden">
-          <p className="text-xs text-slate-400 italic px-2 mb-4 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             ¿Cuánto confías en tu equipo inicial? Porcentaje de jugadores del reparto original que
             aún mantienes en tu plantilla.
           </p>
@@ -22,7 +22,7 @@ export default function InitialSquadLoyaltyCard() {
           {error ? (
             <p className="text-red-400 text-center py-4 text-sm">{error}</p>
           ) : loyaltyRanking.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">No hay datos disponibles</p>
+            <p className="text-slate-400 text-center py-4 text-sm">No hay datos disponibles</p>
           ) : (
             <StatsList
               items={loyaltyRanking.map((user) => ({

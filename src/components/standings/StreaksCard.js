@@ -21,7 +21,7 @@ export default function StreaksCard() {
           <div className="flex flex-col h-full overflow-hidden">
             {/* Fixed height header for alignment */}
             <div className="min-h-[40px] flex items-center mb-3 flex-shrink-0">
-              <p className="text-xs text-slate-400 italic px-2">
+              <p className="text-xs text-slate-300 font-medium italic px-2">
                 Número de jornadas consecutivas en las que el usuario ha superado los 175 puntos.
               </p>
             </div>
@@ -37,7 +37,7 @@ export default function StreaksCard() {
                     <Flame size={14} className="text-orange-500 animate-pulse" />
                     <span className="font-black text-xl text-slate-200">{user.longest_streak}</span>
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
                     Jornadas
                   </span>
                 </div>
@@ -45,7 +45,7 @@ export default function StreaksCard() {
             />
           </div>
         ) : (
-          <div className="text-center text-slate-500 py-8">Sin rachas activas</div>
+          <div className="text-center text-slate-400 py-8">Sin rachas activas</div>
         ))}
     </Card>
   );

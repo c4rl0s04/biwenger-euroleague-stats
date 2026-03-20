@@ -21,7 +21,7 @@ export default function HeartbreakersCard() {
         (data.length > 0 ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="min-h-[40px] flex items-center mb-3 flex-shrink-0">
-              <p className="text-xs text-slate-400 italic px-2">
+              <p className="text-xs text-slate-300 font-medium italic px-2">
                 Suma de puntos por los que te has quedado{' '}
                 <span className="text-rose-400 font-bold not-italic">sin ganar</span> (siendo{' '}
                 <span className="text-rose-400 font-bold not-italic">2º</span>).
@@ -39,7 +39,7 @@ export default function HeartbreakersCard() {
 
                     <div className="flex items-center justify-between py-2 px-1">
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold w-4 text-slate-500">{index + 1}</span>
+                        <span className="text-sm font-bold w-4 text-slate-400">{index + 1}</span>
 
                         <div
                           className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[10px] text-white overflow-hidden border-2"
@@ -80,7 +80,7 @@ export default function HeartbreakersCard() {
                             {user.total_diff}
                           </span>
                         </div>
-                        <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                        <span className="text-[10px] uppercase tracking-wider text-slate-400">
                           Perdidos
                         </span>
                       </div>
@@ -91,7 +91,7 @@ export default function HeartbreakersCard() {
             </div>
           </div>
         ) : (
-          <div className="text-center text-slate-500 py-8">Sin dolor... todavía</div>
+          <div className="text-center text-slate-400 py-8">Sin dolor... todavía</div>
         ))}
     </Card>
   );

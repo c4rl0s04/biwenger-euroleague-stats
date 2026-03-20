@@ -33,7 +33,7 @@ export default function StatsList({
           >
             {/* User Info Section */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <span className="text-slate-500 font-mono text-xs w-5 flex-shrink-0">
+              <span className="text-slate-400 font-mono text-xs w-5 flex-shrink-0">
                 {index + 1 + indexOffset}
               </span>
 
@@ -69,7 +69,7 @@ export default function StatsList({
                   {item.name}
                 </Link>
                 {item.subtitle && (
-                  <div className="text-[11px] text-slate-500 font-medium truncate">
+                  <div className="text-[11px] text-slate-400 font-bold truncate">
                     {item.subtitle}
                   </div>
                 )}

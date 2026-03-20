@@ -27,7 +27,7 @@ export default function DominanceCard() {
                 <span className="text-xl font-black text-white tabular-nums leading-none">
                   {user.wins}
                 </span>
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
                   Vic
                 </span>
               </div>
@@ -37,7 +37,7 @@ export default function DominanceCard() {
                 <span className="block text-xl font-black text-yellow-500 tracking-tighter leading-none tabular-nums">
                   +{user.avg_margin.toFixed(1)}
                 </span>
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
                   Margen
                 </span>
               </div>
@@ -45,7 +45,7 @@ export default function DominanceCard() {
           )}
         />
       ) : (
-        !loading && <div className="text-center text-slate-500 py-4">Sin victorias registradas</div>
+        !loading && <div className="text-center text-slate-400 py-4">Sin victorias registradas</div>
       )}
     </Card>
   );

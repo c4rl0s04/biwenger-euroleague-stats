@@ -31,7 +31,7 @@ export default function LeagueStatsCard() {
               <div className="text-2xl font-bold text-white">
                 <AnimatedNumber value={stats.total_users} duration={1.5} />
               </div>
-              <div className="text-xs text-slate-500">{stats.total_rounds} jornadas</div>
+              <div className="text-xs text-slate-400">{stats.total_rounds} jornadas</div>
             </div>
 
             {/* Box 2: Total Points */}
@@ -45,7 +45,7 @@ export default function LeagueStatsCard() {
               <div className="text-2xl font-bold text-orange-400">
                 <AnimatedNumber value={stats.total_points} duration={2} />
               </div>
-              <div className="text-xs text-slate-500">Media: {stats.avg_round_points}/jornada</div>
+              <div className="text-xs text-slate-400">Media: {stats.avg_round_points}/jornada</div>
             </div>
 
             {/* Box 3: League Value */}
@@ -57,7 +57,7 @@ export default function LeagueStatsCard() {
               <div className="text-2xl font-bold text-blue-400">
                 {formatPrice(stats.total_league_value)}
               </div>
-              <div className="flex flex-col text-xs text-slate-500 mt-1">
+              <div className="flex flex-col text-xs text-slate-400 mt-1">
                 <span>Min: {formatPrice(stats.min_team_value)}</span>
                 <span>Max: {formatPrice(stats.max_team_value)}</span>
               </div>
@@ -99,7 +99,7 @@ export default function LeagueStatsCard() {
                   <div className="text-2xl font-bold text-purple-400">
                     <AnimatedNumber value={stats.round_record.points} duration={1.5} /> pts
                   </div>
-                  <div className="text-xs text-slate-500 truncate transition-colors group-hover:text-purple-400">
+                  <div className="text-xs text-slate-400 truncate transition-colors group-hover:text-purple-400">
                     {stats.round_record.name}
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export default function LeagueStatsCard() {
               <div className="text-2xl font-bold text-orange-400">
                 <AnimatedNumber value={stats.leader_streak || 0} duration={1} />
               </div>
-              <div className="text-xs text-slate-500">Consecutivas</div>
+              <div className="text-xs text-slate-400">Consecutivas</div>
             </div>
           </div>
 
@@ -142,7 +142,7 @@ export default function LeagueStatsCard() {
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-xs text-slate-500 mt-2">
+                <div className="flex justify-between text-xs text-slate-400 mt-2">
                   <span>{Math.round(progressPct)}% completado</span>
                   <span>{remainingRounds} jornadas restantes</span>
                 </div>

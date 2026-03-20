@@ -22,7 +22,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
-        <p className="text-slate-500 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+        <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
           {label}
         </p>
         <div className="space-y-1.5">
@@ -149,7 +149,7 @@ export default function PointsProgressionCard() {
                   className={`px-3 py-1 text-xs !rounded-full border flex items-center gap-2 transition-all cursor-pointer focus:outline-none overflow-hidden ${
                     isSelected
                       ? 'bg-slate-800/50 border-slate-700 text-white'
-                      : 'bg-transparent border-slate-800 text-slate-500 opacity-50'
+                      : 'bg-transparent border-slate-800 text-slate-400 opacity-50'
                   }`}
                   style={{
                     borderColor: isSelected ? colors.stroke : undefined,

@@ -14,7 +14,7 @@ export default function BestDraftPlayerCard() {
     <Card title="Mejor Jugador del Reparto" icon={Star} color="amber" loading={loading}>
       {!loading && (
         <div className="flex flex-col h-full overflow-hidden">
-          <p className="text-xs text-slate-400 italic px-2 mb-4 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             El mejor jugador del reparto inicial para cada mánager, contando sólo los puntos reales
             que aportó mientras estuvo en su equipo.
           </p>
@@ -22,7 +22,7 @@ export default function BestDraftPlayerCard() {
           {error ? (
             <p className="text-red-400 text-center py-4 text-sm">{error}</p>
           ) : bestDraftPerUser.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">No hay datos disponibles</p>
+            <p className="text-slate-400 text-center py-4 text-sm">No hay datos disponibles</p>
           ) : (
             <StatsList
               items={bestDraftPerUser.map((user) => ({
@@ -45,7 +45,7 @@ export default function BestDraftPlayerCard() {
                       {(user.total_fantasy_points ?? 0).toLocaleString()}
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mt-1">
                     pts
                   </span>
                 </div>

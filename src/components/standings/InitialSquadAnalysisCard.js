@@ -18,14 +18,14 @@ export default function InitialSquadAnalysisCard() {
     <Card title="Initial Squad ROI" icon={Target} color="cyan" loading={loading}>
       {!loading && (
         <div className="flex flex-col h-full overflow-hidden">
-          <p className="text-xs text-slate-400 italic px-2 mb-4 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             Compara el rendimiento real de tu plantilla inicial vs su potencial máximo
           </p>
 
           {error ? (
             <p className="text-red-400 text-center py-4 text-sm">{error}</p>
           ) : data.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">
+            <p className="text-slate-400 text-center py-4 text-sm">
               No hay datos de plantillas iniciales
             </p>
           ) : (
@@ -62,7 +62,7 @@ export default function InitialSquadAnalysisCard() {
                       {user.roi_percentage}%
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mt-1">
                     ROI
                   </span>
                 </div>

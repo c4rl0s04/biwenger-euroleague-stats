@@ -23,7 +23,7 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
 
     return (
       <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[180px] pointer-events-none ring-1 ring-white/5">
-        <p className="text-slate-500 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+        <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
           {label}
         </p>
         <div className="space-y-1.5">
@@ -62,7 +62,7 @@ const PositionTick = ({ x, y, payload }) => {
         y={0}
         dy={4}
         textAnchor="end"
-        className="text-slate-500 font-bold font-display text-[10px]"
+        className="text-slate-400 font-bold font-display text-[10px]"
         fill="currentColor"
       >
         {medal ? medal : `#${pos}`}
@@ -212,7 +212,7 @@ export default function PositionEvolutionCard() {
                   className={`px-3 py-1 text-xs !rounded-full border flex items-center gap-2 transition-all cursor-pointer focus:outline-none overflow-hidden ${
                     isSelected
                       ? 'bg-slate-800/50 border-slate-700 text-white'
-                      : 'bg-transparent border-slate-800 text-slate-500 opacity-50'
+                      : 'bg-transparent border-slate-800 text-slate-400 opacity-50'
                   }`}
                   style={{
                     borderColor: isSelected ? colors.stroke : undefined,
@@ -306,7 +306,7 @@ export default function PositionEvolutionCard() {
           </p>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-12">Cargando datos...</div>
+        !loading && <div className="text-center text-slate-400 py-12">Cargando datos...</div>
       )}
     </Card>
   );

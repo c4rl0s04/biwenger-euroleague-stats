@@ -14,7 +14,7 @@ export default function RoundHeatmapCard() {
   const [hoveredCell, setHoveredCell] = useState(null);
 
   const getColor = (score) => {
-    if (score === null) return 'bg-slate-800/60 text-slate-500'; // Did not participate
+    if (score === null) return 'bg-slate-800/60 text-slate-400'; // Did not participate
 
     // Red -> Yellow -> Green Scale
     if (score >= 210)
@@ -102,7 +102,7 @@ export default function RoundHeatmapCard() {
             {data.rounds.map((round, roundIndex) => (
               <div key={round.id} className="flex w-full items-center flex-1 min-h-[1.25rem]">
                 {/* Round Name */}
-                <div className="w-12 flex-shrink-0 font-mono text-[9px] text-slate-500 text-center mr-1">
+                <div className="w-12 flex-shrink-0 font-mono text-[9px] text-slate-400 text-center mr-1">
                   {getShortRoundName(round.name)}
                 </div>
 
@@ -153,11 +153,11 @@ export default function RoundHeatmapCard() {
                             className={`text-lg font-black leading-none my-1 ${getColor(score).split(' ')[1]}`}
                           >
                             {score}{' '}
-                            <span className="text-[9px] font-normal text-slate-500">pts</span>
+                            <span className="text-[9px] font-normal text-slate-400">pts</span>
                           </div>
 
                           {/* Round Name */}
-                          <div className="text-[9px] text-slate-500 border-t border-slate-700/50 pt-1 mt-1">
+                          <div className="text-[9px] text-slate-400 border-t border-slate-700/50 pt-1 mt-1">
                             {getShortRoundName(round.name)}
                           </div>
                         </div>
@@ -170,7 +170,7 @@ export default function RoundHeatmapCard() {
           </div>
         </div>
       ) : (
-        !loading && <div className="text-center text-slate-500 py-8">Cargando datos...</div>
+        !loading && <div className="text-center text-slate-400 py-8">Cargando datos...</div>
       )}
     </Card>
   );

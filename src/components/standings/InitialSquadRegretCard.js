@@ -14,7 +14,7 @@ export default function InitialSquadRegretCard() {
     <Card title="El Arrepentimiento" icon={Frown} color="red" loading={loading}>
       {!loading && (
         <div className="flex flex-col h-full overflow-hidden">
-          <p className="text-xs text-slate-400 italic px-2 mb-4 flex-shrink-0">
+          <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             Puntos generados por tus jugadores iniciales en las jornadas que ya NO te pertenecían
             (fueron vendidos al mercado o a otro mánager).
           </p>
@@ -22,7 +22,7 @@ export default function InitialSquadRegretCard() {
           {error ? (
             <p className="text-red-400 text-center py-4 text-sm">{error}</p>
           ) : regretRanking.length === 0 ? (
-            <p className="text-slate-500 text-center py-4 text-sm">No hay datos disponibles</p>
+            <p className="text-slate-400 text-center py-4 text-sm">No hay datos disponibles</p>
           ) : (
             <StatsList
               items={regretRanking.map((user) => ({
@@ -45,7 +45,7 @@ export default function InitialSquadRegretCard() {
                       {(user.points_lost ?? 0).toLocaleString()}
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mt-1">
                     pts perdidos
                   </span>
                 </div>

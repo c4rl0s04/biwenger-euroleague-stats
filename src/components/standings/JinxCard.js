@@ -21,7 +21,7 @@ export default function JinxCard() {
         (data.length > 0 ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="min-h-[40px] flex items-center mb-3 flex-shrink-0">
-              <p className="text-xs text-slate-400 italic px-2">
+              <p className="text-xs text-slate-300 font-medium italic px-2">
                 Puntuación{' '}
                 <span className="text-purple-400 font-bold not-italic">superior a la media</span>{' '}
                 pero acabando en la{' '}
@@ -40,7 +40,7 @@ export default function JinxCard() {
 
                     <div className="flex items-center justify-between py-2 px-1">
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold w-4 text-slate-500">{index + 1}</span>
+                        <span className="text-sm font-bold w-4 text-slate-400">{index + 1}</span>
 
                         <div
                           className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[10px] text-white overflow-hidden border-2"
@@ -81,7 +81,7 @@ export default function JinxCard() {
                             {user.jinxed_count}
                           </span>
                         </div>
-                        <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                        <span className="text-[10px] uppercase tracking-wider text-slate-400">
                           Jornadas
                         </span>
                       </div>
@@ -92,7 +92,7 @@ export default function JinxCard() {
             </div>
           </div>
         ) : (
-          <div className="text-center text-slate-500 py-8">Nadie ha sido gafado</div>
+          <div className="text-center text-slate-400 py-8">Nadie ha sido gafado</div>
         ))}
     </Card>
   );
