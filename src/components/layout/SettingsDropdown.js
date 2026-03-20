@@ -36,7 +36,7 @@ export default function SettingsDropdown() {
     <div ref={dropdownRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ${
+        className={`p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer ${
           isOpen ? 'bg-secondary text-foreground' : ''
         }`}
         aria-label="Settings"

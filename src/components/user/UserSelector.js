@@ -16,19 +16,19 @@ export default function UserSelector() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-[hsl(220,18%,10%)] hover:bg-[hsl(220,18%,15%)] border border-border rounded-lg transition-colors"
+        className="flex items-center gap-2 px-3 py-2 bg-card hover:bg-secondary border border-border rounded-lg transition-colors cursor-pointer"
       >
-        <UserCircle2 className="w-4 h-4 text-orange-500" />
-        <span className="text-white text-sm hidden sm:block">{currentUser.name}</span>
+        <UserCircle2 className="w-4 h-4 text-primary" />
+        <span className="text-foreground text-sm hidden sm:block">{currentUser.name}</span>
         <ChevronDown
-          className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 w-48 bg-[hsl(220,18%,10%)] border border-border rounded-lg shadow-2xl z-[70] overflow-hidden">
+          <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-2xl z-[70] overflow-hidden">
             {Array.isArray(users) &&
               users.map((user) => (
                 <button
@@ -37,8 +37,8 @@ export default function UserSelector() {
                     selectUser(user.user_id);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[hsl(220,18%,15%)] transition-colors text-left ${
-                    currentUser.id === user.user_id ? 'bg-[hsl(220,18%,15%)]' : ''
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-secondary transition-colors text-left cursor-pointer ${
+                    currentUser.id === user.user_id ? 'bg-secondary' : ''
                   }`}
                 >
                   <UserAvatar src={user.icon} alt={user.name} size={24} className="flex-shrink-0" />
