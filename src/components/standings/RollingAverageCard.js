@@ -15,6 +15,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { getColorForUser } from '@/lib/constants/colors';
+import { GlassTooltip } from '@/components/ui/Tooltip';
 
 export default function RollingAverageCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=rolling-avg');
@@ -36,6 +37,7 @@ export default function RollingAverageCard() {
           roundsMap.set(point.round, {
             round: point.round,
             label: label,
+            fullName: point.round_name || `Jornada ${point.round}`,
           });
         }
         roundsMap.get(point.round)[user.name] = point.avg;
@@ -105,9 +107,9 @@ export default function RollingAverageCard() {
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
-                          <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
-                            {label}
+                        <GlassTooltip className="min-w-[180px] pointer-events-none">
+                          <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
+                            {payload[0]?.payload?.fullName || label}
                           </p>
                           <div className="space-y-1.5">
                             {payload.map((entry, index) => (
@@ -116,16 +118,16 @@ export default function RollingAverageCard() {
                                   className="w-2 h-2 rounded-full flex-shrink-0"
                                   style={{ backgroundColor: entry.color }}
                                 />
-                                <span className="text-slate-300 flex-1 truncate max-w-[110px]">
+                                <span className="text-foreground flex-1 truncate max-w-[110px]">
                                   {entry.name}
                                 </span>
-                                <span className="text-white font-bold ml-auto tabular-nums">
+                                <span className="text-foreground font-bold ml-auto tabular-nums">
                                   {entry.value?.toFixed(1)}
                                 </span>
                               </div>
                             ))}
                           </div>
-                        </div>
+                        </GlassTooltip>
                       );
                     }
                     return null;

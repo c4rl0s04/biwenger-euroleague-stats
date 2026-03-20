@@ -682,7 +682,8 @@ export async function getHeatmapStats(): Promise<HeatmapStat> {
       return {
         rounds: rounds.map((r: any) => ({
           id: r.round_id,
-          name: getShortRoundName(r.round_name),
+          name: r.round_name,
+          shortName: getShortRoundName(r.round_name),
         })),
         users: users.map((u: any) => ({
           id: u.id,
@@ -809,7 +810,8 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
       return {
         rounds: rounds.map((r: any) => ({
           id: r.round_id,
-          name: getShortRoundName(r.round_name),
+          name: r.round_name,
+          shortName: getShortRoundName(r.round_name),
         })),
         users: usersEvolution,
         valid: rounds.length > 1,

@@ -20,12 +20,13 @@ import { GlassTooltip } from '@/components/ui/Tooltip';
 // --- Custom Tooltip ---
 const CustomTooltip = ({ active, payload, label, totalUsers }) => {
   if (active && payload && payload.length) {
+    const fullName = payload[0]?.payload?.fullName || label;
     const sorted = [...payload].filter((p) => p.value != null).sort((a, b) => a.value - b.value); // ascending = rank 1 first
 
     return (
       <GlassTooltip className="min-w-[180px] pointer-events-none">
-        <p className="text-muted-foreground text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
-          {label}
+        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
+          {fullName}
         </p>
         <div className="space-y-1.5">
           {sorted.map((entry, index) => {
@@ -80,7 +81,10 @@ export default function PositionEvolutionCard() {
     if (!data?.users || !data?.rounds) return { chartData: [], users: [] };
 
     const chartData = data.rounds.map((round, idx) => {
-      const entry = { name: round.name };
+      const entry = {
+        name: round.shortName || round.name,
+        fullName: round.name,
+      };
       data.users.forEach((user) => {
         const histItem = user.history[idx];
         if (histItem) {

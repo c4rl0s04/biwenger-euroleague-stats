@@ -3,11 +3,11 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Grid } from 'lucide-react';
-import { getShortRoundName } from '@/lib/utils/format';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useState } from 'react';
+import { GlassTooltip } from '@/components/ui/Tooltip';
 
 export default function RoundHeatmapCard() {
   const { data, loading } = useApiData('/api/standings/advanced?type=heatmap');
@@ -103,7 +103,7 @@ export default function RoundHeatmapCard() {
               <div key={round.id} className="flex w-full items-center flex-1 min-h-[1.25rem]">
                 {/* Round Name */}
                 <div className="w-12 flex-shrink-0 font-mono text-[9px] text-slate-400 text-center mr-1">
-                  {getShortRoundName(round.name)}
+                  {round.shortName || round.name}
                 </div>
 
                 {/* User Scores */}
@@ -139,27 +139,31 @@ export default function RoundHeatmapCard() {
                       {isHovered && score !== null && (
                         <div
                           className={`
-                            absolute z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700 shadow-xl rounded-lg px-3 py-2 text-center min-w-[100px] pointer-events-none
+                            absolute z-50 pointer-events-none
                             ${getTooltipPosition(roundIndex, userIndex, data.rounds.length, data.users.length)}
                           `}
                         >
-                          {/* User Name */}
-                          <div className="text-[10px] font-bold text-slate-300 mb-0.5 whitespace-nowrap">
-                            {user.name}
-                          </div>
+                          <GlassTooltip className="px-3 py-2 text-center min-w-[100px]">
+                            {/* User Name */}
+                            <div className="text-xs font-black text-foreground mb-1 whitespace-nowrap uppercase tracking-wider font-display border-b border-white/5 pb-1">
+                              {user.name}
+                            </div>
 
-                          {/* Score Highlight */}
-                          <div
-                            className={`text-lg font-black leading-none my-1 ${getColor(score).split(' ')[1]}`}
-                          >
-                            {score}{' '}
-                            <span className="text-[9px] font-normal text-slate-400">pts</span>
-                          </div>
+                            {/* Score Highlight */}
+                            <div
+                              className={`text-lg font-black leading-none my-1.5 ${getColor(score).split(' ')[1]}`}
+                            >
+                              {score}{' '}
+                              <span className="text-[10px] font-normal text-muted-foreground tabular-nums">
+                                pts
+                              </span>
+                            </div>
 
-                          {/* Round Name */}
-                          <div className="text-[9px] text-slate-400 border-t border-slate-700/50 pt-1 mt-1">
-                            {getShortRoundName(round.name)}
-                          </div>
+                            {/* Round Name */}
+                            <div className="text-[9px] text-muted-foreground pt-1 opacity-80">
+                              {round.name}
+                            </div>
+                          </GlassTooltip>
                         </div>
                       )}
                     </div>

@@ -16,14 +16,18 @@ import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortRoundName } from '@/lib/utils/format';
+import { GlassTooltip } from '@/components/ui/Tooltip';
 
 // Custom tooltip - defined outside component to avoid recreation on each render
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
+    // Try to get the full name from the payload if available
+    const fullName = payload[0]?.payload?.fullName || label;
+
     return (
-      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
-        <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
-          {label}
+      <GlassTooltip className="min-w-[180px] pointer-events-none">
+        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
+          {fullName}
         </p>
         <div className="space-y-1.5">
           {payload
@@ -34,12 +38,14 @@ const CustomTooltip = ({ active, payload, label }) => {
                   className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="text-slate-300 flex-1 truncate max-w-[110px]">{entry.name}</span>
-                <span className="text-white font-bold ml-auto tabular-nums">{entry.value}</span>
+                <span className="text-foreground flex-1 truncate max-w-[110px]">{entry.name}</span>
+                <span className="text-foreground font-bold ml-auto tabular-nums">
+                  {entry.value}
+                </span>
               </div>
             ))}
         </div>
-      </div>
+      </GlassTooltip>
     );
   }
   return null;
@@ -69,7 +75,7 @@ export default function PointsProgressionCard() {
 
     // Pivot data
     const data = roundNames.map((round) => {
-      const entry = { name: getShortRoundName(round) };
+      const entry = { name: getShortRoundName(round), fullName: round };
       userMap.forEach((details, id) => {
         const stats = progression.find((p) => p.round_name === round && p.user_id === id);
         if (stats) {
