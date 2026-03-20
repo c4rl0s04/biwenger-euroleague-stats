@@ -13,6 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Legend,
 } from 'recharts';
 import { getColorForUser } from '@/lib/constants/colors';
 import { GlassTooltip } from '@/components/ui/Tooltip';
@@ -280,6 +281,14 @@ export default function PositionEvolutionCard() {
                     boxShadow: 'none',
                     outline: 'none',
                   }}
+                />
+                <Legend
+                  wrapperStyle={{ paddingTop: '10px', fontSize: '10px' }}
+                  formatter={(value) => (
+                    <span className="text-slate-400 hover:text-white transition-colors ml-1">
+                      {value}
+                    </span>
+                  )}
                 />
                 {users.map((user) => {
                   const colors = getColorForUser(user.id, user.name, user.color_index);

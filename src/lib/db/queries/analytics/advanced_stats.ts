@@ -311,6 +311,7 @@ export async function getRollingAverageStats(): Promise<RollingAverageStat[]> {
         dataPoints.push({
           round: userPoints[i].round_id,
           round_name: roundName,
+          short_name: getShortRoundName(roundName),
           avg: parseFloat(avg.toFixed(1)),
         });
       }

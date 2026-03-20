@@ -3,7 +3,7 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Activity } from 'lucide-react';
-import { getShortRoundName } from '@/lib/utils/format';
+import { useState, useMemo } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -19,32 +19,58 @@ import { GlassTooltip } from '@/components/ui/Tooltip';
 
 export default function RollingAverageCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=rolling-avg');
+  const [selectedUsers, setSelectedUsers] = useState(new Set());
 
   // Transform data for Recharts: Flatten to one array of round objects with user keys
-  /*
-    Input: [{ user_id, name, data: [{ round, avg }] }]
-    Output: [{ round: 1, user1: 45, user2: 50 }, ...]
-  */
-  const chartData = [];
-  if (data.length > 0) {
+  const { chartData, users } = useMemo(() => {
+    if (!data.length) return { chartData: [], users: [] };
+
     const roundsMap = new Map();
+    const userList = data.map((u) => ({
+      id: String(u.user_id),
+      name: u.name,
+      color_index: u.color_index,
+    }));
+
     data.forEach((user) => {
       user.data.forEach((point) => {
         if (!roundsMap.has(point.round)) {
-          // Use J + number as requested
-          const label = point.round_name ? getShortRoundName(point.round_name) : `J${point.round}`;
-
           roundsMap.set(point.round, {
             round: point.round,
-            label: label,
+            label: point.short_name || `J${point.round}`,
             fullName: point.round_name || `Jornada ${point.round}`,
           });
         }
         roundsMap.get(point.round)[user.name] = point.avg;
       });
     });
-    chartData.push(...Array.from(roundsMap.values()).sort((a, b) => a.round - b.round));
-  }
+
+    const sortedData = Array.from(roundsMap.values()).sort((a, b) => a.round - b.round);
+    return { chartData: sortedData, users: userList };
+  }, [data]);
+
+  // Handle user selection
+  const initializedUsers = useMemo(() => new Set(users.map((u) => u.id)), [users]);
+  const effectiveSelected =
+    selectedUsers.size === 0 && users.length > 0 ? initializedUsers : selectedUsers;
+
+  const toggleUser = (userId) => {
+    const next = new Set(selectedUsers);
+    if (next.has(userId)) {
+      next.delete(userId);
+    } else {
+      next.add(userId);
+    }
+    setSelectedUsers(next);
+  };
+
+  const toggleAll = () => {
+    if (selectedUsers.size === users.length) {
+      setSelectedUsers(new Set());
+    } else {
+      setSelectedUsers(new Set(users.map((u) => u.id)));
+    }
+  };
 
   return (
     <Card
@@ -67,6 +93,46 @@ export default function RollingAverageCard() {
             </span>
             .
           </p>
+
+          {/* User Filter (Added for consistency with other charts) */}
+          <div className="flex flex-wrap gap-2 px-1">
+            <button
+              onClick={toggleAll}
+              className={`px-3 py-1 text-xs !rounded-full border transition-all cursor-pointer focus:outline-none overflow-hidden ${
+                effectiveSelected.size === users.length
+                  ? 'bg-slate-700 border-slate-600 text-white'
+                  : 'bg-transparent border-slate-700 text-slate-400 hover:border-slate-500'
+              }`}
+            >
+              Todos
+            </button>
+            {users.map((user) => {
+              const colors = getColorForUser(user.id, user.name, user.color_index);
+              const isSelected = effectiveSelected.has(user.id);
+              return (
+                <button
+                  key={user.id}
+                  onClick={() => toggleUser(user.id)}
+                  className={`px-3 py-1 text-xs !rounded-full border flex items-center gap-2 transition-all cursor-pointer focus:outline-none overflow-hidden ${
+                    isSelected
+                      ? 'bg-slate-800/50 border-slate-700 text-white'
+                      : 'bg-transparent border-slate-800 text-slate-400 opacity-50'
+                  }`}
+                  style={{
+                    borderColor: isSelected ? colors.stroke : undefined,
+                    boxShadow: isSelected ? `0 0 10px -4px ${colors.stroke}` : 'none',
+                  }}
+                >
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: isSelected ? colors.stroke : '#64748b' }}
+                  />
+                  {user.name}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="h-72 w-full mt-2">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
@@ -112,20 +178,22 @@ export default function RollingAverageCard() {
                             {payload[0]?.payload?.fullName || label}
                           </p>
                           <div className="space-y-1.5">
-                            {payload.map((entry, index) => (
-                              <div key={index} className="flex items-center gap-2.5 text-xs">
-                                <div
-                                  className="w-2 h-2 rounded-full flex-shrink-0"
-                                  style={{ backgroundColor: entry.color }}
-                                />
-                                <span className="text-foreground flex-1 truncate max-w-[110px]">
-                                  {entry.name}
-                                </span>
-                                <span className="text-foreground font-bold ml-auto tabular-nums">
-                                  {entry.value?.toFixed(1)}
-                                </span>
-                              </div>
-                            ))}
+                            {payload
+                              .sort((a, b) => b.value - a.value)
+                              .map((entry, index) => (
+                                <div key={index} className="flex items-center gap-2.5 text-xs">
+                                  <div
+                                    className="w-2 h-2 rounded-full flex-shrink-0"
+                                    style={{ backgroundColor: entry.color }}
+                                  />
+                                  <span className="text-foreground flex-1 truncate max-w-[110px]">
+                                    {entry.name}
+                                  </span>
+                                  <span className="text-foreground font-bold ml-auto tabular-nums">
+                                    {entry.value?.toFixed(1)}
+                                  </span>
+                                </div>
+                              ))}
                           </div>
                         </GlassTooltip>
                       );
@@ -134,19 +202,16 @@ export default function RollingAverageCard() {
                   }}
                 />
                 <Legend
-                  wrapperStyle={{
-                    fontSize: '10px',
-                    paddingTop: '15px',
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                  formatter={(value) => <span className="text-slate-400 ml-1">{value}</span>}
-                  iconType="circle"
+                  wrapperStyle={{ paddingTop: '10px', fontSize: '10px' }}
+                  formatter={(value) => (
+                    <span className="text-slate-400 hover:text-white transition-colors ml-1">
+                      {value}
+                    </span>
+                  )}
                 />
                 {data.map((user) => {
                   const colors = getColorForUser(user.user_id, user.name, user.color_index);
+                  const isSelected = effectiveSelected.has(String(user.user_id));
                   return (
                     <Line
                       key={user.user_id}
@@ -156,6 +221,9 @@ export default function RollingAverageCard() {
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 4 }}
+                      hide={!isSelected}
+                      connectNulls
+                      isAnimationActive
                     />
                   );
                 })}
