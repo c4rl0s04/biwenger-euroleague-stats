@@ -746,8 +746,15 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
         });
 
         // calculate ranks for this round
-        // sort users by total points desc
-        const sortedUsers = [...users].sort(
+        // only include users that have participated up to this point OR have a score in this round
+        // To be most accurate, we should probably only rank users who have at least ONE participation total so far.
+        const participatingUserIds = new Set(
+          scores.filter((s) => s.round_id <= round.round_id).map((s) => s.user_id)
+        );
+
+        const activeUsers = users.filter((u) => participatingUserIds.has(u.id));
+
+        const sortedUsers = [...activeUsers].sort(
           (a: any, b: any) => userTotals[b.id] - userTotals[a.id]
         );
 

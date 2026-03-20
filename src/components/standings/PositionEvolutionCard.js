@@ -22,8 +22,8 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
     const sorted = [...payload].filter((p) => p.value != null).sort((a, b) => a.value - b.value); // ascending = rank 1 first
 
     return (
-      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[180px] pointer-events-none ring-1 ring-white/5">
-        <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+      <div className="bg-popover/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[180px] pointer-events-none ring-1 ring-white/5">
+        <p className="text-muted-foreground text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
           {label}
         </p>
         <div className="space-y-1.5">
@@ -36,8 +36,8 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
                   className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="text-slate-300 flex-1 truncate max-w-[100px]">{entry.name}</span>
-                <span className="font-bold text-white ml-auto flex items-center gap-1">
+                <span className="text-foreground flex-1 truncate max-w-[100px]">{entry.name}</span>
+                <span className="font-bold text-foreground ml-auto flex items-center gap-1">
                   {medal && <span className="text-[11px]">{medal}</span>}
                   <span>#{pos}</span>
                 </span>
@@ -54,7 +54,6 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
 // --- Custom Y-Axis Tick (shows ordinal position) ---
 const PositionTick = ({ x, y, payload }) => {
   const pos = payload.value;
-  const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : null;
   return (
     <g transform={`translate(${x},${y})`}>
       <text
@@ -62,10 +61,10 @@ const PositionTick = ({ x, y, payload }) => {
         y={0}
         dy={4}
         textAnchor="end"
-        className="text-slate-400 font-bold font-display text-[10px]"
+        className="text-slate-300 font-black font-display text-[12px]"
         fill="currentColor"
       >
-        {medal ? medal : `#${pos}`}
+        #{pos}
       </text>
     </g>
   );
@@ -232,7 +231,7 @@ export default function PositionEvolutionCard() {
           {/* Line Chart */}
           <div className="h-[420px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 10, right: 16, left: 8, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 30, right: 16, left: 8, bottom: 0 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="currentColor"
@@ -264,7 +263,7 @@ export default function PositionEvolutionCard() {
                   tick={<PositionTick />}
                   tickLine={false}
                   axisLine={false}
-                  width={36}
+                  width={44}
                 />
                 <Tooltip
                   content={<CustomTooltip totalUsers={totalUsers} />}
@@ -299,11 +298,6 @@ export default function PositionEvolutionCard() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-
-          {/* Bottom note */}
-          <p className="text-center text-[10px] text-slate-600 pb-1">
-            Posición #1 = líder. El eje vertical está invertido (arriba = mejor posición).
-          </p>
         </div>
       ) : (
         !loading && <div className="text-center text-slate-400 py-12">Cargando datos...</div>

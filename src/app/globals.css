@@ -165,7 +165,7 @@ h3,
 /* Premium stat card - Depth and Interactivity */
 .stat-card {
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; -- Removed to allow tooltips/popovers to overflow the card boundary */
   border-radius: var(--radius);
   border: 1px solid hsl(var(--border));
   background: var(--gradient-card);
