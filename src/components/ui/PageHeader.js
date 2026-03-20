@@ -11,9 +11,7 @@ import React from 'react';
  */
 export default function PageHeader({ title, description, className = '' }) {
   return (
-    <div
-      className={`section-base w-full px-4 sm:px-6 lg:px-8 pt-16 pb-8 relative z-10 ${className}`}
-    >
+    <div className={`w-full px-4 sm:px-6 lg:px-8 pt-16 pb-8 relative z-10 ${className}`}>
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-5 group">
