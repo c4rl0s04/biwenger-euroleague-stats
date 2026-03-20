@@ -1,7 +1,7 @@
 'use client';
 
 import { createElement } from 'react';
-import { Info } from 'lucide-react';
+import { InfoTooltip } from '@/components/ui/Tooltip';
 
 /**
  * ElegantCard - Minimal, clean card design
@@ -87,16 +87,7 @@ export default function ElegantCard({
               })}
             <span className="text-[14px] font-black font-sans text-slate-300 uppercase tracking-widest flex items-center gap-2 group-hover/card:text-white transition-colors">
               {title}
-              {info && (
-                <div className="group/info relative cursor-help">
-                  <Info size={14} className="text-slate-400 hover:text-primary transition-colors" />
-                  {/* Premium Glass Tooltip */}
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-popover/90 backdrop-blur-xl border border-white/10 text-foreground text-xs normal-case font-sans leading-relaxed rounded-2xl shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all duration-300 z-50 text-center ring-1 ring-white/5">
-                    {info}
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-popover/90"></div>
-                  </div>
-                </div>
-              )}
+              {info && <InfoTooltip content={info} />}
             </span>
           </div>
           <div className="transition-transform duration-300 hover:scale-105 active:scale-95">

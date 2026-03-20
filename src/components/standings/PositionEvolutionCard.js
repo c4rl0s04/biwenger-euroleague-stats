@@ -15,6 +15,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { getColorForUser } from '@/lib/constants/colors';
+import { GlassTooltip } from '@/components/ui/Tooltip';
 
 // --- Custom Tooltip ---
 const CustomTooltip = ({ active, payload, label, totalUsers }) => {
@@ -22,7 +23,7 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
     const sorted = [...payload].filter((p) => p.value != null).sort((a, b) => a.value - b.value); // ascending = rank 1 first
 
     return (
-      <div className="bg-popover/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[180px] pointer-events-none ring-1 ring-white/5">
+      <GlassTooltip className="min-w-[180px] pointer-events-none">
         <p className="text-muted-foreground text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
           {label}
         </p>
@@ -45,7 +46,7 @@ const CustomTooltip = ({ active, payload, label, totalUsers }) => {
             );
           })}
         </div>
-      </div>
+      </GlassTooltip>
     );
   }
   return null;
@@ -231,7 +232,7 @@ export default function PositionEvolutionCard() {
           {/* Line Chart */}
           <div className="h-[420px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 30, right: 16, left: 8, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 40, right: 16, left: 8, bottom: 30 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="currentColor"
@@ -251,6 +252,7 @@ export default function PositionEvolutionCard() {
                     fontSize: 10,
                     fontWeight: 800,
                     fontFamily: 'var(--font-display)',
+                    dy: 10,
                   }}
                   tickLine={false}
                   axisLine={false}
