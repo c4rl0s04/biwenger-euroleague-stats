@@ -85,7 +85,7 @@ export default function ElegantCard({
               createElement(icon, {
                 className: `w-4.5 h-4.5 transition-transform duration-500 group-hover/card:scale-110 ${iconColor}`,
               })}
-            <span className="text-[10px] font-black font-sans text-slate-300 uppercase tracking-widest flex items-center gap-2 group-hover/card:text-white transition-colors">
+            <span className="text-[14px] font-black font-sans text-slate-300 uppercase tracking-widest flex items-center gap-2 group-hover/card:text-white transition-colors">
               {title}
               {info && (
                 <div className="group/info relative cursor-help">
