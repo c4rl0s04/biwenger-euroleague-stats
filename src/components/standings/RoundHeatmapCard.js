@@ -102,7 +102,9 @@ export default function RoundHeatmapCard() {
               <div key={round.id} className="flex w-full items-center flex-1 min-h-[1.25rem]">
                 {/* Round Name */}
                 <div className="w-12 flex-shrink-0 font-mono text-[9px] text-slate-500 text-center mr-1">
-                  {round.name.replace('Jornada ', 'J')}
+                  {round.name.match(/Jornada\s+(\d+)/)?.[1]
+                    ? 'J' + round.name.match(/Jornada\s+(\d+)/)[1]
+                    : round.name.replace('Jornada ', 'J')}
                 </div>
 
                 {/* User Scores */}
@@ -157,7 +159,9 @@ export default function RoundHeatmapCard() {
 
                           {/* Round Name */}
                           <div className="text-[9px] text-slate-500 border-t border-slate-700/50 pt-1 mt-1">
-                            {round.name}
+                            {round.name.match(/Jornada\s+(\d+)/)?.[1]
+                              ? 'J' + round.name.match(/Jornada\s+(\d+)/)[1]
+                              : round.name}
                           </div>
                         </div>
                       )}

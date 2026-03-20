@@ -190,7 +190,7 @@ export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], lo
                         <span>Ideal: {data?.ideal?.toFixed(0)}</span>
                       </div>
                       <div className="text-[9px] text-zinc-500 border-t border-zinc-700/50 pt-1 mt-1">
-                        Jornada {round.number}
+                        J{round.number}
                       </div>
                     </div>
                   )}
