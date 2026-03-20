@@ -204,7 +204,7 @@ export default function Home() {
                 <Link
                   key={idx}
                   href={card.disabled ? '#' : card.href}
-                  className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all duration-300 ${styles.border} hover:shadow-lg ${styles.shadow} hover:-translate-y-1 block ${
+                  className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 flex flex-col h-full transition-all duration-300 ${styles.border} hover:shadow-lg ${styles.shadow} hover:-translate-y-1 ${
                     card.disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
                   }`}
                   style={{ animationDelay: card.delay }}
@@ -213,7 +213,7 @@ export default function Home() {
                     className={`absolute inset-0 bg-gradient-to-br ${styles.glow} to-transparent opacity-0 transition-opacity group-hover:opacity-100`}
                   />
 
-                  <div className="relative z-10">
+                  <div className="relative z-10 flex flex-col flex-1 h-full">
                     <div className="flex items-center gap-4 mb-4">
                       <div
                         className={`${styles.text} group-hover:scale-110 transition-transform duration-300`}
@@ -227,10 +227,10 @@ export default function Home() {
                         {card.title}
                       </h3>
                     </div>
-                    <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
+                    <p className="text-muted-foreground text-base mb-6">{card.description}</p>
 
                     <div
-                      className={`flex items-center text-sm font-medium ${styles.text} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300`}
+                      className={`mt-auto flex items-center text-sm font-medium ${styles.text} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300`}
                     >
                       Abrir Página <ArrowRight size={16} className="ml-1" />
                     </div>
