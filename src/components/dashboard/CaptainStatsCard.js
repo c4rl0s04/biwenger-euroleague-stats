@@ -67,7 +67,7 @@ export default function CaptainStatsCard() {
               </div>
               <div className="text-muted-foreground/70 text-[9px]">Puntos sin duplicar (1x)</div>
             </div>
-            <div className="overflow-y-auto max-h-[160px] custom-scrollbar pr-1 flex-1">
+            <div className="overflow-y-auto custom-scrollbar pr-1 flex-1">
               <div className="divide-y divide-border/50">
                 {stats.most_used?.map((captain, idx) => (
                   <div
