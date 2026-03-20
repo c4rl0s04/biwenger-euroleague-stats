@@ -281,7 +281,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <div className="px-3 py-4 border-t border-white/5">
             <Link href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}>
               <div className="stat-card backdrop-blur-md bg-white/5 p-4 transition-all duration-500 hover:scale-[1.02] cursor-pointer group">
-                <div className="flex items-center gap-2 text-[12px] font-display text-slate-400 uppercase tracking-widest mb-3">
+                <div className="flex items-center gap-2 text-[16px] font-display text-slate-400 uppercase tracking-widest mb-3">
                   <Wallet size={12} className="text-primary/70" />
                   <span>Mi Plantilla</span>
                 </div>

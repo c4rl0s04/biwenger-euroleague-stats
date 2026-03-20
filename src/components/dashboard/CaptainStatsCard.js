@@ -32,25 +32,25 @@ export default function CaptainStatsCard() {
         <div className="flex-grow flex flex-col gap-3">
           {/* Overall stats */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
-              <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
+            <div className="bg-secondary/50 backdrop-blur-sm rounded-xl p-2.5 border border-border/50">
+              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Jornadas
               </div>
-              <div className="text-xl font-bold text-foreground/90">{stats.total_rounds}</div>
+              <div className="text-2xl font-display text-foreground">{stats.total_rounds}</div>
             </div>
 
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
-              <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
+            <div className="bg-secondary/50 backdrop-blur-sm rounded-xl p-2.5 border border-border/50">
+              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Total pts
               </div>
-              <div className="text-xl font-bold text-yellow-400">{stats.extra_points}</div>
+              <div className="text-2xl font-display text-primary">{stats.extra_points}</div>
             </div>
 
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
-              <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
+            <div className="bg-secondary/50 backdrop-blur-sm rounded-xl p-2.5 border border-border/50">
+              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Promedio
               </div>
-              <div className="text-xl font-bold text-orange-400">
+              <div className="text-2xl font-display text-accent">
                 {Number(stats.avg_points).toFixed(1)}
               </div>
             </div>
@@ -60,50 +60,60 @@ export default function CaptainStatsCard() {
           <div className="border-t border-border/50"></div>
 
           {/* All captains used - scrollable list */}
-          <div className="flex-grow min-h-0">
+          <div className="flex flex-col flex-grow min-h-0">
             <div className="flex items-baseline justify-between mb-2">
-              <div className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+              <div className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
                 Todos los Capitanes
               </div>
-              <div className="text-slate-500 text-[9px]">Puntos sin duplicar (1x)</div>
+              <div className="text-muted-foreground/70 text-[9px]">Puntos sin duplicar (1x)</div>
             </div>
-            <div className="space-y-1.5 pr-1">
-              {stats.most_used?.map((captain, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between text-xs bg-slate-800/30 rounded-lg px-2.5 py-2 hover:bg-slate-800/50 transition-colors border border-slate-700/20"
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="text-slate-500 font-mono text-[10px] w-5">{idx + 1}.</span>
-                    <Link
-                      href={`/player/${captain.player_id}`}
-                      className="text-muted-foreground truncate font-medium hover:text-yellow-400 transition-colors block"
-                    >
-                      {captain.name}
-                    </Link>
+            <div className="overflow-y-auto max-h-[160px] custom-scrollbar pr-1 flex-1">
+              <div className="divide-y divide-border/50">
+                {stats.most_used?.map((captain, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between text-xs px-1 py-3 hover:bg-white/5 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-muted-foreground/50 font-sans text-[10px] w-5">
+                        {idx + 1}.
+                      </span>
+                      <Link
+                        href={`/player/${captain.player_id}`}
+                        className="text-foreground truncate font-medium hover:text-primary transition-colors block"
+                      >
+                        {captain.name}
+                      </Link>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                      <div className="text-right">
+                        <div className="text-primary font-display text-sm">
+                          {captain.times_captain}x
+                        </div>
+                        <div className="text-muted-foreground/70 text-[9px] uppercase tracking-tighter">
+                          {captain.times_captain === 1 ? 'vez' : 'veces'}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-emerald-500 font-display text-sm">
+                          {Number(captain.avg_as_captain).toFixed(1)}
+                        </div>
+                        <div className="text-muted-foreground/70 text-[9px] uppercase tracking-tighter">
+                          media
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-accent font-display text-sm">
+                          {captain.total_as_captain}
+                        </div>
+                        <div className="text-muted-foreground/70 text-[9px] uppercase tracking-tighter">
+                          total
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2.5 flex-shrink-0 ml-2">
-                    <div className="text-right">
-                      <div className="text-yellow-400 font-semibold">{captain.times_captain}x</div>
-                      <div className="text-slate-500 text-[9px]">
-                        {captain.times_captain === 1 ? 'vez' : 'veces'}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-green-400 font-semibold">
-                        {Number(captain.avg_as_captain).toFixed(1)}
-                      </div>
-                      <div className="text-slate-500 text-[9px]">media</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-orange-400 font-semibold">
-                        {captain.total_as_captain}
-                      </div>
-                      <div className="text-slate-500 text-[9px]">total</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
@@ -112,30 +122,30 @@ export default function CaptainStatsCard() {
 
           {/* Best/Worst - more compact */}
           <div className="grid grid-cols-2 gap-2 mt-auto">
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
-              <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
+            <div className="bg-secondary/50 backdrop-blur-sm rounded-xl p-2.5 border border-border/50">
+              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Mejor
               </div>
               {stats.best_round?.name && (
-                <div className="text-xs font-medium text-muted-foreground mb-1 truncate">
+                <div className="text-xs font-sans text-muted-foreground mb-1 truncate">
                   {stats.best_round.name}
                 </div>
               )}
-              <div className="text-lg font-bold text-green-400">
+              <div className="text-xl font-display text-emerald-500 tracking-wider">
                 {stats.best_round?.points || 0} pts
               </div>
             </div>
 
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-2.5 border border-slate-700/30">
-              <div className="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wider">
+            <div className="bg-secondary/50 backdrop-blur-sm rounded-xl p-2.5 border border-border/50">
+              <div className="text-muted-foreground text-[10px] font-medium mb-1 uppercase tracking-wider">
                 Peor
               </div>
               {stats.worst_round?.name && (
-                <div className="text-xs font-medium text-muted-foreground mb-1 truncate">
+                <div className="text-xs font-sans text-muted-foreground mb-1 truncate">
                   {stats.worst_round.name}
                 </div>
               )}
-              <div className="text-lg font-bold text-red-400">
+              <div className="text-xl font-display text-red-500 tracking-wider">
                 {stats.worst_round?.points || 0} pts
               </div>
             </div>
