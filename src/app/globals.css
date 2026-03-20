@@ -378,15 +378,15 @@ h3,
    ======================================== */
 
 .section-base {
-  background-color: hsl(var(--background));
+  background-color: transparent;
 }
 
 .section-raised {
-  background-color: hsl(var(--section-raised));
+  background-color: hsla(0, 0%, 100%, 0.02);
 }
 
 .section-sunken {
-  background-color: hsl(var(--section-sunken));
+  background-color: hsla(0, 0%, 0%, 0.2);
 }
 
 /* ========================================
