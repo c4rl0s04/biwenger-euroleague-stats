@@ -136,9 +136,9 @@ export default function LeagueStatsCard() {
                     {playedRounds} / {TOTAL_ROUNDS}
                   </span>
                 </div>
-                <div className="h-3 bg-slate-700/50 rounded-full overflow-hidden">
+                <div className="h-3 bg-slate-700/30 rounded-full overflow-hidden">
                   <div
-                    className="h-full accent-gradient rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-primary to-orange-500 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
