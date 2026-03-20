@@ -124,32 +124,114 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cards.map((card, idx) => {
+              // Map colors exactly so Tailwind JIT compiler doesn't miss them
+              const colorClasses = {
+                primary: {
+                  border: 'hover:border-primary/50',
+                  shadow: 'hover:shadow-primary/10',
+                  glow: 'from-primary/5',
+                  textHover: 'group-hover:text-primary',
+                  text: 'text-primary',
+                },
+                yellow: {
+                  border: 'hover:border-yellow-500/50',
+                  shadow: 'hover:shadow-yellow-500/10',
+                  glow: 'from-yellow-500/5',
+                  textHover: 'group-hover:text-yellow-500',
+                  text: 'text-yellow-500',
+                },
+                blue: {
+                  border: 'hover:border-blue-500/50',
+                  shadow: 'hover:shadow-blue-500/10',
+                  glow: 'from-blue-500/5',
+                  textHover: 'group-hover:text-blue-500',
+                  text: 'text-blue-500',
+                },
+                green: {
+                  border: 'hover:border-emerald-500/50',
+                  shadow: 'hover:shadow-emerald-500/10',
+                  glow: 'from-emerald-500/5',
+                  textHover: 'group-hover:text-emerald-500',
+                  text: 'text-emerald-500',
+                },
+                red: {
+                  border: 'hover:border-red-500/50',
+                  shadow: 'hover:shadow-red-500/10',
+                  glow: 'from-red-500/5',
+                  textHover: 'group-hover:text-red-500',
+                  text: 'text-red-500',
+                },
+                purple: {
+                  border: 'hover:border-purple-500/50',
+                  shadow: 'hover:shadow-purple-500/10',
+                  glow: 'from-purple-500/5',
+                  textHover: 'group-hover:text-purple-500',
+                  text: 'text-purple-500',
+                },
+                orange: {
+                  border: 'hover:border-orange-500/50',
+                  shadow: 'hover:shadow-orange-500/10',
+                  glow: 'from-orange-500/5',
+                  textHover: 'group-hover:text-orange-500',
+                  text: 'text-orange-500',
+                },
+                amber: {
+                  border: 'hover:border-amber-500/50',
+                  shadow: 'hover:shadow-amber-500/10',
+                  glow: 'from-amber-500/5',
+                  textHover: 'group-hover:text-amber-500',
+                  text: 'text-amber-500',
+                },
+                pink: {
+                  border: 'hover:border-pink-500/50',
+                  shadow: 'hover:shadow-pink-500/10',
+                  glow: 'from-pink-500/5',
+                  textHover: 'group-hover:text-pink-500',
+                  text: 'text-pink-500',
+                },
+                indigo: {
+                  border: 'hover:border-indigo-500/50',
+                  shadow: 'hover:shadow-indigo-500/10',
+                  glow: 'from-indigo-500/5',
+                  textHover: 'group-hover:text-indigo-500',
+                  text: 'text-indigo-500',
+                },
+              };
+
+              const styles = colorClasses[card.color] || colorClasses.primary;
+
               return (
                 <Link
                   key={idx}
                   href={card.disabled ? '#' : card.href}
-                  className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 block ${
+                  className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all duration-300 ${styles.border} hover:shadow-lg ${styles.shadow} hover:-translate-y-1 block ${
                     card.disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
                   }`}
                   style={{ animationDelay: card.delay }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${styles.glow} to-transparent opacity-0 transition-opacity group-hover:opacity-100`}
+                  />
 
                   <div className="relative z-10">
                     <div className="flex items-center gap-4 mb-4">
                       <div
-                        className={`text-${card.color}-500 group-hover:scale-110 transition-transform duration-300`}
+                        className={`${styles.text} group-hover:scale-110 transition-transform duration-300`}
                       >
                         <card.icon size={40} />
                       </div>
 
-                      <h3 className="text-3xl font-display text-white group-hover:text-primary transition-colors">
+                      <h3
+                        className={`text-3xl font-display text-white ${styles.textHover} transition-colors`}
+                      >
                         {card.title}
                       </h3>
                     </div>
                     <p className="text-muted-foreground text-sm mb-6">{card.description}</p>
 
-                    <div className="flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                    <div
+                      className={`flex items-center text-sm font-medium ${styles.text} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300`}
+                    >
                       Abrir Página <ArrowRight size={16} className="ml-1" />
                     </div>
                   </div>

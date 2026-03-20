@@ -3,7 +3,7 @@
 import { createContext, useContext } from 'react';
 
 // Static theme configuration - can be changed here to switch themes globally
-const DEFAULT_THEME = 'mesh';
+const DEFAULT_THEME = 'elegant';
 
 const CardThemeContext = createContext({
   theme: DEFAULT_THEME,
