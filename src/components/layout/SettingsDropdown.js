@@ -47,7 +47,7 @@ export default function SettingsDropdown() {
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50">
           <div className="px-3 py-2 border-b border-border/30">
-            <h3 className="text-sm font-semibold text-foreground">Configuración</h3>
+            <h3 className="text-xl font-display text-foreground tracking-wider">Configuración</h3>
           </div>
 
           {/* Effects Section (Hidden for now) */}
