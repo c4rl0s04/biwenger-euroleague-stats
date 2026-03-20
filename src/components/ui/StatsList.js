@@ -12,15 +12,24 @@ import { getColorForUser } from '@/lib/constants/colors';
  * - Clickable manager icons & names
  * - Consistent typography scale
  */
-export default function StatsList({ items, renderRight, indexOffset = 0 }) {
+export default function StatsList({
+  items,
+  renderRight,
+  renderExtra,
+  indexOffset = 0,
+  onMouseEnter,
+  onMouseLeave,
+}) {
   return (
     <div className="divide-y divide-slate-800/50 -mx-1 flex-1 flex flex-col">
       {items.map((item, index) => {
         const userColor = getColorForUser(item.user_id, item.name, item.color_index);
         return (
           <div
-            key={item.user_id}
-            className="group flex flex-1 items-center justify-between py-1.5 px-2 hover:bg-white/5 transition-colors w-full"
+            key={item.user_id || item.name}
+            className="relative group flex flex-1 items-center justify-between py-1.5 px-2 hover:bg-white/5 transition-colors w-full"
+            onMouseEnter={() => onMouseEnter?.(item)}
+            onMouseLeave={() => onMouseLeave?.(item)}
           >
             {/* User Info Section */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -69,6 +78,9 @@ export default function StatsList({ items, renderRight, indexOffset = 0 }) {
 
             {/* Right Column (Metrics/Status) */}
             <div className="flex items-center gap-2 flex-shrink-0 ml-2">{renderRight(item)}</div>
+
+            {/* Extra Content (e.g. tooltips) */}
+            {renderExtra?.(item)}
           </div>
         );
       })}
