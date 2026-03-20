@@ -4,6 +4,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Flame, Snowflake } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getColorForUser } from '@/lib/constants/colors';
 
 export default function HeatCheckCard() {
@@ -30,6 +31,27 @@ export default function HeatCheckCard() {
                   <span className="text-slate-500 font-mono text-xs w-5 flex-shrink-0">
                     {index + 1}
                   </span>
+                  <Link
+                    href={`/user/${user.user_id}`}
+                    className="relative w-8 h-8 shrink-0 transition-transform hover:scale-110 active:scale-95 z-10"
+                  >
+                    {user.icon ? (
+                      <Image
+                        src={user.icon}
+                        alt={user.name}
+                        fill
+                        className="rounded-full object-cover ring-2 ring-white/10"
+                        sizes="32px"
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-white/10"
+                        style={{ backgroundColor: userColor.stroke }}
+                      >
+                        {user.name.charAt(0)}
+                      </div>
+                    )}
+                  </Link>
                   <div className="min-w-0">
                     <Link
                       href={`/user/${user.user_id}`}
