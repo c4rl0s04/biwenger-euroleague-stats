@@ -281,7 +281,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <div className="px-3 py-4 border-t border-white/5">
             <Link href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}>
               <div className="stat-card backdrop-blur-md bg-white/5 p-4 transition-all duration-500 hover:scale-[1.02] cursor-pointer group">
-                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                <div className="flex items-center gap-2 text-[12px] font-display text-slate-400 uppercase tracking-widest mb-3">
                   <Wallet size={12} className="text-primary/70" />
                   <span>Mi Plantilla</span>
                 </div>
@@ -290,7 +290,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 ) : squadData ? (
                   <>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-white font-display tracking-tight">
+                      <span className="text-2xl text-white font-display tracking-tight">
                         {formatCompact(squadData.total_value)}
                       </span>
                       {trendPercent && (
@@ -309,7 +309,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     </div>
                     <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-white/5">
                       <div>
-                        <div className="text-sm font-bold text-white font-sans">
+                        <div className="text-lg font-display text-white tracking-wider">
                           {squadData.player_count || 0}
                         </div>
                         <div className="text-[9px] uppercase font-black text-slate-500 tracking-tighter">
@@ -317,10 +317,10 @@ export default function Sidebar({ isOpen, onClose }) {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold text-primary font-sans">
+                        <div className="text-lg font-display text-primary tracking-wider">
                           {new Intl.NumberFormat('es-ES').format(squadData.total_points || 0)}
                         </div>
-                        <div className="text-[9px] uppercase font-black text-slate-500 tracking-tighter font-sans">
+                        <div className="text-[9px] uppercase font-black text-slate-500 tracking-tighter">
                           puntos
                         </div>
                       </div>
