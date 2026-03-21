@@ -128,20 +128,26 @@ export default function RivalryMatrixCard() {
                           >
                             {/* Cell Content (Wins - Draws - Losses) */}
                             {record && (
-                              <div className="flex items-center justify-center gap-1 font-mono opacity-90">
+                              <div className="flex items-baseline justify-center gap-1.5 font-display opacity-95 leading-none translate-y-0.5">
                                 <span
-                                  className={`text-sm ${
-                                    record.wins > record.losses ? 'font-bold text-lg' : ''
+                                  className={`text-lg sm:text-xl ${
+                                    record.wins > record.losses
+                                      ? 'font-black text-2xl sm:text-3xl drop-shadow-md'
+                                      : 'font-bold'
                                   }`}
                                 >
                                   {record.wins}
                                 </span>
-                                <span className="opacity-30 text-xs">-</span>
-                                <span className="text-slate-400 text-sm">{record.ties}</span>
-                                <span className="opacity-30 text-xs">-</span>
+                                <span className="opacity-40 text-sm font-bold">-</span>
+                                <span className="text-slate-400 text-lg sm:text-xl font-bold">
+                                  {record.ties}
+                                </span>
+                                <span className="opacity-40 text-sm font-bold">-</span>
                                 <span
-                                  className={`text-sm ${
-                                    record.losses > record.wins ? 'font-bold text-lg' : ''
+                                  className={`text-lg sm:text-xl ${
+                                    record.losses > record.wins
+                                      ? 'font-black text-2xl sm:text-3xl drop-shadow-md'
+                                      : 'font-bold'
                                   }`}
                                 >
                                   {record.losses}
