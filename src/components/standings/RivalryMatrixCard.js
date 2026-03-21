@@ -4,12 +4,10 @@ import { Swords } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
-import React, { useState } from 'react';
-import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
+import React from 'react';
 
 export default function RivalryMatrixCard() {
   const { data: rawData, loading } = useApiData('/api/standings/advanced?type=rivalry-matrix');
-  const [hoveredCell, setHoveredCell] = useState(null);
 
   // Parse data
   const users = rawData?.users || [];
@@ -28,21 +26,6 @@ export default function RivalryMatrixCard() {
     if (record.losses > record.wins)
       return 'bg-red-500/10 text-red-400 font-bold border-red-500/20';
     return 'bg-slate-700/20 text-slate-400 border-slate-700/30';
-  };
-
-  // Helper to determine tooltip position class based on grid index
-  const getTooltipPositionClass = (rowIndex, colIndex, totalItems) => {
-    const isTopRow = rowIndex < 2; // First 2 rows: show tooltip BELOW
-    const isLeftCol = colIndex < 2; // First 2 cols: align LEFT
-    const isRightCol = colIndex >= totalItems - 2; // Last 2 cols: align RIGHT
-
-    let verticalClass = isTopRow ? 'top-full mt-2' : 'bottom-full mb-2';
-    let horizontalClass = 'left-1/2 -translate-x-1/2'; // Default center
-
-    if (isLeftCol) horizontalClass = 'left-0';
-    if (isRightCol) horizontalClass = 'right-0';
-
-    return `${verticalClass} ${horizontalClass}`;
   };
 
   return (
@@ -126,7 +109,6 @@ export default function RivalryMatrixCard() {
                         }
 
                         const record = matrix[user.id]?.[opponent.id];
-                        const isHovered = hoveredCell === `${user.id}-${opponent.id}`;
 
                         return (
                           <div
@@ -135,21 +117,14 @@ export default function RivalryMatrixCard() {
                             className={`
                               relative p-0.5 min-h-[48px] rounded-md border flex items-center justify-center transition-all duration-200 ease-out
                               ${getCellColor(record)}
-                              ${record ? 'cursor-pointer' : ''}
                               
                               /* HOVER EFFECTS */
                               ${
-                                isHovered && record
-                                  ? 'z-50 scale-110 shadow-lg brightness-150 saturate-150'
-                                  : record
-                                    ? 'hover:brightness-110'
-                                    : ''
+                                record
+                                  ? 'hover:brightness-110 hover:scale-[1.02] hover:shadow-sm cursor-pointer'
+                                  : ''
                               }
                             `}
-                            onMouseEnter={() =>
-                              record && setHoveredCell(`${user.id}-${opponent.id}`)
-                            }
-                            onMouseLeave={() => setHoveredCell(null)}
                           >
                             {/* Cell Content (Wins - Draws - Losses) */}
                             {record && (
@@ -171,52 +146,6 @@ export default function RivalryMatrixCard() {
                                 >
                                   {record.losses}
                                 </span>
-                              </div>
-                            )}
-
-                            {/* Tooltip */}
-
-                            {isHovered && record && (
-                              <div
-                                className={`absolute z-[60] pointer-events-none min-w-[140px] ${getTooltipPositionClass(
-                                  rowIndex,
-                                  colIndex,
-                                  sortedUsers.length
-                                )}`}
-                              >
-                                <GlassTooltip className="p-3 !bg-slate-950/95">
-                                  <TooltipHeader className="text-center">
-                                    {user.name}{' '}
-                                    <span className="text-slate-500 font-normal lowercase">vs</span>{' '}
-                                    {opponent.name}
-                                  </TooltipHeader>
-                                  <div className="flex justify-between gap-3">
-                                    <div className="flex flex-col items-center">
-                                      <span className="text-green-400 font-black text-xl tabular-nums leading-none">
-                                        {record.wins}
-                                      </span>
-                                      <span className="text-[9px] uppercase font-bold text-slate-500 mt-1">
-                                        Vic
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-col items-center border-x border-white/5 px-3">
-                                      <span className="text-slate-300 font-black text-xl tabular-nums leading-none">
-                                        {record.ties}
-                                      </span>
-                                      <span className="text-[9px] uppercase font-bold text-slate-500 mt-1">
-                                        Emp
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-col items-center">
-                                      <span className="text-red-400 font-black text-xl tabular-nums leading-none">
-                                        {record.losses}
-                                      </span>
-                                      <span className="text-[9px] uppercase font-bold text-slate-500 mt-1">
-                                        Der
-                                      </span>
-                                    </div>
-                                  </div>
-                                </GlassTooltip>
                               </div>
                             )}
                           </div>
