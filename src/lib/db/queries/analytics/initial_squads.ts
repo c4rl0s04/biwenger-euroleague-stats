@@ -298,6 +298,7 @@ export interface InitialSquadDetailed {
   current_price: number;
   current_owner: string | null;
   current_owner_color_index: number | null;
+  points_contributed: number;
 }
 
 /**
@@ -416,7 +417,12 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
         p.price as current_price,
         p.position as player_position,
         (SELECT name FROM users u2 WHERE u2.id = p.owner_id) as current_owner,
-        (SELECT color_index FROM users u2 WHERE u2.id = p.owner_id) as current_owner_color_index
+        (SELECT color_index FROM users u2 WHERE u2.id = p.owner_id) as current_owner_color_index,
+        (SELECT COALESCE(SUM(prs.fantasy_points), 0)
+         FROM lineups l 
+         JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+         WHERE l.user_id = isq.user_id AND l.player_id = isq.player_id
+        ) as points_contributed
     FROM initial_squads isq
     JOIN users u ON u.id = isq.user_id
     JOIN players p ON p.id = isq.player_id
@@ -433,5 +439,6 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
     ...row,
     current_points: parseFloat(row.current_points) || 0,
     current_price: parseFloat(row.current_price) || 0,
+    points_contributed: parseFloat(row.points_contributed) || 0,
   }));
 }

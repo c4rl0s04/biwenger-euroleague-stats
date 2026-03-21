@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Shield, Award, TrendingUp, DollarSign, Info } from 'lucide-react';
+import { Users, Shield, Award, TrendingUp, DollarSign, Info, User, Activity } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -84,7 +84,7 @@ export default function InitialSquadListCard() {
       className="col-span-1 md:col-span-2 lg:col-span-3 overflow-visible"
     >
       {!loading && (
-        <div className="mt-6 flex flex-col gap-6">
+        <div className="mt-2 flex flex-col gap-4">
           {error ? (
             <p className="text-red-400 text-center py-12 text-sm bg-red-400/5 rounded-2xl border border-red-400/10">
               {error}
@@ -121,68 +121,83 @@ export default function InitialSquadListCard() {
                 })}
               </div>
 
-              {/* Active Manager Squad View */}
               <AnimatePresence mode="wait">
                 {activeManager && (
                   <motion.div
                     key={activeManager.name}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-6"
+                    className="flex flex-col gap-5"
                   >
-                    {/* Left Column: Summary and Stats Card */}
-                    <div className="lg:col-span-4 space-y-4">
-                      {/* Manager Summary Box - References CSS variable for background */}
-                      <div
-                        className="rounded-3xl p-6 shadow-2xl relative overflow-hidden group border border-white/5"
-                        style={{ background: 'var(--manager-card-bg)' }}
-                      >
-                        <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <div className="relative z-10 space-y-6">
+                    {/* Hyper-Compact Manager Hero Bar */}
+                    <div
+                      className="rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group border border-white/5"
+                      style={{ background: 'var(--manager-card-bg)' }}
+                    >
+                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-black text-white shadow-lg bg-gradient-to-br ${getVibrantGradient(activeManager.colorIndex)}`}
+                          >
+                            {activeManager.name.charAt(0)}
+                          </div>
                           <div>
-                            <span className="text-white/40 text-[10px] uppercase font-black tracking-[0.2em] font-display">
-                              MANAGER PROFILE
+                            <span className="text-white/40 text-xs uppercase font-black tracking-[0.2em] font-display block mb-0.5">
+                              MANAGER
                             </span>
                             <h2
-                              className={`text-4xl font-black drop-shadow-lg leading-none tracking-tighter uppercase ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
+                              className={`text-2xl md:text-3xl font-black leading-none tracking-tighter uppercase ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
                             >
                               {activeManager.name}
                             </h2>
                           </div>
+                        </div>
 
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-blue-600/30 backdrop-blur-md rounded-2xl p-4 border border-blue-400/20 shadow-inner">
-                              <span className="text-blue-100/60 text-[10px] uppercase font-black block mb-1">
-                                Pts Totales
-                              </span>
-                              <span className="text-2xl font-black text-white">
-                                {activeManager.players
-                                  .reduce((sum, p) => sum + p.current_points, 0)
-                                  .toLocaleString()}
-                              </span>
-                            </div>
-                            <div className="bg-emerald-600/30 backdrop-blur-md rounded-2xl p-4 border border-emerald-400/20 shadow-inner">
-                              <span className="text-emerald-100/60 text-[10px] uppercase font-black block mb-1">
-                                Valor Draft
-                              </span>
-                              <span className="text-2xl font-black text-white">
-                                {(
-                                  activeManager.players.reduce(
-                                    (sum, p) => sum + p.current_price,
-                                    0
-                                  ) / 1000000
-                                ).toFixed(1)}
-                                M
+                        {/* Enhanced Visual Stats Row (No Boxes, Just Colors & Impact) */}
+                        <div className="flex flex-wrap items-center gap-6 md:gap-8">
+                          {/* Points Stat */}
+                          <div className="flex flex-col gap-0.5 group/stat cursor-default">
+                            <div className="flex items-center gap-1.5 opacity-60 group-hover/stat:opacity-100 transition-opacity">
+                              <Award size={12} className="text-amber-400" />
+                              <span className="text-white text-[11px] uppercase font-black tracking-widest leading-none">
+                                Puntos Totales
                               </span>
                             </div>
+                            <span className="text-2xl md:text-3xl font-black text-amber-400 drop-shadow-sm transition-transform group-hover/stat:scale-105 origin-left">
+                              {activeManager.players
+                                .reduce((sum, p) => sum + p.current_points, 0)
+                                .toLocaleString()}
+                            </span>
                           </div>
 
-                          <div className="pt-2">
-                            <div className="flex justify-between items-center text-white/80 text-xs font-bold uppercase mb-2">
-                              <span>Fidelidad al Reparto</span>
-                              <span>
+                          {/* Value Stat */}
+                          <div className="flex flex-col gap-0.5 group/stat cursor-default">
+                            <div className="flex items-center gap-1.5 opacity-60 group-hover/stat:opacity-100 transition-opacity">
+                              <DollarSign size={12} className="text-emerald-400" />
+                              <span className="text-white text-[11px] uppercase font-black tracking-widest leading-none">
+                                Valor Draft
+                              </span>
+                            </div>
+                            <span className="text-2xl md:text-3xl font-black text-emerald-400 drop-shadow-sm transition-transform group-hover/stat:scale-105 origin-left">
+                              {(
+                                activeManager.players.reduce((sum, p) => sum + p.current_price, 0) /
+                                1000000
+                              ).toFixed(1)}
+                              M
+                            </span>
+                          </div>
+
+                          {/* Fidelity Progress - Integrated Colorfully */}
+                          <div className="flex flex-col gap-1.5 min-w-[160px] group/stat">
+                            <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-wider leading-none">
+                              <div className="flex items-center gap-1.5 opacity-60 group-hover/stat:opacity-100 transition-opacity">
+                                <Shield size={12} className="text-blue-400" />
+                                <span className="text-white">Fidelidad</span>
+                              </div>
+                              <span className="text-blue-400 group-hover/stat:scale-110 transition-transform">
                                 {Math.round(
                                   (activeManager.players.filter(
                                     (p) => p.current_owner === activeManager.name
@@ -193,130 +208,118 @@ export default function InitialSquadListCard() {
                                 %
                               </span>
                             </div>
-                            <div className="h-2.5 bg-black/20 rounded-full overflow-hidden border border-white/5 shadow-inner flex items-center">
+
+                            <div className="h-2 bg-white/5 rounded-full overflow-hidden w-full flex items-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] mt-1">
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{
                                   width: `${(activeManager.players.filter((p) => p.current_owner === activeManager.name).length / activeManager.players.length) * 100}%`,
                                 }}
                                 transition={{ delay: 0.5, duration: 1 }}
-                                className={`h-full rounded-full transition-all duration-500 ${getFidelityColor(
-                                  (activeManager.players.filter(
-                                    (p) => p.current_owner === activeManager.name
-                                  ).length /
-                                    activeManager.players.length) *
-                                    100
-                                )}`}
+                                className={`h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(37,99,235,0.3)] bg-gradient-to-r from-blue-600 to-blue-400`}
                               />
                             </div>
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
-                        <h4 className="text-slate-300 font-bold text-sm mb-4 flex items-center gap-2">
-                          <Info size={16} className="text-slate-400" />
-                          Nota Informativa
-                        </h4>
-                        <p className="text-xs text-slate-400 leading-relaxed italic">
-                          Esta lista muestra exactamente los jugadores que recibió el manager en el
-                          reparto inicial de la temporada. Se indica el dueño actual para ver quién
-                          supo retener su talento y quién lo dejó escapar al mercado u otros
-                          managers.
-                        </p>
+                    {/* Hyper-Compact Squad Grid Section */}
+                    <div className="bg-slate-900/30 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                      <div className="bg-slate-800/20 px-6 py-3 border-b border-slate-800 flex justify-center items-center">
+                        <span className="text-base font-normal uppercase tracking-[0.2em] text-slate-500 font-bebas">
+                          DETALLE SQUAD REPARTO INICIAL
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-5">
+                        {sortedPlayers.map((player, idx) => {
+                          const isStillOwned = player.current_owner === activeManager.name;
+                          const posData = POSITION_MAP[player.player_position] || {
+                            label: '?',
+                            styles: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
+                          };
+
+                          // Official colors for current owner
+                          const ownerStyles =
+                            player.current_owner_color_index !== null
+                              ? USER_COLORS[player.current_owner_color_index % USER_COLORS.length]
+                              : null;
+
+                          return (
+                            <motion.div
+                              key={player.player_name}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: idx * 0.01 }}
+                              className="flex flex-col gap-2.5 p-3 bg-slate-800/10 rounded-xl border border-white/5 hover:border-white/10 transition-all group/item shadow-sm"
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div
+                                  className={`w-10 h-10 rounded-lg flex items-center justify-center font-black ${posData.styles} border text-base shadow-inner shrink-0 group-hover/item:scale-110 transition-transform`}
+                                >
+                                  {posData.label}
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                  <span className="text-base font-bold text-slate-200 truncate group-hover/item:text-white transition-colors leading-tight">
+                                    {player.player_name}
+                                  </span>
+                                  <div className="flex items-center gap-2 text-sm font-bold mt-1 whitespace-nowrap">
+                                    <div
+                                      className="flex items-center gap-0.5 text-pink-400"
+                                      title="Puntos para el manager inicial"
+                                    >
+                                      <Award size={13} />
+                                      {player.points_contributed}
+                                    </div>
+                                    <span className="text-slate-500">|</span>
+                                    <div
+                                      className="text-slate-400"
+                                      title="Puntos totales temporada"
+                                    >
+                                      {player.current_points}
+                                    </div>
+                                    <span className="text-slate-500/50">•</span>
+                                    <span className="text-emerald-500/80">
+                                      {(player.current_price / 1000000).toFixed(1)}M
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div
+                                className={`
+                                  px-2 py-1 rounded-lg border text-center transition-all duration-300 flex items-center justify-center gap-1.5
+                                  ${ownerStyles ? `bg-gradient-to-br ${ownerStyles.bg} ${ownerStyles.border}` : 'bg-slate-800/80 border-slate-700/50'}
+                                `}
+                              >
+                                {(isStillOwned && (
+                                  <Shield
+                                    size={12}
+                                    className={ownerStyles?.text || 'text-slate-400'}
+                                    fill="currentColor"
+                                    fillOpacity={0.2}
+                                  />
+                                )) || <Activity size={12} className="text-slate-500" />}
+                                <span
+                                  className={`text-xs font-black uppercase tracking-tighter truncate ${ownerStyles ? ownerStyles.text : 'text-slate-400'}`}
+                                >
+                                  {player.current_owner || 'MERCADO'}
+                                </span>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    {/* Right Column: Player Grid */}
-                    <div className="lg:col-span-8">
-                      <div className="bg-slate-900/40 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
-                        <div className="bg-slate-800/30 p-5 border-b border-slate-800 flex justify-between items-center text-center">
-                          <h3 className="w-full flex items-center justify-center gap-3">
-                            <span className="text-lg font-normal uppercase tracking-widest text-slate-400 font-bebas">
-                              SQUAD REPARTO INICIAL DE
-                            </span>
-                            <span
-                              className={`text-3xl font-normal uppercase tracking-wider font-bebas drop-shadow-[0_2px_8px_rgba(250,80,1,0.2)] ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
-                            >
-                              {activeManager.name}
-                            </span>
-                          </h3>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
-                          {sortedPlayers.map((player, idx) => {
-                            const isStillOwned = player.current_owner === activeManager.name;
-                            const posData = POSITION_MAP[player.player_position] || {
-                              label: '?',
-                              styles: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
-                            };
-
-                            // Official colors for current owner
-                            const ownerStyles =
-                              player.current_owner_color_index !== null
-                                ? USER_COLORS[player.current_owner_color_index % USER_COLORS.length]
-                                : null;
-
-                            return (
-                              <motion.div
-                                key={player.player_name}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.03 }}
-                                className="flex items-center justify-between p-4 bg-slate-800/20 rounded-2xl border border-slate-800/50 hover:border-slate-700 transition-colors group/item"
-                              >
-                                <div className="flex items-center gap-4 min-w-0">
-                                  <div
-                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${posData.styles} border text-lg shadow-inner shrink-0`}
-                                  >
-                                    {posData.label}
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-sm font-bold text-slate-200 truncate group-hover/item:text-white transition-colors">
-                                      {player.player_name}
-                                    </span>
-                                    <span className="text-xs text-slate-400 font-bold mt-0.5">
-                                      <span className="text-slate-200 text-sm">
-                                        {player.current_points}
-                                      </span>{' '}
-                                      <span className="text-[10px] text-slate-400 uppercase">
-                                        pts
-                                      </span>{' '}
-                                      •{' '}
-                                      <span className="text-emerald-400 text-sm">
-                                        {(player.current_price / 1000000).toFixed(2)}M
-                                      </span>
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center ml-2 shrink-0">
-                                  <div
-                                    className={`
-                                      px-3 py-1.5 rounded-xl border min-w-[90px] text-center shadow-lg transition-all duration-300 flex items-center justify-center gap-2
-                                      ${ownerStyles ? `bg-gradient-to-br ${ownerStyles.bg} ${ownerStyles.border}` : 'bg-slate-800/80 border-slate-700/50'}
-                                    `}
-                                  >
-                                    {isStillOwned && (
-                                      <Shield
-                                        size={12}
-                                        className={ownerStyles?.text || 'text-slate-400'}
-                                        fill="currentColor"
-                                        fillOpacity={0.2}
-                                      />
-                                    )}
-                                    <span
-                                      className={`text-[10px] font-black uppercase tracking-tighter truncate block ${ownerStyles ? ownerStyles.text : 'text-slate-400'}`}
-                                    >
-                                      {player.current_owner || 'MERCADO'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                    {/* Info Footer (Hyper-Compact) */}
+                    <div className="bg-slate-800/10 rounded-xl border border-slate-800/30 p-3.5 flex items-center gap-3">
+                      <Info size={16} className="text-slate-500 shrink-0" />
+                      <p className="text-sm text-slate-500 leading-tight italic">
+                        <span className="text-pink-400/60 font-bold ml-1">★ Pts Manager</span>{' '}
+                        indica aportación al dueño original. Escudo = Retenido.
+                      </p>
                     </div>
                   </motion.div>
                 )}
