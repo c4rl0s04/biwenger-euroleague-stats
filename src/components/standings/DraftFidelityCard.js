@@ -6,6 +6,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import StatsList from '@/components/ui/StatsList';
+import { GlassTooltip } from '@/components/ui/Tooltip';
 
 export default function DraftFidelityCard() {
   const { data, loading, error } = useApiData('/api/standings/initial-squad-stats');
@@ -17,7 +18,7 @@ export default function DraftFidelityCard() {
   return (
     <Card title="Rendimiento del Reparto" icon={Heart} color="emerald" loading={loading}>
       {!loading && (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full overflow-visible">
           <p className="text-xs text-slate-300 font-medium italic px-2 mb-4 flex-shrink-0">
             Puntos totales aportados por los jugadores del reparto inicial (puntos reales, sin
             ponderar por posición).
@@ -62,32 +63,31 @@ export default function DraftFidelityCard() {
                   <AnimatePresence>
                     {hoveredUser === user.user_name && userBreakdown.length > 0 && (
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="absolute bottom-full left-0 right-0 mb-2 z-50 bg-slate-900 border border-slate-700 rounded-xl p-3 shadow-2xl backdrop-blur-md pointer-events-none"
+                        initial={{ opacity: 0, scale: 0.95, y: 0 }}
+                        animate={{ opacity: 1, scale: 1, y: -12 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 0 }}
+                        className="absolute bottom-full left-0 right-0 mb-3 z-50 pointer-events-none flex justify-center origin-bottom"
                       >
-                        <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 border-b border-slate-800 pb-1">
-                          Aportación por Jugador
-                        </p>
-                        <div className="max-h-[160px] overflow-y-auto custom-scrollbar">
-                          <div className="space-y-1.5">
+                        <GlassTooltip className="min-w-[200px] shadow-2xl">
+                          <p className="text-xs font-black tracking-[0.1em] uppercase font-display border-b border-white/10 pb-2 mb-3 text-slate-400">
+                            Aportación por Jugador
+                          </p>
+                          <div className="space-y-2">
                             {userBreakdown.map((player) => (
                               <div
                                 key={player.player_name}
-                                className="flex justify-between items-center text-[10px]"
+                                className="flex justify-between items-center text-[11px]"
                               >
-                                <span className="text-slate-300 truncate pr-2">
+                                <span className="text-slate-300 font-medium truncate pr-3">
                                   {player.player_name}
                                 </span>
-                                <span className="font-mono font-bold text-emerald-400">
+                                <span className="font-display font-black text-emerald-400 text-sm">
                                   {player.points.toLocaleString()}
                                 </span>
                               </div>
                             ))}
                           </div>
-                        </div>
-                        <div className="absolute -bottom-1 left-6 w-2 h-2 bg-slate-900 border-r border-b border-slate-700 rotate-45" />
+                        </GlassTooltip>
                       </motion.div>
                     )}
                   </AnimatePresence>
