@@ -5,7 +5,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import React, { useState } from 'react';
-import { GlassTooltip } from '@/components/ui/Tooltip';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function RivalryMatrixCard() {
   const { data: rawData, loading } = useApiData('/api/standings/advanced?type=rivalry-matrix');
@@ -185,11 +185,11 @@ export default function RivalryMatrixCard() {
                                 )}`}
                               >
                                 <GlassTooltip className="p-3 !bg-slate-950/95">
-                                  <p className="text-muted-foreground text-[10px] mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2 text-center">
+                                  <TooltipHeader className="text-center">
                                     {user.name}{' '}
                                     <span className="text-slate-500 font-normal lowercase">vs</span>{' '}
                                     {opponent.name}
-                                  </p>
+                                  </TooltipHeader>
                                   <div className="flex justify-between gap-3">
                                     <div className="flex flex-col items-center">
                                       <span className="text-green-400 font-black text-xl tabular-nums leading-none">

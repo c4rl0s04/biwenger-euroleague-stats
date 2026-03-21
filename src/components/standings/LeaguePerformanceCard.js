@@ -17,16 +17,14 @@ import {
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 
-import { GlassTooltip } from '@/components/ui/Tooltip';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <GlassTooltip className="min-w-[190px] pointer-events-none">
-        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
-          {data.name}
-        </p>
+      <GlassTooltip className="min-w-[170px] pointer-events-none">
+        <TooltipHeader>{data.name}</TooltipHeader>
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-xs">
             <TrendingUp size={14} className="text-green-400 shrink-0" />

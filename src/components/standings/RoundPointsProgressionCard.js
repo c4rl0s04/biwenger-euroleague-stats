@@ -16,18 +16,14 @@ import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortRoundName } from '@/lib/utils/format';
-import { GlassTooltip } from '@/components/ui/Tooltip';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 // Custom tooltip - defined outside component to avoid recreation on each render
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const fullName = payload[0]?.payload?.fullName || label;
-
     return (
-      <GlassTooltip className="min-w-[180px] pointer-events-none">
-        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
-          {fullName}
-        </p>
+      <GlassTooltip className="min-w-[140px] pointer-events-none" showTriangle={false}>
+        <TooltipHeader>{label}</TooltipHeader>
         <div className="space-y-1.5">
           {payload
             .sort((a, b) => b.value - a.value)

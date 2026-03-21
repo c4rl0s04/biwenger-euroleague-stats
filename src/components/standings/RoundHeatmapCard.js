@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getColorForUser } from '@/lib/constants/colors';
 import { useState } from 'react';
-import { GlassTooltip } from '@/components/ui/Tooltip';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function RoundHeatmapCard() {
   const { data, loading } = useApiData('/api/standings/advanced?type=heatmap');
@@ -145,9 +145,7 @@ export default function RoundHeatmapCard() {
                         >
                           <GlassTooltip className="px-3 py-2 text-center min-w-[100px]">
                             {/* User Name */}
-                            <div className="text-xs font-black text-foreground mb-1 whitespace-nowrap uppercase tracking-wider font-display border-b border-white/5 pb-1">
-                              {user.name}
-                            </div>
+                            <TooltipHeader>{user.name}</TooltipHeader>
 
                             {/* Score Highlight */}
                             <div

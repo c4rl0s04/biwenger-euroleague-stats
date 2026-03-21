@@ -6,7 +6,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import StatsList from '@/components/ui/StatsList';
-import { GlassTooltip } from '@/components/ui/Tooltip';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function DraftFidelityCard() {
   const { data, loading, error } = useApiData('/api/standings/initial-squad-stats');
@@ -69,9 +69,7 @@ export default function DraftFidelityCard() {
                         className="absolute bottom-full left-0 right-0 mb-3 z-50 pointer-events-none flex justify-center origin-bottom"
                       >
                         <GlassTooltip className="min-w-[200px] shadow-2xl">
-                          <p className="text-xs font-black tracking-[0.1em] uppercase font-display border-b border-white/10 pb-2 mb-3 text-slate-400">
-                            Aportación por Jugador
-                          </p>
+                          <TooltipHeader>Aportación por Jugador</TooltipHeader>
                           <div className="space-y-2">
                             {userBreakdown.map((player) => (
                               <div

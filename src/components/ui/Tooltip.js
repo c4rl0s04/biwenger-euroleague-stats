@@ -36,6 +36,22 @@ export const GlassTooltip = ({
 };
 
 /**
+ * Premium Header for tooltips.
+ * Uses Bebas Neue and a "shining" white color for high impact.
+ */
+export const TooltipHeader = ({ children, className = '' }) => (
+  <p
+    className={`
+      text-slate-50 text-base mb-3 font-black tracking-wider uppercase font-display 
+      border-b border-white/10 pb-2.5 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]
+      ${className}
+    `}
+  >
+    {children}
+  </p>
+);
+
+/**
  * Reusable Info icon with a hoverable GlassTooltip.
  * Commonly used in card headers.
  */

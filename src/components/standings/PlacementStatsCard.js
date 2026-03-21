@@ -16,15 +16,13 @@ import {
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 
-import { GlassTooltip } from '@/components/ui/Tooltip';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <GlassTooltip className="min-w-[170px] pointer-events-none">
-        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
-          {label}
-        </p>
+        <TooltipHeader>{label}</TooltipHeader>
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 text-xs text-amber-400 font-bold">
             <Trophy size={14} className="opacity-80 shrink-0" />

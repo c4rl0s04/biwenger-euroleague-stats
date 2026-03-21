@@ -16,19 +16,16 @@ import {
   Legend,
 } from 'recharts';
 import { getColorForUser } from '@/lib/constants/colors';
-import { GlassTooltip } from '@/components/ui/Tooltip';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 // --- Custom Tooltip ---
-const CustomTooltip = ({ active, payload, label, totalUsers }) => {
+const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const fullName = payload[0]?.payload?.fullName || label;
     const sorted = [...payload].filter((p) => p.value != null).sort((a, b) => a.value - b.value); // ascending = rank 1 first
 
     return (
-      <GlassTooltip className="min-w-[180px] pointer-events-none">
-        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
-          {fullName}
-        </p>
+      <GlassTooltip className="min-w-[140px] pointer-events-none" showTriangle={false}>
+        <TooltipHeader>{label}</TooltipHeader>
         <div className="space-y-1.5">
           {sorted.map((entry, index) => {
             const pos = entry.value;
