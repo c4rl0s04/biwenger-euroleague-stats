@@ -3,11 +3,12 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Waves } from 'lucide-react';
-import Link from 'next/link';
-import { getColorForUser } from '@/lib/constants/colors';
+import StatsList from '@/components/ui/StatsList';
 
 export default function VolatilityCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=volatility');
+
+  const maxVol = data.length > 0 ? Math.max(...data.map((u) => u.std_dev)) : 0;
 
   return (
     <Card
@@ -19,49 +20,31 @@ export default function VolatilityCard() {
     >
       {!loading && data.length > 0 ? (
         <div className="flex flex-col gap-4 h-full">
-          <p className="text-xs text-slate-300 font-medium italic px-2">
+          <p className="text-xs text-slate-300 font-medium italic px-2 leading-tight">
             Mide la <span className="text-slate-200 font-bold not-italic">regularidad</span>.
             Valores <span className="text-pink-400 font-bold not-italic">Altos</span> indican
-            resultados impredecibles (montaña rusa), valores{' '}
+            resultados impredecibles, valores{' '}
             <span className="text-green-400 font-bold not-italic">Bajos</span> indican consistencia.
           </p>
-          <div className="space-y-1">
-            {data.slice(0, 8).map((user, index) => {
-              // Visualize volatility with a bar proportional to max
-              // Data is sorted ascending, so max is at the end
-              const maxVol = data[data.length - 1].std_dev;
-              const { user_id, name, color_index, std_dev, avg_points } = user;
-              const pct = (std_dev / maxVol) * 100;
-              const userColor = getColorForUser(user_id, name, color_index);
 
+          <StatsList
+            items={data.slice(0, 10)}
+            renderRight={(user) => (
+              <div className="text-right">
+                <div className="text-sm font-bold text-pink-400">{user.std_dev}</div>
+                <div className="text-[10px] text-slate-400">Media: {user.avg_points}</div>
+              </div>
+            )}
+            renderExtra={(user) => {
+              const pct = (user.std_dev / maxVol) * 100;
               return (
-                <div key={user.user_id} className="relative group">
-                  <Link
-                    href={`/user/${user.user_id}`}
-                    className="flex items-center justify-between py-2 px-2 hover:bg-slate-800 rounded transition-colors z-10 relative"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400 font-mono w-4">{index + 1}</span>
-                      <span
-                        className={`text-sm font-medium ${userColor.text} transition-transform group-hover:scale-105 origin-left inline-block`}
-                      >
-                        {user.name}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-pink-400">{user.std_dev}</div>
-                      <div className="text-[10px] text-slate-400">Media: {user.avg_points}</div>
-                    </div>
-                  </Link>
-                  {/* Background Bar */}
-                  <div
-                    className="absolute bottom-1 left-0 h-0.5 bg-pink-500/20 rounded-full transition-all duration-500"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                <div
+                  className="absolute bottom-0 left-0 h-[1.5px] bg-pink-500/20 rounded-full transition-all duration-700"
+                  style={{ width: `${pct}%` }}
+                />
               );
-            })}
-          </div>
+            }}
+          />
         </div>
       ) : (
         !loading && <div className="text-center text-slate-400 py-4">Calculando volatilidad...</div>
