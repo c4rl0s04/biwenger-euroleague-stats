@@ -7,20 +7,35 @@ import { ResponsiveContainer, ComposedChart, Bar, XAxis, YAxis, Tooltip, Scatter
 import Link from 'next/link';
 import { getColorForUser } from '@/lib/constants/colors';
 
+import { GlassTooltip } from '@/components/ui/Tooltip';
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const dataPayload = payload.find((p) => p.payload.name);
-    const data = dataPayload ? dataPayload.payload : null;
-
-    if (!data) return null;
+    const data = payload[0].payload;
 
     return (
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 shadow-xl z-50 text-xs">
-        <p className="font-bold text-slate-200">{data.name}</p>
-        <p className="text-green-400">Techo: {data.ceiling}</p>
-        <p className="text-blue-400">Media: {data.avg}</p>
-        <p className="text-red-400">Suelo: {data.floor}</p>
-      </div>
+      <GlassTooltip className="min-w-[140px] pointer-events-none">
+        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
+          {data.name}
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2.5 text-xs">
+            <div className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
+            <span className="text-foreground flex-1">Techo</span>
+            <span className="text-foreground font-bold ml-auto tabular-nums">{data.ceiling}</span>
+          </div>
+          <div className="flex items-center gap-2.5 text-xs">
+            <div className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
+            <span className="text-foreground flex-1">Media</span>
+            <span className="text-foreground font-bold ml-auto tabular-nums">{data.avg}</span>
+          </div>
+          <div className="flex items-center gap-2.5 text-xs">
+            <div className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+            <span className="text-foreground flex-1">Suelo</span>
+            <span className="text-foreground font-bold ml-auto tabular-nums">{data.floor}</span>
+          </div>
+        </div>
+      </GlassTooltip>
     );
   }
   return null;

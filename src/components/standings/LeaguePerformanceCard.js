@@ -17,30 +17,44 @@ import {
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 
+import { GlassTooltip } from '@/components/ui/Tooltip';
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl z-50">
-        <p className="text-slate-300 text-sm font-bold mb-2">{data.name}</p>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs text-green-400">
-            <TrendingUp size={12} />
-            <span>Por encima media: {data.above_avg_count} veces</span>
+      <GlassTooltip className="min-w-[190px] pointer-events-none">
+        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
+          {data.name}
+        </p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs">
+            <TrendingUp size={14} className="text-green-400 shrink-0" />
+            <span className="text-slate-300 flex-1">Por encima media:</span>
+            <span className="text-green-400 font-bold tabular-nums">
+              {data.above_avg_count}{' '}
+              <span className="text-[10px] opacity-60 font-normal">veces</span>
+            </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-red-400">
-            <TrendingDown size={12} />
-            <span>Por debajo media: {data.below_avg_count} veces</span>
+          <div className="flex items-center gap-2 text-xs">
+            <TrendingDown size={14} className="text-red-400 shrink-0" />
+            <span className="text-slate-300 flex-1">Por debajo media:</span>
+            <span className="text-red-400 font-bold tabular-nums">
+              {data.below_avg_count}{' '}
+              <span className="text-[10px] opacity-60 font-normal">veces</span>
+            </span>
           </div>
-          <div className="text-xs text-slate-400 mt-2 border-t border-slate-700 pt-2">
-            Dif. promedio:{' '}
-            <span className={data.avg_diff > 0 ? 'text-green-400' : 'text-red-400'}>
+          <div className="pt-2 mt-1 border-t border-white/5 flex items-center justify-between">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Dif. promedio</span>
+            <span
+              className={`text-xs font-black ${data.avg_diff > 0 ? 'text-cyan-400' : 'text-pink-400'}`}
+            >
               {data.avg_diff > 0 ? '+' : ''}
               {data.avg_diff} pts
             </span>
           </div>
         </div>
-      </div>
+      </GlassTooltip>
     );
   }
   return null;

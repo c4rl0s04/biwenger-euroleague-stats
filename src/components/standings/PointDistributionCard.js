@@ -29,20 +29,30 @@ const renderCustomLegend = () => {
   );
 };
 
+import { GlassTooltip } from '@/components/ui/Tooltip';
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 shadow-xl z-50 text-xs">
-        <p className="font-bold text-slate-200 mb-1">{label}</p>
-        <div className="space-y-1">
-          {/* We rely on the payload order from the chart here, or we can sort it if needed */}
+      <GlassTooltip className="min-w-[160px] pointer-events-none">
+        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
+          {label}
+        </p>
+        <div className="space-y-1.5">
           {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }}>
-              {entry.name}: {entry.value} veces
-            </p>
+            <div key={index} className="flex items-center gap-2.5 text-xs">
+              <div
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-foreground flex-1">{entry.name}</span>
+              <span className="text-foreground font-bold ml-auto tabular-nums">
+                {entry.value} <span className="text-[10px] text-slate-500 font-normal">veces</span>
+              </span>
+            </div>
           ))}
         </div>
-      </div>
+      </GlassTooltip>
     );
   }
   return null;
