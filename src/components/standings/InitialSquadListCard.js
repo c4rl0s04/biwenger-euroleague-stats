@@ -145,7 +145,7 @@ export default function InitialSquadListCard() {
                             {activeManager.name.charAt(0)}
                           </div>
                           <div>
-                            <span className="text-white/40 text-xs uppercase font-black tracking-[0.2em] font-display block mb-0.5">
+                            <span className="text-white/40 text-[11px] uppercase font-bold block mb-0.5">
                               MANAGER
                             </span>
                             <h2
@@ -162,7 +162,7 @@ export default function InitialSquadListCard() {
                           <div className="flex flex-col gap-0.5 group/stat cursor-default">
                             <div className="flex items-center gap-1.5 opacity-60 group-hover/stat:opacity-100 transition-opacity">
                               <Award size={12} className="text-amber-400" />
-                              <span className="text-white text-[11px] uppercase font-black tracking-widest leading-none">
+                              <span className="text-white text-[11px] uppercase font-bold leading-none">
                                 Puntos Totales
                               </span>
                             </div>
@@ -177,7 +177,7 @@ export default function InitialSquadListCard() {
                           <div className="flex flex-col gap-0.5 group/stat cursor-default">
                             <div className="flex items-center gap-1.5 opacity-60 group-hover/stat:opacity-100 transition-opacity">
                               <DollarSign size={12} className="text-emerald-400" />
-                              <span className="text-white text-[11px] uppercase font-black tracking-widest leading-none">
+                              <span className="text-white text-[11px] uppercase font-bold leading-none">
                                 Valor Draft
                               </span>
                             </div>
@@ -192,7 +192,7 @@ export default function InitialSquadListCard() {
 
                           {/* Fidelity Progress - Integrated Colorfully */}
                           <div className="flex flex-col gap-1.5 min-w-[160px] group/stat">
-                            <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-wider leading-none">
+                            <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider leading-none">
                               <div className="flex items-center gap-1.5 opacity-60 group-hover/stat:opacity-100 transition-opacity">
                                 <Shield size={12} className="text-blue-400" />
                                 <span className="text-white">Fidelidad</span>
@@ -273,10 +273,7 @@ export default function InitialSquadListCard() {
                                       {player.points_contributed}
                                     </div>
                                     <span className="text-slate-500">|</span>
-                                    <div
-                                      className="text-slate-400"
-                                      title="Puntos totales temporada"
-                                    >
+                                    <div className="text-sky-400" title="Puntos totales temporada">
                                       {player.current_points}
                                     </div>
                                     <span className="text-slate-500/50">•</span>
