@@ -70,7 +70,8 @@ export default function ClasificacionPage() {
         title="Clasificación"
         description="Análisis detallado de la clasificación, tendencias y estadísticas de rendimiento."
       />
-      {/* Section: Overview and Standings */}
+
+      {/* 1. Clasificación General */}
       <Section
         title="Clasificación General"
         id="general-standings"
@@ -83,13 +84,23 @@ export default function ClasificacionPage() {
         </div>
       </Section>
 
-      {/* Section: Round Winners */}
+      {/* 2. Progresión y Evolución */}
       <Section
-        title="Ganadores de Jornada"
-        id="round-winners"
+        title="Progresión y Evolución"
+        id="progression"
         delay={100}
         background="section-raised"
       >
+        <div className="space-y-6">
+          <PointsProgressionCard />
+          <PositionEvolutionCard />
+          <RoundPointsProgressionCard />
+          <RollingAverageCard />
+        </div>
+      </Section>
+
+      {/* 3. Dominio de Jornada */}
+      <Section title="Dominio de Jornada" id="round-winners" delay={150} background="section-base">
         <div className="space-y-6">
           <RoundWinnersCard />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -101,60 +112,56 @@ export default function ClasificacionPage() {
         </div>
       </Section>
 
-      {/* Section: Trends & Momentum */}
+      {/* 4. Análisis del Reparto Inicial (El Draft) */}
       <Section
-        title="Tendencias y Momento (Trends)"
-        id="trends"
-        delay={150}
-        background="section-base"
+        title="Análisis del Reparto Inicial (El Draft)"
+        id="initial-squad"
+        delay={200}
+        background="section-raised"
       >
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div id="heat-check-card">
-              <HeatCheckCard />
-            </div>
-            <div id="hunter-card">
-              <TheHunterCard />
-            </div>
-            <div id="streaks-card">
-              <StreaksCard />
-            </div>
-          </div>
-          <PositionEvolutionCard />
-          <RollingAverageCard />
-        </div>
-      </Section>
-
-      {/* Section: Progression */}
-      <Section title="Progresión de Puntos" delay={200} background="section-raised">
-        <div className="space-y-6">
-          <PointsProgressionCard />
-          <RoundPointsProgressionCard />
-        </div>
-      </Section>
-
-      {/* Section: Performance Analysis */}
-      <Section
-        title="Análisis de Rendimiento"
-        id="performance"
-        delay={250}
-        background="section-base"
-      >
-        <div className="space-y-6">
+          <InitialSquadListCard />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <InitialSquadAnalysisCard />
             <BestDraftPlayerCard />
             <DraftFidelityCard />
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <InitialSquadRegretCard />
             <InitialSquadLoyaltyCard />
             <InitialSquadPotentialCard />
           </div>
+        </div>
+      </Section>
 
-          <InitialSquadListCard />
+      {/* 5. Tendencias y Momento */}
+      <Section
+        title="Tendencias y Momento (Trends)"
+        id="trends"
+        delay={250}
+        background="section-base"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div id="heat-check-card">
+            <HeatCheckCard />
+          </div>
+          <div id="hunter-card">
+            <TheHunterCard />
+          </div>
+          <div id="streaks-card">
+            <StreaksCard />
+          </div>
+        </div>
+      </Section>
 
+      {/* 6. Consistencia y Rendimiento */}
+      <Section
+        title="Consistencia y Rendimiento"
+        id="performance"
+        delay={300}
+        background="section-raised"
+      >
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             <div id="floor-ceiling-card">
               <FloorCeilingCard />
@@ -167,39 +174,35 @@ export default function ClasificacionPage() {
               <LeaguePerformanceCard />
             </div>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="reliability-card">
+              <ReliabilityCard />
+            </div>
+            <EfficiencyCard />
+          </div>
         </div>
       </Section>
 
-      {/* Section: Efficiency & Consistency */}
+      {/* 7. El Multiverso Biwenger (Clasificaciones Alternativas) */}
       <Section
-        title="Eficiencia y Consistencia"
-        id="efficiency"
-        delay={300}
-        background="section-raised"
+        title="El Multiverso Biwenger"
+        id="alternative-standings"
+        delay={350}
+        background="section-base"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div id="gap-card">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <AllPlayAllCard />
+          <PlacementStatsCard />
+          <div id="gap-card" className="md:col-span-2 lg:col-span-2">
             <TheoreticalGapCard />
           </div>
-          <div id="reliability-card">
-            <ReliabilityCard />
-          </div>
-          <EfficiencyCard />
-        </div>
-      </Section>
-
-      {/* Section: League Stats */}
-      <Section title="Estadísticas de Liga" id="league-stats" delay={350} background="section-base">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          <PlacementStatsCard />
-          <AllPlayAllCard />
           <div id="rivalry-matrix-card" className="md:col-span-2 lg:col-span-2">
             <RivalryMatrixCard />
           </div>
         </div>
       </Section>
 
-      {/* Section: Bad Luck */}
+      {/* 8. Mala Suerte y Curiosidades */}
       <Section
         title="Mala Suerte y Curiosidades"
         id="bad-luck"
