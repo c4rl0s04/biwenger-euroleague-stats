@@ -5,6 +5,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 import React, { useState } from 'react';
+import { GlassTooltip } from '@/components/ui/Tooltip';
 
 export default function RivalryMatrixCard() {
   const { data: rawData, loading } = useApiData('/api/standings/advanced?type=rivalry-matrix');
@@ -153,23 +154,20 @@ export default function RivalryMatrixCard() {
                             {/* Cell Content (Wins - Draws - Losses) */}
                             {record && (
                               <div className="flex items-center justify-center gap-1 font-mono opacity-90">
-                                {/* Wins: HUGE if winning */}
                                 <span
-                                  className={`text-sm ${record.wins > record.losses ? 'font-bold text-lg' : ''}`}
+                                  className={`text-sm ${
+                                    record.wins > record.losses ? 'font-bold text-lg' : ''
+                                  }`}
                                 >
                                   {record.wins}
                                 </span>
-
                                 <span className="opacity-30 text-xs">-</span>
-
-                                {/* Ties */}
                                 <span className="text-slate-400 text-sm">{record.ties}</span>
-
                                 <span className="opacity-30 text-xs">-</span>
-
-                                {/* Losses: HUGE if losing */}
                                 <span
-                                  className={`text-sm ${record.losses > record.wins ? 'font-bold text-lg' : ''}`}
+                                  className={`text-sm ${
+                                    record.losses > record.wins ? 'font-bold text-lg' : ''
+                                  }`}
                                 >
                                   {record.losses}
                                 </span>
@@ -177,37 +175,48 @@ export default function RivalryMatrixCard() {
                             )}
 
                             {/* Tooltip */}
+
                             {isHovered && record && (
                               <div
-                                className={`
-                                  absolute z-[60] bg-slate-900/95 backdrop-blur-md text-slate-200 text-xs p-3 rounded-lg shadow-2xl border border-slate-700 whitespace-nowrap pointer-events-none min-w-[120px]
-                                  ${getTooltipPositionClass(rowIndex, colIndex, sortedUsers.length)}
-                                `}
+                                className={`absolute z-[60] pointer-events-none min-w-[140px] ${getTooltipPositionClass(
+                                  rowIndex,
+                                  colIndex,
+                                  sortedUsers.length
+                                )}`}
                               >
-                                <div className="font-bold border-b border-slate-700 pb-1 mb-1 text-center">
-                                  {user.name} <span className="text-slate-400 font-normal">vs</span>{' '}
-                                  {opponent.name}
-                                </div>
-                                <div className="flex justify-between gap-3 text-[11px]">
-                                  <div className="flex flex-col items-center">
-                                    <span className="text-green-400 font-bold text-lg">
-                                      {record.wins}
-                                    </span>
-                                    <span className="text-slate-400 uppercase text-[9px]">Vic</span>
+                                <GlassTooltip className="p-3 !bg-slate-950/95">
+                                  <p className="text-muted-foreground text-[10px] mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2 text-center">
+                                    {user.name}{' '}
+                                    <span className="text-slate-500 font-normal lowercase">vs</span>{' '}
+                                    {opponent.name}
+                                  </p>
+                                  <div className="flex justify-between gap-3">
+                                    <div className="flex flex-col items-center">
+                                      <span className="text-green-400 font-black text-xl tabular-nums leading-none">
+                                        {record.wins}
+                                      </span>
+                                      <span className="text-[9px] uppercase font-bold text-slate-500 mt-1">
+                                        Vic
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-col items-center border-x border-white/5 px-3">
+                                      <span className="text-slate-300 font-black text-xl tabular-nums leading-none">
+                                        {record.ties}
+                                      </span>
+                                      <span className="text-[9px] uppercase font-bold text-slate-500 mt-1">
+                                        Emp
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                      <span className="text-red-400 font-black text-xl tabular-nums leading-none">
+                                        {record.losses}
+                                      </span>
+                                      <span className="text-[9px] uppercase font-bold text-slate-500 mt-1">
+                                        Der
+                                      </span>
+                                    </div>
                                   </div>
-                                  <div className="flex flex-col items-center">
-                                    <span className="text-slate-300 font-bold text-lg">
-                                      {record.ties}
-                                    </span>
-                                    <span className="text-slate-400 uppercase text-[9px]">Emp</span>
-                                  </div>
-                                  <div className="flex flex-col items-center">
-                                    <span className="text-red-400 font-bold text-lg">
-                                      {record.losses}
-                                    </span>
-                                    <span className="text-slate-400 uppercase text-[9px]">Der</span>
-                                  </div>
-                                </div>
+                                </GlassTooltip>
                               </div>
                             )}
                           </div>

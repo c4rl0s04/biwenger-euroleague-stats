@@ -16,24 +16,32 @@ import {
 import { Card } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
 
+import { GlassTooltip } from '@/components/ui/Tooltip';
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 pointer-events-none ring-1 ring-white/5 min-w-[180px]">
-        <p className="text-slate-400 text-[10px] mb-3 font-black tracking-[0.15em] uppercase font-display">
+      <GlassTooltip className="min-w-[170px] pointer-events-none">
+        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
           {label}
         </p>
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 text-xs text-amber-400 font-bold">
-            <Trophy size={14} className="opacity-80" />
-            <span>Top 3: {payload[0].value} veces</span>
+            <Trophy size={14} className="opacity-80 shrink-0" />
+            <span className="flex-1">Top 3:</span>
+            <span className="tabular-nums">
+              {payload[0].value} <span className="text-[10px] opacity-60 font-normal">veces</span>
+            </span>
           </div>
           <div className="flex items-center gap-2.5 text-xs text-red-500 font-bold">
-            <ArrowDownCircle size={14} className="opacity-80" />
-            <span>Bottom 3: {payload[1].value} veces</span>
+            <ArrowDownCircle size={14} className="opacity-80 shrink-0" />
+            <span className="flex-1">Bottom 3:</span>
+            <span className="tabular-nums">
+              {payload[1].value} <span className="text-[10px] opacity-60 font-normal">veces</span>
+            </span>
           </div>
         </div>
-      </div>
+      </GlassTooltip>
     );
   }
   return null;

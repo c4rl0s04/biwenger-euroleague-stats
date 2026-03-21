@@ -9,10 +9,10 @@ import Link from 'next/link';
 
 // 1. Define the items exactly in the order you want them to appear
 const LEGEND_ITEMS = [
-  { label: '90-135', color: '#ef4444' }, // Red (First)
-  { label: '136-170', color: '#eab308' }, // Yellow (Second)
-  { label: '171-205', color: '#22d3ee' }, // Cyan (Third)
-  { label: '206+', color: '#a855f7' }, // Purple (Last)
+  { label: '90-135', color: '#ef4444' }, // Red (Worse)
+  { label: '136-170', color: '#f59e0b' }, // Amber (Middle)
+  { label: '171-205', color: '#10b981' }, // Emerald (Good)
+  { label: '206+', color: '#047857' }, // Dark Green (Best)
 ];
 
 // 2. Custom Render Function for the Legend
@@ -176,9 +176,9 @@ export default function PointDistributionCard() {
                 radius={[4, 0, 0, 4]}
                 name="90-135"
               />
-              <Bar dataKey="136-170" stackId="a" fill="#eab308" name="136-170" />
-              <Bar dataKey="171-205" stackId="a" fill="#22d3ee" name="171-205" />
-              <Bar dataKey="206+" stackId="a" fill="#a855f7" radius={[0, 4, 4, 0]} name="206+" />
+              <Bar dataKey="136-170" stackId="a" fill="#f59e0b" name="136-170" />
+              <Bar dataKey="171-205" stackId="a" fill="#10b981" name="171-205" />
+              <Bar dataKey="206+" stackId="a" fill="#047857" radius={[0, 4, 4, 0]} name="206+" />
             </BarChart>
           </ResponsiveContainer>
         </div>

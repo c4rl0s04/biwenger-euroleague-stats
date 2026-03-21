@@ -8,16 +8,38 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 
 import { getColorForUser } from '@/lib/constants/colors';
 import Link from 'next/link';
 
+import { GlassTooltip } from '@/components/ui/Tooltip';
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 shadow-xl z-50 text-xs">
-        <p className="font-bold text-slate-200">{data.name}</p>
-        <p className="text-slate-400">Total Actual: {data.current_points}</p>
-        <p className="text-yellow-400">Gap Teórico: -{data.gap}</p>
-        <p className="text-emerald-400">Eficiencia: {data.pct.toFixed(1)}%</p>
-      </div>
+      <GlassTooltip className="min-w-[170px] pointer-events-none">
+        <p className="text-muted-foreground text-xs mb-3 font-black tracking-[0.1em] uppercase font-display border-b border-white/5 pb-2">
+          {data.name}
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2.5 text-xs">
+            <div className="w-2 h-2 rounded-full bg-slate-500 shrink-0" />
+            <span className="text-foreground flex-1">Total Actual</span>
+            <span className="text-foreground font-bold ml-auto tabular-nums">
+              {data.current_points}
+            </span>
+          </div>
+          <div className="flex items-center gap-2.5 text-xs">
+            <div className="w-2 h-2 rounded-full bg-yellow-400 shrink-0" />
+            <span className="text-foreground flex-1">Gap Teórico</span>
+            <span className="text-yellow-400 font-bold ml-auto tabular-nums">-{data.gap}</span>
+          </div>
+          <div className="flex items-center gap-2.5 text-xs">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+            <span className="text-foreground flex-1">Eficiencia</span>
+            <span className="text-emerald-400 font-bold ml-auto tabular-nums">
+              {data.pct.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+      </GlassTooltip>
     );
   }
   return null;
