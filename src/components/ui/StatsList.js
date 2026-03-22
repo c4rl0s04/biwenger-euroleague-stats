@@ -14,73 +14,89 @@ import { getColorForUser } from '@/lib/constants/colors';
  */
 export default function StatsList({
   items,
+  renderLeft,
   renderRight,
   renderExtra,
+  emptyMessage = 'No hay datos',
   indexOffset = 0,
   onMouseEnter,
   onMouseLeave,
 }) {
+  if (!items || items.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6 text-sm text-slate-400">
+        {emptyMessage}
+      </div>
+    );
+  }
+
   return (
     <div className="divide-y divide-slate-800/50 -mx-1 flex-1 flex flex-col">
       {items.map((item, index) => {
         const userColor = getColorForUser(item.user_id, item.name, item.color_index);
         return (
           <div
-            key={item.user_id || item.name}
+            key={item.id || item.player_id || item.user_id || item.name || index}
             className="relative group flex flex-1 items-center justify-between py-1.5 px-2 hover:bg-white/5 transition-colors w-full"
             onMouseEnter={() => onMouseEnter?.(item)}
             onMouseLeave={() => onMouseLeave?.(item)}
           >
-            {/* User Info Section */}
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <span className="text-slate-400 font-mono text-xs w-5 flex-shrink-0">
-                {index + 1 + indexOffset}
-              </span>
+            {renderLeft ? (
+              renderLeft(item, index)
+            ) : (
+              /* Default User Info Section (Used by Standings cards) */
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <span className="text-slate-400 font-mono text-xs w-5 flex-shrink-0">
+                  {index + 1 + indexOffset}
+                </span>
 
-              {/* Clickable Icon */}
-              <Link
-                href={`/user/${item.user_id}`}
-                className="relative w-8 h-8 shrink-0 transition-transform hover:scale-110 active:scale-95 z-10"
-              >
-                {item.icon ? (
-                  <Image
-                    src={item.icon}
-                    alt={item.name}
-                    fill
-                    className="rounded-full object-cover ring-2 ring-white/10"
-                    sizes="32px"
-                  />
-                ) : (
-                  <div
-                    className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-white/10"
-                    style={{ backgroundColor: userColor.stroke }}
-                  >
-                    {item.name.charAt(0)}
-                  </div>
-                )}
-              </Link>
-
-              {/* Clickable Name */}
-              <div className="min-w-0">
+                {/* Clickable Icon */}
                 <Link
                   href={`/user/${item.user_id}`}
-                  className={`font-bold text-sm ${userColor.text} truncate block transition-transform group-hover:translate-x-1 origin-left`}
+                  className="relative w-8 h-8 shrink-0 transition-transform hover:scale-110 active:scale-95 z-10"
                 >
-                  {item.name}
+                  {item.icon ? (
+                    <Image
+                      src={item.icon}
+                      alt={item.name}
+                      fill
+                      className="rounded-full object-cover ring-2 ring-white/10"
+                      sizes="32px"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-white/10"
+                      style={{ backgroundColor: userColor.stroke }}
+                    >
+                      {item.name?.charAt(0) || '?'}
+                    </div>
+                  )}
                 </Link>
-                {item.subtitle && (
-                  <div className="text-[11px] text-slate-400 font-bold truncate">
-                    {item.subtitle}
-                  </div>
-                )}
+
+                {/* Clickable Name */}
+                <div className="min-w-0">
+                  <Link
+                    href={`/user/${item.user_id}`}
+                    className={`font-bold text-sm ${userColor.text} truncate block transition-transform group-hover:translate-x-1 origin-left`}
+                  >
+                    {item.name}
+                  </Link>
+                  {item.subtitle && (
+                    <div className="text-[11px] text-slate-400 font-bold truncate">
+                      {item.subtitle}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Right Column (Metrics/Status) */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-2">{renderRight(item)}</div>
+            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+              {renderRight && renderRight(item, index)}
+            </div>
 
             {/* Extra Content (e.g. tooltips) */}
-            {renderExtra?.(item)}
+            {renderExtra?.(item, index)}
           </div>
         );
       })}

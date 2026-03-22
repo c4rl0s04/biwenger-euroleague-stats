@@ -2,7 +2,7 @@
 
 import { Cake, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { Card } from '@/components/ui';
+import { Card, StatsList } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/constants/colors';
 
@@ -11,59 +11,54 @@ export default function BirthdayCard() {
 
   return (
     <Card title="Cumpleaños Hoy" icon={Cake} color="pink" loading={loading}>
-      {!loading && (
-        <div className="relative flex-1 flex flex-col h-full">
-          {birthdays && birthdays.length > 0 ? (
-            <div className="space-y-0 flex-1">
-              {birthdays.map((player) => (
-                <div
-                  key={player.id}
-                  className="flex items-center gap-3 py-3 border-b border-white/5 last:border-0 hover:bg-white/5 rounded-lg px-2 transition-colors"
+      <div className="flex flex-col flex-1 pb-1">
+        <StatsList
+          items={!loading && birthdays && birthdays.length > 0 ? birthdays : []}
+          emptyMessage="No hay cumpleaños hoy"
+          renderLeft={(player) => (
+            <div className="flex items-center gap-3 w-full">
+              <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                <Sparkles size={20} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <Link
+                  href={`/player/${player.id}`}
+                  className="font-bold text-foreground text-sm truncate hover:text-pink-400 transition-colors block"
+                  title={player.name}
                 >
-                  <Sparkles className="w-5 h-5 text-pink-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/player/${player.id}`}
-                      className="font-medium text-white hover:text-pink-400 transition-colors block"
-                    >
-                      {player.name}
-                    </Link>
-                    <div className="text-xs text-slate-400 flex items-center gap-2">
-                      <span>
-                        {player.team} · {player.position}
-                      </span>
-                      {player.birth_date && (
-                        <span className="text-pink-300 font-semibold px-1.5 py-0.5 bg-pink-500/10 rounded">
-                          {new Date().getFullYear() - new Date(player.birth_date).getFullYear()}{' '}
-                          años
-                        </span>
-                      )}
-                    </div>
-                    {player.owner_name &&
-                      (() => {
+                  {player.name}
+                </Link>
+                <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                  <span>{player.team}</span>
+                  {player.owner_name && (
+                    <>
+                      <span>·</span>
+                      {(() => {
                         const color = getColorForUser(
                           player.owner_id,
                           player.owner_name,
                           player.owner_color_index
                         );
-                        return (
-                          <div className={`text-xs mt-0.5 ${color.text}`}>
-                            👤 {player.owner_name}
-                          </div>
-                        );
+                        return <span className={color.text}>👤 {player.owner_name}</span>;
                       })()}
-                  </div>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6 text-slate-400">
-              <Cake className="w-12 h-12 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">No hay cumpleaños hoy</p>
+              </div>
             </div>
           )}
-        </div>
-      )}
+          renderRight={(player) => (
+            <div className="flex flex-col items-end whitespace-nowrap">
+              <div className="font-bold text-lg text-pink-400">
+                {player.birth_date
+                  ? new Date().getFullYear() - new Date(player.birth_date).getFullYear()
+                  : '?'}
+              </div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Años</div>
+            </div>
+          )}
+        />
+      </div>
     </Card>
   );
 }

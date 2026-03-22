@@ -1,10 +1,12 @@
 'use client';
 
+'use client';
+
 import { useState, useMemo, useCallback } from 'react';
 import { BarChart2 } from 'lucide-react';
-import { Card, AnimatedNumber } from '@/components/ui';
+import { Card, AnimatedNumber, StatsList } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import DashboardPlayerRow from './shared/DashboardPlayerRow';
+import { getColorForUser } from '@/lib/constants/colors';
 
 export default function StatsLeadersCard() {
   const [statType, setStatType] = useState('points');
@@ -123,57 +125,69 @@ export default function StatsLeadersCard() {
     >
       <div
         className={`
-          flex flex-col transition-opacity duration-200 ease-out
+          flex flex-col flex-1 pb-1 transition-opacity duration-200 ease-out
           ${isAnimating ? 'opacity-0' : 'opacity-100'}
         `}
       >
-        {leaders.length > 0
-          ? leaders.map((player, index) => (
-              <DashboardPlayerRow
-                key={`${displayedType}-${player.player_id}`}
-                playerId={player.player_id}
-                name={player.name}
-                team={player.team}
-                teamId={player.team_id}
-                owner={player.owner_name}
-                ownerId={player.owner_id}
-                ownerColorIndex={player.owner_color_index}
-                color="cyan"
-                avatar={
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">
-                    {index + 1}
-                  </div>
-                }
-                rightContent={
-                  <div className="flex items-center gap-4 text-right">
-                    {/* Total with stat name */}
-                    <div>
-                      <div className={`font-bold text-base ${displayConfig.color}`}>
-                        <AnimatedNumber value={player.value} duration={0.8} />
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">{displayConfig.label}</div>
-                    </div>
-                    {/* Average per game */}
-                    <div>
-                      <div className="font-bold text-base text-foreground">
-                        <AnimatedNumber value={player.avg_value} decimals={1} duration={0.8} />
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">Promedio</div>
-                    </div>
-                    {/* Games played */}
-                    <div>
-                      <div className="font-bold text-base text-foreground">
-                        <AnimatedNumber value={player.games_played} duration={0.8} />
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">Partidos</div>
-                    </div>
-                  </div>
-                }
-              />
-            ))
-          : !showInitialLoading && (
-              <div className="text-center text-muted-foreground py-8">No hay datos disponibles</div>
-            )}
+        <StatsList
+          items={leaders.length > 0 ? leaders : []}
+          emptyMessage="No hay datos disponibles"
+          renderLeft={(player, index) => (
+            <div className="flex items-center gap-3 w-full">
+              <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">
+                {index + 1}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-foreground text-sm truncate">{player.name}</div>
+                <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                  <span>{player.team}</span>
+                  {player.owner_name && (
+                    <>
+                      <span>·</span>
+                      {(() => {
+                        const color = getColorForUser(
+                          player.owner_id,
+                          player.owner_name,
+                          player.owner_color_index
+                        );
+                        return (
+                          <span className={`${color.text} truncate font-medium`}>
+                            👤 {player.owner_name}
+                          </span>
+                        );
+                      })()}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          renderRight={(player) => (
+            <div className="flex items-center gap-4 text-right whitespace-nowrap">
+              {/* Total with stat name */}
+              <div>
+                <div className={`font-bold text-base ${displayConfig.color}`}>
+                  <AnimatedNumber value={player.value} duration={0.8} />
+                </div>
+                <div className="text-[10px] text-muted-foreground">{displayConfig.label}</div>
+              </div>
+              {/* Average per game */}
+              <div>
+                <div className="font-bold text-base text-foreground">
+                  <AnimatedNumber value={player.avg_value} decimals={1} duration={0.8} />
+                </div>
+                <div className="text-[10px] text-muted-foreground">Promedio</div>
+              </div>
+              {/* Games played */}
+              <div>
+                <div className="font-bold text-base text-foreground">
+                  <AnimatedNumber value={player.games_played} duration={0.8} />
+                </div>
+                <div className="text-[10px] text-muted-foreground">Partidos</div>
+              </div>
+            </div>
+          )}
+        />
       </div>
     </Card>
   );

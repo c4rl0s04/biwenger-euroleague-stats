@@ -1,10 +1,11 @@
 'use client';
 
+'use client';
+
 import PropTypes from 'prop-types';
 import { Flame, Snowflake, TrendingUp, TrendingDown, Info } from 'lucide-react';
-import { Card, AnimatedNumber } from '@/components/ui';
+import { Card, AnimatedNumber, StatsList } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import DashboardPlayerRow from './shared/DashboardPlayerRow';
 
 export default function StreakCard({ type = 'hot' }) {
   const config = {
@@ -57,50 +58,46 @@ export default function StreakCard({ type = 'hot' }) {
       actionRight={infoTooltip}
       className="card-glow"
     >
-      <div className="flex flex-col">
-        {!loading && players.length > 0 ? (
-          players.map((player, index) => (
-            <DashboardPlayerRow
-              key={`${player.player_id}-${index}`}
-              playerId={player.player_id}
-              name={player.name}
-              team={player.team}
-              owner={player.owner_name}
-              ownerId={player.owner_id}
-              ownerColorIndex={player.owner_color_index}
-              color={cfg.color}
-              avatar={
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center bg-${cfg.color}-500/10 text-${cfg.color}-400 border border-${cfg.color}-500/20`}
-                >
-                  <TrendIcon size={20} />
+      <div className="flex flex-col flex-1 pb-1">
+        <StatsList
+          items={!loading && players.length > 0 ? players : []}
+          emptyMessage={cfg.emptyMessage}
+          renderLeft={(player) => (
+            <div className="flex items-center gap-3 w-full">
+              <div
+                className={`w-10 h-10 rounded-full flex shrink-0 items-center justify-center bg-${cfg.color}-500/10 text-${cfg.color}-400 border border-${cfg.color}-500/20`}
+              >
+                <TrendIcon size={20} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-foreground text-sm truncate">{player.name}</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {player.team} {/* Owner info could be added if color index logic imported */}
                 </div>
-              }
-              rightContent={
-                <div className="flex flex-col items-end">
-                  <div
-                    className={`font-bold text-base ${
-                      cfg.color === 'orange' ? 'text-orange-400' : 'text-blue-400'
-                    }`}
-                  >
-                    {player.avg_diff > 0 ? '+' : ''}
-                    <AnimatedNumber
-                      value={parseFloat(player.avg_diff) || 0}
-                      decimals={1}
-                      duration={0.8}
-                    />{' '}
-                    pts
-                  </div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Diferencia
-                  </div>
-                </div>
-              }
-            />
-          ))
-        ) : (
-          <div className="text-center text-muted-foreground py-8">{cfg.emptyMessage}</div>
-        )}
+              </div>
+            </div>
+          )}
+          renderRight={(player) => (
+            <div className="flex flex-col items-end whitespace-nowrap">
+              <div
+                className={`font-bold text-base ${
+                  cfg.color === 'orange' ? 'text-orange-400' : 'text-blue-400'
+                }`}
+              >
+                {player.avg_diff > 0 ? '+' : ''}
+                <AnimatedNumber
+                  value={parseFloat(player.avg_diff) || 0}
+                  decimals={1}
+                  duration={0.8}
+                />{' '}
+                pts
+              </div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                Diferencia
+              </div>
+            </div>
+          )}
+        />
       </div>
     </Card>
   );

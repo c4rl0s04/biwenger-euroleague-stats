@@ -18,7 +18,7 @@ export const apiClient = {
       const res = await fetch(url);
 
       if (!res.ok) {
-        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+        throw new Error(`API ${res.status} on ${url}`);
       }
 
       const json = await res.json();
