@@ -3,7 +3,16 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Goal } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Cell,
+  LabelList,
+} from 'recharts';
 
 import { getColorForUser } from '@/lib/constants/colors';
 import Link from 'next/link';
@@ -129,17 +138,17 @@ export default function TheoreticalGapCard() {
           <p className="text-xs text-slate-300 font-medium italic px-2 text-left">
             Eficiencia comparada con la{' '}
             <span className="text-yellow-400 font-bold not-italic">Temporada Perfecta</span> (suma
-            de todos los MVPs). El porcentaje indica cuántos puntos has capturado del máximo teórico
-            posible.
+            de todos los ganadores de cada jornada). El porcentaje indica cuántos puntos has
+            capturado del máximo teórico posible.
           </p>
 
           {/* Perfect Score Context */}
-          <div className="text-center text-[10px] font-mono bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded py-1 mx-4">
+          <div className="text-center text-[16px] font-mono bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded py-1 mx-4">
             Puntuación Perfecta Posible:{' '}
             <span className="font-bold">{data[0].perfectTotal} pts</span>
           </div>
 
-          <div className="w-full flex-1 min-h-[200px]">
+          <div className="w-full flex-1 min-h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={data}
@@ -161,6 +170,14 @@ export default function TheoreticalGapCard() {
                     const userColor = getColorForUser(entry.user_id, entry.name, entry.color_index);
                     return <Cell key={`cell-${index}`} fill={userColor.stroke} fillOpacity={0.8} />;
                   })}
+                  <LabelList
+                    dataKey="current_points"
+                    position="right"
+                    fill="#cbd5e1"
+                    fontSize={11}
+                    fontWeight="bold"
+                    formatter={(val) => `${val} pts`}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
