@@ -3,8 +3,9 @@
 'use client';
 
 import PropTypes from 'prop-types';
-import { Flame, Snowflake, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { Flame, Snowflake, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, AnimatedNumber, StatsList } from '@/components/ui';
+import { InfoTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function StreakCard({ type = 'hot' }) {
@@ -40,13 +41,17 @@ export default function StreakCard({ type = 'hot' }) {
   });
 
   const infoTooltip = (
-    <div className="group/info relative">
-      <Info className={`w-4 h-4 text-muted-foreground hover:text-${cfg.color}-400 cursor-help`} />
-      <div className="absolute right-0 top-6 w-64 bg-popover border border-border text-muted-foreground text-xs rounded-lg p-3 shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50">
-        <p className={`mb-2 font-semibold text-${cfg.color}-400`}>{cfg.tooltipTitle}</p>
-        Comparativa entre la media de las últimas 5 jornadas y la media de la temporada.
-      </div>
-    </div>
+    <InfoTooltip
+      iconSize={16}
+      content={
+        <div className="text-left">
+          <TooltipHeader className={`!text-${cfg.color}-400`}>{cfg.tooltipTitle}</TooltipHeader>
+          <div className="text-slate-300">
+            Comparativa entre la media de las últimas 5 jornadas y la media de la temporada.
+          </div>
+        </div>
+      }
+    />
   );
 
   return (

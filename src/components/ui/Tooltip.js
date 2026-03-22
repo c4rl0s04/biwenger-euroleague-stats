@@ -15,9 +15,9 @@ export const GlassTooltip = ({
   return (
     <div
       className={`
-      bg-popover/90 backdrop-blur-xl border border-white/10 
+      bg-slate-950/70 backdrop-blur-3xl border border-white/20 
       text-foreground text-xs normal-case font-sans leading-relaxed 
-      rounded-2xl shadow-2xl ring-1 ring-white/5 p-4
+      rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.8)] ring-1 ring-white/10 p-4
       ${className}
     `}
     >
@@ -27,7 +27,7 @@ export const GlassTooltip = ({
           className={`
             absolute left-1/2 -translate-x-1/2 w-0 h-0 
             border-l-[6px] border-r-[6px] border-[6px] border-transparent
-            ${trianglePosition === 'bottom' ? 'top-full border-t-popover/90' : 'bottom-full border-b-popover/90'}
+            ${trianglePosition === 'bottom' ? 'top-full border-t-slate-950/70' : 'bottom-full border-b-slate-950/70'}
           `}
         />
       )}

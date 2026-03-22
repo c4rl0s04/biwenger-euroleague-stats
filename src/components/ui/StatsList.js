@@ -42,7 +42,7 @@ export default function StatsList({
             onMouseLeave={() => onMouseLeave?.(item)}
           >
             {renderLeft ? (
-              renderLeft(item, index)
+              renderLeft(item, index, userColor)
             ) : (
               /* Default User Info Section (Used by Standings cards) */
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -92,11 +92,11 @@ export default function StatsList({
 
             {/* Right Column (Metrics/Status) */}
             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-              {renderRight && renderRight(item, index)}
+              {renderRight && renderRight(item, index, userColor)}
             </div>
 
             {/* Extra Content (e.g. tooltips) */}
-            {renderExtra?.(item, index)}
+            {renderExtra?.(item, index, userColor)}
           </div>
         );
       })}
