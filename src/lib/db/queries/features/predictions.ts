@@ -9,6 +9,8 @@ export interface Achievement {
   jornada: string;
   usuario: string;
   user_id: number;
+  color_index: number;
+  user_icon?: string;
 }
 
 export interface ParticipationStat {
@@ -22,11 +24,13 @@ export interface PorraResult {
   aciertos: number;
   user_id: number;
   color_index: number;
+  user_icon?: string;
 }
 
 export interface TableStat {
   user_id: number;
   usuario: string;
+  user_icon?: string;
   color_index: number;
   jornadas_jugadas: number;
   total_aciertos: number;
@@ -39,6 +43,7 @@ export interface ClutchStat {
   usuario: string;
   user_id: number;
   color_index: number;
+  user_icon?: string;
   avg_last_3: number;
 }
 
@@ -46,6 +51,7 @@ export interface VictoryStat {
   usuario: string;
   user_id: number;
   color_index: number;
+  user_icon?: string;
   victorias: number;
 }
 
@@ -64,6 +70,9 @@ export interface PredictableTeam {
 
 export interface BestRoundStat {
   usuario: string;
+  user_id: number;
+  color_index: number;
+  user_icon?: string;
   aciertos: number;
   jornada: string;
 }
@@ -149,7 +158,7 @@ export async function getPorrasStats(): Promise<PorrasStats> {
 
 async function getAchievements() {
   const perfect10Query = `
-    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id
+    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id, u.icon as user_icon, u.color_index
     FROM porras p
     JOIN users u ON p.user_id = u.id
     WHERE p.aciertos = 10
@@ -160,7 +169,7 @@ async function getAchievements() {
     WITH MinScore AS (
         SELECT MIN(aciertos) as val FROM porras
     )
-    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id
+    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id, u.icon as user_icon, u.color_index
     FROM porras p
     JOIN users u ON p.user_id = u.id
     WHERE p.aciertos = (SELECT val FROM MinScore)
@@ -200,7 +209,7 @@ async function getParticipation(): Promise<ParticipationStat[]> {
 
 async function getPerformanceData(): Promise<PorraResult[]> {
   const query = `
-    SELECT p.round_name as jornada, u.name as usuario, p.aciertos, p.user_id, u.color_index
+    SELECT p.round_name as jornada, u.name as usuario, p.aciertos, p.user_id, u.color_index, u.icon as user_icon
     FROM porras p
     JOIN users u ON p.user_id = u.id
     WHERE p.aciertos IS NOT NULL
@@ -220,6 +229,7 @@ async function getTableStats(): Promise<TableStat[]> {
         SELECT 
             p.user_id,
             u.name as usuario,
+            u.icon as user_icon,
             u.color_index,
             COUNT(p.round_id) as jornadas_jugadas,
             SUM(p.aciertos) as total_aciertos,
@@ -228,7 +238,7 @@ async function getTableStats(): Promise<TableStat[]> {
             MIN(p.aciertos) as peor_jornada
         FROM porras p
         JOIN users u ON p.user_id = u.id
-        GROUP BY p.user_id, u.name, u.color_index
+        GROUP BY p.user_id, u.name, u.icon, u.color_index
     )
     SELECT * FROM UserStats
     ORDER BY promedio DESC
@@ -263,12 +273,13 @@ async function getClutchStats(): Promise<ClutchStat[]> {
     SELECT 
         u.name as usuario,
         p.user_id,
+        u.icon as user_icon,
         u.color_index,
         AVG(p.aciertos) as avg_last_3
     FROM porras p
     JOIN users u ON p.user_id = u.id
     WHERE p.round_id = ANY($1::int[])
-    GROUP BY p.user_id, u.name, u.color_index
+    GROUP BY p.user_id, u.name, u.icon, u.color_index
     HAVING COUNT(p.round_id) >= 1
     ORDER BY avg_last_3 DESC
   `;
@@ -298,11 +309,12 @@ async function getVictorias(): Promise<VictoryStat[]> {
     SELECT 
         u.name as usuario,
         w.user_id,
+        u.icon as user_icon,
         u.color_index,
         COUNT(w.round_id) as victorias
     FROM Winners w
     JOIN users u ON w.user_id = u.id
-    GROUP BY w.user_id, u.name, u.color_index
+    GROUP BY w.user_id, u.name, u.icon, u.color_index
     ORDER BY victorias DESC
   `;
 
@@ -411,7 +423,7 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
 async function getBestRoundStat(): Promise<BestRoundStat[]> {
   // Returns top single round performance of all time
   const query = `
-    SELECT u.name as usuario, p.aciertos, p.round_name as jornada
+    SELECT u.name as usuario, p.aciertos, p.round_name as jornada, u.id as user_id, u.icon as user_icon, u.color_index
     FROM porras p
     JOIN users u ON p.user_id = u.id
     ORDER BY p.aciertos DESC, p.round_id DESC
