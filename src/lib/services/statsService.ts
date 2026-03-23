@@ -7,6 +7,7 @@ export interface HallOfFameEntry {
   id: number;
   name: string;
   icon: string;
+  colorIndex: number;
   titles: number;
   tournaments: string[];
 }
@@ -57,6 +58,7 @@ export async function getGlobalTournamentStats() {
           id: winner.id,
           name: winner.name,
           icon: winner.icon,
+          colorIndex: winner.colorIndex || winner.color_index || 0,
           titles: 0,
           tournaments: [],
         };

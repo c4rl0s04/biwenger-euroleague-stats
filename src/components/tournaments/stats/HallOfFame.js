@@ -1,4 +1,7 @@
 import { Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { getColorForUser } from '@/lib/constants/colors';
+import { cn } from '@/lib/utils';
 
 export function HallOfFame({ winners }) {
   if (!winners || winners.length === 0) return null;
@@ -7,6 +10,8 @@ export function HallOfFame({ winners }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {winners.map((winner, index) => {
         const isFirst = index === 0;
+        const userColor = getColorForUser(winner.id, winner.name, winner.colorIndex);
+
         return (
           <div
             key={winner.id}
@@ -26,8 +31,9 @@ export function HallOfFame({ winners }) {
             </div>
 
             {/* Avatar */}
-            <div
-              className={`relative rounded-full overflow-hidden shrink-0 ${
+            <Link
+              href={`/user/${winner.id || winner.name}`}
+              className={`relative rounded-full overflow-hidden shrink-0 transition-transform active:scale-95 ${
                 isFirst
                   ? 'w-20 h-20 border-4 border-amber-500 shadow-xl'
                   : 'w-16 h-16 border-2 border-white/10'
@@ -48,17 +54,21 @@ export function HallOfFame({ winners }) {
                   <Trophy size={isFirst ? 32 : 24} className="text-zinc-500" />
                 </div>
               )}
-            </div>
+            </Link>
 
             {/* Info */}
             <div className="text-center">
-              <h3
-                className={`font-black font-display tracking-tight mb-1 ${
-                  isFirst ? 'text-2xl text-white' : 'text-lg text-zinc-200'
-                }`}
-              >
-                {winner.name}
-              </h3>
+              <Link href={`/user/${winner.id || winner.name}`} className="group/name">
+                <h3
+                  className={cn(
+                    'font-black font-display tracking-tight mb-1 transition-colors',
+                    isFirst ? 'text-2xl text-white' : 'text-lg text-zinc-200',
+                    userColor.groupHover
+                  )}
+                >
+                  {winner.name}
+                </h3>
+              </Link>
               <div className="flex items-center justify-center gap-2">
                 <Trophy size={14} className={isFirst ? 'text-amber-500' : 'text-zinc-500'} />
                 <span className={`font-bold ${isFirst ? 'text-amber-500' : 'text-zinc-400'}`}>
@@ -67,21 +77,27 @@ export function HallOfFame({ winners }) {
               </div>
             </div>
 
-            {/* Tournaments List (Small) */}
-            <div className="mt-2 flex flex-wrap justify-center gap-1">
-              {winner.tournaments.slice(0, 3).map((t, i) => (
+            {/* Tournaments List */}
+            <div className="mt-2 flex flex-wrap justify-center gap-1.5 px-2">
+              {winner.tournaments.map((t, i) => (
                 <span
                   key={i}
-                  className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-500 truncate max-w-[150px]"
+                  className={cn(
+                    'text-xs px-2.5 py-1 rounded-md font-bold transition-colors uppercase tracking-tight',
+                    isFirst
+                      ? 'bg-amber-500/10 text-amber-500/80 border border-amber-500/20'
+                      : 'bg-white/5 text-zinc-500 border border-white/5',
+                    !isFirst &&
+                      userColor.text
+                        .replace('text-', 'bg-')
+                        .concat('/10 border-')
+                        .concat(userColor.text.replace('text-', ''))
+                        .concat('/20 ') + userColor.text
+                  )}
                 >
                   {t}
                 </span>
               ))}
-              {winner.tournaments.length > 3 && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-500">
-                  +{winner.tournaments.length - 3}
-                </span>
-              )}
             </div>
           </div>
         );
