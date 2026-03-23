@@ -37,7 +37,7 @@ export default async function TournamentDetailsPage({ params }) {
 
       {/* Winner Banner (if finished) */}
       {!isActive && data.winner && (
-        <Section title="" background="section-raised" delay={0}>
+        <Section title="Ganador del Torneo" background="section-raised" delay={0}>
           <ElegantCard hideHeader color="amber" bgColor="amber" className="w-full" padding="p-6">
             <div className="flex items-center gap-8 py-2">
               <Link
@@ -86,16 +86,16 @@ export default async function TournamentDetailsPage({ params }) {
 
       {/* Content based on type */}
       {tournament.type === 'league' ? (
-        <Section title="" delay={100} background="section-base">
+        <Section title="Clasificación" delay={100} background="section-base">
           <StandingsTable standings={standings} />
         </Section>
       ) : (
-        <Section title="" delay={100} background="section-base">
+        <Section title="Cuadro" delay={100} background="section-base">
           <TournamentBracket fixtures={fixtures} />
         </Section>
       )}
 
-      <Section title="" delay={200} background="section-raised">
+      <Section title="Resultados" delay={200} background="section-raised">
         <TournamentFixtures fixtures={fixtures} />
       </Section>
     </div>

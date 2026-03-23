@@ -100,8 +100,6 @@ export default function StandingsTable({ standings }) {
 
   return (
     <StatsTable
-      title="Clasificación"
-      icon={Trophy}
       data={standings}
       columns={columns}
       defaultSort={{ key: 'points', direction: 'desc' }}
