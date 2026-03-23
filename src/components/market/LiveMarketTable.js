@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { getColorForUser } from '@/lib/constants/colors';
 
 const POS_COLORS = {
   Unknown: 'bg-slate-600',
@@ -80,32 +81,6 @@ export default function LiveMarketTable({ initialData }) {
 
   const formatEuro = (val) => val.toLocaleString('es-ES', { maximumFractionDigits: 0 });
 
-  // Utilidad para asignar un color único a cada usuario (hash simple)
-  const userColor = (name) => {
-    if (!name || name === 'Mercado') return 'text-orange-400';
-    // Paleta de colores pastel
-    const palette = [
-      'text-blue-400',
-      'text-green-400',
-      'text-pink-400',
-      'text-yellow-400',
-      'text-purple-400',
-      'text-emerald-400',
-      'text-cyan-400',
-      'text-fuchsia-400',
-      'text-lime-400',
-      'text-sky-400',
-      'text-red-400',
-      'text-indigo-400',
-    ];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const idx = Math.abs(hash) % palette.length;
-    return palette[idx];
-  };
-
   return (
     <ElegantCard
       title="Mercado en Vivo"
@@ -131,14 +106,14 @@ export default function LiveMarketTable({ initialData }) {
               <button
                 onClick={() => setPage((currentPage) => currentPage - 1)}
                 disabled={page <= 1 || loading}
-                className="p-2 rounded-xl bg-white/5 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-white/5 cursor-pointer shadow-sm active:scale-95"
+                className="p-2 rounded-xl bg-card/50 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-border cursor-pointer shadow-sm active:scale-95"
               >
                 <ArrowLeft size={16} />
               </button>
               <button
                 onClick={() => setPage((currentPage) => currentPage + 1)}
                 disabled={page >= tableData.totalPages || loading}
-                className="p-2 rounded-xl bg-white/5 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-white/5 cursor-pointer shadow-sm active:scale-95"
+                className="p-2 rounded-xl bg-card/50 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-border cursor-pointer shadow-sm active:scale-95"
               >
                 <ArrowNext size={16} />
               </button>
@@ -152,7 +127,7 @@ export default function LiveMarketTable({ initialData }) {
                 type="text"
                 name="buyer"
                 placeholder="Comprador..."
-                className="w-full bg-slate-900/50 text-white text-xs rounded-xl border border-white/5 pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-600 transition-all font-display tracking-tight font-black uppercase"
+                className="w-full bg-card/40 text-white text-xs md:text-sm rounded-xl border border-border pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500 transition-all font-display tracking-tight font-black uppercase"
                 value={filters.buyer}
                 onChange={handleFilterChange}
               />
@@ -163,7 +138,7 @@ export default function LiveMarketTable({ initialData }) {
                 type="text"
                 name="seller"
                 placeholder="Vendedor..."
-                className="w-full bg-slate-900/50 text-white text-xs rounded-xl border border-white/5 pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-600 transition-all font-display tracking-tight font-black uppercase"
+                className="w-full bg-card/40 text-white text-xs md:text-sm rounded-xl border border-border pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500 transition-all font-display tracking-tight font-black uppercase"
                 value={filters.seller}
                 onChange={handleFilterChange}
               />
@@ -180,7 +155,7 @@ export default function LiveMarketTable({ initialData }) {
         {/* Tabla compacta con iconografía */}
         <div className="relative min-h-[400px] flex-1 overflow-x-auto">
           {loading && (
-            <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-2xl">
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-2xl">
               <Loader2 className="animate-spin text-primary w-8 h-8" />
             </div>
           )}
@@ -214,8 +189,8 @@ export default function LiveMarketTable({ initialData }) {
               Unknown: { color: 'bg-slate-500/80 border-slate-300', label: '?' },
             };
             return (
-              <table className="w-full text-sm text-left rounded-2xl overflow-hidden border border-white/5 bg-transparent">
-                <thead className="text-[10px] text-slate-500 uppercase border-b border-white/5 sticky top-0 bg-slate-900/80 backdrop-blur-md z-10 font-display tracking-[0.15em]">
+              <table className="w-full text-sm text-left rounded-2xl overflow-hidden border border-border bg-transparent">
+                <thead className="text-[10px] md:text-xs text-slate-400 uppercase border-b border-border sticky top-0 bg-card/90 backdrop-blur-md z-10 font-display tracking-[0.1em]">
                   <tr>
                     <th className="px-4 py-4 font-black">Fecha</th>
                     <th className="px-4 py-4 font-black">Jugador</th>
@@ -223,12 +198,12 @@ export default function LiveMarketTable({ initialData }) {
                     <th className="px-4 py-4 font-black text-right">Precio</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10 bg-transparent">
+                <tbody className="divide-y divide-white/5 bg-transparent">
                   {dayKeys.map((day) => [
                     <tr key={day} className="sticky top-[52px] z-5">
                       <td
                         colSpan="4"
-                        className="py-2.5 px-4 text-[10px] font-black text-primary/80 tracking-[0.2em] uppercase font-display sticky left-0 bg-white/5 backdrop-blur-sm border-b border-white/5"
+                        className="py-2.5 px-4 text-[10px] md:text-xs font-black text-primary/80 tracking-[0.15em] uppercase font-display sticky left-0 bg-card/60 backdrop-blur-sm border-b border-border"
                       >
                         {day}
                       </td>
@@ -263,7 +238,7 @@ export default function LiveMarketTable({ initialData }) {
                               </span>
                               <a
                                 href={`/player/${t.player_id}`}
-                                className="font-black text-white text-xs truncate max-w-45 md:max-w-60 hover:text-primary transition-colors font-display tracking-tight"
+                                className="font-black text-white text-sm md:text-base truncate max-w-45 md:max-w-60 hover:text-primary transition-colors font-display tracking-tight"
                                 style={{ textDecoration: 'none' }}
                               >
                                 {t.player_name}
@@ -314,13 +289,13 @@ export default function LiveMarketTable({ initialData }) {
                                   {t.vendedor !== 'Mercado' ? (
                                     <a
                                       href={`/user/${t.vendedor_id}`}
-                                      className={`${userColor(t.vendedor)} hover:brightness-125 font-black transition-colors font-display tracking-tight text-[13px]`}
+                                      className={`${getColorForUser(t.vendedor_id, t.vendedor, t.vendedor_color_index).text} hover:brightness-125 font-black transition-colors font-display tracking-tight text-sm md:text-base`}
                                       style={{ textDecoration: 'none' }}
                                     >
                                       {t.vendedor}
                                     </a>
                                   ) : (
-                                    <span className="text-orange-400 font-black font-display tracking-tight text-[13px]">
+                                    <span className="text-orange-400 font-black font-display tracking-tight text-sm md:text-base">
                                       {t.vendedor}
                                     </span>
                                   )}
@@ -368,13 +343,13 @@ export default function LiveMarketTable({ initialData }) {
                                   {t.comprador !== 'Mercado' ? (
                                     <a
                                       href={`/user/${t.comprador_id}`}
-                                      className={`${userColor(t.comprador)} hover:brightness-125 font-black transition-colors font-display tracking-tight text-[13px]`}
+                                      className={`${getColorForUser(t.comprador_id, t.comprador, t.comprador_color_index).text} hover:brightness-125 font-black transition-colors font-display tracking-tight text-sm md:text-base`}
                                       style={{ textDecoration: 'none' }}
                                     >
                                       {t.comprador}
                                     </a>
                                   ) : (
-                                    <span className="text-orange-400 font-black font-display tracking-tight text-[13px]">
+                                    <span className="text-orange-400 font-black font-display tracking-tight text-sm md:text-base">
                                       {t.comprador}
                                     </span>
                                   )}
@@ -389,10 +364,12 @@ export default function LiveMarketTable({ initialData }) {
                             </div>
                           </td>
                           {/* Precio */}
-                          <td className="px-4 py-4 whitespace-nowrap text-right font-display font-black text-primary text-base group-hover:text-white relative transition-all">
+                          <td className="px-4 py-4 whitespace-nowrap text-right font-display font-black text-primary text-base md:text-lg group-hover:text-white relative transition-all">
                             <span className="transition-transform duration-300 block group-hover:scale-110 origin-right">
                               {formatEuro(t.precio)}{' '}
-                              <span className="text-[10px] opacity-50 ml-0.5 font-sans">€</span>
+                              <span className="text-[10px] md:text-xs opacity-50 ml-0.5 font-sans">
+                                €
+                              </span>
                             </span>
                           </td>
                         </tr>
@@ -416,7 +393,7 @@ export default function LiveMarketTable({ initialData }) {
         </div>
 
         {/* Pagination (bottom) */}
-        <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+        <div className="mt-8 pt-6 border-t border-border flex items-center justify-between">
           <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest font-display">
             Página <span className="text-white ml-1">{page}</span>{' '}
             <span className="mx-1 text-slate-700">/</span> {tableData.totalPages}
@@ -425,14 +402,14 @@ export default function LiveMarketTable({ initialData }) {
             <button
               onClick={() => setPage((currentPage) => currentPage - 1)}
               disabled={page <= 1 || loading}
-              className="p-2 rounded-xl bg-white/5 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-white/5 cursor-pointer shadow-sm active:scale-95"
+              className="p-2 rounded-xl bg-card/50 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-border cursor-pointer shadow-sm active:scale-95"
             >
               <ArrowLeft size={16} />
             </button>
             <button
               onClick={() => setPage((currentPage) => currentPage + 1)}
               disabled={page >= tableData.totalPages || loading}
-              className="p-2 rounded-xl bg-white/5 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-white/5 cursor-pointer shadow-sm active:scale-95"
+              className="p-2 rounded-xl bg-card/50 text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-white transition-all duration-300 border border-border cursor-pointer shadow-sm active:scale-95"
             >
               <ArrowNext size={16} />
             </button>
