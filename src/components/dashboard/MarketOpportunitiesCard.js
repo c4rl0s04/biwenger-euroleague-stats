@@ -3,7 +3,7 @@
 import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { Card, AnimatedNumber } from '@/components/ui';
+import { Card, AnimatedNumber, StatsList } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function MarketOpportunitiesCard() {
@@ -17,68 +17,58 @@ export default function MarketOpportunitiesCard() {
       loading={loading}
       className="card-glow"
     >
-      {!loading && (
-        <div className="space-y-4 flex-1">
-          {players && players.length > 0 ? (
-            players.slice(0, 6).map((player) => (
-              <div key={player.player_id} className="group/item">
-                {/* Line 1: Name */}
-                <div className="mb-1">
-                  <Link
-                    href={`/player/${player.player_id}`}
-                    className="text-foreground font-medium text-sm truncate block hover:text-blue-500 transition-colors"
-                    title={player.name}
-                  >
-                    {player.name}
-                  </Link>
-                </div>
+      <StatsList
+        items={!loading && players && players.length > 0 ? players.slice(0, 5) : []}
+        emptyMessage="No hay chollos ahora"
+        renderLeft={(player, idx) => (
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <span className="text-slate-500 font-mono text-[10px] w-4 flex-shrink-0">
+              {idx + 1}
+            </span>
 
-                {/* Line 2: Context */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
-                  <Link
-                    href={`/team/${player.team_id}`}
-                    className="truncate hover:text-blue-500 transition-colors"
-                    title={player.team}
-                  >
-                    {getShortTeamName(player.team)}
-                  </Link>
-                  <span className="w-1 h-1 rounded-full bg-muted"></span>
-                  <span className="text-blue-400 font-mono">
-                    <AnimatedNumber value={Number(player.price)} suffix="€" duration={0.8} />
-                  </span>
-                </div>
-
-                {/* Line 3: Scores & Avg */}
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-1">
-                    {player.recent_scores &&
-                      player.recent_scores.split(',').map((score, i) => (
-                        <span
-                          key={i}
-                          className={`text-[10px] px-1.5 py-0.5 rounded border ${getScoreColor(score)}`}
-                        >
-                          {score}
-                        </span>
-                      ))}
-                  </div>
-                  <span className="text-green-400 font-bold text-sm">
-                    <AnimatedNumber
-                      value={parseFloat(player.avg_recent_points)}
-                      decimals={1}
-                      duration={0.8}
-                    />{' '}
-                    pts
-                  </span>
-                </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <Link
+                href={`/player/${player.player_id}`}
+                className="font-bold text-sm text-white truncate hover:text-blue-500 transition-colors leading-tight"
+              >
+                {player.name}
+              </Link>
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 truncate mt-0.5 font-medium">
+                <span className="truncate">{getShortTeamName(player.team)}</span>
+                <span className="opacity-30">•</span>
+                <span className="text-blue-400 font-mono font-bold tracking-tight">
+                  <AnimatedNumber value={Number(player.price)} suffix="€" duration={0.8} />
+                </span>
               </div>
-            ))
-          ) : (
-            <div className="text-muted-foreground text-sm text-center py-4">
-              No hay chollos ahora
+              <div className="flex gap-1 mt-1">
+                {player.recent_scores &&
+                  player.recent_scores.split(',').map((score, i) => (
+                    <span
+                      key={i}
+                      className={`text-[9px] px-1 py-0.5 rounded border leading-none font-bold ${getScoreColor(score)}`}
+                    >
+                      {score}
+                    </span>
+                  ))}
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+        renderRight={(player) => (
+          <div className="flex flex-col items-end justify-center min-w-[60px]">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-widest leading-none mb-1">
+              Reciente
+            </span>
+            <span className="text-green-400 font-bold text-base tabular-nums leading-none">
+              <AnimatedNumber
+                value={parseFloat(player.avg_recent_points)}
+                decimals={1}
+                duration={0.8}
+              />
+            </span>
+          </div>
+        )}
+      />
     </Card>
   );
 }

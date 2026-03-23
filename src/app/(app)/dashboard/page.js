@@ -2,7 +2,6 @@ import nextDynamic from 'next/dynamic';
 import { CardSkeleton, PageHeader } from '@/components/ui';
 import { Section } from '@/components/layout';
 import {
-  StandingsCard,
   MySeasonCard,
   SquadValueCard,
   RecentRoundsCard,
@@ -117,11 +116,10 @@ export default function Dashboard() {
         delay={200}
         background="section-base"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <TopFormCard />
           <CaptainSuggestCard />
           <MarketOpportunitiesCard />
-          <StandingsCard />
         </div>
         <div className="mt-4">
           <NextMatchesCardDynamic />
