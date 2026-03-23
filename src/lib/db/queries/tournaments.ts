@@ -135,7 +135,8 @@ export async function getTournamentStandings(
     drawn: row.drawn,
     scored: row.scored,
     against: row.against,
-    user_color: row.user_color ? parseInt(row.user_color) : null,
+    user_color:
+      row.user_color !== null && row.user_color !== undefined ? parseInt(row.user_color) : null,
   }));
 }
 
@@ -166,7 +167,13 @@ export async function getTournamentFixtures(
     home_score: row.home_score,
     away_score: row.away_score,
     // Ensure color index is number
-    home_user_color: row.home_user_color ? parseInt(row.home_user_color) : null,
-    away_user_color: row.away_user_color ? parseInt(row.away_user_color) : null,
+    home_user_color:
+      row.home_user_color !== null && row.home_user_color !== undefined
+        ? parseInt(row.home_user_color)
+        : null,
+    away_user_color:
+      row.away_user_color !== null && row.away_user_color !== undefined
+        ? parseInt(row.away_user_color)
+        : null,
   }));
 }

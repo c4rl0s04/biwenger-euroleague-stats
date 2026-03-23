@@ -3,17 +3,42 @@
 import { TrendingUp, Zap, Scale } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { UserAvatar } from '@/components/ui';
 import { getColorForUser } from '@/lib/constants/colors';
+import { cn } from '@/lib/utils';
 
-const UserLink = ({ user, className = '' }) => {
-  if (!user || !user.id) return <span className={className}>{user?.name}</span>;
+const UserRecordInfo = ({ user, score, isWinner = false, className = '' }) => {
+  if (!user) return null;
+
+  const userColor = getColorForUser(user.id, user.name, user.colorIndex);
 
   return (
     <Link
-      href={`/user/${user.id}`}
-      className={`hover:underline transition-all ${className} ${getColorForUser(user.id, user.name, user.colorIndex).text}`}
+      href={`/user/${user.id || user.name}`}
+      className={cn(
+        'flex flex-col items-center gap-2 group/user p-2 rounded-xl transition-all hover:bg-white/5',
+        className
+      )}
     >
-      {user.name}
+      <UserAvatar
+        src={user.icon || user.image}
+        alt={user.name}
+        size={40}
+        className={cn(
+          'ring-2 ring-offset-2 ring-offset-black transition-all group-hover/user:ring-4',
+          isWinner ? 'ring-emerald-500/50' : 'ring-white/10'
+        )}
+      />
+      <div className="flex flex-col items-center">
+        <span
+          className={cn('text-xs font-bold truncate max-w-[80px] md:max-w-[100px]', userColor.text)}
+        >
+          {user.name}
+        </span>
+        {score !== undefined && (
+          <span className="text-[10px] font-mono text-zinc-500">{score} pts</span>
+        )}
+      </div>
     </Link>
   );
 };
@@ -22,45 +47,36 @@ export function RecordsSection({ records }) {
   if (!records) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-fade-in-up">
       {/* Biggest Win */}
       {records.biggestWin && (
         <ElegantCard
           title="Mayor Victoria"
           icon={Scale}
           color="emerald"
-          className="h-full relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300"
+          className="h-full group hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all duration-500"
         >
-          {/* Background Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-
-          <div className="flex flex-col items-center justify-between h-full py-4 relative z-10">
-            <div className="flex flex-col items-center">
-              <span className="text-5xl font-black text-white font-display mb-2 tracking-tight drop-shadow-lg">
+          <div className="flex flex-col items-center justify-center py-6 h-full">
+            <div className="flex flex-col items-center mb-8">
+              <span className="text-7xl font-display font-black text-emerald-400 tracking-tighter drop-shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                 +{records.biggestWin.diff}
               </span>
-              <div className="text-xs font-bold text-emerald-400 mb-6 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-                {records.biggestWin.score} pts
+              <span className="text-xs font-black text-emerald-500 uppercase tracking-widest mt-1">
+                DIFERENCIA MÁXIMA
+              </span>
+              <div className="mt-3 flex items-center justify-center">
+                <span className="text-3xl font-display text-emerald-400 drop-shadow-md tracking-wider">
+                  {records.biggestWin.score}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between w-full px-4 mt-auto bg-black/20 rounded-xl py-3 border border-white/5">
-              <div className="flex flex-col items-center gap-1 flex-1">
-                <UserLink
-                  user={records.biggestWin.winner}
-                  className="font-bold text-sm text-center line-clamp-1 text-white"
-                />
-                <span className="text-[10px] font-black bg-emerald-500 text-black px-1.5 py-0.5 rounded uppercase tracking-wider">
-                  WIN
-                </span>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center w-full mt-auto">
+              <UserRecordInfo user={records.biggestWin.winner} isWinner={true} className="w-full" />
+              <div className="flex flex-col items-center justify-center pt-2">
+                <span className="text-[10px] font-black text-zinc-700 italic px-2">VS</span>
               </div>
-              <span className="text-zinc-600 font-black text-xs px-2 italic opacity-50">VS</span>
-              <div className="flex flex-col items-center gap-1 flex-1">
-                <UserLink
-                  user={records.biggestWin.loser}
-                  className="font-medium text-sm text-center line-clamp-1 text-zinc-400"
-                />
-              </div>
+              <UserRecordInfo user={records.biggestWin.loser} isWinner={false} className="w-full" />
             </div>
           </div>
         </ElegantCard>
@@ -69,44 +85,36 @@ export function RecordsSection({ records }) {
       {/* Highest Scoring Match */}
       {records.highestScoring && (
         <ElegantCard
-          title="Partido con Más Puntos"
+          title="Match Más Anotado"
           icon={Zap}
           color="amber"
-          className="h-full relative overflow-hidden group hover:border-amber-500/30 transition-all duration-300"
+          className="h-full group hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-500"
         >
-          {/* Background Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-
-          <div className="flex flex-col items-center justify-between h-full py-4 relative z-10">
-            <div className="flex flex-col items-center">
-              <span className="text-5xl font-black text-white font-display mb-2 tracking-tight drop-shadow-lg">
+          <div className="flex flex-col items-center justify-center py-6 h-full">
+            <div className="flex flex-col items-center mb-10">
+              <span className="text-7xl font-display font-black text-amber-400 tracking-tighter drop-shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                 {records.highestScoring.total}
               </span>
-              <div className="text-xs font-bold text-amber-400 mb-6 bg-amber-500/10 px-3 py-1 rounded-lg border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
-                Total Combinado
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between w-full px-4 mt-auto bg-black/20 rounded-xl py-3 border border-white/5">
-              <div className="flex flex-col items-center gap-1 flex-1">
-                <UserLink
-                  user={records.highestScoring.match.home_user}
-                  className="font-bold text-sm text-center line-clamp-1 text-white"
-                />
-                <span className="text-xs text-zinc-500 font-mono">
+              <span className="text-xs font-black text-amber-500 uppercase tracking-widest mt-1">
+                TOTAL COMBINADO
+              </span>
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-3xl font-display text-amber-400 drop-shadow-md tracking-widest">
                   {records.highestScoring.match.home_score}
                 </span>
-              </div>
-              <span className="text-amber-500 font-black text-xs px-2 italic opacity-80">+</span>
-              <div className="flex flex-col items-center gap-1 flex-1">
-                <UserLink
-                  user={records.highestScoring.match.away_user}
-                  className="font-bold text-sm text-center line-clamp-1 text-white"
-                />
-                <span className="text-xs text-zinc-500 font-mono">
+                <span className="text-amber-600/60 font-display text-xl">+</span>
+                <span className="text-3xl font-display text-amber-400 drop-shadow-md tracking-widest">
                   {records.highestScoring.match.away_score}
                 </span>
               </div>
+            </div>
+
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center w-full mt-auto">
+              <UserRecordInfo user={records.highestScoring.match.home_user} className="w-full" />
+              <div className="flex flex-col items-center justify-center pt-2">
+                <span className="text-[10px] font-black text-zinc-700 italic px-2">VS</span>
+              </div>
+              <UserRecordInfo user={records.highestScoring.match.away_user} className="w-full" />
             </div>
           </div>
         </ElegantCard>
@@ -115,27 +123,31 @@ export function RecordsSection({ records }) {
       {/* Longest Winning Streak */}
       {records.longestStreak && (
         <ElegantCard
-          title="Mejor Racha de Victorias"
+          title="Racha Histórica"
           icon={TrendingUp}
           color="indigo"
-          className="h-full relative overflow-hidden group hover:border-indigo-500/30 transition-all duration-300"
+          className="h-full group hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] transition-all duration-500"
         >
-          {/* Background Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="flex flex-col items-center justify-center py-6 h-full">
+            <div className="flex flex-col items-center mb-10">
+              <span className="text-8xl font-display font-black text-indigo-400 tracking-tighter drop-shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                {records.longestStreak.count}
+              </span>
+              <span className="text-xs font-black text-indigo-500 uppercase tracking-widest mt-1">
+                VICTORIAS SEGUIDAS
+              </span>
+            </div>
 
-          <div className="flex flex-col items-center justify-center h-full py-4 relative z-10">
-            <span className="text-6xl font-black text-white font-display mb-2 drop-shadow-[0_0_15px_rgba(99,102,241,0.3)]">
-              {records.longestStreak.count}
-            </span>
-            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-6 bg-indigo-500/10 px-3 py-1 rounded-lg border border-indigo-500/20">
-              Victorias Seguidas
-            </span>
-
-            <div className="mt-auto w-full bg-black/20 rounded-xl py-3 border border-white/5 flex justify-center">
-              <UserLink
-                user={records.longestStreak.user}
-                className="text-lg font-bold flex items-center gap-2"
-              />
+            <div className="w-full mt-auto">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">
+                  PERTENECE A
+                </span>
+                <UserRecordInfo
+                  user={records.longestStreak.user}
+                  className="!flex-row !gap-4 !px-6"
+                />
+              </div>
             </div>
           </div>
         </ElegantCard>
