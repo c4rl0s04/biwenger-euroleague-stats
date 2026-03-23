@@ -6,28 +6,50 @@ import { StatsTable } from '@/components/ui';
 export default function ManagerFinancesTable({ data }) {
   const columns = [
     {
-      key: 'total_compras',
-      label: 'Compras',
+      key: 'purchases_count',
+      label: 'Nº Compras',
       align: 'center',
       variant: 'numeric',
-      color: 'blue',
+      color: 'red',
+    },
+    {
+      key: 'purchases_total',
+      label: 'Total Compras',
+      align: 'center',
+      variant: 'numeric',
+      color: 'red',
       render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
     {
-      key: 'total_ventas',
-      label: 'Ventas',
+      key: 'sales_count',
+      label: 'Nº Ventas',
       align: 'center',
       variant: 'numeric',
-      color: 'orange',
+      color: 'emerald',
+    },
+    {
+      key: 'sales_total',
+      label: 'Total Ventas',
+      align: 'center',
+      variant: 'numeric',
+      color: 'emerald',
       render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
+    },
+    {
+      key: 'ops',
+      label: 'Total Ops',
+      align: 'center',
+      variant: 'numeric',
+      color: 'indigo',
+      sortValue: (row) => row.purchases_count + row.sales_count,
+      render: (_, row) => row.purchases_count + row.sales_count,
     },
     {
       key: 'balance',
       label: 'Balance',
       align: 'center',
       variant: 'numeric',
-      // Dynamic className overrides the fixed color prop if returned
-      className: (val) => (val >= 0 ? 'text-emerald-400' : 'text-red-400'),
+      color: 'orange',
       render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
   ];
@@ -40,9 +62,9 @@ export default function ManagerFinancesTable({ data }) {
       data={data}
       columns={columns}
       defaultSort={{ key: 'balance', direction: 'desc' }}
-      managerKey="manager_name"
-      managerIdKey="manager_id"
-      managerIconKey="manager_icon"
+      managerKey="user_name"
+      managerIdKey="user_id"
+      managerIconKey="user_icon"
       managerColorIndexKey="color_index"
     />
   );
