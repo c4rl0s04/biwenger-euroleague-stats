@@ -107,7 +107,7 @@ export default function LiveMarketTable({ initialData }) {
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Pagination Top */}
           <div className="flex items-center gap-4 order-2 md:order-1 justify-between md:justify-start">
-            <span className="text-xs md:text-sm text-slate-500 font-bold font-sans">
+            <span className="text-xs md:text-sm text-slate-500 uppercase font-bold tracking-widest font-sans">
               Página <span className="text-white ml-1">{page}</span>{' '}
               <span className="mx-1 text-slate-700">/</span> {tableData.totalPages}
             </span>
@@ -136,7 +136,7 @@ export default function LiveMarketTable({ initialData }) {
                 type="text"
                 name="buyer"
                 placeholder="Comprador..."
-                className="w-full bg-card/40 text-xs md:text-sm rounded-xl border border-border pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500 transition-all font-sans"
+                className="w-full bg-card/40 text-white text-xs md:text-sm rounded-xl border border-border pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500 transition-all font-sans font-bold uppercase tracking-wide"
                 value={filters.buyer}
                 onChange={handleFilterChange}
               />
@@ -147,7 +147,7 @@ export default function LiveMarketTable({ initialData }) {
                 type="text"
                 name="seller"
                 placeholder="Vendedor..."
-                className="w-full bg-card/40 text-xs md:text-sm rounded-xl border border-border pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500 transition-all font-sans"
+                className="w-full bg-card/40 text-white text-xs md:text-sm rounded-xl border border-border pl-9 pr-3 py-2.5 focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-slate-500 transition-all font-sans font-bold uppercase tracking-wide"
                 value={filters.seller}
                 onChange={handleFilterChange}
               />
@@ -198,13 +198,21 @@ export default function LiveMarketTable({ initialData }) {
               Unknown: { color: 'bg-slate-500/80 border-slate-300', label: '?' },
             };
             return (
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow hovering={false}>
-                    <TableHeaderCell align="left">Fecha</TableHeaderCell>
-                    <TableHeaderCell align="left">Jugador</TableHeaderCell>
-                    <TableHeaderCell align="left">Operación</TableHeaderCell>
-                    <TableHeaderCell align="right">Precio</TableHeaderCell>
+                    <TableHeaderCell align="left" className="w-[10%] opacity-0">
+                      Fecha
+                    </TableHeaderCell>
+                    <TableHeaderCell align="left" className="w-[30%]">
+                      Jugador
+                    </TableHeaderCell>
+                    <TableHeaderCell align="left" className="w-[40%]">
+                      Operación
+                    </TableHeaderCell>
+                    <TableHeaderCell align="right" className="w-[20%]">
+                      Precio
+                    </TableHeaderCell>
                   </TableRow>
                 </TableHeader>
                 <tbody className="divide-y divide-white/5 bg-transparent">
@@ -299,7 +307,7 @@ export default function LiveMarketTable({ initialData }) {
                               </span>
                               {/* Badge pujas */}
                               {t.bids_count > 1 && (
-                                <span className="ml-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-[9px] font-bold font-sans border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                                <span className="ml-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-[9px] font-black font-display border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
                                   🔥 {t.bids_count}
                                 </span>
                               )}
@@ -319,7 +327,7 @@ export default function LiveMarketTable({ initialData }) {
                     <TableRow hovering={false}>
                       <TableCell
                         colSpan="4"
-                        className="text-center py-12 text-slate-500 font-sans uppercase tracking-widest font-bold opacity-50"
+                        className="text-center py-12 text-slate-500 font-display uppercase tracking-widest font-black opacity-50"
                       >
                         No se encontraron fichajes
                       </TableCell>
@@ -333,7 +341,7 @@ export default function LiveMarketTable({ initialData }) {
 
         {/* Pagination (bottom) */}
         <div className="mt-8 pt-6 border-t border-border flex items-center justify-between">
-          <span className="text-xs md:text-sm text-slate-500 font-bold font-sans">
+          <span className="text-xs md:text-sm text-slate-500 uppercase font-bold tracking-widest font-sans">
             Página <span className="text-white ml-1">{page}</span>{' '}
             <span className="mx-1 text-slate-700">/</span> {tableData.totalPages}
           </span>
