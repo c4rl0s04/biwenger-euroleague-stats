@@ -35,4 +35,11 @@ export { default as PageHeader } from './PageHeader';
 
 // Stats & Data Display
 export { default as StatsList } from './StatsList';
-export { default as ManagerTable } from './ManagerTable';
+export {
+  default as StatsTable,
+  Table,
+  TableHeader,
+  TableHeaderCell,
+  TableRow,
+  TableCell,
+} from './StatsTable';

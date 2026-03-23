@@ -234,6 +234,8 @@ async function getTableStats(): Promise<TableStat[]> {
             COUNT(p.round_id) as jornadas_jugadas,
             SUM(p.aciertos) as total_aciertos,
             AVG(p.aciertos) as promedio,
+            COUNT(CASE WHEN p.aciertos = 10 THEN 1 END) as perfects,
+            COUNT(CASE WHEN p.aciertos >= 8 THEN 1 END) as exacts,
             MAX(p.aciertos) as mejor_jornada,
             MIN(p.aciertos) as peor_jornada
         FROM porras p
@@ -249,6 +251,8 @@ async function getTableStats(): Promise<TableStat[]> {
     jornadas_jugadas: parseInt(row.jornadas_jugadas),
     total_aciertos: parseInt(row.total_aciertos),
     promedio: parseFloat(row.promedio),
+    perfects: parseInt(row.perfects || '0'),
+    exacts: parseInt(row.exacts || '0'),
     mejor_jornada: parseInt(row.mejor_jornada),
     peor_jornada: parseInt(row.peor_jornada),
   }));

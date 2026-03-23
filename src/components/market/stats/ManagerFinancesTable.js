@@ -1,69 +1,46 @@
 'use client';
 
-import { Wallet } from 'lucide-react';
-import { ManagerTable } from '@/components/ui';
+import { Landmark } from 'lucide-react';
+import { StatsTable } from '@/components/ui';
 
-export default function ManagerFinancesTable({ stats }) {
-  if (!stats || !stats.length) return null;
-
-  const formatMillions = (val, withSign = false) => {
-    const millions = val / 1000000;
-    const sign = withSign && millions > 0 ? '+' : '';
-    return `${sign}${millions.toFixed(1)}M`;
-  };
-
+export default function ManagerFinancesTable({ data }) {
   const columns = [
     {
+      key: 'total_compras',
       label: 'Compras',
-      key: 'purchases_count',
-      align: 'center',
-      className: 'text-emerald-400',
+      align: 'right',
+      variant: 'numeric',
+      render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
     {
+      key: 'total_ventas',
       label: 'Ventas',
-      key: 'sales_count',
-      align: 'center',
-      className: 'text-red-400',
-    },
-    {
-      label: 'Ops',
-      key: 'total_ops',
-      align: 'center',
-      className: 'text-white',
-      sortValue: (row) => row.purchases_count + row.sales_count,
-      render: (val, row) => row.purchases_count + row.sales_count,
-    },
-    {
-      label: 'Gastado',
-      key: 'purchases_total',
       align: 'right',
-      className: 'text-red-500',
-      render: (val) => `-${formatMillions(val)}`,
+      variant: 'numeric',
+      render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
     {
-      label: 'Ingresado',
-      key: 'sales_total',
-      align: 'right',
-      className: 'text-emerald-500',
-      render: (val) => `+${formatMillions(val)}`,
-    },
-    {
-      label: 'Balance',
       key: 'balance',
+      label: 'Balance',
       align: 'right',
-      className: (val) => (val >= 0 ? 'text-primary text-xl' : 'text-red-500 text-xl'),
-      render: (val) => formatMillions(val, true),
+      variant: 'numeric',
+      className: (val) => (val >= 0 ? 'text-emerald-500' : 'text-red-500'),
+      render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
   ];
 
   return (
-    <ManagerTable
-      title="Finanzas Managers"
-      icon={Wallet}
+    <StatsTable
+      title="Finanzas de Managers"
+      icon={Landmark}
       color="emerald"
-      data={stats}
+      data={data}
       columns={columns}
       defaultSort={{ key: 'balance', direction: 'desc' }}
+      managerKey="manager_name"
+      managerIdKey="manager_id"
+      managerIconKey="manager_icon"
+      managerColorIndexKey="color_index"
     />
   );
 }

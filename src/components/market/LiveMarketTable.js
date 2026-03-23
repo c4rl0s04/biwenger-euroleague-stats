@@ -14,6 +14,7 @@ import {
 import Image from 'next/image';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { Table, TableHeader, TableHeaderCell, TableRow, TableCell } from '@/components/ui';
 
 const POS_COLORS = {
   Unknown: 'bg-muted',
@@ -189,36 +190,38 @@ export default function LiveMarketTable({ initialData }) {
               Unknown: { color: 'bg-slate-500/80 border-slate-300', label: '?' },
             };
             return (
-              <table className="w-full text-sm text-left rounded-2xl overflow-hidden border border-border bg-transparent">
-                <thead className="text-[10px] md:text-xs text-slate-400 uppercase border-b border-border sticky top-0 bg-card/90 backdrop-blur-md z-10 font-display tracking-[0.1em]">
-                  <tr>
-                    <th className="px-4 py-4 font-black">Fecha</th>
-                    <th className="px-4 py-4 font-black">Jugador</th>
-                    <th className="px-4 py-4 font-black">Operación</th>
-                    <th className="px-4 py-4 font-black text-right">Precio</th>
-                  </tr>
-                </thead>
+              <Table>
+                <TableHeader>
+                  <TableRow hovering={false}>
+                    <TableHeaderCell align="left">Fecha</TableHeaderCell>
+                    <TableHeaderCell align="left">Jugador</TableHeaderCell>
+                    <TableHeaderCell align="left">Operación</TableHeaderCell>
+                    <TableHeaderCell align="right">Precio</TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
                 <tbody className="divide-y divide-white/5 bg-transparent">
                   {dayKeys.map((day) => [
-                    <tr key={day} className="sticky top-[52px] z-5">
-                      <td
+                    <TableRow key={day} hovering={false} className="sticky top-[52px] z-5">
+                      <TableCell
                         colSpan="4"
+                        align="left"
                         className="py-2.5 px-4 text-[10px] md:text-xs font-black text-primary/80 tracking-[0.15em] uppercase font-display sticky left-0 bg-card/60 backdrop-blur-sm border-b border-border"
                       >
                         {day}
-                      </td>
-                    </tr>,
+                      </TableCell>
+                    </TableRow>,
                     ...grouped[day].map((t) => {
                       const pos = POS_ICON[t.player_position] || POS_ICON.Unknown;
                       return (
-                        <tr
-                          key={t.id}
-                          className="hover:bg-white/[0.02] transition-colors group bg-transparent"
-                        >
-                          {/* Fecha (vacío, ya está el header) */}
-                          <td className="px-4 py-4 whitespace-nowrap text-[10px] text-muted-foreground/40 font-display font-black"></td>
+                        <TableRow key={t.id}>
+                          {/* Fecha (vacío, ya está el header de grupo) */}
+                          <TableCell
+                            align="left"
+                            className="text-[10px] text-muted-foreground/40 font-display font-black"
+                          ></TableCell>
+
                           {/* Jugador */}
-                          <td className="px-4 py-4 whitespace-nowrap">
+                          <TableCell align="left">
                             <div className="flex items-center gap-3">
                               <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/5 border border-white/5 shadow-sm">
                                 {t.player_img && (
@@ -244,9 +247,10 @@ export default function LiveMarketTable({ initialData }) {
                                 {t.player_name}
                               </a>
                             </div>
-                          </td>
-                          {/* Operación con iconos */}
-                          <td className="px-4 py-4 whitespace-nowrap">
+                          </TableCell>
+
+                          {/* Operación */}
+                          <TableCell align="left">
                             <div className="flex items-center gap-3 text-xs">
                               {/* Vendedor icono */}
                               <span title={t.vendedor} className="flex items-center gap-1.5">
@@ -366,32 +370,37 @@ export default function LiveMarketTable({ initialData }) {
                                 </span>
                               )}
                             </div>
-                          </td>
+                          </TableCell>
+
                           {/* Precio */}
-                          <td className="px-4 py-4 whitespace-nowrap text-right font-display font-black text-primary text-base md:text-lg group-hover:text-white relative transition-all">
+                          <TableCell
+                            variant="numeric"
+                            align="right"
+                            className="text-primary group-hover:text-white relative"
+                          >
                             <span className="transition-transform duration-300 block group-hover:scale-110 origin-right">
                               {formatEuro(t.precio)}{' '}
                               <span className="text-[10px] md:text-xs opacity-50 ml-0.5 font-sans">
                                 €
                               </span>
                             </span>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       );
                     }),
                   ])}
                   {!tableData.transfers.length && !loading && (
-                    <tr>
-                      <td
+                    <TableRow hovering={false}>
+                      <TableCell
                         colSpan="4"
                         className="text-center py-12 text-slate-500 font-display uppercase tracking-widest font-black opacity-50"
                       >
                         No se encontraron fichajes
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )}
                 </tbody>
-              </table>
+              </Table>
             );
           })()}
         </div>

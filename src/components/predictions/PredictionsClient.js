@@ -13,7 +13,7 @@ import {
   ParticipationCard,
   PredictableTeamsCard,
 } from './cards';
-import { StatsTable } from './tables/StatsTable';
+import { PredictionsStatsTable } from './tables/PredictionsStatsTable';
 import { HistoryTable } from './tables/HistoryTable';
 import { ClutchModal, VictoriasModal } from './PredictionsModals';
 
@@ -64,7 +64,7 @@ export default function PredictionsClient({ stats }) {
 
       {/* Section: Clasificación */}
       <Section title="Clasificación Detallada" delay={200} background="section-base">
-        <StatsTable data={table_stats} />
+        <PredictionsStatsTable data={table_stats} />
       </Section>
 
       {/* Section: Predicciones por equipo */}
