@@ -8,23 +8,26 @@ export default function ManagerFinancesTable({ data }) {
     {
       key: 'total_compras',
       label: 'Compras',
-      align: 'right',
+      align: 'center',
       variant: 'numeric',
+      color: 'blue',
       render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
     {
       key: 'total_ventas',
       label: 'Ventas',
-      align: 'right',
+      align: 'center',
       variant: 'numeric',
+      color: 'orange',
       render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
     {
       key: 'balance',
       label: 'Balance',
-      align: 'right',
+      align: 'center',
       variant: 'numeric',
-      className: (val) => (val >= 0 ? 'text-emerald-500' : 'text-red-500'),
+      // Dynamic className overrides the fixed color prop if returned
+      className: (val) => (val >= 0 ? 'text-emerald-400' : 'text-red-400'),
       render: (val) => (val != null ? `${val.toLocaleString()} €` : '-'),
     },
   ];

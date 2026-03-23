@@ -5,8 +5,20 @@ import { StatsTable } from '@/components/ui';
 
 export function PredictionsStatsTable({ data }) {
   const columns = [
-    { key: 'jornadas_jugadas', label: 'Jornadas', align: 'center', variant: 'numeric' },
-    { key: 'total_aciertos', label: 'Aciertos', align: 'center', variant: 'numeric' },
+    {
+      key: 'jornadas_jugadas',
+      label: 'Jornadas',
+      align: 'center',
+      variant: 'numeric',
+      color: 'blue',
+    },
+    {
+      key: 'total_aciertos',
+      label: 'Aciertos',
+      align: 'center',
+      variant: 'numeric',
+      color: 'orange',
+    },
     {
       key: 'exacts',
       label: 'Plenos (+8)',
@@ -19,13 +31,15 @@ export function PredictionsStatsTable({ data }) {
       label: 'Perfectos',
       align: 'center',
       variant: 'numeric',
-      render: (val) => (val > 0 ? <span className="text-yellow-500">★ {val}</span> : '-'),
+      color: 'yellow',
+      render: (val) => (val > 0 ? <span>★ {val}</span> : '-'),
     },
     {
       key: 'promedio',
       label: 'Media',
-      align: 'right',
+      align: 'center',
       variant: 'numeric',
+      color: 'emerald',
       render: (val) => (typeof val === 'number' ? val.toFixed(2) : '-'),
     },
   ];
