@@ -60,7 +60,6 @@ export function TableHeaderCell({
       onClick={onClick}
       className={cn(
         'px-4 py-3 bg-white/[0.02] transition-colors text-slate-200 font-bold text-xs md:text-sm uppercase tracking-widest font-sans border-b border-white/5',
-        'first:rounded-tl-xl last:rounded-tr-xl',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
         colorClass,
         className

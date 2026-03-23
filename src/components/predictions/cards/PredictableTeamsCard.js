@@ -165,23 +165,20 @@ export function PredictableTeamsCard({ teams }) {
         </TableHeader>
         <tbody>
           {sortedTeams.map((team, index) => {
-            const isTop =
-              index === 0 && sortConfig.key === 'percentage' && sortConfig.direction === 'desc';
-
             return (
-              <TableRow key={team.id} className={isTop ? 'bg-emerald-500/5' : ''}>
+              <TableRow key={team.id}>
                 <TableCell align="left" className="pl-3">
                   <TableIdentity
                     name={team.name}
                     image={team.img}
-                    color={isTop ? 'text-emerald-500' : 'text-slate-200'}
+                    link={`/team/${team.id}`}
                     size="sm"
                     className="!p-0"
                   />
                 </TableCell>
 
                 {/* Global % */}
-                <TableCell color="emerald">{Math.round(team.percentage)}%</TableCell>
+                <TableCell>{Math.round(team.percentage)}%</TableCell>
 
                 {/* Win Predictions */}
                 <TableCell className="text-slate-400">
