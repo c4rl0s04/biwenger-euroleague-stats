@@ -86,16 +86,16 @@ export default async function TournamentDetailsPage({ params }) {
 
       {/* Content based on type */}
       {tournament.type === 'league' ? (
-        <Section title="Clasificación" delay={100} background="section-base">
+        <Section title="" delay={100} background="section-base">
           <StandingsTable standings={standings} />
         </Section>
       ) : (
-        <Section title="Cuadro" delay={100} background="section-base">
+        <Section title="" delay={100} background="section-base">
           <TournamentBracket fixtures={fixtures} />
         </Section>
       )}
 
-      <Section title="Resultados" delay={200} background="section-raised">
+      <Section title="" delay={200} background="section-raised">
         <TournamentFixtures fixtures={fixtures} />
       </Section>
     </div>
