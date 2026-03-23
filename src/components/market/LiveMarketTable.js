@@ -374,9 +374,8 @@ export default function LiveMarketTable({ initialData }) {
 
                           {/* Precio */}
                           <TableCell
-                            variant="numeric"
                             align="right"
-                            className="text-primary group-hover:text-white relative"
+                            className="text-primary group-hover:text-white relative tabular-nums"
                           >
                             <span className="transition-transform duration-300 block group-hover:scale-110 origin-right">
                               {formatEuro(t.precio)}{' '}

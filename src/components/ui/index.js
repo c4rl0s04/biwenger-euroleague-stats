@@ -42,4 +42,5 @@ export {
   TableHeaderCell,
   TableRow,
   TableCell,
+  TableIdentity,
 } from './StatsTable';

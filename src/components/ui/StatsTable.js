@@ -81,24 +81,14 @@ export function TableRow({ children, className, hovering = true }) {
   );
 }
 
-export function TableCell({
-  children,
-  className,
-  align = 'center',
-  variant = 'default',
-  color,
-  colSpan,
-}) {
+export function TableCell({ children, className, align = 'center', color, colSpan }) {
   const colorClass = color ? COLUMN_COLOR_MAP[color] || color : '';
 
   return (
     <td
       colSpan={colSpan}
       className={cn(
-        'px-4 py-2 border-b border-white/5',
-        variant === 'numeric'
-          ? 'font-display font-black text-lg md:text-xl tabular-nums'
-          : 'text-sm md:text-base font-medium',
+        'px-4 py-2 border-b border-white/5 text-sm md:text-base font-medium',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
         colorClass,
         className
@@ -107,6 +97,77 @@ export function TableCell({
       {children}
     </td>
   );
+}
+
+/**
+ * TableIdentity - A component for displaying an entity's identity (avatar + name + optional subtitle).
+ * Used for both Managers and Teams.
+ */
+export function TableIdentity({ name, image, subtitle, link, color, size = 'md', className }) {
+  const isSm = size === 'sm';
+
+  const content = (
+    <div
+      className={cn(
+        'flex items-center gap-2 md:gap-3 p-0.5 rounded-xl transition-all group/link',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          'relative shrink-0',
+          isSm ? 'w-7 h-7 md:w-8 md:h-8' : 'w-9 h-9 md:w-10 md:h-10'
+        )}
+      >
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="rounded-full object-cover border border-white/5 shadow-md"
+            sizes={isSm ? '32px' : '40px'}
+          />
+        ) : (
+          <div
+            className={cn(
+              'rounded-full bg-slate-800 flex items-center justify-center font-black text-white shadow-md border border-white/5',
+              isSm
+                ? 'w-7 h-7 md:w-8 md:h-8 text-xs'
+                : 'w-9 h-9 md:w-10 md:h-10 text-sm md:text-base'
+            )}
+          >
+            {name.charAt(0)}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col min-w-0 text-left">
+        <span
+          className={cn(
+            'font-bold transition-all group-hover/link:scale-105 origin-left tracking-tight whitespace-nowrap',
+            isSm ? 'text-sm md:text-base' : 'text-base md:text-lg',
+            color
+          )}
+        >
+          {name}
+        </span>
+        {subtitle && (
+          <span className={cn('text-slate-400 truncate', isSm ? 'text-[10px]' : 'text-xs')}>
+            {subtitle}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+
+  if (link) {
+    return (
+      <Link href={link} className="block">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 // --- High-level Template Component ---
@@ -168,6 +229,8 @@ function SortableHeader({
  * @param {string} managerIdKey - The key for the manager ID in data objects
  * @param {string} managerIconKey - The key for the manager icon URL in data objects
  * @param {string} managerColorIndexKey - The key for the manager color index in data objects
+ * @param {string} managerSubtitleKey - The key for a subtitle to show under the manager name
+ * @param {Function} managerSubtitleRender - Optional custom render for the manager subtitle (receives value and row)
  * @param {boolean} showManagerColumn - Whether to show the default manager avatar/name column
  * @param {string} className - Additional CSS classes for the card
  * @param {React.ReactNode} children - Optional custom table body (overrides default column mapping)
@@ -183,6 +246,9 @@ export default function StatsTable({
   managerIdKey = 'user_id',
   managerIconKey = 'user_icon',
   managerColorIndexKey = 'color_index',
+  managerSubtitleKey,
+  managerSubtitleRender,
+  managerColumnIndex = 0,
   showManagerColumn = true,
   className = '',
   children,
@@ -232,27 +298,36 @@ export default function StatsTable({
       <Table>
         <TableHeader>
           <TableRow hovering={false}>
-            {showManagerColumn && (
-              <SortableHeader
-                label="Manager"
-                sortKey={managerKey}
-                currentSort={sortConfig}
-                onSort={handleSort}
-                align="left"
-              />
-            )}
-            {columns.map((col) => (
-              <SortableHeader
-                key={col.key}
-                label={col.label}
-                sortKey={col.key}
-                currentSort={sortConfig}
-                onSort={handleSort}
-                align={col.align}
-                color={col.color}
-                sortable={col.sortable !== false}
-              />
-            ))}
+            {(() => {
+              const headers = columns.map((col) => (
+                <SortableHeader
+                  key={col.key}
+                  label={col.label}
+                  sortKey={col.key}
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  align={col.align}
+                  color={col.color}
+                  sortable={col.sortable !== false}
+                />
+              ));
+
+              if (showManagerColumn) {
+                headers.splice(
+                  managerColumnIndex,
+                  0,
+                  <SortableHeader
+                    key="manager-header"
+                    label="Manager"
+                    sortKey={managerKey}
+                    currentSort={sortConfig}
+                    onSort={handleSort}
+                    align="left"
+                  />
+                );
+              }
+              return headers;
+            })()}
           </TableRow>
         </TableHeader>
         {children ? (
@@ -268,56 +343,50 @@ export default function StatsTable({
 
               return (
                 <TableRow key={idx}>
-                  {showManagerColumn && (
-                    <TableCell align="left">
-                      <div className="flex items-center gap-3 md:gap-4 p-0.5 rounded-xl transition-all">
-                        <div className="relative w-9 h-9 md:w-10 md:h-10 shrink-0">
-                          {uIcon ? (
-                            <Image
-                              src={uIcon}
-                              alt={uName}
-                              fill
-                              className="rounded-full object-cover border border-white/5 shadow-md"
-                              sizes="40px"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm md:text-base font-black text-white shadow-md border border-white/5">
-                              {uName.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <Link
-                          href={`/user/${uId || uName}`}
-                          className={cn(
-                            'font-bold transition-all group-hover:scale-105 origin-left text-base md:text-lg tracking-tight whitespace-nowrap',
-                            userColor.text
-                          )}
-                        >
-                          {uName}
-                        </Link>
-                      </div>
-                    </TableCell>
-                  )}
-                  {columns.map((col) => {
-                    const value = row[col.key];
-                    const content = col.render ? col.render(value, row) : value;
-                    const cellClassName =
-                      typeof col.className === 'function'
-                        ? col.className(value, row)
-                        : col.className;
+                  {(() => {
+                    const cells = columns.map((col) => {
+                      const value = row[col.key];
+                      const content = col.render ? col.render(value, row) : value;
+                      const cellClassName =
+                        typeof col.className === 'function'
+                          ? col.className(value, row)
+                          : col.className;
 
-                    return (
-                      <TableCell
-                        key={col.key}
-                        variant={col.variant || 'default'}
-                        align={col.align}
-                        color={col.color}
-                        className={cellClassName}
-                      >
-                        {content}
-                      </TableCell>
-                    );
-                  })}
+                      return (
+                        <TableCell
+                          key={col.key}
+                          align={col.align}
+                          className={cellClassName}
+                          color={col.color}
+                        >
+                          {content}
+                        </TableCell>
+                      );
+                    });
+
+                    if (showManagerColumn) {
+                      cells.splice(
+                        managerColumnIndex,
+                        0,
+                        <TableCell key="manager-cell" align="left">
+                          <TableIdentity
+                            name={uName}
+                            image={uIcon}
+                            link={`/user/${uId || uName}`}
+                            color={userColor.text}
+                            subtitle={
+                              managerSubtitleKey || managerSubtitleRender
+                                ? managerSubtitleRender
+                                  ? managerSubtitleRender(row[managerSubtitleKey], row)
+                                  : row[managerSubtitleKey]
+                                : null
+                            }
+                          />
+                        </TableCell>
+                      );
+                    }
+                    return cells;
+                  })()}
                 </TableRow>
               );
             })}

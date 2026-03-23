@@ -1,50 +1,11 @@
 'use client';
 
-import { Trophy, Medal } from 'lucide-react';
-import { useState } from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Trophy, Medal, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { StatsTable } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { getColorForUser } from '@/lib/constants/colors';
-
 export default function FullStandingsCard() {
-  const [sortConfig, setSortConfig] = useState({ key: 'position', direction: 'asc' });
   const { data: standings = [], loading } = useApiData('/api/standings/full');
-
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const sortedStandings = [...standings].sort((a, b) => {
-    const aVal = a[sortConfig.key];
-    const bVal = b[sortConfig.key];
-
-    if (aVal < bVal) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    }
-    if (aVal > bVal) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
-
-  const getSortIndicator = (key) => {
-    if (sortConfig.key !== key) return '↕';
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
-  };
-
-  const getPriceTrendIcon = (trend) => {
-    if (trend > 0) return <TrendingUp className="w-3 h-3 text-green-400" />;
-    if (trend < 0) return <TrendingDown className="w-3 h-3 text-red-400" />;
-    return <Minus className="w-3 h-3 text-slate-400" />;
-  };
 
   const getPositionStyle = (position) => {
     if (position === 1) return 'bg-yellow-500 text-slate-900';
@@ -53,148 +14,120 @@ export default function FullStandingsCard() {
     return 'bg-slate-700 text-slate-300';
   };
 
+  const getPriceTrendIcon = (trend) => {
+    if (trend > 0) return <TrendingUp className="w-3 h-3 text-green-400" />;
+    if (trend < 0) return <TrendingDown className="w-3 h-3 text-red-400" />;
+    return <Minus className="w-3 h-3 text-slate-400" />;
+  };
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('es-ES').format(price);
   };
 
-  const leader = sortedStandings[0];
+  const leader =
+    standings.length > 0 ? [...standings].sort((a, b) => b.total_points - a.total_points)[0] : null;
+
+  const columns = [
+    {
+      key: 'position',
+      label: 'Pos',
+      align: 'center',
+      render: (val) => (
+        <span
+          className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${getPositionStyle(val)}`}
+        >
+          {val}
+        </span>
+      ),
+    },
+    {
+      key: 'total_points',
+      label: 'Puntos',
+      align: 'right',
+      color: 'orange',
+      variant: 'numeric',
+      render: (val, row) => {
+        const gapToLeader = leader ? leader.total_points - val : 0;
+        return (
+          <div className="flex flex-col items-end">
+            <span className="font-bold text-orange-500">{val}</span>
+            {gapToLeader > 0 && <span className="text-[10px] text-red-400">-{gapToLeader}</span>}
+          </div>
+        );
+      },
+    },
+    {
+      key: 'avg_points',
+      label: 'Media',
+      align: 'right',
+      variant: 'numeric',
+      className: 'hidden md:table-cell',
+      render: (val, row) => (
+        <div className="flex flex-col items-end">
+          <span className="text-slate-200">{val}</span>
+          <span className="text-[10px] text-slate-500 tabular-nums">
+            {row.best_round} / {row.worst_round}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'round_wins',
+      label: 'Victorias',
+      align: 'right',
+      variant: 'numeric',
+      color: 'yellow',
+      className: 'hidden lg:table-cell',
+      render: (val) => (
+        <div className="flex items-center justify-end gap-1">
+          {val > 0 && <Medal className="w-3.5 h-3.5 text-yellow-500" />}
+          <span className={val > 0 ? 'text-yellow-400 font-bold' : 'text-slate-500 opacity-50'}>
+            {val}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'team_value',
+      label: 'Valor',
+      align: 'right',
+      variant: 'numeric',
+      render: (val, row) => (
+        <div className="flex flex-col items-end">
+          <div className="flex items-center gap-1">
+            <span className="text-slate-300 text-xs">{formatPrice(val)}€</span>
+            {getPriceTrendIcon(row.price_trend)}
+          </div>
+          {row.price_trend !== 0 && (
+            <div
+              className={`text-[9px] ${row.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}
+            >
+              {row.price_trend > 0 ? '+' : ''}
+              {formatPrice(row.price_trend)}€
+            </div>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Card
-      title="Clasificación Completa"
+    <StatsTable
+      title="Clasificación General"
       icon={Trophy}
       color="indigo"
-      className="lg:col-span-2"
+      data={standings}
+      columns={columns}
       loading={loading}
-    >
-      {!loading && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-400 uppercase bg-slate-800/50">
-              <tr>
-                <th className="px-3 py-3 rounded-l-lg">Pos</th>
-                <th className="px-3 py-3">Usuario</th>
-                <th
-                  className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors"
-                  onClick={() => handleSort('total_points')}
-                >
-                  Puntos {getSortIndicator('total_points')}
-                </th>
-                <th
-                  className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors hidden md:table-cell"
-                  onClick={() => handleSort('avg_points')}
-                >
-                  Media {getSortIndicator('avg_points')}
-                </th>
-                <th
-                  className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors hidden lg:table-cell"
-                  onClick={() => handleSort('round_wins')}
-                >
-                  Victorias {getSortIndicator('round_wins')}
-                </th>
-                <th
-                  className="px-3 py-3 text-right cursor-pointer hover:text-white transition-colors rounded-r-lg"
-                  onClick={() => handleSort('team_value')}
-                >
-                  Valor {getSortIndicator('team_value')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedStandings.map((user) => {
-                const gapToLeader = leader ? leader.total_points - user.total_points : 0;
-                const userColor = getColorForUser(user.user_id, user.name, user.color_index);
-                return (
-                  <tr
-                    key={user.user_id}
-                    className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors group"
-                  >
-                    <td className="px-3 py-3">
-                      <span
-                        className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${getPositionStyle(user.position)}`}
-                      >
-                        {user.position}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3">
-                      <Link
-                        href={`/user/${user.user_id}`}
-                        className="flex items-center gap-2 group hover:opacity-100"
-                      >
-                        {user.icon ? (
-                          <div className="relative w-8 h-8 shrink-0">
-                            <Image
-                              src={user.icon}
-                              alt={user.name}
-                              fill
-                              className="rounded-full transition-opacity group-hover:opacity-80 object-cover"
-                              sizes="32px"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium transition-opacity group-hover:opacity-80">
-                            {user.name.charAt(0)}
-                          </div>
-                        )}
-                        <div>
-                          <div
-                            className={`font-medium transition-transform group-hover:scale-105 origin-left inline-block ${userColor.text}`}
-                          >
-                            {user.name}
-                          </div>
-                          <div className="text-xs text-slate-400">
-                            {user.rounds_played} jornadas
-                          </div>
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      <div className="font-bold text-orange-500">{user.total_points}</div>
-                      {gapToLeader > 0 && (
-                        <div className="text-xs text-red-400">-{gapToLeader}</div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 text-right hidden md:table-cell">
-                      <div className="text-slate-300">{user.avg_points}</div>
-                      <div className="text-xs text-slate-400">
-                        {user.best_round} / {user.worst_round}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 text-right hidden lg:table-cell">
-                      <div className="flex items-center justify-end gap-1">
-                        {user.round_wins > 0 && <Medal className="w-4 h-4 text-yellow-500" />}
-                        <span
-                          className={
-                            user.round_wins > 0 ? 'text-yellow-400 font-bold' : 'text-slate-400'
-                          }
-                        >
-                          {user.round_wins}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <span className="text-slate-400 text-xs">
-                          {formatPrice(user.team_value)}€
-                        </span>
-                        {getPriceTrendIcon(user.price_trend)}
-                      </div>
-                      {user.price_trend !== 0 && (
-                        <div
-                          className={`text-[10px] ${user.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}
-                        >
-                          {user.price_trend > 0 ? '+' : ''}
-                          {formatPrice(user.price_trend)}€
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </Card>
+      className="lg:col-span-2"
+      defaultSort={{ key: 'position', direction: 'asc' }}
+      managerKey="name"
+      managerIdKey="user_id"
+      managerIconKey="icon"
+      managerColorIndexKey="color_index"
+      managerSubtitleKey="rounds_played"
+      managerSubtitleRender={(val) => `${val} jornadas`}
+      managerColumnIndex={1}
+    />
   );
 }
