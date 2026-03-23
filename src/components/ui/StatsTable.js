@@ -56,7 +56,7 @@ export function TableCell({ children, className, align = 'center', variant = 'de
     <td
       colSpan={colSpan}
       className={cn(
-        'px-4 py-2 border-b border-white/[0.02] last:border-0',
+        'px-4 py-2 border-b border-white/5',
         variant === 'numeric'
           ? 'font-display font-black text-lg md:text-xl tabular-nums'
           : 'text-sm md:text-base font-medium',
@@ -215,7 +215,7 @@ export default function StatsTable({
         {children ? (
           children
         ) : (
-          <tbody className="divide-y divide-white/5">
+          <tbody className="">
             {sortedData.map((row, idx) => {
               const uName = row[managerKey] || 'Unknown';
               const uId = row[managerIdKey];
