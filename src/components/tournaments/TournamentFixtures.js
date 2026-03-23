@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getColorForUser } from '@/lib/constants/colors';
+import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 export default function TournamentFixtures({ fixtures }) {
   const [manualSelectedRound, setManualSelectedRound] = useState(null);
@@ -75,32 +76,34 @@ export default function TournamentFixtures({ fixtures }) {
   return (
     <div className="space-y-6">
       {/* Round Selector */}
-      <div className="flex items-center justify-between bg-card/50 backdrop-blur-sm border border-white/10 p-2 rounded-xl">
-        <button
-          onClick={handlePrevRound}
-          disabled={rounds.indexOf(selectedRound) === 0}
-          className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
-        >
-          <ChevronLeft size={20} />
-        </button>
+      <ElegantCard hideHeader padding="p-0" color="zinc" bgColor="zinc" className="overflow-hidden">
+        <div className="flex items-center justify-between p-2">
+          <button
+            onClick={handlePrevRound}
+            disabled={rounds.indexOf(selectedRound) === 0}
+            className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
+          >
+            <ChevronLeft size={20} />
+          </button>
 
-        <div className="flex flex-col items-center">
-          <span className="text-xs text-amber-500 uppercase tracking-widest font-bold">
-            Jornada
-          </span>
-          <span className="text-lg font-black text-white font-display">
-            {selectedRound?.replace('Jornada ', '') || selectedRound}
-          </span>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-amber-500 uppercase tracking-widest font-bold">
+              Jornada
+            </span>
+            <span className="text-lg font-black text-white font-display">
+              {selectedRound?.replace('Jornada ', '') || selectedRound}
+            </span>
+          </div>
+
+          <button
+            onClick={handleNextRound}
+            disabled={rounds.indexOf(selectedRound) === rounds.length - 1}
+            className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
-
-        <button
-          onClick={handleNextRound}
-          disabled={rounds.indexOf(selectedRound) === rounds.length - 1}
-          className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
+      </ElegantCard>
 
       {/* Fixtures List */}
       <div className="grid gap-3">
@@ -123,132 +126,138 @@ export default function TournamentFixtures({ fixtures }) {
               const isDraw = isFinished && fixture.home_score === fixture.away_score;
 
               return (
-                <div
+                <ElegantCard
                   key={fixture.id}
-                  className="relative flex flex-col sm:flex-row items-center justify-center p-4 rounded-xl border border-white/5 bg-gradient-to-r from-white/5 to-transparent hover:border-white/10 transition-all group"
+                  hideHeader
+                  padding="p-4"
+                  color={isFinished ? 'emerald' : 'zinc'}
+                  bgColor={null}
+                  className="w-full relative group"
                 >
-                  {/* Group/Info - Absolute Left */}
-                  {fixture.group_name && (
-                    <div className="absolute top-2 left-3 sm:top-1/2 sm:-translate-y-1/2 sm:left-4">
-                      <span className="text-[10px] uppercase font-bold text-zinc-500 bg-zinc-900/50 px-2 py-0.5 rounded-full border border-white/5">
-                        Gr. {fixture.group_name}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Matchup - Center */}
-                  <div className="flex items-center justify-center gap-4 sm:gap-8 w-full max-w-3xl mt-6 sm:mt-0">
-                    {/* Home Team */}
-                    <Link
-                      href={`/user/${fixture.home_user_id}`}
-                      className={`flex-1 flex flex-col items-center sm:items-end gap-2 text-center sm:text-right group/home transition-all hover:opacity-80 ${
-                        isFinished && !homeWon && !isDraw ? 'opacity-50' : ''
-                      }`}
-                    >
-                      <div
-                        className={`sm:hidden text-sm truncate w-full px-2 ${isFinished && homeWon ? 'font-black text-white' : 'font-medium text-zinc-300'}`}
-                      >
-                        {fixture.home_user_name}
+                  <div className="flex flex-col sm:flex-row items-center justify-center relative">
+                    {/* Group/Info - Absolute Left */}
+                    {fixture.group_name && (
+                      <div className="absolute top-2 left-3 sm:top-1/2 sm:-translate-y-1/2 sm:left-4">
+                        <span className="text-[10px] uppercase font-bold text-zinc-500 bg-zinc-900/50 px-2 py-0.5 rounded-full border border-white/5">
+                          Gr. {fixture.group_name}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`hidden sm:block text-sm transition-colors ${
-                            isFinished && homeWon ? 'font-black' : 'font-medium'
-                          } ${getColorForUser(fixture.home_user_id, fixture.home_user_name, fixture.home_user_color).text}`}
+                    )}
+
+                    {/* Matchup - Center */}
+                    <div className="flex items-center justify-center gap-4 sm:gap-8 w-full max-w-3xl mt-6 sm:mt-0">
+                      {/* Home Team */}
+                      <Link
+                        href={`/user/${fixture.home_user_id}`}
+                        className={`flex-1 flex flex-col items-center sm:items-end gap-2 text-center sm:text-right group/home transition-all hover:opacity-80 ${
+                          isFinished && !homeWon && !isDraw ? 'opacity-50' : ''
+                        }`}
+                      >
+                        <div
+                          className={`sm:hidden text-sm truncate w-full px-2 ${isFinished && homeWon ? 'font-black text-white' : 'font-medium text-zinc-300'}`}
                         >
                           {fixture.home_user_name}
-                        </span>
-                        <div
-                          className={`relative w-10 h-10 rounded-full overflow-hidden bg-zinc-800 border shrink-0 shadow-lg transition-all ${isFinished && homeWon ? 'border-amber-500 shadow-amber-900/20 scale-110 ring-2 ring-amber-500/20' : 'border-white/10 group-hover/home:border-amber-500/30'}`}
-                        >
-                          {fixture.home_user_icon ? (
-                            <img
-                              src={
-                                fixture.home_user_icon.startsWith('http')
-                                  ? fixture.home_user_icon
-                                  : `https://cdn.biwenger.com/${fixture.home_user_icon}`
-                              }
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-white/5 text-zinc-500">
-                              <User size={16} />
-                            </div>
-                          )}
                         </div>
-                      </div>
-                    </Link>
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`hidden sm:block text-sm transition-colors ${
+                              isFinished && homeWon ? 'font-black' : 'font-medium'
+                            } ${getColorForUser(fixture.home_user_id, fixture.home_user_name, fixture.home_user_color).text}`}
+                          >
+                            {fixture.home_user_name}
+                          </span>
+                          <div
+                            className={`relative w-10 h-10 rounded-full overflow-hidden bg-zinc-800 border shrink-0 shadow-lg transition-all ${isFinished && homeWon ? 'border-amber-500 shadow-amber-900/20 scale-110 ring-2 ring-amber-500/20' : 'border-white/10 group-hover/home:border-amber-500/30'}`}
+                          >
+                            {fixture.home_user_icon ? (
+                              <img
+                                src={
+                                  fixture.home_user_icon.startsWith('http')
+                                    ? fixture.home_user_icon
+                                    : `https://cdn.biwenger.com/${fixture.home_user_icon}`
+                                }
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-white/5 text-zinc-500">
+                                <User size={16} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
 
-                    {/* Score */}
-                    <div
-                      className={`px-4 py-1.5 rounded-lg text-xl font-black font-mono tracking-widest min-w-[80px] text-center border transition-all ${
-                        isFinished
-                          ? 'bg-zinc-900/80 text-white border-white/10 shadow-inner'
-                          : 'bg-white/5 text-zinc-500 border-transparent'
-                      }`}
-                    >
-                      <span className={isFinished && homeWon ? 'text-green-400' : ''}>
-                        {fixture.home_score ?? '-'}
-                      </span>
-                      <span className="mx-1 opacity-50">:</span>
-                      <span className={isFinished && awayWon ? 'text-green-400' : ''}>
-                        {fixture.away_score ?? '-'}
-                      </span>
-                    </div>
-
-                    {/* Away Team */}
-                    <Link
-                      href={`/user/${fixture.away_user_id}`}
-                      className={`flex-1 flex flex-col items-center sm:items-start gap-2 text-center sm:text-left group/away transition-all hover:opacity-80 ${
-                        isFinished && !awayWon && !isDraw ? 'opacity-50' : ''
-                      }`}
-                    >
+                      {/* Score */}
                       <div
-                        className={`sm:hidden text-sm truncate w-full px-2 ${isFinished && awayWon ? 'font-black text-white' : 'font-medium text-zinc-300'}`}
+                        className={`px-4 py-1.5 rounded-lg text-xl font-black font-mono tracking-widest min-w-[80px] text-center border transition-all ${
+                          isFinished
+                            ? 'bg-zinc-900/80 text-white border-white/10 shadow-inner'
+                            : 'bg-white/5 text-zinc-500 border-transparent'
+                        }`}
                       >
-                        {fixture.away_user_name}
+                        <span className={isFinished && homeWon ? 'text-green-400' : ''}>
+                          {fixture.home_score ?? '-'}
+                        </span>
+                        <span className="mx-1 opacity-50">:</span>
+                        <span className={isFinished && awayWon ? 'text-green-400' : ''}>
+                          {fixture.away_score ?? '-'}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-3 flex-row-reverse sm:flex-row">
-                        <span
-                          className={`hidden sm:block text-sm transition-colors ${
-                            isFinished && awayWon ? 'font-black' : 'font-medium'
-                          } ${getColorForUser(fixture.away_user_id, fixture.away_user_name, fixture.away_user_color).text}`}
+
+                      {/* Away Team */}
+                      <Link
+                        href={`/user/${fixture.away_user_id}`}
+                        className={`flex-1 flex flex-col items-center sm:items-start gap-2 text-center sm:text-left group/away transition-all hover:opacity-80 ${
+                          isFinished && !awayWon && !isDraw ? 'opacity-50' : ''
+                        }`}
+                      >
+                        <div
+                          className={`sm:hidden text-sm truncate w-full px-2 ${isFinished && awayWon ? 'font-black text-white' : 'font-medium text-zinc-300'}`}
                         >
                           {fixture.away_user_name}
-                        </span>
-                        <div
-                          className={`relative w-10 h-10 rounded-full overflow-hidden bg-zinc-800 border shrink-0 shadow-lg transition-all ${isFinished && awayWon ? 'border-amber-500 shadow-amber-900/20 scale-110 ring-2 ring-amber-500/20' : 'border-white/10 group-hover/away:border-amber-500/30'}`}
-                        >
-                          {fixture.away_user_icon ? (
-                            <img
-                              src={
-                                fixture.away_user_icon.startsWith('http')
-                                  ? fixture.away_user_icon
-                                  : `https://cdn.biwenger.com/${fixture.away_user_icon}`
-                              }
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-white/5 text-zinc-500">
-                              <User size={16} />
-                            </div>
-                          )}
                         </div>
-                      </div>
-                    </Link>
-                  </div>
+                        <div className="flex items-center gap-3 flex-row-reverse sm:flex-row">
+                          <span
+                            className={`hidden sm:block text-sm transition-colors ${
+                              isFinished && awayWon ? 'font-black' : 'font-medium'
+                            } ${getColorForUser(fixture.away_user_id, fixture.away_user_name, fixture.away_user_color).text}`}
+                          >
+                            {fixture.away_user_name}
+                          </span>
+                          <div
+                            className={`relative w-10 h-10 rounded-full overflow-hidden bg-zinc-800 border shrink-0 shadow-lg transition-all ${isFinished && awayWon ? 'border-amber-500 shadow-amber-900/20 scale-110 ring-2 ring-amber-500/20' : 'border-white/10 group-hover/away:border-amber-500/30'}`}
+                          >
+                            {fixture.away_user_icon ? (
+                              <img
+                                src={
+                                  fixture.away_user_icon.startsWith('http')
+                                    ? fixture.away_user_icon
+                                    : `https://cdn.biwenger.com/${fixture.away_user_icon}`
+                                }
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-white/5 text-zinc-500">
+                                <User size={16} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
 
-                  {/* Status - Absolute Right */}
-                  <div className="hidden sm:flex flex-col items-end absolute top-1/2 -translate-y-1/2 right-4">
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${isFinished ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'}`}
-                    >
-                      {isFinished ? 'Finalizado' : 'Pendiente'}
-                    </span>
+                    {/* Status - Absolute Right */}
+                    <div className="hidden sm:flex flex-col items-end absolute top-1/2 -translate-y-1/2 right-0">
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${isFinished ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'}`}
+                      >
+                        {isFinished ? 'Finalizado' : 'Pendiente'}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </ElegantCard>
               );
             })}
           </motion.div>
