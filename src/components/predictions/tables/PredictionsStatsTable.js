@@ -12,7 +12,7 @@ export function PredictionsStatsTable({ data }) {
       label: 'Plenos (+8)',
       align: 'center',
       variant: 'numeric',
-      className: 'text-primary',
+      color: 'primary',
     },
     {
       key: 'perfects',

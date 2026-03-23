@@ -8,6 +8,25 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import Image from 'next/image';
 import Link from 'next/link';
 
+// Map of standard color names to Tailwind text color classes
+const COLUMN_COLOR_MAP = {
+  blue: 'text-blue-400',
+  yellow: 'text-yellow-400',
+  emerald: 'text-emerald-400',
+  green: 'text-emerald-400',
+  pink: 'text-pink-400',
+  cyan: 'text-cyan-400',
+  orange: 'text-orange-400',
+  purple: 'text-purple-400',
+  red: 'text-red-400',
+  amber: 'text-amber-400',
+  indigo: 'text-indigo-400',
+  teal: 'text-teal-400',
+  lime: 'text-lime-400',
+  fuchsia: 'text-fuchsia-400',
+  primary: 'text-primary',
+};
+
 // --- Primitive Components (formerly BaseTable) ---
 
 /**
@@ -25,7 +44,16 @@ export function TableHeader({ children, className }) {
   return <thead className={cn('bg-white/5 border-y border-white/5', className)}>{children}</thead>;
 }
 
-export function TableHeaderCell({ children, className, align = 'center', colSpan, onClick }) {
+export function TableHeaderCell({
+  children,
+  className,
+  align = 'center',
+  color,
+  colSpan,
+  onClick,
+}) {
+  const colorClass = color ? COLUMN_COLOR_MAP[color] || color : '';
+
   return (
     <th
       colSpan={colSpan}
@@ -33,6 +61,7 @@ export function TableHeaderCell({ children, className, align = 'center', colSpan
       className={cn(
         'px-4 py-3 bg-white/[0.02] transition-colors text-slate-200 font-bold text-xs md:text-sm uppercase tracking-widest font-sans border-b border-white/5',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
+        colorClass,
         className
       )}
     >
@@ -51,7 +80,16 @@ export function TableRow({ children, className, hovering = true }) {
   );
 }
 
-export function TableCell({ children, className, align = 'center', variant = 'default', colSpan }) {
+export function TableCell({
+  children,
+  className,
+  align = 'center',
+  variant = 'default',
+  color,
+  colSpan,
+}) {
+  const colorClass = color ? COLUMN_COLOR_MAP[color] || color : '';
+
   return (
     <td
       colSpan={colSpan}
@@ -61,6 +99,7 @@ export function TableCell({ children, className, align = 'center', variant = 'de
           ? 'font-display font-black text-lg md:text-xl tabular-nums'
           : 'text-sm md:text-base font-medium',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
+        colorClass,
         className
       )}
     >
@@ -80,6 +119,7 @@ function SortableHeader({
   currentSort,
   onSort,
   align = 'center',
+  color,
   sortable = true,
 }) {
   const isSorted = currentSort.key === sortKey;
@@ -87,6 +127,7 @@ function SortableHeader({
   return (
     <TableHeaderCell
       align={align}
+      color={color}
       className={cn(sortable ? 'cursor-pointer select-none hover:bg-white/5' : '')}
       onClick={() => sortable && onSort(sortKey)}
     >
@@ -207,6 +248,7 @@ export default function StatsTable({
                 currentSort={sortConfig}
                 onSort={handleSort}
                 align={col.align}
+                color={col.color}
                 sortable={col.sortable !== false}
               />
             ))}
@@ -268,6 +310,7 @@ export default function StatsTable({
                         key={col.key}
                         variant={col.variant || 'default'}
                         align={col.align}
+                        color={col.color}
                         className={cellClassName}
                       >
                         {content}
