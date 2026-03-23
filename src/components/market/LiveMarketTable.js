@@ -14,7 +14,14 @@ import {
 import Image from 'next/image';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
-import { Table, TableHeader, TableHeaderCell, TableRow, TableCell } from '@/components/ui';
+import {
+  Table,
+  TableHeader,
+  TableHeaderCell,
+  TableRow,
+  TableCell,
+  TableIdentity,
+} from '@/components/ui';
 
 const POS_COLORS = {
   Unknown: 'bg-muted',
@@ -201,11 +208,11 @@ export default function LiveMarketTable({ initialData }) {
                 </TableHeader>
                 <tbody className="divide-y divide-white/5 bg-transparent">
                   {dayKeys.map((day) => [
-                    <TableRow key={day} hovering={false} className="sticky top-[52px] z-5">
+                    <TableRow key={day} hovering={false} className="sticky top-[52px] z-20">
                       <TableCell
                         colSpan="4"
                         align="left"
-                        className="py-2.5 px-4 text-[10px] md:text-xs font-black text-primary/80 tracking-[0.15em] uppercase font-display sticky left-0 bg-card/60 backdrop-blur-sm border-b border-border"
+                        className="py-2.5 px-4 text-[10px] md:text-sm font-bold text-slate-400 tracking-wider uppercase sticky left-0 bg-white/[0.03] backdrop-blur-md border-b border-white/5 shadow-sm"
                       >
                         {day}
                       </TableCell>
@@ -222,31 +229,13 @@ export default function LiveMarketTable({ initialData }) {
 
                           {/* Jugador */}
                           <TableCell align="left">
-                            <div className="flex items-center gap-3">
-                              <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/5 border border-white/5 shadow-sm">
-                                {t.player_img && (
-                                  <Image
-                                    src={t.player_img}
-                                    alt={t.player_name}
-                                    fill
-                                    className="object-cover object-top scale-[1.8] origin-top translate-y-[10%] transition-transform group-hover:scale-[2.0]"
-                                    sizes="36px"
-                                  />
-                                )}
-                              </div>
-                              <span
-                                className={`inline-flex items-center justify-center w-5 h-5 rounded-full border text-[10px] font-black text-white shadow-sm font-display ${pos.color}`}
-                              >
-                                {pos.label}
-                              </span>
-                              <a
-                                href={`/player/${t.player_id}`}
-                                className="font-black text-white text-sm md:text-base truncate max-w-45 md:max-w-60 hover:text-primary transition-colors font-display tracking-tight"
-                                style={{ textDecoration: 'none' }}
-                              >
-                                {t.player_name}
-                              </a>
-                            </div>
+                            <TableIdentity
+                              name={t.player_name}
+                              image={t.player_img}
+                              link={`/player/${t.player_id}`}
+                              size="sm"
+                              subtitle={t.player_position}
+                            />
                           </TableCell>
 
                           {/* Operación */}
@@ -256,54 +245,26 @@ export default function LiveMarketTable({ initialData }) {
                               <span title={t.vendedor} className="flex items-center gap-1.5">
                                 {t.vendedor === 'Mercado' ? (
                                   <span
-                                    className="bg-orange-500/10 rounded-full p-1.5 text-orange-400 border border-orange-500/30"
+                                    className="bg-orange-500/10 rounded-full p-1.5 text-orange-400 border border-orange-500/30 font-bold"
                                     title="Mercado"
                                   >
-                                    <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
-                                      <path
-                                        d="M2 6l6-4 6 4v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                      />
-                                    </svg>
+                                    M
                                   </span>
                                 ) : (
-                                  <span
-                                    className="bg-red-500/10 rounded-full p-1.5 text-red-500 border border-red-500/30"
-                                    title={t.vendedor}
-                                  >
-                                    <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
-                                      <circle
-                                        cx="8"
-                                        cy="8"
-                                        r="6"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                      />
-                                      <path
-                                        d="M8 5v3l2 2"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                      />
-                                    </svg>
-                                  </span>
+                                  <TableIdentity
+                                    name={t.vendedor}
+                                    image={t.vendedor_icon}
+                                    link={`/user/${t.vendedor_id}`}
+                                    color={
+                                      getColorForUser(
+                                        t.vendedor_id,
+                                        t.vendedor,
+                                        t.vendedor_color_index
+                                      ).text
+                                    }
+                                    size="sm"
+                                  />
                                 )}
-                                <span className="hidden md:inline">
-                                  {t.vendedor !== 'Mercado' ? (
-                                    <a
-                                      href={`/user/${t.vendedor_id}`}
-                                      className={`${getColorForUser(t.vendedor_id, t.vendedor, t.vendedor_color_index).text} hover:brightness-125 font-black transition-colors font-display tracking-tight text-sm md:text-base`}
-                                      style={{ textDecoration: 'none' }}
-                                    >
-                                      {t.vendedor}
-                                    </a>
-                                  ) : (
-                                    <span className="text-orange-400 font-black font-display tracking-tight text-sm md:text-base">
-                                      {t.vendedor}
-                                    </span>
-                                  )}
-                                </span>
                               </span>
                               <ArrowRight
                                 size={14}
@@ -314,54 +275,26 @@ export default function LiveMarketTable({ initialData }) {
                               <span title={t.comprador} className="flex items-center gap-1.5">
                                 {t.comprador === 'Mercado' ? (
                                   <span
-                                    className="bg-orange-500/10 rounded-full p-1.5 text-orange-400 border border-orange-500/30"
+                                    className="bg-orange-500/10 rounded-full p-1.5 text-orange-400 border border-orange-500/30 font-bold"
                                     title="Mercado"
                                   >
-                                    <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
-                                      <path
-                                        d="M2 6l6-4 6 4v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                      />
-                                    </svg>
+                                    M
                                   </span>
                                 ) : (
-                                  <span
-                                    className="bg-emerald-500/10 rounded-full p-1.5 text-emerald-400 border border-emerald-500/30"
-                                    title={t.comprador}
-                                  >
-                                    <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
-                                      <circle
-                                        cx="8"
-                                        cy="8"
-                                        r="6"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                      />
-                                      <path
-                                        d="M8 11V8l-2-2"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                      />
-                                    </svg>
-                                  </span>
+                                  <TableIdentity
+                                    name={t.comprador}
+                                    image={t.comprador_icon}
+                                    link={`/user/${t.comprador_id}`}
+                                    color={
+                                      getColorForUser(
+                                        t.comprador_id,
+                                        t.comprador,
+                                        t.comprador_color_index
+                                      ).text
+                                    }
+                                    size="sm"
+                                  />
                                 )}
-                                <span className="hidden md:inline">
-                                  {t.comprador !== 'Mercado' ? (
-                                    <a
-                                      href={`/user/${t.comprador_id}`}
-                                      className={`${getColorForUser(t.comprador_id, t.comprador, t.comprador_color_index).text} hover:brightness-125 font-black transition-colors font-display tracking-tight text-sm md:text-base`}
-                                      style={{ textDecoration: 'none' }}
-                                    >
-                                      {t.comprador}
-                                    </a>
-                                  ) : (
-                                    <span className="text-orange-400 font-black font-display tracking-tight text-sm md:text-base">
-                                      {t.comprador}
-                                    </span>
-                                  )}
-                                </span>
                               </span>
                               {/* Badge pujas */}
                               {t.bids_count > 1 && (
@@ -373,16 +306,9 @@ export default function LiveMarketTable({ initialData }) {
                           </TableCell>
 
                           {/* Precio */}
-                          <TableCell
-                            align="right"
-                            className="text-primary group-hover:text-white relative tabular-nums"
-                          >
-                            <span className="transition-transform duration-300 block group-hover:scale-110 origin-right">
-                              {formatEuro(t.precio)}{' '}
-                              <span className="text-[10px] md:text-xs opacity-50 ml-0.5 font-sans">
-                                €
-                              </span>
-                            </span>
+                          <TableCell align="right" className="tabular-nums">
+                            {formatEuro(t.precio)}{' '}
+                            <span className="text-[10px] opacity-50 ml-0.5">€</span>
                           </TableCell>
                         </TableRow>
                       );
