@@ -21,6 +21,8 @@ export default function ElegantCard({
   className = '',
   actionRight = null,
   info = null,
+  hideHeader = false,
+  padding = 'p-6',
   ...rest
 }) {
   // Icon colors mapping to premium color tokens
@@ -73,7 +75,7 @@ export default function ElegantCard({
       <div
         className={`
           stat-card backdrop-blur-md bg-white/5 border border-white/5
-          p-6 h-full flex flex-col animate-pulse
+          ${padding} h-full flex flex-col animate-pulse
           ${className}
         `}
         {...rest}
@@ -95,7 +97,7 @@ export default function ElegantCard({
     <div
       className={`
         stat-card backdrop-blur-lg border border-white/5
-        p-6 h-full flex flex-col group/card relative overflow-hidden
+        ${padding} h-full flex flex-col group/card relative overflow-hidden
         transition-all duration-500 hover:scale-[1.01] hover:border-white/10
         ${className}
       `}
@@ -111,7 +113,7 @@ export default function ElegantCard({
       )}
 
       {/* Header */}
-      {(title || actionRight) && (
+      {!hideHeader && (title || actionRight) && (
         <div className="flex items-start justify-between mb-6 relative z-10">
           <div className="flex items-center gap-3">
             {icon &&
