@@ -21,7 +21,7 @@ export default function LeagueStatsCard() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {/* Box 1: Participants */}
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all">
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:border-cyan-500/30 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-5 h-5 text-cyan-400" />
                 <span className="text-slate-400 text-xs uppercase tracking-wider">
@@ -35,7 +35,7 @@ export default function LeagueStatsCard() {
             </div>
 
             {/* Box 2: Total Points */}
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all">
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:border-orange-500/30 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-orange-400" />
                 <span className="text-slate-400 text-xs uppercase tracking-wider">
@@ -49,7 +49,7 @@ export default function LeagueStatsCard() {
             </div>
 
             {/* Box 3: League Value */}
-            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all">
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:border-blue-500/30 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <BarChart3 className="w-5 h-5 text-blue-400" />
                 <span className="text-slate-400 text-xs uppercase tracking-wider">Valor Liga</span>
@@ -127,7 +127,7 @@ export default function LeagueStatsCard() {
             const progressPct = Math.min(100, Math.max(0, (playedRounds / TOTAL_ROUNDS) * 100));
 
             return (
-              <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30">
+              <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-slate-400 text-xs uppercase tracking-wider">
                     Progreso Temporada
@@ -136,7 +136,7 @@ export default function LeagueStatsCard() {
                     {playedRounds} / {TOTAL_ROUNDS}
                   </span>
                 </div>
-                <div className="h-3 bg-slate-700/30 rounded-full overflow-hidden">
+                <div className="h-3 bg-card/80 border border-border rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-primary to-orange-500 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${progressPct}%` }}

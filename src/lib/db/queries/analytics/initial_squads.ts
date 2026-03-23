@@ -290,12 +290,15 @@ export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]>
 }
 
 export interface InitialSquadDetailed {
+  user_id: string | number;
   manager_name: string;
   manager_color_index: number;
+  player_id: number;
   player_name: string;
   player_position: string;
   current_points: number;
   current_price: number;
+  current_owner_id: string | number | null;
   current_owner: string | null;
   current_owner_color_index: number | null;
   points_contributed: number;
@@ -410,12 +413,15 @@ export async function getInitialSquadPotentialAdvanced(): Promise<InitialSquadPo
 export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]> {
   const query = `
     SELECT 
+        u.id as user_id,
         u.name as manager_name,
         u.color_index as manager_color_index,
+        p.id as player_id,
         p.name as player_name,
         p.puntos as current_points,
         p.price as current_price,
         p.position as player_position,
+        p.owner_id as current_owner_id,
         (SELECT name FROM users u2 WHERE u2.id = p.owner_id) as current_owner,
         (SELECT color_index FROM users u2 WHERE u2.id = p.owner_id) as current_owner_color_index,
         (SELECT COALESCE(SUM(prs.fantasy_points), 0)

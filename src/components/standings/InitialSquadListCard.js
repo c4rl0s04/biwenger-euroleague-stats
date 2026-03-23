@@ -1,31 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Users, Shield, Award, TrendingUp, DollarSign, Info, User, Activity } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
-import { USER_COLORS } from '@/lib/constants/colors';
-
-// Helper to get vibrant gradient for headers/tabs based on official index
-const getVibrantGradient = (index) => {
-  const gradients = [
-    'from-blue-600 to-blue-400', // 0: Blue
-    'from-yellow-600 to-yellow-400', // 1: Yellow
-    'from-emerald-600 to-emerald-400', // 2: Emerald
-    'from-pink-600 to-pink-400', // 3: Pink
-    'from-cyan-600 to-cyan-400', // 4: Cyan
-    'from-orange-600 to-orange-400', // 5: Orange
-    'from-purple-600 to-purple-400', // 6: Purple
-    'from-red-600 to-red-400', // 7: Red
-    'from-amber-600 to-amber-400', // 8: Amber
-    'from-indigo-600 to-indigo-400', // 9: Indigo
-    'from-teal-600 to-teal-400', // 10: Teal
-    'from-lime-600 to-lime-400', // 11: Lime
-    'from-fuchsia-600 to-fuchsia-400', // 12: Fuchsia
-  ];
-  return gradients[index % gradients.length];
-};
+import { getColorForUser } from '@/lib/constants/colors';
 
 const POSITION_MAP = {
   Base: { label: 'B', styles: 'text-blue-400 bg-blue-400/10 border-blue-400/20 shadow-blue-400/5' },
@@ -61,6 +42,7 @@ export default function InitialSquadListCard() {
       acc[player.manager_name] = {
         name: player.manager_name,
         colorIndex: player.manager_color_index,
+        user_id: player.user_id,
         players: [],
       };
     }
@@ -90,7 +72,7 @@ export default function InitialSquadListCard() {
               {error}
             </p>
           ) : managers.length === 0 ? (
-            <p className="text-slate-400 text-center py-12 text-sm bg-slate-800/20 rounded-2xl">
+            <p className="text-slate-400 text-center py-12 text-sm bg-card/20 rounded-2xl">
               No hay datos disponibles
             </p>
           ) : (
@@ -99,8 +81,11 @@ export default function InitialSquadListCard() {
               <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
                 {managers.map((manager, idx) => {
                   const isActive = activeManagerIdx === idx;
-                  const managerGradient = getVibrantGradient(manager.colorIndex);
-                  const managerColor = USER_COLORS[manager.colorIndex % USER_COLORS.length];
+                  const managerColor = getColorForUser(
+                    manager.user_id,
+                    manager.name,
+                    manager.colorIndex
+                  );
 
                   return (
                     <button
@@ -110,10 +95,14 @@ export default function InitialSquadListCard() {
                         flex-shrink-0 px-4 py-2 rounded-xl border text-sm font-bold transition-all duration-300 cursor-pointer
                         ${
                           isActive
-                            ? `bg-gradient-to-r ${managerGradient} text-white border-transparent shadow-lg shadow-black/40 scale-105`
-                            : `bg-slate-800/40 ${managerColor.text} ${managerColor.border} hover:bg-slate-800/60 hover:border-slate-600`
+                            ? `text-white border-transparent shadow-lg scale-105`
+                            : `bg-card/40 ${managerColor.text} ${managerColor.border.replace('border-', 'border-') || 'border-transparent'} hover:bg-card hover:border-border`
                         }
                       `}
+                      style={{
+                        backgroundColor: isActive ? managerColor.stroke : undefined,
+                        boxShadow: isActive ? `0 4px 14px 0 ${managerColor.stroke}40` : undefined,
+                      }}
                     >
                       {manager.name}
                     </button>
@@ -140,7 +129,14 @@ export default function InitialSquadListCard() {
                       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                           <div
-                            className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-black text-white shadow-lg bg-gradient-to-br ${getVibrantGradient(activeManager.colorIndex)}`}
+                            className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-black text-white shadow-lg`}
+                            style={{
+                              backgroundColor: getColorForUser(
+                                activeManager.user_id,
+                                activeManager.name,
+                                activeManager.colorIndex
+                              ).stroke,
+                            }}
                           >
                             {activeManager.name.charAt(0)}
                           </div>
@@ -148,11 +144,19 @@ export default function InitialSquadListCard() {
                             <span className="text-white/40 text-[11px] uppercase font-bold block mb-0.5">
                               MANAGER
                             </span>
-                            <h2
-                              className={`text-2xl md:text-3xl font-black leading-none tracking-tighter uppercase ${USER_COLORS[activeManager.colorIndex % USER_COLORS.length].text}`}
+                            <Link
+                              href={`/user/${activeManager.user_id}`}
+                              className={`text-2xl md:text-3xl font-black leading-none tracking-tighter uppercase hover:scale-105 origin-left transition-transform cursor-pointer block`}
+                              style={{
+                                color: getColorForUser(
+                                  activeManager.user_id,
+                                  activeManager.name,
+                                  activeManager.colorIndex
+                                ).stroke,
+                              }}
                             >
                               {activeManager.name}
-                            </h2>
+                            </Link>
                           </div>
                         </div>
 
@@ -216,7 +220,15 @@ export default function InitialSquadListCard() {
                                   width: `${(activeManager.players.filter((p) => p.current_owner === activeManager.name).length / activeManager.players.length) * 100}%`,
                                 }}
                                 transition={{ delay: 0.5, duration: 1 }}
-                                className={`h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(37,99,235,0.3)] bg-gradient-to-r from-blue-600 to-blue-400`}
+                                className={`h-full rounded-full transition-all duration-500`}
+                                style={{
+                                  backgroundColor: getColorForUser(
+                                    activeManager.user_id,
+                                    activeManager.name,
+                                    activeManager.colorIndex
+                                  ).stroke,
+                                  boxShadow: `0 0 10px ${getColorForUser(activeManager.user_id, activeManager.name, activeManager.colorIndex).stroke}80`,
+                                }}
                               />
                             </div>
                           </div>
@@ -225,13 +237,7 @@ export default function InitialSquadListCard() {
                     </div>
 
                     {/* Hyper-Compact Squad Grid Section */}
-                    <div className="bg-slate-900/30 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
-                      <div className="bg-slate-800/20 px-6 py-3 border-b border-slate-800 flex justify-center items-center">
-                        <span className="text-base font-normal uppercase tracking-[0.2em] text-slate-500 font-bebas">
-                          DETALLE SQUAD REPARTO INICIAL
-                        </span>
-                      </div>
-
+                    <div className="bg-card/20 rounded-2xl border border-border shadow-xl overflow-hidden">
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-5">
                         {sortedPlayers.map((player, idx) => {
                           const isStillOwned = player.current_owner === activeManager.name;
@@ -241,10 +247,13 @@ export default function InitialSquadListCard() {
                           };
 
                           // Official colors for current owner
-                          const ownerStyles =
-                            player.current_owner_color_index !== null
-                              ? USER_COLORS[player.current_owner_color_index % USER_COLORS.length]
-                              : null;
+                          const ownerStyles = player.current_owner
+                            ? getColorForUser(
+                                player.current_owner_id,
+                                player.current_owner,
+                                player.current_owner_color_index
+                              )
+                            : null;
 
                           return (
                             <motion.div
@@ -252,7 +261,7 @@ export default function InitialSquadListCard() {
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ delay: idx * 0.01 }}
-                              className="flex flex-col gap-2.5 p-3 bg-slate-800/10 rounded-xl border border-white/5 hover:border-white/10 transition-all group/item shadow-sm"
+                              className="flex flex-col gap-2.5 p-3 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-all group/item shadow-sm"
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div
@@ -261,9 +270,12 @@ export default function InitialSquadListCard() {
                                   {posData.label}
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                  <span className="text-base font-bold text-slate-200 truncate group-hover/item:text-white transition-colors leading-tight">
+                                  <Link
+                                    href={`/player/${player.player_id}`}
+                                    className="text-base font-bold text-slate-200 truncate hover:text-white hover:scale-105 origin-left transition-all leading-tight cursor-pointer block"
+                                  >
                                     {player.player_name}
-                                  </span>
+                                  </Link>
                                   <div className="flex items-center gap-2 text-sm font-bold mt-1 whitespace-nowrap">
                                     <div
                                       className="flex items-center gap-0.5 text-pink-400"
@@ -287,22 +299,42 @@ export default function InitialSquadListCard() {
                               <div
                                 className={`
                                   px-2 py-1 rounded-lg border text-center transition-all duration-300 flex items-center justify-center gap-1.5
-                                  ${ownerStyles ? `bg-gradient-to-br ${ownerStyles.bg} ${ownerStyles.border}` : 'bg-slate-800/80 border-slate-700/50'}
+                                  ${ownerStyles ? '' : 'bg-card/80 border-border'}
                                 `}
+                                style={
+                                  ownerStyles
+                                    ? {
+                                        backgroundColor:
+                                          ownerStyles.bg?.replace('bg-', '') ||
+                                          ownerStyles.stroke + '20',
+                                        borderColor: ownerStyles.stroke + '40',
+                                      }
+                                    : undefined
+                                }
                               >
                                 {(isStillOwned && (
                                   <Shield
                                     size={12}
-                                    className={ownerStyles?.text || 'text-slate-400'}
+                                    color={ownerStyles?.stroke || '#94a3b8'}
                                     fill="currentColor"
                                     fillOpacity={0.2}
                                   />
                                 )) || <Activity size={12} className="text-slate-500" />}
-                                <span
-                                  className={`text-xs font-black uppercase tracking-tighter truncate ${ownerStyles ? ownerStyles.text : 'text-slate-400'}`}
-                                >
-                                  {player.current_owner || 'MERCADO'}
-                                </span>
+                                {player.current_owner ? (
+                                  <Link
+                                    href={`/user/${player.current_owner_id || player.current_owner}`}
+                                    className={`text-xs font-black uppercase tracking-tighter truncate hover:scale-110 origin-center transition-transform cursor-pointer block text-white`}
+                                    style={{ color: ownerStyles?.stroke || undefined }}
+                                  >
+                                    {player.current_owner}
+                                  </Link>
+                                ) : (
+                                  <span
+                                    className={`text-xs font-black uppercase tracking-tighter truncate text-slate-400`}
+                                  >
+                                    MERCADO
+                                  </span>
+                                )}
                               </div>
                             </motion.div>
                           );
@@ -311,7 +343,7 @@ export default function InitialSquadListCard() {
                     </div>
 
                     {/* Info Footer (Hyper-Compact) */}
-                    <div className="bg-slate-800/10 rounded-xl border border-slate-800/30 p-3.5 flex items-center gap-3">
+                    <div className="bg-card/10 rounded-xl border border-border p-3.5 flex items-center gap-3">
                       <Info size={16} className="text-slate-500 shrink-0" />
                       <p className="text-sm text-slate-500 leading-tight italic">
                         <span className="text-pink-400/60 font-bold ml-1">★ Pts Manager</span>{' '}
