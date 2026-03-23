@@ -15,6 +15,7 @@ export function HallOfFame({ winners }) {
         const isFirst = index === 0;
         const isSecond = index === 1;
         const isThird = index === 2;
+        const userColor = getColorForUser(winner.id, winner.name, winner.colorIndex);
 
         // Rank-based color logic (Gold, Silver, Bronze)
         const rankColor = isFirst ? 'amber' : isSecond ? 'zinc' : isThird ? 'orange' : 'zinc';
@@ -69,7 +70,13 @@ export function HallOfFame({ winners }) {
                   href={`/user/${winner.id || winner.name}`}
                   className="group/name inline-block"
                 >
-                  <h3 className="font-black font-display tracking-tight text-2xl text-white mb-1 group-hover/name:text-primary transition-colors">
+                  <h3
+                    className={cn(
+                      'font-black font-display tracking-tight text-2xl mb-1 transition-colors',
+                      userColor.text,
+                      userColor.groupHover
+                    )}
+                  >
                     {winner.name}
                   </h3>
                 </Link>

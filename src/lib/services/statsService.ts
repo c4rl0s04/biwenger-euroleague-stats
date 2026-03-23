@@ -48,6 +48,14 @@ export async function getGlobalTournamentStats() {
   // 1. Hall of Fame (Most Titles)
   const hallOfFame: Record<number, HallOfFameEntry> = {};
 
+  // Build a map of user colors from the latest standings data (which joins with users table)
+  const managerColorMap: Record<string, number> = {};
+  standings.forEach((s: any) => {
+    if (s.user_id && s.user_color !== null && s.user_color !== undefined) {
+      managerColorMap[s.user_id] = s.user_color;
+    }
+  });
+
   allTournaments.forEach((t: any) => {
     // Check both potential winner locations
     const winner = t.data?.winner || (t.status === 'finished' && t.winner ? t.winner : null);
@@ -58,7 +66,8 @@ export async function getGlobalTournamentStats() {
           id: winner.id,
           name: winner.name,
           icon: winner.icon,
-          colorIndex: winner.colorIndex || winner.color_index || 0,
+          // Use map color if available, otherwise snapshot, fallback to 0
+          colorIndex: managerColorMap[winner.id] ?? (winner.colorIndex || winner.color_index || 0),
           titles: 0,
           tournaments: [],
         };
