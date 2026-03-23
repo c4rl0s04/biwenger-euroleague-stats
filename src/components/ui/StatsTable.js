@@ -182,6 +182,7 @@ function SortableHeader({
   align = 'center',
   color,
   sortable = true,
+  className,
 }) {
   const isSorted = currentSort.key === sortKey;
 
@@ -189,7 +190,7 @@ function SortableHeader({
     <TableHeaderCell
       align={align}
       color={color}
-      className={cn(sortable ? 'cursor-pointer select-none hover:bg-white/5' : '')}
+      className={cn(sortable ? 'cursor-pointer select-none hover:bg-white/5' : '', className)}
       onClick={() => sortable && onSort(sortKey)}
     >
       <div
@@ -249,6 +250,7 @@ export default function StatsTable({
   managerSubtitleRender,
   managerColumnIndex = 0,
   showManagerColumn = true,
+  managerAlign = 'left',
   className = '',
   children,
 }) {
@@ -308,6 +310,7 @@ export default function StatsTable({
                   align={col.align}
                   color={col.color}
                   sortable={col.sortable !== false}
+                  className={col.headerClassName}
                 />
               ));
 
@@ -321,7 +324,7 @@ export default function StatsTable({
                     sortKey={managerKey}
                     currentSort={sortConfig}
                     onSort={handleSort}
-                    align="left"
+                    align={managerAlign}
                   />
                 );
               }
@@ -367,7 +370,7 @@ export default function StatsTable({
                       cells.splice(
                         managerColumnIndex,
                         0,
-                        <TableCell key="manager-cell" align="left">
+                        <TableCell key="manager-cell" align={managerAlign}>
                           <TableIdentity
                             name={uName}
                             image={uIcon}

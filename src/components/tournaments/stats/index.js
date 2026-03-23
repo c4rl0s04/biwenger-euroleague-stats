@@ -1,3 +1,3 @@
 export * from './HallOfFame';
-export * from './StatsTable';
+export * from './TournamentHistoryTable';
 export * from './RecordsSection';

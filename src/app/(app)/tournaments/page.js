@@ -5,7 +5,7 @@ import { getGlobalTournamentStats } from '@/lib/services/statsService';
 import {
   ActiveTournamentsSection,
   HallOfFame,
-  StatsTable,
+  TournamentHistoryTable,
   RecordsSection,
 } from '@/components/tournaments';
 
@@ -60,7 +60,7 @@ export default async function TournamentsPage() {
       {globalStats.length > 0 && (
         <Section title="Récord Global" id="global-stats" delay={300} background="section-raised">
           <RecordsSection records={records} />
-          <StatsTable data={globalStats} title="Histórico Completo" type="global" />
+          <TournamentHistoryTable data={globalStats} title="Histórico Completo" type="global" />
         </Section>
       )}
     </div>
