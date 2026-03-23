@@ -16,6 +16,9 @@ import {
 import CustomSelect from '@/components/ui/CustomSelect';
 import PlayerCard from './PlayerCard';
 import PlayersList from './PlayersList';
+import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { AnimatedNumber } from '@/components/ui';
+import { Trophy, User as UserIcon, UserCheck } from 'lucide-react';
 
 // 21 items to fit perfectly in a 3-column grid (7 rows x 3 cols)
 const ITEMS_PER_PAGE = 21;
@@ -342,37 +345,44 @@ export default function PlayersTable({ initialPlayers }) {
       </div>
 
       {/* --- STATS SUMMARY --- */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-card/30 p-4 rounded-xl border border-border/30">
-          <div className="text-muted-foreground text-xs mb-1">Total Jugadores</div>
-          <div className="text-2xl font-bold font-display">{initialPlayers.length}</div>
-        </div>
-        <div className="bg-card/30 p-4 rounded-xl border border-border/30">
-          <div className="text-muted-foreground text-xs mb-1">Fichados</div>
-          <div className="text-2xl font-bold font-display text-primary">
-            {initialPlayers.filter((p) => p.owner_id).length}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <ElegantCard title="Total Jugadores" icon={Users} color="zinc" padding="p-4">
+          <div className="text-2xl font-bold font-display mt-1">
+            <AnimatedNumber value={initialPlayers.length} duration={1} />
           </div>
-        </div>
-        <div className="bg-card/30 p-4 rounded-xl border border-border/30">
-          <div className="text-muted-foreground text-xs mb-1">Libres</div>
-          <div className="text-2xl font-bold font-display text-green-400">
-            {initialPlayers.filter((p) => !p.owner_id).length}
+        </ElegantCard>
+
+        <ElegantCard title="Fichados" icon={UserCheck} color="primary" padding="p-4">
+          <div className="text-2xl font-bold font-display text-primary mt-1">
+            <AnimatedNumber value={initialPlayers.filter((p) => p.owner_id).length} duration={1} />
           </div>
-        </div>
-        <div className="bg-card/30 p-4 rounded-xl border border-border/30">
-          <div className="text-muted-foreground text-xs mb-1">Valor Total</div>
-          <div className="text-2xl font-bold font-display text-blue-400">
-            {formatMoney(initialPlayers.reduce((acc, p) => acc + (p.price || 0), 0) / 1000000)}M
+        </ElegantCard>
+
+        <ElegantCard title="Libres" icon={UserIcon} color="emerald" padding="p-4">
+          <div className="text-2xl font-bold font-display text-emerald-400 mt-1">
+            <AnimatedNumber value={initialPlayers.filter((p) => !p.owner_id).length} duration={1} />
           </div>
-        </div>
-        <div className="bg-card/30 p-4 rounded-xl border border-border/30">
-          <div className="text-muted-foreground text-xs mb-1">Puntos Totales</div>
-          <div className="text-2xl font-bold font-display text-primary">
-            {new Intl.NumberFormat('es-ES').format(
-              initialPlayers.reduce((acc, p) => acc + (p.total_points || 0), 0)
-            )}
+        </ElegantCard>
+
+        <ElegantCard title="Valor Total" icon={Euro} color="blue" padding="p-4">
+          <div className="text-2xl font-bold font-display text-blue-400 mt-1">
+            <AnimatedNumber
+              value={initialPlayers.reduce((acc, p) => acc + (p.price || 0), 0) / 1000000}
+              decimals={1}
+              suffix="M"
+              duration={1}
+            />
           </div>
-        </div>
+        </ElegantCard>
+
+        <ElegantCard title="Puntos Totales" icon={Trophy} color="amber" padding="p-4">
+          <div className="text-2xl font-bold font-display text-amber-400 mt-1">
+            <AnimatedNumber
+              value={initialPlayers.reduce((acc, p) => acc + (p.total_points || 0), 0)}
+              duration={1}
+            />
+          </div>
+        </ElegantCard>
       </div>
 
       {/* --- CARD GRID --- */}
