@@ -104,7 +104,7 @@ export default function ElegantCard({
       {/* Premium Gradient Glow Overlay */}
       {bgColor ? (
         <div
-          className={`absolute inset-0 bg-gradient-to-br ${bgTint} opacity-40 transition-opacity duration-700 pointer-events-none`}
+          className={`absolute inset-0 bg-gradient-to-br ${bgTint} opacity-70 transition-opacity duration-700 pointer-events-none`}
         />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-primary/0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-700 pointer-events-none" />
