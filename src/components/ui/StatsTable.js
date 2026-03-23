@@ -34,7 +34,7 @@ const COLUMN_COLOR_MAP = {
  */
 export function Table({ children, className }) {
   return (
-    <div className={cn('overflow-x-auto', className)}>
+    <div className={cn('overflow-x-auto rounded-xl overflow-hidden', className)}>
       <table className="w-full text-sm text-left border-collapse">{children}</table>
     </div>
   );
@@ -60,6 +60,7 @@ export function TableHeaderCell({
       onClick={onClick}
       className={cn(
         'px-4 py-3 bg-white/[0.02] transition-colors text-slate-200 font-bold text-xs md:text-sm uppercase tracking-widest font-sans border-b border-white/5',
+        'first:rounded-tl-xl last:rounded-tr-xl',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
         colorClass,
         className
