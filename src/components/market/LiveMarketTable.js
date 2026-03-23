@@ -16,7 +16,7 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
 
 const POS_COLORS = {
-  Unknown: 'bg-slate-600',
+  Unknown: 'bg-muted',
   B: 'bg-blue-500',
   A: 'bg-emerald-500',
   P: 'bg-red-500',
@@ -216,7 +216,7 @@ export default function LiveMarketTable({ initialData }) {
                           className="hover:bg-white/[0.02] transition-colors group bg-transparent"
                         >
                           {/* Fecha (vacío, ya está el header) */}
-                          <td className="px-4 py-4 whitespace-nowrap text-[10px] text-slate-600 font-display font-black"></td>
+                          <td className="px-4 py-4 whitespace-nowrap text-[10px] text-muted-foreground/40 font-display font-black"></td>
                           {/* Jugador */}
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
@@ -301,7 +301,11 @@ export default function LiveMarketTable({ initialData }) {
                                   )}
                                 </span>
                               </span>
-                              <ArrowRight size={14} title="hacia" className="text-slate-600" />
+                              <ArrowRight
+                                size={14}
+                                title="hacia"
+                                className="text-muted-foreground/30"
+                              />
                               {/* Comprador icono */}
                               <span title={t.comprador} className="flex items-center gap-1.5">
                                 {t.comprador === 'Mercado' ? (
