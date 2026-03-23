@@ -2,6 +2,7 @@ import { CONFIG } from '@/lib/config';
 
 export const USER_COLORS = [
   {
+    name: 'blue',
     bg: 'from-blue-500/20 to-blue-600/10',
     border: 'border-blue-500/30',
     text: 'text-blue-400',
@@ -10,6 +11,7 @@ export const USER_COLORS = [
     stroke: '#60a5fa',
   },
   {
+    name: 'yellow',
     bg: 'from-yellow-500/20 to-yellow-600/10',
     border: 'border-yellow-500/30',
     text: 'text-yellow-400',
@@ -18,6 +20,7 @@ export const USER_COLORS = [
     stroke: '#facc15',
   },
   {
+    name: 'emerald',
     bg: 'from-emerald-500/20 to-emerald-600/10',
     border: 'border-emerald-500/30',
     text: 'text-emerald-400',
@@ -26,6 +29,7 @@ export const USER_COLORS = [
     stroke: '#34d399',
   },
   {
+    name: 'pink',
     bg: 'from-pink-500/20 to-pink-600/10',
     border: 'border-pink-500/30',
     text: 'text-pink-400',
@@ -34,6 +38,7 @@ export const USER_COLORS = [
     stroke: '#f472b6',
   },
   {
+    name: 'cyan',
     bg: 'from-cyan-500/20 to-cyan-600/10',
     border: 'border-cyan-500/30',
     text: 'text-cyan-400',
@@ -42,6 +47,7 @@ export const USER_COLORS = [
     stroke: '#22d3ee',
   },
   {
+    name: 'orange',
     bg: 'from-orange-500/20 to-orange-600/10',
     border: 'border-orange-500/30',
     text: 'text-orange-400',
@@ -50,6 +56,7 @@ export const USER_COLORS = [
     stroke: '#fb923c',
   },
   {
+    name: 'purple',
     bg: 'from-purple-500/20 to-purple-600/10',
     border: 'border-purple-500/30',
     text: 'text-purple-400',
@@ -58,6 +65,7 @@ export const USER_COLORS = [
     stroke: '#c084fc',
   },
   {
+    name: 'red',
     bg: 'from-red-500/20 to-red-600/10',
     border: 'border-red-500/30',
     text: 'text-red-400',
@@ -66,6 +74,7 @@ export const USER_COLORS = [
     stroke: '#f87171',
   },
   {
+    name: 'amber',
     bg: 'from-amber-500/20 to-amber-600/10',
     border: 'border-amber-500/30',
     text: 'text-amber-400',
@@ -74,6 +83,7 @@ export const USER_COLORS = [
     stroke: '#fbbf24',
   },
   {
+    name: 'indigo',
     bg: 'from-indigo-500/20 to-indigo-600/10',
     border: 'border-indigo-500/30',
     text: 'text-indigo-400',
@@ -82,6 +92,7 @@ export const USER_COLORS = [
     stroke: '#818cf8',
   },
   {
+    name: 'teal',
     bg: 'from-teal-500/20 to-teal-600/10',
     border: 'border-teal-500/30',
     text: 'text-teal-400',
@@ -90,6 +101,7 @@ export const USER_COLORS = [
     stroke: '#2dd4bf',
   },
   {
+    name: 'lime',
     bg: 'from-lime-500/20 to-lime-600/10',
     border: 'border-lime-500/30',
     text: 'text-lime-400',
@@ -98,6 +110,7 @@ export const USER_COLORS = [
     stroke: '#a3e635',
   },
   {
+    name: 'fuchsia',
     bg: 'from-fuchsia-500/20 to-fuchsia-600/10',
     border: 'border-fuchsia-500/30',
     text: 'text-fuchsia-400',

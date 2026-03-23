@@ -16,10 +16,11 @@ export default function ElegantCard({
   title,
   icon,
   color = 'primary',
+  bgColor = null, // New prop for background tinting
   loading = false,
   className = '',
   actionRight = null,
-  info = null, // New prop for explanation text
+  info = null,
   ...rest
 }) {
   // Icon colors mapping to premium color tokens
@@ -37,9 +38,35 @@ export default function ElegantCard({
     rose: 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.3)]',
     green: 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]',
     teal: 'text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.3)]',
+    zinc: 'text-zinc-400 drop-shadow-[0_0_8px_rgba(161,161,170,0.3)]',
+    red: 'text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.3)]',
+    lime: 'text-lime-400 drop-shadow-[0_0_8px_rgba(163,230,53,0.3)]',
+    fuchsia: 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(232,121,249,0.3)]',
+  };
+
+  // Background tint mappings (subtle gradient overlays)
+  const bgTints = {
+    primary: 'from-primary/10 to-primary/5',
+    emerald: 'from-emerald-500/10 to-emerald-900/5',
+    indigo: 'from-indigo-500/10 to-indigo-900/5',
+    purple: 'from-purple-500/10 to-purple-900/5',
+    blue: 'from-blue-500/10 to-blue-900/5',
+    orange: 'from-orange-500/10 to-orange-900/5',
+    amber: 'from-amber-500/10 to-amber-900/5',
+    cyan: 'from-cyan-500/10 to-cyan-900/5',
+    yellow: 'from-yellow-500/10 to-yellow-900/5',
+    pink: 'from-pink-500/10 to-pink-900/5',
+    rose: 'from-rose-500/10 to-rose-900/5',
+    green: 'from-green-500/10 to-green-900/5',
+    teal: 'from-teal-500/10 to-teal-900/5',
+    zinc: 'from-zinc-500/10 to-zinc-900/5',
+    red: 'from-red-500/10 to-red-900/5',
+    lime: 'from-lime-500/10 to-lime-900/5',
+    fuchsia: 'from-fuchsia-500/10 to-fuchsia-900/5',
   };
 
   const iconColor = iconColors[color] || iconColors.primary;
+  const bgTint = bgColor ? bgTints[bgColor] || bgTints.primary : '';
 
   if (loading) {
     return (
@@ -68,14 +95,20 @@ export default function ElegantCard({
     <div
       className={`
         stat-card backdrop-blur-lg border border-white/5
-        p-6 h-full flex flex-col group/card
-        transition-all duration-500 hover:scale-[1.01] hover:border-primary/20
+        p-6 h-full flex flex-col group/card relative overflow-hidden
+        transition-all duration-500 hover:scale-[1.01] hover:border-white/10
         ${className}
       `}
       {...rest}
     >
       {/* Premium Gradient Glow Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-primary/0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-700 pointer-events-none" />
+      {bgColor ? (
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${bgTint} opacity-40 transition-opacity duration-700 pointer-events-none`}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-primary/0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-700 pointer-events-none" />
+      )}
 
       {/* Header */}
       {(title || actionRight) && (

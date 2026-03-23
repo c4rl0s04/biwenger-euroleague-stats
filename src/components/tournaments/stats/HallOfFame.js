@@ -13,29 +13,37 @@ export function HallOfFame({ winners }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       {winners.map((winner, index) => {
         const isFirst = index === 0;
-        const userColor = getColorForUser(winner.id, winner.name, winner.colorIndex);
+        const isSecond = index === 1;
+        const isThird = index === 2;
+
+        // Rank-based color logic (Gold, Silver, Bronze)
+        const rankColor = isFirst ? 'amber' : isSecond ? 'zinc' : isThird ? 'orange' : 'zinc';
+        const rankTitle = isFirst
+          ? '1º PUESTO'
+          : isSecond
+            ? '2º PUESTO'
+            : isThird
+              ? '3º PUESTO'
+              : `#${index + 1} PUESTO`;
 
         return (
           <ElegantCard
             key={winner.id}
-            title={isFirst ? 'GRAN CAMPEÓN' : `CAMPEÓN #${index + 1}`}
+            title={rankTitle}
             icon={Trophy}
-            color={isFirst ? 'amber' : 'zinc'}
-            className={cn(
-              'h-full relative overflow-hidden transition-all duration-500 hover:scale-[1.03]',
-              isFirst &&
-                'bg-gradient-to-br from-amber-500/10 via-amber-900/5 to-transparent border-amber-500/30'
-            )}
+            color={rankColor}
+            bgColor={rankColor}
+            className="h-full relative overflow-hidden transition-all duration-500 hover:scale-[1.03]"
           >
-            <div className="flex flex-col items-center justify-center gap-4 py-2">
-              {/* Avatar */}
+            <div className="flex flex-col items-center justify-center gap-5 py-3">
+              {/* Avatar - Unified Size */}
               <Link
                 href={`/user/${winner.id || winner.name}`}
                 className={cn(
-                  'relative rounded-full overflow-hidden shrink-0 transition-all duration-500 hover:shadow-2xl active:scale-95 group/avatar',
+                  'relative w-24 h-24 rounded-full overflow-hidden shrink-0 transition-all duration-500 hover:shadow-2xl active:scale-95 group/avatar border-2',
                   isFirst
-                    ? 'w-24 h-24 border-4 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
-                    : 'w-20 h-20 border-2 border-white/10'
+                    ? 'border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                    : 'border-white/10 shadow-lg'
                 )}
               >
                 {winner.icon ? (
@@ -50,40 +58,28 @@ export function HallOfFame({ winners }) {
                   />
                 ) : (
                   <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-                    <Trophy size={isFirst ? 36 : 28} className="text-zinc-500" />
-                  </div>
-                )}
-                {/* Visual Rank overlay for non-first */}
-                {!isFirst && (
-                  <div className="absolute inset-0 bg-black/0 group-hover/avatar:bg-black/20 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover/avatar:opacity-100 text-white font-black text-xl transition-opacity">
-                      #{index + 1}
-                    </span>
+                    <Trophy size={32} className="text-zinc-500" />
                   </div>
                 )}
               </Link>
 
-              {/* Info */}
+              {/* Info - Unified Typography */}
               <div className="text-center">
                 <Link
                   href={`/user/${winner.id || winner.name}`}
                   className="group/name inline-block"
                 >
-                  <h3
-                    className={cn(
-                      'font-black font-display tracking-tight mb-1 transition-colors',
-                      isFirst ? 'text-3xl text-white' : 'text-xl text-zinc-200',
-                      userColor.groupHover
-                    )}
-                  >
+                  <h3 className="font-black font-display tracking-tight text-2xl text-white mb-1 group-hover/name:text-primary transition-colors">
                     {winner.name}
                   </h3>
                 </Link>
                 <div className="flex items-center justify-center gap-2 mt-1">
                   <span
                     className={cn(
-                      'px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest',
-                      isFirst ? 'bg-amber-500 text-black' : 'bg-white/10 text-zinc-400'
+                      'px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border',
+                      isFirst
+                        ? 'bg-amber-500 text-black border-amber-400'
+                        : 'bg-white/5 text-zinc-400 border-white/5'
                     )}
                   >
                     {winner.titles} Título{winner.titles !== 1 ? 's' : ''}
@@ -91,22 +87,20 @@ export function HallOfFame({ winners }) {
                 </div>
               </div>
 
-              {/* Tournaments List */}
-              <div className="mt-4 flex flex-wrap justify-center gap-2 px-2 max-w-full">
+              {/* Tournaments List - Unified Styling */}
+              <div className="mt-2 flex flex-wrap justify-center gap-2 px-2 max-w-full">
                 {winner.tournaments.map((t, i) => (
                   <span
                     key={i}
                     className={cn(
-                      'text-xs px-3 py-1.5 rounded-lg font-bold transition-all duration-300 uppercase tracking-tight border shadow-sm',
+                      'text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all duration-300 uppercase tracking-tight border shadow-sm',
                       isFirst
                         ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                        : 'bg-white/5 text-zinc-500 border-white/5',
-                      !isFirst &&
-                        userColor.text
-                          .replace('text-', 'bg-')
-                          .concat('/10 border-')
-                          .concat(userColor.text.replace('text-', ''))
-                          .concat('/20 ') + userColor.text
+                        : isSecond
+                          ? 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                          : isThird
+                            ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                            : 'bg-white/5 text-zinc-500 border-white/5'
                     )}
                   >
                     {t}
@@ -114,14 +108,6 @@ export function HallOfFame({ winners }) {
                 ))}
               </div>
             </div>
-
-            {/* Background elements for first place */}
-            {isFirst && (
-              <>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-[60px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-amber-600/5 blur-[50px] pointer-events-none" />
-              </>
-            )}
           </ElegantCard>
         );
       })}
