@@ -7,7 +7,7 @@
  */
 
 import { fetchAllPlayers } from '@/lib/services';
-import PlayersTable from '@/components/players-list/PlayersTable';
+import PlayersDiscovery from '@/components/players-list/PlayersDiscovery';
 import { PageHeader } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
@@ -21,10 +21,8 @@ export default async function PlayersPage() {
         title="Jugadores"
         description="Explora todos los jugadores de la liga, sus valores y estadísticas."
       />
-      <main className="w-full px-4 sm:px-6 lg:px-8 pb-2 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <PlayersTable initialPlayers={players} />
-        </div>
+      <main className="w-full relative z-10">
+        <PlayersDiscovery initialPlayers={players} />
       </main>
     </div>
   );

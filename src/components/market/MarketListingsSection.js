@@ -3,6 +3,7 @@ import { Search, Filter, X, Euro } from 'lucide-react';
 import { Section } from '@/components/layout';
 import MarketPlayerCard from './MarketPlayerCard';
 import CustomSelect from '@/components/ui/CustomSelect';
+import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { AnimatePresence, LayoutGroup } from 'framer-motion';
 import ExpandedPlayerModal from './ExpandedPlayerModal';
 export default function MarketListingsSection({ listings = [] }) {
@@ -64,15 +65,15 @@ export default function MarketListingsSection({ listings = [] }) {
 
   return (
     <Section title="Jugadores en el Mercado" delay={50} background="section-base">
-      {/* Filters Bar (Styled like PlayersTable) */}
-      <div className="relative z-20 bg-card/50 backdrop-blur-sm p-4 rounded-xl border border-border/50 mb-6 shadow-sm">
+      {/* Filters Bar (Premium Elegant Style) */}
+      <ElegantCard hideHeader padding="p-4" className="mb-6 relative z-20 overflow-visible">
         <div className="flex flex-col xl:flex-row gap-4 xl:items-end justify-between">
           <div className="flex flex-row flex-wrap xl:flex-nowrap gap-3 w-full items-end">
             {/* Text Search */}
             <div className="flex w-full gap-2 items-end space-y-1.5 shrink-0 md:w-auto md:min-w-50">
               <div className="relative w-full">
-                <span className="text-xs font-medium text-muted-foreground ml-1 mb-1.5 block">
-                  Buscar
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 mb-1.5 block">
+                  BUSCAR
                 </span>
                 <div className="relative">
                   <Search
@@ -100,7 +101,9 @@ export default function MarketListingsSection({ listings = [] }) {
 
             {/* Owner Filter */}
             <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-35">
-              <span className="text-xs font-medium text-muted-foreground ml-1">Propiedad</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                PROPIEDAD
+              </span>
               <CustomSelect
                 value={filterOwner}
                 onChange={setFilterOwner}
@@ -115,7 +118,9 @@ export default function MarketListingsSection({ listings = [] }) {
 
             {/* Position Filter */}
             <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-27.5">
-              <span className="text-xs font-medium text-muted-foreground ml-1">Posición</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                POSICIÓN
+              </span>
               <CustomSelect
                 value={filterPosition}
                 onChange={setFilterPosition}
@@ -129,7 +134,9 @@ export default function MarketListingsSection({ listings = [] }) {
 
             {/* Team Filter */}
             <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-32.5">
-              <span className="text-xs font-medium text-muted-foreground ml-1">Equipo</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                EQUIPO
+              </span>
               <CustomSelect
                 value={filterTeam}
                 onChange={setFilterTeam}
@@ -143,7 +150,9 @@ export default function MarketListingsSection({ listings = [] }) {
 
             {/* Price Filter */}
             <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-30">
-              <span className="text-xs font-medium text-muted-foreground ml-1">Precio máx.</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                PRECIO MÁX.
+              </span>
               <div className="relative">
                 <Euro
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -166,7 +175,7 @@ export default function MarketListingsSection({ listings = [] }) {
             {filteredListings.length === 1 ? 'resultado' : 'resultados'}
           </div>
         </div>
-      </div>
+      </ElegantCard>
 
       {/* Grid or Empty State */}
       <LayoutGroup>
