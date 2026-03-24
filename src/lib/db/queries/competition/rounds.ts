@@ -157,8 +157,8 @@ export async function getCurrentRoundState(): Promise<RoundState> {
     return { ...r, status_calc };
   });
 
-  // 3. Current Round: The round of the latest match that is either LIVE or FINISHED but started before now.
-  // We prioritize 'live' matches regardless of round order if one is actually playing.
+  // 3. Current Round: The round of the earliest match that is truly LIVE (playing now).
+  // Priority 1: A match currently playing (started but not finished)
   const liveMatch = allMatches.find(
     (m) => m.status !== 'finished' && m.date && new Date(m.date) <= now
   );
@@ -167,10 +167,18 @@ export async function getCurrentRoundState(): Promise<RoundState> {
   if (liveMatch) {
     currentRound = allRounds.find((r) => r.round_id === liveMatch.round_id);
   } else {
-    // If no match is live, current is the latest finished round
-    const finishedRounds = allRounds.filter((r) => r.status_calc === 'finished');
-    currentRound =
-      finishedRounds.length > 0 ? finishedRounds[finishedRounds.length - 1] : allRounds[0];
+    // Priority 2: If nothing is live, current is the LATEST round that has at least one match that started in the past.
+    const startedMatchRounds = allMatches
+      .filter((m) => m.date && new Date(m.date) <= now)
+      .map((m) => m.round_id);
+
+    if (startedMatchRounds.length > 0) {
+      const latestStartedRoundId = startedMatchRounds[startedMatchRounds.length - 1];
+      currentRound = allRounds.find((r) => r.round_id === latestStartedRoundId);
+    } else {
+      // Fallback: If no matches have started EVER (e.g. pre-season), pick first round.
+      currentRound = allRounds[0];
+    }
   }
 
   // 4. Next Round: The round of the EARLIEST match that is FUTURE and from a DIFFERENT round than current
