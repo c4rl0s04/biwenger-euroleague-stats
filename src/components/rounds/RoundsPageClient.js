@@ -314,7 +314,7 @@ export default function RoundsPageClient() {
         {/* MAIN LAYOUT - 2 COLUMNS ON XL (Flexbox for equal height) */}
         <div className="flex flex-col xl:flex-row gap-6">
           {/* LEFT COLUMN: STANDINGS + STATS (1/3 width) */}
-          <div className="xl:w-1/3 flex flex-col justify-between gap-6">
+          <div className="xl:w-1/3 flex flex-col justify-start gap-6">
             <RoundStandings
               roundId={selectedRoundId}
               selectedUserId={selectedUserId}

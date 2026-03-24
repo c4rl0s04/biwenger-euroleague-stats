@@ -50,12 +50,12 @@ export default function GradaList({ players }) {
               {/* Points */}
               <div className="text-right shrink-0">
                 <span
-                  className={`text-sm font-bold ${player.points > 15 ? 'text-red-400' : 'text-zinc-500'} group-hover:text-white transition-colors duration-200`}
+                  className={`text-base font-black font-mono ${player.points > 15 ? 'text-red-400' : 'text-zinc-400'} group-hover:text-white transition-colors duration-200`}
                 >
                   {player.points}
                 </span>
-                <span className="text-[10px] text-zinc-600 block -mt-1 group-hover:text-zinc-400">
-                  pts
+                <span className="text-[9px] text-zinc-500 font-bold uppercase block -mt-1 tracking-tighter group-hover:text-zinc-400">
+                  PTS
                 </span>
               </div>
             </div>

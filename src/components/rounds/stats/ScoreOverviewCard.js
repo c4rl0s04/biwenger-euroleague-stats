@@ -39,41 +39,55 @@ export default function ScoreOverviewCard({ summary, viewMode, user }) {
   else if (rating >= 50) ratingColor = 'text-orange-400';
 
   return (
-    <ElegantCard title={title} icon={Trophy} color={color}>
+    <ElegantCard title={title} icon={Trophy} color={color} bgColor={color} className="card-glow">
       <div className="flex items-center gap-4">
         {/* LEFT: Points (1/4) */}
-        <div className="flex flex-col items-center justify-center min-w-[80px]">
-          <span className={`text-4xl font-bold font-mono tracking-tight ${textColor}`}>
+        <div className="flex flex-col items-center justify-center min-w-[90px] border-r border-white/5 pr-4">
+          <span
+            className={`text-5xl font-bold font-mono tracking-tighter ${textColor} drop-shadow-[0_0_15px_rgba(250,80,1,0.2)]`}
+          >
             {Math.round(total_points ?? 0)}
           </span>
-          <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">
-            {round_rank ? `#${round_rank}` : 'pts'}
+          <span className="text-[11px] text-zinc-400 font-black uppercase tracking-[0.2em] mt-1">
+            {round_rank ? `#${round_rank}` : 'PTS'}
           </span>
         </div>
 
         {/* RIGHT: Coach Rating (3/4) - Always visible */}
         {coachRating && (
-          <div className="flex-1 border-l border-white/10 pl-4">
-            <div className="flex items-center justify-between mb-2">
+          <div className="flex-1 py-1">
+            <div className="flex items-center justify-between mb-3">
               {/* Efficiency */}
-              <div className="flex items-center gap-1.5">
-                <Target size={12} className="text-zinc-500" />
-                <span className={`text-lg font-bold font-mono ${ratingColor}`}>{rating}%</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-widest mb-0.5">
+                  Eficiencia
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <Target size={14} className="text-zinc-500" />
+                  <span className={`text-xl font-bold font-mono ${ratingColor}`}>{rating}%</span>
+                </div>
               </div>
 
               {/* Points Lost */}
-              <div className="flex items-center gap-1.5">
-                <TrendingDown size={12} className="text-red-400/50" />
-                <span className="text-lg font-bold font-mono text-red-400">
-                  -{Math.round((coachRating?.maxScore || 0) - (coachRating?.actualScore || 0))}
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-widest mb-0.5">
+                  Perdidos
                 </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl font-bold font-mono text-red-500">
+                    -{Math.round((coachRating?.maxScore || 0) - (coachRating?.actualScore || 0))}
+                  </span>
+                  <TrendingDown size={14} className="text-red-500/70" />
+                </div>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
               <div
-                className={`h-full transition-all duration-500 ${rating >= 90 ? 'bg-emerald-500' : rating >= 70 ? 'bg-yellow-500' : 'bg-orange-500'}`}
+                className={`h-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(250,250,250,0.1)] ${
+                  rating >= 90 ? 'bg-emerald-500' : rating >= 70 ? 'bg-yellow-500' : 'bg-orange-500'
+                }`}
                 style={{ width: `${rating}%` }}
               />
             </div>
