@@ -103,58 +103,90 @@ export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
 
 /**
  * Get the state of current and next rounds
- * Unified logic to determine what is "Current" (Live or Last Finished) and "Next"
+ * Unified logic to determine what is "Current" (Active Match Window) and "Next"
+ * Handles postponed matches by looking at individual match dates.
  */
 export async function getCurrentRoundState(): Promise<RoundState> {
   const now = new Date();
 
-  // 1. Get all round schedules to determine sequence
-  const rows = await db
+  // 1. Get all matches to analyze chronology
+  const allMatches = await db
     .select({
+      id: matches.id,
+      date: matches.date,
+      status: matches.status,
       round_id: matches.roundId,
-      round_name: max(matches.roundName),
-      start_date: min(matches.date),
-      end_date: max(matches.date),
-      total_matches: count(),
-      finished_matches:
-        sql<number>`SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`.mapWith(
-          Number
-        ),
+      round_name: matches.roundName,
     })
     .from(matches)
-    .groupBy(matches.roundId)
-    .orderBy(asc(min(matches.date)));
+    .orderBy(asc(matches.date), asc(matches.id));
 
-  const roundsWithStatus = rows.map((r) => {
-    const startDate = r.start_date ? new Date(r.start_date) : null;
-    const endDate = r.end_date ? new Date(r.end_date) : null;
+  if (allMatches.length === 0) return { currentRound: null, nextRound: null };
 
-    let status_calc = 'upcoming';
-    if (startDate && now >= startDate) {
-      if (r.finished_matches < r.total_matches) {
-        status_calc = 'live';
-      } else {
-        status_calc = 'finished';
-      }
+  // 2. Aggregate rounds metadata from the flat match list
+  const roundsMap = new Map<number, any>();
+  allMatches.forEach((m) => {
+    const rid = m.round_id!;
+    if (!roundsMap.has(rid)) {
+      roundsMap.set(rid, {
+        round_id: rid,
+        round_name: m.round_name,
+        start_date: m.date,
+        end_date: m.date,
+        total_matches: 0,
+        finished_matches: 0,
+        matches: [],
+      });
     }
-
-    return {
-      ...r,
-      status_calc,
-    };
+    const r = roundsMap.get(rid);
+    r.total_matches++;
+    if (m.status === 'finished') r.finished_matches++;
+    r.matches.push(m);
+    // Update boundaries
+    if (m.date && (!r.start_date || new Date(m.date) < new Date(r.start_date)))
+      r.start_date = m.date;
+    if (m.date && (!r.end_date || new Date(m.date) > new Date(r.end_date))) r.end_date = m.date;
   });
 
-  // Find Current Round: The latest round that has started (start_date <= NOW)
-  const startedRounds = roundsWithStatus.filter(
-    (r: any) => r.start_date && new Date(r.start_date) <= now
-  );
-  let currentRound = startedRounds.length > 0 ? startedRounds[startedRounds.length - 1] : null;
+  const allRounds = Array.from(roundsMap.values()).map((r) => {
+    let status_calc = 'upcoming';
+    const startDate = r.start_date ? new Date(r.start_date) : null;
+    if (startDate && now >= startDate) {
+      status_calc = r.finished_matches < r.total_matches ? 'live' : 'finished';
+    }
+    return { ...r, status_calc };
+  });
 
-  // Find Next Round: The first round that has NOT started
-  const futureRounds = roundsWithStatus.filter(
-    (r: any) => !r.start_date || new Date(r.start_date) > now
+  // 3. Current Round: The round of the latest match that is either LIVE or FINISHED but started before now.
+  // We prioritize 'live' matches regardless of round order if one is actually playing.
+  const liveMatch = allMatches.find(
+    (m) => m.status !== 'finished' && m.date && new Date(m.date) <= now
   );
-  let nextRound = futureRounds.length > 0 ? futureRounds[0] : null;
+
+  let currentRound: any = null;
+  if (liveMatch) {
+    currentRound = allRounds.find((r) => r.round_id === liveMatch.round_id);
+  } else {
+    // If no match is live, current is the latest finished round
+    const finishedRounds = allRounds.filter((r) => r.status_calc === 'finished');
+    currentRound =
+      finishedRounds.length > 0 ? finishedRounds[finishedRounds.length - 1] : allRounds[0];
+  }
+
+  // 4. Next Round: The round of the EARLIEST match that is FUTURE and from a DIFFERENT round than current
+  const nextMatch = allMatches.find((m) => {
+    const isFuture = m.date && new Date(m.date) > now;
+    const isDifferentRound = !currentRound || m.round_id !== currentRound.round_id;
+    return isFuture && isDifferentRound;
+  });
+
+  let nextRound = nextMatch ? allRounds.find((r) => r.round_id === nextMatch.round_id) : null;
+
+  // Final validation: If no current was found (e.g. pre-season), next becomes the first round.
+  if (!currentRound && allRounds.length > 0) {
+    currentRound = allRounds[0];
+    nextRound = allRounds[1] || null;
+  }
 
   return { currentRound, nextRound };
 }
