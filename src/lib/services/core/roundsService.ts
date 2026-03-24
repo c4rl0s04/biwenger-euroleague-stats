@@ -8,7 +8,7 @@ import 'server-only';
 import {
   getAllRounds,
   getUserLineup,
-  getNextRound,
+  resolveRoundIdByPolicy,
   getLastCompletedRound,
   hasOfficialStats,
   getOfficialStandings,
@@ -229,9 +229,8 @@ export async function fetchRoundsList() {
     getLastCompletedRound(),
   ]);
 
-  // Determine default round
-  // Use explicit last completed round, or fallback to latest round if none found
-  const defaultRoundId = lastCompleted?.round_id || rounds[0]?.round_id;
+  // Determine default round (Priority: Live > Last Finished > Next Upcoming)
+  const defaultRoundId = (await resolveRoundIdByPolicy('active_or_last')) || rounds[0]?.round_id;
 
   return {
     rounds,

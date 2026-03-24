@@ -12,7 +12,7 @@ import {
   fetchMatchesForRound,
   fetchUserPlayers,
   getScheduleRounds,
-  getNextRound,
+  resolveRoundIdByPolicy,
 } from '../../db';
 import { getTeamColor } from '../../constants/teamColors.js';
 
@@ -28,7 +28,7 @@ export async function getUserScheduleService(
     let targetRound;
 
     // 1. Determine which round to show (Standardized priority: Live > Upcoming > Finished)
-    const activeRoundId = targetRoundId || (await getNextRound());
+    const activeRoundId = targetRoundId || (await resolveRoundIdByPolicy('active_or_next'));
     if (activeRoundId && !targetRound) {
       targetRound = await getRoundById(Number(activeRoundId));
     }

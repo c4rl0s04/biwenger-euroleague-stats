@@ -5,7 +5,7 @@ import 'server-only';
  * Business logic for match display and grouping
  */
 
-import { getMatchesGroupedByRound as getRawMatches, getNextRound } from '../../db';
+import { getMatchesGroupedByRound as getRawMatches, resolveRoundIdByPolicy } from '../../db';
 import { getCurrentRoundState } from '../core/roundsService';
 
 /**
@@ -16,7 +16,7 @@ export async function fetchMatchesGrouped() {
   // 1. Get raw grouped matches
   const roundsArr = await getRawMatches();
 
-  const currentRoundId = await getNextRound();
+  const currentRoundId = await resolveRoundIdByPolicy('active_or_next');
 
   return {
     rounds: roundsArr,

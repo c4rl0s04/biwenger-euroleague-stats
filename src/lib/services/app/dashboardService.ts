@@ -8,8 +8,6 @@ import 'server-only';
  */
 
 import {
-  getNextRoundData as getNextRoundDataDb,
-  getNextRound,
   getTopPlayersByForm,
   getCaptainRecommendations,
   getMarketOpportunities,
@@ -35,6 +33,7 @@ import {
   getUpcomingMatches,
   getRecentResults,
   getRoundDetails,
+  resolveRoundIdByPolicy,
 } from '../../db';
 
 // ============ DIRECT WRAPPERS ============
@@ -99,7 +98,8 @@ export async function fetchMarketOpportunities(limit: number = 6) {
 }
 
 export async function fetchNextRound() {
-  return await getNextRoundDataDb();
+  const targetId = await resolveRoundIdByPolicy('active_or_next');
+  return targetId ? await getRoundDetails(targetId) : null;
 }
 
 // ============ AGGREGATED FUNCTIONS ============
@@ -110,21 +110,17 @@ export async function fetchNextRound() {
  * @returns Round data bundle
  */
 export async function getNextRoundData(userId: string | number | null = null) {
-  const [roundState, topPlayersForm, captainRecommendations, marketOpportunities] =
+  // Use the standardized policy for selection (Priority: Live > Upcoming > Last)
+  const targetId = await resolveRoundIdByPolicy('active_or_next');
+
+  const [roundState, topPlayersForm, captainRecommendations, marketOpportunities, nextRound] =
     await Promise.all([
       getCurrentRoundState(),
       getTopPlayersByForm(5, 3),
       userId ? getCaptainRecommendations(userId, 6) : [],
       getMarketOpportunities(6),
+      targetId ? getRoundDetails(targetId) : null,
     ]);
-
-  // Determine target round ID from already fetched state (Logic: Current Live or Next Upcoming)
-  const targetId =
-    roundState.currentRound?.status_calc === 'live'
-      ? roundState.currentRound.round_id
-      : roundState.nextRound?.round_id || roundState.currentRound?.round_id;
-
-  const nextRound = targetId ? await getRoundDetails(targetId) : null;
 
   return {
     nextRound,

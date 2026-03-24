@@ -249,43 +249,51 @@ export async function getRoundDetails(roundId: string | number): Promise<Round |
 }
 
 /**
- * Get the next upcoming round ID
+ * Select a target round ID based on a specific context policy.
+ * @param policy
+ *   - 'active_or_next': Priority Live > Next Upcoming > Last Finished (Dashboard/Schedule/Matches)
+ *   - 'active_or_last': Priority Live > Last Finished > Next Upcoming (Rounds Page)
  */
-export async function getNextRound(): Promise<number | null> {
+export async function resolveRoundIdByPolicy(
+  policy: 'active_or_next' | 'active_or_last'
+): Promise<number | null> {
   const { currentRound, nextRound } = await getCurrentRoundState();
 
-  // If we have a live round, that's the one we want to show on the dashboard
-  if (currentRound && currentRound.status_calc === 'live') {
-    return currentRound.round_id;
+  const isLive = currentRound?.status_calc === 'live';
+  const isFinished = currentRound?.status_calc === 'finished';
+
+  if (policy === 'active_or_next') {
+    if (isLive) return currentRound.round_id;
+    if (nextRound) return nextRound.round_id;
+    return currentRound?.round_id || null;
   }
 
-  // Otherwise, show the next upcoming one
-  if (nextRound) {
-    return nextRound.round_id;
+  if (policy === 'active_or_last') {
+    if (isLive) return currentRound.round_id;
+    if (isFinished) return currentRound.round_id;
+    return nextRound?.round_id || null;
   }
 
-  // Fallback to the latest started one if everything is finished
-  return currentRound?.round_id || null;
+  return null;
 }
 
 /**
- * Get the next upcoming round
- * @deprecated Use getCurrentRoundState() instead
+ * Get the current active or last completed round ID using the 'active_or_last' policy.
  */
-export async function getNextRoundData(): Promise<Round | null> {
-  const nextRoundId = await getNextRound();
-  if (!nextRoundId) return null;
-
-  return getRoundDetails(nextRoundId);
+export async function getLastCompletedRoundId(): Promise<number | null> {
+  return await resolveRoundIdByPolicy('active_or_last');
 }
 
 /**
- * Get the current active or last completed round
- * Updated to use unified logic: returns the "Current" round (Live or Finished)
+ * Get the current active or last completed round object
  */
 export async function getLastCompletedRound(): Promise<any> {
-  const { currentRound } = await getCurrentRoundState();
-  return currentRound;
+  const roundId = await getLastCompletedRoundId();
+  if (!roundId) return null;
+
+  // We need to fetch the round details since it's used as an object in many places
+  const { currentRound, nextRound } = await getCurrentRoundState();
+  return currentRound?.round_id === roundId ? currentRound : nextRound;
 }
 
 /**
