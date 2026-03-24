@@ -8,6 +8,7 @@ import 'server-only';
  */
 
 import {
+  getNextRoundData as getNextRoundDataDb,
   getNextRound,
   getTopPlayersByForm,
   getCaptainRecommendations,
@@ -33,6 +34,7 @@ import {
   getCurrentRoundState,
   getUpcomingMatches,
   getRecentResults,
+  getRoundDetails,
 } from '../../db';
 
 // ============ DIRECT WRAPPERS ============
@@ -97,7 +99,7 @@ export async function fetchMarketOpportunities(limit: number = 6) {
 }
 
 export async function fetchNextRound() {
-  return await getNextRound();
+  return await getNextRoundDataDb();
 }
 
 // ============ AGGREGATED FUNCTIONS ============
@@ -116,7 +118,13 @@ export async function getNextRoundData(userId: string | number | null = null) {
       getMarketOpportunities(6),
     ]);
 
-  const nextRound = await getNextRound(); // Uses new logic under the hood
+  // Determine target round ID from already fetched state (Logic: Current Live or Next Upcoming)
+  const targetId =
+    roundState.currentRound?.status_calc === 'live'
+      ? roundState.currentRound.round_id
+      : roundState.nextRound?.round_id || roundState.currentRound?.round_id;
+
+  const nextRound = targetId ? await getRoundDetails(targetId) : null;
 
   return {
     nextRound,

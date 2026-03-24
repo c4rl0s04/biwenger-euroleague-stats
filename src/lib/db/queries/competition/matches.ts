@@ -1,8 +1,7 @@
 import { db } from '../../index';
 import { matches, teams } from '../../schema';
-import { eq, asc, desc, gt, and, sql } from 'drizzle-orm';
+import { eq, asc, desc, gt, and, sql, or } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { db as clientDb } from '../../client';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
 
 export async function getMatchesGroupedByRound() {
@@ -152,7 +151,7 @@ export async function getRecentResults(limit = 5) {
 }
 
 export interface TeamUpcomingMatch {
-  date: string;
+  date: Date | string;
   home_team: string;
   away_team: string;
   home_img: string;
@@ -171,26 +170,41 @@ export async function getTeamUpcomingMatches(
   teamId: number,
   limit = 3
 ): Promise<TeamUpcomingMatch[]> {
-  const nextMatchQuery = `
-    SELECT 
-      date, 
-      th.name as home_team, 
-      ta.name as away_team,
-      th.img as home_img,
-      ta.img as away_img,
-      m.home_id,
-      m.away_id,
-      m.home_score,
-      m.away_score,
-      round_name
-    FROM matches m
-    LEFT JOIN teams th ON m.home_id = th.id
-    LEFT JOIN teams ta ON m.away_id = ta.id
-    WHERE (m.home_id = $1 OR m.away_id = $2) 
-      AND ${FUTURE_MATCH_CONDITION('date')} 
-    ORDER BY date ASC 
-    LIMIT $3
-  `;
-  const res = await clientDb.query(nextMatchQuery, [teamId, teamId, limit]);
-  return res.rows;
+  const th = alias(teams, 'th');
+  const ta = alias(teams, 'ta');
+
+  const rows = await db
+    .select({
+      date: matches.date,
+      home_team: th.name,
+      away_team: ta.name,
+      home_img: th.img,
+      away_img: ta.img,
+      home_id: matches.homeId,
+      away_id: matches.awayId,
+      home_score: matches.homeScore,
+      away_score: matches.awayScore,
+      round_name: matches.roundName,
+    })
+    .from(matches)
+    .leftJoin(th, eq(matches.homeId, th.id))
+    .leftJoin(ta, eq(matches.awayId, ta.id))
+    .where(
+      and(or(eq(matches.homeId, teamId), eq(matches.awayId, teamId)), sql`${matches.date} > NOW()`)
+    )
+    .orderBy(asc(matches.date))
+    .limit(limit);
+
+  return rows.map((r) => ({
+    date: r.date || new Date(),
+    home_team: r.home_team || 'TBD',
+    away_team: r.away_team || 'TBD',
+    home_img: r.home_img || '',
+    away_img: r.away_img || '',
+    home_id: r.home_id || 0,
+    away_id: r.away_id || 0,
+    home_score: r.home_score,
+    away_score: r.away_score,
+    round_name: r.round_name || '',
+  })) as TeamUpcomingMatch[];
 }

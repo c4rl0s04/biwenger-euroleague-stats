@@ -7,6 +7,8 @@ import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/utils/format';
 import { getCorrectedMatchDate, formatMatchTime } from '@/lib/utils/date';
+import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { Subheading } from '@/components/ui';
 
 function DayMatchRow({ dayName, matches, roundName }) {
   const scrollContainerRef = useRef(null);
@@ -39,12 +41,9 @@ function DayMatchRow({ dayName, matches, roundName }) {
   };
 
   return (
-    <div className="flex flex-col gap-3 relative group/carousel">
-      {/* Day Header */}
-      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
-        <Calendar className="w-4 h-4 text-blue-400" />
-        {dayName}
-      </div>
+    <div className="flex flex-col gap-6 relative group/carousel">
+      {/* Day Header (Standardized Subheading) */}
+      <Subheading title={dayName} icon={Calendar} className="px-1 border-none pb-0" />
 
       <div className="relative">
         {/* Left Arrow */}
@@ -79,96 +78,97 @@ function DayMatchRow({ dayName, matches, roundName }) {
             const time = formatMatchTime(match.date);
 
             return (
-              <div
-                key={idx}
-                className="snap-center shrink-0 w-[260px] bg-card/40 backdrop-blur-sm border border-border/50 rounded-xl hover:border-blue-500/30 transition-all group relative overflow-hidden flex flex-col"
-              >
-                {/* Card Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-                {/* Top: Time */}
-                {/* Top: Time OR Score */}
-                <div className="bg-muted/30 py-3 text-center border-b border-white/5 group-hover:bg-blue-500/5 transition-colors relative">
-                  {match.home_score !== null && match.status !== 'scheduled' ? (
-                    <div className="flex flex-col items-center justify-center gap-1">
-                      <span className="text-3xl font-bold text-foreground font-mono tracking-tight leading-none group-hover:scale-110 transition-transform duration-300">
-                        {match.home_score} - {match.away_score}
-                      </span>
-                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                        {match.status === 'finished' ? 'Finalizado' : 'En Juego'}
-                      </span>
-                      {/* Floating Time for reference */}
-                      <div className="absolute top-2 right-2 text-[10px] text-muted-foreground/50 font-mono">
-                        {time}
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="text-2xl font-bold text-foreground font-mono tracking-tight block">
-                      {time}
-                    </span>
-                  )}
-                </div>
-
-                {/* Bottom: Teams Side-by-Side */}
-                <div className="grid grid-cols-2 gap-2 p-3 pt-4 items-start">
-                  {/* Home Team */}
-                  <Link
-                    href={`/team/${match.home_id}`}
-                    className="flex flex-col items-center text-center gap-2 group/home cursor-pointer"
-                  >
-                    {match.home_logo && (
-                      <div className="relative w-12 h-12 transition-transform group-hover/home:scale-110 duration-200">
-                        <Image
-                          src={match.home_logo}
-                          alt={match.home_team}
-                          fill
-                          className="object-contain drop-shadow-md"
-                          sizes="48px"
-                          onError={(e) => (e.target.style.display = 'none')}
-                        />
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-display text-base font-bold text-foreground leading-tight group-hover/home:text-blue-400 transition-colors">
-                        {match.home_short || getShortTeamName(match.home_team)}
-                      </span>
-                      {match.home_position && (
-                        <span className="text-[10px] font-mono text-muted-foreground">
-                          {match.home_position}º
+              <div key={idx} className="snap-center shrink-0 w-[260px]">
+                <ElegantCard
+                  hideHeader={true}
+                  padding="p-0"
+                  className="group/match transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] overflow-hidden"
+                >
+                  <div className="flex flex-col h-full">
+                    {/* Top: Time OR Score */}
+                    <div className="bg-white/5 py-4 text-center border-b border-white/5 group-hover/match:bg-primary/5 transition-colors duration-500 relative">
+                      {match.home_score !== null && match.status !== 'scheduled' ? (
+                        <div className="flex flex-col items-center justify-center gap-1">
+                          <span className="text-3xl font-bold text-foreground font-mono tracking-tight leading-none group-hover:scale-110 transition-transform duration-300">
+                            {match.home_score} - {match.away_score}
+                          </span>
+                          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                            {match.status === 'finished' ? 'Finalizado' : 'En Juego'}
+                          </span>
+                          {/* Floating Time for reference */}
+                          <div className="absolute top-2 right-2 text-[10px] text-muted-foreground/50 font-mono">
+                            {time}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-2xl font-bold text-foreground font-mono tracking-tight block">
+                          {time}
                         </span>
                       )}
                     </div>
-                  </Link>
 
-                  {/* Away Team */}
-                  <Link
-                    href={`/team/${match.away_id}`}
-                    className="flex flex-col items-center text-center gap-2 group/away cursor-pointer"
-                  >
-                    {match.away_logo && (
-                      <div className="relative w-12 h-12 transition-transform group-hover/away:scale-110 duration-200">
-                        <Image
-                          src={match.away_logo}
-                          alt={match.away_team}
-                          fill
-                          className="object-contain drop-shadow-md"
-                          sizes="48px"
-                          onError={(e) => (e.target.style.display = 'none')}
-                        />
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-display text-base font-bold text-foreground leading-tight group-hover/away:text-blue-400 transition-colors">
-                        {match.away_short || getShortTeamName(match.away_team)}
-                      </span>
-                      {match.away_position && (
-                        <span className="text-[10px] font-mono text-muted-foreground">
-                          {match.away_position}º
-                        </span>
-                      )}
+                    {/* Bottom: Teams Side-by-Side */}
+                    <div className="grid grid-cols-2 gap-2 p-3 pt-4 items-start">
+                      {/* Home Team */}
+                      <Link
+                        href={`/team/${match.home_id}`}
+                        className="flex flex-col items-center text-center gap-2 group/home cursor-pointer"
+                      >
+                        {match.home_logo && (
+                          <div className="relative w-12 h-12 transition-transform group-hover/home:scale-110 duration-200">
+                            <Image
+                              src={match.home_logo}
+                              alt={match.home_team}
+                              fill
+                              className="object-contain drop-shadow-md"
+                              sizes="48px"
+                              onError={(e) => (e.target.style.display = 'none')}
+                            />
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-display text-base font-bold text-foreground leading-tight group-hover/home:text-blue-400 transition-colors">
+                            {match.home_short || getShortTeamName(match.home_team)}
+                          </span>
+                          {match.home_position && (
+                            <span className="text-[10px] font-mono text-muted-foreground">
+                              {match.home_position}º
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+
+                      {/* Away Team */}
+                      <Link
+                        href={`/team/${match.away_id}`}
+                        className="flex flex-col items-center text-center gap-2 group/away cursor-pointer"
+                      >
+                        {match.away_logo && (
+                          <div className="relative w-12 h-12 transition-transform group-hover/away:scale-110 duration-200">
+                            <Image
+                              src={match.away_logo}
+                              alt={match.away_team}
+                              fill
+                              className="object-contain drop-shadow-md"
+                              sizes="48px"
+                              onError={(e) => (e.target.style.display = 'none')}
+                            />
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-display text-base font-bold text-foreground leading-tight group-hover/away:text-blue-400 transition-colors">
+                            {match.away_short || getShortTeamName(match.away_team)}
+                          </span>
+                          {match.away_position && (
+                            <span className="text-[10px] font-mono text-muted-foreground">
+                              {match.away_position}º
+                            </span>
+                          )}
+                        </div>
+                      </Link>
                     </div>
-                  </Link>
-                </div>
+                  </div>
+                </ElegantCard>
               </div>
             );
           })}

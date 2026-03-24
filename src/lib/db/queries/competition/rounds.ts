@@ -1,6 +1,18 @@
-import { db } from '../../client';
+import { db } from '../../index';
+import {
+  matches,
+  porras,
+  users,
+  userRounds,
+  playerRoundStats,
+  lineups,
+  teams,
+  players,
+} from '../../schema';
+import { eq, asc, desc, sql, and, gte, lt, sum, count, max, min } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { calcEfficiency } from '@/lib/utils/efficiency';
-import { getTeamPositions } from '../../../logic/standings';
+import { getTeamPositions, StandingsMatch } from '../../../logic/standings';
 import { NEXT_ROUND_CTE } from '../../sql_utils';
 
 export interface PorrasRound {
@@ -76,16 +88,17 @@ export interface UserLineup {
  * Get all Porras rounds
  */
 export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
-  const query = `
-    SELECT 
-      jornada,
-      usuario,
-      aciertos
-    FROM porras
-    ORDER BY jornada DESC, aciertos DESC
-  `;
+  const result = await db
+    .select({
+      jornada: porras.roundName, // mapped from legacy naming
+      usuario: users.name,
+      aciertos: porras.aciertos,
+    })
+    .from(porras)
+    .leftJoin(users, eq(porras.userId, users.id))
+    .orderBy(desc(porras.roundId), desc(porras.aciertos));
 
-  return (await db.query(query)).rows;
+  return result as any[];
 }
 
 /**
@@ -93,39 +106,54 @@ export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
  * Unified logic to determine what is "Current" (Live or Last Finished) and "Next"
  */
 export async function getCurrentRoundState(): Promise<RoundState> {
-  // 1. Get all round schedules to determine sequence
-  const query = `
-    WITH RoundStats AS (
-      SELECT 
-        round_id,
-        MAX(round_name) as round_name,
-        MIN(date) as start_date,
-        MAX(date) as end_date,
-        COUNT(*) as total_matches,
-        SUM(CASE WHEN status = 'finished' THEN 1 ELSE 0 END) as finished_matches
-      FROM matches
-      GROUP BY round_id
-    )
-    SELECT *,
-      CASE 
-        WHEN finished_matches < total_matches AND NOW() >= start_date THEN 'live'
-        WHEN finished_matches = total_matches AND NOW() >= start_date THEN 'finished'
-        ELSE 'upcoming'
-      END as status_calc
-    FROM RoundStats
-    ORDER BY start_date ASC
-  `;
-
-  const rows = (await db.query(query)).rows;
   const now = new Date();
 
-  // Find Current Round: The latest round that has started (start_date <= NOW)
-  const startedRounds = rows.filter((r: any) => new Date(r.start_date) <= now);
+  // 1. Get all round schedules to determine sequence
+  const rows = await db
+    .select({
+      round_id: matches.roundId,
+      round_name: max(matches.roundName),
+      start_date: min(matches.date),
+      end_date: max(matches.date),
+      total_matches: count(),
+      finished_matches:
+        sql<number>`SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`.mapWith(
+          Number
+        ),
+    })
+    .from(matches)
+    .groupBy(matches.roundId)
+    .orderBy(asc(min(matches.date)));
 
+  const roundsWithStatus = rows.map((r) => {
+    const startDate = r.start_date ? new Date(r.start_date) : null;
+    const endDate = r.end_date ? new Date(r.end_date) : null;
+
+    let status_calc = 'upcoming';
+    if (startDate && now >= startDate) {
+      if (r.finished_matches < r.total_matches) {
+        status_calc = 'live';
+      } else {
+        status_calc = 'finished';
+      }
+    }
+
+    return {
+      ...r,
+      status_calc,
+    };
+  });
+
+  // Find Current Round: The latest round that has started (start_date <= NOW)
+  const startedRounds = roundsWithStatus.filter(
+    (r: any) => r.start_date && new Date(r.start_date) <= now
+  );
   let currentRound = startedRounds.length > 0 ? startedRounds[startedRounds.length - 1] : null;
 
   // Find Next Round: The first round that has NOT started
-  const futureRounds = rows.filter((r: any) => new Date(r.start_date) > now);
+  const futureRounds = roundsWithStatus.filter(
+    (r: any) => !r.start_date || new Date(r.start_date) > now
+  );
   let nextRound = futureRounds.length > 0 ? futureRounds[0] : null;
 
   return { currentRound, nextRound };
@@ -137,60 +165,81 @@ export async function getCurrentRoundState(): Promise<RoundState> {
 export async function getRoundDetails(roundId: string | number): Promise<Round | null> {
   if (!roundId) return null;
 
-  // Basic info
-  const basicQuery = `
-    SELECT 
-      round_id,
-      round_name,
-      MIN(date) as start_date,
-      MAX(date) as end_date
-    FROM matches
-    WHERE round_id = $1
-    GROUP BY round_id, round_name
-  `;
-  const roundRes = await db.query(basicQuery, [roundId]);
-  const round: Round = roundRes.rows[0];
+  // 1. Basic info
+  const basicInfo = await db
+    .select({
+      round_id: matches.roundId,
+      round_name: max(matches.roundName),
+      start_date: min(matches.date),
+      end_date: max(matches.date),
+    })
+    .from(matches)
+    .where(eq(matches.roundId, Number(roundId)))
+    .groupBy(matches.roundId);
 
-  if (!round) return null;
+  if (basicInfo.length === 0) return null;
+  const round: any = basicInfo[0];
 
-  // 1. Get all finished matches for standings (Global context, not just this round)
-  const allFinishedMatchesQuery = `
-    SELECT 
-      home_id, away_id, home_score, away_score, 
-      home_score_regtime, away_score_regtime, status
-    FROM matches
-    WHERE status = 'finished' 
-      AND home_score IS NOT NULL 
-      AND away_score IS NOT NULL
-  `;
-
+  // 2. Get team positions (Global context)
   let positionMap = new Map<number, number>();
   try {
-    const allFinishedMatches = (await db.query(allFinishedMatchesQuery)).rows;
-    // Get actual standings positions for this round
+    const allFinishedMatches = (
+      await db
+        .select({
+          home_id: matches.homeId,
+          away_id: matches.awayId,
+          home_score: matches.homeScore,
+          away_score: matches.awayScore,
+          home_score_regtime: matches.homeScoreRegtime,
+          away_score_regtime: matches.awayScoreRegtime,
+          status: matches.status,
+        })
+        .from(matches)
+        .where(
+          and(
+            eq(matches.status, 'finished'),
+            sql`${matches.homeScore} IS NOT NULL`,
+            sql`${matches.awayScore} IS NOT NULL`
+          )
+        )
+    ).map((m) => ({
+      ...m,
+      home_id: m.home_id!,
+      away_id: m.away_id!,
+      status: m.status!,
+    })) as StandingsMatch[];
+
     positionMap = getTeamPositions(allFinishedMatches);
   } catch (err) {
     console.warn('Could not calculate standings:', err);
   }
 
-  // 2. Get Matches for this round
-  const matchesQuery = `
-    SELECT 
-      m.home_id, m.away_id,
-      t1.name as home_team, t2.name as away_team, 
-      m.date, m.status,
-      m.home_score, m.away_score,
-      t1.img as home_logo, t1.short_name as home_short,
-      t2.img as away_logo, t2.short_name as away_short
-    FROM matches m
-    LEFT JOIN teams t1 ON m.home_id = t1.id
-    LEFT JOIN teams t2 ON m.away_id = t2.id
-    WHERE m.round_id = $1
-    ORDER BY m.date ASC
-  `;
+  // 3. Get Matches for this round
+  const homeTeam = alias(teams, 'homeTeam');
+  const awayTeam = alias(teams, 'awayTeam');
 
-  const matchesRes = await db.query(matchesQuery, [roundId]);
-  round.matches = matchesRes.rows.map((match: any) => ({
+  const roundMatches = await db
+    .select({
+      home_id: matches.homeId,
+      away_id: matches.awayId,
+      home_team: homeTeam.name,
+      away_team: awayTeam.name,
+      date: matches.date,
+      status: matches.status,
+      home_score: matches.homeScore,
+      away_score: matches.awayScore,
+      home_logo: homeTeam.img,
+      home_short: homeTeam.shortName,
+      away_logo: awayTeam.img,
+      away_short: awayTeam.shortName,
+    })
+    .from(matches)
+    .leftJoin(homeTeam, eq(matches.homeId, homeTeam.id))
+    .leftJoin(awayTeam, eq(matches.awayId, awayTeam.id))
+    .where(eq(matches.roundId, Number(roundId)))
+    .orderBy(asc(matches.date));
+
+  round.matches = roundMatches.map((match: any) => ({
     ...match,
     home_position: positionMap.get(match.home_id) || null,
     away_position: positionMap.get(match.away_id) || null,
@@ -200,13 +249,34 @@ export async function getRoundDetails(roundId: string | number): Promise<Round |
 }
 
 /**
+ * Get the next upcoming round ID
+ */
+export async function getNextRound(): Promise<number | null> {
+  const { currentRound, nextRound } = await getCurrentRoundState();
+
+  // If we have a live round, that's the one we want to show on the dashboard
+  if (currentRound && currentRound.status_calc === 'live') {
+    return currentRound.round_id;
+  }
+
+  // Otherwise, show the next upcoming one
+  if (nextRound) {
+    return nextRound.round_id;
+  }
+
+  // Fallback to the latest started one if everything is finished
+  return currentRound?.round_id || null;
+}
+
+/**
  * Get the next upcoming round
  * @deprecated Use getCurrentRoundState() instead
  */
-export async function getNextRound(): Promise<Round | null> {
-  const { nextRound } = await getCurrentRoundState();
-  if (!nextRound) return null;
-  return await getRoundDetails(nextRound.round_id);
+export async function getNextRoundData(): Promise<Round | null> {
+  const nextRoundId = await getNextRound();
+  if (!nextRoundId) return null;
+
+  return getRoundDetails(nextRoundId);
 }
 
 /**
@@ -222,29 +292,31 @@ export async function getLastCompletedRound(): Promise<any> {
  * Get the winner of the last completed round
  */
 export async function getLastRoundWinner(): Promise<any> {
-  const query = `
-    WITH LastRound AS (
-      SELECT m.round_id
-      FROM matches m
-      GROUP BY m.round_id
-      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
-      ORDER BY m.round_id DESC
-      LIMIT 1
+  const lastRoundIdQuery = db
+    .select({ round_id: matches.roundId })
+    .from(matches)
+    .groupBy(matches.roundId)
+    .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
+    .orderBy(desc(matches.roundId))
+    .limit(1);
+
+  const result = await db
+    .select({
+      user_id: userRounds.userId,
+      name: users.name,
+      icon: users.icon,
+      points: userRounds.points,
+      round_name: userRounds.roundName,
+    })
+    .from(userRounds)
+    .innerJoin(users, eq(userRounds.userId, users.id))
+    .where(
+      and(eq(userRounds.roundId, sql`(${lastRoundIdQuery})`), eq(userRounds.participated, true))
     )
-    SELECT 
-      ur.user_id,
-      u.name,
-      u.icon,
-      ur.points,
-      ur.round_name
-    FROM user_rounds ur
-    JOIN users u ON ur.user_id = u.id
-    WHERE ur.round_id = (SELECT round_id FROM LastRound)
-      AND ur.participated = TRUE
-    ORDER BY ur.points DESC
-    LIMIT 1
-  `;
-  return (await db.query(query)).rows[0];
+    .orderBy(desc(userRounds.points))
+    .limit(1);
+
+  return result[0];
 }
 
 /**
@@ -252,56 +324,66 @@ export async function getLastRoundWinner(): Promise<any> {
  */
 export async function getUserRecentRounds(userId: string, limit = 10) {
   // Get all rounds (including non-participated) with position when participated
-  const query = `
-    WITH AllRounds AS (
-      SELECT DISTINCT round_id, round_name
-      FROM user_rounds
-      ORDER BY round_id DESC
-      LIMIT $1
-    ),
-    RoundPositions AS (
-      SELECT 
-        ur.round_id,
-        ur.user_id,
-        ur.points,
-        ur.participated,
-        RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
-      FROM user_rounds ur
-      WHERE ur.participated = TRUE
-    )
-    SELECT 
-      ar.round_id,
-      ar.round_name,
-      COALESCE(rp.points, 0) as points,
-      COALESCE(rp.position, 0) as position,
-      CASE WHEN rp.user_id IS NOT NULL THEN 1 ELSE 0 END as participated
-    FROM AllRounds ar
-    LEFT JOIN RoundPositions rp ON ar.round_id = rp.round_id AND rp.user_id = $2
-    ORDER BY ar.round_id DESC
-  `;
+  const allRoundsSubquery = db
+    .selectDistinct({ round_id: userRounds.roundId, round_name: userRounds.roundName })
+    .from(userRounds)
+    .orderBy(desc(userRounds.roundId))
+    .limit(limit)
+    .as('all_rounds_sq');
 
-  const rounds = (await db.query(query, [limit, userId])).rows.map((row: any) => ({
+  const roundPositionsSubquery = db
+    .select({
+      round_id: userRounds.roundId,
+      user_id: userRounds.userId,
+      points: userRounds.points,
+      participated: userRounds.participated,
+      position:
+        sql`RANK() OVER (PARTITION BY ${userRounds.roundId} ORDER BY ${userRounds.points} DESC)`.as(
+          'position'
+        ),
+    })
+    .from(userRounds)
+    .where(eq(userRounds.participated, true))
+    .as('rp_sq');
+
+  const rows = await db
+    .select({
+      round_id: allRoundsSubquery.round_id,
+      round_name: allRoundsSubquery.round_name,
+      points: sql<number>`COALESCE(${roundPositionsSubquery.points}, 0)`,
+      position: sql<number>`COALESCE(${roundPositionsSubquery.position}, 0)`,
+      participated: sql<number>`CASE WHEN ${roundPositionsSubquery.user_id} IS NOT NULL THEN 1 ELSE 0 END`,
+    })
+    .from(allRoundsSubquery)
+    .leftJoin(
+      roundPositionsSubquery,
+      and(
+        eq(allRoundsSubquery.round_id, roundPositionsSubquery.round_id),
+        eq(roundPositionsSubquery.user_id, userId)
+      )
+    )
+    .orderBy(desc(allRoundsSubquery.round_id));
+
+  const rounds = rows.map((row: any) => ({
     ...row,
     points: parseInt(row.points) || 0,
     position: parseInt(row.position) || 0,
   }));
 
   // Count total rounds where user participated
-  const countQuery = `
-    SELECT COUNT(*) as total_played
-    FROM user_rounds
-    WHERE user_id = $1 AND participated = TRUE
-  `;
-  const countRes = await db.query(countQuery, [userId]);
-  const total_played = parseInt(countRes.rows[0]?.total_played) || 0;
+  const countRes = await db
+    .select({ total_played: count() })
+    .from(userRounds)
+    .where(and(eq(userRounds.userId, userId), eq(userRounds.participated, true)));
+
+  const total_played = Number(countRes[0]?.total_played) || 0;
 
   // Count total rounds in the season (distinct round_ids)
-  const totalRoundsQuery = `
-    SELECT COUNT(DISTINCT round_id) as total_rounds
-    FROM user_rounds
-  `;
-  const totalRoundsRes = await db.query(totalRoundsQuery);
-  const total_rounds = parseInt(totalRoundsRes.rows[0]?.total_rounds) || 0;
+  const totalRoundsRes = await db
+    .select({ total_rounds: sql<number>`COUNT(DISTINCT ${userRounds.roundId})`.mapWith(Number) })
+    .from(userRounds);
+
+  const total_rounds = totalRoundsRes[0]?.total_rounds || 0;
 
   return { rounds, total_played, total_rounds };
 }
@@ -310,79 +392,86 @@ export async function getUserRecentRounds(userId: string, limit = 10) {
  * Get best performers from the last completed round
  */
 export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
-  const query = `
-    WITH LastRound AS (
-      SELECT m.round_id as last_round_id
-      FROM matches m
-      GROUP BY m.round_id
-      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
-      ORDER BY m.round_id DESC
-      LIMIT 1
-    )
-    SELECT 
-      prs.player_id,
-      p.name,
-      t.id as team_id,
-      t.name as team,
-      p.position,
-      prs.fantasy_points as points,
-      u.id as owner_id,
-      u.name as owner_name,
-      u.color_index as owner_color_index
-    FROM player_round_stats prs
-    JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
-    WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
-    ORDER BY prs.fantasy_points DESC
-    LIMIT $1
-  `;
+  const lastRoundRes = await db
+    .select({
+      last_round_id: matches.roundId,
+    })
+    .from(matches)
+    .groupBy(matches.roundId)
+    .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
+    .orderBy(desc(matches.roundId))
+    .limit(1);
 
-  return (await db.query(query, [limit])).rows;
+  if (!lastRoundRes[0]) return [];
+  const lastRoundId = lastRoundRes[0].last_round_id;
+
+  return await db
+    .select({
+      player_id: playerRoundStats.playerId,
+      name: players.name,
+      team: teams.name,
+      position: players.position,
+      points: playerRoundStats.fantasyPoints,
+      owner_name: users.name,
+      owner_color_index: users.colorIndex,
+    })
+    .from(playerRoundStats)
+    .innerJoin(players, eq(playerRoundStats.playerId, players.id))
+    .leftJoin(teams, eq(players.teamId, teams.id))
+    .leftJoin(users, eq(players.ownerId, users.id))
+    .where(eq(playerRoundStats.roundId, lastRoundId))
+    .orderBy(desc(playerRoundStats.fantasyPoints))
+    .limit(limit);
 }
 
 /**
  * Get all player stats for the last completed round to calculate ideal lineup
  */
 export async function getLastRoundStats(): Promise<any[]> {
-  const query = `
-    WITH LastRound AS (
-      SELECT m.round_id as last_round_id
-      FROM matches m
-      GROUP BY m.round_id
-      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
-      ORDER BY m.round_id DESC
-      LIMIT 1
-    )
-    SELECT 
-      prs.player_id,
-      p.name,
-      t.name as team,
-      p.position,
-      p.price,
-      prs.fantasy_points as points,
-      u.name as owner_name,
-      (SELECT round_name FROM matches WHERE round_id = prs.round_id LIMIT 1) as round_name
-    FROM player_round_stats prs
-    JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
-    WHERE prs.round_id = (SELECT last_round_id FROM LastRound)
-    ORDER BY prs.fantasy_points DESC
-  `;
-  return (await db.query(query)).rows;
+  const lastRoundRes = await db
+    .select({
+      last_round_id: matches.roundId,
+    })
+    .from(matches)
+    .groupBy(matches.roundId)
+    .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
+    .orderBy(desc(matches.roundId))
+    .limit(1);
+
+  if (!lastRoundRes[0]) return [];
+  const lastRoundId = lastRoundRes[0].last_round_id;
+
+  return await db
+    .select({
+      player_id: playerRoundStats.playerId,
+      name: players.name,
+      team: teams.name,
+      position: players.position,
+      price: players.price,
+      points: playerRoundStats.fantasyPoints,
+      owner_name: users.name,
+      round_name: sql<string>`(SELECT round_name FROM matches WHERE round_id = ${playerRoundStats.roundId} LIMIT 1)`,
+    })
+    .from(playerRoundStats)
+    .innerJoin(players, eq(playerRoundStats.playerId, players.id))
+    .leftJoin(teams, eq(players.teamId, teams.id))
+    .leftJoin(users, eq(players.ownerId, users.id))
+    .where(eq(playerRoundStats.roundId, lastRoundId))
+    .orderBy(desc(playerRoundStats.fantasyPoints));
 }
 
 /**
  * Get all rounds available in the system
  */
 export async function getAllRounds(): Promise<any[]> {
-  const query = `
-    SELECT DISTINCT round_id, round_name 
-    FROM matches 
-    ORDER BY round_id DESC
-  `;
-  return (await db.query(query)).rows;
+  return await db
+    .select({
+      round_id: matches.roundId,
+      round_name: matches.roundName,
+    })
+    .from(matches)
+    .groupBy(matches.roundId, matches.roundName)
+    .orderBy(desc(matches.roundId));
 }
 
 /**
