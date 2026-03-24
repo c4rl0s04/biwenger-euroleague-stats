@@ -1031,7 +1031,7 @@ export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
     ORDER BY (COALESCE(s.total, 0) - COALESCE(p.total, 0)) DESC
   `;
 
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   return result.rows.map((r: any) => ({
     user_id: r.user_id,
     user_icon: r.user_icon,
@@ -1073,7 +1073,7 @@ export async function getBestSeller(): Promise<BestSeller[]> {
     ORDER BY net_profit DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1112,7 +1112,7 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
     ORDER BY revaluation DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1191,7 +1191,7 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
     ORDER BY points_per_million DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1261,7 +1261,7 @@ export async function getBestValueDetails(transferId: number): Promise<BestValue
       )
     ORDER BY m.date ASC
   `;
-  const result = await db.query(query, [transferId]);
+  const result = await pgClient.query(query, [transferId]);
   return result.rows.map((row: any) => ({
     ...row,
     points: parseInt(row.points),
@@ -1352,7 +1352,7 @@ export async function getWorstValuePlayer(): Promise<BestValuePlayer[]> {
     ORDER BY points_per_million ASC, purchase_price DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1381,7 +1381,7 @@ export async function getTheThief(): Promise<TheThief[]> {
     ORDER BY stolen_count DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1423,7 +1423,7 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
     ORDER BY price_diff ASC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1450,7 +1450,7 @@ export async function getTheVictim(): Promise<TheVictim[]> {
     ORDER BY failed_bids_count DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1496,7 +1496,7 @@ export async function getOverpayerManager(): Promise<OverpayerManager[]> {
     LIMIT 10
   `;
 
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
 
   return result.rows.map((row: any) => ({
@@ -1549,7 +1549,7 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
     LIMIT 10
   `;
 
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
 
   return result.rows.map((row: any) => ({
@@ -1566,8 +1566,8 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
  */
 export async function getBiddingDuelsStats(): Promise<BiddingDuelsStats> {
   const [usersResult, duelsResult] = await Promise.all([
-    db.query('SELECT id, name, icon, color_index FROM users ORDER BY name ASC'),
-    db.query(`
+    pgClient.query('SELECT id, name, icon, color_index FROM users ORDER BY name ASC'),
+    pgClient.query(`
       SELECT
         winner.id as winner_id,
         winner.name as winner_name,
@@ -1787,7 +1787,7 @@ export async function getBiddingDuelDetails(
     ORDER BY f.timestamp DESC NULLS LAST, f.id DESC
   `;
 
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
 
   return result.rows.map((row: any) => ({
     transfer_id: parseInt(row.transfer_id),
@@ -1848,7 +1848,7 @@ export async function getBestSingleFlip(): Promise<SingleFlip[]> {
     ORDER BY profit DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1897,7 +1897,7 @@ export async function getWorstSingleFlip(): Promise<SingleFlip[]> {
     ORDER BY profit ASC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1949,7 +1949,7 @@ export async function getBestPercentageGain(): Promise<PercentageGain[]> {
     ORDER BY percentage_gain DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1978,7 +1978,7 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
     ORDER BY distinct_owners_count DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2016,7 +2016,7 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
     ORDER BY missed_profit DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2059,7 +2059,7 @@ export async function getTopTrader(): Promise<TopTrader[]> {
     ORDER BY trade_count DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2101,7 +2101,7 @@ export async function getProfitablePlayer(): Promise<PlayerProfitability[]> {
     ORDER BY total_profit DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2143,7 +2143,7 @@ export async function getLossyPlayer(): Promise<PlayerProfitability[]> {
     ORDER BY total_loss ASC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2192,7 +2192,7 @@ export async function getQuickestFlip(): Promise<QuickFlip[]> {
     ORDER BY (sale.timestamp - purchase.timestamp) ASC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2243,7 +2243,7 @@ export async function getLongestProfitableHold(): Promise<LongHold[]> {
     ORDER BY (sale.timestamp - purchase.timestamp) DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2290,7 +2290,7 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
     ORDER BY devaluation ASC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2404,7 +2404,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     getAllTeamMatchesCount(),
   ]);
 
-  const rows = (await db.query(query)).rows;
+  const rows = (await pgClient.query(query)).rows;
 
   const mappedRows = rows.map((row: any) => {
     // 1. Raw Stats
