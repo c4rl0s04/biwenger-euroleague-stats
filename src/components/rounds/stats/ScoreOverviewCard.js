@@ -39,7 +39,13 @@ export default function ScoreOverviewCard({ summary, viewMode, user }) {
   else if (rating >= 50) ratingColor = 'text-orange-400';
 
   return (
-    <ElegantCard title={title} icon={Trophy} color={color} bgColor={color} className="card-glow">
+    <ElegantCard
+      title={title}
+      icon={Trophy}
+      color={color}
+      bgColor={color}
+      className="card-glow h-fit"
+    >
       <div className="flex items-center gap-4">
         {/* LEFT: Points (1/4) */}
         <div className="flex flex-col items-center justify-center min-w-[90px] border-r border-white/5 pr-4">

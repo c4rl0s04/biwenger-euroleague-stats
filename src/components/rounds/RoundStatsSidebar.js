@@ -20,7 +20,7 @@ export default function RoundStatsSidebar({ stats, loading, summary, viewMode })
   const { global, user } = stats || {};
 
   return (
-    <div className="flex-1 flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <ScoreOverviewCard summary={summary} viewMode={viewMode} user={user} />
 
       {stats && (

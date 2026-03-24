@@ -97,7 +97,7 @@ export default function ElegantCard({
     <div
       className={`
         stat-card backdrop-blur-lg border border-white/5
-        ${padding} h-full flex flex-col group/card relative overflow-hidden
+        ${padding} ${className.includes('h-') ? '' : 'h-full'} flex flex-col group/card relative overflow-hidden
         transition-all duration-500 hover:scale-[1.01] hover:border-white/10
         ${className}
       `}
