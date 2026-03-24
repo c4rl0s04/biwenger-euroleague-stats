@@ -3,6 +3,7 @@ import * as schema from './schema';
 import { db as clientDb } from './client'; // Shared pool from legacy client
 
 export const db = drizzle(clientDb as any, { schema });
+export const pgClient = clientDb; // Legacy bridge
 
 // --- Exports from legacy index.js (Restored for backward compatibility) ---
 

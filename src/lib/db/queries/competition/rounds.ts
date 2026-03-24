@@ -1,4 +1,4 @@
-import { db } from '../../index';
+import { db, pgClient } from '../../index';
 import {
   matches,
   porras,
@@ -419,7 +419,7 @@ export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
     .innerJoin(players, eq(playerRoundStats.playerId, players.id))
     .leftJoin(teams, eq(players.teamId, teams.id))
     .leftJoin(users, eq(players.ownerId, users.id))
-    .where(eq(playerRoundStats.roundId, lastRoundId))
+    .where(eq(playerRoundStats.roundId, lastRoundId as any))
     .orderBy(desc(playerRoundStats.fantasyPoints))
     .limit(limit);
 }
@@ -456,7 +456,7 @@ export async function getLastRoundStats(): Promise<any[]> {
     .innerJoin(players, eq(playerRoundStats.playerId, players.id))
     .leftJoin(teams, eq(players.teamId, teams.id))
     .leftJoin(users, eq(players.ownerId, users.id))
-    .where(eq(playerRoundStats.roundId, lastRoundId))
+    .where(eq(playerRoundStats.roundId, lastRoundId as any))
     .orderBy(desc(playerRoundStats.fantasyPoints));
 }
 
@@ -578,7 +578,7 @@ export async function getUserLineup(userId: string, roundId: string | number): P
       END
   `;
 
-  const rawLineup: any[] = (await db.query(query, [userId, roundId])).rows;
+  const rawLineup: any[] = (await pgClient.query(query, [userId, roundId])).rows;
 
   // 2. Get User Round totals
   const totalsQuery = `
@@ -593,7 +593,7 @@ export async function getUserLineup(userId: string, roundId: string | number): P
     FROM user_rounds ur
     WHERE ur.user_id = $1 AND ur.round_id = $2
   `;
-  const totals = (await db.query(totalsQuery, [userId, roundId])).rows[0];
+  const totals = (await pgClient.query(totalsQuery, [userId, roundId])).rows[0];
 
   // 3. Process lineup and detect missing players (ghost players)
   const lineup: LineupPlayer[] = rawLineup.map((p) => ({
@@ -660,7 +660,7 @@ export async function hasOfficialStats(roundId: string | number): Promise<boolea
       WHERE round_id = $1 AND participated = TRUE
     ) as exists
   `;
-  const res = await db.query(query, [roundId]);
+  const res = await pgClient.query(query, [roundId]);
   return res.rows[0]?.exists || false;
 }
 
@@ -689,7 +689,7 @@ export async function getOfficialStandings(roundId: string | number): Promise<an
     LEFT JOIN user_rounds ur ON u.id = ur.user_id AND ur.round_id = $1
     ORDER BY round_points DESC, u.name ASC
   `;
-  return (await db.query(query, [roundId])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [roundId])).rows.map((row: any) => ({
     ...row,
     points: parseInt(row.round_points) || 0,
     round_points: parseInt(row.round_points) || 0,
@@ -737,7 +737,7 @@ export async function getLivingStandings(roundId: string | number): Promise<any[
     ORDER BY round_points DESC, u.name ASC
   `;
 
-  return (await db.query(query, [roundId])).rows.map((row: any) => {
+  return (await pgClient.query(query, [roundId])).rows.map((row: any) => {
     const round_points = Math.round(parseFloat(row.round_points) || 0);
     const past_total = parseInt(row.past_total) || 0;
     return {
@@ -825,12 +825,12 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<any
 
   const [mvpRes, topScorerRes, topRebounderRes, topAssisterRes, avgRes, winnerRes] =
     await Promise.all([
-      db.query(mvpQuery, [roundId]),
-      db.query(topScorerQuery, [roundId]),
-      db.query(topRebounderQuery, [roundId]),
-      db.query(topAssisterQuery, [roundId]),
-      db.query(avgQuery, [roundId]),
-      db.query(winnerQuery, [roundId]),
+      pgClient.query(mvpQuery, [roundId]),
+      pgClient.query(topScorerQuery, [roundId]),
+      pgClient.query(topRebounderQuery, [roundId]),
+      pgClient.query(topAssisterQuery, [roundId]),
+      pgClient.query(avgQuery, [roundId]),
+      pgClient.query(winnerQuery, [roundId]),
     ]);
 
   return {
@@ -861,7 +861,7 @@ export async function getIdealLineup(roundId: string | number): Promise<LineupPl
     LIMIT 50
   `;
 
-  const allStats: any[] = (await db.query(query, [roundId])).rows;
+  const allStats: any[] = (await pgClient.query(query, [roundId])).rows;
 
   // LOGIC: Valid Formation Greedy Algorithm (Same as Coach Rating)
   // - Starts: 5 players. Max 3 per position (Base, Alero, Pivot).
@@ -934,12 +934,12 @@ export async function getIdealLineup(roundId: string | number): Promise<LineupPl
 async function getHistoricSquad(userId: string, roundId: string | number): Promise<Set<number>> {
   try {
     // 1. Get User Name (fichajes table stores names, not IDs)
-    const userRes = await db.query('SELECT name FROM users WHERE id = $1', [userId]);
+    const userRes = await pgClient.query('SELECT name FROM users WHERE id = $1', [userId]);
     if (userRes.rows.length === 0) return new Set();
     const userName = userRes.rows[0].name;
 
     // 2. Get Round Start Date (Lock Time)
-    const roundRes = await db.query(
+    const roundRes = await pgClient.query(
       'SELECT MIN(date) as start_date FROM matches WHERE round_id = $1',
       [roundId]
     );
@@ -955,12 +955,12 @@ async function getHistoricSquad(userId: string, roundId: string | number): Promi
     const adjustedRoundTs = roundTs + 3600;
 
     // 3. Get Current Squad
-    const squadRes = await db.query('SELECT id FROM players WHERE owner_id = $1', [userId]);
+    const squadRes = await pgClient.query('SELECT id FROM players WHERE owner_id = $1', [userId]);
     const squad = new Set<number>(squadRes.rows.map((r: any) => r.id));
 
     // 4. Fetch Transfers that happened AFTER the round start
     // We need to reverse these actions to get back to the state at round_start.
-    const transfersRes = await db.query(
+    const transfersRes = await pgClient.query(
       `
       SELECT player_id, vendedor, comprador, timestamp
       FROM fichajes 
@@ -1004,7 +1004,7 @@ export async function getPlayersLeftOut(userId: string, roundId: string | number
   const lineupQuery = `
     SELECT player_id FROM lineups WHERE user_id = $1 AND round_id = $2
   `;
-  const lineupRes = await db.query(lineupQuery, [userId, roundId]);
+  const lineupRes = await pgClient.query(lineupQuery, [userId, roundId]);
   const lineupIds = new Set(lineupRes.rows.map((r: any) => r.player_id));
 
   // 3. Find players in Squad but NOT in Lineup
@@ -1029,7 +1029,7 @@ export async function getPlayersLeftOut(userId: string, roundId: string | number
     ORDER BY prs.fantasy_points DESC
   `;
 
-  return (await db.query(statsQuery, [roundId, leftOutIds])).rows;
+  return (await pgClient.query(statsQuery, [roundId, leftOutIds])).rows;
 }
 
 /**
@@ -1058,7 +1058,7 @@ export async function getUserOptimization(userId: string, roundId: string | numb
     ORDER BY COALESCE(prs.fantasy_points, 0) DESC
   `;
 
-  const squadStats = (await db.query(statsQuery, [roundId, Array.from(historicSquad)])).rows;
+  const squadStats = (await pgClient.query(statsQuery, [roundId, Array.from(historicSquad)])).rows;
 
   // 3. Inject ghost players (players in lineups but deleted from the players table).
   //    getHistoricSquad cannot find them because it queries players.owner_id, and ghost
@@ -1174,7 +1174,7 @@ export async function getUserRoundsHistoryDAO(userId: string) {
     WHERE ur.user_id = $1
     ORDER BY ur.round_id ASC
   `;
-  return (await db.query(query, [userId])).rows;
+  return (await pgClient.query(query, [userId])).rows;
 }
 
 /**
@@ -1245,7 +1245,10 @@ export async function getLineupUsageStats() {
     ORDER BY user_id, formation_rank
   `;
 
-  const [globalRes, userRes] = await Promise.all([db.query(finalGlobalQuery), db.query(userQuery)]);
+  const [globalRes, userRes] = await Promise.all([
+    pgClient.query(finalGlobalQuery),
+    pgClient.query(userQuery),
+  ]);
 
   return {
     global: globalRes.rows,

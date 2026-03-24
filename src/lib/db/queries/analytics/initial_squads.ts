@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 
 export interface InitialSquadPerformance {
   user_id: string;
@@ -142,7 +142,7 @@ export async function getInitialSquadActualPerformance(): Promise<InitialSquadPe
     WHERE a.actual_points IS NOT NULL OR p.potential_points IS NOT NULL
     ORDER BY roi_percentage DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     actual_points: parseFloat(row.actual_points) || 0,
     potential_points: parseFloat(row.potential_points) || 0,
@@ -183,7 +183,7 @@ export async function getBestInitialSquadPlayer(): Promise<BestInitialSquadPlaye
     WHERE rn = 1
     ORDER BY total_fantasy_points DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     player_id: parseInt(row.player_id),
     total_fantasy_points: parseFloat(row.total_fantasy_points) || 0,
@@ -211,7 +211,7 @@ export async function getInitialSquadRetainedPoints(): Promise<InitialSquadRetai
     GROUP BY u.id, u.name, u.color_index, u.icon
     ORDER BY total_points DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     players_contributed: parseInt(row.players_contributed) || 0,
     total_points: parseFloat(row.total_points) || 0,
@@ -237,7 +237,7 @@ export async function getInitialSquadRetainedBreakdown(): Promise<InitialSquadPl
     GROUP BY u.id, u.name, u.icon, p.name
     ORDER BY u.name, points DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     points: parseFloat(row.points) || 0,
   }));
@@ -260,7 +260,7 @@ export async function getInitialSquadTheoreticalPotential(): Promise<InitialSqua
     GROUP BY u.id, u.name, u.color_index, u.icon
     ORDER BY potential_points DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     potential_points: parseInt(row.potential_points) || 0,
   }));
@@ -283,7 +283,7 @@ export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]>
     GROUP BY u.name, u.color_index, p.name
     ORDER BY u.name, player_total_points DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     points: parseFloat(row.points) || 0,
   }));
@@ -347,7 +347,7 @@ export async function getInitialSquadRegret(): Promise<InitialSquadRegret[]> {
     )
     SELECT * FROM aggregated ORDER BY points_lost DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     points_lost: parseFloat(row.points_lost) || 0,
   }));
@@ -373,7 +373,7 @@ export async function getInitialSquadLoyalty(): Promise<InitialSquadLoyalty[]> {
     GROUP BY u.id, u.name, u.color_index, u.icon
     ORDER BY loyalty_percentage DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     retained_count: parseInt(row.retained_count) || 0,
     initial_count: parseInt(row.initial_count) || 0,
@@ -400,7 +400,7 @@ export async function getInitialSquadPotentialAdvanced(): Promise<InitialSquadPo
     GROUP BY u.id, u.name, u.color_index, u.icon
     ORDER BY total_points DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     total_points: parseFloat(row.total_points) || 0,
     total_value: parseFloat(row.total_value) || 0,
@@ -441,7 +441,7 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
              END, 
              p.price DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     current_points: parseFloat(row.current_points) || 0,
     current_price: parseFloat(row.current_price) || 0,

@@ -1,5 +1,5 @@
 import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '../core/teams';
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 
 // ==========================================
 // INTERFACES
@@ -357,7 +357,7 @@ export async function getPlayerPriceHistory(playerId: number): Promise<PlayerPri
     WHERE player_id = $1 
     ORDER BY date ASC
   `;
-  return (await db.query(query, [playerId])).rows;
+  return (await pgClient.query(query, [playerId])).rows;
 }
 
 /**
@@ -379,7 +379,7 @@ export async function getPlayerTransfers(playerId: number): Promise<PlayerTransf
     WHERE f.player_id = $1 
     ORDER BY f.timestamp DESC
   `;
-  const transfers = (await db.query(query, [playerId])).rows;
+  const transfers = (await pgClient.query(query, [playerId])).rows;
 
   // Check for Initial Squad Assignment to complete the full transfer timeline
   const initialSquadQuery = `
@@ -390,7 +390,7 @@ export async function getPlayerTransfers(playerId: number): Promise<PlayerTransf
     JOIN users u ON s.user_id = u.id
     WHERE s.player_id = $1
   `;
-  const initialOwnerRes = await db.query(initialSquadQuery, [playerId]);
+  const initialOwnerRes = await pgClient.query(initialSquadQuery, [playerId]);
   const initialOwner = initialOwnerRes.rows[0];
 
   if (initialOwner) {
@@ -511,7 +511,7 @@ export async function getAllTransfers(limit = 100, offset = 0): Promise<Transfer
     LIMIT $1 OFFSET $2
   `;
 
-  return (await db.query(query, [limit, offset])).rows;
+  return (await pgClient.query(query, [limit, offset])).rows;
 }
 
 /**
@@ -536,7 +536,7 @@ export async function getRecentTransfers(limit = 5): Promise<RecentTransfer[]> {
     ORDER BY f.timestamp DESC
     LIMIT $1
   `;
-  return (await db.query(query, [limit])).rows;
+  return (await pgClient.query(query, [limit])).rows;
 }
 
 /**
@@ -555,7 +555,7 @@ export async function getMarketTrends(): Promise<MarketTrend[]> {
     ORDER BY date ASC
     LIMIT 30
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     count: parseInt(row.count) || 0,
     avg_value: parseFloat(row.avg_value) || 0,
@@ -613,7 +613,7 @@ export async function getMarketOpportunities(limit = 3): Promise<MarketOpportuni
     LIMIT $1
   `;
 
-  return (await db.query(query, [limit])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [limit])).rows.map((row: any) => ({
     ...row,
     avg_recent_points: parseFloat(row.avg_recent_points) || 0,
     value_score: parseFloat(row.value_score) || 0,
@@ -646,7 +646,7 @@ export async function getSignificantPriceChanges(
     LIMIT 5
   `;
 
-  return (await db.query(query, [minChange])).rows;
+  return (await pgClient.query(query, [minChange])).rows;
 }
 
 /**
@@ -666,7 +666,7 @@ export async function getMarketKPIs(): Promise<MarketKPIs> {
     FROM fichajes
   `;
 
-  const kpis = (await db.query(query)).rows[0];
+  const kpis = (await pgClient.query(query)).rows[0];
   return {
     ...kpis,
     total_transfers: parseInt(kpis?.total_transfers) || 0,
@@ -702,7 +702,7 @@ export async function getMarketOverviewKPIs(): Promise<MarketOverviewKPIs> {
       (SELECT AVG(precio) FROM fichajes WHERE precio > 0) as avg_price,
       (SELECT 1.0 + (losing_bids::float / NULLIF(total_transfers, 0)) FROM BidStats, TransferStats) as avg_bids
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   const row = result.rows[0];
 
   return {
@@ -732,7 +732,7 @@ export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]>
     ORDER BY transfer_count DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
 
   return result.rows.map((row: any) => ({
@@ -762,7 +762,7 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
     ORDER BY f.precio DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -786,7 +786,7 @@ export async function getBigSpender(): Promise<BigSpender[]> {
     ORDER BY total_spent DESC
     LIMIT 10
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -817,7 +817,7 @@ export async function getRecordBid(): Promise<RecordBid[]> {
     LIMIT 10
   `;
   try {
-    const result = await db.query(query);
+    const result = await pgClient.query(query);
     if (!result.rows.length) return [];
     return result.rows.map((row: any) => ({
       ...row,
@@ -851,7 +851,7 @@ export async function getMarketTrendsAnalysis(days = 30): Promise<MarketAnalysis
     GROUP BY date
     ORDER BY date ASC
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   return result.rows.map((r: any) => ({
     date: r.date,
     volume: parseInt(r.volume),
@@ -881,7 +881,7 @@ export async function getPositionAnalysis(): Promise<PositionAnalysis> {
     GROUP BY p.position
     ORDER BY count DESC
   `;
-  const result = await db.query(query);
+  const result = await pgClient.query(query);
   const rows = result.rows;
 
   if (!rows.length) return { mostSigned: null, distribution: [] };
@@ -973,8 +973,8 @@ export async function getLiveMarketTransfers({
   params.push(limit, offset);
 
   const [rowsResult, countResult] = await Promise.all([
-    db.query(query, params),
-    db.query(countQuery, params.slice(0, paramIndex - 1)),
+    pgClient.query(query, params),
+    pgClient.query(countQuery, params.slice(0, paramIndex - 1)),
   ]);
 
   return {

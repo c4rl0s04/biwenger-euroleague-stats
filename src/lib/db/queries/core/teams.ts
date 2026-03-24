@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 
 export interface Team {
   id: number;
@@ -20,7 +20,7 @@ export async function getTeamById(id: number | string): Promise<Team | undefined
     FROM teams
     WHERE id = $1
   `;
-  return (await db.query(query, [id])).rows[0];
+  return (await pgClient.query(query, [id])).rows[0];
 }
 
 /**
@@ -39,7 +39,7 @@ export async function getTeamMatchesCount(teamId: number | string): Promise<numb
       AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats)
   `;
 
-  const res = await db.query(query, [numericTeamId]);
+  const res = await pgClient.query(query, [numericTeamId]);
   return parseInt(res.rows[0]?.count || '0', 10);
 }
 
@@ -58,7 +58,7 @@ export async function getAllTeamMatchesCount(): Promise<Record<number, number>> 
       AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats)
     GROUP BY t.id
   `;
-  const res = await db.query(query);
+  const res = await pgClient.query(query);
   const result: Record<number, number> = {};
   for (const row of res.rows) {
     result[Number(row.team_id)] = parseInt(row.count, 10);
@@ -107,7 +107,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
     )
     SELECT * FROM RankedStandings
   `;
-  const standingsRes = await db.query(standingsQuery);
+  const standingsRes = await pgClient.query(standingsQuery);
   const standings = standingsRes.rows;
 
   const tenthPlace = standings.find((s) => Number(s.position) === 10);
@@ -135,7 +135,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
     WHERE rn <= 5
     GROUP BY team_id
   `;
-  const formRes = await db.query(formQuery);
+  const formRes = await pgClient.query(formQuery);
   const formData = new Map(formRes.rows.map((r) => [Number(r.team_id), Number(r.recent_wins)]));
 
   // 3. Schedule Difficulty (Next 3 opponents average position) for all teams
@@ -158,7 +158,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
     ) next_matches
     WHERE rn <= 3
   `;
-  const nextMatchesRes = await db.query(nextMatchesQuery);
+  const nextMatchesRes = await pgClient.query(nextMatchesQuery);
   const nextOpponentsMap = new Map<number, number[]>();
   for (const row of nextMatchesRes.rows) {
     const tid = Number(row.team_id);

@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 
 export interface VolatilityStat {
   user_id: number;
@@ -113,7 +113,7 @@ export async function getVolatilityStats(): Promise<VolatilityStat[]> {
     ORDER BY s.std_dev ASC
   `;
   // Note: Postgres `STDDEV` returns numeric/float, `ROUND` works fine.
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     avg_points: parseFloat(row.avg_points) || 0,
     std_dev: parseFloat(row.std_dev) || 0,
@@ -148,7 +148,7 @@ export async function getPlacementStats(): Promise<PlacementStat[]> {
     GROUP BY u.id
     ORDER BY top_3_count DESC, bottom_3_count ASC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     top_3_count: parseInt(row.top_3_count) || 0,
     bottom_3_count: parseInt(row.bottom_3_count) || 0,
@@ -185,7 +185,7 @@ export async function getLeagueComparisonStats(): Promise<LeagueComparisonStat[]
     GROUP BY u.id
     ORDER BY above_avg_count DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     above_avg_count: parseInt(row.above_avg_count) || 0,
     below_avg_count: parseInt(row.below_avg_count) || 0,
@@ -227,7 +227,7 @@ export async function getEfficiencyStats(): Promise<EfficiencyStat[]> {
     WHERE uv.team_value > 0
     ORDER BY points_per_million DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     total_points: parseInt(row.total_points) || 0,
     team_value: parseInt(row.team_value) || 0,
@@ -299,7 +299,7 @@ export async function getStreakStats(): Promise<StreakStat[]> {
     GROUP BY u.id, u.name, u.icon, u.color_index, csc.current_streak
     ORDER BY longest_streak DESC, current_streak DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     longest_streak: parseInt(row.longest_streak) || 0,
     current_streak: parseInt(row.current_streak) || 0,
@@ -339,7 +339,7 @@ export async function getBottlerStats(): Promise<BottlerStat[]> {
     HAVING (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) > 0 OR SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) > 0)
     ORDER BY bottler_score DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     wins: parseInt(row.wins) || 0,
     seconds: parseInt(row.seconds) || 0,
@@ -385,7 +385,7 @@ export async function getHeartbreakerStats(): Promise<HeartbreakerStat[]> {
     GROUP BY u.id
     ORDER BY (CASE WHEN COALESCE(SUM(he.diff), 0) = 0 THEN 1 ELSE 0 END) ASC, total_diff ASC
   `;
-  return (await db.query(refinedQuery)).rows.map((row: any) => ({
+  return (await pgClient.query(refinedQuery)).rows.map((row: any) => ({
     ...row,
     count: parseInt(row.count) || 0,
     total_diff: parseInt(row.total_diff) || 0,
@@ -427,7 +427,7 @@ export async function getNoGloryStats(): Promise<NoGloryStat[]> {
     GROUP BY u.id
     ORDER BY total_points_no_glory DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     total_points_no_glory: parseInt(row.total_points_no_glory) || 0,
     rounds_count: parseInt(row.rounds_count) || 0,
@@ -479,7 +479,7 @@ export async function getJinxStats(): Promise<JinxStat[]> {
     GROUP BY u.id
     ORDER BY jinxed_count DESC
   `;
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     jinxed_count: parseInt(row.jinxed_count) || 0,
   }));

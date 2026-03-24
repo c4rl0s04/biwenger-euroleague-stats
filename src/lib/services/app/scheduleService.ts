@@ -12,6 +12,7 @@ import {
   fetchMatchesForRound,
   fetchUserPlayers,
   getScheduleRounds,
+  getNextRound,
 } from '../../db';
 import { getTeamColor } from '../../constants/teamColors.js';
 
@@ -26,22 +27,10 @@ export async function getUserScheduleService(
   try {
     let targetRound;
 
-    // 1. Determine which round to show
-    if (targetRoundId) {
-      targetRound = await getRoundById(Number(targetRoundId));
-    }
-
-    // Fallback: Custom Logic for Schedule Page
-    if (!targetRound) {
-      const { currentRound, nextRound } = await getCurrentRoundState();
-
-      if (currentRound && currentRound.status_calc === 'live') {
-        targetRound = { round_id: currentRound.round_id, round_name: currentRound.round_name };
-      } else if (nextRound) {
-        targetRound = { round_id: nextRound.round_id, round_name: nextRound.round_name };
-      } else if (currentRound) {
-        targetRound = { round_id: currentRound.round_id, round_name: currentRound.round_name };
-      }
+    // 1. Determine which round to show (Standardized priority: Live > Upcoming > Finished)
+    const activeRoundId = targetRoundId || (await getNextRound());
+    if (activeRoundId && !targetRound) {
+      targetRound = await getRoundById(Number(activeRoundId));
     }
 
     // Still no round? Try last one

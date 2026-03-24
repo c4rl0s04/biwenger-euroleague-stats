@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 
 export interface SearchPlayer {
   id: number;
@@ -50,7 +50,7 @@ export async function globalSearch(query: string, limit: number = 5): Promise<Gl
       ORDER BY p.puntos DESC
       LIMIT $2
   `;
-  const playersRes = await db.query(playersQuery, [searchTerm, limit]);
+  const playersRes = await pgClient.query(playersQuery, [searchTerm, limit]);
   const players: SearchPlayer[] = playersRes.rows.map((row: any) => ({
     ...row,
     price: parseInt(row.price),
@@ -70,7 +70,7 @@ export async function globalSearch(query: string, limit: number = 5): Promise<Gl
       ORDER BY player_count DESC
       LIMIT $2
   `;
-  const teamsRes = await db.query(teamsQuery, [searchTerm, limit]);
+  const teamsRes = await pgClient.query(teamsQuery, [searchTerm, limit]);
   const teams: SearchTeam[] = teamsRes.rows.map((row: any) => ({
     ...row,
     player_count: parseInt(row.player_count),
@@ -84,7 +84,7 @@ export async function globalSearch(query: string, limit: number = 5): Promise<Gl
       ORDER BY name
       LIMIT $2
   `;
-  const usersRes = await db.query(usersQuery, [searchTerm, limit]);
+  const usersRes = await pgClient.query(usersQuery, [searchTerm, limit]);
   const users: SearchUser[] = usersRes.rows;
 
   return {

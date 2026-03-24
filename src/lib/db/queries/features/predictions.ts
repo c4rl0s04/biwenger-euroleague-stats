@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 
 // ==========================================
 // INTERFACES
@@ -177,8 +177,8 @@ async function getAchievements() {
   `;
 
   const [perfect10, blanked] = await Promise.all([
-    db.query(perfect10Query),
-    db.query(blankedQuery),
+    pgClient.query(perfect10Query),
+    pgClient.query(blankedQuery),
   ]);
 
   return {
@@ -200,7 +200,7 @@ async function getParticipation(): Promise<ParticipationStat[]> {
     GROUP BY round_id, round_name
     ORDER BY round_id ASC
   `;
-  const res = await db.query(query);
+  const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
     count: parseInt(row.count),
@@ -215,7 +215,7 @@ async function getPerformanceData(): Promise<PorraResult[]> {
     WHERE p.aciertos IS NOT NULL
     ORDER BY p.round_id ASC
   `;
-  const res = await db.query(query);
+  const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
     aciertos: parseInt(row.aciertos),
@@ -245,7 +245,7 @@ async function getTableStats(): Promise<TableStat[]> {
     SELECT * FROM UserStats
     ORDER BY promedio DESC
   `;
-  const res = await db.query(query);
+  const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
     jornadas_jugadas: parseInt(row.jornadas_jugadas),
@@ -267,7 +267,7 @@ async function getClutchStats(): Promise<ClutchStat[]> {
     ORDER BY round_id DESC 
     LIMIT 3
   `;
-  const roundsRes = await db.query(roundsQuery);
+  const roundsRes = await pgClient.query(roundsQuery);
 
   if (roundsRes.rows.length === 0) return [];
 
@@ -288,7 +288,7 @@ async function getClutchStats(): Promise<ClutchStat[]> {
     ORDER BY avg_last_3 DESC
   `;
 
-  const res = await db.query(query, [roundIds]);
+  const res = await pgClient.query(query, [roundIds]);
   return res.rows.map((row: any) => ({
     ...row,
     avg_last_3: parseFloat(row.avg_last_3),
@@ -322,7 +322,7 @@ async function getVictorias(): Promise<VictoryStat[]> {
     ORDER BY victorias DESC
   `;
 
-  const res = await db.query(query);
+  const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
     victorias: parseInt(row.victorias),
@@ -411,7 +411,7 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
     ORDER BY percentage DESC
   `;
 
-  const res = await db.query(query);
+  const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
     total: parseInt(row.total),
@@ -433,7 +433,7 @@ async function getBestRoundStat(): Promise<BestRoundStat[]> {
     ORDER BY p.aciertos DESC, p.round_id DESC
     LIMIT 5
   `;
-  const res = await db.query(query);
+  const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
     aciertos: parseInt(row.aciertos),
@@ -442,13 +442,13 @@ async function getBestRoundStat(): Promise<BestRoundStat[]> {
 
 async function getHistoryPivot(): Promise<HistoryPivot> {
   // Get all rounds that have scores
-  const roundsRes = await db.query(
+  const roundsRes = await pgClient.query(
     'SELECT DISTINCT round_id, round_name FROM porras WHERE aciertos IS NOT NULL ORDER BY round_id ASC'
   );
   const rounds = roundsRes.rows;
 
   // Get all users
-  const usersRes = await db.query(
+  const usersRes = await pgClient.query(
     'SELECT DISTINCT u.id, u.name, u.color_index FROM users u JOIN porras p ON p.user_id = u.id ORDER BY u.name'
   );
   // users will now be an array of objects { id, name, color_index }
@@ -460,7 +460,7 @@ async function getHistoryPivot(): Promise<HistoryPivot> {
     FROM porras p
     JOIN users u ON p.user_id = u.id
   `;
-  const scoresRes = await db.query(scoresQuery);
+  const scoresRes = await pgClient.query(scoresQuery);
 
   // Pivot data in JS
   const pivotData: HistoryPivotRow[] = rounds.map((round: any) => {

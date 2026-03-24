@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 import { getSimpleStandings as getStandings } from '../competition/standings';
 
 export interface User {
@@ -101,7 +101,9 @@ export interface PersonalizedAlert {
  * Get all users with their basic info
  */
 export async function getAllUsers(): Promise<User[]> {
-  const result = await db.query('SELECT id, name, icon, color_index FROM users ORDER BY name ASC');
+  const result = await pgClient.query(
+    'SELECT id, name, icon, color_index FROM users ORDER BY name ASC'
+  );
   return result.rows as User[];
 }
 
@@ -127,7 +129,7 @@ export async function getSquadStats(): Promise<SquadStats[]> {
     ORDER BY total_points DESC
   `;
 
-  return (await db.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     squad_size: parseInt(row.squad_size) || 0,
     total_value: parseInt(row.total_value) || 0,
@@ -155,7 +157,7 @@ export async function getUserSquad(userId: number | string): Promise<UserSquadPl
     ORDER BY p.puntos DESC
   `;
 
-  return (await db.query(query, [userId])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [userId])).rows.map((row: any) => ({
     ...row,
     average: parseFloat(row.average) || 0,
     points: parseInt(row.points) || 0,
@@ -168,7 +170,9 @@ export async function getUserSquad(userId: number | string): Promise<UserSquadPl
  */
 export async function getUserSeasonStats(userId: number | string): Promise<UserSeasonStats> {
   // First get user details for name
-  const userRes = await db.query('SELECT name, color_index FROM users WHERE id = $1', [userId]);
+  const userRes = await pgClient.query('SELECT name, color_index FROM users WHERE id = $1', [
+    userId,
+  ]);
   const user = userRes.rows[0];
 
   const statsQuery = `
@@ -189,7 +193,7 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
     FROM UserRounds
   `;
 
-  const statsRes = await db.query(statsQuery, [userId]);
+  const statsRes = await pgClient.query(statsQuery, [userId]);
   const stats = statsRes.rows[0];
 
   const positionsQuery = `
@@ -219,12 +223,12 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
     FROM fichajes
   `;
 
-  const positionsRes = await db.query(positionsQuery, [userId]);
+  const positionsRes = await pgClient.query(positionsQuery, [userId]);
   const positions = positionsRes.rows[0];
 
   let transfers = { purchases: 0, sales: 0 };
   if (user) {
-    const transfersRes = await db.query(transfersQuery, [user.name, user.name]); // using names as per schema
+    const transfersRes = await pgClient.query(transfersQuery, [user.name, user.name]); // using names as per schema
     transfers = transfersRes.rows[0] || transfers;
   }
 
@@ -273,7 +277,7 @@ export async function getUserSquadDetails(userId: number | string): Promise<User
     ORDER BY price_increment DESC
   `;
 
-  const squadRes = await db.query(squadQuery, [userId]);
+  const squadRes = await pgClient.query(squadQuery, [userId]);
   const squad = squadRes.rows;
 
   // Get user's actual competition points from user_rounds
@@ -282,7 +286,7 @@ export async function getUserSquadDetails(userId: number | string): Promise<User
     FROM user_rounds
     WHERE user_id = $1 AND participated = TRUE
   `;
-  const userPointsRes = await db.query(userPointsQuery, [userId]);
+  const userPointsRes = await pgClient.query(userPointsQuery, [userId]);
   const userPoints = userPointsRes.rows[0];
 
   // Convert to numbers explicitly to assume safety
@@ -318,7 +322,7 @@ export async function getUserCaptainStats(userId: number | string): Promise<Capt
     LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
     WHERE l.user_id = $1 AND l.is_captain = TRUE
   `;
-  const overallRes = await db.query(overallQuery, [userId]);
+  const overallRes = await pgClient.query(overallQuery, [userId]);
   const overall = overallRes.rows[0];
 
   const mostUsedQuery = `
@@ -335,7 +339,7 @@ export async function getUserCaptainStats(userId: number | string): Promise<Capt
     GROUP BY l.player_id, p.id, p.name
     ORDER BY times_captain DESC, avg_as_captain DESC
   `;
-  const mostUsedRes = await db.query(mostUsedQuery, [userId]);
+  const mostUsedRes = await pgClient.query(mostUsedQuery, [userId]);
   const mostUsed = mostUsedRes.rows;
 
   const bestQuery = `
@@ -349,7 +353,7 @@ export async function getUserCaptainStats(userId: number | string): Promise<Capt
     ORDER BY points DESC
     LIMIT 1
   `;
-  const bestRes = await db.query(bestQuery, [userId]);
+  const bestRes = await pgClient.query(bestQuery, [userId]);
   const best = bestRes.rows[0];
 
   const worstQuery = `
@@ -363,7 +367,7 @@ export async function getUserCaptainStats(userId: number | string): Promise<Capt
     ORDER BY points ASC
     LIMIT 1
   `;
-  const worstRes = await db.query(worstQuery, [userId]);
+  const worstRes = await pgClient.query(worstQuery, [userId]);
   const worst = worstRes.rows[0];
 
   return {
@@ -399,7 +403,7 @@ export async function getUserHomeAwayStats(userId: number | string): Promise<Hom
     WHERE owner_id = $1
   `;
 
-  const statsRes = await db.query(query, [userId]);
+  const statsRes = await pgClient.query(query, [userId]);
   const stats = statsRes.rows[0];
 
   // Safely parse
@@ -486,7 +490,7 @@ export async function getCaptainRecommendations(
     LIMIT $2
   `;
 
-  return (await db.query(query, [userId, limit])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [userId, limit])).rows.map((row: any) => ({
     ...row,
     avg_recent_points: parseFloat(row.avg_recent_points) || 0,
     recent_games: parseInt(row.recent_games) || 0,
@@ -511,7 +515,7 @@ export async function getPersonalizedAlerts(
     ORDER BY price_increment DESC
     LIMIT 2
   `;
-  const priceGains = (await db.query(priceGainsQuery, [userId])).rows;
+  const priceGains = (await pgClient.query(priceGainsQuery, [userId])).rows;
   priceGains.forEach((player: any) => {
     alerts.push({
       type: 'price_gain',
@@ -530,7 +534,7 @@ export async function getPersonalizedAlerts(
     ORDER BY price_increment ASC
     LIMIT 2
   `;
-  const priceLosses = (await db.query(priceLossesQuery, [userId])).rows;
+  const priceLosses = (await pgClient.query(priceLossesQuery, [userId])).rows;
   priceLosses.forEach((player: any) => {
     alerts.push({
       type: 'price_loss',
@@ -556,7 +560,7 @@ export async function getPersonalizedAlerts(
     ORDER BY prs.fantasy_points DESC
     LIMIT 1
   `;
-  const goodForm = (await db.query(recentGoodFormQuery, [userId])).rows[0];
+  const goodForm = (await pgClient.query(recentGoodFormQuery, [userId])).rows[0];
   if (goodForm) {
     alerts.push({
       type: 'good_performance',

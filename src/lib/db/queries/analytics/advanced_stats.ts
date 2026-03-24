@@ -3,7 +3,7 @@
  * Complex analytics for the standings page
  */
 
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 import { cached, CACHE_TTL } from '../../../utils/cache';
 import { getShortRoundName } from '../../../utils/format';
 
@@ -30,6 +30,7 @@ export interface HunterStat {
 export interface RollingAverageStat {
   user_id: number;
   name: string;
+  icon: string;
   color_index: number;
   data: {
     round: number;
@@ -61,6 +62,7 @@ export interface ReliabilityStat {
 export interface PointDistributionStat {
   user_id: number;
   name: string;
+  icon: string;
   color_index: number;
   distribution: {
     [range: string]: number; // '90-135' | '136-170' | ...
@@ -196,7 +198,7 @@ export async function getHeatCheckStats(): Promise<HeatCheckStat[]> {
       ORDER BY diff DESC
     `;
 
-    return (await db.query(sql)).rows.map((stat: any) => ({
+    return (await pgClient.query(sql)).rows.map((stat: any) => ({
       ...stat,
       last5_avg: parseFloat(stat.last5_avg) || 0,
       season_avg: parseFloat(stat.season_avg) || 0,
@@ -217,7 +219,7 @@ export async function getHunterStats(): Promise<HunterStat[]> {
   try {
     // Get current leader ID
     const extendedStandings = (
-      await db.query(`
+      await pgClient.query(`
       SELECT user_id, SUM(points) as total 
       FROM user_rounds 
       GROUP BY user_id 
@@ -231,7 +233,9 @@ export async function getHunterStats(): Promise<HunterStat[]> {
 
     // Get last 5 rounds
     const rounds = (
-      await db.query('SELECT DISTINCT round_id FROM user_rounds ORDER BY round_id DESC LIMIT 5')
+      await pgClient.query(
+        'SELECT DISTINCT round_id FROM user_rounds ORDER BY round_id DESC LIMIT 5'
+      )
     ).rows;
     if (rounds.length === 0) return [];
     const minRoundId = rounds[rounds.length - 1].round_id;
@@ -249,7 +253,7 @@ export async function getHunterStats(): Promise<HunterStat[]> {
       GROUP BY u.id
     `;
 
-    const recentPoints = (await db.query(sql, [minRoundId])).rows.map((p: any) => ({
+    const recentPoints = (await pgClient.query(sql, [minRoundId])).rows.map((p: any) => ({
       ...p,
       recent_points: parseInt(p.recent_points) || 0,
     }));
@@ -276,16 +280,18 @@ export async function getHunterStats(): Promise<HunterStat[]> {
 export async function getRollingAverageStats(): Promise<RollingAverageStat[]> {
   try {
     const rounds = (
-      await db.query('SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC')
+      await pgClient.query(
+        'SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC'
+      )
     ).rows;
-    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+    const users = (await pgClient.query('SELECT id, name, icon, color_index FROM users')).rows;
 
     const result: RollingAverageStat[] = [];
 
     // Calculate rolling avg for each user
     for (const user of users) {
       const userPoints = (
-        await db.query(
+        await pgClient.query(
           `
         SELECT round_id, points 
         FROM user_rounds 
@@ -353,7 +359,7 @@ export async function getFloorCeilingStats(): Promise<FloorCeilingStat[]> {
       ORDER BY ceiling DESC
     `;
 
-    return (await db.query(sql)).rows.map((row: any) => ({
+    return (await pgClient.query(sql)).rows.map((row: any) => ({
       ...row,
       floor: parseInt(row.floor) || 0,
       ceiling: parseInt(row.ceiling) || 0,
@@ -372,7 +378,7 @@ export async function getReliabilityStats(): Promise<ReliabilityStat[]> {
   try {
     // 1. Calculate Average per Round
     const roundAvgs = (
-      await db.query(`
+      await pgClient.query(`
       SELECT round_id, AVG(points) as avg_pts
       FROM user_rounds
       WHERE participated = TRUE
@@ -385,7 +391,7 @@ export async function getReliabilityStats(): Promise<ReliabilityStat[]> {
 
     // 2. Get all User Scores
     const userScores = (
-      await db.query(`
+      await pgClient.query(`
       SELECT 
         u.id as user_id,
         u.name,
@@ -437,7 +443,7 @@ export async function getReliabilityStats(): Promise<ReliabilityStat[]> {
  */
 export async function getPointDistributionStats(): Promise<PointDistributionStat[]> {
   try {
-    const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+    const users = (await pgClient.query('SELECT id, name, icon, color_index FROM users')).rows;
     const buckets = [
       { range: '90-135', min: 90, max: 135 },
       { range: '136-170', min: 136, max: 170 },
@@ -452,7 +458,7 @@ export async function getPointDistributionStats(): Promise<PointDistributionStat
       buckets.forEach((b) => (distribution[b.range] = 0));
 
       const rounds = (
-        await db.query(
+        await pgClient.query(
           'SELECT points FROM user_rounds WHERE user_id = $1 AND participated = TRUE',
           [user.id]
         )
@@ -491,9 +497,9 @@ export async function getAllPlayAllStats(): Promise<PlayAllStat[]> {
     try {
       // Get all rounds
       const rounds = (
-        await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
+        await pgClient.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
       ).rows;
-      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+      const users = (await pgClient.query('SELECT id, name, icon, color_index FROM users')).rows;
 
       const standings: Record<number, any> = {};
       users.forEach((u: any) => {
@@ -510,7 +516,7 @@ export async function getAllPlayAllStats(): Promise<PlayAllStat[]> {
 
       for (const round of rounds) {
         const roundScores = (
-          await db.query('SELECT user_id, points FROM user_rounds WHERE round_id = $1', [
+          await pgClient.query('SELECT user_id, points FROM user_rounds WHERE round_id = $1', [
             round.round_id,
           ])
         ).rows;
@@ -557,7 +563,7 @@ export async function getAllPlayAllStats(): Promise<PlayAllStat[]> {
 export async function getDominanceStats(): Promise<DominanceStat[]> {
   try {
     const result = (
-      await db.query(`
+      await pgClient.query(`
       WITH RoundWinners AS (
         SELECT 
           round_id,
@@ -601,7 +607,7 @@ export async function getTheoreticalGapStats(): Promise<TheoreticalGapStat[]> {
   try {
     // Calculate Perfect Season Total
     const perfectTotalResult = (
-      await db.query(`
+      await pgClient.query(`
       WITH MaxPoints AS (
         SELECT MAX(points) as max_pts FROM user_rounds GROUP BY round_id
       )
@@ -614,7 +620,7 @@ export async function getTheoreticalGapStats(): Promise<TheoreticalGapStat[]> {
 
     // Get User Totals
     const userTotals = (
-      await db.query(`
+      await pgClient.query(`
       SELECT 
         u.id as user_id,
         u.name,
@@ -655,17 +661,17 @@ export async function getHeatmapStats(): Promise<HeatmapStat> {
     try {
       // Get all rounds to ensure column structure
       const rounds = (
-        await db.query(
+        await pgClient.query(
           'SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC'
         )
       ).rows;
 
       // Get all users
-      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+      const users = (await pgClient.query('SELECT id, name, icon, color_index FROM users')).rows;
 
       // Get all scores
       const scores = (
-        await db.query(`
+        await pgClient.query(`
       SELECT user_id, round_id, points 
       FROM user_rounds 
       WHERE participated = TRUE
@@ -710,14 +716,14 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
   return cached('advanced:position-changes', CACHE_TTL.LONG, async () => {
     try {
       const rounds = (
-        await db.query(
+        await pgClient.query(
           'SELECT DISTINCT round_id, round_name FROM user_rounds ORDER BY round_id ASC'
         )
       ).rows;
-      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+      const users = (await pgClient.query('SELECT id, name, icon, color_index FROM users')).rows;
       // Get all scores ordered by round
       const scores = (
-        await db.query(
+        await pgClient.query(
           'SELECT user_id, round_id, points FROM user_rounds WHERE participated = TRUE ORDER BY round_id ASC'
         )
       ).rows;
@@ -841,9 +847,9 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
 export async function getRivalryMatrixStats(): Promise<RivalryMatrixStat> {
   return cached('advanced:rivalry-matrix', CACHE_TTL.LONG, async () => {
     try {
-      const users = (await db.query('SELECT id, name, icon, color_index FROM users')).rows;
+      const users = (await pgClient.query('SELECT id, name, icon, color_index FROM users')).rows;
       const rounds = (
-        await db.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
+        await pgClient.query('SELECT DISTINCT round_id FROM user_rounds WHERE participated = TRUE')
       ).rows;
 
       // Initialize matrix
@@ -860,7 +866,7 @@ export async function getRivalryMatrixStats(): Promise<RivalryMatrixStat> {
 
       for (const round of rounds) {
         const roundScores = (
-          await db.query(
+          await pgClient.query(
             'SELECT user_id, points FROM user_rounds WHERE round_id = $1 AND participated = TRUE',
             [round.round_id]
           )
@@ -932,7 +938,7 @@ export async function getCaptainStats(): Promise<CaptainStat[]> {
       ORDER BY raw_captain_points DESC
     `;
 
-    return (await db.query(sql)).rows.map((u: any) => ({
+    return (await pgClient.query(sql)).rows.map((u: any) => ({
       ...u,
       total_bonus: parseInt(u.raw_captain_points) || 0,
       avg_captain_points: parseFloat(u.avg_captain_points) || 0,

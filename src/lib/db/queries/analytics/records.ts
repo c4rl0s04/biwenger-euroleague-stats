@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 
 export interface RecordItem {
   type: 'highest_round' | 'highest_transfer' | 'biggest_gain';
@@ -28,7 +28,7 @@ export async function getRecentRecords(): Promise<RecordItem[]> {
     ORDER BY ur.points DESC
     LIMIT 1
   `;
-  const highestRound = (await db.query(highestRoundQuery)).rows[0];
+  const highestRound = (await pgClient.query(highestRoundQuery)).rows[0];
   if (highestRound) {
     records.push({
       type: 'highest_round',
@@ -50,7 +50,7 @@ export async function getRecentRecords(): Promise<RecordItem[]> {
     ORDER BY f.precio DESC
     LIMIT 1
   `;
-  const highestTransfer = (await db.query(highestTransferQuery)).rows[0];
+  const highestTransfer = (await pgClient.query(highestTransferQuery)).rows[0];
   if (highestTransfer) {
     records.push({
       type: 'highest_transfer',
@@ -72,7 +72,7 @@ export async function getRecentRecords(): Promise<RecordItem[]> {
     ORDER BY price_increment DESC
     LIMIT 1
   `;
-  const biggestGain = (await db.query(biggestGainQuery)).rows[0];
+  const biggestGain = (await pgClient.query(biggestGainQuery)).rows[0];
   if (biggestGain && biggestGain.price_increment > 0) {
     records.push({
       type: 'biggest_gain',

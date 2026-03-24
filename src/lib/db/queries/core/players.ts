@@ -1,4 +1,4 @@
-import { db } from '../../client';
+import { db, pgClient } from '../../index';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
 import { getPlayerPriceHistory, getPlayerTransfers } from '../features/market';
 import { getTeamUpcomingMatches } from '../competition/matches';
@@ -76,7 +76,7 @@ export async function getPlayerMatchesPlayed(playerId: number | string): Promise
     WHERE player_id = $1 AND minutes > 0
   `;
 
-  const res = await db.query(query, [numericPlayerId]);
+  const res = await pgClient.query(query, [numericPlayerId]);
   return parseInt(res.rows[0]?.count || '0', 10);
 }
 
@@ -128,7 +128,7 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
     LIMIT $1
   `;
   // Note: Adjusted SELECT columns to match interface (team -> team_name) somewhat, or rely on loose mapping
-  return (await db.query(query, [limit])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [limit])).rows.map((row: any) => ({
     ...row,
     average: parseFloat(row.average) || 0,
   }));
@@ -196,7 +196,7 @@ export async function getTopPlayersByForm(
     LIMIT $2
   `;
 
-  return (await db.query(query, [rounds, limit])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [rounds, limit])).rows.map((row: any) => ({
     ...row,
     avg_points: parseFloat(row.avg_points) || 0,
   })) as PlayerRecentForm[];
@@ -225,7 +225,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     WHERE p.id = $1
   `;
 
-  const playerRes = await db.query(query, [numericPlayerId]);
+  const playerRes = await pgClient.query(query, [numericPlayerId]);
   const player = playerRes.rows[0];
 
   if (!player) return null;
@@ -268,7 +268,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     ORDER BY m.round_id DESC
   `;
 
-  const recentMatches = (await db.query(matchesQuery, [numericPlayerId])).rows;
+  const recentMatches = (await pgClient.query(matchesQuery, [numericPlayerId])).rows;
 
   // 3. Extracted modular queries
   const [
@@ -351,7 +351,7 @@ export async function getPlayersBirthday(): Promise<CorePlayer[]> {
     ORDER BY p.name
   `;
 
-  return (await db.query(query)).rows;
+  return (await pgClient.query(query)).rows;
 }
 
 /**
@@ -413,7 +413,7 @@ export async function getPlayerStreaks(
     LIMIT 20
   `;
 
-  const allPlayers = (await db.query(query, [minGames])).rows.map((p: any) => ({
+  const allPlayers = (await pgClient.query(query, [minGames])).rows.map((p: any) => ({
     ...p,
     recent_avg: parseFloat(p.recent_avg) || 0,
     season_avg: parseFloat(p.season_avg) || 0,
@@ -485,7 +485,7 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
     LIMIT $1
   `;
 
-  return (await db.query(query, [limit])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [limit])).rows.map((row: any) => ({
     ...row,
     recent_avg: parseFloat(row.recent_avg) || 0,
     earlier_avg: parseFloat(row.earlier_avg) || 0,
@@ -572,7 +572,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
      LEFT JOIN RecentScores rs ON p.id = rs.player_id
      ORDER BY COALESCE(pa.total_points, 0) DESC
   `;
-  return (await db.query(query)).rows.map((p: any) => ({
+  return (await pgClient.query(query)).rows.map((p: any) => ({
     ...p,
     total_points: parseFloat(p.total_points) || 0,
     played: parseInt(p.played) || 0,
@@ -621,7 +621,7 @@ export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
   `;
 
   try {
-    return (await db.query(query)).rows.map((row: any) => ({
+    return (await pgClient.query(query)).rows.map((row: any) => ({
       ...row,
       value: parseFloat(row.value) || 0,
       avg_value: parseFloat(row.avg_value) || 0,

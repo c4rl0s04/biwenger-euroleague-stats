@@ -1,4 +1,4 @@
-import { db } from '../client';
+import { db, pgClient } from '../index';
 
 // ==========================================
 // INTERFACES
@@ -63,7 +63,7 @@ export interface TournamentFixture {
 // ==========================================
 
 export async function getTournaments(): Promise<Tournament[]> {
-  const { rows } = await db.query(`
+  const { rows } = await pgClient.query(`
     SELECT 
       t.id, 
       t.name, 
@@ -83,7 +83,7 @@ export async function getTournaments(): Promise<Tournament[]> {
 }
 
 export async function getTournamentById(id: number): Promise<Tournament | null> {
-  const { rows } = await db.query(
+  const { rows } = await pgClient.query(
     `
     SELECT 
       t.id, 
@@ -110,7 +110,7 @@ export async function getTournamentById(id: number): Promise<Tournament | null> 
 export async function getTournamentStandings(
   tournamentId: number | null
 ): Promise<TournamentStanding[]> {
-  const { rows } = await db.query(
+  const { rows } = await pgClient.query(
     `
         SELECT 
             ts.*,
@@ -143,7 +143,7 @@ export async function getTournamentStandings(
 export async function getTournamentFixtures(
   tournamentId: number | null
 ): Promise<TournamentFixture[]> {
-  const { rows } = await db.query(
+  const { rows } = await pgClient.query(
     `
         SELECT 
             tf.*,
