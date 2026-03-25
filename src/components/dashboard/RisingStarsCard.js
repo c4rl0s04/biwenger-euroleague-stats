@@ -21,7 +21,7 @@ export default function RisingStarsCard() {
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <Link
-                href={`/player/${player.player_id}`}
+                href={`/player/${player.id}`}
                 className="font-bold text-sm text-white truncate hover:text-emerald-400 transition-colors leading-tight"
               >
                 {player.name}

@@ -4,6 +4,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { BarChart2 } from 'lucide-react';
+import Link from 'next/link';
 import { Card, AnimatedNumber, StatsList } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/constants/colors';
@@ -138,7 +139,12 @@ export default function StatsLeadersCard() {
                 {index + 1}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="font-bold text-foreground text-sm truncate">{player.name}</div>
+                <Link
+                  href={`/player/${player.player_id}`}
+                  className="font-bold text-foreground text-sm truncate hover:text-cyan-400 transition-colors"
+                >
+                  {player.name}
+                </Link>
                 <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
                   <span>{player.team}</span>
                   {player.owner_name && (

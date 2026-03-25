@@ -1,6 +1,7 @@
 'use client';
 import PropTypes from 'prop-types';
 import { Flame, Snowflake, TrendingUp, TrendingDown } from 'lucide-react';
+import Link from 'next/link';
 import { Card, AnimatedNumber, StatsList } from '@/components/ui';
 import { InfoTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 import { useApiData } from '@/lib/hooks/useApiData';
@@ -65,7 +66,12 @@ export default function StreakCard({ type = 'hot' }) {
                 <TrendIcon size={20} />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="font-bold text-foreground text-sm truncate">{player.name}</div>
+                <Link
+                  href={`/player/${player.id}`}
+                  className={`font-bold text-foreground text-sm truncate hover:text-${cfg.color}-400 transition-colors`}
+                >
+                  {player.name}
+                </Link>
                 <div className="text-xs text-muted-foreground truncate">
                   {player.team} {/* Owner info could be added if color index logic imported */}
                 </div>
