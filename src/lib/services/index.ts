@@ -50,7 +50,6 @@ export {
   fetchLeagueAveragePoints,
   fetchLastRoundMVPs,
   fetchRisingStars,
-  fetchStandingsPreview,
   fetchLeaderComparison,
   fetchTopPlayers,
   fetchPlayerBirthdays,

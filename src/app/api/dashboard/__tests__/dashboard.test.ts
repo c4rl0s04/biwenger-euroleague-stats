@@ -17,7 +17,6 @@ vi.mock('@/lib/services', () => ({
   fetchNextRound: vi.fn(),
   getRecentActivityData: vi.fn(),
   fetchRisingStars: vi.fn(),
-  fetchStandingsPreview: vi.fn(),
   fetchTopPlayersByForm: vi.fn(),
   fetchLeaderComparison: vi.fn(),
   getNextRoundData: vi.fn(),
@@ -111,24 +110,6 @@ describe('GET /api/dashboard/rising-stars', () => {
     const { GET } = await import('@/app/api/dashboard/rising-stars/route');
     const response = await GET();
     expect(response.status).toBe(500);
-  });
-});
-
-// --- /api/dashboard/standings-preview ---
-describe('GET /api/dashboard/standings-preview', () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it('returns 200 with standings preview', async () => {
-    vi.mocked(services.fetchStandingsPreview).mockResolvedValue([
-      { rank: 1, user: 'Alice' },
-    ] as any);
-
-    const { GET } = await import('@/app/api/dashboard/standings-preview/route');
-    const response = await GET();
-    const json = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(json.success).toBe(true);
   });
 });
 

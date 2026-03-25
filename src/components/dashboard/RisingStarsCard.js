@@ -3,7 +3,7 @@
 import { Sparkles, TrendingUp, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { getShortTeamName } from '@/lib/utils/format';
-import { Card, AnimatedNumber } from '@/components/ui';
+import { Card, AnimatedNumber, StatsList } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RisingStarsCard() {
@@ -11,71 +11,58 @@ export default function RisingStarsCard() {
 
   return (
     <Card title="Estrellas Emergentes" icon={Sparkles} color="emerald" loading={loading}>
-      {!loading && (
-        <div className="flex-1 flex flex-col justify-between gap-2">
-          {stars && stars.length > 0 ? (
-            stars.map((player) => (
-              <div
-                key={player.player_id}
-                className="p-3 bg-secondary/40 rounded-lg border border-border/30 hover:border-emerald-600/50 transition-all"
+      <StatsList
+        items={!loading && stars && stars.length > 0 ? stars.slice(0, 5) : []}
+        emptyMessage="No hay datos suficientes"
+        renderLeft={(player) => (
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="rounded-full p-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <Link
+                href={`/player/${player.player_id}`}
+                className="font-bold text-sm text-white truncate hover:text-emerald-400 transition-colors leading-tight"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-foreground text-sm flex items-center gap-2">
-                      <Link
-                        href={`/player/${player.player_id}`}
-                        className="hover:text-emerald-400 transition-colors"
-                      >
-                        {player.name}
-                      </Link>
-                      <TrendingUp className="w-4 h-4 text-emerald-400" />
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {getShortTeamName(player.team)} · {player.position}
-                    </div>
-                    {player.owner_name && (
-                      <div className="text-xs text-blue-400">👤 {player.owner_name}</div>
-                    )}
-                  </div>
-                  <div className="text-right ml-3">
-                    <div className="flex items-center gap-1">
-                      <ArrowUp className="w-4 h-4 text-emerald-400" />
-                      <div>
-                        <div className="text-sm font-bold text-emerald-400">
-                          +
-                          <AnimatedNumber
-                            value={parseFloat(player.improvement)}
-                            decimals={1}
-                            duration={0.8}
-                          />
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          <AnimatedNumber
-                            value={parseFloat(player.improvement_pct)}
-                            decimals={1}
-                            duration={0.8}
-                          />
-                          %
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      <AnimatedNumber
-                        value={parseFloat(player.recent_avg)}
-                        decimals={1}
-                        duration={0.8}
-                      />{' '}
-                      pts/g
-                    </div>
-                  </div>
-                </div>
+                {player.name}
+              </Link>
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 truncate mt-0.5 font-medium">
+                <span className="truncate">{getShortTeamName(player.team)}</span>
+                <span className="opacity-30">•</span>
+                <span className="truncate">{player.position}</span>
+                {player.owner_name && (
+                  <>
+                    <span className="opacity-30">•</span>
+                    <span className="text-blue-400 font-bold">👤 {player.owner_name}</span>
+                  </>
+                )}
               </div>
-            ))
-          ) : (
-            <div className="text-center text-muted-foreground py-8">No hay datos suficientes</div>
-          )}
-        </div>
-      )}
+            </div>
+          </div>
+        )}
+        renderRight={(player) => (
+          <div className="flex flex-col items-end justify-center min-w-[70px]">
+            <div className="flex items-center gap-1 text-emerald-400">
+              <ArrowUp className="w-3 h-3" />
+              <span className="font-bold text-base leading-none">
+                <AnimatedNumber
+                  value={parseFloat(player.improvement)}
+                  decimals={1}
+                  duration={0.8}
+                />
+              </span>
+            </div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
+              <AnimatedNumber
+                value={parseFloat(player.improvement_pct)}
+                decimals={1}
+                duration={0.8}
+              />
+              % mejora
+            </div>
+          </div>
+        )}
+      />
     </Card>
   );
 }

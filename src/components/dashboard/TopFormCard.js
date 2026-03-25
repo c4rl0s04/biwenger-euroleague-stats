@@ -28,7 +28,9 @@ export default function TopFormCard() {
 
           return (
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <span className="text-slate-500 font-mono text-[10px] w-4 shrink-0">{idx + 1}</span>
+              <span className="text-slate-500 font-mono text-base font-black w-5 shrink-0 tabular-nums">
+                {idx + 1}
+              </span>
 
               <div className="min-w-0 flex flex-col justify-center">
                 <Link

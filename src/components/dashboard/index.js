@@ -7,8 +7,6 @@
  */
 
 // Standings & Rankings
-export { default as StandingsCard } from './StandingsCard';
-export { default as StandingsTable } from './StandingsTable';
 export { default as LeaderGapCard } from './LeaderGapCard';
 export { default as LeagueComparisonCard } from './LeagueComparisonCard';
 

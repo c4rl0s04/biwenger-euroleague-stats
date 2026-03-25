@@ -33,7 +33,7 @@ export default function CaptainSuggestCard() {
         emptyMessage={currentUser ? 'No hay recomendaciones' : 'Selecciona un usuario'}
         renderLeft={(player, idx) => (
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <span className="text-slate-500 font-mono text-[10px] w-4 flex-shrink-0">
+            <span className="text-slate-500 font-mono text-base font-black w-5 shrink-0 tabular-nums">
               {idx + 1}
             </span>
 

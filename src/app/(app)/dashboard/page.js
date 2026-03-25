@@ -43,6 +43,11 @@ const MarketActivityCard = nextDynamic(() => import('@/components/dashboard/Mark
   ssr: true,
 });
 
+const RisingStarsCard = nextDynamic(() => import('@/components/dashboard/RisingStarsCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: true,
+});
+
 const BirthdayCard = nextDynamic(() => import('@/components/dashboard/BirthdayCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
@@ -128,9 +133,10 @@ export default function Dashboard() {
 
       {/* Section: Mercado y Jugadores */}
       <Section title="Mercado y Jugadores" delay={300} background="section-raised">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <TopPlayersCard />
           <MarketActivityCard />
+          <RisingStarsCard />
         </div>
       </Section>
 

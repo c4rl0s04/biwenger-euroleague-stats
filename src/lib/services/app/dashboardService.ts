@@ -59,16 +59,6 @@ export async function fetchRisingStars() {
   return await getRisingStars();
 }
 
-export async function fetchStandingsPreview() {
-  const [standings, lastRoundWinner] = await Promise.all([getStandings(), getLastRoundWinner()]);
-
-  return {
-    standings: standings, // Show all users instead of top 5
-    totalUsers: standings?.length || 0,
-    lastRoundWinner,
-  };
-}
-
 export async function fetchLeaderComparison(userId: string | number) {
   return await getLeaderComparison(String(userId));
 }
