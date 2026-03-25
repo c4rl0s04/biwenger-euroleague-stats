@@ -119,44 +119,54 @@ export async function getRoundWinners(limit = 15) {
 }
 
 export async function getLeagueTotals() {
-  const pointsStats = (
-    await db.execute(sql`
+  // Query for general stats filtered by COMPLETED rounds
+  const statistics = await db.execute(sql`
+    WITH CompletedRounds AS (
+      SELECT round_id
+      FROM ${matches}
+      GROUP BY round_id
+      HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
+    )
     SELECT 
       SUM(points)::int as total_points,
-      ROUND(AVG(points), 1)::float as avg_round_points,
       COUNT(DISTINCT round_id)::int as total_rounds,
-      COUNT(DISTINCT user_id)::int as total_users
+      (SELECT COUNT(*) FROM ${users})::int as total_users
     FROM ${userRounds}
     WHERE participated = TRUE
-  `)
-  ).rows[0];
+    AND round_id IN (SELECT round_id FROM CompletedRounds)
+  `);
 
-  const seasonRounds = (
-    await db.execute(sql`
-    SELECT COUNT(DISTINCT 
-      CASE 
-        WHEN round_name LIKE '%(aplazada)%' THEN TRIM(REPLACE(round_name, '(aplazada)', ''))
-        ELSE round_name
-      END
-    )::int as total_season_rounds
-    FROM ${matches}
-  `)
-  ).rows[0];
+  const pointsStats = statistics.rows[0] as {
+    total_points: number;
+    total_rounds: number;
+    total_users: number;
+  };
 
   const valueStats = (
     await db.execute(sql`
     SELECT 
-      SUM(sq.team_value)::bigint as total_league_value,
-      MAX(sq.team_value)::bigint as max_team_value,
-      MIN(sq.team_value)::bigint as min_team_value
+      SUM(team_value)::bigint as total_league_value,
+      MAX(team_value)::bigint as max_team_value,
+      MIN(team_value)::bigint as min_team_value
     FROM (
       SELECT owner_id, SUM(price) as team_value
       FROM ${players}
       WHERE owner_id IS NOT NULL
       GROUP BY owner_id
-    ) sq
+    ) t
   `)
-  ).rows[0];
+  ).rows[0] as {
+    total_league_value: string;
+    max_team_value: string;
+    min_team_value: string;
+  };
+
+  const seasonRounds = (
+    await db.execute(sql`
+    SELECT COUNT(DISTINCT round_id)::int as total_season_rounds
+    FROM ${matches}
+  `)
+  ).rows[0] as { total_season_rounds: number };
 
   const mostValuable = (
     await db.execute(sql`
@@ -165,10 +175,9 @@ export async function getLeagueTotals() {
       u.icon,
       u.color_index,
       SUM(p.price)::bigint as team_value
-    FROM ${players} p
-    JOIN ${users} u ON p.owner_id = u.id
-    WHERE p.owner_id IS NOT NULL
-    GROUP BY p.owner_id, u.name, u.icon, u.color_index
+    FROM ${users} u
+    JOIN ${players} p ON u.id = p.owner_id
+    GROUP BY u.id
     ORDER BY team_value DESC
     LIMIT 1
   `)
@@ -176,6 +185,12 @@ export async function getLeagueTotals() {
 
   const roundRecord = (
     await db.execute(sql`
+    WITH CompletedRounds AS (
+      SELECT round_id
+      FROM ${matches}
+      GROUP BY round_id
+      HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
+    )
     SELECT 
       ur.user_id,
       u.name,
@@ -185,78 +200,94 @@ export async function getLeagueTotals() {
       ur.points
     FROM ${userRounds} ur
     JOIN ${users} u ON ur.user_id = u.id
-    WHERE ur.participated = TRUE
+    WHERE ur.round_id IN (SELECT round_id FROM CompletedRounds)
     ORDER BY ur.points DESC
     LIMIT 1
   `)
   ).rows[0];
 
-  // Leader Streak Logic
   let leaderStreak = { streak: 0 };
   try {
     const res = await db.execute(sql`
-      WITH CurrentLeader AS (
-        SELECT user_id
-        FROM (
-          SELECT user_id, SUM(points) as total
-          FROM ${userRounds}
-          WHERE participated = TRUE
-          GROUP BY user_id
-          ORDER BY total DESC
-          LIMIT 1
-        ) sub
+      WITH CompletedRounds AS (
+        SELECT round_id
+        FROM ${matches}
+        GROUP BY round_id
+        HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
       ),
-      LeagueRounds AS (
-        SELECT DISTINCT round_id 
-        FROM ${userRounds} 
-        WHERE participated = TRUE
-      ),
-      RoundRanks AS (
+      RoundWinners AS (
         SELECT 
           round_id,
           user_id,
-          RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
+          RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as pos
         FROM ${userRounds}
         WHERE participated = TRUE
+        AND round_id IN (SELECT round_id FROM CompletedRounds)
       ),
-      LeaderPerformance AS (
+      LatestCompletedRound AS (
+        SELECT MAX(round_id) as rid FROM CompletedRounds
+      ),
+      TargetUser AS (
+        SELECT ur.user_id, u.name
+        FROM RoundWinners ur
+        JOIN ${users} u ON ur.user_id = u.id
+        WHERE ur.pos = 1 
+        AND ur.round_id = (SELECT rid FROM LatestCompletedRound)
+        LIMIT 1
+      ),
+      WinningRounds AS (
         SELECT 
-          lr.round_id,
+          r.round_id,
           CASE 
             WHEN EXISTS (
-              SELECT 1 FROM RoundRanks rr 
-              WHERE rr.round_id = lr.round_id 
-              AND rr.user_id = (SELECT user_id FROM CurrentLeader)
-              AND rr.position = 1
+              SELECT 1 FROM RoundWinners rw 
+              WHERE rw.round_id = r.round_id 
+              AND rw.user_id = (SELECT user_id FROM TargetUser)
+              AND rw.pos = 1
             ) THEN 1 
             ELSE 0 
           END as is_win
-        FROM LeagueRounds lr
+        FROM CompletedRounds r
       ),
-      CalculatedStreak AS (
+      StreakCalc AS (
         SELECT 
           round_id,
           is_win,
           SUM(CASE WHEN is_win = 0 THEN 1 ELSE 0 END) OVER (ORDER BY round_id DESC) as grp
-        FROM LeaderPerformance
+        FROM WinningRounds
       )
-      SELECT COUNT(*)::int as streak
-      FROM CalculatedStreak
+      SELECT 
+        COUNT(*)::int as streak
+      FROM StreakCalc
       WHERE grp = 0 AND is_win = 1
     `);
-    if (res.rows.length > 0) leaderStreak = res.rows[0] as { streak: number };
+    if (res.rows.length > 0) {
+      leaderStreak = res.rows[0] as { streak: number };
+    }
   } catch (e) {
-    console.error('Leader Streak Query Error', e);
+    console.error('Winner Streak Query Error', e);
   }
 
-  return {
+  const result = {
     ...pointsStats,
     ...valueStats,
+    avg_round_points:
+      pointsStats.total_rounds > 0
+        ? Number(
+            (
+              pointsStats.total_points /
+              pointsStats.total_rounds /
+              (pointsStats.total_users || 1)
+            ).toFixed(1)
+          )
+        : 0,
     total_season_rounds: seasonRounds?.total_season_rounds || 34,
     most_valuable_user: mostValuable,
     round_record: roundRecord,
-    leader_streak: leaderStreak.streak || 0,
+    winner_streak: Number(leaderStreak.streak) || 0,
   };
+
+  return result;
 }
 
 export async function getPointsProgression(limit = 10) {

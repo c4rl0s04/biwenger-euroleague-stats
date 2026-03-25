@@ -110,10 +110,12 @@ export default function LeagueStatsCard() {
             <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl p-4 border border-orange-500/20">
               <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-5 h-5 text-orange-400" />
-                <span className="text-slate-400 text-xs uppercase tracking-wider">Racha Líder</span>
+                <span className="text-slate-400 text-xs uppercase tracking-wider">
+                  Racha Ganador
+                </span>
               </div>
               <div className="text-2xl font-bold text-orange-400">
-                <AnimatedNumber value={stats.leader_streak || 0} duration={1} />
+                <AnimatedNumber value={stats.winner_streak || 0} duration={1} />
               </div>
               <div className="text-xs text-slate-400">Consecutivas</div>
             </div>
