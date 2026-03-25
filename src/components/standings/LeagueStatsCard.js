@@ -127,7 +127,7 @@ export default function LeagueStatsCard() {
             const progressPct = Math.min(100, Math.max(0, (playedRounds / TOTAL_ROUNDS) * 100));
 
             return (
-              <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-sm rounded-xl p-4 border border-emerald-500/20 transition-all">
+              <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 backdrop-blur-sm rounded-xl p-4 border border-orange-500/20 transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-slate-400 text-xs uppercase tracking-wider">
                     Progreso Temporada
