@@ -1,7 +1,4 @@
 'use client';
-
-'use client';
-
 import PropTypes from 'prop-types';
 import { Flame, Snowflake, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, AnimatedNumber, StatsList } from '@/components/ui';
@@ -40,10 +37,13 @@ export default function StreakCard({ type = 'hot' }) {
     dependencies: [cfg.dataKey],
   });
 
-  const infoTooltip = (
-    <InfoTooltip
-      iconSize={16}
-      content={
+  return (
+    <Card
+      title={cfg.title}
+      icon={cfg.icon}
+      color={cfg.color}
+      loading={loading}
+      info={
         <div className="text-left">
           <TooltipHeader className={`!text-${cfg.color}-400`}>{cfg.tooltipTitle}</TooltipHeader>
           <div className="text-slate-300">
@@ -51,16 +51,6 @@ export default function StreakCard({ type = 'hot' }) {
           </div>
         </div>
       }
-    />
-  );
-
-  return (
-    <Card
-      title={cfg.title}
-      icon={cfg.icon}
-      color={cfg.color}
-      loading={loading}
-      actionRight={infoTooltip}
       className="card-glow"
     >
       <div className="flex flex-col flex-1 pb-1">
