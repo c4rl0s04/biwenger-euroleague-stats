@@ -106,7 +106,7 @@ export async function getNextRoundData(userId: string | number | null = null) {
   const [roundState, topPlayersForm, captainRecommendations, marketOpportunities, nextRound] =
     await Promise.all([
       getCurrentRoundState(),
-      getTopPlayersByForm(5, 3),
+      getTopPlayersByForm(6, 3),
       userId ? getCaptainRecommendations(userId, 6) : [],
       getMarketOpportunities(6),
       targetId ? getRoundDetails(targetId) : null,

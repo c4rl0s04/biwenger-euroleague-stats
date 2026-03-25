@@ -12,7 +12,7 @@ export default function RisingStarsCard() {
   return (
     <Card title="Estrellas Emergentes" icon={Sparkles} color="emerald" loading={loading}>
       <StatsList
-        items={!loading && stars && stars.length > 0 ? stars.slice(0, 5) : []}
+        items={!loading && stars && stars.length > 0 ? stars.slice(0, 6) : []}
         emptyMessage="No hay datos suficientes"
         renderLeft={(player) => (
           <div className="flex items-center gap-3 flex-1 min-w-0">

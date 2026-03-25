@@ -176,7 +176,7 @@ export async function getTopPlayersByForm(
       LEFT JOIN teams t ON p.team_id = t.id
       LEFT JOIN users u ON p.owner_id = u.id
       GROUP BY os.player_id, p.name, p.position, t.id, t.name, p.owner_id, u.name, u.color_index
-      HAVING COUNT(*) >= 2
+      HAVING COUNT(*) >= 1
     )
     SELECT 
       player_id as id,

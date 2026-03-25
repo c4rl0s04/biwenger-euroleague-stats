@@ -590,7 +590,7 @@ export async function getMarketOpportunities(limit = 3): Promise<MarketOpportuni
         ORDER BY round_id DESC
       ) sub
       GROUP BY player_id
-      HAVING COUNT(*) >= 2
+      HAVING COUNT(*) >= 1
     )
     SELECT 
       p.id as player_id,
@@ -608,7 +608,6 @@ export async function getMarketOpportunities(limit = 3): Promise<MarketOpportuni
     LEFT JOIN PlayerForm pf ON p.id = pf.player_id
     WHERE p.owner_id IS NULL
       AND p.price > 0
-      AND pf.avg_recent_points >= 12
     ORDER BY value_score DESC, price_trend DESC
     LIMIT $1
   `;

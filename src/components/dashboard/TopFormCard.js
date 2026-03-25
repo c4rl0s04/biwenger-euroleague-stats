@@ -19,7 +19,7 @@ export default function TopFormCard() {
       className="card-glow"
     >
       <StatsList
-        items={!loading && players && players.length > 0 ? players.slice(0, 5) : []}
+        items={!loading && players && players.length > 0 ? players.slice(0, 6) : []}
         emptyMessage="No hay datos disponibles"
         renderLeft={(player, idx) => {
           const ownerColor = player.owner_id

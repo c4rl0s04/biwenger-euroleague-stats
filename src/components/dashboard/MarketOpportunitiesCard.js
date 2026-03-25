@@ -18,7 +18,7 @@ export default function MarketOpportunitiesCard() {
       className="card-glow"
     >
       <StatsList
-        items={!loading && players && players.length > 0 ? players.slice(0, 5) : []}
+        items={!loading && players && players.length > 0 ? players.slice(0, 6) : []}
         emptyMessage="No hay chollos ahora"
         renderLeft={(player, idx) => (
           <div className="flex items-center gap-3 flex-1 min-w-0">
