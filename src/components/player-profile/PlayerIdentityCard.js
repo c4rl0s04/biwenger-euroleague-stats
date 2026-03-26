@@ -49,13 +49,14 @@ export default function PlayerIdentityCard({ player }) {
           <div
             className={`absolute top-3 right-3 z-30 flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border shadow-sm backdrop-blur-md transition-transform hover:scale-105 ${ownerColors.bg.replace('/10', '/80')} ${ownerColors.border} ${ownerColors.text}`}
           >
-            {player.owner_icon ? (
+            {player.owner_icon && player.owner_icon !== '' ? (
               <div className="relative w-5 h-5 rounded-full overflow-hidden border border-white/30">
                 <Image
                   src={player.owner_icon}
                   alt={player.owner_name}
                   fill
                   className="object-cover"
+                  unoptimized
                 />
               </div>
             ) : (
@@ -97,7 +98,7 @@ export default function PlayerIdentityCard({ player }) {
           {/* Header Section: Team & Name */}
           <div className="space-y-1 mb-6">
             <div className="flex items-center gap-2 text-muted-foreground">
-              {player.team_img && (
+              {player.team_img && player.team_img !== '' && (
                 <div className="relative w-5 h-5 opacity-90 grayscale group-hover:grayscale-0 transition-all">
                   <Image
                     src={player.team_img}

@@ -103,15 +103,19 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 </td>
                 <td className="px-4 py-3">
                   <Link href={`/player/${player.id}`} className="flex items-center gap-3">
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary border border-border">
-                      <Image
-                        src={player.img}
-                        alt={player.name}
-                        fill
-                        className="object-cover object-top"
-                        unoptimized
-                        sizes="32px"
-                      />
+                    <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary border border-border flex items-center justify-center">
+                      {player.img && player.img !== '' ? (
+                        <Image
+                          src={player.img}
+                          alt={player.name}
+                          fill
+                          className="object-cover object-top"
+                          unoptimized
+                          sizes="32px"
+                        />
+                      ) : (
+                        <User size={16} className="text-slate-500 opacity-50" />
+                      )}
                     </div>
                     <span
                       className={`font-medium group-hover:text-primary transition-colors ${
@@ -130,7 +134,7 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    {player.team_img && (
+                    {player.team_img && player.team_img !== '' && (
                       <div className="relative w-5 h-5 opacity-80">
                         <Image
                           src={player.team_img}
@@ -215,13 +219,14 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 <td className="px-4 py-3">
                   {player.owner_id ? (
                     <div className="flex items-center gap-2">
-                      {player.owner_icon ? (
+                      {player.owner_icon && player.owner_icon !== '' ? (
                         <div className="relative w-5 h-5 rounded-full overflow-hidden border border-border/50">
                           <Image
                             src={player.owner_icon}
                             alt={player.owner_name}
                             fill
                             className="object-cover"
+                            unoptimized
                           />
                         </div>
                       ) : (

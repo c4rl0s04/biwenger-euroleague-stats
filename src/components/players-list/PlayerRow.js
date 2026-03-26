@@ -28,14 +28,18 @@ export default function PlayerRow({ player }) {
     <tr className="group hover:bg-white/5 transition-all duration-300 border-b border-white/5 last:border-0 grow">
       <td className="px-6 py-3.5">
         <Link href={`/player/${player.id}`} className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-900/50 border border-white/10 shrink-0">
-            <Image
-              src={player.img}
-              alt={player.name}
-              fill
-              className="object-cover object-top"
-              unoptimized
-            />
+          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-900/50 border border-white/10 shrink-0 flex items-center justify-center">
+            {player.img && player.img !== '' ? (
+              <Image
+                src={player.img}
+                alt={player.name}
+                fill
+                className="object-cover object-top"
+                unoptimized
+              />
+            ) : (
+              <User size={20} className="text-slate-500 opacity-50" />
+            )}
           </div>
           <div className="flex flex-col">
             <span
@@ -59,7 +63,7 @@ export default function PlayerRow({ player }) {
 
       <td className="px-6 py-3.5">
         <div className="flex items-center gap-2">
-          {player.team_img && (
+          {player.team_img && player.team_img !== '' && (
             <div className="relative w-4 h-4 opacity-80 shrink-0">
               <Image src={player.team_img} alt="team" fill className="object-contain" unoptimized />
             </div>

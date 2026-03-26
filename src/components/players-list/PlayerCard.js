@@ -45,7 +45,7 @@ export default function PlayerCard({ player, sortConfig }) {
       />
 
       {/* Team Logo Watermark (Top Right) */}
-      {player.team_img && (
+      {player.team_img && player.team_img !== '' && (
         <div className="absolute -right-8 -top-8 w-40 h-40 opacity-5 group-hover:opacity-10 transition-opacity rotate-12 pointer-events-none">
           <Image
             src={player.team_img}
@@ -59,18 +59,22 @@ export default function PlayerCard({ player, sortConfig }) {
 
       <div className="flex h-full relative z-10">
         {/* Player Image (Left Side - 50%) */}
-        <div className="w-1/2 relative h-full self-end">
-          <Image
-            src={player.img}
-            alt={player.name}
-            fill
-            unoptimized={true}
-            className="object-contain object-bottom drop-shadow-xl"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+        <div className="w-1/2 relative h-full self-end flex items-center justify-center">
+          {player.img && player.img !== '' ? (
+            <Image
+              src={player.img}
+              alt={player.name}
+              fill
+              unoptimized={true}
+              className="object-contain object-bottom drop-shadow-xl"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : (
+            <User size={80} className="text-slate-500 opacity-20" />
+          )}
         </div>
 
         {/* Info Column (Right Side - 50%) */}
@@ -97,7 +101,7 @@ export default function PlayerCard({ player, sortConfig }) {
                 {player.name}
               </h3>
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1">
-                {player.team_img && (
+                {player.team_img && player.team_img !== '' && (
                   <div className="relative w-3.5 h-3.5 shrink-0">
                     <Image
                       src={player.team_img}
@@ -121,7 +125,7 @@ export default function PlayerCard({ player, sortConfig }) {
             <div className="flex items-center gap-2 border-b border-border/50 pb-1 mb-1">
               {player.owner_id ? (
                 <>
-                  {player.owner_icon ? (
+                  {player.owner_icon && player.owner_icon !== '' ? (
                     <div className="relative w-3.5 h-3.5 rounded-full border border-background overflow-hidden shrink-0">
                       <Image
                         src={player.owner_icon}
