@@ -22,7 +22,7 @@ export default function PlayerList({
   return (
     <div className="space-y-6">
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
           {players.map((player) => (
             <PlayerGridItem key={player.id} player={player} />
           ))}
@@ -75,14 +75,14 @@ export default function PlayerList({
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-border/50 hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              className="p-2 rounded-lg border border-border/50 hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer disabled:cursor-not-allowed"
             >
               <ChevronLeft size={20} />
             </button>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-border/50 hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              className="p-2 rounded-lg border border-border/50 hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer disabled:cursor-not-allowed"
             >
               <ChevronRight size={20} />
             </button>

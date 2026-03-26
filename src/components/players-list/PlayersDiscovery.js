@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Section from '@/components/layout/Section';
 import PlayerStatsSection from './PlayerStatsSection';
 import PlayerFilters from './PlayerFilters';
@@ -116,6 +116,16 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const playersSectionRef = useRef(null);
+
+  // Auto-scroll when page changes
+  useEffect(() => {
+    // Only scroll if we are not at the top (to avoid scrolling on first render if unnecessary)
+    if (playersSectionRef.current) {
+      playersSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [currentPage]);
+
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
@@ -132,38 +142,40 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
       </Section>
 
       {/* SECTION 2: PLAYERS */}
-      <Section title="Players" background="section-raised" delay={100}>
-        <PlayerFilters
-          search={search}
-          setSearch={setSearch}
-          teamFilter={teamFilter}
-          setTeamFilter={setTeamFilter}
-          ownerFilter={ownerFilter}
-          setOwnerFilter={setOwnerFilter}
-          positionFilter={positionFilter}
-          setPositionFilter={setPositionFilter}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          sortConfig={sortConfig}
-          setSortConfig={setSortConfig}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
-          teams={teams}
-          owners={owners}
-          handleSort={handleSort}
-          setCurrentPage={setCurrentPage}
-        />
+      <div ref={playersSectionRef} className="scroll-mt-6">
+        <Section title="Players" background="section-raised" delay={100}>
+          <PlayerFilters
+            search={search}
+            setSearch={setSearch}
+            teamFilter={teamFilter}
+            setTeamFilter={setTeamFilter}
+            ownerFilter={ownerFilter}
+            setOwnerFilter={setOwnerFilter}
+            positionFilter={positionFilter}
+            setPositionFilter={setPositionFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            sortConfig={sortConfig}
+            setSortConfig={setSortConfig}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            teams={teams}
+            owners={owners}
+            handleSort={handleSort}
+            setCurrentPage={setCurrentPage}
+          />
 
-        <PlayerList
-          players={displayPlayers}
-          viewMode={viewMode}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          setCurrentPage={setCurrentPage}
-        />
-      </Section>
+          <PlayerList
+            players={displayPlayers}
+            viewMode={viewMode}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
+        </Section>
+      </div>
     </div>
   );
 }
