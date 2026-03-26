@@ -201,7 +201,7 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
             <TeamDistributionTable initialPlayers={initialPlayers} owners={owners} />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <SquadDistributionPieCard
               initialPlayers={initialPlayers}
               owners={owners}
@@ -211,7 +211,7 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
             />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <SquadDistributionPieCard
               initialPlayers={initialPlayers}
               owners={owners}

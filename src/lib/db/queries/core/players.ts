@@ -14,6 +14,7 @@ export interface CorePlayer {
   team_id: number;
   team_name: string;
   team_short_name?: string;
+  team_code?: string;
   team_img?: string;
   owner_id: number;
   owner_name: string;
@@ -114,7 +115,8 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
       GROUP BY player_id
     )
     SELECT 
-      p.id, p.name, p.img, t.id as team_id, t.name as team_name, p.position, p.price,
+      p.id, p.name, p.img, t.id as team_id, t.name as team_name,
+        t.code as team_code, p.position, p.price,
       p.puntos as points, 
       ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
       p.owner_id,
@@ -165,6 +167,7 @@ export async function getTopPlayersByForm(
         p.position,
         t.id as team_id,
         t.name as team_name,
+        t.code as team_code,
         p.owner_id,
         u.name as owner_name, u.color_index as owner_color_index,
         SUM(os.fantasy_points) as total_points,
@@ -340,6 +343,7 @@ export async function getPlayersBirthday(): Promise<CorePlayer[]> {
       p.name,
       t.id as team_id,
       t.name as team_name,
+        t.code as team_code,
       p.position,
       p.birth_date,
       u.name as owner_name, u.color_index as owner_color_index
@@ -373,6 +377,7 @@ export async function getPlayerStreaks(
         p.name,
         t.id as team_id,
         t.name as team_name,
+        t.code as team_code,
         p.position,
         COUNT(*) as games,
         AVG(prs.fantasy_points) as recent_avg,
@@ -468,6 +473,7 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
       p.name,
       t.id as team_id,
       t.name as team_name,
+        t.code as team_code,
       p.position,
       rp.recent_avg,
       COALESCE(ep.earlier_avg, 0) as earlier_avg,
@@ -549,6 +555,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
        p.price_increment,
        p.team_id,
        t.name as team_name,
+        t.code as team_code,
        t.short_name as team_short_name,
        t.img as team_img,
 
@@ -604,6 +611,7 @@ export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
       p.name,
       t.id as team_id,
       t.name as team_name,
+        t.code as team_code,
       p.owner_id,
       u.name as owner_name,
       u.color_index as owner_color_index,
