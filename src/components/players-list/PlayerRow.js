@@ -77,9 +77,21 @@ export default function PlayerRow({ player }) {
       <td className="px-6 py-3.5">
         {player.owner_id ? (
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-              <User size={10} className="text-primary" />
-            </div>
+            {player.owner_icon && player.owner_icon !== '' ? (
+              <div className="relative w-4 h-4 rounded-full border border-white/20 overflow-hidden shrink-0">
+                <Image
+                  src={player.owner_icon}
+                  alt={player.owner_name}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                <User size={10} className="text-primary" />
+              </div>
+            )}
             <span className="text-xs font-bold text-slate-300">{player.owner_name}</span>
           </div>
         ) : (

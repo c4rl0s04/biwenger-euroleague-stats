@@ -116,9 +116,21 @@ export default function PlayerGridItem({ player, sortConfig }) {
             <div className="flex items-center gap-2 border-b border-white/5 pb-1 mb-1">
               {player.owner_id ? (
                 <>
-                  <div className="w-3.5 h-3.5 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <User size={10} className="text-primary" />
-                  </div>
+                  {player.owner_icon && player.owner_icon !== '' ? (
+                    <div className="relative w-4 h-4 rounded-full border border-background overflow-hidden shrink-0">
+                      <Image
+                        src={player.owner_icon}
+                        alt={player.owner_name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center border border-background shrink-0">
+                      <User size={10} className="text-primary" />
+                    </div>
+                  )}
                   <span className="text-xs font-bold text-foreground/90 truncate">
                     {player.owner_name}
                   </span>
