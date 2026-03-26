@@ -23,8 +23,12 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
   const teams = useMemo(() => {
     const uniqueTeams = {};
     initialPlayers.forEach((p) => {
-      if (p.team && !uniqueTeams[p.team.id]) {
-        uniqueTeams[p.team.id] = p.team;
+      if (p.team_id && !uniqueTeams[p.team_id]) {
+        uniqueTeams[p.team_id] = {
+          id: p.team_id,
+          name: p.team_name,
+          img: p.team_img,
+        };
       }
     });
     return Object.values(uniqueTeams).sort((a, b) => a.name.localeCompare(b.name));
@@ -33,8 +37,11 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
   const owners = useMemo(() => {
     const uniqueOwners = {};
     initialPlayers.forEach((p) => {
-      if (p.owner && !uniqueOwners[p.owner.id]) {
-        uniqueOwners[p.owner.id] = p.owner;
+      if (p.owner_id && !uniqueOwners[p.owner_id]) {
+        uniqueOwners[p.owner_id] = {
+          id: p.owner_id,
+          name: p.owner_name,
+        };
       }
     });
     return Object.values(uniqueOwners).sort((a, b) => a.name.localeCompare(b.name));
