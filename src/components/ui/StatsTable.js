@@ -150,9 +150,7 @@ export function TableIdentity({ name, image, subtitle, link, color, size = 'md',
           {name}
         </span>
         {subtitle && (
-          <span className={cn('text-slate-400 truncate', isSm ? 'text-[10px]' : 'text-xs')}>
-            {subtitle}
-          </span>
+          <span className="text-slate-400 truncate text-sm font-medium">{subtitle}</span>
         )}
       </div>
     </div>

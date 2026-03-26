@@ -43,15 +43,19 @@ export default function FullStandingsCard() {
     {
       key: 'total_points',
       label: 'Puntos',
-      align: 'right',
+      align: 'center',
       color: 'orange',
       variant: 'numeric',
       render: (val, row) => {
         const gapToLeader = leader ? leader.total_points - val : 0;
         return (
-          <div className="flex flex-col items-end">
-            <span className="font-bold text-orange-500">{val}</span>
-            {gapToLeader > 0 && <span className="text-[10px] text-red-400">-{gapToLeader}</span>}
+          <div className="flex flex-col items-center">
+            <span className="font-bold text-orange-500 text-lg md:text-xl leading-tight">
+              {val}
+            </span>
+            {gapToLeader > 0 && (
+              <span className="text-sm text-red-400 font-semibold">-{gapToLeader}</span>
+            )}
           </div>
         );
       },
@@ -59,13 +63,13 @@ export default function FullStandingsCard() {
     {
       key: 'avg_points',
       label: 'Media',
-      align: 'right',
+      align: 'center',
       variant: 'numeric',
       className: 'hidden md:table-cell',
       render: (val, row) => (
-        <div className="flex flex-col items-end">
-          <span className="text-slate-200">{val}</span>
-          <span className="text-[10px] text-slate-500 tabular-nums">
+        <div className="flex flex-col items-center">
+          <span className="text-slate-200 text-base md:text-lg font-bold leading-tight">{val}</span>
+          <span className="text-sm text-slate-500 tabular-nums font-medium">
             {row.best_round} / {row.worst_round}
           </span>
         </div>
@@ -74,14 +78,20 @@ export default function FullStandingsCard() {
     {
       key: 'round_wins',
       label: 'Victorias',
-      align: 'right',
+      align: 'center',
       variant: 'numeric',
       color: 'yellow',
       className: 'hidden lg:table-cell',
       render: (val) => (
-        <div className="flex items-center justify-end gap-1">
-          {val > 0 && <Medal className="w-3.5 h-3.5 text-yellow-500" />}
-          <span className={val > 0 ? 'text-yellow-400 font-bold' : 'text-slate-500 opacity-50'}>
+        <div className="flex items-center justify-center gap-1.5">
+          {val > 0 && <Medal className="w-4 h-4 text-yellow-500" />}
+          <span
+            className={
+              val > 0
+                ? 'text-yellow-400 font-bold text-base md:text-lg'
+                : 'text-slate-500 opacity-50'
+            }
+          >
             {val}
           </span>
         </div>
@@ -90,17 +100,17 @@ export default function FullStandingsCard() {
     {
       key: 'team_value',
       label: 'Valor',
-      align: 'right',
+      align: 'center',
       variant: 'numeric',
       render: (val, row) => (
-        <div className="flex flex-col items-end">
-          <div className="flex items-center gap-1">
-            <span className="text-slate-300 text-xs">{formatPrice(val)}€</span>
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-300 text-sm font-bold">{formatPrice(val)}€</span>
             {getPriceTrendIcon(row.price_trend)}
           </div>
           {row.price_trend !== 0 && (
             <div
-              className={`text-[9px] ${row.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}
+              className={`text-sm font-medium ${row.price_trend > 0 ? 'text-green-400' : 'text-red-400'}`}
             >
               {row.price_trend > 0 ? '+' : ''}
               {formatPrice(row.price_trend)}€
