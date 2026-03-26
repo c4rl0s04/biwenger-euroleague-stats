@@ -4,6 +4,8 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import Section from '@/components/layout/Section';
 import PlayerStatsSection from './PlayerStatsSection';
 import TeamDistributionTable from './TeamDistributionTable';
+import SquadDistributionPieCard from './SquadDistributionPieCard';
+import { PieChart as PieIcon, Briefcase } from 'lucide-react';
 import PlayerFilters from './PlayerFilters';
 import PlayerList from './PlayerList';
 
@@ -194,8 +196,30 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
 
       {/* SECTION 3: RESUMEN DE PLANTILLAS */}
       <Section title="Resumen de Plantillas" background="section-base" delay={200}>
-        <div className="grid grid-cols-1 gap-6">
-          <TeamDistributionTable initialPlayers={initialPlayers} owners={owners} />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-4">
+            <TeamDistributionTable initialPlayers={initialPlayers} owners={owners} />
+          </div>
+
+          <div className="lg:col-span-2">
+            <SquadDistributionPieCard
+              initialPlayers={initialPlayers}
+              owners={owners}
+              type="position"
+              title="ADN por Posiciones"
+              icon={PieIcon}
+            />
+          </div>
+
+          <div className="lg:col-span-2">
+            <SquadDistributionPieCard
+              initialPlayers={initialPlayers}
+              owners={owners}
+              type="team"
+              title="Influencia Euroleague"
+              icon={Briefcase}
+            />
+          </div>
         </div>
       </Section>
     </div>
