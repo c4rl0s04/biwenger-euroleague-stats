@@ -41,7 +41,9 @@ export function Table({ children, className }) {
 }
 
 export function TableHeader({ children, className }) {
-  return <thead className={cn('bg-white/5 border-y border-white/5', className)}>{children}</thead>;
+  return (
+    <thead className={cn('bg-secondary/10 border-y border-border/20', className)}>{children}</thead>
+  );
 }
 
 export function TableHeaderCell({
@@ -59,7 +61,7 @@ export function TableHeaderCell({
       colSpan={colSpan}
       onClick={onClick}
       className={cn(
-        'px-4 py-3 bg-white/[0.02] transition-colors text-slate-200 font-bold text-xs md:text-sm uppercase tracking-widest font-sans border-b border-white/5',
+        'px-4 py-3 bg-white/[0.01] transition-colors text-foreground/80 font-bold text-[10px] md:text-sm uppercase tracking-widest font-sans border-b border-border/20',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
         colorClass,
         className
@@ -73,7 +75,7 @@ export function TableHeaderCell({
 export function TableRow({ children, className, hovering = true }) {
   return (
     <tr
-      className={cn('transition-colors group', hovering ? 'hover:bg-white/[0.03]' : '', className)}
+      className={cn('transition-colors group', hovering ? 'hover:bg-secondary/20' : '', className)}
     >
       {children}
     </tr>
@@ -87,7 +89,7 @@ export function TableCell({ children, className, align = 'center', color, colSpa
     <td
       colSpan={colSpan}
       className={cn(
-        'px-4 py-2 border-b border-white/5 text-sm md:text-base font-medium',
+        'px-4 py-2 border-b border-border/20 text-sm md:text-base font-medium',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
         colorClass,
         className
@@ -150,7 +152,7 @@ export function TableIdentity({ name, image, subtitle, link, color, size = 'md',
           {name}
         </span>
         {subtitle && (
-          <span className="text-slate-400 truncate text-sm font-medium">{subtitle}</span>
+          <span className="text-muted-foreground truncate text-sm font-medium">{subtitle}</span>
         )}
       </div>
     </div>
@@ -188,7 +190,7 @@ function SortableHeader({
     <TableHeaderCell
       align={align}
       color={color}
-      className={cn(sortable ? 'cursor-pointer select-none hover:bg-white/5' : '', className)}
+      className={cn(sortable ? 'cursor-pointer select-none hover:bg-secondary/40' : '', className)}
       onClick={() => sortable && onSort(sortKey)}
     >
       <div
@@ -206,7 +208,7 @@ function SortableHeader({
               <ArrowDown className="w-3 h-3 text-primary" />
             )
           ) : (
-            <ArrowUpDown className="w-3 h-3 text-slate-400/30" />
+            <ArrowUpDown className="w-3 h-3 text-muted-foreground/30" />
           ))}
       </div>
     </TableHeaderCell>

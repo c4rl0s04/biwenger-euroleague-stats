@@ -31,26 +31,26 @@ export default function PlayerList({
         <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl overflow-hidden shadow-xl">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-900/40 border-b border-border/50">
-                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">
+              <tr className="bg-secondary/20 border-b border-border/20">
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                   Jugador
                 </th>
-                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                   Equipo
                 </th>
-                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                   Manager
                 </th>
-                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                   Valor
                 </th>
-                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
                   Puntos
                 </th>
-                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
                   Media
                 </th>
-                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
                   Mejor
                 </th>
               </tr>
@@ -67,7 +67,7 @@ export default function PlayerList({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between bg-card/30 backdrop-blur-sm p-4 rounded-xl border border-border/50">
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-muted-foreground">
             Página <span className="text-white font-bold">{currentPage}</span> de{' '}
             <span className="text-white font-bold">{totalPages}</span>
           </div>
@@ -75,14 +75,14 @@ export default function PlayerList({
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-border/50 hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer disabled:cursor-not-allowed"
+              className="p-2 rounded-lg border border-border/50 hover:bg-secondary/50 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer disabled:cursor-not-allowed"
             >
               <ChevronLeft size={20} />
             </button>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-border/50 hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer disabled:cursor-not-allowed"
+              className="p-2 rounded-lg border border-border/50 hover:bg-secondary/50 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer disabled:cursor-not-allowed"
             >
               <ChevronRight size={20} />
             </button>

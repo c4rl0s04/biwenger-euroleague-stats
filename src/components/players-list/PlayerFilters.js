@@ -32,7 +32,7 @@ export default function PlayerFilters({
         {/* Search */}
         <div className="w-full xl:w-72 shrink-0 space-y-1.5 flex gap-2 items-end">
           <div className="relative w-full">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 mb-1.5 block">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1.5 block">
               BUSCAR
             </span>
             <div className="relative">
@@ -95,7 +95,7 @@ export default function PlayerFilters({
         <div className="flex flex-row flex-wrap xl:flex-nowrap gap-3 w-full items-end">
           {/* Team */}
           <div className="w-[48%] md:w-auto md:min-w-[130px] shrink-0 space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
               EQUIPO
             </span>
             <CustomSelect
@@ -114,7 +114,7 @@ export default function PlayerFilters({
 
           {/* Owner */}
           <div className="w-[48%] md:w-auto md:min-w-[120px] shrink-0 space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
               MANAGER
             </span>
             <CustomSelect
@@ -133,7 +133,7 @@ export default function PlayerFilters({
 
           {/* Position */}
           <div className="w-[30%] md:w-auto md:min-w-[110px] shrink-0 space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
               POSICIÓN
             </span>
             <CustomSelect
@@ -153,7 +153,7 @@ export default function PlayerFilters({
 
           {/* Status */}
           <div className="w-[30%] md:w-auto md:min-w-[110px] shrink-0 space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
               ESTADO
             </span>
             <CustomSelect

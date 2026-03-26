@@ -26,7 +26,7 @@ export default function PlayerGridItem({ player, sortConfig }) {
       case 'Pivot':
         return 'bg-red-500/25 text-red-500 border-red-500/30';
       default:
-        return 'bg-gray-500/25 text-gray-500 border-gray-500/30';
+        return 'bg-muted/25 text-muted-foreground border-muted/30';
     }
   };
 
@@ -40,7 +40,7 @@ export default function PlayerGridItem({ player, sortConfig }) {
         className={`absolute inset-0 transition-opacity bg-gradient-to-br ${
           player.owner_id
             ? getColorForUser(player.owner_id, player.owner_name, player.owner_color_index).bg
-            : 'from-gray-500/20 to-gray-600/10'
+            : 'from-secondary/30 to-secondary/10'
         }`}
       />
 
@@ -136,14 +136,14 @@ export default function PlayerGridItem({ player, sortConfig }) {
                   </span>
                 </>
               ) : (
-                <span className="text-[10px] font-black uppercase text-slate-500 italic tracking-widest">
+                <span className="text-[10px] font-black uppercase text-muted-foreground italic tracking-widest">
                   LIBRE
                 </span>
               )}
             </div>
 
             <div className="flex justify-between items-end border-b border-white/5 pb-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                 PUNTOS
               </span>
               <span className="font-bold text-base text-primary tabular-nums">
@@ -152,7 +152,7 @@ export default function PlayerGridItem({ player, sortConfig }) {
             </div>
 
             <div className="flex justify-between items-end border-b border-white/5 pb-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                 VALOR
               </span>
               <div className="flex items-center gap-1">
@@ -165,7 +165,7 @@ export default function PlayerGridItem({ player, sortConfig }) {
             </div>
 
             <div className="flex justify-between items-end">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                 MEDIA
               </span>
               <span

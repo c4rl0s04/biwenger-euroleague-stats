@@ -19,7 +19,7 @@ export default function PlayerStatsSection({ filteredPlayers = [] }) {
           <span className="text-3xl font-black text-blue-500 tracking-tight">
             <AnimatedNumber value={totalCount} />
           </span>
-          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">
+          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">
             Encontrados
           </span>
         </div>

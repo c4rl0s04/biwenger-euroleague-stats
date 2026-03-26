@@ -28,7 +28,7 @@ export default function PlayerRow({ player }) {
     <tr className="group hover:bg-white/5 transition-all duration-300 border-b border-white/5 last:border-0 grow">
       <td className="px-6 py-3.5">
         <Link href={`/player/${player.id}`} className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-900/50 border border-white/10 shrink-0 flex items-center justify-center">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary/50 border border-border/50 shrink-0 flex items-center justify-center">
             {player.img && player.img !== '' ? (
               <Image
                 src={player.img}
@@ -38,7 +38,7 @@ export default function PlayerRow({ player }) {
                 unoptimized
               />
             ) : (
-              <User size={20} className="text-slate-500 opacity-50" />
+              <User size={20} className="text-muted-foreground opacity-30" />
             )}
           </div>
           <div className="flex flex-col">
@@ -68,7 +68,7 @@ export default function PlayerRow({ player }) {
               <Image src={player.team_img} alt="team" fill className="object-contain" unoptimized />
             </div>
           )}
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-muted-foreground font-medium">
             {player.team_short_name || player.team_name}
           </span>
         </div>
@@ -92,10 +92,10 @@ export default function PlayerRow({ player }) {
                 <User size={10} className="text-primary" />
               </div>
             )}
-            <span className="text-xs font-bold text-slate-300">{player.owner_name}</span>
+            <span className="text-xs font-bold text-foreground/80">{player.owner_name}</span>
           </div>
         ) : (
-          <span className="text-[10px] font-black uppercase text-slate-500 italic tracking-widest">
+          <span className="text-[10px] font-black uppercase text-muted-foreground italic tracking-widest">
             LIBRE
           </span>
         )}

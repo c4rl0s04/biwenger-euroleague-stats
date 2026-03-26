@@ -44,9 +44,11 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border/50 bg-secondary/30">
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground w-12">#</th>
+              <th className="px-4 py-3 text-left font-black text-muted-foreground text-[10px] uppercase tracking-widest w-12">
+                #
+              </th>
               <th
-                className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                className="px-4 py-3 text-left font-black text-muted-foreground text-[10px] uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => onSort('name')}
               >
                 <div className="flex items-center gap-1">
@@ -54,16 +56,18 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 </div>
               </th>
               <th
-                className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                className="px-4 py-3 text-left font-black text-muted-foreground text-[10px] uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => onSort('team_name')}
               >
                 <div className="flex items-center gap-1">
                   Equipo <SortIcon column="team_name" sortConfig={sortConfig} />
                 </div>
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Pos</th>
+              <th className="px-4 py-3 text-left font-black text-muted-foreground text-[10px] uppercase tracking-widest">
+                Pos
+              </th>
               <th
-                className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                className="px-4 py-3 text-right font-black text-muted-foreground text-[10px] uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => onSort('price')}
               >
                 <div className="flex items-center justify-end gap-1">
@@ -71,7 +75,7 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 </div>
               </th>
               <th
-                className="px-4 py-3 text-center font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                className="px-4 py-3 text-center font-black text-muted-foreground text-[10px] uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => onSort('total_points')}
               >
                 <div className="flex items-center justify-center gap-1">
@@ -91,8 +95,12 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                   <SortIcon column="average" sortConfig={sortConfig} />
                 </div>
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Forma</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Manager</th>
+              <th className="px-4 py-3 text-left font-black text-muted-foreground text-[10px] uppercase tracking-widest">
+                Forma
+              </th>
+              <th className="px-4 py-3 text-left font-black text-muted-foreground text-[10px] uppercase tracking-widest">
+                Manager
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/30">
