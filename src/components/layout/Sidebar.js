@@ -13,9 +13,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
-  TrendingDown,
-  Wallet,
   Home,
   Sparkles,
   Clock,
@@ -23,11 +20,7 @@ import {
   Medal,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useClientUser } from '@/lib/hooks/useClientUser';
-import { useApiData } from '@/lib/hooks/useApiData';
 import { useSections } from './SectionContext';
-
-import { getColorForUser } from '@/lib/constants/colors';
 
 const navItems = [
   { name: 'Inicio', href: '/', icon: Home },
@@ -46,10 +39,10 @@ const navItems = [
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { currentUser, isReady } = useClientUser();
   const { sections } = useSections();
   const [isSectionsVisible, setIsSectionsVisible] = useState(true);
-  const [isMembersVisible, setIsMembersVisible] = useState(false);
+
+  const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
 
   // Reset section visibility on route change
   // Reset section visibility on route change
@@ -58,41 +51,6 @@ export default function Sidebar({ isOpen, onClose }) {
     const t = setTimeout(() => setIsSectionsVisible(true), 0);
     return () => clearTimeout(t);
   }, [pathname]);
-
-  // Fetch squad data for Quick Stats widget
-  const { data: squadData, loading } = useApiData(
-    () => (currentUser ? `/api/player/squad?userId=${currentUser.id}` : null),
-    {
-      dependencies: [currentUser?.id],
-      skip: !currentUser,
-    }
-  );
-
-  // Fetch all users for the members list
-  const { data: users = [] } = useApiData('/api/users');
-
-  const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
-
-  // Format large numbers as compact (e.g., 15.2M)
-  const formatCompact = (value) => {
-    if (!value) return '—';
-    if (value >= 1000000) {
-      return `€${(value / 1000000).toFixed(1)}M`;
-    } else if (value >= 1000) {
-      return `€${(value / 1000).toFixed(0)}K`;
-    }
-    return `€${value}`;
-  };
-
-  // Calculate trend percentage
-  const getTrendPercent = () => {
-    if (!squadData?.total_value || !squadData?.price_trend) return null;
-    const percent = (squadData.price_trend / squadData.total_value) * 100;
-    return percent.toFixed(1);
-  };
-
-  const trendPercent = getTrendPercent();
-  const isPositiveTrend = squadData?.price_trend >= 0;
 
   return (
     <>
@@ -227,127 +185,6 @@ export default function Sidebar({ isOpen, onClose }) {
             })}
           </ul>
         </nav>
-
-        {/* League Members Legend */}
-        <div className="px-4 py-3 border-t border-white/5">
-          {!isCollapsed && (
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-black text-emerald-400 uppercase tracking-widest font-display">
-                Miembros
-              </h3>
-              <button
-                onClick={() => setIsMembersVisible(!isMembersVisible)}
-                className="p-1 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors cursor-pointer"
-              >
-                <ChevronLeft
-                  size={12}
-                  className={`transition-transform duration-300 ${!isMembersVisible ? 'rotate-90' : '-rotate-90'}`}
-                />
-              </button>
-            </div>
-          )}
-
-          <div
-            className={`space-y-1 overflow-hidden transition-all duration-300 ${isMembersVisible && !isCollapsed ? 'max-h-72 opacity-100' : 'max-h-0 opacity-0'}`}
-          >
-            {Array.isArray(users) &&
-              users.map((member) => {
-                const { id, name, color_index } = member;
-                const color = getColorForUser(id, name, color_index);
-
-                return (
-                  <Link
-                    key={id}
-                    href={`/user/${id}`}
-                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-white/5 transition-all group"
-                  >
-                    <div
-                      className={`w-2 h-2 rounded-full ring-4 ring-white/5 ${color.text.replace('text-', 'bg-')}`}
-                      style={{ backgroundColor: color.stroke }}
-                    />
-                    <span
-                      className={`text-xs font-medium transition-colors truncate ${color.text} opacity-80 group-hover:opacity-100`}
-                    >
-                      {name}
-                    </span>
-                  </Link>
-                );
-              })}
-          </div>
-        </div>
-
-        {/* Quick Stats Widget (only when expanded) */}
-        {!isCollapsed && isReady && (
-          <div className="px-3 py-4 border-t border-white/5">
-            <Link href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}>
-              <div className="stat-card backdrop-blur-md bg-white/5 p-4 transition-all duration-500 hover:scale-[1.02] cursor-pointer group">
-                <div className="flex items-center gap-2 text-[16px] font-display text-slate-400 uppercase tracking-widest mb-3">
-                  <Wallet size={12} className="text-primary/70" />
-                  <span>Mi Plantilla</span>
-                </div>
-                {loading ? (
-                  <div className="h-8 w-24 bg-white/5 rounded-lg animate-shimmer" />
-                ) : squadData ? (
-                  <>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl text-white font-display tracking-tight">
-                        {formatCompact(squadData.total_value)}
-                      </span>
-                      {trendPercent && (
-                        <span
-                          className={`flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isPositiveTrend ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}
-                        >
-                          {isPositiveTrend ? (
-                            <TrendingUp size={10} className="mr-1" />
-                          ) : (
-                            <TrendingDown size={10} className="mr-1" />
-                          )}
-                          {isPositiveTrend ? '+' : ''}
-                          {trendPercent}%
-                        </span>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-white/5">
-                      <div>
-                        <div className="text-lg font-display text-white tracking-wider">
-                          {squadData.player_count || 0}
-                        </div>
-                        <div className="text-[9px] uppercase font-black text-slate-500 tracking-tighter">
-                          jugadores
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-display text-primary tracking-wider">
-                          {new Intl.NumberFormat('es-ES').format(squadData.total_points || 0)}
-                        </div>
-                        <div className="text-[9px] uppercase font-black text-slate-500 tracking-tighter">
-                          puntos
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-xs text-slate-500 italic py-2">Selecciona usuario</div>
-                )}
-              </div>
-            </Link>
-          </div>
-        )}
-
-        {/* Collapsed state: just icons for quick stats */}
-        {isCollapsed && (
-          <div className="px-2 py-4 border-t border-white/5 space-y-2">
-            <Link
-              href={currentUser ? `/user/${currentUser.id}` : '/dashboard'}
-              className="w-full p-2.5 rounded-xl hover:bg-white/5 text-muted-foreground hover:text-primary transition-all flex items-center justify-center group"
-              title={
-                squadData ? `Mi Plantilla ${formatCompact(squadData.total_value)}` : 'Mi Plantilla'
-              }
-            >
-              <Wallet size={20} className="group-hover:scale-110 transition-transform" />
-            </Link>
-          </div>
-        )}
       </aside>
     </>
   );

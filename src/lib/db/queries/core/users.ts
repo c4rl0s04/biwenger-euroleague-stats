@@ -296,11 +296,16 @@ export async function getUserSquadDetails(userId: number | string): Promise<User
     0
   );
 
+  // Get standings for position
+  const standings = await getStandings();
+  const userStanding = standings.find((u: any) => String(u.user_id) === String(userId));
+
   return {
     total_value: totalValue,
     price_trend: totalTrend,
     total_points: userPoints?.total_points || 0,
     player_count: squad.length,
+    position: Number((userStanding as any)?.position) || 0,
     top_rising: squad.filter((p: any) => (parseInt(p.price_increment) || 0) > 0).slice(0, 7),
     top_falling: squad
       .filter((p: any) => (parseInt(p.price_increment) || 0) < 0)
