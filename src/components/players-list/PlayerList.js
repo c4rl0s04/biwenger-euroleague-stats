@@ -10,6 +10,7 @@ export default function PlayerList({
   currentPage = 1,
   totalPages = 1,
   setCurrentPage,
+  sortConfig = {},
 }) {
   if (players.length === 0) {
     return (
@@ -24,7 +25,7 @@ export default function PlayerList({
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
           {players.map((player) => (
-            <PlayerGridItem key={player.id} player={player} />
+            <PlayerGridItem key={player.id} player={player} sortConfig={sortConfig} />
           ))}
         </div>
       ) : (
@@ -48,16 +49,20 @@ export default function PlayerList({
                   Puntos
                 </th>
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  Media
+                  {sortConfig?.key === 'best_score'
+                    ? 'Mejor'
+                    : sortConfig?.key === 'worst_score'
+                      ? 'Peor'
+                      : 'Media'}
                 </th>
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  Mejor
+                  {sortConfig?.key === 'best_score' ? 'Media' : 'Mejor'}
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/20">
               {players.map((player) => (
-                <PlayerRow key={player.id} player={player} />
+                <PlayerRow key={player.id} player={player} sortConfig={sortConfig} />
               ))}
             </tbody>
           </table>

@@ -173,6 +173,7 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
             currentPage={currentPage}
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}
+            sortConfig={sortConfig}
           />
         </Section>
       </div>

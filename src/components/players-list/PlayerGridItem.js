@@ -166,12 +166,28 @@ export default function PlayerGridItem({ player, sortConfig }) {
 
             <div className="flex justify-between items-end">
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                MEDIA
+                {sortConfig?.key === 'best_score'
+                  ? 'MEJOR'
+                  : sortConfig?.key === 'worst_score'
+                    ? 'PEOR'
+                    : 'MEDIA'}
               </span>
               <span
-                className={`font-bold text-base tabular-nums ${player.average >= 5 ? 'text-green-400' : 'text-yellow-400'}`}
+                className={`font-bold text-base tabular-nums ${
+                  sortConfig?.key === 'best_score'
+                    ? 'text-emerald-400'
+                    : sortConfig?.key === 'worst_score'
+                      ? 'text-red-400'
+                      : player.average >= 5
+                        ? 'text-green-400'
+                        : 'text-yellow-400'
+                }`}
               >
-                {player.average || '0.0'}
+                {sortConfig?.key === 'best_score'
+                  ? player.best_score
+                  : sortConfig?.key === 'worst_score'
+                    ? player.worst_score
+                    : player.average || '0.0'}
               </span>
             </div>
           </div>

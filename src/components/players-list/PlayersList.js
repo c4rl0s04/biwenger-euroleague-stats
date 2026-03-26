@@ -15,8 +15,8 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { getScoreColor } from '@/lib/utils/format';
 
 const SortIcon = ({ column, sortConfig }) => {
-  if (sortConfig.key !== column) return <ArrowUpDown size={14} className="opacity-30" />;
-  return sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
+  if (sortConfig?.key !== column) return <ArrowUpDown size={14} className="opacity-30" />;
+  return sortConfig?.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
 };
 
 export default function PlayersList({ players, sortConfig, onSort, startIndex = 0 }) {
@@ -83,13 +83,13 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 </div>
               </th>
               <th
-                className="px-4 py-3 text-center font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                className="px-4 py-3 text-center font-black text-muted-foreground text-[10px] uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors"
                 onClick={() => onSort('average')}
               >
                 <div className="flex items-center justify-center gap-1">
-                  {sortConfig.key === 'best_score'
+                  {sortConfig?.key === 'best_score'
                     ? 'Mejor'
-                    : sortConfig.key === 'worst_score'
+                    : sortConfig?.key === 'worst_score'
                       ? 'Peor'
                       : 'Med'}{' '}
                   <SortIcon column="average" sortConfig={sortConfig} />
@@ -191,9 +191,9 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                 <td className="px-4 py-3 text-center font-medium tabular-nums">
                   <span
                     className={
-                      sortConfig.key === 'best_score'
+                      sortConfig?.key === 'best_score'
                         ? 'text-emerald-400 font-bold'
-                        : sortConfig.key === 'worst_score'
+                        : sortConfig?.key === 'worst_score'
                           ? 'text-red-400 font-bold'
                           : player.average >= 5
                             ? 'text-green-400 font-bold'
@@ -202,9 +202,9 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                               : 'text-muted-foreground'
                     }
                   >
-                    {sortConfig.key === 'best_score'
+                    {sortConfig?.key === 'best_score'
                       ? player.best_score
-                      : sortConfig.key === 'worst_score'
+                      : sortConfig?.key === 'worst_score'
                         ? player.worst_score
                         : player.average}
                   </span>
