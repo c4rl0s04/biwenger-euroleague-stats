@@ -121,29 +121,17 @@ export default function PlayerRow({ player, sortConfig }) {
       </td>
 
       <td className="px-6 py-3.5 text-center font-bold tabular-nums">
-        <span
-          className={
-            sortConfig?.key === 'best_score'
-              ? 'text-emerald-400'
-              : sortConfig?.key === 'worst_score'
-                ? 'text-red-400'
-                : player.average >= 5
-                  ? 'text-green-400'
-                  : 'text-yellow-400'
-          }
-        >
-          {sortConfig?.key === 'best_score'
-            ? player.best_score
-            : sortConfig?.key === 'worst_score'
-              ? player.worst_score
-              : player.average || '0.0'}
+        <span className={player.average >= 5 ? 'text-green-400' : 'text-yellow-400'}>
+          {player.average || '0.0'}
         </span>
       </td>
 
-      <td className="px-6 py-3.5 text-center font-bold tabular-nums">
-        <span className={sortConfig?.key === 'best_score' ? 'text-yellow-400' : 'text-emerald-400'}>
-          {sortConfig?.key === 'best_score' ? player.average || '0.0' : player.best_score || 0}
-        </span>
+      <td className="px-6 py-3.5 text-center font-bold text-emerald-400 tabular-nums">
+        {player.best_score || 0}
+      </td>
+
+      <td className="px-6 py-3.5 text-center font-bold text-red-400 tabular-nums">
+        {player.worst_score || 0}
       </td>
     </tr>
   );

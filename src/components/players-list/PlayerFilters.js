@@ -1,6 +1,4 @@
-'use client';
-
-import { Search, X, SortAsc, SortDesc, LayoutGrid, List, Euro } from 'lucide-react';
+import { Search, X, SortAsc, SortDesc, LayoutGrid, List, Euro, RotateCcw } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
@@ -24,6 +22,7 @@ export default function PlayerFilters({
   teams,
   owners,
   handleSort,
+  handleResetFilters,
   setCurrentPage,
 }) {
   return (
@@ -209,7 +208,7 @@ export default function PlayerFilters({
           </div>
 
           {/* Price Filter */}
-          <div className="w-full md:w-auto md:min-w-[100px] shrink-0 space-y-1.5">
+          <div className="w-full md:w-auto md:min-w-[100px] flex-1 min-w-[120px] shrink-0 space-y-1.5">
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
               PRECIO MÁX.
             </span>
@@ -229,6 +228,21 @@ export default function PlayerFilters({
                 className="w-full h-[40px] bg-secondary/50 border border-border/50 rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
+          </div>
+
+          {/* Clear Filters Button */}
+          <div className="shrink-0 space-y-1.5">
+            <span className="text-xs font-medium text-muted-foreground ml-1 opacity-0 select-none">
+              .
+            </span>
+            <button
+              onClick={handleResetFilters}
+              className="h-[40px] px-3 flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg transition-all cursor-pointer font-bold text-xs uppercase tracking-wider"
+              title="Limpiar Filtros"
+            >
+              <RotateCcw size={16} />
+              <span className="hidden xl:inline">Limpiar</span>
+            </button>
           </div>
         </div>
       </div>

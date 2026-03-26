@@ -134,6 +134,17 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
     setCurrentPage(1);
   };
 
+  const handleResetFilters = () => {
+    setSearch('');
+    setTeamFilter('ALL');
+    setOwnerFilter('ALL');
+    setPositionFilter('ALL');
+    setStatusFilter('ALL');
+    setMaxPrice('');
+    setSortConfig({ key: 'total_points', direction: 'desc' });
+    setCurrentPage(1);
+  };
+
   return (
     <div className="w-full">
       {/* SECTION 1: ESTADÍSTICAS */}
@@ -164,6 +175,7 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
             teams={teams}
             owners={owners}
             handleSort={handleSort}
+            handleResetFilters={handleResetFilters}
             setCurrentPage={setCurrentPage}
           />
 

@@ -49,14 +49,13 @@ export default function PlayerList({
                   Puntos
                 </th>
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  {sortConfig?.key === 'best_score'
-                    ? 'Mejor'
-                    : sortConfig?.key === 'worst_score'
-                      ? 'Peor'
-                      : 'Media'}
+                  Media
                 </th>
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  {sortConfig?.key === 'best_score' ? 'Media' : 'Mejor'}
+                  Mejor
+                </th>
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
+                  Peor
                 </th>
               </tr>
             </thead>
