@@ -32,16 +32,17 @@ export default function CustomSelect({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-[38px] appearance-none bg-secondary/50 border border-border/50 rounded-lg px-3 py-2 text-left focus:outline-none focus:ring-1 focus:ring-primary/50 hover:bg-secondary/70 transition-colors flex items-center justify-between whitespace-nowrap cursor-pointer ${buttonClassName}`}
+        className={`w-full h-[38px] appearance-none bg-secondary/50 border border-border/50 rounded-lg px-3 py-2 text-left focus:outline-none focus:ring-1 focus:ring-primary/50 hover:bg-secondary/70 transition-colors flex items-center justify-between cursor-pointer ${buttonClassName}`}
       >
         <span
-          className={`text-inherit ${!selectedOption ? 'text-muted-foreground' : 'text-foreground font-medium'}`}
+          className={`text-inherit truncate min-w-0 flex-1 ${!selectedOption ? 'text-muted-foreground' : 'text-foreground font-medium'}`}
+          title={selectedOption ? selectedOption.label : placeholder}
         >
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown
           size={16}
-          className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-muted-foreground transition-transform duration-200 shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
