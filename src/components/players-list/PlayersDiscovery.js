@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Section from '@/components/layout/Section';
 import PlayerStatsSection from './PlayerStatsSection';
+import TeamDistributionTable from './TeamDistributionTable';
 import PlayerFilters from './PlayerFilters';
 import PlayerList from './PlayerList';
 
@@ -41,6 +42,7 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
         uniqueOwners[p.owner_id] = {
           id: p.owner_id,
           name: p.owner_name,
+          color_index: p.owner_color_index,
         };
       }
     });
@@ -154,7 +156,7 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
 
       {/* SECTION 2: PLAYERS */}
       <div ref={playersSectionRef} className="scroll-mt-6">
-        <Section title="Players" background="section-raised" delay={100}>
+        <Section title="Todos los jugadores" background="section-raised" delay={100}>
           <PlayerFilters
             search={search}
             setSearch={setSearch}
@@ -189,6 +191,13 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
           />
         </Section>
       </div>
+
+      {/* SECTION 3: RESUMEN DE PLANTILLAS */}
+      <Section title="Resumen de Plantillas" background="section-base" delay={200}>
+        <div className="grid grid-cols-1 gap-6">
+          <TeamDistributionTable initialPlayers={initialPlayers} owners={owners} />
+        </div>
+      </Section>
     </div>
   );
 }
