@@ -59,6 +59,15 @@ export default function MarketListingsSection({ listings = [] }) {
     });
   }, [listings, filterOwner, filterPosition, filterTeam, maxPrice, searchQuery]);
 
+  // Reset Filters
+  const handleResetFilters = () => {
+    setFilterOwner('all');
+    setFilterPosition('all');
+    setFilterTeam('all');
+    setMaxPrice('');
+    setSearchQuery('');
+  };
+
   if (!listings || listings.length === 0) {
     return null;
   }
@@ -166,6 +175,35 @@ export default function MarketListingsSection({ listings = [] }) {
                   className="h-10 w-full rounded-lg border border-border/50 bg-secondary/50 py-2 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div className="shrink-0 space-y-1.5 self-end">
+              <button
+                onClick={handleResetFilters}
+                className="h-10 px-2.5 flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg transition-all cursor-pointer font-bold text-[10px] uppercase tracking-wider"
+                title="Limpiar Filtros"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="p-0.5 bg-red-500/20 rounded-md">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                  </span>
+                  <span className="hidden min-[1600px]:inline">Limpiar</span>
+                </div>
+              </button>
             </div>
           </div>
 
