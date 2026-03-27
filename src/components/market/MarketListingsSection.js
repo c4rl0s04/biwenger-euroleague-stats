@@ -79,7 +79,7 @@ export default function MarketListingsSection({ listings = [] }) {
         <div className="flex flex-col xl:flex-row gap-4 xl:items-end justify-between">
           <div className="flex flex-row flex-wrap xl:flex-nowrap gap-3 w-full items-end">
             {/* Text Search */}
-            <div className="flex w-full gap-2 items-end space-y-1.5 shrink-0 md:w-auto md:min-w-50">
+            <div className="flex w-full gap-2 items-end space-y-1.5 shrink-0 md:w-[220px]">
               <div className="relative w-full">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 mb-1.5 block">
                   BUSCAR
@@ -109,7 +109,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Owner Filter */}
-            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-35">
+            <div className="w-[48%] md:w-[135px] shrink-0 space-y-1.5">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
                 PROPIEDAD
               </span>
@@ -126,7 +126,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Position Filter */}
-            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-27.5">
+            <div className="w-[48%] md:w-[105px] shrink-0 space-y-1.5">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
                 POSICIÓN
               </span>
@@ -142,7 +142,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Team Filter */}
-            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-32.5">
+            <div className="w-[48%] md:w-[135px] shrink-0 space-y-1.5">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
                 EQUIPO
               </span>
@@ -158,7 +158,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Price Filter */}
-            <div className="w-[48%] shrink-0 space-y-1.5 md:w-auto md:min-w-30">
+            <div className="w-[48%] md:w-[110px] shrink-0 space-y-1.5">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
                 PRECIO MÁX.
               </span>

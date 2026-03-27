@@ -29,8 +29,8 @@ export default function PlayerFilters({
     <ElegantCard hideHeader padding="p-3" className="mb-6 relative z-30 overflow-visible">
       {/* Unified Filter Row - Full width distribution */}
       <div className="flex flex-row flex-wrap xl:flex-nowrap gap-x-2 gap-y-4 xl:gap-x-0 w-full items-end justify-between">
-        {/* BUSCAR */}
-        <div className="w-full md:w-[200px] shrink-0 space-y-1">
+        {/* Search */}
+        <div className="w-full md:w-[220px] shrink-0 space-y-1">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">
             BUSCAR
           </span>
@@ -88,7 +88,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Team */}
-        <div className="w-[48%] md:w-[125px] shrink-0 space-y-1">
+        <div className="w-[48%] md:w-[135px] shrink-0 space-y-1">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             EQUIPO
           </span>
@@ -107,7 +107,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Owner */}
-        <div className="w-[48%] md:w-[115px] shrink-0 space-y-1">
+        <div className="w-[48%] md:w-[115px] shrink-0 space-y-1 text-ellipsis overflow-hidden">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             MANAGER
           </span>
@@ -126,7 +126,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Position */}
-        <div className="w-[30%] md:w-[95px] shrink-0 space-y-1">
+        <div className="w-[30%] md:w-[105px] shrink-0 space-y-1">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             POSICIÓN
           </span>
@@ -146,7 +146,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Status */}
-        <div className="w-[30%] md:w-[95px] shrink-0 space-y-1">
+        <div className="w-[30%] md:w-[105px] shrink-0 space-y-1">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             ESTADO
           </span>
@@ -165,7 +165,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Sort Key */}
-        <div className="w-[30%] md:w-[115px] shrink-0 space-y-1">
+        <div className="w-[30%] md:w-[120px] shrink-0 space-y-1">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
             ORDENAR
           </span>
