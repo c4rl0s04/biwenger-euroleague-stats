@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { X, Trophy, Target, TrendingUp, Euro } from 'lucide-react';
 import PlayerImage from '@/components/ui/PlayerImage';
 
@@ -116,60 +117,64 @@ export default function SquadSectionDrawer({
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 + idx * 0.05 }}
-                      className="group flex items-center gap-4 p-4 rounded-2xl bg-[hsl(var(--secondary)/0.3)] hover:bg-[hsl(var(--secondary)/0.6)] border border-[hsl(var(--border)/0.5)] hover:border-[hsl(var(--primary)/0.3)] transition-all duration-300 cursor-default"
                     >
-                      {/* Player Image with Background */}
-                      <div className="w-14 h-14 rounded-xl bg-[hsl(var(--background))] border border-[hsl(var(--sidebar-border))] overflow-hidden shrink-0 relative">
-                        <PlayerImage
-                          src={player.img}
-                          name={player.name}
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover object-top transform group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-black italic text-base text-foreground uppercase tracking-tight truncate leading-none group-hover:text-primary transition-colors">
-                            {player.name}
-                          </h4>
-                          <span
-                            className={`text-[9px] font-black px-2 py-0.5 rounded border leading-none uppercase ${getPositionColor(player.position)}`}
-                          >
-                            {player.position}
-                          </span>
+                      <Link
+                        href={`/player/${player.id}`}
+                        className="group flex items-center gap-4 p-4 rounded-2xl bg-[hsl(var(--secondary)/0.3)] hover:bg-[hsl(var(--secondary)/0.6)] border border-[hsl(var(--border)/0.5)] hover:border-[hsl(var(--primary)/0.3)] transition-all duration-300 cursor-pointer"
+                      >
+                        {/* Player Image with Background */}
+                        <div className="w-14 h-14 rounded-xl bg-[hsl(var(--background))] border border-[hsl(var(--sidebar-border))] overflow-hidden shrink-0 relative">
+                          <PlayerImage
+                            src={player.img}
+                            name={player.name}
+                            width={56}
+                            height={56}
+                            className="w-full h-full object-cover object-top transform group-hover:scale-110 transition-transform duration-500"
+                          />
                         </div>
 
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1.5">
-                            <Target size={12} className="text-primary" />
-                            <span className="text-xs font-black tabular-nums text-foreground/80">
-                              {player.average || 0}{' '}
-                              <span className="text-[9px] text-muted-foreground italic ml-0.5">
-                                AVG
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-black italic text-base text-foreground uppercase tracking-tight truncate leading-none group-hover:text-primary transition-colors">
+                              {player.name}
+                            </h4>
+                            <span
+                              className={`text-[9px] font-black px-2 py-0.5 rounded border leading-none uppercase ${getPositionColor(player.position)}`}
+                            >
+                              {player.position}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5">
+                              <Target size={12} className="text-primary" />
+                              <span className="text-xs font-black tabular-nums text-foreground/80">
+                                {player.average || 0}{' '}
+                                <span className="text-[9px] text-muted-foreground italic ml-0.5">
+                                  AVG
+                                </span>
                               </span>
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Euro size={12} className="text-emerald-500" />
-                            <span className="text-xs font-black tabular-nums text-foreground/80">
-                              {new Intl.NumberFormat('es-ES').format(player.price || 0)}
-                            </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Euro size={12} className="text-emerald-500" />
+                              <span className="text-xs font-black tabular-nums text-foreground/80">
+                                {new Intl.NumberFormat('es-ES').format(player.price || 0)}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Team Logo Overlay (Subtle) */}
-                      <div className="w-8 h-8 opacity-30 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0 relative">
-                        <Image
-                          src={player.team_img}
-                          alt=""
-                          fill
-                          className="object-contain"
-                          unoptimized
-                        />
-                      </div>
+                        {/* Team Logo Overlay (Subtle) */}
+                        <div className="w-8 h-8 opacity-30 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0 relative">
+                          <Image
+                            src={player.team_img}
+                            alt=""
+                            fill
+                            className="object-contain"
+                            unoptimized
+                          />
+                        </div>
+                      </Link>
                     </motion.div>
                   ))
                 ) : (
