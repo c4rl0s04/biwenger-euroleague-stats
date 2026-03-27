@@ -21,17 +21,26 @@ export default function SquadSectionDrawer({
   players = [],
   color = '#3b82f6',
 }) {
-  // Prevent body scroll when open
+  // Handle Escape key and body scroll
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = 'auto';
     }
+
     return () => {
       document.body.style.overflow = 'auto';
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   // Helper: Get badge color based on position
   const getPositionColor = (pos) => {
@@ -74,7 +83,7 @@ export default function SquadSectionDrawer({
             <div className="relative p-8 pb-6 border-b border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-background)/0.4)]">
               <button
                 onClick={onClose}
-                className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors text-muted-foreground hover:text-white"
+                className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
               >
                 <X size={20} />
               </button>
