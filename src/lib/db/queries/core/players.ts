@@ -86,33 +86,25 @@ export async function getPlayerMatchesPlayed(playerId: number | string): Promise
  */
 export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
   const query = `
-    WITH FinishedRounds AS (
-      SELECT m.round_id
-      FROM matches m
-      GROUP BY m.round_id
-      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
-      ORDER BY m.round_id DESC
-      LIMIT 5
-    ),
-    PlayerRoundScores AS (
+    RecentMatchInfo AS (
       SELECT 
-        prs.player_id,
-        prs.round_id,
-        SUM(prs.fantasy_points) as round_points
-      FROM player_round_stats prs
-      WHERE prs.round_id IN (SELECT round_id FROM FinishedRounds)
-      GROUP BY prs.player_id, prs.round_id
+        t.id as team_id,
+        m.round_id,
+        m.date as match_date,
+        ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date DESC) as team_rn
+      FROM teams t
+      JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
+      WHERE m.status = 'finished'
     ),
     RecentScores AS (
       SELECT 
-        player_id,
-        STRING_AGG(CAST(round_points AS TEXT), ',' ORDER BY round_id DESC) as recent_scores
-      FROM (
-        SELECT player_id, round_id, round_points
-        FROM PlayerRoundScores
-        ORDER BY round_id DESC
-      ) sub
-      GROUP BY player_id
+        p_sub.id as player_id,
+        STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rmi.match_date DESC) as recent_scores
+      FROM players p_sub
+      JOIN RecentMatchInfo rmi ON p_sub.team_id = rmi.team_id
+      LEFT JOIN player_round_stats prs ON p_sub.id = prs.player_id AND rmi.round_id = prs.round_id
+      WHERE rmi.team_rn <= 5
+      GROUP BY p_sub.id
     )
     SELECT 
       p.id, p.name, p.img, t.id as team_id, t.name as team_name,
@@ -505,14 +497,7 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
  */
 export async function getAllPlayers(): Promise<CorePlayer[]> {
   const query = `
-    WITH PlayerRoundScores AS (
-       SELECT 
-         player_id, 
-         round_id, 
-         fantasy_points
-       FROM player_round_stats
-     ),
-     PlayerAggregates AS (
+     WITH PlayerAggregates AS (
        SELECT 
          player_id,
          COUNT(*) as played_count,
@@ -523,28 +508,25 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
        FROM player_round_stats
        GROUP BY player_id
      ),
-     RoundDates AS (
-       SELECT round_id, MIN(date) as round_date
-       FROM matches
-       WHERE date IS NOT NULL
-       GROUP BY round_id
+     RecentMatchInfo AS (
+       SELECT 
+         t.id as team_id,
+         m.round_id,
+         m.date as match_date,
+         ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date DESC) as team_rn
+       FROM teams t
+       JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
+       WHERE m.status = 'finished'
      ),
      RecentScores AS (
        SELECT 
-         player_id,
-         STRING_AGG(CAST(fantasy_points AS TEXT), ',' ORDER BY round_date DESC) as recent_scores
-       FROM (
-         SELECT 
-           prs.player_id, 
-           prs.fantasy_points,
-           prs.round_id,
-           rd.round_date,
-           ROW_NUMBER() OVER (PARTITION BY prs.player_id ORDER BY rd.round_date DESC, prs.round_id DESC) as rn
-         FROM PlayerRoundScores prs
-         LEFT JOIN RoundDates rd ON prs.round_id = rd.round_id
-       ) sub
-       WHERE rn <= 5
-       GROUP BY player_id
+         p_sub.id as player_id,
+         STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rmi.match_date DESC) as recent_scores
+       FROM players p_sub
+       JOIN RecentMatchInfo rmi ON p_sub.team_id = rmi.team_id
+       LEFT JOIN player_round_stats prs ON p_sub.id = prs.player_id AND rmi.round_id = prs.round_id
+       WHERE rmi.team_rn <= 5
+       GROUP BY p_sub.id
      )
      SELECT 
        p.id,

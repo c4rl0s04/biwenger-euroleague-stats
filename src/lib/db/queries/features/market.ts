@@ -2306,24 +2306,26 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
  */
 export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]> {
   const query = `
-    WITH RecentRounds AS (
-      SELECT DISTINCT round_id
-      FROM player_round_stats
-      ORDER BY round_id DESC
-      LIMIT 5
-    ),
-    RoundCount AS (
-      SELECT COUNT(*) as total_rounds FROM RecentRounds
+    RecentMatchInfo AS (
+      SELECT 
+        t.id as team_id,
+        m.round_id,
+        m.date as match_date,
+        ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date DESC) as team_rn
+      FROM teams t
+      JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
+      WHERE m.status = 'finished'
     ),
     PlayerForm AS (
       SELECT 
-        ml.player_id,
-        SUM(prs.fantasy_points) * 1.0 / NULLIF((SELECT total_rounds FROM RoundCount), 0) as avg_recent_points,
-        STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rr.round_id DESC) as recent_scores
-      FROM (SELECT DISTINCT player_id FROM market_listings WHERE listed_at = (SELECT MAX(listed_at) FROM market_listings)) ml
-      CROSS JOIN RecentRounds rr
-      LEFT JOIN player_round_stats prs ON prs.player_id = ml.player_id AND prs.round_id = rr.round_id
-      GROUP BY ml.player_id
+        p_sub.id as player_id,
+        AVG(prs.fantasy_points) as avg_recent_points,
+        STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rmi.match_date DESC) as recent_scores
+      FROM players p_sub
+      JOIN RecentMatchInfo rmi ON p_sub.team_id = rmi.team_id
+      LEFT JOIN player_round_stats prs ON p_sub.id = prs.player_id AND rmi.round_id = prs.round_id
+      WHERE rmi.team_rn <= 5
+      GROUP BY p_sub.id
     ),
     PlayerTotals AS (
       SELECT 

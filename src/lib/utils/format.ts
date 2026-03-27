@@ -2,13 +2,14 @@
  * Get color class for a score
  */
 export function getScoreColor(score: number | string): string {
+  if (score === 'X') return 'bg-rose-600/40 text-rose-100 border-rose-500/50';
   const s = Number(score);
+  if (s >= 15) return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
   if (s >= 10) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
   if (s >= 5) return 'bg-green-500/20 text-green-300 border-green-500/30';
   if (s > 0) return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
-  if (s == 0) return 'bg-grey-500/20 text-grey-300 border-grey-500/30';
-  if (s >= -10) return 'bg-red-500/20 text-red-300 border-red-500/30';
-  return 'bg-slate-700/50 text-slate-400 border-slate-600/30';
+  if (s == 0) return 'bg-slate-700/40 text-slate-300 border-slate-600/30';
+  return 'bg-red-500/20 text-red-300 border-red-500/30';
 }
 
 const SHORT_TEAM_NAME_MAP: Record<string, string> = {

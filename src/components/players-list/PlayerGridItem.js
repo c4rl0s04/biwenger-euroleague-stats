@@ -200,14 +200,14 @@ export default function PlayerGridItem({ player, sortConfig }) {
               <div className="flex gap-1.5">
                 {player.recent_scores ? (
                   player.recent_scores.split(',').map((score, idx) => {
-                    const numScore = parseFloat(score);
+                    const isDNP = score === 'X';
                     return (
                       <div
                         key={idx}
-                        className={`w-[30px] h-[30px] rounded-lg flex items-center justify-center text-xs font-[1000] shadow-[0_2px_8px_rgba(0,0,0,0.3)] border border-white/5 transition-transform hover:scale-125 cursor-default ${getScoreColor(numScore)}`}
-                        title={`Jornada ${idx + 1}: ${numScore} pts`}
+                        className={`w-[30px] h-[30px] rounded-lg flex items-center justify-center text-xs font-[1000] shadow-[0_2px_8px_rgba(0,0,0,0.3)] border border-white/5 transition-transform hover:scale-125 cursor-default ${getScoreColor(score)}`}
+                        title={`Jornada ${idx + 1}: ${isDNP ? 'No jugó / Lesionado' : `${score} pts`}`}
                       >
-                        {numScore}
+                        {score}
                       </div>
                     );
                   })

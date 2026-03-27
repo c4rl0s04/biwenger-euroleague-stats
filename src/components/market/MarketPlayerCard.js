@@ -83,10 +83,10 @@ const userColors = [
 ];
 
 function ScoreBar({ score }) {
-  if (score === null) {
+  if (score === null || score === 'X') {
     return (
-      <div className="flex-1 h-8 bg-rose-950/50 border border-rose-900/50 rounded flex items-center justify-center">
-        <span className="text-sm text-rose-500 font-bold leading-none pb-0.5">×</span>
+      <div className="flex-1 h-8 bg-rose-600/40 border border-rose-500/50 rounded flex items-center justify-center">
+        <span className="text-xs font-bold text-rose-100">X</span>
       </div>
     );
   }
