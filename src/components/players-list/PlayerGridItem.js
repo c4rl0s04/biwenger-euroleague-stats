@@ -164,7 +164,7 @@ export default function PlayerGridItem({ player, sortConfig }) {
               </div>
             </div>
 
-            <div className="flex justify-between items-end">
+            <div className="flex justify-between items-end border-b border-white/5 pb-1">
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                 {sortConfig?.key === 'best_score'
                   ? 'MEJOR'
@@ -178,7 +178,7 @@ export default function PlayerGridItem({ player, sortConfig }) {
                     ? 'text-emerald-400'
                     : sortConfig?.key === 'worst_score'
                       ? 'text-red-400'
-                      : player.average >= 5
+                      : (player.average || 0) >= 5
                         ? 'text-green-400'
                         : 'text-yellow-400'
                 }`}
@@ -189,6 +189,32 @@ export default function PlayerGridItem({ player, sortConfig }) {
                     ? player.worst_score
                     : player.average || '0.0'}
               </span>
+            </div>
+
+            <div className="pt-2 mt-2 border-t border-white/10">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[12px] font-black uppercase tracking-[0.3em] text-foreground/90 leading-none">
+                  FORMA
+                </span>
+              </div>
+              <div className="flex gap-1.5">
+                {player.recent_scores ? (
+                  player.recent_scores.split(',').map((score, idx) => {
+                    const numScore = parseFloat(score);
+                    return (
+                      <div
+                        key={idx}
+                        className={`w-[30px] h-[30px] rounded-lg flex items-center justify-center text-xs font-[1000] shadow-[0_2px_8px_rgba(0,0,0,0.3)] border border-white/5 transition-transform hover:scale-125 cursor-default ${getScoreColor(numScore)}`}
+                        title={`Jornada ${idx + 1}: ${numScore} pts`}
+                      >
+                        {numScore}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <span className="text-[10px] italic text-muted-foreground/30">N/A</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
