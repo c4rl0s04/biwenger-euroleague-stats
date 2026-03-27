@@ -129,7 +129,7 @@ export default function SquadSectionDrawer({
                             name={player.name}
                             width={56}
                             height={56}
-                            className="w-full h-full object-cover object-top transform group-hover:scale-110 transition-transform duration-500"
+                            className="w-full h-full object-cover object-top scale-[1.55] translate-y-[22%] transform group-hover:scale-[1.65] transition-all duration-500"
                           />
                         </div>
 
