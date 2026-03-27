@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Section from '@/components/layout/Section';
 import PlayerStatsSection from './PlayerStatsSection';
 import TeamDistributionTable from './TeamDistributionTable';
@@ -8,6 +8,7 @@ import SquadDistributionPieCard from './SquadDistributionPieCard';
 import { PieChart as PieIcon, Briefcase } from 'lucide-react';
 import PlayerFilters from './PlayerFilters';
 import PlayerList from './PlayerList';
+import SquadSectionDrawer from './SquadSectionDrawer';
 
 export default function PlayersDiscovery({ initialPlayers = [] }) {
   // --- STATE ---
@@ -21,6 +22,16 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [maxPrice, setMaxPrice] = useState('');
   const ITEMS_PER_PAGE = 24;
+
+  // --- DRAWER STATE ---
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerData, setDrawerData] = useState({
+    title: '',
+    subtitle: '',
+    icon: '',
+    color: '',
+    players: [],
+  });
 
   // --- DATA DERIVATION ---
   const teams = useMemo(() => {
@@ -149,6 +160,40 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
     setCurrentPage(1);
   };
 
+  const handleSliceClick = useCallback(
+    (entry, type, chartOwnerId) => {
+      // 1. Determine which players belong to this slice
+      // Based on whether the chart itself was filtered by a specific owner
+      const { name, color, img } = entry;
+
+      let filtered;
+      if (type === 'position') {
+        filtered = initialPlayers.filter(
+          (p) => p.position === name && p.owner_id && p.owner_id !== 0
+        );
+      } else {
+        filtered = initialPlayers.filter(
+          (p) => p.team_name === name && p.owner_id && p.owner_id !== 0
+        );
+      }
+
+      // 2. Further filter by the owner that was selected in that specific chart
+      if (chartOwnerId && chartOwnerId !== 'ALL') {
+        filtered = filtered.filter((p) => String(p.owner_id) === String(chartOwnerId));
+      }
+
+      setDrawerData({
+        title: name,
+        subtitle: type === 'position' ? 'ADN por Posición' : 'Influencia Euroleague',
+        icon: img,
+        color: color,
+        players: filtered.sort((a, b) => (b.total_points || 0) - (a.total_points || 0)),
+      });
+      setDrawerOpen(true);
+    },
+    [initialPlayers]
+  );
+
   return (
     <div className="w-full">
       {/* SECTION 1: ESTADÍSTICAS */}
@@ -208,6 +253,7 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
               type="position"
               title="ADN por Posiciones"
               icon={PieIcon}
+              onSliceClick={(entry, ownerId) => handleSliceClick(entry, 'position', ownerId)}
             />
           </div>
 
@@ -218,10 +264,22 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
               type="team"
               title="Influencia Euroleague"
               icon={Briefcase}
+              onSliceClick={(entry, ownerId) => handleSliceClick(entry, 'team', ownerId)}
             />
           </div>
         </div>
       </Section>
+
+      {/* OVERLAYS */}
+      <SquadSectionDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title={drawerData.title}
+        subtitle={drawerData.subtitle}
+        icon={drawerData.icon}
+        color={drawerData.color}
+        players={drawerData.players}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, memo } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -93,12 +93,13 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, img, value }) =>
   );
 };
 
-export default function SquadDistributionPieCard({
+const SquadDistributionPieCard = memo(function SquadDistributionPieCard({
   initialPlayers = [],
   owners = [],
   type = 'position',
   title,
   icon: Icon,
+  onSliceClick,
 }) {
   const [selectedOwnerId, setSelectedOwnerId] = useState('ALL');
 
@@ -200,7 +201,8 @@ export default function SquadDistributionPieCard({
                       key={`cell-${entry.name}`}
                       fill={entry.color}
                       stroke="none"
-                      className="hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
+                      onClick={() => onSliceClick?.(entry, selectedOwnerId)}
+                      className="hover:opacity-80 transition-opacity cursor-pointer focus:outline-none outline-none"
                     />
                   ))}
                 </Pie>
@@ -252,4 +254,6 @@ export default function SquadDistributionPieCard({
       </div>
     </ElegantCard>
   );
-}
+});
+
+export default SquadDistributionPieCard;

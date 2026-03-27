@@ -34,13 +34,20 @@ export default function PlayerImage({
   }
 
   return (
-    <Image
-      src={src}
-      alt={alt || 'Player image'}
-      width={width}
-      height={height}
-      className={className}
-      onError={() => setError(true)}
-    />
+    <div
+      className={`relative ${className}`}
+      style={!width ? { width: '100%', height: '100%' } : {}}
+    >
+      <Image
+        src={src}
+        alt={alt || 'Player image'}
+        width={width}
+        height={height}
+        fill={!width && !height}
+        className={className}
+        onError={() => setError(true)}
+        unoptimized
+      />
+    </div>
   );
 }
