@@ -5,7 +5,8 @@ import Section from '@/components/layout/Section';
 import PlayerStatsSection from './PlayerStatsSection';
 import TeamDistributionTable from './TeamDistributionTable';
 import SquadDistributionPieCard from './SquadDistributionPieCard';
-import { PieChart as PieIcon, Briefcase } from 'lucide-react';
+import SquadPositionBarCard from './SquadPositionBarCard';
+import { LayoutList, Briefcase } from 'lucide-react';
 import PlayerFilters from './PlayerFilters';
 import PlayerList from './PlayerList';
 import SquadSectionDrawer from './SquadSectionDrawer';
@@ -247,12 +248,11 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
           </div>
 
           <div className="lg:col-span-1">
-            <SquadDistributionPieCard
+            <SquadPositionBarCard
               initialPlayers={initialPlayers}
               owners={owners}
-              type="position"
               title="ADN por Posiciones"
-              icon={PieIcon}
+              icon={LayoutList}
               onSliceClick={(entry, ownerId) => handleSliceClick(entry, 'position', ownerId)}
             />
           </div>
