@@ -7,7 +7,9 @@ export default function BigSpenderCard({ spender }) {
   if (!spender || !Array.isArray(spender) || spender.length === 0) return null;
 
   const renderWinnerMeta = (winner) => (
-    <p className="text-[10px] text-zinc-500 font-bold">{winner.purchases_count} operaciones</p>
+    <p className="text-sm text-white font-bold uppercase tracking-tight opacity-100">
+      {winner.purchases_count} operaciones
+    </p>
   );
 
   return (

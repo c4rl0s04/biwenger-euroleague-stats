@@ -3,27 +3,13 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
 
 /**
- * MarketStatCard - Reusable template for market statistics
- *
- * @param {Array} data - Array of objects (winner + runner-ups)
- * @param {string} title - Card title
- * @param {React.ElementType} icon - Lucide icon
- * @param {string} color - Accent color
- * @param {string} winnerLabel - Uppercase label above the winner
- * @param {string} type - 'player' | 'user' (determines link routing)
- * @param {Object} fields - Mapping for data fields
- * @param {string} fields.id - User/Player ID field
- * @param {string} fields.name - User/Player Name field
- * @param {string} fields.value - The primary metric field
- * @param {string} fields.colorIndex - Color index field (for users)
- * @param {Function} renderWinnerMeta - Custom render for winner subtitle
- * @param {Function} renderValue - Custom formatter for values
- * @param {string} info - Tooltip info text
+ * MarketStatCard - Harmonized with Cleaner List Structure & Bigger Fonts
  */
 export default function MarketStatCard({
   data,
@@ -36,6 +22,7 @@ export default function MarketStatCard({
   renderWinnerMeta,
   renderValue,
   renderListItemValue,
+  renderMiddle,
   info,
   className = '',
 }) {
@@ -47,44 +34,62 @@ export default function MarketStatCard({
   const runnerUps = data.slice(1);
   const route = type === 'player' ? '/player/' : '/user/';
 
-  // Resolve colors
   const winnerColor =
     type === 'user'
       ? getColorForUser(winner[fields.id], winner[fields.name], winner[fields.colorIndex])
       : { text: 'text-white' };
 
-  const defaultFormat = (val) => `${formatEuro(val)} €`;
-  const formatValue = renderValue || defaultFormat;
+  const formatValue = renderValue || ((val) => `${formatEuro(val)} €`);
 
   return (
-    <div className={`hover:scale-[1.02] transition-transform duration-200 h-full ${className}`}>
-      <ElegantCard title={title} icon={icon} color={color} info={info}>
-        <div className="flex flex-col h-full">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`group/stat transition-all duration-300 h-fit ${className}`}
+    >
+      <ElegantCard
+        title={title}
+        icon={icon}
+        color={color}
+        info={info}
+        className="h-auto !bg-card backdrop-blur-xl rounded-2xl border-white/5 overflow-hidden group-hover/stat:border-primary/30 transition-colors duration-500 shadow-xl"
+      >
+        {/* Subtle Brand Glow */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-primary/0 opacity-0 group-hover/stat:opacity-5 transition-opacity duration-700 pointer-events-none rounded-[inherit]" />
+
+        <div className="flex flex-col relative z-20">
           {/* 1. Winner Section */}
-          <div className="mt-2 text-center">
+          <div className="mt-1 text-center py-5 flex flex-col items-center">
             {winnerLabel && (
               <div
-                className={`text-xs uppercase tracking-widest font-black mb-1`}
-                style={{ color: `var(--color-${color}-500)` }}
+                className="text-2xl font-display uppercase tracking-tighter mb-1 opacity-100 text-center w-full leading-[0.8]"
+                style={{ color: `var(--color-${color}-400)` }}
               >
                 {winnerLabel}
               </div>
             )}
 
-            <Link href={`${route}${winner[fields.id] || ''}`} className="block group">
+            <Link href={`${route}${winner[fields.id] || ''}`} className="block group/link">
               <div
-                className={`text-xl md:text-2xl font-black transition-colors truncate px-2 leading-tight ${type === 'user' ? winnerColor.text : `group-hover:text-${color}-400`}`}
+                className={`text-2xl md:text-3xl font-black transition-all duration-500 tracking-tight leading-tight mb-1 font-sans
+                ${type === 'user' ? winnerColor.text : 'text-white group-hover/link:text-primary'}`}
               >
                 {winner[fields.name] || 'Desconocido'}
               </div>
             </Link>
 
-            <div className="text-xl md:text-2xl font-black text-white mt-1">
+            <motion.div
+              layoutId={`value-${title}`}
+              className="text-2xl md:text-3xl font-bold text-white mt-1 font-mono tracking-tight tabular-nums"
+            >
               {formatValue(winner[fields.value])}
-            </div>
+            </motion.div>
 
             {renderWinnerMeta && (
-              <div className="mt-1">{renderWinnerMeta(winner, winnerColor)}</div>
+              <div className="mt-2.5 opacity-75 scale-95 origin-center font-sans tracking-tight">
+                {renderWinnerMeta(winner, winnerColor)}
+              </div>
             )}
           </div>
 
@@ -92,31 +97,40 @@ export default function MarketStatCard({
           {runnerUps.length > 0 && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-3 flex items-center justify-center gap-1 text-[10px] text-zinc-500 hover:opacity-80 transition-opacity py-1 border-t border-zinc-800 cursor-pointer"
+              className="mt-1 flex items-center justify-center gap-2 text-[10px] uppercase font-bold tracking-[0.15em] text-zinc-300 hover:text-white transition-all py-3 border-t border-white/5 cursor-pointer group/button"
             >
               {isExpanded ? (
                 <>
-                  <ChevronUp className="w-3 h-3" />
-                  Ocultar top 10
+                  <ChevronUp className="w-3.5 h-3.5 group-hover/button:-translate-y-0.5 transition-transform" />
+                  Ocultar Ranking
                 </>
               ) : (
                 <>
-                  <ChevronDown className="w-3 h-3" />
-                  Ver top 10
+                  <ChevronDown className="w-3.5 h-3.5 group-hover/button:translate-y-0.5 transition-transform" />
+                  Ver Ranking Completo
                 </>
               )}
             </button>
           )}
 
-          {/* 3. Runner-ups List */}
-          <div
-            className={`overflow-hidden transition-all duration-300 ease-in-out ${
-              isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-            }`}
-          >
-            {runnerUps.length > 0 && (
-              <div className="pt-2">
-                <div className="space-y-1">
+          {/* 3. Runner-ups List - Clean Separator Lines */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
+                <motion.div
+                  className="px-2 pb-3"
+                  initial="hidden"
+                  animate="show"
+                  variants={{
+                    show: { transition: { staggerChildren: 0.04 } },
+                  }}
+                >
                   {runnerUps.map((item, index) => {
                     const itemColor =
                       type === 'user'
@@ -128,39 +142,48 @@ export default function MarketStatCard({
                         : { text: 'text-zinc-300' };
 
                     return (
-                      <div
-                        key={item[fields.id] || index}
-                        className="flex items-center justify-between px-2 py-1 text-xs hover:bg-zinc-800/50 rounded"
+                      <motion.div
+                        key={`${item[fields.id]}-${index}`}
+                        variants={{
+                          hidden: { opacity: 0, y: 4 },
+                          show: { opacity: 1, y: 0 },
+                        }}
+                        className="flex items-center justify-between py-2.5 px-2 text-sm border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group/item"
                       >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="text-zinc-500 font-bold w-4 flex-shrink-0">
-                            {index + 2}.
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <span className="text-[10px] text-zinc-600 font-bold w-4 flex-shrink-0 font-mono">
+                            {(index + 2).toString().padStart(2, '0')}
                           </span>
                           <Link
                             href={`${route}${item[fields.id]}`}
-                            className={`truncate transition-colors ${itemColor.text} ${type === 'player' ? `hover:text-${color}-400` : 'hover:brightness-110'}`}
+                            className={`truncate font-medium transition-colors ${itemColor.text} ${type === 'player' ? 'group-hover/item:text-white' : 'group-hover/item:brightness-125'}`}
                           >
                             {item[fields.name]}
                           </Link>
                         </div>
-                        <div className="whitespace-nowrap ml-2">
+
+                        {renderMiddle && (
+                          <div className="px-2 flex-shrink-0">{renderMiddle(item, index)}</div>
+                        )}
+
+                        <div className="whitespace-nowrap ml-auto tabular-nums font-mono font-medium">
                           {renderListItemValue ? (
                             renderListItemValue(item, index)
                           ) : (
-                            <span className="text-zinc-400 font-semibold">
+                            <span className="text-zinc-500 group-hover/item:text-zinc-200 transition-colors">
                               {formatValue(item[fields.value])}
                             </span>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
       </ElegantCard>
-    </div>
+    </motion.div>
   );
 }

@@ -8,7 +8,9 @@ export default function BestSellerCard({ seller }) {
   if (!seller || !Array.isArray(seller) || seller.length === 0) return null;
 
   const renderWinnerMeta = (winner) => (
-    <p className="text-[10px] text-zinc-500 font-bold">{winner.sales_count} ventas</p>
+    <p className="text-sm text-white font-bold uppercase tracking-tight opacity-100">
+      {winner.sales_count} ventas
+    </p>
   );
 
   const renderValue = (val) => (

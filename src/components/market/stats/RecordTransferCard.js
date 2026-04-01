@@ -9,7 +9,7 @@ export default function RecordTransferCard({ record }) {
   if (!record || !Array.isArray(record) || record.length === 0) return null;
 
   const renderWinnerMeta = (winner, winnerColor) => (
-    <p className="text-[10px] text-zinc-500 font-bold">
+    <p className="text-sm text-white font-bold uppercase tracking-tight opacity-100">
       Comprador: <span className={winnerColor.text}>{winner.buyer_name || winner.comprador}</span>
     </p>
   );
@@ -17,12 +17,13 @@ export default function RecordTransferCard({ record }) {
   const renderListItemValue = (item) => {
     const buyerColor = getColorForUser(item.buyer_id, item.buyer_name, item.buyer_color);
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-zinc-600 flex-shrink-0">→</span>
-        <span className={`${buyerColor.text} truncate text-[10px]`}>
+      <div className="flex items-center gap-3">
+        <span
+          className={`${buyerColor.text} truncate font-bold text-xs uppercase tracking-tighter`}
+        >
           {item.buyer_name || item.comprador}
         </span>
-        <span className="text-zinc-400 font-semibold ml-1">{formatEuro(item.precio)}€</span>
+        <span className="text-zinc-200 font-black text-sm">{formatEuro(item.precio)}€</span>
       </div>
     );
   };
