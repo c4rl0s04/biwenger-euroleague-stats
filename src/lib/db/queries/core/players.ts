@@ -534,6 +534,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
     worst_score: parseFloat(p.worst_score) || 0,
     price: parseInt(p.price) || 0,
     recent_scores: formMap.get(Number(p.id))?.recent_scores ?? null,
+    avg_form_score: formMap.get(Number(p.id))?.avg_form_score ?? 0,
   }));
 }
 

@@ -170,7 +170,9 @@ export default function PlayerGridItem({ player, sortConfig }) {
                   ? 'MEJOR'
                   : sortConfig?.key === 'worst_score'
                     ? 'PEOR'
-                    : 'MEDIA'}
+                    : sortConfig?.key === 'avg_form_score'
+                      ? 'FORMA'
+                      : 'MEDIA'}
               </span>
               <span
                 className={`font-bold text-base tabular-nums ${
@@ -187,7 +189,9 @@ export default function PlayerGridItem({ player, sortConfig }) {
                   ? player.best_score
                   : sortConfig?.key === 'worst_score'
                     ? player.worst_score
-                    : player.average || '0.0'}
+                    : sortConfig?.key === 'avg_form_score'
+                      ? player.avg_form_score
+                      : player.average || '0.0'}
               </span>
             </div>
 

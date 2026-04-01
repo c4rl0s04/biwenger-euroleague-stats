@@ -175,6 +175,7 @@ export default function PlayerFilters({
             options={[
               { value: 'total_points', label: 'Puntos' },
               { value: 'average', label: 'Media' },
+              { value: 'avg_form_score', label: 'Forma' },
               { value: 'price', label: 'Valor' },
               { value: 'name', label: 'Nombre' },
               { value: 'best_score', label: 'Mejor' },

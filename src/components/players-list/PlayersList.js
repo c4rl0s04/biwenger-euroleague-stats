@@ -91,7 +91,9 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                     ? 'Mejor'
                     : sortConfig?.key === 'worst_score'
                       ? 'Peor'
-                      : 'Med'}{' '}
+                      : sortConfig?.key === 'avg_form_score'
+                        ? 'Forma'
+                        : 'Med'}{' '}
                   <SortIcon column="average" sortConfig={sortConfig} />
                 </div>
               </th>
@@ -206,7 +208,9 @@ export default function PlayersList({ players, sortConfig, onSort, startIndex = 
                       ? player.best_score
                       : sortConfig?.key === 'worst_score'
                         ? player.worst_score
-                        : player.average}
+                        : sortConfig?.key === 'avg_form_score'
+                          ? player.avg_form_score
+                          : player.average}
                   </span>
                 </td>
                 <td className="px-4 py-3">

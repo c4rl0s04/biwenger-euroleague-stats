@@ -181,7 +181,9 @@ export default function PlayerCard({ player, sortConfig }) {
                   ? 'Mejor'
                   : sortConfig?.key === 'worst_score'
                     ? 'Peor'
-                    : 'Media'}
+                    : sortConfig?.key === 'avg_form_score'
+                      ? 'Forma'
+                      : 'Media'}
               </span>
               <div
                 className={`font-bold text-base tabular-nums ${
@@ -200,7 +202,9 @@ export default function PlayerCard({ player, sortConfig }) {
                   ? player.best_score
                   : sortConfig?.key === 'worst_score'
                     ? player.worst_score
-                    : player.average || '0.0'}
+                    : sortConfig?.key === 'avg_form_score'
+                      ? player.avg_form_score
+                      : player.average || '0.0'}
               </div>
             </div>
 
