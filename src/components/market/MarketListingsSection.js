@@ -98,7 +98,7 @@ export default function MarketListingsSection({ listings = [] }) {
   return (
     <Section title="Jugadores en el Mercado" delay={50} background="section-base">
       {/* Filters Bar (Premium Elegant Style) */}
-      <ElegantCard hideHeader padding="p-4" className="mb-6 relative z-20 overflow-visible">
+      <ElegantCard hideHeader padding="p-4" className="mb-6 relative z-[60] overflow-visible">
         <div className="flex flex-col xl:flex-row gap-4 xl:items-end justify-between">
           <div className="flex flex-row flex-wrap xl:flex-nowrap gap-3 w-full items-end">
             {/* Text Search */}
@@ -189,6 +189,7 @@ export default function MarketListingsSection({ listings = [] }) {
                 value={sortBy}
                 onChange={setSortBy}
                 options={[
+                  { value: 'recommendation_score', label: 'Recomendable' },
                   { value: 'value_score', label: 'Calidad/Precio' },
                   { value: 'total_points', label: 'Puntos Totales' },
                   { value: 'price', label: 'Precio' },
@@ -214,7 +215,7 @@ export default function MarketListingsSection({ listings = [] }) {
             </div>
 
             {/* Price Filter */}
-            <div className="w-[48%] md:w-[100px] shrink-0 space-y-1.5">
+            <div className="w-[48%] md:w-[130px] shrink-0 space-y-1.5">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
                 PRECIO MÁX
               </span>
