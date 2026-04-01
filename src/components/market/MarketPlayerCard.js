@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { TrendingUp, TrendingDown, Star, Activity, Calendar, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { getShortTeamName } from '@/lib/utils/format';
 
 function getPurchaseHeuristic(player) {
   // Use the advanced 0-100 algorithm recommendation from backend if available
@@ -263,7 +264,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
 
         {/* Price */}
         <div className="flex flex-col items-center">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black mb-1">
+          <p className="text-[11px] text-white uppercase tracking-wider font-bold mb-1.5">
             Precio en Mercado
           </p>
           <div className="flex items-center gap-2 justify-center">
@@ -287,7 +288,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
               )}
           </div>
           {player.real_price != null && (
-            <p className="text-[11px] text-muted-foreground/80 tabular-nums leading-none mt-2 font-black uppercase tracking-wider font-sans">
+            <p className="text-[11px] text-white/50 tabular-nums leading-none mt-2 font-bold uppercase tracking-wider font-sans">
               Valor real:{' '}
               <span className="text-white/80">
                 {new Intl.NumberFormat('es-ES').format(player.real_price)}
@@ -300,10 +301,10 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
         {/* Form */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black font-sans">
+            <span className="text-[11px] text-white uppercase tracking-wider font-bold font-sans">
               Forma reciente
             </span>
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-black font-sans flex items-center">
+            <span className="text-[11px] text-white/50 uppercase tracking-wider font-bold font-sans flex items-center">
               Media:
               <span className="text-emerald-400 font-display text-[15px] leading-none ml-1.5 mr-0.5 translate-y-[1px]">
                 {player.avg_recent_points?.toFixed(1) || '0.0'}
@@ -350,7 +351,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
             </div>
           ) : (
             <div className="px-2.5 py-1 rounded-full border border-white/5 bg-white/5 shadow-sm">
-              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider font-sans mt-0.5 inline-block">
+              <span className="text-[11px] text-white/40 font-bold uppercase tracking-wider font-sans mt-0.5 inline-block">
                 Biwenger
               </span>
             </div>
@@ -390,7 +391,7 @@ function CardBack({
 
   return (
     <div
-      className={`bg-card backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden flex flex-col shadow-2xl ${isSpacer ? '' : 'h-full w-full'} text-white relative`}
+      className={`bg-card backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden flex flex-col shadow-2xl ${isSpacer ? '' : 'h-full w-full'} text-white relative group/card`}
     >
       {/* Same accent as front — ties both faces together */}
       <div
@@ -398,10 +399,13 @@ function CardBack({
       />
 
       {/* Header */}
-      <div className="px-3 py-2.5 flex items-center justify-between border-b border-white/6">
-        <div className="flex items-center gap-2">
-          <Activity size={13} className="text-emerald-400" />
-          <span className="text-[10px] font-display uppercase tracking-[0.15em] text-white/40">
+      <div className="px-3 py-2 flex items-center justify-between border-b border-white/6 relative z-10">
+        <div className="flex items-center gap-2.5">
+          <Activity
+            size={15}
+            className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)] transition-transform duration-500 group-hover/card:scale-110"
+          />
+          <span className="text-[14px] font-black font-sans text-slate-300 uppercase tracking-widest group-hover/card:text-white transition-colors">
             Quick Stats
           </span>
         </div>
@@ -416,40 +420,48 @@ function CardBack({
         </button>
       </div>
 
-      <div className="p-3 flex-1 flex flex-col gap-2.5">
+      <div className="p-3 flex-1 flex flex-col gap-2">
         {/* Next match */}
         {player.next_opponent_id ? (
-          <div className="bg-white/4 border border-white/8 rounded-xl p-2.5 flex items-center justify-between flex-shrink-0">
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold flex items-center gap-1">
-                <Calendar size={10} /> Próx. Partido
+          <div className="bg-white/4 border border-white/8 rounded-xl px-3 py-2 flex flex-col gap-1.5 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white uppercase tracking-wider font-bold flex items-center gap-1.5">
+                <Calendar size={12} className="text-amber-400" /> Próx. Partido
               </span>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                {player.next_opponent_img && (
-                  <Image
-                    src={player.next_opponent_img}
-                    alt="Opponent"
-                    width={16}
-                    height={16}
-                    className="object-contain"
-                  />
-                )}
-                <span className="font-bold text-sm text-white truncate max-w-[110px]">
-                  {player.next_opponent_name}
+              <span className="text-[10px] bg-white/6 border border-white/8 px-2 py-0.5 rounded-lg text-white/80 font-medium font-sans">
+                {new Date(player.next_match_date).toLocaleDateString('es-ES', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                })}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between bg-black/20 rounded-lg px-4 py-1.5 border border-white/5">
+              {/* My Team */}
+              <div className="flex flex-col items-center flex-1">
+                <span className="text-[11px] font-bold text-white uppercase tracking-tight truncate max-w-[80px]">
+                  {getShortTeamName(player.team)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center px-3">
+                <span className="text-[10px] font-black text-white/30 uppercase tracking-widest italic leading-none">
+                  VS
+                </span>
+              </div>
+
+              {/* Opponent Team */}
+              <div className="flex flex-col items-center flex-1">
+                <span className="text-[11px] font-bold text-white uppercase tracking-tight truncate max-w-[80px]">
+                  {getShortTeamName(player.next_opponent_name)}
                 </span>
               </div>
             </div>
-            <span className="text-[10px] bg-white/6 border border-white/8 px-2 py-1 rounded-lg text-white/50 font-medium">
-              {new Date(player.next_match_date).toLocaleDateString('es-ES', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-              })}
-            </span>
           </div>
         ) : (
           <div className="bg-white/4 border border-white/8 rounded-xl p-2.5 flex items-center justify-center flex-shrink-0">
-            <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+            <span className="text-[11px] text-white uppercase tracking-wider font-bold">
               Sin próximos partidos
             </span>
           </div>
@@ -468,16 +480,16 @@ function CardBack({
           <div className="flex-1 flex flex-col gap-2.5 min-h-0">
             {/* 2-col tiles — mirror the stat block style from front */}
             <div className="grid grid-cols-2 gap-2 flex-shrink-0">
-              <div className="bg-white/4 border border-white/8 rounded-xl p-2.5 flex flex-col gap-0.5">
-                <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+              <div className="bg-white/4 border border-white/8 rounded-xl p-2 flex flex-col gap-0.5">
+                <span className="text-[11px] text-white uppercase tracking-wider font-bold">
                   Calidad/Precio
                 </span>
                 <span className="text-xl font-bold text-sky-400 tabular-nums leading-none mt-0.5 font-display">
                   {(player.value_score || 0).toFixed(1)}
                 </span>
               </div>
-              <div className="bg-white/4 border border-white/8 rounded-xl p-2.5 flex flex-col gap-0.5">
-                <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+              <div className="bg-white/4 border border-white/8 rounded-xl p-2 flex flex-col gap-0.5">
+                <span className="text-[11px] text-white uppercase tracking-wider font-bold">
                   Partidos
                 </span>
                 <span className="text-xl font-bold text-white tabular-nums leading-none mt-0.5 font-display">
@@ -488,20 +500,20 @@ function CardBack({
 
             {/* Divider rows — same pattern as front's bottom section */}
             <div className="bg-white/4 border border-white/8 rounded-xl divide-y divide-white/6 flex-shrink-0">
-              <div className="flex items-center justify-between px-3 py-2">
-                <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+              <div className="flex items-center justify-between px-3 py-1.5">
+                <span className="text-[11px] text-white uppercase tracking-wider font-bold">
                   Total Pts
                 </span>
-                <span className="text-sm font-bold text-emerald-400 tabular-nums font-display">
+                <span className="text-base font-bold text-emerald-400 tabular-nums font-display">
                   {details.total_points}
                 </span>
               </div>
               <div className="flex items-center justify-between px-3 py-2">
-                <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+                <span className="text-[11px] text-white uppercase tracking-wider font-bold">
                   Flujo Diario
                 </span>
                 <span
-                  className={`text-sm font-bold tabular-nums font-display ${priceTrendPositive ? 'text-emerald-400' : priceTrendNeutral ? 'text-white/50' : 'text-rose-400'}`}
+                  className={`text-base font-bold tabular-nums font-display ${priceTrendPositive ? 'text-emerald-400' : priceTrendNeutral ? 'text-white/50' : 'text-rose-400'}`}
                 >
                   {priceTrendPositive ? '+' : ''}
                   {new Intl.NumberFormat('es-ES').format(player.price_trend)} €
@@ -515,15 +527,20 @@ function CardBack({
                 e.stopPropagation();
                 if (onExpandLevel2) onExpandLevel2();
               }}
-              className="mt-auto w-full py-2.5 bg-white/4 hover:bg-white/8 text-xs font-semibold text-white/70 hover:text-white flex items-center justify-center gap-2 transition-all duration-200 border border-white/8 rounded-xl cursor-pointer flex-shrink-0"
+              className="mt-auto w-full py-2.5 bg-white/[0.03] hover:bg-white/5 text-[13px] font-black font-sans uppercase tracking-[0.1em] text-white/70 hover:text-white flex items-center justify-center gap-2 transition-all duration-300 border border-white/8 rounded-xl cursor-pointer flex-shrink-0 group/btn"
             >
-              Ver Análisis Completo
-              <TrendingUp size={14} className="opacity-70" />
+              <span className="transition-transform duration-300 origin-center group-hover/btn:scale-[1.05] inline-block">
+                Ver Análisis Completo
+              </span>
+              <TrendingUp
+                size={14}
+                className="opacity-70 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform"
+              />
             </button>
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center bg-white/4 rounded-xl border border-white/8">
-            <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
+            <span className="text-[11px] text-white uppercase tracking-wider font-bold">
               Error cargando detalles
             </span>
           </div>
