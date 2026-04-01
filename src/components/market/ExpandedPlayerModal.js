@@ -16,21 +16,47 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { TEAM_COLORS, DEFAULT_TEAM_COLOR } from '@/lib/constants/teamColors';
 
 const getTeamColor = (teamName) => {
-  const colors = [
-    '#f59e0b',
-    '#ec4899',
-    '#06b6d4',
-    '#84cc16',
-    '#a855f7',
-    '#14b8a6',
-    '#ef4444',
-    '#3b82f6',
-    '#10b981',
-    '#f97316',
-  ];
-  if (!teamName) return colors[0];
+  if (!teamName) return DEFAULT_TEAM_COLOR;
+
+  const name = teamName.toUpperCase();
+  // Direct code matches
+  if (TEAM_COLORS[name]) return TEAM_COLORS[name];
+
+  // Common Name Mappings
+  const nameMap = {
+    'REAL MADRID': 'RMA',
+    BARCELONA: 'BAR',
+    'FC BARCELONA': 'BAR',
+    BASKONIA: 'BSK',
+    VALENCIA: 'VAL',
+    OLYMPIACOS: 'OLY',
+    PANATHINAIKOS: 'PAO',
+    FENERBAHCE: 'FEN',
+    'ANADOLU EFES': 'EFS',
+    MONACO: 'MON',
+    MACCABI: 'MTA',
+    PARTIZAN: 'PAR',
+    ZALGIRIS: 'ZAL',
+    MILANO: 'EA7',
+    VIRTUS: 'VIR',
+    BAYERN: 'BAY',
+    ALBA: 'ALB',
+    ASVEL: 'ASV',
+    'ESTRELLA ROJA': 'CZV',
+    'CRVENA ZVEZDA': 'CZV',
+    PARIS: 'PRS',
+    DUBAI: 'DUB',
+  };
+
+  for (const [key, code] of Object.entries(nameMap)) {
+    if (name.includes(key)) return TEAM_COLORS[code];
+  }
+
+  // Final Hash Fallback (kept for safety)
+  const colors = ['#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#a855f7', '#ef4444', '#3b82f6'];
   let hash = 0;
   for (let i = 0; i < teamName.length; i++) hash = teamName.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
@@ -147,12 +173,13 @@ export default function ExpandedPlayerModal({ player, onClose }) {
 
         {/* 1. HERO HEADER */}
         <div
-          className="h-40 sm:h-52 relative flex items-end px-6 sm:px-8 pb-6"
+          className="h-44 sm:h-52 relative flex items-start px-6 sm:px-8 pt-8 sm:pt-10"
           style={{ backgroundColor: `${teamColor}20` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
 
-          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-card rounded-2xl overflow-hidden translate-y-8 sm:translate-y-10 border-4 border-background shadow-2xl flex-shrink-0 relative">
+          {/* Photo Column */}
+          <div className="w-24 h-24 sm:w-40 sm:h-40 bg-card rounded-2xl overflow-hidden border-4 border-background shadow-2xl flex-shrink-0 relative z-10">
             {player.img ? (
               <Image
                 src={player.img}
@@ -167,48 +194,72 @@ export default function ExpandedPlayerModal({ player, onClose }) {
             )}
           </div>
 
-          <div className="ml-5 sm:ml-6 mb-1 text-white flex-1 flex flex-col sm:flex-row justify-between sm:items-end relative z-10 gap-3">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-[0.05em] leading-none mb-1 uppercase text-white drop-shadow-md font-display">
+          <div className="ml-5 sm:ml-6 text-white flex-1 flex flex-col sm:flex-row justify-between relative z-10 gap-3 h-full pb-4 sm:pb-5">
+            {/* Identity Column */}
+            <div className="flex flex-col">
+              <h2 className="text-2xl sm:text-[34px] font-bold tracking-[0.05em] leading-tight mb-2 uppercase text-white drop-shadow-lg font-display">
                 {player.name}
               </h2>
-              <div className="flex items-center gap-2">
-                {player.team_img && (
-                  <Image
-                    src={player.team_img}
-                    alt={player.team}
-                    width={18}
-                    height={18}
-                    className="object-contain"
-                  />
-                )}
-                <p
-                  className="text-xs sm:text-sm font-semibold tracking-wide"
-                  style={{ color: teamColor }}
-                >
-                  {player.team} • {player.position}
-                </p>
+              <div className="flex flex-col gap-2.5 border-l-2 border-white/10 pl-4 mt-1">
+                <div className="flex items-center gap-2.5">
+                  {player.team_img && (
+                    <Image
+                      src={player.team_img}
+                      alt={player.team}
+                      width={22}
+                      height={22}
+                      className="object-contain opacity-90"
+                    />
+                  )}
+                  <p
+                    className="text-[18px] sm:text-[20px] font-bold tracking-widest font-display uppercase"
+                    style={{ color: teamColor }}
+                  >
+                    {player.team}
+                  </p>
+                </div>
+                <div>
+                  <span
+                    className={`inline-block px-4 py-1.5 rounded text-[16px] sm:text-[17px] font-bold uppercase tracking-[0.1em] border font-display shadow-lg ${
+                      player.position?.includes('Base') ||
+                      player.position === 'G' ||
+                      player.position === 'B'
+                        ? 'bg-sky-500/20 text-sky-400 border-sky-500/30 shadow-sky-500/5'
+                        : player.position?.includes('Alero') ||
+                            player.position === 'F' ||
+                            player.position === 'A'
+                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 shadow-emerald-500/5'
+                          : player.position?.includes('Pivot') ||
+                              player.position === 'C' ||
+                              player.position === 'P'
+                            ? 'bg-rose-500/20 text-rose-400 border-rose-500/30 shadow-rose-500/5'
+                            : 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30 shadow-zinc-500/5'
+                    }`}
+                  >
+                    {player.position}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Top Right Quick Metrics */}
+            {/* Quick Metrics Column (Bottom Right) */}
             {details && (
-              <div className="hidden sm:flex gap-2 text-right">
-                <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 backdrop-blur-md">
-                  <p className="text-[18px] text-white/90 uppercase tracking-[0.15em] mb-1 font-display">
+              <div className="hidden sm:flex gap-3 text-right self-end">
+                <div className="bg-card/40 border border-white/10 rounded-xl px-5 py-3 backdrop-blur-md min-w-[180px] shadow-xl">
+                  <p className="text-[14px] text-white/50 uppercase tracking-[0.2em] mb-1.5 font-display flex items-center justify-end gap-2">
                     Rol Actual
                   </p>
-                  <p className="text-xl font-medium text-white flex items-center gap-2 font-display tracking-[0.05em]">
+                  <p className="text-xl font-bold text-white flex items-center justify-end gap-2 font-display tracking-wide uppercase">
                     <Clock size={16} className="text-sky-400" /> {roleLabel}
                   </p>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 backdrop-blur-md">
-                  <p className="text-[18px] text-white/90 uppercase tracking-[0.15em] mb-1 font-display">
+                <div className="bg-card/40 border border-white/10 rounded-xl px-5 py-3 backdrop-blur-md min-w-[140px] shadow-xl">
+                  <p className="text-[14px] text-white/50 uppercase tracking-[0.2em] mb-1 font-display">
                     Minutos Prom.
                   </p>
-                  <p className="text-2xl font-medium text-white tabular-nums font-display tracking-[0.05em]">
-                    {avgMinutes}{' '}
-                    <span className="text-base font-normal text-white/90 ml-0">min</span>
+                  <p className="text-3xl font-bold text-white tabular-nums font-display tracking-tight">
+                    {avgMinutes}
+                    <span className="text-base font-normal text-white/20 ml-1">MIN</span>
                   </p>
                 </div>
               </div>
@@ -539,7 +590,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               <div className="pt-2">
                 <a
                   href={`/player/${player.player_id}`}
-                  className="flex justify-center items-center w-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-400 font-black text-[11px] uppercase tracking-[0.2em] py-5 rounded-xl transition-all group cursor-pointer font-display"
+                  className="flex justify-center items-center w-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-400 font-black text-[18px] uppercase tracking-[0.2em] py-5 rounded-xl transition-all group cursor-pointer font-display"
                 >
                   Ver Informe Completo en BiwengerStats
                   <TrendingUp
