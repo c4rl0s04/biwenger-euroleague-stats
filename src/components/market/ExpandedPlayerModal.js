@@ -169,7 +169,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
 
           <div className="ml-5 sm:ml-6 mb-1 text-white flex-1 flex flex-col sm:flex-row justify-between sm:items-end relative z-10 gap-3">
             <div>
-              <h2 className="text-2xl sm:text-4xl font-black tracking-tighter leading-none mb-1 uppercase text-white drop-shadow-md">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-[0.05em] leading-none mb-1 uppercase text-white drop-shadow-md font-display">
                 {player.name}
               </h2>
               <div className="flex items-center gap-2">
@@ -193,21 +193,22 @@ export default function ExpandedPlayerModal({ player, onClose }) {
 
             {/* Top Right Quick Metrics */}
             {details && (
-              <div className="hidden sm:flex gap-3 text-right">
-                <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 backdrop-blur-md">
-                  <p className="text-[9px] text-white/50 uppercase tracking-widest font-bold mb-0.5 mt-0.5">
+              <div className="hidden sm:flex gap-2 text-right">
+                <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 backdrop-blur-md">
+                  <p className="text-[18px] text-white/90 uppercase tracking-[0.15em] mb-1 font-display">
                     Rol Actual
                   </p>
-                  <p className="text-sm font-bold text-white flex items-center gap-1.5 font-display tracking-wide">
-                    <Clock size={12} className="text-sky-400" /> {roleLabel}
+                  <p className="text-xl font-medium text-white flex items-center gap-2 font-display tracking-[0.05em]">
+                    <Clock size={16} className="text-sky-400" /> {roleLabel}
                   </p>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 backdrop-blur-md">
-                  <p className="text-[9px] text-white/60 uppercase tracking-widest font-black mb-0.5 mt-0.5 font-display">
+                <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 backdrop-blur-md">
+                  <p className="text-[18px] text-white/90 uppercase tracking-[0.15em] mb-1 font-display">
                     Minutos Prom.
                   </p>
-                  <p className="text-sm font-bold text-white tabular-nums font-display tracking-wide">
-                    {avgMinutes} <span className="text-xs font-normal text-white/40">min</span>
+                  <p className="text-2xl font-medium text-white tabular-nums font-display tracking-[0.05em]">
+                    {avgMinutes}{' '}
+                    <span className="text-base font-normal text-white/90 ml-0">min</span>
                   </p>
                 </div>
               </div>
@@ -216,7 +217,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
         </div>
 
         {/* 2. MAIN CONTENT AREA */}
-        <div className="p-5 sm:p-8 pt-10 sm:pt-14 flex-1 overflow-y-auto w-full bg-background custom-scrollbar">
+        <div className="p-4 sm:p-5 pt-8 sm:pt-10 flex-1 overflow-y-auto w-full bg-background custom-scrollbar">
           {detailsLoading ? (
             <div className="flex items-center justify-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-sky-500"></div>
@@ -226,62 +227,62 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               {/* Mobile Role Details (Shown only on small screens) */}
               <div className="sm:hidden grid grid-cols-2 gap-3 mb-2">
                 <div className="bg-[#151820] border border-white/5 rounded-xl p-3">
-                  <p className="text-[9px] text-white/50 uppercase tracking-widest font-bold mb-1">
+                  <p className="text-[11px] text-white/40 uppercase tracking-widest font-bold mb-1 font-display">
                     Rol Actual
                   </p>
-                  <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <p className="text-sm font-semibold text-white flex items-center gap-1.5 font-display tracking-wide">
                     <Clock size={12} className="text-sky-400" /> {roleLabel}
                   </p>
                 </div>
                 <div className="bg-[#151820] border border-white/5 rounded-xl p-3">
-                  <p className="text-[9px] text-white/50 uppercase tracking-widest font-bold mb-1">
+                  <p className="text-[11px] text-white/40 uppercase tracking-widest font-bold mb-1 font-display">
                     Min / Partido
                   </p>
-                  <p className="text-xs font-bold text-white tabular-nums">{avgMinutes} min</p>
+                  <p className="text-sm font-semibold text-white tabular-nums font-display tracking-wide">
+                    {avgMinutes} min
+                  </p>
                 </div>
               </div>
 
               {/* ROW 1: Context & Fantasy Performance */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Contexto del Equipo */}
-                <div className="bg-card/50 border border-white/10 rounded-xl p-5 relative overflow-hidden group">
+                <div className="bg-card/40 border border-white/10 rounded-xl p-4 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
-                    <Activity size={12} className="mr-1.5 text-sky-400" /> Estado del Equipo
+                  <h4 className="text-[22px] text-sky-400 font-medium uppercase tracking-[0.1em] flex items-center mb-5 font-display border-l-4 border-sky-500/50 pl-3 py-1">
+                    <Activity size={18} className="mr-2" /> Estado del Equipo
                   </h4>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-white/80 font-medium font-display">
+                  <div className="flex justify-between items-center mb-4 px-1">
+                    <span className="text-[18px] text-white font-bold font-display uppercase tracking-widest">
                       Racha Reciente
                     </span>
-                    <div className="flex gap-1 font-display">
-                      {formArray.length > 0 ? (
-                        formArray.map((res, i) => (
-                          <span
-                            key={i}
-                            className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded ${res === 'V' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}
-                          >
-                            {res}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs text-white/30 italic">Sin datos</span>
-                      )}
+                    <div className="flex gap-1.5 font-display">
+                      {formArray.map((res, i) => (
+                        <span
+                          key={i}
+                          className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-lg shadow-md border ${res === 'V' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30'}`}
+                        >
+                          {res}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-white/80 font-medium">% Asistencia</span>
+                  <div className="flex justify-between items-center mb-4 px-1">
+                    <span className="text-[18px] text-white font-bold font-display uppercase tracking-widest">
+                      % Asistencia
+                    </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-white">
+                      <span className="text-xl font-medium text-white font-display tracking-tight leading-none">
                         {details.player_total_matches}/{details.team_total_matches}
                       </span>
-                      <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase">
+                      <span className="text-xl font-medium text-white/90 font-display uppercase tracking-tight leading-none ml-1">
                         Partidos
                       </span>
                     </div>
                   </div>
                   <div className="flex justify-between items-center bg-white/5 rounded-lg p-2.5">
-                    <span className="text-sm font-semibold text-white/80 flex items-center gap-1.5">
+                    <span className="text-[18px] font-bold text-white flex items-center gap-1.5 font-display uppercase tracking-wide">
                       Prob. Playoffs
                     </span>
                     <div className="flex items-center gap-2">
@@ -298,7 +299,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                         />
                       </div>
                       <span
-                        className={`text-sm font-bold tabular-nums ${
+                        className={`text-xl font-bold tabular-nums font-display ${
                           (details.playoff_probability || 0) >= 70
                             ? 'text-emerald-400'
                             : (details.playoff_probability || 0) >= 40
@@ -313,42 +314,39 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                 </div>
 
                 {/* Fiabilidad / Techo y Suelo */}
-                <div className="bg-card/50 border border-white/10 rounded-xl p-5 relative overflow-hidden group">
+                <div className="bg-card/40 border border-white/10 rounded-xl p-4 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-indigo-500/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
-                    <BarChart3 size={12} className="mr-1.5 text-indigo-400" /> Fiabilidad Biwenger
+                  <h4 className="text-[22px] text-indigo-400 font-medium uppercase tracking-[0.1em] flex items-center mb-5 font-display border-l-4 border-indigo-500/50 pl-3 py-1">
+                    <BarChart3 size={18} className="mr-2" /> Fiabilidad Biwenger
                   </h4>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-white/80 font-medium font-display uppercase tracking-tight">
+                  <div className="flex justify-between items-center mb-5 px-1">
+                    <span className="text-[18px] text-white font-bold font-display uppercase tracking-widest">
                       Promedio Puntos
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-white tabular-nums font-display">
+                      <span className="text-2xl font-medium text-white tabular-nums font-display tracking-tight leading-none">
                         {details.season_avg !== undefined && details.season_avg !== null
                           ? Number(details.season_avg).toFixed(1)
                           : player.average !== undefined
                             ? Number(player.average).toFixed(1)
                             : '-'}
                       </span>
-                      <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded uppercase font-display">
-                        Pts/Part
-                      </span>
                     </div>
                   </div>
                   <div className="flex items-end justify-between gap-4 mt-2">
                     <div className="flex-1 flex flex-col items-center bg-rose-500/5 border border-rose-500/10 rounded-lg p-3">
-                      <span className="text-[10px] text-rose-400/70 font-black uppercase tracking-wider mb-1 font-display">
+                      <span className="text-[16px] text-rose-400/80 font-semibold uppercase tracking-[0.1em] mb-1.5 font-display">
                         Suelo
                       </span>
-                      <span className="text-3xl font-black text-rose-400 leading-none font-display">
+                      <span className="text-3xl font-medium text-rose-400 leading-none font-display tracking-tight">
                         {floor}
                       </span>
                     </div>
                     <div className="flex-1 flex flex-col items-center bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-3">
-                      <span className="text-[10px] text-emerald-400/70 font-black uppercase tracking-wider mb-1 font-display">
+                      <span className="text-[16px] text-emerald-400/80 font-semibold uppercase tracking-[0.1em] mb-1.5 font-display">
                         Techo
                       </span>
-                      <span className="text-3xl font-black text-emerald-400 leading-none font-display">
+                      <span className="text-3xl font-medium text-emerald-400 leading-none font-display tracking-tight">
                         {ceiling}
                       </span>
                     </div>
@@ -356,45 +354,51 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                 </div>
 
                 {/* Volumen Ofensivo / Tiros */}
-                <div className="bg-card/50 border border-white/10 rounded-xl p-5 relative overflow-hidden group md:col-span-2 lg:col-span-1">
+                <div className="bg-card/40 border border-white/10 rounded-xl p-4 relative overflow-hidden group md:col-span-2 lg:col-span-1">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-sky-500/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
-                    <Target size={12} className="mr-1.5 text-emerald-400" /> Volumen Ofensivo (%)
+                  <h4 className="text-[22px] text-emerald-400 font-medium uppercase tracking-[0.1em] flex items-center mb-5 font-display border-l-4 border-emerald-500/50 pl-3 py-1">
+                    <Target size={18} className="mr-2" /> Volumen Ofensivo (%)
                   </h4>
-                  <div className="space-y-3 font-display">
+                  <div className="space-y-3 font-display mt-2 px-1">
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-white/50 w-6 font-bold">T2</span>
-                      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                      <span className="text-[18px] text-white w-7 font-bold tracking-widest">
+                        T2
+                      </span>
+                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-sky-400 rounded-full"
+                          className="h-full bg-sky-400/80 rounded-full"
                           style={{ width: `${t2pct}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs font-bold text-white w-8 text-right tabular-nums">
+                      <span className="text-xl font-medium text-white w-12 text-right tabular-nums tracking-tight">
                         {t2pct}%
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-white/50 w-6 font-bold">T3</span>
-                      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                      <span className="text-[18px] text-white w-7 font-bold tracking-widest">
+                        T3
+                      </span>
+                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-indigo-400 rounded-full"
+                          className="h-full bg-indigo-400/80 rounded-full"
                           style={{ width: `${t3pct}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs font-bold text-white w-8 text-right tabular-nums">
+                      <span className="text-xl font-medium text-white w-12 text-right tabular-nums tracking-tight">
                         {t3pct}%
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-white/50 w-6 font-bold">TL</span>
-                      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                      <span className="text-[18px] text-white w-7 font-bold tracking-widest">
+                        TL
+                      </span>
+                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-emerald-400 rounded-full"
+                          className="h-full bg-emerald-400/80 rounded-full"
                           style={{ width: `${ftpct}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs font-bold text-white w-8 text-right tabular-nums">
+                      <span className="text-xl font-medium text-white w-12 text-right tabular-nums tracking-tight">
                         {ftpct}%
                       </span>
                     </div>
@@ -405,9 +409,9 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               {/* ROW 2: Calendario y Mercado */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Calendario 3 Rivales */}
-                <div className="bg-card/50 border border-white/10 rounded-xl p-5 flex flex-col">
-                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
-                    <Calendar size={12} className="mr-1.5 text-amber-400" /> Calendario FAS (Próx 3)
+                <div className="bg-card/40 border border-white/10 rounded-xl p-4 flex flex-col">
+                  <h4 className="text-[22px] text-amber-400 font-medium uppercase tracking-[0.1em] flex items-center mb-5 font-display border-l-4 border-amber-500/50 pl-3 py-1">
+                    <Calendar size={18} className="mr-2" /> Próximos Partidos (Próx 3)
                   </h4>
                   <div className="grid grid-cols-3 gap-2 flex-1">
                     {calendarBlocks.map((match, i) => {
@@ -446,7 +450,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                           <div
                             className={`absolute top-0 w-full h-1 ${isEasy ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`}
                           ></div>
-                          <span className="text-[9px] text-white/40 uppercase mb-2 font-bold tracking-wider">
+                          <span className="text-[12px] text-white/40 uppercase mb-2 font-bold tracking-wider">
                             {matchDate.toLocaleDateString('es-ES', {
                               weekday: 'short',
                               day: 'numeric',
@@ -465,14 +469,14 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                               {oppName || 'TBD'}
                             </span>
                           )}
-                          <div className="flex items-center gap-1.5 mt-1.5">
-                            <span className="text-[8px] bg-white/10 px-1.5 py-0.5 rounded uppercase font-bold text-white/50">
+                          <div className="flex items-center gap-1 mt-2">
+                            <span className="text-[11px] bg-white/5 px-1.5 py-0.5 rounded uppercase font-bold text-white/30 tracking-wider">
                               {isHome ? 'Local' : 'Visit'}
                             </span>
                             <span
-                              className={`text-[8px] px-1 py-0.5 rounded uppercase font-bold flex items-center gap-0.5 ${diffColor}`}
+                              className={`text-[11px] px-1.5 py-0.5 rounded uppercase font-bold flex items-center gap-0.5 tracking-wider ${diffColor}`}
                             >
-                              <DiffIcon size={8} /> {isEasy ? 'Fácil' : 'Duro'}
+                              <DiffIcon size={9} /> {isEasy ? 'Fácil' : 'Duro'}
                             </span>
                           </div>
                         </div>
@@ -482,36 +486,36 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                 </div>
 
                 {/* Contexto Bursátil */}
-                <div className="bg-card/50 border border-white/10 rounded-xl p-5 flex flex-col justify-between">
-                  <h4 className="text-[10px] text-white/60 font-black uppercase tracking-[0.2em] flex items-center mb-5 font-display">
-                    <TrendingUp size={12} className="mr-1.5 text-sky-400" /> Mercado Bursátil
+                <div className="bg-card/40 border border-white/10 rounded-xl p-4 flex flex-col justify-between">
+                  <h4 className="text-[22px] text-sky-400 font-medium uppercase tracking-[0.1em] flex items-center mb-5 font-display border-l-4 border-sky-400/50 pl-3 py-1">
+                    <TrendingUp size={18} className="mr-2" /> Mercado Bursátil
                   </h4>
-                  <div className="flex justify-between items-center bg-background/50 backdrop-blur-sm rounded-xl border border-white/5 p-4 mb-4">
+                  <div className="flex justify-between items-center bg-black/20 backdrop-blur-sm rounded-xl border border-white/5 p-4 mb-3">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1.5 font-display">
+                      <span className="text-[18px] font-bold text-white uppercase tracking-widest mb-1 font-display">
                         Precio Actual
                       </span>
-                      <span className="text-4xl font-black text-white tabular-nums leading-none font-display drop-shadow-sm">
+                      <span className="text-3xl font-medium text-white tabular-nums leading-none font-display tracking-tight">
                         {new Intl.NumberFormat('es-ES').format(player.price)}{' '}
-                        <span className="text-lg font-normal text-white/40">€</span>
+                        <span className="text-xl font-normal text-white/20 ml-1">€</span>
                       </span>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-[9px] font-black text-sky-400 uppercase tracking-widest mb-1.5 font-display">
+                      <span className="text-[18px] font-bold text-sky-400 font-display uppercase tracking-widest mb-1">
                         Target sugerido
                       </span>
-                      <span className="text-4xl font-black text-sky-400 tabular-nums leading-none font-display drop-shadow-sm">
+                      <span className="text-3xl font-medium text-sky-400 tabular-nums leading-none font-display tracking-tight">
                         {new Intl.NumberFormat('es-ES').format(targetPrice)}{' '}
-                        <span className="text-lg font-normal text-sky-400/50">€</span>
+                        <span className="text-xl font-normal text-sky-400/40 ml-1">€</span>
                       </span>
                     </div>
                   </div>
                   <div className="flex justify-between items-center text-sm pt-4 border-t border-white/5 mt-auto font-display">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-white/50">
+                    <span className="text-[18px] font-bold uppercase tracking-widest text-white">
                       Demanda (Ownership)
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white">
+                      <span className="text-lg font-medium text-white font-display">
                         {player.seller_name && player.seller_name !== 'Mercado'
                           ? 'En propiedad'
                           : 'Mercado Libre'}
