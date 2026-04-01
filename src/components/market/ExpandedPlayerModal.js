@@ -442,6 +442,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
 
                       const matchDate = new Date(match.date || match.match_date);
                       const isHome = match.home_id === player.team_id;
+                      const oppId = isHome ? match.away_id : match.home_id;
                       const oppName = isHome ? match.away_team : match.home_team;
                       const oppImg = isHome ? match.away_img : match.home_img;
 
@@ -474,19 +475,24 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                               day: 'numeric',
                             })}
                           </span>
-                          {oppImg ? (
-                            <Image
-                              src={oppImg}
-                              alt={oppName || 'Rival'}
-                              width={40}
-                              height={40}
-                              className="mb-1.5 mt-1 object-contain h-10 w-auto drop-shadow-md"
-                            />
-                          ) : (
-                            <span className="text-xs font-black text-white leading-tight line-clamp-2 md:line-clamp-1 h-8 md:h-auto flex items-center mb-1">
-                              {oppName || 'TBD'}
-                            </span>
-                          )}
+                          <Link
+                            href={`/team/${oppId}`}
+                            className="flex flex-col items-center group/logo cursor-pointer hover:scale-105 transition-transform"
+                          >
+                            {oppImg ? (
+                              <Image
+                                src={oppImg}
+                                alt={oppName || 'Rival'}
+                                width={40}
+                                height={40}
+                                className="mb-1.5 mt-1 object-contain h-10 w-auto drop-shadow-md group-hover/logo:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] transition-all"
+                              />
+                            ) : (
+                              <span className="text-xs font-black text-white leading-tight line-clamp-2 md:line-clamp-1 h-8 md:h-auto flex items-center mb-1 group-hover/logo:text-primary transition-colors">
+                                {oppName || 'TBD'}
+                              </span>
+                            )}
+                          </Link>
                           <div className="flex items-center gap-0.5 mt-2">
                             <span className="text-[9px] bg-white/5 px-1 py-[2px] rounded uppercase font-bold text-white/30 tracking-wider leading-none">
                               {isHome ? 'Local' : 'Visit'}
