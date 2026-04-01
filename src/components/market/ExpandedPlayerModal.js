@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   X,
   Calendar,
@@ -201,7 +202,10 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                 {player.name}
               </h2>
               <div className="flex flex-col gap-2.5 border-l-2 border-white/10 pl-4 mt-1">
-                <div className="flex items-center gap-2.5">
+                <Link
+                  href={`/team/${player.team_id}`}
+                  className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+                >
                   {player.team_img && (
                     <Image
                       src={player.team_img}
@@ -217,7 +221,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                   >
                     {player.team}
                   </p>
-                </div>
+                </Link>
                 <div>
                   <span
                     className={`inline-block px-4 py-1.5 rounded text-[16px] sm:text-[17px] font-bold uppercase tracking-[0.1em] border font-display shadow-lg ${
@@ -566,22 +570,29 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       Demanda (Ownership)
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-medium text-white font-display">
-                        {player.seller_name && player.seller_name !== 'Mercado'
-                          ? 'En propiedad'
-                          : 'Mercado Libre'}
-                      </span>
-                      {player.seller_name &&
-                      player.seller_name !== 'Mercado' &&
-                      player.seller_icon ? (
-                        <Image
-                          src={player.seller_icon}
-                          alt="Owner"
-                          width={18}
-                          height={18}
-                          className="rounded-full border border-white/20"
-                        />
-                      ) : null}
+                      {player.seller_name && player.seller_name !== 'Mercado' ? (
+                        <Link
+                          href={`/user/${player.seller_id}`}
+                          className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+                        >
+                          <span className="text-lg font-medium text-white font-display">
+                            En propiedad
+                          </span>
+                          {player.seller_icon && (
+                            <Image
+                              src={player.seller_icon}
+                              alt="Owner"
+                              width={18}
+                              height={18}
+                              className="rounded-full border border-white/20"
+                            />
+                          )}
+                        </Link>
+                      ) : (
+                        <span className="text-lg font-medium text-white font-display">
+                          Mercado Libre
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
