@@ -597,7 +597,7 @@ export async function getMarketOpportunities(limit = 3): Promise<MarketOpportuni
   return rows
     .map((row: any) => {
       const form = formMap.get(Number(row.player_id));
-      const avg = form?.avg_recent_points || 0;
+      const avg = form?.avg_form_score || 0;
       return {
         ...row,
         avg_recent_points: avg,

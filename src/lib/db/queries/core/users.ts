@@ -458,7 +458,7 @@ export async function getCaptainRecommendations(
   return squadRows
     .map((row: any) => {
       const form = formMap.get(Number(row.player_id));
-      const avg = form?.avg_recent_points || 0;
+      const avg = form?.avg_form_score || 0;
 
       let formLabel = 'Forma baja';
       if (avg >= 25) formLabel = 'Excelente forma';

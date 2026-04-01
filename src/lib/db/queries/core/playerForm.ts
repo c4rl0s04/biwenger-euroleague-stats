@@ -10,7 +10,8 @@ import { pgClient } from '../../index';
 export interface PlayerFormEntry {
   player_id: number;
   recent_scores: string;
-  avg_recent_points: number;
+  avg_recent_points: number; // Average only over rounds played
+  avg_form_score: number; // Average over all team rounds in window (DNPs = 0)
 }
 
 /**
@@ -21,10 +22,6 @@ export interface PlayerFormEntry {
  *  - LEFT JOINs player stats: if a player has no row for a finished team match → 'X' (DNP).
  *  - If a player played and scored 0, it shows as '0' and counts toward the average.
  *  - Live/upcoming matches are excluded (status = 'finished' only).
- *
- * Usage:
- *   const formMap = await getPlayerFormMap();
- *   const form = formMap.get(playerId); // { recent_scores: "12,X,7", avg_recent_points: 9.5 }
  *
  * @param limit - Number of recent team matches to consider (default: 5)
  * @returns Map keyed by player_id
@@ -59,10 +56,21 @@ export async function getPlayerFormMap(limit: number = 5): Promise<Map<number, P
 
   const map = new Map<number, PlayerFormEntry>();
   for (const row of rows) {
+    const scores = (row.recent_scores ?? '').split(',');
+    // Calculate form score by treating 'X' as 0 and dividing by the limit
+    const totalPoints = scores.reduce((sum: number, s: string) => {
+      if (s === 'X') return sum;
+      return sum + (parseFloat(s) || 0);
+    }, 0);
+
+    // Divide by the requested 'limit' to penalize missing games
+    const avgFormScore = totalPoints / limit;
+
     map.set(Number(row.player_id), {
       player_id: Number(row.player_id),
       recent_scores: row.recent_scores ?? '',
       avg_recent_points: parseFloat(row.avg_recent_points) || 0,
+      avg_form_score: parseFloat(avgFormScore.toFixed(2)),
     });
   }
   return map;

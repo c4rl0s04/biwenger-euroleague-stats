@@ -125,7 +125,7 @@ export async function getTopPlayersByForm(
 
   // 2. Identify the top players by form from the map
   const topFormEntries = Array.from(formMap.values())
-    .sort((a, b) => b.avg_recent_points - a.avg_recent_points)
+    .sort((a, b) => b.avg_form_score - a.avg_form_score)
     .slice(0, limit * 2); // Fetch extra for safety
 
   if (topFormEntries.length === 0) return [];
@@ -169,7 +169,7 @@ export async function getTopPlayersByForm(
         id: Number(row.id),
         total_points: parseInt(row.total_points) || 0,
         games_played: parseInt(row.games_played) || 0,
-        avg_points: form?.avg_recent_points || 0,
+        avg_points: form?.avg_form_score || 0,
         recent_scores: form?.recent_scores || '',
       };
     })
