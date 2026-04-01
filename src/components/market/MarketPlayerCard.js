@@ -360,9 +360,11 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
 
       <button
         onClick={onToggleExpand}
-        className="w-full py-3.5 bg-white/5 hover:bg-primary/20 text-xs font-black font-display uppercase tracking-[0.2em] text-white/50 hover:text-white flex items-center justify-center gap-2 transition-all duration-300 border-t border-white/5 cursor-pointer flex-shrink-0 group-hover:bg-primary/10"
+        className="w-full py-4 bg-white/[0.03] hover:bg-white/5 text-[13px] font-black font-sans uppercase tracking-[0.1em] text-white/70 hover:text-white flex items-center justify-center gap-2 transition-colors duration-300 border-t border-white/5 cursor-pointer flex-shrink-0 group/btn"
       >
-        Analizar Fichaje
+        <span className="transition-transform duration-300 origin-center group-hover/btn:scale-[1.05] inline-block">
+          Analizar Fichaje
+        </span>
       </button>
     </div>
   );
