@@ -2379,10 +2379,10 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       ...row,
       recent_scores: form?.recent_scores ?? null,
       avg_recent_points: form?.avg_recent_points ?? 0,
-      // value_score computed here now that we have avg_recent_points
-      value_score: form?.avg_recent_points
+      // value_score computed here using season total points vs current price
+      value_score: row.total_points
         ? parseFloat(
-            ((form.avg_recent_points * 1_000_000) / Math.max(Number(row.price), 1)).toFixed(2)
+            ((Number(row.total_points) * 1_000_000) / Math.max(Number(row.price), 1)).toFixed(2)
           )
         : 0,
     };
@@ -2423,7 +2423,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     totalScore += Math.max(0, attendanceScore);
 
     // - Rentabilidad / Value (10%)
-    let profitabilityScore = Math.min(value_score / 35, 1) * 10;
+    let profitabilityScore = Math.min(value_score / 100, 1) * 10;
     totalScore += Math.max(0, profitabilityScore);
 
     // - Flujo Diario (5%)

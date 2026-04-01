@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TrendingUp, TrendingDown, Star, Activity, Calendar, X } from 'lucide-react';
@@ -484,8 +485,22 @@ function CardBack({
                 <span className="text-[11px] text-white uppercase tracking-wider font-bold">
                   Calidad/Precio
                 </span>
-                <span className="text-xl font-bold text-sky-400 tabular-nums leading-none mt-0.5 font-display">
+                <span
+                  className={clsx(
+                    'text-xl font-bold tabular-nums leading-none mt-0.5 font-display',
+                    (player.value_score || 0) >= 25
+                      ? 'text-emerald-400'
+                      : (player.value_score || 0) >= 15
+                        ? 'text-sky-400'
+                        : (player.value_score || 0) >= 8
+                          ? 'text-amber-400'
+                          : (player.value_score || 0) > 0
+                            ? 'text-rose-400'
+                            : 'text-white'
+                  )}
+                >
                   {(player.value_score || 0).toFixed(1)}
+                  <span className="text-[10px] opacity-60 ml-0.5 font-sans">pts/M</span>
                 </span>
               </div>
               <div className="bg-white/4 border border-white/8 rounded-xl p-2 flex flex-col gap-0.5">
