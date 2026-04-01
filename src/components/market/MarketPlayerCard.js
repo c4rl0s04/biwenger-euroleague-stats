@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { TrendingUp, TrendingDown, Star, Activity, Calendar, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApiData } from '@/lib/hooks/useApiData';
@@ -60,6 +61,30 @@ function getPurchaseHeuristic(player) {
       icon: <Star size={11} className="mr-1" />,
     };
   }
+}
+
+function getTeamColorByName(teamName) {
+  if (!teamName) return '#ffffff';
+  const name = teamName.toLowerCase();
+  if (name.includes('madrid')) return '#FEBE10';
+  if (name.includes('barcelona')) return '#ED2939';
+  if (name.includes('baskonia')) return '#B40039';
+  if (name.includes('valencia')) return '#F39200';
+  if (name.includes('olympiacos')) return '#E2001A';
+  if (name.includes('panathinaikos')) return '#007934';
+  if (name.includes('fenerbahce')) return '#F0C405';
+  if (name.includes('efes')) return '#2249AB';
+  if (name.includes('monaco')) return '#E31B23';
+  if (name.includes('maccabi')) return '#F9D308';
+  if (name.includes('partizan') || name.includes('virtus') || name.includes('asvel'))
+    return '#E4E4E7';
+  if (name.includes('zalgiris')) return '#006737';
+  if (name.includes('milano')) return '#DA291C';
+  if (name.includes('bayern')) return '#DC052D';
+  if (name.includes('alba')) return '#FFCD00';
+  if (name.includes('zvezda')) return '#E31B23';
+  if (name.includes('paris')) return '#27C4F3';
+  return '#ffffff';
 }
 
 const positionColors = {
@@ -184,7 +209,10 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
         className={`h-1 w-full flex-shrink-0 bg-gradient-to-r from-transparent ${heuristic.accent} to-transparent opacity-80`}
       />
 
-      <div className="p-4 flex-1 flex flex-col gap-4">
+      <Link
+        href={`/player/${player.player_id}`}
+        className="p-4 flex-1 flex flex-col gap-4 group/link hover:bg-white/[0.03] transition-colors"
+      >
         {/* Identity */}
         <div className="flex items-center gap-3">
           <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex-shrink-0 flex items-center justify-center">
@@ -202,8 +230,9 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
           </div>
           <div className="flex-1 min-w-0">
             <h3
-              className="text-[22px] font-display font-bold text-white leading-none truncate tracking-wide uppercase mt-0.5"
+              className="text-[22px] font-display font-bold text-white leading-none truncate tracking-wide uppercase mt-0.5 transition-all duration-300 origin-left group-hover/link:scale-[1.03] group-hover/link:text-[var(--team-color)] inline-block max-w-full drop-shadow-md"
               title={player.name}
+              style={{ '--team-color': getTeamColorByName(player.team) }}
             >
               {player.name}
             </h3>
@@ -311,7 +340,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
             </div>
           )}
         </div>
-      </div>
+      </Link>
 
       <button
         onClick={onToggleExpand}
