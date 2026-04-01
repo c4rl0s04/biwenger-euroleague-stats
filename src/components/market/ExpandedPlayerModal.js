@@ -608,7 +608,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
               <div className="pt-2">
                 <a
                   href={`/player/${player.player_id}`}
-                  className="flex justify-center items-center w-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-400 font-black text-[18px] uppercase tracking-[0.2em] py-5 rounded-xl transition-all group cursor-pointer font-display"
+                  className="flex justify-center items-center w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary font-black text-[18px] uppercase tracking-[0.2em] py-5 rounded-xl transition-all group cursor-pointer font-display"
                 >
                   Ver Informe Completo en BiwengerStats
                   <TrendingUp
