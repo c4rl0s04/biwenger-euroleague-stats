@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, X, Euro } from 'lucide-react';
+import { Search, Filter, X, Euro, SortAsc, SortDesc } from 'lucide-react';
 import { Section } from '@/components/layout';
 import MarketPlayerCard from './MarketPlayerCard';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -12,6 +12,8 @@ export default function MarketListingsSection({ listings = [] }) {
   const [filterTeam, setFilterTeam] = useState('all');
   const [maxPrice, setMaxPrice] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('value_score');
+  const [sortDirection, setSortDirection] = useState('desc'); // Add sortDirection state
   const [expandedPlayerId, setExpandedPlayerId] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null); // For Level 2 Expansion
 
@@ -33,9 +35,9 @@ export default function MarketListingsSection({ listings = [] }) {
     return Array.from(pos).sort();
   }, [listings]);
 
-  // Apply filters
+  // Apply filters AND sorting
   const filteredListings = useMemo(() => {
-    return listings.filter((player) => {
+    const list = listings.filter((player) => {
       // Owner Logic
       const isFree =
         !player.seller_name || player.seller_name === 'Mercado' || player.seller_id === null;
@@ -57,7 +59,26 @@ export default function MarketListingsSection({ listings = [] }) {
 
       return true;
     });
-  }, [listings, filterOwner, filterPosition, filterTeam, maxPrice, searchQuery]);
+
+    // Apply Sorting
+    return list.sort((a, b) => {
+      const valA = a[sortBy] ?? 0;
+      const valB = b[sortBy] ?? 0;
+
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [
+    listings,
+    filterOwner,
+    filterPosition,
+    filterTeam,
+    maxPrice,
+    searchQuery,
+    sortBy,
+    sortDirection,
+  ]);
 
   // Reset Filters
   const handleResetFilters = () => {
@@ -66,6 +87,8 @@ export default function MarketListingsSection({ listings = [] }) {
     setFilterTeam('all');
     setMaxPrice('');
     setSearchQuery('');
+    setSortBy('value_score');
+    setSortDirection('desc');
   };
 
   if (!listings || listings.length === 0) {
@@ -157,10 +180,43 @@ export default function MarketListingsSection({ listings = [] }) {
               />
             </div>
 
-            {/* Price Filter */}
-            <div className="w-[48%] md:w-[110px] shrink-0 space-y-1.5">
+            {/* Sort Selection */}
+            <div className="w-[48%] md:w-[165px] shrink-0 space-y-1.5">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
-                PRECIO MÁX.
+                ORDENAR
+              </span>
+              <CustomSelect
+                value={sortBy}
+                onChange={setSortBy}
+                options={[
+                  { value: 'value_score', label: 'Calidad/Precio' },
+                  { value: 'total_points', label: 'Puntos Totales' },
+                  { value: 'price', label: 'Precio' },
+                  { value: 'price_trend', label: 'Flujo Diario' },
+                  { value: 'avg_recent_points', label: 'Media Reciente' },
+                ]}
+                placeholder="Valor..."
+              />
+            </div>
+
+            {/* Sort Direction Toggle */}
+            <div className="shrink-0 space-y-1.5">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 opacity-0 select-none block">
+                DIR
+              </span>
+              <button
+                onClick={() => setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                className="h-10 w-10 flex items-center justify-center bg-secondary/50 border border-border/50 rounded-lg hover:bg-secondary/80 transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
+                title={sortDirection === 'asc' ? 'Orden Ascendente' : 'Orden Descendente'}
+              >
+                {sortDirection === 'asc' ? <SortAsc size={18} /> : <SortDesc size={18} />}
+              </button>
+            </div>
+
+            {/* Price Filter */}
+            <div className="w-[48%] md:w-[100px] shrink-0 space-y-1.5">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                PRECIO MÁX
               </span>
               <div className="relative">
                 <Euro
