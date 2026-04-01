@@ -202,7 +202,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
           </div>
           <div className="flex-1 min-w-0">
             <h3
-              className="text-lg font-black text-white leading-tight truncate tracking-tight uppercase"
+              className="text-[22px] font-display font-bold text-white leading-none truncate tracking-wide uppercase mt-0.5"
               title={player.name}
             >
               {player.name}
@@ -210,9 +210,9 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
             <div className="flex items-center gap-2 mt-1.5">
               {player.position && (
                 <span
-                  className={`text-sm font-bold px-2 py-0.5 rounded border ${posStyle.text} ${posStyle.bg} uppercase tracking-wide flex-shrink-0 leading-none font-display`}
+                  className={`text-[15px] font-display font-medium px-2.5 py-0.5 rounded border ${posStyle.text} ${posStyle.bg} uppercase tracking-widest flex-shrink-0 leading-none mt-0.5`}
                 >
-                  {posStyle.initial}
+                  {player.position === 'Pivot' ? 'Pívot' : player.position}
                 </span>
               )}
             </div>
@@ -242,9 +242,12 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
             <span className="text-base text-white/40 font-normal ml-1">€</span>
           </p>
           {player.real_price != null && (
-            <p className="text-[10px] text-muted-foreground/80 tabular-nums leading-none mt-2 font-bold uppercase tracking-wider">
-              Valor real: {new Intl.NumberFormat('es-ES').format(player.real_price)}
-              <span className="text-white/25 ml-0.5">€</span>
+            <p className="text-[11px] text-muted-foreground/80 tabular-nums leading-none mt-2 font-black uppercase tracking-wider font-sans">
+              Valor real:{' '}
+              <span className="text-white/80">
+                {new Intl.NumberFormat('es-ES').format(player.real_price)}
+              </span>
+              <span className="text-white/50 ml-0.5">€</span>
             </p>
           )}
         </div>
@@ -252,15 +255,15 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
         {/* Form */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] text-white/30 uppercase tracking-widest font-black">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black font-sans">
               Forma reciente
             </span>
-            <span className="text-[10px] text-white/30 font-display">
-              Media:{' '}
-              <span className="text-emerald-400 font-bold">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-black font-sans flex items-center">
+              Media:
+              <span className="text-emerald-400 font-display text-[15px] leading-none ml-1.5 mr-0.5 translate-y-[1px]">
                 {player.avg_recent_points?.toFixed(1) || '0.0'}
-              </span>{' '}
-              pts
+              </span>
+              <span className="text-[9px]">pts</span>
             </span>
           </div>
           <div className="flex gap-1">
@@ -273,7 +276,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
         {/* Heuristic + Seller */}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
           <div
-            className={`flex items-center text-[10px] font-display uppercase tracking-wider px-2.5 py-1 rounded-lg border shadow-sm ${heuristic.color}`}
+            className={`flex items-center text-[9px] font-sans font-black uppercase tracking-wider px-2 py-1 rounded-lg border shadow-sm whitespace-nowrap overflow-hidden text-ellipsis ${heuristic.color}`}
           >
             {heuristic.icon}
             {heuristic.label}
@@ -287,8 +290,8 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
               }}
             >
               <span
-                className="text-[10px] font-display capitalize"
-                style={{ color: sellerColor || 'rgba(255,255,255,0.5)' }}
+                className="text-[10px] font-sans font-black uppercase tracking-wider mt-0.5 truncate max-w-20"
+                style={{ color: sellerColor || 'rgba(255,255,255,0.7)' }}
               >
                 {player.seller_name}
               </span>
@@ -302,7 +305,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
             </div>
           ) : (
             <div className="px-2.5 py-1 rounded-full border border-white/5 bg-white/5 shadow-sm">
-              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-tight font-display">
+              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider font-sans mt-0.5 inline-block">
                 Biwenger
               </span>
             </div>
