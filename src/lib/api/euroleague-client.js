@@ -21,14 +21,62 @@ const HEADERS = {
   Accept: '*/*',
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Generic fetch wrapper for Euroleague API with Retry Logic and Polite Delay
+ * @param {string} url - Full URL to fetch
+ * @param {object} options - Internal options for retries
+ * @returns {Promise<Response>} - Fetch response
+ */
+async function euroleagueFetch(url, options = {}) {
+  const { retries = 3, retryDelay = 2000 } = options;
+
+  // Polite Delay (300ms) to avoid rate limits
+  await sleep(300);
+
+  try {
+    const response = await fetch(url, { headers: HEADERS });
+
+    // Retry only on Server Errors (500, 502, 503, 504)
+    if ([500, 502, 503, 504].includes(response.status) && retries > 0) {
+      console.warn(
+        `⚠️ Euroleague API ${response.status} at ${url}. Retrying in ${retryDelay}ms... (${retries} left)`
+      );
+      await sleep(retryDelay);
+      return euroleagueFetch(url, {
+        ...options,
+        retries: retries - 1,
+        retryDelay: retryDelay * 2,
+      });
+    }
+
+    if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
+
+    return response;
+  } catch (error) {
+    // Retry on network errors or status errors (except 4xx which are usually permanent)
+    if (retries > 0 && !error.message.includes('error: 4')) {
+      console.warn(
+        `⚠️ Euroleague fetch failed: ${error.message}. Retrying in ${retryDelay}ms... (${retries} left)`
+      );
+      await sleep(retryDelay);
+      return euroleagueFetch(url, {
+        ...options,
+        retries: retries - 1,
+        retryDelay: retryDelay * 2,
+      });
+    }
+    throw error;
+  }
+}
+
 export async function fetchTeams(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   // V1 API uses api-live domain
   const url = `${API_V1_URL}/v1/teams?seasonCode=${season}&competitionCode=E`;
 
   try {
-    const response = await fetch(url, { headers: HEADERS });
-    if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
-
+    const response = await euroleagueFetch(url);
     const xml = await response.text();
     const result = parser.parse(xml);
     return result;
@@ -42,9 +90,7 @@ export async function fetchSchedule(season = CONFIG.EUROLEAGUE.SEASON_CODE) {
   const url = `${API_V1_URL}/v1/schedules?seasonCode=${season}&competitionCode=E`;
 
   try {
-    const response = await fetch(url, { headers: HEADERS });
-    if (!response.ok) throw new Error(`Euroleague API error: ${response.status}`);
-
+    const response = await euroleagueFetch(url);
     const xml = await response.text();
     const result = parser.parse(xml);
 
@@ -65,11 +111,7 @@ export async function fetchBoxScore(gameCode, season = CONFIG.EUROLEAGUE.SEASON_
   const url = `${API_LEGACY_URL}/Boxscore?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
-    const response = await fetch(url, { headers: HEADERS });
-
-    if (!response.ok) {
-      throw new Error(`Euroleague API error: ${response.status}`);
-    }
+    const response = await euroleagueFetch(url);
 
     // Check if response is empty (future game)
     const text = await response.text();
@@ -96,11 +138,7 @@ export async function fetchGameHeader(gameCode, season = CONFIG.EUROLEAGUE.SEASO
   const url = `${API_LEGACY_URL}/Header?gamecode=${gameCode}&seasoncode=${season}`;
 
   try {
-    const response = await fetch(url, { headers: HEADERS });
-
-    if (!response.ok) {
-      throw new Error(`Euroleague API error: ${response.status}`);
-    }
+    const response = await euroleagueFetch(url);
 
     // Check if response is empty (future game)
     const text = await response.text();

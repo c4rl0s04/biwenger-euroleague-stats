@@ -1,5 +1,7 @@
-import { fetchRoundsLeague } from '../../../api/biwenger-client';
+import { fetchRoundsLeague, fetchPlayerDetails } from '../../../api/biwenger-client';
 import { prepareUserMutations } from '../../../db/mutations/users';
+import { preparePlayerMutations } from '../../../db/mutations/players';
+import { CONFIG } from '../../../config';
 import { SyncManager } from '../../manager';
 
 /**
@@ -40,6 +42,8 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
     if (standings) {
       // Initialize Mutations
       const mutations = prepareUserMutations(db as any);
+      const playerMutations = preparePlayerMutations(db as any);
+      const positions: any = CONFIG.POSITIONS;
 
       for (const user of standings) {
         // Insert user info
@@ -87,13 +91,38 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
               if (index < 5) role = 'titular';
               else if (index === 5) role = '6th_man';
 
-              // Handle missing players (e.g. left the league)
+              // Handle missing players (e.g. left the league, DNP, etc)
               if (!playersList[playerId]) {
-                manager.log(
-                  `      ⚠️ Player ${playerId} not in list. Skipping details fetch (User requested).`
-                );
-                // We do NOT fetch/insert into players table.
-                // We proceed to insert the lineup row with the ID (Ghost Player).
+                manager.log(`      🛠️  Repairing missing player ${playerId}...`);
+                try {
+                  const details = await fetchPlayerDetails(playerId);
+                  if (details.data) {
+                    const d = details.data;
+                    await playerMutations.upsertPlayer({
+                      id: playerId,
+                      name: d.name,
+                      team_id: d.team?.id || 0,
+                      position: positions[d.position] || 'Unknown',
+                      puntos: d.points || 0,
+                      partidos_jugados: 0,
+                      played_home: 0,
+                      played_away: 0,
+                      points_home: 0,
+                      points_away: 0,
+                      points_last_season: 0,
+                      status: 'ok',
+                      price_increment: 0,
+                      price: d.price || 0,
+                      img: d.img || `https://cdn.biwenger.com/players/euroleague/${playerId}.png`,
+                    });
+                    // Add to list to avoid re-fetching in this run
+                    playersList[playerId] = { id: playerId, name: d.name };
+                  }
+                } catch (repairError: any) {
+                  manager.error(
+                    `      ❌ Failed to repair player ${playerId}: ${repairError.message}`
+                  );
+                }
               }
 
               // Proceed even if not in list (table has no FK constraint on player_id based on schema.js check)
