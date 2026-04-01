@@ -34,20 +34,20 @@ export default function AppShell({ children }) {
                 {/* Brand Section */}
                 <div className="col-span-1 md:col-span-2 space-y-6">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-2xl font-black font-sans bg-gradient-to-br from-white via-white to-primary/80 bg-clip-text text-transparent tracking-tighter">
-                      Biwenger<span className="text-primary italic">Stats</span>
+                    <h3 className="text-3xl font-display tracking-wide bg-gradient-to-br from-white via-white to-primary/80 bg-clip-text text-transparent">
+                      Biwenger<span className="text-primary">Stats</span>
                     </h3>
                   </div>
                   <p className="text-sm text-slate-400 leading-relaxed max-w-sm font-sans">
-                    The ultimate analytical companion for Euroleague Biwenger managers. Master your
-                    league with real-time data, deep performance metrics, and elite-level visual
-                    tools.
+                    El compañero analítico definitivo para mánagers de Biwenger Euroliga. Domina tu
+                    liga con datos en tiempo real, métricas de rendimiento avanzadas y herramientas
+                    visuales de élite.
                   </p>
                 </div>
 
                 {/* Navigation Columns */}
                 <div className="space-y-6">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.1em] text-white/40 font-sans">
+                  <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-sans">
                     Project
                   </h4>
                   <ul className="space-y-3 text-sm font-medium text-slate-400">
@@ -83,7 +83,7 @@ export default function AppShell({ children }) {
 
                 {/* Social & Version */}
                 <div className="space-y-6">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.1em] text-white/40 font-sans">
+                  <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-sans">
                     Comunidad
                   </h4>
                   <div className="flex gap-4">
@@ -124,7 +124,7 @@ export default function AppShell({ children }) {
                 <p className="text-[11px] font-medium text-slate-500 font-sans tracking-wide">
                   © 2026 BiwengerStats. Built for the European Basketball Community.
                 </p>
-                <div className="flex gap-8 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">
+                <div className="flex gap-8 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
                   <span className="cursor-pointer hover:text-white transition-colors">
                     Privacidad
                   </span>
