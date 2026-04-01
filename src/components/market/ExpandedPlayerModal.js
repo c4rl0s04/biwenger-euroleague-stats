@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getTeamColor } from '@/lib/constants/teamColors';
+import { calculateTargetPrice } from '@/lib/utils/player-finance';
 
 export default function ExpandedPlayerModal({ player, onClose }) {
   const [mounted, setMounted] = useState(false);
@@ -92,15 +93,8 @@ export default function ExpandedPlayerModal({ player, onClose }) {
   // Ensure we always map 3 blocks even if empty
   const calendarBlocks = [0, 1, 2].map((i) => nextMatches[i] || null);
 
-  // Suggested Purchase based on the new recommendation score
-  let multiplier = 0.95; // Default lower target (Compra Arriesgada / Evitar)
-  if (player.recommendation_score >= 90)
-    multiplier = 1.3; // Fichaje Obligatorio
-  else if (player.recommendation_score >= 75)
-    multiplier = 1.15; // Compra Excelente
-  else if (player.recommendation_score >= 50) multiplier = 1.05; // Compra Normal
-
-  const targetPrice = Math.round(player.price * multiplier);
+  // Suggested Purchase based on the new recommendation score from centralized utility
+  const targetPrice = calculateTargetPrice(player?.price, player?.recommendation_score);
 
   const modalContent = (
     <motion.div
