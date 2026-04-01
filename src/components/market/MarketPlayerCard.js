@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, Star, Activity, Calendar, X } from 'lucide-re
 import { motion } from 'framer-motion';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/utils/format';
+import { getColorForUser } from '@/lib/constants/colors';
 
 function getPurchaseHeuristic(player) {
   // Use the advanced 0-100 algorithm recommendation from backend if available
@@ -95,19 +96,6 @@ const positionColors = {
   Pívot: { text: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/30', initial: 'P' },
   Pivot: { text: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/30', initial: 'P' },
 };
-
-const userColors = [
-  '#f43f5e',
-  '#3b82f6',
-  '#10b981',
-  '#8b5cf6',
-  '#f59e0b',
-  '#ec4899',
-  '#06b6d4',
-  '#84cc16',
-  '#a855f7',
-  '#14b8a6',
-];
 
 function ScoreBar({ score }) {
   if (score === null || score === 'X') {
@@ -200,8 +188,12 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
   const displayScores = Array(5)
     .fill(null)
     .map((_, i) => recentScores[i] ?? null);
-  const sellerColor =
-    player.seller_color != null ? userColors[player.seller_color % userColors.length] : null;
+
+  const sellerUserColor =
+    player.seller_id != null
+      ? getColorForUser(player.seller_id, player.seller_name, player.seller_color)
+      : null;
+  const sellerColor = sellerUserColor?.stroke;
 
   return (
     <div
@@ -389,6 +381,12 @@ function CardBack({
 
   const priceTrendPositive = player.price_trend > 0;
   const priceTrendNeutral = player.price_trend === 0;
+
+  const ownerUserColor =
+    player.owner_id != null
+      ? getColorForUser(player.owner_id, player.owner_name, player.owner_color_index)
+      : null;
+  const ownerColor = ownerUserColor?.stroke;
 
   return (
     <div
