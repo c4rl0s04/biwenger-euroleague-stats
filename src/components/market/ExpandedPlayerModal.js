@@ -17,51 +17,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { TEAM_COLORS, DEFAULT_TEAM_COLOR } from '@/lib/constants/teamColors';
-
-const getTeamColor = (teamName) => {
-  if (!teamName) return DEFAULT_TEAM_COLOR;
-
-  const name = teamName.toUpperCase();
-  // Direct code matches
-  if (TEAM_COLORS[name]) return TEAM_COLORS[name];
-
-  // Common Name Mappings
-  const nameMap = {
-    'REAL MADRID': 'RMA',
-    BARCELONA: 'BAR',
-    'FC BARCELONA': 'BAR',
-    BASKONIA: 'BSK',
-    VALENCIA: 'VAL',
-    OLYMPIACOS: 'OLY',
-    PANATHINAIKOS: 'PAO',
-    FENERBAHCE: 'FEN',
-    'ANADOLU EFES': 'EFS',
-    MONACO: 'MON',
-    MACCABI: 'MTA',
-    PARTIZAN: 'PAR',
-    ZALGIRIS: 'ZAL',
-    MILANO: 'EA7',
-    VIRTUS: 'VIR',
-    BAYERN: 'BAY',
-    ALBA: 'ALB',
-    ASVEL: 'ASV',
-    'ESTRELLA ROJA': 'CZV',
-    'CRVENA ZVEZDA': 'CZV',
-    PARIS: 'PRS',
-    DUBAI: 'DUB',
-  };
-
-  for (const [key, code] of Object.entries(nameMap)) {
-    if (name.includes(key)) return TEAM_COLORS[code];
-  }
-
-  // Final Hash Fallback (kept for safety)
-  const colors = ['#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#a855f7', '#ef4444', '#3b82f6'];
-  let hash = 0;
-  for (let i = 0; i < teamName.length; i++) hash = teamName.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-};
+import { getTeamColor } from '@/lib/constants/teamColors';
 
 export default function ExpandedPlayerModal({ player, onClose }) {
   const [mounted, setMounted] = useState(false);

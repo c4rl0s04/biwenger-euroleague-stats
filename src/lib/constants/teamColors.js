@@ -37,7 +37,60 @@ export const TEAM_COLORS = {
 
 export const DEFAULT_TEAM_COLOR = '#A1A1AA'; // Zinc-400
 
-export function getTeamColor(teamCode) {
-  if (!teamCode) return DEFAULT_TEAM_COLOR;
-  return TEAM_COLORS[teamCode.toUpperCase()] || DEFAULT_TEAM_COLOR;
+const NAME_MAP = {
+  'REAL MADRID': 'RMA',
+  BARCELONA: 'BAR',
+  'FC BARCELONA': 'BAR',
+  BASKONIA: 'BSK',
+  VALENCIA: 'VAL',
+  OLYMPIACOS: 'OLY',
+  PANATHINAIKOS: 'PAO',
+  FENERBAHCE: 'FEN',
+  'ANADOLU EFES': 'EFS',
+  MONACO: 'MON',
+  MACCABI: 'MTA',
+  PARTIZAN: 'PAR',
+  ZALGIRIS: 'ZAL',
+  MILANO: 'EA7',
+  VIRTUS: 'VIR',
+  BAYERN: 'BAY',
+  ALBA: 'ALB',
+  ASVEL: 'ASV',
+  'ESTRELLA ROJA': 'CZV',
+  'CRVENA ZVEZDA': 'CZV',
+  PARIS: 'PRS',
+  DUBAI: 'DUB',
+};
+
+/**
+ * Get the brand color for a team based on code or name
+ */
+export function getTeamColor(identifier) {
+  if (!identifier) return DEFAULT_TEAM_COLOR;
+
+  const upper = identifier.toUpperCase();
+
+  // 1. Direct match (Code or Name as key)
+  if (TEAM_COLORS[upper]) return TEAM_COLORS[upper];
+
+  // 2. Name mapping (Matches Real Madrid -> RMA)
+  for (const [key, code] of Object.entries(NAME_MAP)) {
+    if (upper.includes(key)) return TEAM_COLORS[code];
+  }
+
+  // 3. Final Deterministic Hash Fallback (for unknown teams)
+  const fallbackColors = [
+    '#f59e0b',
+    '#ec4899',
+    '#06b6d4',
+    '#84cc16',
+    '#a855f7',
+    '#ef4444',
+    '#3b82f6',
+  ];
+  let hash = 0;
+  for (let i = 0; i < identifier.length; i++) {
+    hash = identifier.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return fallbackColors[Math.abs(hash) % fallbackColors.length];
 }
