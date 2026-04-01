@@ -1,5 +1,6 @@
 import { db, pgClient } from '../../index';
 import { getSimpleStandings as getStandings } from '../competition/standings';
+import { getPlayerFormMap } from './playerForm';
 
 export interface User {
   id: number;
@@ -51,6 +52,7 @@ export interface UserSquadDetails {
   price_trend: number;
   total_points: number;
   player_count: number;
+  position: number;
   top_rising: any[]; // refined below if needed
   top_falling: any[];
 }
@@ -434,72 +436,46 @@ export async function getCaptainRecommendations(
   userId: number | string,
   limit: number = 3
 ): Promise<CaptainRecommendation[]> {
-  const query = `
-    WITH FinishedRounds AS (
-      SELECT m.round_id
-      FROM matches m
-      GROUP BY m.round_id
-      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
-      ORDER BY m.round_id DESC
-      LIMIT 3
-    ),
-    RoundCount AS (
-      SELECT COUNT(*) as total_rounds FROM FinishedRounds
-    ),
-    UserSquadForm AS (
-      SELECT 
-        p.id as player_id,
-        p.name,
-        p.position,
-        t.id as team_id,
-        t.name as team,
-        COALESCE(ps.total_points, 0) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
-        COALESCE(ps.games_played, 0) as recent_games,
-        ps.recent_scores
-      FROM players p
-      LEFT JOIN teams t ON p.team_id = t.id
-      LEFT JOIN (
-        SELECT 
-          player_id, 
-          STRING_AGG(CAST(fantasy_points AS TEXT), ',') as recent_scores,
-          SUM(fantasy_points) as total_points,
-          COUNT(*) as games_played
-        FROM (
-          SELECT player_id, fantasy_points
-          FROM player_round_stats
-          WHERE round_id IN (SELECT round_id FROM FinishedRounds)
-          ORDER BY round_id DESC
-        ) sub
-        GROUP BY player_id
-      ) ps ON p.id = ps.player_id
-      WHERE p.owner_id = $1
-    )
+  // 1. Fetch user squad basic info
+  const squadQuery = `
     SELECT 
-      player_id,
-      name,
-      position,
-      team_id,
-      team,
-      avg_recent_points,
-      recent_games,
-      recent_scores,
-      CASE 
-        WHEN avg_recent_points >= 25 THEN 'Excelente forma'
-        WHEN avg_recent_points >= 18 THEN 'Buena forma'
-        WHEN avg_recent_points >= 12 THEN 'Forma regular'
-        ELSE 'Forma baja'
-      END as form_label
-    FROM UserSquadForm
-    WHERE avg_recent_points > 0
-    ORDER BY avg_recent_points DESC
-    LIMIT $2
+      p.id as player_id,
+      p.name,
+      p.position,
+      t.id as team_id,
+      t.name as team
+    FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
+    WHERE p.owner_id = $1
   `;
 
-  return (await pgClient.query(query, [userId, limit])).rows.map((row: any) => ({
-    ...row,
-    avg_recent_points: parseFloat(row.avg_recent_points) || 0,
-    recent_games: parseInt(row.recent_games) || 0,
-  }));
+  const [squadRows, formMap] = await Promise.all([
+    pgClient.query(squadQuery, [userId]).then((r) => r.rows),
+    getPlayerFormMap(3), // Match the original "last 3 rounds" window
+  ]);
+
+  // 2. Merge with form data and provide recommendations
+  return squadRows
+    .map((row: any) => {
+      const form = formMap.get(Number(row.player_id));
+      const avg = form?.avg_recent_points || 0;
+
+      let formLabel = 'Forma baja';
+      if (avg >= 25) formLabel = 'Excelente forma';
+      else if (avg >= 18) formLabel = 'Buena forma';
+      else if (avg >= 12) formLabel = 'Forma regular';
+
+      return {
+        ...row,
+        avg_recent_points: avg,
+        recent_games: form ? form.recent_scores.split(',').filter((s) => s !== 'X').length : 0,
+        recent_scores: form?.recent_scores || '',
+        form_label: formLabel,
+      } as CaptainRecommendation;
+    })
+    .filter((p) => p.avg_recent_points > 0)
+    .sort((a, b) => b.avg_recent_points - a.avg_recent_points)
+    .slice(0, limit);
 }
 
 /**

@@ -1,5 +1,6 @@
 import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '../core/teams';
 import { db, pgClient } from '../../index';
+import { getPlayerFormMap } from '../core/playerForm';
 
 // ==========================================
 // INTERFACES
@@ -568,30 +569,9 @@ export async function getMarketTrends(): Promise<MarketTrend[]> {
  * @returns {Promise<MarketOpportunity[]>} List of recommended buys
  */
 export async function getMarketOpportunities(limit = 3): Promise<MarketOpportunity[]> {
+  // 1. Fetch available players basic info
+  // Fetch more than 'limit' to ensure we can rank them correctly by value_score
   const query = `
-    WITH RecentRounds AS (
-      SELECT DISTINCT round_id
-      FROM player_round_stats
-      ORDER BY round_id DESC
-      LIMIT 3
-    ),
-    RoundCount AS (
-      SELECT COUNT(*) as total_rounds FROM RecentRounds
-    ),
-    PlayerForm AS (
-      SELECT 
-        player_id,
-        SUM(fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount) as avg_recent_points,
-        STRING_AGG(CAST(fantasy_points AS TEXT), ',') as recent_scores
-      FROM (
-        SELECT player_id, fantasy_points
-        FROM player_round_stats
-        WHERE round_id IN (SELECT round_id FROM RecentRounds)
-        ORDER BY round_id DESC
-      ) sub
-      GROUP BY player_id
-      HAVING COUNT(*) >= 1
-    )
     SELECT 
       p.id as player_id,
       p.name,
@@ -599,24 +579,36 @@ export async function getMarketOpportunities(limit = 3): Promise<MarketOpportuni
       t.id as team_id,
       t.name as team,
       p.price,
-      COALESCE(p.price_increment, 0) as price_trend,
-      COALESCE(pf.avg_recent_points, 0) as avg_recent_points,
-      pf.recent_scores,
-      ROUND(COALESCE(pf.avg_recent_points, 0) * 1000000.0 / NULLIF(p.price, 0), 2) as value_score
+      COALESCE(p.price_increment, 0) as price_trend
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN PlayerForm pf ON p.id = pf.player_id
     WHERE p.owner_id IS NULL
       AND p.price > 0
-    ORDER BY value_score DESC, price_trend DESC
-    LIMIT $1
+    ORDER BY p.price_increment DESC
+    LIMIT 100
   `;
 
-  return (await pgClient.query(query, [limit])).rows.map((row: any) => ({
-    ...row,
-    avg_recent_points: parseFloat(row.avg_recent_points) || 0,
-    value_score: parseFloat(row.value_score) || 0,
-  }));
+  const [rows, formMap] = await Promise.all([
+    pgClient.query(query).then((r) => r.rows),
+    getPlayerFormMap(3),
+  ]);
+
+  // 2. Merge with form data and rank by value_score
+  return rows
+    .map((row: any) => {
+      const form = formMap.get(Number(row.player_id));
+      const avg = form?.avg_recent_points || 0;
+      return {
+        ...row,
+        avg_recent_points: avg,
+        recent_scores: form?.recent_scores || '',
+        // Value score based on form performance per millon
+        value_score:
+          avg > 0 ? parseFloat(((avg * 1000000) / Math.max(Number(row.price), 1)).toFixed(2)) : 0,
+      };
+    })
+    .sort((a, b) => b.value_score - a.value_score || b.price_trend - a.price_trend)
+    .slice(0, limit);
 }
 
 /**
@@ -2306,28 +2298,7 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
  */
 export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]> {
   const query = `
-    RecentMatchInfo AS (
-      SELECT 
-        t.id as team_id,
-        m.round_id,
-        m.date as match_date,
-        ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date DESC) as team_rn
-      FROM teams t
-      JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
-      WHERE m.status = 'finished'
-    ),
-    PlayerForm AS (
-      SELECT 
-        p_sub.id as player_id,
-        AVG(prs.fantasy_points) as avg_recent_points,
-        STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rmi.match_date DESC) as recent_scores
-      FROM players p_sub
-      JOIN RecentMatchInfo rmi ON p_sub.team_id = rmi.team_id
-      LEFT JOIN player_round_stats prs ON p_sub.id = prs.player_id AND rmi.round_id = prs.round_id
-      WHERE rmi.team_rn <= 5
-      GROUP BY p_sub.id
-    ),
-    PlayerTotals AS (
+    WITH PlayerTotals AS (
       SELECT 
         player_id,
         (SELECT COUNT(*) FROM player_round_stats WHERE player_id = prs.player_id) as games_played,
@@ -2372,9 +2343,6 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       ml.price,
       p.price as real_price,
       COALESCE(p.price_increment, 0) as price_trend,
-      COALESCE(pf.avg_recent_points, 0) as avg_recent_points,
-      pf.recent_scores,
-      ROUND(COALESCE(pf.avg_recent_points, 0) * 1000000.0 / NULLIF(ml.price, 0), 2) as value_score,
       COALESCE(pt.total_points, 0) as total_points,
       COALESCE(pt.season_avg, 0) as season_avg,
       pt.min_points,
@@ -2393,19 +2361,32 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     JOIN players p ON ml.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON ml.seller_id::text = u.id::text
-    LEFT JOIN PlayerForm pf ON p.id = pf.player_id
     LEFT JOIN PlayerTotals pt ON p.id = pt.player_id
     LEFT JOIN TeamNextMatch tnm ON tnm.team_id = p.team_id
     WHERE ml.listed_at = (SELECT MAX(listed_at) FROM market_listings)
-    ORDER BY value_score DESC NULLS LAST, price_trend DESC, ml.price DESC
+    ORDER BY pt.season_avg DESC NULLS LAST, ml.price DESC
   `;
 
-  const [teamPlayoffProbs, teamMatchCounts] = await Promise.all([
+  const [teamPlayoffProbs, teamMatchCounts, formMap] = await Promise.all([
     getAllTeamsPlayoffProbabilities(),
     getAllTeamMatchesCount(),
+    getPlayerFormMap(),
   ]);
 
-  const rows = (await pgClient.query(query)).rows;
+  const rows = (await pgClient.query(query)).rows.map((row: any) => {
+    const form = formMap.get(Number(row.player_id));
+    return {
+      ...row,
+      recent_scores: form?.recent_scores ?? null,
+      avg_recent_points: form?.avg_recent_points ?? 0,
+      // value_score computed here now that we have avg_recent_points
+      value_score: form?.avg_recent_points
+        ? parseFloat(
+            ((form.avg_recent_points * 1_000_000) / Math.max(Number(row.price), 1)).toFixed(2)
+          )
+        : 0,
+    };
+  });
 
   const mappedRows = rows.map((row: any) => {
     // 1. Raw Stats

@@ -1,5 +1,6 @@
 import { db, pgClient } from '../../index';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
+import { getPlayerFormMap } from './playerForm';
 import { getPlayerPriceHistory, getPlayerTransfers } from '../features/market';
 import { getTeamUpcomingMatches } from '../competition/matches';
 import { getTeamMatchesCount, getTeamPlayoffProbability } from './teams';
@@ -86,45 +87,29 @@ export async function getPlayerMatchesPlayed(playerId: number | string): Promise
  */
 export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
   const query = `
-    RecentMatchInfo AS (
-      SELECT 
-        t.id as team_id,
-        m.round_id,
-        m.date as match_date,
-        ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date DESC) as team_rn
-      FROM teams t
-      JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
-      WHERE m.status = 'finished'
-    ),
-    RecentScores AS (
-      SELECT 
-        p_sub.id as player_id,
-        STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rmi.match_date DESC) as recent_scores
-      FROM players p_sub
-      JOIN RecentMatchInfo rmi ON p_sub.team_id = rmi.team_id
-      LEFT JOIN player_round_stats prs ON p_sub.id = prs.player_id AND rmi.round_id = prs.round_id
-      WHERE rmi.team_rn <= 5
-      GROUP BY p_sub.id
-    )
     SELECT 
       p.id, p.name, p.img, t.id as team_id, t.name as team_name,
         t.code as team_code, p.position, p.price,
       p.puntos as points, 
       ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
       p.owner_id,
-      u.name as owner_name, u.color_index as owner_color_index,
-      rs.recent_scores
+      u.name as owner_name, u.color_index as owner_color_index
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id
-    LEFT JOIN RecentScores rs ON p.id = rs.player_id
     ORDER BY p.puntos DESC 
     LIMIT $1
   `;
-  // Note: Adjusted SELECT columns to match interface (team -> team_name) somewhat, or rely on loose mapping
-  return (await pgClient.query(query, [limit])).rows.map((row: any) => ({
+
+  const [rows, formMap] = await Promise.all([
+    pgClient.query(query, [limit]).then((r) => r.rows),
+    getPlayerFormMap(),
+  ]);
+
+  return rows.map((row: any) => ({
     ...row,
     average: parseFloat(row.average) || 0,
+    recent_scores: formMap.get(Number(row.id))?.recent_scores ?? null,
   }));
 }
 
@@ -135,66 +120,61 @@ export async function getTopPlayersByForm(
   limit: number = 5,
   rounds: number = 3
 ): Promise<PlayerRecentForm[]> {
+  // 1. Get the form map for everyone with the specified round window
+  const formMap = await getPlayerFormMap(rounds);
+
+  // 2. Identify the top players by form from the map
+  const topFormEntries = Array.from(formMap.values())
+    .sort((a, b) => b.avg_recent_points - a.avg_recent_points)
+    .slice(0, limit * 2); // Fetch extra for safety
+
+  if (topFormEntries.length === 0) return [];
+
+  const playerIds = topFormEntries.map((e) => e.player_id);
+
+  // 3. Fetch metadata for these specific players
   const query = `
-    WITH RecentRounds AS (
-      SELECT m.round_id
-      FROM matches m
-      GROUP BY m.round_id
-      HAVING COUNT(*) = SUM(CASE WHEN m.status = 'finished' THEN 1 ELSE 0 END)
-      ORDER BY m.round_id DESC
-      LIMIT $1
-    ),
-    RoundCount AS (
-      SELECT COUNT(*) as total_rounds FROM RecentRounds
-    ),
-    OrderedStats AS (
-      SELECT prs.* FROM player_round_stats prs
-      WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
-      ORDER BY prs.round_id DESC
-    ),
-    PlayerFormStats AS (
-      SELECT 
-        os.player_id,
-        p.name,
-        p.position,
-        t.id as team_id,
-        t.name as team_name,
-        t.code as team_code,
-        p.owner_id,
-        u.name as owner_name, u.color_index as owner_color_index,
-        SUM(os.fantasy_points) as total_points,
-        ROUND(SUM(os.fantasy_points) * 1.0 / (SELECT total_rounds FROM RoundCount), 1) as avg_points,
-        COUNT(*) as games_played,
-        STRING_AGG(CAST(os.fantasy_points AS TEXT), ',' ORDER BY os.round_id DESC) as recent_scores
-      FROM OrderedStats os
-      JOIN players p ON os.player_id = p.id
-      LEFT JOIN teams t ON p.team_id = t.id
-      LEFT JOIN users u ON p.owner_id = u.id
-      GROUP BY os.player_id, p.name, p.position, t.id, t.name, p.owner_id, u.name, u.color_index
-      HAVING COUNT(*) >= 1
-    )
     SELECT 
-      player_id as id,
-      name,
-      position,
-      team_id,
-      team_name,
-      owner_id,
-      owner_name,
-      owner_color_index,
-      total_points,
-      avg_points,
-      games_played,
-      recent_scores
-    FROM PlayerFormStats
-    ORDER BY avg_points DESC, total_points DESC
-    LIMIT $2
+      p.id,
+      p.name,
+      p.position,
+      p.img,
+      t.id as team_id,
+      t.name as team_name,
+      t.code as team_code,
+      t.img as team_img,
+      p.owner_id,
+      u.name as owner_name, u.color_index as owner_color_index,
+      COALESCE(pa.total_points, 0) as total_points,
+      COALESCE(pa.played_count, 0) as games_played
+    FROM players p
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN users u ON p.owner_id = u.id
+    LEFT JOIN (
+      SELECT player_id, SUM(fantasy_points) as total_points, COUNT(*) as played_count
+      FROM player_round_stats
+      GROUP BY player_id
+    ) pa ON p.id = pa.player_id
+    WHERE p.id = ANY($1)
   `;
 
-  return (await pgClient.query(query, [rounds, limit])).rows.map((row: any) => ({
-    ...row,
-    avg_points: parseFloat(row.avg_points) || 0,
-  })) as PlayerRecentForm[];
+  const rows = (await pgClient.query(query, [playerIds])).rows;
+
+  // 4. Merge metadata with form data and sort final list
+  return rows
+    .map((row: any) => {
+      const form = formMap.get(Number(row.id));
+      return {
+        ...row,
+        id: Number(row.id),
+        total_points: parseInt(row.total_points) || 0,
+        games_played: parseInt(row.games_played) || 0,
+        avg_points: form?.avg_recent_points || 0,
+        recent_scores: form?.recent_scores || '',
+      };
+    })
+    .sort((a, b) => b.avg_points - a.avg_points)
+    .slice(0, limit);
 }
 
 /**
@@ -507,26 +487,6 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
          MIN(fantasy_points) as worst_score
        FROM player_round_stats
        GROUP BY player_id
-     ),
-     RecentMatchInfo AS (
-       SELECT 
-         t.id as team_id,
-         m.round_id,
-         m.date as match_date,
-         ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date DESC) as team_rn
-       FROM teams t
-       JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
-       WHERE m.status = 'finished'
-     ),
-     RecentScores AS (
-       SELECT 
-         p_sub.id as player_id,
-         STRING_AGG(COALESCE(CAST(prs.fantasy_points AS TEXT), 'X'), ',' ORDER BY rmi.match_date DESC) as recent_scores
-       FROM players p_sub
-       JOIN RecentMatchInfo rmi ON p_sub.team_id = rmi.team_id
-       LEFT JOIN player_round_stats prs ON p_sub.id = prs.player_id AND rmi.round_id = prs.round_id
-       WHERE rmi.team_rn <= 5
-       GROUP BY p_sub.id
      )
      SELECT 
        p.id,
@@ -552,16 +512,20 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
        COALESCE(pa.best_score, 0) as best_score,
        COALESCE(pa.worst_score, 0) as worst_score,
        
-       p.status,
-       rs.recent_scores
+       p.status
      FROM players p
      LEFT JOIN teams t ON p.team_id = t.id
      LEFT JOIN users u ON p.owner_id = u.id
      LEFT JOIN PlayerAggregates pa ON p.id = pa.player_id
-     LEFT JOIN RecentScores rs ON p.id = rs.player_id
      ORDER BY COALESCE(pa.total_points, 0) DESC
   `;
-  return (await pgClient.query(query)).rows.map((p: any) => ({
+
+  const [rows, formMap] = await Promise.all([
+    pgClient.query(query).then((r) => r.rows),
+    getPlayerFormMap(),
+  ]);
+
+  return rows.map((p: any) => ({
     ...p,
     total_points: parseFloat(p.total_points) || 0,
     played: parseInt(p.played) || 0,
@@ -569,6 +533,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
     best_score: parseFloat(p.best_score) || 0,
     worst_score: parseFloat(p.worst_score) || 0,
     price: parseInt(p.price) || 0,
+    recent_scores: formMap.get(Number(p.id))?.recent_scores ?? null,
   }));
 }
 
