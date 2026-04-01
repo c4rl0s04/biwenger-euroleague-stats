@@ -489,22 +489,29 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       const oppName = isHome ? match.away_team : match.home_team;
                       const oppImg = isHome ? match.away_img : match.home_img;
 
-                      // Simple pseudo-difficulty logic
-                      const easyTeams = ['ALBA', 'ASVEL', 'Virtus', 'Paris'];
-                      const isEasy = easyTeams.some((t) => oppName?.includes(t));
-                      const diffColor = isEasy
-                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                        : 'bg-rose-500/10 border-rose-500/20 text-rose-400';
-                      const DiffIcon = isEasy ? ShieldCheck : ShieldAlert;
+                      // Use difficulty from the backend
+                      const diffLevel = match.difficulty || 'Normal';
+
+                      let diffColor = 'bg-amber-500/10 border-amber-500/20 text-amber-400';
+                      let diffBg = 'bg-amber-500/50';
+                      let DiffIcon = Activity;
+
+                      if (diffLevel === 'Fácil') {
+                        diffColor = 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
+                        diffBg = 'bg-emerald-500/50';
+                        DiffIcon = ShieldCheck;
+                      } else if (diffLevel === 'Duro') {
+                        diffColor = 'bg-rose-500/10 border-rose-500/20 text-rose-400';
+                        diffBg = 'bg-rose-500/50';
+                        DiffIcon = ShieldAlert;
+                      }
 
                       return (
                         <div
                           key={i}
                           className="bg-background border border-border/50 rounded-lg p-2.5 flex flex-col items-center justify-center text-center relative overflow-hidden group"
                         >
-                          <div
-                            className={`absolute top-0 w-full h-1 ${isEasy ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`}
-                          ></div>
+                          <div className={`absolute top-0 w-full h-1 ${diffBg}`}></div>
                           <span className="text-[12px] text-white/40 uppercase mb-2 font-bold tracking-wider">
                             {matchDate.toLocaleDateString('es-ES', {
                               weekday: 'short',
@@ -524,14 +531,14 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                               {oppName || 'TBD'}
                             </span>
                           )}
-                          <div className="flex items-center gap-1 mt-2">
-                            <span className="text-[11px] bg-white/5 px-1.5 py-0.5 rounded uppercase font-bold text-white/30 tracking-wider">
+                          <div className="flex items-center gap-0.5 mt-2">
+                            <span className="text-[9px] bg-white/5 px-1 py-[2px] rounded uppercase font-bold text-white/30 tracking-wider leading-none">
                               {isHome ? 'Local' : 'Visit'}
                             </span>
                             <span
-                              className={`text-[11px] px-1.5 py-0.5 rounded uppercase font-bold flex items-center gap-0.5 tracking-wider ${diffColor}`}
+                              className={`text-[9px] px-1 py-[2px] rounded uppercase font-bold flex items-center gap-0.5 tracking-wider leading-none ${diffColor}`}
                             >
-                              <DiffIcon size={9} /> {isEasy ? 'Fácil' : 'Duro'}
+                              <DiffIcon size={8} /> {diffLevel}
                             </span>
                           </div>
                         </div>

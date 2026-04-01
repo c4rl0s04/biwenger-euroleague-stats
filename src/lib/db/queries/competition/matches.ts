@@ -161,6 +161,71 @@ export interface TeamUpcomingMatch {
   home_score: number | null;
   away_score: number | null;
   round_name: string;
+  difficulty?: 'Fácil' | 'Normal' | 'Duro';
+}
+
+/**
+ * Get a performance map of all teams (wins/losses home and away)
+ */
+export async function getTeamPerformanceMap(): Promise<Record<number, any>> {
+  const allFinishedMatches = await db
+    .select({
+      homeId: matches.homeId,
+      awayId: matches.awayId,
+      homeScore: matches.homeScore,
+      awayScore: matches.awayScore,
+    })
+    .from(matches)
+    .where(eq(matches.status, 'finished'));
+
+  const teamStats: Record<number, any> = {};
+
+  const initTeam = (id: number) => {
+    if (!teamStats[id]) {
+      teamStats[id] = {
+        homeGames: 0,
+        homeWins: 0,
+        awayGames: 0,
+        awayWins: 0,
+        totalGames: 0,
+        totalWins: 0,
+      };
+    }
+  };
+
+  allFinishedMatches.forEach((m) => {
+    if (!m.homeId || !m.awayId || m.homeScore === null || m.awayScore === null) return;
+
+    initTeam(m.homeId);
+    initTeam(m.awayId);
+
+    const homeWon = m.homeScore > m.awayScore;
+
+    teamStats[m.homeId].homeGames += 1;
+    teamStats[m.homeId].totalGames += 1;
+    if (homeWon) {
+      teamStats[m.homeId].homeWins += 1;
+      teamStats[m.homeId].totalWins += 1;
+    }
+
+    teamStats[m.awayId].awayGames += 1;
+    teamStats[m.awayId].totalGames += 1;
+    if (!homeWon) {
+      teamStats[m.awayId].awayWins += 1;
+      teamStats[m.awayId].totalWins += 1;
+    }
+  });
+
+  // Calculate percentages
+  Object.keys(teamStats).forEach((idStr) => {
+    const id = Number(idStr);
+    const stats = teamStats[id];
+    stats.homeWinPct = stats.homeGames > 0 ? stats.homeWins / stats.homeGames : 0.5; // default 50%
+    stats.awayWinPct = stats.awayGames > 0 ? stats.awayWins / stats.awayGames : 0.5;
+    stats.overallWinPct = stats.totalGames > 0 ? stats.totalWins / stats.totalGames : 0.5;
+  });
+
+  return teamStats;
 }
 
 /**
@@ -195,16 +260,43 @@ export async function getTeamUpcomingMatches(
     .orderBy(asc(matches.date))
     .limit(limit);
 
-  return rows.map((r) => ({
-    date: r.date || new Date(),
-    home_team: r.home_team || 'TBD',
-    away_team: r.away_team || 'TBD',
-    home_img: r.home_img || '',
-    away_img: r.away_img || '',
-    home_id: r.home_id || 0,
-    away_id: r.away_id || 0,
-    home_score: r.home_score,
-    away_score: r.away_score,
-    round_name: r.round_name || '',
-  })) as TeamUpcomingMatch[];
+  // Fetch performance map to calculate difficulty
+  const performanceMap = await getTeamPerformanceMap();
+
+  return rows.map((r) => {
+    let difficulty: 'Fácil' | 'Normal' | 'Duro' = 'Normal';
+
+    // Calculate opponent's context-specific difficulty
+    if (r.home_id && r.away_id) {
+      if (r.home_id === teamId) {
+        // Player's team is Home -> Opponent is Away. Check opponent's away win pct.
+        const oppStats = performanceMap[r.away_id];
+        if (oppStats) {
+          if (oppStats.awayWinPct >= 0.6) difficulty = 'Duro';
+          else if (oppStats.awayWinPct < 0.4) difficulty = 'Fácil';
+        }
+      } else {
+        // Player's team is Away -> Opponent is Home. Check opponent's home win pct.
+        const oppStats = performanceMap[r.home_id];
+        if (oppStats) {
+          if (oppStats.homeWinPct >= 0.6) difficulty = 'Duro';
+          else if (oppStats.homeWinPct < 0.4) difficulty = 'Fácil';
+        }
+      }
+    }
+
+    return {
+      date: r.date || new Date(),
+      home_team: r.home_team || 'TBD',
+      away_team: r.away_team || 'TBD',
+      home_img: r.home_img || '',
+      away_img: r.away_img || '',
+      home_id: r.home_id || 0,
+      away_id: r.away_id || 0,
+      home_score: r.home_score,
+      away_score: r.away_score,
+      round_name: r.round_name || '',
+      difficulty,
+    };
+  }) as TeamUpcomingMatch[];
 }
