@@ -266,10 +266,26 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
           <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black mb-1">
             Precio en Mercado
           </p>
-          <p className="text-3xl font-display text-white tabular-nums leading-none tracking-tight">
-            {new Intl.NumberFormat('es-ES').format(player.price)}
-            <span className="text-base text-white/40 font-normal ml-1">€</span>
-          </p>
+          <div className="flex items-center gap-2 justify-center">
+            <p className="text-3xl font-display text-white tabular-nums leading-none tracking-tight">
+              {new Intl.NumberFormat('es-ES').format(player.price)}
+              <span className="text-base text-white/40 font-normal ml-1">€</span>
+            </p>
+            {player.price_trend !== undefined &&
+              player.price_trend !== null &&
+              player.price_trend !== 0 && (
+                <span
+                  className={`flex items-center ${player.price_trend > 0 ? 'text-emerald-400' : 'text-rose-400'}`}
+                  title={`Tendencia hoy: ${player.price_trend > 0 ? '+' : ''}${new Intl.NumberFormat('es-ES').format(player.price_trend)}€`}
+                >
+                  {player.price_trend > 0 ? (
+                    <TrendingUp size={20} strokeWidth={3} />
+                  ) : (
+                    <TrendingDown size={20} strokeWidth={3} />
+                  )}
+                </span>
+              )}
+          </div>
           {player.real_price != null && (
             <p className="text-[11px] text-muted-foreground/80 tabular-nums leading-none mt-2 font-black uppercase tracking-wider font-sans">
               Valor real:{' '}
