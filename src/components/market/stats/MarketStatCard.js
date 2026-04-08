@@ -53,7 +53,7 @@ export default function MarketStatCard({
         icon={icon}
         color={color}
         info={info}
-        className="h-auto !bg-card backdrop-blur-xl rounded-2xl border-white/5 overflow-hidden group-hover/stat:border-primary/30 transition-colors duration-500 shadow-xl"
+        className="h-auto rounded-2xl border-white/5 group-hover/stat:border-primary/30 transition-colors duration-500 shadow-xl"
       >
         {/* Subtle Brand Glow */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-primary/0 opacity-0 group-hover/stat:opacity-5 transition-opacity duration-700 pointer-events-none rounded-[inherit]" />

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BestValueCard({ player }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
@@ -15,7 +16,16 @@ export default function BestValueCard({ player }) {
       title="El Chollo"
       icon={Tag}
       color="amber"
-      info="Rentabilidad. Puntos conseguidos por el jugador MIENTRAS PERTENECÍA al usuario, dividido por el precio de compra (Puntos / Millón €). Haz clic para ver detalles."
+      info={
+        <>
+          <TooltipHeader>El Chollo</TooltipHeader>
+          <p>
+            Muestra los jugadores con mejor relación puntos/precio (Puntos por cada millón
+            invertido). Identifica a los jugadores más eficientes que han aportado un gran
+            rendimiento por un coste bajo.
+          </p>
+        </>
+      }
       winnerLabel="EL CHOLLO"
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">

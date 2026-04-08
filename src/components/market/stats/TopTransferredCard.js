@@ -4,6 +4,7 @@ import { Flame } from 'lucide-react';
 import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function TopTransferredCard({ player }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
@@ -14,7 +15,16 @@ export default function TopTransferredCard({ player }) {
       title="El más fichado"
       icon={Flame}
       color="orange"
-      info="Jugador con mayor número de fichajes en el periodo seleccionado."
+      info={
+        <>
+          <TooltipHeader>El más fichado</TooltipHeader>
+          <p>
+            Muestra los jugadores que han protagonizado más traspasos entre managers. Un alto
+            volumen de fichajes suele indicar jugadores clave que cambian de manos frecuentemente
+            por estrategia o necesidad de caja.
+          </p>
+        </>
+      }
       winnerLabel="JUGADOR DE MODA"
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">

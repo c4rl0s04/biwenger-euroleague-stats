@@ -2,6 +2,7 @@
 
 import { Briefcase } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function MostOwnersCard({ player }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
@@ -12,7 +13,16 @@ export default function MostOwnersCard({ player }) {
       title="El Inquieto"
       icon={Briefcase}
       color="purple"
-      info="Más Equipos Diferentes. El jugador que ha pasado por más manos distintas."
+      info={
+        <>
+          <TooltipHeader>El Inquieto</TooltipHeader>
+          <p>
+            Muestra los jugadores que han pasado por más manos distintas a lo largo de la temporada.
+            Es un indicador de alta rotación y de jugadores que no terminan de encajar en los
+            equipos o se usan para especular.
+          </p>
+        </>
+      }
       winnerLabel="TROTAMUNDOS"
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">

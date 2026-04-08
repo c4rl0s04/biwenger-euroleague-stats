@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function WorstValueCard({ player }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
@@ -25,7 +26,16 @@ export default function WorstValueCard({ player }) {
       title="El Flop"
       icon={ThumbsDown}
       color="red"
-      info="Peor Rentabilidad. Puntos por millón más bajos entre jugadores caros (>2M). La gran decepción."
+      info={
+        <>
+          <TooltipHeader>El Flop</TooltipHeader>
+          <p>
+            Identifica a los jugadores caros (precio &gt; 2M) con la peor relación puntos/precio.
+            Representa las grandes decepciones de la temporada en términos de rendimiento por euro
+            invertido.
+          </p>
+        </>
+      }
       winnerLabel="LA DECEPCIÓN"
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">

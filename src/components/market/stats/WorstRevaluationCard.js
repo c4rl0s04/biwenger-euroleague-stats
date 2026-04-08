@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function WorstRevaluationCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -22,7 +23,16 @@ export default function WorstRevaluationCard({ data }) {
       title="El Depreciado"
       icon={TrendingDown}
       color="pink"
-      info="Mayor pérdida de valor no realizada. (Valor Actual - Precio Compra) para jugadores que aún posees."
+      info={
+        <>
+          <TooltipHeader>El Depreciado</TooltipHeader>
+          <p>
+            Muestra los jugadores que más valor han perdido desde que fueron fichados. Representa el
+            &quot;coste de oportunidad&quot; y la pérdida potencial de los managers que mantienen a
+            estos jugadores.
+          </p>
+        </>
+      }
       winnerLabel="EL DEPRECIADO"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-rose-400">

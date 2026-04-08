@@ -4,6 +4,7 @@ import { BadgePercent } from 'lucide-react';
 import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function InflatedPlayerCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -21,7 +22,15 @@ export default function InflatedPlayerCard({ data }) {
       title="El Inflado"
       icon={BadgePercent}
       color="rose"
-      info="El jugador que más veces se ha comprado por encima de su valor de mercado del día."
+      info={
+        <>
+          <TooltipHeader>El Inflado</TooltipHeader>
+          <p>
+            Identifica a los jugadores por los que los managers han pagado más dinero por encima de
+            su valor de mercado. Refleja las mayores apuestas (o sobrepagos) de la temporada.
+          </p>
+        </>
+      }
       winnerLabel="MÁS SOBREVALORADO"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-rose-400">

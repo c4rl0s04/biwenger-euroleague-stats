@@ -4,6 +4,7 @@ import { Crown } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BiggestDominanceCard({ data }) {
   if (!data || !data.leader_id || !data.trailer_id) return null;
@@ -27,7 +28,15 @@ export default function BiggestDominanceCard({ data }) {
         title="Dominio Más Claro"
         icon={Crown}
         color="emerald"
-        info="El enfrentamiento más desequilibrado entre dos managers en duelos directos de subasta."
+        info={
+          <>
+            <TooltipHeader>Dominio Más Claro</TooltipHeader>
+            <p>
+              Identifica el enfrentamiento más desequilibrado entre dos managers. Muestra quién ha
+              &quot;tomado la medida&quot; a quién en las subastas directas.
+            </p>
+          </>
+        }
       >
         <div className="flex h-full flex-col justify-between gap-4 text-center">
           <div>

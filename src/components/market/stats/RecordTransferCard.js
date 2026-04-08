@@ -4,6 +4,7 @@ import { TrendingUp } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 import MarketStatCard from './MarketStatCard';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function RecordTransferCard({ record }) {
   if (!record || !Array.isArray(record) || record.length === 0) return null;
@@ -41,6 +42,15 @@ export default function RecordTransferCard({ record }) {
         name: 'player_name',
         value: 'precio',
       }}
+      info={
+        <>
+          <TooltipHeader>Récord de Traspasos</TooltipHeader>
+          <p>
+            Muestra los traspasos más caros entre managers en la historia de la liga. Son las
+            operaciones que han marcado un antes y un después en el mercado.
+          </p>
+        </>
+      }
       renderWinnerMeta={renderWinnerMeta}
       renderListItemValue={renderListItemValue}
     />

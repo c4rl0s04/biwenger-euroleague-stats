@@ -15,20 +15,22 @@ export const GlassTooltip = ({
   return (
     <div
       className={`
-      bg-slate-950/70 backdrop-blur-3xl border border-white/20 
+      backdrop-blur-3xl border border-white/20 
       text-foreground text-xs normal-case font-sans leading-relaxed 
       rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.8)] ring-1 ring-white/10 p-4
       ${className}
     `}
+      style={{ backgroundColor: 'var(--glass-surface)' }}
     >
       {children}
       {showTriangle && (
         <div
-          className={`
-            absolute left-1/2 -translate-x-1/2 w-0 h-0 
-            border-l-[6px] border-r-[6px] border-[6px] border-transparent
-            ${trianglePosition === 'bottom' ? 'top-full border-t-slate-950/70' : 'bottom-full border-b-slate-950/70'}
-          `}
+          className="absolute left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-[6px] border-transparent"
+          style={{
+            [trianglePosition === 'bottom' ? 'top' : 'bottom']: '100%',
+            [trianglePosition === 'bottom' ? 'borderTopColor' : 'borderBottomColor']:
+              'var(--glass-surface)',
+          }}
         />
       )}
     </div>
@@ -64,9 +66,9 @@ export const InfoTooltip = ({ content, iconSize = 14 }) => {
 
       <div
         className="
-        absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 
+        absolute left-1/2 -translate-x-1/2 bottom-full mb-3 min-w-[240px] max-w-[320px]
         opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible 
-        transition-all duration-300 z-50 text-center
+        transition-all duration-300 z-50 text-left
       "
       >
         <GlassTooltip showTriangle trianglePosition="bottom">

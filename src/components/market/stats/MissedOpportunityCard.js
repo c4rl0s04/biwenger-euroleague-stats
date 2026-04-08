@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function MissedOpportunityCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -22,7 +23,16 @@ export default function MissedOpportunityCard({ data }) {
       title="El Impaciente"
       icon={Clock}
       color="amber"
-      info="El que vendió demasiado pronto. Diferencia entre el precio de venta y el valor actual del jugador."
+      info={
+        <>
+          <TooltipHeader>El Impaciente</TooltipHeader>
+          <p>
+            Destaca a los managers que vendieron a un jugador justo antes de que su valor se
+            disparara. Es la diferencia entre el precio de venta y su valor de mercado pico o
+            actual.
+          </p>
+        </>
+      }
       winnerLabel="EL IMPACIENTE"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-amber-400">

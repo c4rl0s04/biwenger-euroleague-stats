@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BestFlipCard({ flip }) {
   if (!flip || !Array.isArray(flip) || flip.length === 0) return null;
@@ -21,7 +22,16 @@ export default function BestFlipCard({ flip }) {
       title="El Pelotazo"
       icon={Rocket}
       color="emerald"
-      info="Mayor Beneficio en una Venta. La operación de compraventa más rentable (Venta - Compra)."
+      info={
+        <>
+          <TooltipHeader>El Pelotazo</TooltipHeader>
+          <p>
+            Muestra las operaciones de compraventa que han generado el mayor beneficio neto absoluto
+            (Precio de Venta - Precio de Compra). Es el ranking de los mejores flips de la temporada
+            en términos de dinero real.
+          </p>
+        </>
+      }
       winnerLabel="EL PELOTAZO"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-emerald-400">

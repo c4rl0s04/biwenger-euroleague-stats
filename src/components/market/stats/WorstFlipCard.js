@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function WorstFlipCard({ flip }) {
   if (!flip || !Array.isArray(flip) || flip.length === 0) return null;
@@ -22,7 +23,15 @@ export default function WorstFlipCard({ flip }) {
       title="El Fiasco"
       icon={TrendingDown}
       color="red"
-      info="Mayor Pérdida en una Venta. La operación de compraventa menos rentable (Venta - Compra)."
+      info={
+        <>
+          <TooltipHeader>El Fiasco</TooltipHeader>
+          <p>
+            Muestra las operaciones de compraventa que han generado la mayor pérdida neta absoluta.
+            Es el ranking de los peores movimientos de mercado de la temporada.
+          </p>
+        </>
+      }
       winnerLabel="EL FIASCO"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-rose-400">-{formatShortEuro(item.profit)}€</span>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BestRevaluationCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -21,7 +22,15 @@ export default function BestRevaluationCard({ data }) {
       title="El Visionario"
       icon={Telescope}
       color="purple"
-      info="Mayor incremento de valor de un jugador desde su fichaje hasta hoy. (Valor Actual - Precio Compra)"
+      info={
+        <>
+          <TooltipHeader>El Visionario</TooltipHeader>
+          <p>
+            Muestra el mayor incremento de valor de un jugador desde que fue fichado hasta el día de
+            hoy. Es el beneficio potencial acumulado por mantener a un crack en la plantilla.
+          </p>
+        </>
+      }
       winnerLabel="EL VISIONARIO"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-purple-400">

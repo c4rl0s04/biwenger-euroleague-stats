@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BestPercentageCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -15,7 +16,16 @@ export default function BestPercentageCard({ data }) {
       title="Diamante en Bruto"
       icon={Gem}
       color="cyan"
-      info="Mayor Revalorización (%). El jugador que más ha multiplicado su valor desde su compra."
+      info={
+        <>
+          <TooltipHeader>Diamante en Bruto</TooltipHeader>
+          <p>
+            Muestra los jugadores que más han multiplicado su valor inicial en términos
+            porcentuales. Premia a los managers con ojo clínico para detectar talentos
+            infravalorados antes de su explosión.
+          </p>
+        </>
+      }
       winnerLabel="DIAMANTE EN BRUTO"
       renderHeroValue={(item) => (
         <span className="text-4xl font-black text-cyan-400">

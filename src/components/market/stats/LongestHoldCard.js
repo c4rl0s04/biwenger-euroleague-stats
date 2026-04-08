@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function LongestHoldCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -27,7 +28,15 @@ export default function LongestHoldCard({ data }) {
       title="El Hold"
       icon={Hourglass}
       color="teal"
-      info="La inversión más paciente. Mayor tiempo de posesión con beneficio final."
+      info={
+        <>
+          <TooltipHeader>El Hold</TooltipHeader>
+          <p>
+            Muestra las inversiones más pacientes: jugadores que han permanecido más tiempo en la
+            plantilla de un manager y han acabado generando un beneficio neto al ser vendidos.
+          </p>
+        </>
+      }
       winnerLabel="EL HOLD"
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">

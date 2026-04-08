@@ -54,7 +54,7 @@ export default function MarketPodiumCard({
         icon={icon}
         color={color}
         info={info}
-        className="h-auto !bg-card/40 backdrop-blur-xl border-white/5 shadow-2xl"
+        className="h-auto border-white/5 shadow-2xl"
       >
         <div className="flex flex-col">
           {/* 1. Hero Section (#1) */}

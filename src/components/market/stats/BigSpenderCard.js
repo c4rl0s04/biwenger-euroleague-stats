@@ -2,6 +2,7 @@
 
 import { Gem } from 'lucide-react';
 import MarketStatCard from './MarketStatCard';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BigSpenderCard({ spender }) {
   if (!spender || !Array.isArray(spender) || spender.length === 0) return null;
@@ -26,6 +27,15 @@ export default function BigSpenderCard({ spender }) {
         value: 'total_spent',
         colorIndex: 'color_index',
       }}
+      info={
+        <>
+          <TooltipHeader>El Jeque</TooltipHeader>
+          <p>
+            Ranking de los managers que más han invertido en el mercado. Refleja quién tiene la
+            billetera más activa y quién está apostando más fuerte por reforzar su plantilla.
+          </p>
+        </>
+      }
       renderWinnerMeta={renderWinnerMeta}
     />
   );

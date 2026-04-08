@@ -3,6 +3,7 @@
 import { Briefcase } from 'lucide-react';
 import MarketStatCard from './MarketStatCard';
 import { formatProfit } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BestSellerCard({ seller }) {
   if (!seller || !Array.isArray(seller) || seller.length === 0) return null;
@@ -37,7 +38,16 @@ export default function BestSellerCard({ seller }) {
         value: 'net_profit',
         colorIndex: 'color_index',
       }}
-      info="Beneficio real obtenido. Suma de (Precio Venta - Precio Compra) de todos los jugadores que has comprado y vendido."
+      info={
+        <>
+          <TooltipHeader>El Negociador</TooltipHeader>
+          <p>
+            Muestra el beneficio neto total obtenido por cada manager a través de todas sus
+            operaciones de compra y venta. Es la medida real de quién está sacando más partido al
+            mercado.
+          </p>
+        </>
+      }
       renderWinnerMeta={renderWinnerMeta}
       renderValue={renderValue}
       renderListItemValue={renderListItemValue}

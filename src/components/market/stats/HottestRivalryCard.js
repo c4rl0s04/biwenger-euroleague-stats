@@ -4,6 +4,7 @@ import { Flame } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 function formatEuro(value) {
   if (!value) return '0';
@@ -25,7 +26,15 @@ export default function HottestRivalryCard({ data }) {
         title="Rivalidad Más Caliente"
         icon={Flame}
         color="orange"
-        info="La pareja de managers que más veces se ha jugado una subasta en un cara a cara directo."
+        info={
+          <>
+            <TooltipHeader>Rivalidad Más Caliente</TooltipHeader>
+            <p>
+              La pareja de managers que más veces se ha enfrentado cara a cara en una subasta.
+              Indica dónde saltan chispas cada vez que sale un jugador al mercado.
+            </p>
+          </>
+        }
       >
         <div className="flex h-full flex-col justify-between gap-4 text-center">
           <div>

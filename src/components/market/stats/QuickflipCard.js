@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { getColorForUser } from '@/lib/constants/colors';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function QuickflipCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -27,7 +28,15 @@ export default function QuickflipCard({ data }) {
       title="El Quickflip"
       icon={Zap}
       color="orange"
-      info="La operación de compraventa más rápida con beneficio. Velocidad máxima."
+      info={
+        <>
+          <TooltipHeader>El Quickflip</TooltipHeader>
+          <p>
+            La operación de compraventa más rápida con beneficio. Premia a los managers que detectan
+            valor y venden en el menor tiempo posible para liberar presupuesto.
+          </p>
+        </>
+      }
       winnerLabel="EL QUICKFLIP"
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">

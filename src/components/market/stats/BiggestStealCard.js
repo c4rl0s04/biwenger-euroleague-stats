@@ -4,6 +4,7 @@ import { Search, Trophy, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function BiggestStealCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -20,7 +21,15 @@ export default function BiggestStealCard({ data }) {
       title="Mayor Robo"
       icon={Search}
       color="cyan"
-      info="El fichaje ganado por la mínima diferencia respecto a la segunda puja más alta."
+      info={
+        <>
+          <TooltipHeader>Mayor Robo</TooltipHeader>
+          <p>
+            Muestra los fichajes ganados por la mínima diferencia respecto a la segunda puja más
+            alta. Representa la máxima eficiencia al pujar.
+          </p>
+        </>
+      }
       winnerLabel="MÍNIMA DIFERENCIA"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-cyan-400">
