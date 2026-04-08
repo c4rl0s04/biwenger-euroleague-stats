@@ -42,7 +42,14 @@ export default function TeamDistributionTable({ initialPlayers = [], owners = []
         key: 'team_name',
         label: 'Equipo Euroleague',
         align: 'left',
-        render: (val, row) => <TableIdentity name={row.team_name} image={row.team_img} size="sm" />,
+        render: (val, row) => (
+          <TableIdentity
+            name={row.team_name}
+            image={row.team_img}
+            link={`/team/${row.team_id}`}
+            size="sm"
+          />
+        ),
       },
       {
         key: 'total',
