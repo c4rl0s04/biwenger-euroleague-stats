@@ -37,7 +37,7 @@ export default function BestSellerCard({ seller }) {
       renderHeroStats={(item) => (
         <HeroStatGroup stats={[{ label: 'Ventas', value: item.sales_count }]} />
       )}
-      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span
@@ -48,9 +48,7 @@ export default function BestSellerCard({ seller }) {
           <span className="text-[10px] text-zinc-500 font-bold">{item.sales_count} ventas</span>
         </div>
       )}
-      renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
-      )}
+      renderRunnerUpMeta={() => null}
       renderListItemValue={(item) => (
         <div className="flex items-center gap-2">
           <span

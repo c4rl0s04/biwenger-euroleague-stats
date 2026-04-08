@@ -32,16 +32,14 @@ export default function BigSpenderCard({ spender }) {
       renderHeroStats={(item) => (
         <HeroStatGroup stats={[{ label: 'Operaciones', value: item.purchases_count }]} />
       )}
-      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-cyan-400">{formatEuro(item.total_spent)}€</span>
           <span className="text-[10px] text-zinc-500 font-bold">{item.purchases_count} ops.</span>
         </div>
       )}
-      renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
-      )}
+      renderRunnerUpMeta={() => null}
       renderListItemValue={(item) => (
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-cyan-400/80">

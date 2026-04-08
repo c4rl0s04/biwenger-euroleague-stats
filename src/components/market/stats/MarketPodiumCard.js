@@ -40,10 +40,43 @@ export default function MarketPodiumCard({
   const runnerUps = data.slice(1, 3);
   const restRunnerUps = data.slice(3);
 
+  // Helper to get the best image source (supports players and managers/users)
+  const getEntryImage = (item) => {
+    return (
+      item.player_img ||
+      item.user_img ||
+      item.icon ||
+      item.user_icon ||
+      item.buyer_icon ||
+      item.seller_icon ||
+      item.img
+    );
+  };
+
   // Helper to get name styling and link path
   const getNameConfig = (item) => {
     const isPlayer = !!item.player_id;
     const linkPath = isPlayer ? `/player/${item.player_id}` : `/user/${item.id || item.user_id}`;
+
+    // Priority 1: User Color (for manager-centric cards where the subject is the user)
+    if (!isPlayer) {
+      const resolvedColorIndex = [
+        item.color_index,
+        item.user_color_index,
+        item.buyer_color,
+        item.user_color,
+      ].find((v) => v !== undefined && v !== null);
+
+      const userColor = getColorForUser(
+        item.id || item.user_id || item.buyer_id,
+        item.user_name || item.name || item.buyer_name,
+        resolvedColorIndex
+      );
+      return {
+        linkPath,
+        className: userColor?.text || 'text-white',
+      };
+    }
 
     if (useTeamColors && item.player_team) {
       return {
@@ -86,7 +119,7 @@ export default function MarketPodiumCard({
                   className="block w-full h-full relative z-10"
                 >
                   <PlayerImage
-                    src={winner.player_img}
+                    src={getEntryImage(winner)}
                     alt={winner.player_name || winner.user_name || winner.name}
                     width={96}
                     height={96}
@@ -154,8 +187,8 @@ export default function MarketPodiumCard({
                           className="block w-full h-full"
                         >
                           <PlayerImage
-                            src={item.player_img || item.img}
-                            alt={item.player_name || item.name}
+                            src={getEntryImage(item)}
+                            alt={item.player_name || item.name || item.user_name}
                             width={48}
                             height={48}
                             className="object-cover object-top w-full h-full group-hover/item:scale-110 transition-transform duration-500"

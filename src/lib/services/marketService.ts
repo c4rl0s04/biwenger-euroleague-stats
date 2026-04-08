@@ -67,6 +67,7 @@ function enrichUserArray(
         [idField]: user.id,
         [iconField]: user.icon,
         [colorField]: user.color_index,
+        user_color_index: user.color_index, // Ensure both are available for legacy compatibility
       };
     }
     return statObj;
@@ -166,6 +167,14 @@ export async function fetchMarketStats() {
   const enrichedTheThief = enrichUserArray(theThief, allUsers, 'name');
   const enrichedTheVictim = enrichUserArray(theVictim, allUsers, 'name');
   const enrichedOverpayerManager = enrichUserArray(overpayerManager, allUsers, 'name');
+  const enrichedTopTrader = enrichUserArray(
+    topTrader,
+    allUsers,
+    'user_name',
+    'user_id',
+    'user_icon',
+    'user_color_index'
+  );
 
   // BiggestSteal needs double enrichment (winner + second bidder)
   const enrichedBiggestSteal = enrichUserArray(
@@ -201,7 +210,7 @@ export async function fetchMarketStats() {
     inflatedPlayer,
     biddingDuels,
     missedOpportunity,
-    topTrader,
+    topTrader: enrichedTopTrader,
     profitablePlayer,
     lossyPlayer,
     quickestFlip,

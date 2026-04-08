@@ -44,7 +44,7 @@ export default function OverpayerManagerCard({ data }) {
           ]}
         />
       )}
-      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-amber-400">
@@ -55,20 +55,13 @@ export default function OverpayerManagerCard({ data }) {
           </span>
         </div>
       )}
-      renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
-      )}
+      renderRunnerUpMeta={() => null}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-amber-400/80">
           +{formatEuro(item.total_overpay)}€
         </span>
       )}
-      renderListItemMeta={(item) => (
-        <ManagerName
-          user={item}
-          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
-        />
-      )}
+      renderListItemMeta={() => null}
     />
   );
 }

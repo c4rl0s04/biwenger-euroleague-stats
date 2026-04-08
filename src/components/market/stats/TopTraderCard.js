@@ -53,7 +53,7 @@ export default function TopTraderCard({ data }) {
           ]}
         />
       )}
-      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-indigo-400">{item.trade_count}</span>
@@ -64,9 +64,7 @@ export default function TopTraderCard({ data }) {
           </span>
         </div>
       )}
-      renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
-      )}
+      renderRunnerUpMeta={() => null}
       renderListItemValue={(item) => (
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-indigo-400/80">{item.trade_count} ops.</span>
@@ -77,12 +75,7 @@ export default function TopTraderCard({ data }) {
           </span>
         </div>
       )}
-      renderListItemMeta={(item) => (
-        <ManagerName
-          user={item}
-          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
-        />
-      )}
+      renderListItemMeta={() => null}
     />
   );
 }

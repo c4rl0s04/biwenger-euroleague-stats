@@ -12,7 +12,10 @@ export function ManagerPill({ user }) {
 
   const userId = user.user_id || user.id;
   const userName = user.user_name || user.name;
-  const userColor = getColorForUser(userId, userName, user.user_color_index);
+  const resolvedColorIndex = [user.color_index, user.user_color_index, user.user_color].find(
+    (v) => v !== undefined && v !== null
+  );
+  const userColor = getColorForUser(userId, userName, resolvedColorIndex);
 
   return (
     <Link
@@ -36,7 +39,10 @@ export function ManagerName({ user, className = '' }) {
 
   const userId = user.user_id || user.id;
   const userName = user.user_name || user.name;
-  const userColor = getColorForUser(userId, userName, user.user_color_index);
+  const resolvedColorIndex = [user.color_index, user.user_color_index, user.user_color].find(
+    (v) => v !== undefined && v !== null
+  );
+  const userColor = getColorForUser(userId, userName, resolvedColorIndex);
 
   return (
     <Link
