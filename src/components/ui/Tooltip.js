@@ -15,12 +15,12 @@ export const GlassTooltip = ({
   return (
     <div
       className={`
-      backdrop-blur-3xl border border-white/20 
+      border border-white/10
       text-foreground text-xs normal-case font-sans leading-relaxed 
-      rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.8)] ring-1 ring-white/10 p-4
+      rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,1)] ring-1 ring-white/5 p-4
       ${className}
     `}
-      style={{ backgroundColor: 'var(--glass-surface)' }}
+      style={{ backgroundColor: '#030303' }}
     >
       {children}
       {showTriangle && (
@@ -28,8 +28,7 @@ export const GlassTooltip = ({
           className="absolute left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-[6px] border-transparent"
           style={{
             [trianglePosition === 'bottom' ? 'top' : 'bottom']: '100%',
-            [trianglePosition === 'bottom' ? 'borderTopColor' : 'borderBottomColor']:
-              'var(--glass-surface)',
+            [trianglePosition === 'bottom' ? 'borderTopColor' : 'borderBottomColor']: '#030303',
           }}
         />
       )}
