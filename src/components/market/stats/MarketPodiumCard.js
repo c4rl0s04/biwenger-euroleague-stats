@@ -230,12 +230,13 @@ export default function MarketPodiumCard({
                 return (
                   <div
                     key={(item.player_id || item.id) + '-' + rank}
-                    className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/[0.03] transition-colors group/row"
+                    className="grid grid-cols-[24px_1fr_auto] items-center gap-2 px-3 py-1 rounded-xl hover:bg-white/[0.03] transition-colors group/row"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <span className="text-xs text-zinc-600 font-black w-5 flex-shrink-0 font-mono">
-                        {rank.toString().padStart(2, '0')}
-                      </span>
+                    {/* Rank Column */}
+                    <span className="text-sm text-zinc-500 font-black font-display">{rank}</span>
+
+                    {/* Content Column (Player + Manager Stacked) */}
+                    <div className="flex flex-col justify-center min-w-0">
                       <Link
                         href={getNameConfig(item).linkPath}
                         className={`text-xs font-bold truncate transition-colors hover:scale-105 transition-transform origin-left ${getNameConfig(item).className}`}
@@ -245,12 +246,13 @@ export default function MarketPodiumCard({
                       </Link>
 
                       {renderListItemMeta && (
-                        <div className="opacity-60 scale-90 origin-left">
+                        <div className="min-w-0 truncate origin-left">
                           {renderListItemMeta(item)}
                         </div>
                       )}
                     </div>
 
+                    {/* Value Column */}
                     <div className="text-right">
                       {renderListItemValue ? (
                         renderListItemValue(item)

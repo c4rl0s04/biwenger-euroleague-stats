@@ -29,10 +29,7 @@ export default function BestValueCard({ player }) {
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">
           <span className="text-3xl font-black text-amber-400">
-            {item.points_per_million?.toFixed(1)}
-          </span>
-          <span className="text-[11px] uppercase font-black tracking-widest text-zinc-500 mt-2">
-            PTS / MILLÓN €
+            {item.points_per_million?.toFixed(1)} PTS/M
           </span>
         </div>
       )}
