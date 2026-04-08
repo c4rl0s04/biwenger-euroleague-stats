@@ -3,6 +3,7 @@
 import { Egg } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
 export default function ProfitablePlayerCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -36,15 +37,13 @@ export default function ProfitablePlayerCard({ data }) {
           <span className="text-3xl font-black text-yellow-500">
             +{formatShortEuro(item.total_profit)}€
           </span>
-          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+          <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest mt-2">
             Generados
           </span>
         </div>
       )}
       renderHeroStats={(item) => (
-        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tight">
-          {item.trade_count} operaciones rentables
-        </p>
+        <HeroStatGroup stats={[{ label: 'Operaciones', value: item.trade_count }]} />
       )}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">

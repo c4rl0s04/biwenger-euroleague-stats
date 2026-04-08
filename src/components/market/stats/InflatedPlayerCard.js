@@ -1,10 +1,10 @@
 'use client';
 
 import { BadgePercent } from 'lucide-react';
-import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+import { HeroStatGroup } from './StatUIComponents';
 
 export default function InflatedPlayerCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -38,16 +38,12 @@ export default function InflatedPlayerCard({ data }) {
         </span>
       )}
       renderHeroStats={(item) => (
-        <div className="flex justify-center gap-6 text-[10px] mt-1">
-          <div className="flex flex-col items-center">
-            <span className="text-zinc-500 font-bold uppercase tracking-wider">Compras</span>
-            <span className="text-zinc-300 font-mono">{item.trade_count}</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-zinc-500 font-bold uppercase tracking-wider">Sobreprecio</span>
-            <span className="text-zinc-300 font-mono">+{formatShortEuro(item.avg_inflation)}€</span>
-          </div>
-        </div>
+        <HeroStatGroup
+          stats={[
+            { label: 'Compras', value: item.trade_count },
+            { label: 'Sobreprecio', value: `+${formatShortEuro(item.avg_inflation)}`, suffix: '€' },
+          ]}
+        />
       )}
       renderRunnerUpValue={(item) => (
         <span className="text-sm font-black text-rose-400">

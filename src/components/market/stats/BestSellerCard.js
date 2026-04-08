@@ -1,43 +1,22 @@
 'use client';
 
 import { Briefcase } from 'lucide-react';
-import MarketStatCard from './MarketStatCard';
+import MarketPodiumCard from './MarketPodiumCard';
 import { formatProfit } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
 export default function BestSellerCard({ seller }) {
   if (!seller || !Array.isArray(seller) || seller.length === 0) return null;
 
-  const renderWinnerMeta = (winner) => (
-    <p className="text-sm text-white font-bold uppercase tracking-tight opacity-100">
-      {winner.sales_count} ventas
-    </p>
-  );
-
-  const renderValue = (val) => (
-    <span className={val >= 0 ? 'text-white' : 'text-red-400'}>{formatProfit(val)}</span>
-  );
-
-  const renderListItemValue = (item) => (
-    <span className={`font-semibold ${item.net_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-      {formatProfit(item.net_profit)}
-    </span>
-  );
-
   return (
-    <MarketStatCard
+    <MarketPodiumCard
       data={seller}
       title="El Negociador"
       icon={Briefcase}
       color="emerald"
       winnerLabel="MAYOR BENEFICIO"
-      type="user"
-      fields={{
-        id: 'id',
-        name: 'name',
-        value: 'net_profit',
-        colorIndex: 'color_index',
-      }}
+      useTeamColors={false}
       info={
         <>
           <TooltipHeader>El Negociador</TooltipHeader>
@@ -48,9 +27,40 @@ export default function BestSellerCard({ seller }) {
           </p>
         </>
       }
-      renderWinnerMeta={renderWinnerMeta}
-      renderValue={renderValue}
-      renderListItemValue={renderListItemValue}
+      renderHeroValue={(item) => (
+        <span
+          className={`text-3xl font-black ${item.net_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
+        >
+          {formatProfit(item.net_profit)}
+        </span>
+      )}
+      renderHeroStats={(item) => (
+        <HeroStatGroup stats={[{ label: 'Ventas', value: item.sales_count }]} />
+      )}
+      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderRunnerUpValue={(item) => (
+        <div className="flex flex-col items-end">
+          <span
+            className={`text-sm font-black ${item.net_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
+          >
+            {formatProfit(item.net_profit)}
+          </span>
+          <span className="text-[9px] text-zinc-500 font-bold">{item.sales_count} ventas</span>
+        </div>
+      )}
+      renderRunnerUpMeta={(item) => (
+        <ManagerName user={item} className="text-[10px] opacity-80 hover:opacity-100" />
+      )}
+      renderListItemValue={(item) => (
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-xs font-bold ${item.net_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
+          >
+            {formatProfit(item.net_profit)}
+          </span>
+          <span className="text-[9px] text-zinc-500 font-medium">({item.sales_count} v.)</span>
+        </div>
+      )}
     />
   );
 }

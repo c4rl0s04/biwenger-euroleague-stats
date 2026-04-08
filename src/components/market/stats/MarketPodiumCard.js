@@ -71,15 +71,6 @@ export default function MarketPodiumCard({
         <div className="flex flex-col">
           {/* 1. Hero Section (#1) */}
           <div className="relative mt-2 flex flex-col items-center">
-            {winnerLabel && (
-              <div
-                className="text-[10px] uppercase font-black tracking-[0.2em] mb-3 px-3 py-1 rounded-full bg-white/5 border border-white/10"
-                style={{ color: `var(--color-${color}-400)` }}
-              >
-                {winnerLabel}
-              </div>
-            )}
-
             {/* Player Image */}
             <div className="relative mb-4 group/img">
               <div

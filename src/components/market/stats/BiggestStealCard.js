@@ -1,10 +1,10 @@
 'use client';
 
 import { Search, Trophy, XCircle } from 'lucide-react';
-import Link from 'next/link';
 import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
 export default function BiggestStealCard({ data }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -37,20 +37,21 @@ export default function BiggestStealCard({ data }) {
         </span>
       )}
       renderHeroStats={(item) => (
-        <div className="grid grid-cols-2 gap-2 mt-2 px-2">
-          <div className="bg-cyan-900/10 border border-cyan-500/20 rounded-lg p-1.5">
-            <Trophy size={10} className="text-cyan-400 inline mr-1" />
-            <span className="text-[9px] text-cyan-400 uppercase font-black">Ganador</span>
-            <div className="text-[10px] font-bold text-white truncate">{item.winner}</div>
-          </div>
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-1.5">
-            <XCircle size={10} className="text-zinc-500 inline mr-1" />
-            <span className="text-[9px] text-zinc-500 uppercase font-black">2º Lugar</span>
-            <div className="text-[10px] font-bold text-zinc-300 truncate">
-              {item.second_bidder_name || 'Desconocido'}
-            </div>
-          </div>
-        </div>
+        <HeroStatGroup
+          stats={[
+            { label: 'Ganador', value: item.winner },
+            { label: '2º Lugar', value: item.second_bidder_name || 'Desconocido' },
+          ]}
+        />
+      )}
+      renderHeroMeta={(item) => (
+        <ManagerPill
+          user={{
+            user_id: item.winner_id,
+            user_name: item.winner,
+            user_color_index: item.winner_color,
+          }}
+        />
       )}
       renderRunnerUpValue={(item) => (
         <span className="text-sm font-black text-cyan-400">
@@ -58,8 +59,18 @@ export default function BiggestStealCard({ data }) {
         </span>
       )}
       renderRunnerUpMeta={(item) => (
-        <div className="text-[10px] text-zinc-500 truncate mt-0.5">
-          {item.winner} vs {item.second_bidder_name || 'desconocido'}
+        <div className="flex flex-col gap-1 mt-1">
+          <ManagerName
+            user={{
+              user_id: item.winner_id,
+              user_name: item.winner,
+              user_color_index: item.winner_color,
+            }}
+            className="text-[10px] opacity-80 hover:opacity-100"
+          />
+          <div className="text-[9px] text-zinc-500 font-bold truncate">
+            vs {item.second_bidder_name || 'desconocido'}
+          </div>
         </div>
       )}
       renderListItemValue={(item) => (
@@ -68,8 +79,18 @@ export default function BiggestStealCard({ data }) {
         </span>
       )}
       renderListItemMeta={(item) => (
-        <div className="text-[9px] text-zinc-600 truncate ml-2 font-medium">
-          {item.winner} vs {item.second_bidder_name || '...'}
+        <div className="flex items-center gap-2 ml-2">
+          <ManagerName
+            user={{
+              user_id: item.winner_id,
+              user_name: item.winner,
+              user_color_index: item.winner_color,
+            }}
+            className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100"
+          />
+          <span className="text-[8px] text-zinc-600 font-medium">
+            vs {item.second_bidder_name || '...'}
+          </span>
         </div>
       )}
     />

@@ -2,46 +2,21 @@
 
 import { TrendingUp } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
-import MarketStatCard from './MarketStatCard';
+import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
 export default function RecordTransferCard({ record }) {
   if (!record || !Array.isArray(record) || record.length === 0) return null;
 
-  const renderWinnerMeta = (winner, winnerColor) => (
-    <p className="text-sm text-white font-bold uppercase tracking-tight opacity-100">
-      Comprador: <span className={winnerColor.text}>{winner.buyer_name || winner.comprador}</span>
-    </p>
-  );
-
-  const renderListItemValue = (item) => {
-    const buyerColor = getColorForUser(item.buyer_id, item.buyer_name, item.buyer_color);
-    return (
-      <div className="flex items-center gap-3">
-        <span
-          className={`${buyerColor.text} truncate font-bold text-xs uppercase tracking-tighter`}
-        >
-          {item.buyer_name || item.comprador}
-        </span>
-        <span className="text-zinc-200 font-black text-sm">{formatEuro(item.precio)}€</span>
-      </div>
-    );
-  };
-
   return (
-    <MarketStatCard
+    <MarketPodiumCard
       data={record}
       title="Récord Histórico"
       icon={TrendingUp}
       color="rose"
       winnerLabel="TRASPASO MÁS CARO"
-      type="player"
-      fields={{
-        id: 'player_id',
-        name: 'player_name',
-        value: 'precio',
-      }}
       info={
         <>
           <TooltipHeader>Récord de Traspasos</TooltipHeader>
@@ -51,8 +26,59 @@ export default function RecordTransferCard({ record }) {
           </p>
         </>
       }
-      renderWinnerMeta={renderWinnerMeta}
-      renderListItemValue={renderListItemValue}
+      renderHeroValue={(item) => (
+        <div className="flex flex-col items-center">
+          <span className="text-3xl font-black text-rose-400">{formatEuro(item.precio)}€</span>
+        </div>
+      )}
+      renderHeroStats={(item) => (
+        <HeroStatGroup
+          stats={[
+            {
+              label: 'Comprador',
+              value: item.buyer_name || item.comprador,
+              className: 'text-zinc-300',
+            },
+          ]}
+        />
+      )}
+      renderHeroMeta={(item) => (
+        <ManagerPill
+          user={{
+            user_id: item.buyer_id,
+            user_name: item.buyer_name || item.comprador,
+            user_color_index: item.buyer_color,
+          }}
+        />
+      )}
+      renderRunnerUpValue={(item) => (
+        <div className="flex flex-col items-end">
+          <span className="text-sm font-black text-rose-400">{formatEuro(item.precio)}€</span>
+        </div>
+      )}
+      renderRunnerUpMeta={(item) => (
+        <ManagerName
+          user={{
+            user_id: item.buyer_id,
+            user_name: item.buyer_name || item.comprador,
+            user_color_index: item.buyer_color,
+          }}
+          className="text-[10px] opacity-80 hover:opacity-100"
+        />
+      )}
+      renderListItemValue={(item) => (
+        <span className="text-xs font-bold text-rose-400/80">{formatEuro(item.precio)}€</span>
+      )}
+      renderListItemMeta={(item) => (
+        <ManagerName
+          user={{
+            user_id: item.buyer_id,
+            user_name: item.buyer_name || item.comprador,
+            user_color_index: item.buyer_color,
+          }}
+          className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+        />
+      )}
     />
   );
 }
