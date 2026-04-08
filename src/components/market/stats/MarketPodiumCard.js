@@ -30,7 +30,7 @@ export default function MarketPodiumCard({
   renderListItemValue,
   renderListItemMeta,
   // If provided, we'll try to use team colors for player names
-  useTeamColors = true,
+  useTeamColors = false,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -40,11 +40,23 @@ export default function MarketPodiumCard({
   const runnerUps = data.slice(1, 3);
   const restRunnerUps = data.slice(3);
 
-  // Helper to get player team color
-  const getPlayerNameColor = (item) => {
-    if (!useTeamColors || !item.player_team) return 'text-white';
-    const teamColor = getTeamColor(item.player_team);
-    return teamColor.text || 'text-white';
+  // Helper to get name styling and link path
+  const getNameConfig = (item) => {
+    const isPlayer = !!item.player_id;
+    const linkPath = isPlayer ? `/player/${item.player_id}` : `/user/${item.id || item.user_id}`;
+
+    if (useTeamColors && item.player_team) {
+      return {
+        linkPath,
+        className: getTeamColor(item.player_team).text || 'text-white',
+      };
+    }
+
+    return {
+      linkPath,
+      style: { color: `var(--color-${color}-400)` },
+      className: '',
+    };
   };
 
   return (
@@ -78,24 +90,30 @@ export default function MarketPodiumCard({
                 className={`w-24 h-24 rounded-full overflow-hidden ring-4 ring-offset-4 ring-offset-zinc-950 shadow-2xl relative z-10`}
                 style={{ ringColor: `var(--color-${color}-500)` }}
               >
-                <PlayerImage
-                  src={winner.player_img}
-                  alt={winner.player_name || winner.name}
-                  width={96}
-                  height={96}
-                  className="object-cover object-top w-full h-full transform group-hover/img:scale-110 transition-transform duration-700"
-                  fallbackSize={48}
-                />
+                <Link
+                  href={getNameConfig(winner).linkPath}
+                  className="block w-full h-full relative z-10"
+                >
+                  <PlayerImage
+                    src={winner.player_img}
+                    alt={winner.player_name || winner.user_name || winner.name}
+                    width={96}
+                    height={96}
+                    className="object-cover object-top w-full h-full transform group-hover/img:scale-110 transition-transform duration-700"
+                    fallbackSize={48}
+                  />
+                </Link>
               </div>
             </div>
 
             {/* Player Name */}
             <div className="text-center group/name">
-              <Link href={`/player/${winner.player_id || winner.id}`} className="block">
+              <Link href={getNameConfig(winner).linkPath} className="block">
                 <span
-                  className={`text-2xl font-black transition-all duration-300 block leading-tight ${getPlayerNameColor(winner)} group-hover/name:brightness-125`}
+                  className={`text-2xl font-black transition-all duration-300 block leading-tight hover:scale-105 transition-transform origin-center ${getNameConfig(winner).className}`}
+                  style={getNameConfig(winner).style}
                 >
-                  {winner.player_name || winner.name}
+                  {winner.player_name || winner.user_name || winner.name}
                 </span>
               </Link>
             </div>
@@ -164,10 +182,11 @@ export default function MarketPodiumCard({
 
                     <div className="flex-1 min-w-0">
                       <Link
-                        href={`/player/${item.player_id || item.id}`}
-                        className={`text-sm font-bold truncate transition-colors block ${getPlayerNameColor(item)} group-hover/item:brightness-125`}
+                        href={getNameConfig(item).linkPath}
+                        className={`text-sm font-bold truncate transition-colors block hover:scale-105 transition-transform origin-left ${getNameConfig(item).className}`}
+                        style={getNameConfig(item).style}
                       >
-                        {item.player_name || item.name}
+                        {item.player_name || item.user_name || item.name}
                       </Link>
 
                       {renderRunnerUpMeta && (
@@ -227,10 +246,11 @@ export default function MarketPodiumCard({
                         {rank.toString().padStart(2, '0')}
                       </span>
                       <Link
-                        href={`/player/${item.player_id || item.id}`}
-                        className={`text-xs font-bold truncate transition-colors ${getPlayerNameColor(item)} group-hover/row:brightness-125`}
+                        href={getNameConfig(item).linkPath}
+                        className={`text-xs font-bold truncate transition-colors hover:scale-105 transition-transform origin-left ${getNameConfig(item).className}`}
+                        style={getNameConfig(item).style}
                       >
-                        {item.player_name || item.name}
+                        {item.player_name || item.user_name || item.name}
                       </Link>
 
                       {renderListItemMeta && (
