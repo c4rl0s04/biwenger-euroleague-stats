@@ -6,11 +6,12 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function RecordBidCard({ record }) {
+export default function RecordBidCard({ record, onViewAll }) {
   if (!record || !Array.isArray(record) || record.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={record}
       title="Récord Pujas"
       icon={Gavel}

@@ -6,11 +6,12 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function BestPercentageCard({ data }) {
+export default function BestPercentageCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="Diamante en Bruto"
       icon={Gem}

@@ -6,11 +6,12 @@ import { formatProfit } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function BestSellerCard({ seller }) {
+export default function BestSellerCard({ seller, onViewAll }) {
   if (!seller || !Array.isArray(seller) || seller.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={seller}
       title="El Negociador"
       icon={Briefcase}

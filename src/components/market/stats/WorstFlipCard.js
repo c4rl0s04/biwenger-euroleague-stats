@@ -6,7 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function WorstFlipCard({ flip }) {
+export default function WorstFlipCard({ flip, onViewAll }) {
   if (!flip || !Array.isArray(flip) || flip.length === 0) return null;
 
   const formatShortEuro = (val) => {
@@ -18,6 +18,7 @@ export default function WorstFlipCard({ flip }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={flip}
       title="El Fiasco"
       icon={TrendingDown}

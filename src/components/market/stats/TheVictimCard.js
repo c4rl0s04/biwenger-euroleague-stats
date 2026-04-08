@@ -5,11 +5,12 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function TheVictimCard({ data }) {
+export default function TheVictimCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="La Víctima"
       icon={Frown}

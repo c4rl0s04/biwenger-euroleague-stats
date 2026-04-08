@@ -6,7 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { ManagerPill, ManagerName, HeroStatGroup } from './StatUIComponents';
 
-export default function WorstValueCard({ player }) {
+export default function WorstValueCard({ player, onViewAll }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
 
   const formatNumber = (val) => {
@@ -21,6 +21,7 @@ export default function WorstValueCard({ player }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={player}
       title="El Flop"
       icon={ThumbsDown}

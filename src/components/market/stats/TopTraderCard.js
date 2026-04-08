@@ -7,7 +7,7 @@ import { TooltipHeader } from '@/components/ui/Tooltip';
 import { formatEuro } from '@/lib/utils/currency';
 import { ManagerPill, ManagerName, HeroStatGroup } from './StatUIComponents';
 
-export default function TopTraderCard({ data }) {
+export default function TopTraderCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const formatProfit = (val) => {
@@ -18,6 +18,7 @@ export default function TopTraderCard({ data }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="El Especulador"
       icon={Repeat}

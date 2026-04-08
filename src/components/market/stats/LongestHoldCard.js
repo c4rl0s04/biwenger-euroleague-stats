@@ -6,7 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function LongestHoldCard({ data }) {
+export default function LongestHoldCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const formatShortEuro = (val) => {
@@ -23,6 +23,7 @@ export default function LongestHoldCard({ data }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="El Hold"
       icon={Hourglass}

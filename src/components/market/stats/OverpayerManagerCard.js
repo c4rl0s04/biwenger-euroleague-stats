@@ -6,11 +6,12 @@ import { TooltipHeader } from '@/components/ui/Tooltip';
 import { formatEuro } from '@/lib/utils/currency';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function OverpayerManagerCard({ data }) {
+export default function OverpayerManagerCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="El Sobrepagador"
       icon={Coins}

@@ -6,11 +6,12 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function BigSpenderCard({ spender }) {
+export default function BigSpenderCard({ spender, onViewAll }) {
   if (!spender || !Array.isArray(spender) || spender.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={spender}
       title="El Jeque"
       icon={Gem}

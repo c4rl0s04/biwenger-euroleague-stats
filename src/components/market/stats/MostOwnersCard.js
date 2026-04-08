@@ -5,11 +5,12 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup } from './StatUIComponents';
 
-export default function MostOwnersCard({ player }) {
+export default function MostOwnersCard({ player, onViewAll }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={player}
       title="El Inquieto"
       icon={Briefcase}

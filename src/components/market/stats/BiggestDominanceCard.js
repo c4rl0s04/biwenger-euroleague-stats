@@ -5,7 +5,7 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerName } from './StatUIComponents';
 
-export default function BiggestDominanceCard({ data }) {
+export default function BiggestDominanceCard({ data, onViewAll }) {
   if (!data || !data.leader_id || !data.trailer_id) return null;
 
   const leaderWins = data.user1_id === data.leader_id ? data.wins1 : data.wins2;
@@ -13,6 +13,7 @@ export default function BiggestDominanceCard({ data }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={[data]}
       title="Dominio Más Claro"
       icon={Crown}

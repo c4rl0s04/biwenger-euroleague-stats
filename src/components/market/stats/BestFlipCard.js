@@ -6,7 +6,7 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 
-export default function BestFlipCard({ flip }) {
+export default function BestFlipCard({ flip, onViewAll }) {
   if (!flip || !Array.isArray(flip) || flip.length === 0) return null;
 
   const formatShortEuro = (val) => {
@@ -17,6 +17,7 @@ export default function BestFlipCard({ flip }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={flip}
       title="El Pelotazo"
       icon={Rocket}

@@ -5,7 +5,7 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function LossyPlayerCard({ data }) {
+export default function LossyPlayerCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const formatShortEuro = (val) => {
@@ -17,6 +17,7 @@ export default function LossyPlayerCard({ data }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="El Ruinoso"
       icon={Skull}

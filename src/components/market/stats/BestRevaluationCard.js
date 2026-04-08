@@ -6,7 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function BestRevaluationCard({ data }) {
+export default function BestRevaluationCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const formatShortEuro = (val) => {
@@ -17,6 +17,7 @@ export default function BestRevaluationCard({ data }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="El Visionario"
       icon={Telescope}

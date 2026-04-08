@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import PlayerImage from '@/components/ui/PlayerImage';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
@@ -31,6 +31,7 @@ export default function MarketPodiumCard({
   renderListItemMeta,
   // If provided, we'll try to use team colors for player names
   useTeamColors = false,
+  onViewAll,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -38,7 +39,7 @@ export default function MarketPodiumCard({
 
   const winner = data[0];
   const runnerUps = data.slice(1, 3);
-  const restRunnerUps = data.slice(3);
+  const restRunnerUps = data.slice(3, 10);
 
   // Helper to get the best image source (supports players and managers/users)
   const getEntryImage = (item) => {
@@ -99,7 +100,8 @@ export default function MarketPodiumCard({
         icon={icon}
         color={color}
         info={info}
-        className="h-auto border-white/5 shadow-2xl"
+        onClick={onViewAll}
+        className={`h-auto border-white/5 shadow-2xl transition-all duration-300 ${onViewAll ? 'cursor-pointer hover:border-white/20 active:scale-[0.98]' : ''}`}
       >
         <div className="flex flex-col">
           {/* 1. Hero Section (#1) */}
@@ -117,6 +119,7 @@ export default function MarketPodiumCard({
                 <Link
                   href={getNameConfig(winner).linkPath}
                   className="block w-full h-full relative z-10"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <PlayerImage
                     src={getEntryImage(winner)}
@@ -132,7 +135,11 @@ export default function MarketPodiumCard({
 
             {/* Player Name */}
             <div className="text-center group/name">
-              <Link href={getNameConfig(winner).linkPath} className="block">
+              <Link
+                href={getNameConfig(winner).linkPath}
+                className="block"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span
                   className={`text-2xl font-black transition-all duration-300 block leading-tight hover:scale-105 transition-transform origin-center ${getNameConfig(winner).className}`}
                   style={getNameConfig(winner).style}
@@ -185,6 +192,7 @@ export default function MarketPodiumCard({
                         <Link
                           href={`/player/${item.player_id || item.id}`}
                           className="block w-full h-full"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <PlayerImage
                             src={getEntryImage(item)}
@@ -209,6 +217,7 @@ export default function MarketPodiumCard({
                         href={getNameConfig(item).linkPath}
                         className={`text-sm font-bold truncate transition-colors block hover:scale-105 transition-transform origin-left ${getNameConfig(item).className}`}
                         style={getNameConfig(item).style}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {item.player_name || item.user_name || item.name}
                       </Link>
@@ -236,7 +245,10 @@ export default function MarketPodiumCard({
           {/* 3. Expansion Toggle */}
           {restRunnerUps.length > 0 && (
             <button
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
               className="mt-4 flex items-center justify-center gap-2 text-xs uppercase font-black tracking-[0.2em] text-zinc-500 hover:text-white transition-all py-4 border-t border-white/5 cursor-pointer group/toggle"
             >
               {isExpanded ? (
@@ -274,6 +286,7 @@ export default function MarketPodiumCard({
                         href={getNameConfig(item).linkPath}
                         className={`text-xs font-bold truncate transition-colors hover:scale-105 transition-transform origin-left ${getNameConfig(item).className}`}
                         style={getNameConfig(item).style}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {item.player_name || item.user_name || item.name}
                       </Link>

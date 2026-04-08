@@ -39,9 +39,36 @@ import ManagerFinancesTable from './stats/ManagerFinancesTable';
 import MarketListingsSection from './MarketListingsSection';
 import AnalyticsDemoShowroom from './AnalyticsDemoShowroom';
 import InflatedPlayerCard from './stats/InflatedPlayerCard';
+import StatDetailDrawer from './stats/StatDetailDrawer';
+import {
+  Trophy,
+  TrendingUp,
+  Euro,
+  Users,
+  ShoppingCart,
+  Activity,
+  AlertTriangle,
+  Clock,
+  Flame,
+  GanttChartSquare,
+  Coins,
+  Swords,
+  ShieldAlert,
+  Crown,
+} from 'lucide-react';
 
 export default function MarketPageClient() {
   const [selectedDuel, setSelectedDuel] = useState(null);
+  const [drawerData, setDrawerData] = useState({
+    isOpen: false,
+    title: '',
+    subtitle: '',
+    data: [],
+    icon: Trophy,
+    statType: 'player',
+    color: 'blue',
+  });
+
   const { data: statsData, loading } = useApiData('/api/market/stats');
   const marketStats = statsData || {};
 
@@ -90,6 +117,17 @@ export default function MarketPageClient() {
     });
   };
 
+  const handleOpenDrawer = (config) => {
+    setDrawerData({
+      ...config,
+      isOpen: true,
+    });
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerData((prev) => ({ ...prev, isOpen: false }));
+  };
+
   return (
     <div>
       {/* 1. KPIs Section */}
@@ -105,9 +143,45 @@ export default function MarketPageClient() {
       {/* Section: Transacciones */}
       <Section title="Transacciones Destacadas" delay={100} background="section-raised">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          <RecordTransferCard record={marketStats.recordTransfer} />
-          <BigSpenderCard spender={marketStats.bigSpender} />
-          <BestSellerCard seller={marketStats.bestSeller} />
+          <RecordTransferCard
+            record={marketStats.recordTransfer}
+            onViewAll={() =>
+              handleOpenDrawer({
+                title: 'Récord de Traspasos',
+                subtitle: 'Traspasos históricos entre managers',
+                data: marketStats.recordTransfer,
+                icon: Euro,
+                statType: 'transaction',
+                color: 'rose',
+              })
+            }
+          />
+          <BigSpenderCard
+            spender={marketStats.bigSpender}
+            onViewAll={() =>
+              handleOpenDrawer({
+                title: 'Los Grandes Gastadores',
+                subtitle: 'Managers con mayor inversión total',
+                data: marketStats.bigSpender,
+                icon: ShoppingCart,
+                statType: 'user',
+                color: 'blue',
+              })
+            }
+          />
+          <BestSellerCard
+            seller={marketStats.bestSeller}
+            onViewAll={() =>
+              handleOpenDrawer({
+                title: 'Los Mejores Vendedores',
+                subtitle: 'Managers con mayores beneficios obtenidos',
+                data: marketStats.bestSeller,
+                icon: Coins,
+                statType: 'user',
+                color: 'emerald',
+              })
+            }
+          />
         </div>
       </Section>
 
@@ -117,10 +191,58 @@ export default function MarketPageClient() {
         <div className="mb-8">
           <Subheading title="Ganancias" subtitle="Las mejores operaciones y plusvalías" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
-            <BestFlipCard flip={marketStats.bestFlip} />
-            <BestRevaluationCard data={marketStats.bestRevaluation} />
-            <BestPercentageCard data={marketStats.bestPercentage} />
-            <BestValueCard player={marketStats.bestValue} />
+            <BestFlipCard
+              flip={marketStats.bestFlip}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'El Pelotazo',
+                  subtitle: 'Mayores plusvalías en una sola operación',
+                  data: marketStats.bestFlip,
+                  icon: TrendingUp,
+                  statType: 'transaction',
+                  color: 'emerald',
+                })
+              }
+            />
+            <BestRevaluationCard
+              data={marketStats.bestRevaluation}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'El Diamante en Bruto',
+                  subtitle: 'Mayores revalorizaciones (no realizadas)',
+                  data: marketStats.bestRevaluation,
+                  icon: Activity,
+                  statType: 'player',
+                  color: 'blue',
+                })
+              }
+            />
+            <BestPercentageCard
+              data={marketStats.bestPercentage}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'Rentabilidad Relativa',
+                  subtitle: 'Mayor % de beneficio sobre compra',
+                  data: marketStats.bestPercentage,
+                  icon: Activity,
+                  statType: 'player',
+                  color: 'indigo',
+                })
+              }
+            />
+            <BestValueCard
+              player={marketStats.bestValue}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'Relación Calidad/Precio',
+                  subtitle: 'Mejores puntos por millón invertido',
+                  data: marketStats.bestValue,
+                  icon: Star,
+                  statType: 'player',
+                  color: 'amber',
+                })
+              }
+            />
           </div>
         </div>
 
@@ -128,9 +250,45 @@ export default function MarketPageClient() {
         <div className="mb-8">
           <Subheading title="Pérdidas" subtitle="Las peores operaciones y oportunidades perdidas" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-            <WorstFlipCard flip={marketStats.worstFlip} />
-            <WorstRevaluationCard data={marketStats.worstRevaluation} />
-            <MissedOpportunityCard data={marketStats.missedOpportunity} />
+            <WorstFlipCard
+              flip={marketStats.worstFlip}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'El Fiasco',
+                  subtitle: 'Mayores pérdidas en una sola operación',
+                  data: marketStats.worstFlip,
+                  icon: AlertTriangle,
+                  statType: 'transaction',
+                  color: 'rose',
+                })
+              }
+            />
+            <WorstRevaluationCard
+              data={marketStats.worstRevaluation}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'El Depreciado',
+                  subtitle: 'Mayores depreciaciones en cartera',
+                  data: marketStats.worstRevaluation,
+                  icon: ShieldAlert,
+                  statType: 'player',
+                  color: 'orange',
+                })
+              }
+            />
+            <MissedOpportunityCard
+              data={marketStats.missedOpportunity}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'El Impaciente',
+                  subtitle: 'Jugadores vendidos que luego explotaron',
+                  data: marketStats.missedOpportunity,
+                  icon: Clock,
+                  statType: 'player',
+                  color: 'zinc',
+                })
+              }
+            />
           </div>
         </div>
 
@@ -153,9 +311,45 @@ export default function MarketPageClient() {
               subtitle="Quién roba más operaciones disputadas, quién pierde más finales y quién termina pagando de más por ganar"
             />
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-              <TheThiefCard data={marketStats.theThief} />
-              <TheVictimCard data={marketStats.theVictim} />
-              <OverpayerManagerCard data={marketStats.overpayerManager} />
+              <TheThiefCard
+                data={marketStats.theThief}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'El Ladrón',
+                    subtitle: 'Especialistas en robar pujas disputadas',
+                    data: marketStats.theThief,
+                    icon: Flame,
+                    statType: 'user',
+                    color: 'amber',
+                  })
+                }
+              />
+              <TheVictimCard
+                data={marketStats.theVictim}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'La Víctima',
+                    subtitle: 'Managers que más finales de subasta pierden',
+                    data: marketStats.theVictim,
+                    icon: Swords,
+                    statType: 'user',
+                    color: 'rose',
+                  })
+                }
+              />
+              <OverpayerManagerCard
+                data={marketStats.overpayerManager}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'El Sobrepagador',
+                    subtitle: 'Managers que pagan más de lo necesario por ganar',
+                    data: marketStats.overpayerManager,
+                    icon: GanttChartSquare,
+                    statType: 'user',
+                    color: 'indigo',
+                  })
+                }
+              />
             </div>
 
             <div className="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-6 xl:items-stretch items-start">
@@ -190,12 +384,86 @@ export default function MarketPageClient() {
               subtitle="Los nombres que concentran pujas, rotación, sobreprecio, robos ajustados y también grandes decepciones"
             />
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-              <RecordBidCard record={marketStats.recordBid} />
-              <BiggestStealCard data={marketStats.biggestSteal} />
-              <TopTransferredCard player={marketStats.topPlayer} />
-              <MostOwnersCard player={marketStats.mostOwners} />
-              <InflatedPlayerCard data={marketStats.inflatedPlayer} />
-              {marketStats.worstValue && <WorstValueCard player={marketStats.worstValue} />}
+              <RecordBidCard
+                record={marketStats.recordBid}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'La Puja Récord',
+                    subtitle: 'Las pujas más altas registradas',
+                    data: marketStats.recordBid,
+                    icon: TrendingUp,
+                    statType: 'transaction',
+                    color: 'emerald',
+                  })
+                }
+              />
+              <BiggestStealCard
+                data={marketStats.biggestSteal}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'El Chollo',
+                    subtitle: 'Fichajes ganados por el margen más estrecho',
+                    data: marketStats.biggestSteal,
+                    icon: Trophy,
+                    statType: 'transaction',
+                    color: 'emerald',
+                  })
+                }
+              />
+              <TopTransferredCard
+                player={marketStats.topPlayer}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'El Más Deseado',
+                    subtitle: 'Jugadores con mayor volumen de traspasos',
+                    data: marketStats.topPlayer,
+                    icon: Users,
+                    statType: 'player',
+                    color: 'blue',
+                  })
+                }
+              />
+              <MostOwnersCard
+                player={marketStats.mostOwners}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'El Inquieto',
+                    subtitle: 'Jugadores que han pasado por más manos',
+                    data: marketStats.mostOwners,
+                    icon: Clock,
+                    statType: 'player',
+                    color: 'zinc',
+                  })
+                }
+              />
+              <InflatedPlayerCard
+                data={marketStats.inflatedPlayer}
+                onViewAll={() =>
+                  handleOpenDrawer({
+                    title: 'El Inflado',
+                    subtitle: 'Jugadores con mayor sobreprecio sobre valor inicial',
+                    data: marketStats.inflatedPlayer,
+                    icon: Flame,
+                    statType: 'player',
+                    color: 'orange',
+                  })
+                }
+              />
+              {marketStats.worstValue && (
+                <WorstValueCard
+                  player={marketStats.worstValue}
+                  onViewAll={() =>
+                    handleOpenDrawer({
+                      title: 'El Ruinoso',
+                      subtitle: 'Peor relación puntos por millón',
+                      data: marketStats.worstValue,
+                      icon: AlertTriangle,
+                      statType: 'player',
+                      color: 'rose',
+                    })
+                  }
+                />
+              )}
             </div>
           </div>
         </div>
@@ -218,6 +486,18 @@ export default function MarketPageClient() {
           <LiveMarketTable />
         </div>
       </Section>
+
+      {/* Global Ranking Sidebar */}
+      <StatDetailDrawer
+        isOpen={drawerData.isOpen}
+        onClose={handleCloseDrawer}
+        title={drawerData.title}
+        subtitle={drawerData.subtitle}
+        data={drawerData.data}
+        icon={drawerData.icon}
+        statType={drawerData.statType}
+        color={drawerData.color}
+      />
     </div>
   );
 }

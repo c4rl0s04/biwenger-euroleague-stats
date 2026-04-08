@@ -6,7 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function BiggestStealCard({ data }) {
+export default function BiggestStealCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const formatShortEuro = (val) => {
@@ -17,6 +17,7 @@ export default function BiggestStealCard({ data }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="Mayor Robo"
       icon={Search}

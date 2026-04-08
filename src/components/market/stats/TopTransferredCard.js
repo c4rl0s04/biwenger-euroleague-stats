@@ -6,11 +6,12 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup } from './StatUIComponents';
 
-export default function TopTransferredCard({ player }) {
+export default function TopTransferredCard({ player, onViewAll }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={player}
       title="El más fichado"
       icon={Flame}

@@ -6,7 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup } from './StatUIComponents';
 
-export default function InflatedPlayerCard({ data }) {
+export default function InflatedPlayerCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const formatShortEuro = (val) => {
@@ -18,6 +18,7 @@ export default function InflatedPlayerCard({ data }) {
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={data}
       title="El Inflado"
       icon={BadgePercent}

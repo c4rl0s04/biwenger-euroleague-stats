@@ -6,11 +6,12 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerName } from './StatUIComponents';
 
-export default function HottestRivalryCard({ data }) {
+export default function HottestRivalryCard({ data, onViewAll }) {
   if (!data) return null;
 
   return (
     <MarketPodiumCard
+      onViewAll={onViewAll}
       data={[data]}
       title="Rivalidad Más Caliente"
       icon={Flame}
