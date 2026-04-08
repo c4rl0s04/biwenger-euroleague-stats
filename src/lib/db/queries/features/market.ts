@@ -764,6 +764,8 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
+      t.name as team_name,
+      t.img as team_logo,
       u.id as buyer_id,
       u.name as buyer_name,
       u.icon as buyer_icon,
@@ -822,12 +824,14 @@ export async function getRecordBid(): Promise<RecordBid[]> {
       f.comprador,
       p.name as player_name,
       p.img as player_img,
-      tm.code as player_team
+      tm.code as player_team,
+      tm.name as team_name,
+      tm.img as team_logo
     FROM transfer_bids t
     JOIN fichajes f ON t.transfer_id = f.id
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN teams tm ON p.team_id = tm.id
-    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, p.name, p.img, tm.code
+    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, p.name, p.img, tm.code, tm.name, tm.img
     ORDER BY bid_count DESC
     LIMIT 50
   `;
@@ -1112,12 +1116,14 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
-      p.price as current_price,
-      f.precio as purchase_price,
-      (p.price - f.precio) as revaluation,
+      t.name as team_name,
+      t.img as team_logo,
       u.id as user_id,
       u.name as user_name,
-      u.color_index as user_color_index
+      u.color_index as user_color_index,
+      p.price as current_price,
+      f.precio as purchase_price,
+      (p.price - f.precio) as revaluation
     FROM players p
     JOIN fichajes f ON p.id = f.player_id AND p.owner_id IS NOT NULL
     LEFT JOIN teams t ON p.team_id = t.id
@@ -1998,13 +2004,14 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
+      t.name as team_name,
+      t.img as team_logo,
       COUNT(DISTINCT f.comprador) as distinct_owners_count
-      
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE f.comprador != 'Mercado'
-    GROUP BY p.id, p.name, p.img, t.code
+    GROUP BY p.id, p.name, p.img, t.code, t.name, t.img
     ORDER BY distinct_owners_count DESC
     LIMIT 50
   `;
@@ -2299,18 +2306,19 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
       u.id as user_id,
       u.name as user_name,
       u.color_index as user_color_index,
-      
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
+      t.name as team_name,
+      t.img as team_logo,
       p.price as current_price,
-      
       purchase.precio as purchase_price,
       (p.price - purchase.precio) as devaluation
-      
     FROM fichajes purchase
     JOIN users u ON purchase.comprador = u.name
     JOIN players p ON purchase.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     
     -- Ensure player is still owned (no sale after purchase)
     WHERE purchase.comprador != 'Mercado'

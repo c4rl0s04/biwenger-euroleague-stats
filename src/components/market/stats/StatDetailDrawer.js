@@ -108,7 +108,7 @@ export default function StatDetailDrawer({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 200 }}
-            className="fixed top-0 right-0 h-screen w-full sm:w-[500px] bg-zinc-950/90 backdrop-blur-3xl border-l border-white/5 z-[201] flex flex-col shadow-[-10px_0_50px_rgba(0,0,0,0.8)]"
+            className="fixed top-0 right-0 h-screen w-full sm:w-[700px] bg-zinc-950/95 backdrop-blur-3xl border-l border-white/5 z-[201] flex flex-col shadow-[-10px_0_50px_rgba(0,0,0,0.8)]"
           >
             {/* Header */}
             <div className="relative p-8 pb-6 border-b border-white/5 bg-zinc-900/40">
@@ -127,7 +127,7 @@ export default function StatDetailDrawer({
                 </div>
 
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 leading-tight mb-1">
+                  <span className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-400 leading-tight mb-2">
                     {subtitle || 'Ranking Completo'}
                   </span>
                   <h2 className="text-2xl font-black uppercase tracking-tight text-white leading-tight truncate">
@@ -183,42 +183,119 @@ function StatItemRow({ item, idx, statType }) {
   let valueText = '';
   let valueSub = '';
 
-  // 1. Transaction Type
-  if (item.purchase_price && item.sale_price) {
-    const profit = item.profit || item.sale_price - item.purchase_price;
+  // --- CATEGORY: Competitive / Rivalry ---
+  if (
+    item.stolen_count !== undefined ||
+    item.stolen_from_count !== undefined ||
+    item.bid_count !== undefined
+  ) {
+    if (item.bid_count !== undefined) {
+      valueLabel = 'Pujas';
+      valueText = item.bid_count;
+      valueSub = `Precio Traspaso: ${formatEuro(item.precio)}€`;
+    } else if (item.stolen_count !== undefined) {
+      valueLabel = 'Jugadores Robados';
+      valueText = item.stolen_count;
+      valueSub = `${item.total_spent ? formatEuro(item.total_spent) + '€ invertidos' : 'Al acecho'}`;
+    } else {
+      valueLabel = 'Jugadores Perdidos';
+      valueText = item.stolen_from_count;
+      valueSub = 'Víctima de pujas';
+    }
+  }
+  // --- CATEGORY: Transactions / Flips ---
+  else if (item.purchase_price && (item.sale_price || item.profit)) {
+    const profit = item.profit || (item.sale_price ? item.sale_price - item.purchase_price : 0);
     valueLabel = profit >= 0 ? 'Beneficio' : 'Pérdida';
     valueText = `${formatEuro(Math.abs(profit))}€`;
-    valueSub = `Compra: ${formatEuro(item.purchase_price)}€`;
+
+    if (item.team_name && item.team_logo) {
+      valueSub = (
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            <img
+              src={item.team_logo}
+              alt={item.team_name}
+              className="w-3.5 h-3.5 object-contain shrink-0"
+            />
+            <span className="truncate">{item.team_name}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="opacity-70">C:</span> {formatEuro(item.purchase_price)}€
+            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+            <span className="opacity-70">V:</span> {formatEuro(item.sale_price)}€
+          </div>
+        </div>
+      );
+    } else {
+      valueSub = (
+        <div className="flex items-center gap-2">
+          <span className="opacity-70">C:</span> {formatEuro(item.purchase_price)}€
+          <span className="w-1 h-1 rounded-full bg-zinc-700" />
+          <span className="opacity-70">V:</span> {formatEuro(item.sale_price)}€
+        </div>
+      );
+    }
   }
-  // 2. Revaluation Type
+  // --- CATEGORY: Revaluation ---
   else if (item.purchase_price && (item.revaluation || item.devaluation)) {
     const change = item.revaluation || item.devaluation;
     valueLabel = change >= 0 ? 'Revalorización' : 'Depreciación';
     valueText = `${formatEuro(Math.abs(change))}€`;
-    valueSub = `Comprado por: ${formatEuro(item.purchase_price)}€`;
+    valueSub = (
+      <div className="flex items-center gap-2">
+        <span className="opacity-70">Compra:</span> {formatEuro(item.purchase_price)}€
+        <span className="w-1 h-1 rounded-full bg-zinc-700" />
+        <span className="opacity-70">Actual:</span> {formatEuro(item.current_price || item.price)}€
+      </div>
+    );
   }
-  // 3. User Stats
-  else if (item.total_spent || item.total_overpay || item.trade_count) {
-    if (item.total_spent) {
-      valueLabel = 'Total Invertido';
+  // --- CATEGORY: User Totals / Sellers ---
+  else if (
+    item.total_spent !== undefined ||
+    item.net_profit !== undefined ||
+    item.total_profit !== undefined
+  ) {
+    if (item.total_spent !== undefined) {
+      valueLabel = 'Inversión Total';
       valueText = `${formatEuro(item.total_spent)}€`;
-      valueSub = `${item.purchases_count} fichajes`;
-    } else if (item.total_overpay) {
-      valueLabel = 'Sobrepago Total';
-      valueText = `${formatEuro(item.total_overpay)}€`;
-      valueSub = `${item.contested_wins} victorias disputadas`;
+      valueSub = `${item.purchases_count} fichajes realizados`;
     } else {
-      valueLabel = 'Plusvalías';
-      valueText = `${formatEuro(item.total_profit || 0)}€`;
-      valueSub = `${item.trade_count} operaciones`;
+      const profit = item.net_profit || item.total_profit || 0;
+      valueLabel = 'Plusvalías Totales';
+      valueText = `${formatEuro(profit)}€`;
+      valueSub = item.total_sales
+        ? `${formatEuro(item.total_sales)}€ en ventas (${item.sales_count} ops)`
+        : `${item.trade_count || item.sales_count || 0} operaciones`;
     }
   }
-  // 4. Default / Generic Player
+  // --- CATEGORY: Performance / Value ---
+  else if (item.points_per_million !== undefined) {
+    valueLabel = 'Puntos / Millón';
+    valueText = item.points_per_million.toFixed(2);
+    valueSub = `${item.total_points} puntos totales`;
+  }
+  // --- CATEGORY: Generic / Transfer Record ---
   else {
-    const mainVal = item.price || item.purchase_price || item.total_spent || item.profit || 0;
-    valueLabel = 'Valor';
+    const mainVal =
+      item.precio || item.price || item.purchase_price || item.total_spent || item.value || 0;
+    valueLabel = item.precio ? 'Precio Traspaso' : 'Valor';
     valueText = `${formatEuro(mainVal)}€`;
-    valueSub = item.player_team || item.team || '';
+
+    if (item.team_name && item.team_logo) {
+      valueSub = (
+        <div className="flex items-center gap-1.5 overflow-hidden">
+          <img
+            src={item.team_logo}
+            alt={item.team_name}
+            className="w-3.5 h-3.5 object-contain shrink-0"
+          />
+          <span className="truncate">{item.team_name}</span>
+        </div>
+      );
+    } else {
+      valueSub = item.player_team || item.team || item.player_name || '';
+    }
   }
 
   // Resolve Image and Identity
@@ -234,9 +311,8 @@ function StatItemRow({ item, idx, statType }) {
     item.buyer_color,
     item.user_color,
   ].find((v) => v !== undefined && v !== null);
-  const userColor = isUser
-    ? getColorForUser(linkId, name, resolvedColorIndex)
-    : { text: 'text-white' };
+
+  const userColor = isUser ? getColorForUser(linkId, name, resolvedColorIndex) : { text: '' };
 
   return (
     <motion.div
@@ -250,7 +326,7 @@ function StatItemRow({ item, idx, statType }) {
       >
         {/* Rank */}
         <div
-          className={`w-8 font-black italic text-xl tabular-nums text-center ${isTop3 ? 'text-primary' : 'text-zinc-700'}`}
+          className={`w-8 font-black italic text-xl tabular-nums text-center ${isTop3 ? 'text-primary' : 'text-zinc-400'}`}
         >
           {rank}
         </div>
@@ -262,24 +338,26 @@ function StatItemRow({ item, idx, statType }) {
             name={name}
             width={48}
             height={48}
-            className={`w-full h-full object-cover ${!isUser ? 'object-top scale-[1.6] translate-y-1.5' : 'object-contain p-2'}`}
+            className={`w-full h-full object-cover ${!isUser ? 'object-top scale-[1.35] translate-y-1.5' : 'object-center'}`}
           />
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h4
-            className={`font-black uppercase tracking-tight truncate leading-tight group-hover:text-primary transition-colors ${userColor.text}`}
+            className={`font-black uppercase tracking-tight truncate leading-tight group-hover:text-primary transition-colors text-white`}
           >
             {name}
           </h4>
-          <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{valueSub}</div>
+          <div className="text-[10px] text-zinc-300 font-bold uppercase tracking-widest mt-1.5">
+            {valueSub}
+          </div>
         </div>
 
         {/* Value */}
         <div className="text-right shrink-0">
           <div className="text-sm font-black text-white leading-none">{valueText}</div>
-          <div className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-1.5">
+          <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1.5">
             {valueLabel}
           </div>
         </div>
