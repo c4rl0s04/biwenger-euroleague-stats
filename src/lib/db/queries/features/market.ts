@@ -30,6 +30,7 @@ export interface CurrentMarketListing {
   next_opponent_name: string | null;
   next_opponent_img: string | null;
   next_match_date: string | null;
+  player_team: string | null;
 }
 
 export interface Transfer {
@@ -48,6 +49,7 @@ export interface RecentTransfer extends Transfer {
   vendedor_color_index: number | null;
   comprador_id: number | null;
   comprador_color_index: number | null;
+  player_team: string | null;
 }
 
 export interface MarketTrend {
@@ -67,6 +69,7 @@ export interface MarketOpportunity {
   avg_recent_points: number;
   recent_scores: string;
   value_score: number;
+  player_team: string | null;
 }
 
 export interface PriceChange {
@@ -77,6 +80,7 @@ export interface PriceChange {
   price: number;
   price_increment: number;
   owner_id: number | null;
+  player_team: string | null;
 }
 
 export interface MarketKPIs {
@@ -101,6 +105,7 @@ export interface TopTransferredPlayer {
   img: string;
   transfer_count: number;
   avg_price: number;
+  player_team: string | null;
 }
 
 export interface EnrichedTransfer extends Transfer {
@@ -110,6 +115,7 @@ export interface EnrichedTransfer extends Transfer {
   buyer_name: string;
   buyer_icon: string;
   buyer_color: number;
+  player_team: string | null;
 }
 
 export interface BigSpender {
@@ -126,6 +132,7 @@ export interface RecordBid {
   comprador: string;
   player_name: string;
   player_img: string;
+  player_team: string | null;
 }
 
 export interface MarketAnalysisDay {
@@ -151,6 +158,7 @@ export interface PaginatedTransfers {
     player_name: string;
     player_position: string;
     player_img: string;
+    player_team: string | null;
     bids_count: number;
   })[];
   total: number;
@@ -184,6 +192,7 @@ export interface BestRevaluation {
   user_id: number;
   user_name: string;
   user_color_index: number;
+  player_team: string | null;
 }
 
 export interface BestValuePlayer {
@@ -197,6 +206,7 @@ export interface BestValuePlayer {
   purchase_price: number;
   total_points: number;
   points_per_million: number;
+  player_team: string | null;
 }
 
 export interface BestValueDetail {
@@ -222,6 +232,7 @@ export interface BiggestSteal {
   second_highest_bid: number;
   second_bidder_name: string;
   price_diff: number;
+  player_team: string | null;
 }
 
 export interface TheVictim {
@@ -243,6 +254,7 @@ export interface InflatedPlayer {
   trade_count: number;
   total_inflation: number;
   avg_inflation: number;
+  player_team: string | null;
 }
 
 export interface BidDuelUser {
@@ -316,6 +328,7 @@ export interface SingleFlip {
   purchase_price: number;
   sale_price: number;
   profit: number;
+  player_team: string | null;
 }
 
 export interface PercentageGain {
@@ -328,6 +341,7 @@ export interface PercentageGain {
   current_price: number;
   purchase_price: number;
   percentage_gain: number;
+  player_team: string | null;
 }
 
 // ==========================================
@@ -437,6 +451,7 @@ export interface MostOwnersPlayer {
   player_name: string;
   player_img: string;
   distinct_owners_count: number;
+  player_team: string | null;
 }
 
 export interface MissedOpportunity {
@@ -449,6 +464,7 @@ export interface MissedOpportunity {
   current_price: number;
   sale_price: number;
   missed_profit: number;
+  player_team: string | null;
 }
 
 export interface TopTrader {
@@ -466,6 +482,7 @@ export interface PlayerProfitability {
   trade_count: number;
   total_profit?: number;
   total_loss?: number;
+  player_team: string | null;
 }
 
 export interface QuickFlip extends SingleFlip {
@@ -486,6 +503,7 @@ export interface Devaluation {
   current_price: number;
   purchase_price: number;
   devaluation: number;
+  player_team: string | null;
 }
 
 // ==========================================
@@ -714,12 +732,14 @@ export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]>
       f.player_id,
       p.name,
       p.img,
+      t.code as player_team,
       COUNT(*) as transfer_count,
       AVG(f.precio) as avg_price
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     WHERE f.precio > 0
-    GROUP BY f.player_id, p.name, p.img
+    GROUP BY f.player_id, p.name, p.img, t.code
     ORDER BY transfer_count DESC
     LIMIT 10
   `;
@@ -743,12 +763,14 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
       f.*,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       u.id as buyer_id,
       u.name as buyer_name,
       u.icon as buyer_icon,
       u.color_index as buyer_color
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON f.comprador = u.name
     ORDER BY f.precio DESC
     LIMIT 10
@@ -799,11 +821,13 @@ export async function getRecordBid(): Promise<RecordBid[]> {
       f.precio,
       f.comprador,
       p.name as player_name,
-      p.img as player_img
+      p.img as player_img,
+      tm.code as player_team
     FROM transfer_bids t
     JOIN fichajes f ON t.transfer_id = f.id
     LEFT JOIN players p ON f.player_id = p.id
-    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, p.name, p.img
+    LEFT JOIN teams tm ON p.team_id = tm.id
+    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, p.name, p.img, tm.code
     ORDER BY bid_count DESC
     LIMIT 10
   `;
@@ -943,9 +967,11 @@ export async function getLiveMarketTransfers({
       p.name as player_name,
       p.position as player_position,
       p.img as player_img,
+      t.code as player_team,
       (SELECT COUNT(*) FROM transfer_bids tb WHERE tb.transfer_id = f.id) as bids_count
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users v ON v.name = f.vendedor
     LEFT JOIN users c ON c.name = f.comprador
     ${whereClause}
@@ -1085,6 +1111,7 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       p.price as current_price,
       f.precio as purchase_price,
       (p.price - f.precio) as revaluation,
@@ -1093,6 +1120,7 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
       u.color_index as user_color_index
     FROM players p
     JOIN fichajes f ON p.id = f.player_id AND p.owner_id IS NOT NULL
+    LEFT JOIN teams t ON p.team_id = t.id
     JOIN users u ON p.owner_id = u.id
     -- Find the *last* purchase for this player by the CURRENT owner
     WHERE f.id = (
@@ -1134,6 +1162,7 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       
       f.id as transfer_id,
       f.precio as purchase_price,
@@ -1164,6 +1193,7 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
 
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     JOIN users curr_owner ON f.comprador = curr_owner.name
     
     LEFT JOIN LATERAL (
@@ -1280,6 +1310,7 @@ export async function getWorstValuePlayer(): Promise<BestValuePlayer[]> {
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       
       f.id as transfer_id,
       f.precio as purchase_price,
@@ -1312,6 +1343,7 @@ export async function getWorstValuePlayer(): Promise<BestValuePlayer[]> {
 
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     JOIN users curr_owner ON f.comprador = curr_owner.name
     
     -- Find the next sale
@@ -1398,11 +1430,13 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
       f.player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       second_bid.amount as second_highest_bid,
       second_bid.bidder_name as second_bidder_name,
       (f.precio - second_bid.amount) as price_diff
     FROM ValidTransfers f
     JOIN players p ON f.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     CROSS JOIN LATERAL (
         SELECT amount, bidder_name
         FROM transfer_bids tb
@@ -1511,11 +1545,13 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
         p.id as player_id,
         p.name as player_name,
         p.img as player_img,
+        t.code as player_team,
         f.precio as purchase_price,
         mv.price as market_price,
         (f.precio - mv.price) as inflation
       FROM fichajes f
       JOIN players p ON p.id = f.player_id
+      LEFT JOIN teams t ON p.team_id = t.id
       JOIN LATERAL (
         SELECT mv.price
         FROM market_values mv
@@ -1531,11 +1567,12 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
       player_id,
       player_name,
       player_img,
+      player_team,
       COUNT(*) as trade_count,
       SUM(inflation) as total_inflation,
       AVG(inflation) as avg_inflation
     FROM TransferWithMarketValue
-    GROUP BY player_id, player_name, player_img
+    GROUP BY player_id, player_name, player_img, player_team
     ORDER BY total_inflation DESC, avg_inflation DESC
     LIMIT 10
   `;
@@ -1960,12 +1997,14 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       COUNT(DISTINCT f.comprador) as distinct_owners_count
       
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     WHERE f.comprador != 'Mercado'
-    GROUP BY p.id, p.name, p.img
+    GROUP BY p.id, p.name, p.img, t.code
     ORDER BY distinct_owners_count DESC
     LIMIT 10
   `;
@@ -2070,11 +2109,13 @@ export async function getProfitablePlayer(): Promise<PlayerProfitability[]> {
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       COUNT(*) as trade_count,
       SUM(sale.precio - purchase.precio) as total_profit
       
     FROM fichajes purchase
     JOIN players p ON purchase.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     
     JOIN LATERAL (
         SELECT precio, timestamp
@@ -2087,7 +2128,7 @@ export async function getProfitablePlayer(): Promise<PlayerProfitability[]> {
     ) sale ON true
     
     WHERE purchase.comprador != 'Mercado'
-    GROUP BY p.id, p.name, p.img
+    GROUP BY p.id, p.name, p.img, t.code
     HAVING SUM(sale.precio - purchase.precio) > 0
     ORDER BY total_profit DESC
     LIMIT 10
@@ -2112,11 +2153,13 @@ export async function getLossyPlayer(): Promise<PlayerProfitability[]> {
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
+      t.code as player_team,
       COUNT(*) as trade_count,
       SUM(sale.precio - purchase.precio) as total_loss
       
     FROM fichajes purchase
     JOIN players p ON purchase.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
     
     JOIN LATERAL (
         SELECT precio, timestamp
@@ -2129,7 +2172,7 @@ export async function getLossyPlayer(): Promise<PlayerProfitability[]> {
     ) sale ON true
     
     WHERE purchase.comprador != 'Mercado'
-    GROUP BY p.id, p.name, p.img
+    GROUP BY p.id, p.name, p.img, t.code
     HAVING SUM(sale.precio - purchase.precio) < 0
     ORDER BY total_loss ASC
     LIMIT 10
@@ -2352,6 +2395,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       u.name as seller_name,
       u.icon as seller_icon,
       u.color_index as seller_color,
+      t.code as player_team,
       -- Next opponent logic
       tnm.opponent_id as next_opponent_id,
       tnm.opponent_name as next_opponent_name,
