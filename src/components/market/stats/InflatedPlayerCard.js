@@ -51,7 +51,7 @@ export default function InflatedPlayerCard({ data }) {
         </span>
       )}
       renderRunnerUpMeta={(item) => (
-        <div className="text-[10px] text-zinc-500 truncate mt-0.5">
+        <div className="text-xs text-zinc-500 truncate mt-0.5">
           {item.trade_count} compras sobre mercado
         </div>
       )}
@@ -61,7 +61,7 @@ export default function InflatedPlayerCard({ data }) {
         </span>
       )}
       renderListItemMeta={(item) => (
-        <div className="text-[9px] text-zinc-600 truncate ml-2 font-medium">
+        <div className="text-[10px] text-zinc-600 truncate ml-2 font-medium">
           {item.trade_count} pases/mercado
         </div>
       )}

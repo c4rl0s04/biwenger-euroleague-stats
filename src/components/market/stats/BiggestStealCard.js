@@ -66,9 +66,9 @@ export default function BiggestStealCard({ data }) {
               user_name: item.winner,
               user_color_index: item.winner_color,
             }}
-            className="text-[10px] opacity-80 hover:opacity-100"
+            className="text-xs opacity-80 hover:opacity-100"
           />
-          <div className="text-[9px] text-zinc-500 font-bold truncate">
+          <div className="text-[10px] text-zinc-500 font-bold truncate">
             vs {item.second_bidder_name || 'desconocido'}
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function BiggestStealCard({ data }) {
               user_name: item.winner,
               user_color_index: item.winner_color,
             }}
-            className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100"
+            className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100"
           />
           <span className="text-[8px] text-zinc-600 font-medium">
             vs {item.second_bidder_name || '...'}

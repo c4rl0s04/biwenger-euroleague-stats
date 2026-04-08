@@ -53,7 +53,7 @@ export default function WorstRevaluationCard({ data }) {
         </span>
       )}
       renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-[10px] opacity-80 hover:opacity-100" />
+        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
       )}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-rose-400/80">
@@ -63,7 +63,7 @@ export default function WorstRevaluationCard({ data }) {
       renderListItemMeta={(item) => (
         <ManagerName
           user={item}
-          className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
         />
       )}
     />

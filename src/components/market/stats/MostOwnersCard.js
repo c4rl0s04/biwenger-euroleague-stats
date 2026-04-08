@@ -40,11 +40,11 @@ export default function MostOwnersCard({ player }) {
         <HeroStatGroup stats={[{ label: 'Recurrencia', value: 'Alta rotación' }]} />
       )}
       renderRunnerUpMeta={(item) => (
-        <div className="text-[10px] text-zinc-500 truncate mt-0.5">Equipos diferentes</div>
+        <div className="text-xs text-zinc-500 truncate mt-0.5">Equipos diferentes</div>
       )}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-purple-400/80">
-          {item.distinct_owners_count} <span className="text-[9px] opacity-60">eq.</span>
+          {item.distinct_owners_count} <span className="text-[10px] opacity-60">eq.</span>
         </span>
       )}
     />

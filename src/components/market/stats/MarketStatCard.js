@@ -97,7 +97,7 @@ export default function MarketStatCard({
           {runnerUps.length > 0 && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-1 flex items-center justify-center gap-2 text-[10px] uppercase font-bold tracking-[0.15em] text-zinc-300 hover:text-white transition-all py-3 border-t border-white/5 cursor-pointer group/button"
+              className="mt-1 flex items-center justify-center gap-2 text-xs uppercase font-bold tracking-[0.15em] text-zinc-300 hover:text-white transition-all py-3 border-t border-white/5 cursor-pointer group/button"
             >
               {isExpanded ? (
                 <>
@@ -151,7 +151,7 @@ export default function MarketStatCard({
                         className="flex items-center justify-between py-2.5 px-2 text-sm border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group/item"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="text-[10px] text-zinc-600 font-bold w-4 flex-shrink-0 font-mono">
+                          <span className="text-xs text-zinc-600 font-bold w-4 flex-shrink-0 font-mono">
                             {(index + 2).toString().padStart(2, '0')}
                           </span>
                           <Link

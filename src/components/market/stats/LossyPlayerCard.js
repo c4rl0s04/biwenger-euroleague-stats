@@ -49,7 +49,7 @@ export default function LossyPlayerCard({ data }) {
           <span className="text-sm font-black text-red-500">
             -{formatShortEuro(item.total_loss)}€
           </span>
-          <span className="text-[9px] text-zinc-500 font-bold">{item.trade_count} ops.</span>
+          <span className="text-[10px] text-zinc-500 font-bold">{item.trade_count} ops.</span>
         </div>
       )}
       renderListItemValue={(item) => (

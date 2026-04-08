@@ -40,7 +40,7 @@ export default function BiggestDominanceCard({ data }) {
         <HeroStatGroup stats={[{ label: 'Duelos Totales', value: item.duels }]} />
       )}
       renderHeroMeta={(item) => (
-        <div className="flex items-center justify-center gap-2 text-sm font-black uppercase tracking-tight text-white/90">
+        <div className="flex items-center justify-center gap-2 text-base font-black uppercase tracking-tight text-white/90">
           <ManagerName
             user={{
               user_id: item.leader_id,
@@ -48,7 +48,7 @@ export default function BiggestDominanceCard({ data }) {
               user_color_index: item.leader_color,
             }}
           />
-          <span className="text-zinc-500 text-[10px] mx-1">SOBRE</span>
+          <span className="text-zinc-500 text-xs mx-1">SOBRE</span>
           <ManagerName
             user={{
               user_id: item.trailer_id,

@@ -164,7 +164,7 @@ export default function MarketPodiumCard({
                         </Link>
                       </div>
                       <div
-                        className={`absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-lg
+                        className={`absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-black shadow-lg
                         ${isSilver ? 'bg-zinc-400 text-zinc-950' : 'bg-amber-700 text-amber-50'}`}
                       >
                         {rank}
@@ -204,7 +204,7 @@ export default function MarketPodiumCard({
           {restRunnerUps.length > 0 && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-4 flex items-center justify-center gap-2 text-[10px] uppercase font-black tracking-[0.2em] text-zinc-500 hover:text-white transition-all py-4 border-t border-white/5 cursor-pointer group/toggle"
+              className="mt-4 flex items-center justify-center gap-2 text-xs uppercase font-black tracking-[0.2em] text-zinc-500 hover:text-white transition-all py-4 border-t border-white/5 cursor-pointer group/toggle"
             >
               {isExpanded ? (
                 <>
@@ -233,7 +233,7 @@ export default function MarketPodiumCard({
                     className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/[0.03] transition-colors group/row"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <span className="text-[10px] text-zinc-600 font-black w-5 flex-shrink-0 font-mono">
+                      <span className="text-xs text-zinc-600 font-black w-5 flex-shrink-0 font-mono">
                         {rank.toString().padStart(2, '0')}
                       </span>
                       <Link

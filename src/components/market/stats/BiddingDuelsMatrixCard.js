@@ -73,7 +73,7 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
                     className="sticky top-0 z-20 flex items-end justify-center pb-2"
                   >
                     <span
-                      className={`text-[10px] md:text-xs font-medium ${colors.text} text-center truncate w-full px-1`}
+                      className={`text-xs md:text-xs font-medium ${colors.text} text-center truncate w-full px-1`}
                     >
                       {opponent.name}
                     </span>
@@ -88,7 +88,7 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
                   <React.Fragment key={user.id}>
                     <div className="sticky left-0 z-20 flex items-center justify-end pr-3 py-1">
                       <span
-                        className={`text-[10px] md:text-xs font-medium ${userColors.text} text-right whitespace-nowrap`}
+                        className={`text-xs md:text-xs font-medium ${userColors.text} text-right whitespace-nowrap`}
                       >
                         {user.name}
                       </span>
@@ -179,26 +179,28 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
                                   <span className="text-emerald-400 font-bold text-lg">
                                     {record.wins}
                                   </span>
-                                  <span className="text-zinc-500 uppercase text-[9px]">Vict</span>
+                                  <span className="text-zinc-500 uppercase text-[10px]">Vict</span>
                                 </div>
                                 <div className="flex flex-col items-center">
                                   <span className="text-zinc-300 font-bold text-lg">
                                     {record.duels}
                                   </span>
-                                  <span className="text-zinc-500 uppercase text-[9px]">Duelos</span>
+                                  <span className="text-zinc-500 uppercase text-[10px]">
+                                    Duelos
+                                  </span>
                                 </div>
                                 <div className="flex flex-col items-center">
                                   <span className="text-red-400 font-bold text-lg">
                                     {record.losses}
                                   </span>
-                                  <span className="text-zinc-500 uppercase text-[9px]">Der</span>
+                                  <span className="text-zinc-500 uppercase text-[10px]">Der</span>
                                 </div>
                               </div>
-                              <div className="mt-2 text-center text-[10px] text-zinc-400">
+                              <div className="mt-2 text-center text-xs text-zinc-400">
                                 Margen medio: +{formatEuro(record.avg_margin)}€
                               </div>
                               {isMostCompetitive ? (
-                                <div className="mt-1 text-center text-[10px] font-semibold text-amber-400">
+                                <div className="mt-1 text-center text-xs font-semibold text-amber-400">
                                   Duelo mas ajustado
                                 </div>
                               ) : null}

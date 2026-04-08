@@ -41,7 +41,7 @@ export default function HottestRivalryCard({ data }) {
         />
       )}
       renderHeroMeta={(item) => (
-        <div className="flex items-center justify-center gap-2 text-sm font-black uppercase tracking-tight text-white/90">
+        <div className="flex items-center justify-center gap-2 text-base font-black uppercase tracking-tight text-white/90">
           <ManagerName
             user={{
               user_id: item.user1_id,
@@ -49,7 +49,7 @@ export default function HottestRivalryCard({ data }) {
               user_color_index: item.user1_color,
             }}
           />
-          <span className="text-zinc-500 text-[10px] mx-1">VS</span>
+          <span className="text-zinc-500 text-xs mx-1">VS</span>
           <ManagerName
             user={{
               user_id: item.user2_id,

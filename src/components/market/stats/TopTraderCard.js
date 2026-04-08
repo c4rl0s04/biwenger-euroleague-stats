@@ -58,20 +58,20 @@ export default function TopTraderCard({ data }) {
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-indigo-400">{item.trade_count}</span>
           <span
-            className={`text-[9px] font-bold ${item.total_profit >= 0 ? 'text-emerald-500/80' : 'text-red-500/80'}`}
+            className={`text-[10px] font-bold ${item.total_profit >= 0 ? 'text-emerald-500/80' : 'text-red-500/80'}`}
           >
             ({formatProfit(item.total_profit)}€)
           </span>
         </div>
       )}
       renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-[10px] opacity-80 hover:opacity-100" />
+        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
       )}
       renderListItemValue={(item) => (
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-indigo-400/80">{item.trade_count} ops.</span>
           <span
-            className={`text-[10px] font-medium ${item.total_profit >= 0 ? 'text-emerald-500/60' : 'text-red-500/60'}`}
+            className={`text-xs font-medium ${item.total_profit >= 0 ? 'text-emerald-500/60' : 'text-red-500/60'}`}
           >
             ({formatProfit(item.total_profit)}€)
           </span>
@@ -80,7 +80,7 @@ export default function TopTraderCard({ data }) {
       renderListItemMeta={(item) => (
         <ManagerName
           user={item}
-          className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
         />
       )}
     />

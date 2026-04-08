@@ -61,7 +61,7 @@ export default function RecordBidCard({ record }) {
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-purple-400">{item.bid_count}</span>
-          <span className="text-[9px] text-zinc-500 font-bold">pujas</span>
+          <span className="text-[10px] text-zinc-500 font-bold">pujas</span>
         </div>
       )}
       renderRunnerUpMeta={(item) => (
@@ -71,7 +71,7 @@ export default function RecordBidCard({ record }) {
             user_name: item.comprador,
             user_color_index: item.buyer_color,
           }}
-          className="text-[10px] opacity-80 hover:opacity-100"
+          className="text-xs opacity-80 hover:opacity-100"
         />
       )}
       renderListItemValue={(item) => (
@@ -84,7 +84,7 @@ export default function RecordBidCard({ record }) {
             user_name: item.comprador,
             user_color_index: item.buyer_color,
           }}
-          className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
         />
       )}
     />

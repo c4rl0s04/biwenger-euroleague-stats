@@ -36,18 +36,20 @@ export default function BigSpenderCard({ spender }) {
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-cyan-400">{formatEuro(item.total_spent)}€</span>
-          <span className="text-[9px] text-zinc-500 font-bold">{item.purchases_count} ops.</span>
+          <span className="text-[10px] text-zinc-500 font-bold">{item.purchases_count} ops.</span>
         </div>
       )}
       renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-[10px] opacity-80 hover:opacity-100" />
+        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
       )}
       renderListItemValue={(item) => (
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-cyan-400/80">
             {formatEuro(item.total_spent)}€
           </span>
-          <span className="text-[9px] text-zinc-500 font-medium">({item.purchases_count} op.)</span>
+          <span className="text-[10px] text-zinc-500 font-medium">
+            ({item.purchases_count} op.)
+          </span>
         </div>
       )}
     />

@@ -35,11 +35,11 @@ export default function TheThiefCard({ data }) {
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-red-500">{item.stolen_count}</span>
-          <span className="text-[9px] text-zinc-500 font-bold">robos</span>
+          <span className="text-[10px] text-zinc-500 font-bold">robos</span>
         </div>
       )}
       renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-[10px] opacity-80 hover:opacity-100" />
+        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
       )}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-red-500/80">{item.stolen_count} robos</span>
@@ -47,7 +47,7 @@ export default function TheThiefCard({ data }) {
       renderListItemMeta={(item) => (
         <ManagerName
           user={item}
-          className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
         />
       )}
     />

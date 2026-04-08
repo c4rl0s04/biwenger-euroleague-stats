@@ -63,7 +63,7 @@ export default function RecordTransferCard({ record }) {
             user_name: item.buyer_name || item.comprador,
             user_color_index: item.buyer_color,
           }}
-          className="text-[10px] opacity-80 hover:opacity-100"
+          className="text-xs opacity-80 hover:opacity-100"
         />
       )}
       renderListItemValue={(item) => (
@@ -76,7 +76,7 @@ export default function RecordTransferCard({ record }) {
             user_name: item.buyer_name || item.comprador,
             user_color_index: item.buyer_color,
           }}
-          className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
         />
       )}
     />

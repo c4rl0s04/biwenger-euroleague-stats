@@ -45,11 +45,11 @@ export default function BestSellerCard({ seller }) {
           >
             {formatProfit(item.net_profit)}
           </span>
-          <span className="text-[9px] text-zinc-500 font-bold">{item.sales_count} ventas</span>
+          <span className="text-[10px] text-zinc-500 font-bold">{item.sales_count} ventas</span>
         </div>
       )}
       renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-[10px] opacity-80 hover:opacity-100" />
+        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
       )}
       renderListItemValue={(item) => (
         <div className="flex items-center gap-2">
@@ -58,7 +58,7 @@ export default function BestSellerCard({ seller }) {
           >
             {formatProfit(item.net_profit)}
           </span>
-          <span className="text-[9px] text-zinc-500 font-medium">({item.sales_count} v.)</span>
+          <span className="text-[10px] text-zinc-500 font-medium">({item.sales_count} v.)</span>
         </div>
       )}
     />

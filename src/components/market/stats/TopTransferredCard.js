@@ -41,13 +41,13 @@ export default function TopTransferredCard({ player }) {
         <span className="text-lg font-black text-orange-400">{item.transfer_count}</span>
       )}
       renderRunnerUpMeta={(item) => (
-        <div className="text-[10px] text-zinc-500 font-bold truncate mt-0.5">
+        <div className="text-xs text-zinc-500 font-bold truncate mt-0.5">
           Avg: {formatEuro(item.avg_price)} €
         </div>
       )}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-orange-400/80">
-          {item.transfer_count} <span className="text-[9px] opacity-60">fich.</span>
+          {item.transfer_count} <span className="text-[10px] opacity-60">fich.</span>
         </span>
       )}
     />

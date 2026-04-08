@@ -50,7 +50,7 @@ export default function ProfitablePlayerCard({ data }) {
           <span className="text-sm font-black text-yellow-500">
             +{formatShortEuro(item.total_profit)}€
           </span>
-          <span className="text-[9px] text-zinc-500 font-bold">{item.trade_count} ops.</span>
+          <span className="text-[10px] text-zinc-500 font-bold">{item.trade_count} ops.</span>
         </div>
       )}
       renderListItemValue={(item) => (

@@ -20,7 +20,7 @@ export function ManagerPill({ user }) {
       className="group/manager block hover:scale-105 transition-transform duration-300 transform-gpu"
     >
       <div
-        className={`px-4 py-1.5 rounded-full text-xs font-black ${userColor.bg} ${userColor.text} bg-opacity-20 border border-current border-opacity-10 group-hover/manager:bg-opacity-30 transition-all shadow-lg backdrop-blur-sm`}
+        className={`px-4 py-1.5 rounded-full text-sm font-black ${userColor.bg} ${userColor.text} bg-opacity-20 border border-current border-opacity-10 group-hover/manager:bg-opacity-30 transition-all shadow-lg backdrop-blur-sm`}
       >
         {userName}
       </div>

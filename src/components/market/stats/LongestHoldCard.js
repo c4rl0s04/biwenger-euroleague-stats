@@ -60,13 +60,13 @@ export default function LongestHoldCard({ data }) {
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-teal-400">{formatDays(item.days_held)}</span>
-          <span className="text-[9px] text-emerald-400 font-bold">
+          <span className="text-[10px] text-emerald-400 font-bold">
             +{formatShortEuro(item.profit)}€
           </span>
         </div>
       )}
       renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-[10px] opacity-80 hover:opacity-100" />
+        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
       )}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-teal-400/80">{formatDays(item.days_held)}</span>
@@ -74,7 +74,7 @@ export default function LongestHoldCard({ data }) {
       renderListItemMeta={(item) => (
         <ManagerName
           user={item}
-          className="text-[9px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
         />
       )}
     />

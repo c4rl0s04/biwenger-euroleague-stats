@@ -252,7 +252,7 @@ export default function PositionAnalysisGrid({ positionStats }) {
               <button
                 type="button"
                 onClick={() => setDistributionMode('count')}
-                className={`cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+                className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition-colors ${
                   distributionMode === 'count'
                     ? 'bg-blue-500 text-white'
                     : 'text-zinc-500 hover:text-zinc-300'
@@ -263,7 +263,7 @@ export default function PositionAnalysisGrid({ positionStats }) {
               <button
                 type="button"
                 onClick={() => setDistributionMode('volume')}
-                className={`cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+                className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition-colors ${
                   distributionMode === 'volume'
                     ? 'bg-blue-500 text-white'
                     : 'text-zinc-500 hover:text-zinc-300'
@@ -277,9 +277,7 @@ export default function PositionAnalysisGrid({ positionStats }) {
           <div className="flex h-full flex-col items-center justify-start gap-3 pt-1">
             <div className="relative h-76 w-full max-w-lg">
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-                  Dominante
-                </div>
+                <div className="text-xs uppercase tracking-[0.24em] text-zinc-500">Dominante</div>
                 <div className="mt-1 max-w-44 text-3xl leading-none font-black text-white">
                   {distributionLeader?.displayPosition || 'Sin datos'}
                 </div>
