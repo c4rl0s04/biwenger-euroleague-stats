@@ -117,7 +117,11 @@ export async function getGlobalTournamentStats() {
   );
 
   sortedFixtures.forEach((f: any) => {
-    if (f.status !== 'finished' && !f.home_score && !f.away_score) return;
+    // Basic check for finished or scored matches
+    if (f.status !== 'finished' && f.home_score === null && f.away_score === null) return;
+
+    // EXCLUDE matches against "no one" (byes) from statistics
+    if (!f.home_user_id || !f.away_user_id) return;
 
     const homeScore = f.home_score || 0;
     const awayScore = f.away_score || 0;
@@ -129,8 +133,8 @@ export async function getGlobalTournamentStats() {
       highestScoring = { total: totalPoints, match: f };
     }
 
-    // Track Biggest Win (Only if both scored > 0 to avoid ghost matches)
-    if (diff > biggestWin.diff && homeScore > 0 && awayScore > 0) {
+    // Track Biggest Win
+    if (diff > biggestWin.diff) {
       biggestWin = { diff, match: f };
     }
 
