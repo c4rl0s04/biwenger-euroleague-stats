@@ -508,6 +508,21 @@ function StatItemRow({ item, idx, statType }) {
       );
     }
   }
+  // --- CATEGORY: Inflation ---
+  else if (item.inflation !== undefined) {
+    valueLabel = 'Sobreprecio';
+    valueText = `+${formatEuro(item.inflation)}€`;
+
+    valueSub = (
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2 mt-1">
+          <span className="opacity-70">P:</span> {formatEuro(item.purchase_price)}€
+          <span className="w-1 h-1 rounded-full bg-zinc-700" />
+          <span className="opacity-70">V. Mercado:</span> {formatEuro(item.market_price)}€
+        </div>
+      </div>
+    );
+  }
   // --- CATEGORY: Revaluation / Percentage ---
   else if (
     item.revaluation !== undefined ||
@@ -621,7 +636,13 @@ function StatItemRow({ item, idx, statType }) {
 
   // Resolve Secondary Manager Identity (for players/transactions)
   const managerName =
-    item.user_name || item.owner_name || item.comprador || item.vendedor || item.winner || null;
+    item.user_name ||
+    item.owner_name ||
+    item.buyer_name ||
+    item.comprador ||
+    item.vendedor ||
+    item.winner ||
+    null;
 
   const managerId =
     item.user_id ||

@@ -4,7 +4,7 @@ import { BadgePercent } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
-import { HeroStatGroup } from './StatUIComponents';
+import { HeroStatGroup, ManagerName, ManagerPill } from './StatUIComponents';
 
 export default function InflatedPlayerCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
@@ -35,36 +35,45 @@ export default function InflatedPlayerCard({ data, onViewAll }) {
       winnerLabel="MÁS SOBREVALORADO"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-rose-400">
-          +{formatShortEuro(item.total_inflation)}€
+          +{formatShortEuro(item.inflation)}€
         </span>
       )}
       renderHeroStats={(item) => (
         <HeroStatGroup
           stats={[
-            { label: 'Compras', value: item.trade_count },
-            { label: 'Sobreprecio', value: `+${formatShortEuro(item.avg_inflation)}`, suffix: '€' },
+            { label: 'Precio', value: formatShortEuro(item.purchase_price), suffix: '€' },
+            { label: 'Mercado', value: formatShortEuro(item.market_price), suffix: '€' },
           ]}
+        />
+      )}
+      renderHeroMeta={(item) => (
+        <ManagerPill
+          user={{
+            id: item.buyer_id,
+            name: item.buyer_name,
+            color_index: item.buyer_color,
+          }}
         />
       )}
       renderRunnerUpValue={(item) => (
         <span className="text-sm font-black text-rose-400">
-          +{formatShortEuro(item.total_inflation)}€
+          +{formatShortEuro(item.inflation)}€
         </span>
       )}
       renderRunnerUpMeta={(item) => (
-        <div className="text-xs text-zinc-500 truncate mt-0.5">
-          {item.trade_count} compras sobre mercado
+        <div className="text-[10px] text-zinc-500 truncate mt-0.5">
+          <ManagerName
+            user={{
+              id: item.buyer_id,
+              name: item.buyer_name,
+              color_index: item.buyer_color,
+            }}
+            className="text-[10px]"
+          />
         </div>
       )}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-rose-400">
-          +{formatShortEuro(item.total_inflation)}€
-        </span>
-      )}
-      renderListItemMeta={(item) => (
-        <div className="text-[10px] text-zinc-600 truncate ml-2 font-medium">
-          {item.trade_count} pases/mercado
-        </div>
+        <span className="text-xs font-bold text-rose-400">+{formatShortEuro(item.inflation)}€</span>
       )}
     />
   );

@@ -269,10 +269,14 @@ export interface InflatedPlayer {
   player_id: number;
   player_name: string;
   player_img: string;
-  trade_count: number;
-  total_inflation: number;
-  avg_inflation: number;
   player_team: string | null;
+  inflation: number;
+  purchase_price: number;
+  market_price: number;
+  buyer_id: number;
+  buyer_name: string;
+  buyer_color: number | null;
+  transfer_id: number;
 }
 
 export interface BidDuelUser {
@@ -1630,16 +1634,22 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
         AND f.precio > mv.price
     )
     SELECT
-      player_id,
-      player_name,
-      player_img,
-      player_team,
-      COUNT(*) as trade_count,
-      SUM(inflation) as total_inflation,
-      AVG(inflation) as avg_inflation
-    FROM TransferWithMarketValue
-    GROUP BY player_id, player_name, player_img, player_team
-    ORDER BY total_inflation DESC, avg_inflation DESC
+      t.player_id,
+      t.player_name,
+      t.player_img,
+      t.player_team,
+      t.inflation,
+      t.purchase_price,
+      t.market_price,
+      u.id as buyer_id,
+      u.name as buyer_name,
+      u.color_index as buyer_color,
+      t.transfer_id
+    FROM TransferWithMarketValue t
+    JOIN fichajes f ON t.transfer_id = f.id
+    JOIN users u ON f.comprador = u.name
+    ORDER BY t.inflation DESC
+    LIMIT 100;
     
   `;
 
