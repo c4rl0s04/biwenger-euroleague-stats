@@ -95,10 +95,10 @@ export default function InitialSquadListCard() {
                         flex-shrink-0 px-4 py-2 rounded-xl border text-sm font-bold transition-all duration-300 cursor-pointer
                         ${
                           isActive
-                            ? `text-white border-transparent shadow-lg scale-105`
-                            : `bg-card/40 ${managerColor.text} ${managerColor.border.replace('border-', 'border-') || 'border-transparent'} hover:bg-card hover:border-border`
+                            ? `text-white border-transparent shadow-lg scale-105 uppercase tracking-widest`
+                            : `bg-card/40 ${managerColor.text} ${managerColor.border || 'border-transparent'} hover:bg-card hover:border-border uppercase tracking-widest`
                         }
-                      `}
+                    `}
                       style={{
                         backgroundColor: isActive ? managerColor.stroke : undefined,
                         boxShadow: isActive ? `0 4px 14px 0 ${managerColor.stroke}40` : undefined,
@@ -146,7 +146,7 @@ export default function InitialSquadListCard() {
                             </span>
                             <Link
                               href={`/user/${activeManager.user_id}`}
-                              className={`text-2xl md:text-3xl font-black leading-none tracking-tighter uppercase hover:scale-105 origin-left transition-transform cursor-pointer block`}
+                              className={`text-2xl md:text-3xl font-black leading-none tracking-widest uppercase hover:scale-105 origin-left transition-transform cursor-pointer block drop-shadow-lg`}
                               style={{
                                 color: getColorForUser(
                                   activeManager.user_id,

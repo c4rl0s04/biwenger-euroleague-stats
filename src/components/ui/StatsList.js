@@ -77,7 +77,7 @@ export default function StatsList({
                 <div className="min-w-0">
                   <Link
                     href={`/user/${item.user_id}`}
-                    className={`font-bold text-sm ${userColor.text} truncate block transition-transform group-hover:translate-x-1 origin-left`}
+                    className={`font-black uppercase tracking-widest text-[10px] sm:text-xs ${userColor.text} truncate block transition-transform group-hover:translate-x-1 origin-left`}
                   >
                     {item.name}
                   </Link>

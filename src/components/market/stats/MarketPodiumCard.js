@@ -69,8 +69,14 @@ export default function MarketPodiumCard({
       ].find((v) => v !== undefined && v !== null);
 
       const userColor = getColorForUser(
-        item.id || item.user_id || item.buyer_id,
-        item.user_name || item.name || item.buyer_name,
+        item.id || item.user_id || item.buyer_id || item.owner_id || item.seller_id,
+        item.user_name ||
+          item.name ||
+          item.buyer_name ||
+          item.owner_name ||
+          item.seller_name ||
+          item.vendedor ||
+          item.comprador,
         resolvedColorIndex
       );
       return {

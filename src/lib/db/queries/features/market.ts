@@ -120,6 +120,8 @@ export interface EnrichedTransfer extends Transfer {
 
 export interface BigSpender {
   name: string;
+  user_id?: number;
+  user_color_index?: number;
   total_spent: number;
   purchases_count: number;
 }
@@ -130,6 +132,8 @@ export interface RecordBid {
   player_id: number;
   precio: number;
   comprador: string;
+  buyer_id?: number;
+  buyer_color_index?: number;
   player_name: string;
   player_img: string;
   player_team: string | null;
@@ -177,6 +181,8 @@ export interface ManagerMarketStats {
 
 export interface BestSeller {
   name: string;
+  user_id?: number;
+  user_color_index?: number;
   net_profit: number;
   total_sales: number;
   sales_count: number;
@@ -219,6 +225,8 @@ export interface BestValueDetail {
 
 export interface TheThief {
   name: string;
+  user_id?: number;
+  user_color_index?: number;
   stolen_count: number;
 }
 
@@ -226,6 +234,8 @@ export interface BiggestSteal {
   transfer_id: number;
   winning_price: number;
   winner: string;
+  winner_id?: number;
+  winner_color_index?: number;
   player_id: number;
   player_name: string;
   player_img: string;
@@ -237,11 +247,15 @@ export interface BiggestSteal {
 
 export interface TheVictim {
   name: string;
+  user_id?: number;
+  user_color_index?: number;
   failed_bids_count: number;
 }
 
 export interface OverpayerManager {
   name: string;
+  user_id?: number;
+  user_color_index?: number;
   contested_wins: number;
   total_overpay: number;
   avg_overpay: number;
@@ -741,7 +755,7 @@ export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]>
     WHERE f.precio > 0
     GROUP BY f.player_id, p.name, p.img, t.code
     ORDER BY transfer_count DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -775,7 +789,7 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON f.comprador = u.name
     ORDER BY f.precio DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -792,14 +806,17 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
 export async function getBigSpender(): Promise<BigSpender[]> {
   const query = `
     SELECT 
-      comprador as name,
-      SUM(precio) as total_spent,
+      f.comprador as name,
+      u.id as user_id,
+      u.color_index as user_color_index,
+      SUM(f.precio) as total_spent,
       COUNT(*) as purchases_count
-    FROM fichajes
-    WHERE comprador != 'Mercado'
-    GROUP BY comprador
+    FROM fichajes f
+    LEFT JOIN users u ON f.comprador = u.name
+    WHERE f.comprador != 'Mercado'
+    GROUP BY f.comprador, u.id, u.color_index
     ORDER BY total_spent DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -822,6 +839,8 @@ export async function getRecordBid(): Promise<RecordBid[]> {
       f.player_id,
       f.precio,
       f.comprador,
+      u.id as buyer_id,
+      u.color_index as buyer_color_index,
       p.name as player_name,
       p.img as player_img,
       tm.code as player_team,
@@ -829,11 +848,12 @@ export async function getRecordBid(): Promise<RecordBid[]> {
       tm.img as team_logo
     FROM transfer_bids t
     JOIN fichajes f ON t.transfer_id = f.id
+    LEFT JOIN users u ON f.comprador = u.name
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN teams tm ON p.team_id = tm.id
-    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, p.name, p.img, tm.code, tm.name, tm.img
+    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, u.id, u.color_index, p.name, p.img, tm.code, tm.name, tm.img
     ORDER BY bid_count DESC
-    LIMIT 50
+    
   `;
   try {
     const result = await pgClient.query(query);
@@ -1076,10 +1096,13 @@ export async function getBestSeller(): Promise<BestSeller[]> {
   const query = `
     SELECT 
       s.vendedor as name,
+      u.id as user_id,
+      u.color_index as user_color_index,
       SUM(s.precio - p.precio) as net_profit,
       SUM(s.precio) as total_sales,
       COUNT(*) as sales_count
     FROM fichajes s
+    LEFT JOIN users u ON s.vendedor = u.name
     CROSS JOIN LATERAL (
         SELECT precio 
         FROM fichajes p
@@ -1090,9 +1113,9 @@ export async function getBestSeller(): Promise<BestSeller[]> {
         LIMIT 1
     ) p
     WHERE s.vendedor != 'Mercado' -- Only check user sales
-    GROUP BY s.vendedor
+    GROUP BY s.vendedor, u.id, u.color_index
     ORDER BY net_profit DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1134,8 +1157,9 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
       WHERE player_id = p.id AND comprador = u.name 
       ORDER BY timestamp DESC LIMIT 1
     )
+    AND (p.price - f.precio) > 0
     ORDER BY revaluation DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1214,9 +1238,19 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
 
     WHERE f.precio > 100000 
       AND f.comprador != 'Mercado'
+      AND (
+        SELECT COALESCE(SUM(prs.fantasy_points), 0)
+        FROM player_round_stats prs
+        JOIN RoundStarts rs ON rs.round_id = prs.round_id
+        WHERE prs.player_id = p.id
+          AND to_timestamp(f.timestamp) < rs.start_date
+          AND (
+             sale.timestamp IS NULL OR to_timestamp(sale.timestamp) > rs.start_date
+          )
+      ) > 0
 
     ORDER BY points_per_million DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1379,7 +1413,7 @@ export async function getWorstValuePlayer(): Promise<BestValuePlayer[]> {
       )
 
     ORDER BY points_per_million ASC, purchase_price DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1401,14 +1435,17 @@ export async function getTheThief(): Promise<TheThief[]> {
   const query = `
     SELECT 
       f.comprador as name,
+      u.id as user_id,
+      u.color_index as user_color_index,
       COUNT(DISTINCT f.id) as stolen_count
     FROM fichajes f
     JOIN transfer_bids tb ON f.id = tb.transfer_id
+    LEFT JOIN users u ON f.comprador = u.name
     WHERE f.comprador != 'Mercado'
       AND tb.bidder_name != f.comprador -- Bid was from someone else
-    GROUP BY f.comprador
+    GROUP BY f.comprador, u.id, u.color_index
     ORDER BY stolen_count DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1433,6 +1470,8 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
       f.id as transfer_id,
       f.precio as winning_price,
       f.comprador as winner,
+      u.id as winner_id,
+      u.color_index as winner_color_index,
       f.player_id,
       p.name as player_name,
       p.img as player_img,
@@ -1443,6 +1482,7 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
     FROM ValidTransfers f
     JOIN players p ON f.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN users u ON f.comprador = u.name
     CROSS JOIN LATERAL (
         SELECT amount, bidder_name
         FROM transfer_bids tb
@@ -1452,7 +1492,7 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
         LIMIT 1
     ) second_bid
     ORDER BY price_diff ASC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1472,14 +1512,17 @@ export async function getTheVictim(): Promise<TheVictim[]> {
   const query = `
     SELECT 
         tb.bidder_name as name,
+        u.id as user_id,
+        u.color_index as user_color_index,
         COUNT(*) as failed_bids_count
     FROM transfer_bids tb
     JOIN fichajes f ON tb.transfer_id = f.id
+    LEFT JOIN users u ON tb.bidder_name = u.name
     WHERE tb.bidder_name != f.comprador -- The bidder was NOT the winner
       AND tb.bidder_name != 'Mercado' -- Exclude system
-    GROUP BY tb.bidder_name
+    GROUP BY tb.bidder_name, u.id, u.color_index
     ORDER BY failed_bids_count DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1516,15 +1559,18 @@ export async function getOverpayerManager(): Promise<OverpayerManager[]> {
       WHERE f.comprador != 'Mercado'
     )
     SELECT
-      name,
+      cw.name,
+      u.id as user_id,
+      u.color_index as user_color_index,
       COUNT(*) as contested_wins,
-      SUM(overpay) as total_overpay,
-      AVG(overpay) as avg_overpay
-    FROM CompetitiveWins
-    WHERE overpay > 0
-    GROUP BY name
+      SUM(cw.overpay) as total_overpay,
+      AVG(cw.overpay) as avg_overpay
+    FROM CompetitiveWins cw
+    LEFT JOIN users u ON cw.name = u.name
+    WHERE cw.overpay > 0
+    GROUP BY cw.name, u.id, u.color_index
     ORDER BY total_overpay DESC, avg_overpay DESC
-    LIMIT 50
+    
   `;
 
   const result = await pgClient.query(query);
@@ -1580,7 +1626,7 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
     FROM TransferWithMarketValue
     GROUP BY player_id, player_name, player_img, player_team
     ORDER BY total_inflation DESC, avg_inflation DESC
-    LIMIT 50
+    
   `;
 
   const result = await pgClient.query(query);
@@ -1879,8 +1925,9 @@ export async function getBestSingleFlip(): Promise<SingleFlip[]> {
     ) sale ON true
     
     WHERE purchase.comprador != 'Mercado'
+      AND (sale.precio - purchase.precio) > 0
     ORDER BY profit DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1928,8 +1975,9 @@ export async function getWorstSingleFlip(): Promise<SingleFlip[]> {
     ) sale ON true
     
     WHERE purchase.comprador != 'Mercado'
+      AND (sale.precio - purchase.precio) < 0
     ORDER BY profit ASC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -1977,11 +2025,12 @@ export async function getBestPercentageGain(): Promise<PercentageGain[]> {
     ) sale ON true
     
     WHERE f.comprador != 'Mercado'
-      AND sale.timestamp IS NULL -- Still owned
-      AND f.precio > 150000 -- Avoid trivial gains on min price players
+      AND sale.timestamp IS NULL
+      AND (p.price - f.precio) > 0
+      AND f.precio > 150000
 
     ORDER BY percentage_gain DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2012,8 +2061,9 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE f.comprador != 'Mercado'
     GROUP BY p.id, p.name, p.img, t.code, t.name, t.img
+    HAVING COUNT(DISTINCT f.comprador) > 1
     ORDER BY distinct_owners_count DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2051,7 +2101,7 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
     WHERE sale.vendedor != 'Mercado'
       AND p.price > sale.precio
     ORDER BY missed_profit DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2094,7 +2144,7 @@ export async function getTopTrader(): Promise<TopTrader[]> {
     WHERE purchase.comprador != 'Mercado'
     GROUP BY u.id, u.name, u.color_index
     ORDER BY trade_count DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2138,7 +2188,7 @@ export async function getProfitablePlayer(): Promise<PlayerProfitability[]> {
     GROUP BY p.id, p.name, p.img, t.code
     HAVING SUM(sale.precio - purchase.precio) > 0
     ORDER BY total_profit DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2182,7 +2232,7 @@ export async function getLossyPlayer(): Promise<PlayerProfitability[]> {
     GROUP BY p.id, p.name, p.img, t.code
     HAVING SUM(sale.precio - purchase.precio) < 0
     ORDER BY total_loss ASC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2231,7 +2281,7 @@ export async function getQuickestFlip(): Promise<QuickFlip[]> {
     WHERE purchase.comprador != 'Mercado'
       AND (sale.precio - purchase.precio) > 0
     ORDER BY (sale.timestamp - purchase.timestamp) ASC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2282,7 +2332,7 @@ export async function getLongestProfitableHold(): Promise<LongHold[]> {
     WHERE purchase.comprador != 'Mercado'
       AND (sale.precio - purchase.precio) > 0
     ORDER BY (sale.timestamp - purchase.timestamp) DESC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2319,9 +2369,8 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
     JOIN users u ON purchase.comprador = u.name
     JOIN players p ON purchase.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
-    
-    -- Ensure player is still owned (no sale after purchase)
-    WHERE purchase.comprador != 'Mercado'
+    WHERE (p.price - purchase.precio) < 0
+    AND purchase.comprador != 'Mercado'
       AND NOT EXISTS (
           SELECT 1 FROM fichajes s
           WHERE s.player_id = purchase.player_id 
@@ -2330,7 +2379,7 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
       )
       AND p.price < purchase.precio
     ORDER BY devaluation ASC
-    LIMIT 50
+    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];

@@ -32,18 +32,18 @@ export default function TheThiefCard({ data, onViewAll }) {
       renderHeroStats={() => (
         <HeroStatGroup stats={[{ label: 'Condición', value: 'Con rivales pujando' }]} />
       )}
-      renderHeroMeta={() => null}
+      renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-red-500">{item.stolen_count}</span>
           <span className="text-[10px] text-zinc-500 font-bold">robos</span>
         </div>
       )}
-      renderRunnerUpMeta={() => null}
+      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-red-500/80">{item.stolen_count} robos</span>
+        <span className="text-xs font-bold text-red-500">{item.stolen_count} robos</span>
       )}
-      renderListItemMeta={() => null}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

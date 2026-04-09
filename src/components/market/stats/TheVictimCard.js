@@ -32,18 +32,18 @@ export default function TheVictimCard({ data, onViewAll }) {
       renderHeroStats={() => (
         <HeroStatGroup stats={[{ label: 'Condición', value: 'Donde otro manager ganó' }]} />
       )}
-      renderHeroMeta={() => null}
+      renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-pink-500">{item.failed_bids_count}</span>
           <span className="text-[10px] text-zinc-500 font-bold">fallos</span>
         </div>
       )}
-      renderRunnerUpMeta={() => null}
+      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-pink-500/80">{item.failed_bids_count} fallos</span>
+        <span className="text-xs font-bold text-pink-500">{item.failed_bids_count} fallos</span>
       )}
-      renderListItemMeta={() => null}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

@@ -3,7 +3,7 @@
 import { Briefcase } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
-import { HeroStatGroup } from './StatUIComponents';
+import { HeroStatGroup, ManagerName, ManagerPill } from './StatUIComponents';
 
 export default function MostOwnersCard({ player, onViewAll }) {
   if (!player || !Array.isArray(player) || player.length === 0) return null;
@@ -34,20 +34,20 @@ export default function MostOwnersCard({ player, onViewAll }) {
           </span>
         </div>
       )}
-      renderRunnerUpValue={(item) => (
-        <span className="text-lg font-black text-purple-400">{item.distinct_owners_count}</span>
-      )}
       renderHeroStats={() => (
         <HeroStatGroup stats={[{ label: 'Recurrencia', value: 'Alta rotación' }]} />
       )}
-      renderRunnerUpMeta={(item) => (
-        <div className="text-xs text-zinc-500 truncate mt-0.5">Equipos diferentes</div>
+      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderRunnerUpValue={(item) => (
+        <span className="text-lg font-black text-purple-400">{item.distinct_owners_count}</span>
       )}
+      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-purple-400/80">
-          {item.distinct_owners_count} <span className="text-[10px] opacity-60">eq.</span>
+        <span className="text-xs font-bold text-purple-400">
+          {item.distinct_owners_count} <span className="text-[10px]">eq.</span>
         </span>
       )}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

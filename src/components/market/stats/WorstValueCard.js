@@ -66,21 +66,14 @@ export default function WorstValueCard({ player, onViewAll }) {
           </span>
         </div>
       )}
-      renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
-      )}
+      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-red-500/80">
-          {formatNumber(item.points_per_million)}{' '}
+        <span className="text-xs font-bold text-rose-400">
+          {item.points_per_million?.toFixed(1)}{' '}
           <span className="text-[10px] opacity-60">pts/M</span>
         </span>
       )}
-      renderListItemMeta={(item) => (
-        <ManagerName
-          user={item}
-          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
-        />
-      )}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

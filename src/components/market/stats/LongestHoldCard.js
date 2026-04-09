@@ -41,43 +41,23 @@ export default function LongestHoldCard({ data, onViewAll }) {
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-teal-600/20 to-cyan-600/20 px-6 py-3 rounded-2xl border border-teal-500/30 mb-3">
-            <Clock className="w-8 h-8 text-teal-400" />
-            <span className="text-3xl font-black text-teal-400">{formatDays(item.days_held)}</span>
-          </div>
-          <div className="text-emerald-400 text-xl font-black">
-            +{formatShortEuro(item.profit)}€
+            <span className="text-3xl font-black text-pink-400">
+              {item.hold_days} <span className="text-sm">días</span>
+            </span>
           </div>
         </div>
-      )}
-      renderHeroStats={(item) => (
-        <HeroStatGroup
-          stats={[
-            { label: 'Compra', value: formatShortEuro(item.purchase_price), suffix: '€' },
-            { label: 'Venta', value: formatShortEuro(item.sale_price), suffix: '€' },
-          ]}
-        />
       )}
       renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
-        <div className="flex flex-col items-end">
-          <span className="text-sm font-black text-teal-400">{formatDays(item.days_held)}</span>
-          <span className="text-[10px] text-emerald-400 font-bold">
-            +{formatShortEuro(item.profit)}€
-          </span>
-        </div>
+        <span className="text-sm font-black text-pink-400">{item.hold_days} días</span>
       )}
-      renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
-      )}
+      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-teal-400/80">{formatDays(item.days_held)}</span>
+        <span className="text-xs font-bold text-pink-400">
+          {item.hold_days} <span className="text-[10px]">días</span>
+        </span>
       )}
-      renderListItemMeta={(item) => (
-        <ManagerName
-          user={item}
-          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
-        />
-      )}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

@@ -23,7 +23,7 @@ export function ManagerPill({ user }) {
       className="group/manager block hover:scale-105 transition-transform duration-300 transform-gpu"
     >
       <div
-        className={`px-4 py-1.5 rounded-full text-sm font-black ${userColor.bg} ${userColor.text} bg-opacity-20 border border-current border-opacity-10 group-hover/manager:bg-opacity-30 transition-all shadow-lg backdrop-blur-sm truncate max-w-[180px]`}
+        className={`px-4 py-1.5 rounded-full text-sm font-black ${userColor.bg} ${userColor.text} bg-opacity-30 border border-current border-opacity-20 group-hover/manager:bg-opacity-40 transition-all shadow-lg backdrop-blur-md truncate max-w-[180px]`}
       >
         {userName}
       </div>
@@ -47,7 +47,7 @@ export function ManagerName({ user, className = '' }) {
   return (
     <Link
       href={`/user/${userId}`}
-      className={`font-bold transition-all hover:scale-105 inline-block truncate max-w-full origin-left transform-gpu ${userColor.text} ${className}`}
+      className={`font-black uppercase tracking-widest transition-all hover:scale-105 inline-block truncate max-w-full origin-left transform-gpu ${userColor.text} ${className}`}
     >
       {userName}
     </Link>

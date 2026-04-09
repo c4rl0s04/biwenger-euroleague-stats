@@ -25,7 +25,18 @@ export default function StatDetailDrawer({
   data = [],
   statType = 'player', // 'player' | 'user' | 'transaction'
   color = 'blue',
+  allUsers = [],
 }) {
+  const [selectedManagerId, setSelectedManagerId] = React.useState(null);
+  const [prevOpen, setPrevOpen] = React.useState(isOpen);
+
+  // Reset filter when opening (Render-time state update pattern)
+  if (isOpen !== prevOpen) {
+    setPrevOpen(isOpen);
+    if (isOpen) {
+      setSelectedManagerId(null);
+    }
+  }
   // Handle Escape key and body scroll
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -137,11 +148,74 @@ export default function StatDetailDrawer({
               </div>
             </div>
 
+            {/* Manager Filter Bar */}
+            {allUsers.length > 0 && (statType === 'player' || statType === 'transaction') && (
+              <div className="px-8 py-4 border-b border-white/5 bg-zinc-950/30">
+                <div className="flex flex-wrap items-center gap-2 max-w-full">
+                  <button
+                    onClick={() => setSelectedManagerId(null)}
+                    className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${
+                      selectedManagerId === null
+                        ? 'bg-white text-black shadow-lg shadow-white/10'
+                        : 'bg-white/5 text-zinc-500 hover:bg-white/10 border border-white/5'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {allUsers.map((user) => {
+                    const uColor = getColorForUser(user.id, user.name, user.color_index);
+                    const isSelected = selectedManagerId === user.id;
+                    return (
+                      <button
+                        key={user.id}
+                        onClick={() => setSelectedManagerId(user.id)}
+                        className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border whitespace-nowrap ${
+                          isSelected
+                            ? `${uColor.bg} ${uColor.textShort || 'text-white'} border-transparent shadow-lg ${uColor.border.replace('border-', 'shadow-')}`
+                            : `bg-white/5 text-zinc-500 border-white/[0.05] hover:bg-white/10`
+                        }`}
+                      >
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-current shadow-[0_0_8px_rgba(255,255,255,0.5)]' : uColor.bg}`}
+                        />
+                        {user.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-              {data.slice(0, 50).map((item, idx) => (
-                <StatItemRow key={idx} item={item} idx={idx} statType={statType} />
-              ))}
+              {data
+                ?.filter((item) => {
+                  if (!selectedManagerId) return true;
+
+                  // Match by ID fields
+                  const itemId = item.user_id || item.owner_id || item.buyer_id || item.id;
+                  if (itemId === selectedManagerId) return true;
+
+                  // Match by Name fields (comprador, seller, owner_name, etc)
+                  const selectedUser = allUsers.find((u) => u.id === selectedManagerId);
+                  if (selectedUser) {
+                    const names = [
+                      item.user_name,
+                      item.owner_name,
+                      item.name,
+                      item.buyer_name,
+                      item.comprador,
+                      item.vendedor,
+                      item.winner, // for biggest steal
+                    ];
+                    if (names.includes(selectedUser.name)) return true;
+                  }
+
+                  return false;
+                })
+                .map((item, idx) => (
+                  <StatItemRow key={idx} item={item} idx={idx} statType={statType} />
+                ))}
 
               {data.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-zinc-500 italic text-sm">
@@ -298,7 +372,7 @@ function StatItemRow({ item, idx, statType }) {
     }
   }
 
-  // Resolve Image and Identity
+  // Resolve Primary Subject Identity
   const isUser = statType === 'user' || (!item.player_id && (item.id || item.user_id));
   const imageSrc = item.player_img || item.user_img || item.icon || item.buyer_icon;
   const name = item.player_name || item.user_name || item.name || item.buyer_name;
@@ -312,7 +386,41 @@ function StatItemRow({ item, idx, statType }) {
     item.user_color,
   ].find((v) => v !== undefined && v !== null);
 
-  const userColor = isUser ? getColorForUser(linkId, name, resolvedColorIndex) : { text: '' };
+  const primaryColor = isUser
+    ? getColorForUser(linkId, name, resolvedColorIndex)
+    : { text: 'text-white group-hover:text-primary' };
+
+  // Resolve Secondary Manager Identity (for players/transactions)
+  const managerName =
+    item.user_name ||
+    item.owner_name ||
+    item.comprador ||
+    item.vendedor ||
+    item.winner ||
+    (statType === 'user' ? null : item.name);
+
+  const managerId =
+    item.user_id ||
+    item.owner_id ||
+    item.comprador_id ||
+    item.buyer_id ||
+    item.vendedor_id ||
+    item.winner_id;
+
+  const managerColorIndex = [
+    item.user_color_index,
+    item.color_index,
+    item.buyer_color,
+    item.buyer_color_index,
+    item.owner_color_index,
+    item.comprador_color_index,
+    item.vendedor_color_index,
+  ].find((v) => v !== undefined && v !== null);
+
+  const secondaryColor =
+    !isUser && managerName && managerId
+      ? getColorForUser(managerId, managerName, managerColorIndex)
+      : { text: 'text-zinc-500' };
 
   return (
     <motion.div
@@ -344,12 +452,25 @@ function StatItemRow({ item, idx, statType }) {
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h4
-            className={`font-black uppercase tracking-tight truncate leading-tight group-hover:text-primary transition-colors text-white`}
-          >
-            {name}
-          </h4>
-          <div className="text-[10px] text-zinc-300 font-bold uppercase tracking-widest mt-1.5">
+          <div className="flex flex-col">
+            <h4
+              className={`font-black uppercase tracking-tight truncate leading-tight transition-colors ${primaryColor.text}`}
+            >
+              {name}
+            </h4>
+            {isUser ? (
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                Manager
+              </span>
+            ) : (
+              <span
+                className={`text-[10px] font-black uppercase tracking-widest mt-1 ${secondaryColor.text}`}
+              >
+                {managerName || 'Sin Dueño'}
+              </span>
+            )}
+          </div>
+          <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-2 border-l border-white/10 pl-2">
             {valueSub}
           </div>
         </div>

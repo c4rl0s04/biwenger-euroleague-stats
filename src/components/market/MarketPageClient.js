@@ -497,6 +497,7 @@ export default function MarketPageClient() {
         icon={drawerData.icon}
         statType={drawerData.statType}
         color={drawerData.color}
+        allUsers={marketStats.allUsers}
       />
     </div>
   );

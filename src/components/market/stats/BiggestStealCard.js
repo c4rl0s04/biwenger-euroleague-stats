@@ -67,15 +67,15 @@ export default function BiggestStealCard({ data, onViewAll }) {
               user_name: item.winner,
               user_color_index: item.winner_color,
             }}
-            className="text-xs opacity-80 hover:opacity-100"
+            className="text-xs"
           />
-          <div className="text-[10px] text-zinc-500 font-bold truncate">
+          <div className="text-[10px] text-zinc-500 font-bold">
             vs {item.second_bidder_name || 'desconocido'}
           </div>
         </div>
       )}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-cyan-400/80">
+        <span className="text-xs font-bold text-cyan-400">
           +{formatShortEuro(item.price_diff)}€
         </span>
       )}
@@ -87,7 +87,7 @@ export default function BiggestStealCard({ data, onViewAll }) {
               user_name: item.winner,
               user_color_index: item.winner_color,
             }}
-            className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100"
+            className="text-[10px] ml-2"
           />
           <span className="text-[8px] text-zinc-600 font-medium">
             vs {item.second_bidder_name || '...'}
