@@ -242,7 +242,8 @@ export default function StatDetailDrawer({
                   if (!selectedManagerId) return true;
 
                   // Match by ID fields
-                  const itemId = item.user_id || item.owner_id || item.buyer_id || item.id;
+                  const itemId =
+                    item.winner_id || item.user_id || item.owner_id || item.buyer_id || item.id;
                   if (itemId === selectedManagerId) return true;
 
                   // Match by Name fields (comprador, seller, owner_name, etc)
@@ -312,7 +313,8 @@ function StatItemRow({ item, idx, statType }) {
     item.failed_bids_count !== undefined ||
     item.bid_count !== undefined ||
     item.total_spent !== undefined ||
-    item.total_overpay !== undefined
+    item.total_overpay !== undefined ||
+    item.price_diff !== undefined
   ) {
     if (item.total_spent !== undefined) {
       valueLabel = 'Gasto Total';
@@ -334,6 +336,34 @@ function StatItemRow({ item, idx, statType }) {
       valueLabel = 'Jugadores Perdidos';
       valueText = item.failed_bids_count;
       valueSub = 'Víctima de pujas ajustadas';
+    } else if (item.price_diff !== undefined) {
+      valueLabel = 'Margen de Victoria';
+      valueText = `+${formatEuro(item.price_diff)}€`;
+      valueSub = (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span
+              className={`text-[10px] font-black uppercase tracking-tight ${
+                getColorForUser(item.winner_id, item.winner, item.winner_color).text
+              }`}
+            >
+              {item.winner}
+            </span>
+            <span className="text-[9px] text-zinc-600 font-bold uppercase">le robó a</span>
+            <span
+              className={`text-[10px] font-black uppercase tracking-tight ${
+                getColorForUser(
+                  item.second_bidder_id,
+                  item.second_bidder_name,
+                  item.second_bidder_color
+                ).text
+              }`}
+            >
+              {item.second_bidder_name || 'otro manager'}
+            </span>
+          </div>
+        </div>
+      );
     }
   }
   // --- CATEGORY: Time-based (Hold / Quickflip) ---
@@ -549,6 +579,8 @@ function StatItemRow({ item, idx, statType }) {
     item.owner_color_index,
     item.comprador_color_index,
     item.vendedor_color_index,
+    item.winner_color_index,
+    item.bidder_color_index,
   ].find((v) => v !== undefined && v !== null);
 
   const secondaryColor =
@@ -557,15 +589,19 @@ function StatItemRow({ item, idx, statType }) {
       : { text: 'text-zinc-500' };
 
   // --- Theme Resolution (Owner-based) ---
-  // For transactions, the purchaser (comprador) defines the background, if available.
+  // For transactions, the purchaser (comprador or winner) defines the background, if available.
   // For players/users, or transactions lacking a specific 'comprador', the owner/user themselves defines it.
   const themeUserId =
-    statType === 'transaction' ? item.comprador_id || item.buyer_id || linkId : linkId;
+    statType === 'transaction'
+      ? item.winner_id || item.comprador_id || item.buyer_id || linkId
+      : linkId;
   const themeUserName =
-    statType === 'transaction' ? item.comprador || item.buyer_name || name : name;
+    statType === 'transaction' ? item.winner || item.comprador || item.buyer_name || name : name;
   const themeColorIndex =
     statType === 'transaction'
-      ? (item.comprador_color_index ??
+      ? (item.winner_color_index ??
+        item.winner_color ??
+        item.comprador_color_index ??
         item.buyer_color ??
         item.buyer_color_index ??
         resolvedColorIndex)
@@ -653,7 +689,7 @@ function StatItemRow({ item, idx, statType }) {
                   </span>
                 </div>
               </div>
-            ) : (
+            ) : item.price_diff !== undefined ? null : (
               <span
                 className={`text-[10px] font-black uppercase tracking-widest mt-1 ${secondaryColor.text}`}
               >

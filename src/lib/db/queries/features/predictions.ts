@@ -90,6 +90,20 @@ export interface HistoryPivotRow {
   scores: Record<string, { score: number | null; is_partial: boolean }>;
 }
 
+export interface NormalizedPrediction {
+  user_id: string;
+  usuario: string;
+  user_icon?: string;
+  color_index: number;
+  jornada: string;
+  base_round_id: number;
+  aciertos: number;
+  result: string;
+  is_partial: boolean;
+  total_matches: number;
+  user_matches: number;
+}
+
 export interface HistoryPivot {
   users: HistoryUser[];
   jornadas: HistoryPivotRow[];
@@ -122,19 +136,22 @@ export interface PorrasStats {
  * Optimizes performance by using parallel queries where possible.
  */
 export async function getPorrasStats(): Promise<PorrasStats> {
-  // Parallelize independent queries
+  // 1. Fetch normalized data once
+  const normalizedData = await getNormalizedPredictions();
+
+  // 2. Parallelize processing of normalized data
   const [achievements, participation, tableStats, performance, history] = await Promise.all([
-    getAchievements(),
-    getParticipation(),
-    getTableStats(),
-    getPerformanceData(),
-    getHistoryPivot(),
+    getAchievements(normalizedData),
+    getParticipation(normalizedData),
+    getTableStats(normalizedData),
+    getPerformanceData(normalizedData),
+    getHistoryPivot(normalizedData),
   ]);
 
-  const clutch = await getClutchStats();
-  const victories = await getVictorias();
-  const predictable = await getPredictableTeams();
-  const bestRound = await getBestRoundStat();
+  const clutch = await getClutchStats(normalizedData);
+  const victories = await getVictorias(normalizedData);
+  const predictable = await getPredictableTeams(); // Match-based, keep separate query
+  const bestRound = await getBestRoundStat(normalizedData);
 
   return {
     achievements,
@@ -144,10 +161,9 @@ export async function getPorrasStats(): Promise<PorrasStats> {
     history,
     clutch_stats: clutch,
     porra_stats: {
-      // Grouping common stats under the structure expected by the UI if needed
       victorias: victories,
       predictable_teams: predictable,
-      promedios: tableStats, // Refers to the main leaderboard table
+      promedios: tableStats,
       mejor_jornada: bestRound,
     },
   };
@@ -157,321 +173,258 @@ export async function getPorrasStats(): Promise<PorrasStats> {
 // HELPER FUNCTIONS
 // ==========================================
 
-async function getAchievements() {
-  // Normalize rounds to correctly identify Perfect 10s and Blanked across postponed parts.
-  const commonCTE = `
-    WITH RoundParts AS (
-        SELECT
+/**
+ * The CORE function for all prediction statistics.
+ * Normalizes all partitioned rounds and merges prediction strings correctly.
+ */
+async function getNormalizedPredictions(): Promise<NormalizedPrediction[]> {
+  const query = `
+    WITH RoundInfo AS (
+        -- Get total matches per conceptual round
+        SELECT 
             REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(DISTINCT round_id) AS total_parts
-        FROM porras GROUP BY 1
+            COUNT(*) as total_matches,
+            MIN(round_id) as base_round_id
+        FROM matches
+        GROUP BY 1
     ),
-    NormalizedPorras AS (
-        SELECT
+    MatchMap AS (
+        -- Map each match to its position in its specific round_id
+        SELECT 
+            id as match_id,
+            round_id,
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            ROW_NUMBER() OVER (PARTITION BY round_id ORDER BY id ASC) as part_pos
+        FROM matches
+    ),
+    UserMatchPredictions AS (
+        -- Extract individual predictions from hyphenated strings
+        SELECT 
             p.user_id,
-            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            MIN(p.round_id) AS base_round_id,
-            SUM(p.aciertos) AS aciertos,
-            COUNT(DISTINCT p.round_id) AS user_parts,
-            rp.total_parts
+            p.round_id,
+            unnest(string_to_array(p.result, '-')) as pred,
+            generate_subscripts(string_to_array(p.result, '-'), 1) as part_pos,
+            p.aciertos as part_aciertos
         FROM porras p
-        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
         WHERE p.aciertos IS NOT NULL
-        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
     ),
-    CompleteOnly AS (
-        SELECT * FROM NormalizedPorras WHERE user_parts = total_parts
+    MatchedPredictions AS (
+        -- Link predictions to their actual match_ids across the whole season
+        SELECT 
+            ump.user_id,
+            mm.base_round,
+            mm.match_id,
+            ump.pred,
+            ump.round_id,
+            ump.part_aciertos
+        FROM UserMatchPredictions ump
+        JOIN MatchMap mm ON ump.round_id = mm.round_id AND ump.part_pos = mm.part_pos
+    ),
+    ConceptualSummaries AS (
+        -- Aggregate by conceptual round
+        SELECT 
+            mp.user_id,
+            u.name as usuario,
+            u.icon as user_icon,
+            u.color_index,
+            mp.base_round as jornada,
+            ri.base_round_id,
+            ri.total_matches,
+            COUNT(DISTINCT mp.match_id) as user_matches,
+            -- Important: result string must be ordered by Match ID across ALL parts
+            string_agg(mp.pred, '-' ORDER BY mp.match_id) as merged_result,
+            -- Aciertos should be sum of part scores
+            (SELECT SUM(DISTINCT part_aciertos) FROM MatchedPredictions sub WHERE sub.user_id = mp.user_id AND sub.base_round = mp.base_round) as total_aciertos
+        FROM MatchedPredictions mp
+        JOIN users u ON mp.user_id = u.id
+        JOIN RoundInfo ri ON mp.base_round = ri.base_round
+        GROUP BY mp.user_id, u.name, u.icon, u.color_index, mp.base_round, ri.base_round_id, ri.total_matches
     )
+    SELECT 
+        *,
+        (user_matches < total_matches) as is_partial
+    FROM ConceptualSummaries
+    ORDER BY base_round_id ASC, total_aciertos DESC
   `;
 
-  const perfect10Query = `
-    ${commonCTE}
-    SELECT
-        co.aciertos,
-        co.base_round as jornada,
-        u.name as usuario,
-        co.user_id,
-        u.icon as user_icon,
-        u.color_index
-    FROM CompleteOnly co
-    JOIN users u ON co.user_id = u.id
-    WHERE co.aciertos >= 10
-    ORDER BY co.base_round_id DESC
-  `;
-
-  const blankedQuery = `
-    ${commonCTE},
-    MinScore AS (
-        SELECT MIN(aciertos) as val FROM CompleteOnly
-    )
-    SELECT
-        co.aciertos,
-        co.base_round as jornada,
-        u.name as usuario,
-        co.user_id,
-        u.icon as user_icon,
-        u.color_index
-    FROM CompleteOnly co
-    JOIN users u ON co.user_id = u.id
-    WHERE co.aciertos = (SELECT val FROM MinScore)
-    ORDER BY co.base_round_id DESC
-  `;
-
-  const [perfect10, blanked] = await Promise.all([
-    pgClient.query(perfect10Query),
-    pgClient.query(blankedQuery),
-  ]);
-
-  return {
-    perfect_10: perfect10.rows.map((row: any) => ({
-      ...row,
-      aciertos: parseInt(row.aciertos),
-    })),
-    blanked: blanked.rows.map((row: any) => ({
-      ...row,
-      aciertos: parseInt(row.aciertos),
-    })),
-  };
-}
-
-async function getParticipation(): Promise<ParticipationStat[]> {
-  // Group by base round name (merging postponed parts) and take min round_id for ordering.
-  const query = `
-    SELECT
-        REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS jornada,
-        MIN(round_id) AS sort_id,
-        COUNT(DISTINCT user_id) as count
-    FROM porras
-    GROUP BY REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi')
-    ORDER BY sort_id ASC
-  `;
   const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
-    count: parseInt(row.count),
-  }));
-}
-
-async function getPerformanceData(): Promise<PorraResult[]> {
-  // Merge postponed rows, carry is_partial flag for chart styling.
-  const query = `
-    WITH RoundParts AS (
-        SELECT
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(DISTINCT round_id) AS total_parts
-        FROM porras GROUP BY 1
-    )
-    SELECT
-        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS jornada,
-        MIN(p.round_id) AS sort_id,
-        u.name AS usuario,
-        SUM(p.aciertos) AS aciertos,
-        p.user_id,
-        u.color_index,
-        u.icon AS user_icon,
-        (COUNT(DISTINCT p.round_id) < rp.total_parts) AS is_partial
-    FROM porras p
-    JOIN users u ON p.user_id = u.id
-    JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
-    WHERE p.aciertos IS NOT NULL
-    GROUP BY
-        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'),
-        p.user_id, u.name, u.color_index, u.icon, rp.total_parts
-    ORDER BY sort_id ASC
-  `;
-  const res = await pgClient.query(query);
-  return res.rows.map((row: any) => ({
-    ...row,
-    aciertos: parseInt(row.aciertos),
+    aciertos: parseInt(row.total_aciertos),
+    total_matches: parseInt(row.total_matches),
+    user_matches: parseInt(row.user_matches),
     is_partial: row.is_partial === true,
   }));
 }
 
-async function getTableStats(): Promise<TableStat[]> {
-  // Only complete rounds (user played all parts) count toward all stats.
-  const query = `
-    WITH RoundParts AS (
-        SELECT
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(DISTINCT round_id) AS total_parts
-        FROM porras GROUP BY 1
-    ),
-    NormalizedPorras AS (
-        SELECT
-            p.user_id,
-            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            SUM(p.aciertos) AS aciertos,
-            COUNT(DISTINCT p.round_id) AS user_parts,
-            rp.total_parts
-        FROM porras p
-        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
-        WHERE p.aciertos IS NOT NULL
-        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
-    ),
-    CompleteOnly AS (
-        SELECT * FROM NormalizedPorras WHERE user_parts = total_parts
-    ),
-    UserStats AS (
-        SELECT
-            co.user_id,
-            u.name AS usuario,
-            u.icon AS user_icon,
-            u.color_index,
-            COUNT(*) AS jornadas_jugadas,
-            SUM(co.aciertos) AS total_aciertos,
-            AVG(co.aciertos) AS promedio,
-            COUNT(CASE WHEN co.aciertos = 10 THEN 1 END) AS perfects,
-            COUNT(CASE WHEN co.aciertos >= 8 THEN 1 END) AS exacts,
-            MAX(co.aciertos) AS mejor_jornada,
-            MIN(co.aciertos) AS peor_jornada
-        FROM CompleteOnly co
-        JOIN users u ON co.user_id = u.id
-        GROUP BY co.user_id, u.name, u.icon, u.color_index
-    )
-    SELECT * FROM UserStats
-    ORDER BY promedio DESC
-  `;
-  const res = await pgClient.query(query);
-  return res.rows.map((row: any) => ({
-    ...row,
-    jornadas_jugadas: parseInt(row.jornadas_jugadas),
-    total_aciertos: parseInt(row.total_aciertos),
-    promedio: parseFloat(row.promedio),
-    perfects: parseInt(row.perfects || '0'),
-    exacts: parseInt(row.exacts || '0'),
-    mejor_jornada: parseInt(row.mejor_jornada),
-    peor_jornada: parseInt(row.peor_jornada),
-  }));
+async function getAchievements(data: NormalizedPrediction[]) {
+  const perfect10 = data
+    .filter((d) => !d.is_partial && d.aciertos >= 10)
+    .map((d) => ({
+      aciertos: d.aciertos,
+      jornada: d.jornada,
+      usuario: d.usuario,
+      user_id: parseInt(d.user_id),
+      user_icon: d.user_icon,
+      color_index: d.color_index,
+    }))
+    .sort((a, b) => b.aciertos - a.aciertos);
+
+  const completeOnly = data.filter((d) => !d.is_partial);
+  const minScore = completeOnly.length > 0 ? Math.min(...completeOnly.map((d) => d.aciertos)) : 0;
+  const blanked = completeOnly
+    .filter((d) => d.aciertos === minScore)
+    .map((d) => ({
+      aciertos: d.aciertos,
+      jornada: d.jornada,
+      usuario: d.usuario,
+      user_id: parseInt(d.user_id),
+      user_icon: d.user_icon,
+      color_index: d.color_index,
+    }))
+    .sort((a, b) => b.aciertos - a.aciertos);
+
+  return { perfect_10: perfect10, blanked: blanked };
 }
 
-async function getClutchStats(): Promise<ClutchStat[]> {
-  // Get the last 3 *conceptual* complete rounds (ignoring postponed duplicates).
-  const roundsQuery = `
-    SELECT
-        REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-        MAX(round_id) AS max_round_id
-    FROM porras
-    WHERE aciertos IS NOT NULL
-    GROUP BY REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi')
-    ORDER BY max_round_id DESC
-    LIMIT 3
-  `;
-  const roundsRes = await pgClient.query(roundsQuery);
+async function getParticipation(data: NormalizedPrediction[]): Promise<ParticipationStat[]> {
+  const roundCounts = data.reduce(
+    (acc, curr) => {
+      acc[curr.jornada] = (acc[curr.jornada] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  if (roundsRes.rows.length === 0) return [];
+  const uniqueRounds = Array.from(new Set(data.map((d) => d.jornada))).map((name) => {
+    const entry = data.find((d) => d.jornada === name);
+    return { jornada: name, count: roundCounts[name], sort_id: entry?.base_round_id || 0 };
+  });
 
-  const baseRounds = roundsRes.rows.map((r: any) => r.base_round);
+  return uniqueRounds
+    .sort((a, b) => a.sort_id - b.sort_id)
+    .map(({ jornada, count }) => ({ jornada, count }));
+}
 
-  // Only count complete rounds (user played all parts) for clutch ranking.
-  const simpleQuery = `
-    WITH RoundParts AS (
-        SELECT
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(DISTINCT round_id) AS total_parts
-        FROM porras GROUP BY 1
-    )
-    SELECT
-        p.user_id,
-        u.name AS usuario,
-        u.icon AS user_icon,
-        u.color_index,
-        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-        SUM(p.aciertos) AS round_total,
-        COUNT(DISTINCT p.round_id) AS user_parts,
-        rp.total_parts
-    FROM porras p
-    JOIN users u ON p.user_id = u.id
-    JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
-    WHERE REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = ANY($1::text[])
-      AND p.aciertos IS NOT NULL
-    GROUP BY p.user_id, u.name, u.icon, u.color_index,
-             REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
-    HAVING COUNT(DISTINCT p.round_id) = rp.total_parts
-  `;
+async function getPerformanceData(data: NormalizedPrediction[]): Promise<PorraResult[]> {
+  return data
+    .sort((a, b) => a.base_round_id - b.base_round_id)
+    .map((d) => ({
+      jornada: d.jornada,
+      usuario: d.usuario,
+      aciertos: d.aciertos,
+      user_id: parseInt(d.user_id),
+      color_index: d.color_index,
+      user_icon: d.user_icon,
+      is_partial: d.is_partial,
+    }));
+}
 
-  const simpleRes = await pgClient.query(simpleQuery, [baseRounds]);
+async function getTableStats(data: NormalizedPrediction[]): Promise<TableStat[]> {
+  const userMap = new Map<string, NormalizedPrediction[]>();
+  data.forEach((d) => {
+    if (!userMap.has(d.user_id)) userMap.set(d.user_id, []);
+    userMap.get(d.user_id)!.push(d);
+  });
 
-  // Group by user and calculate average across complete rounds only
+  const stats = Array.from(userMap.entries()).map(([userId, userPredictions]) => {
+    const complete = userPredictions.filter((p) => !p.is_partial);
+    const first = userPredictions[0];
+
+    return {
+      user_id: parseInt(userId),
+      usuario: first.usuario,
+      user_icon: first.user_icon,
+      color_index: first.color_index,
+      jornadas_jugadas: complete.length,
+      total_aciertos: complete.reduce((sum, p) => sum + p.aciertos, 0),
+      promedio:
+        complete.length > 0
+          ? complete.reduce((sum, p) => sum + p.aciertos, 0) / complete.length
+          : 0,
+      mejor_jornada: complete.length > 0 ? Math.max(...complete.map((p) => p.aciertos)) : 0,
+      peor_jornada: complete.length > 0 ? Math.min(...complete.map((p) => p.aciertos)) : 0,
+    };
+  });
+
+  return stats.sort((a, b) => b.promedio - a.promedio);
+}
+
+async function getClutchStats(data: NormalizedPrediction[]): Promise<ClutchStat[]> {
+  const uniqueRounds = Array.from(new Set(data.map((d) => d.jornada)))
+    .map((name) => ({
+      name,
+      id: data.find((d) => d.jornada === name)!.base_round_id,
+    }))
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 3)
+    .map((r) => r.name);
+
+  if (uniqueRounds.length === 0) return [];
+
   const userAgg = new Map<
     string,
-    { usuario: string; user_id: string; user_icon: string; color_index: number; totals: number[] }
+    { usuario: string; user_id: string; icon: string; color: number; totals: number[] }
   >();
-  for (const row of simpleRes.rows) {
-    if (!userAgg.has(row.user_id)) {
-      userAgg.set(row.user_id, {
-        usuario: row.usuario,
-        user_id: row.user_id,
-        user_icon: row.user_icon,
-        color_index: row.color_index,
-        totals: [],
-      });
-    }
-    userAgg.get(row.user_id)!.totals.push(parseFloat(row.round_total));
-  }
+
+  data
+    .filter((d) => uniqueRounds.includes(d.jornada) && !d.is_partial)
+    .forEach((d) => {
+      if (!userAgg.has(d.user_id)) {
+        userAgg.set(d.user_id, {
+          usuario: d.usuario,
+          user_id: d.user_id,
+          icon: d.user_icon || '',
+          color: d.color_index,
+          totals: [],
+        });
+      }
+      userAgg.get(d.user_id)!.totals.push(d.aciertos);
+    });
 
   return Array.from(userAgg.values())
     .map((u) => ({
       usuario: u.usuario,
-      user_id: u.user_id,
-      user_icon: u.user_icon,
-      color_index: u.color_index,
-      avg_last_3: u.totals.reduce((a, b) => a + b, 0) / u.totals.length,
+      user_id: parseInt(u.user_id),
+      user_icon: u.icon,
+      color_index: u.color,
+      avg_last_3: u.totals.length > 0 ? u.totals.reduce((a, b) => a + b, 0) / u.totals.length : 0,
     }))
     .sort((a, b) => b.avg_last_3 - a.avg_last_3);
 }
 
-async function getVictorias(): Promise<VictoryStat[]> {
-  // Only complete rounds can be "won" — partial rounds excluded.
-  const query = `
-    WITH RoundParts AS (
-        SELECT
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(DISTINCT round_id) AS total_parts
-        FROM porras GROUP BY 1
-    ),
-    NormalizedPorras AS (
-        SELECT
-            p.user_id,
-            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            MIN(p.round_id) AS base_round_id,
-            SUM(p.aciertos) AS aciertos,
-            COUNT(DISTINCT p.round_id) AS user_parts,
-            rp.total_parts
-        FROM porras p
-        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
-        WHERE p.aciertos IS NOT NULL
-        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
-    ),
-    CompleteOnly AS (
-        SELECT * FROM NormalizedPorras WHERE user_parts = total_parts
-    ),
-    RoundMax AS (
-        SELECT base_round, MAX(aciertos) AS max_score
-        FROM CompleteOnly
-        GROUP BY base_round
-    ),
-    Winners AS (
-        SELECT co.user_id, co.base_round
-        FROM CompleteOnly co
-        JOIN RoundMax rm ON co.base_round = rm.base_round AND co.aciertos = rm.max_score
-    )
-    SELECT
-        u.name AS usuario,
-        w.user_id,
-        u.icon AS user_icon,
-        u.color_index,
-        COUNT(w.base_round) AS victorias
-    FROM Winners w
-    JOIN users u ON w.user_id = u.id
-    GROUP BY w.user_id, u.name, u.icon, u.color_index
-    ORDER BY victorias DESC
-  `;
+async function getVictorias(data: NormalizedPrediction[]): Promise<VictoryStat[]> {
+  const complete = data.filter((d) => !d.is_partial);
+  const roundWinners = new Map<string, string[]>();
 
-  const res = await pgClient.query(query);
-  return res.rows.map((row: any) => ({
-    ...row,
-    victorias: parseInt(row.victorias),
-  }));
+  const rounds = Array.from(new Set(complete.map((d) => d.jornada)));
+  rounds.forEach((round) => {
+    const roundScores = complete.filter((d) => d.jornada === round);
+    if (roundScores.length === 0) return;
+    const max = Math.max(...roundScores.map((s) => s.aciertos));
+    const winners = roundScores.filter((s) => s.aciertos === max).map((s) => s.user_id);
+    roundWinners.set(round, winners);
+  });
+
+  const victoryCount = new Map<string, number>();
+  roundWinners.forEach((winners) => {
+    winners.forEach((id) => victoryCount.set(id, (victoryCount.get(id) || 0) + 1));
+  });
+
+  const firstEntry = (id: string) => data.find((d) => d.user_id === id)!;
+
+  return Array.from(victoryCount.entries())
+    .map(([userId, count]) => {
+      const user = firstEntry(userId);
+      return {
+        usuario: user.usuario,
+        user_id: parseInt(userId),
+        user_icon: user.user_icon,
+        color_index: user.color_index,
+        victorias: count,
+      };
+    })
+    .sort((a, b) => b.victorias - a.victorias);
 }
 
 async function getPredictableTeams(): Promise<PredictableTeam[]> {
@@ -569,113 +522,52 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
   }));
 }
 
-async function getBestRoundStat(): Promise<BestRoundStat[]> {
-  // Only complete rounds count for the all-time record.
-  const query = `
-    WITH RoundParts AS (
-        SELECT
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(DISTINCT round_id) AS total_parts
-        FROM porras GROUP BY 1
-    ),
-    NormalizedPorras AS (
-        SELECT
-            p.user_id,
-            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            MIN(p.round_id) AS base_round_id,
-            SUM(p.aciertos) AS aciertos,
-            COUNT(DISTINCT p.round_id) AS user_parts,
-            rp.total_parts
-        FROM porras p
-        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
-        WHERE p.aciertos IS NOT NULL
-        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
-    )
-    SELECT
-        u.name AS usuario,
-        np.aciertos,
-        np.base_round AS jornada,
-        u.id AS user_id,
-        u.icon AS user_icon,
-        u.color_index
-    FROM NormalizedPorras np
-    JOIN users u ON np.user_id = u.id
-    WHERE np.user_parts = np.total_parts
-    ORDER BY np.aciertos DESC, np.base_round_id DESC
-    LIMIT 5
-  `;
-  const res = await pgClient.query(query);
-  return res.rows.map((row: any) => ({
-    ...row,
-    aciertos: parseInt(row.aciertos),
-  }));
+async function getBestRoundStat(data: NormalizedPrediction[]): Promise<BestRoundStat[]> {
+  return data
+    .filter((d) => !d.is_partial)
+    .sort((a, b) => b.aciertos - a.aciertos || b.base_round_id - a.base_round_id)
+    .slice(0, 5)
+    .map((d) => ({
+      usuario: d.usuario,
+      aciertos: d.aciertos,
+      jornada: d.jornada,
+      user_id: parseInt(d.user_id),
+      user_icon: d.user_icon,
+      color_index: d.color_index,
+    }));
 }
 
-async function getHistoryPivot(): Promise<HistoryPivot> {
-  // Get all DISTINCT base rounds (merged) ordered chronologically
-  const roundsRes = await pgClient.query(`
-    SELECT
-        REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-        MIN(round_id) AS base_round_id,
-        COUNT(DISTINCT round_id) AS total_parts
-    FROM porras
-    WHERE aciertos IS NOT NULL
-    GROUP BY REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi')
-    ORDER BY base_round_id ASC
-  `);
-  const rounds = roundsRes.rows;
+async function getHistoryPivot(data: NormalizedPrediction[]): Promise<HistoryPivot> {
+  const users = Array.from(new Set(data.map((d) => d.user_id)))
+    .map((id) => {
+      const entry = data.find((d) => d.user_id === id)!;
+      return { id: parseInt(id), name: entry.usuario, color_index: entry.color_index };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Get all users
-  const usersRes = await pgClient.query(
-    'SELECT DISTINCT u.id, u.name, u.color_index FROM users u JOIN porras p ON p.user_id = u.id ORDER BY u.name'
-  );
-  const users = usersRes.rows as HistoryUser[];
+  const rounds = Array.from(new Set(data.map((d) => d.jornada)))
+    .map((name) => {
+      const entry = data.find((d) => d.jornada === name)!;
+      return { name, id: entry.base_round_id };
+    })
+    .sort((a, b) => a.id - b.id);
 
-  // Get all scores merged by base round per user, with is_partial flag
-  const scoresQuery = `
-    WITH RoundParts AS (
-        SELECT
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(DISTINCT round_id) AS total_parts
-        FROM porras GROUP BY 1
-    )
-    SELECT
-        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-        u.name AS usuario,
-        SUM(p.aciertos) AS aciertos,
-        (COUNT(DISTINCT p.round_id) < rp.total_parts) AS is_partial
-    FROM porras p
-    JOIN users u ON p.user_id = u.id
-    JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
-    WHERE p.aciertos IS NOT NULL
-    GROUP BY
-        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'),
-        u.name, rp.total_parts
-  `;
-  const scoresRes = await pgClient.query(scoresQuery);
-
-  // Pivot data in JS — scores now carry { score, is_partial }
-  const pivotData: HistoryPivotRow[] = rounds.map((round: any) => {
+  const pivotData: HistoryPivotRow[] = rounds.map((round) => {
     const row: HistoryPivotRow = {
-      id: round.base_round_id,
-      name: round.base_round,
+      id: round.id,
+      name: round.name,
       scores: {},
     };
 
     users.forEach((user) => {
-      const match = scoresRes.rows.find(
-        (s: any) => s.base_round === round.base_round && s.usuario === user.name
-      );
+      const match = data.find((d) => d.jornada === round.name && d.user_id === String(user.id));
       row.scores[user.name] = match
-        ? { score: parseInt(match.aciertos), is_partial: match.is_partial === true }
+        ? { score: match.aciertos, is_partial: match.is_partial }
         : { score: null, is_partial: false };
     });
 
     return row;
   });
 
-  return {
-    users,
-    jornadas: pivotData,
-  };
+  return { users, jornadas: pivotData };
 }
