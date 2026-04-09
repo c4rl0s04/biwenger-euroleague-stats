@@ -41,7 +41,19 @@ export default function BiggestStealCard({ data, onViewAll }) {
         <HeroStatGroup
           stats={[
             { label: 'Ganador', value: item.winner },
-            { label: '2º Lugar', value: item.second_bidder_name || 'Desconocido' },
+            {
+              label: '2º Lugar',
+              value: (
+                <ManagerName
+                  user={{
+                    user_id: item.second_bidder_id,
+                    user_name: item.second_bidder_name,
+                    user_color_index: item.second_bidder_color,
+                  }}
+                  className="text-[11px]"
+                />
+              ),
+            },
           ]}
         />
       )}
@@ -69,8 +81,18 @@ export default function BiggestStealCard({ data, onViewAll }) {
             }}
             className="text-xs"
           />
-          <div className="text-[10px] text-zinc-500 font-bold">
-            vs {item.second_bidder_name || 'desconocido'}
+          <div className="flex items-baseline gap-1">
+            <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-tighter">
+              vs
+            </span>
+            <ManagerName
+              user={{
+                user_id: item.second_bidder_id,
+                user_name: item.second_bidder_name,
+                user_color_index: item.second_bidder_color,
+              }}
+              className="text-[10px]"
+            />
           </div>
         </div>
       )}
@@ -80,7 +102,7 @@ export default function BiggestStealCard({ data, onViewAll }) {
         </span>
       )}
       renderListItemMeta={(item) => (
-        <div className="flex items-center gap-2 ml-2">
+        <div className="flex items-center gap-1.5 ml-2">
           <ManagerName
             user={{
               user_id: item.winner_id,
@@ -89,9 +111,15 @@ export default function BiggestStealCard({ data, onViewAll }) {
             }}
             className="text-[10px]"
           />
-          <span className="text-[8px] text-zinc-600 font-medium">
-            vs {item.second_bidder_name || '...'}
-          </span>
+          <span className="text-[9px] text-zinc-700 font-black uppercase">vs</span>
+          <ManagerName
+            user={{
+              user_id: item.second_bidder_id,
+              user_name: item.second_bidder_name,
+              user_color_index: item.second_bidder_color,
+            }}
+            className="text-[10px]"
+          />
         </div>
       )}
     />

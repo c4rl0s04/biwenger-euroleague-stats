@@ -165,9 +165,9 @@ export default function MarketPageClient() {
                 title: 'Los Grandes Gastadores',
                 subtitle: 'Managers con mayor inversión total',
                 data: marketStats.bigSpender,
-                icon: ShoppingCart,
+                icon: Gem,
                 statType: 'user',
-                color: 'blue',
+                color: 'cyan',
               })
             }
           />
@@ -215,7 +215,7 @@ export default function MarketPageClient() {
                   data: marketStats.bestRevaluation,
                   icon: Activity,
                   statType: 'player',
-                  color: 'blue',
+                  color: 'purple',
                 })
               }
             />
@@ -228,7 +228,7 @@ export default function MarketPageClient() {
                   data: marketStats.bestPercentage,
                   icon: Activity,
                   statType: 'player',
-                  color: 'indigo',
+                  color: 'cyan',
                 })
               }
             />
@@ -261,7 +261,7 @@ export default function MarketPageClient() {
                   data: marketStats.worstFlip,
                   icon: AlertTriangle,
                   statType: 'transaction',
-                  color: 'rose',
+                  color: 'red',
                 })
               }
             />
@@ -274,7 +274,7 @@ export default function MarketPageClient() {
                   data: marketStats.worstRevaluation,
                   icon: ShieldAlert,
                   statType: 'player',
-                  color: 'orange',
+                  color: 'pink',
                 })
               }
             />
@@ -287,7 +287,7 @@ export default function MarketPageClient() {
                   data: marketStats.missedOpportunity,
                   icon: Clock,
                   statType: 'player',
-                  color: 'zinc',
+                  color: 'amber',
                 })
               }
             />
@@ -346,7 +346,7 @@ export default function MarketPageClient() {
                     data: marketStats.theThief,
                     icon: Flame,
                     statType: 'user',
-                    color: 'amber',
+                    color: 'red',
                   })
                 }
               />
@@ -359,7 +359,7 @@ export default function MarketPageClient() {
                     data: marketStats.theVictim,
                     icon: Swords,
                     statType: 'user',
-                    color: 'rose',
+                    color: 'pink',
                   })
                 }
               />
@@ -372,7 +372,7 @@ export default function MarketPageClient() {
                     data: marketStats.overpayerManager,
                     icon: GanttChartSquare,
                     statType: 'user',
-                    color: 'indigo',
+                    color: 'amber',
                   })
                 }
               />
@@ -419,7 +419,7 @@ export default function MarketPageClient() {
                     data: marketStats.recordBid,
                     icon: TrendingUp,
                     statType: 'transaction',
-                    color: 'emerald',
+                    color: 'purple',
                   })
                 }
               />
@@ -427,12 +427,12 @@ export default function MarketPageClient() {
                 data={marketStats.biggestSteal}
                 onViewAll={() =>
                   handleOpenDrawer({
-                    title: 'El Chollo',
+                    title: 'Mayores Robos',
                     subtitle: 'Fichajes ganados por el margen más estrecho',
                     data: marketStats.biggestSteal,
-                    icon: Trophy,
+                    icon: Search,
                     statType: 'transaction',
-                    color: 'emerald',
+                    color: 'cyan',
                   })
                 }
               />
@@ -445,7 +445,7 @@ export default function MarketPageClient() {
                     data: marketStats.topPlayer,
                     icon: Users,
                     statType: 'player',
-                    color: 'blue',
+                    color: 'orange',
                   })
                 }
               />
@@ -458,7 +458,7 @@ export default function MarketPageClient() {
                     data: marketStats.mostOwners,
                     icon: Clock,
                     statType: 'player',
-                    color: 'zinc',
+                    color: 'purple',
                   })
                 }
               />
@@ -471,7 +471,7 @@ export default function MarketPageClient() {
                     data: marketStats.inflatedPlayer,
                     icon: Flame,
                     statType: 'player',
-                    color: 'orange',
+                    color: 'rose',
                   })
                 }
               />
@@ -485,7 +485,7 @@ export default function MarketPageClient() {
                       data: marketStats.worstValue,
                       icon: AlertTriangle,
                       statType: 'player',
-                      color: 'rose',
+                      color: 'red',
                     })
                   }
                 />

@@ -1494,12 +1494,16 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON f.comprador = u.name
     CROSS JOIN LATERAL (
-        SELECT amount, bidder_name
-        FROM transfer_bids tb
-        WHERE tb.transfer_id = f.id
-          AND tb.amount < f.precio -- losing bid
-        ORDER BY tb.amount DESC
-        LIMIT 1
+        SELECT amount, bidder_name, bidder_id, bidder_color_index
+        FROM (
+            SELECT tb.amount, tb.bidder_name, u2.id as bidder_id, u2.color_index as bidder_color_index
+            FROM transfer_bids tb
+            LEFT JOIN users u2 ON tb.bidder_name = u2.name
+            WHERE tb.transfer_id = f.id
+              AND tb.amount < f.precio -- losing bid
+            ORDER BY tb.amount DESC
+            LIMIT 1
+        ) sub
     ) second_bid
     ORDER BY price_diff ASC
     

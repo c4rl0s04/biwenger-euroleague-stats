@@ -101,6 +101,42 @@ export default function StatDetailDrawer({
       text: 'text-fuchsia-400',
       glow: 'shadow-fuchsia-500/20',
     },
+    cyan: {
+      bg: 'bg-cyan-500/10',
+      border: 'border-cyan-500/20',
+      text: 'text-cyan-400',
+      glow: 'shadow-cyan-500/20',
+    },
+    orange: {
+      bg: 'bg-orange-500/10',
+      border: 'border-orange-500/20',
+      text: 'text-orange-400',
+      glow: 'shadow-orange-500/20',
+    },
+    teal: {
+      bg: 'bg-teal-500/10',
+      border: 'border-teal-500/20',
+      text: 'text-teal-400',
+      glow: 'shadow-teal-500/20',
+    },
+    red: {
+      bg: 'bg-red-500/10',
+      border: 'border-red-500/20',
+      text: 'text-red-400',
+      glow: 'shadow-red-500/20',
+    },
+    pink: {
+      bg: 'bg-pink-500/10',
+      border: 'border-pink-500/20',
+      text: 'text-pink-400',
+      glow: 'shadow-pink-500/20',
+    },
+    purple: {
+      bg: 'bg-purple-500/10',
+      border: 'border-purple-500/20',
+      text: 'text-purple-400',
+      glow: 'shadow-purple-500/20',
+    },
   };
 
   const colors = colorMap[color] || colorMap.blue;
