@@ -46,7 +46,7 @@ export default function RecordBidCard({ record, onViewAll }) {
                     user_name: item.comprador,
                     user_color_index: item.buyer_color,
                   }}
-                  className="text-[11px]"
+                  className="text-base font-mono tracking-tighter"
                 />
               ),
             },

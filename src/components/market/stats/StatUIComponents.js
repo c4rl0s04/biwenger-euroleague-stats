@@ -58,9 +58,13 @@ export function ManagerName({ user, className = '' }) {
  * A standardized layout for secondary hero stats (e.g., Purchase/Sale price).
  * Ensures correct sizing and legibility across all cards.
  */
-export function HeroStatGroup({ stats = [] }) {
+export function HeroStatGroup({ stats = [], direction = 'row' }) {
   return (
-    <div className="flex justify-center gap-16 text-xs mt-8">
+    <div
+      className={`flex justify-center ${
+        direction === 'col' ? 'flex-col items-center gap-6' : 'gap-16'
+      } text-xs mt-8`}
+    >
       {stats.map((stat, idx) => (
         <div key={idx} className="flex flex-col items-center">
           <span className="text-zinc-500 font-bold uppercase tracking-widest text-sm mb-2">

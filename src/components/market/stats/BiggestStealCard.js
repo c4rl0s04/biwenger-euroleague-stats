@@ -49,7 +49,7 @@ export default function BiggestStealCard({ data, onViewAll }) {
                     user_name: item.winner,
                     user_color_index: item.winner_color,
                   }}
-                  className="text-[11px]"
+                  className="text-base font-mono tracking-tighter"
                 />
               ),
             },
@@ -62,7 +62,7 @@ export default function BiggestStealCard({ data, onViewAll }) {
                     user_name: item.second_bidder_name,
                     user_color_index: item.second_bidder_color,
                   }}
-                  className="text-[11px]"
+                  className="text-base font-mono tracking-tighter"
                 />
               ),
             },
