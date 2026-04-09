@@ -72,11 +72,11 @@ export default function RecordBidCard({ record, onViewAll }) {
             user_name: item.comprador,
             user_color_index: item.buyer_color,
           }}
-          className="text-xs opacity-80 hover:opacity-100"
+          className="text-xs"
         />
       )}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-purple-400/80">{item.bid_count} pujas</span>
+        <span className="text-xs font-bold text-purple-400">{item.bid_count} pujas</span>
       )}
       renderListItemMeta={(item) => (
         <ManagerName
@@ -85,7 +85,7 @@ export default function RecordBidCard({ record, onViewAll }) {
             user_name: item.comprador,
             user_color_index: item.buyer_color,
           }}
-          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
+          className="text-[10px] ml-2"
         />
       )}
     />

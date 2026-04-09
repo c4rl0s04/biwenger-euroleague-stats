@@ -57,7 +57,7 @@ export default function InflatedPlayerCard({ data, onViewAll }) {
         </div>
       )}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-rose-400/80">
+        <span className="text-xs font-bold text-rose-400">
           +{formatShortEuro(item.total_inflation)}€
         </span>
       )}

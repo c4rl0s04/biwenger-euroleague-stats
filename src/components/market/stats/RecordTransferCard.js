@@ -68,7 +68,7 @@ export default function RecordTransferCard({ record, onViewAll }) {
         />
       )}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-rose-400/80">{formatEuro(item.precio)}€</span>
+        <span className="text-xs font-bold text-rose-400">{formatEuro(item.precio)}€</span>
       )}
       renderListItemMeta={(item) => (
         <ManagerName

@@ -274,17 +274,17 @@ export default function StatDetailDrawer({
             </div>
 
             {/* Footer */}
-            <div className="p-8 border-t border-white/5 bg-zinc-900/40 flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 leading-none mb-1">
+            <div className="px-8 py-3 border-t border-white/5 bg-zinc-900/40 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600">
                   Registros
                 </span>
-                <span className="text-2xl font-black text-white tabular-nums leading-none">
+                <span className="text-lg font-black text-white tabular-nums leading-none">
                   {data.length}
                 </span>
               </div>
 
-              <div className="text-[10px] font-black uppercase text-zinc-600 tracking-widest">
+              <div className="text-[9px] font-black uppercase text-zinc-700 tracking-[0.2em]">
                 Data Actualizada
               </div>
             </div>
@@ -471,6 +471,27 @@ function StatItemRow({ item, idx, statType }) {
       ? getColorForUser(managerId, managerName, managerColorIndex)
       : { text: 'text-zinc-500' };
 
+  // --- Theme Resolution (Owner-based) ---
+  // For transactions, the purchaser (comprador) defines the background, if available.
+  // For players/users, or transactions lacking a specific 'comprador', the owner/user themselves defines it.
+  const themeUserId =
+    statType === 'transaction' ? item.comprador_id || item.buyer_id || linkId : linkId;
+  const themeUserName =
+    statType === 'transaction' ? item.comprador || item.buyer_name || name : name;
+  const themeColorIndex =
+    statType === 'transaction'
+      ? (item.comprador_color_index ??
+        item.buyer_color ??
+        item.buyer_color_index ??
+        resolvedColorIndex)
+      : resolvedColorIndex;
+
+  const isMercadoTheme =
+    themeUserName === 'Mercado' || themeUserName === 'Biwenger' || !themeUserId;
+  const themeColor = !isMercadoTheme
+    ? getColorForUser(themeUserId, themeUserName, themeColorIndex)
+    : null;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -479,7 +500,11 @@ function StatItemRow({ item, idx, statType }) {
     >
       <Link
         href={linkPath}
-        className="group flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300"
+        className={`group flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${
+          themeColor
+            ? `bg-gradient-to-br ${themeColor.bg} ${themeColor.border}`
+            : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] hover:border-white/10'
+        }`}
       >
         {/* Rank */}
         <div

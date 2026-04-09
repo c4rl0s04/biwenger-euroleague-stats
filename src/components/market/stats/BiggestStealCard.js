@@ -87,7 +87,7 @@ export default function BiggestStealCard({ data, onViewAll }) {
               user_name: item.winner,
               user_color_index: item.winner_color,
             }}
-            className="text-[10px] ml-2"
+            className="text-[10px]"
           />
           <span className="text-[8px] text-zinc-600 font-medium">
             vs {item.second_bidder_name || '...'}

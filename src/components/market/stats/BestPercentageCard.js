@@ -46,20 +46,13 @@ export default function BestPercentageCard({ data, onViewAll }) {
           +{item.percentage_gain?.toFixed(0)}%
         </span>
       )}
-      renderRunnerUpMeta={(item) => (
-        <ManagerName user={item} className="text-xs opacity-80 hover:opacity-100" />
-      )}
+      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-cyan-400/80">
+        <span className="text-xs font-bold text-cyan-400">
           +{item.percentage_gain?.toFixed(0)}%
         </span>
       )}
-      renderListItemMeta={(item) => (
-        <ManagerName
-          user={item}
-          className="text-[10px] font-black uppercase tracking-wider opacity-60 hover:opacity-100 ml-2"
-        />
-      )}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

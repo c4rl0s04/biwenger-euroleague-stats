@@ -57,7 +57,7 @@ export default function BestRevaluationCard({ data, onViewAll }) {
           +{formatShortEuro(item.revaluation)}€
         </span>
       )}
-      renderListItemMeta={(item) => <ManagerName user={item} className="text-xs" />}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

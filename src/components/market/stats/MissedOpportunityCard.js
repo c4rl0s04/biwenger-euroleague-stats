@@ -64,7 +64,7 @@ export default function MissedOpportunityCard({ data, onViewAll }) {
         />
       )}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-amber-400/80">
+        <span className="text-xs font-bold text-amber-400">
           +{formatShortEuro(item.missed_profit)}€
         </span>
       )}
