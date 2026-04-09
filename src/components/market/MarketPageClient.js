@@ -55,6 +55,8 @@ import {
   Swords,
   ShieldAlert,
   Crown,
+  Zap,
+  Hourglass,
 } from 'lucide-react';
 
 export default function MarketPageClient() {
@@ -296,8 +298,32 @@ export default function MarketPageClient() {
         <div>
           <Subheading title="Tiempos" subtitle="Velocidad y paciencia en las operaciones" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-            <QuickflipCard data={marketStats.quickestFlip} />
-            <LongestHoldCard data={marketStats.longestHold} />
+            <QuickflipCard
+              data={marketStats.quickestFlip}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'El Quickflip',
+                  subtitle: 'Operaciones de compraventa más veloces con beneficio',
+                  data: marketStats.quickestFlip,
+                  icon: Zap,
+                  statType: 'transaction',
+                  color: 'orange',
+                })
+              }
+            />
+            <LongestHoldCard
+              data={marketStats.longestHold}
+              onViewAll={() =>
+                handleOpenDrawer({
+                  title: 'El Hold',
+                  subtitle: 'Inversiones más pacientes con beneficio final',
+                  data: marketStats.longestHold,
+                  icon: Hourglass,
+                  statType: 'transaction',
+                  color: 'teal',
+                })
+              }
+            />
           </div>
         </div>
       </Section>
