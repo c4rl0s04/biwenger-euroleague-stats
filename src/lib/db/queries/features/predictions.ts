@@ -158,17 +158,8 @@ export async function getPorrasStats(): Promise<PorrasStats> {
 // ==========================================
 
 async function getAchievements() {
-  // Perfect 10s are never split across postponed rounds (they're per-round-id), so keep as-is.
-  const perfect10Query = `
-    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id, u.icon as user_icon, u.color_index
-    FROM porras p
-    JOIN users u ON p.user_id = u.id
-    WHERE p.aciertos = 10
-    ORDER BY p.round_id DESC
-  `;
-
-  // Blanked: only consider COMPLETE rounds (user played all parts).
-  const blankedQuery = `
+  // Normalize rounds to correctly identify Perfect 10s and Blanked across postponed parts.
+  const commonCTE = `
     WITH RoundParts AS (
         SELECT
             REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
@@ -190,7 +181,26 @@ async function getAchievements() {
     ),
     CompleteOnly AS (
         SELECT * FROM NormalizedPorras WHERE user_parts = total_parts
-    ),
+    )
+  `;
+
+  const perfect10Query = `
+    ${commonCTE}
+    SELECT
+        co.aciertos,
+        co.base_round as jornada,
+        u.name as usuario,
+        co.user_id,
+        u.icon as user_icon,
+        u.color_index
+    FROM CompleteOnly co
+    JOIN users u ON co.user_id = u.id
+    WHERE co.aciertos >= 10
+    ORDER BY co.base_round_id DESC
+  `;
+
+  const blankedQuery = `
+    ${commonCTE},
     MinScore AS (
         SELECT MIN(aciertos) as val FROM CompleteOnly
     )
