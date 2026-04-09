@@ -177,73 +177,101 @@ export async function getPorrasStats(): Promise<PorrasStats> {
  * The CORE function for all prediction statistics.
  * Normalizes all partitioned rounds and merges prediction strings correctly.
  */
-async function getNormalizedPredictions(): Promise<NormalizedPrediction[]> {
+export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]> {
   const query = `
-    WITH RoundInfo AS (
-        -- Get total matches per conceptual round
-        SELECT 
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            COUNT(*) as total_matches,
-            MIN(round_id) as base_round_id
-        FROM matches
-        GROUP BY 1
-    ),
-    MatchMap AS (
-        -- Map each match to its position in its specific round_id
+    WITH BaseRoundInfo AS (
+        -- Consolidate round names and restrict to the current season (Rounds > 4000)
         SELECT 
             id as match_id,
-            round_id,
-            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
-            ROW_NUMBER() OVER (PARTITION BY round_id ORDER BY id ASC) as part_pos
+            home_score,
+            away_score,
+            TRIM(REGEXP_REPLACE(
+                REGEXP_REPLACE(round_name, 'Jornada', 'Round', 'gi'),
+                '\\s*\\(.*?\\)', '', 'gi'
+            )) AS base_round,
+            MIN(round_id) OVER (PARTITION BY TRIM(REGEXP_REPLACE(
+                REGEXP_REPLACE(round_name, 'Jornada', 'Round', 'gi'),
+                '\\s*\\(.*?\\)', '', 'gi'
+            ))) as base_round_id
         FROM matches
+        WHERE round_id > 4000
     ),
-    UserMatchPredictions AS (
-        -- Extract individual predictions from hyphenated strings
+    MatchSequences AS (
+        -- Assign a global 1...N index to matches within each conceptual round
+        SELECT 
+            match_id,
+            base_round,
+            base_round_id,
+            CASE 
+                WHEN home_score > away_score THEN '1'
+                WHEN away_score > home_score THEN '2'
+                ELSE 'X'
+            END as outcome,
+            ROW_NUMBER() OVER (PARTITION BY base_round ORDER BY match_id ASC) as global_pos
+        FROM BaseRoundInfo
+    ),
+    UserPredictionsUnnested AS (
+        -- Use WITH ORDINALITY to get array position correctly and avoid SRF cross-join issues
         SELECT 
             p.user_id,
             p.round_id,
-            unnest(string_to_array(p.result, '-')) as pred,
-            generate_subscripts(string_to_array(p.result, '-'), 1) as part_pos,
-            p.aciertos as part_aciertos
-        FROM porras p
-        WHERE p.aciertos IS NOT NULL
+            TRIM(REGEXP_REPLACE(
+                REGEXP_REPLACE(p.round_name, 'Jornada', 'Round', 'gi'),
+                '\\s*\\(.*?\\)', '', 'gi'
+            )) AS base_round,
+            prediction.pred,
+            prediction.idx as array_pos
+        FROM porras p,
+        unnest(string_to_array(p.result, '-')) WITH ORDINALITY AS prediction(pred, idx)
+        WHERE p.result IS NOT NULL AND p.result != ''
+        AND p.round_id > 4000
     ),
-    MatchedPredictions AS (
-        -- Link predictions to their actual match_ids across the whole season
+    UserPredictionSequences AS (
+        -- Assign final global position based on chronlogical round order + array index
         SELECT 
-            ump.user_id,
-            mm.base_round,
-            mm.match_id,
-            ump.pred,
-            ump.round_id,
-            ump.part_aciertos
-        FROM UserMatchPredictions ump
-        JOIN MatchMap mm ON ump.round_id = mm.round_id AND ump.part_pos = mm.part_pos
+            user_id,
+            base_round,
+            pred,
+            ROW_NUMBER() OVER (
+                PARTITION BY user_id, base_round 
+                ORDER BY round_id ASC, array_pos ASC
+            ) as global_pos
+        FROM UserPredictionsUnnested
     ),
-    ConceptualSummaries AS (
-        -- Aggregate by conceptual round
+    MatchedData AS (
+        -- ZIP matches and predictions by their global position in the round
         SELECT 
-            mp.user_id,
+            ups.user_id,
+            ms.base_round,
+            ms.base_round_id,
+            ms.outcome,
+            ups.pred,
+            ms.global_pos,
+            (CASE WHEN ms.outcome = ups.pred THEN 1 ELSE 0 END) as is_correct
+        FROM MatchSequences ms
+        JOIN UserPredictionSequences ups ON ms.base_round = ups.base_round AND ms.global_pos = ups.global_pos
+    ),
+    ConceptualTotals AS (
+        -- Final Aggregation
+        SELECT 
+            md.user_id,
             u.name as usuario,
             u.icon as user_icon,
             u.color_index,
-            mp.base_round as jornada,
-            ri.base_round_id,
-            ri.total_matches,
-            COUNT(DISTINCT mp.match_id) as user_matches,
-            -- Important: result string must be ordered by Match ID across ALL parts
-            string_agg(mp.pred, '-' ORDER BY mp.match_id) as merged_result,
-            -- Aciertos should be sum of part scores
-            (SELECT SUM(DISTINCT part_aciertos) FROM MatchedPredictions sub WHERE sub.user_id = mp.user_id AND sub.base_round = mp.base_round) as total_aciertos
-        FROM MatchedPredictions mp
-        JOIN users u ON mp.user_id = u.id
-        JOIN RoundInfo ri ON mp.base_round = ri.base_round
-        GROUP BY mp.user_id, u.name, u.icon, u.color_index, mp.base_round, ri.base_round_id, ri.total_matches
+            md.base_round as jornada,
+            md.base_round_id,
+            SUM(md.is_correct) as total_aciertos,
+            string_agg(md.pred, '-' ORDER BY md.global_pos) as result,
+            COUNT(md.global_pos) as user_matches,
+            (SELECT COUNT(*) FROM MatchSequences ms2 WHERE ms2.base_round = md.base_round) as total_matches
+        FROM MatchedData md
+        JOIN users u ON md.user_id = u.id
+        GROUP BY md.user_id, u.name, u.icon, u.color_index, md.base_round, md.base_round_id
     )
     SELECT 
         *,
         (user_matches < total_matches) as is_partial
-    FROM ConceptualSummaries
+    FROM ConceptualTotals
     ORDER BY base_round_id ASC, total_aciertos DESC
   `;
 
@@ -257,7 +285,7 @@ async function getNormalizedPredictions(): Promise<NormalizedPrediction[]> {
   }));
 }
 
-async function getAchievements(data: NormalizedPrediction[]) {
+export async function getAchievements(data: NormalizedPrediction[]) {
   const perfect10 = data
     .filter((d) => !d.is_partial && d.aciertos >= 10)
     .map((d) => ({
@@ -287,7 +315,7 @@ async function getAchievements(data: NormalizedPrediction[]) {
   return { perfect_10: perfect10, blanked: blanked };
 }
 
-async function getParticipation(data: NormalizedPrediction[]): Promise<ParticipationStat[]> {
+export async function getParticipation(data: NormalizedPrediction[]): Promise<ParticipationStat[]> {
   const roundCounts = data.reduce(
     (acc, curr) => {
       acc[curr.jornada] = (acc[curr.jornada] || 0) + 1;
@@ -306,7 +334,7 @@ async function getParticipation(data: NormalizedPrediction[]): Promise<Participa
     .map(({ jornada, count }) => ({ jornada, count }));
 }
 
-async function getPerformanceData(data: NormalizedPrediction[]): Promise<PorraResult[]> {
+export async function getPerformanceData(data: NormalizedPrediction[]): Promise<PorraResult[]> {
   return data
     .sort((a, b) => a.base_round_id - b.base_round_id)
     .map((d) => ({
@@ -320,7 +348,7 @@ async function getPerformanceData(data: NormalizedPrediction[]): Promise<PorraRe
     }));
 }
 
-async function getTableStats(data: NormalizedPrediction[]): Promise<TableStat[]> {
+export async function getTableStats(data: NormalizedPrediction[]): Promise<TableStat[]> {
   const userMap = new Map<string, NormalizedPrediction[]>();
   data.forEach((d) => {
     if (!userMap.has(d.user_id)) userMap.set(d.user_id, []);
@@ -350,7 +378,7 @@ async function getTableStats(data: NormalizedPrediction[]): Promise<TableStat[]>
   return stats.sort((a, b) => b.promedio - a.promedio);
 }
 
-async function getClutchStats(data: NormalizedPrediction[]): Promise<ClutchStat[]> {
+export async function getClutchStats(data: NormalizedPrediction[]): Promise<ClutchStat[]> {
   const uniqueRounds = Array.from(new Set(data.map((d) => d.jornada)))
     .map((name) => ({
       name,
@@ -393,7 +421,7 @@ async function getClutchStats(data: NormalizedPrediction[]): Promise<ClutchStat[
     .sort((a, b) => b.avg_last_3 - a.avg_last_3);
 }
 
-async function getVictorias(data: NormalizedPrediction[]): Promise<VictoryStat[]> {
+export async function getVictorias(data: NormalizedPrediction[]): Promise<VictoryStat[]> {
   const complete = data.filter((d) => !d.is_partial);
   const roundWinners = new Map<string, string[]>();
 
@@ -427,7 +455,7 @@ async function getVictorias(data: NormalizedPrediction[]): Promise<VictoryStat[]
     .sort((a, b) => b.victorias - a.victorias);
 }
 
-async function getPredictableTeams(): Promise<PredictableTeam[]> {
+export async function getPredictableTeams(): Promise<PredictableTeam[]> {
   const query = `
     WITH MatchOutcomes AS (
         SELECT 
@@ -441,17 +469,18 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
             END as outcome,
             ROW_NUMBER() OVER (PARTITION BY round_id ORDER BY id ASC) as match_idx
         FROM matches
-        WHERE NOT (home_score = 0 AND away_score = 0)
+        WHERE round_id > 4000
     ),
     UserPredictions AS (
         SELECT 
             p.user_id,
             p.round_id,
-            p.aciertos,
-            unnest(string_to_array(p.result, '-')) as pred,
-            generate_subscripts(string_to_array(p.result, '-'), 1) as match_idx
-        FROM porras p
+            prediction.pred,
+            prediction.idx as match_idx
+        FROM porras p,
+        unnest(string_to_array(p.result, '-')) WITH ORDINALITY AS prediction(pred, idx)
         WHERE p.aciertos IS NOT NULL
+        AND p.round_id > 4000
     ),
     PredictionResults AS (
         SELECT 
@@ -492,7 +521,7 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
         GROUP BY away_id
     )
     SELECT 
-        t.id,
+        ts.team_id as id,
         t.name,
         t.img,
         SUM(ts.total_predictions) as total,
@@ -504,7 +533,7 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
         ROUND((SUM(ts.correct_predictions)::decimal / NULLIF(SUM(ts.total_predictions), 0)) * 100, 1) as percentage
     FROM TeamStats ts
     JOIN teams t ON ts.team_id = t.id
-    GROUP BY t.id, t.name, t.img
+    GROUP BY ts.team_id, t.name, t.img
     HAVING SUM(ts.total_predictions) > 0
     ORDER BY percentage DESC
   `;
@@ -522,7 +551,7 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
   }));
 }
 
-async function getBestRoundStat(data: NormalizedPrediction[]): Promise<BestRoundStat[]> {
+export async function getBestRoundStat(data: NormalizedPrediction[]): Promise<BestRoundStat[]> {
   return data
     .filter((d) => !d.is_partial)
     .sort((a, b) => b.aciertos - a.aciertos || b.base_round_id - a.base_round_id)
@@ -537,7 +566,7 @@ async function getBestRoundStat(data: NormalizedPrediction[]): Promise<BestRound
     }));
 }
 
-async function getHistoryPivot(data: NormalizedPrediction[]): Promise<HistoryPivot> {
+export async function getHistoryPivot(data: NormalizedPrediction[]): Promise<HistoryPivot> {
   const users = Array.from(new Set(data.map((d) => d.user_id)))
     .map((id) => {
       const entry = data.find((d) => d.user_id === id)!;
