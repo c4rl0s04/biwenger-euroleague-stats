@@ -3,6 +3,7 @@
 import { Swords } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+import { formatEuro } from '@/lib/utils/currency';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
 export default function TheThiefCard({ data, onViewAll }) {
@@ -27,10 +28,14 @@ export default function TheThiefCard({ data, onViewAll }) {
       winnerLabel="MÁS ROBOS"
       useTeamColors={false}
       renderHeroValue={(item) => (
-        <span className="text-3xl font-black text-red-500">{item.stolen_count}</span>
+        <span className="text-4xl font-black text-red-500">{item.stolen_count}</span>
       )}
       renderHeroStats={() => (
-        <HeroStatGroup stats={[{ label: 'Condición', value: 'Con rivales pujando' }]} />
+        <div className="mt-6 flex justify-center">
+          <span className="text-sm text-zinc-100 font-bold uppercase tracking-[0.2em]">
+            Pujas ganadas sobre otro jugador
+          </span>
+        </div>
       )}
       renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
