@@ -35,12 +35,7 @@ export default function TopTraderCard({ data, onViewAll }) {
       winnerLabel="MÁS OPERACIONES"
       useTeamColors={false}
       renderHeroValue={(item) => (
-        <div className="flex flex-col items-center">
-          <span className="text-3xl font-black text-indigo-400">{item.trade_count}</span>
-          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-2">
-            Operaciones
-          </span>
-        </div>
+        <span className="text-3xl font-black text-indigo-400">{item.trade_count}</span>
       )}
       renderHeroStats={(item) => (
         <HeroStatGroup
