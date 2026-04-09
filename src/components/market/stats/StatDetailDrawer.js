@@ -385,7 +385,7 @@ function StatItemRow({ item, idx, statType }) {
             >
               {item.winner}
             </span>
-            <span className="text-[9px] text-zinc-600 font-bold uppercase">le robó a</span>
+            <span className="text-[9px] text-zinc-400 font-bold uppercase">le robó a</span>
             <span
               className={`text-[10px] font-black uppercase tracking-tight ${
                 getColorForUser(
