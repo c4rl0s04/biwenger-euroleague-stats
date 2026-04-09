@@ -1,6 +1,7 @@
 'use client';
 
 import { Swords, X, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { useApiData } from '@/lib/hooks/useApiData';
@@ -145,7 +146,7 @@ export default function BiddingDuelDetailsCard({ selectedDuel, onClear }) {
                         alt={duel.player_name}
                         width={128}
                         height={128}
-                        className="h-full w-full scale-160 object-contain object-top translate-y-2 origin-top"
+                        className="h-full w-full scale-110 object-contain object-top translate-y-2 origin-top"
                         fallbackSize={24}
                         bgClassName="bg-transparent"
                       />
@@ -155,11 +156,14 @@ export default function BiddingDuelDetailsCard({ selectedDuel, onClear }) {
                       <div className="min-w-0 flex-1 pr-28">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 pr-2">
-                            <div className="truncate text-sm font-semibold text-white">
+                            <Link
+                              href={`/players/${duel.player_id}`}
+                              className="inline-block truncate text-sm font-semibold text-white transition-all hover:text-primary hover:scale-[1.02] active:scale-95"
+                            >
                               {duel.player_name}
-                            </div>
-                            <div className="mt-0.5 text-[11px] text-zinc-500">
-                              Fichaje #{duel.transfer_id} · {formatDate(duel.transfer_date)}
+                            </Link>
+                            <div className="mt-0.5 text-[11px] text-zinc-500 text-xs">
+                              {formatDate(duel.transfer_date)}
                             </div>
                           </div>
 

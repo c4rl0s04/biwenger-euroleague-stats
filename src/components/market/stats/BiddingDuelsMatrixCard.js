@@ -8,9 +8,9 @@ import { getColorForUser } from '@/lib/constants/colors';
 function getCellColor(record) {
   if (!record || record.duels === 0) return 'bg-transparent border-transparent text-zinc-700';
   if (record.wins > record.losses)
-    return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-  if (record.losses > record.wins) return 'bg-red-500/10 text-red-400 border-red-500/20';
-  return 'bg-zinc-700/20 text-zinc-300 border-zinc-700/30';
+    return 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40';
+  if (record.losses > record.wins) return 'bg-red-500/25 text-red-300 border-red-500/40';
+  return 'bg-zinc-700/30 text-zinc-200 border-zinc-700/40';
 }
 
 function formatEuro(value) {
@@ -153,17 +153,15 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
 
                           {record?.duels ? (
                             <div
-                              className={`relative z-10 flex items-center justify-center gap-1 font-mono text-sm opacity-90 ${isMostCompetitive ? 'text-amber-50 drop-shadow-[0_0_10px_rgba(251,191,36,0.32)]' : ''}`}
+                              className={`relative z-10 flex items-center justify-center gap-1 font-mono text-sm font-bold ${isMostCompetitive ? 'text-amber-50 drop-shadow-[0_0_10px_rgba(251,191,36,0.32)]' : ''}`}
                             >
                               <span
-                                className={record.wins > record.losses ? 'font-bold text-base' : ''}
+                                className={record.wins > record.losses ? 'text-emerald-300' : ''}
                               >
                                 {record.wins}
                               </span>
                               <span className="opacity-30 text-xs">-</span>
-                              <span
-                                className={record.losses > record.wins ? 'font-bold text-base' : ''}
-                              >
+                              <span className={record.losses > record.wins ? 'text-red-300' : ''}>
                                 {record.losses}
                               </span>
                             </div>
