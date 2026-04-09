@@ -326,6 +326,42 @@ function StatItemRow({ item, idx, statType }) {
       valueSub = 'Víctima de pujas';
     }
   }
+  // --- CATEGORY: Time-based (Hold / Quickflip) ---
+  else if (item.hours_held !== undefined || item.hold_days !== undefined) {
+    if (item.hours_held !== undefined) {
+      const formatTime = (hours) => {
+        if (hours < 1) return `${Math.round(hours * 60)}m`;
+        if (hours < 24) return `${hours.toFixed(1)}h`;
+        return `${(hours / 24).toFixed(1)}d`;
+      };
+      valueLabel = 'Beneficio Quickflip';
+      valueText = `+${formatEuro(item.profit || 0)}€`;
+      valueSub = (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-orange-400 font-bold">
+            <Timer className="w-3.5 h-3.5" />
+            {formatTime(item.hours_held)} de posesión
+          </div>
+          <div className="flex items-center gap-2 opacity-70 text-[10px]">
+            Compra: {formatEuro(item.purchase_price || 0)}€
+            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+            Venta: {formatEuro(item.sale_price || 0)}€
+          </div>
+        </div>
+      );
+    } else {
+      valueLabel = 'Beneficio Realizado';
+      valueText = `+${formatEuro(item.profit || 0)}€`;
+      valueSub = (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-teal-400 font-bold">
+            <Hourglass className="w-3.5 h-3.5" />
+            {item.hold_days} días en plantilla
+          </div>
+        </div>
+      );
+    }
+  }
   // --- CATEGORY: Transactions / Flips ---
   else if (
     item.purchase_price !== undefined &&
@@ -429,42 +465,6 @@ function StatItemRow({ item, idx, statType }) {
       valueSub = item.total_sales
         ? `${formatEuro(item.total_sales)}€ en ventas (${item.sales_count} ops)`
         : `${item.trade_count || item.sales_count || 0} operaciones`;
-    }
-  }
-  // --- CATEGORY: Time-based (Hold / Quickflip) ---
-  else if (item.hours_held !== undefined || item.hold_days !== undefined) {
-    if (item.hours_held !== undefined) {
-      const formatTime = (hours) => {
-        if (hours < 1) return `${Math.round(hours * 60)}m`;
-        if (hours < 24) return `${hours.toFixed(1)}h`;
-        return `${(hours / 24).toFixed(1)}d`;
-      };
-      valueLabel = 'Beneficio Quickflip';
-      valueText = `+${formatEuro(item.profit || 0)}€`;
-      valueSub = (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-orange-400 font-bold">
-            <Timer className="w-3.5 h-3.5" />
-            {formatTime(item.hours_held)} de posesión
-          </div>
-          <div className="flex items-center gap-2 opacity-70 text-[10px]">
-            Compra: {formatEuro(item.purchase_price || 0)}€
-            <span className="w-1 h-1 rounded-full bg-zinc-700" />
-            Venta: {formatEuro(item.sale_price || 0)}€
-          </div>
-        </div>
-      );
-    } else {
-      valueLabel = 'Beneficio Realizado';
-      valueText = `+${formatEuro(item.profit || 0)}€`;
-      valueSub = (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-teal-400 font-bold">
-            <Hourglass className="w-3.5 h-3.5" />
-            {item.hold_days} días en plantilla
-          </div>
-        </div>
-      );
     }
   }
   // --- CATEGORY: Performance / Value ---
