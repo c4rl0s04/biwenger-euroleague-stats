@@ -385,13 +385,17 @@ export default function TournamentBracket({ tournament, fixtures }) {
           const hTotal = hLeg1 + hLeg2;
           const aTotal = aLeg1 + aLeg2;
 
+          const hasHome = !!f.home_user_id;
+          const hasAway = !!f.away_user_id;
+
           const isFinished =
-            f.home_score !== null &&
-            f.away_score !== null &&
-            (!leg2 || (leg2.home_score !== null && leg2.away_score !== null));
+            (hasHome && f.home_score !== null) || (hasAway && f.away_score !== null);
+
           let winner = null;
           if (isFinished) {
-            winner = hTotal > aTotal ? 'home' : aTotal > hTotal ? 'away' : null;
+            if (hasHome && !hasAway) winner = 'home';
+            else if (!hasHome && hasAway) winner = 'away';
+            else winner = hTotal > aTotal ? 'home' : aTotal > hTotal ? 'away' : null;
           }
 
           aggregatedMatches.push({
@@ -430,7 +434,18 @@ export default function TournamentBracket({ tournament, fixtures }) {
         matches.forEach((f) => {
           const hTotal = f.home_score ?? 0;
           const aTotal = f.away_score ?? 0;
-          const isFinished = f.home_score !== null && f.away_score !== null;
+          const hasHome = !!f.home_user_id;
+          const hasAway = !!f.away_user_id;
+
+          const isFinished =
+            (hasHome && f.home_score !== null) || (hasAway && f.away_score !== null);
+
+          let winner = null;
+          if (isFinished) {
+            if (hasHome && !hasAway) winner = 'home';
+            else if (!hasHome && hasAway) winner = 'away';
+            else winner = hTotal > aTotal ? 'home' : aTotal > hTotal ? 'away' : null;
+          }
 
           aggregatedMatches.push({
             ...f,
@@ -438,7 +453,7 @@ export default function TournamentBracket({ tournament, fixtures }) {
             isFinished,
             home_total: f.home_score,
             away_total: f.away_score,
-            winner: isFinished ? (hTotal > aTotal ? 'home' : 'away') : null,
+            winner,
           });
         });
       }
