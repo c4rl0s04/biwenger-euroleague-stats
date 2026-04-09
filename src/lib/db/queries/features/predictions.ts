@@ -187,13 +187,14 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
             id as match_id,
             home_score,
             away_score,
+            date,
             TRIM(REGEXP_REPLACE(
                 REGEXP_REPLACE(round_name, 'Jornada', 'Round', 'gi'),
-                '\\s*\\(.*?\\)', '', 'gi'
+                '\\s*\\(.*', '', 'gi'
             )) AS base_round,
             MIN(round_id) OVER (PARTITION BY TRIM(REGEXP_REPLACE(
                 REGEXP_REPLACE(round_name, 'Jornada', 'Round', 'gi'),
-                '\\s*\\(.*?\\)', '', 'gi'
+                '\\s*\\(.*', '', 'gi'
             ))) as base_round_id
         FROM matches
         WHERE round_id > 4000
@@ -209,7 +210,7 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
                 WHEN away_score > home_score THEN '2'
                 ELSE 'X'
             END as outcome,
-            ROW_NUMBER() OVER (PARTITION BY base_round ORDER BY match_id ASC) as global_pos
+            ROW_NUMBER() OVER (PARTITION BY base_round ORDER BY date ASC, match_id ASC) as global_pos
         FROM BaseRoundInfo
     ),
     UserPredictionsUnnested AS (
@@ -219,7 +220,7 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
             p.round_id,
             TRIM(REGEXP_REPLACE(
                 REGEXP_REPLACE(p.round_name, 'Jornada', 'Round', 'gi'),
-                '\\s*\\(.*?\\)', '', 'gi'
+                '\\s*\\(.*', '', 'gi'
             )) AS base_round,
             prediction.pred,
             prediction.idx as array_pos
@@ -471,7 +472,7 @@ export async function getPredictableTeams(): Promise<PredictableTeam[]> {
                 WHEN away_score > home_score THEN '2'
                 ELSE 'X'
             END as outcome,
-            ROW_NUMBER() OVER (PARTITION BY round_id ORDER BY id ASC) as match_idx
+            ROW_NUMBER() OVER (PARTITION BY round_id ORDER BY date ASC, id ASC) as match_idx
         FROM matches
         WHERE round_id > 4000
     ),
