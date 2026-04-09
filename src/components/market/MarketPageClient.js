@@ -448,6 +448,7 @@ export default function MarketPageClient() {
                     icon: Users,
                     statType: 'player',
                     color: 'orange',
+                    showFilters: false,
                   })
                 }
               />
@@ -461,6 +462,7 @@ export default function MarketPageClient() {
                     icon: Clock,
                     statType: 'player',
                     color: 'purple',
+                    showFilters: false,
                   })
                 }
               />
@@ -526,6 +528,7 @@ export default function MarketPageClient() {
         statType={drawerData.statType}
         color={drawerData.color}
         allUsers={marketStats.allUsers}
+        showFilters={drawerData.showFilters}
       />
     </div>
   );

@@ -682,8 +682,8 @@ function StatItemRow({ item, idx, statType }) {
       <Link
         href={linkPath}
         className={`group flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${
-          themeColor
-            ? `bg-gradient-to-br ${themeColor.bg} ${themeColor.border}`
+          secondaryColor.bg && managerId
+            ? `bg-gradient-to-br ${secondaryColor.bg} ${secondaryColor.border} bg-opacity-10 border-opacity-20`
             : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] hover:border-white/10'
         }`}
       >
