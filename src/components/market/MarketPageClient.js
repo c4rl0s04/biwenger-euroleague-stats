@@ -57,6 +57,8 @@ import {
   Crown,
   Zap,
   Hourglass,
+  Search,
+  Gem,
 } from 'lucide-react';
 
 export default function MarketPageClient() {
