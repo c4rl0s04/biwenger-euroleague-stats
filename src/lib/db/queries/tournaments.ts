@@ -145,19 +145,22 @@ export async function getTournamentFixtures(
 ): Promise<TournamentFixture[]> {
   const { rows } = await pgClient.query(
     `
-        SELECT 
-            tf.*,
-            uh.name as home_user_name,
-            uh.icon as home_user_icon,
-            uh.color_index as home_user_color,
-            ua.name as away_user_name,
-            ua.icon as away_user_icon,
-            ua.color_index as away_user_color
-        FROM tournament_fixtures tf
-        LEFT JOIN users uh ON tf.home_user_id = uh.id
-        LEFT JOIN users ua ON tf.away_user_id = ua.id
-        WHERE ($1::int IS NULL OR tf.tournament_id = $1)
-        ORDER BY tf.date DESC
+    SELECT 
+      tf.*,
+      tp.name as phase_name,
+      tp.type as phase_type,
+      uh.name as home_user_name,
+      uh.icon as home_user_icon,
+      uh.color_index as home_user_color,
+      ua.name as away_user_name,
+      ua.icon as away_user_icon,
+      ua.color_index as away_user_color
+    FROM tournament_fixtures tf
+    LEFT JOIN tournament_phases tp ON tf.phase_id = tp.id
+    LEFT JOIN users uh ON tf.home_user_id = uh.id
+    LEFT JOIN users ua ON tf.away_user_id = ua.id
+    WHERE ($1::int IS NULL OR tf.tournament_id = $1)
+    ORDER BY tf.date ASC
     `,
     [tournamentId]
   );

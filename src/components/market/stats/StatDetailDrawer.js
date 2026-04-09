@@ -306,13 +306,23 @@ function StatItemRow({ item, idx, statType }) {
   let valueText = '';
   let valueSub = '';
 
-  // --- CATEGORY: Competitive / Rivalry ---
+  // --- CATEGORY: Competitive / Rivalry / Financial Managers ---
   if (
     item.stolen_count !== undefined ||
-    item.stolen_from_count !== undefined ||
-    item.bid_count !== undefined
+    item.failed_bids_count !== undefined ||
+    item.bid_count !== undefined ||
+    item.total_spent !== undefined ||
+    item.total_overpay !== undefined
   ) {
-    if (item.bid_count !== undefined) {
+    if (item.total_spent !== undefined) {
+      valueLabel = 'Gasto Total';
+      valueText = `${formatEuro(item.total_spent)}€`;
+      valueSub = `${item.purchases_count || 0} compras realizadas`;
+    } else if (item.total_overpay !== undefined) {
+      valueLabel = 'Sobrepago Total';
+      valueText = `+${formatEuro(item.total_overpay)}€`;
+      valueSub = `${item.contested_wins || 0} victorias en subasta`;
+    } else if (item.bid_count !== undefined) {
       valueLabel = 'Pujas';
       valueText = item.bid_count;
       valueSub = `Precio Traspaso: ${formatEuro(item.precio)}€`;
@@ -320,10 +330,10 @@ function StatItemRow({ item, idx, statType }) {
       valueLabel = 'Jugadores Robados';
       valueText = item.stolen_count;
       valueSub = `${item.total_spent ? formatEuro(item.total_spent) + '€ invertidos' : 'Al acecho'}`;
-    } else {
+    } else if (item.failed_bids_count !== undefined) {
       valueLabel = 'Jugadores Perdidos';
-      valueText = item.stolen_from_count;
-      valueSub = 'Víctima de pujas';
+      valueText = item.failed_bids_count;
+      valueSub = 'Víctima de pujas ajustadas';
     }
   }
   // --- CATEGORY: Time-based (Hold / Quickflip) ---

@@ -32,9 +32,6 @@ export default function OverpayerManagerCard({ data, onViewAll }) {
           <span className="text-3xl font-black text-amber-400">
             +{formatEuro(item.total_overpay)}€
           </span>
-          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-2">
-            Dinero Extra
-          </span>
         </div>
       )}
       renderHeroStats={(item) => (

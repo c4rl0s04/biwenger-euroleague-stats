@@ -108,7 +108,7 @@ export default async function TournamentDetailsPage({ params }) {
         </Section>
       ) : (
         <Section title="Cuadro" delay={100} background="section-base">
-          <TournamentBracket fixtures={fixtures} />
+          <TournamentBracket tournament={tournament} fixtures={fixtures} />
         </Section>
       )}
 
