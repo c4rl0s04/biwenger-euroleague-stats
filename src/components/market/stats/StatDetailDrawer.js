@@ -511,6 +511,38 @@ function StatItemRow({ item, idx, statType }) {
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
                 Manager
               </span>
+            ) : item.vendedor && item.comprador ? (
+              <div className="flex items-center gap-2 mt-1.5 overflow-hidden">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-widest truncate ${
+                      item.vendedor === 'Mercado' || item.vendedor === 'Biwenger'
+                        ? 'text-zinc-500'
+                        : getColorForUser(
+                            item.vendedor_id || item.seller_id,
+                            item.vendedor || item.seller_name,
+                            item.vendedor_color_index ?? item.seller_color
+                          ).text
+                    }`}
+                  >
+                    {item.vendedor}
+                  </span>
+                  <ArrowRight size={10} className="text-zinc-700 shrink-0" />
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-widest truncate ${
+                      item.comprador === 'Mercado' || item.comprador === 'Biwenger'
+                        ? 'text-zinc-500'
+                        : getColorForUser(
+                            item.comprador_id || item.buyer_id,
+                            item.comprador || item.buyer_name,
+                            item.comprador_color_index ?? item.buyer_color
+                          ).text
+                    }`}
+                  >
+                    {item.comprador}
+                  </span>
+                </div>
+              </div>
             ) : (
               <span
                 className={`text-[10px] font-black uppercase tracking-widest mt-1 ${secondaryColor.text}`}

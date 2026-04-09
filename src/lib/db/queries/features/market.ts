@@ -111,10 +111,14 @@ export interface TopTransferredPlayer {
 export interface EnrichedTransfer extends Transfer {
   player_name: string;
   player_img: string;
-  buyer_id: number;
-  buyer_name: string;
-  buyer_icon: string;
-  buyer_color: number;
+  buyer_id?: number | string;
+  buyer_name?: string;
+  buyer_icon?: string;
+  buyer_color?: number;
+  seller_id?: number | string;
+  seller_name?: string;
+  seller_icon?: string;
+  seller_color?: number;
   player_team: string | null;
 }
 
@@ -780,14 +784,19 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
       t.code as player_team,
       t.name as team_name,
       t.img as team_logo,
-      u.id as buyer_id,
-      u.name as buyer_name,
-      u.icon as buyer_icon,
-      u.color_index as buyer_color
+      ub.id as buyer_id,
+      ub.name as buyer_name,
+      ub.icon as buyer_icon,
+      ub.color_index as buyer_color,
+      us.id as seller_id,
+      us.name as seller_name,
+      us.icon as seller_icon,
+      us.color_index as seller_color
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON f.comprador = u.name
+    LEFT JOIN users ub ON f.comprador = ub.name
+    LEFT JOIN users us ON f.vendedor = us.name
     ORDER BY f.precio DESC
     
   `;
