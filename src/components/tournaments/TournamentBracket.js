@@ -64,14 +64,16 @@ function PlayerRow({
         <span
           className={[
             'text-[14px] sm:text-[15px] truncate tracking-wide',
-            won
-              ? `font-bold ${color.text}`
-              : isFinished
-                ? 'font-medium text-zinc-100' // Brighter than zinc-400
-                : `font-medium ${color.text}`,
+            !name
+              ? 'text-zinc-600 italic'
+              : won
+                ? `font-bold ${color.text}`
+                : isFinished
+                  ? 'font-medium text-white/90'
+                  : `font-medium ${color.text}`,
           ].join(' ')}
         >
-          {name ?? 'TBD'}
+          {name || '—'}
         </span>
       </div>
 
@@ -88,10 +90,14 @@ function PlayerRow({
               <span
                 className={[
                   'font-mono text-[12px] tabular-nums',
-                  leg1Won ? 'text-amber-400 font-bold' : 'text-zinc-200', // Brighter than zinc-400
+                  leg1Won
+                    ? 'text-amber-400 font-black'
+                    : leg1 === 0
+                      ? 'text-rose-500/80'
+                      : 'text-zinc-50',
                 ].join(' ')}
               >
-                {leg1 ?? '—'}
+                {leg1 === 0 ? 'DNP' : (leg1 ?? '—')}
               </span>
             </div>
             <div
@@ -103,10 +109,14 @@ function PlayerRow({
               <span
                 className={[
                   'font-mono text-[12px] tabular-nums',
-                  leg2Won ? 'text-amber-400 font-bold' : 'text-zinc-200',
+                  leg2Won
+                    ? 'text-amber-400 font-black'
+                    : leg2 === 0
+                      ? 'text-rose-500/80'
+                      : 'text-zinc-50',
                 ].join(' ')}
               >
-                {leg2 ?? '—'}
+                {leg2 === 0 ? 'DNP' : (leg2 ?? '—')}
               </span>
             </div>
           </>
@@ -121,13 +131,15 @@ function PlayerRow({
             className={[
               'font-mono text-[14px] tabular-nums',
               won
-                ? 'text-white font-black'
-                : isFinished
-                  ? 'text-zinc-100 font-medium'
-                  : 'text-zinc-400 font-medium',
+                ? 'text-amber-400 font-black'
+                : total === 0 && isFinished
+                  ? 'text-rose-500/80 font-bold'
+                  : isFinished
+                    ? 'text-white'
+                    : 'text-zinc-300 font-medium',
             ].join(' ')}
           >
-            {total ?? '—'}
+            {total === 0 && isFinished ? 'DNP' : (total ?? '—')}
           </span>
         </div>
       </div>
@@ -358,70 +370,75 @@ export default function TournamentBracket({ tournament, fixtures }) {
                   String(m.away_user_id) === String(f.away_user_id)))
           );
 
-          if (leg2) {
-            const hLeg1 = f.home_score ?? 0;
-            const aLeg1 = f.away_score ?? 0;
-            const hLeg2 =
-              (leg2.home_user_id === f.home_user_id ? leg2.home_score : leg2.away_score) ?? 0;
-            const aLeg2 =
-              (leg2.away_user_id === f.away_user_id ? leg2.away_score : leg2.home_score) ?? 0;
-            const hTotal = hLeg1 + hLeg2;
-            const aTotal = aLeg1 + aLeg2;
-            const isFinished = f.status === 'finished' && leg2.status === 'finished';
+          const hLeg1 = f.home_score ?? 0;
+          const aLeg1 = f.away_score ?? 0;
+          const hLeg2 = leg2
+            ? leg2.home_user_id === f.home_user_id
+              ? leg2.home_score
+              : leg2.away_score
+            : 0;
+          const aLeg2 = leg2
+            ? leg2.away_user_id === f.away_user_id
+              ? leg2.away_score
+              : leg2.home_score
+            : 0;
+          const hTotal = hLeg1 + hLeg2;
+          const aTotal = aLeg1 + aLeg2;
 
-            aggregatedMatches.push({
-              id: `agg-${f.id}`,
-              isTwoLegged: true,
-              isFinished,
-              winner: isFinished
-                ? hTotal > aTotal
-                  ? 'home'
-                  : aTotal > hTotal
-                    ? 'away'
-                    : null
-                : null,
-              home_user_id: f.home_user_id,
-              home_user_name: f.home_user_name,
-              home_user_icon: f.home_user_icon,
-              home_user_color: f.home_user_color,
-              away_user_id: f.away_user_id,
-              away_user_name: f.away_user_name,
-              away_user_icon: f.away_user_icon,
-              away_user_color: f.away_user_color,
-              home_leg1: f.home_score,
-              away_leg1: f.away_score,
-              home_leg2: leg2.home_user_id === f.home_user_id ? leg2.home_score : leg2.away_score,
-              away_leg2: leg2.away_user_id === f.away_user_id ? leg2.away_score : leg2.home_score,
-              home_total: hTotal,
-              away_total: aTotal,
-            });
-            processedIds.add(f.id);
-            processedIds.add(leg2.id);
-          } else {
-            // No partner found (maybe a bye or data mismatch), treat as single leg
-            aggregatedMatches.push({
-              ...f,
-              isTwoLegged: false,
-              isFinished: f.status === 'finished',
-              home_total: f.home_score,
-              away_total: f.away_score,
-              winner:
-                f.status === 'finished' ? (f.home_score > f.away_score ? 'home' : 'away') : null,
-            });
-            processedIds.add(f.id);
+          const isFinished =
+            f.home_score !== null &&
+            f.away_score !== null &&
+            (!leg2 || (leg2.home_score !== null && leg2.away_score !== null));
+          let winner = null;
+          if (isFinished) {
+            winner = hTotal > aTotal ? 'home' : aTotal > hTotal ? 'away' : null;
           }
+
+          aggregatedMatches.push({
+            id: `agg-${f.id}`,
+            isTwoLegged: true,
+            isFinished,
+            winner,
+            home_user_id: f.home_user_id,
+            home_user_name: f.home_user_name,
+            home_user_icon: f.home_user_icon,
+            home_user_color: f.home_user_color,
+            away_user_id: f.away_user_id,
+            away_user_name: f.away_user_name,
+            away_user_icon: f.away_user_icon,
+            away_user_color: f.away_user_color,
+            home_leg1: f.home_score,
+            away_leg1: f.away_score,
+            home_leg2: leg2
+              ? leg2.home_user_id === f.home_user_id
+                ? leg2.home_score
+                : leg2.away_score
+              : null,
+            away_leg2: leg2
+              ? leg2.away_user_id === f.away_user_id
+                ? leg2.away_score
+                : leg2.home_score
+              : null,
+            home_total: hTotal,
+            away_total: aTotal,
+          });
+          processedIds.add(f.id);
+          if (leg2) processedIds.add(leg2.id);
         });
       } else {
         // Single leg behavior
         matches.forEach((f) => {
+          const hTotal = f.home_score ?? 0;
+          const aTotal = f.away_score ?? 0;
+          const isFinished = f.home_score !== null && f.away_score !== null;
+
           aggregatedMatches.push({
             ...f,
             isTwoLegged: false,
-            isFinished: f.status === 'finished',
+            isFinished,
             home_total: f.home_score,
             away_total: f.away_score,
-            winner:
-              f.status === 'finished' ? (f.home_score > f.away_score ? 'home' : 'away') : null,
+            winner: isFinished ? (hTotal > aTotal ? 'home' : 'away') : null,
           });
         });
       }
