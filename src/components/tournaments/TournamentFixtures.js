@@ -113,7 +113,7 @@ export default function TournamentFixtures({ fixtures, initialRoundId }) {
               Jornada {selectedRound?.internalNumber}
             </span>
             <span className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-bold">
-              {selectedRound?.name}
+              {selectedRound?.name?.replace(/Round/g, 'Ronda')}
             </span>
           </div>
 

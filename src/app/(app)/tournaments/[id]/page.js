@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, BackButton } from '@/components/ui';
 import { Section } from '@/components/layout';
 import { getTournamentDetails, getStandings, getFixtures } from '@/lib/services/tournamentService';
 import { StandingsTable, TournamentFixtures, TournamentBracket } from '@/components/tournaments';
@@ -35,7 +35,13 @@ export default async function TournamentDetailsPage({ params }) {
   }
 
   return (
-    <div>
+    <div className="min-h-screen pb-20">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-10 relative z-20">
+        <div className="max-w-7xl mx-auto mb-2">
+          <BackButton href="/tournaments" label="Volver a Torneos" />
+        </div>
+      </div>
+
       <PageHeader
         title={tournament.name}
         description={
@@ -43,7 +49,7 @@ export default async function TournamentDetailsPage({ params }) {
             ? 'Liga - Fase de grupos y clasificación'
             : 'Eliminatoria - Cuadro de enfrentamientos'
         }
-        className="!pb-0"
+        className="!pt-0 !pb-10"
       />
 
       {/* Winner Banner (if finished) */}
