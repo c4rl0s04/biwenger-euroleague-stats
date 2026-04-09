@@ -39,8 +39,16 @@ export default function RecordBidCard({ record, onViewAll }) {
           stats={[
             {
               label: 'Ganador',
-              value: item.comprador,
-              className: 'text-zinc-300',
+              value: (
+                <ManagerName
+                  user={{
+                    user_id: item.buyer_id,
+                    user_name: item.comprador,
+                    user_color_index: item.buyer_color,
+                  }}
+                  className="text-[11px]"
+                />
+              ),
             },
             {
               label: 'Precio',
@@ -50,15 +58,7 @@ export default function RecordBidCard({ record, onViewAll }) {
           ]}
         />
       )}
-      renderHeroMeta={(item) => (
-        <ManagerPill
-          user={{
-            user_id: item.buyer_id,
-            user_name: item.comprador,
-            user_color_index: item.buyer_color,
-          }}
-        />
-      )}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-purple-400">{item.bid_count}</span>

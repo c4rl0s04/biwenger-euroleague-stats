@@ -40,7 +40,19 @@ export default function BiggestStealCard({ data, onViewAll }) {
       renderHeroStats={(item) => (
         <HeroStatGroup
           stats={[
-            { label: 'Ganador', value: item.winner },
+            {
+              label: 'Ganador',
+              value: (
+                <ManagerName
+                  user={{
+                    user_id: item.winner_id,
+                    user_name: item.winner,
+                    user_color_index: item.winner_color,
+                  }}
+                  className="text-[11px]"
+                />
+              ),
+            },
             {
               label: '2º Lugar',
               value: (
@@ -57,15 +69,7 @@ export default function BiggestStealCard({ data, onViewAll }) {
           ]}
         />
       )}
-      renderHeroMeta={(item) => (
-        <ManagerPill
-          user={{
-            user_id: item.winner_id,
-            user_name: item.winner,
-            user_color_index: item.winner_color,
-          }}
-        />
-      )}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <span className="text-sm font-black text-cyan-400">
           +{formatShortEuro(item.price_diff)}€
