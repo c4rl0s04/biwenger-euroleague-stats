@@ -480,6 +480,31 @@ function StatItemRow({ item, idx, statType }) {
       );
     }
   }
+  // --- CATEGORY: Market Activity (Deseado / Inquieto) ---
+  else if (item.transfer_count !== undefined || item.distinct_owners_count !== undefined) {
+    const isTransfer = item.transfer_count !== undefined;
+    valueLabel = isTransfer ? 'Total Fichajes' : 'Propietarios';
+    valueText = isTransfer ? item.transfer_count : item.distinct_owners_count;
+
+    if (item.avg_price) {
+      valueSub = (
+        <div className="flex items-center gap-2">
+          <span className="opacity-70">Desembolso Medio:</span> {formatEuro(item.avg_price)}€
+        </div>
+      );
+    } else if (item.team_name && item.team_logo) {
+      valueSub = (
+        <div className="flex items-center gap-1.5 overflow-hidden">
+          <img
+            src={item.team_logo}
+            alt={item.team_name}
+            className="w-3.5 h-3.5 object-contain shrink-0"
+          />
+          <span className="truncate">{item.team_name}</span>
+        </div>
+      );
+    }
+  }
   // --- CATEGORY: Revaluation / Percentage ---
   else if (
     item.revaluation !== undefined ||
@@ -574,7 +599,8 @@ function StatItemRow({ item, idx, statType }) {
 
   // Resolve Primary Subject Identity
   const isUser = statType === 'user' || (!item.player_id && (item.id || item.user_id));
-  const imageSrc = item.player_img || item.user_img || item.icon || item.buyer_icon;
+  const imageSrc =
+    item.player_img || item.user_img || item.icon || item.buyer_icon || item.img || item.image;
   const name = item.player_name || item.user_name || item.name || item.buyer_name;
   const linkId = item.id || item.user_id || item.buyer_id || item.player_id;
   const linkPath = isUser ? `/user/${linkId}` : `/player/${item.player_id || item.id}`;
@@ -592,12 +618,7 @@ function StatItemRow({ item, idx, statType }) {
 
   // Resolve Secondary Manager Identity (for players/transactions)
   const managerName =
-    item.user_name ||
-    item.owner_name ||
-    item.comprador ||
-    item.vendedor ||
-    item.winner ||
-    (statType === 'user' ? null : item.name);
+    item.user_name || item.owner_name || item.comprador || item.vendedor || item.winner || null;
 
   const managerId =
     item.user_id ||
@@ -725,7 +746,9 @@ function StatItemRow({ item, idx, statType }) {
                   </span>
                 </div>
               </div>
-            ) : item.price_diff !== undefined ? null : (
+            ) : item.price_diff !== undefined ||
+              ((item.transfer_count !== undefined || item.distinct_owners_count !== undefined) &&
+                !managerName) ? null : (
               <span
                 className={`text-[10px] font-black uppercase tracking-widest mt-1 ${secondaryColor.text}`}
               >
