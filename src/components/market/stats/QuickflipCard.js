@@ -39,9 +39,9 @@ export default function QuickflipCard({ data, onViewAll }) {
       }
       winnerLabel="EL QUICKFLIP"
       renderHeroValue={(item) => (
-        <div className="flex flex-col items-center">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 px-6 py-3 rounded-2xl border border-orange-500/30 mb-3">
-            <Timer className="w-8 h-8 text-orange-400" />
+        <div className="flex flex-col items-center gap-0.5">
+          <div className="inline-flex items-center gap-2 mb-1">
+            <Timer className="w-5 h-5 text-orange-400" />
             <span className="text-3xl font-black text-orange-400">
               {formatTime(item.hours_held)}
             </span>
@@ -70,11 +70,9 @@ export default function QuickflipCard({ data, onViewAll }) {
       )}
       renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-orange-400/80">{formatTime(item.hours_held)}</span>
+        <span className="text-xs font-bold text-orange-400">{formatTime(item.hours_held)}</span>
       )}
-      renderListItemMeta={(item) => (
-        <ManagerName user={item} className="text-[10px] font-black uppercase tracking-wider ml-2" />
-      )}
+      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }

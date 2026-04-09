@@ -2,46 +2,46 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { User, Trophy } from 'lucide-react';
+import { User } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
+import { motion } from 'framer-motion';
 
 // ─── Layout constants ────────────────────────────────────────────────────────
-const CARD_HEIGHT = 82; // px – height of a match card
-const CARD_WIDTH = 200; // px – width of each column / card
-const COL_GAP = 52; // px – horizontal gap between columns (connector zone)
-const MIN_SLOT_H = 104; // px – minimum vertical slot per match
+const CARD_HEIGHT = 56; // px – height of a match card (two 28px rows)
+const MIN_CARD_WIDTH = 160; // px – minimum width of each column / card
+const MIN_COL_GAP = 24; // px – minimum horizontal gap between columns
+const MIN_SLOT_H = 76; // px – minimum vertical slot per match
 
 // ─── Tiny helpers ────────────────────────────────────────────────────────────
-function PlayerRow({ userId, icon, name, score, won, isFinished, userColor }) {
+function PlayerRow({ userId, icon, name, score, won, isFinished, userColor, isTop }) {
   const color = getColorForUser(userId, name, userColor);
 
   return (
     <Link
       href={`/user/${userId}`}
       className={[
-        'group/player flex items-center justify-between px-2.5 py-1.5',
-        'transition-colors duration-150',
-        won ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]',
+        'group/player relative flex items-center h-7',
+        'transition-colors duration-200',
+        won ? 'bg-white/[0.04]' : 'bg-transparent hover:bg-white/[0.02]',
+        isTop ? 'border-b border-white/[0.08]' : '',
       ].join(' ')}
     >
-      {/* Avatar + name */}
-      <div className="flex items-center gap-2 min-w-0">
+      {/* Player Info Section */}
+      <div className="flex-1 flex items-center gap-2 min-w-0 px-2 h-full border-r border-white/[0.08]">
         <div
           className={[
-            'w-5 h-5 rounded-full overflow-hidden shrink-0',
-            'border transition-colors duration-150',
-            won ? 'border-white/20' : 'border-white/8',
-            'bg-zinc-800',
+            'w-4 h-4 rounded-sm overflow-hidden shrink-0 bg-zinc-900 border',
+            won ? 'border-white/20' : 'border-white/5 group-hover/player:border-white/10',
           ].join(' ')}
         >
           {icon ? (
             <img
               src={icon.startsWith('http') ? icon : `https://cdn.biwenger.com/${icon}`}
               alt={name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover grayscale-[0.2]"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-zinc-500">
+            <div className="w-full h-full flex items-center justify-center text-zinc-500 bg-white/5">
               <User size={10} />
             </div>
           )}
@@ -49,11 +49,11 @@ function PlayerRow({ userId, icon, name, score, won, isFinished, userColor }) {
 
         <span
           className={[
-            'text-[11px] truncate transition-colors duration-150',
+            'text-[11px] truncate tracking-wide',
             won
-              ? `font-semibold ${color.text}`
+              ? `font-bold ${color.text}`
               : isFinished
-                ? 'font-medium text-zinc-500'
+                ? 'font-medium text-zinc-400'
                 : `font-medium ${color.text}`,
           ].join(' ')}
         >
@@ -61,15 +61,26 @@ function PlayerRow({ userId, icon, name, score, won, isFinished, userColor }) {
         </span>
       </div>
 
-      {/* Score */}
-      <span
+      {/* Score Box Section */}
+      <div
         className={[
-          'font-mono text-xs tabular-nums ml-2 shrink-0 font-bold',
-          won ? 'text-emerald-400' : isFinished ? 'text-zinc-500' : 'text-zinc-600',
+          'w-9 h-full flex items-center justify-center shrink-0',
+          won ? 'bg-white/5' : isFinished ? 'bg-black/20' : 'bg-transparent',
         ].join(' ')}
       >
-        {score ?? '—'}
-      </span>
+        <span
+          className={[
+            'font-mono text-[11px] tabular-nums',
+            won
+              ? 'text-white font-bold'
+              : isFinished
+                ? 'text-zinc-500 font-medium'
+                : 'text-zinc-600 font-medium',
+          ].join(' ')}
+        >
+          {score ?? '—'}
+        </span>
+      </div>
     </Link>
   );
 }
@@ -85,18 +96,11 @@ function MatchCard({ match, isFinal }) {
     <div
       className={[
         'relative flex flex-col overflow-hidden',
-        'rounded-lg border transition-all duration-200',
-        isFinal
-          ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)]'
-          : 'border-white/[0.08] hover:border-white/[0.14]',
-        'bg-[#111114] shadow-md',
+        'rounded-md border bg-[#111114] w-full',
+        isFinal ? 'border-amber-500/30 ring-1 ring-inset ring-amber-500/10' : 'border-white/[0.12]',
       ].join(' ')}
-      style={{ height: CARD_HEIGHT, width: CARD_WIDTH }}
+      style={{ height: CARD_HEIGHT }}
     >
-      {isFinal && (
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
-      )}
-
       <PlayerRow
         userId={match.home_user_id}
         icon={match.home_user_icon}
@@ -105,10 +109,8 @@ function MatchCard({ match, isFinal }) {
         won={homeWon}
         isFinished={isFinished}
         userColor={match.home_user_color}
+        isTop={true}
       />
-
-      {/* Divider */}
-      <div className="h-px mx-2.5 bg-white/[0.05]" />
 
       <PlayerRow
         userId={match.away_user_id}
@@ -118,19 +120,8 @@ function MatchCard({ match, isFinal }) {
         won={awayWon}
         isFinished={isFinished}
         userColor={match.away_user_color}
+        isTop={false}
       />
-
-      {/* Status tag */}
-      {!isFinished &&
-        (match.home_user_id || match.away_user_id) &&
-        !(match.home_user_id && !match.away_user_id && match.home_score !== null) &&
-        !(!match.home_user_id && match.away_user_id && match.away_score !== null) && (
-          <div className="absolute bottom-1 right-2">
-            <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-600">
-              Pendiente
-            </span>
-          </div>
-        )}
     </div>
   );
 }
@@ -147,30 +138,63 @@ function RoundConnector({ leftRound, rightRound, totalHeight }) {
     const yA = srcA.slotTop + srcA.slotHeight / 2;
     const yB = srcB ? srcB.slotTop + srcB.slotHeight / 2 : yA;
     const yMid = target.slotTop + target.slotHeight / 2;
-    const xMid = COL_GAP / 2;
+    const xMid = 50; // Middle of the relative width (0 to 100)
 
     const path = srcB
-      ? `M 0 ${yA} H ${xMid} V ${yB} M ${xMid} ${yMid} H ${COL_GAP} M 0 ${yB} H ${xMid}`
-      : `M 0 ${yA} H ${COL_GAP}`;
+      ? `M 0 ${yA} H ${xMid} V ${yB} M ${xMid} ${yMid} H 100 M 0 ${yB} H ${xMid}`
+      : `M 0 ${yA} H 100`;
 
     lines.push(
       <path
         key={j}
         d={path}
-        stroke="rgba(255,255,255,0.12)"
-        strokeWidth="1"
+        stroke="rgba(255, 255, 255, 0.15)"
+        strokeWidth="1.5"
         fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeLinejoin="miter"
       />
     );
   });
 
   return (
-    <svg width={COL_GAP} height={totalHeight} className="shrink-0" style={{ display: 'block' }}>
+    <svg
+      width="100%"
+      height={totalHeight}
+      viewBox={`0 0 100 ${totalHeight}`}
+      preserveAspectRatio="none"
+      className="shrink-0"
+      style={{ display: 'block' }}
+    >
       {lines}
     </svg>
   );
+}
+
+// ─── Phase Mapping ───────────────────────────────────────────────────────────
+function getCleanRoundName(name, roundIndex, totalRounds) {
+  const lower = name.toLowerCase();
+
+  if (
+    lower.includes('final') &&
+    !lower.includes('octavos') &&
+    !lower.includes('cuartos') &&
+    !lower.includes('semi')
+  )
+    return 'Gran Final';
+  if (lower.includes('semi')) return 'Semifinales';
+  if (lower.includes('cuartos')) return 'Cuartos';
+  if (lower.includes('octavos')) return 'Octavos';
+  if (lower.includes('dieciseis')) return 'Dieciseisavos';
+
+  // Fallback for "Round X" or "Jornada X"
+  const dist = totalRounds - 1 - roundIndex;
+  if (dist === 0) return 'Gran Final';
+  if (dist === 1) return 'Semifinales';
+  if (dist === 2) return 'Cuartos';
+  if (dist === 3) return 'Octavos';
+  if (dist === 4) return 'Dieciseisavos';
+
+  return name.replace(/\(.*\)/, '').trim();
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -236,56 +260,67 @@ export default function TournamentBracket({ fixtures }) {
   }
 
   const finalRoundIndex = layout.length - 1;
+  const minWidth = layout.length * MIN_CARD_WIDTH + (layout.length - 1) * MIN_COL_GAP;
 
   return (
-    <div className="overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-      {/* Round headers */}
-      <div className="flex min-w-max mb-4">
-        {layout.map((round, ri) => (
-          <div key={round.name} className="flex items-center shrink-0">
-            <div className="flex flex-col items-center gap-0.5" style={{ width: CARD_WIDTH }}>
-              <span
-                className={[
-                  'text-[11px] font-semibold tracking-wide truncate px-2',
-                  ri === finalRoundIndex ? 'text-amber-400/90' : 'text-white/60',
-                ].join(' ')}
-              >
-                {round.name}
-              </span>
-              <span className="text-[9px] text-zinc-600 uppercase tracking-[0.15em] font-bold">
-                {round.matches.length === 1 ? '1 Partido' : `${round.matches.length} Partidos`}
-              </span>
-            </div>
-            {ri < layout.length - 1 && <div style={{ width: COL_GAP }} />}
-          </div>
-        ))}
-      </div>
-
-      {/* Bracket body */}
-      <div className="relative flex min-w-max" style={{ height: totalHeight }}>
+    <div className="overflow-x-auto pb-6 scrollbar-hide w-full">
+      <div className="flex w-full min-h-[400px]" style={{ minWidth }}>
         {layout.map((round, ri) => {
           const isFinalRound = ri === finalRoundIndex;
+          const cleanName = getCleanRoundName(round.name, ri, layout.length);
 
           return (
-            <div key={round.name} className="flex items-stretch shrink-0">
-              {/* Column of match cards */}
-              <div className="relative shrink-0" style={{ width: CARD_WIDTH, height: totalHeight }}>
-                {round.matches.map((match) => (
-                  <div key={match.id} className="absolute" style={{ top: match.cardTop, left: 0 }}>
-                    <MatchCard match={match} isFinal={isFinalRound} />
-                  </div>
-                ))}
+            <motion.div
+              key={round.name}
+              className="flex items-stretch flex-1 min-w-0"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: ri * 0.1 }}
+            >
+              {/* Column Structure: Title + Matches */}
+              <div className="flex flex-col flex-1 min-w-0">
+                {/* Header Aligned to Column */}
+                <div className="h-8 mb-4 flex items-end justify-center text-center">
+                  <span
+                    className={[
+                      'text-[10px] font-bold tracking-[0.2em] uppercase',
+                      ri === finalRoundIndex ? 'text-amber-500' : 'text-zinc-500',
+                    ].join(' ')}
+                  >
+                    {cleanName}
+                  </span>
+                </div>
+
+                {/* Vertical Matches Container */}
+                <div className="relative flex-1" style={{ height: totalHeight }}>
+                  {round.matches.map((match) => (
+                    <div
+                      key={match.id}
+                      className="absolute w-full"
+                      style={{ top: match.cardTop, left: 0 }}
+                    >
+                      <MatchCard match={match} isFinal={isFinalRound} />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Connectors to the right */}
               {ri < layout.length - 1 && (
-                <RoundConnector
-                  leftRound={round}
-                  rightRound={layout[ri + 1]}
-                  totalHeight={totalHeight}
-                />
+                <div className="flex-[0.5] min-w-0 flex flex-col">
+                  {/* Spacer to match Header height */}
+                  <div className="h-8 mb-4" />
+
+                  <div className="relative flex-1">
+                    <RoundConnector
+                      leftRound={round}
+                      rightRound={layout[ri + 1]}
+                      totalHeight={totalHeight}
+                    />
+                  </div>
+                </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>

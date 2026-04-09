@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { X, TrendingUp, ArrowRight } from 'lucide-react';
+import { X, TrendingUp, ArrowRight, Timer, Hourglass } from 'lucide-react';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { getColorForUser } from '@/lib/constants/colors';
 
@@ -391,6 +391,27 @@ function StatItemRow({ item, idx, statType }) {
       </div>
     );
   }
+  // --- CATEGORY: Missed Opportunity (Impaciente) ---
+  else if (item.missed_profit !== undefined) {
+    valueLabel = 'Beneficio Perdido';
+    valueText = `${formatEuro(item.missed_profit)}€`;
+    valueSub = (
+      <div className="flex items-center gap-2">
+        <span className="opacity-70">Venta:</span> {formatEuro(item.sale_price || 0)}€
+        <span className="w-1 h-1 rounded-full bg-zinc-700" />
+        <span className="opacity-70">Actual:</span> {formatEuro(item.current_price || 0)}€
+      </div>
+    );
+  }
+  // --- CATEGORY: Overpayment (Sobrepagador / Inflado) ---
+  else if (item.total_overpay !== undefined || item.total_inflation !== undefined) {
+    const isInflation = item.total_inflation !== undefined;
+    valueLabel = isInflation ? 'Sobreprecio Total' : 'Sobrepago Total';
+    valueText = `${formatEuro(item.total_inflation || item.total_overpay)}€`;
+    valueSub = isInflation
+      ? `${item.trade_count} compras sobre mercado`
+      : `${item.contested_wins} victorias en subasta`;
+  }
   // --- CATEGORY: User Totals / Sellers ---
   else if (
     item.total_spent !== undefined ||
@@ -408,6 +429,42 @@ function StatItemRow({ item, idx, statType }) {
       valueSub = item.total_sales
         ? `${formatEuro(item.total_sales)}€ en ventas (${item.sales_count} ops)`
         : `${item.trade_count || item.sales_count || 0} operaciones`;
+    }
+  }
+  // --- CATEGORY: Time-based (Hold / Quickflip) ---
+  else if (item.hours_held !== undefined || item.hold_days !== undefined) {
+    if (item.hours_held !== undefined) {
+      const formatTime = (hours) => {
+        if (hours < 1) return `${Math.round(hours * 60)}m`;
+        if (hours < 24) return `${hours.toFixed(1)}h`;
+        return `${(hours / 24).toFixed(1)}d`;
+      };
+      valueLabel = 'Beneficio Quickflip';
+      valueText = `+${formatEuro(item.profit || 0)}€`;
+      valueSub = (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-orange-400 font-bold">
+            <Timer className="w-3.5 h-3.5" />
+            {formatTime(item.hours_held)} de posesión
+          </div>
+          <div className="flex items-center gap-2 opacity-70 text-[10px]">
+            Compra: {formatEuro(item.purchase_price || 0)}€
+            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+            Venta: {formatEuro(item.sale_price || 0)}€
+          </div>
+        </div>
+      );
+    } else {
+      valueLabel = 'Beneficio Realizado';
+      valueText = `+${formatEuro(item.profit || 0)}€`;
+      valueSub = (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-teal-400 font-bold">
+            <Hourglass className="w-3.5 h-3.5" />
+            {item.hold_days} días en plantilla
+          </div>
+        </div>
+      );
     }
   }
   // --- CATEGORY: Performance / Value ---
