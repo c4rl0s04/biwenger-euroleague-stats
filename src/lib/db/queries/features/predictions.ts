@@ -38,6 +38,8 @@ export interface TableStat {
   promedio: number;
   mejor_jornada: number;
   peor_jornada: number;
+  exacts: number;
+  perfects: number;
 }
 
 export interface ClutchStat {
@@ -372,6 +374,8 @@ export async function getTableStats(data: NormalizedPrediction[]): Promise<Table
           : 0,
       mejor_jornada: complete.length > 0 ? Math.max(...complete.map((p) => p.aciertos)) : 0,
       peor_jornada: complete.length > 0 ? Math.min(...complete.map((p) => p.aciertos)) : 0,
+      exacts: complete.filter((p) => p.aciertos >= 8).length,
+      perfects: complete.filter((p) => p.aciertos >= 10).length,
     };
   });
 
