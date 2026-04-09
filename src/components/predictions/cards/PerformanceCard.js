@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { getColorForUser } from '@/lib/constants/colors';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui';
 import {
   LineChart,
@@ -17,18 +17,34 @@ import {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl z-50 pointer-events-none">
-        <p className="text-slate-400 text-xs mb-2 font-medium">{label}</p>
-        <div className="space-y-1">
+      <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-lg p-3 shadow-2xl z-50 pointer-events-none min-w-[160px]">
+        <p className="text-slate-400 text-xs mb-3 font-semibold uppercase tracking-wider border-b border-slate-700/50 pb-1.5">
+          {label}
+        </p>
+        <div className="space-y-2">
           {payload
             .sort((a, b) => b.value - a.value)
-            .map((entry, index) => (
-              <div key={index} className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-slate-300 w-20 truncate">{entry.name}</span>
-                <span className="text-white font-bold ml-auto">{entry.value}</span>
-              </div>
-            ))}
+            .map((entry, index) => {
+              const isPartial = entry.payload[`${entry.dataKey}_partial`];
+              return (
+                <div key={index} className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2 text-xs">
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className="text-slate-300 w-24 truncate font-medium">{entry.name}</span>
+                    <span className="text-white font-bold ml-auto">{entry.value}</span>
+                  </div>
+                  {isPartial && (
+                    <div className="flex items-center gap-1 text-[9px] text-amber-400/80 font-bold ml-4 uppercase tracking-tight">
+                      <AlertCircle className="w-2.5 h-2.5" />
+                      Participación Parcial
+                    </div>
+                  )}
+                </div>
+              );
+            })}
         </div>
       </div>
     );
@@ -56,7 +72,7 @@ export function PerformanceCard({ data }) {
     data.forEach((d) => {
       if (!uniqueUsers.has(d.user_id)) {
         uniqueUsers.set(d.user_id, {
-          id: String(d.user_id), // Ensure string ID for Recharts data keys
+          id: String(d.user_id),
           name: d.usuario,
           colorIndex: d.color_index,
         });
@@ -65,16 +81,15 @@ export function PerformanceCard({ data }) {
 
     // Pivot data
     const pivotedData = rounds.map((round) => {
-      const entry = { name: round.replace(/Round |Jornada /i, 'J') }; // Shorten names like J1, J2
-      uniqueUsers.forEach((u, originalId) => {
-        // u.id is String(d.user_id)
-        // originalId is the key in the Map (can be number or string)
-
+      const entry = { name: round.replace(/Round |Jornada /i, 'J') };
+      uniqueUsers.forEach((u) => {
         const stats = data.find((d) => d.jornada === round && String(d.user_id) === u.id);
         if (stats) {
           entry[u.id] = stats.aciertos;
+          entry[`${u.id}_partial`] = stats.is_partial;
         } else {
           entry[u.id] = null;
+          entry[`${u.id}_partial`] = false;
         }
       });
       return entry;
@@ -101,7 +116,6 @@ export function PerformanceCard({ data }) {
   const toggleUser = (userId) => {
     const newSelected = new Set(selectedUsers);
     if (newSelected.size === 0 && users.length > 0) {
-      // Initialize with all
       users.forEach((u) => newSelected.add(u.id));
     }
 
@@ -114,16 +128,6 @@ export function PerformanceCard({ data }) {
   };
 
   const handleToggleAll = () => {
-    // If all selected (explicit or implicit) -> Clear (implicit all, or explicit none? user wants toggle)
-    // Behavior: Match RoundPointsProgressionCard
-    // If showing all -> clear (empty set = all? No, in that component empty=implicit all)
-    // Wait, in RoundPointsProgressionCard code:
-    // const effectiveSelectedUsers = selectedUsers.size === 0 && users.length > 0 ? initializedUsers : selectedUsers;
-    // toggleAll: if size === length -> set(empty). else -> set(all).
-    // If set(empty), effective becomes ALL.
-    // So "All" button creates a state where filters are cleared (showing all).
-    // If I want to select NONE, I can't?
-    // That's acceptable for this chart type.
     if (selectedUsers.size === users.length) {
       setSelectedUsers(new Set());
     } else {
@@ -138,13 +142,13 @@ export function PerformanceCard({ data }) {
         <div className="flex flex-wrap gap-2 pt-2">
           <button
             onClick={handleToggleAll}
-            className={`px-3 py-1 text-xs !rounded-full border transition-all cursor-pointer focus:outline-none overflow-hidden ${
+            className={`px-3 py-1 text-xs font-bold uppercase tracking-wider !rounded-full border transition-all cursor-pointer focus:outline-none overflow-hidden ${
               effectiveSelectedUsers.size === users.length
-                ? 'bg-primary/20 border-primary text-primary-foreground font-medium'
-                : 'bg-transparent border-border text-muted-foreground hover:border-primary/50'
+                ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                : 'bg-transparent border-slate-800 text-slate-500 hover:border-slate-700'
             }`}
           >
-            All
+            Todos
           </button>
           {users.map((user) => {
             const colors = getColorForUser(user.id, user.name, user.colorIndex);
@@ -168,7 +172,7 @@ export function PerformanceCard({ data }) {
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: isSelected ? colors.stroke : '#64748b' }}
                 />
-                <span className={isSelected ? 'text-foreground' : ''}>{user.name}</span>
+                <span className={isSelected ? 'text-foreground font-medium' : ''}>{user.name}</span>
               </button>
             );
           })}
@@ -176,7 +180,7 @@ export function PerformanceCard({ data }) {
 
         <div className="h-[350px] w-full mt-2">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="#334155"
@@ -185,27 +189,26 @@ export function PerformanceCard({ data }) {
               />
               <XAxis
                 dataKey="name"
-                stroke="#cbd5e1"
-                tick={{ fill: '#cbd5e1', fontSize: 12, fontWeight: 500 }}
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
                 tickLine={false}
                 axisLine={false}
                 interval="preserveStartEnd"
               />
               <YAxis
-                stroke="#cbd5e1"
-                tick={{ fill: '#cbd5e1', fontSize: 12, fontWeight: 500 }}
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
                 tickLine={false}
                 axisLine={false}
-                width={30}
-                domain={[0, 10]} // Fixed domain for aciertos
+                width={40}
+                domain={[0, 10]}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ paddingTop: '10px', fontSize: '10px' }}
+                wrapperStyle={{ paddingTop: '20px', fontSize: '10px' }}
+                iconType="circle"
                 formatter={(value) => (
-                  <span className="text-slate-400 hover:text-white transition-colors ml-1">
-                    {value}
-                  </span>
+                  <span className="text-slate-400 font-medium ml-1">{value}</span>
                 )}
               />
               {users.map((user) => {
@@ -215,17 +218,16 @@ export function PerformanceCard({ data }) {
                 return (
                   <Line
                     key={user.id}
-                    type="natural"
+                    type="monotone"
                     dataKey={user.id}
                     name={user.name}
                     stroke={colors.stroke}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 6, strokeWidth: 0 }}
-                    connectNulls={true} // User requested continuous lines
+                    strokeWidth={isSelected ? 3 : 1}
+                    dot={isSelected ? { r: 3, strokeWidth: 1, fill: colors.stroke } : false}
+                    activeDot={{ r: 5, strokeWidth: 1, fill: '#fff', stroke: colors.stroke }}
+                    connectNulls={true}
                     isAnimationActive={true}
                     hide={!isSelected}
-                    legendType="circle"
                   />
                 );
               })}

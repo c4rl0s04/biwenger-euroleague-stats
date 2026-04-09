@@ -25,6 +25,7 @@ export interface PorraResult {
   user_id: number;
   color_index: number;
   user_icon?: string;
+  is_partial: boolean;
 }
 
 export interface TableStat {
@@ -86,7 +87,7 @@ export interface HistoryUser {
 export interface HistoryPivotRow {
   id: number;
   name: string;
-  scores: Record<string, number | null>;
+  scores: Record<string, { score: number | null; is_partial: boolean }>;
 }
 
 export interface HistoryPivot {
@@ -157,6 +158,7 @@ export async function getPorrasStats(): Promise<PorrasStats> {
 // ==========================================
 
 async function getAchievements() {
+  // Perfect 10s are never split across postponed rounds (they're per-round-id), so keep as-is.
   const perfect10Query = `
     SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id, u.icon as user_icon, u.color_index
     FROM porras p
@@ -165,15 +167,44 @@ async function getAchievements() {
     ORDER BY p.round_id DESC
   `;
 
+  // Blanked: only consider COMPLETE rounds (user played all parts).
   const blankedQuery = `
-    WITH MinScore AS (
-        SELECT MIN(aciertos) as val FROM porras
+    WITH RoundParts AS (
+        SELECT
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            COUNT(DISTINCT round_id) AS total_parts
+        FROM porras GROUP BY 1
+    ),
+    NormalizedPorras AS (
+        SELECT
+            p.user_id,
+            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            MIN(p.round_id) AS base_round_id,
+            SUM(p.aciertos) AS aciertos,
+            COUNT(DISTINCT p.round_id) AS user_parts,
+            rp.total_parts
+        FROM porras p
+        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
+        WHERE p.aciertos IS NOT NULL
+        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
+    ),
+    CompleteOnly AS (
+        SELECT * FROM NormalizedPorras WHERE user_parts = total_parts
+    ),
+    MinScore AS (
+        SELECT MIN(aciertos) as val FROM CompleteOnly
     )
-    SELECT p.aciertos, p.round_name as jornada, u.name as usuario, p.user_id, u.icon as user_icon, u.color_index
-    FROM porras p
-    JOIN users u ON p.user_id = u.id
-    WHERE p.aciertos = (SELECT val FROM MinScore)
-    ORDER BY p.round_id DESC
+    SELECT
+        co.aciertos,
+        co.base_round as jornada,
+        u.name as usuario,
+        co.user_id,
+        u.icon as user_icon,
+        u.color_index
+    FROM CompleteOnly co
+    JOIN users u ON co.user_id = u.id
+    WHERE co.aciertos = (SELECT val FROM MinScore)
+    ORDER BY co.base_round_id DESC
   `;
 
   const [perfect10, blanked] = await Promise.all([
@@ -194,11 +225,15 @@ async function getAchievements() {
 }
 
 async function getParticipation(): Promise<ParticipationStat[]> {
+  // Group by base round name (merging postponed parts) and take min round_id for ordering.
   const query = `
-    SELECT round_name as jornada, COUNT(DISTINCT user_id) as count
+    SELECT
+        REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS jornada,
+        MIN(round_id) AS sort_id,
+        COUNT(DISTINCT user_id) as count
     FROM porras
-    GROUP BY round_id, round_name
-    ORDER BY round_id ASC
+    GROUP BY REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi')
+    ORDER BY sort_id ASC
   `;
   const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
@@ -208,39 +243,80 @@ async function getParticipation(): Promise<ParticipationStat[]> {
 }
 
 async function getPerformanceData(): Promise<PorraResult[]> {
+  // Merge postponed rows, carry is_partial flag for chart styling.
   const query = `
-    SELECT p.round_name as jornada, u.name as usuario, p.aciertos, p.user_id, u.color_index, u.icon as user_icon
+    WITH RoundParts AS (
+        SELECT
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            COUNT(DISTINCT round_id) AS total_parts
+        FROM porras GROUP BY 1
+    )
+    SELECT
+        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS jornada,
+        MIN(p.round_id) AS sort_id,
+        u.name AS usuario,
+        SUM(p.aciertos) AS aciertos,
+        p.user_id,
+        u.color_index,
+        u.icon AS user_icon,
+        (COUNT(DISTINCT p.round_id) < rp.total_parts) AS is_partial
     FROM porras p
     JOIN users u ON p.user_id = u.id
+    JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
     WHERE p.aciertos IS NOT NULL
-    ORDER BY p.round_id ASC
+    GROUP BY
+        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'),
+        p.user_id, u.name, u.color_index, u.icon, rp.total_parts
+    ORDER BY sort_id ASC
   `;
   const res = await pgClient.query(query);
   return res.rows.map((row: any) => ({
     ...row,
     aciertos: parseInt(row.aciertos),
+    is_partial: row.is_partial === true,
   }));
 }
 
 async function getTableStats(): Promise<TableStat[]> {
-  // Calculates average, total, min, max, count for each user
+  // Only complete rounds (user played all parts) count toward all stats.
   const query = `
-    WITH UserStats AS (
-        SELECT 
+    WITH RoundParts AS (
+        SELECT
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            COUNT(DISTINCT round_id) AS total_parts
+        FROM porras GROUP BY 1
+    ),
+    NormalizedPorras AS (
+        SELECT
             p.user_id,
-            u.name as usuario,
-            u.icon as user_icon,
-            u.color_index,
-            COUNT(p.round_id) as jornadas_jugadas,
-            SUM(p.aciertos) as total_aciertos,
-            AVG(p.aciertos) as promedio,
-            COUNT(CASE WHEN p.aciertos = 10 THEN 1 END) as perfects,
-            COUNT(CASE WHEN p.aciertos >= 8 THEN 1 END) as exacts,
-            MAX(p.aciertos) as mejor_jornada,
-            MIN(p.aciertos) as peor_jornada
+            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            SUM(p.aciertos) AS aciertos,
+            COUNT(DISTINCT p.round_id) AS user_parts,
+            rp.total_parts
         FROM porras p
-        JOIN users u ON p.user_id = u.id
-        GROUP BY p.user_id, u.name, u.icon, u.color_index
+        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
+        WHERE p.aciertos IS NOT NULL
+        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
+    ),
+    CompleteOnly AS (
+        SELECT * FROM NormalizedPorras WHERE user_parts = total_parts
+    ),
+    UserStats AS (
+        SELECT
+            co.user_id,
+            u.name AS usuario,
+            u.icon AS user_icon,
+            u.color_index,
+            COUNT(*) AS jornadas_jugadas,
+            SUM(co.aciertos) AS total_aciertos,
+            AVG(co.aciertos) AS promedio,
+            COUNT(CASE WHEN co.aciertos = 10 THEN 1 END) AS perfects,
+            COUNT(CASE WHEN co.aciertos >= 8 THEN 1 END) AS exacts,
+            MAX(co.aciertos) AS mejor_jornada,
+            MIN(co.aciertos) AS peor_jornada
+        FROM CompleteOnly co
+        JOIN users u ON co.user_id = u.id
+        GROUP BY co.user_id, u.name, u.icon, u.color_index
     )
     SELECT * FROM UserStats
     ORDER BY promedio DESC
@@ -259,63 +335,122 @@ async function getTableStats(): Promise<TableStat[]> {
 }
 
 async function getClutchStats(): Promise<ClutchStat[]> {
-  // Get the last 3 rounds with collected scores
+  // Get the last 3 *conceptual* complete rounds (ignoring postponed duplicates).
   const roundsQuery = `
-    SELECT DISTINCT round_id 
-    FROM porras 
-    WHERE aciertos IS NOT NULL 
-    ORDER BY round_id DESC 
+    SELECT
+        REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+        MAX(round_id) AS max_round_id
+    FROM porras
+    WHERE aciertos IS NOT NULL
+    GROUP BY REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi')
+    ORDER BY max_round_id DESC
     LIMIT 3
   `;
   const roundsRes = await pgClient.query(roundsQuery);
 
   if (roundsRes.rows.length === 0) return [];
 
-  const roundIds = roundsRes.rows.map((r: any) => r.round_id);
+  const baseRounds = roundsRes.rows.map((r: any) => r.base_round);
 
-  const query = `
-    SELECT 
-        u.name as usuario,
+  // Only count complete rounds (user played all parts) for clutch ranking.
+  const simpleQuery = `
+    WITH RoundParts AS (
+        SELECT
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            COUNT(DISTINCT round_id) AS total_parts
+        FROM porras GROUP BY 1
+    )
+    SELECT
         p.user_id,
-        u.icon as user_icon,
+        u.name AS usuario,
+        u.icon AS user_icon,
         u.color_index,
-        AVG(p.aciertos) as avg_last_3
+        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+        SUM(p.aciertos) AS round_total,
+        COUNT(DISTINCT p.round_id) AS user_parts,
+        rp.total_parts
     FROM porras p
     JOIN users u ON p.user_id = u.id
-    WHERE p.round_id = ANY($1::int[])
-    GROUP BY p.user_id, u.name, u.icon, u.color_index
-    HAVING COUNT(p.round_id) >= 1
-    ORDER BY avg_last_3 DESC
+    JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
+    WHERE REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = ANY($1::text[])
+      AND p.aciertos IS NOT NULL
+    GROUP BY p.user_id, u.name, u.icon, u.color_index,
+             REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
+    HAVING COUNT(DISTINCT p.round_id) = rp.total_parts
   `;
 
-  const res = await pgClient.query(query, [roundIds]);
-  return res.rows.map((row: any) => ({
-    ...row,
-    avg_last_3: parseFloat(row.avg_last_3),
-  }));
+  const simpleRes = await pgClient.query(simpleQuery, [baseRounds]);
+
+  // Group by user and calculate average across complete rounds only
+  const userAgg = new Map<
+    string,
+    { usuario: string; user_id: string; user_icon: string; color_index: number; totals: number[] }
+  >();
+  for (const row of simpleRes.rows) {
+    if (!userAgg.has(row.user_id)) {
+      userAgg.set(row.user_id, {
+        usuario: row.usuario,
+        user_id: row.user_id,
+        user_icon: row.user_icon,
+        color_index: row.color_index,
+        totals: [],
+      });
+    }
+    userAgg.get(row.user_id)!.totals.push(parseFloat(row.round_total));
+  }
+
+  return Array.from(userAgg.values())
+    .map((u) => ({
+      usuario: u.usuario,
+      user_id: u.user_id,
+      user_icon: u.user_icon,
+      color_index: u.color_index,
+      avg_last_3: u.totals.reduce((a, b) => a + b, 0) / u.totals.length,
+    }))
+    .sort((a, b) => b.avg_last_3 - a.avg_last_3);
 }
 
 async function getVictorias(): Promise<VictoryStat[]> {
-  // 1. Calculate max score per round
-  // 2. Count how many times each user achieved that max score
-
+  // Only complete rounds can be "won" — partial rounds excluded.
   const query = `
-    WITH RoundMax AS (
-        SELECT round_id, MAX(aciertos) as max_score
-        FROM porras
-        GROUP BY round_id
+    WITH RoundParts AS (
+        SELECT
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            COUNT(DISTINCT round_id) AS total_parts
+        FROM porras GROUP BY 1
+    ),
+    NormalizedPorras AS (
+        SELECT
+            p.user_id,
+            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            MIN(p.round_id) AS base_round_id,
+            SUM(p.aciertos) AS aciertos,
+            COUNT(DISTINCT p.round_id) AS user_parts,
+            rp.total_parts
+        FROM porras p
+        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
+        WHERE p.aciertos IS NOT NULL
+        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
+    ),
+    CompleteOnly AS (
+        SELECT * FROM NormalizedPorras WHERE user_parts = total_parts
+    ),
+    RoundMax AS (
+        SELECT base_round, MAX(aciertos) AS max_score
+        FROM CompleteOnly
+        GROUP BY base_round
     ),
     Winners AS (
-        SELECT p.user_id, p.round_id
-        FROM porras p
-        JOIN RoundMax rm ON p.round_id = rm.round_id AND p.aciertos = rm.max_score
+        SELECT co.user_id, co.base_round
+        FROM CompleteOnly co
+        JOIN RoundMax rm ON co.base_round = rm.base_round AND co.aciertos = rm.max_score
     )
-    SELECT 
-        u.name as usuario,
+    SELECT
+        u.name AS usuario,
         w.user_id,
-        u.icon as user_icon,
+        u.icon AS user_icon,
         u.color_index,
-        COUNT(w.round_id) as victorias
+        COUNT(w.base_round) AS victorias
     FROM Winners w
     JOIN users u ON w.user_id = u.id
     GROUP BY w.user_id, u.name, u.icon, u.color_index
@@ -425,12 +560,38 @@ async function getPredictableTeams(): Promise<PredictableTeam[]> {
 }
 
 async function getBestRoundStat(): Promise<BestRoundStat[]> {
-  // Returns top single round performance of all time
+  // Only complete rounds count for the all-time record.
   const query = `
-    SELECT u.name as usuario, p.aciertos, p.round_name as jornada, u.id as user_id, u.icon as user_icon, u.color_index
-    FROM porras p
-    JOIN users u ON p.user_id = u.id
-    ORDER BY p.aciertos DESC, p.round_id DESC
+    WITH RoundParts AS (
+        SELECT
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            COUNT(DISTINCT round_id) AS total_parts
+        FROM porras GROUP BY 1
+    ),
+    NormalizedPorras AS (
+        SELECT
+            p.user_id,
+            REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            MIN(p.round_id) AS base_round_id,
+            SUM(p.aciertos) AS aciertos,
+            COUNT(DISTINCT p.round_id) AS user_parts,
+            rp.total_parts
+        FROM porras p
+        JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
+        WHERE p.aciertos IS NOT NULL
+        GROUP BY p.user_id, REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'), rp.total_parts
+    )
+    SELECT
+        u.name AS usuario,
+        np.aciertos,
+        np.base_round AS jornada,
+        u.id AS user_id,
+        u.icon AS user_icon,
+        u.color_index
+    FROM NormalizedPorras np
+    JOIN users u ON np.user_id = u.id
+    WHERE np.user_parts = np.total_parts
+    ORDER BY np.aciertos DESC, np.base_round_id DESC
     LIMIT 5
   `;
   const res = await pgClient.query(query);
@@ -441,47 +602,70 @@ async function getBestRoundStat(): Promise<BestRoundStat[]> {
 }
 
 async function getHistoryPivot(): Promise<HistoryPivot> {
-  // Get all rounds that have scores
-  const roundsRes = await pgClient.query(
-    'SELECT DISTINCT round_id, round_name FROM porras WHERE aciertos IS NOT NULL ORDER BY round_id ASC'
-  );
+  // Get all DISTINCT base rounds (merged) ordered chronologically
+  const roundsRes = await pgClient.query(`
+    SELECT
+        REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+        MIN(round_id) AS base_round_id,
+        COUNT(DISTINCT round_id) AS total_parts
+    FROM porras
+    WHERE aciertos IS NOT NULL
+    GROUP BY REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi')
+    ORDER BY base_round_id ASC
+  `);
   const rounds = roundsRes.rows;
 
   // Get all users
   const usersRes = await pgClient.query(
     'SELECT DISTINCT u.id, u.name, u.color_index FROM users u JOIN porras p ON p.user_id = u.id ORDER BY u.name'
   );
-  // users will now be an array of objects { id, name, color_index }
   const users = usersRes.rows as HistoryUser[];
 
-  // Get all scores
+  // Get all scores merged by base round per user, with is_partial flag
   const scoresQuery = `
-    SELECT p.round_id, u.name as usuario, p.aciertos
+    WITH RoundParts AS (
+        SELECT
+            REGEXP_REPLACE(round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+            COUNT(DISTINCT round_id) AS total_parts
+        FROM porras GROUP BY 1
+    )
+    SELECT
+        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') AS base_round,
+        u.name AS usuario,
+        SUM(p.aciertos) AS aciertos,
+        (COUNT(DISTINCT p.round_id) < rp.total_parts) AS is_partial
     FROM porras p
     JOIN users u ON p.user_id = u.id
+    JOIN RoundParts rp ON REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi') = rp.base_round
+    WHERE p.aciertos IS NOT NULL
+    GROUP BY
+        REGEXP_REPLACE(p.round_name, '\\s*\\((postponed|aplazada)\\)', '', 'gi'),
+        u.name, rp.total_parts
   `;
   const scoresRes = await pgClient.query(scoresQuery);
 
-  // Pivot data in JS
+  // Pivot data in JS — scores now carry { score, is_partial }
   const pivotData: HistoryPivotRow[] = rounds.map((round: any) => {
     const row: HistoryPivotRow = {
-      id: round.round_id,
-      name: round.round_name,
+      id: round.base_round_id,
+      name: round.base_round,
       scores: {},
     };
 
     users.forEach((user) => {
       const match = scoresRes.rows.find(
-        (s: any) => s.round_id === round.round_id && s.usuario === user.name
+        (s: any) => s.base_round === round.base_round && s.usuario === user.name
       );
-      row.scores[user.name] = match ? match.aciertos : null;
+      row.scores[user.name] = match
+        ? { score: parseInt(match.aciertos), is_partial: match.is_partial === true }
+        : { score: null, is_partial: false };
     });
 
     return row;
   });
 
   return {
-    users, // Now array of { name, color_index }
+    users,
     jornadas: pivotData,
   };
 }

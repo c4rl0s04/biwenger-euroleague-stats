@@ -34,9 +34,6 @@ export function HistoryTable({ history }) {
     const isRightEdge = userIndex === totalUsers - 1;
 
     let vertical = isTopHalf ? 'top-full mt-2' : 'bottom-full mb-2';
-    // Since rows are jornadas here (vertical list), identifying "top half" depends on round index in list (which is reversed usually? rounds are likely ordered).
-    // Actually, jornadas.map passes index. Let's rely on that.
-
     let horizontal = 'left-1/2 -translate-x-1/2';
     if (isLeftEdge) horizontal = 'left-0';
     if (isRightEdge) horizontal = 'right-0';
@@ -62,7 +59,7 @@ export function HistoryTable({ history }) {
             return (
               <Link
                 key={user.name}
-                href={`/user/${user.id}`} // user object has id now
+                href={`/user/${user.id}`}
                 className="flex-1 flex flex-col items-end justify-end pb-2 gap-1 group min-w-0"
               >
                 <span
@@ -89,7 +86,11 @@ export function HistoryTable({ history }) {
 
               {/* User Scores */}
               {users.map((user, userIndex) => {
-                const score = round.scores[user.name];
+                const cell = round.scores[user.name];
+                // Handle both old (number | null) and new ({ score, is_partial }) shapes
+                const score = cell !== null && typeof cell === 'object' ? cell.score : cell;
+                const isPartial =
+                  cell !== null && typeof cell === 'object' ? cell.is_partial : false;
                 const cellId = `${round.id}-${user.name}`;
                 const isHovered = hoveredCell === cellId;
 
@@ -97,7 +98,7 @@ export function HistoryTable({ history }) {
                   <div key={cellId} className="flex-1 h-full px-[1px] relative flex items-center">
                     <div
                       className={cn(
-                        'relative w-full h-[1.75rem] rounded-sm flex items-center justify-center text-[10px] font-medium transition-all duration-200',
+                        'relative w-full h-[1.75rem] rounded-sm flex items-center justify-center text-[10px] font-medium transition-all duration-200 overflow-hidden',
                         getColor(score),
                         score !== null ? 'cursor-default' : 'opacity-50',
                         isHovered && score !== null
@@ -109,7 +110,23 @@ export function HistoryTable({ history }) {
                       onMouseEnter={() => setHoveredCell(cellId)}
                       onMouseLeave={() => setHoveredCell(null)}
                     >
-                      {score ?? ''}
+                      {/* Partial round diagonal stripe overlay */}
+                      {isPartial && score !== null && (
+                        <div
+                          className="absolute inset-0 pointer-events-none opacity-40"
+                          style={{
+                            backgroundImage:
+                              'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.4) 3px, rgba(0,0,0,0.4) 4px)',
+                          }}
+                        />
+                      )}
+                      <span className="relative z-10">{score ?? ''}</span>
+                      {/* Partial asterisk badge */}
+                      {isPartial && score !== null && (
+                        <span className="absolute top-0 right-0.5 text-[7px] font-black text-white/80 leading-none z-20">
+                          *
+                        </span>
+                      )}
                     </div>
 
                     {/* Tooltip */}
@@ -131,6 +148,11 @@ export function HistoryTable({ history }) {
                         >
                           {score} <span className="text-[9px] font-normal text-slate-500">pts</span>
                         </div>
+                        {isPartial && (
+                          <div className="text-[8px] font-bold text-amber-400/80 uppercase tracking-wider mt-1">
+                            ⚠ Participación parcial
+                          </div>
+                        )}
                         <div className="text-[9px] text-slate-500 border-t border-slate-700/50 pt-1 mt-1">
                           {round.name}
                         </div>
@@ -141,6 +163,23 @@ export function HistoryTable({ history }) {
               })}
             </div>
           ))}
+        </div>
+
+        {/* Legend */}
+        <div className="flex-shrink-0 pt-3 border-t border-white/5 flex items-center gap-2 mt-2">
+          <div className="w-3 h-3 rounded-sm bg-slate-700 border border-slate-600 relative overflow-hidden flex-shrink-0">
+            <div
+              className="absolute inset-0 opacity-40"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(0,0,0,0.5) 1px, rgba(0,0,0,0.5) 2px)',
+              }}
+            />
+            <span className="absolute top-0 right-0 text-[5px] text-white font-black">*</span>
+          </div>
+          <span className="text-[9px] text-slate-500 font-medium uppercase tracking-wider">
+            Participación parcial (no computa para el promedio)
+          </span>
         </div>
       </div>
     </Card>
