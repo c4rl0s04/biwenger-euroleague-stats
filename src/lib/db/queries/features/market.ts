@@ -861,6 +861,7 @@ export async function getRecordBid(): Promise<RecordBid[]> {
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN teams tm ON p.team_id = tm.id
     GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, u.id, u.color_index, p.name, p.img, tm.code, tm.name, tm.img
+    HAVING COUNT(*) > 1
     ORDER BY bid_count DESC
     
   `;
