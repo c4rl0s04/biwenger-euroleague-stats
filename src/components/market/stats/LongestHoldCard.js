@@ -39,23 +39,36 @@ export default function LongestHoldCard({ data, onViewAll }) {
       }
       winnerLabel="EL HOLD"
       renderHeroValue={(item) => (
-        <div className="flex flex-col items-center">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-teal-600/20 to-cyan-600/20 px-6 py-3 rounded-2xl border border-teal-500/30 mb-3">
-            <span className="text-3xl font-black text-pink-400">
-              {item.hold_days} <span className="text-sm">días</span>
-            </span>
+        <div className="flex flex-col items-center gap-0.5">
+          <div className="inline-flex items-center gap-2 mb-1">
+            <Hourglass className="w-5 h-5 text-teal-400" />
+            <span className="text-3xl font-black text-teal-400">{formatDays(item.days_held)}</span>
+          </div>
+          <div className="text-emerald-400 text-xl font-black">
+            +{formatShortEuro(item.profit)}€
           </div>
         </div>
       )}
+      renderHeroStats={(item) => (
+        <HeroStatGroup
+          stats={[
+            { label: 'Compra', value: formatShortEuro(item.purchase_price), suffix: '€' },
+            { label: 'Venta', value: formatShortEuro(item.sale_price), suffix: '€' },
+          ]}
+        />
+      )}
       renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
-        <span className="text-sm font-black text-pink-400">{item.hold_days} días</span>
+        <div className="flex flex-col items-end">
+          <span className="text-sm font-black text-teal-400">{formatDays(item.days_held)}</span>
+          <span className="text-[10px] text-emerald-400 font-bold">
+            +{formatShortEuro(item.profit)}€
+          </span>
+        </div>
       )}
       renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-pink-400">
-          {item.hold_days} <span className="text-[10px]">días</span>
-        </span>
+        <span className="text-xs font-bold text-teal-400">{formatDays(item.days_held)}</span>
       )}
       renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />

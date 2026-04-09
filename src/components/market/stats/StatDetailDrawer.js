@@ -327,7 +327,7 @@ function StatItemRow({ item, idx, statType }) {
     }
   }
   // --- CATEGORY: Time-based (Hold / Quickflip) ---
-  else if (item.hours_held !== undefined || item.hold_days !== undefined) {
+  else if (item.hours_held !== undefined || item.days_held !== undefined) {
     if (item.hours_held !== undefined) {
       const formatTime = (hours) => {
         if (hours < 1) return `${Math.round(hours * 60)}m`;
@@ -356,7 +356,7 @@ function StatItemRow({ item, idx, statType }) {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-teal-400 font-bold">
             <Hourglass className="w-3.5 h-3.5" />
-            {item.hold_days} días en plantilla
+            {Math.floor(item.days_held)} días en plantilla
           </div>
         </div>
       );
