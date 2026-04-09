@@ -11,12 +11,24 @@ export default function StandingsTable({ standings }) {
       label: 'Pos',
       align: 'center',
       className: 'w-12',
-      render: (val, row) =>
-        row.position === 1 ? (
-          <Trophy size={14} className="text-amber-500 mx-auto" />
-        ) : (
-          <span className="text-xs text-blue-400 font-bold">{row.position}</span>
-        ),
+      render: (val, row) => {
+        if (row.position === 1) {
+          return <Trophy size={16} className="text-amber-500 mx-auto drop-shadow-sm" />;
+        }
+
+        const rankColors = {
+          2: 'text-zinc-300',
+          3: 'text-orange-400/80',
+        };
+
+        return (
+          <span
+            className={`text-xs md:text-sm font-black font-mono tracking-tighter ${rankColors[row.position] || 'text-zinc-500'}`}
+          >
+            {row.position}
+          </span>
+        );
+      },
     },
     {
       key: 'points',
@@ -31,6 +43,7 @@ export default function StandingsTable({ standings }) {
       align: 'center',
       color: 'indigo',
       className: 'font-bold',
+      sortValue: (row) => row.won + row.lost + (row.drawn || 0),
       render: (val, row) => row.won + row.lost + (row.drawn || 0),
     },
     {
@@ -79,6 +92,7 @@ export default function StandingsTable({ standings }) {
       label: 'DIF',
       align: 'center',
       headerClassName: 'hidden sm:table-cell',
+      sortValue: (row) => row.scored - row.against,
       className: (val, row) => {
         const dif = row.scored - row.against;
         return `hidden sm:table-cell font-medium ${

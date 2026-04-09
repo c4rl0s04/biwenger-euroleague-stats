@@ -88,6 +88,11 @@ export function TournamentHistoryTable({ data, title, type = 'global' }) {
         align: 'center',
         headerClassName: 'text-zinc-500',
         className: 'hidden sm:table-cell',
+        sortValue: (row) => {
+          const pf = type === 'league' ? row.scored : row.gf;
+          const pc = type === 'league' ? row.against : row.ga;
+          return pf - pc;
+        },
         render: (_, row) => {
           const pf = type === 'league' ? row.scored : row.gf;
           const pc = type === 'league' ? row.against : row.ga;
