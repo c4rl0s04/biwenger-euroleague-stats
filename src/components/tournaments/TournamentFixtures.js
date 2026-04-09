@@ -7,33 +7,50 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getColorForUser } from '@/lib/constants/colors';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
-export default function TournamentFixtures({ fixtures }) {
-  const [manualSelectedRound, setManualSelectedRound] = useState(null);
+export default function TournamentFixtures({ fixtures, initialRoundId }) {
+  const [manualSelectedRoundId, setManualSelectedRoundId] = useState(null);
 
   // Extract unique rounds and sort them
   const rounds = useMemo(() => {
-    if (!fixtures) return [];
+    if (!fixtures || fixtures.length === 0) return [];
 
-    const uniqueRounds = [...new Set(fixtures.map((f) => f.round_name))];
-
-    // Custom sort for "Jornada X" or "Round X"
-    return uniqueRounds.sort((a, b) => {
-      // Extract numbers if present
-      const numA = parseInt(a.replace(/\D/g, '')) || 0;
-      const numB = parseInt(b.replace(/\D/g, '')) || 0;
-
-      if (numA !== numB) return numA - numB;
-      return a.localeCompare(b);
+    const roundMap = new Map();
+    fixtures.forEach((f) => {
+      const rid = f.round_id;
+      if (!rid) return;
+      if (!roundMap.has(rid)) {
+        roundMap.set(rid, {
+          id: rid,
+          name: f.round_name,
+        });
+      }
     });
+
+    const uniqueRounds = Array.from(roundMap.values());
+
+    // Sort by ID (assuming ID is chronological order for rounds)
+    uniqueRounds.sort((a, b) => a.id - b.id);
+
+    // Assign internal numbering
+    return uniqueRounds.map((r, index) => ({
+      ...r,
+      internalNumber: index + 1,
+    }));
   }, [fixtures]);
 
-  // Determine the default round (first with pending matches or last one)
+  // Determine the default round (respect initialRoundId from props or find first pending)
   const defaultRound = useMemo(() => {
-    if (rounds.length === 0 || !fixtures) return null;
+    if (rounds.length === 0) return null;
 
-    // Find the first round that has at least one pending match (not finished)
+    // 1. If initialRoundId is provided and exists in this tournament's rounds
+    if (initialRoundId) {
+      const found = rounds.find((r) => r.id === initialRoundId);
+      if (found) return found;
+    }
+
+    // 2. Fallback: Find the first round that has at least one pending match
     const firstRoundWithPendingMatches = rounds.find((round) => {
-      const roundFixtures = fixtures.filter((f) => f.round_name === round);
+      const roundFixtures = fixtures.filter((f) => f.round_id === round.id);
       return roundFixtures.some((f) => {
         const isFinished =
           f.status === 'finished' || (f.home_score !== null && f.away_score !== null);
@@ -42,26 +59,31 @@ export default function TournamentFixtures({ fixtures }) {
     });
 
     return firstRoundWithPendingMatches || rounds[rounds.length - 1];
-  }, [rounds, fixtures]);
+  }, [rounds, fixtures, initialRoundId]);
 
-  const selectedRound = manualSelectedRound || defaultRound;
+  const selectedRound = useMemo(() => {
+    if (manualSelectedRoundId) {
+      return rounds.find((r) => r.id === manualSelectedRoundId) || defaultRound;
+    }
+    return defaultRound;
+  }, [manualSelectedRoundId, rounds, defaultRound]);
 
   const filteredFixtures = useMemo(() => {
     if (!fixtures || !selectedRound) return [];
-    return fixtures.filter((f) => f.round_name === selectedRound);
+    return fixtures.filter((f) => f.round_id === selectedRound.id);
   }, [fixtures, selectedRound]);
 
   const handlePrevRound = () => {
-    const currentIndex = rounds.indexOf(selectedRound);
+    const currentIndex = rounds.findIndex((r) => r.id === selectedRound?.id);
     if (currentIndex > 0) {
-      setManualSelectedRound(rounds[currentIndex - 1]);
+      setManualSelectedRoundId(rounds[currentIndex - 1].id);
     }
   };
 
   const handleNextRound = () => {
-    const currentIndex = rounds.indexOf(selectedRound);
+    const currentIndex = rounds.findIndex((r) => r.id === selectedRound?.id);
     if (currentIndex < rounds.length - 1) {
-      setManualSelectedRound(rounds[currentIndex + 1]);
+      setManualSelectedRoundId(rounds[currentIndex + 1].id);
     }
   };
 
@@ -80,24 +102,24 @@ export default function TournamentFixtures({ fixtures }) {
         <div className="flex items-center justify-between p-2">
           <button
             onClick={handlePrevRound}
-            disabled={rounds.indexOf(selectedRound) === 0}
+            disabled={rounds.findIndex((r) => r.id === selectedRound?.id) === 0}
             className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
           >
             <ChevronLeft size={20} />
           </button>
 
-          <div className="flex flex-col items-center">
-            <span className="text-xs text-amber-500 uppercase tracking-widest font-bold">
-              Jornada
+          <div className="flex flex-col items-center text-center">
+            <span className="text-lg font-black text-white font-display leading-tight">
+              Jornada {selectedRound?.internalNumber}
             </span>
-            <span className="text-lg font-black text-white font-display">
-              {selectedRound?.replace('Jornada ', '') || selectedRound}
+            <span className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-bold">
+              {selectedRound?.name}
             </span>
           </div>
 
           <button
             onClick={handleNextRound}
-            disabled={rounds.indexOf(selectedRound) === rounds.length - 1}
+            disabled={rounds.findIndex((r) => r.id === selectedRound?.id) === rounds.length - 1}
             className="p-2 rounded-lg hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white cursor-pointer"
           >
             <ChevronRight size={20} />

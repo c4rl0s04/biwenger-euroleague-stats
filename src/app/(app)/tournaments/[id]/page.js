@@ -6,6 +6,7 @@ import { getTournamentDetails, getStandings, getFixtures } from '@/lib/services/
 import { StandingsTable, TournamentFixtures, TournamentBracket } from '@/components/tournaments';
 import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { resolveRoundIdByPolicy } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,16 @@ export default async function TournamentDetailsPage({ params }) {
 
   const isActive = tournament.status === 'active';
   const data = tournament.data || {};
+
+  // Determine initial round to show
+  let initialRoundId = null;
+  if (isActive) {
+    initialRoundId = await resolveRoundIdByPolicy('active_or_next');
+  } else if (fixtures && fixtures.length > 0) {
+    // For finished tournaments, find the last round in the fixtures
+    const sortedFixtures = [...fixtures].sort((a, b) => (b.round_id || 0) - (a.round_id || 0));
+    initialRoundId = sortedFixtures[0]?.round_id;
+  }
 
   return (
     <div>
@@ -96,7 +107,7 @@ export default async function TournamentDetailsPage({ params }) {
       )}
 
       <Section title="Resultados" delay={200} background="section-raised">
-        <TournamentFixtures fixtures={fixtures} />
+        <TournamentFixtures fixtures={fixtures} initialRoundId={initialRoundId} />
       </Section>
     </div>
   );
