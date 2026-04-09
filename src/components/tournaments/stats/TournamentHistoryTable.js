@@ -13,7 +13,8 @@ export function TournamentHistoryTable({ data, title, type = 'global' }) {
         key: 'points',
         label: 'Pts',
         align: 'center',
-        className: 'font-black text-indigo-400 font-display text-lg uppercase tracking-tight',
+        // Cambiado: se eliminó font-display, text-lg y uppercase
+        className: 'font-bold text-indigo-400',
         headerClassName: 'text-indigo-400',
         sortable: true,
       },
@@ -93,10 +94,7 @@ export function TournamentHistoryTable({ data, title, type = 'global' }) {
           const dif = pf - pc;
           return (
             <span
-              className={cn(
-                'font-display font-medium text-sm tracking-tight',
-                dif > 0 ? 'text-emerald-500' : 'text-rose-500'
-              )}
+              className={cn('font-medium', dif > 0 ? 'text-emerald-400/90' : 'text-rose-400/90')}
             >
               {dif > 0 ? '+' : ''}
               {dif}
