@@ -45,22 +45,28 @@ export default function OverpayerManagerCard({ data, onViewAll }) {
           ]}
         />
       )}
-      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
           <span className="text-sm font-black text-amber-400">
             +{formatEuro(item.total_overpay)}€
           </span>
-          <span className="text-[10px] text-zinc-500 font-bold">
-            {item.contested_wins} victorias
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+            {item.contested_wins} wins
           </span>
         </div>
       )}
-      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
+      renderRunnerUpMeta={() => null}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-amber-400">+{formatEuro(item.total_overpay)}€</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-amber-400">
+            +{formatEuro(item.total_overpay)}€
+          </span>
+          <span className="text-[10px] text-zinc-500 font-medium whitespace-nowrap">
+            ({item.contested_wins} wins)
+          </span>
+        </div>
       )}
-      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }
