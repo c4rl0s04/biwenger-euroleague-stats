@@ -327,8 +327,16 @@ function StatItemRow({ item, idx, statType }) {
     }
   }
   // --- CATEGORY: Transactions / Flips ---
-  else if (item.purchase_price && (item.sale_price || item.profit)) {
-    const profit = item.profit || (item.sale_price ? item.sale_price - item.purchase_price : 0);
+  else if (
+    item.purchase_price !== undefined &&
+    (item.sale_price !== undefined || item.profit !== undefined)
+  ) {
+    const profit =
+      item.profit !== undefined
+        ? item.profit
+        : item.sale_price
+          ? item.sale_price - item.purchase_price
+          : 0;
     valueLabel = profit >= 0 ? 'Beneficio' : 'Pérdida';
     valueText = `${formatEuro(Math.abs(profit))}€`;
 
@@ -360,16 +368,26 @@ function StatItemRow({ item, idx, statType }) {
       );
     }
   }
-  // --- CATEGORY: Revaluation ---
-  else if (item.purchase_price && (item.revaluation || item.devaluation)) {
-    const change = item.revaluation || item.devaluation;
-    valueLabel = change >= 0 ? 'Revalorización' : 'Depreciación';
-    valueText = `${formatEuro(Math.abs(change))}€`;
+  // --- CATEGORY: Revaluation / Percentage ---
+  else if (
+    item.revaluation !== undefined ||
+    item.devaluation !== undefined ||
+    item.percentage_gain !== undefined
+  ) {
+    if (item.percentage_gain !== undefined) {
+      valueLabel = 'Rentabilidad';
+      valueText = `+${item.percentage_gain.toFixed(0)}%`;
+    } else {
+      const change = item.revaluation !== undefined ? item.revaluation : item.devaluation;
+      valueLabel = change >= 0 ? 'Revalorización' : 'Depreciación';
+      valueText = `${formatEuro(Math.abs(change))}€`;
+    }
     valueSub = (
       <div className="flex items-center gap-2">
-        <span className="opacity-70">Compra:</span> {formatEuro(item.purchase_price)}€
+        <span className="opacity-70">Compra:</span> {formatEuro(item.purchase_price || 0)}€
         <span className="w-1 h-1 rounded-full bg-zinc-700" />
-        <span className="opacity-70">Actual:</span> {formatEuro(item.current_price || item.price)}€
+        <span className="opacity-70">Actual:</span>{' '}
+        {formatEuro(item.current_price || item.price || 0)}€
       </div>
     );
   }
