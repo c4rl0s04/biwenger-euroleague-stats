@@ -153,15 +153,11 @@ Production runs on **Vercel** (Next.js app) + **Supabase** (PostgreSQL). Docker/
 
 ---
 
-## Agent Skills
+## Agent Workflows
 
-Step-by-step workflows for the most common repetitive tasks live in `.agents/`:
+Master workflows for all core tasks live in the consolidated agent instruction file:
 
-| Skill                      | When to use                                                        |
-| -------------------------- | ------------------------------------------------------------------ |
-| `.agents/add-feature.md`   | New dashboard card end-to-end: query → service → route → component |
-| `.agents/add-sync-step.md` | New ETL sync step + mutation in the pipeline                       |
-| `.agents/add-db-query.md`  | New read query — includes domain→file mapping table                |
+- **[.agents/INSTRUCTIONS.md](file:///.agents/INSTRUCTIONS.md)**: Main SOP for new features, DB queries, and sync steps.
 
 ---
 
