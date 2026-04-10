@@ -170,20 +170,9 @@ npm test -- --run # Single run
 
 ---
 
-## 📚 Documentation
+## 📚 Documentation & Legal
 
-| Document                                               | Description                                            |
-| ------------------------------------------------------ | ------------------------------------------------------ |
-| [`docs/TECH_STACK.md`](./docs/TECH_STACK.md)           | Deep-dive into every technology choice and why         |
-| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)       | System architecture, data flow, and request lifecycle  |
-| [`docs/PATTERNS.md`](./docs/PATTERNS.md)               | Design patterns and software engineering methodologies |
-| [`docs/FEATURES.md`](./docs/FEATURES.md)               | Full feature catalogue                                 |
-| [`docs/DATA_SYNC.md`](./docs/DATA_SYNC.md)             | ETL pipeline guide                                     |
-| [`docs/API_INTEGRATION.md`](./docs/API_INTEGRATION.md) | External API integration reference                     |
-| [`CONTRIBUTING.md`](./CONTRIBUTING.md)                 | Development workflow                                   |
-
----
-
-## 📄 License
-
-MIT — see [LICENSE](LICENSE)
+- **Technical Reference**: See [`docs/`](./docs/) for Architecture, Tech Stack, and Engineering Patterns.
+- **Contributing**: Contributions are welcome. Please open an issue first to discuss major changes.
+- **Security**: Report vulnerabilities via private messaging. **Never commit your `.env` file.**
+- **License**: MIT — see [LICENSE](LICENSE)
