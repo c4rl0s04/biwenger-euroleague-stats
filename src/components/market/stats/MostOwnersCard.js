@@ -34,20 +34,21 @@ export default function MostOwnersCard({ player, onViewAll }) {
           </span>
         </div>
       )}
-      renderHeroStats={() => (
-        <HeroStatGroup stats={[{ label: 'Recurrencia', value: 'Alta rotación' }]} />
-      )}
-      renderHeroMeta={(item) => <ManagerPill user={item} />}
+      renderHeroStats={() => null}
+      renderHeroMeta={() => null}
       renderRunnerUpValue={(item) => (
         <span className="text-lg font-black text-purple-400">{item.distinct_owners_count}</span>
       )}
-      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
+      renderRunnerUpMeta={(item) => (
+        <div className="text-[10px] text-zinc-500 font-bold truncate mt-0.5">
+          {item.team_name || item.player_team}
+        </div>
+      )}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-purple-400">
           {item.distinct_owners_count} <span className="text-[10px]">eq.</span>
         </span>
       )}
-      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
   );
 }
