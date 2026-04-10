@@ -19,7 +19,6 @@ import MostOwnersCard from './stats/MostOwnersCard';
 import BestFlipCard from './stats/BestFlipCard';
 import WorstFlipCard from './stats/WorstFlipCard';
 import MissedOpportunityCard from './stats/MissedOpportunityCard';
-import TopTraderCard from './stats/TopTraderCard';
 import QuickflipCard from './stats/QuickflipCard';
 import LongestHoldCard from './stats/LongestHoldCard';
 import WorstRevaluationCard from './stats/WorstRevaluationCard';
@@ -60,7 +59,6 @@ import {
   Search,
   Stethoscope,
   Gem,
-  Repeat,
 } from 'lucide-react';
 
 export default function MarketPageClient() {
@@ -148,7 +146,7 @@ export default function MarketPageClient() {
 
       {/* Section: Transacciones */}
       <Section title="Transacciones Destacadas" delay={100} background="section-raised">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
           <RecordTransferCard
             data={marketStats.recordTransfer}
             onViewAll={() =>
@@ -185,19 +183,6 @@ export default function MarketPageClient() {
                 icon: Coins,
                 statType: 'user',
                 color: 'emerald',
-              })
-            }
-          />
-          <TopTraderCard
-            data={marketStats.topTrader}
-            onViewAll={() =>
-              handleOpenDrawer({
-                title: 'El Especulador',
-                subtitle: 'Managers con mayor volumen de operaciones (compra-venta)',
-                data: marketStats.topTrader,
-                icon: Repeat,
-                statType: 'user',
-                color: 'indigo',
               })
             }
           />
