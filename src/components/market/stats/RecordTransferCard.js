@@ -37,7 +37,6 @@ export default function RecordTransferCard({ data, onViewAll }) {
           stats={[
             {
               label: 'Comprador',
-              value: item.buyer_name || item.comprador,
               className: 'text-zinc-300',
             },
           ]}

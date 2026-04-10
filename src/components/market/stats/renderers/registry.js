@@ -181,13 +181,13 @@ export const METRIC_REGISTRY = {
       match: (item) => item.vendedor && item.comprador,
       label: 'Precio Traspaso',
       value: (item) => `${formatEuro(item.precio || item.price || 0)}€`,
-      sub: (item) => item.player_team || item.team || '',
+      sub: null, // Removed team as requested
       info: (item) => (
         <div className="flex items-center gap-1.5 mt-1.5 overflow-hidden">
           <span className={`text-[10px] font-black uppercase tracking-widest truncate ${
             item.vendedor === 'Mercado' || item.vendedor === 'Biwenger' 
               ? 'text-zinc-500' 
-              : getColorForUser(item.vendedor_id || item.seller_id, item.vendedor, item.vendedor_color_index).text
+              : getColorForUser(item.vendedor_id || item.seller_id, item.vendedor, item.vendedor_color_index || item.seller_color).text
           }`}>
             {item.vendedor}
           </span>
@@ -195,7 +195,7 @@ export const METRIC_REGISTRY = {
           <span className={`text-[10px] font-black uppercase tracking-widest truncate ${
             item.comprador === 'Mercado' || item.comprador === 'Biwenger' 
               ? 'text-zinc-500' 
-              : getColorForUser(item.comprador_id || item.buyer_id, item.comprador, item.comprador_color_index).text
+              : getColorForUser(item.comprador_id || item.buyer_id, item.comprador, item.comprador_color_index || item.buyer_color).text
           }`}>
             {item.comprador}
           </span>
