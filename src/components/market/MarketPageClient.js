@@ -14,7 +14,7 @@ import RecordBidCard from './stats/RecordBidCard';
 import BestSellerCard from './stats/BestSellerCard';
 import BestRevaluationCard from './stats/BestRevaluationCard';
 import BestValueCard from './stats/BestValueCard';
-import WorstValueCard from './stats/WorstValueCard';
+import InfirmaryCard from './stats/InfirmaryCard';
 import MostOwnersCard from './stats/MostOwnersCard';
 import BestFlipCard from './stats/BestFlipCard';
 import WorstFlipCard from './stats/WorstFlipCard';
@@ -58,7 +58,7 @@ import {
   Zap,
   Hourglass,
   Search,
-  Gem,
+  Stethoscope,
 } from 'lucide-react';
 
 export default function MarketPageClient() {
@@ -479,17 +479,17 @@ export default function MarketPageClient() {
                   })
                 }
               />
-              {marketStats.worstValue && (
-                <WorstValueCard
-                  player={marketStats.worstValue}
+              {marketStats.infirmary && (
+                <InfirmaryCard
+                  data={marketStats.infirmary}
                   onViewAll={() =>
                     handleOpenDrawer({
-                      title: 'El Ruinoso',
-                      subtitle: 'Peor relación puntos por millón',
-                      data: marketStats.worstValue,
-                      icon: AlertTriangle,
+                      title: 'La Enfermería',
+                      subtitle: 'Jugadores con mayor tasa de ausencias',
+                      data: marketStats.infirmary,
+                      icon: Stethoscope,
                       statType: 'player',
-                      color: 'red',
+                      color: 'rose',
                     })
                   }
                 />

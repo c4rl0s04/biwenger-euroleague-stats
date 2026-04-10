@@ -279,6 +279,20 @@ export interface InflatedPlayer {
   transfer_id: number;
 }
 
+export interface InfirmaryPlayer {
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  player_team: string | null;
+  user_id: number;
+  user_name: string;
+  user_color_index: number | null;
+  purchase_price: number;
+  available_rounds: number;
+  played_rounds: number;
+  missed_rounds: number;
+}
+
 export interface BidDuelUser {
   id: number;
   name: string;
@@ -1344,99 +1358,86 @@ export async function getBestValueDetails(transferId: number): Promise<BestValue
 }
 
 /**
- * Get Worst Value Deal (High Price / Low Points)
- * "El Flop"
- * - Same logic as Best Value but ordering by ASC
- * - Only considers players costing > 2M to identify true "flops"
+ * Get La Enfermería Players (Expensive players with most missed matches)
  */
-export async function getWorstValuePlayer(): Promise<BestValuePlayer[]> {
+export async function getInfirmaryPlayers(): Promise<InfirmaryPlayer[]> {
   const query = `
     WITH RoundStarts AS (
       SELECT round_id, MIN(date) as start_date
       FROM matches
       GROUP BY round_id
+    ),
+    TargetPlayers AS (
+      SELECT 
+        p.id as player_id,
+        p.name as player_name,
+        p.img as player_img,
+        p.team_id,
+        t.code as player_team,
+        u.id as user_id,
+        u.name as user_name,
+        u.color_index as user_color_index,
+        f.precio as purchase_price,
+        to_timestamp(f.timestamp) as signed_at
+      FROM players p
+      JOIN users u ON p.owner_id = u.id
+      LEFT JOIN teams t ON p.team_id = t.id
+      JOIN LATERAL (
+        SELECT precio, timestamp
+        FROM fichajes f2
+        WHERE f2.player_id = p.id
+          AND f2.comprador = u.name
+        ORDER BY timestamp DESC
+        LIMIT 1
+      ) f ON true
+      WHERE f.precio > 2000000
+    ),
+    TeamRounds AS (
+      SELECT 
+        tp.player_id,
+        count(DISTINCT m.round_id) as total_team_rounds
+      FROM TargetPlayers tp
+      JOIN matches m ON (m.home_id = tp.team_id OR m.away_id = tp.team_id)
+      WHERE m.date >= tp.signed_at::date
+        AND m.date < NOW()
+      GROUP BY tp.player_id
+    ),
+    PlayedRounds AS (
+      SELECT 
+        tp.player_id,
+        count(DISTINCT prs.round_id) as played_rounds
+      FROM TargetPlayers tp
+      JOIN player_round_stats prs ON prs.player_id = tp.player_id
+      JOIN RoundStarts rs ON rs.round_id = prs.round_id
+      WHERE rs.start_date >= tp.signed_at
+      GROUP BY tp.player_id
     )
     SELECT 
-      curr_owner.id as user_id,
-      curr_owner.name as user_name,
-      curr_owner.color_index as user_color_index,
-      
-      p.id as player_id,
-      p.name as player_name,
-      p.img as player_img,
-      t.code as player_team,
-      
-      f.id as transfer_id,
-      f.precio as purchase_price,
-      
-      -- Calculate total points earned in valid rounds (Owned BEFORE round start)
-      (
-        SELECT COALESCE(SUM(prs.fantasy_points), 0)
-        FROM player_round_stats prs
-        JOIN RoundStarts rs ON rs.round_id = prs.round_id
-        WHERE prs.player_id = p.id
-          -- Ownership must start BEFORE round lock
-          AND to_timestamp(f.timestamp) < rs.start_date
-          -- Must still own player when round starts
-          AND (
-             sale.timestamp IS NULL OR to_timestamp(sale.timestamp) > rs.start_date
-          )
-      ) as total_points,
-
-      -- Calculate Ratio
-      (
-        SELECT COALESCE(SUM(prs.fantasy_points), 0)
-        FROM player_round_stats prs
-        JOIN RoundStarts rs ON rs.round_id = prs.round_id
-        WHERE prs.player_id = p.id
-          AND to_timestamp(f.timestamp) < rs.start_date
-          AND (
-             sale.timestamp IS NULL OR to_timestamp(sale.timestamp) > rs.start_date
-          )
-      )::float * 1000000 / NULLIF(f.precio, 0) as points_per_million
-
-    FROM fichajes f
-    JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    JOIN users curr_owner ON f.comprador = curr_owner.name
-    
-    -- Find the next sale
-    LEFT JOIN LATERAL (
-        SELECT timestamp 
-        FROM fichajes s
-        WHERE s.player_id = f.player_id 
-          AND s.vendedor = f.comprador
-          AND s.timestamp > f.timestamp
-        ORDER BY s.timestamp ASC
-        LIMIT 1
-    ) sale ON true
-
-    WHERE f.precio > 2000000 -- Only expensive players
-      AND f.comprador != 'Mercado'
-      
-      -- Ensure player played in at least one VALID round where user had ownership
-      AND EXISTS (
-          SELECT 1
-          FROM player_round_stats prs
-          JOIN RoundStarts rs ON rs.round_id = prs.round_id
-          WHERE prs.player_id = p.id
-            AND to_timestamp(f.timestamp) < rs.start_date
-            AND (
-               sale.timestamp IS NULL OR to_timestamp(sale.timestamp) > rs.start_date
-            )
-      )
-
-    ORDER BY points_per_million ASC, purchase_price DESC
-    
+      tp.player_id,
+      tp.player_name,
+      tp.player_img,
+      tp.player_team,
+      tp.user_id,
+      tp.user_name,
+      tp.user_color_index,
+      tp.purchase_price,
+      COALESCE(tr.total_team_rounds, 0) as available_rounds,
+      COALESCE(pr.played_rounds, 0) as played_rounds,
+      (COALESCE(tr.total_team_rounds, 0) - COALESCE(pr.played_rounds, 0)) as missed_rounds
+    FROM TargetPlayers tp
+    LEFT JOIN TeamRounds tr ON tp.player_id = tr.player_id
+    LEFT JOIN PlayedRounds pr ON tp.player_id = pr.player_id
+    WHERE COALESCE(tr.total_team_rounds, 0) >= 3
+    ORDER BY missed_rounds DESC, available_rounds ASC;
   `;
+
   const result = await pgClient.query(query);
-  if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
-    total_points: parseInt(row.total_points),
     purchase_price: parseInt(row.purchase_price),
-    points_per_million: parseFloat(row.points_per_million),
-    transfer_id: row.transfer_id,
+    available_rounds: parseInt(row.available_rounds),
+    played_rounds: parseInt(row.played_rounds),
+    missed_rounds: parseInt(row.missed_rounds),
   }));
 }
 

@@ -1,17 +1,13 @@
 'use client';
 
-import { ThumbsDown } from 'lucide-react';
+import { Stethoscope } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
 import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { ManagerPill, ManagerName, HeroStatGroup } from './StatUIComponents';
 
-export default function WorstValueCard({ player, onViewAll }) {
-  if (!player || !Array.isArray(player) || player.length === 0) return null;
-
-  const formatNumber = (val) => {
-    return val?.toLocaleString('es-ES', { maximumFractionDigits: 1 });
-  };
+export default function InfirmaryCard({ data, onViewAll }) {
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const formatShortEuro = (val) => {
     if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
@@ -19,38 +15,45 @@ export default function WorstValueCard({ player, onViewAll }) {
     return val?.toLocaleString('es-ES');
   };
 
+  const calculateRate = (played, available) => {
+    if (!available) return 0;
+    return Math.round((played / available) * 100);
+  };
+
   return (
     <MarketPodiumCard
       onViewAll={onViewAll}
-      data={player}
-      title="El Flop"
-      icon={ThumbsDown}
-      color="red"
+      data={data}
+      title="La Enfermería"
+      icon={Stethoscope}
+      color="rose"
       info={
         <>
-          <TooltipHeader>El Flop</TooltipHeader>
+          <TooltipHeader>La Enfermería</TooltipHeader>
           <p>
-            Identifica a los jugadores caros (precio &gt; 2M) con la peor relación puntos/precio.
-            Representa las grandes decepciones de la temporada en términos de rendimiento por euro
-            invertido.
+            Identifica a los jugadores más propensos a faltar (ausencia de registro en el acta)
+            desde que fueron fichados. Solo considera jugadores con un coste superior a 2M€ y al
+            menos 3 jornadas en el equipo.
           </p>
         </>
       }
-      winnerLabel="LA DECEPCIÓN"
+      winnerLabel="EL MÁS AUSENTE"
       renderHeroValue={(item) => (
         <div className="flex flex-col items-center">
-          <span className="text-3xl font-black text-red-500">
-            {formatNumber(item.points_per_million)}
-          </span>
+          <span className="text-3xl font-black text-rose-500">{item.missed_rounds}</span>
           <span className="text-[11px] uppercase font-black tracking-widest text-zinc-500 mt-2">
-            PTS / MILLÓN €
+            AUSENCIAS
           </span>
         </div>
       )}
       renderHeroStats={(item) => (
         <HeroStatGroup
           stats={[
-            { label: 'Puntos', value: item.total_points },
+            {
+              label: 'Asistencia',
+              value: calculateRate(item.played_rounds, item.available_rounds),
+              suffix: '%',
+            },
             { label: 'Compra', value: formatShortEuro(item.purchase_price), suffix: '€' },
           ]}
         />
@@ -58,19 +61,16 @@ export default function WorstValueCard({ player, onViewAll }) {
       renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
         <div className="flex flex-col items-end">
-          <span className="text-lg font-black text-red-500">
-            {formatNumber(item.points_per_million)}
-          </span>
+          <span className="text-lg font-black text-rose-500">{item.missed_rounds}</span>
           <span className="text-[8px] text-zinc-500 font-bold -mt-1 uppercase tracking-tighter">
-            pts/M
+            ABS
           </span>
         </div>
       )}
       renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-rose-400">
-          {item.points_per_million?.toFixed(1)}{' '}
-          <span className="text-[10px] opacity-60">pts/M</span>
+          {item.missed_rounds} <span className="text-[10px] opacity-60 ml-0.5">abs</span>
         </span>
       )}
       renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}

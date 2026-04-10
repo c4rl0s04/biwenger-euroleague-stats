@@ -523,6 +523,22 @@ function StatItemRow({ item, idx, statType }) {
       </div>
     );
   }
+  // --- CATEGORY: La Enfermería (Infirmary) ---
+  else if (item.missed_rounds !== undefined) {
+    valueLabel = 'Ausencias';
+    valueText = `${item.missed_rounds}`;
+    const attendanceRate = item.available_rounds
+      ? Math.round((item.played_rounds / item.available_rounds) * 100)
+      : 0;
+
+    valueSub = (
+      <div className="flex items-center gap-2">
+        <span className="opacity-70">Asistencia:</span> {attendanceRate}%
+        <span className="w-1 h-1 rounded-full bg-zinc-700" />
+        <span className="opacity-70">Actas:</span> {item.played_rounds} / {item.available_rounds}
+      </div>
+    );
+  }
   // --- CATEGORY: Revaluation / Percentage ---
   else if (
     item.revaluation !== undefined ||
