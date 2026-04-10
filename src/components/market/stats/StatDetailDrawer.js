@@ -4,12 +4,18 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { X, TrendingUp, ArrowRight, Timer, Hourglass } from 'lucide-react';
+import { X, TrendingUp } from 'lucide-react';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { getColorForUser } from '@/lib/constants/colors';
 
 import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+
+// Import strategy-based renderers
+import PlayerStatRow from './renderers/PlayerStatRow';
+import UserStatRow from './renderers/UserStatRow';
+import TransactionStatRow from './renderers/TransactionStatRow';
+import TemporalStatRow from './renderers/TemporalStatRow';
 
 function getInitials(name) {
   if (!name) return '??';
@@ -336,484 +342,38 @@ export default function StatDetailDrawer({
 }
 
 function StatItemRow({ item, idx, statType }) {
-  // Common data resolution
-  const rank = idx + 1;
-  const isTop3 = rank <= 3;
+  // Strategy: Determine which specialized row to render based on data presence
 
-  // Resolve Value Label and Value
-  let valueLabel = '';
-  let valueText = '';
-  let valueSub = '';
-
-  // --- CATEGORY: Competitive / Rivalry / Financial Managers ---
+  // 1. Transactional / Transfer specific
   if (
-    item.stolen_count !== undefined ||
-    item.failed_bids_count !== undefined ||
+    item.price_diff !== undefined ||
     item.bid_count !== undefined ||
-    item.total_spent !== undefined ||
-    item.total_overpay !== undefined ||
-    item.price_diff !== undefined
+    (item.vendedor && item.comprador)
   ) {
-    if (item.total_spent !== undefined) {
-      valueLabel = 'Gasto Total';
-      valueText = `${formatEuro(item.total_spent)}€`;
-      valueSub = `${item.purchases_count || 0} compras realizadas`;
-    } else if (item.total_overpay !== undefined) {
-      valueLabel = 'Sobrepago Total';
-      valueText = `+${formatEuro(item.total_overpay)}€`;
-      valueSub = `${item.contested_wins || 0} victorias en subasta`;
-    } else if (item.bid_count !== undefined) {
-      valueLabel = 'Pujas';
-      valueText = item.bid_count;
-      valueSub = `Precio Traspaso: ${formatEuro(item.precio)}€`;
-    } else if (item.stolen_count !== undefined) {
-      valueLabel = 'Jugadores Robados';
-      valueText = item.stolen_count;
-      valueSub = `${item.total_spent ? formatEuro(item.total_spent) + '€ invertidos' : 'Al acecho'}`;
-    } else if (item.failed_bids_count !== undefined) {
-      valueLabel = 'Jugadores Perdidos';
-      valueText = item.failed_bids_count;
-      valueSub = 'Víctima de pujas ajustadas';
-    } else if (item.price_diff !== undefined) {
-      valueLabel = 'Margen de Victoria';
-      valueText = `+${formatEuro(item.price_diff)}€`;
-      valueSub = (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span
-              className={`text-[10px] font-black uppercase tracking-tight ${
-                getColorForUser(item.winner_id, item.winner, item.winner_color).text
-              }`}
-            >
-              {item.winner}
-            </span>
-            <span className="text-[9px] text-zinc-400 font-bold uppercase">le robó a</span>
-            <span
-              className={`text-[10px] font-black uppercase tracking-tight ${
-                getColorForUser(
-                  item.second_bidder_id,
-                  item.second_bidder_name,
-                  item.second_bidder_color
-                ).text
-              }`}
-            >
-              {item.second_bidder_name || 'otro manager'}
-            </span>
-          </div>
-        </div>
-      );
-    }
+    return <TransactionStatRow item={item} idx={idx} statType={statType} />;
   }
-  // --- CATEGORY: Time-based (Hold / Quickflip) ---
-  else if (item.hours_held !== undefined || item.days_held !== undefined) {
-    if (item.hours_held !== undefined) {
-      const formatTime = (hours) => {
-        if (hours < 1) return `${Math.round(hours * 60)}m`;
-        if (hours < 24) return `${hours.toFixed(1)}h`;
-        return `${(hours / 24).toFixed(1)}d`;
-      };
-      valueLabel = 'Beneficio Quickflip';
-      valueText = `+${formatEuro(item.profit || 0)}€`;
-      valueSub = (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-orange-400 font-bold">
-            <Timer className="w-3.5 h-3.5" />
-            {formatTime(item.hours_held)} de posesión
-          </div>
-          <div className="flex items-center gap-2 opacity-70 text-[10px]">
-            Compra: {formatEuro(item.purchase_price || 0)}€
-            <span className="w-1 h-1 rounded-full bg-zinc-700" />
-            Venta: {formatEuro(item.sale_price || 0)}€
-          </div>
-        </div>
-      );
-    } else {
-      valueLabel = 'Beneficio Realizado';
-      valueText = `+${formatEuro(item.profit || 0)}€`;
-      valueSub = (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-teal-400 font-bold">
-            <Hourglass className="w-3.5 h-3.5" />
-            {Math.floor(item.days_held)} días en plantilla
-          </div>
-        </div>
-      );
-    }
-  }
-  // --- CATEGORY: Transactions / Flips ---
-  else if (
-    item.purchase_price !== undefined &&
-    (item.sale_price !== undefined || item.profit !== undefined)
+
+  // 2. Temporal / Hold-time based
+  if (
+    item.hours_held !== undefined ||
+    item.days_held !== undefined ||
+    (item.purchase_price !== undefined && item.sale_price !== undefined)
   ) {
-    const profit =
-      item.profit !== undefined
-        ? item.profit
-        : item.sale_price
-          ? item.sale_price - item.purchase_price
-          : 0;
-    valueLabel = profit >= 0 ? 'Beneficio' : 'Pérdida';
-    valueText = `${formatEuro(Math.abs(profit))}€`;
+    return <TemporalStatRow item={item} idx={idx} statType={statType} />;
+  }
 
-    if (item.team_name && item.team_logo) {
-      valueSub = (
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-1.5 overflow-hidden">
-            <img
-              src={item.team_logo}
-              alt={item.team_name}
-              className="w-3.5 h-3.5 object-contain shrink-0"
-            />
-            <span className="truncate">{item.team_name}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="opacity-70">C:</span> {formatEuro(item.purchase_price)}€
-            <span className="w-1 h-1 rounded-full bg-zinc-700" />
-            <span className="opacity-70">V:</span> {formatEuro(item.sale_price)}€
-          </div>
-        </div>
-      );
-    } else {
-      valueSub = (
-        <div className="flex items-center gap-2">
-          <span className="opacity-70">C:</span> {formatEuro(item.purchase_price)}€
-          <span className="w-1 h-1 rounded-full bg-zinc-700" />
-          <span className="opacity-70">V:</span> {formatEuro(item.sale_price)}€
-        </div>
-      );
-    }
-  }
-  // --- CATEGORY: Market Activity (Deseado / Inquieto) ---
-  else if (item.transfer_count !== undefined || item.distinct_owners_count !== undefined) {
-    const isTransfer = item.transfer_count !== undefined;
-    valueLabel = isTransfer ? 'Total Fichajes' : 'Propietarios';
-    valueText = isTransfer ? item.transfer_count : item.distinct_owners_count;
-
-    if (item.avg_price) {
-      valueSub = (
-        <div className="flex items-center gap-2">
-          <span className="opacity-70">Desembolso Medio:</span> {formatEuro(item.avg_price)}€
-        </div>
-      );
-    } else if (item.team_name && item.team_logo) {
-      valueSub = (
-        <div className="flex items-center gap-1.5 overflow-hidden">
-          <img
-            src={item.team_logo}
-            alt={item.team_name}
-            className="w-3.5 h-3.5 object-contain shrink-0"
-          />
-          <span className="truncate">{item.team_name}</span>
-        </div>
-      );
-    }
-  }
-  // --- CATEGORY: Inflation ---
-  else if (item.inflation !== undefined) {
-    valueLabel = 'Sobreprecio';
-    valueText = `+${formatEuro(item.inflation)}€`;
-
-    valueSub = (
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2 mt-1">
-          <span className="opacity-70">P:</span> {formatEuro(item.purchase_price)}€
-          <span className="w-1 h-1 rounded-full bg-zinc-700" />
-          <span className="opacity-70">V. Mercado:</span> {formatEuro(item.market_price)}€
-        </div>
-      </div>
-    );
-  }
-  // --- CATEGORY: La Enfermería (Infirmary) ---
-  else if (item.missed_rounds !== undefined) {
-    valueLabel = 'Ausencias';
-    valueText = `${item.missed_rounds}`;
-    const attendanceRate = item.available_rounds
-      ? Math.round((item.played_rounds / item.available_rounds) * 100)
-      : 0;
-
-    valueSub = (
-      <div className="flex items-center gap-2">
-        <span className="opacity-70">Asistencia:</span> {attendanceRate}%
-        <span className="w-1 h-1 rounded-full bg-zinc-700" />
-        <span className="opacity-70">Actas:</span> {item.played_rounds} / {item.available_rounds}
-      </div>
-    );
-  }
-  // --- CATEGORY: Revaluation / Percentage ---
-  else if (
-    item.revaluation !== undefined ||
-    item.devaluation !== undefined ||
-    item.percentage_gain !== undefined
-  ) {
-    if (item.percentage_gain !== undefined) {
-      valueLabel = 'Rentabilidad';
-      valueText = `+${item.percentage_gain.toFixed(0)}%`;
-    } else {
-      const change = item.revaluation !== undefined ? item.revaluation : item.devaluation;
-      valueLabel = change >= 0 ? 'Revalorización' : 'Depreciación';
-      valueText = `${formatEuro(Math.abs(change))}€`;
-    }
-    valueSub = (
-      <div className="flex items-center gap-2">
-        <span className="opacity-70">Compra:</span> {formatEuro(item.purchase_price || 0)}€
-        <span className="w-1 h-1 rounded-full bg-zinc-700" />
-        <span className="opacity-70">Actual:</span>{' '}
-        {formatEuro(item.current_price || item.price || 0)}€
-      </div>
-    );
-  }
-  // --- CATEGORY: Missed Opportunity (Impaciente) ---
-  else if (item.missed_profit !== undefined) {
-    valueLabel = 'Beneficio Perdido';
-    valueText = `${formatEuro(item.missed_profit)}€`;
-    valueSub = (
-      <div className="flex items-center gap-2">
-        <span className="opacity-70">Venta:</span> {formatEuro(item.sale_price || 0)}€
-        <span className="w-1 h-1 rounded-full bg-zinc-700" />
-        <span className="opacity-70">Actual:</span> {formatEuro(item.current_price || 0)}€
-      </div>
-    );
-  }
-  // --- CATEGORY: Overpayment (Sobrepagador / Inflado) ---
-  else if (item.total_overpay !== undefined || item.total_inflation !== undefined) {
-    const isInflation = item.total_inflation !== undefined;
-    valueLabel = isInflation ? 'Sobreprecio Total' : 'Sobrepago Total';
-    valueText = `${formatEuro(item.total_inflation || item.total_overpay)}€`;
-    valueSub = isInflation
-      ? `${item.trade_count} compras sobre mercado`
-      : `${item.contested_wins} victorias en subasta`;
-  }
-  // --- CATEGORY: User Totals / Sellers ---
-  else if (
+  // 3. User / Manager Totals
+  if (
     item.total_spent !== undefined ||
     item.net_profit !== undefined ||
-    item.total_profit !== undefined
+    item.total_profit !== undefined ||
+    item.stolen_count !== undefined ||
+    item.failed_bids_count !== undefined ||
+    item.trade_count !== undefined
   ) {
-    if (item.total_spent !== undefined) {
-      valueLabel = 'Inversión Total';
-      valueText = `${formatEuro(item.total_spent)}€`;
-      valueSub = `${item.purchases_count} fichajes realizados`;
-    } else {
-      const profit = item.net_profit || item.total_profit || 0;
-      valueLabel = 'Plusvalías Totales';
-      valueText = `${formatEuro(profit)}€`;
-      valueSub = item.total_sales
-        ? `${formatEuro(item.total_sales)}€ en ventas (${item.sales_count} ops)`
-        : `${item.trade_count || item.sales_count || 0} operaciones`;
-    }
-  }
-  // --- CATEGORY: Performance / Value ---
-  else if (item.points_per_million !== undefined) {
-    valueLabel = 'Puntos / Millón';
-    valueText = item.points_per_million.toFixed(2);
-    valueSub = `${item.total_points} puntos totales`;
-  }
-  // --- CATEGORY: Generic / Transfer Record ---
-  else {
-    // We use our imported formatter, usually non-compact for drawer details
-    const fv = (val) => formatEuro(val || 0, false);
-    const fp = (val) => `${fv(val)}€`;
-    valueLabel = item.precio ? 'Precio Traspaso' : 'Valor';
-    valueText = `${formatEuro(mainVal)}€`;
-
-    if (item.team_name && item.team_logo) {
-      valueSub = (
-        <div className="flex items-center gap-1.5 overflow-hidden">
-          <img
-            src={item.team_logo}
-            alt={item.team_name}
-            className="w-3.5 h-3.5 object-contain shrink-0"
-          />
-          <span className="truncate">{item.team_name}</span>
-        </div>
-      );
-    } else {
-      valueSub = item.player_team || item.team || item.player_name || '';
-    }
+    return <UserStatRow item={item} idx={idx} statType={statType} />;
   }
 
-  // Resolve Primary Subject Identity
-  const isUser = statType === 'user' || (!item.player_id && (item.id || item.user_id));
-  const imageSrc =
-    item.player_img || item.user_img || item.icon || item.buyer_icon || item.img || item.image;
-  const name = item.player_name || item.user_name || item.name || item.buyer_name;
-  const linkId = item.id || item.user_id || item.buyer_id || item.player_id;
-  const linkPath = isUser ? `/user/${linkId}` : `/player/${item.player_id || item.id}`;
-
-  const resolvedColorIndex = [
-    item.color_index,
-    item.user_color_index,
-    item.buyer_color,
-    item.user_color,
-  ].find((v) => v !== undefined && v !== null);
-
-  const primaryColor = isUser
-    ? getColorForUser(linkId, name, resolvedColorIndex)
-    : { text: 'text-white group-hover:text-primary' };
-
-  // Resolve Secondary Manager Identity (for players/transactions)
-  const managerName =
-    item.user_name ||
-    item.owner_name ||
-    item.buyer_name ||
-    item.comprador ||
-    item.vendedor ||
-    item.winner ||
-    null;
-
-  const managerId =
-    item.user_id ||
-    item.owner_id ||
-    item.comprador_id ||
-    item.buyer_id ||
-    item.vendedor_id ||
-    item.winner_id;
-
-  const managerColorIndex = [
-    item.user_color_index,
-    item.color_index,
-    item.buyer_color,
-    item.buyer_color_index,
-    item.owner_color_index,
-    item.comprador_color_index,
-    item.vendedor_color_index,
-    item.winner_color_index,
-    item.bidder_color_index,
-  ].find((v) => v !== undefined && v !== null);
-
-  const secondaryColor =
-    !isUser && managerName && managerId
-      ? getColorForUser(managerId, managerName, managerColorIndex)
-      : { text: 'text-zinc-500' };
-
-  // --- Theme Resolution (Owner-based) ---
-  // For transactions, the purchaser (comprador or winner) defines the background, if available.
-  // For players/users, or transactions lacking a specific 'comprador', the owner/user themselves defines it.
-  const themeUserId =
-    statType === 'transaction'
-      ? item.winner_id || item.comprador_id || item.buyer_id || linkId
-      : linkId;
-  const themeUserName =
-    statType === 'transaction' ? item.winner || item.comprador || item.buyer_name || name : name;
-  const themeColorIndex =
-    statType === 'transaction'
-      ? (item.winner_color_index ??
-        item.winner_color ??
-        item.comprador_color_index ??
-        item.buyer_color ??
-        item.buyer_color_index ??
-        resolvedColorIndex)
-      : resolvedColorIndex;
-
-  const isMercadoTheme =
-    themeUserName === 'Mercado' || themeUserName === 'Biwenger' || !themeUserId;
-  const themeColor = !isMercadoTheme
-    ? getColorForUser(themeUserId, themeUserName, themeColorIndex)
-    : null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.1 + idx * 0.02 }}
-    >
-      <Link
-        href={linkPath}
-        className={`group flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${
-          secondaryColor.bg && managerId
-            ? `bg-gradient-to-br ${secondaryColor.bg} ${secondaryColor.border} bg-opacity-10 border-opacity-20`
-            : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] hover:border-white/10'
-        }`}
-      >
-        {/* Rank */}
-        <div
-          className={`w-8 font-black italic text-xl tabular-nums text-center ${isTop3 ? 'text-primary' : 'text-zinc-400'}`}
-        >
-          {rank}
-        </div>
-
-        {/* Media */}
-        <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/5 overflow-hidden shrink-0 relative">
-          <PlayerImage
-            src={imageSrc}
-            name={name}
-            width={48}
-            height={48}
-            className={`w-full h-full object-cover ${!isUser ? 'object-top scale-[1.35] translate-y-1.5' : 'object-center'}`}
-          />
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-col">
-            <h4
-              className={`font-black uppercase tracking-tight truncate leading-tight transition-colors ${primaryColor.text}`}
-            >
-              {name}
-            </h4>
-            {isUser ? (
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
-                Manager
-              </span>
-            ) : item.vendedor && item.comprador ? (
-              <div className="flex items-center gap-2 mt-1.5 overflow-hidden">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span
-                    className={`text-[10px] font-black uppercase tracking-widest truncate ${
-                      item.vendedor === 'Mercado' || item.vendedor === 'Biwenger'
-                        ? 'text-zinc-500'
-                        : getColorForUser(
-                            item.vendedor_id || item.seller_id,
-                            item.vendedor || item.seller_name,
-                            item.vendedor_color_index ?? item.seller_color
-                          ).text
-                    }`}
-                  >
-                    {item.vendedor}
-                  </span>
-                  <ArrowRight size={10} className="text-zinc-700 shrink-0" />
-                  <span
-                    className={`text-[10px] font-black uppercase tracking-widest truncate ${
-                      item.comprador === 'Mercado' || item.comprador === 'Biwenger'
-                        ? 'text-zinc-500'
-                        : getColorForUser(
-                            item.comprador_id || item.buyer_id,
-                            item.comprador || item.buyer_name,
-                            item.comprador_color_index ?? item.buyer_color
-                          ).text
-                    }`}
-                  >
-                    {item.comprador}
-                  </span>
-                </div>
-              </div>
-            ) : item.price_diff !== undefined ||
-              ((item.transfer_count !== undefined || item.distinct_owners_count !== undefined) &&
-                !managerName) ? null : (
-              <span
-                className={`text-[10px] font-black uppercase tracking-widest mt-1 ${secondaryColor.text}`}
-              >
-                {managerName || 'Sin Dueño'}
-              </span>
-            )}
-          </div>
-          <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-2 border-l border-white/10 pl-2">
-            {valueSub}
-          </div>
-        </div>
-
-        {/* Value */}
-        <div className="text-right shrink-0">
-          <div className="text-sm font-black text-white leading-none">{valueText}</div>
-          <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1.5">
-            {valueLabel}
-          </div>
-        </div>
-
-        <ArrowRight
-          size={14}
-          className="text-zinc-800 group-hover:text-primary transition-colors ml-1"
-        />
-      </Link>
-    </motion.div>
-  );
+  // 4. Default to Player (Activiy, Inflation, Infirmary, Revaluation, Points)
+  return <PlayerStatRow item={item} idx={idx} statType={statType} />;
 }
