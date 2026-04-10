@@ -7,9 +7,7 @@ import PlayerImage from '@/components/ui/PlayerImage';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/constants/colors';
 
-function formatEuro(value) {
-  return new Intl.NumberFormat('es-ES').format(Math.round(value || 0));
-}
+import { formatEuro } from '@/lib/utils/currency';
 
 function formatDate(value) {
   if (!value) return 'Fecha no disponible';

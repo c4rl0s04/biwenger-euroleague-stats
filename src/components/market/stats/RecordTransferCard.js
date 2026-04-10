@@ -7,12 +7,12 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function RecordTransferCard({ record, onViewAll }) {
-  if (!record || !Array.isArray(record) || record.length === 0) return null;
+export default function RecordTransferCard({ data, onViewAll }) {
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
-      data={record}
+      data={data}
       onViewAll={onViewAll}
       title="Récord Histórico"
       icon={TrendingUp}

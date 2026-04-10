@@ -13,13 +13,7 @@ function getCellColor(record) {
   return 'bg-zinc-700/30 text-zinc-200 border-zinc-700/40';
 }
 
-function formatEuro(value) {
-  if (!value) return '0';
-  const abs = Math.abs(value);
-  if (abs >= 1000000) return (abs / 1000000).toFixed(1) + 'M';
-  if (abs >= 1000) return (abs / 1000).toFixed(0) + 'k';
-  return Math.round(abs).toLocaleString('es-ES');
-}
+import { formatEuro } from '@/lib/utils/currency';
 
 export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDuel }) {
   const [hoveredCell, setHoveredCell] = useState(null);

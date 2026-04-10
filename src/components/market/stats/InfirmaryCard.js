@@ -9,12 +9,6 @@ import { ManagerPill, ManagerName, HeroStatGroup } from './StatUIComponents';
 export default function InfirmaryCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
-  const formatShortEuro = (val) => {
-    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
-    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
-    return val?.toLocaleString('es-ES');
-  };
-
   const calculateRate = (played, available) => {
     if (!available) return 0;
     return Math.round((played / available) * 100);
@@ -54,7 +48,7 @@ export default function InfirmaryCard({ data, onViewAll }) {
               value: calculateRate(item.played_rounds, item.available_rounds),
               suffix: '%',
             },
-            { label: 'Compra', value: formatShortEuro(item.purchase_price), suffix: '€' },
+            { label: 'Compra', value: formatEuro(item.purchase_price, true), suffix: '€' },
           ]}
         />
       )}

@@ -5,13 +5,13 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerName, ManagerPill } from './StatUIComponents';
 
-export default function MostOwnersCard({ player, onViewAll }) {
-  if (!player || !Array.isArray(player) || player.length === 0) return null;
+export default function MostOwnersCard({ data, onViewAll }) {
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
       onViewAll={onViewAll}
-      data={player}
+      data={data}
       title="El Inquieto"
       icon={Briefcase}
       color="purple"

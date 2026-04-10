@@ -6,7 +6,7 @@
  * @returns {string} Formatted string
  */
 export function formatEuro(value: number | null | undefined, compact: boolean = true): string {
-  if (value === null || value === undefined) return '0 €';
+  if (value === null || value === undefined) return '0';
 
   const abs = Math.abs(value);
   let result = '';

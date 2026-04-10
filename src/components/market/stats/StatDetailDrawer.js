@@ -8,9 +8,8 @@ import { X, TrendingUp, ArrowRight, Timer, Hourglass } from 'lucide-react';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { getColorForUser } from '@/lib/constants/colors';
 
-function formatEuro(value) {
-  return new Intl.NumberFormat('es-ES').format(Math.round(value || 0));
-}
+import { formatEuro } from '@/lib/utils/currency';
+import { TooltipHeader } from '@/components/ui/Tooltip';
 
 function getInitials(name) {
   if (!name) return '??';
@@ -610,8 +609,9 @@ function StatItemRow({ item, idx, statType }) {
   }
   // --- CATEGORY: Generic / Transfer Record ---
   else {
-    const mainVal =
-      item.precio || item.price || item.purchase_price || item.total_spent || item.value || 0;
+    // We use our imported formatter, usually non-compact for drawer details
+    const fv = (val) => formatEuro(val || 0, false);
+    const fp = (val) => `${fv(val)}€`;
     valueLabel = item.precio ? 'Precio Traspaso' : 'Valor';
     valueText = `${formatEuro(mainVal)}€`;
 

@@ -59,6 +59,8 @@ import {
   Hourglass,
   Search,
   Stethoscope,
+  Gem,
+  Repeat,
 } from 'lucide-react';
 
 export default function MarketPageClient() {
@@ -146,9 +148,9 @@ export default function MarketPageClient() {
 
       {/* Section: Transacciones */}
       <Section title="Transacciones Destacadas" delay={100} background="section-raised">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
           <RecordTransferCard
-            record={marketStats.recordTransfer}
+            data={marketStats.recordTransfer}
             onViewAll={() =>
               handleOpenDrawer({
                 title: 'Récord de Traspasos',
@@ -161,7 +163,7 @@ export default function MarketPageClient() {
             }
           />
           <BigSpenderCard
-            spender={marketStats.bigSpender}
+            data={marketStats.bigSpender}
             onViewAll={() =>
               handleOpenDrawer({
                 title: 'Los Grandes Gastadores',
@@ -174,7 +176,7 @@ export default function MarketPageClient() {
             }
           />
           <BestSellerCard
-            seller={marketStats.bestSeller}
+            data={marketStats.bestSeller}
             onViewAll={() =>
               handleOpenDrawer({
                 title: 'Los Mejores Vendedores',
@@ -183,6 +185,19 @@ export default function MarketPageClient() {
                 icon: Coins,
                 statType: 'user',
                 color: 'emerald',
+              })
+            }
+          />
+          <TopTraderCard
+            data={marketStats.topTrader}
+            onViewAll={() =>
+              handleOpenDrawer({
+                title: 'El Especulador',
+                subtitle: 'Managers con mayor volumen de operaciones (compra-venta)',
+                data: marketStats.topTrader,
+                icon: Repeat,
+                statType: 'user',
+                color: 'indigo',
               })
             }
           />
@@ -196,7 +211,7 @@ export default function MarketPageClient() {
           <Subheading title="Ganancias" subtitle="Las mejores operaciones y plusvalías" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             <BestFlipCard
-              flip={marketStats.bestFlip}
+              data={marketStats.bestFlip}
               onViewAll={() =>
                 handleOpenDrawer({
                   title: 'El Pelotazo',
@@ -235,7 +250,7 @@ export default function MarketPageClient() {
               }
             />
             <BestValueCard
-              player={marketStats.bestValue}
+              data={marketStats.bestValue}
               onViewAll={() =>
                 handleOpenDrawer({
                   title: 'Relación Calidad/Precio',
@@ -255,7 +270,7 @@ export default function MarketPageClient() {
           <Subheading title="Pérdidas" subtitle="Las peores operaciones y oportunidades perdidas" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
             <WorstFlipCard
-              flip={marketStats.worstFlip}
+              data={marketStats.worstFlip}
               onViewAll={() =>
                 handleOpenDrawer({
                   title: 'El Fiasco',
@@ -413,7 +428,7 @@ export default function MarketPageClient() {
             />
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
               <RecordBidCard
-                record={marketStats.recordBid}
+                data={marketStats.recordBid}
                 onViewAll={() =>
                   handleOpenDrawer({
                     title: 'La Puja Récord',
@@ -439,7 +454,7 @@ export default function MarketPageClient() {
                 }
               />
               <TopTransferredCard
-                player={marketStats.topPlayer}
+                data={marketStats.topPlayer}
                 onViewAll={() =>
                   handleOpenDrawer({
                     title: 'El Más Deseado',
@@ -453,7 +468,7 @@ export default function MarketPageClient() {
                 }
               />
               <MostOwnersCard
-                player={marketStats.mostOwners}
+                data={marketStats.mostOwners}
                 onViewAll={() =>
                   handleOpenDrawer({
                     title: 'El Inquieto',

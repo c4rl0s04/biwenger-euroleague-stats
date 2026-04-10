@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { formatEuro } from '@/lib/utils/currency';
 import {
   ArrowRight,
   Search,
@@ -88,7 +89,7 @@ export default function LiveMarketTable({ initialData }) {
     }
   };
 
-  const formatEuro = (val) => val.toLocaleString('es-ES', { maximumFractionDigits: 0 });
+  // Local formatEuro removed in favor of global utility
 
   return (
     <ElegantCard
@@ -316,7 +317,7 @@ export default function LiveMarketTable({ initialData }) {
 
                           {/* Precio */}
                           <TableCell align="right" className="tabular-nums">
-                            {formatEuro(t.precio)}{' '}
+                            {formatEuro(t.precio, false)}{' '}
                             <span className="text-[10px] opacity-50 ml-0.5">€</span>
                           </TableCell>
                         </TableRow>

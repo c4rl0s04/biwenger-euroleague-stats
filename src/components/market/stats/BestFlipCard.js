@@ -6,19 +6,13 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 
-export default function BestFlipCard({ flip, onViewAll }) {
-  if (!flip || !Array.isArray(flip) || flip.length === 0) return null;
-
-  const formatShortEuro = (val) => {
-    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
-    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
-    return val?.toLocaleString('es-ES');
-  };
+export default function BestFlipCard({ data, onViewAll }) {
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
       onViewAll={onViewAll}
-      data={flip}
+      data={data}
       title="El Pelotazo"
       icon={Rocket}
       color="emerald"
@@ -35,27 +29,27 @@ export default function BestFlipCard({ flip, onViewAll }) {
       winnerLabel="EL PELOTAZO"
       renderHeroValue={(item) => (
         <span className="text-3xl font-black text-emerald-400">
-          +{formatShortEuro(item.profit)}€
+          +{formatEuro(item.profit, true)}€
         </span>
       )}
       renderHeroStats={(item) => (
         <HeroStatGroup
           stats={[
-            { label: 'Compra', value: formatShortEuro(item.purchase_price), suffix: '€' },
-            { label: 'Venta', value: formatShortEuro(item.sale_price), suffix: '€' },
+            { label: 'Compra', value: formatEuro(item.purchase_price, true), suffix: '€' },
+            { label: 'Venta', value: formatEuro(item.sale_price, true), suffix: '€' },
           ]}
         />
       )}
       renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
         <span className="text-sm font-black text-emerald-400">
-          +{formatShortEuro(item.profit)}€
+          +{formatEuro(item.profit, true)}€
         </span>
       )}
       renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
         <span className="text-xs font-bold text-emerald-400/80">
-          +{formatShortEuro(item.profit)}€
+          +{formatEuro(item.profit, true)}€
         </span>
       )}
       renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}

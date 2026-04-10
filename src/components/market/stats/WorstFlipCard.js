@@ -6,20 +6,13 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function WorstFlipCard({ flip, onViewAll }) {
-  if (!flip || !Array.isArray(flip) || flip.length === 0) return null;
-
-  const formatShortEuro = (val) => {
-    const absVal = Math.abs(val);
-    if (absVal >= 1000000) return (absVal / 1000000).toFixed(1) + 'M';
-    if (absVal >= 1000) return (absVal / 1000).toFixed(0) + 'k';
-    return absVal?.toLocaleString('es-ES');
-  };
+export default function WorstFlipCard({ data, onViewAll }) {
+  if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
       onViewAll={onViewAll}
-      data={flip}
+      data={data}
       title="El Fiasco"
       icon={TrendingDown}
       color="red"
@@ -34,23 +27,23 @@ export default function WorstFlipCard({ flip, onViewAll }) {
       }
       winnerLabel="EL FIASCO"
       renderHeroValue={(item) => (
-        <span className="text-3xl font-black text-rose-400">-{formatShortEuro(item.profit)}€</span>
+        <span className="text-3xl font-black text-rose-400">-{formatEuro(item.profit, true)}€</span>
       )}
       renderHeroStats={(item) => (
         <HeroStatGroup
           stats={[
-            { label: 'Compra', value: formatShortEuro(item.purchase_price), suffix: '€' },
-            { label: 'Venta', value: formatShortEuro(item.sale_price), suffix: '€' },
+            { label: 'Compra', value: formatEuro(item.purchase_price, true), suffix: '€' },
+            { label: 'Venta', value: formatEuro(item.sale_price, true), suffix: '€' },
           ]}
         />
       )}
       renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
-        <span className="text-sm font-black text-rose-400">-{formatShortEuro(item.profit)}€</span>
+        <span className="text-sm font-black text-rose-400">-{formatEuro(item.profit, true)}€</span>
       )}
       renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-rose-400">-{formatShortEuro(item.profit)}€</span>
+        <span className="text-xs font-bold text-rose-400">-{formatEuro(item.profit, true)}€</span>
       )}
       renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
