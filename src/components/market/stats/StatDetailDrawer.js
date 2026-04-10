@@ -244,129 +244,118 @@ export default function StatDetailDrawer({
               </div>
             </div>
 
-            {/* Manager Filter Bar - Initial Palette Style */}
+            {/* Manager Filter Bar & Summary Metric */}
             {showFilters &&
               allUsers.length > 0 &&
               (statType === 'player' || statType === 'transaction') && (
-                <div className="px-8 py-5 border-b border-white/5 bg-zinc-950/20">
-                  <div className="flex flex-wrap items-center gap-3">
-                    {/* "Todos" Icon */}
-                    <button
-                      onClick={() => setSelectedManagerId(null)}
-                      className={`w-11 h-11 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border-2 flex items-center justify-center relative cursor-pointer ${
-                        selectedManagerId === null
-                          ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.1)] scale-110 z-10'
-                          : 'bg-zinc-900/40 text-zinc-500 border-white/5 hover:bg-white/5 hover:border-white/10'
-                      }`}
-                      title="Todos los Managers"
-                    >
-                      ALL
-                    </button>
+                <div className="px-8 py-5 border-b border-white/5 bg-zinc-950/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* "Todos" Icon */}
+                      <button
+                        onClick={() => setSelectedManagerId(null)}
+                        className={`w-11 h-11 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border-2 flex items-center justify-center relative cursor-pointer ${
+                          selectedManagerId === null
+                            ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.1)] scale-110 z-10'
+                            : 'bg-zinc-900/40 text-zinc-500 border-white/5 hover:bg-white/5 hover:border-white/10'
+                        }`}
+                        title="Todos los Managers"
+                      >
+                        ALL
+                      </button>
 
-                    {/* Manager Icons */}
-                    {allUsers.map((user) => {
-                      const uColor = getColorForUser(user.id, user.name, user.color_index);
-                      const isSelected = selectedManagerId === user.id;
+                      {/* Manager Icons */}
+                      {allUsers.map((user) => {
+                        const uColor = getColorForUser(user.id, user.name, user.color_index);
+                        const isSelected = selectedManagerId === user.id;
 
-                      return (
-                        <button
-                          key={user.id}
-                          onClick={() => setSelectedManagerId(user.id)}
-                          className={`w-11 h-11 rounded-full text-[11px] font-black uppercase transition-all shrink-0 flex items-center justify-center border-2 overflow-hidden relative cursor-pointer ${
-                            isSelected
-                              ? `${uColor.border.replace('border-', 'border-opacity-100 border-')} shadow-[0_0_15px_rgba(0,0,0,0.4)] scale-110 z-10 opacity-100`
-                              : `opacity-30 hover:opacity-100 border-white/5 hover:border-white/20 bg-zinc-900/20`
-                          }`}
-                          title={user.name}
-                        >
-                          {/* Manager Avatar Image */}
-                          {user.icon ? (
-                            <img
-                              src={user.icon}
-                              alt={user.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : null}
-
-                          {/* Fallback Initials (Visible if no image or error) */}
-                          <span
-                            className={`absolute inset-0 flex items-center justify-center font-bold text-xs tracking-tighter ${isSelected ? uColor.text : 'text-zinc-600'} -z-10`}
+                        return (
+                          <button
+                            key={user.id}
+                            onClick={() => setSelectedManagerId(user.id)}
+                            className={`w-11 h-11 rounded-full text-[11px] font-black uppercase transition-all shrink-0 flex items-center justify-center border-2 overflow-hidden relative cursor-pointer ${
+                              isSelected
+                                ? `${uColor.border.replace('border-', 'border-opacity-100 border-')} shadow-[0_0_15px_rgba(0,0,0,0.4)] scale-110 z-10 opacity-100`
+                                : `opacity-30 hover:opacity-100 border-white/5 hover:border-white/20 bg-zinc-900/20`
+                            }`}
+                            title={user.name}
                           >
-                            {getInitials(user.name)}
-                          </span>
-                        </button>
-                      );
-                    })}
+                            {/* Manager Avatar Image */}
+                            {user.icon ? (
+                              <img
+                                src={user.icon}
+                                alt={user.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : null}
+
+                            {/* Fallback Initials */}
+                            <span
+                              className={`absolute inset-0 flex items-center justify-center font-bold text-xs tracking-tighter ${isSelected ? uColor.text : 'text-zinc-600'} -z-10`}
+                            >
+                              {getInitials(user.name)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selection Context Label */}
+                    <div className="mt-4 flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">
+                        Filtrando por:
+                      </span>
+                      <span
+                        className={`text-[11px] font-black uppercase tracking-widest transition-colors ${
+                          selectedManagerId
+                            ? getColorForUser(
+                                selectedManagerId,
+                                allUsers.find((u) => u.id === selectedManagerId)?.name,
+                                allUsers.find((u) => u.id === selectedManagerId)?.color_index
+                              ).text
+                            : 'text-zinc-400'
+                        }`}
+                      >
+                        {selectedManagerId
+                          ? allUsers.find((u) => u.id === selectedManagerId)?.name
+                          : 'Todos los Managers'}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Selection Context Label */}
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">
-                      Filtrando por:
-                    </span>
-                    <span
-                      className={`text-[11px] font-black uppercase tracking-widest transition-colors ${
-                        selectedManagerId
-                          ? getColorForUser(
-                              selectedManagerId,
-                              allUsers.find((u) => u.id === selectedManagerId)?.name,
-                              allUsers.find((u) => u.id === selectedManagerId)?.color_index
-                            ).text
-                          : 'text-zinc-400'
-                      }`}
+                  {/* Integrated centered, wider Summary Metric */}
+                  {summaryData && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center border-l border-white/10 pl-6 h-full shrink-0"
                     >
-                      {selectedManagerId
-                        ? allUsers.find((u) => u.id === selectedManagerId)?.name
-                        : 'Todos los Managers'}
-                    </span>
-                  </div>
+                      <div className="flex flex-col items-center">
+                        <div className="max-w-[140px] text-center mb-1.5">
+                          <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-500 leading-tight block">
+                            {summaryData.label}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2 whitespace-nowrap">
+                          <span className={`${summaryData.type === 'currency' ? 'text-3xl' : 'text-4xl'} font-black tracking-tighter tabular-nums leading-none ${colors.text}`}>
+                            {summaryData.type === 'currency'
+                              ? `${formatEuro(Math.abs(summaryData.total))}€`
+                              : summaryData.total}
+                          </span>
+                          {summaryData.type === 'currency' && summaryData.total < 0 && (
+                            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none">
+                              pérdida
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               )}
-
-            {/* Summary Banner */}
-            {summaryData && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-8 pt-6 pb-2"
-              >
-                <div
-                  className={`relative p-5 rounded-2xl border ${colors.border} ${colors.bg} overflow-hidden group shadow-xl`}
-                >
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
-                        {summaryData.label}
-                      </span>
-                      <div className="flex items-baseline gap-2">
-                        <span className={`text-3xl font-black tracking-tighter ${colors.text} tabular-nums`}>
-                          {summaryData.type === 'currency'
-                            ? `${formatEuro(Math.abs(summaryData.total))}€`
-                            : summaryData.total}
-                        </span>
-                        {summaryData.type === 'currency' && summaryData.total < 0 && (
-                          <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
-                            en pérdidas
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center border ${colors.border} bg-white/5 opacity-50 group-hover:scale-110 transition-transform`}
-                    >
-                      <Icon size={20} className={colors.text} />
-                    </div>
-                  </div>
-
-                  {/* Decorative Elements */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl opacity-50" />
-                </div>
-              </motion.div>
-            )}
 
             {/* List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
