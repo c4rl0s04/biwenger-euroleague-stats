@@ -28,8 +28,7 @@ export default function BaseRow({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.1 + idx * 0.02 }}
     >
-      <Link
-        href={linkPath}
+      <div
         className={`group flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${
           secondaryColor.bg && managerId
             ? `bg-gradient-to-br ${secondaryColor.bg} ${secondaryColor.border} bg-opacity-10 border-opacity-20`
@@ -44,7 +43,11 @@ export default function BaseRow({
         </div>
 
         {/* Media */}
-        <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/5 overflow-hidden shrink-0 relative">
+        <Link 
+          href={linkPath}
+          onClick={(e) => e.stopPropagation()}
+          className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/5 overflow-hidden shrink-0 relative hover:scale-105 active:scale-95 transition-transform duration-200 block shadow-lg"
+        >
           <PlayerImage
             src={imageSrc}
             name={name}
@@ -52,24 +55,44 @@ export default function BaseRow({
             height={48}
             className={`w-full h-full object-cover ${!isUser ? 'object-top scale-[1.35] translate-y-1.5' : 'object-center'}`}
           />
-        </div>
+        </Link>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col">
-            <h4
-              className={`font-black uppercase tracking-tight truncate leading-tight transition-colors ${primaryColor.text}`}
+            <Link 
+              href={linkPath}
+              onClick={(e) => e.stopPropagation()}
+              className="group/name inline-block max-w-full"
             >
-              {name}
-            </h4>
+              <h4
+                className={`font-black uppercase tracking-tight truncate leading-tight transition-colors hover:scale-105 origin-left duration-200 ${primaryColor.text}`}
+              >
+                {name}
+              </h4>
+            </Link>
             
             {/* Custom info slot or default manager name */}
             {children || (
-              <span
-                className={`text-[10px] font-black uppercase tracking-widest mt-1 ${isUser ? 'text-zinc-500' : secondaryColor.text}`}
-              >
-                {isUser ? 'Manager' : (managerName || 'Sin Dueño')}
-              </span>
+              <div className="mt-1">
+                {isUser ? (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                    Manager
+                  </span>
+                ) : managerName ? (
+                  <Link 
+                    href={`/user/${managerId}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className={`text-[10px] font-black uppercase tracking-widest hover:scale-105 inline-block origin-left transition-transform duration-200 ${secondaryColor.text}`}
+                  >
+                    {managerName}
+                  </Link>
+                ) : (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                    Sin Dueño
+                  </span>
+                )}
+              </div>
             )}
           </div>
           <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-2 border-l border-white/10 pl-2">
@@ -86,7 +109,7 @@ export default function BaseRow({
             {valueText}
           </span>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 }

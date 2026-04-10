@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { formatEuro } from '@/lib/utils/currency';
 import { Timer, Hourglass, ArrowRight } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
@@ -159,13 +160,21 @@ export const METRIC_REGISTRY = {
       sub: (item) => 'Ganador de la puja ajustada',
       info: (item) => (
         <div className="flex items-center gap-1.5 flex-wrap mt-1">
-          <span className={`text-[10px] font-black uppercase tracking-tight ${getColorForUser(item.winner_id, item.winner, item.winner_color).text}`}>
+          <Link
+            href={`/user/${item.winner_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`text-[10px] font-black uppercase tracking-tight hover:scale-105 transition-transform duration-200 ${getColorForUser(item.winner_id, item.winner, item.winner_color).text}`}
+          >
             {item.winner}
-          </span>
+          </Link>
           <span className="text-[9px] text-zinc-400 font-bold uppercase shrink-0">le robó a</span>
-          <span className={`text-[10px] font-black uppercase tracking-tight ${getColorForUser(item.second_bidder_id, item.second_bidder_name, item.second_bidder_color).text}`}>
+          <Link
+            href={`/user/${item.second_bidder_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`text-[10px] font-black uppercase tracking-tight hover:scale-105 transition-transform duration-200 ${getColorForUser(item.second_bidder_id, item.second_bidder_name, item.second_bidder_color).text}`}
+          >
             {item.second_bidder_name || 'otro manager'}
-          </span>
+          </Link>
         </div>
       )
     },
@@ -184,21 +193,29 @@ export const METRIC_REGISTRY = {
       sub: null, // Removed team as requested
       info: (item) => (
         <div className="flex items-center gap-1.5 mt-1.5 overflow-hidden">
-          <span className={`text-[10px] font-black uppercase tracking-widest truncate ${
-            item.vendedor === 'Mercado' || item.vendedor === 'Biwenger' 
-              ? 'text-zinc-500' 
-              : getColorForUser(item.vendedor_id || item.seller_id, item.vendedor, item.vendedor_color_index || item.seller_color).text
-          }`}>
+          <Link
+            href={item.vendedor === 'Mercado' || item.vendedor === 'Biwenger' ? '#' : `/user/${item.vendedor_id || item.seller_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`text-[10px] font-black uppercase tracking-widest truncate transition-transform duration-200 hover:scale-105 origin-left ${
+              item.vendedor === 'Mercado' || item.vendedor === 'Biwenger' 
+                ? 'text-zinc-500 cursor-default pointer-events-none' 
+                : getColorForUser(item.vendedor_id || item.seller_id, item.vendedor, item.vendedor_color_index || item.seller_color).text
+            }`}
+          >
             {item.vendedor}
-          </span>
+          </Link>
           <ArrowRight size={10} className="text-zinc-700 shrink-0" />
-          <span className={`text-[10px] font-black uppercase tracking-widest truncate ${
-            item.comprador === 'Mercado' || item.comprador === 'Biwenger' 
-              ? 'text-zinc-500' 
-              : getColorForUser(item.comprador_id || item.buyer_id, item.comprador, item.comprador_color_index || item.buyer_color).text
-          }`}>
+          <Link
+            href={item.comprador === 'Mercado' || item.comprador === 'Biwenger' ? '#' : `/user/${item.comprador_id || item.buyer_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`text-[10px] font-black uppercase tracking-widest truncate transition-transform duration-200 hover:scale-105 origin-left ${
+              item.comprador === 'Mercado' || item.comprador === 'Biwenger' 
+                ? 'text-zinc-500 cursor-default pointer-events-none' 
+                : getColorForUser(item.comprador_id || item.buyer_id, item.comprador, item.comprador_color_index || item.buyer_color).text
+            }`}
+          >
             {item.comprador}
-          </span>
+          </Link>
         </div>
       ),
       summary: {
