@@ -55,3 +55,10 @@ data/*_backup*
 
 # Local folders
 backups/
+
+# MemPalace Storage (Local Agent Memory)
+knowledge_graph.sqlite3*
+entities.json
+chroma.sqlite3*
+mempalace.yaml
+[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-*

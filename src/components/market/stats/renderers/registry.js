@@ -42,7 +42,12 @@ export const METRIC_REGISTRY = {
       match: (item) => item.inflation !== undefined,
       label: 'Sobreprecio',
       value: (item) => `+${formatEuro(item.inflation)}€`,
-      sub: (item) => `P: ${formatEuro(item.purchase_price)}€ · M: ${formatEuro(item.market_price)}€`
+      sub: (item) => `P: ${formatEuro(item.purchase_price)}€ · M: ${formatEuro(item.market_price)}€`,
+      summary: {
+        key: 'inflation',
+        label: 'Sobreprecio Total',
+        type: 'currency'
+      }
     },
     {
       id: 'absences',
@@ -52,6 +57,11 @@ export const METRIC_REGISTRY = {
       sub: (item) => {
         const rate = item.available_rounds ? Math.round((item.played_rounds / item.available_rounds) * 100) : 0;
         return `Asistencia: ${rate}% (${item.played_rounds}/${item.available_rounds})`;
+      },
+      summary: {
+        key: 'missed_rounds',
+        label: 'Ausencias Totales',
+        type: 'number'
       }
     },
     {
@@ -63,14 +73,24 @@ export const METRIC_REGISTRY = {
         const change = item.revaluation !== undefined ? item.revaluation : item.devaluation;
         return `${formatEuro(Math.abs(change))}€`;
       },
-      sub: (item) => `C: ${formatEuro(item.purchase_price || 0)}€ · A: ${formatEuro(item.current_price || item.price || 0)}€`
+      sub: (item) => `C: ${formatEuro(item.purchase_price || 0)}€ · A: ${formatEuro(item.current_price || item.price || 0)}€`,
+      summary: {
+        key: (item) => item.revaluation !== undefined ? item.revaluation : item.devaluation,
+        label: (item) => (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0 ? 'Revalorización Total' : 'Depreciación Total',
+        type: 'currency'
+      }
     },
     {
       id: 'missed_profit',
       match: (item) => item.missed_profit !== undefined,
       label: 'Beneficio Perdido',
       value: (item) => `${formatEuro(item.missed_profit)}€`,
-      sub: (item) => `V: ${formatEuro(item.sale_price || 0)}€ · A: ${formatEuro(item.current_price || 0)}€`
+      sub: (item) => `V: ${formatEuro(item.sale_price || 0)}€ · A: ${formatEuro(item.current_price || 0)}€`,
+      summary: {
+        key: 'missed_profit',
+        label: 'Beneficio Perdido Total',
+        type: 'currency'
+      }
     },
     {
       id: 'points_million',
@@ -180,7 +200,12 @@ export const METRIC_REGISTRY = {
             {item.comprador}
           </span>
         </div>
-      )
+      ),
+      summary: {
+        key: (item) => item.precio || item.price || 0,
+        label: 'Volumen Total de Traspasos',
+        type: 'currency'
+      }
     }
   ],
 
@@ -201,7 +226,12 @@ export const METRIC_REGISTRY = {
             C: {formatEuro(item.purchase_price || 0)}€ · V: {formatEuro(item.sale_price || 0)}€
           </div>
         </div>
-      )
+      ),
+      summary: {
+        key: 'profit',
+        label: 'Beneficio Total Realizado',
+        type: 'currency'
+      }
     },
     {
       id: 'revaluation_flip',
@@ -218,7 +248,12 @@ export const METRIC_REGISTRY = {
             C: {formatEuro(item.purchase_price || 0)}€ · V: {formatEuro(item.sale_price || 0)}€
           </div>
         </div>
-      )
+      ),
+      summary: {
+        key: 'profit',
+        label: 'Beneficio Total Realizado',
+        type: 'currency'
+      }
     },
     {
       id: 'generic_flip',
@@ -231,7 +266,15 @@ export const METRIC_REGISTRY = {
         const p = (item.profit !== undefined) ? item.profit : (item.sale_price - item.purchase_price);
         return `${formatEuro(Math.abs(p))}€`;
       },
-      sub: (item) => `C: ${formatEuro(item.purchase_price)}€ · V: ${formatEuro(item.sale_price)}€`
+      sub: (item) => `C: ${formatEuro(item.purchase_price)}€ · V: ${formatEuro(item.sale_price)}€`,
+      summary: {
+        key: (item) => (item.profit !== undefined) ? item.profit : (item.sale_price - item.purchase_price),
+        label: (item) => {
+          const p = (item.profit !== undefined) ? item.profit : (item.sale_price - item.purchase_price);
+          return p >= 0 ? 'Beneficio Total' : 'Pérdida Total';
+        },
+        type: 'currency'
+      }
     }
   ]
 };

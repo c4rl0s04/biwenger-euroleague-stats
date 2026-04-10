@@ -16,6 +16,7 @@ import PlayerStatRow from './renderers/PlayerStatRow';
 import UserStatRow from './renderers/UserStatRow';
 import TransactionStatRow from './renderers/TransactionStatRow';
 import TemporalStatRow from './renderers/TemporalStatRow';
+import { getMetricConfig } from './renderers/registry';
 
 function getInitials(name) {
   if (!name) return '??';
@@ -146,6 +147,52 @@ export default function StatDetailDrawer({
   };
 
   const colors = colorMap[color] || colorMap.blue;
+
+  // Memoize filtered data for both summary and list
+  const filteredData = React.useMemo(() => {
+    if (!data) return [];
+    return data.filter((item) => {
+      if (!selectedManagerId) return true;
+
+      // Match by ID fields
+      const itemId =
+        item.winner_id || item.user_id || item.owner_id || item.buyer_id || item.id;
+      if (itemId === selectedManagerId) return true;
+
+      // Match by Name fields (comprador, seller, owner_name, etc)
+      const selectedUser = allUsers.find((u) => u.id === selectedManagerId);
+      if (selectedUser) {
+        const names = [
+          item.user_name,
+          item.owner_name,
+          item.name,
+          item.buyer_name,
+          item.comprador,
+          item.vendedor,
+          item.winner, // for biggest steal
+        ];
+        if (names.includes(selectedUser.name)) return true;
+      }
+
+      return false;
+    });
+  }, [data, selectedManagerId, allUsers]);
+
+  // Calculate Summary if config exists
+  const summaryData = React.useMemo(() => {
+    if (!filteredData.length) return null;
+    const config = getMetricConfig(filteredData[0], statType.toUpperCase());
+    if (!config?.summary) return null;
+
+    const total = filteredData.reduce((acc, item) => {
+      const val = typeof config.summary.key === 'function' ? config.summary.key(item) : item[config.summary.key];
+      return acc + (Number(val) || 0);
+    }, 0);
+
+    const label = typeof config.summary.label === 'function' ? config.summary.label(filteredData[0]) : config.summary.label;
+
+    return { total, label, type: config.summary.type };
+  }, [filteredData, statType]);
 
   if (typeof document === 'undefined') return null;
 
@@ -279,39 +326,55 @@ export default function StatDetailDrawer({
                 </div>
               )}
 
+            {/* Summary Banner */}
+            {summaryData && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="px-8 pt-6 pb-2"
+              >
+                <div
+                  className={`relative p-5 rounded-2xl border ${colors.border} ${colors.bg} overflow-hidden group shadow-xl`}
+                >
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
+                        {summaryData.label}
+                      </span>
+                      <div className="flex items-baseline gap-2">
+                        <span className={`text-3xl font-black tracking-tighter ${colors.text} tabular-nums`}>
+                          {summaryData.type === 'currency'
+                            ? `${formatEuro(Math.abs(summaryData.total))}€`
+                            : summaryData.total}
+                        </span>
+                        {summaryData.type === 'currency' && summaryData.total < 0 && (
+                          <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                            en pérdidas
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center border ${colors.border} bg-white/5 opacity-50 group-hover:scale-110 transition-transform`}
+                    >
+                      <Icon size={20} className={colors.text} />
+                    </div>
+                  </div>
+
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl opacity-50" />
+                </div>
+              </motion.div>
+            )}
+
             {/* List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-              {data
-                ?.filter((item) => {
-                  if (!selectedManagerId) return true;
+              {filteredData.map((item, idx) => (
+                <StatItemRow key={idx} item={item} idx={idx} statType={statType} />
+              ))}
 
-                  // Match by ID fields
-                  const itemId =
-                    item.winner_id || item.user_id || item.owner_id || item.buyer_id || item.id;
-                  if (itemId === selectedManagerId) return true;
-
-                  // Match by Name fields (comprador, seller, owner_name, etc)
-                  const selectedUser = allUsers.find((u) => u.id === selectedManagerId);
-                  if (selectedUser) {
-                    const names = [
-                      item.user_name,
-                      item.owner_name,
-                      item.name,
-                      item.buyer_name,
-                      item.comprador,
-                      item.vendedor,
-                      item.winner, // for biggest steal
-                    ];
-                    if (names.includes(selectedUser.name)) return true;
-                  }
-
-                  return false;
-                })
-                .map((item, idx) => (
-                  <StatItemRow key={idx} item={item} idx={idx} statType={statType} />
-                ))}
-
-              {data.length === 0 && (
+              {filteredData.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-zinc-500 italic text-sm">
                   No hay datos disponibles para este ranking.
                 </div>
@@ -325,7 +388,7 @@ export default function StatDetailDrawer({
                   Registros
                 </span>
                 <span className="text-lg font-black text-white tabular-nums leading-none">
-                  {data.length}
+                  {filteredData.length}
                 </span>
               </div>
 
