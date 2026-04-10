@@ -33,13 +33,10 @@ export default function MarketPodiumCard({
   useTeamColors = false,
   onViewAll,
 }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   const winner = data[0];
   const runnerUps = data.slice(1, 3);
-  const restRunnerUps = data.slice(3, 10);
 
   // Helper to get the best image source (supports players and managers/users)
   const getEntryImage = (item) => {
@@ -247,78 +244,6 @@ export default function MarketPodiumCard({
               })}
             </div>
           )}
-
-          {/* 3. Expansion Toggle */}
-          {restRunnerUps.length > 0 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-              className="mt-4 flex items-center justify-center gap-2 text-xs uppercase font-black tracking-[0.2em] text-zinc-500 hover:text-white transition-all py-4 border-t border-white/5 cursor-pointer group/toggle"
-            >
-              {isExpanded ? (
-                <>
-                  <ChevronUp className="w-4 h-4 group-hover/toggle:-translate-y-1 transition-transform" />{' '}
-                  Ocultar Ranking
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="w-4 h-4 group-hover/toggle:translate-y-1 transition-transform" />{' '}
-                  Ver Ranking Completo
-                </>
-              )}
-            </button>
-          )}
-
-          {/* 4. Rest of Ranking (#4-#10) */}
-          <div
-            className={`overflow-hidden transition-all duration-500 ease-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
-          >
-            <div className="pb-4 space-y-1">
-              {restRunnerUps.map((item, index) => {
-                const rank = index + 4;
-                return (
-                  <div
-                    key={(item.player_id || item.id) + '-' + rank}
-                    className="grid grid-cols-[24px_1fr_auto] items-center gap-2 px-3 py-1 rounded-xl hover:bg-white/[0.03] transition-colors group/row"
-                  >
-                    {/* Rank Column */}
-                    <span className="text-sm text-zinc-500 font-black font-display">{rank}</span>
-
-                    {/* Content Column (Player + Manager Stacked) */}
-                    <div className="flex flex-col justify-center min-w-0">
-                      <Link
-                        href={getNameConfig(item).linkPath}
-                        className={`text-xs font-bold truncate transition-colors hover:scale-105 transition-transform origin-left ${getNameConfig(item).className}`}
-                        style={getNameConfig(item).style}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {item.player_name || item.user_name || item.name}
-                      </Link>
-
-                      {renderListItemMeta && (
-                        <div className="min-w-0 truncate origin-left">
-                          {renderListItemMeta(item)}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Value Column */}
-                    <div className="text-right">
-                      {renderListItemValue ? (
-                        renderListItemValue(item)
-                      ) : (
-                        <span className="text-xs font-mono font-bold text-zinc-400 group-hover/row:text-white transition-colors">
-                          {item.value?.toLocaleString('es-ES')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </ElegantCard>
     </div>
