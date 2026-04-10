@@ -109,14 +109,17 @@ export default function LoginPage() {
           {/* UPDATED ICON: Standalone, larger, with a glow effect */}
           <div className="mb-4 relative">
             <div className="absolute inset-0 bg-orange-500 blur-[20px] opacity-20 rounded-full"></div>
-            <Trophy className="relative w-12 h-12 text-orange-500 drop-shadow-[0_2px_10px_rgba(249,115,22,0.3)]" />
+            <Trophy
+              aria-hidden="true"
+              className="relative w-12 h-12 text-orange-500 drop-shadow-[0_2px_10px_rgba(249,115,22,0.3)]"
+            />
           </div>
 
           <h1 className="text-6xl md:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 mb-2">
             Biwenger Stats
           </h1>
           <p className="text-neutral-400 text-sm flex items-center justify-center gap-2 mt-2">
-            <Activity className="w-3 h-3 text-green-500" />
+            <Activity aria-hidden="true" className="w-3 h-3 text-green-500" />
             Panel de Control Privado
           </p>
         </div>
@@ -146,9 +149,14 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff aria-hidden="true" className="h-4 w-4" />
+                    ) : (
+                      <Eye aria-hidden="true" className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -162,8 +170,12 @@ export default function LoginPage() {
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center gap-3 text-red-200 text-sm">
-                      <AlertCircle className="h-4 w-4 text-red-400" />
+                    <div
+                      role="alert"
+                      aria-live="polite"
+                      className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center gap-3 text-red-200 text-sm"
+                    >
+                      <AlertCircle aria-hidden="true" className="h-4 w-4 text-red-400" />
                       {error}
                     </div>
                   </motion.div>
