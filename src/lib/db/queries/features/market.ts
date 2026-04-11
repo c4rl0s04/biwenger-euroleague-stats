@@ -507,6 +507,7 @@ export interface MissedOpportunity {
   sale_price: number;
   missed_profit: number;
   player_team: string | null;
+  is_repurchase: boolean;
 }
 
 export interface TopTrader {
@@ -888,8 +889,9 @@ export async function getRecordBid(): Promise<RecordBid[]> {
     LEFT JOIN users u ON f.comprador = u.name
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN teams tm ON p.team_id = tm.id
+    WHERE f.comprador != 'Mercado'
     GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, u.id, u.color_index, p.name, p.img, tm.code, tm.name, tm.img
-    HAVING COUNT(*) > 1
+    HAVING COUNT(*) >= 1 -- At least one loser exists, so at least 2 total bidders
     ORDER BY bid_count DESC
     
   `;
@@ -898,7 +900,7 @@ export async function getRecordBid(): Promise<RecordBid[]> {
     if (!result.rows.length) return [];
     return result.rows.map((row: any) => ({
       ...row,
-      bid_count: parseInt(row.bid_count),
+      bid_count: parseInt(row.bid_count) + 1, // Count losers + 1 (the winner)
     }));
   } catch (error: any) {
     console.warn('Could not fetch record bid:', error.message);
@@ -1511,11 +1513,17 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
     CROSS JOIN LATERAL (
         SELECT amount, bidder_name, bidder_id, bidder_color_index
         FROM (
+            -- We look for the highest LOSING bid. 
+            -- If multiple people bid the same as the winner, we count that as a steal with 0 diff.
+            -- One of the bids for this transfer_id in transfer_bids MUST be the winning f.precio.
+            -- So we look for bids where id != (the row that matched f.precio) 
+            -- or more simply: bids that are ONE of the multiple bids.
+            
             SELECT tb.amount, tb.bidder_name, u2.id as bidder_id, u2.color_index as bidder_color_index
             FROM transfer_bids tb
             LEFT JOIN users u2 ON tb.bidder_name = u2.name
             WHERE tb.transfer_id = f.id
-              AND tb.amount < f.precio -- losing bid
+              AND tb.bidder_name != f.comprador -- The winner isn't a losing bid
             ORDER BY tb.amount DESC
             LIMIT 1
         ) sub
@@ -2120,6 +2128,26 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
  */
 export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
   const query = `
+    WITH LatestSales AS (
+      SELECT DISTINCT ON (vendedor, player_id)
+        vendedor as user_name,
+        player_id,
+        precio as sale_price,
+        timestamp as sale_timestamp
+      FROM fichajes
+      WHERE vendedor != 'Mercado'
+      ORDER BY vendedor, player_id, timestamp DESC
+    ),
+    LatestPurchases AS (
+      SELECT DISTINCT ON (comprador, player_id)
+        comprador as user_name,
+        player_id,
+        precio as purchase_price,
+        timestamp as purchase_timestamp
+      FROM fichajes
+      WHERE comprador != 'Mercado'
+      ORDER BY comprador, player_id, timestamp DESC
+    )
     SELECT 
       u.id as user_id,
       u.name as user_name,
@@ -2128,19 +2156,37 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
-      p.price as current_price,
+      t.code as player_team,
       
-      sale.precio as sale_price,
-      (p.price - sale.precio) as missed_profit
+      ls.sale_price,
+      CASE 
+        WHEN p.owner_id = u.id THEN lp.purchase_price
+        ELSE p.price
+      END as current_price,
       
-    FROM fichajes sale
-    JOIN users u ON sale.vendedor = u.name
-    JOIN players p ON sale.player_id = p.id
+      (p.owner_id = u.id) as is_repurchase,
+      
+      CASE 
+        WHEN p.owner_id = u.id THEN (lp.purchase_price - ls.sale_price)
+        ELSE (p.price - ls.sale_price)
+      END as missed_profit
+      
+    FROM LatestSales ls
+    JOIN users u ON ls.user_name = u.name
+    JOIN players p ON ls.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN LatestPurchases lp ON ls.user_name = lp.user_name 
+      AND ls.player_id = lp.player_id 
+      AND lp.purchase_timestamp > ls.sale_timestamp
     
-    WHERE sale.vendedor != 'Mercado'
-      AND p.price > sale.precio
+    WHERE 
+      -- Case 1: Not owned and market price rose since sale
+      (p.owner_id != u.id AND p.price > ls.sale_price)
+      OR
+      -- Case 2: Currently owned and repurchase price was higher than sale price
+      (p.owner_id = u.id AND lp.purchase_price > ls.sale_price)
+      
     ORDER BY missed_profit DESC
-    
   `;
   const result = await pgClient.query(query);
   if (!result.rows.length) return [];
@@ -2149,6 +2195,7 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
     current_price: parseInt(row.current_price),
     sale_price: parseInt(row.sale_price),
     missed_profit: parseInt(row.missed_profit),
+    is_repurchase: !!row.is_repurchase,
   }));
 }
 

@@ -193,7 +193,13 @@ export const METRIC_REGISTRY = {
       match: (item) => item.price_diff !== undefined,
       label: 'Margen de Victoria',
       value: (item) => `+${formatEuro(item.price_diff)}€`,
-      sub: null,
+      sub: (item) => (
+        <div className="flex items-center gap-2">
+          <span>Ganó: {formatEuro(item.winning_price || 0)}€</span>
+          <span className="opacity-30">|</span>
+          <span>2º: {formatEuro(item.second_highest_bid || 0)}€</span>
+        </div>
+      ),
       info: (item) => (
         <div className="flex items-center gap-1.5 flex-wrap mt-1">
           <Link
@@ -402,7 +408,7 @@ export const METRIC_REGISTRY = {
       label: 'Beneficio Perdido',
       value: (item) => `${formatEuro(item.missed_profit)}€`,
       sub: (item) =>
-        `V: ${formatEuro(item.sale_price || 0)}€ · A: ${formatEuro(item.current_price || 0)}€`,
+        `V: ${formatEuro(item.sale_price || 0)}€ · ${item.is_repurchase ? 'R' : 'A'}: ${formatEuro(item.current_price || 0)}€`,
       summary: {
         key: 'missed_profit',
         label: 'Beneficio Perdido Total',

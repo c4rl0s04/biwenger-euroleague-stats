@@ -43,7 +43,11 @@ export default function MissedOpportunityCard({ data, onViewAll }) {
         <HeroStatGroup
           stats={[
             { label: 'Venta', value: formatShortEuro(item.sale_price), suffix: '€' },
-            { label: 'Actual', value: formatShortEuro(item.current_price), suffix: '€' },
+            {
+              label: item.is_repurchase ? 'Recompra' : 'Actual',
+              value: formatShortEuro(item.current_price),
+              suffix: '€',
+            },
           ]}
         />
       )}
