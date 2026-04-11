@@ -5,11 +5,15 @@ import { getColorForUser } from '@/lib/constants/colors';
  */
 export function resolveIdentity(item, statType) {
   const isUser = statType === 'user' || (!item.player_id && (item.id || item.user_id));
-  const imageSrc =
-    item.player_img || item.user_img || item.icon || item.buyer_icon || item.img || item.image;
+
+  // Context-aware image resolution
+  const imageSrc = isUser
+    ? item.user_img || item.icon || item.buyer_icon || item.img || item.image
+    : item.player_img || item.img || item.image;
+
   const name = item.player_name || item.user_name || item.name || item.buyer_name;
   const linkId = item.id || item.user_id || item.buyer_id || item.player_id;
-  const linkPath = isUser ? `/user/${linkId}` : `/player/${item.player_id || item.id}`;
+  const linkPath = isUser ? `/managers/${linkId}` : `/players/${item.player_id || item.id}`;
 
   const resolvedColorIndex = [
     item.color_index,
@@ -22,36 +26,30 @@ export function resolveIdentity(item, statType) {
     ? getColorForUser(linkId, name, resolvedColorIndex)
     : { text: 'text-white' };
 
-  const managerId =
-    item.user_id ||
-    item.owner_id ||
-    item.comprador_id ||
-    item.buyer_id ||
-    item.vendedor_id ||
-    item.winner_id ||
-    item.id;
+  // Case-specific Manager Identity Resolution
+  let managerId = null;
+  let managerName = null;
 
-  const managerName =
-    item.user_name ||
-    item.owner_name ||
-    item.buyer_name ||
-    item.comprador ||
-    item.vendedor ||
-    item.winner ||
-    item.name ||
-    null;
+  if (statType === 'user') {
+    managerId = item.user_id || item.id;
+    managerName = item.user_name || item.name;
+  } else if (statType === 'transaction' || statType === 'temporal') {
+    // For transactions/temporal, only the BUYER/WINNER defines the theme
+    managerId = item.comprador_id || item.buyer_id || item.winner_id;
+    managerName = item.comprador || item.buyer_name || item.winner;
+  } else {
+    // For players/others, the OWNER defines the theme
+    managerId = item.owner_id || item.user_id;
+    managerName = item.owner_name || item.user_name || item.name;
+  }
 
   const managerColorIndex = [
     item.user_color_index,
     item.color_index,
-    item.buyer_color,
-    item.buyer_color_index,
     item.owner_color_index,
-    item.comprador_color_index,
-    item.vendedor_color_index,
+    item.buyer_color_index,
     item.winner_color_index,
-    item.bidder_color_index,
-  ].find((v) => v !== undefined && v !== null);
+  ].find((idx) => idx !== undefined && idx !== null);
 
   const secondaryColor =
     managerName && managerId

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro, formatProfit } from '@/lib/utils/currency';
 import { Timer, Hourglass, ArrowRight } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 
@@ -132,6 +132,11 @@ export const METRIC_REGISTRY = {
       label: 'Inversión Total',
       value: (item) => `${formatEuro(item.total_spent)}€`,
       sub: (item) => `${item.purchases_count || 0} fichajes realizados`,
+      summary: {
+        key: 'total_spent',
+        label: 'Inversión Total Liga',
+        type: 'currency',
+      },
     },
     {
       id: 'steals',
@@ -168,15 +173,15 @@ export const METRIC_REGISTRY = {
     {
       id: 'profit',
       match: (item) => item.net_profit !== undefined || item.total_profit !== undefined,
-      label: 'Plusvalías Totales',
-      value: (item) => `${formatEuro(item.net_profit || item.total_profit || 0)}€`,
+      label: 'Beneficio Neto',
+      value: (item) => formatProfit(item.net_profit || item.total_profit || 0),
       sub: (item) =>
-        item.total_sales
-          ? `${formatEuro(item.total_sales)}€ en ventas (${item.sales_count} ops)`
-          : `${item.trade_count || item.sales_count || 0} operaciones`,
+        item.sales_count !== undefined
+          ? `${item.sales_count} operaciones completadas`
+          : `${item.trade_count || 0} operaciones`,
       summary: {
         key: (item) => item.net_profit || item.total_profit || 0,
-        label: 'Plusvalía Total Liga',
+        label: 'Beneficio Neto Total Liga',
         type: 'currency',
       },
     },

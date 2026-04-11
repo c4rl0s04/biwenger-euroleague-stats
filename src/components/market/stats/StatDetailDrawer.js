@@ -8,7 +8,7 @@ import { X, TrendingUp } from 'lucide-react';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { getColorForUser } from '@/lib/constants/colors';
 
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro, formatProfit } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 
 // Import strategy-based renderers
@@ -356,12 +356,12 @@ export default function StatDetailDrawer({
                           className={`${summaryData.type === 'currency' ? 'text-3xl' : 'text-4xl'} font-black tracking-tighter tabular-nums leading-none ${colors.text}`}
                         >
                           {summaryData.type === 'currency'
-                            ? `${formatEuro(Math.abs(summaryData.total))}€`
+                            ? formatProfit(summaryData.total)
                             : summaryData.total.toLocaleString('es-ES')}
                         </span>
                         {summaryData.type === 'currency' && summaryData.total < 0 && (
                           <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none">
-                            pérdida
+                            pérdida total
                           </span>
                         )}
                       </div>

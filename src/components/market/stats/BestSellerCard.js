@@ -49,7 +49,7 @@ export default function BestSellerCard({ data, onViewAll }) {
           <span className="text-[10px] text-zinc-500 font-bold">{item.sales_count} ventas</span>
         </div>
       )}
-      renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
+      renderRunnerUpMeta={() => null}
       renderListItemValue={(item) => (
         <span
           className={`text-xs font-bold ${item.net_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
@@ -57,7 +57,7 @@ export default function BestSellerCard({ data, onViewAll }) {
           {formatProfit(item.net_profit)}
         </span>
       )}
-      renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
+      renderListItemMeta={() => null}
     />
   );
 }
