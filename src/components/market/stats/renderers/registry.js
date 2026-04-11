@@ -45,19 +45,6 @@ export const METRIC_REGISTRY = {
       },
     },
     {
-      id: 'inflation',
-      match: (item) => item.inflation !== undefined,
-      label: 'Sobreprecio',
-      value: (item) => `+${formatEuro(item.inflation)}€`,
-      sub: (item) =>
-        `P: ${formatEuro(item.purchase_price)}€ · M: ${formatEuro(item.market_price)}€`,
-      summary: {
-        key: 'inflation',
-        label: 'Sobreprecio Total',
-        type: 'currency',
-      },
-    },
-    {
       id: 'absences',
       match: (item) => item.missed_rounds !== undefined,
       label: 'Ausencias',
@@ -229,6 +216,49 @@ export const METRIC_REGISTRY = {
       summary: {
         key: 'price_diff',
         label: 'Margen Total',
+        type: 'currency',
+      },
+    },
+    {
+      id: 'transfer',
+      match: (item) => item.vendedor && item.comprador,
+      label: 'Precio Traspaso',
+      value: (item) => `${formatEuro(item.precio)}€`,
+      info: (item) => (
+        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+          <Link
+            href={`/user/${item.vendedor_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`text-[10px] font-black uppercase tracking-tight hover:scale-105 transition-transform duration-200 ${getColorForUser(item.vendedor_id, item.vendedor, item.vendedor_color).text}`}
+          >
+            {item.vendedor}
+          </Link>
+          <span className="text-[9px] text-zinc-400 font-bold uppercase shrink-0">vendió a</span>
+          <Link
+            href={`/user/${item.comprador_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`text-[10px] font-black uppercase tracking-tight hover:scale-105 transition-transform duration-200 ${getColorForUser(item.comprador_id, item.comprador, item.comprador_color).text}`}
+          >
+            {item.comprador}
+          </Link>
+        </div>
+      ),
+      summary: {
+        key: 'precio',
+        label: 'Volumen de Traspasos',
+        type: 'currency',
+      },
+    },
+    {
+      id: 'inflation',
+      match: (item) => item.inflation !== undefined,
+      label: 'Sobreprecio Pagado',
+      value: (item) => `+${formatEuro(item.inflation)}€`,
+      sub: (item) =>
+        `Pagado: ${formatEuro(item.purchase_price)}€ (Valor: ${formatEuro(item.market_price)}€)`,
+      summary: {
+        key: 'inflation',
+        label: 'Sobreprecio Total Liga',
         type: 'currency',
       },
     },

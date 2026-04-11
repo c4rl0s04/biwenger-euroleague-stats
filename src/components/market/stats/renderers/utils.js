@@ -54,6 +54,7 @@ export function resolveIdentity(item, statType) {
     item.user_color_index,
     item.color_index,
     item.owner_color_index,
+    item.buyer_color,
     item.buyer_color_index,
     item.winner_color_index,
   ].find((idx) => idx !== undefined && idx !== null);

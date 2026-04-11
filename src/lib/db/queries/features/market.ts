@@ -1669,9 +1669,9 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
 
   return result.rows.map((row: any) => ({
     ...row,
-    trade_count: parseInt(row.trade_count),
-    total_inflation: parseInt(row.total_inflation),
-    avg_inflation: parseFloat(row.avg_inflation),
+    inflation: parseInt(row.inflation),
+    purchase_price: parseInt(row.purchase_price),
+    market_price: parseInt(row.market_price),
   }));
 }
 

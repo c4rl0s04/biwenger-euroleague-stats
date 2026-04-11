@@ -485,7 +485,7 @@ export default function MarketPageClient() {
                     subtitle: 'Jugadores con mayor sobreprecio sobre valor inicial',
                     data: marketStats.inflatedPlayer,
                     icon: Flame,
-                    statType: 'player',
+                    statType: 'transaction',
                     color: 'rose',
                   })
                 }
