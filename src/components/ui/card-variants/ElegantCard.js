@@ -114,18 +114,18 @@ export default function ElegantCard({
 
       {/* Header */}
       {!hideHeader && (title || actionRight) && (
-        <div className="flex items-start justify-between mb-6 relative z-10">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-4 mb-6 relative z-10">
+          <div className="flex items-center gap-3 min-w-0">
             {icon &&
               createElement(icon, {
-                className: `w-4.5 h-4.5 transition-transform duration-500 group-hover/card:scale-110 ${iconColor}`,
+                className: `flex-shrink-0 w-4.5 h-4.5 transition-transform duration-500 group-hover/card:scale-110 ${iconColor}`,
               })}
             <span className="text-[14px] font-black font-sans text-slate-300 uppercase tracking-widest flex items-center gap-2 group-hover/card:text-white transition-colors">
               {title}
               {info && <InfoTooltip content={info} />}
             </span>
           </div>
-          <div className="transition-transform duration-300 hover:scale-105 active:scale-95">
+          <div className="flex-shrink-0 transition-transform duration-300 hover:scale-105 active:scale-95">
             {actionRight}
           </div>
         </div>

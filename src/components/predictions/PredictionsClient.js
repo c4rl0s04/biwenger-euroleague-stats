@@ -15,11 +15,11 @@ import {
 } from './cards';
 import { PredictionsStatsTable } from './tables/PredictionsStatsTable';
 import { HistoryTable } from './tables/HistoryTable';
-import { ClutchModal, VictoriasModal } from './PredictionsModals';
+import PredictionsDrawer from './PredictionsDrawer';
 
 export default function PredictionsClient({ stats }) {
-  const [isClutchOpen, setIsClutchOpen] = useState(false);
-  const [isVictoriasOpen, setIsVictoriasOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState(null); // 'clutch' | 'victorias' | null
+  const isDrawerOpen = drawerType !== null;
 
   if (!stats) return null;
 
@@ -40,15 +40,15 @@ export default function PredictionsClient({ stats }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Perfect10Card achievements={achievements} />
           <BlankedCard achievements={achievements} />
-          <ClutchCard clutchStats={clutch_stats} onClick={() => setIsClutchOpen(true)} />
+          <ClutchCard clutchStats={clutch_stats} onClick={() => setDrawerType('clutch')} />
           <VictoriasCard
             victorias={porra_stats?.victorias}
-            onClick={() => setIsVictoriasOpen(true)}
+            onClick={() => setDrawerType('victorias')}
           />
 
           {/* Row 2 */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-3 h-full">
-            <ParticipationCard data={participation} />
+            <ParticipationCard data={participation} totalUsers={table_stats?.length || 0} />
           </div>
 
           <div className="col-span-1 sm:col-span-2 lg:col-span-1 h-full space-y-4">
@@ -77,16 +77,13 @@ export default function PredictionsClient({ stats }) {
         <HistoryTable history={history} />
       </Section>
 
-      {/* Modals */}
-      <ClutchModal
-        isOpen={isClutchOpen}
-        onClose={() => setIsClutchOpen(false)}
-        stats={clutch_stats}
-      />
-      <VictoriasModal
-        isOpen={isVictoriasOpen}
-        onClose={() => setIsVictoriasOpen(false)}
-        victorias={porra_stats?.victorias || []}
+      {/* Rankings Drawer */}
+      <PredictionsDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setDrawerType(null)}
+        type={drawerType}
+        clutchStats={clutch_stats}
+        victoriasStats={porra_stats?.victorias || []}
       />
     </div>
   );

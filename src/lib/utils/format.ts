@@ -53,8 +53,8 @@ export function getShortTeamName(teamName: string | null | undefined): string {
  */
 export function getShortRoundName(name: string | null | undefined): string {
   if (!name) return '';
-  // Support both "Jornada X" and already shortened "JX" formats
+  // Support "Jornada X", "Round X", or already shortened "JX" formats
   // and strip any suffixes like "(aplazada)"
-  const match = name.match(/(?:Jornada|J)\s*(\d+)/i);
+  const match = name.match(/(?:Jornada|J|Round)\s*(\d+)/i);
   return match ? `J${match[1]}` : name;
 }

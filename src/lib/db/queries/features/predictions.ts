@@ -189,11 +189,11 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
             away_score,
             date,
             TRIM(REGEXP_REPLACE(
-                REGEXP_REPLACE(round_name, 'Jornada', 'Round', 'gi'),
+                REGEXP_REPLACE(round_name, 'Round', 'Jornada', 'gi'),
                 '\\s*\\(.*', '', 'gi'
             )) AS base_round,
             MIN(round_id) OVER (PARTITION BY TRIM(REGEXP_REPLACE(
-                REGEXP_REPLACE(round_name, 'Jornada', 'Round', 'gi'),
+                REGEXP_REPLACE(round_name, 'Round', 'Jornada', 'gi'),
                 '\\s*\\(.*', '', 'gi'
             ))) as base_round_id
         FROM matches
@@ -219,7 +219,7 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
             p.user_id,
             p.round_id,
             TRIM(REGEXP_REPLACE(
-                REGEXP_REPLACE(p.round_name, 'Jornada', 'Round', 'gi'),
+                REGEXP_REPLACE(p.round_name, 'Round', 'Jornada', 'gi'),
                 '\\s*\\(.*', '', 'gi'
             )) AS base_round,
             prediction.pred,

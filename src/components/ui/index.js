@@ -33,7 +33,9 @@ export { default as BackButton } from './BackButton';
 export { default as Subheading } from './Subheading';
 export { default as PageHeader } from './PageHeader';
 
-// Stats & Data Display
+// Layout & Structure
+export { default as Drawer } from './Drawer';
+export { default as BaseRow } from './BaseRow';
 export { default as StatsList } from './StatsList';
 export {
   default as StatsTable,

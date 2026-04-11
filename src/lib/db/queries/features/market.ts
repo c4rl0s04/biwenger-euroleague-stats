@@ -1002,13 +1002,13 @@ export async function getLiveMarketTransfers({
   let paramIndex = 1;
 
   if (buyer && buyer !== 'all' && buyer !== 'Todos') {
-    whereClause += ` AND f.comprador = $${paramIndex}`;
+    whereClause += ` AND f.comprador ILIKE '%' || $${paramIndex} || '%'`;
     params.push(buyer);
     paramIndex++;
   }
 
   if (seller && seller !== 'all' && seller !== 'Todos') {
-    whereClause += ` AND f.vendedor = $${paramIndex}`;
+    whereClause += ` AND f.vendedor ILIKE '%' || $${paramIndex} || '%'`;
     params.push(seller);
     paramIndex++;
   }
@@ -1032,7 +1032,7 @@ export async function getLiveMarketTransfers({
       p.position as player_position,
       p.img as player_img,
       t.code as player_team,
-      (SELECT COUNT(*) FROM transfer_bids tb WHERE tb.transfer_id = f.id) as bids_count
+      (SELECT COUNT(*) + 1 FROM transfer_bids tb WHERE tb.transfer_id = f.id) as bids_count
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
