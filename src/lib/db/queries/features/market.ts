@@ -106,6 +106,9 @@ export interface TopTransferredPlayer {
   transfer_count: number;
   avg_price: number;
   player_team: string | null;
+  owner_id?: number | null;
+  owner_name?: string | null;
+  owner_color_index?: number | null;
 }
 
 export interface EnrichedTransfer extends Transfer {
@@ -488,6 +491,9 @@ export interface MostOwnersPlayer {
   player_img: string;
   distinct_owners_count: number;
   player_team: string | null;
+  owner_id?: number | null;
+  owner_name?: string | null;
+  owner_color_index?: number | null;
 }
 
 export interface MissedOpportunity {
@@ -770,12 +776,16 @@ export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]>
       p.img,
       t.code as player_team,
       COUNT(*) as transfer_count,
-      AVG(f.precio) as avg_price
+      AVG(f.precio) as avg_price,
+      p.owner_id,
+      u.name as owner_name,
+      u.color_index as owner_color_index
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN users u ON p.owner_id = u.id
     WHERE f.precio > 0
-    GROUP BY f.player_id, p.name, p.img, t.code
+    GROUP BY f.player_id, p.name, p.img, t.code, p.owner_id, u.name, u.color_index
     ORDER BY transfer_count DESC
     
   `;
@@ -2080,12 +2090,16 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
       t.code as player_team,
       t.name as team_name,
       t.img as team_logo,
-      COUNT(DISTINCT f.comprador) as distinct_owners_count
+      COUNT(DISTINCT f.comprador) as distinct_owners_count,
+      p.owner_id,
+      u.name as owner_name,
+      u.color_index as owner_color_index
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN users u ON p.owner_id = u.id
     WHERE f.comprador != 'Mercado'
-    GROUP BY p.id, p.name, p.img, t.code, t.name, t.img
+    GROUP BY p.id, p.name, p.img, t.code, t.name, t.img, p.owner_id, u.name, u.color_index
     HAVING COUNT(DISTINCT f.comprador) > 1
     ORDER BY distinct_owners_count DESC
     

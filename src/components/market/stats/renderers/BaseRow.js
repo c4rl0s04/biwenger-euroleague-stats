@@ -93,7 +93,7 @@ export default function BaseRow({
                   </Link>
                 ) : (
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                    Sin Dueño
+                    Mercado
                   </span>
                 )}
               </div>

@@ -47,7 +47,7 @@ export function resolveIdentity(item, statType) {
   } else {
     // For players/others, the OWNER defines the theme
     managerId = item.owner_id || item.user_id;
-    managerName = item.owner_name || item.user_name || item.name;
+    managerName = item.owner_name || item.user_name;
   }
 
   const managerColorIndex = [

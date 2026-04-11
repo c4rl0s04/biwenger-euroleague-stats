@@ -423,7 +423,8 @@ function StatItemRow({ item, localIdx, globalIdx, statType }) {
   if (
     item.price_diff !== undefined ||
     item.bid_count !== undefined ||
-    (item.vendedor && item.comprador)
+    (item.vendedor && item.comprador) ||
+    statType === 'transaction'
   ) {
     return (
       <TransactionStatRow
@@ -439,7 +440,12 @@ function StatItemRow({ item, localIdx, globalIdx, statType }) {
   if (
     item.hours_held !== undefined ||
     item.days_held !== undefined ||
-    (item.purchase_price !== undefined && item.sale_price !== undefined)
+    item.revaluation !== undefined ||
+    item.devaluation !== undefined ||
+    item.percentage_gain !== undefined ||
+    item.missed_profit !== undefined ||
+    (item.purchase_price !== undefined && item.sale_price !== undefined) ||
+    statType === 'temporal'
   ) {
     return (
       <TemporalStatRow item={item} localIdx={localIdx} globalIdx={globalIdx} statType={statType} />
@@ -453,7 +459,10 @@ function StatItemRow({ item, localIdx, globalIdx, statType }) {
     item.total_profit !== undefined ||
     item.stolen_count !== undefined ||
     item.failed_bids_count !== undefined ||
-    item.trade_count !== undefined
+    item.trade_count !== undefined ||
+    item.total_overpay !== undefined ||
+    item.contested_wins !== undefined ||
+    statType === 'user'
   ) {
     return (
       <UserStatRow item={item} localIdx={localIdx} globalIdx={globalIdx} statType={statType} />

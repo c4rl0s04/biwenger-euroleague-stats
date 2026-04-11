@@ -206,7 +206,7 @@ export const METRIC_REGISTRY = {
       match: (item) => item.price_diff !== undefined,
       label: 'Margen de Victoria',
       value: (item) => `+${formatEuro(item.price_diff)}€`,
-      sub: (item) => 'Ganador de la puja ajustada',
+      sub: null,
       info: (item) => (
         <div className="flex items-center gap-1.5 flex-wrap mt-1">
           <Link

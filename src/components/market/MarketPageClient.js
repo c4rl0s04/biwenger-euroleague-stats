@@ -429,6 +429,7 @@ export default function MarketPageClient() {
                     icon: TrendingUp,
                     statType: 'transaction',
                     color: 'purple',
+                    showSummary: false,
                   })
                 }
               />
@@ -442,6 +443,7 @@ export default function MarketPageClient() {
                     icon: Search,
                     statType: 'transaction',
                     color: 'cyan',
+                    showSummary: false,
                   })
                 }
               />
