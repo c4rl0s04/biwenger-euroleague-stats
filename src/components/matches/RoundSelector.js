@@ -21,7 +21,7 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
   return (
     <div
       className={cn(
-        'flex items-center p-1 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl shadow-black/50',
+        'flex items-center p-1 bg-zinc-950 border border-white/10 rounded-xl shadow-2xl shadow-black/50',
         className
       )}
     >
@@ -29,7 +29,7 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
       <button
         onClick={handlePrev}
         disabled={roundIndex <= 0}
-        className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
         title="Previous Round"
       >
         <ChevronLeft size={16} />
@@ -44,8 +44,8 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
           fullWidth
         >
           {(close) => (
-            <div className="max-h-[300px] overflow-y-auto sidebar-scroll">
-              <div className="px-3 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 sticky top-0 bg-zinc-950 z-50">
+            <div className="max-h-[300px] overflow-y-auto sidebar-scroll bg-zinc-950">
+              <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border sticky top-0 bg-zinc-950 z-50">
                 Jornadas
               </div>
               <div className="p-1">
@@ -59,13 +59,13 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
                     className={cn(
                       'w-full text-left px-3 py-2 text-sm rounded-md flex items-center justify-between transition-colors my-0.5 cursor-pointer',
                       r.round_id === selectedRoundId
-                        ? 'bg-zinc-800 text-white font-medium'
-                        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                        ? 'bg-muted text-white font-medium'
+                        : 'text-zinc-400 hover:bg-muted/50 hover:text-zinc-200'
                     )}
                   >
                     {r.round_name}
                     {r.round_id === selectedRoundId && (
-                      <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                      <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_var(--glow-primary)]" />
                     )}
                   </button>
                 ))}
@@ -79,7 +79,7 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
       <button
         onClick={handleNext}
         disabled={roundIndex >= rounds.length - 1}
-        className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
         title="Next Round"
       >
         <ChevronRight size={16} />

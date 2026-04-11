@@ -74,7 +74,11 @@ export default async function SchedulePage({ searchParams }) {
             {/* Summary Section: Show TOTAL squad points, regardless of schedule */}
             {(schedule.userPlayers?.length > 0 || allActivePlayers.length > 0) && (
               <div className="w-full lg:flex-1 min-w-0">
-                <RoundSummary players={schedule.userPlayers || allActivePlayers} />
+                <RoundSummary
+                  players={schedule.userPlayers || allActivePlayers}
+                  activeUserId={userId}
+                  colorIndex={users.find((u) => String(u.id) === String(userId))?.color_index}
+                />
               </div>
             )}
           </div>

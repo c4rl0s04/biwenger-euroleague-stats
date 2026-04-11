@@ -13,6 +13,11 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
   const activeUser = users.find((u) => String(u.id) === String(activeUserId)) || users[0];
   const activeRound = rounds.find((r) => String(r.round_id) === String(activeRoundId)) || rounds[0];
 
+  // Theme color for the active manager
+  const activeColor = activeUser
+    ? getColorForUser(activeUser.id, activeUser.name, activeUser.color_index)
+    : null;
+
   // Helper to push URL updates
   const updateParams = (newUserId, newRoundId) => {
     const uId = newUserId ?? activeUserId;
@@ -38,22 +43,23 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
   return (
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
           Filtros de Vista
         </span>
       </div>
 
       {/* Control Bar: z-index ensures dropdowns go over sticky headers */}
-      <div className="relative z-30 flex items-center p-1 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-2xl flex-1">
+      <div className="relative z-30 flex items-center p-1 bg-popover border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-2xl flex-1">
         {/* 1. USER SELECTOR */}
         <Dropdown icon={<User size={16} />} label={activeUser?.name || 'Select User'} align="left">
           {(close) => (
-            <div className="p-1 min-w-[200px]">
-              <div className="px-2 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 mb-1">
+            <div className="p-1 min-w-[200px] bg-zinc-950">
+              <div className="px-2 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border mb-1">
                 Managers
               </div>
               {users.map((u) => {
                 const color = getColorForUser(u.id, u.name, u.color_index);
+                const isActive = String(u.id) === String(activeUserId);
                 return (
                   <button
                     key={u.id}
@@ -63,20 +69,23 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
                     }}
                     className={clsx(
                       'w-full text-left px-3 py-2 text-sm rounded-md flex items-center justify-between group transition-colors my-0.5 cursor-pointer',
-                      String(u.id) === String(activeUserId)
-                        ? 'bg-zinc-800 text-white font-medium'
-                        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                      isActive
+                        ? 'bg-muted text-white font-medium'
+                        : 'text-zinc-400 hover:bg-muted/50 hover:text-zinc-200'
                     )}
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className={`w-2 h-2 rounded-full ring-1 ring-white/10 ${color.text.replace('text-', 'bg-')}`}
-                        style={{ backgroundColor: color.stroke }}
+                        className={`w-2.5 h-2.5 rounded-full ring-1 ring-white/10 ${color.text.replace('text-', 'bg-')}`}
+                        style={{
+                          backgroundColor: color.stroke,
+                          boxShadow: `0 0 8px ${color.stroke}40`,
+                        }}
                       />
                       <span>{u.name}</span>
                     </div>
-                    {String(u.id) === String(activeUserId) && (
-                      <Check size={14} className="text-indigo-500" />
+                    {isActive && (
+                      <Check size={14} className={activeColor?.text || 'text-primary'} />
                     )}
                   </button>
                 );
@@ -93,7 +102,7 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
           {/* Prev Arrow */}
           <button
             onClick={handlePrevRound}
-            className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
             title="Previous Round"
           >
             <ChevronLeft size={16} />
@@ -108,31 +117,34 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
               fullWidth
             >
               {(close) => (
-                <div className="max-h-[300px] overflow-y-auto sidebar-scroll">
-                  <div className="px-3 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 sticky top-0 bg-zinc-950 z-50">
+                <div className="max-h-[300px] overflow-y-auto sidebar-scroll bg-zinc-950">
+                  <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border sticky top-0 bg-zinc-950 z-50">
                     Jornadas
                   </div>
                   <div className="p-1">
-                    {rounds.map((r) => (
-                      <button
-                        key={r.round_id}
-                        onClick={() => {
-                          updateParams(null, r.round_id);
-                          close();
-                        }}
-                        className={clsx(
-                          'w-full text-left px-3 py-2 text-sm rounded-md flex items-center justify-between transition-colors my-0.5 cursor-pointer',
-                          String(r.round_id) === String(activeRoundId)
-                            ? 'bg-zinc-800 text-white font-medium'
-                            : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
-                        )}
-                      >
-                        {r.round_name}
-                        {String(r.round_id) === String(activeRoundId) && (
-                          <Check size={14} className="text-indigo-500" />
-                        )}
-                      </button>
-                    ))}
+                    {rounds.map((r) => {
+                      const isActive = String(r.round_id) === String(activeRoundId);
+                      return (
+                        <button
+                          key={r.round_id}
+                          onClick={() => {
+                            updateParams(null, r.round_id);
+                            close();
+                          }}
+                          className={clsx(
+                            'w-full text-left px-3 py-2 text-sm rounded-md flex items-center justify-between transition-colors my-0.5 cursor-pointer',
+                            isActive
+                              ? 'bg-muted text-white font-medium'
+                              : 'text-zinc-400 hover:bg-muted/50 hover:text-zinc-200'
+                          )}
+                        >
+                          {r.round_name}
+                          {isActive && (
+                            <Check size={14} className={activeColor?.text || 'text-primary'} />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -142,7 +154,7 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
           {/* Next Arrow */}
           <button
             onClick={handleNextRound}
-            className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
             title="Next Round"
           >
             <ChevronRight size={16} />
@@ -193,7 +205,7 @@ function Dropdown({ icon, label, children, align = 'left', fullWidth = false }) 
       {isOpen && (
         <div
           className={clsx(
-            'absolute top-full mt-2 z-[100] bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl shadow-black overflow-hidden min-w-[240px] animate-in fade-in zoom-in-95 duration-100',
+            'absolute top-full mt-2 z-[100] bg-zinc-950 border border-border rounded-xl shadow-2xl shadow-black overflow-hidden min-w-[240px]',
             align === 'left'
               ? 'left-0'
               : align === 'right'
