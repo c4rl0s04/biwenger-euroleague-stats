@@ -41,12 +41,9 @@ export default function TransactionStatRow({ item, localIdx, globalIdx, statType
       {...identity}
       valueLabel={label}
       valueText={value}
-      valueSub={
-        <div className="flex flex-col gap-1.5">
-          {info}
-          <div className="mt-0.5">{sub}</div>
-        </div>
-      }
-    />
+      valueSub={sub}
+    >
+      {info}
+    </BaseRow>
   );
 }

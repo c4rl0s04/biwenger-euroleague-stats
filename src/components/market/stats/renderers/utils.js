@@ -29,38 +29,37 @@ export function resolveIdentity(item, statType) {
   // Case-specific Manager Identity Resolution
   let managerId = null;
   let managerName = null;
+  let managerColorIndex = null;
 
   if (statType === 'user') {
     managerId = item.user_id || item.id;
     managerName = item.user_name || item.name;
-  } else if (statType === 'transaction' || statType === 'temporal') {
-    // For transactions/temporal, only the BUYER/WINNER defines the theme
-    managerId = item.comprador_id || item.buyer_id || item.winner_id || item.user_id || item.id;
-    managerName =
-      item.comprador ||
-      item.buyer_name ||
-      item.winner ||
-      item.user_name ||
-      item.name ||
-      item.vendedor ||
-      item.seller_name;
+    managerColorIndex = [item.user_color_index, item.color_index].find(
+      (idx) => idx !== undefined && idx !== null
+    );
+  } else if (statType === 'transaction') {
+    // For transactions (Record Historico, Record Puja), only the BUYER defines the theme
+    managerId = item.buyer_id || item.comprador_id || item.winner_id;
+    managerName = item.comprador || item.buyer_name || item.winner;
+    managerColorIndex = [
+      item.buyer_color, // Specific buyer color from SQL
+      item.buyer_color_index,
+      item.user_color_index, // Fallback from enrichment
+      item.color_index,
+    ].find((idx) => idx !== undefined && idx !== null);
   } else {
-    // For players/others, the OWNER defines the theme
-    managerId = item.owner_id || item.user_id;
-    managerName = item.owner_name || item.user_name;
+    // For players and temporal (El Pelotazo), the CURRENT OWNER defines the theme
+    managerId = item.owner_id || item.user_id || item.managerId;
+    managerName = item.owner_name || item.user_name || item.managerName;
+    managerColorIndex = [
+      item.owner_color_index, // Specific owner color from SQL
+      item.user_color_index, // Fallback from enrichment
+      item.color_index,
+    ].find((idx) => idx !== undefined && idx !== null);
   }
 
-  const managerColorIndex = [
-    item.user_color_index,
-    item.color_index,
-    item.owner_color_index,
-    item.buyer_color,
-    item.buyer_color_index,
-    item.winner_color_index,
-  ].find((idx) => idx !== undefined && idx !== null);
-
   const secondaryColor =
-    managerName && managerId
+    managerName && (managerId || managerColorIndex !== null)
       ? getColorForUser(managerId, managerName, managerColorIndex)
       : { text: 'text-zinc-500' };
 

@@ -220,36 +220,6 @@ export const METRIC_REGISTRY = {
       },
     },
     {
-      id: 'transfer',
-      match: (item) => item.vendedor && item.comprador,
-      label: 'Precio Traspaso',
-      value: (item) => `${formatEuro(item.precio)}€`,
-      info: (item) => (
-        <div className="flex items-center gap-1.5 flex-wrap mt-1">
-          <Link
-            href={`/user/${item.vendedor_id}`}
-            onClick={(e) => e.stopPropagation()}
-            className={`text-[10px] font-black uppercase tracking-tight hover:scale-105 transition-transform duration-200 ${getColorForUser(item.vendedor_id, item.vendedor, item.vendedor_color).text}`}
-          >
-            {item.vendedor}
-          </Link>
-          <span className="text-[9px] text-zinc-400 font-bold uppercase shrink-0">vendió a</span>
-          <Link
-            href={`/user/${item.comprador_id}`}
-            onClick={(e) => e.stopPropagation()}
-            className={`text-[10px] font-black uppercase tracking-tight hover:scale-105 transition-transform duration-200 ${getColorForUser(item.comprador_id, item.comprador, item.comprador_color).text}`}
-          >
-            {item.comprador}
-          </Link>
-        </div>
-      ),
-      summary: {
-        key: 'precio',
-        label: 'Volumen de Traspasos',
-        type: 'currency',
-      },
-    },
-    {
       id: 'inflation',
       match: (item) => item.inflation !== undefined,
       label: 'Sobreprecio Pagado',
@@ -267,7 +237,28 @@ export const METRIC_REGISTRY = {
       match: (item) => item.bid_count !== undefined,
       label: 'Pujas',
       value: (item) => item.bid_count,
-      sub: (item) => `Precio Traspaso: ${formatEuro(item.precio)}€`,
+      sub: (item) => `Precio Traspaso: ${formatEuro(item.precio || item.price || 0)}€`,
+      info: (item) => (
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-[9px] text-zinc-400 font-bold uppercase shrink-0">Ganador:</span>
+          <Link
+            href={`/user/${item.buyer_id || item.comprador_id || item.user_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`text-[10px] font-black uppercase tracking-widest truncate transition-transform duration-200 hover:scale-105 origin-left ${
+              getColorForUser(
+                item.buyer_id || item.comprador_id || item.user_id,
+                item.comprador || item.buyer_name || item.user_name,
+                item.buyer_color_index ||
+                  item.comprador_color_index ||
+                  item.buyer_color ||
+                  item.user_color_index
+              ).text
+            }`}
+          >
+            {item.comprador || item.buyer_name || item.user_name}
+          </Link>
+        </div>
+      ),
       summary: {
         key: 'bid_count',
         label: 'Pujas Totales',
