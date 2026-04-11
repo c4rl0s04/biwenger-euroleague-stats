@@ -259,4 +259,31 @@ This means API routes import from `@/lib/services` (one path) rather than needin
 
 ---
 
-_For the technologies underlying these patterns, see [`docs/TECH_STACK.md`](./TECH_STACK.md). For the system architecture, see [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)._
+## 12. UI Registry / Strategy Pattern
+
+**Where**: `src/components/market/stats/renderers/registry.js`
+
+To avoid monolithic components with massive conditional rendering logic (e.g., in a `StatDetailDrawer`), the application uses a **Registry Pattern**. This separates the "How to show data" from the "How to fetch data".
+
+The registry consists of a central configuration object (`METRIC_REGISTRY`) where each entry defines:
+
+| Property      | Purpose                                                                                                        |
+| :------------ | :------------------------------------------------------------------------------------------------------------- |
+| **`match`**   | A predicate function that identifies if an item belongs to this metric (e.g., `item.inflation !== undefined`). |
+| **`label`**   | The display name for the metric.                                                                               |
+| **`value`**   | A formatter for the primary value (e.g., currency, percentage).                                                |
+| **`sub`**     | Supplementary details (e.g., purchase price vs market price).                                                  |
+| **`summary`** | Metadata for calculating totals/averages across a list of items.                                               |
+
+**Component Usage**:
+Generic Stat components (like `PlayerStatRow`) call `getMetricConfig(item, category)` to determine their own rendering logic at runtime.
+
+**Benefit**:
+
+- **High Extensibility**: Adding a new stat (e.g., "Assists per Million") only requires a new entry in the registry, not any changes to the UI components.
+- **Isolated Logic**: Formatting and business rules for display are contained in the registry, keeping JSX components lean and focused on layout.
+- **Dynamic Summarization**: The registry provides the logic to aggregate metrics without hardcoding mathematical rules in the container.
+
+---
+
+_For the technologies underlying these patterns, see [`docs/SYSTEM_GUIDE.md`](./SYSTEM_GUIDE.md). For feature definitions, see [`docs/FEATURES.md`](./FEATURES.md)._

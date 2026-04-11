@@ -62,43 +62,42 @@ Comprehensive league analysis divided into categories.
 
 ## 💰 Money & Market (`/market`)
 
-    Advanced financial analytics to help you win the transfer market.
+Advanced financial analytics to help you win the transfer market.
 
-    ### 1. Flipping & Trading
+### 1. Market Intelligence
 
-    - **Best Flip**: Top profits made from a single player (Buy Low -> Sell High).
-    - **Worst Flip**: Biggest losses on a single player.
-    - **Quick Flip**: Highest profit generated in the shortest ownership time (< 7 days).
-    - **Top Trader**: Users with the highest volume of profitable trades.
+- **Market Overview**: Real-time KPIs including total league spend, biggest single purchase, and market liquidity.
+- **La Enfermería (The Infirmary)**: Tracking "Attendance Rate" for all players in your league. Monitors missed rounds, available rounds, and current status to identify the most (and least) reliable assets.
+- **Registry Strategy**: All market statistics are resolved via a unified `registry.js` architecture, ensuring consistent value formatting and sub-metric displays across all dashboards.
 
-    ### 2. Valuation & Growth
+### 2. Flipping & Trading
 
-    - **Revaluation**: Current squad members who have increased (or decreased) most in value since purchase.
-    - **Big Spender**: Tracks who spends the most money in the market.
-    - **Profitable Player**: Players who have generated the most value (Points + Price Increase) for their owners.
+- **Quick Flip**: Highest profit generated in the shortest ownership time (measured in hours).
+- **Retention Analytics**: Tracks "Days Held" vs Profit for every player sold, identifying your most efficient holds.
+- **Missed Profit**: Calculates potential gains lost by selling players right before a massive price surge.
+- **Worst Flip**: Identification of the "Biggest Flops" where players were sold for significantly less than their purchase price.
 
-    ### 3. Scouting & Opportunities
+### 3. Manager Behavior
 
-    - **Sniper Mode**: Highlights players currently on the market who are undervalued based on their recent performance.
-    - **The Steal**: Players bought for cheap who exploded in value/points immediately after.
-    - **Missed Opportunity**: Players you sold right before they started performing well.
-    - **Market Trends**: Interactive charts showing market spending and player value history with customizable time ranges (1W, 1M, Season).
+- **The Thief**: Managers who aggressively outbid others for players currently on the market.
+- **The Victim**: Tracking "Failed Bids" where managers participated in an auction but lost to a higher bidder.
+- **Sobrepago (Overpay)**: Total amount spent above the market value at the time of purchase.
+- **Top Trader**: Volume vs Profit analysis for the most active managers in the league.
 
-    ### 4. Ownership & Behavior
+### 4. Valuation & Trends
 
-    - **The Thief**: Managers who frequently buy players that were previously owned by others.
-    - **The Victim**: Managers who often sell players that immediately shine elsewhere.
-    - **Longest Hold**: Players kept in a squad for the longest consecutive duration.
+- **Market Trends**: High-density interactive charts showing global spending trends, player value distribution, and league-wide liquidity over 1W, 1M, and Season views.
+- **Floor & Ceiling**: Price range analysis for the top 50 players in the league.
+- **Efficiency (ROI)**: `Points / Million` metric to identify the best value-for-money players currently in squads.
 
-    ## 🏆 Tournaments & Cups
+  ## 🏆 Tournaments & Cups
 
-    Support for secondary competitions running alongside the main league.
+  Support for secondary competitions running alongside the main league.
+  - **Custom Brackets**: Support for Playoffs, Final Four, and Group Phases.
+  - **Cup Standings**: Separate points tracking for tournament rounds.
+  - **Fixtures**: Head-to-Head matchups specific to tournament rules.
 
-    - **Custom Brackets**: Support for Playoffs, Final Four, and Group Phases.
-    - **Cup Standings**: Separate points tracking for tournament rounds.
-    - **Fixtures**: Head-to-Head matchups specific to tournament rules.
-
-    ## 📅 Matches (`/matches`)
+  ## 📅 Matches (`/matches`)
 
 - **Live Scores**: Real-time updates matches in progress.
 - **Round Selector**: Navigate through past and future rounds.

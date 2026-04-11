@@ -22,7 +22,15 @@ export function resolveIdentity(item, statType) {
     ? getColorForUser(linkId, name, resolvedColorIndex)
     : { text: 'text-white' };
 
-  // Resolve Secondary Manager Identity (for players/transactions)
+  const managerId =
+    item.user_id ||
+    item.owner_id ||
+    item.comprador_id ||
+    item.buyer_id ||
+    item.vendedor_id ||
+    item.winner_id ||
+    item.id;
+
   const managerName =
     item.user_name ||
     item.owner_name ||
@@ -30,15 +38,8 @@ export function resolveIdentity(item, statType) {
     item.comprador ||
     item.vendedor ||
     item.winner ||
+    item.name ||
     null;
-
-  const managerId =
-    item.user_id ||
-    item.owner_id ||
-    item.comprador_id ||
-    item.buyer_id ||
-    item.vendedor_id ||
-    item.winner_id;
 
   const managerColorIndex = [
     item.user_color_index,
@@ -53,7 +54,7 @@ export function resolveIdentity(item, statType) {
   ].find((v) => v !== undefined && v !== null);
 
   const secondaryColor =
-    !isUser && managerName && managerId
+    managerName && managerId
       ? getColorForUser(managerId, managerName, managerColorIndex)
       : { text: 'text-zinc-500' };
 

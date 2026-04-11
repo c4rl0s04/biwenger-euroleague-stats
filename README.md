@@ -21,7 +21,7 @@
 
 ## 🚀 Overview
 
-**Biwenger Stats** is an AI-augmented analytics platform for fantasy basketball managers. It replaces standard spreadsheets with a premium, real-time dashboard that syncs data from the Biwenger and Euroleague APIs through a proprietary 14-step idempotent ETL pipeline.
+**Biwenger Stats** is an AI-augmented analytics platform for fantasy basketball managers. It replaces standard spreadsheets with a premium, real-time dashboard that syncs data from the Biwenger and Euroleague APIs through a proprietary 15-step idempotent ETL pipeline.
 
 The platform exposes insights unavailable elsewhere — from "La Enfermería" (detecting high-risk injuries) to "Bidding Duels" (tracking historical rivalries over market players).
 
@@ -34,6 +34,7 @@ The platform exposes insights unavailable elsewhere — from "La Enfermería" (d
 - **La Enfermería (The Infirmary)** — Identify expensive players with low availability to avoid market traps.
 - **Bidding Duels & Matrix** — Track historical bidding wars between managers for the same players.
 - **Sniper Mode** — Real-time detection of undervalued players currently listed on the market.
+- **Market Trends** — Interactive charts for liquidity, global volume, and price evolution.
 - **Big Spender Analysis** — Track investment trends across all managers in your league.
 
 ### 📊 Performance Analytics
@@ -45,7 +46,7 @@ The platform exposes insights unavailable elsewhere — from "La Enfermería" (d
 
 ### 🛠️ Infrastructure & Data
 
-- **Idempotent ETL** — 14 sequential sync steps ensure data integrity even after failure.
+- **Idempotent ETL** — 15 sequential sync steps ensure data integrity even after failure.
 - **Live Scoring Pipeline** — High-frequency polling service for real-time fantasy points.
 - **Interactive Setup Wizard** — Zero-config initialization via `npm run setup`.
 
@@ -78,13 +79,20 @@ The platform exposes insights unavailable elsewhere — from "La Enfermería" (d
 We follow a strict **4-Layer Architecture**:
 `Query (Drizzle) → Service (Logic) → API Route (Handler) → UI Component (RSC/Client)`
 
+Key patterns:
+
+- **Registry / Strategy Pattern**: UI stat resolution is decoupled from component logic via `registry.js`.
+- **Typed DAO**: All SQL queries are isolated in `src/lib/db/queries/` with Zod validation.
+
 Refer to [**`.agents/INSTRUCTIONS.md`**](./.agents/INSTRUCTIONS.md) for detailed implementation patterns.
 
 ---
 
 ## 📚 Documentation & Legal
 
-- **Technical Reference**: See [`docs/`](./docs/) for Architecture, Tech Stack, and Engineering Patterns.
+- **Technical Reference**: See [`docs/SYSTEM_GUIDE.md`](./docs/SYSTEM_GUIDE.md) for Architecture, Tech Stack, and Infrastructure.
+- **Engineering Patterns**: See [`docs/PATTERNS.md`](./docs/PATTERNS.md) for software design and UI registries.
+- **Feature Manual**: See [`docs/FEATURES.md`](./docs/FEATURES.md) for detailed analytical capabilities.
 - **Contributing**: Contributions are welcome. Please open an issue first to discuss major changes.
 - **Security**: Report vulnerabilities via private messaging. **Never commit your `.env` file.**
 - **License**: MIT — see [LICENSE](LICENSE)

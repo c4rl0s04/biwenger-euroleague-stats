@@ -5,22 +5,22 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import PlayerImage from '@/components/ui/PlayerImage';
 
-export default function BaseRow({ 
-  rank, 
-  isTop3, 
-  imageSrc, 
-  name, 
-  linkPath, 
-  primaryColor, 
-  secondaryColor, 
-  managerName, 
-  managerId, 
-  valueLabel, 
-  valueText, 
+export default function BaseRow({
+  rank,
+  isTop3,
+  imageSrc,
+  name,
+  linkPath,
+  primaryColor,
+  secondaryColor,
+  managerName,
+  managerId,
+  valueLabel,
+  valueText,
   valueSub,
   isUser,
   idx,
-  children // For custom sub-info like trade flows
+  children, // For custom sub-info like trade flows
 }) {
   return (
     <motion.div
@@ -31,7 +31,7 @@ export default function BaseRow({
       <div
         className={`group flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${
           secondaryColor.bg && managerId
-            ? `bg-gradient-to-br ${secondaryColor.bg} ${secondaryColor.border} bg-opacity-10 border-opacity-20`
+            ? `bg-gradient-to-br ${secondaryColor.bg} ${secondaryColor.border} bg-opacity-[0.07] border-opacity-30`
             : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] hover:border-white/10'
         }`}
       >
@@ -43,10 +43,14 @@ export default function BaseRow({
         </div>
 
         {/* Media */}
-        <Link 
+        <Link
           href={linkPath}
           onClick={(e) => e.stopPropagation()}
-          className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/5 overflow-hidden shrink-0 relative hover:scale-105 active:scale-95 transition-transform duration-200 block shadow-lg"
+          className={`w-12 h-12 rounded-xl border border-white/5 overflow-hidden shrink-0 relative hover:scale-105 active:scale-95 transition-all duration-200 block shadow-lg ${
+            isUser && primaryColor.bg
+              ? `bg-gradient-to-br ${primaryColor.bg} bg-opacity-20`
+              : 'bg-zinc-900'
+          }`}
         >
           <PlayerImage
             src={imageSrc}
@@ -60,7 +64,7 @@ export default function BaseRow({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col">
-            <Link 
+            <Link
               href={linkPath}
               onClick={(e) => e.stopPropagation()}
               className="group/name inline-block max-w-full"
@@ -71,7 +75,7 @@ export default function BaseRow({
                 {name}
               </h4>
             </Link>
-            
+
             {/* Custom info slot or default manager name */}
             {children || (
               <div className="mt-1">
@@ -80,7 +84,7 @@ export default function BaseRow({
                     Manager
                   </span>
                 ) : managerName ? (
-                  <Link 
+                  <Link
                     href={`/user/${managerId}`}
                     onClick={(e) => e.stopPropagation()}
                     className={`text-[10px] font-black uppercase tracking-widest hover:scale-105 inline-block origin-left transition-transform duration-200 ${secondaryColor.text}`}
@@ -105,7 +109,9 @@ export default function BaseRow({
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">
             {valueLabel}
           </span>
-          <span className={`text-xl font-black tabular-nums transition-colors ${primaryColor.text}`}>
+          <span
+            className={`text-xl font-black tabular-nums transition-colors ${primaryColor.text}`}
+          >
             {valueText}
           </span>
         </div>

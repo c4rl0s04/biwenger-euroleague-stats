@@ -39,6 +39,7 @@ The sync is an idempotent pipeline orchestrated by `src/lib/sync/index.js`. It r
 12. **`12-user-colors.js`**: Assigns UI themes based on user preferences.
 13. **`13-porras.js`**: Syncs user predictions from the league minigame.
 14. **`14-tournaments.js`**: Syncs Cup/Playoff brackets, fixtures, and standings.
+15. **`15-market-listings.ts`**: Captures a snapshot of players currently for sale on the market, including seller and price. Handles the 5:00 AM market rollover logic.
 
 ### "Live" Mode
 
