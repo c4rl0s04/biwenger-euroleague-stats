@@ -6,10 +6,10 @@ import { resolveIdentity } from './utils';
 import { formatEuro } from '@/lib/utils/currency';
 import { getMetricConfig } from './registry';
 
-export default function PlayerStatRow({ item, idx, statType }) {
-  const identity = resolveIdentity(item, statType);
-  const rank = idx + 1;
+export default function PlayerStatRow({ item, localIdx, globalIdx, statType }) {
+  const rank = globalIdx + 1;
   const isTop3 = rank <= 3;
+  const identity = resolveIdentity(item, statType);
 
   // Resolve metric configuration from registry
   const config = getMetricConfig(item, 'PLAYER');
@@ -18,7 +18,7 @@ export default function PlayerStatRow({ item, idx, statType }) {
     // Fallback for unexpected data
     return (
       <BaseRow
-        idx={idx}
+        idx={localIdx}
         rank={rank}
         isTop3={isTop3}
         {...identity}
@@ -36,7 +36,7 @@ export default function PlayerStatRow({ item, idx, statType }) {
 
   return (
     <BaseRow
-      idx={idx}
+      idx={localIdx}
       rank={rank}
       isTop3={isTop3}
       {...identity}

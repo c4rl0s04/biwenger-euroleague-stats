@@ -74,6 +74,8 @@ export default function MarketPageClient() {
     icon: Trophy,
     statType: 'player',
     color: 'blue',
+    showFilters: true,
+    showSummary: true,
   });
 
   const { data: statsData, loading } = useApiData('/api/market/stats');
@@ -234,6 +236,7 @@ export default function MarketPageClient() {
                   icon: Gem,
                   statType: 'temporal',
                   color: 'cyan',
+                  showSummary: false,
                 })
               }
             />
@@ -247,6 +250,7 @@ export default function MarketPageClient() {
                   icon: Star,
                   statType: 'player',
                   color: 'amber',
+                  showSummary: false,
                 })
               }
             />
@@ -452,6 +456,7 @@ export default function MarketPageClient() {
                     statType: 'player',
                     color: 'orange',
                     showFilters: false,
+                    showSummary: false,
                   })
                 }
               />
@@ -466,6 +471,7 @@ export default function MarketPageClient() {
                     statType: 'player',
                     color: 'purple',
                     showFilters: false,
+                    showSummary: false,
                   })
                 }
               />
@@ -532,6 +538,7 @@ export default function MarketPageClient() {
         color={drawerData.color}
         allUsers={marketStats.allUsers}
         showFilters={drawerData.showFilters}
+        showSummary={drawerData.showSummary}
       />
     </div>
   );

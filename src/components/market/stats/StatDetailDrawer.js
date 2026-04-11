@@ -40,6 +40,7 @@ export default function StatDetailDrawer({
   color = 'blue',
   allUsers = [],
   showFilters = true,
+  showSummary = true,
 }) {
   const [selectedManagerId, setSelectedManagerId] = React.useState(null);
   const [prevOpen, setPrevOpen] = React.useState(isOpen);
@@ -151,30 +152,32 @@ export default function StatDetailDrawer({
   // Memoize filtered data for both summary and list
   const filteredData = React.useMemo(() => {
     if (!data) return [];
-    return data.filter((item) => {
-      if (!selectedManagerId) return true;
+    return data
+      .map((item, originalIndex) => ({ ...item, globalIndex: originalIndex }))
+      .filter((item) => {
+        if (!selectedManagerId) return true;
 
-      // Match by ID fields
-      const itemId = item.winner_id || item.user_id || item.owner_id || item.buyer_id || item.id;
-      if (itemId === selectedManagerId) return true;
+        // Match by ID fields
+        const itemId = item.winner_id || item.user_id || item.owner_id || item.buyer_id || item.id;
+        if (itemId === selectedManagerId) return true;
 
-      // Match by Name fields (comprador, seller, owner_name, etc)
-      const selectedUser = allUsers.find((u) => u.id === selectedManagerId);
-      if (selectedUser) {
-        const names = [
-          item.user_name,
-          item.owner_name,
-          item.name,
-          item.buyer_name,
-          item.comprador,
-          item.vendedor,
-          item.winner, // for biggest steal
-        ];
-        if (names.includes(selectedUser.name)) return true;
-      }
+        // Match by Name fields (comprador, seller, owner_name, etc)
+        const selectedUser = allUsers.find((u) => u.id === selectedManagerId);
+        if (selectedUser) {
+          const names = [
+            item.user_name,
+            item.owner_name,
+            item.name,
+            item.buyer_name,
+            item.comprador,
+            item.vendedor,
+            item.winner, // for biggest steal
+          ];
+          if (names.includes(selectedUser.name)) return true;
+        }
 
-      return false;
-    });
+        return false;
+      });
   }, [data, selectedManagerId, allUsers]);
 
   // Calculate Summary if config exists
@@ -250,10 +253,10 @@ export default function StatDetailDrawer({
             </div>
 
             {/* Manager Filter Bar & Summary Metric */}
-            {showFilters && allUsers.length > 0 && (
+            {(showFilters || showSummary) && (
               <div className="px-8 py-5 border-b border-white/5 bg-zinc-950/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 {/* Only show icons/filter for NON-user types */}
-                {statType !== 'user' ? (
+                {showFilters && allUsers.length > 0 && statType !== 'user' ? (
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-3">
                       {/* "Todos" Icon */}
@@ -339,7 +342,7 @@ export default function StatDetailDrawer({
                 )}
 
                 {/* Integrated centered, wider Summary Metric */}
-                {summaryData && (
+                {showSummary && summaryData && (
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -351,7 +354,7 @@ export default function StatDetailDrawer({
                           {summaryData.label}
                         </span>
                       </div>
-                      <div className="flex items-baseline gap-2 whitespace-nowrap">
+                      <div className="flex flex-col items-center gap-1">
                         <span
                           className={`${summaryData.type === 'currency' ? 'text-3xl' : 'text-4xl'} font-black tracking-tighter tabular-nums leading-none ${colors.text}`}
                         >
@@ -360,7 +363,7 @@ export default function StatDetailDrawer({
                             : summaryData.total.toLocaleString('es-ES')}
                         </span>
                         {summaryData.type === 'currency' && summaryData.total < 0 && (
-                          <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none">
+                          <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest leading-none mt-1">
                             pérdida total
                           </span>
                         )}
@@ -374,7 +377,13 @@ export default function StatDetailDrawer({
             {/* List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
               {filteredData.map((item, idx) => (
-                <StatItemRow key={idx} item={item} idx={idx} statType={statType} />
+                <StatItemRow
+                  key={idx}
+                  item={item}
+                  localIdx={idx}
+                  globalIdx={item.globalIndex}
+                  statType={statType}
+                />
               ))}
 
               {filteredData.length === 0 && (
@@ -407,7 +416,7 @@ export default function StatDetailDrawer({
   );
 }
 
-function StatItemRow({ item, idx, statType }) {
+function StatItemRow({ item, localIdx, globalIdx, statType }) {
   // Strategy: Determine which specialized row to render based on data presence
 
   // 1. Transactional / Transfer specific
@@ -416,7 +425,14 @@ function StatItemRow({ item, idx, statType }) {
     item.bid_count !== undefined ||
     (item.vendedor && item.comprador)
   ) {
-    return <TransactionStatRow item={item} idx={idx} statType={statType} />;
+    return (
+      <TransactionStatRow
+        item={item}
+        localIdx={localIdx}
+        globalIdx={globalIdx}
+        statType={statType}
+      />
+    );
   }
 
   // 2. Temporal / Hold-time based
@@ -425,7 +441,9 @@ function StatItemRow({ item, idx, statType }) {
     item.days_held !== undefined ||
     (item.purchase_price !== undefined && item.sale_price !== undefined)
   ) {
-    return <TemporalStatRow item={item} idx={idx} statType={statType} />;
+    return (
+      <TemporalStatRow item={item} localIdx={localIdx} globalIdx={globalIdx} statType={statType} />
+    );
   }
 
   // 3. User / Manager Totals
@@ -437,9 +455,13 @@ function StatItemRow({ item, idx, statType }) {
     item.failed_bids_count !== undefined ||
     item.trade_count !== undefined
   ) {
-    return <UserStatRow item={item} idx={idx} statType={statType} />;
+    return (
+      <UserStatRow item={item} localIdx={localIdx} globalIdx={globalIdx} statType={statType} />
+    );
   }
 
   // 4. Default to Player (Activiy, Inflation, Infirmary, Revaluation, Points)
-  return <PlayerStatRow item={item} idx={idx} statType={statType} />;
+  return (
+    <PlayerStatRow item={item} localIdx={localIdx} globalIdx={globalIdx} statType={statType} />
+  );
 }

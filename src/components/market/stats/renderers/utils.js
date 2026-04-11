@@ -35,8 +35,15 @@ export function resolveIdentity(item, statType) {
     managerName = item.user_name || item.name;
   } else if (statType === 'transaction' || statType === 'temporal') {
     // For transactions/temporal, only the BUYER/WINNER defines the theme
-    managerId = item.comprador_id || item.buyer_id || item.winner_id;
-    managerName = item.comprador || item.buyer_name || item.winner;
+    managerId = item.comprador_id || item.buyer_id || item.winner_id || item.user_id || item.id;
+    managerName =
+      item.comprador ||
+      item.buyer_name ||
+      item.winner ||
+      item.user_name ||
+      item.name ||
+      item.vendedor ||
+      item.seller_name;
   } else {
     // For players/others, the OWNER defines the theme
     managerId = item.owner_id || item.user_id;
