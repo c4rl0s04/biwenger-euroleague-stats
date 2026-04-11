@@ -21,6 +21,7 @@ export { default as LeaguePerformanceCard } from './LeaguePerformanceCard';
 export { default as ReliabilityCard } from './ReliabilityCard';
 export { default as EfficiencyCard } from './EfficiencyCard';
 export { default as StreaksCard } from './StreaksCard';
+export { default as CaptainStandingsCard } from './CaptainStandingsCard';
 
 // Fun Stats
 export { default as BottlerCard } from './BottlerCard';

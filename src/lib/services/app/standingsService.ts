@@ -45,6 +45,7 @@ import {
   getInitialSquadLoyalty,
   getInitialSquadPotentialAdvanced,
   getInitialSquadsDetailed,
+  getDetailedCaptainStats,
 } from '../../db';
 
 export interface StandingsOptions {
@@ -235,6 +236,11 @@ export async function fetchReliabilityStats() {
 /** Head-to-head rivalry matrix */
 export async function fetchRivalryMatrixStats() {
   return await getRivalryMatrixStats();
+}
+
+/** Detailed captain performance stats */
+export async function fetchDetailedCaptainStats() {
+  return await getDetailedCaptainStats();
 }
 
 export interface StandingsPageOptions {

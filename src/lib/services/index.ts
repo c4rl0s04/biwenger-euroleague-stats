@@ -36,6 +36,7 @@ export {
   fetchPositionChangesStats,
   fetchReliabilityStats,
   fetchRivalryMatrixStats,
+  fetchDetailedCaptainStats,
 } from './app/standingsService';
 
 // Dashboard Service

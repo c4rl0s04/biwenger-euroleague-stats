@@ -153,6 +153,22 @@ export interface CaptainStat {
   avg_captain_points: number;
 }
 
+export interface DetailedCaptainStat {
+  user_id: string;
+  user_name: string;
+  user_icon: string;
+  color_index: number;
+  total_rounds: number;
+  total_captain_points: number;
+  avg_captain_points: number;
+  success_rate: number;
+  unique_captains: number;
+  best_points: number;
+  worst_points: number;
+  most_used_captain: string;
+  most_used_captain_id: number;
+}
+
 /**
  * Get Heat Check Stats
  * Compares average points in last 5 rounds vs season average
@@ -947,6 +963,98 @@ export async function getCaptainStats(): Promise<CaptainStat[]> {
     }));
   } catch (error) {
     console.error('Error in getCaptainStats:', error);
+    return [];
+  }
+}
+
+/**
+ * Get Detailed Captain Stats
+ * Comprehensive comparison of captaincy performance for all users
+ * Considering all owned players (starters + substitutes) for optimal hit rate
+ */
+export async function getDetailedCaptainStats(): Promise<DetailedCaptainStat[]> {
+  try {
+    const sql = `
+      WITH AllSquadStats AS (
+          SELECT 
+              l.user_id,
+              l.round_id,
+              l.player_id,
+              l.is_captain,
+              COALESCE(prs.fantasy_points, 0) as player_points
+          FROM lineups l
+          LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+      ),
+      MaxPossibleScores AS (
+          SELECT 
+              user_id,
+              round_id,
+              MAX(player_points) as max_pts_possible
+          FROM AllSquadStats
+          GROUP BY user_id, round_id
+      ),
+      CaptainUsage AS (
+          SELECT 
+              l.user_id,
+              l.player_id,
+              p.name as player_name,
+              COUNT(*) as times_used,
+              ROW_NUMBER() OVER (PARTITION BY l.user_id ORDER BY COUNT(*) DESC, AVG(COALESCE(prs.fantasy_points, 0)) DESC) as usage_rank
+          FROM lineups l
+          JOIN players p ON l.player_id = p.id
+          LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+          WHERE l.is_captain = TRUE
+          GROUP BY l.user_id, l.player_id, p.name
+      ),
+      UserCapiStats AS (
+          SELECT 
+              cs.user_id,
+              COUNT(cs.round_id) as total_rounds,
+              SUM(cs.player_points * 2) as total_captain_points,
+              AVG(cs.player_points) as avg_captain_points,
+              SUM(CASE WHEN cs.player_points >= mps.max_pts_possible THEN 1 ELSE 0 END) as optimal_hits,
+              MAX(cs.player_points) as best_captain_points,
+              MIN(cs.player_points) as worst_captain_points,
+              COUNT(DISTINCT cs.player_id) as unique_captains
+          FROM AllSquadStats cs
+          JOIN MaxPossibleScores mps ON cs.user_id = mps.user_id AND cs.round_id = mps.round_id
+          WHERE cs.is_captain = TRUE
+          GROUP BY cs.user_id
+      )
+      SELECT 
+          u.id as user_id,
+          u.name as user_name,
+          u.icon as user_icon,
+          u.color_index,
+          COALESCE(ucs.total_rounds, 0) as total_rounds,
+          COALESCE(ucs.total_captain_points, 0) as total_captain_points,
+          COALESCE(ucs.avg_captain_points, 0) as avg_captain_points,
+          COALESCE(CAST(ucs.optimal_hits AS FLOAT) / NULLIF(ucs.total_rounds, 0) * 100, 0) as success_rate,
+          COALESCE(ucs.unique_captains, 0) as unique_captains,
+          COALESCE(ucs.best_captain_points, 0) as best_points,
+          COALESCE(ucs.worst_captain_points, 0) as worst_points,
+          cu.player_name as most_used_captain,
+          cu.player_id as most_used_captain_id
+      FROM users u
+      LEFT JOIN UserCapiStats ucs ON u.id = ucs.user_id
+      LEFT JOIN CaptainUsage cu ON u.id = cu.user_id AND cu.usage_rank = 1
+      ORDER BY total_captain_points DESC
+    `;
+
+    const result = await pgClient.query(sql);
+    return result.rows.map((row: any) => ({
+      ...row,
+      total_rounds: parseInt(row.total_rounds) || 0,
+      total_captain_points: parseInt(row.total_captain_points) || 0,
+      avg_captain_points: parseFloat(row.avg_captain_points) || 0,
+      success_rate: parseFloat(row.success_rate) || 0,
+      unique_captains: parseInt(row.unique_captains) || 0,
+      best_points: parseInt(row.best_points) || 0,
+      worst_points: parseInt(row.worst_points) || 0,
+      most_used_captain_id: parseInt(row.most_used_captain_id) || null,
+    }));
+  } catch (error) {
+    console.error('Error in getDetailedCaptainStats:', error);
     return [];
   }
 }

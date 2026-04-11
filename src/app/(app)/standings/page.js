@@ -27,6 +27,7 @@ import {
   InitialSquadAnalysisCard,
   BestDraftPlayerCard,
   DraftFidelityCard,
+  CaptainStandingsCard,
 } from '@/components/standings';
 
 import InitialSquadRegretCard from '@/components/standings/InitialSquadRegretCard';
@@ -222,6 +223,12 @@ export default function ClasificacionPage() {
           <div id="bottler-card">
             <BottlerCard />
           </div>
+        </div>
+      </Section>
+      {/* 9. Rendimiento de Capitanes */}
+      <Section title="Rendimiento de Capitanes" id="captains" delay={450} background="section-base">
+        <div className="grid grid-cols-1 gap-6">
+          <CaptainStandingsCard />
         </div>
       </Section>
     </div>
