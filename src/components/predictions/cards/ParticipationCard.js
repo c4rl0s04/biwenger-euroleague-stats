@@ -1,116 +1,126 @@
+'use client';
+
+import React, { useMemo } from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  Legend,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-import { useMemo } from 'react';
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 import { Users } from 'lucide-react';
 import { Card } from '@/components/ui';
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
-// Register ChartJS components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+/**
+ * CustomTooltip for Participation Chart
+ */
+const CustomTooltip = ({ active, payload, totalUsers }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const color = payload[0].fill;
 
-// Common options
-const commonOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'bottom',
-      labels: {
-        boxWidth: 8,
-        usePointStyle: true,
-        padding: 20,
-        color: '#94a3b8', // text-muted-foreground (approx)
-        font: {
-          family: "'Barlow', sans-serif",
-          size: 11,
-        },
-      },
-    },
-    tooltip: {
-      mode: 'index',
-      intersect: false,
-      backgroundColor: 'rgba(15, 23, 42, 0.9)', // bg-slate-900
-      titleColor: '#f8fafc', // text-foreground
-      bodyColor: '#cbd5e1', // text-muted-foreground
-      borderColor: 'rgba(51, 65, 85, 0.5)', // border-slate-700
-      borderWidth: 1,
-      padding: 10,
-      cornerRadius: 8,
-      titleFont: { family: "'Barlow', sans-serif", size: 13, weight: 'bold' },
-      bodyFont: { family: "'Barlow', sans-serif", size: 12 },
-    },
-  },
-  scales: {
-    y: {
-      grid: { color: 'rgba(51, 65, 85, 0.3)', borderDash: [4, 4] }, // border-slate-700
-      ticks: { color: '#64748b', font: { size: 10 } }, // text-slate-500
-      border: { display: false },
-    },
-    x: {
-      grid: { display: false },
-      ticks: { color: '#64748b', font: { size: 10 } },
-      border: { display: false },
-    },
-  },
+    return (
+      <GlassTooltip className="min-w-[180px]">
+        <TooltipHeader>{data.fullName}</TooltipHeader>
+        <div className="flex items-center justify-between gap-4 mt-1">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+            <span className="text-zinc-400 font-medium">Managers</span>
+          </div>
+          <span className="text-white font-black text-base tabular-nums">
+            {data.count}
+            <span className="text-[10px] text-zinc-500 ml-1 font-bold">/ {totalUsers}</span>
+          </span>
+        </div>
+      </GlassTooltip>
+    );
+  }
+  return null;
 };
 
-export function ParticipationCard({ data }) {
+export function ParticipationCard({ data, totalUsers }) {
   const chartData = useMemo(() => {
-    if (!data || data.length === 0) return { labels: [], datasets: [] };
+    if (!data || data.length === 0) return [];
 
-    const sortedData = [...data].sort((a, b) => {
-      const numA = parseInt(a.jornada.replace(/\D/g, '')) || 0;
-      const numB = parseInt(b.jornada.replace(/\D/g, '')) || 0;
-      return numA - numB;
-    });
-
-    return {
-      labels: sortedData.map((d) => d.jornada),
-      datasets: [
-        {
-          label: 'Participantes',
-          data: sortedData.map((d) => d.count),
-          backgroundColor: 'rgba(59, 130, 246, 0.8)', // blue-500 with opacity
-          hoverBackgroundColor: '#3b82f6',
-          borderRadius: 4,
-          borderSkipped: false,
-          barThickness: 20,
-        },
-      ],
-    };
+    return [...data]
+      .sort((a, b) => {
+        const numA = parseInt(a.jornada.replace(/\D/g, '')) || 0;
+        const numB = parseInt(b.jornada.replace(/\D/g, '')) || 0;
+        return numA - numB;
+      })
+      .map((d) => ({
+        name: d.jornada.replace(/Round |Jornada /i, 'J'),
+        fullName: d.jornada,
+        count: d.count,
+      }));
   }, [data]);
 
-  const options = {
-    ...commonOptions,
-    plugins: {
-      ...commonOptions.plugins,
-      legend: { display: false },
-    },
-    scales: {
-      ...commonOptions.scales,
-      y: {
-        ...commonOptions.scales.y,
-        beginAtZero: true,
-        ticks: { stepSize: 1, color: '#64748b' },
-      },
-      x: {
-        ...commonOptions.scales.x,
-        grid: { display: false },
-      },
-    },
+  const getBarColor = (count) => {
+    const ratio = totalUsers > 0 ? count / totalUsers : 0;
+    if (ratio >= 0.95) return '#012A4A';
+    if (ratio >= 0.75) return '#01497C';
+    if (ratio >= 0.55) return '#2A6F97';
+    if (ratio >= 0.35) return '#468FAF';
+    return '#89C2D9';
   };
 
   return (
     <Card title="Participación" icon={Users} color="blue" className="h-full">
-      <div className="h-[250px] w-full mt-auto">
-        <Bar options={options} data={chartData} />
+      <div className="h-[250px] w-full mt-4">
+        {chartData.length === 0 || totalUsers === 0 ? (
+          <div className="h-full flex items-center justify-center text-zinc-500 italic text-sm">
+            Sin datos de participación
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -35, bottom: 0 }}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#3f3f46"
+                opacity={0.2}
+              />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71717a', fontSize: 10, fontWeight: 600 }}
+                dy={10}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71717a', fontSize: 10, fontWeight: 600 }}
+                domain={[0, totalUsers]}
+                allowDecimals={false}
+                ticks={Array.from({ length: totalUsers + 1 }, (_, i) => i)}
+              />
+              <Tooltip
+                content={<CustomTooltip totalUsers={totalUsers} />}
+                cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }}
+              />
+              <Bar
+                dataKey="count"
+                radius={[6, 6, 0, 0]}
+                barSize={24}
+                animationDuration={1500}
+                animationEasing="ease-in-out"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={getBarColor(entry.count)}
+                    style={{ filter: `drop-shadow(0 0 6px ${getBarColor(entry.count)}40)` }}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </Card>
   );
