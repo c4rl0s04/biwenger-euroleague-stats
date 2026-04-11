@@ -6,6 +6,8 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { TrendingUp } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
 
+import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
+
 /**
  * Custom tooltip for the multi-user performance chart
  */
@@ -25,32 +27,35 @@ function CustomTooltip({ active, payload, label, metrics }) {
   }, {});
 
   return (
-    <div className="bg-zinc-900/95 backdrop-blur-sm border border-white/10 rounded-lg p-3 shadow-xl max-w-[250px] z-50">
-      <p className="text-xs text-zinc-400 mb-2 border-b border-white/5 pb-1">Jornada {label}</p>
+    <GlassTooltip className="min-w-[180px] pointer-events-none">
+      <TooltipHeader>Jornada {label}</TooltipHeader>
       <div className="space-y-3">
         {Object.entries(userPayloads).map(([userId, data]) => (
-          <div key={userId} className="space-y-1">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: data.color }} />
+          <div key={userId} className="space-y-1.5">
+            <div className="flex items-center gap-2.5 mb-1">
+              <div
+                className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+                style={{ backgroundColor: data.color }}
+              />
               <span className="text-xs font-bold text-white">{data.name}</span>
             </div>
 
             {metrics.actual && data.points.actual !== undefined && (
-              <div className="flex justify-between text-xs pl-4">
+              <div className="flex justify-between text-xs pl-5">
                 <span className="text-zinc-400">Reales:</span>
-                <span className="text-white font-mono">{data.points.actual}</span>
+                <span className="text-white font-bold tabular-nums">{data.points.actual}</span>
               </div>
             )}
             {metrics.ideal && data.points.ideal !== undefined && (
-              <div className="flex justify-between text-xs pl-4">
+              <div className="flex justify-between text-xs pl-5">
                 <span className="text-zinc-400">Ideales:</span>
-                <span className="text-white font-mono">{data.points.ideal}</span>
+                <span className="text-white font-bold tabular-nums">{data.points.ideal}</span>
               </div>
             )}
           </div>
         ))}
       </div>
-    </div>
+    </GlassTooltip>
   );
 }
 

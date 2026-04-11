@@ -34,15 +34,20 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
           <ChevronLeft size={24} />
         </button>
 
-        <div className="text-center min-w-[200px]">
+        <div className="text-center">
           <CustomSelect
             value={selectedRoundId}
             onChange={onChangeRound}
             options={
-              lists.rounds.map((r) => ({ value: r.round_id, label: r.round_name })).reverse() || []
+              lists.rounds
+                .map((r) => ({
+                  value: r.round_id,
+                  label: r.round_name.replace(/\s*\(aplazada\)/i, ''),
+                }))
+                .reverse() || []
             }
-            className="w-[350px] mx-auto"
-            buttonClassName="h-16 text-5xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10 cursor-pointer"
+            className="w-fit mx-auto"
+            buttonClassName="h-16 text-5xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10 cursor-pointer px-4"
             placeholder="Selecciona Jornada"
           />
           {/* Points display moved to Sidebar ScoreOverviewCard */}
