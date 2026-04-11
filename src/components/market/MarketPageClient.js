@@ -42,6 +42,9 @@ import StatDetailDrawer from './stats/StatDetailDrawer';
 import {
   Trophy,
   TrendingUp,
+  TrendingDown,
+  Telescope,
+  FastForward,
   Euro,
   Users,
   ShoppingCart,
@@ -203,7 +206,7 @@ export default function MarketPageClient() {
                   subtitle: 'Mayores plusvalías en una sola operación',
                   data: marketStats.bestFlip,
                   icon: TrendingUp,
-                  statType: 'transaction',
+                  statType: 'temporal',
                   color: 'emerald',
                 })
               }
@@ -212,11 +215,11 @@ export default function MarketPageClient() {
               data={marketStats.bestRevaluation}
               onViewAll={() =>
                 handleOpenDrawer({
-                  title: 'El Diamante en Bruto',
+                  title: 'El Visionario',
                   subtitle: 'Mayores revalorizaciones (no realizadas)',
                   data: marketStats.bestRevaluation,
-                  icon: Activity,
-                  statType: 'player',
+                  icon: Telescope,
+                  statType: 'temporal',
                   color: 'purple',
                 })
               }
@@ -225,11 +228,11 @@ export default function MarketPageClient() {
               data={marketStats.bestPercentage}
               onViewAll={() =>
                 handleOpenDrawer({
-                  title: 'Rentabilidad Relativa',
+                  title: 'Diamante en Bruto',
                   subtitle: 'Mayor % de beneficio sobre compra',
                   data: marketStats.bestPercentage,
-                  icon: Activity,
-                  statType: 'player',
+                  icon: Gem,
+                  statType: 'temporal',
                   color: 'cyan',
                 })
               }
@@ -262,7 +265,7 @@ export default function MarketPageClient() {
                   subtitle: 'Mayores pérdidas en una sola operación',
                   data: marketStats.worstFlip,
                   icon: AlertTriangle,
-                  statType: 'transaction',
+                  statType: 'temporal',
                   color: 'red',
                 })
               }
@@ -274,8 +277,8 @@ export default function MarketPageClient() {
                   title: 'El Depreciado',
                   subtitle: 'Mayores depreciaciones en cartera',
                   data: marketStats.worstRevaluation,
-                  icon: ShieldAlert,
-                  statType: 'player',
+                  icon: TrendingDown,
+                  statType: 'temporal',
                   color: 'pink',
                 })
               }
@@ -287,8 +290,8 @@ export default function MarketPageClient() {
                   title: 'El Impaciente',
                   subtitle: 'Jugadores vendidos que luego explotaron',
                   data: marketStats.missedOpportunity,
-                  icon: Clock,
-                  statType: 'player',
+                  icon: FastForward,
+                  statType: 'temporal',
                   color: 'amber',
                 })
               }
@@ -308,7 +311,7 @@ export default function MarketPageClient() {
                   subtitle: 'Operaciones de compraventa más veloces con beneficio',
                   data: marketStats.quickestFlip,
                   icon: Zap,
-                  statType: 'transaction',
+                  statType: 'temporal',
                   color: 'orange',
                 })
               }
@@ -321,7 +324,7 @@ export default function MarketPageClient() {
                   subtitle: 'Inversiones más pacientes con beneficio final',
                   data: marketStats.longestHold,
                   icon: Hourglass,
-                  statType: 'transaction',
+                  statType: 'temporal',
                   color: 'teal',
                 })
               }

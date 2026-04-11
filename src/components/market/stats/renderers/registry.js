@@ -22,33 +22,40 @@ export const METRIC_REGISTRY = {
   PLAYER: [
     {
       id: 'transfers_owners',
-      match: (item) => item.transfer_count !== undefined || item.distinct_owners_count !== undefined,
-      label: (item) => item.transfer_count !== undefined ? 'Total Fichajes' : 'Propietarios',
-      value: (item) => item.transfer_count !== undefined ? item.transfer_count : item.distinct_owners_count,
+      match: (item) =>
+        item.transfer_count !== undefined || item.distinct_owners_count !== undefined,
+      label: (item) => (item.transfer_count !== undefined ? 'Total Fichajes' : 'Propietarios'),
+      value: (item) =>
+        item.transfer_count !== undefined ? item.transfer_count : item.distinct_owners_count,
       sub: (item) => {
         if (item.avg_price) return `Desembolso Medio: ${formatEuro(item.avg_price)}€`;
         if (item.team_name && item.team_logo) {
           return (
             <div className="flex items-center gap-1.5 overflow-hidden">
-              <img src={item.team_logo} alt={item.team_name} className="w-3.5 h-3.5 object-contain shrink-0" />
+              <img
+                src={item.team_logo}
+                alt={item.team_name}
+                className="w-3.5 h-3.5 object-contain shrink-0"
+              />
               <span className="truncate">{item.team_name}</span>
             </div>
           );
         }
         return '';
-      }
+      },
     },
     {
       id: 'inflation',
       match: (item) => item.inflation !== undefined,
       label: 'Sobreprecio',
       value: (item) => `+${formatEuro(item.inflation)}€`,
-      sub: (item) => `P: ${formatEuro(item.purchase_price)}€ · M: ${formatEuro(item.market_price)}€`,
+      sub: (item) =>
+        `P: ${formatEuro(item.purchase_price)}€ · M: ${formatEuro(item.market_price)}€`,
       summary: {
         key: 'inflation',
         label: 'Sobreprecio Total',
-        type: 'currency'
-      }
+        type: 'currency',
+      },
     },
     {
       id: 'absences',
@@ -56,50 +63,65 @@ export const METRIC_REGISTRY = {
       label: 'Ausencias',
       value: (item) => `${item.missed_rounds}`,
       sub: (item) => {
-        const rate = item.available_rounds ? Math.round((item.played_rounds / item.available_rounds) * 100) : 0;
+        const rate = item.available_rounds
+          ? Math.round((item.played_rounds / item.available_rounds) * 100)
+          : 0;
         return `Asistencia: ${rate}% (${item.played_rounds}/${item.available_rounds})`;
       },
       summary: {
         key: 'missed_rounds',
         label: 'Ausencias Totales',
-        type: 'number'
-      }
+        type: 'number',
+      },
     },
     {
       id: 'revaluation',
-      match: (item) => item.revaluation !== undefined || item.devaluation !== undefined || item.percentage_gain !== undefined,
-      label: (item) => item.percentage_gain !== undefined ? 'Rentabilidad' : ( (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0 ? 'Revalorización' : 'Depreciación' ),
+      match: (item) =>
+        item.revaluation !== undefined ||
+        item.devaluation !== undefined ||
+        item.percentage_gain !== undefined,
+      label: (item) =>
+        item.percentage_gain !== undefined
+          ? 'Rentabilidad'
+          : (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+            ? 'Revalorización'
+            : 'Depreciación',
       value: (item) => {
         if (item.percentage_gain !== undefined) return `+${item.percentage_gain.toFixed(0)}%`;
         const change = item.revaluation !== undefined ? item.revaluation : item.devaluation;
         return `${formatEuro(Math.abs(change))}€`;
       },
-      sub: (item) => `C: ${formatEuro(item.purchase_price || 0)}€ · A: ${formatEuro(item.current_price || item.price || 0)}€`,
+      sub: (item) =>
+        `C: ${formatEuro(item.purchase_price || 0)}€ · A: ${formatEuro(item.current_price || item.price || 0)}€`,
       summary: {
-        key: (item) => item.revaluation !== undefined ? item.revaluation : item.devaluation,
-        label: (item) => (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0 ? 'Revalorización Total' : 'Depreciación Total',
-        type: 'currency'
-      }
+        key: (item) => (item.revaluation !== undefined ? item.revaluation : item.devaluation),
+        label: (item) =>
+          (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+            ? 'Revalorización Total'
+            : 'Depreciación Total',
+        type: 'currency',
+      },
     },
     {
       id: 'missed_profit',
       match: (item) => item.missed_profit !== undefined,
       label: 'Beneficio Perdido',
       value: (item) => `${formatEuro(item.missed_profit)}€`,
-      sub: (item) => `V: ${formatEuro(item.sale_price || 0)}€ · A: ${formatEuro(item.current_price || 0)}€`,
+      sub: (item) =>
+        `V: ${formatEuro(item.sale_price || 0)}€ · A: ${formatEuro(item.current_price || 0)}€`,
       summary: {
         key: 'missed_profit',
         label: 'Beneficio Perdido Total',
-        type: 'currency'
-      }
+        type: 'currency',
+      },
     },
     {
       id: 'points_million',
       match: (item) => item.points_per_million !== undefined,
       label: 'Puntos / Millón',
       value: (item) => item.points_per_million.toFixed(2),
-      sub: (item) => `${item.total_points} puntos totales`
-    }
+      sub: (item) => `${item.total_points} puntos totales`,
+    },
   ],
 
   // --- USER / MANAGER METRICS ---
@@ -109,45 +131,67 @@ export const METRIC_REGISTRY = {
       match: (item) => item.total_spent !== undefined && item.purchases_count !== undefined,
       label: 'Inversión Total',
       value: (item) => `${formatEuro(item.total_spent)}€`,
-      sub: (item) => `${item.purchases_count || 0} fichajes realizados`
+      sub: (item) => `${item.purchases_count || 0} fichajes realizados`,
     },
     {
       id: 'steals',
       match: (item) => item.stolen_count !== undefined,
       label: 'Jugadores Robados',
       value: (item) => item.stolen_count,
-      sub: (item) => item.total_spent ? `${formatEuro(item.total_spent)}€ invertidos` : 'Al acecho'
+      sub: (item) =>
+        item.total_spent ? `${formatEuro(item.total_spent)}€ invertidos` : 'Al acecho',
     },
     {
       id: 'failed_bids',
       match: (item) => item.failed_bids_count !== undefined,
       label: 'Jugadores Perdidos',
       value: (item) => item.failed_bids_count,
-      sub: (item) => 'Víctima de pujas ajustadas'
+      sub: (item) => 'Pujas realizadas sin éxito',
+      summary: {
+        key: 'failed_bids_count',
+        label: 'Total Pujas Fallidas',
+        type: 'number',
+      },
     },
     {
       id: 'overpay',
       match: (item) => item.total_overpay !== undefined,
       label: 'Sobrepago Total',
       value: (item) => `${formatEuro(item.total_overpay)}€`,
-      sub: (item) => `${item.contested_wins || 0} victorias en subasta`
+      sub: (item) => `${item.contested_wins} subastas ganadas con sobrepago`,
+      summary: {
+        key: 'total_overpay',
+        label: 'Sobrepago Total',
+        type: 'currency',
+      },
     },
     {
       id: 'profit',
       match: (item) => item.net_profit !== undefined || item.total_profit !== undefined,
       label: 'Plusvalías Totales',
       value: (item) => `${formatEuro(item.net_profit || item.total_profit || 0)}€`,
-      sub: (item) => item.total_sales
-        ? `${formatEuro(item.total_sales)}€ en ventas (${item.sales_count} ops)`
-        : `${item.trade_count || item.sales_count || 0} operaciones`
+      sub: (item) =>
+        item.total_sales
+          ? `${formatEuro(item.total_sales)}€ en ventas (${item.sales_count} ops)`
+          : `${item.trade_count || item.sales_count || 0} operaciones`,
+      summary: {
+        key: (item) => item.net_profit || item.total_profit || 0,
+        label: 'Plusvalía Total Liga',
+        type: 'currency',
+      },
     },
     {
       id: 'trades',
       match: (item) => item.trade_count !== undefined,
       label: 'Operaciones',
       value: (item) => item.trade_count,
-      sub: (item) => 'Volumen total de actividad'
-    }
+      sub: (item) => 'Volumen total de actividad',
+      summary: {
+        key: 'trade_count',
+        label: 'Operaciones Totales',
+        type: 'number',
+      },
+    },
   ],
 
   // --- TRANSACTION / FLOW METRICS ---
@@ -176,14 +220,24 @@ export const METRIC_REGISTRY = {
             {item.second_bidder_name || 'otro manager'}
           </Link>
         </div>
-      )
+      ),
+      summary: {
+        key: 'price_diff',
+        label: 'Margen Total',
+        type: 'currency',
+      },
     },
     {
       id: 'auction',
       match: (item) => item.bid_count !== undefined,
       label: 'Pujas',
       value: (item) => item.bid_count,
-      sub: (item) => `Precio Traspaso: ${formatEuro(item.precio)}€`
+      sub: (item) => `Precio Traspaso: ${formatEuro(item.precio)}€`,
+      summary: {
+        key: 'bid_count',
+        label: 'Pujas Totales',
+        type: 'number',
+      },
     },
     {
       id: 'transfer',
@@ -194,24 +248,40 @@ export const METRIC_REGISTRY = {
       info: (item) => (
         <div className="flex items-center gap-1.5 mt-1.5 overflow-hidden">
           <Link
-            href={item.vendedor === 'Mercado' || item.vendedor === 'Biwenger' ? '#' : `/user/${item.vendedor_id || item.seller_id}`}
+            href={
+              item.vendedor === 'Mercado' || item.vendedor === 'Biwenger'
+                ? '#'
+                : `/user/${item.vendedor_id || item.seller_id}`
+            }
             onClick={(e) => e.stopPropagation()}
             className={`text-[10px] font-black uppercase tracking-widest truncate transition-transform duration-200 hover:scale-105 origin-left ${
-              item.vendedor === 'Mercado' || item.vendedor === 'Biwenger' 
-                ? 'text-zinc-500 cursor-default pointer-events-none' 
-                : getColorForUser(item.vendedor_id || item.seller_id, item.vendedor, item.vendedor_color_index || item.seller_color).text
+              item.vendedor === 'Mercado' || item.vendedor === 'Biwenger'
+                ? 'text-zinc-500 cursor-default pointer-events-none'
+                : getColorForUser(
+                    item.vendedor_id || item.seller_id,
+                    item.vendedor,
+                    item.vendedor_color_index || item.seller_color
+                  ).text
             }`}
           >
             {item.vendedor}
           </Link>
           <ArrowRight size={10} className="text-zinc-700 shrink-0" />
           <Link
-            href={item.comprador === 'Mercado' || item.comprador === 'Biwenger' ? '#' : `/user/${item.comprador_id || item.buyer_id}`}
+            href={
+              item.comprador === 'Mercado' || item.comprador === 'Biwenger'
+                ? '#'
+                : `/user/${item.comprador_id || item.buyer_id}`
+            }
             onClick={(e) => e.stopPropagation()}
             className={`text-[10px] font-black uppercase tracking-widest truncate transition-transform duration-200 hover:scale-105 origin-left ${
-              item.comprador === 'Mercado' || item.comprador === 'Biwenger' 
-                ? 'text-zinc-500 cursor-default pointer-events-none' 
-                : getColorForUser(item.comprador_id || item.buyer_id, item.comprador, item.comprador_color_index || item.buyer_color).text
+              item.comprador === 'Mercado' || item.comprador === 'Biwenger'
+                ? 'text-zinc-500 cursor-default pointer-events-none'
+                : getColorForUser(
+                    item.comprador_id || item.buyer_id,
+                    item.comprador,
+                    item.comprador_color_index || item.buyer_color
+                  ).text
             }`}
           >
             {item.comprador}
@@ -221,9 +291,9 @@ export const METRIC_REGISTRY = {
       summary: {
         key: (item) => item.precio || item.price || 0,
         label: 'Volumen Total de Traspasos',
-        type: 'currency'
-      }
-    }
+        type: 'currency',
+      },
+    },
   ],
 
   // --- TEMPORAL / FLIP METRICS ---
@@ -247,8 +317,8 @@ export const METRIC_REGISTRY = {
       summary: {
         key: 'profit',
         label: 'Beneficio Total Realizado',
-        type: 'currency'
-      }
+        type: 'currency',
+      },
     },
     {
       id: 'revaluation_flip',
@@ -269,31 +339,73 @@ export const METRIC_REGISTRY = {
       summary: {
         key: 'profit',
         label: 'Beneficio Total Realizado',
-        type: 'currency'
-      }
+        type: 'currency',
+      },
+    },
+    {
+      id: 'revaluation_open',
+      match: (item) =>
+        item.revaluation !== undefined ||
+        item.devaluation !== undefined ||
+        item.percentage_gain !== undefined,
+      label: (item) =>
+        item.percentage_gain !== undefined
+          ? 'Rentabilidad'
+          : (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+            ? 'Revalorización'
+            : 'Depreciación',
+      value: (item) => {
+        if (item.percentage_gain !== undefined) return `+${item.percentage_gain.toFixed(0)}%`;
+        const change = item.revaluation !== undefined ? item.revaluation : item.devaluation;
+        return `${formatEuro(Math.abs(change))}€`;
+      },
+      sub: (item) =>
+        `C: ${formatEuro(item.purchase_price || 0)}€ · A: ${formatEuro(item.current_price || item.price || 0)}€`,
+      summary: {
+        key: (item) => (item.revaluation !== undefined ? item.revaluation : item.devaluation),
+        label: (item) =>
+          (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+            ? 'Revalorización Total'
+            : 'Depreciación Total',
+        type: 'currency',
+      },
+    },
+    {
+      id: 'missed_profit_item',
+      match: (item) => item.missed_profit !== undefined,
+      label: 'Beneficio Perdido',
+      value: (item) => `${formatEuro(item.missed_profit)}€`,
+      sub: (item) =>
+        `V: ${formatEuro(item.sale_price || 0)}€ · A: ${formatEuro(item.current_price || 0)}€`,
+      summary: {
+        key: 'missed_profit',
+        label: 'Beneficio Perdido Total',
+        type: 'currency',
+      },
     },
     {
       id: 'generic_flip',
       match: (item) => item.purchase_price !== undefined && item.sale_price !== undefined,
       label: (item) => {
-        const p = (item.profit !== undefined) ? item.profit : (item.sale_price - item.purchase_price);
+        const p = item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price;
         return p >= 0 ? 'Beneficio' : 'Pérdida';
       },
       value: (item) => {
-        const p = (item.profit !== undefined) ? item.profit : (item.sale_price - item.purchase_price);
+        const p = item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price;
         return `${formatEuro(Math.abs(p))}€`;
       },
       sub: (item) => `C: ${formatEuro(item.purchase_price)}€ · V: ${formatEuro(item.sale_price)}€`,
       summary: {
-        key: (item) => (item.profit !== undefined) ? item.profit : (item.sale_price - item.purchase_price),
+        key: (item) =>
+          item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price,
         label: (item) => {
-          const p = (item.profit !== undefined) ? item.profit : (item.sale_price - item.purchase_price);
+          const p = item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price;
           return p >= 0 ? 'Beneficio Total' : 'Pérdida Total';
         },
-        type: 'currency'
-      }
-    }
-  ]
+        type: 'currency',
+      },
+    },
+  ],
 };
 
 /**
@@ -301,5 +413,5 @@ export const METRIC_REGISTRY = {
  */
 export function getMetricConfig(item, category) {
   const metrics = METRIC_REGISTRY[category] || [];
-  return metrics.find(m => m.match(item)) || null;
+  return metrics.find((m) => m.match(item)) || null;
 }
