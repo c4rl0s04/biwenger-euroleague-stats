@@ -5,7 +5,7 @@ import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/res
 export async function GET(request: NextRequest) {
   try {
     const stats = await fetchDetailedCaptainStats();
-    return successResponse({ stats }, CACHE_DURATIONS.NONE);
+    return successResponse({ stats }, 0);
   } catch (error) {
     console.error('API Error in /api/standings/captains:', error);
     return errorResponse('Failed to fetch detailed captain stats');

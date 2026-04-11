@@ -14,13 +14,16 @@ import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 function CustomTooltip({ active, payload, label, metrics }) {
   if (!active || !payload || !payload.length) return null;
 
-  // Group payload by user (prefix in dataKey)
   const userPayloads = payload.reduce((acc, p) => {
-    const [userId, metric] = p.dataKey.split('_');
-    if (!acc[userId]) acc[userId] = { color: p.color, name: p.name, points: {} };
+    if (!p.dataKey) return acc;
+    const parts = p.dataKey.split('_');
+    if (parts.length < 2) return acc;
+    const [userId, metric] = parts;
+
+    if (!acc[userId]) acc[userId] = { color: p.color, name: p.name || 'Usuario', points: {} };
     // Fix: If the line has legendType="none", p.name might be the raw dataKey or adjusted.
     // We prefer using the name from the "Actual" line which is usually the user's name.
-    if (metric === 'actual') acc[userId].name = p.name;
+    if (metric === 'actual') acc[userId].name = p.name || acc[userId].name;
 
     acc[userId].points[metric] = p.value;
     return acc;
@@ -127,9 +130,11 @@ export default function PerformanceChart({
             <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '11px' }} iconType="circle" />
 
             {comparisonUsers.map((user, index) => {
+              if (!user?.id) return null;
+
               // 1. Get consistent color from constants
-              const userColor = getColorForUser(user.id, user.name, user.color_index);
-              const strokeColor = userColor.stroke;
+              const userColor = getColorForUser(user.id, user.name || 'Usuario', user.color_index);
+              const strokeColor = userColor?.stroke || '#ffffff';
 
               return (
                 <g key={user.id}>

@@ -7,7 +7,7 @@ const bundleAnalyzer = withBundleAnalyzer({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone', // Enabled for Docker builds
-  serverExternalPackages: ['better-sqlite3'],
+  serverExternalPackages: [],
   allowedDevOrigins: ['192.168.1.40', '192.168.1.68', 'localhost'],
   images: {
     remotePatterns: [

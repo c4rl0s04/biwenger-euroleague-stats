@@ -28,7 +28,8 @@ export default function CustomSelect({
 
   const selectedOption = options.find((opt) => opt.value === value);
 
-  const isCentered = buttonClassName.includes('justify-center');
+  const isCentered =
+    typeof buttonClassName === 'string' && buttonClassName.includes('justify-center');
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>

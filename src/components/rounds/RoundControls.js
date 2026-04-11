@@ -42,7 +42,7 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
               lists.rounds
                 .map((r) => ({
                   value: r.round_id,
-                  label: r.round_name.replace(/\s*\(aplazada\)/i, ''),
+                  label: (r.round_name || `Jornada ${r.round_id}`).replace(/\s*\(aplazada\)/i, ''),
                 }))
                 .reverse() || []
             }
