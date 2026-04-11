@@ -183,15 +183,24 @@ describe('GET /api/standings/initial-squad-stats', () => {
     const mockStats = {
       bestDraftPerUser: [
         {
+          user_id: '1',
           user_name: 'ask72',
           user_color_index: 0,
+          icon: null,
           player_name: 'Coid Miller',
           player_id: 31790,
           total_fantasy_points: 697,
         },
       ],
       retainedRanking: [
-        { user_name: 'ask72', user_color_index: 0, players_contributed: 7, total_points: 1600 },
+        {
+          user_id: '1',
+          user_name: 'ask72',
+          user_color_index: 0,
+          icon: null,
+          players_contributed: 7,
+          total_points: 1600,
+        },
       ],
       retainedBreakdown: [],
       regretRanking: [],
