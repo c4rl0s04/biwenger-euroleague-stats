@@ -285,11 +285,18 @@ export async function fetchRoundLeaderboard() {
           avgEfficiency: stats.avgEfficiency,
           totalLost: stats.totalLost,
           bestActual: stats.bestRound?.actual_points || 0,
+          bestActualRound: stats.bestRound?.round_number || null,
           worstActual: stats.worstRound?.actual_points || 0,
+          worstActualRound: stats.worstRound?.round_number || null,
           bestEfficiency: stats.bestEffRound?.efficiency || 0,
           bestEffRound: stats.bestEffRound?.round_number || null,
           worstEfficiency: stats.worstEffRound?.efficiency || 0,
           worstEffRound: stats.worstEffRound?.round_number || null,
+          bestIdeal: stats.bestIdealRound?.ideal_points || 0,
+          bestIdealRoundNum: stats.bestIdealRound?.round_number || null,
+          maxLost:
+            (stats.maxLostRound?.ideal_points || 0) - (stats.maxLostRound?.actual_points || 0),
+          maxLostRoundNum: stats.maxLostRound?.round_number || null,
           roundsPlayed: stats.roundsPlayed,
         };
       } catch (err) {
@@ -309,11 +316,17 @@ function generateEmptyStats(userId: string | number) {
     avgEfficiency: '0.0',
     totalLost: 0,
     bestActual: 0,
+    bestActualRound: null,
     worstActual: 0,
+    worstActualRound: null,
     bestEfficiency: 0,
-    round_number: null,
+    bestEffRound: null,
     worstEfficiency: 0,
     worstEffRound: null,
+    bestIdeal: 0,
+    bestIdealRoundNum: null,
+    maxLost: 0,
+    maxLostRoundNum: null,
     roundsPlayed: 0,
   };
 }

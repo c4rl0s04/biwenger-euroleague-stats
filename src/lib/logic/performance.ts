@@ -19,6 +19,8 @@ export interface CalculatedPerformanceStats {
   bestEffRound: RoundPerformance;
   worstRound: RoundPerformance;
   worstEffRound: RoundPerformance;
+  bestIdealRound: RoundPerformance;
+  maxLostRound: RoundPerformance;
   roundsPlayed: number;
 }
 
@@ -48,6 +50,15 @@ export function calculateStats(
     (worst, r) => (r.actual_points < worst.actual_points ? r : worst),
     history[0]
   );
+  const bestIdealRound = history.reduce(
+    (best, r) => (r.ideal_points > best.ideal_points ? r : best),
+    history[0]
+  );
+  const maxLostRound = history.reduce((worst, r) => {
+    const lostR = (r.ideal_points || 0) - (r.actual_points || 0);
+    const lostBest = (worst.ideal_points || 0) - (worst.actual_points || 0);
+    return lostR > lostBest ? r : worst;
+  }, history[0]);
 
   return {
     avgEfficiency: avgEfficiency.toFixed(1),
@@ -58,6 +69,8 @@ export function calculateStats(
     bestEffRound,
     worstRound,
     worstEffRound,
+    bestIdealRound,
+    maxLostRound,
     roundsPlayed: history.length,
   };
 }

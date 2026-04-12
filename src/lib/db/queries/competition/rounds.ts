@@ -1120,25 +1120,25 @@ export async function getUserOptimization(userId: string, roundId: string | numb
   //    getUserLineup already back-calculates their points (total - known players weighted sum).
   //    We inject them here so the greedy algorithm can include them in the optimal lineup,
   //    which prevents actualScore > maxScore (efficiency > 100%).
-  const lineupForGhosts = await getUserLineup(userId, roundId);
-  if (lineupForGhosts) {
+  const lineupPlayers = await getUserLineup(userId, roundId);
+  if (lineupPlayers) {
     const knownIds = new Set(squadStats.map((s: any) => s.player_id));
-    for (const ghost of lineupForGhosts.players) {
-      if (ghost.is_missing && ghost.points > 0 && !knownIds.has(ghost.player_id)) {
+    for (const player of lineupPlayers.players) {
+      if (!knownIds.has(player.player_id)) {
         squadStats.push({
-          player_id: ghost.player_id,
-          name: ghost.name || 'Unknown Player',
-          // Infer the ghost's actual position from the lineup context instead of
-          // defaulting to 'Base'. A wrong position can cause the greedy to bench a
-          // highly-scoring ghost player, underestimating potentialPoints.
-          position: inferGhostPosition(lineupForGhosts.players, ghost, squadStats),
-          img: ghost.img ?? null,
-          team_short: ghost.team_short ?? null,
-          team_img: ghost.team_img ?? null,
-          points: ghost.points,
-          valuation: 0,
+          player_id: player.player_id,
+          name: player.name || 'Unknown Player',
+          position:
+            player.position && player.position !== 'Bench'
+              ? player.position
+              : inferGhostPosition(lineupPlayers.players, player, squadStats),
+          img: player.img ?? null,
+          team_short: player.team_short ?? null,
+          team_img: player.team_img ?? null,
+          points: player.points,
+          valuation: player.valuation || 0,
         });
-        knownIds.add(ghost.player_id);
+        knownIds.add(player.player_id);
       }
     }
     // Re-sort by points descending so the greedy algorithm picks the best players first.

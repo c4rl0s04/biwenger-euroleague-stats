@@ -36,6 +36,7 @@ import LeagueLeaderboard from './stats/history/LeagueLeaderboard';
 import EfficiencyHeatmap from './stats/history/EfficiencyHeatmap';
 import ConsistencyRanking from './stats/history/ConsistencyRanking';
 import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
+import RecordsGrid from './stats/history/RecordsGrid';
 import LineupStatsCard from './stats/general/LineupStatsCard';
 import { Section } from '@/components/layout';
 import { usePerformanceStats } from '@/lib/hooks/usePerformanceStats';
@@ -553,6 +554,14 @@ export default function RoundsPageClient() {
               comparisonUsers={comparisonUsersList}
               metrics={chartMetrics}
             />
+
+            {/* LEAGUE WIDE RECORDS */}
+            {!leaderboardLoading && leaderboardData?.leaderboard && (
+              <RecordsGrid
+                leaderboardData={leaderboardData.leaderboard}
+                users={lists?.users || []}
+              />
+            )}
 
             {historyStats && (
               <div className="space-y-3">
