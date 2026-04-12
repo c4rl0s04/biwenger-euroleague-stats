@@ -1,16 +1,12 @@
-'use client';
-
 import { useMemo } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { getColorForUser } from '@/lib/constants/colors';
+import { Ruler } from 'lucide-react';
+import StatsList from '@/components/ui/StatsList';
 
 /**
- * ConsistencyRanking - Shows users ranked by consistency (lowest variance in efficiency)
- * Redesigned to clearly show Range, Average, and Variation with color coding.
+ * ConsistencyRanking - Shows users ranked by consistency using StatsList
  */
 export default function ConsistencyRanking({ allUsersHistory = [], users = [], loading = false }) {
-  const consistencyData = useMemo(() => {
+  const items = useMemo(() => {
     if (!allUsersHistory.length) return [];
 
     return allUsersHistory
@@ -28,8 +24,14 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
           efficiencies.reduce((sum, e) => sum + Math.pow(e - avg, 2), 0) / efficiencies.length;
         const stdDev = Math.sqrt(variance);
 
+        const user = users.find((u) => u.id === userId);
+
         return {
-          userId,
+          id: userId,
+          user_id: userId,
+          name: user?.name || 'User',
+          icon: user?.icon,
+          color_index: user?.color_index,
           min,
           max,
           range,
@@ -40,7 +42,7 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
       })
       .filter(Boolean)
       .sort((a, b) => a.stdDev - b.stdDev); // Most consistent first
-  }, [allUsersHistory]);
+  }, [allUsersHistory, users]);
 
   if (loading) {
     return (
@@ -52,7 +54,7 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
     );
   }
 
-  if (!consistencyData.length) {
+  if (!items.length) {
     return (
       <div className="text-center py-8 text-muted-foreground text-sm">
         No hay datos de consistencia disponibles
@@ -60,144 +62,93 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
     );
   }
 
+  // Visualization helpers
+  const scaleMin = 50;
+  const scaleMax = 100;
+  const getPos = (val) =>
+    Math.max(0, Math.min(100, ((val - scaleMin) / (scaleMax - scaleMin)) * 100));
+
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        {consistencyData.map((data, index) => {
-          const user = users.find((u) => u.id === data.userId);
-          const userColor = getColorForUser(data.userId, user?.name, user?.color_index);
-
-          // Calculate bar positions (scale 50-100 range for detailed view)
-          const scaleMin = 50;
-          const scaleMax = 100;
-          const getPos = (val) =>
-            Math.max(0, Math.min(100, ((val - scaleMin) / (scaleMax - scaleMin)) * 100));
-
+    <div className="flex flex-col h-full">
+      <StatsList
+        items={items}
+        renderRight={(data) => {
           const minPos = getPos(data.min);
           const maxPos = getPos(data.max);
           const avgPos = getPos(data.avg);
-
-          // Standard Deviation positions (Visualizing "Normal Performance Range")
-          // Clamped to be visually useful, roughly Avg +/- SD
           const sdLowPos = getPos(Math.max(data.min, data.avg - data.stdDev));
           const sdHighPos = getPos(Math.min(data.max, data.avg + data.stdDev));
 
           // Dynamic Color based on Variation (stdDev)
-          let barColorBase = 'emerald-500';
-          if (data.stdDev >= 5 && data.stdDev < 10) barColorBase = 'cyan-500';
-          else if (data.stdDev >= 10 && data.stdDev < 15) barColorBase = 'yellow-500';
-          else if (data.stdDev >= 15) barColorBase = 'orange-500';
+          let barColor = 'emerald-500';
+          let textColor = 'text-emerald-400';
+          if (data.stdDev >= 5 && data.stdDev < 10) {
+            barColor = 'cyan-500';
+            textColor = 'text-cyan-400';
+          } else if (data.stdDev >= 10 && data.stdDev < 15) {
+            barColor = 'yellow-500';
+            textColor = 'text-yellow-400';
+          } else if (data.stdDev >= 15) {
+            barColor = 'orange-500';
+            textColor = 'text-orange-400';
+          }
 
           return (
-            <div
-              key={data.userId}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors group"
-            >
-              {/* Rank */}
-              <span className="w-5 text-xs text-muted-foreground font-bold">#{index + 1}</span>
-
-              {/* User */}
-              <Link
-                href={`/user/${data.userId}`}
-                className="flex items-center gap-2 w-28 flex-shrink-0 group-hover:opacity-100 transition-opacity"
-              >
-                {user?.icon ? (
-                  <Image
-                    src={user.icon}
-                    alt={user.name}
-                    width={20}
-                    height={20}
-                    unoptimized
-                    className="rounded-full object-cover group-hover:scale-110 transition-transform"
-                  />
-                ) : (
-                  <div
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white"
-                    style={{ backgroundColor: userColor.stroke }}
-                  >
-                    {user?.name?.charAt(0) || '?'}
-                  </div>
-                )}
-                <span className={`text-xs font-medium truncate ${userColor.text}`}>
-                  {user?.name?.slice(0, 10) || 'User'}
-                </span>
-              </Link>
-
+            <div className="flex items-center gap-4">
               {/* Visualization Container */}
-              <div className="flex-1 h-6 bg-zinc-900/50 rounded relative overflow-hidden border border-white/5">
-                {/* 1. Min-Max Total Range Bar (Faint/Thin) */}
+              <div className="w-48 sm:w-72 h-5 bg-zinc-900/50 rounded relative overflow-hidden border border-white/5">
+                {/* Min-Max Total Range Bar */}
                 <div
-                  className={`absolute top-1/2 -translate-y-1/2 h-1 bg-${barColorBase}/20 rounded-full`}
+                  className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-white/10 rounded-full"
                   style={{
                     left: `${minPos}%`,
                     width: `${Math.max(2, maxPos - minPos)}%`,
                   }}
-                >
-                  {/* Vertical ticks for min/max */}
-                  <div className={`absolute left-0 h-3 -top-1 w-0.5 bg-${barColorBase}/40`} />
-                  <div className={`absolute right-0 h-3 -top-1 w-0.5 bg-${barColorBase}/40`} />
-                </div>
-
-                {/* 2. Variation Range Bar (Avg +/- SD) - Solid & Thicker */}
-                {/* Represents typical performance area */}
+                />
+                {/* Variation Range Bar (Avg +/- SD) */}
                 <div
-                  className={`absolute top-1/2 -translate-y-1/2 h-2.5 bg-${barColorBase} rounded-sm shadow-sm`}
+                  className="absolute top-1/2 -translate-y-1/2 h-2 rounded-sm shadow-sm opacity-80"
                   style={{
                     left: `${sdLowPos}%`,
-                    width: `${Math.max(1, sdHighPos - sdLowPos)}%`,
-                    opacity: 0.8,
+                    width: `${Math.max(2, sdHighPos - sdLowPos)}%`,
+                    backgroundColor: `var(--tw-color-${barColor.replace('-500', '')}-500, ${
+                      barColor.includes('emerald') ? '#10b981' : '#f59e0b'
+                    })`,
                   }}
                 />
-
-                {/* 3. Average Marker (Visual Pivot) */}
+                {/* Average Marker */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 h-4 w-1 bg-white rounded-full shadow-md z-10"
+                  className="absolute top-1/2 -translate-y-1/2 h-3.5 w-0.5 bg-white rounded-full shadow-md z-10"
                   style={{ left: `${avgPos}%` }}
                 />
               </div>
 
-              {/* Stats */}
-              <div className="text-right w-24 flex-shrink-0 flex flex-col items-end gap-0.5">
-                <div className="flex items-center gap-1.5" title="Average Efficiency">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Prom
-                  </span>
-                  <span className="text-xs font-bold text-white">{data.avg.toFixed(1)}%</span>
+              {/* Numeric Stats */}
+              <div className="text-right w-16 flex-shrink-0 flex flex-col justify-center">
+                <div className="text-[11px] font-black text-white leading-none">
+                  {data.avg.toFixed(1)}%
                 </div>
-                <div className="flex items-center gap-1.5" title="Standard Deviation">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Var
-                  </span>
-                  <span className={`text-xs font-medium text-${barColorBase}`}>
-                    ±{data.stdDev.toFixed(1)}
-                  </span>
+                <div className={`text-[9px] font-bold ${textColor} leading-tight pt-0.5`}>
+                  ±{data.stdDev.toFixed(1)}
                 </div>
               </div>
             </div>
           );
-        })}
-      </div>
+        }}
+      />
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 pt-3 border-t border-white/5 text-[10px] text-muted-foreground flex-wrap">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-3 w-8 bg-zinc-800 rounded relative border border-white/5">
-            <div className="absolute left-[10%] right-[10%] h-0.5 bg-emerald-500/40" />
-            <div className="absolute left-[10%] h-2 w-px bg-emerald-500/40" />
-            <div className="absolute right-[10%] h-2 w-px bg-emerald-500/40" />
-          </div>
-          <span>Rango Total (Min-Max)</span>
+      <div className="flex items-center justify-center gap-x-4 gap-y-1.5 pt-3 mt-auto border-t border-white/5 text-[9px] text-muted-foreground flex-wrap uppercase font-bold tracking-tighter">
+        <div className="flex items-center gap-1">
+          <div className="w-2.5 h-0.5 bg-white/20" />
+          <span>Rango Min-Max</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-3 w-8 bg-zinc-800 rounded relative border border-white/5">
-            <div className="h-2 w-4 bg-emerald-500/80 rounded-sm" />
-          </div>
-          <span>Rango Habitual (±Var)</span>
+        <div className="flex items-center gap-1">
+          <div className="w-2.5 h-1.5 rounded-[1px] bg-zinc-500/50 border border-white/10" />
+          <span>Var. Típica</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center h-3 w-4 justify-center bg-zinc-800 rounded relative">
-            <div className="w-1 h-2.5 bg-white rounded-full" />
-          </div>
+        <div className="flex items-center gap-1">
+          <div className="w-0.5 h-2.5 bg-white" />
           <span>Promedio</span>
         </div>
       </div>
