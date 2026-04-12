@@ -943,8 +943,7 @@ export async function getIdealLineup(roundId: string | number): Promise<LineupPl
 
   const idealLineupRaw = [...starters, ...bench];
 
-  // Map to "Lineup" format with Multipliers
-  return idealLineupRaw.map((p, index) => {
+  const idealLineup = idealLineupRaw.map((p, index) => {
     let multiplier = 0;
     let role = 'bench';
     let is_captain = false;
@@ -973,6 +972,13 @@ export async function getIdealLineup(roundId: string | number): Promise<LineupPl
       multiplier,
     } as LineupPlayer;
   });
+
+  const totalPoints = Math.round(calculateWeightedSum(idealLineup));
+
+  return {
+    idealLineup,
+    totalPoints,
+  } as any;
 }
 
 /**
@@ -1318,12 +1324,12 @@ export async function getCoachRating(userId: string, roundId: string | number) {
     return null;
   }
 
-  const maxScore = optimization.totalPoints;
+  const maxScore = Math.round(optimization.totalPoints);
   // In live rounds user_rounds rows may not exist yet, so summary can be null.
   // Fall back to calculating the live score directly from lineup player stats.
-  const actualScore = userLineup.summary
-    ? userLineup.summary.total_points
-    : calculateWeightedSum(userLineup.players);
+  const actualScore = Math.round(
+    userLineup.summary ? userLineup.summary.total_points : calculateWeightedSum(userLineup.players)
+  );
 
   // calcEfficiency is the single source of truth: actual/ideal, capped at 100.
   const efficiency = calcEfficiency(actualScore, maxScore);

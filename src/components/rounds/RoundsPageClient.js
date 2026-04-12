@@ -216,7 +216,8 @@ export default function RoundsPageClient() {
   // Stats Data (For Sidebar)
   const statsData = {
     global: roundData?.global,
-    idealLineup: fullRoundData?.idealLineup,
+    idealLineup: fullRoundData?.idealLineup || roundData?.idealLineup,
+    globalIdealPoints: fullRoundData?.globalIdealPoints || roundData?.globalIdealPoints,
     user: currentUserStats
       ? {
           ...currentUserStats, // points, ideal_points
@@ -280,14 +281,8 @@ export default function RoundsPageClient() {
       round_rank: null,
     };
   } else if (viewMode === 'ideal' && statsData?.idealLineup) {
-    // Calculate total using multipliers (Captain, 6thMan, Bench)
-    const globalTotal = statsData.idealLineup.reduce((sum, p) => {
-      const multiplier = p.multiplier || (p.role === 'titular' ? 1 : 0.5); // Fallback
-      return sum + (p.points || 0) * multiplier;
-    }, 0);
-
     currentSummary = {
-      total_points: Math.round(globalTotal),
+      total_points: statsData.globalIdealPoints || 0,
       round_rank: null,
     };
   }

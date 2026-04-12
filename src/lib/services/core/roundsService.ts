@@ -64,7 +64,7 @@ export async function fetchRoundStandings(roundId: string | number): Promise<Use
         const rating = await getCoachRating(user.id, roundId);
         return {
           ...user,
-          ideal_points: rating?.maxScore || 0,
+          ideal_points: Math.round(rating?.maxScore || 0),
         };
       } catch (e) {
         console.error(`Failed to calc ideal for user ${user.id}`, e);
@@ -93,11 +93,13 @@ export async function fetchRoundCompleteData(
   if (!roundId) return null;
 
   // 1. Fetch Global Context
-  const [globalStats, globalIdealLineup, baseStandings] = await Promise.all([
+  const [globalStats, idealQueryResult, baseStandings] = await Promise.all([
     getRoundGlobalStats(roundId),
-    getIdealLineup(roundId),
+    getIdealLineup(roundId) as Promise<any>,
     fetchRoundStandings(roundId), // Reuses the logic to get list + basic points + ideal points
   ]);
+
+  const { idealLineup, totalPoints: globalIdealPoints } = idealQueryResult;
 
   // 2. Filter users based on mode
   let usersToFetch = baseStandings || [];
@@ -135,7 +137,8 @@ export async function fetchRoundCompleteData(
 
   return {
     global: globalStats,
-    idealLineup: globalIdealLineup,
+    idealLineup: idealLineup,
+    globalIdealPoints: globalIdealPoints,
     users: usersDetailed, // Filtered list based on mode
   };
 }
@@ -169,8 +172,8 @@ export async function getUserPerformanceHistoryService(
   // 2. Iterate direct results (Trust user_rounds points regardless of participation)
   const historyWithIdeal = await Promise.all(
     rawRounds.map(async (round: any) => {
-      // Extract round number from name
-      const roundNumberMatch = round.round_name.match(/(\d+)$/);
+      // Extract round number from name (e.g. "Jornada 34 (aplazada)" -> 34)
+      const roundNumberMatch = round.round_name.match(/(\d+)/);
       const roundNumber = roundNumberMatch ? parseInt(roundNumberMatch[1]) : 0;
 
       // Always use the stored points, even if they didn't "participate" (e.g. general rounds)
@@ -181,7 +184,7 @@ export async function getUserPerformanceHistoryService(
         // Business Logic: Calculate ideal points
         const coachRating = await getCoachRating(String(userId), String(round.round_id));
 
-        const idealPoints = coachRating?.maxScore || actualPoints;
+        const idealPoints = Math.round(coachRating?.maxScore || actualPoints);
 
         const efficiency = calcEfficiency(actualPoints, idealPoints);
 
@@ -189,7 +192,7 @@ export async function getUserPerformanceHistoryService(
           round_id: round.round_id,
           round_number: roundNumber,
           round_name: round.round_name,
-          actual_points: actualPoints,
+          actual_points: Math.round(actualPoints),
           ideal_points: idealPoints,
           efficiency: parseFloat(efficiency.toFixed(1)),
           participated: participated,
@@ -200,8 +203,8 @@ export async function getUserPerformanceHistoryService(
           round_id: round.round_id,
           round_number: roundNumber,
           round_name: round.round_name,
-          actual_points: actualPoints,
-          ideal_points: actualPoints, // Fallback
+          actual_points: Math.round(actualPoints),
+          ideal_points: Math.round(actualPoints), // Fallback
           efficiency: participated ? 100 : 0,
           participated: participated,
         };
