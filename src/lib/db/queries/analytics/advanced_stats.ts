@@ -580,28 +580,27 @@ export async function getDominanceStats(): Promise<DominanceStat[]> {
   try {
     const result = (
       await pgClient.query(`
-      WITH RoundWinners AS (
+      WITH RoundStats AS (
         SELECT 
           round_id,
           user_id,
           points,
-          RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as rnk
+          RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as rnk,
+          LEAD(points) OVER (PARTITION BY round_id ORDER BY points DESC) as next_points
         FROM user_rounds
         WHERE participated = TRUE
       )
       SELECT 
-        w.user_id,
+        u.id as user_id,
         u.name,
         u.icon,
         u.color_index,
-        COUNT(*) as wins,
-        AVG(w.points - runner.points) as avg_margin
-      FROM RoundWinners w
-      JOIN RoundWinners runner ON w.round_id = runner.round_id AND runner.rnk = 2
-      JOIN users u ON w.user_id = u.id
-      WHERE w.rnk = 1
-      GROUP BY w.user_id, u.name, u.icon, u.color_index
-      ORDER BY avg_margin DESC
+        COUNT(CASE WHEN rs.rnk = 1 THEN 1 END)::int as wins,
+        COALESCE(AVG(CASE WHEN rs.rnk = 1 THEN rs.points - COALESCE(rs.next_points, rs.points) END), 0)::float as avg_margin
+      FROM users u
+      LEFT JOIN RoundStats rs ON u.id = rs.user_id
+      GROUP BY u.id, u.name, u.icon, u.color_index
+      ORDER BY wins DESC, avg_margin DESC
     `)
     ).rows;
 

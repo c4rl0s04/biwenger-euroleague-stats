@@ -231,6 +231,10 @@ export default function HeadToHeadCard({
           value: parseFloat(row?.avg_points || 0),
           rank: getRank(standings, 'avg_points', u),
         },
+        roundWins: {
+          value: parseInt(row?.round_wins || 0),
+          rank: getRank(standings, 'round_wins', u),
+        },
         teamValue: { value: row?.team_value || 0, rank: getRank(standings, 'team_value', u) },
         titles: { value: row?.titles || 0, rank: null },
         avgPlayer: {
@@ -721,10 +725,10 @@ export default function HeadToHeadCard({
                 <ComparisonRow
                   label="Victorias de Jornada"
                   info="Número total de jornadas *ganadas* (1º puesto)"
-                  valueA={stats.adv.user.dominance?.wins || 0}
-                  rankA={stats.adv.user.dominance?.rank}
-                  valueB={stats.adv.rival.dominance?.wins || 0}
-                  rankB={stats.adv.rival.dominance?.rank}
+                  valueA={stats.general.user.roundWins.value}
+                  rankA={stats.general.user.roundWins.rank}
+                  valueB={stats.general.rival.roundWins.value}
+                  rankB={stats.general.rival.roundWins.rank}
                   highlightColor="text-yellow-400"
                 />
                 <ComparisonRow
