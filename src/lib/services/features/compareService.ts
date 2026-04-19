@@ -6,7 +6,14 @@ import 'server-only';
  */
 
 import { db } from '../../db/client';
-import { getExtendedStandings as getStandings, getPorrasStats } from '../../db';
+import {
+  getExtendedStandings as getStandings,
+  getPorrasStats,
+  getManagerMarketStats,
+  getBestSeller,
+  getBiddingDuelsStats,
+  getTheThief,
+} from '../../db';
 import { getUserPerformanceHistoryService } from '../core/roundsService';
 import {
   fetchStreakStats,
@@ -101,6 +108,10 @@ export interface CompareDataResponse {
     theoreticalGap: any[];
     rivalryMatrix: any;
     leagueComparison: any[];
+    market: any[];
+    bestSeller: any[];
+    biddingDuels: any;
+    theThief: any[];
   };
 }
 
@@ -144,6 +155,10 @@ export async function getCompareData(): Promise<CompareDataResponse> {
     theoreticalGapStats,
     rivalryMatrixStats,
     leagueComparisonStats,
+    managerMarketStats,
+    bestSellerStats,
+    biddingDuelsStats,
+    theThiefStats,
   ] = await Promise.all([
     db.query(usersQuery),
     getStandings(),
@@ -163,6 +178,10 @@ export async function getCompareData(): Promise<CompareDataResponse> {
     fetchTheoreticalGapStats(),
     fetchRivalryMatrixStats(),
     fetchLeagueComparisonStats(),
+    getManagerMarketStats(),
+    getBestSeller(),
+    getBiddingDuelsStats(),
+    getTheThief(),
   ]);
 
   // Fetch full history for each user in parallel using the expert service
@@ -230,6 +249,10 @@ export async function getCompareData(): Promise<CompareDataResponse> {
       theoreticalGap: theoreticalGapStats || [],
       rivalryMatrix: rivalryMatrixStats?.matrix || {},
       leagueComparison: leagueComparisonStats || [],
+      market: managerMarketStats || [],
+      bestSeller: bestSellerStats || [],
+      biddingDuels: biddingDuelsStats || { matrix: {}, summaries: [] },
+      theThief: theThiefStats || [],
     },
   };
 }

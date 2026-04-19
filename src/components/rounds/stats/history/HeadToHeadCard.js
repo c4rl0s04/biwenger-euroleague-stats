@@ -364,6 +364,68 @@ export default function HeadToHeadCard({
       recordToUse = advancedStats.rivalryMatrix[currentUser.id][rivalId];
     }
 
+    // --- 6. Market ---
+    const getMarket = (uid) => {
+      if (!advancedStats || !advancedStats.market) return {};
+      const u = String(uid);
+      const row = advancedStats.market.find((s) => String(s.user_id) === u);
+      const sellerRow = advancedStats.bestSeller?.find((s) => String(s.user_id) === u);
+      const thiefRow = advancedStats.theThief?.find(
+        (s) =>
+          String(s.user_id) === u ||
+          s.name === (uid === currentUser.id ? currentUser.name : rivalUser?.name)
+      );
+
+      if (u === String(currentUser.id)) {
+        console.log('TheThief Debug - uid:', u, 'currentUser.name:', currentUser.name);
+        console.log('TheThief Debug - Array:', advancedStats.theThief);
+        console.log('TheThief Debug - Found Row:', thiefRow);
+      }
+      return {
+        purchases: {
+          count: row?.purchases_count || 0,
+          total: row?.purchases_total || 0,
+        },
+        sales: {
+          count: row?.sales_count || 0,
+          total: row?.sales_total || 0,
+        },
+        balance: {
+          value: row?.balance || 0,
+          rank: getRank(advancedStats.market, 'balance', u, true),
+        },
+        bestSeller: {
+          netProfit: sellerRow?.net_profit || 0,
+          salesCount: sellerRow?.sales_count || 0,
+          rank: getRank(advancedStats.bestSeller || [], 'net_profit', u, true),
+        },
+        theThief: {
+          stolenCount: thiefRow?.stolen_count || 0,
+          rank: getRank(advancedStats.theThief || [], 'stolen_count', u, true),
+        },
+        spentRank: getRank(advancedStats.market, 'purchases_total', u, true),
+        incomeRank: getRank(advancedStats.market, 'sales_total', u, true),
+      };
+    };
+    const userMarket = getMarket(currentUser.id);
+    const rivalMarket = getMarket(rivalId);
+
+    // Bidding Duels Record
+    let duelsRecord = { wins: 0, losses: 0, duels: 0, avg_margin: 0 };
+    if (
+      advancedStats?.biddingDuels?.matrix &&
+      advancedStats.biddingDuels.matrix[currentUser.id] &&
+      advancedStats.biddingDuels.matrix[currentUser.id][rivalId]
+    ) {
+      const duelStats = advancedStats.biddingDuels.matrix[currentUser.id][rivalId];
+      duelsRecord = {
+        wins: duelStats.wins || 0,
+        losses: duelStats.losses || 0,
+        duels: duelStats.duels || 0,
+        avg_margin: duelStats.duels > 0 ? duelStats.total_margin / duelStats.duels : 0,
+      };
+    }
+
     return {
       rival: rivalUser,
       record: recordToUse,
@@ -405,6 +467,8 @@ export default function HeadToHeadCard({
       },
       preds: { user: userPreds, rival: rivalPreds },
       adv: { user: userAdv, rival: rivalAdv },
+      market: { user: userMarket, rival: rivalMarket },
+      duels: duelsRecord,
     };
   }, [currentUser, rivalId, allUsersHistory, usersList, standings, predictions, advancedStats]);
 
@@ -1113,6 +1177,76 @@ export default function HeadToHeadCard({
                     rankB={stats.adv.rival.noGlory?.rank}
                     highlightColor="text-red-400"
                   />
+                </div>
+              </div>
+
+              <div>
+                <SectionHeader title="Mercado y Finanzas" icon={Banknote} color="text-teal-400" />
+                <div className="space-y-0.5">
+                  <ComparisonRow
+                    label="Balance Comercial"
+                    subLabel="Beneficio Neto"
+                    info="Diferencia entre el dinero *ingresado por ventas* y el dinero *gastado en compras* (Ingresos - Gastos)"
+                    valueA={stats.market.user.balance.value}
+                    rankA={stats.market.user.balance.rank}
+                    valueB={stats.market.rival.balance.value}
+                    rankB={stats.market.rival.balance.rank}
+                    format={(v) => (v > 0 ? '+' : '') + (v / 1000000).toFixed(2) + 'M'}
+                    highlightColor="text-teal-400"
+                  />
+                  <ComparisonRow
+                    label="El Negociador"
+                    subLabel="Beneficio Real"
+                    info="Beneficio *realizado*. Solo cuenta jugadores comprados y luego vendidos (Venta - Compra)"
+                    valueA={stats.market.user.bestSeller.netProfit}
+                    rankA={stats.market.user.bestSeller.rank}
+                    valueB={stats.market.rival.bestSeller.netProfit}
+                    rankB={stats.market.rival.bestSeller.rank}
+                    format={(v) => (v > 0 ? '+' : '') + (v / 1000000).toFixed(2) + 'M'}
+                    highlightColor="text-teal-400"
+                  />
+                  <ComparisonRow
+                    label="El Ladrón"
+                    subLabel="Jugadores Robados"
+                    info="Número de veces que le *quitaste* un jugador a otro mánager superando su puja"
+                    valueA={stats.market.user.theThief.stolenCount}
+                    rankA={stats.market.user.theThief.rank}
+                    valueB={stats.market.rival.theThief.stolenCount}
+                    rankB={stats.market.rival.theThief.rank}
+                    format={(v) => `${v} robos`}
+                    highlightColor="text-teal-400"
+                  />
+                  <ComparisonRow
+                    label="Fichajes (Compras)"
+                    info="Número total de jugadores *comprados* y dinero total *gastado*"
+                    valueA={stats.market.user.purchases.total}
+                    rankA={stats.market.user.spentRank}
+                    valueB={stats.market.rival.purchases.total}
+                    rankB={stats.market.rival.spentRank}
+                    format={(v) => (v / 1000000).toFixed(1) + 'M'}
+                    highlightColor="text-teal-400"
+                  />
+                  <ComparisonRow
+                    label="Ventas"
+                    info="Número total de jugadores *vendidos* y dinero total *ingresado*"
+                    valueA={stats.market.user.sales.total}
+                    rankA={stats.market.user.incomeRank}
+                    valueB={stats.market.rival.sales.total}
+                    rankB={stats.market.rival.incomeRank}
+                    format={(v) => (v / 1000000).toFixed(1) + 'M'}
+                    highlightColor="text-teal-400"
+                  />
+                  {stats.duels.duels > 0 && (
+                    <ComparisonRow
+                      label="Duelos de Pujas"
+                      subLabel="Cara a Cara"
+                      info="Veces que ambos pujasteis por el mismo jugador y quién se lo llevó"
+                      valueA={stats.duels.wins}
+                      valueB={stats.duels.losses}
+                      format={(v) => `${v} ganados`}
+                      highlightColor="text-teal-400"
+                    />
+                  )}
                 </div>
               </div>
             </div>
