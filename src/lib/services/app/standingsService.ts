@@ -1,4 +1,6 @@
 import 'server-only';
+import { getUserPerformanceHistoryService } from '../core/roundsService';
+import { getAllUsers } from '../../db';
 
 /**
  * Standings Service
@@ -241,6 +243,38 @@ export async function fetchRivalryMatrixStats() {
 /** Detailed captain performance stats */
 export async function fetchDetailedCaptainStats() {
   return await getDetailedCaptainStats();
+}
+
+/**
+ * Fetch theoretical standings (100% efficiency)
+ * Calculates the sum of ideal points for all users across all rounds
+ */
+export async function fetchTheoreticalStandings() {
+  const users = await getAllUsers();
+
+  const theoreticalData = await Promise.all(
+    users.map(async (user) => {
+      const history = await getUserPerformanceHistoryService(user.id);
+      const totalActual = history.reduce((sum, r) => sum + r.actual_points, 0);
+      const totalIdeal = history.reduce((sum, r) => sum + (r.ideal_points || 0), 0);
+      const roundsPlayed = history.length;
+
+      return {
+        user_id: user.id,
+        name: user.name,
+        icon: user.icon,
+        color_index: user.color_index,
+        total_actual: totalActual,
+        total_ideal: totalIdeal,
+        gap: totalIdeal - totalActual,
+        efficiency: totalIdeal > 0 ? (totalActual / totalIdeal) * 100 : 0,
+        rounds_played: roundsPlayed,
+      };
+    })
+  );
+
+  // Sort by total_ideal descending
+  return theoreticalData.sort((a, b) => b.total_ideal - a.total_ideal);
 }
 
 export interface StandingsPageOptions {

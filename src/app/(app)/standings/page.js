@@ -28,6 +28,7 @@ import {
   BestDraftPlayerCard,
   DraftFidelityCard,
   CaptainStandingsCard,
+  TheoreticalStandingsCard,
 } from '@/components/standings';
 
 import InitialSquadRegretCard from '@/components/standings/InitialSquadRegretCard';
@@ -194,6 +195,9 @@ export default function ClasificacionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           <AllPlayAllCard />
           <PlacementStatsCard />
+          <div id="theoretical-standings-card" className="md:col-span-2 lg:col-span-2">
+            <TheoreticalStandingsCard />
+          </div>
           <div id="gap-card" className="md:col-span-2 lg:col-span-2">
             <TheoreticalGapCard />
           </div>

@@ -348,7 +348,7 @@ export default function StatsTable({
                   {(() => {
                     const cells = columns.map((col) => {
                       const value = row[col.key];
-                      const content = col.render ? col.render(value, row) : value;
+                      const content = col.render ? col.render(value, row, idx) : value;
                       const cellClassName =
                         typeof col.className === 'function'
                           ? col.className(value, row)

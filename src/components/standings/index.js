@@ -46,3 +46,4 @@ export { default as DominanceCard } from './DominanceCard';
 export { default as TheoreticalGapCard } from './TheoreticalGapCard';
 export { default as PositionEvolutionCard } from './PositionEvolutionCard';
 export { default as RivalryMatrixCard } from './RivalryMatrixCard';
+export { default as TheoreticalStandingsCard } from './TheoreticalStandingsCard';
