@@ -2,18 +2,13 @@
 
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
-import { useState } from 'react';
 import HeadToHeadCard from '@/components/rounds/stats/history/HeadToHeadCard';
-import LazyAdvancedStats from '@/components/compare/LazyAdvancedStats';
 import { Section } from '@/components/layout';
 import { Subheading, PageHeader } from '@/components/ui';
-import { Scale } from 'lucide-react';
 
 export default function ComparePageClient() {
   const { currentUser } = useClientUser();
-  const { data, loading, error } = useApiData('/api/compare/data/lite');
-  const [advancedStats, setAdvancedStats] = useState(null);
-  const [loadingAdvanced, setLoadingAdvanced] = useState(false);
+  const { data, loading, error } = useApiData('/api/compare/data');
 
   if (loading) {
     return (
@@ -21,7 +16,7 @@ export default function ComparePageClient() {
         <div className="animate-pulse flex flex-col items-center gap-4">
           <div className="w-16 h-16 bg-zinc-800 rounded-full" />
           <div className="h-4 w-48 bg-zinc-800 rounded" />
-          <div className="text-zinc-500 text-sm">Cargando centro de datos...</div>
+          <div className="text-zinc-500 text-sm">Cargando centro de datos avanzado...</div>
         </div>
       </div>
     );
@@ -55,25 +50,9 @@ export default function ComparePageClient() {
           usersList={data.users}
           standings={data.standings}
           predictions={data.predictions}
-          advancedStats={advancedStats}
+          advancedStats={data.advancedStats}
         />
       </Section>
-
-      {/* Lazy-loaded Advanced Stats */}
-      {advancedStats === null && (
-        <LazyAdvancedStats
-          onLoadAdvanced={() => {
-            setLoadingAdvanced(true);
-          }}
-          onAdvancedStatsLoaded={(stats) => {
-            setAdvancedStats(stats);
-            setLoadingAdvanced(false);
-          }}
-          isLoading={loadingAdvanced}
-        />
-      )}
-
-      {/* Placeholder for future charts or deeper analysis */}
     </div>
   );
 }

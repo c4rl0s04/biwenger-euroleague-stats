@@ -573,7 +573,7 @@ export default function HeadToHeadCard({
     <div className="relative z-20">
       <button
         onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-        className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-white/5 shadow-lg"
+        className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-white/5 shadow-lg cursor-pointer"
       >
         <span className="text-zinc-400">RIVAL:</span>
         <span className="text-white font-bold">{stats.rival.name}</span>
@@ -582,7 +582,10 @@ export default function HeadToHeadCard({
 
       {isSelectorOpen && (
         <>
-          <div className="fixed inset-0" onClick={() => setIsSelectorOpen(false)} />
+          <div
+            className="fixed inset-0 z-40 cursor-default"
+            onClick={() => setIsSelectorOpen(false)}
+          />
           <div className="absolute right-0 top-full mt-2 w-56 max-h-80 overflow-y-auto bg-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 p-1 custom-scrollbar">
             {usersList
               .filter((u) => u.id !== currentUser.id)
@@ -593,7 +596,7 @@ export default function HeadToHeadCard({
                     setRivalId(u.id);
                     setIsSelectorOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-2.5 rounded-md text-sm flex items-center gap-3 hover:bg-white/5 transition-colors ${u.id === rivalId ? 'bg-indigo-500/10 text-indigo-400' : 'text-zinc-300'}`}
+                  className={`w-full text-left px-3 py-2.5 rounded-md text-sm flex items-center gap-3 hover:bg-white/5 transition-colors cursor-pointer ${u.id === rivalId ? 'bg-indigo-500/10 text-indigo-400' : 'text-zinc-300'}`}
                 >
                   {u.icon ? (
                     <Image

@@ -114,7 +114,7 @@ export default function ElegantCard({
 
       {/* Header */}
       {!hideHeader && (title || actionRight) && (
-        <div className="flex items-center justify-between gap-4 mb-6 relative z-10">
+        <div className="flex items-center justify-between gap-4 mb-6 relative z-20">
           <div className="flex items-center gap-3 min-w-0">
             {icon &&
               createElement(icon, {
@@ -125,9 +125,7 @@ export default function ElegantCard({
               {info && <InfoTooltip content={info} />}
             </span>
           </div>
-          <div className="flex-shrink-0 transition-transform duration-300 hover:scale-105 active:scale-95">
-            {actionRight}
-          </div>
+          <div className="flex-shrink-0">{actionRight}</div>
         </div>
       )}
 
