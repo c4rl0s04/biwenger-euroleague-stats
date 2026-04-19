@@ -80,16 +80,16 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
           const sdHighPos = getPos(Math.min(data.max, data.avg + data.stdDev));
 
           // Dynamic Color based on Variation (stdDev)
-          let barColor = 'emerald-500';
+          let barClass = 'bg-emerald-500';
           let textColor = 'text-emerald-400';
           if (data.stdDev >= 5 && data.stdDev < 10) {
-            barColor = 'cyan-500';
+            barClass = 'bg-cyan-500';
             textColor = 'text-cyan-400';
           } else if (data.stdDev >= 10 && data.stdDev < 15) {
-            barColor = 'yellow-500';
+            barClass = 'bg-yellow-500';
             textColor = 'text-yellow-400';
           } else if (data.stdDev >= 15) {
-            barColor = 'orange-500';
+            barClass = 'bg-orange-500';
             textColor = 'text-orange-400';
           }
 
@@ -107,13 +107,10 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
                 />
                 {/* Variation Range Bar (Avg +/- SD) */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 h-2 rounded-sm shadow-sm opacity-80"
+                  className={`absolute top-1/2 -translate-y-1/2 h-2 rounded-sm shadow-sm opacity-80 ${barClass}`}
                   style={{
                     left: `${sdLowPos}%`,
                     width: `${Math.max(2, sdHighPos - sdLowPos)}%`,
-                    backgroundColor: `var(--tw-color-${barColor.replace('-500', '')}-500, ${
-                      barColor.includes('emerald') ? '#10b981' : '#f59e0b'
-                    })`,
                   }}
                 />
                 {/* Average Marker */}

@@ -28,10 +28,10 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={handlePrev}
-          className="p-2 rounded-full hover:bg-white/10 transition-colors disabled:opacity-50 cursor-pointer"
+          className="p-3 rounded-full hover:bg-secondary/50 text-zinc-400 hover:text-primary transition-all disabled:opacity-20 cursor-pointer"
           disabled={isLast}
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={28} />
         </button>
 
         <div className="text-center">
@@ -47,7 +47,7 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
                 .reverse() || []
             }
             className="w-fit mx-auto"
-            buttonClassName="h-16 text-5xl font-bold font-display justify-center bg-transparent border-none hover:bg-white/10 cursor-pointer px-4"
+            buttonClassName="h-16 text-5xl md:text-6xl font-black font-display justify-center bg-transparent border-none hover:text-primary transition-all cursor-pointer px-6"
             placeholder="Selecciona Jornada"
           />
           {/* Points display moved to Sidebar ScoreOverviewCard */}
@@ -55,10 +55,10 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
 
         <button
           onClick={handleNext}
-          className="p-2 rounded-full hover:bg-white/10 transition-colors disabled:opacity-50 cursor-pointer"
+          className="p-3 rounded-full hover:bg-secondary/50 text-zinc-400 hover:text-primary transition-all disabled:opacity-20 cursor-pointer"
           disabled={isFirst}
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={28} />
         </button>
       </div>
     </div>

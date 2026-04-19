@@ -114,14 +114,14 @@ export default function PerformanceChart({
 
             <XAxis
               dataKey="round_number"
-              tick={{ fill: '#71717a', fontSize: 11 }}
-              axisLine={{ stroke: '#3f3f46' }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+              axisLine={{ stroke: 'hsl(var(--border) / 0.5)' }}
               tickLine={false}
               dy={10}
             />
             <YAxis
-              tick={{ fill: '#71717a', fontSize: 11 }}
-              axisLine={{ stroke: '#3f3f46' }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+              axisLine={{ stroke: 'hsl(var(--border) / 0.5)' }}
               tickLine={false}
               dx={-10}
             />

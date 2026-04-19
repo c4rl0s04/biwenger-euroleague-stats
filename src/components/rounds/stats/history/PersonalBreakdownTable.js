@@ -1,134 +1,165 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-
-const CHART_HEIGHT = 280; // Height in pixels for the chart area
+import { useMemo, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Table, TableRow, TableCell } from '@/components/ui/StatsTable';
 
 /**
- * PersonalBreakdownChart - Visual bar chart showing actual vs ideal points per round
- * Each bar shows actual points (solid) + lost points (semi-transparent)
+ * PersonalBreakdownTable - Transposed version (Horizontal Scroll) with Navigation Arrows.
+ * Fixed scroll logic for better compatibility.
  */
 export default function PersonalBreakdownTable({ history = [] }) {
-  const [hoveredRound, setHoveredRound] = useState(null);
+  const scrollRef = useRef(null);
 
   const sortedHistory = useMemo(() => {
-    return [...history].sort((a, b) => a.round_number - b.round_number);
+    return [...history].sort((a, b) => b.round_number - a.round_number); // Newest first
   }, [history]);
-
-  // Find max ideal points for scaling
-  const maxIdeal = useMemo(() => {
-    if (!sortedHistory.length) return 300;
-    return Math.max(...sortedHistory.map((r) => r.ideal_points));
-  }, [sortedHistory]);
 
   if (!history || history.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground text-sm">
+      <div className="text-center py-8 text-muted-foreground text-sm uppercase font-bold tracking-widest">
         No hay datos de historial disponibles
       </div>
     );
   }
 
+  // Define the rows we want to show
+  const metrics = [
+    { label: 'Jornada', key: 'round_number', type: 'header' },
+    { label: 'Puntos Reales', key: 'actual_points', type: 'points' },
+    { label: 'Puntos Ideales', key: 'ideal_points', type: 'points', color: 'text-zinc-400' },
+    { label: 'Perdidos', key: 'lost', type: 'lost' },
+    { label: 'Eficiencia', key: 'efficiency', type: 'efficiency' },
+  ];
+
+  const handleScroll = (direction) => {
+    const container = scrollRef.current;
+    if (container) {
+      const scrollAmount = 300; // Adjusted for better feel
+      const targetScroll =
+        container.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+
+      container.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   return (
-    <div className="w-full">
-      {/* Chart container */}
+    <div className="w-full overflow-hidden rounded-xl border border-white/5 bg-zinc-950/20 flex flex-col">
       <div
-        className="flex items-end gap-1 px-2 pb-6 relative"
-        style={{ height: CHART_HEIGHT + 24 }}
+        ref={scrollRef}
+        className="overflow-x-auto custom-scrollbar scroll-smooth w-full"
+        style={{ scrollBehavior: 'smooth' }}
       >
-        {/* Y-axis labels */}
-        <div
-          className="absolute left-0 top-0 flex flex-col justify-between text-xs text-muted-foreground w-8"
-          style={{ height: CHART_HEIGHT }}
-        >
-          <span>{Math.round(maxIdeal)}</span>
-          <span>{Math.round(maxIdeal / 2)}</span>
-          <span>0</span>
-        </div>
+        <Table className="border-separate border-spacing-0 w-max min-w-full">
+          <tbody>
+            {metrics.map((metric, rowIndex) => (
+              <TableRow key={metric.label} hovering={rowIndex !== 0}>
+                {/* Sticky Label Column */}
+                <TableCell
+                  align="left"
+                  className="sticky left-0 bg-zinc-950 z-20 min-w-[120px] border-r border-white/10 shadow-[4px_0_10px_rgba(0,0,0,0.5)] py-3"
+                >
+                  <span
+                    className={`text-[10px] uppercase font-black tracking-widest ${rowIndex === 0 ? 'text-zinc-500' : 'text-zinc-300'}`}
+                  >
+                    {metric.label}
+                  </span>
+                </TableCell>
 
-        {/* Bars container */}
-        <div className="flex items-end gap-1 flex-1 ml-10" style={{ height: CHART_HEIGHT }}>
-          {sortedHistory.map((round) => {
-            const lost = Math.max(0, round.ideal_points - round.actual_points);
-            const actualHeight = (round.actual_points / maxIdeal) * CHART_HEIGHT;
-            const lostHeight = (lost / maxIdeal) * CHART_HEIGHT;
-            const isHovered = hoveredRound === round.round_id;
+                {/* Data Columns (Rounds) */}
+                {sortedHistory.map((round) => {
+                  const lost = Math.max(0, round.ideal_points - round.actual_points);
 
-            // Color based on efficiency
-            const barColor =
-              round.efficiency >= 90
-                ? 'bg-emerald-500'
-                : round.efficiency >= 80
-                  ? 'bg-yellow-500'
-                  : round.efficiency >= 70
-                    ? 'bg-orange-500'
-                    : 'bg-red-500';
+                  let content;
+                  let colorClass = metric.color || 'text-white';
 
-            const lostColor =
-              round.efficiency >= 90
-                ? 'bg-emerald-500/30'
-                : round.efficiency >= 80
-                  ? 'bg-yellow-500/30'
-                  : round.efficiency >= 70
-                    ? 'bg-orange-500/30'
-                    : 'bg-red-500/30';
+                  if (metric.type === 'header') {
+                    content = (
+                      <span className="font-display text-xl text-primary drop-shadow-[0_0_8px_rgba(250,80,1,0.3)]">
+                        J{round.round_number}
+                      </span>
+                    );
+                  } else if (metric.type === 'points') {
+                    content = (
+                      <span className={`font-black tabular-nums ${colorClass}`}>
+                        {round[metric.key].toFixed(0)}
+                      </span>
+                    );
+                  } else if (metric.type === 'lost') {
+                    content = (
+                      <span
+                        className={`font-bold tabular-nums ${lost > 0 ? 'text-red-500/80' : 'text-zinc-600'}`}
+                      >
+                        {lost > 0 ? `-${lost.toFixed(0)}` : '0'}
+                      </span>
+                    );
+                  } else if (metric.type === 'efficiency') {
+                    const effColor =
+                      round.efficiency >= 90
+                        ? 'text-emerald-400'
+                        : round.efficiency >= 80
+                          ? 'text-yellow-400'
+                          : round.efficiency >= 70
+                            ? 'text-orange-400'
+                            : 'text-red-400';
 
-            return (
-              <div
-                key={round.round_id}
-                className="flex-1 flex flex-col justify-end items-center relative cursor-pointer"
-                style={{ height: CHART_HEIGHT }}
-                onMouseEnter={() => setHoveredRound(round.round_id)}
-                onMouseLeave={() => setHoveredRound(null)}
-              >
-                {/* Tooltip */}
-                {isHovered && (
-                  <div className="absolute -top-20 left-1/2 -translate-x-1/2 bg-zinc-800 border border-border rounded-lg px-3 py-2 text-xs z-10 whitespace-nowrap shadow-lg">
-                    <div className="text-foreground font-medium">Jornada {round.round_number}</div>
-                    <div className="text-emerald-400">Real: {round.actual_points.toFixed(0)}</div>
-                    <div className="text-muted-foreground">
-                      Ideal: {round.ideal_points.toFixed(0)}
-                    </div>
-                    <div className="text-red-400">Perdidos: -{lost.toFixed(0)}</div>
-                    <div className="text-yellow-400">
-                      Eficiencia: {round.efficiency.toFixed(1)}%
-                    </div>
-                  </div>
-                )}
+                    content = (
+                      <div className="flex flex-col items-center">
+                        <span className={`font-black tabular-nums ${effColor}`}>
+                          {round.efficiency.toFixed(1)}%
+                        </span>
+                        <div className="w-8 h-0.5 bg-zinc-800 rounded-full mt-1 overflow-hidden">
+                          <div
+                            className={`h-full ${effColor.replace('text', 'bg')}`}
+                            style={{ width: `${round.efficiency}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
 
-                {/* Lost portion (semi-transparent, on top) */}
-                {lost > 0 && (
-                  <div
-                    className={`w-full rounded-t transition-all duration-200 ${lostColor} ${isHovered ? 'opacity-80' : ''}`}
-                    style={{ height: lostHeight, minHeight: 2 }}
-                  />
-                )}
-                {/* Actual portion (solid, bottom) */}
-                <div
-                  className={`w-full ${lost > 0 ? '' : 'rounded-t'} rounded-b transition-all duration-200 ${barColor} ${isHovered ? 'brightness-125' : ''}`}
-                  style={{ height: actualHeight, minHeight: 4 }}
-                />
-
-                {/* X-axis label */}
-                <div className="absolute -bottom-5 text-xs text-muted-foreground whitespace-nowrap">
-                  {round.round_number}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  return (
+                    <TableCell
+                      key={`${round.round_id}-${metric.label}`}
+                      align="center"
+                      className="min-w-[90px] border-r border-white/5 last:border-r-0"
+                    >
+                      {content}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </tbody>
+        </Table>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-6 mt-4 text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-emerald-500" />
-          <span>Puntos reales</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-emerald-500/30" />
-          <span>Puntos perdidos</span>
-        </div>
+      {/* Navigation Controls */}
+      <div className="p-2 bg-zinc-950/60 flex items-center justify-between border-t border-white/5 px-6">
+        <button
+          onClick={() => handleScroll('left')}
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer active:scale-95 border border-white/5"
+          title="Desplazar a la izquierda"
+        >
+          <ChevronLeft size={20} />
+        </button>
+
+        <span className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.3em] flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+          Historial
+          <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+        </span>
+
+        <button
+          onClick={() => handleScroll('right')}
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer active:scale-95 border border-white/5"
+          title="Desplazar a la derecha"
+        >
+          <ChevronRight size={20} />
+        </button>
       </div>
     </div>
   );

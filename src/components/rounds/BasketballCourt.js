@@ -6,10 +6,10 @@ import { getFormation, toPct, COURT_WIDTH, COURT_HEIGHT } from '@/lib/constants/
 
 // --- COMPONENT: GEOMETRIC LAYER (The Floor Markings) ---
 const GeometricLayer = () => {
-  // COLORS - Minimalistic Palette
-  const LINE_COLOR = 'rgba(255, 255, 255, 0.3)'; // Subtle white lines
-  const PAINT_COLOR = '#ea580c'; // Orange tint
-  const PAINT_OPACITY = '0.15'; // Subtle glow
+  // COLORS - Standardized Theme Colors
+  const LINE_COLOR = 'rgba(255, 255, 255, 0.25)'; // Subtle theme lines
+  const PAINT_COLOR = 'hsl(var(--primary))'; // Brand Primary (Orange)
+  const PAINT_OPACITY = '0.12'; // Subtle glow
 
   // Dimensions for calculations
   const CENTER_X = 25;

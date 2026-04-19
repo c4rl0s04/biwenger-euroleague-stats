@@ -338,24 +338,24 @@ export default function RoundsPageClient() {
           {/* RIGHT COLUMN: COURT + BENCH (2/3 width) */}
           <div className="xl:w-2/3 flex flex-col gap-4">
             {/* View Toggles */}
-            <div className="flex p-1 bg-zinc-900/50 rounded-lg border border-white/5 w-fit mx-auto">
+            <div className="flex p-1 bg-secondary/30 backdrop-blur-md rounded-xl border border-white/5 w-fit mx-auto transition-all duration-300 hover:border-white/10 shadow-inner">
               <button
                 onClick={() => setViewMode('user')}
-                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'user' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+                className={`px-5 py-2 text-xs font-black uppercase tracking-tighter rounded-lg transition-all flex items-center gap-2 cursor-pointer ${viewMode === 'user' ? 'bg-primary text-white shadow-[0_0_15px_rgba(250,80,1,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               >
-                <User size={12} /> Alineación
+                <User size={14} /> Alineación
               </button>
               <button
                 onClick={() => setViewMode('user_ideal')}
-                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+                className={`px-5 py-2 text-xs font-black uppercase tracking-tighter rounded-lg transition-all flex items-center gap-2 cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               >
-                <BrainCircuit size={12} /> Mi Ideal
+                <BrainCircuit size={14} /> Mi Ideal
               </button>
               <button
                 onClick={() => setViewMode('ideal')}
-                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+                className={`px-5 py-2 text-xs font-black uppercase tracking-tighter rounded-lg transition-all flex items-center gap-2 cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               >
-                <Star size={12} /> Global
+                <Star size={14} /> Global
               </button>
             </div>
 
@@ -448,20 +448,20 @@ export default function RoundsPageClient() {
                   <span className="text-sm font-medium text-zinc-400">Métricas:</span>
                   <button
                     onClick={() => setChartMetrics((p) => ({ ...p, actual: !p.actual }))}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
                       chartMetrics.actual
-                        ? 'bg-orange-500/10 border-orange-500/50 text-orange-400'
-                        : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                        ? 'bg-primary/20 border-primary/50 text-primary shadow-[0_0_10px_rgba(250,80,1,0.2)]'
+                        : 'bg-zinc-800/50 border-white/5 text-zinc-500'
                     }`}
                   >
                     Puntos Reales
                   </button>
                   <button
                     onClick={() => setChartMetrics((p) => ({ ...p, ideal: !p.ideal }))}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
                       chartMetrics.ideal
-                        ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
-                        : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                        ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_10px_rgba(5,150,105,0.2)]'
+                        : 'bg-zinc-800/50 border-white/5 text-zinc-500'
                     }`}
                   >
                     Puntos Ideales
@@ -500,7 +500,7 @@ export default function RoundsPageClient() {
                 <div className="relative">
                   <button
                     onClick={() => setIsCompareSelectorOpen(!isCompareSelectorOpen)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors shadow-lg cursor-pointer"
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-primary hover:bg-primary/80 text-white transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-90"
                     title="Añadir usuario a comparar"
                   >
                     <Plus size={16} />
