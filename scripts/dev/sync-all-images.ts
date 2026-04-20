@@ -15,16 +15,25 @@ async function syncAllImages() {
 
   // 1. Get all players with Euroleague codes
   const players = await db.query(
-    'SELECT id, name, euroleague_code FROM players WHERE euroleague_code IS NOT NULL'
+    'SELECT id, name, euroleague_code, team_id FROM players WHERE euroleague_code IS NOT NULL'
   );
   const all = players.rows;
   const playersToSync = (limit ? all.slice(0, limit) : all).map((p) => ({
     id: p.id,
     name: p.name,
     euroleague_code: p.euroleague_code,
+    team_id: p.team_id,
   }));
 
   console.log(`📊 Processing ${playersToSync.length} of ${all.length} players.`);
+
+  // 2. Fetch all teams to create a lookup map
+  const teamsResult = await db.query('SELECT id, name, short_name FROM teams');
+  const teamsMap = new Map<string, number>();
+  teamsResult.rows.forEach(t => {
+      teamsMap.set(t.name.toLowerCase(), t.id);
+      if (t.short_name) teamsMap.set(t.short_name.toLowerCase(), t.id);
+  });
 
   // 3. Spawn the Python Harvester
   const pythonProcess = spawn('python3', ['scripts/sync/bulk_harvester.py']);
@@ -33,6 +42,7 @@ async function syncAllImages() {
   pythonProcess.stdin.end();
 
   let updatedCount = 0;
+  let restoredTeams = 0;
 
   pythonProcess.stdout.on('data', async (data) => {
     // Output might contain multiple lines if buffered
@@ -45,8 +55,19 @@ async function syncAllImages() {
       try {
         const res = JSON.parse(line);
         if (res.success && res.url) {
+          // Update Image
           await mutations.updatePlayerImage(res.url, res.id);
           updatedCount++;
+
+          // Repair Team ID if missing
+          const currentPlayer = playersToSync.find(p => p.id === res.id);
+          if (currentPlayer && !currentPlayer.team_id && res.team_name) {
+              const matchedTeamId = teamsMap.get(res.team_name.toLowerCase());
+              if (matchedTeamId) {
+                  await db.query('UPDATE players SET team_id = $1 WHERE id = $2', [matchedTeamId, res.id]);
+                  restoredTeams++;
+              }
+          }
         }
       } catch (e) {
         // Ignore parsing errors for non-JSON stdout lines
@@ -60,7 +81,9 @@ async function syncAllImages() {
   });
 
   pythonProcess.on('close', (code) => {
-    console.log(`\n🎉 Sync Complete! Saved ${updatedCount} images to the database.`);
+    console.log(`\n🎉 Sync Complete!`);
+    console.log(`   📸 Images Updated: ${updatedCount}`);
+    console.log(`   🛡️  Teams Restored: ${restoredTeams}`);
     process.exit(code === 0 ? 0 : 1);
   });
 }

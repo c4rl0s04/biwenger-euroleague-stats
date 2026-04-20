@@ -1,0 +1,41 @@
+name: Bulk Euroleague Image Sync
+
+on:
+  workflow_dispatch: # Allows you to run it manually from the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360 # 6 hours max (our sync takes ~3h)
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm install
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install scrapling
+          # Install browser binaries for Scrapling/Playwright
+          python -m scrapling install
+
+      - name: Run Image Sync
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # Include other vars if the script needs them (e.g. for logging)
+          NODE_ENV: production
+        run: npx tsx scripts/dev/sync-all-images.ts

@@ -2,11 +2,17 @@
 
 import { motion } from 'framer-motion';
 import { X, Download, Share2, MessageCircle, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSummary }) {
   const [copiedText, setCopiedText] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
+  const [canNativeShare, setCanNativeShare] = useState(false);
+
+  // Check for native share support on mount
+  useEffect(() => {
+    setCanNativeShare(!!navigator.share);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -27,7 +33,16 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
 
   const handleCopyImage = async () => {
     if (!navigator.clipboard || !navigator.clipboard.write) {
-      alert('Tu navegador no soporta copiar imágenes directamente.');
+      const isSecure = window.isSecureContext;
+      if (!isSecure) {
+        alert(
+          'El copiado de imágenes requiere una conexión segura (HTTPS). Por favor, usa el botón "Descargar" o mantén pulsada la imagen para guardarla.'
+        );
+      } else {
+        alert(
+          'Tu navegador no soporta copiar imágenes. Por favor, usa el botón "Descargar" o mantén pulsada la imagen.'
+        );
+      }
       return;
     }
     try {
@@ -42,7 +57,27 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
       setTimeout(() => setCopiedImage(false), 2000);
     } catch (err) {
       console.error('Failed to copy image:', err);
-      alert('Hubo un error al copiar la imagen.');
+      alert('Error al copiar. Intenta descargar la imagen directamente.');
+    }
+  };
+
+  const handleNativeShare = async () => {
+    if (!navigator.share) return;
+
+    try {
+      const res = await fetch(imageUri);
+      const blob = await res.blob();
+      const file = new File([blob], 'hoopgrid.png', { type: 'image/png' });
+
+      await navigator.share({
+        files: [file],
+        title: 'Euroleague Hoopgrid',
+        text: textSummary,
+      });
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Error sharing:', err);
+      }
     }
   };
 
@@ -88,6 +123,16 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
 
         {/* Action Buttons */}
         <div className="p-8 space-y-4">
+          {canNativeShare && (
+            <button
+              onClick={handleNativeShare}
+              className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer shadow-lg shadow-indigo-500/20"
+            >
+              <Share2 className="w-5 h-5" />
+              Compartir Imagen
+            </button>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             {/* Primary Actions */}
             <button

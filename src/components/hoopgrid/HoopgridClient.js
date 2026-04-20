@@ -123,13 +123,13 @@ export default function HoopgridClient() {
   const handleShare = async () => {
     // ─── SHARE CARD LAYOUT CONSTANTS ──────────────────────────────────────────
     // Tweak these values to adjust the generated image layout:
-    const CARD_WIDTH = 1000; // Total image width in pixels
-    const CARD_HEIGHT = 1000; // Force a 1:1 square to prevent bottom cut-off
-    const CARD_PADDING = 40; // Outer padding around the entire card (px)
-    const CARD_BORDER_RADIUS = 24; // Rounded corners on the card (px)
-    const LEFT_COL_WIDTH = 180; // Wider so team names (e.g. Valencia Basket) don't wrap
-    const CENTER_COL_WIDTH = 720; // Width of the 3x3 grid (px)
-    const RIGHT_COL_WIDTH = 100; // Less empty space on the right
+    const CARD_WIDTH = 840; // Reduced total width to make content pop
+    const CARD_HEIGHT = 840; // Tighter vertical fit
+    const CARD_PADDING = 20; // 
+    const CARD_BORDER_RADIUS = 24; 
+    const LEFT_COL_WIDTH = 150; // Tighter left margin
+    const CENTER_COL_WIDTH = 640; // Tighter grid width
+    const RIGHT_COL_WIDTH = 50; // Tighter right margin
     // ─────────────────────────────────────────────────────────────────────────
 
     // 1. Text Summary
