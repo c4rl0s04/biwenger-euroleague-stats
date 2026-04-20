@@ -446,3 +446,22 @@ h3,
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes rainbow-border {
+  0% {
+    border-color: #ff0000;
+  }
+  33% {
+    border-color: #00ff00;
+  }
+  66% {
+    border-color: #0000ff;
+  }
+  100% {
+    border-color: #ff0000;
+  }
+}
+
+.animate-rainbow-border {
+  animation: rainbow-border 2s linear infinite;
+}
