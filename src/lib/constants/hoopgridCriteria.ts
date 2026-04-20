@@ -163,3 +163,17 @@ export const HOOPGRID_COUNTRIES = [
   { value: 'Latvia', label: 'Letonia' },
   { value: 'Montenegro', label: 'Montenegro' },
 ];
+
+export const HOOPGRID_HEIGHT = [
+  { type: 'height_min', value: 210, label: '2.10m o más' },
+  { type: 'height_min', value: 205, label: '2.05m o más' },
+  { type: 'height_max', value: 190, label: 'Menos de 1.90m' },
+  { type: 'height_max', value: 185, label: 'Menos de 1.85m' },
+];
+
+export const HOOPGRID_AGE = [
+  { type: 'age_max', value: 25, label: '25 años o menos' },
+  { type: 'age_max', value: 23, label: '23 años o menos' },
+  { type: 'age_min', value: 30, label: '30 años o más' },
+  { type: 'age_min', value: 33, label: '33 años o más' },
+];

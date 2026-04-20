@@ -121,7 +121,18 @@ export default function HoopgridClient() {
   };
 
   const handleShare = async () => {
-    // 1. Text Copy
+    // ─── SHARE CARD LAYOUT CONSTANTS ──────────────────────────────────────────
+    // Tweak these values to adjust the generated image layout:
+    const CARD_WIDTH = 1000; // Total image width in pixels
+    const CARD_HEIGHT = 1000; // Force a 1:1 square to prevent bottom cut-off
+    const CARD_PADDING = 40; // Outer padding around the entire card (px)
+    const CARD_BORDER_RADIUS = 24; // Rounded corners on the card (px)
+    const LEFT_COL_WIDTH = 180; // Wider so team names (e.g. Valencia Basket) don't wrap
+    const CENTER_COL_WIDTH = 720; // Width of the 3x3 grid (px)
+    const RIGHT_COL_WIDTH = 100; // Less empty space on the right
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // 1. Text Summary
     let gridText = 'Euroleague Hoopgrid 🏀\n';
     for (let i = 0; i < 3; i++) {
       let row = '';
@@ -138,20 +149,51 @@ export default function HoopgridClient() {
     if (gridRef.current) {
       try {
         setCopying(true);
-        // Pull actual theme background color from CSS variables
         const bgColor =
           getComputedStyle(document.documentElement).getPropertyValue('--background') || '#0f172a';
 
         const dataUrl = await toPng(gridRef.current, {
           cacheBust: true,
           backgroundColor: bgColor.trim(),
+          width: CARD_WIDTH,
+          height: CARD_HEIGHT, // Forces the capture engine to use a 1000x1000 canvas
           style: {
-            borderRadius: '24px',
-            padding: '40px', // Extra padding for the share card
+            borderRadius: `${CARD_BORDER_RADIUS}px`,
+            padding: `${CARD_PADDING}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center', // Centers the grid vertically inside the new square
           },
           onClone: (clonedDoc) => {
             const footer = clonedDoc.querySelector('.share-only-footer');
             if (footer) footer.style.display = 'flex';
+
+            const mainContainer = clonedDoc.querySelector('.hoopgrid-main-container');
+            if (mainContainer) {
+              mainContainer.style.width = '100%';
+              mainContainer.style.display = 'flex';
+              mainContainer.style.flexWrap = 'nowrap';
+
+              const leftCol = mainContainer.children[0];
+              if (leftCol) {
+                leftCol.style.width = `${LEFT_COL_WIDTH}px`;
+                leftCol.style.minWidth = `${LEFT_COL_WIDTH}px`;
+              }
+
+              const centerCol = mainContainer.children[1];
+              if (centerCol) {
+                centerCol.style.width = `${CENTER_COL_WIDTH}px`;
+                centerCol.style.minWidth = `${CENTER_COL_WIDTH}px`;
+              }
+
+              const rightCol = mainContainer.children[2];
+              if (rightCol) {
+                rightCol.style.display = 'block';
+                rightCol.style.width = `${RIGHT_COL_WIDTH}px`;
+                rightCol.style.minWidth = `${RIGHT_COL_WIDTH}px`;
+              }
+            }
           },
         });
         setShareImageUri(dataUrl);
@@ -215,7 +257,7 @@ export default function HoopgridClient() {
       </div>
 
       {/* 1. The Grid Container */}
-      <div ref={gridRef} className="w-full flex mb-16 md:mb-20">
+      <div ref={gridRef} className="hoopgrid-main-container w-full flex flex-wrap mb-16 md:mb-20">
         {/* Left Column: Row Headers */}
         <div className="w-[25%] md:w-[20%] flex flex-col pt-8 md:pt-14 pr-2 md:pr-6">
           {challenge.rows.map((row, i) => (
@@ -264,10 +306,10 @@ export default function HoopgridClient() {
         </div>
 
         {/* Right Column: Empty spacer to perfectly center the board on desktop */}
-        <div className="hidden md:block md:w-[20%]"></div>
+        <div className="w-[25%] md:w-[20%] hidden md:block"></div>
 
         {/* GHOST FOOTER: Only visible in the shared image */}
-        <div className="share-only-footer hidden w-full mt-12 flex justify-between items-center px-4 opacity-40">
+        <div className="share-only-footer hidden w-full max-w-4xl mt-12 flex justify-between items-center px-4 opacity-40">
           <span className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
             biwengerstats.com
           </span>

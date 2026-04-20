@@ -5,7 +5,8 @@ import { X, Download, Share2, MessageCircle, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 
 export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSummary }) {
-  const [copied, setCopied] = useState(false);
+  const [copiedText, setCopiedText] = useState(false);
+  const [copiedImage, setCopiedImage] = useState(false);
 
   if (!isOpen) return null;
 
@@ -19,8 +20,29 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
   const handleCopyText = () => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(textSummary);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedText(true);
+      setTimeout(() => setCopiedText(false), 2000);
+    }
+  };
+
+  const handleCopyImage = async () => {
+    if (!navigator.clipboard || !navigator.clipboard.write) {
+      alert('Tu navegador no soporta copiar imágenes directamente.');
+      return;
+    }
+    try {
+      const res = await fetch(imageUri);
+      const blob = await res.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob,
+        }),
+      ]);
+      setCopiedImage(true);
+      setTimeout(() => setCopiedImage(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy image:', err);
+      alert('Hubo un error al copiar la imagen.');
     }
   };
 
@@ -67,6 +89,7 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
         {/* Action Buttons */}
         <div className="p-8 space-y-4">
           <div className="grid grid-cols-2 gap-4">
+            {/* Primary Actions */}
             <button
               onClick={handleWhatsApp}
               className="flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -81,24 +104,41 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
               <Download className="w-5 h-5" />
               Descargar
             </button>
-          </div>
 
-          <button
-            onClick={handleCopyText}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-secondary hover:bg-muted text-secondary-foreground font-bold transition-all border border-border/50"
-          >
-            {copied ? (
-              <>
-                <Check className="w-5 h-5 text-green-500" />
-                ¡Copiado al Portapapeles!
-              </>
-            ) : (
-              <>
-                <Copy className="w-5 h-5" />
-                Copiar Resumen Texto
-              </>
-            )}
-          </button>
+            {/* Secondary Actions */}
+            <button
+              onClick={handleCopyImage}
+              className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-secondary hover:bg-muted text-secondary-foreground font-bold transition-all border border-border/50 text-sm"
+            >
+              {copiedImage ? (
+                <>
+                  <Check className="w-4 h-4 text-green-500" />
+                  Copiada
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  Copiar Imagen
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleCopyText}
+              className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-secondary hover:bg-muted text-secondary-foreground font-bold transition-all border border-border/50 text-sm"
+            >
+              {copiedText ? (
+                <>
+                  <Check className="w-4 h-4 text-green-500" />
+                  Copiado
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  Copiar Texto
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Footer info */}

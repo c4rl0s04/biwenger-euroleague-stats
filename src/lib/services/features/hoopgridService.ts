@@ -16,6 +16,8 @@ import {
   HOOPGRID_MARKET,
   HOOPGRID_OWNERSHIP,
   HOOPGRID_USER_OWNERSHIP,
+  HOOPGRID_HEIGHT,
+  HOOPGRID_AGE,
 } from '@/lib/constants/hoopgridCriteria';
 import crypto from 'crypto';
 
@@ -33,7 +35,11 @@ export type CriteriaType =
   | 'user_ownership'
   | 'ownership'
   | 'price_min'
-  | 'price_max';
+  | 'price_max'
+  | 'age_max'
+  | 'age_min'
+  | 'height_min'
+  | 'height_max';
 
 export interface Criteria {
   type: CriteriaType;
@@ -202,6 +208,22 @@ export class HoopgridService {
         return (player.price || 0) >= criteria.value;
       case 'price_max':
         return (player.price || 0) <= criteria.value;
+      case 'height_min':
+        return (player.height || 0) >= criteria.value;
+      case 'height_max':
+        return (player.height || 0) <= criteria.value;
+      case 'age_min':
+      case 'age_max': {
+        if (!player.birthDate) return false;
+        const birth = new Date(player.birthDate);
+        const today = new Date();
+        const age =
+          today.getFullYear() -
+          birth.getFullYear() -
+          (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
+        if (criteria.type === 'age_min') return age >= criteria.value;
+        return age <= criteria.value;
+      }
       default:
         return false;
     }
@@ -434,6 +456,19 @@ export class HoopgridService {
       if (criteria.type === 'country') return player.country === criteria.value;
       if (criteria.type === 'price_min') return (player.price || 0) >= criteria.value;
       if (criteria.type === 'price_max') return (player.price || 0) <= criteria.value;
+      if (criteria.type === 'height_min') return (player.height || 0) >= criteria.value;
+      if (criteria.type === 'height_max') return (player.height || 0) <= criteria.value;
+      if (criteria.type === 'age_min' || criteria.type === 'age_max') {
+        if (!player.birthDate) return false;
+        const birth = new Date(player.birthDate);
+        const today = new Date();
+        const age =
+          today.getFullYear() -
+          birth.getFullYear() -
+          (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
+        if (criteria.type === 'age_min') return age >= criteria.value;
+        return age <= criteria.value;
+      }
       return false;
     };
 
@@ -452,10 +487,17 @@ export class HoopgridService {
         ...HOOPGRID_MARKET,
         ...HOOPGRID_OWNERSHIP,
         ...HOOPGRID_USER_OWNERSHIP,
+        ...HOOPGRID_HEIGHT,
+        ...HOOPGRID_AGE,
       ];
       cols = pickN(colPool, 3).map((item) => ({
         type: item.type || 'country',
-        value: item.value || { field: item.field, threshold: item.threshold },
+        // For simple numeric value criteria (height, age, market, country), use value directly.
+        // For stat criteria that embed field/threshold inside value, preserve that object.
+        value:
+          item.value !== undefined
+            ? item.value
+            : { field: (item as any).field, threshold: (item as any).threshold },
         label: item.label,
       }));
 

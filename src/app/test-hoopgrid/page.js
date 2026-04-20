@@ -8,6 +8,8 @@ import {
   HOOPGRID_MARKET,
   HOOPGRID_OWNERSHIP,
   HOOPGRID_USER_OWNERSHIP,
+  HOOPGRID_HEIGHT,
+  HOOPGRID_AGE,
 } from '@/lib/constants/hoopgridCriteria';
 
 export default function TestHoopgridPage() {
@@ -82,7 +84,7 @@ export default function TestHoopgridPage() {
           </h2>
 
           <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-6">
               {/* Averages */}
               <div className="space-y-2">
                 <h4 className="text-[10px] font-black text-primary uppercase">Average (Media)</h4>
@@ -168,6 +170,36 @@ export default function TestHoopgridPage() {
                   <div
                     key={i}
                     className="bg-blue-500/5 border border-blue-500/20 p-3 rounded-lg flex flex-col"
+                  >
+                    <span className="font-bold text-sm">{s.label}</span>
+                    <span className="text-[9px] opacity-40 font-mono mt-1">{s.type}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Height */}
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-black text-indigo-500 uppercase">
+                  Height (Altura)
+                </h4>
+                {HOOPGRID_HEIGHT.map((s, i) => (
+                  <div
+                    key={i}
+                    className="bg-indigo-500/5 border border-indigo-500/20 p-3 rounded-lg flex flex-col"
+                  >
+                    <span className="font-bold text-sm">{s.label}</span>
+                    <span className="text-[9px] opacity-40 font-mono mt-1">{s.type}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Age */}
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-black text-rose-500 uppercase">Age (Edad)</h4>
+                {HOOPGRID_AGE.map((s, i) => (
+                  <div
+                    key={i}
+                    className="bg-rose-500/5 border border-rose-500/20 p-3 rounded-lg flex flex-col"
                   >
                     <span className="font-bold text-sm">{s.label}</span>
                     <span className="text-[9px] opacity-40 font-mono mt-1">{s.type}</span>
