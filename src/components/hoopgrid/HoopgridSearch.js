@@ -7,7 +7,13 @@ import { motion } from 'framer-motion';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { apiClient } from '@/lib/api-client';
 
-export default function HoopgridSearch({ onClose, onSelect, title }) {
+export default function HoopgridSearch({
+  onClose,
+  onSelect,
+  title,
+  possibleCount,
+  usedPlayerIds = new Set(),
+}) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,6 +23,12 @@ export default function HoopgridSearch({ onClose, onSelect, title }) {
 
   const handleSelect = async (player) => {
     if (failedPlayers.has(player.id) || validating) return;
+
+    // Local check for duplicates before hitting the server
+    if (usedPlayerIds.has(player.id)) {
+      setFailedPlayers((prev) => new Set(prev).add(player.id));
+      return;
+    }
 
     setValidating(true);
     const isCorrect = await onSelect(player);
@@ -63,7 +75,7 @@ export default function HoopgridSearch({ onClose, onSelect, title }) {
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="w-full max-w-xl"
+        className="w-full max-w-2xl"
       >
         <Command
           className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden glass-panel"
@@ -75,28 +87,34 @@ export default function HoopgridSearch({ onClose, onSelect, title }) {
             }
           }}
         >
-          {/* Header & Input */}
-          <div className="flex items-center border-b border-border px-4 py-1" cmdk-input-wrapper="">
-            <Search className="w-5 h-5 text-muted-foreground mr-3" />
+          <div className="flex items-center border-b border-border px-6 py-2" cmdk-input-wrapper="">
+            <Search className="w-6 h-6 text-muted-foreground mr-4" />
             <Command.Input
               ref={inputRef}
               value={query}
               onValueChange={setQuery}
               placeholder="Escribe el nombre del jugador..."
-              className="flex-1 h-14 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-lg"
+              className="flex-1 h-20 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-2xl"
             />
             <button
               onClick={onClose}
-              className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+              className="p-3 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-8 h-8" />
             </button>
           </div>
 
-          <div className="p-2 bg-muted/20 border-b border-border">
-            <p className="text-[10px] uppercase font-bold tracking-widest text-primary px-2">
+          <div className="p-4 bg-primary/5 border-b border-border flex justify-between items-center px-8">
+            <p className="text-xs md:text-sm uppercase font-bold tracking-widest text-primary">
               Objetivo: {title}
             </p>
+            {possibleCount !== undefined && (
+              <div className="bg-primary/10 px-3 py-1 rounded border border-primary/20">
+                <span className="text-[10px] md:text-xs font-black text-primary uppercase">
+                  {possibleCount} POSIBLES
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Results List */}
@@ -120,7 +138,7 @@ export default function HoopgridSearch({ onClose, onSelect, title }) {
                       value={player.name}
                       onSelect={() => handleSelect(player)}
                       disabled={isFailed || validating}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer text-sm transition-colors group ${
+                      className={`flex items-center gap-4 px-8 py-5 rounded-xl cursor-pointer text-base md:text-lg transition-colors group ${
                         isFailed
                           ? 'bg-destructive/10 text-destructive pointer-events-none'
                           : 'aria-selected:bg-primary/10 aria-selected:text-primary text-muted-foreground'
@@ -129,9 +147,9 @@ export default function HoopgridSearch({ onClose, onSelect, title }) {
                       <PlayerImage
                         src={player.img}
                         alt={player.name}
-                        width={40}
-                        height={40}
-                        className={`w-10 h-10 rounded-full shrink-0 object-cover object-top ${isFailed ? 'opacity-50 grayscale' : 'bg-muted'}`}
+                        width={60}
+                        height={60}
+                        className={`w-14 h-14 md:w-16 md:h-16 rounded-full shrink-0 object-cover object-top ${isFailed ? 'opacity-50 grayscale' : 'bg-muted'}`}
                       />
                       <div className="flex-1 min-w-0 flex flex-col justify-center">
                         <span
@@ -148,7 +166,7 @@ export default function HoopgridSearch({ onClose, onSelect, title }) {
                       <div
                         className={`text-[10px] font-black uppercase tracking-tighter shrink-0 pl-2 ${isFailed ? 'text-destructive opacity-100' : 'opacity-0 group-aria-selected:opacity-100'}`}
                       >
-                        {isFailed ? '✗ ERROR' : '⏎'}
+                        {isFailed ? (usedPlayerIds.has(player.id) ? '✗ YA USADO' : '✗ ERROR') : '⏎'}
                       </div>
                     </Command.Item>
                   );

@@ -53,6 +53,7 @@ export interface UpsertUserRoundParams {
 
 export interface UserMutations {
   resetAllOwners: () => Promise<void>;
+  resetActiveOwners: () => Promise<void>;
   getAllUsers: () => Promise<{ all: () => any[]; iterate: () => any[] }>;
   updatePlayerOwner: (params: UpdatePlayerOwnerParams) => Promise<void>;
   updateUserColor: (colorIndex: number, userId: string) => Promise<void>;
@@ -91,6 +92,15 @@ export function prepareUserMutations(db: DbClient): UserMutations {
   return {
     resetAllOwners: async () => {
       await db.query('UPDATE players SET owner_id = NULL');
+    },
+
+    resetActiveOwners: async () => {
+      // Only reset owners for players belonging to active teams
+      await db.query(`
+        UPDATE players 
+        SET owner_id = NULL 
+        WHERE team_id IN (SELECT id FROM teams WHERE is_active = true)
+      `);
     },
 
     getAllUsers: async () => {

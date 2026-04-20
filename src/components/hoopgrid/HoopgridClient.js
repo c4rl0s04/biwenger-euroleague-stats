@@ -276,6 +276,8 @@ export default function HoopgridClient() {
             onClose={() => setActiveCell(null)}
             onSelect={handleGuess}
             title={`${challenge.rows[Math.floor(activeCell / 3)].label} + ${challenge.cols[activeCell % 3].label}`}
+            possibleCount={challenge.possibleCounts?.[activeCell]}
+            usedPlayerIds={new Set(Object.values(guesses).map((g) => g.playerId))}
           />
         )}
       </AnimatePresence>
@@ -364,7 +366,9 @@ function GridCell({ guess, onClick }) {
               />
             </svg>
           </div>
-          <span className="text-[10px] font-display text-destructive">Incorrecto</span>
+          <span className="text-[10px] font-display text-destructive uppercase tracking-widest font-black">
+            Incorrecto
+          </span>
         </motion.div>
       ) : (
         <div className="h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

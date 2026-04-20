@@ -14,8 +14,8 @@ export async function run(manager: SyncManager) {
   // Initialize Mutations
   const mutations = prepareUserMutations(db as any);
 
-  // 1. Reset all ownerships first
-  await mutations.resetAllOwners();
+  // 1. Reset ownerships for active teams only (preserves historical info for eliminated teams)
+  await mutations.resetActiveOwners();
 
   // 2. Get all users
   const usersRes = await mutations.getAllUsers();

@@ -3,6 +3,7 @@ import { db, pgClient } from '../../index';
 export interface SearchPlayer {
   id: number;
   name: string;
+  img: string;
   position: string;
   team: string;
   price: number;
@@ -43,10 +44,13 @@ export async function globalSearch(query: string, limit: number = 5): Promise<Gl
 
   // Search players by name
   const playersQuery = `
-      SELECT p.id, p.name, p.position, t.name as team, p.price, p.puntos as points
+      SELECT p.id, p.name, p.img, p.position, t.name as team, p.price, p.puntos as points
       FROM players p
       LEFT JOIN teams t ON p.team_id = t.id
-      WHERE p.name ILIKE $1
+      WHERE p.name ILIKE $1 
+        AND p.name IS NOT NULL 
+        AND p.img IS NOT NULL 
+        AND p.team_id IS NOT NULL
       ORDER BY p.puntos DESC
       LIMIT $2
   `;

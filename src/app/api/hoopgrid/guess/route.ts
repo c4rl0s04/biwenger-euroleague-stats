@@ -1,18 +1,23 @@
 import { NextResponse } from 'next/server';
 import { hoopgridService } from '@/lib/services/features/hoopgridService';
 import { auth } from '@/auth';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
     const { challengeId, cellIndex, playerId, dryRun, action, guesses } = await request.json();
 
-    // 1. Auth check
-    const session = await auth();
-    let userId = session?.user?.id;
+    // 1. Auth & User check
+    const cookieStore = cookies();
+    let userId = cookieStore.get('NEXT_USER_ID')?.value;
+
+    if (!userId) {
+      const session = await auth();
+      userId = session?.user?.id;
+    }
 
     if (!userId) {
       const { db } = await import('@/lib/db');
-      const { users } = await import('@/lib/db/schema');
       const fallbackUser = await db.query.users.findFirst();
       if (!fallbackUser) throw new Error('No users found in database for guest fallback.');
       userId = fallbackUser.id;

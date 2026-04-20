@@ -1,12 +1,23 @@
 import { db } from '@/lib/db';
-import { hoopgridChallenges, hoopgridGuesses, players, playerRoundStats } from '@/lib/db/schema';
+import {
+  hoopgridChallenges,
+  hoopgridGuesses,
+  players,
+  playerRoundStats,
+  initialSquads,
+  fichajes,
+} from '@/lib/db/schema';
 import { eq, and, avg, count, sql } from 'drizzle-orm';
 import {
   HOOPGRID_TEAMS,
   HOOPGRID_POSITIONS,
   HOOPGRID_STATS,
   HOOPGRID_COUNTRIES,
+  HOOPGRID_MARKET,
+  HOOPGRID_OWNERSHIP,
+  HOOPGRID_USER_OWNERSHIP,
 } from '@/lib/constants/hoopgridCriteria';
+import crypto from 'crypto';
 
 export type CriteriaType = 'team' | 'pos' | 'country' | 'stat' | 'price';
 
@@ -95,6 +106,51 @@ export class HoopgridService {
     });
 
     if (!player) return false;
+
+    if (criteria.type === 'user_ownership') {
+      const { userId, mode } = criteria.value;
+      if (mode === 'current') return player.ownerId === userId;
+      if (mode === 'past') {
+        if (player.ownerId === userId) return false;
+        const [initial] = await db
+          .select()
+          .from(initialSquads)
+          .where(and(eq(initialSquads.playerId, playerId), eq(initialSquads.userId, userId)));
+        const [transfer] = await db
+          .select()
+          .from(fichajes)
+          .where(and(eq(fichajes.playerId, playerId), eq(fichajes.comprador, userId)));
+        return !!(initial || transfer);
+      }
+    }
+
+    if (criteria.type === 'ownership') {
+      const isCurrentlyOwned = player.ownerId !== null;
+      if (criteria.value === 'current') return isCurrentlyOwned;
+      if (criteria.value === 'free') return !isCurrentlyOwned;
+
+      // Historical checks need additional DB lookups if not in memory
+      if (criteria.value === 'ever' || criteria.value === 'past_not_current') {
+        const [initial] = await db
+          .select()
+          .from(initialSquads)
+          .where(eq(initialSquads.playerId, playerId));
+        const [transfer] = await db.select().from(fichajes).where(eq(fichajes.playerId, playerId));
+        const wasEverOwned = !!(initial || transfer);
+
+        if (criteria.value === 'ever') return wasEverOwned;
+        return !isCurrentlyOwned && wasEverOwned;
+      }
+
+      if (criteria.value === 'never') {
+        const [initial] = await db
+          .select()
+          .from(initialSquads)
+          .where(eq(initialSquads.playerId, playerId));
+        const [transfer] = await db.select().from(fichajes).where(eq(fichajes.playerId, playerId));
+        return !initial && !transfer;
+      }
+    }
 
     switch (criteria.type) {
       case 'team':
@@ -195,23 +251,163 @@ export class HoopgridService {
    * Generates a random daily challenge
    */
   static async generateDailyChallenge(targetDate?: string) {
+    const start = Date.now();
     const dateStr = targetDate || new Date().toISOString().split('T')[0];
 
     const pickN = (arr: any[], n: number) => [...arr].sort(() => 0.5 - Math.random()).slice(0, n);
 
-    const rowPool = [...HOOPGRID_TEAMS, ...HOOPGRID_POSITIONS];
-    const rows = pickN(rowPool, 3).map((item) => ({
-      type: item.id ? 'team' : 'pos',
-      value: item.id || item.value,
-      label: item.label,
-    }));
+    let rows, cols, possibleCounts;
+    let attempts = 0;
 
-    const colPool = [...HOOPGRID_STATS, ...HOOPGRID_COUNTRIES];
-    const cols = pickN(colPool, 3).map((item) => ({
-      type: item.type || 'country',
-      value: item.value || { field: item.field, threshold: item.threshold },
-      label: item.label,
-    }));
+    // 1. Fetch all data once to process in memory
+    const allPlayers = await db.select().from(players);
+    const allStats = await db.select().from(playerRoundStats);
+    const allInitial = await db.select().from(initialSquads);
+    const allFichajes = await db.select().from(fichajes);
+
+    const userOwnershipHistory = new Map();
+    const allUsers = [
+      ...new Set([...allInitial.map((i) => i.userId), ...allFichajes.map((f) => f.comprador)]),
+    ].filter(Boolean);
+
+    allUsers.forEach((u) => userOwnershipHistory.set(u, new Set()));
+    allInitial.forEach((i) => userOwnershipHistory.get(i.userId)?.add(i.playerId));
+    allFichajes.forEach((f) => {
+      if (f.comprador) userOwnershipHistory.get(f.comprador)?.add(f.playerId);
+    });
+
+    const everOwnedIds = new Set();
+    userOwnershipHistory.forEach((set) => set.forEach((id) => everOwnedIds.add(id)));
+
+    // 2. Pre-process player stats into a map for fast lookup
+    const playerStatsMap = new Map();
+    for (const s of allStats) {
+      if (!playerStatsMap.get(s.playerId)) playerStatsMap.set(s.playerId, []);
+      playerStatsMap.get(s.playerId).push(s);
+    }
+
+    // 3. Helper for in-memory criteria checking
+    const checkCriteriaInMemory = (player: any, criteria: any) => {
+      const stats = playerStatsMap.get(player.id) || [];
+
+      if (criteria.type === 'user_ownership') {
+        const { userId, mode } = criteria.value;
+        const history = userOwnershipHistory.get(userId);
+        if (mode === 'current') return player.ownerId === userId;
+        if (mode === 'past') return history?.has(player.id) && player.ownerId !== userId;
+        return false;
+      }
+
+      if (criteria.type === 'ownership') {
+        const isCurrentlyOwned = player.ownerId !== null;
+        const wasEverOwned = everOwnedIds.has(player.id);
+
+        if (criteria.value === 'current') return isCurrentlyOwned;
+        if (criteria.value === 'free') return !isCurrentlyOwned;
+        if (criteria.value === 'ever') return wasEverOwned;
+        if (criteria.value === 'never') return !wasEverOwned;
+        if (criteria.value === 'past_not_current') return !isCurrentlyOwned && wasEverOwned;
+        return false;
+      }
+
+      if (criteria.type === 'stat_avg') {
+        if (stats.length === 0) return false;
+        const sumVal = stats.reduce(
+          (acc: number, s: any) => acc + (s[criteria.value.field] || 0),
+          0
+        );
+        return sumVal / stats.length >= criteria.value.threshold;
+      }
+      if (criteria.type === 'stat_single') {
+        return stats.some((s: any) => (s[criteria.value.field] || 0) >= criteria.value.threshold);
+      }
+      if (criteria.type === 'stat_total') {
+        const sumVal = stats.reduce(
+          (acc: number, s: any) => acc + (s[criteria.value.field] || 0),
+          0
+        );
+        return sumVal >= criteria.value.threshold;
+      }
+      if (criteria.type === 'double_double') {
+        return stats.some((s) => {
+          const counts = [
+            (s.points || 0) >= 10,
+            (s.rebounds || 0) >= 10,
+            (s.assists || 0) >= 10,
+            (s.steals || 0) >= 10,
+            (s.blocks || 0) >= 10,
+          ].filter(Boolean).length;
+          return counts >= 2;
+        });
+      }
+      if (criteria.type === 'percentage') {
+        const made = stats.reduce(
+          (acc: number, s: any) => acc + (s[criteria.value.madeField] || 0),
+          0
+        );
+        const att = stats.reduce(
+          (acc: number, s: any) => acc + (s[criteria.value.attField] || 0),
+          0
+        );
+        return att > 0 && made / att >= criteria.value.threshold;
+      }
+      if (criteria.type === 'team') return player.teamId === criteria.value;
+      if (criteria.type === 'pos') return player.position === criteria.value;
+      if (criteria.type === 'country') return player.country === criteria.value;
+      if (criteria.type === 'price_min') return (player.price || 0) >= criteria.value;
+      if (criteria.type === 'price_max') return (player.price || 0) <= criteria.value;
+      return false;
+    };
+
+    while (attempts < 100) {
+      attempts++;
+      const rowPool = [...HOOPGRID_TEAMS, ...HOOPGRID_POSITIONS];
+      rows = pickN(rowPool, 3).map((item) => ({
+        type: item.id ? 'team' : 'pos',
+        value: item.id || item.value,
+        label: item.label,
+      }));
+
+      const colPool = [
+        ...HOOPGRID_STATS,
+        ...HOOPGRID_COUNTRIES,
+        ...HOOPGRID_MARKET,
+        ...HOOPGRID_OWNERSHIP,
+        ...HOOPGRID_USER_OWNERSHIP,
+      ];
+      cols = pickN(colPool, 3).map((item) => ({
+        type: item.type || 'country',
+        value: item.value || { field: item.field, threshold: item.threshold },
+        label: item.label,
+      }));
+
+      possibleCounts = [];
+      let isCompletable = true;
+
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          let count = 0;
+          for (const player of allPlayers) {
+            if (checkCriteriaInMemory(player, rows[r]) && checkCriteriaInMemory(player, cols[c])) {
+              count++;
+            }
+          }
+          if (count === 0) {
+            isCompletable = false;
+            break;
+          }
+          possibleCounts.push(count);
+        }
+        if (!isCompletable) break;
+      }
+
+      if (isCompletable) {
+        console.log(
+          `Generated completable hoopgrid for ${dateStr} in ${attempts} attempts (${Date.now() - start}ms).`
+        );
+        break;
+      }
+    }
 
     const [challenge] = await db
       .insert(hoopgridChallenges)
@@ -220,11 +416,16 @@ export class HoopgridService {
         gameDate: dateStr,
         rows: JSON.stringify(rows),
         cols: JSON.stringify(cols),
+        possibleCounts: JSON.stringify(possibleCounts),
         isActive: true,
       })
       .onConflictDoUpdate({
         target: [hoopgridChallenges.gameDate],
-        set: { rows: JSON.stringify(rows), cols: JSON.stringify(cols) },
+        set: {
+          rows: JSON.stringify(rows),
+          cols: JSON.stringify(cols),
+          possibleCounts: JSON.stringify(possibleCounts),
+        },
       })
       .returning();
 

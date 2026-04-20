@@ -347,3 +347,31 @@ export const marketListings = pgTable(
     unq_market_listing: unique('unique_market_listing').on(t.playerId, t.listedAt),
   })
 );
+
+// 20. Hoopgrid Challenges Table
+export const hoopgridChallenges = pgTable('hoopgrid_challenges', {
+  id: text('id').primaryKey(),
+  gameDate: date('game_date').unique().notNull(),
+  rows: text('rows'), // Stored as JSON string
+  cols: text('cols'), // Stored as JSON string
+  possibleCounts: text('possible_counts'), // Stored as JSON string [n1, n2, ... n9]
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// 21. Hoopgrid Guesses Table
+export const hoopgridGuesses = pgTable(
+  'hoopgrid_guesses',
+  {
+    id: text('id').primaryKey(),
+    challengeId: text('challenge_id').references(() => hoopgridChallenges.id),
+    userId: text('user_id').references(() => users.id),
+    cellIndex: integer('cell_index').notNull(),
+    playerId: integer('player_id').references(() => players.id),
+    isCorrect: boolean('is_correct').default(false),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (t) => ({
+    unq_guess: unique('unique_guess').on(t.challengeId, t.userId, t.cellIndex),
+  })
+);

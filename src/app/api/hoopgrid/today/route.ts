@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { hoopgridGuesses, players } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@/auth';
+import { cookies } from 'next/headers';
 
 export async function GET() {
   try {
@@ -18,12 +19,23 @@ export async function GET() {
       challenge = await hoopgridService.generateDailyChallenge(today);
     }
 
-    // 2. Get user session
-    const session = await auth();
+    // 2. Get user from cookie or session fallback
+    const cookieStore = cookies();
+    let userId = cookieStore.get('NEXT_USER_ID')?.value;
+
+    if (!userId) {
+      const session = await auth();
+      userId = session?.user?.id;
+    }
+
+    if (!userId) {
+      const fallbackUser = await db.query.users.findFirst();
+      userId = fallbackUser?.id;
+    }
 
     let userGuesses = [];
-    if (session?.user) {
-      userGuesses = await db
+    if (userId) {
+      const rawGuesses = await db
         .select({
           cellIndex: hoopgridGuesses.cellIndex,
           playerId: hoopgridGuesses.playerId,
@@ -33,8 +45,17 @@ export async function GET() {
         })
         .from(hoopgridGuesses)
         .leftJoin(players, eq(hoopgridGuesses.playerId, players.id))
-        .where(eq(hoopgridGuesses.challengeId, challenge.id))
-        .where(eq(hoopgridGuesses.userId, session.user.id || '1')); // Default to '1' as per your auth config
+        .where(
+          and(eq(hoopgridGuesses.challengeId, challenge.id), eq(hoopgridGuesses.userId, userId))
+        );
+
+      // Attach rarity to each guess
+      userGuesses = await Promise.all(
+        rawGuesses.map(async (g) => ({
+          ...g,
+          rarity: await hoopgridService.getRarity(challenge.id, g.cellIndex, g.playerId),
+        }))
+      );
     }
 
     return NextResponse.json({
@@ -44,6 +65,10 @@ export async function GET() {
           typeof challenge.rows === 'string' ? JSON.parse(challenge.rows) : challenge.rows || [],
         cols:
           typeof challenge.cols === 'string' ? JSON.parse(challenge.cols) : challenge.cols || [],
+        possibleCounts:
+          typeof challenge.possibleCounts === 'string'
+            ? JSON.parse(challenge.possibleCounts)
+            : challenge.possibleCounts || [],
       },
       userGuesses,
     });

@@ -34,7 +34,7 @@ export const HOOPGRID_STATS = [
   { type: 'stat_avg', field: 'points', threshold: 12, label: '12+ Puntos (Media)' },
   { type: 'stat_avg', field: 'assists', threshold: 5, label: '5+ Asis. (Media)' },
   { type: 'stat_avg', field: 'rebounds', threshold: 6, label: '6+ Reb. (Media)' },
-  { type: 'stat_avg', field: 'minutes', threshold: 28, label: '28+ Min. (Media)' },
+  { type: 'stat_avg', field: 'minutes', threshold: 24, label: '24+ Min. (Media)' },
 
   // Sniper Achievement (Media)
   {
@@ -42,6 +42,7 @@ export const HOOPGRID_STATS = [
     value: { madeField: 'threePointsMade', attField: 'threePointsAttempted', threshold: 0.4 },
     label: '40%+ Triples (Media)',
   },
+  { type: 'stat_avg', field: 'threePointsMade', threshold: 2.2, label: '2.2+ Triples (Media)' },
 
   // Single Game Peaks
   { type: 'stat_single', field: 'points', threshold: 30, label: '30+ Puntos (1 Part.)' },
@@ -64,6 +65,86 @@ export const HOOPGRID_MARKET = [
   { type: 'price_min', value: 20000000, label: 'Precio > 20M' },
   { type: 'price_max', value: 5000000, label: 'Precio < 5M' },
   { type: 'price_max', value: 3000000, label: 'Ganga (< 3M)' },
+];
+
+export const HOOPGRID_OWNERSHIP = [
+  { type: 'ownership', value: 'current', label: 'Jugador Fichado' },
+  { type: 'ownership', value: 'free', label: 'Agente Libre' },
+  { type: 'ownership', value: 'past_not_current', label: 'Fichado antes (Ahora libre)' },
+  { type: 'ownership', value: 'never', label: 'Nunca Fichado' },
+];
+
+export const HOOPGRID_USER_OWNERSHIP = [
+  {
+    type: 'user_ownership',
+    value: { userId: '13207868', mode: 'current' },
+    label: 'Fichado por All Stars',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13207868', mode: 'past' },
+    label: 'Ex-jugador de All Stars',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13207924', mode: 'current' },
+    label: 'Fichado por ask72',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13207924', mode: 'past' },
+    label: 'Ex-jugador de ask72',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13208192', mode: 'current' },
+    label: 'Fichado por Real Madrid Basket',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13208192', mode: 'past' },
+    label: 'Ex-jugador de Real Madrid Basket',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13207910', mode: 'current' },
+    label: 'Fichado por June',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13207910', mode: 'past' },
+    label: 'Ex-jugador de June',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13208960', mode: 'current' },
+    label: 'Fichado por Cactus Team',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13208960', mode: 'past' },
+    label: 'Ex-jugador de Cactus Team',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13209320', mode: 'current' },
+    label: 'Fichado por Daniel De Castro',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13209320', mode: 'past' },
+    label: 'Ex-jugador de Daniel De Castro',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13207974', mode: 'current' },
+    label: 'Fichado por Nonameyet',
+  },
+  {
+    type: 'user_ownership',
+    value: { userId: '13207974', mode: 'past' },
+    label: 'Ex-jugador de Nonameyet',
+  },
 ];
 
 export const HOOPGRID_COUNTRIES = [
