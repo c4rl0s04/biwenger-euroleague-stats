@@ -8,24 +8,36 @@ async function syncAllImages() {
   const limit = process.argv.includes('--limit')
     ? parseInt(process.argv[process.argv.indexOf('--limit') + 1])
     : undefined;
-
+  const force = process.argv.includes('--force');
   console.log('🚀 Starting One-Time Image Sync...');
+  if (force) console.log('⚠️  Force mode enabled: Syncing all players.');
 
   const mutations = prepareEuroleagueMutations(db as any);
 
   // 1. Get all players with Euroleague codes
   const players = await db.query(
-    'SELECT id, name, euroleague_code, team_id FROM players WHERE euroleague_code IS NOT NULL'
+    'SELECT id, name, euroleague_code, team_id, img FROM players WHERE euroleague_code IS NOT NULL'
   );
+  
   const all = players.rows;
-  const playersToSync = (limit ? all.slice(0, limit) : all).map((p) => ({
+  
+  // Filter for players needing sync (missing team_id OR missing official image)
+  const filtered = force ? all : all.filter(p => {
+    const hasOfficialImg = p.img && p.img.includes('media-cdn.incrowdsports.com');
+    const hasTeam = !!p.team_id;
+    return !hasOfficialImg || !hasTeam;
+  });
+
+  const playersToSync = (limit ? filtered.slice(0, limit) : filtered).map((p) => ({
     id: p.id,
     name: p.name,
     euroleague_code: p.euroleague_code,
     team_id: p.team_id,
   }));
 
-  console.log(`📊 Processing ${playersToSync.length} of ${all.length} players.`);
+  console.log(`📊 Total Players: ${all.length}`);
+  console.log(`📊 Needing Sync: ${filtered.length}`);
+  console.log(`📊 Processing: ${playersToSync.length}`);
 
   // 2. Fetch all teams to create a lookup map
   const teamsResult = await db.query('SELECT id, name, short_name FROM teams');
