@@ -1,0 +1,38 @@
+name: Image Recovery Sync (Step 11)
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  sync-images:
+    name: Recover Player Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 60 # Step 11 can be slow due to rate limiting delays
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Image Sync (Step 11)
+        env:
+          # Database Connection
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+
+          # Biwenger Credentials (needed for database context)
+          BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
+          BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
+          BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
+        run: npx tsx src/lib/sync/index.ts --step=11
