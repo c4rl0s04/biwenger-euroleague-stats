@@ -12,8 +12,8 @@ export default function GridCell({ guess, onClick, isSubmitted }) {
     if (rarity <= 5) return '#9333ea';
     if (rarity <= 15) return '#2563eb';
     if (rarity <= 30) return '#eab308';
-    if (rarity <= 50) return '#e2e8f0';
-    return '#ea580c';
+    if (rarity <= 50) return '#c2c8d07b';
+    return '#a86929';
   };
 
   return (
@@ -33,24 +33,33 @@ export default function GridCell({ guess, onClick, isSubmitted }) {
       `}
     >
       {isCorrect ? (
-        <div className="h-full flex flex-col items-center justify-end relative">
-          <div className="absolute inset-0 flex items-center justify-center pt-2">
+        <div className="h-full flex flex-col items-end justify-end relative">
+          {/* Player Image */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
             <PlayerImage
               src={guess.playerImg}
               alt={guess.playerName}
-              width={160}
-              height={160}
-              className="object-contain opacity-100"
+              width={180}
+              height={180}
+              className="object-contain opacity-100 w-full h-full scale-125 translate-y-4"
             />
           </div>
 
-          <div className="relative w-full p-2 bg-gradient-to-t from-black/90 to-transparent pt-8 text-center">
-            <p className="text-[9px] font-black uppercase text-white leading-tight drop-shadow-md">
-              {guess.playerName}
-            </p>
-            <p className="text-[8px] font-bold text-white opacity-70">
-              Rarity: {Number(guess.rarity).toFixed(2)}%
-            </p>
+          {/* Static gloss shine */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-white/5 to-transparent pointer-events-none" />
+          {/* Dark gradient base */}
+          <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+
+          {/* Name + Rarity — single box */}
+          <div className="relative w-full pb-2 px-1.5">
+            <div className="w-full flex flex-col items-center gap-0.5 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1.5 border border-white/10">
+              <span className="w-full text-center text-[11px] md:text-[13px] font-black uppercase tracking-wide text-white leading-tight">
+                {guess.playerName}
+              </span>
+              <span className="text-[10px] md:text-[11px] font-semibold text-white/70 tracking-widest">
+                {Number(guess.rarity).toFixed(2)}%
+              </span>
+            </div>
           </div>
         </div>
       ) : (

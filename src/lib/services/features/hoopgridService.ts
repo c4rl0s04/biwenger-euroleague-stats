@@ -230,6 +230,103 @@ export class HoopgridService {
   }
 
   /**
+   * Internal helper for synchronous validation once data is loaded
+   */
+  private static validateCriteriaSync(
+    player: any,
+    stats: any[],
+    criteria: Criteria,
+    initials: any[],
+    transfers: any[]
+  ): boolean {
+    if (criteria.type.startsWith('stat_')) {
+      if (!stats || stats.length === 0) return false;
+      const field = criteria.value.field as string;
+      const values = stats.map((s) => Number(s[field] || 0));
+      if (criteria.type === 'stat_avg') {
+        const avg = values.reduce((a, b) => a + b, 0) / (values.length || 1);
+        return avg >= criteria.value.threshold;
+      }
+      if (criteria.type === 'stat_single') return Math.max(...values) >= criteria.value.threshold;
+      if (criteria.type === 'stat_total')
+        return values.reduce((a, b) => a + b, 0) >= criteria.value.threshold;
+    }
+
+    if (criteria.type === 'double_double') {
+      return stats.some((s) => {
+        const counts = [
+          (s.points || 0) >= 10,
+          (s.rebounds || 0) >= 10,
+          (s.assists || 0) >= 10,
+          (s.steals || 0) >= 10,
+          (s.blocks || 0) >= 10,
+        ].filter(Boolean).length;
+        return counts >= 2;
+      });
+    }
+
+    if (criteria.type === 'percentage') {
+      const madeField = criteria.value.madeField as string;
+      const attField = criteria.value.attField as string;
+      const totalMade = stats.reduce((a, b) => a + Number(b[madeField] || 0), 0);
+      const totalAtt = stats.reduce((a, b) => a + Number(b[attField] || 0), 0);
+      return totalAtt > 0 && totalMade / totalAtt >= criteria.value.threshold;
+    }
+
+    if (criteria.type === 'user_ownership') {
+      const { userId, mode } = criteria.value;
+      if (mode === 'current') return player.ownerId === userId;
+      if (mode === 'past') {
+        if (player.ownerId === userId) return false;
+        const wasMine =
+          initials.some((i) => i.userId === userId) ||
+          transfers.some((t) => t.comprador === userId);
+        return wasMine;
+      }
+    }
+
+    if (criteria.type === 'ownership') {
+      const isCurrentlyOwned = player.ownerId !== null;
+      if (criteria.value === 'current') return isCurrentlyOwned;
+      if (criteria.value === 'free') return !isCurrentlyOwned;
+      const wasEverOwned = initials.length > 0 || transfers.length > 0;
+      if (criteria.value === 'ever') return wasEverOwned;
+      if (criteria.value === 'past_not_current') return !isCurrentlyOwned && wasEverOwned;
+      if (criteria.value === 'never') return !wasEverOwned;
+    }
+
+    switch (criteria.type) {
+      case 'team':
+        return player.teamId === criteria.value;
+      case 'pos':
+        return player.position === criteria.value;
+      case 'country':
+        return player.country === criteria.value;
+      case 'price_min':
+        return (player.price || 0) >= criteria.value;
+      case 'price_max':
+        return (player.price || 0) <= criteria.value;
+      case 'height_min':
+        return (player.height || 0) >= criteria.value;
+      case 'height_max':
+        return (player.height || 0) <= criteria.value;
+      case 'age_min':
+      case 'age_max': {
+        if (!player.birthDate) return false;
+        const birth = new Date(player.birthDate);
+        const today = new Date();
+        const age =
+          today.getFullYear() -
+          birth.getFullYear() -
+          (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
+        return criteria.type === 'age_min' ? age >= criteria.value : age <= criteria.value;
+      }
+      default:
+        return false;
+    }
+  }
+
+  /**
    * Records or validates a user's guess
    */
   static async submitGuess(
@@ -239,27 +336,36 @@ export class HoopgridService {
     playerId: number,
     dryRun: boolean = false
   ) {
-    const challenge = await db.query.hoopgridChallenges.findFirst({
-      where: eq(hoopgridChallenges.id, challengeId),
-    });
+    const [challenge, player, stats, initials, transfers] = await Promise.all([
+      db.query.hoopgridChallenges.findFirst({ where: eq(hoopgridChallenges.id, challengeId) }),
+      db.query.players.findFirst({ where: eq(players.id, playerId) }),
+      db.select().from(playerRoundStats).where(eq(playerRoundStats.playerId, playerId)),
+      db.select().from(initialSquads).where(eq(initialSquads.playerId, playerId)),
+      db.select().from(fichajes).where(eq(fichajes.playerId, playerId)),
+    ]);
 
-    if (!challenge) throw new Error('Challenge not found');
+    if (!challenge || !player) throw new Error('Data not found');
 
     const rows =
       typeof challenge.rows === 'string' ? JSON.parse(challenge.rows) : challenge.rows || [];
     const cols =
       typeof challenge.cols === 'string' ? JSON.parse(challenge.cols) : challenge.cols || [];
+    const rowCriteria = rows[Math.floor(cellIndex / 3)];
+    const colCriteria = cols[cellIndex % 3];
 
-    const rowIndex = Math.floor(cellIndex / 3);
-    const colIndex = cellIndex % 3;
+    const isRowCorrect = this.validateCriteriaSync(player, stats, rowCriteria, initials, transfers);
+    const isColCorrect = this.validateCriteriaSync(player, stats, colCriteria, initials, transfers);
+    const isCorrect = isRowCorrect && isColCorrect;
 
-    const isCorrectRow = await this.checkCriteria(playerId, rows[rowIndex]);
-    const isCorrectCol = await this.checkCriteria(playerId, cols[colIndex]);
-    const isCorrect = isCorrectRow && isCorrectCol;
+    let rarity = null;
+    if (isCorrect) {
+      rarity = await this.getRarity(challengeId, cellIndex, playerId, challenge);
+    }
 
     if (dryRun) {
       return {
         isCorrect,
+        rarity,
         guess: { id: 'draft', challengeId, userId, cellIndex, playerId, isCorrect },
       };
     }
@@ -280,13 +386,24 @@ export class HoopgridService {
       })
       .returning();
 
-    return { isCorrect, guess };
+    return {
+      isCorrect,
+      rarity,
+      guess,
+    };
   }
 
   /**
-   * Calculates rarity for a specific correct guess
+   * Calculates rarity for a specific correct guess.
+   * Uses a single GROUP BY query — O(1) regardless of player count.
    */
-  static async getRarity(challengeId: string, cellIndex: number, playerId: number) {
+  static async getRarity(
+    challengeId: string,
+    cellIndex: number,
+    playerId: number,
+    _existingChallenge?: any
+  ) {
+    // Single query: count how many people picked each player for this cell today
     const results = await db
       .select({
         playerId: hoopgridGuesses.playerId,
@@ -303,48 +420,13 @@ export class HoopgridService {
       .groupBy(hoopgridGuesses.playerId);
 
     const totalCorrectGuesses = results.reduce((acc, curr) => acc + curr.count, 0);
-    let playerPicks = results.find((r) => r.playerId === playerId)?.count || 0;
+    const playerPicks = results.find((r) => r.playerId === playerId)?.count || 0;
 
+    // Laplace smoothing: add 1 to numerator and denominator to avoid 0%/100% extremes
     const virtualTotal = totalCorrectGuesses + 1;
     const virtualPlayerPicks = playerPicks + 1;
-    const popularityRarity = (virtualPlayerPicks * 100) / virtualTotal;
 
-    // 2. Points-Weighted Rarity
-    // We look at all players who fit this cell and see where our player sits in terms of performance (points).
-    const challenge = await db.query.hoopgridChallenges.findFirst({
-      where: eq(hoopgridChallenges.id, challengeId),
-    });
-
-    if (!challenge) return popularityRarity;
-
-    const rows = typeof challenge.rows === 'string' ? JSON.parse(challenge.rows) : challenge.rows;
-    const cols = typeof challenge.cols === 'string' ? JSON.parse(challenge.cols) : challenge.cols;
-    const rowIndex = Math.floor(cellIndex / 3);
-    const colIndex = cellIndex % 3;
-
-    // Get all players that fit this cell to find the points range
-    const allPlayers = await db.select({ puntos: players.puntos, id: players.id }).from(players);
-    let maxPoints = 1;
-    let myPoints = 0;
-
-    for (const p of allPlayers) {
-      const fits =
-        (await HoopgridService.checkCriteria(p.id, rows[rowIndex])) &&
-        (await HoopgridService.checkCriteria(p.id, cols[colIndex]));
-
-      if (fits) {
-        const pPoints = p.puntos || 0;
-        if (pPoints > maxPoints) maxPoints = pPoints;
-        if (p.id === playerId) myPoints = pPoints;
-      }
-    }
-
-    // Performance Rarity: Your points relative to the "top contributor" choice.
-    // We add a small offset to avoid 0% and handle players with 0 points fairly.
-    const performanceWeight = Math.max(0.05, (myPoints + 1) / (maxPoints + 1));
-
-    // Final Rarity: Popularity scaled by Performance Weight
-    return popularityRarity * performanceWeight;
+    return (virtualPlayerPicks * 100) / virtualTotal;
   }
 
   /**

@@ -30,23 +30,20 @@ export async function POST(request: Request) {
       for (const [cellIdxStr, p] of Object.entries(batchGuesses)) {
         if (!p.isCorrect) continue;
         const cellIdx = parseInt(cellIdxStr);
-        const { isCorrect, guess } = await hoopgridService.submitGuess(
+        const res = await hoopgridService.submitGuess(
           challengeId,
           userId,
           cellIdx,
           p.playerId,
           false
         );
-        const rarity = isCorrect
-          ? await HoopgridService.getRarity(challengeId, cellIdx, p.playerId)
-          : null;
-        results.push({ cellIndex: cellIdx, isCorrect, guess, rarity });
+        results.push({ cellIndex: cellIdx, ...res });
       }
       return NextResponse.json({ success: true, results });
     }
 
-    // 2. Submit guess via service (dryRun by default if specified)
-    const { isCorrect, guess } = await hoopgridService.submitGuess(
+    // 2. Submit guess via service
+    const result = await hoopgridService.submitGuess(
       challengeId,
       userId,
       cellIndex,
@@ -54,17 +51,7 @@ export async function POST(request: Request) {
       dryRun
     );
 
-    // 3. If correct, fetch rarity score
-    let rarity = null;
-    if (isCorrect) {
-      rarity = await HoopgridService.getRarity(challengeId, cellIndex, playerId);
-    }
-
-    return NextResponse.json({
-      isCorrect,
-      rarity,
-      guess,
-    });
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error('Hoopgrid Guess Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
