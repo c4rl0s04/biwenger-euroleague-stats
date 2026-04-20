@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toPng } from 'html-to-image';
 import PlayerImage from '@/components/ui/PlayerImage';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
 import HoopgridSearch from './HoopgridSearch';
+import HoopgridShareModal from './HoopgridShareModal';
+import { useUser } from '@/contexts/UserContext';
 
 export default function HoopgridClient() {
   const [challenge, setChallenge] = useState(null);
@@ -14,6 +17,11 @@ export default function HoopgridClient() {
   const [copying, setCopying] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareImageUri, setShareImageUri] = useState(null);
+  const [shareText, setShareText] = useState('');
+  const gridRef = useRef(null);
+  const { currentUser } = useUser();
 
   useEffect(() => {
     fetchTodayChallenge();
@@ -112,21 +120,48 @@ export default function HoopgridClient() {
     }
   };
 
-  const handleShare = () => {
-    let grid = 'Euroleague Hoopgrid 🏀\n';
+  const handleShare = async () => {
+    // 1. Text Copy
+    let gridText = 'Euroleague Hoopgrid 🏀\n';
     for (let i = 0; i < 3; i++) {
       let row = '';
       for (let j = 0; j < 3; j++) {
         const guess = guesses[i * 3 + j];
-        row += guess?.isCorrect ? '🟧' : '⬜'; // Using orange for your brand
+        row += guess?.isCorrect ? '🟧' : '⬜';
       }
-      grid += row + '\n';
+      gridText += row + '\n';
     }
-    grid += '\nJuega en biwengerstats.com';
+    gridText += '\nJuega en biwengerstats.com';
+    setShareText(gridText);
 
-    navigator.clipboard.writeText(grid);
-    setCopying(true);
-    setTimeout(() => setCopying(false), 2000);
+    // 2. Image Generation
+    if (gridRef.current) {
+      try {
+        setCopying(true);
+        // Pull actual theme background color from CSS variables
+        const bgColor =
+          getComputedStyle(document.documentElement).getPropertyValue('--background') || '#0f172a';
+
+        const dataUrl = await toPng(gridRef.current, {
+          cacheBust: true,
+          backgroundColor: bgColor.trim(),
+          style: {
+            borderRadius: '24px',
+            padding: '40px', // Extra padding for the share card
+          },
+          onClone: (clonedDoc) => {
+            const footer = clonedDoc.querySelector('.share-only-footer');
+            if (footer) footer.style.display = 'flex';
+          },
+        });
+        setShareImageUri(dataUrl);
+        setShareModalOpen(true);
+      } catch (err) {
+        console.error('Failed to generate image:', err);
+      } finally {
+        setCopying(false);
+      }
+    }
   };
 
   const correctGuessesCount = Object.values(guesses).filter((g) => g.isCorrect).length;
@@ -180,7 +215,7 @@ export default function HoopgridClient() {
       </div>
 
       {/* 1. The Grid Container */}
-      <div className="w-full flex mb-16 md:mb-20">
+      <div ref={gridRef} className="w-full flex mb-16 md:mb-20">
         {/* Left Column: Row Headers */}
         <div className="w-[25%] md:w-[20%] flex flex-col pt-8 md:pt-14 pr-2 md:pr-6">
           {challenge.rows.map((row, i) => (
@@ -230,6 +265,16 @@ export default function HoopgridClient() {
 
         {/* Right Column: Empty spacer to perfectly center the board on desktop */}
         <div className="hidden md:block md:w-[20%]"></div>
+
+        {/* GHOST FOOTER: Only visible in the shared image */}
+        <div className="share-only-footer hidden w-full mt-12 flex justify-between items-center px-4 opacity-40">
+          <span className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+            biwengerstats.com
+          </span>
+          <span className="text-[12px] font-display uppercase tracking-tighter text-foreground">
+            Manager: {currentUser?.name || 'Invitado'}
+          </span>
+        </div>
       </div>
 
       {/* Action Buttons */}
@@ -278,6 +323,17 @@ export default function HoopgridClient() {
             title={`${challenge.rows[Math.floor(activeCell / 3)].label} + ${challenge.cols[activeCell % 3].label}`}
             possibleCount={challenge.possibleCounts?.[activeCell]}
             usedPlayerIds={new Set(Object.values(guesses).map((g) => g.playerId))}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {shareModalOpen && (
+          <HoopgridShareModal
+            isOpen={shareModalOpen}
+            onClose={() => setShareModalOpen(false)}
+            imageUri={shareImageUri}
+            textSummary={shareText}
           />
         )}
       </AnimatePresence>

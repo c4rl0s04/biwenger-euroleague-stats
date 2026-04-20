@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { hoopgridService } from '@/lib/services/features/hoopgridService';
+import { HoopgridService, hoopgridService } from '@/lib/services/features/hoopgridService';
 import { db } from '@/lib/db';
 import { hoopgridGuesses, players } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -33,7 +33,7 @@ export async function GET() {
       userId = fallbackUser?.id;
     }
 
-    let userGuesses = [];
+    let userGuesses: any[] = [];
     if (userId) {
       const rawGuesses = await db
         .select({
@@ -53,7 +53,9 @@ export async function GET() {
       userGuesses = await Promise.all(
         rawGuesses.map(async (g) => ({
           ...g,
-          rarity: await hoopgridService.getRarity(challenge.id, g.cellIndex, g.playerId),
+          rarity: g.playerId
+            ? await HoopgridService.getRarity(challenge!.id, g.cellIndex, g.playerId)
+            : 0,
         }))
       );
     }

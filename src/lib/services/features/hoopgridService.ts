@@ -7,7 +7,7 @@ import {
   initialSquads,
   fichajes,
 } from '@/lib/db/schema';
-import { eq, and, avg, count, sql } from 'drizzle-orm';
+import { eq, and, avg, count, sql, sum, max } from 'drizzle-orm';
 import {
   HOOPGRID_TEAMS,
   HOOPGRID_POSITIONS,
@@ -19,7 +19,21 @@ import {
 } from '@/lib/constants/hoopgridCriteria';
 import crypto from 'crypto';
 
-export type CriteriaType = 'team' | 'pos' | 'country' | 'stat' | 'price';
+export type CriteriaType =
+  | 'team'
+  | 'pos'
+  | 'country'
+  | 'stat'
+  | 'price'
+  | 'stat_avg'
+  | 'stat_single'
+  | 'stat_total'
+  | 'double_double'
+  | 'percentage'
+  | 'user_ownership'
+  | 'ownership'
+  | 'price_min'
+  | 'price_max';
 
 export interface Criteria {
   type: CriteriaType;
@@ -30,9 +44,13 @@ export interface Criteria {
 export class HoopgridService {
   static async checkCriteria(playerId: number, criteria: Criteria): Promise<boolean> {
     if (criteria.type === 'stat_avg') {
+      const field = criteria.value.field as keyof typeof playerRoundStats;
+      const column = playerRoundStats[field];
+      if (typeof column === 'function' || !column) return false;
+
       const stats = await db
         .select({
-          average: avg(playerRoundStats[criteria.value.field as keyof typeof playerRoundStats]),
+          average: avg(column as any),
         })
         .from(playerRoundStats)
         .where(eq(playerRoundStats.playerId, playerId));
@@ -43,9 +61,13 @@ export class HoopgridService {
 
     if (criteria.type === 'stat_single') {
       const { max } = await import('drizzle-orm');
+      const field = criteria.value.field as keyof typeof playerRoundStats;
+      const column = playerRoundStats[field];
+      if (typeof column === 'function' || !column) return false;
+
       const stats = await db
         .select({
-          maximum: max(playerRoundStats[criteria.value.field as keyof typeof playerRoundStats]),
+          maximum: max(column as any),
         })
         .from(playerRoundStats)
         .where(eq(playerRoundStats.playerId, playerId));
@@ -56,9 +78,13 @@ export class HoopgridService {
 
     if (criteria.type === 'stat_total') {
       const { sum } = await import('drizzle-orm');
+      const field = criteria.value.field as keyof typeof playerRoundStats;
+      const column = playerRoundStats[field];
+      if (typeof column === 'function' || !column) return false;
+
       const stats = await db
         .select({
-          total: sum(playerRoundStats[criteria.value.field as keyof typeof playerRoundStats]),
+          total: sum(column as any),
         })
         .from(playerRoundStats)
         .where(eq(playerRoundStats.playerId, playerId));
@@ -86,11 +112,24 @@ export class HoopgridService {
     }
 
     if (criteria.type === 'percentage') {
-      const { sum } = await import('drizzle-orm');
+      const madeField = criteria.value.madeField as keyof typeof playerRoundStats;
+      const attField = criteria.value.attField as keyof typeof playerRoundStats;
+      const madeColumn = playerRoundStats[madeField];
+      const attColumn = playerRoundStats[attField];
+
+      if (
+        typeof madeColumn === 'function' ||
+        !madeColumn ||
+        typeof attColumn === 'function' ||
+        !attColumn
+      ) {
+        return false;
+      }
+
       const stats = await db
         .select({
-          made: sum(playerRoundStats[criteria.value.madeField as keyof typeof playerRoundStats]),
-          att: sum(playerRoundStats[criteria.value.attField as keyof typeof playerRoundStats]),
+          made: sum(madeColumn as any),
+          att: sum(attColumn as any),
         })
         .from(playerRoundStats)
         .where(eq(playerRoundStats.playerId, playerId));
@@ -305,9 +344,9 @@ export class HoopgridService {
     const allFichajes = await db.select().from(fichajes);
 
     const userOwnershipHistory = new Map();
-    const allUsers = [
-      ...new Set([...allInitial.map((i) => i.userId), ...allFichajes.map((f) => f.comprador)]),
-    ].filter(Boolean);
+    const allUsers = Array.from(
+      new Set([...allInitial.map((i) => i.userId), ...allFichajes.map((f) => f.comprador)])
+    ).filter((u): u is string => !!u);
 
     allUsers.forEach((u) => userOwnershipHistory.set(u, new Set()));
     allInitial.forEach((i) => userOwnershipHistory.get(i.userId)?.add(i.playerId));
@@ -315,8 +354,8 @@ export class HoopgridService {
       if (f.comprador) userOwnershipHistory.get(f.comprador)?.add(f.playerId);
     });
 
-    const everOwnedIds = new Set();
-    userOwnershipHistory.forEach((set) => set.forEach((id) => everOwnedIds.add(id)));
+    const everOwnedIds = new Set<number>();
+    userOwnershipHistory.forEach((set) => set.forEach((id: number) => everOwnedIds.add(id)));
 
     // 2. Pre-process player stats into a map for fast lookup
     const playerStatsMap = new Map();
@@ -368,7 +407,7 @@ export class HoopgridService {
         return sumVal >= criteria.value.threshold;
       }
       if (criteria.type === 'double_double') {
-        return stats.some((s) => {
+        return stats.some((s: any) => {
           const counts = [
             (s.points || 0) >= 10,
             (s.rebounds || 0) >= 10,
@@ -431,7 +470,7 @@ export class HoopgridService {
               count++;
             }
           }
-          if (count === 0) {
+          if (count < 1) {
             isCompletable = false;
             break;
           }

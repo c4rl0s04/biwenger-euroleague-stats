@@ -30,11 +30,15 @@ export async function run(manager: SyncManager) {
     if (!player.euroleague_code) continue;
 
     try {
-      process.stdout.write(`   Fetching image for ${player.name} (${player.euroleague_code})... `);
+      // Clean and pad the code (e.g. "P014416" -> "014416")
+      const cleanCode = player.euroleague_code.toString().replace(/\D/g, '');
+      const paddedId = cleanCode.padStart(6, '0');
+
+      process.stdout.write(`   Fetching image for ${player.name} (${paddedId})... `);
 
       // Use the Mobile App API which has no firewall
       const res = await fetch(
-        `https://api-live.euroleague.net/v1/players?playerCode=${player.euroleague_code}&seasonCode=E2024`
+        `https://api-live.euroleague.net/v1/players?playerCode=${paddedId}&seasonCode=E2024`
       );
 
       if (!res.ok) {
@@ -59,7 +63,7 @@ export async function run(manager: SyncManager) {
         updatedCount++;
         console.log('✅');
       } else {
-        manager.warn(`   ⚠️ No image found in API for ${player.name}`);
+        manager.log(`   ⚠️ No image found in API for ${player.name}`);
         errorCount++;
       }
 

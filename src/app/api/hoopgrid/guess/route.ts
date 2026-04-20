@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { hoopgridService } from '@/lib/services/features/hoopgridService';
+import { HoopgridService, hoopgridService } from '@/lib/services/features/hoopgridService';
 import { auth } from '@/auth';
 import { cookies } from 'next/headers';
 
@@ -24,8 +24,10 @@ export async function POST(request: Request) {
     }
 
     if (action === 'submitBatch') {
-      const results = [];
-      for (const [cellIdxStr, p] of Object.entries(guesses)) {
+      const results: any[] = [];
+      const batchGuesses = guesses as Record<string, { playerId: number; isCorrect: boolean }>;
+
+      for (const [cellIdxStr, p] of Object.entries(batchGuesses)) {
         if (!p.isCorrect) continue;
         const cellIdx = parseInt(cellIdxStr);
         const { isCorrect, guess } = await hoopgridService.submitGuess(
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
           false
         );
         const rarity = isCorrect
-          ? await hoopgridService.getRarity(challengeId, cellIdx, p.playerId)
+          ? await HoopgridService.getRarity(challengeId, cellIdx, p.playerId)
           : null;
         results.push({ cellIndex: cellIdx, isCorrect, guess, rarity });
       }
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
     // 3. If correct, fetch rarity score
     let rarity = null;
     if (isCorrect) {
-      rarity = await hoopgridService.getRarity(challengeId, cellIndex, playerId);
+      rarity = await HoopgridService.getRarity(challengeId, cellIndex, playerId);
     }
 
     return NextResponse.json({
