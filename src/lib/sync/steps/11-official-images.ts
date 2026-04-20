@@ -45,18 +45,45 @@ export async function run(manager: SyncManager) {
     const url = CONFIG.ENDPOINTS.EUROLEAGUE_WEBSITE.OFFICIAL_PLAYER_PROFILE(slug, paddedId);
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
+
       if (!res.ok) {
+        if (res.status === 429) {
+          manager.error(`   ⚠️ Rate limited (429) by Euroleague website. Sleeping longer...`);
+          await sleep(2000);
+        }
         errorCount++;
         continue;
       }
 
       const html = await res.text();
-      const regex = /"photo":"(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/;
-      const match = html.match(regex);
+      // Try multiple regex patterns for the image
+      const patterns = [
+        /"photo":"(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/,
+        /property="og:image" content="(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/,
+        /src="(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/,
+      ];
 
-      if (match && match[1]) {
-        const imgUrl = match[1];
+      let imgUrl = null;
+      for (const pattern of patterns) {
+        const match = html.match(pattern);
+        if (match && match[1]) {
+          imgUrl = match[1];
+          break;
+        }
+      }
+
+      if (imgUrl) {
         await mutations.updatePlayerImage(imgUrl, player.id);
         updatedCount++;
       } else {

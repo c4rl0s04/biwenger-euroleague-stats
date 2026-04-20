@@ -58,6 +58,8 @@ export interface PlayerMutations {
     playerId: number
   ) => Promise<{ birth_date: string; height: number; weight: number } | undefined>;
   upsertTeam: (params: UpsertTeamParams) => Promise<void>;
+  updateTeamActiveStatus: (id: number, active: boolean) => Promise<void>;
+  setAllTeamsInactive: () => Promise<void>;
 }
 
 /**
@@ -97,8 +99,10 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
           points_last_season=excluded.points_last_season,
           status=excluded.status,
           price_increment=excluded.price_increment,
-          price=excluded.price
-          -- img is NOT updated to preserve potentially better images
+          price=excluded.price,
+          -- Use COALESCE to prevent overwriting with NULL if the API drops info for eliminated teams
+          team_id = COALESCE(excluded.team_id, players.team_id),
+          img = COALESCE(players.img, excluded.img) -- Preserve existing (potentially official) images
       `;
       const values = [
         params.id,
@@ -160,10 +164,22 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
     // Insert/Update Team (for Team Sync)
     upsertTeam: async (params: UpsertTeamParams) => {
       const sql = `
-        INSERT INTO teams (id, name, short_name, img) VALUES ($1, $2, $3, $4)
-        ON CONFLICT(id) DO UPDATE SET name=excluded.name, short_name=excluded.short_name
+        INSERT INTO teams (id, name, short_name, img, is_active) VALUES ($1, $2, $3, $4, true)
+        ON CONFLICT(id) DO UPDATE SET 
+          name=excluded.name, 
+          short_name=excluded.short_name, 
+          img=COALESCE(teams.img, excluded.img),
+          is_active=excluded.is_active
       `;
       await db.query(sql, [params.id, params.name, params.short_name, params.img]);
+    },
+
+    updateTeamActiveStatus: async (id: number, active: boolean) => {
+      await db.query('UPDATE teams SET is_active = $1 WHERE id = $2', [active, id]);
+    },
+
+    setAllTeamsInactive: async () => {
+      await db.query('UPDATE teams SET is_active = false');
     },
   };
 }

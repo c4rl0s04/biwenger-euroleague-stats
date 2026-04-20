@@ -86,6 +86,7 @@ export async function run(manager: SyncManager) {
   manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing players in DB.`);
 
   manager.log('Syncing Teams...');
+  await mutations.setAllTeamsInactive();
   for (const [teamId, teamData] of Object.entries(teams) as any[]) {
     await mutations.upsertTeam({
       id: parseInt(teamId),
@@ -121,7 +122,7 @@ export async function run(manager: SyncManager) {
     await mutations.upsertPlayer({
       id: playerId,
       name: player.name,
-      team_id: player.teamID,
+      team_id: player.teamID ?? null,
       position: positions[player.position] || 'Unknown',
       puntos: finalPoints,
       partidos_jugados: (player.playedHome || 0) + (player.playedAway || 0),
@@ -133,7 +134,7 @@ export async function run(manager: SyncManager) {
       status: player.status || 'ok',
       price_increment: player.priceIncrement || 0,
       price: player.price || 0,
-      img: player.img || null,
+      img: player.img ?? null,
     });
 
     const todayInt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
