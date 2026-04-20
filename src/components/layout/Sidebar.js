@@ -18,6 +18,7 @@ import {
   Clock,
   Scale,
   Medal,
+  LayoutGrid,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSections } from './SectionContext';
@@ -29,6 +30,7 @@ const navItems = [
   { name: 'Jugadores', href: '/players', icon: User },
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },
+  { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Alineaciones', href: '/schedule', icon: Users },
   { name: 'Jornadas', href: '/rounds', icon: Clock },
   { name: 'Torneos', href: '/tournaments', icon: Medal },
