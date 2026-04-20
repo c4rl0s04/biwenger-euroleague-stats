@@ -12,6 +12,7 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
   // Check for native share support on mount
   useEffect(() => {
     if (typeof navigator !== 'undefined' && navigator.share) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanNativeShare(true);
     }
   }, []);
@@ -111,16 +112,11 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
 
         {/* Image Preview */}
         <div className="p-8 flex justify-center bg-muted/10">
-          <div className="relative group">
-            <img
-              src={imageUri}
-              alt="Hoopgrid Results"
-              className="max-h-[40vh] rounded-xl shadow-2xl border border-white/10"
-            />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl backdrop-blur-[2px]">
-              <p className="text-white text-xs font-bold uppercase tracking-widest">Vista Previa</p>
-            </div>
-          </div>
+          <img
+            src={imageUri}
+            alt="Hoopgrid Results"
+            className="max-h-[40vh] rounded-xl shadow-2xl border border-white/10"
+          />
         </div>
 
         {/* Action Buttons */}

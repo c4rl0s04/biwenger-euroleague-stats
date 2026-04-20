@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { toPng } from 'html-to-image';
 
 /**
- * Hook to manage the Hoopgrid sharing logic with symmetrical centering.
+ * Hook to manage the Hoopgrid sharing logic.
+ * Captures the grid exactly as it appears on screen.
  */
 export function useHoopgridShare(gridRef, guesses, currentUser) {
   const [copying, setCopying] = useState(false);
@@ -13,14 +14,6 @@ export function useHoopgridShare(gridRef, guesses, currentUser) {
   const [shareText, setShareText] = useState('');
 
   const handleShare = async () => {
-    // ─── SHARE CARD LAYOUT CONSTANTS (SYMMETRICAL) ──────────────────────────
-    const CARD_WIDTH = 840;
-    const CARD_HEIGHT = 840;
-    const CARD_PADDING = 20;
-    const SIDE_COL_WIDTH = 100;
-    const CENTER_COL_WIDTH = 640;
-    // ─────────────────────────────────────────────────────────────────────────
-
     // 1. Text Summary
     let gridText = 'Euroleague Hoopgrid 🏀\n';
     for (let i = 0; i < 3; i++) {
@@ -37,16 +30,21 @@ export function useHoopgridShare(gridRef, guesses, currentUser) {
     if (gridRef.current) {
       try {
         setCopying(true);
-        const bgColor =
-          getComputedStyle(document.documentElement).getPropertyValue('--background') || '#0f172a';
+
+        // Fetch theme colors from CSS variables
+        const styles = getComputedStyle(document.documentElement);
+        const bgColor = styles.getPropertyValue('--background').trim() || '#0f172a';
+        const fgColor = styles.getPropertyValue('--foreground').trim() || '#ffffff';
+        const primaryColor = styles.getPropertyValue('--primary').trim() || '#3b82f6';
+        const mutedColor = 'rgba(255,255,255,0.4)'; // Using opacity for muted effect
 
         const dataUrl = await toPng(gridRef.current, {
           cacheBust: true,
-          backgroundColor: bgColor.trim(),
-          width: CARD_WIDTH,
-          height: CARD_HEIGHT,
+          backgroundColor: bgColor,
+          width: 840,
+          height: 840,
           style: {
-            padding: `${CARD_PADDING}px`,
+            padding: '20px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -58,19 +56,23 @@ export function useHoopgridShare(gridRef, guesses, currentUser) {
               : clonedNode.querySelector('.hoopgrid-main-container');
 
             if (container) {
-              container.style.width = `${CARD_WIDTH - CARD_PADDING * 2}px`;
+              // Force container layout to match the screen grid
+              container.style.width = '800px';
+              container.style.maxWidth = 'none';
               container.style.display = 'flex';
+              container.style.flexWrap = 'nowrap';
               container.style.margin = '0 auto';
+              container.style.padding = '0';
 
               const leftCol = container.children[0];
               const centerCol = container.children[1];
               const rightCol = container.children[2];
 
-              if (leftCol) leftCol.style.width = `${SIDE_COL_WIDTH}px`;
-              if (centerCol) centerCol.style.width = `${CENTER_COL_WIDTH}px`;
+              if (leftCol) leftCol.style.width = '80px';
+              if (centerCol) centerCol.style.width = '640px';
               if (rightCol) {
                 rightCol.style.display = 'block';
-                rightCol.style.width = `${SIDE_COL_WIDTH}px`;
+                rightCol.style.width = '80px';
               }
             }
           },

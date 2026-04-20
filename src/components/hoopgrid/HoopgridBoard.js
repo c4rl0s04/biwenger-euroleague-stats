@@ -15,7 +15,7 @@ export default function HoopgridBoard({
   return (
     <div ref={gridRef} className="hoopgrid-main-container w-full max-w-3xl flex flex-wrap mb-16">
       {/* Left Column: Row Headers */}
-      <div className="w-[25%] md:w-[20%] flex flex-col pt-8 md:pt-14 pr-2 md:pr-6">
+      <div className="w-[25%] md:w-[14%] flex flex-col pt-8 md:pt-14 pr-2 md:pr-4">
         {challenge.rows.map((row, i) => (
           <div
             key={`row-${i}`}
@@ -27,7 +27,7 @@ export default function HoopgridBoard({
       </div>
 
       {/* Center: Column Headers + 3x3 Grid */}
-      <div className="w-[75%] md:w-[60%] flex flex-col">
+      <div className="w-[75%] md:w-[72%] flex flex-col">
         {/* Column Headers */}
         <div className="grid grid-cols-3 gap-2 md:gap-4 mb-2 md:mb-4 h-8 md:h-14">
           {challenge.cols.map((col, i) => (
@@ -54,7 +54,7 @@ export default function HoopgridBoard({
       </div>
 
       {/* Right Column: Empty spacer for horizontal balancing on desktop */}
-      <div className="w-[25%] md:w-[20%] hidden md:block"></div>
+      <div className="w-[25%] md:w-[14%] hidden md:block"></div>
     </div>
   );
 }

@@ -7,13 +7,14 @@ export default function GridCell({ guess, onClick, isSubmitted }) {
   const isCorrect = !!guess?.isCorrect;
 
   const getRarityColor = (rarity) => {
-    if (rarity === null || rarity === undefined) return '#2563eb';
-    if (rarity <= 1) return '#ffffff';
-    if (rarity <= 5) return '#9333ea';
-    if (rarity <= 15) return '#2563eb';
-    if (rarity <= 30) return '#eab308';
-    if (rarity <= 50) return '#c2c8d07b';
-    return '#a86929';
+    const r = Number(rarity);
+    if (isNaN(r)) return '#2563eb';
+    if (r <= 1) return '#ffffff'; // Rainbow/White (Mythic)
+    if (r <= 5) return '#9333ea'; // Purple (Legendary)
+    if (r <= 12) return '#2563eb'; // Blue (Rare)
+    if (r <= 25) return '#eab308'; // Gold (Uncommon)
+    if (r <= 40) return '#c2c8d0'; // Silver (Common+)
+    return '#a86929'; // Brown/Bronze (Common - 100%)
   };
 
   return (
