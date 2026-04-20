@@ -95,54 +95,54 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-xl bg-card border border-border rounded-3xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30">
-          <h3 className="font-display text-xl uppercase tracking-tighter text-foreground">
+        <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
+          <h3 className="font-display text-lg uppercase tracking-tighter text-foreground">
             Compartir Resultados
           </h3>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Image Preview */}
-        <div className="p-8 flex justify-center bg-muted/10">
+        <div className="p-5 flex justify-center bg-muted/5">
           <img
             src={imageUri}
             alt="Hoopgrid Results"
-            className="max-h-[40vh] rounded-xl shadow-2xl border border-white/10"
+            className="max-h-[35vh] rounded-lg shadow-xl border border-white/10"
           />
         </div>
 
         {/* Action Buttons */}
-        <div className="p-8 space-y-4">
+        <div className="p-5 space-y-3">
           {canNativeShare && (
             <button
               onClick={handleNativeShare}
-              className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer shadow-lg shadow-indigo-500/20"
+              className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer shadow-lg shadow-indigo-500/20 text-sm"
             >
               <Share2 className="w-5 h-5" />
               Compartir Imagen
             </button>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {/* Primary Actions */}
             <button
               onClick={handleWhatsApp}
-              className="flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="flex items-center justify-center gap-3 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-sm"
             >
               <MessageCircle className="w-5 h-5 fill-current" />
               WhatsApp
             </button>
             <button
               onClick={handleDownload}
-              className="flex items-center justify-center gap-3 py-4 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="flex items-center justify-center gap-3 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-sm"
             >
               <Download className="w-5 h-5" />
               Descargar
@@ -151,7 +151,7 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
             {/* Secondary Actions */}
             <button
               onClick={handleCopyImage}
-              className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-secondary hover:bg-muted text-secondary-foreground font-bold transition-all border border-border/50 text-sm cursor-pointer"
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary hover:bg-muted text-secondary-foreground font-bold transition-all border border-border/50 text-xs cursor-pointer"
             >
               {copiedImage ? (
                 <>
@@ -160,6 +160,7 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
                 </>
               ) : (
                 <>
+                  <Check className="w-4 h-4 hidden" /> {/* Hidden icon to keep layout if needed */}
                   <Copy className="w-4 h-4" />
                   Copiar Imagen
                 </>
@@ -167,7 +168,7 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
             </button>
             <button
               onClick={handleCopyText}
-              className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-secondary hover:bg-muted text-secondary-foreground font-bold transition-all border border-border/50 text-sm cursor-pointer"
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary hover:bg-muted text-secondary-foreground font-bold transition-all border border-border/50 text-xs cursor-pointer"
             >
               {copiedText ? (
                 <>
@@ -185,7 +186,7 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
         </div>
 
         {/* Footer info */}
-        <div className="px-8 pb-8 text-center">
+        <div className="px-5 pb-5 text-center">
           <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-[0.2em] opacity-40">
             biwengerstats.com
           </p>
