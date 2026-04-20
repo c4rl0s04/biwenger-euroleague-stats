@@ -4,27 +4,21 @@ import { useState } from 'react';
 import { toPng } from 'html-to-image';
 
 /**
- * Hook to manage the Hoopgrid sharing logic (image generation and modals).
- * @param {Object} gridRef - React ref to the grid container
- * @param {Object} challenge - The current challenge data
- * @param {Object} guesses - The current user guesses
- * @param {Object} currentUser - The current user context (for branding)
+ * Hook to manage the Hoopgrid sharing logic with symmetrical centering.
  */
-export function useHoopgridShare(gridRef, challenge, guesses, currentUser) {
+export function useHoopgridShare(gridRef, guesses, currentUser) {
   const [copying, setCopying] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareImageUri, setShareImageUri] = useState(null);
   const [shareText, setShareText] = useState('');
 
   const handleShare = async () => {
-    // ─── SHARE CARD LAYOUT CONSTANTS ──────────────────────────────────────────
+    // ─── SHARE CARD LAYOUT CONSTANTS (SYMMETRICAL) ──────────────────────────
     const CARD_WIDTH = 840;
     const CARD_HEIGHT = 840;
     const CARD_PADDING = 20;
-    const CARD_BORDER_RADIUS = 24;
-    const LEFT_COL_WIDTH = 150;
+    const SIDE_COL_WIDTH = 100;
     const CENTER_COL_WIDTH = 640;
-    const RIGHT_COL_WIDTH = 50;
     // ─────────────────────────────────────────────────────────────────────────
 
     // 1. Text Summary
@@ -32,8 +26,7 @@ export function useHoopgridShare(gridRef, challenge, guesses, currentUser) {
     for (let i = 0; i < 3; i++) {
       let row = '';
       for (let j = 0; j < 3; j++) {
-        const guess = guesses[i * 3 + j];
-        row += guess?.isCorrect ? '🟧' : '⬜';
+        row += guesses[i * 3 + j]?.isCorrect ? '🟧' : '⬜';
       }
       gridText += row + '\n';
     }
@@ -53,34 +46,32 @@ export function useHoopgridShare(gridRef, challenge, guesses, currentUser) {
           width: CARD_WIDTH,
           height: CARD_HEIGHT,
           style: {
-            borderRadius: `${CARD_BORDER_RADIUS}px`,
             padding: `${CARD_PADDING}px`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
           },
-          onClone: (clonedDoc) => {
-            const footer = clonedDoc.querySelector('.share-only-footer');
-            if (footer) {
-              footer.classList.remove('hidden');
-              footer.classList.add('flex');
-            }
+          onClone: (clonedNode) => {
+            const container = clonedNode.classList.contains('hoopgrid-main-container')
+              ? clonedNode
+              : clonedNode.querySelector('.hoopgrid-main-container');
 
-            // Force widths for shared image layout
-            const container = clonedDoc.querySelector('.hoopgrid-main-container');
             if (container) {
               container.style.width = `${CARD_WIDTH - CARD_PADDING * 2}px`;
               container.style.display = 'flex';
-              container.style.flexWrap = 'wrap';
+              container.style.margin = '0 auto';
 
               const leftCol = container.children[0];
               const centerCol = container.children[1];
               const rightCol = container.children[2];
 
-              if (leftCol) leftCol.style.width = `${LEFT_COL_WIDTH}px`;
+              if (leftCol) leftCol.style.width = `${SIDE_COL_WIDTH}px`;
               if (centerCol) centerCol.style.width = `${CENTER_COL_WIDTH}px`;
-              if (rightCol) rightCol.style.width = `${RIGHT_COL_WIDTH}px`;
+              if (rightCol) {
+                rightCol.style.display = 'block';
+                rightCol.style.width = `${SIDE_COL_WIDTH}px`;
+              }
             }
           },
         });

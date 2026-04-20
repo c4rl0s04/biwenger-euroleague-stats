@@ -19,7 +19,7 @@ export default function HoopgridPage() {
         {/* Header Section */}
         <PageHeader
           title="Hoopgrid Diario"
-          description="Completa la cuadrícula de 3x3 seleccionando jugadores que cumplan ambos criterios. ¡Menos del 10% de fallos es de crack!"
+          description="Completa la cuadrícula de 3x3 seleccionando jugadores que cumplan ambos criterios."
         />
 
         {/* Section Title & Game Container */}

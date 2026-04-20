@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
  */
 export function useHoopgridGame() {
   const [challenge, setChallenge] = useState(null);
-  const [guesses, setGuesses] = useState({}); // { cellIndex: { ... } }
+  const [guesses, setGuesses] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeCell, setActiveCell] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -23,7 +23,22 @@ export function useHoopgridGame() {
       const data = await res.json();
 
       if (data.challenge) {
-        setChallenge(data.challenge);
+        setChallenge({
+          ...data.challenge,
+          rows:
+            typeof data.challenge.rows === 'string'
+              ? JSON.parse(data.challenge.rows)
+              : data.challenge.rows,
+          cols:
+            typeof data.challenge.cols === 'string'
+              ? JSON.parse(data.challenge.cols)
+              : data.challenge.cols,
+          possibleCounts:
+            typeof data.challenge.possibleCounts === 'string'
+              ? JSON.parse(data.challenge.possibleCounts)
+              : data.challenge.possibleCounts,
+        });
+
         const guessMap = {};
         let hasSavedGuesses = false;
         data.userGuesses?.forEach((g) => {
@@ -44,7 +59,6 @@ export function useHoopgridGame() {
 
   const handleGuess = async (player) => {
     if (activeCell === null) return false;
-
     try {
       const res = await fetch('/api/hoopgrid/guess', {
         method: 'POST',
@@ -56,14 +70,7 @@ export function useHoopgridGame() {
           dryRun: true,
         }),
       });
-
       const result = await res.json();
-
-      if (result.error) {
-        console.error('Submission failed:', result.error);
-        return false;
-      }
-
       if (result.isCorrect) {
         setGuesses((prev) => ({
           ...prev,
@@ -78,10 +85,8 @@ export function useHoopgridGame() {
         setActiveCell(null);
         return true;
       }
-
       return false;
     } catch (err) {
-      console.error('Submission failed:', err);
       return false;
     }
   };
@@ -113,7 +118,13 @@ export function useHoopgridGame() {
     }
   };
 
+  // Challenge Progress Stats
   const correctGuessesCount = Object.values(guesses).filter((g) => g.isCorrect).length;
+
+  // Reto # Logic
+  const challengeDate = challenge?.gameDate ? new Date(challenge.gameDate) : new Date();
+  const launchDate = new Date('2026-04-01');
+  const diffDays = Math.ceil(Math.abs(challengeDate - launchDate) / (1000 * 60 * 60 * 24)) + 1;
 
   return {
     challenge,
@@ -123,6 +134,8 @@ export function useHoopgridGame() {
     isSubmitted,
     submitting,
     correctGuessesCount,
+    challengeDate,
+    diffDays,
     setActiveCell,
     handleGuess,
     handleSubmitBoard,
