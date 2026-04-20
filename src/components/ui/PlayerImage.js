@@ -13,6 +13,7 @@ export default function PlayerImage({
   fallbackSize = 32,
   iconClassName = 'text-zinc-500',
   bgClassName = 'bg-zinc-800',
+  hideFallback = false,
 }) {
   const [error, setError] = useState(false);
   const [lastSrc, setLastSrc] = useState(src);
@@ -23,6 +24,7 @@ export default function PlayerImage({
   }
 
   if (!src || error) {
+    if (hideFallback) return null;
     return (
       <div
         className={`flex items-center justify-center ${bgClassName} ${className}`}

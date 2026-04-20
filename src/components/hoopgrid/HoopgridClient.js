@@ -70,11 +70,11 @@ export default function HoopgridClient() {
         setGuesses((prev) => ({
           ...prev,
           [activeCell]: {
-            ...result.guess,
+            playerId: player.id,
             playerName: player.name,
             playerImg: player.img,
             rarity: result.rarity,
-            playerId: player.id,
+            isCorrect: true, // Explicitly set this for immediate styling
           },
         }));
         setActiveCell(null);
@@ -286,109 +286,139 @@ export default function HoopgridClient() {
 }
 
 function GridCell({ guess, onClick }) {
+  // Direct HEX color map for maximum reliability
+  const getRarityColor = (rarity) => {
+    if (rarity === null || rarity === undefined) return '#2563eb'; // Selection Blue
+    if (rarity <= 1) return '#ffffff'; // Rainbow/White
+    if (rarity <= 5) return '#9333ea'; // Purple
+    if (rarity <= 15) return '#2563eb'; // Blue
+    if (rarity <= 30) return '#eab308'; // Gold
+    if (rarity <= 50) return '#e2e8f0'; // Silver
+    return '#ea580c'; // Bronze (Orange-600)
+  };
+
+  const isCorrect = !!guess?.isCorrect;
+  const rarityColor = isCorrect ? getRarityColor(guess.rarity) : null;
+
   return (
-    <motion.div
-      whileHover={!guess?.isCorrect ? { scale: 1.02, backgroundColor: 'hsl(var(--muted))' } : {}}
-      whileTap={!guess?.isCorrect ? { scale: 0.98 } : {}}
-      onClick={onClick}
-      className={`
-        relative aspect-square rounded-xl overflow-hidden cursor-pointer
-        border-2 transition-all duration-500 group
-        ${
-          guess?.isCorrect
-            ? 'border-primary/40 bg-primary/5 shadow-2xl'
-            : guess?.isCorrect === false
-              ? 'border-destructive/50 bg-destructive/10 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
-              : 'border-border bg-secondary/60 shadow-inner hover:border-muted-foreground/30'
+    <>
+      <style jsx global>{`
+        @keyframes rainbow-border {
+          0% {
+            border-color: #ff0000;
+          }
+          33% {
+            border-color: #00ff00;
+          }
+          66% {
+            border-color: #0000ff;
+          }
+          100% {
+            border-color: #ff0000;
+          }
         }
-      `}
-    >
-      {guess?.isCorrect ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="h-full flex flex-col items-center justify-center p-2"
-        >
-          <div className="relative mb-2">
-            <PlayerImage
-              src={guess.playerImg}
-              alt={guess.playerName}
-              width={112}
-              height={112}
-              className="w-16 h-16 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full border-2 border-primary/20 object-cover object-top shadow-lg"
-            />
-            <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1.5 shadow-lg">
+        .animate-rainbow-border {
+          animation: rainbow-border 2s linear infinite;
+        }
+      `}</style>
+
+      <motion.div
+        whileHover={!isCorrect ? { scale: 1.02, backgroundColor: 'rgba(255,255,255,0.1)' } : {}}
+        whileTap={!isCorrect ? { scale: 0.98 } : {}}
+        onClick={onClick}
+        style={{
+          backgroundColor: rarityColor || undefined,
+          color: guess?.rarity <= 50 && isCorrect && guess?.rarity > 30 ? '#0f172a' : 'inherit',
+        }}
+        className={`
+          relative aspect-square rounded-xl overflow-hidden cursor-pointer
+          border-2 transition-all duration-300 group
+          ${isCorrect && guess.rarity <= 1 ? 'animate-rainbow-border shadow-xl' : 'border-white/10'}
+          ${!isCorrect ? 'bg-white/5 shadow-inner' : ''}
+          ${guess?.isCorrect === false ? 'border-destructive bg-destructive/20' : ''}
+        `}
+      >
+        {guess?.isCorrect ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="h-full flex flex-col items-center justify-end relative"
+          >
+            {/* Player Image - Large & Faded into background */}
+            <div className="absolute inset-0 flex items-center justify-center pt-2">
+              <PlayerImage
+                src={guess.playerImg}
+                alt={guess.playerName}
+                width={140}
+                height={140}
+                className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+                hideFallback={true}
+              />
+              {/* Very subtle gradient for text readability only */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+            </div>
+
+            {/* Name & Rarity Bubble */}
+            <div className="relative z-10 w-full p-2 flex flex-col items-center gap-1.5">
+              <span className="text-[10px] md:text-[11px] font-black text-white text-center leading-tight line-clamp-1 drop-shadow-md">
+                {guess.playerName?.split(',')[0]}
+              </span>
+
+              <div className="px-2 py-0.5 rounded-full bg-primary shadow-lg border border-primary-foreground/10">
+                <AnimatedNumber
+                  value={guess.rarity || 100}
+                  decimals={1}
+                  suffix="%"
+                  className="text-[9px] md:text-[10px] font-mono font-bold text-primary-foreground"
+                />
+              </div>
+            </div>
+          </motion.div>
+        ) : guess?.isCorrect === false ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="h-full flex flex-col items-center justify-center p-2"
+          >
+            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-destructive/30 flex items-center justify-center mb-1">
               <svg
-                className="w-3 h-3 md:w-4 md:h-4 text-primary-foreground"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+                className="w-6 h-6 text-destructive"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
                 <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
+            <span className="text-[10px] font-display text-destructive uppercase tracking-widest font-black">
+              Incorrecto
+            </span>
+          </motion.div>
+        ) : (
+          <div className="h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <svg
+                className="w-4 h-4 md:w-5 md:h-5 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M12 4v16m8-8H4"
                 />
               </svg>
             </div>
           </div>
-
-          <span className="text-[10px] md:text-sm lg:text-base font-black text-foreground text-center leading-tight mb-1 line-clamp-1">
-            {guess.playerName?.split(',')[0]}
-          </span>
-
-          <div className="px-2 py-0.5 md:py-1 rounded-full bg-primary/10 border border-primary/20">
-            <AnimatedNumber
-              value={guess.rarity || 100}
-              decimals={1}
-              suffix="%"
-              className="text-[9px] md:text-xs lg:text-sm font-mono font-bold text-primary"
-            />
-          </div>
-        </motion.div>
-      ) : guess?.isCorrect === false ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="h-full flex flex-col items-center justify-center p-2"
-        >
-          <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-destructive/30 flex items-center justify-center mb-1">
-            <svg
-              className="w-6 h-6 text-destructive"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={3}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </div>
-          <span className="text-[10px] font-display text-destructive uppercase tracking-widest font-black">
-            Incorrecto
-          </span>
-        </motion.div>
-      ) : (
-        <div className="h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <svg
-              className="w-4 h-4 md:w-5 md:h-5 text-primary"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={3}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-          </div>
-        </div>
-      )}
-    </motion.div>
+        )}
+      </motion.div>
+    </>
   );
 }

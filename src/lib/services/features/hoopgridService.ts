@@ -242,9 +242,48 @@ export class HoopgridService {
       .groupBy(hoopgridGuesses.playerId);
 
     const totalCorrectGuesses = results.reduce((acc, curr) => acc + curr.count, 0);
-    const playerPicks = results.find((r) => r.playerId === playerId)?.count || 0;
+    let playerPicks = results.find((r) => r.playerId === playerId)?.count || 0;
 
-    return totalCorrectGuesses > 0 ? (playerPicks * 100) / totalCorrectGuesses : 100;
+    const virtualTotal = totalCorrectGuesses + 1;
+    const virtualPlayerPicks = playerPicks + 1;
+    const popularityRarity = (virtualPlayerPicks * 100) / virtualTotal;
+
+    // 2. Points-Weighted Rarity
+    // We look at all players who fit this cell and see where our player sits in terms of performance (points).
+    const challenge = await db.query.hoopgridChallenges.findFirst({
+      where: eq(hoopgridChallenges.id, challengeId),
+    });
+
+    if (!challenge) return popularityRarity;
+
+    const rows = typeof challenge.rows === 'string' ? JSON.parse(challenge.rows) : challenge.rows;
+    const cols = typeof challenge.cols === 'string' ? JSON.parse(challenge.cols) : challenge.cols;
+    const rowIndex = Math.floor(cellIndex / 3);
+    const colIndex = cellIndex % 3;
+
+    // Get all players that fit this cell to find the points range
+    const allPlayers = await db.select({ puntos: players.puntos, id: players.id }).from(players);
+    let maxPoints = 1;
+    let myPoints = 0;
+
+    for (const p of allPlayers) {
+      const fits =
+        (await HoopgridService.checkCriteria(p.id, rows[rowIndex])) &&
+        (await HoopgridService.checkCriteria(p.id, cols[colIndex]));
+
+      if (fits) {
+        const pPoints = p.puntos || 0;
+        if (pPoints > maxPoints) maxPoints = pPoints;
+        if (p.id === playerId) myPoints = pPoints;
+      }
+    }
+
+    // Performance Rarity: Your points relative to the "top contributor" choice.
+    // We add a small offset to avoid 0% and handle players with 0 points fairly.
+    const performanceWeight = Math.max(0.05, (myPoints + 1) / (maxPoints + 1));
+
+    // Final Rarity: Popularity scaled by Performance Weight
+    return popularityRarity * performanceWeight;
   }
 
   /**

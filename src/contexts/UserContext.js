@@ -35,6 +35,9 @@ export function UserProvider({ children, users }) {
 
       // Sync to cookie for server-side access (1 year expiry)
       document.cookie = `NEXT_USER_ID=${user.user_id}; path=/; max-age=31536000; SameSite=Lax`;
+
+      // Force reload to ensure all components/APIs sync with the new identity
+      window.location.reload();
     }
   };
 
