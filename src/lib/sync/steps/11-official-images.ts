@@ -27,24 +27,79 @@ export async function run(manager: SyncManager) {
   let errorCount = 0;
 
   for (const player of players) {
+    // Construct URL
+    const slug = player.name
+      .toLowerCase()
+      .replace(/,/g, '') // Remove commas if any
+      .replace(/\./g, '') // Remove dots
+      .replace(/\s+/g, '-') // Spaces to dashes
+      .normalize('NFD') // Decompose accents
+      .replace(/[\u0300-\u036f]/g, ''); // Remove accents
+
+    // Pad ID to 6 digits (strip 'P' prefix if present)
+    const cleanCode = player.euroleague_code.toString().replace(/\D/g, '');
+    const paddedId = cleanCode.padStart(6, '0');
+
+    // NOTE: Euroleague website routing prioritizes the ID over the slug.
+    // Even if the name slug has typos (e.g. "sahsa-vezenkov"), it redirects correctly as long as the ID is valid.
+    const url = CONFIG.ENDPOINTS.EUROLEAGUE_WEBSITE.OFFICIAL_PLAYER_PROFILE(slug, paddedId);
+
     try {
-      // Pad ID to 6 digits (strip 'P' prefix if present)
-      const cleanCode = player.euroleague_code.toString().replace(/\D/g, '');
-      const paddedId = cleanCode.padStart(6, '0');
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
 
-      // The deterministic CDN pattern used by Euroleague
-      const imageUrl = `https://media-cdn.euroleague.net/p/${paddedId}/profile.png`;
-
-      await mutations.updatePlayerImage(imageUrl, player.id);
-      updatedCount++;
-
-      // Show progress every 50 players
-      if (updatedCount > 0 && updatedCount % 50 === 0) {
-        manager.log(`      Synced ${updatedCount} images...`);
+      if (!res.ok) {
+        if (res.status === 429) {
+          manager.error(`   ⚠️ Rate limited (429) by Euroleague website. Sleeping longer...`);
+          await sleep(2000);
+        }
+        errorCount++;
+        continue;
       }
+
+      const html = await res.text();
+      // Try multiple regex patterns for the image
+      const patterns = [
+        /"photo":"(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/,
+        /property="og:image" content="(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/,
+        /src="(https:\/\/media-cdn\.cortextech\.io\/[^"]+)"/,
+      ];
+
+      let imgUrl = null;
+      for (const pattern of patterns) {
+        const match = html.match(pattern);
+        if (match && match[1]) {
+          imgUrl = match[1];
+          break;
+        }
+      }
+
+      if (imgUrl) {
+        await mutations.updatePlayerImage(imgUrl, player.id);
+        updatedCount++;
+      } else {
+        errorCount++;
+      }
+
+      // Respect rate limit
+      await sleep(200);
     } catch (e) {
-      manager.error(`   ❌ Error syncing ${player.name}:`, e);
+      manager.error(`   ❌ Error fetching ${player.name}:`, e);
       errorCount++;
+    }
+
+    // Show progress every 20 players
+    if (updatedCount > 0 && updatedCount % 20 === 0) {
+      manager.log(`      Synced ${updatedCount} images...`);
     }
   }
 
