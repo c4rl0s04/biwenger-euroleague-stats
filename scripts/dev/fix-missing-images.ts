@@ -1,8 +1,6 @@
+import 'dotenv/config';
 import { db } from '../../src/lib/db/client';
-import dotenv from 'dotenv';
 import prompts from 'prompts';
-
-dotenv.config();
 
 /**
  * Interactive Script to manually fix missing player images

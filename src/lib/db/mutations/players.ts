@@ -99,8 +99,8 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
           status=excluded.status,
           price_increment=excluded.price_increment,
           price=excluded.price,
-          -- COALESCE: never overwrite existing team_id or img with NULL
-          team_id = COALESCE(excluded.team_id, players.team_id),
+          -- COALESCE: never overwrite existing team_id or img with incoming data if already set
+          team_id = COALESCE(players.team_id, excluded.team_id),
           img = COALESCE(players.img, excluded.img)
       `;
       const values = [
