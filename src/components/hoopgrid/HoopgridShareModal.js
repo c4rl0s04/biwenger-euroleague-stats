@@ -11,7 +11,9 @@ export default function HoopgridShareModal({ isOpen, onClose, imageUri, textSumm
 
   // Check for native share support on mount
   useEffect(() => {
-    setCanNativeShare(!!navigator.share);
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      setCanNativeShare(true);
+    }
   }, []);
 
   if (!isOpen) return null;
