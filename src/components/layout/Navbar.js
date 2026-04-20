@@ -2,7 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Trophy, Users, User, ShoppingCart, Calendar, Target } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Trophy,
+  Users,
+  User,
+  ShoppingCart,
+  Calendar,
+  Target,
+  LayoutGrid,
+} from 'lucide-react';
 import { UserSelector } from '@/components/user';
 
 import { useCardTheme } from '@/contexts/CardThemeContext';
@@ -14,6 +23,7 @@ const navItems = [
   { name: 'Jugadores', href: '/players', icon: User },
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },
+  { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Porras', href: '/predictions', icon: Target },
 ];
 

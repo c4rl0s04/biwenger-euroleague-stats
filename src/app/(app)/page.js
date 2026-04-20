@@ -13,6 +13,7 @@ import {
   Clock,
   Activity,
   Medal,
+  LayoutGrid,
 } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
@@ -98,6 +99,15 @@ export default function Home() {
       href: '/predictions',
       color: 'pink',
       delay: '0.8s',
+      disabled: false,
+    },
+    {
+      title: 'Hoopgrid',
+      description: 'El juego diario de Euroleague. ¿Podrás completar el 3x3?',
+      icon: LayoutGrid,
+      href: '/hoopgrid',
+      color: 'primary',
+      delay: '0.85s',
       disabled: false,
     },
     {
