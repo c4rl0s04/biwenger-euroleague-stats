@@ -55,9 +55,9 @@ async function syncAllImages() {
 
   let updatedCount = 0;
   let restoredTeams = 0;
+  const pendingOps: Promise<void>[] = [];
 
-  pythonProcess.stdout.on('data', async (data) => {
-    // Output might contain multiple lines if buffered
+  pythonProcess.stdout.on('data', (data) => {
     const lines = data
       .toString()
       .split('\n')
@@ -67,32 +67,37 @@ async function syncAllImages() {
       try {
         const res = JSON.parse(line);
         if (res.success && res.url) {
-          // Update Image
-          await mutations.updatePlayerImage(res.url, res.id);
-          updatedCount++;
+          // Track each DB write as a promise so we can await them all at the end
+          const op = (async () => {
+            await mutations.updatePlayerImage(res.url, res.id);
+            updatedCount++;
 
-          // Repair Team ID if missing
-          const currentPlayer = playersToSync.find(p => p.id === res.id);
-          if (currentPlayer && !currentPlayer.team_id && res.team_name) {
+            // Repair Team ID if missing
+            const currentPlayer = playersToSync.find(p => p.id === res.id);
+            if (currentPlayer && !currentPlayer.team_id && res.team_name) {
               const matchedTeamId = teamsMap.get(res.team_name.toLowerCase());
               if (matchedTeamId) {
-                  await db.query('UPDATE players SET team_id = $1 WHERE id = $2', [matchedTeamId, res.id]);
-                  restoredTeams++;
+                await db.query('UPDATE players SET team_id = $1 WHERE id = $2', [matchedTeamId, res.id]);
+                restoredTeams++;
+                console.log(`   🛡️  Team restored for ${res.name}: ${res.team_name}`);
               }
-          }
+            }
+          })();
+          pendingOps.push(op);
         }
       } catch (e) {
-        // Ignore parsing errors for non-JSON stdout lines
+        // Ignore non-JSON lines
       }
     }
   });
 
   pythonProcess.stderr.on('data', (data) => {
-    // Python prints progress messages to stderr
     process.stdout.write(data.toString());
   });
 
-  pythonProcess.on('close', (code) => {
+  pythonProcess.on('close', async (code) => {
+    // Wait for ALL pending DB writes to finish before printing stats
+    await Promise.all(pendingOps);
     console.log(`\n🎉 Sync Complete!`);
     console.log(`   📸 Images Updated: ${updatedCount}`);
     console.log(`   🛡️  Teams Restored: ${restoredTeams}`);

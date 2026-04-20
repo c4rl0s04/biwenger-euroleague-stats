@@ -94,18 +94,15 @@ async def process_players(players):
 
     semaphore = asyncio.Semaphore(CONCURRENCY)
 
-    # Create all tasks
     tasks = [
-        fetch_one(semaphore, player, i + 1, total)
+        asyncio.ensure_future(fetch_one(semaphore, player, i + 1, total))
         for i, player in enumerate(players)
     ]
 
-    # Run all tasks concurrently, respecting the semaphore
-    # as_completed would be ideal, but gather preserves order for simplicity
-    results = await asyncio.gather(*tasks)
-
-    # Emit each result as a JSON line for the TypeScript orchestrator
-    for result in results:
+    # Stream results as each task finishes (not all at the end)
+    for coro in asyncio.as_completed(tasks):
+        result = await coro
+        # Emit immediately so TypeScript can start DB writes right away
         print(json.dumps(result), flush=True)
 
 
