@@ -10,12 +10,21 @@ def test_single_player():
         # network_idle=True is important here to allow lazy-loading scripts to run
         page = StealthyFetcher.fetch(url, headless=True, network_idle=True)
         
-        # Look for the specific image pattern the user provided
-        # We check both data-srcset and srcset
-        img_url = page.css('img[data-srcset*="cortextech"]::attr(data-srcset)').get()
+        # Find the image that matches the player name in the alt attribute
+        player_name = "ALPHA DIALLO"
+        # We look for an img tag where the alt attribute contains the player name
+        selector = f'img[alt*="{player_name}"]'
         
+        # Try to get the data-srcset first (common in lazy-loading)
+        img_url = page.css(f'{selector}::attr(data-srcset)').get()
+        
+        # Fallback to srcset
         if not img_url:
-            img_url = page.css('img[srcset*="cortextech"]::attr(srcset)').get()
+            img_url = page.css(f'{selector}::attr(srcset)').get()
+            
+        # Fallback to standard src
+        if not img_url:
+            img_url = page.css(f'{selector}::attr(src)').get()
             
         if not img_url:
              # Last resort: search the entire page text for the cortextech pattern

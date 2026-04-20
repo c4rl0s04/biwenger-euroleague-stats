@@ -88,7 +88,6 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
         )
         ON CONFLICT(id) DO UPDATE SET 
           name=excluded.name, 
-          team_id=excluded.team_id,
           position=excluded.position,
           puntos=excluded.puntos,
           partidos_jugados=excluded.partidos_jugados,
@@ -100,9 +99,9 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
           status=excluded.status,
           price_increment=excluded.price_increment,
           price=excluded.price,
-          -- Use COALESCE to prevent overwriting with NULL if the API drops info for eliminated teams
+          -- COALESCE: never overwrite existing team_id or img with NULL
           team_id = COALESCE(excluded.team_id, players.team_id),
-          img = COALESCE(players.img, excluded.img) -- Preserve existing (potentially official) images
+          img = COALESCE(players.img, excluded.img)
       `;
       const values = [
         params.id,
