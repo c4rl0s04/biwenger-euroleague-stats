@@ -20,7 +20,7 @@ export async function GET() {
     }
 
     // 2. Get user from cookie or session fallback
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     let userId = cookieStore.get('NEXT_USER_ID')?.value;
 
     if (!userId) {

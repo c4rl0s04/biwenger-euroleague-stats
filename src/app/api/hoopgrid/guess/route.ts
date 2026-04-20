@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const { challengeId, cellIndex, playerId, dryRun, action, guesses } = await request.json();
 
     // 1. Auth & User check
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     let userId = cookieStore.get('NEXT_USER_ID')?.value;
 
     if (!userId) {
