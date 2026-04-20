@@ -46,26 +46,33 @@ async def fetch_one(semaphore, player, index, total):
                 wait=2000,
             )
 
-            # 1. Player image — any incrowdsports CDN URL
+            # Extract Team Name AND Player Image in one pass
             img_url = None
+            team_name = None
+
             for img in page.css('img'):
-                src = (
+                href = img.attrib.get('href') or ''
+                alt  = img.attrib.get('alt')  or ''
+                src  = (
                     img.attrib.get('srcset')
                     or img.attrib.get('data-srcset')
                     or img.attrib.get('src')
                     or ''
                 )
-                if 'media-cdn.incrowdsports.com' in src:
-                    img_url = src.split(',')[0].split(' ')[0].strip()
-                    break
 
-            # 2. Team name — from the team logo's alt attribute
-            team_name = None
-            for img in page.css('img'):
-                href = img.attrib.get('href') or ''
-                alt = img.attrib.get('alt') or ''
-                if '/teams/' in href and alt:
-                    team_name = alt
+                is_cdn = 'media-cdn.incrowdsports.com' in src
+                is_team_logo = '/teams/' in href
+
+                if is_cdn and is_team_logo and not team_name:
+                    # This is the team logo → grab the team name from alt
+                    team_name = alt or None
+
+                elif is_cdn and not is_team_logo and not img_url:
+                    # This is the player photo (CDN image without a /teams/ link)
+                    img_url = src.split(',')[0].split(' ')[0].strip()
+
+                # Stop early once we have both
+                if img_url and team_name:
                     break
 
             result = {
