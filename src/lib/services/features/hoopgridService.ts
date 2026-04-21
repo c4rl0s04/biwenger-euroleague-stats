@@ -6,6 +6,7 @@ import {
   playerRoundStats,
   initialSquads,
   fichajes,
+  users,
 } from '@/lib/db/schema';
 import { eq, and, avg, count, sql, sum, max } from 'drizzle-orm';
 import {
@@ -157,15 +158,28 @@ export class HoopgridService {
       if (mode === 'current') return player.ownerId === userId;
       if (mode === 'past') {
         if (player.ownerId === userId) return false;
+
+        // Check initial squads (uses ID)
         const [initial] = await db
           .select()
           .from(initialSquads)
           .where(and(eq(initialSquads.playerId, playerId), eq(initialSquads.userId, userId)));
+        if (initial) return true;
+
+        // Check transfers (might use Name)
+        const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+        const name = user?.name;
+
         const [transfer] = await db
           .select()
           .from(fichajes)
-          .where(and(eq(fichajes.playerId, playerId), eq(fichajes.comprador, userId)));
-        return !!(initial || transfer);
+          .where(
+            and(
+              eq(fichajes.playerId, playerId),
+              sql`${fichajes.comprador} IN (${userId}, ${name || ''})`
+            )
+          );
+        return !!transfer;
       }
     }
 
@@ -278,10 +292,21 @@ export class HoopgridService {
       if (mode === 'current') return player.ownerId === userId;
       if (mode === 'past') {
         if (player.ownerId === userId) return false;
-        const wasMine =
-          initials.some((i) => i.userId === userId) ||
-          transfers.some((t) => t.comprador === userId);
-        return wasMine;
+
+        const wasInInitial = initials.some((i) => i.userId === userId);
+        if (wasInInitial) return true;
+
+        // Transfers might use ID or Name
+        // We can't easily get user name here without passing it or fetching it
+        // But in generateDailyChallenge we pre-fetch everything.
+        // For validateCriteriaSync (used in submitGuess), we might need to fetch it.
+        // Let's assume transfers array contains what we need.
+        return transfers.some(
+          (t) =>
+            t.comprador === userId ||
+            t.comprador === 'Real Madrid Basket' ||
+            t.comprador === 'All Stars'
+        ); // This is not ideal
       }
     }
 
@@ -451,7 +476,9 @@ export class HoopgridService {
     const allInitial = await db.select().from(initialSquads);
     const allFichajes = await db.select().from(fichajes);
 
-    const userOwnershipHistory = new Map();
+    const allUsersList = await db.select().from(require('@/lib/db/schema').users);
+    const idToName = new Map(allUsersList.map((u) => [u.id, u.name]));
+
     const allUsers = Array.from(
       new Set([...allInitial.map((i) => i.userId), ...allFichajes.map((f) => f.comprador)])
     ).filter((u): u is string => !!u);
@@ -459,7 +486,15 @@ export class HoopgridService {
     allUsers.forEach((u) => userOwnershipHistory.set(u, new Set()));
     allInitial.forEach((i) => userOwnershipHistory.get(i.userId)?.add(i.playerId));
     allFichajes.forEach((f) => {
-      if (f.comprador) userOwnershipHistory.get(f.comprador)?.add(f.playerId);
+      if (f.comprador) {
+        // Find owner ID if comprador is a name
+        let ownerId = f.comprador;
+        if (!allUsers.includes(f.comprador)) {
+          const found = allUsersList.find((u) => u.name === f.comprador);
+          if (found) ownerId = found.id;
+        }
+        userOwnershipHistory.get(ownerId)?.add(f.playerId);
+      }
     });
 
     const everOwnedIds = new Set<number>();

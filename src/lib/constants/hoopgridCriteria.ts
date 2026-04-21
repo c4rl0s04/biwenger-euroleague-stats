@@ -68,9 +68,9 @@ export const HOOPGRID_MARKET = [
 ];
 
 export const HOOPGRID_OWNERSHIP = [
-  { type: 'ownership', value: 'current', label: 'Jugador Fichado' },
+  { type: 'ownership', value: 'current', label: 'En Plantilla' },
   { type: 'ownership', value: 'free', label: 'Agente Libre' },
-  { type: 'ownership', value: 'past_not_current', label: 'Fichado antes (Ahora libre)' },
+  { type: 'ownership', value: 'past_not_current', label: 'Anteriormente en plantilla' },
   { type: 'ownership', value: 'never', label: 'Nunca Fichado' },
 ];
 
@@ -78,7 +78,7 @@ export const HOOPGRID_USER_OWNERSHIP = [
   {
     type: 'user_ownership',
     value: { userId: '13207868', mode: 'current' },
-    label: 'Fichado por All Stars',
+    label: 'Pertenece a All Stars',
   },
   {
     type: 'user_ownership',
@@ -88,7 +88,7 @@ export const HOOPGRID_USER_OWNERSHIP = [
   {
     type: 'user_ownership',
     value: { userId: '13207924', mode: 'current' },
-    label: 'Fichado por ask72',
+    label: 'Pertenece a ask72',
   },
   {
     type: 'user_ownership',
@@ -98,7 +98,7 @@ export const HOOPGRID_USER_OWNERSHIP = [
   {
     type: 'user_ownership',
     value: { userId: '13208192', mode: 'current' },
-    label: 'Fichado por Real Madrid Basket',
+    label: 'Pertenece a Real Madrid Basket',
   },
   {
     type: 'user_ownership',
@@ -108,7 +108,7 @@ export const HOOPGRID_USER_OWNERSHIP = [
   {
     type: 'user_ownership',
     value: { userId: '13207910', mode: 'current' },
-    label: 'Fichado por June',
+    label: 'Pertenece a June',
   },
   {
     type: 'user_ownership',
@@ -118,7 +118,7 @@ export const HOOPGRID_USER_OWNERSHIP = [
   {
     type: 'user_ownership',
     value: { userId: '13208960', mode: 'current' },
-    label: 'Fichado por Cactus Team',
+    label: 'Pertenece a Cactus Team',
   },
   {
     type: 'user_ownership',
@@ -128,7 +128,7 @@ export const HOOPGRID_USER_OWNERSHIP = [
   {
     type: 'user_ownership',
     value: { userId: '13209320', mode: 'current' },
-    label: 'Fichado por Daniel De Castro',
+    label: 'Pertenece a Daniel De Castro',
   },
   {
     type: 'user_ownership',
@@ -138,7 +138,7 @@ export const HOOPGRID_USER_OWNERSHIP = [
   {
     type: 'user_ownership',
     value: { userId: '13207974', mode: 'current' },
-    label: 'Fichado por Nonameyet',
+    label: 'Pertenece a Nonameyet',
   },
   {
     type: 'user_ownership',

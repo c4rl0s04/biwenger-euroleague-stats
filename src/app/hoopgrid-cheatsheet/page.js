@@ -5,6 +5,7 @@ import {
   playerRoundStats,
   initialSquads,
   fichajes,
+  users as usersTable,
 } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import Image from 'next/image';
@@ -134,11 +135,12 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
   const cols = typeof challenge.cols === 'string' ? JSON.parse(challenge.cols) : challenge.cols;
 
   // 1. Fetch all data
-  const [allPlayers, allStats, allInitial, allFichajes] = await Promise.all([
+  const [allPlayers, allStats, allInitial, allFichajes, allUsersList] = await Promise.all([
     db.select().from(playersTable),
     db.select().from(playerRoundStats),
     db.select().from(initialSquads),
     db.select().from(fichajes),
+    db.select().from(usersTable),
   ]);
 
   // 2. Build Helper Maps
@@ -147,10 +149,22 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
     new Set([...allInitial.map((i) => i.userId), ...allFichajes.map((f) => f.comprador)])
   ).filter((u) => !!u);
 
-  allUsers.forEach((u) => userOwnershipHistory.set(u, new Set()));
+  // Initialize for all known managers
+  allUsersList.forEach((u) => userOwnershipHistory.set(u.id, new Set()));
+
+  // Add initial squads
   allInitial.forEach((i) => userOwnershipHistory.get(i.userId)?.add(i.playerId));
+
+  // Add transfers with name-to-ID resolution
   allFichajes.forEach((f) => {
-    if (f.comprador) userOwnershipHistory.get(f.comprador)?.add(f.playerId);
+    if (f.comprador) {
+      let ownerId = f.comprador;
+      if (!userOwnershipHistory.has(f.comprador)) {
+        const found = allUsersList.find((u) => u.name === f.comprador);
+        if (found) ownerId = found.id;
+      }
+      userOwnershipHistory.get(ownerId)?.add(f.playerId);
+    }
   });
 
   const everOwnedIds = new Set();
