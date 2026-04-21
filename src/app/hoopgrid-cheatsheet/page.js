@@ -6,8 +6,10 @@ import {
   initialSquads,
   fichajes,
 } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import Image from 'next/image';
+import { HoopgridService } from '@/lib/services/features/hoopgridService';
+import HoopgridCheatsheetHeader from '@/components/hoopgrid/HoopgridCheatsheetHeader';
 
 // We'll replicate the checkCriteria logic here to keep it self-contained
 // and avoid issues with private methods in HoopgridService
@@ -90,9 +92,15 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
   const today = new Date().toISOString().split('T')[0];
   const targetDate = dateParam || today;
 
-  const challenge = await db.query.hoopgridChallenges.findFirst({
-    where: eq(hoopgridChallenges.gameDate, targetDate),
-  });
+  // 1. Fetch current challenge and ALL challenges for the dropdown
+  const [challenge, rawAllChallenges] = await Promise.all([
+    db.query.hoopgridChallenges.findFirst({
+      where: eq(hoopgridChallenges.gameDate, targetDate),
+    }),
+    db.query.hoopgridChallenges.findMany({
+      orderBy: desc(hoopgridChallenges.gameDate),
+    }),
+  ]);
 
   if (!challenge) {
     return (
@@ -104,6 +112,12 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
       </div>
     );
   }
+
+  // Calculate complexity for the dropdown
+  const allChallenges = rawAllChallenges.map((ch) => ({
+    ...ch,
+    complexity: HoopgridService.calculateComplexity(ch.possibleCounts),
+  }));
 
   // Calculate prev/next
   const current = new Date(targetDate);
@@ -168,32 +182,14 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10 font-sans">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-10 border-b border-border pb-6">
-          <h1 className="text-4xl font-black uppercase tracking-tighter italic text-primary">
-            Hoopgrid Cheatsheet
-          </h1>
-          <div className="flex items-center gap-4 mt-2">
-            <a
-              href={`/hoopgrid-cheatsheet?date=${prevStr}`}
-              className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
-            >
-              ← Anterior
-            </a>
-            <p className="text-muted-foreground text-base font-medium">
-              Reto <span className="text-primary">#{challenge.number}</span> | Challenge:{' '}
-              <span className="text-foreground font-mono">{challenge.id}</span> | Date:{' '}
-              <span className="text-foreground font-mono">{challenge.gameDate}</span>
-            </p>
-            {!isLatest && (
-              <a
-                href={`/hoopgrid-cheatsheet?date=${nextStr}`}
-                className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
-              >
-                Siguiente →
-              </a>
-            )}
-          </div>
-        </header>
+        <HoopgridCheatsheetHeader
+          allChallenges={allChallenges}
+          currentDate={targetDate}
+          currentNumber={challenge.number}
+          prevDate={prevStr}
+          nextDate={nextStr}
+          isLatest={isLatest}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {solutions.map((cell, idx) => (
@@ -216,7 +212,7 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
                 </h2>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 sidebar-scroll">
                 {cell.players.map((player) => (
                   <div
                     key={player.id}
