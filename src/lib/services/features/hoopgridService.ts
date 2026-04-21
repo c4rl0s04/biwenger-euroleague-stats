@@ -432,7 +432,7 @@ export class HoopgridService {
   /**
    * Generates a random daily challenge
    */
-  static async generateDailyChallenge(targetDate?: string) {
+  static async generateDailyChallenge(targetDate?: string, minComplexity: number = 0) {
     const start = Date.now();
     const dateStr = targetDate || new Date().toISOString().split('T')[0];
 
@@ -554,7 +554,10 @@ export class HoopgridService {
       return false;
     };
 
-    while (attempts < 100) {
+    let found = false;
+    let finalComplexity = 0;
+
+    while (attempts < 1000) {
       attempts++;
       const rowPool = [...HOOPGRID_TEAMS, ...HOOPGRID_POSITIONS];
       rows = pickN(rowPool, 3).map((item) => ({
@@ -574,8 +577,6 @@ export class HoopgridService {
       ];
       cols = pickN(colPool, 3).map((item) => ({
         type: item.type || 'country',
-        // For simple numeric value criteria (height, age, market, country), use value directly.
-        // For stat criteria that embed field/threshold inside value, preserve that object.
         value:
           item.value !== undefined
             ? item.value
@@ -604,11 +605,23 @@ export class HoopgridService {
       }
 
       if (isCompletable) {
+        finalComplexity = this.calculateComplexity(possibleCounts);
+        if (finalComplexity < minComplexity) {
+          continue;
+        }
+
+        found = true;
         console.log(
-          `Generated completable hoopgrid for ${dateStr} in ${attempts} attempts (${Date.now() - start}ms).`
+          `Generated hoopgrid for ${dateStr} in ${attempts} attempts (Comp: ${finalComplexity}, ${Date.now() - start}ms).`
         );
         break;
       }
+    }
+
+    if (!found) {
+      throw new Error(
+        `Failed to generate a completable hoopgrid with minComplexity ${minComplexity} for ${dateStr} after ${attempts} attempts.`
+      );
     }
 
     // 4. Calculate or preserve challenge number

@@ -19,7 +19,9 @@ export async function GET(request: Request) {
 
     // Lazy Generation: If no challenge exists for today, the first user to visit triggers its creation
     if (!challenge) {
-      challenge = await hoopgridService.generateDailyChallenge(today);
+      // 20% chance of generating a very hard challenge if auto-generating
+      const minComplexity = Math.random() < 0.2 ? 75 : 0;
+      challenge = await hoopgridService.generateDailyChallenge(targetDate, minComplexity);
     }
 
     // 2. Get user from cookie or session fallback
