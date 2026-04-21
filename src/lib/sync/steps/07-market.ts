@@ -1,6 +1,7 @@
 import { biwengerFetch } from '../../api/biwenger-client';
 import { CONFIG } from '../../config';
 import { prepareMarketMutations } from '../../db/mutations/market';
+import { prepareUserMutations } from '../../db/mutations/users';
 import { SyncManager } from '../manager';
 
 /**
@@ -27,6 +28,7 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
   );
 
   manager.log('Fetching full board history...');
+  const processedPlayerIds = new Set<number>();
 
   let offset = 0;
   const limit = 50;
@@ -185,6 +187,30 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
           vendedor: fromName,
           comprador: toName,
         });
+
+        // ==========================================
+        // OWNERSHIP UPDATE (Event-Driven)
+        // ==========================================
+        // Since we process newest items first (offset 0),
+        // the first time we see a player, it's their latest movement.
+        if (!processedPlayerIds.has(playerId)) {
+          const userMutations = (manager as any).userMutations || prepareUserMutations(db as any);
+          (manager as any).userMutations = userMutations; // Cache it in manager context
+
+          let newOwnerId: string | null = null;
+
+          if (toName !== 'Mercado' && content.to) {
+            // User ID can be in .id or the value itself
+            newOwnerId = (content.to.id || content.to).toString();
+          }
+
+          await userMutations.updatePlayerOwner({
+            owner_id: newOwnerId,
+            player_id: playerId,
+          });
+
+          processedPlayerIds.add(playerId);
+        }
 
         // If transfer was inserted (not ignored), insert bids
         if (result.created && result.id && content.bids && Array.isArray(content.bids)) {
