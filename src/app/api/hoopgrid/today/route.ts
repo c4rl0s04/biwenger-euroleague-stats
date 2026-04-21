@@ -74,6 +74,7 @@ export async function GET(request: Request) {
           typeof challenge.possibleCounts === 'string'
             ? JSON.parse(challenge.possibleCounts)
             : challenge.possibleCounts || [],
+        complexity: HoopgridService.calculateComplexity(challenge.possibleCounts),
       },
       userGuesses,
     });

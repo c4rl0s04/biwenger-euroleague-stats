@@ -12,6 +12,7 @@ export function useHoopgridGame() {
   const dateParam = searchParams.get('date');
 
   const [challenge, setChallenge] = useState(null);
+  const [allChallenges, setAllChallenges] = useState([]);
   const [guesses, setGuesses] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeCell, setActiveCell] = useState(null);
@@ -19,8 +20,22 @@ export function useHoopgridGame() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    fetchAllChallenges();
+  }, []);
+
+  useEffect(() => {
     fetchChallenge(dateParam);
   }, [dateParam]);
+
+  const fetchAllChallenges = async () => {
+    try {
+      const res = await fetch('/api/hoopgrid/list');
+      const data = await res.json();
+      if (data.challenges) setAllChallenges(data.challenges);
+    } catch (err) {
+      console.error('Failed to fetch challenges list:', err);
+    }
+  };
 
   const fetchChallenge = async (date) => {
     setLoading(true);
@@ -157,6 +172,7 @@ export function useHoopgridGame() {
 
   return {
     challenge,
+    allChallenges,
     guesses,
     loading,
     activeCell,
@@ -164,6 +180,8 @@ export function useHoopgridGame() {
     submitting,
     correctGuessesCount,
     challengeDate,
+    rawGameDate: challenge?.gameDate,
+    complexity: challenge?.complexity || 0,
     diffDays,
     prevDate,
     nextDate,

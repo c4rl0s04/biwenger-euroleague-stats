@@ -649,6 +649,29 @@ export class HoopgridService {
 
     return challenge;
   }
+
+  static calculateComplexity(possibleCounts: number[] | string | null): number {
+    if (!possibleCounts) return 0;
+    const counts = typeof possibleCounts === 'string' ? JSON.parse(possibleCounts) : possibleCounts;
+    if (!Array.isArray(counts) || counts.length === 0) return 0;
+
+    // Complexity formula:
+    // For each cell, complexity = max(0, 100 - (log2(count + 1) * 15))
+    // This means:
+    // 1 option -> ~85 complexity
+    // 5 options -> ~62 complexity
+    // 20 options -> ~34 complexity
+    // 100 options -> ~1 complexity
+    const cellComplexities = counts.map((count) => {
+      if (count === 0) return 100;
+      const score = 100 - Math.log2(count + 1) * 15;
+      return Math.max(1, Math.min(100, Math.round(score)));
+    });
+
+    // Average complexity across all cells
+    const avg = cellComplexities.reduce((a, b) => a + b, 0) / cellComplexities.length;
+    return Math.round(avg);
+  }
 }
 
 // Export as an object for backward compatibility with your API routes

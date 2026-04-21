@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Share2 } from 'lucide-react';
+import { Share2, Calendar } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 
 // Hooks
@@ -16,6 +16,7 @@ import HoopgridBoard from './HoopgridBoard';
 import HoopgridInstructions from './HoopgridInstructions';
 import HoopgridSearch from './HoopgridSearch';
 import HoopgridShareModal from './HoopgridShareModal';
+import HoopgridCalendar from './HoopgridCalendar';
 
 /**
  * Main Hoopgrid Orchestrator.
@@ -24,10 +25,12 @@ import HoopgridShareModal from './HoopgridShareModal';
 export default function HoopgridClient() {
   const gridRef = useRef(null);
   const { currentUser } = useUser();
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // 1. Logic Engine
   const {
     challenge,
+    allChallenges,
     guesses,
     loading,
     activeCell,
@@ -35,6 +38,8 @@ export default function HoopgridClient() {
     submitting,
     correctGuessesCount,
     challengeDate,
+    rawGameDate,
+    complexity,
     diffDays,
     prevDate,
     nextDate,
@@ -65,14 +70,22 @@ export default function HoopgridClient() {
       <HoopgridHeader
         diffDays={diffDays}
         challengeDate={challengeDate}
+        currentDateStr={rawGameDate}
         prevDate={prevDate}
         nextDate={nextDate}
+        allChallenges={allChallenges}
         isLatest={isLatest}
         onNavigate={navigateToDate}
+        complexity={complexity}
+        onOpenCalendar={() => setCalendarOpen(true)}
       />
 
       {/* 2. Stats Section */}
-      <HoopgridStats guesses={guesses} correctGuessesCount={correctGuessesCount} />
+      <HoopgridStats
+        guesses={guesses}
+        correctGuessesCount={correctGuessesCount}
+        complexity={complexity}
+      />
 
       {/* 3. The Interactive Board */}
       <HoopgridBoard
@@ -135,6 +148,21 @@ export default function HoopgridClient() {
             onClose={() => setShareModalOpen(false)}
             imageUri={shareImageUri}
             textSummary={shareText}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence mode="wait">
+        {calendarOpen && (
+          <HoopgridCalendar
+            key="calendar-modal"
+            isOpen={calendarOpen}
+            onClose={() => setCalendarOpen(false)}
+            allChallenges={allChallenges}
+            onSelectDate={(date) => {
+              navigateToDate(date);
+              setCalendarOpen(false);
+            }}
+            currentDate={rawGameDate}
           />
         )}
       </AnimatePresence>
