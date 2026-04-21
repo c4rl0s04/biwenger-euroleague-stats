@@ -18,10 +18,11 @@ async function main() {
 
   const args = process.argv.slice(2);
   const count = parseInt(args[0]) || 5;
-  const minDifficulty = parseInt(args[1]) || 80;
+  const minDifficulty = parseInt(args[1]) || 0;
+  const maxDifficulty = parseInt(args[2]) || 100;
 
   console.log(
-    `🚀 Starting generation of ${count} challenges with min difficulty ${minDifficulty}...`
+    `🚀 Starting generation of ${count} challenges with difficulty range [${minDifficulty} - ${maxDifficulty}]...`
   );
 
   // Get the last challenge date
@@ -40,7 +41,11 @@ async function main() {
     console.log(`\n📅 Generating for ${targetDate}...`);
 
     try {
-      const challenge = await hoopgridService.generateDailyChallenge(targetDate, minDifficulty);
+      const challenge = await hoopgridService.generateDailyChallenge(
+        targetDate,
+        minDifficulty,
+        maxDifficulty
+      );
       const complexity = hoopgridService.calculateComplexity(challenge.possibleCounts);
       console.log(
         `✅ Success! Challenge #${challenge.number} generated with complexity: ${complexity}`

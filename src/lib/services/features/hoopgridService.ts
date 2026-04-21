@@ -432,7 +432,11 @@ export class HoopgridService {
   /**
    * Generates a random daily challenge
    */
-  static async generateDailyChallenge(targetDate?: string, minComplexity: number = 0) {
+  static async generateDailyChallenge(
+    targetDate?: string,
+    minComplexity: number = 0,
+    maxComplexity: number = 100
+  ) {
     const start = Date.now();
     const dateStr = targetDate || new Date().toISOString().split('T')[0];
 
@@ -606,7 +610,7 @@ export class HoopgridService {
 
       if (isCompletable) {
         finalComplexity = this.calculateComplexity(possibleCounts);
-        if (finalComplexity < minComplexity) {
+        if (finalComplexity < minComplexity || finalComplexity > maxComplexity) {
           continue;
         }
 
@@ -669,15 +673,16 @@ export class HoopgridService {
     if (!Array.isArray(counts) || counts.length === 0) return 0;
 
     // Complexity formula:
-    // For each cell, complexity = max(0, 100 - (log2(count + 1) * 15))
+    // For each cell, complexity = max(0, 100 - (log2(count) * 15))
     // This means:
-    // 1 option -> ~85 complexity
-    // 5 options -> ~62 complexity
-    // 20 options -> ~34 complexity
-    // 100 options -> ~1 complexity
+    // 1 option -> 100 complexity (Absolute hard)
+    // 2 options -> 85 complexity
+    // 5 options -> 65 complexity
+    // 20 options -> 35 complexity
+    // 100 options -> 0 complexity
     const cellComplexities = counts.map((count) => {
-      if (count === 0) return 100;
-      const score = 100 - Math.log2(count + 1) * 15;
+      if (count <= 1) return 100;
+      const score = 100 - Math.log2(count) * 15;
       return Math.max(1, Math.min(100, Math.round(score)));
     });
 
