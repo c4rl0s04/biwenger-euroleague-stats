@@ -6,12 +6,15 @@ import { eq, and } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { cookies } from 'next/headers';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // 1. Get today's challenge
-    const today = new Date().toISOString().split('T')[0];
+    // 1. Get target date from query or default to today
+    const { searchParams } = new URL(request.url);
+    const dateParam = searchParams.get('date');
+    const targetDate = dateParam || new Date().toISOString().split('T')[0];
+
     let challenge = await db.query.hoopgridChallenges.findFirst({
-      where: (ch, { eq, and }) => and(eq(ch.gameDate, today), eq(ch.isActive, true)),
+      where: (ch, { eq, and }) => and(eq(ch.gameDate, targetDate), eq(ch.isActive, true)),
     });
 
     // Lazy Generation: If no challenge exists for today, the first user to visit triggers its creation

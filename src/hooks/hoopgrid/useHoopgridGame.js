@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 /**
  * Hook to manage the Hoopgrid game state and API interactions.
  */
 export function useHoopgridGame() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const dateParam = searchParams.get('date');
+
   const [challenge, setChallenge] = useState(null);
   const [guesses, setGuesses] = useState({});
   const [loading, setLoading] = useState(true);
@@ -14,12 +19,14 @@ export function useHoopgridGame() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchTodayChallenge();
-  }, []);
+    fetchChallenge(dateParam);
+  }, [dateParam]);
 
-  const fetchTodayChallenge = async () => {
+  const fetchChallenge = async (date) => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/hoopgrid/today');
+      const url = date ? `/api/hoopgrid/today?date=${date}` : '/api/hoopgrid/today';
+      const res = await fetch(url);
       const data = await res.json();
 
       if (data.challenge) {
@@ -48,7 +55,8 @@ export function useHoopgridGame() {
           }
         });
         setGuesses(guessMap);
-        if (hasSavedGuesses) setIsSubmitted(true);
+        // Only set as submitted if we have at least one guess OR if we want to show results
+        setIsSubmitted(hasSavedGuesses);
       }
     } catch (err) {
       console.error('Failed to fetch hoopgrid:', err);
@@ -118,13 +126,34 @@ export function useHoopgridGame() {
     }
   };
 
+  const navigateToDate = (date) => {
+    const params = new URLSearchParams(searchParams);
+    if (date) {
+      params.set('date', date);
+    } else {
+      params.delete('date');
+    }
+    router.push(`/hoopgrid?${params.toString()}`);
+  };
+
   // Challenge Progress Stats
   const correctGuessesCount = Object.values(guesses).filter((g) => g.isCorrect).length;
 
   // Reto # Logic
   const challengeDate = challenge?.gameDate ? new Date(challenge.gameDate) : new Date();
-  const launchDate = new Date('2026-04-01');
-  const diffDays = Math.ceil(Math.abs(challengeDate - launchDate) / (1000 * 60 * 60 * 24)) + 1;
+  const diffDays = challenge?.number || 0;
+
+  // Navigation Logic
+  const prevDateObj = new Date(challengeDate);
+  prevDateObj.setDate(prevDateObj.getDate() - 1);
+  const prevDate = prevDateObj.toISOString().split('T')[0];
+
+  const nextDateObj = new Date(challengeDate);
+  nextDateObj.setDate(nextDateObj.getDate() + 1);
+  const nextDate = nextDateObj.toISOString().split('T')[0];
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isLatest = challenge?.gameDate === todayStr;
 
   return {
     challenge,
@@ -136,8 +165,12 @@ export function useHoopgridGame() {
     correctGuessesCount,
     challengeDate,
     diffDays,
+    prevDate,
+    nextDate,
+    isLatest,
     setActiveCell,
     handleGuess,
     handleSubmitBoard,
+    navigateToDate,
   };
 }

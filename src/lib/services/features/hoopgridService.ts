@@ -611,6 +611,21 @@ export class HoopgridService {
       }
     }
 
+    // 4. Calculate or preserve challenge number
+    const existing = await db.query.hoopgridChallenges.findFirst({
+      where: eq(hoopgridChallenges.gameDate, dateStr),
+    });
+
+    let challengeNumber;
+    if (existing?.number) {
+      challengeNumber = existing.number;
+    } else {
+      const [maxRes] = await db
+        .select({ val: max(hoopgridChallenges.number) })
+        .from(hoopgridChallenges);
+      challengeNumber = (maxRes?.val || 0) + 1;
+    }
+
     const [challenge] = await db
       .insert(hoopgridChallenges)
       .values({
@@ -618,6 +633,7 @@ export class HoopgridService {
         gameDate: dateStr,
         rows: JSON.stringify(rows),
         cols: JSON.stringify(cols),
+        number: challengeNumber,
         possibleCounts: JSON.stringify(possibleCounts),
         isActive: true,
       })

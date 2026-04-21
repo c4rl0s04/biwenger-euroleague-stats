@@ -45,6 +45,11 @@ async function syncData() {
   // Register Pipeline Steps
   const shouldRun = (num: number) => {
     if (onlyStep) return String(onlyStep) === String(num);
+
+    // Step 11 is disabled in global runs because it's blocked by Euroleague.
+    // We handle this manually via the CSV injection script.
+    if (num === 11) return false;
+
     if (isDaily) {
       // Daily mode: Skip steps 9 (Initial Squads), 10 (Logos), 11 (Images), 12 (Colors)
       // But Allow steps <= 8 AND Step 13 (Porras)

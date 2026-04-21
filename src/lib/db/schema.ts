@@ -354,6 +354,7 @@ export const hoopgridChallenges = pgTable('hoopgrid_challenges', {
   gameDate: date('game_date').unique().notNull(),
   rows: text('rows'), // Stored as JSON string
   cols: text('cols'), // Stored as JSON string
+  number: integer('number'), // Sequential challenge number (e.g., 21)
   possibleCounts: text('possible_counts'), // Stored as JSON string [n1, n2, ... n9]
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),

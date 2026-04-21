@@ -1,5 +1,6 @@
 import HoopgridClient from '@/components/hoopgrid/HoopgridClient';
 import { PageHeader } from '@/components/ui';
+import { Suspense } from 'react';
 
 /**
  * Hoopgrid Page
@@ -25,7 +26,13 @@ export default function HoopgridPage() {
         {/* Section Title & Game Container */}
         <div className="container mx-auto px-4 pb-20">
           <div className="flex flex-col items-center justify-center">
-            <HoopgridClient />
+            <Suspense
+              fallback={
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+              }
+            >
+              <HoopgridClient />
+            </Suspense>
           </div>
         </div>
       </main>

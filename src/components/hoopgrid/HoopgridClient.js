@@ -36,9 +36,13 @@ export default function HoopgridClient() {
     correctGuessesCount,
     challengeDate,
     diffDays,
+    prevDate,
+    nextDate,
+    isLatest,
     setActiveCell,
     handleGuess,
     handleSubmitBoard,
+    navigateToDate,
   } = useHoopgridGame();
 
   // 2. Share Engine (Symmetrical Centering)
@@ -58,7 +62,14 @@ export default function HoopgridClient() {
   return (
     <div className="w-full flex flex-col items-center pt-12">
       {/* 1. Header Section */}
-      <HoopgridHeader diffDays={diffDays} challengeDate={challengeDate} />
+      <HoopgridHeader
+        diffDays={diffDays}
+        challengeDate={challengeDate}
+        prevDate={prevDate}
+        nextDate={nextDate}
+        isLatest={isLatest}
+        onNavigate={navigateToDate}
+      />
 
       {/* 2. Stats Section */}
       <HoopgridStats guesses={guesses} correctGuessesCount={correctGuessesCount} />
