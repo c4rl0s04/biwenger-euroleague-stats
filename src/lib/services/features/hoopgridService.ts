@@ -251,7 +251,8 @@ export class HoopgridService {
     stats: any[],
     criteria: Criteria,
     initials: any[],
-    transfers: any[]
+    transfers: any[],
+    managerName?: string
   ): boolean {
     if (criteria.type.startsWith('stat_')) {
       if (!stats || stats.length === 0) return false;
@@ -297,16 +298,9 @@ export class HoopgridService {
         if (wasInInitial) return true;
 
         // Transfers might use ID or Name
-        // We can't easily get user name here without passing it or fetching it
-        // But in generateDailyChallenge we pre-fetch everything.
-        // For validateCriteriaSync (used in submitGuess), we might need to fetch it.
-        // Let's assume transfers array contains what we need.
         return transfers.some(
-          (t) =>
-            t.comprador === userId ||
-            t.comprador === 'Real Madrid Basket' ||
-            t.comprador === 'All Stars'
-        ); // This is not ideal
+          (t) => t.comprador === userId || (managerName && t.comprador === managerName)
+        );
       }
     }
 
@@ -361,13 +355,16 @@ export class HoopgridService {
     playerId: number,
     dryRun: boolean = false
   ) {
-    const [challenge, player, stats, initials, transfers] = await Promise.all([
+    const [challenge, player, stats, initials, transfers, allUsers] = await Promise.all([
       db.query.hoopgridChallenges.findFirst({ where: eq(hoopgridChallenges.id, challengeId) }),
       db.query.players.findFirst({ where: eq(players.id, playerId) }),
       db.select().from(playerRoundStats).where(eq(playerRoundStats.playerId, playerId)),
       db.select().from(initialSquads).where(eq(initialSquads.playerId, playerId)),
       db.select().from(fichajes).where(eq(fichajes.playerId, playerId)),
+      db.select().from(users),
     ]);
+
+    const userMap = new Map(allUsers.map((u) => [u.id, u.name]));
 
     if (!challenge || !player) throw new Error('Data not found');
 
@@ -378,8 +375,28 @@ export class HoopgridService {
     const rowCriteria = rows[Math.floor(cellIndex / 3)];
     const colCriteria = cols[cellIndex % 3];
 
-    const isRowCorrect = this.validateCriteriaSync(player, stats, rowCriteria, initials, transfers);
-    const isColCorrect = this.validateCriteriaSync(player, stats, colCriteria, initials, transfers);
+    // Helper to get name for a specific criteria's manager
+    const getManagerName = (crit: Criteria) => {
+      if (crit.type === 'user_ownership') return userMap.get(crit.value.userId) || undefined;
+      return undefined;
+    };
+
+    const isRowCorrect = this.validateCriteriaSync(
+      player,
+      stats,
+      rowCriteria,
+      initials,
+      transfers,
+      getManagerName(rowCriteria)
+    );
+    const isColCorrect = this.validateCriteriaSync(
+      player,
+      stats,
+      colCriteria,
+      initials,
+      transfers,
+      getManagerName(colCriteria)
+    );
     const isCorrect = isRowCorrect && isColCorrect;
 
     let rarity = null;
@@ -476,9 +493,10 @@ export class HoopgridService {
     const allInitial = await db.select().from(initialSquads);
     const allFichajes = await db.select().from(fichajes);
 
-    const allUsersList = await db.select().from(require('@/lib/db/schema').users);
+    const allUsersList = await db.select().from(users);
     const idToName = new Map(allUsersList.map((u) => [u.id, u.name]));
 
+    const userOwnershipHistory = new Map();
     const allUsers = Array.from(
       new Set([...allInitial.map((i) => i.userId), ...allFichajes.map((f) => f.comprador)])
     ).filter((u): u is string => !!u);
