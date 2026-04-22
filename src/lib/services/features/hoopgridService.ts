@@ -464,11 +464,11 @@ export class HoopgridService {
     const totalCorrectGuesses = results.reduce((acc, curr) => acc + curr.count, 0);
     const playerPicks = results.find((r) => r.playerId === playerId)?.count || 0;
 
-    // Laplace smoothing: add 1 to numerator and denominator to avoid 0%/100% extremes
-    const virtualTotal = totalCorrectGuesses + 1;
-    const virtualPlayerPicks = playerPicks + 1;
+    // Add +1 to both to account for the current guess being processed
+    const totalCorrectWithCurrent = totalCorrectGuesses + 1;
+    const playerPicksWithCurrent = playerPicks + 1;
 
-    return (virtualPlayerPicks * 100) / virtualTotal;
+    return (playerPicksWithCurrent * 100) / totalCorrectWithCurrent;
   }
 
   /**
