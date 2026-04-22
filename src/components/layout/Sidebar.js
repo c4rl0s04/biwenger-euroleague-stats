@@ -16,9 +16,10 @@ import {
   Home,
   Sparkles,
   Clock,
-  Scale,
   Medal,
   LayoutGrid,
+  Swords,
+  Scale,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSections } from './SectionContext';
@@ -30,13 +31,13 @@ const navItems = [
   { name: 'Jugadores', href: '/players', icon: User },
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
   { name: 'Partidos', href: '/matches', icon: Calendar },
-  { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Alineaciones', href: '/schedule', icon: Users },
   { name: 'Jornadas', href: '/rounds', icon: Clock },
   { name: 'Torneos', href: '/tournaments', icon: Medal },
-  { name: 'Comparativa', href: '/compare', icon: Scale },
   { name: 'Porras', href: '/predictions', icon: Target },
-  { name: 'Playoffs', href: '/playoffs', icon: Trophy },
+  { name: 'Playoffs', href: '/playoffs', icon: Swords },
+  { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
+  { name: 'Comparativa', href: '/compare', icon: Scale },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
