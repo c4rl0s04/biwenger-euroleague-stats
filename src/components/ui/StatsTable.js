@@ -62,7 +62,7 @@ export function TableHeaderCell({
       colSpan={colSpan}
       onClick={onClick}
       className={cn(
-        'px-4 py-3 bg-white/[0.01] transition-colors text-foreground/80 font-bold text-[10px] md:text-sm uppercase tracking-widest font-sans border-b border-border/20',
+        'px-2 md:px-4 py-3 bg-white/[0.01] transition-colors text-foreground/80 font-bold text-[10px] md:text-sm uppercase tracking-widest font-sans border-b border-border/20',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
         colorClass,
         className
@@ -90,7 +90,7 @@ export function TableCell({ children, className, align = 'center', color, colSpa
     <td
       colSpan={colSpan}
       className={cn(
-        'px-4 py-2 border-b border-border/20 text-sm md:text-base font-medium',
+        'px-2 md:px-4 py-2 border-b border-border/20 text-sm md:text-base font-medium',
         align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center',
         colorClass,
         className
@@ -296,7 +296,13 @@ export default function StatsTable({
   };
 
   return (
-    <ElegantCard title={title} icon={icon} color={color} className={cn('h-full', className)}>
+    <ElegantCard
+      title={title}
+      icon={icon}
+      color={color}
+      padding="p-3 md:p-6"
+      className={cn('h-full', className)}
+    >
       <Table>
         <TableHeader>
           <TableRow hovering={false}>

@@ -70,10 +70,11 @@ export default function PlayoffClient({
       key: 'rank',
       label: 'Pos',
       align: 'center',
+      className: 'w-10 md:w-16',
       render: (_: any, __: any, index: number) => (
         <span
           className={clsx(
-            'flex items-center justify-center w-7 h-7 mx-auto rounded-full text-xs font-bold',
+            'flex items-center justify-center w-5 h-5 md:w-7 md:h-7 mx-auto rounded-full text-[10px] md:text-xs font-bold',
             index === 0
               ? 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.4)]'
               : index === 1
@@ -96,12 +97,14 @@ export default function PlayoffClient({
         return (
           <Link
             href={`/user/${row.userId || row.userName}`}
-            className="flex items-center gap-3 cursor-pointer group/link"
+            className="flex items-center gap-2 md:gap-3 cursor-pointer group/link"
           >
-            <UserAvatar src={row.userIcon} alt={row.userName} size={36} />
+            <div className="shrink-0 scale-75 md:scale-100 origin-center">
+              <UserAvatar src={row.userIcon} alt={row.userName} size={36} />
+            </div>
             <span
               className={clsx(
-                'font-bold tracking-tight text-lg group-hover/link:scale-105 transition-all duration-300 origin-left',
+                'font-bold tracking-tight text-sm md:text-lg group-hover/link:scale-105 transition-all duration-300 origin-left truncate max-w-[80px] md:max-w-none',
                 userColor.text
               )}
             >
@@ -117,7 +120,7 @@ export default function PlayoffClient({
       align: 'center',
       color: 'emerald',
       render: (val: number, row: LeaderboardRow) => (
-        <span className="text-sm font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.2)]">
+        <span className="text-[10px] md:text-sm font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.2)]">
           {val} / {row.totalCount}
         </span>
       ),
@@ -132,7 +135,7 @@ export default function PlayoffClient({
           <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden hidden md:block">
             <div className="h-full bg-cyan-500" style={{ width: `${val}%` }} />
           </div>
-          <span className="text-xs font-mono font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.2)]">
+          <span className="text-[10px] md:text-xs font-mono font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.2)]">
             {val.toFixed(0)}%
           </span>
         </div>
@@ -144,7 +147,9 @@ export default function PlayoffClient({
       align: 'right',
       color: 'primary',
       render: (val: number) => (
-        <span className="font-black text-2xl drop-shadow-[0_0_8px_rgba(250,80,1,0.4)]">{val}</span>
+        <span className="font-black text-lg md:text-2xl drop-shadow-[0_0_8px_rgba(250,80,1,0.4)]">
+          {val}
+        </span>
       ),
     },
     {
