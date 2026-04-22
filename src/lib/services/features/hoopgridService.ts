@@ -461,14 +461,29 @@ export class HoopgridService {
       )
       .groupBy(hoopgridGuesses.playerId);
 
-    const totalCorrectGuesses = results.reduce((acc, curr) => acc + curr.count, 0);
-    const playerPicks = results.find((r) => r.playerId === playerId)?.count || 0;
+    const totalInDB = results.reduce((acc, curr) => acc + curr.count, 0);
+    const picksInDB = results.find((r) => r.playerId === playerId)?.count || 0;
 
-    // Add +1 to both to account for the current guess being processed
-    const totalCorrectWithCurrent = totalCorrectGuesses + 1;
-    const playerPicksWithCurrent = playerPicks + 1;
+    // We want the rarity to include the current guess.
+    // If the current guess is already in the DB (e.g., updating a correct guess),
+    // then the DB counts are already correct.
+    // Otherwise, we add 1 to both to represent the guess we're about to insert.
+    const [existing] = await db
+      .select()
+      .from(hoopgridGuesses)
+      .where(
+        and(
+          eq(hoopgridGuesses.challengeId, challengeId),
+          eq(hoopgridGuesses.cellIndex, cellIndex),
+          eq(hoopgridGuesses.playerId, playerId),
+          eq(hoopgridGuesses.isCorrect, true)
+        )
+      );
 
-    return (playerPicksWithCurrent * 100) / totalCorrectWithCurrent;
+    const finalTotal = existing ? totalInDB : totalInDB + 1;
+    const finalPicks = existing ? picksInDB : picksInDB + 1;
+
+    return (finalPicks * 100) / (finalTotal || 1);
   }
 
   /**
