@@ -59,7 +59,7 @@ export async function GET(request: Request) {
         rawGuesses.map(async (g) => ({
           ...g,
           rarity: g.playerId
-            ? await HoopgridService.getRarity(challenge!.id, g.cellIndex, g.playerId)
+            ? await HoopgridService.getRarity(challenge!.id, g.cellIndex, g.playerId, userId!)
             : 0,
         }))
       );
