@@ -14,6 +14,7 @@ import {
   Activity,
   Medal,
   LayoutGrid,
+  Swords,
 } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
@@ -99,6 +100,15 @@ export default function Home() {
       href: '/predictions',
       color: 'pink',
       delay: '0.8s',
+      disabled: false,
+    },
+    {
+      title: 'Playoffs',
+      description: 'Predicciones y seguimiento de la fase final',
+      icon: Swords,
+      href: '/playoffs',
+      color: 'rose',
+      delay: '0.82s',
       disabled: false,
     },
     {
