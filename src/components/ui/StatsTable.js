@@ -25,6 +25,7 @@ const COLUMN_COLOR_MAP = {
   lime: 'text-lime-400',
   fuchsia: 'text-fuchsia-400',
   primary: 'text-primary',
+  rose: 'text-rose-400',
 };
 
 // --- Primitive Components (formerly BaseTable) ---

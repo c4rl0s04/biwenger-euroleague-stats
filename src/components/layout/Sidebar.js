@@ -36,6 +36,7 @@ const navItems = [
   { name: 'Torneos', href: '/tournaments', icon: Medal },
   { name: 'Comparativa', href: '/compare', icon: Scale },
   { name: 'Porras', href: '/predictions', icon: Target },
+  { name: 'Playoffs', href: '/playoffs', icon: Trophy },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {

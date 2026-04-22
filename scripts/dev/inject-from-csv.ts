@@ -4,7 +4,7 @@ import path from 'path';
 import { db } from '../../src/lib/db/client';
 
 async function injectFromCsv() {
-  const csvPath = path.resolve(process.cwd(), 'euroleague_players.csv');
+  const csvPath = path.resolve(process.cwd(), 'src/lib/data/players/euroleague_players.csv');
   console.log(`📂 Reading CSV from: ${csvPath}`);
 
   if (!fs.existsSync(csvPath)) {

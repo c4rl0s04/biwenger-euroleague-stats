@@ -1,0 +1,452 @@
+{
+  "predictions": [
+    {
+      "userId": "13207868",
+      "stage": "play-in",
+      "matchId": "PI-1",
+      "predictedWinnerName": "Panathinaikos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "play-in",
+      "matchId": "PI-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "play-in",
+      "matchId": "PI-3",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "quarter",
+      "matchId": "QF-1",
+      "predictedWinnerName": "Fenerbahce",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "quarter",
+      "matchId": "QF-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "quarter",
+      "matchId": "QF-3",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "quarter",
+      "matchId": "QF-4",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "semi",
+      "matchId": "SF-1",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "semi",
+      "matchId": "SF-2",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207868",
+      "stage": "final",
+      "matchId": "F",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+
+    {
+      "userId": "13207924",
+      "stage": "play-in",
+      "matchId": "PI-1",
+      "predictedWinnerName": "Panathinaikos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "play-in",
+      "matchId": "PI-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "play-in",
+      "matchId": "PI-3",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "quarter",
+      "matchId": "QF-1",
+      "predictedWinnerName": "Fenerbahce",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "quarter",
+      "matchId": "QF-2",
+      "predictedWinnerName": "Olympiacos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "quarter",
+      "matchId": "QF-3",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "quarter",
+      "matchId": "QF-4",
+      "predictedWinnerName": "Panathinaikos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "semi",
+      "matchId": "SF-1",
+      "predictedWinnerName": "Olympiacos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "semi",
+      "matchId": "SF-2",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207924",
+      "stage": "final",
+      "matchId": "F",
+      "predictedWinnerName": "Olympiacos",
+      "predictionDetails": "Winner"
+    },
+
+    {
+      "userId": "13208192",
+      "stage": "play-in",
+      "matchId": "PI-1",
+      "predictedWinnerName": "Panathinaikos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "play-in",
+      "matchId": "PI-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "play-in",
+      "matchId": "PI-3",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "quarter",
+      "matchId": "QF-1",
+      "predictedWinnerName": "Zalgiris",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "quarter",
+      "matchId": "QF-2",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "quarter",
+      "matchId": "QF-3",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "quarter",
+      "matchId": "QF-4",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "semi",
+      "matchId": "SF-1",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "semi",
+      "matchId": "SF-2",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208192",
+      "stage": "final",
+      "matchId": "F",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+
+    {
+      "userId": "13207910",
+      "stage": "play-in",
+      "matchId": "PI-1",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "play-in",
+      "matchId": "PI-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "play-in",
+      "matchId": "PI-3",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "quarter",
+      "matchId": "QF-1",
+      "predictedWinnerName": "Zalgiris",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "quarter",
+      "matchId": "QF-2",
+      "predictedWinnerName": "Olympiacos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "quarter",
+      "matchId": "QF-3",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "quarter",
+      "matchId": "QF-4",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "semi",
+      "matchId": "SF-1",
+      "predictedWinnerName": "Zalgiris",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "semi",
+      "matchId": "SF-2",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207910",
+      "stage": "final",
+      "matchId": "F",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+
+    {
+      "userId": "13208960",
+      "stage": "play-in",
+      "matchId": "PI-1",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "play-in",
+      "matchId": "PI-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "play-in",
+      "matchId": "PI-3",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "quarter",
+      "matchId": "QF-1",
+      "predictedWinnerName": "Fenerbahce",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "quarter",
+      "matchId": "QF-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "quarter",
+      "matchId": "QF-3",
+      "predictedWinnerName": "Hapoel",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "quarter",
+      "matchId": "QF-4",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "semi",
+      "matchId": "SF-1",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "semi",
+      "matchId": "SF-2",
+      "predictedWinnerName": "Hapoel",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13208960",
+      "stage": "final",
+      "matchId": "F",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+
+    {
+      "userId": "13207974",
+      "stage": "play-in",
+      "matchId": "PI-1",
+      "predictedWinnerName": "Monaco",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "play-in",
+      "matchId": "PI-2",
+      "predictedWinnerName": "Barcelona",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "play-in",
+      "matchId": "PI-3",
+      "predictedWinnerName": "Panathinaikos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "quarter",
+      "matchId": "QF-1",
+      "predictedWinnerName": "Zalgiris",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "quarter",
+      "matchId": "QF-2",
+      "predictedWinnerName": "Olympiacos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "quarter",
+      "matchId": "QF-3",
+      "predictedWinnerName": "Real Madrid",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "quarter",
+      "matchId": "QF-4",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "semi",
+      "matchId": "SF-1",
+      "predictedWinnerName": "Olympiacos",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "semi",
+      "matchId": "SF-2",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    },
+    {
+      "userId": "13207974",
+      "stage": "final",
+      "matchId": "F",
+      "predictedWinnerName": "Valencia",
+      "predictionDetails": "Winner"
+    }
+  ],
+  "media": [
+    { "userId": "13207868", "predictionImageUrl": "/assets/playoffs/predictions/all-stars.png" },
+    { "userId": "13207924", "predictionImageUrl": "/assets/playoffs/predictions/ask72.png" },
+    {
+      "userId": "13208192",
+      "predictionImageUrl": "/assets/playoffs/predictions/real-madrid-basket.png"
+    },
+    { "userId": "13207910", "predictionImageUrl": "/assets/playoffs/predictions/june.png" },
+    { "userId": "13208960", "predictionImageUrl": "/assets/playoffs/predictions/cactus-team.png" },
+    { "userId": "13207974", "predictionImageUrl": "/assets/playoffs/predictions/nonameyet.png" }
+  ],
+  "results": [
+    { "matchId": "PI-1", "winnerName": "Panathinaikos", "score": "", "isCompleted": true },
+    { "matchId": "PI-2", "winnerName": "Barcelona", "score": "", "isCompleted": true },
+    { "matchId": "PI-3", "winnerName": "", "score": "", "isCompleted": false },
+    { "matchId": "QF-1", "winnerName": "", "score": "", "isCompleted": false },
+    { "matchId": "QF-2", "winnerName": "", "score": "", "isCompleted": false },
+    { "matchId": "QF-3", "winnerName": "", "score": "", "isCompleted": false },
+    { "matchId": "QF-4", "winnerName": "", "score": "", "isCompleted": false },
+    { "matchId": "SF-1", "winnerName": "", "score": "", "isCompleted": false },
+    { "matchId": "SF-2", "winnerName": "", "score": "", "isCompleted": false },
+    { "matchId": "F", "winnerName": "", "score": "", "isCompleted": false }
+  ]
+}

@@ -376,3 +376,41 @@ export const hoopgridGuesses = pgTable(
     unq_guess: unique('unique_guess').on(t.challengeId, t.userId, t.cellIndex),
   })
 );
+
+// 22. Playoff Predictions Table
+export const playoffPredictions = pgTable(
+  'playoff_predictions',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').references(() => users.id),
+    stage: text('stage'), // 'play-in', 'quarter', 'semi', 'final'
+    matchId: text('match_id'), // 'PI-1', 'QF-1', etc.
+    predictedWinnerId: integer('predicted_winner_id').references(() => teams.id),
+    predictionDetails: text('prediction_details'), // e.g. "3-1" for series
+    points: integer('points').default(0),
+    isCorrect: boolean('is_correct'),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (t) => ({
+    unq_prediction: unique('unique_playoff_prediction').on(t.userId, t.stage, t.matchId),
+  })
+);
+
+// 23. Playoff Results Table
+export const playoffResults = pgTable('playoff_results', {
+  matchId: text('match_id').primaryKey(), // 'PI-1', 'QF-1', etc.
+  stage: text('stage'),
+  winnerId: integer('winner_id').references(() => teams.id),
+  score: text('score'), // e.g. "3-1" or "88-75"
+  isCompleted: boolean('is_completed').default(false),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// 24. User Playoff Media Table
+export const userPlayoffMedia = pgTable('user_playoff_media', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => users.id),
+  predictionImageUrl: text('prediction_image_url'),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});

@@ -13,6 +13,7 @@
     "sync": "tsx -r dotenv/config src/lib/sync/index.ts",
     "sync:daily": "tsx -r dotenv/config src/lib/sync/index.ts --daily",
     "sync:live": "tsx -r dotenv/config src/lib/sync/live.ts",
+    "sync:playoffs": "tsx -r dotenv/config src/lib/sync/playoffs/sync.ts",
     "test": "vitest",
     "db:check": "tsx scripts/dev/db-check.ts",
     "db:verify": "tsx scripts/dev/verify-db-connection.ts",

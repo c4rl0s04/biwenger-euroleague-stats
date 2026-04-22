@@ -20,6 +20,9 @@ export { default as AnimatedNumber, AnimatedCounter } from './AnimatedNumber';
 
 // Cards
 export { default as Card } from './Card';
+export { default as ElegantCard } from './card-variants/ElegantCard';
+export { default as GlassCard } from './card-variants/GlassCard';
+export { default as MeshCard } from './card-variants/MeshCard';
 
 // Error Handling
 export { default as ErrorBoundary } from './ErrorBoundary';

@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 BASE_URL     = "https://www.euroleaguebasketball.net"
 LISTINGS_URL = f"{BASE_URL}/es/euroleague/players/"
-OUTPUT_FILE  = "euroleague_players.csv"
+OUTPUT_FILE  = "src/lib/data/players/euroleague_players.csv"
 DELAY_SEC    = 1.0
 
 

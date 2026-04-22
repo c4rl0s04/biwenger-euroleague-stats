@@ -25,6 +25,7 @@ const navItems = [
   { name: 'Partidos', href: '/matches', icon: Calendar },
   { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Porras', href: '/predictions', icon: Target },
+  { name: 'Playoffs', href: '/playoffs', icon: Trophy },
 ];
 
 // Navbar styles for each theme (kept for backend configuration)
