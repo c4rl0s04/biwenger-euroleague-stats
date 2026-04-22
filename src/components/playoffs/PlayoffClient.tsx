@@ -18,8 +18,21 @@ import {
   Info,
   TrendingUp,
 } from 'lucide-react';
-import { ElegantCard, FadeIn, AnimatedNumber, UserAvatar, StatsTable } from '@/components/ui';
-import { Section } from '@/components/layout';
+import {
+  ElegantCard as ElegantCardAny,
+  FadeIn as FadeInAny,
+  AnimatedNumber as AnimatedNumberAny,
+  UserAvatar as UserAvatarAny,
+  StatsTable as StatsTableAny,
+} from '@/components/ui';
+import { Section as SectionAny } from '@/components/layout';
+
+const ElegantCard = ElegantCardAny as any;
+const FadeIn = FadeInAny as any;
+const AnimatedNumber = AnimatedNumberAny as any;
+const UserAvatar = UserAvatarAny as any;
+const StatsTable = StatsTableAny as any;
+const Section = SectionAny as any;
 import { getColorForUser } from '@/lib/constants/colors';
 import { clsx } from 'clsx';
 import Link from 'next/link';
@@ -50,7 +63,7 @@ export default function PlayoffClient({
   leaderboard: LeaderboardRow[];
   teams: Team[];
 }) {
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<LeaderboardRow | null>(null);
 
   const leaderboardColumns = [
     {
@@ -335,11 +348,16 @@ export default function PlayoffClient({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedUser.predictions
-                        .sort((a, b) => {
-                          const priority = { 'play-in': 1, quarter: 2, semi: 3, final: 4 };
+                        .sort((a: any, b: any) => {
+                          const priority: Record<string, number> = {
+                            'play-in': 1,
+                            quarter: 2,
+                            semi: 3,
+                            final: 4,
+                          };
                           return (priority[a.stage] || 99) - (priority[b.stage] || 99);
                         })
-                        .map((pred, i) => (
+                        .map((pred: any, i: number) => (
                           <div
                             key={i}
                             className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50"
