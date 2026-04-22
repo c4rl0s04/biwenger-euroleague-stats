@@ -401,7 +401,7 @@ export class HoopgridService {
 
     let rarity = null;
     if (isCorrect) {
-      rarity = await this.getRarity(challengeId, cellIndex, playerId, challenge);
+      rarity = await this.getRarity(challengeId, cellIndex, playerId, userId);
     }
 
     if (dryRun) {
@@ -439,12 +439,7 @@ export class HoopgridService {
    * Calculates rarity for a specific correct guess.
    * Uses a single GROUP BY query — O(1) regardless of player count.
    */
-  static async getRarity(
-    challengeId: string,
-    cellIndex: number,
-    playerId: number,
-    _existingChallenge?: any
-  ) {
+  static async getRarity(challengeId: string, cellIndex: number, playerId: number, userId: string) {
     // Single query: count how many people picked each player for this cell today
     const results = await db
       .select({
@@ -475,7 +470,7 @@ export class HoopgridService {
         and(
           eq(hoopgridGuesses.challengeId, challengeId),
           eq(hoopgridGuesses.cellIndex, cellIndex),
-          eq(hoopgridGuesses.playerId, playerId),
+          eq(hoopgridGuesses.userId, userId),
           eq(hoopgridGuesses.isCorrect, true)
         )
       );
