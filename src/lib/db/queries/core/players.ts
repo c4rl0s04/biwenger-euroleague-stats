@@ -193,7 +193,9 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE player_id = p.id) as season_avg,
       (SELECT SUM(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as total_points,
       t.id as team_id,
-      t.name as team_name
+      t.name as team_name,
+      t.img as team_img,
+      t.code as team_code
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
     LEFT JOIN users u ON p.owner_id = u.id

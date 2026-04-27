@@ -137,7 +137,7 @@ export async function run(manager: SyncManager) {
       img: player.img ?? null,
     });
 
-    const todayInt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const todayInt = new Date().toISOString().slice(2, 10).replace(/-/g, '');
     const priceDate = parsePriceDate(todayInt);
 
     await mutations.insertMarketValue({

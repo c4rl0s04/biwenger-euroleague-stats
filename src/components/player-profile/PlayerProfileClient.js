@@ -38,7 +38,7 @@ export default function PlayerProfileClient({ player }) {
       {/* Row 2: Next Match, Market, Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <FadeIn delay={150} className="h-full">
-          <PlayerNextMatchCard nextMatch={player.nextMatch} playerTeam={player.team} />
+          <PlayerNextMatchCard nextMatch={player.nextMatch} playerTeam={player.team_name} />
         </FadeIn>
 
         <FadeIn delay={200} className="h-full">
@@ -54,7 +54,7 @@ export default function PlayerProfileClient({ player }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-3">
           <FadeIn delay={300} className="h-full">
-            <PlayerPriceHistoryCard priceHistory={player.priceHistory} />
+            <PlayerPriceHistoryCard priceHistory={player.priceHistory} playerPrice={player.price} />
           </FadeIn>
         </div>
       </div>
@@ -72,12 +72,12 @@ export default function PlayerProfileClient({ player }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <FadeIn delay={450} className="h-full">
-            <PlayerPointsGraph matches={player.recentMatches} playerTeam={player.team} />
+            <PlayerPointsGraph matches={player.recentMatches} playerTeam={player.team_name} />
           </FadeIn>
         </div>
         <div className="lg:col-span-1">
           <FadeIn delay={500} className="h-full">
-            <PlayerSplitsCard matches={player.recentMatches} playerTeam={player.team} />
+            <PlayerSplitsCard matches={player.recentMatches} playerTeam={player.team_name} />
           </FadeIn>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function PlayerProfileClient({ player }) {
       {/* Row 5: Match History Table */}
       <div className="grid grid-cols-1">
         <FadeIn delay={500}>
-          <PlayerHistoryCard recentMatches={player.recentMatches} playerTeam={player.team} />
+          <PlayerHistoryCard recentMatches={player.recentMatches} playerTeam={player.team_name} />
         </FadeIn>
       </div>
     </div>

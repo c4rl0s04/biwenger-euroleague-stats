@@ -11,7 +11,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { ElegantCard } from '@/components/ui';
 
 // Custom Tooltip moved outside render
 function CustomTooltip({ active, payload, label }) {
@@ -30,21 +30,36 @@ function CustomTooltip({ active, payload, label }) {
   return null;
 }
 
-export default function PlayerPriceHistoryCard({ priceHistory, className = '' }) {
+export default function PlayerPriceHistoryCard({ priceHistory, playerPrice, className = '' }) {
   const [range, setRange] = useState('3M');
 
   if (!priceHistory || priceHistory.length === 0) return null;
 
   const getFilteredData = () => {
-    const end = new Date();
-    let start = new Date();
+    // Clone history and append current price to bridge the gap to today
+    const historyWithCurrent = [...priceHistory];
+
+    // Add today's actual price if the last data point is older than yesterday
+    const lastPoint = new Date(historyWithCurrent[historyWithCurrent.length - 1].date);
+    const today = new Date();
+    if (today.getTime() - lastPoint.getTime() > 86400000) {
+      historyWithCurrent.push({
+        date: today.toISOString(),
+        price: playerPrice,
+      });
+    }
+
+    // Find the latest date in the dataset (now likely today)
+    const latestDateMs = Math.max(...historyWithCurrent.map((d) => new Date(d.date).getTime()));
+    const end = new Date(latestDateMs);
+    let start = new Date(end);
 
     if (range === '1M') start.setMonth(end.getMonth() - 1);
     else if (range === '3M') start.setMonth(end.getMonth() - 3);
     else if (range === '1Y') start.setFullYear(end.getFullYear() - 1);
-    else return priceHistory;
+    else return historyWithCurrent;
 
-    return priceHistory.filter((d) => new Date(d.date) >= start);
+    return historyWithCurrent.filter((d) => new Date(d.date) >= start);
   };
 
   const data = getFilteredData().map((d) => ({
@@ -54,7 +69,7 @@ export default function PlayerPriceHistoryCard({ priceHistory, className = '' })
   }));
 
   return (
-    <Card
+    <ElegantCard
       title="Evolución de Mercado"
       icon={TrendingUp}
       color="cyan"
@@ -118,6 +133,6 @@ export default function PlayerPriceHistoryCard({ priceHistory, className = '' })
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </Card>
+    </ElegantCard>
   );
 }
