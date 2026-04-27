@@ -26,7 +26,9 @@ export async function run(manager: SyncManager) {
     if (
       baseName.includes('Jornada') ||
       baseName.includes('Playoff') ||
-      baseName.includes('Final Four')
+      baseName.includes('Final Four') ||
+      baseName.includes('Eliminatoria') ||
+      baseName.includes('Play-In')
     ) {
       // Valid Round
     } else {

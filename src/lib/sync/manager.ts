@@ -60,11 +60,13 @@ export class SyncManager {
 
     // If we have a canonical ID for this name, use it.
     // Logic: In Step 1 we will populate this map with the LOWEST ID for each name.
-    if (this.roundNameMap.has(baseName)) {
+    // We only want to canonicalize 'Jornada' rounds (to group postponed matches).
+    // Playoff rounds ('Eliminatoria', 'Final Four') have the exact same name but are distinct rounds (e.g., Game 1, Game 2).
+    if (baseName.includes('Jornada') && this.roundNameMap.has(baseName)) {
       return this.roundNameMap.get(baseName)!;
     }
 
-    // Fallback if map not populated (shouldn't happen if Step 1 runs)
+    // Fallback if map not populated (shouldn't happen if Step 1 runs) or if it's a playoff round
     return round.id;
   }
 
