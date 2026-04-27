@@ -31,14 +31,14 @@ The sync is an idempotent pipeline orchestrated by `src/lib/sync/index.js`. It r
 4.  **`04-standings.js`**: Calculates league tables, efficiency, and advanced metrics.
 5.  **`05-stats.js`**: Downloads official boxscores (Points, Rebounds, etc.) for finished games and processes fantasy points.
 6.  **`06-lineups.js`**: Records the actual lineups used by managers in past rounds.
-7.  **`07-market.js`**: Processes the "Board" (news feed) to track transfers and bids.
+7.  **`07-market.js`**: Processes the "Board" (news feed) to track transfers and bids. **Includes Event-Driven Ownership Tracking** to ensure eliminated players are correctly set to unowned when sold.
 8.  **`08-squads.js`**: Updates current user rosters (ownership).
 9.  **`09-initial-squads.js`**: Captures initial team assignments for tracking original drafts.
 10. **`10-team-logos.js`**: Utility to ensure all Euroleague team assets are up to date.
-11. **`11-official-images.js`**: Fetches high-res player portraits from official sources.
+11. **`11-official-images.js`**: Fetches high-res player portraits from official sources using a **parallelized scraping pipeline** to prevent Biwenger data loss.
 12. **`12-user-colors.js`**: Assigns UI themes based on user preferences.
 13. **`13-porras.js`**: Syncs user predictions from the league minigame.
-14. **`14-tournaments.js`**: Syncs Cup/Playoff brackets, fixtures, and standings.
+14. **`14-tournaments.js`**: Syncs Cup/Playoff brackets, fixtures, match filtering, and standings.
 15. **`15-market-listings.ts`**: Captures a snapshot of players currently for sale on the market, including seller and price. Handles the 5:00 AM market rollover logic.
 
 ### "Live" Mode
@@ -48,6 +48,26 @@ A lighter version (`npm run sync:live`) skips heavy biographical data fetching a
 - Live match scores
 - Current round fantasy points
 - Lineup updates
+
+## 🎮 Minigames & Special Events Sync
+
+While the main pipeline handles league data, some features use alternative synchronization strategies:
+
+### Hoopgrid Data Architecture
+
+Unlike standard stats, **Hoopgrid** challenges are not pre-synced via the CLI. They use an **On-Demand (Lazy) Generation** approach:
+
+- When a user visits `/hoopgrid`, the system checks for an active challenge for `targetDate`.
+- If none exists, the API generates one in real-time, matching player criteria from the database.
+- Guesses are recorded individually, and **Rarity Scores** are computed dynamically based on the frequency of a specific player being guessed correctly by other users.
+
+### Playoff Standings & Predictions
+
+The standard tournament tree is fetched via `14-tournaments.js`, but specific custom Playoff Data (like predictions, embedded media, and overrides) uses a dedicated local sync script:
+
+- **File**: `src/lib/sync/playoffs/playoff-data.json` acts as the source of truth for custom playoff metadata.
+- **Script**: `src/lib/sync/playoffs/sync.ts` parses the JSON, dynamically resolves Biwenger Team IDs based on string matching, and safely upserts `playoffPredictions` and `playoffResults` using idempotent `ON CONFLICT DO UPDATE` queries.
+- **Debugging**: An auxiliary `scripts/dev/debug-playoffs.ts` script allows manual inspection of the Biwenger API to extract hidden playoff round IDs when the default pipeline fails to map them correctly.
 
 ---
 

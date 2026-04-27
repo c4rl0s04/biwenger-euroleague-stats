@@ -59,6 +59,8 @@ Comprehensive league analysis divided into categories.
   - _Logic_: Your rank in the standings after every single round.
 - **Efficiency**: ROI.
   - _Formula_: `Total_Points / Current_Squad_Value`. Measures points per million Euro spent.
+- **Theoretical Efficiency Standings**: Ideal lineup optimization.
+  - _Logic_: Visualizes the potential points each manager would have achieved with 100% lineup optimization (including perfect captain stats).
 
 ## 💰 Money & Market (`/market`)
 
@@ -103,8 +105,14 @@ Advanced financial analytics to help you win the transfer market.
 - **Round Selector**: Navigate through past and future rounds.
 - **Daily Grouping**: Matches organized by date for easy planning.
 
-## 📊 Predictions (`/predictions`)
+## 📊 Predictions (`/predictions` & `/playoffs`)
 
 - **Porras**: Track user predictions for match results.
+- **Playoff Predictions Tracker**: A fully responsive mobile-friendly dashboard to track prediction accuracy specifically during the Playoffs.
 - **Accuracy**: Who is the best at predicting Euroleague games?
 - **Predictable Teams**: Which real teams are easiest/hardest to predict.
+
+## 🎮 Minigames (`/hoopgrid`)
+
+- **Hoopgrid**: A premium visual interface for daily Euroleague trivia.
+- **Rarity Analytics**: Real-time popularity percentages to see how common or obscure your correct guesses are, calculating scores across all active users.

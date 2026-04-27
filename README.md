@@ -41,12 +41,19 @@ The platform exposes insights unavailable elsewhere — from "La Enfermería" (d
 
 - **All-Play-All Standings** — What if every manager played every other every week? Find the "unluckiest" manager.
 - **Volatility & Heat Check** — Consistency analysis vs. scoring peaks to identify "hot" managers.
-- **Theoretical Gap** — Measure the distance between active scores and "Ideal Lineup" possibilities.
+- **Theoretical Gap & Efficiency** — Measure the distance between active scores and "Ideal Lineup" possibilities, including 100% captain optimization.
 - **Rivalry Matrix** — Detailed H2H breakdown across the entire season.
+
+### 🎮 Minigames & Extensions
+
+- **Hoopgrid** — Interactive Euroleague player grid trivia featuring a dynamic visual identity and real-time rarity analytics to track how popular your guesses are.
+- **Playoff Predictions** — Responsive dashboard to track "Porras" (predictions) accuracy throughout the Euroleague playoffs.
 
 ### 🛠️ Infrastructure & Data
 
 - **Idempotent ETL** — 15 sequential sync steps ensure data integrity even after failure.
+- **Parallelized Data Harvester** — High-performance scraping pipeline that prevents Biwenger data loss and safely synchronizes all 364 players.
+- **Event-Driven Market Sync** — Robust ownership tracking that updates in real-time, correctly handling player eliminations and sales.
 - **Live Scoring Pipeline** — High-frequency polling service for real-time fantasy points.
 - **Interactive Setup Wizard** — Zero-config initialization via `npm run setup`.
 
