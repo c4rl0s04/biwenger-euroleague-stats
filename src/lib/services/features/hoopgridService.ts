@@ -482,6 +482,38 @@ export class HoopgridService {
   }
 
   /**
+   * Checks if there exists a set of 9 distinct players that can fill the 3x3 grid.
+   * Uses a backtracking approach with Minimum Remaining Values (MRV) heuristic.
+   */
+  private static hasValidMatching(cellPlayerIds: number[][]): boolean {
+    // 1. Sort cells by number of options (MRV) to prune the search space early
+    const indexedCells = cellPlayerIds
+      .map((ids, idx) => ({ ids, idx }))
+      .sort((a, b) => a.ids.length - b.ids.length);
+
+    const chosen = new Set<number>();
+
+    function solve(i: number): boolean {
+      if (i === 9) return true; // All cells filled with distinct players
+
+      const { ids } = indexedCells[i];
+
+      // Standard backtracking
+      for (const playerId of ids) {
+        if (!chosen.has(playerId)) {
+          chosen.add(playerId);
+          if (solve(i + 1)) return true;
+          chosen.delete(playerId);
+        }
+      }
+
+      return false;
+    }
+
+    return solve(0);
+  }
+
+  /**
    * Generates a random daily challenge
    */
   static async generateDailyChallenge(
@@ -651,27 +683,30 @@ export class HoopgridService {
         label: item.label,
       }));
 
-      possibleCounts = [];
-      let isCompletable = true;
+      const cellPossiblePlayers: number[][] = Array.from({ length: 9 }, () => []);
 
-      for (let r = 0; r < 3; r++) {
-        for (let c = 0; c < 3; c++) {
-          let count = 0;
-          for (const player of allPlayers) {
-            if (checkCriteriaInMemory(player, rows[r]) && checkCriteriaInMemory(player, cols[c])) {
-              count++;
+      // Optimization: Iterate players once and check which cells they fit
+      for (const player of allPlayers) {
+        for (let r = 0; r < 3; r++) {
+          if (!checkCriteriaInMemory(player, rows[r])) continue;
+          for (let c = 0; c < 3; c++) {
+            if (checkCriteriaInMemory(player, cols[c])) {
+              cellPossiblePlayers[r * 3 + c].push(player.id);
             }
           }
-          if (count < 1) {
-            isCompletable = false;
-            break;
-          }
-          possibleCounts.push(count);
         }
-        if (!isCompletable) break;
       }
 
-      if (isCompletable) {
+      possibleCounts = cellPossiblePlayers.map((p) => p.length);
+
+      // Robust check: Each cell must have >=1 player AND there must be a valid matching of 9 distinct players
+      if (possibleCounts.every((count) => count > 0)) {
+        if (this.hasValidMatching(cellPossiblePlayers)) {
+          found = true;
+        }
+      }
+
+      if (found) {
         finalComplexity = this.calculateComplexity(possibleCounts);
         if (finalComplexity < minComplexity || finalComplexity > maxComplexity) {
           continue;
