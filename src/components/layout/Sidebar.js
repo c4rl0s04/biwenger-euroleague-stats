@@ -114,7 +114,11 @@ export default function Sidebar({ isOpen, onClose }) {
         <nav className="flex-1 py-6 overflow-y-auto overflow-x-hidden sidebar-scroll">
           <ul className="space-y-1 px-3">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+              const isPlayersList = item.href === '/players';
+              const isActive =
+                pathname === item.href ||
+                pathname.startsWith(item.href + '/') ||
+                (isPlayersList && pathname.startsWith('/player/'));
               const hasSections = isActive && sections.length > 0;
 
               return (
@@ -175,7 +179,7 @@ export default function Sidebar({ isOpen, onClose }) {
                       {sections.map((section) => (
                         <li key={section.id}>
                           <Link
-                            href={`${item.href}#${section.id}`}
+                            href={`${pathname}#${section.id}`}
                             className="block px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-md transition-colors"
                           >
                             {section.title}
