@@ -90,7 +90,7 @@ export async function run(manager: SyncManager) {
   }
 
   let eliminatoriaCount = 1;
-  for (const round of rounds) {
+  for (const round of sortedRounds) {
     const baseName = round.name;
 
     // Filter Rounds (Same logic as matches)

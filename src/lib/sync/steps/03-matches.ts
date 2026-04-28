@@ -19,8 +19,9 @@ export async function run(manager: SyncManager) {
     throw new Error('Competition rounds data missing from Step 1');
   }
 
+  const sortedRounds = [...rounds].sort((a, b) => a.id - b.id);
   let eliminatoriaCount = 1;
-  for (const round of rounds) {
+  for (const round of sortedRounds) {
     const baseName = round.name;
 
     // Match Biwenger Round Names

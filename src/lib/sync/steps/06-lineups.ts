@@ -47,8 +47,9 @@ export async function run(manager: SyncManager) {
 
   let totalLineups = 0;
 
+  const sortedRounds = [...rounds].sort((a, b) => a.id - b.id);
   let eliminatoriaCount = 1;
-  for (const round of rounds) {
+  for (const round of sortedRounds) {
     const baseName = round.name;
 
     // Filter Rounds
