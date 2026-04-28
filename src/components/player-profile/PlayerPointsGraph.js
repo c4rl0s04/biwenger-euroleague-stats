@@ -20,8 +20,8 @@ import { getShortRoundName } from '@/lib/utils/format';
 // Recharts colors - using consistent premium palette
 const HOME_COLOR = '#60a5fa'; // blue-400
 const AWAY_COLOR = '#a78bfa'; // violet-400
-const WIN_COLOR = '#34d399'; // emerald-400
-const LOSS_COLOR = '#fda4af'; // rose-300 (lighter)
+const WIN_COLOR = '#0aab4a71'; // emerald-400
+const LOSS_COLOR = '#b4081cff'; // rose-300 (lighter)
 
 // Custom Tooltip Component
 const CustomTooltip = ({ active, payload, mode }) => {

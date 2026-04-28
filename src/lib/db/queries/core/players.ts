@@ -192,6 +192,8 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       (SELECT COUNT(*) FROM player_round_stats WHERE player_id = p.id) as games_played,
       (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE player_id = p.id) as season_avg,
       (SELECT SUM(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as total_points,
+      (SELECT MAX(points) FROM player_round_stats WHERE player_id = p.id) as best_real_points,
+      (SELECT MIN(points) FROM player_round_stats WHERE player_id = p.id) as worst_real_points,
       t.id as team_id,
       t.name as team_name,
       t.img as team_img,
@@ -233,7 +235,8 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       prs.three_points_attempted,
       prs.free_throws_made,
       prs.free_throws_attempted,
-      prs.fouls_committed
+      prs.fouls_committed,
+      prs.valuation
     FROM matches m
     JOIN players p ON p.id = $1
     LEFT JOIN teams th ON m.home_id = th.id
@@ -282,7 +285,9 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       acc.assists += m.assists || 0;
       acc.steals += m.steals || 0;
       acc.minutes_played += m.minutes_played || 0;
-      acc.games_played += m.minutes_played ? 1 : 0; // count games where they actually played
+      acc.points_scored += m.points_scored || 0;
+      acc.valuation += m.valuation || 0;
+      acc.games_played += m.minutes_played ? 1 : 0;
       return acc;
     },
     {
@@ -299,9 +304,31 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       assists: 0,
       steals: 0,
       minutes_played: 0,
+      points_scored: 0,
+      valuation: 0,
       games_played: 0,
     }
   );
+
+  // Add the records to advancedStats
+  advancedStats.season_avg = player.season_avg; // Still keeping BW avg just in case
+  advancedStats.best_real_points = player.best_real_points;
+  advancedStats.worst_real_points = player.worst_real_points;
+
+  const gp_stat = Math.max(advancedStats.games_played, 1);
+  advancedStats.avg_real_points = parseFloat((advancedStats.points_scored / gp_stat).toFixed(1));
+  advancedStats.avg_pir = parseFloat((advancedStats.valuation / gp_stat).toFixed(1));
+
+  // Advanced Ratios
+  advancedStats.ast_to_ratio =
+    advancedStats.turnovers > 0
+      ? parseFloat((advancedStats.assists / advancedStats.turnovers).toFixed(2))
+      : advancedStats.assists;
+
+  advancedStats.pts_per_40 =
+    advancedStats.minutes_played > 0
+      ? parseFloat(((advancedStats.points_scored / advancedStats.minutes_played) * 40).toFixed(1))
+      : 0;
 
   return {
     ...player,

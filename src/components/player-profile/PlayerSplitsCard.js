@@ -1,8 +1,97 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Card } from '@/components/ui';
-import { Split, MapPin, Trophy, XCircle, Home, Plane } from 'lucide-react';
+import { ElegantCard } from '@/components/ui';
+import { Split, Trophy, Home, Plane, Swords } from 'lucide-react';
+
+// Consistent colors with PlayerPointsGraph
+const HOME_COLOR = '#60a5fa'; // blue-400
+const AWAY_COLOR = '#a78bfa'; // violet-400
+const WIN_COLOR = '#0aab4a'; // emerald-500 base
+const LOSS_COLOR = '#b4081c'; // dark rose/red base
+
+const SplitSection = ({
+  title,
+  icon: Icon,
+  leftLabel,
+  rightLabel,
+  leftVal,
+  rightVal,
+  leftColor,
+  rightColor,
+  leftIcon: LeftIcon,
+  rightIcon: RightIcon,
+  titleColor,
+}) => {
+  const total = leftVal + rightVal;
+  const leftWidth = total > 0 ? (leftVal / total) * 100 : 50;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-2 mb-1">
+        <Icon className="w-4 h-4" style={{ color: titleColor }} />
+        <h4
+          className="text-[12px] font-black uppercase tracking-[0.2em]"
+          style={{ color: titleColor }}
+        >
+          {title}
+        </h4>
+      </div>
+
+      {/* Visual Bar */}
+      <div className="relative h-2 bg-white/5 rounded-full overflow-hidden flex shadow-inner">
+        <div
+          className="h-full transition-all duration-1000 ease-out"
+          style={{ width: `${leftWidth}%`, backgroundColor: leftColor }}
+        />
+        <div
+          className="h-full transition-all duration-1000 ease-out flex-1"
+          style={{ backgroundColor: rightColor }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        {/* Left Stat */}
+        <div className="group relative overflow-hidden bg-white/[0.03] border border-white/5 p-4 rounded-xl hover:bg-white/[0.06] transition-all duration-300">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">
+              {leftLabel}
+            </span>
+            <LeftIcon
+              className="w-4 h-4 transition-transform group-hover:scale-110"
+              style={{ color: leftColor }}
+            />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-white tabular-nums">{leftVal}</span>
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-tighter">
+              PTS/P
+            </span>
+          </div>
+        </div>
+
+        {/* Right Stat */}
+        <div className="group relative overflow-hidden bg-white/[0.03] border border-white/5 p-4 rounded-xl hover:bg-white/[0.06] transition-all duration-300">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">
+              {rightLabel}
+            </span>
+            <RightIcon
+              className="w-4 h-4 transition-transform group-hover:scale-110"
+              style={{ color: rightColor }}
+            />
+          </div>
+          <div className="flex items-baseline gap-1.5 justify-end">
+            <span className="text-2xl font-black text-white tabular-nums">{rightVal}</span>
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-tighter">
+              PTS/P
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function PlayerSplitsCard({ matches, playerTeam }) {
   const splits = useMemo(() => {
@@ -16,23 +105,20 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
     };
 
     matches.forEach((m) => {
-      // Aggressively normalize: remove all non-alphanumeric chars and lowercase
       const normalize = (str) => str?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
       const homeNorm = normalize(m.home_team);
       const playerNorm = normalize(playerTeam);
 
-      // Check exact match OR inclusion (e.g. "Bayern" in "FC Bayern Munich")
       const isHome =
         homeNorm &&
         playerNorm &&
         (homeNorm === playerNorm || homeNorm.includes(playerNorm) || playerNorm.includes(homeNorm));
 
-      // SKIP DNP (Did Not Play) - Don't count toward stats
+      // SKIP DNP (Did Not Play)
       if (m.fantasy_points === null) return;
 
       const points = m.fantasy_points || 0;
 
-      // Home/Away
       if (isHome) {
         stats.home.points += points;
         stats.home.games++;
@@ -41,9 +127,7 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
         stats.away.games++;
       }
 
-      // Win/Loss
-      // Ensure scores exist before calculating
-      if (m.home_score !== undefined && m.away_score !== undefined) {
+      if (m.home_score !== null && m.away_score !== null) {
         const homeScore = parseInt(m.home_score);
         const awayScore = parseInt(m.away_score);
 
@@ -61,7 +145,7 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
       }
     });
 
-    const calcAvg = (set) => (set.games > 0 ? (set.points / set.games).toFixed(1) : '-');
+    const calcAvg = (set) => (set.games > 0 ? parseFloat((set.points / set.games).toFixed(1)) : 0);
 
     return {
       home: calcAvg(stats.home),
@@ -74,102 +158,37 @@ export default function PlayerSplitsCard({ matches, playerTeam }) {
 
   if (!splits) return null;
 
-  const StatRow = ({ label, val1, val2, label1, label2, icon: Icon, color }) => (
-    <div className="flex items-center justify-between py-3 border-b border-slate-700/30 last:border-0">
-      <div className="flex items-center gap-2">
-        <div className={`p-1.5 rounded-lg bg-${color}-500/10`}>
-          <Icon className={`w-4 h-4 text-${color}-400`} />
-        </div>
-        <span className="text-sm text-slate-300 font-medium">{label}</span>
-      </div>
-      <div className="flex gap-6 text-sm">
-        <div className="text-right">
-          <div className="text-xs text-slate-500 uppercase tracking-wide">{label1}</div>
-          <div className="font-bold text-white">
-            {val1} <span className="text-[10px] text-slate-500 font-normal">pts</span>
-          </div>
-        </div>
-        <div className="text-right min-w-[3rem]">
-          <div className="text-xs text-slate-500 uppercase tracking-wide">{label2}</div>
-          <div className="font-bold text-white">
-            {val2} <span className="text-[10px] text-slate-500 font-normal">pts</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <Card title="Rendimiento por Contexto" icon={Split} color="yellow" className="h-full">
-      <div className="space-y-6 pt-2">
-        {/* Home vs Away */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs uppercase tracking-wider font-semibold text-slate-400">
-            <div className="flex items-center gap-2">
-              <Home className="w-3 h-3 text-blue-400" /> Local
-            </div>
-            <div className="flex items-center gap-2">
-              Visitante <Plane className="w-3 h-3 text-purple-400" />
-            </div>
-          </div>
+    <ElegantCard title="RENDIMIENTO POR CONTEXTO" icon={Split}>
+      <div className="space-y-10 pt-2">
+        <SplitSection
+          title="LOCALIZACIÓN"
+          icon={Swords}
+          leftLabel="CASA"
+          rightLabel="FUERA"
+          leftVal={splits.home}
+          rightVal={splits.away}
+          leftColor={HOME_COLOR}
+          rightColor={AWAY_COLOR}
+          leftIcon={Home}
+          rightIcon={Plane}
+          titleColor={HOME_COLOR}
+        />
 
-          {/* Visual Bar */}
-          <div className="relative h-2 bg-slate-800 rounded-full overflow-hidden flex">
-            <div
-              className="bg-blue-500 h-full transition-all duration-500"
-              style={{
-                width: `${(parseFloat(splits.home) / (parseFloat(splits.home) + parseFloat(splits.away))) * 100 || 50}%`,
-              }}
-            />
-            <div className="bg-purple-500 h-full transition-all duration-500 flex-1" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-500/10 rounded-lg p-2 border border-blue-500/10 transition-colors hover:bg-blue-500/20">
-              <div className="text-[10px] text-blue-400 uppercase mb-0.5">Casa (Local)</div>
-              <div className="text-xl font-bold text-blue-100">{splits.home}</div>
-            </div>
-            <div className="text-right bg-purple-500/10 rounded-lg p-2 border border-purple-500/10 transition-colors hover:bg-purple-500/20">
-              <div className="text-[10px] text-purple-400 uppercase mb-0.5">Fuera (Visitante)</div>
-              <div className="text-xl font-bold text-purple-100">{splits.away}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Win vs Loss */}
-        <div className="space-y-3 pt-4 border-t border-slate-700/30">
-          <div className="flex items-center justify-between text-xs uppercase tracking-wider font-semibold text-slate-400">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-3 h-3 text-emerald-400" /> Victoria
-            </div>
-            <div className="flex items-center gap-2">
-              Derrota <XCircle className="w-3 h-3 text-rose-400" />
-            </div>
-          </div>
-
-          {/* Visual Bar */}
-          <div className="relative h-2 bg-slate-800 rounded-full overflow-hidden flex">
-            <div
-              className="bg-emerald-500 h-full transition-all duration-500"
-              style={{
-                width: `${(parseFloat(splits.win) / (parseFloat(splits.win) + parseFloat(splits.loss))) * 100 || 50}%`,
-              }}
-            />
-            <div className="bg-rose-500 h-full transition-all duration-500 flex-1" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-emerald-900/10 rounded-lg p-2 border border-emerald-500/10 transition-colors hover:bg-emerald-900/20">
-              <div className="text-[10px] text-emerald-400 uppercase mb-0.5">En Victoria</div>
-              <div className="text-xl font-bold text-emerald-100">{splits.win}</div>
-            </div>
-            <div className="text-right bg-rose-900/10 rounded-lg p-2 border border-rose-500/10 transition-colors hover:bg-rose-900/20">
-              <div className="text-[10px] text-rose-400 uppercase mb-0.5">En Derrota</div>
-              <div className="text-xl font-bold text-rose-100">{splits.loss}</div>
-            </div>
-          </div>
-        </div>
+        <SplitSection
+          title="RESULTADO EQUIPO"
+          icon={Trophy}
+          leftLabel="VICTORIA"
+          rightLabel="DERROTA"
+          leftVal={splits.win}
+          rightVal={splits.loss}
+          leftColor={WIN_COLOR}
+          rightColor={LOSS_COLOR}
+          leftIcon={Trophy}
+          rightIcon={Swords}
+          titleColor="#34d399"
+        />
       </div>
-    </Card>
+    </ElegantCard>
   );
 }
