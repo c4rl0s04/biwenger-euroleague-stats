@@ -278,6 +278,11 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       acc.blocks += m.blocks || 0;
       acc.turnovers += m.turnovers || 0;
       acc.fouls += m.fouls_committed || 0;
+      acc.rebounds += m.rebounds || 0;
+      acc.assists += m.assists || 0;
+      acc.steals += m.steals || 0;
+      acc.minutes_played += m.minutes_played || 0;
+      acc.games_played += m.minutes_played ? 1 : 0; // count games where they actually played
       return acc;
     },
     {
@@ -290,6 +295,11 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       blocks: 0,
       turnovers: 0,
       fouls: 0,
+      rebounds: 0,
+      assists: 0,
+      steals: 0,
+      minutes_played: 0,
+      games_played: 0,
     }
   );
 
