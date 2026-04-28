@@ -56,7 +56,7 @@ const CustomTooltip = ({ active, payload, mode }) => {
     }
 
     return (
-      <div className="glass-panel border-white/10 rounded-xl p-4 shadow-2xl min-w-[160px] animate-in fade-in zoom-in duration-200">
+      <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-xl p-4 shadow-2xl min-w-[160px] animate-in fade-in zoom-in duration-200">
         <div className="text-[10px] text-white/40 font-black tracking-widest uppercase mb-2 border-b border-white/5 pb-2">
           {d.fullRound}
         </div>
@@ -96,8 +96,8 @@ const CustomPointLabel = (props) => {
 
   const isNegative = value < 0;
   // For negative bars, y is the 0-line and height is the distance down.
-  // We want it below the bottom edge of the bar.
-  const labelY = isNegative ? y + height + 14 : y - 10;
+  // We want it significantly below the bottom edge of the bar.
+  const labelY = isNegative ? y + height + 20 : y - 10;
 
   return (
     <text
@@ -167,8 +167,9 @@ export default function PlayerPointsGraph({ matches, playerTeam, className = '' 
     const maxVal = Math.max(...points, 0);
     const minVal = Math.min(...points, 0);
 
-    const maxWithPadding = Math.ceil(maxVal * 1.25);
-    const minWithPadding = Math.floor(minVal * 1.25);
+    // Add more padding at the bottom for labels
+    const maxWithPadding = Math.ceil(maxVal * 1.2) + 2;
+    const minWithPadding = Math.floor(minVal * 1.4) - 8;
 
     const roundedMax = Math.ceil(maxWithPadding / 5) * 5;
     const roundedMin = Math.floor(minWithPadding / 5) * 5;
