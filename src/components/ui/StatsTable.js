@@ -33,10 +33,12 @@ const COLUMN_COLOR_MAP = {
 /**
  * Table - A primitive table component with project-standard styling.
  */
-export function Table({ children, className }) {
+export function Table({ children, className, tableClassName }) {
   return (
     <div className={cn('overflow-x-auto rounded-xl overflow-hidden', className)}>
-      <table className="w-full text-sm text-left border-collapse">{children}</table>
+      <table className={cn('w-full text-sm text-left border-collapse', tableClassName)}>
+        {children}
+      </table>
     </div>
   );
 }
