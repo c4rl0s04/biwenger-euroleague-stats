@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import Image from 'next/image';
 import { User, Globe, Activity, Ruler, Weight } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
@@ -38,11 +39,12 @@ export default function PlayerIdentityCard({ player }) {
       <div className="relative flex flex-col md:flex-row h-full min-h-[300px] z-10">
         {/* --- OWNER BADGE (Top Right) --- */}
         {player.owner_id && (
-          <div
-            className={`absolute top-4 right-4 z-30 flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-full border shadow-lg backdrop-blur-xl transition-all duration-300 hover:scale-105 ${ownerColors.bg.replace('/10', '/80')} ${ownerColors.border} ${ownerColors.text}`}
+          <Link
+            href={`/managers/${player.owner_id}`}
+            className={`absolute top-6 right-6 z-30 flex items-center gap-3 pl-2 pr-5 py-2 rounded-2xl border shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:scale-105 hover:ring-4 hover:ring-white/10 active:scale-95 group/owner ${ownerColors.bg.replace('/10', '/90')} ${ownerColors.border} ${ownerColors.text}`}
           >
             {player.owner_icon && player.owner_icon !== '' ? (
-              <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/30 shadow-inner">
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden border-2 border-white/30 shadow-inner transition-transform duration-500 group-hover/owner:rotate-3 group-hover/owner:scale-110">
                 <Image
                   src={player.owner_icon}
                   alt={player.owner_name}
@@ -52,14 +54,19 @@ export default function PlayerIdentityCard({ player }) {
                 />
               </div>
             ) : (
-              <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center border border-white/20 shadow-inner">
-                <User size={14} className="text-current" />
+              <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center border-2 border-white/20 shadow-inner">
+                <User size={20} className="text-current" />
               </div>
             )}
-            <span className="text-xs font-black drop-shadow-md tracking-wider uppercase">
-              {player.owner_name}
-            </span>
-          </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 leading-none mb-1">
+                Propietario
+              </span>
+              <span className="text-sm md:text-base font-black drop-shadow-md tracking-tight uppercase leading-none">
+                {player.owner_name}
+              </span>
+            </div>
+          </Link>
         )}
 
         {/* --- LEFT: PLAYER IMAGE --- */}

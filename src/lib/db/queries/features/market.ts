@@ -399,6 +399,10 @@ export interface PlayerTransferEvent {
   amount: number;
   from_img: string | null;
   to_img: string | null;
+  from_color: number | null;
+  to_color: number | null;
+  from_id: number | string | null;
+  to_id: number | string | null;
 }
 
 /**
@@ -426,7 +430,11 @@ export async function getPlayerTransfers(playerId: number): Promise<PlayerTransf
       f.comprador as to_name, 
       f.precio as amount,
       u1.icon as from_img,
-      u2.icon as to_img
+      u2.icon as to_img,
+      u1.color_index as from_color,
+      u2.color_index as to_color,
+      u1.id as from_id,
+      u2.id as to_id
     FROM fichajes f
     LEFT JOIN users u1 ON f.vendedor = u1.name
     LEFT JOIN users u2 ON f.comprador = u2.name
@@ -438,7 +446,7 @@ export async function getPlayerTransfers(playerId: number): Promise<PlayerTransf
   // Check for Initial Squad Assignment to complete the full transfer timeline
   const initialSquadQuery = `
     SELECT 
-      u.name as owner_name, u.color_index as owner_color_index, 
+      u.id as user_id, u.name as owner_name, u.color_index as owner_color_index, 
       u.icon as owner_img 
     FROM initial_squads s
     JOIN users u ON s.user_id = u.id
@@ -479,6 +487,10 @@ export async function getPlayerTransfers(playerId: number): Promise<PlayerTransf
       amount: 0,
       from_img: null,
       to_img: initialOwner.owner_img,
+      from_color: null,
+      to_color: initialOwner.owner_color_index,
+      from_id: null,
+      to_id: initialOwner.user_id,
     });
   }
 
