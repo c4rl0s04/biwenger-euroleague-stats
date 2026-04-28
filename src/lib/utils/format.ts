@@ -48,13 +48,15 @@ export function getShortTeamName(teamName: string | null | undefined): string {
   return SHORT_TEAM_NAME_MAP[teamName] ?? teamName;
 }
 
-/**
- * Get shortened round name (e.g. "Jornada 31 (aplazada)" -> "J31")
- */
 export function getShortRoundName(name: string | null | undefined): string {
   if (!name) return '';
   // Support "Jornada X", "Round X", or already shortened "JX" formats
-  // and strip any suffixes like "(aplazada)"
-  const match = name.match(/(?:Jornada|J|Round)\s*(\d+)/i);
-  return match ? `J${match[1]}` : name;
+  const matchJ = name.match(/(?:Jornada|J|Round)\s*(\d+)/i);
+  if (matchJ) return `J${matchJ[1]}`;
+
+  // Support "Eliminatoria X" formats
+  const matchE = name.match(/Eliminatoria\s*(\d+)/i);
+  if (matchE) return `PO${matchE[1]}`;
+
+  return name;
 }

@@ -4,8 +4,10 @@ import { eq, desc, asc, min, max, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 // 1. Get List of Rounds (with deduplication logic handled in JS for now or refined SQL)
+/**
+ * Get all unique rounds with matches for the schedule selector
+ */
 export async function getScheduleRounds() {
-  // Select distinct roundId, roundName, and min(date) for ordering
   const rows = await db
     .select({
       round_id: matches.roundId,
@@ -16,27 +18,7 @@ export async function getScheduleRounds() {
     .groupBy(matches.roundId, matches.roundName)
     .orderBy(asc(min(matches.date)));
 
-  // Deduplication Logic (same as legacy)
-  const roundMap = new Map();
-
-  for (const r of rows) {
-    if (!r.round_name) continue;
-
-    // Normalize name: "Jornada 14 (aplazada)" -> "Jornada 14"
-    const baseName = r.round_name.replace(/\s*\(.*\)/, '').trim();
-
-    if (!roundMap.has(baseName)) {
-      roundMap.set(baseName, { ...r, round_name: baseName });
-    } else {
-      // If we found a duplicate (e.g. we have "Jornada 14", now found "Jornada 14 (aplazada)")
-      // logic: if current row has 'aplazada', overwrite.
-      if (r.round_name.toLowerCase().includes('aplazada')) {
-        roundMap.set(baseName, { ...r, round_name: baseName });
-      }
-    }
-  }
-
-  return Array.from(roundMap.values());
+  return rows;
 }
 
 // 2. Get Round by ID

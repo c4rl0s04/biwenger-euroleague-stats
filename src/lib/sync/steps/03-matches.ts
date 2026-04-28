@@ -19,6 +19,7 @@ export async function run(manager: SyncManager) {
     throw new Error('Competition rounds data missing from Step 1');
   }
 
+  let eliminatoriaCount = 1;
   for (const round of rounds) {
     const baseName = round.name;
 
@@ -35,10 +36,19 @@ export async function run(manager: SyncManager) {
       continue;
     }
 
+    // --- Normalize Round Name for DB Consistency ---
+    // This solves deduplication at the source.
+    const normalizedName = manager.normalizeRoundName(baseName);
+    const finalName =
+      normalizedName === 'Eliminatoria' ? `Eliminatoria ${eliminatoriaCount++}` : normalizedName;
+
+    // Create a copy of the round with the final name to pass to the sync service
+    const roundToSync = { ...round, name: finalName };
+
     // OPTIMIZATION: In Daily Mode, skip rounds that finished long ago
     // Since the `round` object from Step 1 lacks dates, we query our own DB.
     if (manager.context.isDaily) {
-      const roundId = manager.resolveRoundId(round);
+      const roundId = manager.resolveRoundId(roundToSync);
 
       // Check local DB for this round's matches
       try {
@@ -75,10 +85,10 @@ export async function run(manager: SyncManager) {
       }
     }
 
-    manager.log(`\n🔹 Processing ${baseName}...`);
+    manager.log(`\n🔹 Processing ${finalName} (original: ${baseName})...`);
 
     // Sync Biwenger Schedule (Matches table)
-    await syncMatches.run(manager, round, manager.context.playersList);
+    await syncMatches.run(manager, roundToSync, manager.context.playersList);
   }
 
   return {

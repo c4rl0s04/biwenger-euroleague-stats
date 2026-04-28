@@ -89,6 +89,7 @@ export async function run(manager: SyncManager) {
     manager.error(`   ❌ Failed to fetch schedule key for stats mapping: ${e.message}`);
   }
 
+  let eliminatoriaCount = 1;
   for (const round of rounds) {
     const baseName = round.name;
 
@@ -96,13 +97,23 @@ export async function run(manager: SyncManager) {
     if (
       !baseName.includes('Jornada') &&
       !baseName.includes('Playoff') &&
-      !baseName.includes('Final Four')
+      !baseName.includes('Final Four') &&
+      !baseName.includes('Eliminatoria') &&
+      !baseName.includes('Play-In')
     )
       continue;
 
+    // --- Normalize Round Name for DB Consistency ---
+    const normalizedName = manager.normalizeRoundName(baseName);
+    const finalName =
+      normalizedName === 'Eliminatoria' ? `Eliminatoria ${eliminatoriaCount++}` : normalizedName;
+
+    // Create a copy for downstream
+    const roundToSync = { ...round, name: finalName };
+
     // OPTIMIZATION: Daily Mode
     if (manager.context.isDaily) {
-      const roundId = manager.resolveRoundId(round);
+      const roundId = manager.resolveRoundId(roundToSync);
       try {
         const res = await (manager.context.db as any).query(
           `SELECT 
@@ -138,21 +149,21 @@ export async function run(manager: SyncManager) {
       }
     }
 
-    manager.log(`\n🔹 Processing Stats for ${baseName}...`);
+    manager.log(`\n🔹 Processing Stats for ${finalName} (original: ${baseName})...`);
 
     // 1. Sync Euroleague Boxscores (Robust Schedule-Based Sync)
 
     // Fetch Matches for this round from DB
     // Fetch Matches for this round from DB
-    const roundId = manager.resolveRoundId(round);
+    const roundId = manager.resolveRoundId(roundToSync);
 
     // IMPORTANT: Attach canonical ID so downstream functions use it for INSERT/UPDATE
-    round.dbId = roundId;
+    roundToSync.dbId = roundId;
 
     const dbMatches = await mutations.getMatchesByRound(roundId);
 
     if (dbMatches.length === 0) {
-      manager.log(`   ⚠️ No matches found in DB for ${baseName}. Run Step 3 first?`);
+      manager.log(`   ⚠️ No matches found in DB for ${finalName}. Run Step 3 first?`);
     }
 
     let syncedGames = 0;
@@ -169,7 +180,7 @@ export async function run(manager: SyncManager) {
       const gameCode = gameCodeMap.get(gameKey);
 
       if (gameCode) {
-        await syncEuroleagueStats.runGame(manager, gameCode, roundId, round.name);
+        await syncEuroleagueStats.runGame(manager, gameCode, roundId, finalName);
         syncedGames++;
       }
     }
@@ -178,7 +189,7 @@ export async function run(manager: SyncManager) {
     }
 
     // 2. Sync Biwenger Fantasy Points
-    await syncEuroleagueStats.runBiwengerPoints(manager, round, manager.context.playersList);
+    await syncEuroleagueStats.runBiwengerPoints(manager, roundToSync, manager.context.playersList);
   }
 
   return { success: true, message: 'Synced player stats.' };

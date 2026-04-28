@@ -47,6 +47,7 @@ export async function run(manager: SyncManager) {
 
   let totalLineups = 0;
 
+  let eliminatoriaCount = 1;
   for (const round of rounds) {
     const baseName = round.name;
 
@@ -54,13 +55,22 @@ export async function run(manager: SyncManager) {
     if (
       !baseName.includes('Jornada') &&
       !baseName.includes('Playoff') &&
-      !baseName.includes('Final Four')
+      !baseName.includes('Final Four') &&
+      !baseName.includes('Eliminatoria') &&
+      !baseName.includes('Play-In')
     )
       continue;
 
+    // --- Normalize Round Name for DB Consistency ---
+    const normalizedName = manager.normalizeRoundName(baseName);
+    const finalName =
+      normalizedName === 'Eliminatoria' ? `Eliminatoria ${eliminatoriaCount++}` : normalizedName;
+
+    const roundToSync = { ...round, name: finalName };
+
     // OPTIMIZATION: Daily Mode
     if (manager.context.isDaily) {
-      const roundId = manager.resolveRoundId(round);
+      const roundId = manager.resolveRoundId(roundToSync);
       try {
         const res = await (manager.context.db as any).query(
           `SELECT 
@@ -96,7 +106,7 @@ export async function run(manager: SyncManager) {
     }
 
     // Sync Lineups (Always)
-    const lineupsRes = await syncLineups.run(manager, round, manager.context.playersList);
+    const lineupsRes = await syncLineups.run(manager, roundToSync, manager.context.playersList);
     totalLineups += lineupsRes.insertedCount || 0;
   }
 

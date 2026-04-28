@@ -42,11 +42,16 @@ export class SyncManager {
   }
 
   /**
-   * Helper to normalize round names (remove "aplazada")
+   * Helper to normalize round names (remove "aplazada", etc.)
    */
   normalizeRoundName(name: string | undefined): string {
     if (!name) return '';
-    return name.replace(/\s*\(aplazada\)\s*/i, '').trim();
+    return name
+      .replace(/\s*\(aplazada\)\s*/i, '')
+      .replace(/\s*Playoff\s*/i, '')
+      .replace(/\s*Eliminatoria\s*/i, 'Eliminatoria')
+      .replace(/\s*Final Four\s*/i, 'Final Four')
+      .trim();
   }
 
   /**
