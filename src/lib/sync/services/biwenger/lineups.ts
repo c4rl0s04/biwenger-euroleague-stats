@@ -86,6 +86,10 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
           // Sequential loop for async
           for (let index = 0; index < user.lineup.players.length; index++) {
             const playerId = user.lineup.players[index];
+
+            // Skip empty slots in lineup (null or undefined)
+            if (!playerId) continue;
+
             try {
               let role = 'suplente';
               if (index < 5) role = 'titular';
