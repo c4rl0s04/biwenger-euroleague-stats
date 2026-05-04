@@ -16,15 +16,19 @@ import {
 import { FadeIn, BackButton, PageHeader, ElegantCard } from '@/components/ui';
 import Section from '@/components/layout/Section';
 import ManagerIdentityCard from './ManagerIdentityCard';
+import SeasonRecordsCard from './SeasonRecordsCard';
+import MarketActivityCard from './MarketActivityCard';
+import LeagueDominanceCard from './LeagueDominanceCard';
+import UserTournamentsCard from './UserTournamentsCard';
 
-export default function ManagerProfileClient({ stats, squad, recentRounds }) {
+export default function ManagerProfileClient({ stats, squad, recentRounds, tournaments }) {
   if (!stats) return null;
 
   return (
     <div className="max-w-7xl mx-auto pb-20">
       {/* Header / Back Link */}
       <FadeIn delay={0}>
-        <div className="mb-4 px-4 sm:px-6 lg:px-8">
+        <div className="mb-2 px-4 sm:px-6 lg:px-8 pt-4">
           <BackButton />
         </div>
       </FadeIn>
@@ -32,6 +36,7 @@ export default function ManagerProfileClient({ stats, squad, recentRounds }) {
       <PageHeader
         title={`Perfil de ${stats.name}`}
         description="Análisis detallado del rendimiento, plantilla y movimientos de mercado."
+        className="!pt-2"
       />
 
       {/* Hero Section */}
@@ -48,19 +53,22 @@ export default function ManagerProfileClient({ stats, squad, recentRounds }) {
         id="season-performance"
         delay={150}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <ElegantCard
-            title="Hitos de Temporada"
-            icon={Activity}
-            color="orange"
-            className="lg:col-span-4"
-          >
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-muted-foreground italic">
-                Próximamente: Tarjetas de estadísticas detalladas y medallas.
-              </p>
-            </div>
-          </ElegantCard>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <SeasonRecordsCard stats={stats} />
+          <MarketActivityCard stats={stats} />
+          <LeagueDominanceCard userId={stats.id} />
+        </div>
+      </Section>
+
+      {/* SECTION 2: COMPETICIONES */}
+      <Section
+        title="Competiciones y Copas"
+        subtitle="Rendimiento en porras y torneos eliminatorios."
+        id="tournaments"
+        delay={250}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <UserTournamentsCard tournaments={tournaments} />
         </div>
       </Section>
 

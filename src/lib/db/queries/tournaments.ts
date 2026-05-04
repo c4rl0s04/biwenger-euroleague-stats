@@ -180,3 +180,60 @@ export async function getTournamentFixtures(
         : null,
   }));
 }
+
+export async function getUserTournaments(userId: string | number) {
+  const { rows } = await pgClient.query(
+    `
+    WITH user_leagues AS (
+      SELECT
+        t.id as tournament_id,
+        t.name as tournament_name,
+        t.type as tournament_type,
+        t.status as tournament_status,
+        t.data_json,
+        ts.position,
+        ts.points,
+        ts.won,
+        ts.drawn,
+        ts.lost,
+        ts.phase_name,
+        ts.group_name
+      FROM tournament_standings ts
+      JOIN tournaments t ON ts.tournament_id = t.id
+      WHERE ts.user_id = $1::text
+    ),
+    user_playoffs AS (
+      SELECT 
+        t.id as tournament_id,
+        t.name as tournament_name,
+        t.type as tournament_type,
+        t.status as tournament_status,
+        t.data_json,
+        NULL::int as position,
+        NULL::int as points,
+        0 as won,
+        0 as drawn,
+        0 as lost,
+        NULL::text as phase_name,
+        NULL::text as group_name
+      FROM tournaments t
+      WHERE t.type = 'playoff'
+        AND t.data_json::text LIKE '%' || $1::text || '%'
+    )
+    SELECT * FROM user_leagues
+    UNION ALL
+    SELECT * FROM user_playoffs
+    ORDER BY tournament_id DESC
+    `,
+    [String(userId)]
+  );
+
+  return rows.map((row: any) => ({
+    ...row,
+    position: row.position ? parseInt(row.position) : null,
+    points: row.points ? parseInt(row.points) : null,
+    won: row.won ? parseInt(row.won) : 0,
+    drawn: row.drawn ? parseInt(row.drawn) : 0,
+    lost: row.lost ? parseInt(row.lost) : 0,
+  }));
+}

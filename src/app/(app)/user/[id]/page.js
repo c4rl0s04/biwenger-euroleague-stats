@@ -1,4 +1,9 @@
-import { fetchUserSeasonStats, fetchUserSquadDetails, fetchUserRecentRounds } from '@/lib/services';
+import {
+  fetchUserSeasonStats,
+  fetchUserSquadDetails,
+  fetchUserRecentRounds,
+  fetchUserTournaments,
+} from '@/lib/services';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ManagerProfileClient from '@/components/user/ManagerProfileClient';
@@ -10,10 +15,11 @@ export default async function ManagerPage({ params }) {
   const { id } = await params;
 
   // Fetch all necessary data for the manager profile
-  const [stats, squad, recentRounds] = await Promise.all([
+  const [stats, squad, recentRounds, tournaments] = await Promise.all([
     fetchUserSeasonStats(id),
     fetchUserSquadDetails(id),
     fetchUserRecentRounds(id),
+    fetchUserTournaments(id),
   ]);
 
   if (!stats || !stats.name || stats.name === 'Desconocido') {
@@ -39,7 +45,12 @@ export default async function ManagerPage({ params }) {
         <ThemeBackground />
       </div>
       <div className="relative z-10 p-6">
-        <ManagerProfileClient stats={stats} squad={squad} recentRounds={recentRounds} />
+        <ManagerProfileClient
+          stats={stats}
+          squad={squad}
+          recentRounds={recentRounds}
+          tournaments={tournaments}
+        />
       </div>
     </>
   );

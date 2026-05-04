@@ -28,6 +28,7 @@ export interface UserSquadPlayer {
 }
 
 export interface UserSeasonStats {
+  id: string;
   name: string;
   icon: string;
   color_index: number;
@@ -43,6 +44,9 @@ export interface UserSeasonStats {
   podiums: number;
   purchases: number;
   sales: number;
+  total_spent: number;
+  total_received: number;
+  last_transfers: any[];
   position: number;
   team_value: number;
   price_trend: number;
@@ -222,17 +226,38 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
   const transfersQuery = `
     SELECT
       COUNT(CASE WHEN comprador = $1 THEN 1 END) as purchases,
-      COUNT(CASE WHEN vendedor = $2 THEN 1 END) as sales
+      COUNT(CASE WHEN vendedor = $2 THEN 1 END) as sales,
+      SUM(CASE WHEN comprador = $1 THEN precio ELSE 0 END) as total_spent,
+      SUM(CASE WHEN vendedor = $2 THEN precio ELSE 0 END) as total_received
     FROM fichajes
   `;
 
   const positionsRes = await pgClient.query(positionsQuery, [userId]);
   const positions = positionsRes.rows[0];
 
-  let transfers = { purchases: 0, sales: 0 };
+  let transfers = { purchases: 0, sales: 0, total_spent: 0, total_received: 0, last_transfers: [] };
   if (user) {
-    const transfersRes = await pgClient.query(transfersQuery, [user.name, user.name]); // using names as per schema
+    const transfersRes = await pgClient.query(transfersQuery, [user.name, user.name]);
     transfers = transfersRes.rows[0] || transfers;
+
+    // Get last 3 transfers
+    const lastTransfersQuery = `
+      SELECT 
+        f.player_id,
+        p.name as player_name,
+        f.precio as price,
+        f.comprador,
+        f.vendedor,
+        f.fecha,
+        CASE WHEN f.comprador = $1 THEN 'purchase' ELSE 'sale' END as type
+      FROM fichajes f
+      LEFT JOIN players p ON f.player_id = p.id
+      WHERE f.comprador = $1 OR f.vendedor = $1
+      ORDER BY f.fecha DESC, f.id DESC
+      LIMIT 3
+    `;
+    const lastTransfersRes = await pgClient.query(lastTransfersQuery, [user.name]);
+    transfers.last_transfers = lastTransfersRes.rows;
   }
 
   const standings = await getStandings();
@@ -240,6 +265,7 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
   const userStanding = standings.find((u: any) => String(u.user_id) === String(userId));
 
   return {
+    id: String(userId),
     name: user?.name || 'Desconocido',
     icon: user?.icon || '',
     color_index: user?.color_index ?? 0,
@@ -261,6 +287,9 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
     // Transfers Parsing
     purchases: Number(transfers?.purchases) || 0,
     sales: Number(transfers?.sales) || 0,
+    total_spent: Number(transfers?.total_spent) || 0,
+    total_received: Number(transfers?.total_received) || 0,
+    last_transfers: transfers?.last_transfers || [],
 
     position: Number((userStanding as any)?.position) || 0,
     team_value: Number((userStanding as any)?.team_value) || 0,
