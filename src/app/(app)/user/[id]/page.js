@@ -1,44 +1,46 @@
-import { fetchUserSeasonStats } from '@/lib/services';
-
-import { BackButton, PageHeader } from '@/components/ui';
+import { fetchUserSeasonStats, fetchUserSquadDetails, fetchUserRecentRounds } from '@/lib/services';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import ManagerProfileClient from '@/components/user/ManagerProfileClient';
+import { ThemeBackground } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * User Profile Page
- *
- * User profile, squad overview, and season stats.
- */
-export default async function UserProfilePage({ params }) {
+export default async function ManagerPage({ params }) {
   const { id } = await params;
-  // User ID is TEXT in DB, we must check it as a string, not number
-  const userId = id;
 
-  const stats = await fetchUserSeasonStats(userId);
-  const userName = stats?.name || 'Usuario';
+  // Fetch all necessary data for the manager profile
+  const [stats, squad, recentRounds] = await Promise.all([
+    fetchUserSeasonStats(id),
+    fetchUserSquadDetails(id),
+    fetchUserRecentRounds(id),
+  ]);
+
+  if (!stats || !stats.name || stats.name === 'Desconocido') {
+    return (
+      <div className="p-6 text-center py-20">
+        <h1 className="text-2xl font-bold text-white mb-4">Manager no encontrado</h1>
+        <p className="text-muted-foreground mb-8 text-lg">
+          El ID proporcionado no corresponde a ningún usuario activo en la liga.
+        </p>
+        <Link
+          href="/standings"
+          className="text-blue-400 hover:text-blue-300 flex items-center justify-center gap-2 font-bold"
+        >
+          <ArrowLeft className="w-5 h-5" /> Volver a la clasificación
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <main className="container mx-auto px-4 py-12 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-6">
-            <BackButton />
-          </div>
-          <PageHeader
-            title={`Perfil de ${userName}`}
-            description="Estadísticas y plantilla"
-            className="px-0 pb-10"
-          />
-
-          {/* Placeholder for future implementation */}
-          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-12 text-center">
-            <p className="text-muted-foreground text-lg">🚧 Página en construcción</p>
-            <p className="text-muted-foreground/70 text-sm mt-2">
-              Próximamente: perfil completo, plantilla y comparativa.
-            </p>
-          </div>
-        </div>
-      </main>
-    </div>
+    <>
+      <div className="fixed inset-0 z-0">
+        <ThemeBackground />
+      </div>
+      <div className="relative z-10 p-6">
+        <ManagerProfileClient stats={stats} squad={squad} recentRounds={recentRounds} />
+      </div>
+    </>
   );
 }

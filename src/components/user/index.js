@@ -8,3 +8,5 @@
 
 export { default as UserSelector } from './UserSelector';
 export { default as UserSelectionModal } from './UserSelectionModal';
+export { default as ManagerProfileClient } from './ManagerProfileClient';
+export { default as ManagerIdentityCard } from './ManagerIdentityCard';

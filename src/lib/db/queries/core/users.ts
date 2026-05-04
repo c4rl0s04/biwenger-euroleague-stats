@@ -29,6 +29,7 @@ export interface UserSquadPlayer {
 
 export interface UserSeasonStats {
   name: string;
+  icon: string;
   color_index: number;
   total_points: number;
   best_round: number;
@@ -172,7 +173,7 @@ export async function getUserSquad(userId: number | string): Promise<UserSquadPl
  */
 export async function getUserSeasonStats(userId: number | string): Promise<UserSeasonStats> {
   // First get user details for name
-  const userRes = await pgClient.query('SELECT name, color_index FROM users WHERE id = $1', [
+  const userRes = await pgClient.query('SELECT name, icon, color_index FROM users WHERE id = $1', [
     userId,
   ]);
   const user = userRes.rows[0];
@@ -240,6 +241,7 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
 
   return {
     name: user?.name || 'Desconocido',
+    icon: user?.icon || '',
     color_index: user?.color_index ?? 0,
 
     // Stats Parsing

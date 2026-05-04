@@ -13,7 +13,7 @@ export function resolveIdentity(item, statType) {
 
   const name = item.player_name || item.user_name || item.name || item.buyer_name;
   const linkId = item.id || item.user_id || item.buyer_id || item.player_id;
-  const linkPath = isUser ? `/managers/${linkId}` : `/players/${item.player_id || item.id}`;
+  const linkPath = isUser ? `/user/${linkId}` : `/players/${item.player_id || item.id}`;
 
   const resolvedColorIndex = [
     item.color_index,

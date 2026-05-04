@@ -139,7 +139,7 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
                     <div className="flex items-center gap-3 overflow-hidden">
                       {t.from_id ? (
                         <Link
-                          href={`/managers/${t.from_id}`}
+                          href={`/user/${t.from_id}`}
                           className="flex items-center gap-3 hover:opacity-70 transition-opacity"
                         >
                           <div className="relative w-9 h-9 shrink-0">
@@ -189,7 +189,7 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
                     <div className="flex items-center gap-3 overflow-hidden justify-end">
                       {t.to_id ? (
                         <Link
-                          href={`/managers/${t.to_id}`}
+                          href={`/user/${t.to_id}`}
                           className="flex items-center gap-3 hover:opacity-70 transition-opacity justify-end"
                         >
                           <span className="text-sm font-bold text-white/90 truncate text-right underline underline-offset-4 decoration-white/10">
@@ -239,7 +239,7 @@ export default function PlayerOwnershipCard({ transfers, className = '' }) {
                     className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border-2 shadow-inner transition-all duration-500 group-hover:scale-110 ${t.to_id ? `border-${mColors.name}-500/50 bg-white/5` : 'border-white/10 bg-white/5 overflow-hidden'}`}
                   >
                     {t.to_id ? (
-                      <Link href={`/managers/${t.to_id}`} className="relative w-full h-full">
+                      <Link href={`/user/${t.to_id}`} className="relative w-full h-full">
                         {t.to_img ? (
                           <Image
                             src={t.to_img}

@@ -40,7 +40,7 @@ export default function PlayerIdentityCard({ player }) {
         {/* --- OWNER BADGE (Top Right) --- */}
         {player.owner_id && (
           <Link
-            href={`/managers/${player.owner_id}`}
+            href={`/user/${player.owner_id}`}
             className={`absolute top-6 right-6 z-30 flex items-center gap-3 pl-2 pr-5 py-2 rounded-2xl border shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:scale-105 hover:ring-4 hover:ring-white/10 active:scale-95 group/owner ${ownerColors.bg.replace('/10', '/90')} ${ownerColors.border} ${ownerColors.text}`}
           >
             {player.owner_icon && player.owner_icon !== '' ? (
