@@ -18,6 +18,7 @@ export const users = pgTable('users', {
   name: text('name'),
   icon: text('icon'),
   colorIndex: integer('color_index').default(0),
+  biwengerToken: text('biwenger_token'),
 });
 
 // 1b. Teams Table

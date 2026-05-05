@@ -2,11 +2,20 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, ChevronLeft, ChevronRight, User, Calendar, Check } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Calendar,
+  Check,
+  Sparkles,
+} from 'lucide-react';
 import { clsx } from 'clsx';
 import { getColorForUser } from '@/lib/constants/colors';
+import AutoAlignButton from './AutoAlignButton';
 
-export default function ScheduleControls({ users, activeUserId, activeRoundId, rounds }) {
+export default function ScheduleControls({ users, activeUserId, activeRoundId, rounds, matches }) {
   const router = useRouter();
 
   // Find current active objects

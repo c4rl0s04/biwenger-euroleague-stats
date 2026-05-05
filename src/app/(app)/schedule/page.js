@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react';
 import ScheduleControls from '@/components/schedule/ScheduleControls';
 import MatchCard from '@/components/schedule/MatchCard';
 import RoundSummary from '@/components/schedule/RoundSummary';
+import AutoAlignButton from '@/components/schedule/AutoAlignButton';
 import { Section } from '@/components/layout';
 import { PageHeader } from '@/components/ui';
 
@@ -68,10 +69,11 @@ export default async function SchedulePage({ searchParams }) {
                 rounds={rounds}
                 activeUserId={userId}
                 activeRoundId={schedule.found ? schedule.round.round_id : null}
+                matches={schedule.matches}
               />
             </div>
 
-            {/* Summary Section: Show TOTAL squad points, regardless of schedule */}
+            {/* Summary Section */}
             {(schedule.userPlayers?.length > 0 || allActivePlayers.length > 0) && (
               <div className="w-full lg:flex-1 min-w-0">
                 <RoundSummary
@@ -79,6 +81,27 @@ export default async function SchedulePage({ searchParams }) {
                   activeUserId={userId}
                   colorIndex={users.find((u) => String(u.id) === String(userId))?.color_index}
                 />
+              </div>
+            )}
+
+            {/* Automation Section: Dedicated Column */}
+            {schedule.found && schedule.matches?.length > 0 && (
+              <div className="w-full lg:w-48 shrink-0">
+                <div className="flex flex-col gap-4 w-full h-full">
+                  <div className="flex items-center px-1">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                      Acciones
+                    </span>
+                  </div>
+                  <div className="relative z-20 flex-1 p-4 bg-zinc-950 border border-white/10 rounded-xl shadow-2xl shadow-black/50 flex flex-col items-center justify-center min-h-[88px]">
+                    <AutoAlignButton
+                      userId={userId}
+                      matches={schedule.matches}
+                      userName={users.find((u) => String(u.id) === String(userId))?.name}
+                      discrete={true}
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>

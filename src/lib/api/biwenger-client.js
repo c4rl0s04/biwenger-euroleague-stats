@@ -58,7 +58,15 @@ export async function biwengerFetch(endpoint, options = {}) {
   const userId = CONFIG.API.USER_ID;
 
   // Default retry configuration
-  const { retries = 3, retryDelay = 5000, skipVersionCheck = false } = options;
+  const {
+    retries = 3,
+    retryDelay = 5000,
+    skipVersionCheck = false,
+    method = 'GET',
+    body,
+    customToken,
+    customUserId,
+  } = options;
 
   if (!tokenRaw) throw new Error('BIWENGER_TOKEN is missing');
   if (!leagueId) throw new Error('BIWENGER_LEAGUE_ID is missing');
@@ -78,16 +86,26 @@ export async function biwengerFetch(endpoint, options = {}) {
   // ---------------------------------
 
   const url = `${CONFIG.API.BASE_URL}${finalEndpoint}`;
-  const token = tokenRaw.startsWith('Bearer ') ? tokenRaw : `Bearer ${tokenRaw}`;
+  const token = customToken
+    ? customToken.startsWith('Bearer ')
+      ? customToken
+      : `Bearer ${customToken}`
+    : tokenRaw.startsWith('Bearer ')
+      ? tokenRaw
+      : `Bearer ${tokenRaw}`;
 
   const headers = {
     Authorization: token,
     'X-League': leagueId,
-    'X-User': userId,
+    'X-User': customUserId || userId,
     Accept: 'application/json, text/plain, */*',
     'User-Agent':
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   };
+
+  if (body) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   // RANDOM DELAY: Safety measure against bans (2-5 seconds random)
   const safeDelay = getRandomDelay(2000, 5000);
@@ -95,7 +113,12 @@ export async function biwengerFetch(endpoint, options = {}) {
   await sleep(safeDelay);
 
   try {
-    const response = await fetch(url, { headers });
+    const fetchOptions = { headers, method };
+    if (body) {
+      fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     // --- RETRY LOGIC FOR 429 ---
     if (response.status === 429) {

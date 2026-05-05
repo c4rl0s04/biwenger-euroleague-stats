@@ -84,6 +84,10 @@ async function main() {
   print('5. Look for a request to "https://biwenger.as.com/api/v2/"');
   print('6. Click it, go to "Headers", find "Authorization: Bearer <TOKEN>"');
   print('7. Copy everything AFTER "Bearer " (the long string)\n');
+  print(
+    'NOTE: This token will be used for general sync AND for the primary manager account automation.\n',
+    'yellow'
+  );
 
   let tokenValid = false;
   while (!tokenValid) {
