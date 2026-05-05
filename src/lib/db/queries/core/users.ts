@@ -235,7 +235,13 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
   const positionsRes = await pgClient.query(positionsQuery, [userId]);
   const positions = positionsRes.rows[0];
 
-  let transfers = { purchases: 0, sales: 0, total_spent: 0, total_received: 0, last_transfers: [] };
+  let transfers = {
+    purchases: 0,
+    sales: 0,
+    total_spent: 0,
+    total_received: 0,
+    last_transfers: [] as any[],
+  };
   if (user) {
     const transfersRes = await pgClient.query(transfersQuery, [user.name, user.name]);
     transfers = transfersRes.rows[0] || transfers;
