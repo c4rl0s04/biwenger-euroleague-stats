@@ -58,8 +58,9 @@ export interface UserSquadDetails {
   total_points: number;
   player_count: number;
   position: number;
-  top_rising: any[]; // refined below if needed
+  top_rising: any[];
   top_falling: any[];
+  players: any[];
 }
 
 export interface CaptainStats {
@@ -309,15 +310,29 @@ export async function getUserSeasonStats(userId: number | string): Promise<UserS
 export async function getUserSquadDetails(userId: number | string): Promise<UserSquadDetails> {
   const squadQuery = `
     SELECT 
-      p.id, p.name, p.position, t.name as team, p.price, p.price_increment, p.puntos as points
+      p.id, 
+      p.name, 
+      p.position, 
+      t.name as team, 
+      t.img as team_img,
+      t.short_name as team_short_name,
+      p.price, 
+      p.price_increment, 
+      p.puntos as points,
+      p.img
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE p.owner_id = $1
-    ORDER BY price_increment DESC
+    ORDER BY p.puntos DESC
   `;
 
   const squadRes = await pgClient.query(squadQuery, [userId]);
-  const squad = squadRes.rows;
+  const formMap = await getPlayerFormMap(5);
+
+  const squad = squadRes.rows.map((p) => ({
+    ...p,
+    recent_scores: formMap.get(Number(p.id))?.recent_scores || '',
+  }));
 
   // Get user's actual competition points from user_rounds
   const userPointsQuery = `
@@ -350,6 +365,7 @@ export async function getUserSquadDetails(userId: number | string): Promise<User
       .filter((p: any) => (parseInt(p.price_increment) || 0) < 0)
       .slice(-7)
       .reverse(),
+    players: squad,
   };
 }
 

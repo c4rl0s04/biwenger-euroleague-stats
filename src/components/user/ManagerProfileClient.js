@@ -21,6 +21,7 @@ import MarketActivityCard from './MarketActivityCard';
 import LeagueDominanceCard from './LeagueDominanceCard';
 import UserTournamentsCard from './UserTournamentsCard';
 import UserTrophyCabinetCard from './UserTrophyCabinetCard';
+import UserSquadAnalysisCard from './UserSquadAnalysisCard';
 
 export default function ManagerProfileClient({ stats, squad, recentRounds, tournaments }) {
   if (!stats) return null;
@@ -81,20 +82,7 @@ export default function ManagerProfileClient({ stats, squad, recentRounds, tourn
         id="squad-analysis"
         delay={300}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <ElegantCard
-            title="Composición de Plantilla"
-            icon={Briefcase}
-            color="indigo"
-            className="lg:col-span-3"
-          >
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-muted-foreground italic">
-                Próximamente: Vista de plantilla, valor por posición y tendencias de jugadores.
-              </p>
-            </div>
-          </ElegantCard>
-        </div>
+        <UserSquadAnalysisCard squad={squad} />
       </Section>
 
       {/* SECTION 3: EVOLUCIÓN Y TENDENCIAS */}
