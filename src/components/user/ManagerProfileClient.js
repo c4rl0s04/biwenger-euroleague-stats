@@ -20,6 +20,7 @@ import SeasonRecordsCard from './SeasonRecordsCard';
 import MarketActivityCard from './MarketActivityCard';
 import LeagueDominanceCard from './LeagueDominanceCard';
 import UserTournamentsCard from './UserTournamentsCard';
+import UserTrophyCabinetCard from './UserTrophyCabinetCard';
 
 export default function ManagerProfileClient({ stats, squad, recentRounds, tournaments }) {
   if (!stats) return null;
@@ -69,6 +70,7 @@ export default function ManagerProfileClient({ stats, squad, recentRounds, tourn
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <UserTournamentsCard tournaments={tournaments} />
+          <UserTrophyCabinetCard stats={stats} tournaments={tournaments} />
         </div>
       </Section>
 

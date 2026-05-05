@@ -14,3 +14,4 @@ export { default as SeasonRecordsCard } from './SeasonRecordsCard';
 export { default as MarketActivityCard } from './MarketActivityCard';
 export { default as LeagueDominanceCard } from './LeagueDominanceCard';
 export { default as UserTournamentsCard } from './UserTournamentsCard';
+export { default as UserTrophyCabinetCard } from './UserTrophyCabinetCard';
