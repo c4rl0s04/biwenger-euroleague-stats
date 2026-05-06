@@ -55,7 +55,7 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
         </span>
       </div>
 
-      <div className="relative z-30 flex items-center p-1 bg-popover border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-2xl flex-1">
+      <div className="relative z-0 flex items-center p-1 bg-popover border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-2xl flex-1">
         {/* 1. MANAGER IDENTITY (Locked) */}
         <div className="flex items-center gap-3 px-4 py-2 mr-1">
           <div
