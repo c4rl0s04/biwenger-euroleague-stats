@@ -15,7 +15,7 @@ export default function RecentRoundsCard() {
   const { currentUser, isReady } = useClientUser();
 
   const { data, loading } = useApiData(
-    () => (currentUser ? `/api/player/rounds?userId=${currentUser.id}` : null),
+    () => (currentUser?.id ? `/api/player/rounds?userId=${currentUser.id}` : null),
     {
       dependencies: [currentUser?.id],
       skip: !currentUser,

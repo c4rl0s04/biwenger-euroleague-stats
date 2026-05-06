@@ -7,20 +7,12 @@ export async function POST(request: Request) {
   try {
     const { challengeId, cellIndex, playerId, dryRun, action, guesses } = await request.json();
 
-    // 1. Auth & User check
-    const cookieStore = await cookies();
-    let userId = cookieStore.get('NEXT_USER_ID')?.value;
+    // 1. Auth & User check (Strict Session)
+    const session = await auth();
+    const userId = session?.user?.id;
 
     if (!userId) {
-      const session = await auth();
-      userId = session?.user?.id;
-    }
-
-    if (!userId) {
-      const { db } = await import('@/lib/db');
-      const fallbackUser = await db.query.users.findFirst();
-      if (!fallbackUser) throw new Error('No users found in database for guest fallback.');
-      userId = fallbackUser.id;
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     if (action === 'submitBatch') {

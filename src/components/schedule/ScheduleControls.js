@@ -27,25 +27,23 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
     ? getColorForUser(activeUser.id, activeUser.name, activeUser.color_index)
     : null;
 
-  // Helper to push URL updates
-  const updateParams = (newUserId, newRoundId) => {
-    const uId = newUserId ?? activeUserId;
-    const rId = newRoundId ?? activeRoundId;
-    router.push(`/schedule?userId=${uId}&roundId=${rId}`);
+  // Helper to push URL updates (Now only for roundId)
+  const updateParams = (newRoundId) => {
+    router.push(`/schedule?roundId=${newRoundId}`);
   };
 
   // Logic for Next/Prev Round Arrows
   const handlePrevRound = () => {
     const idx = rounds.findIndex((r) => String(r.round_id) === String(activeRoundId));
     if (idx > 0) {
-      updateParams(null, rounds[idx - 1].round_id);
+      updateParams(rounds[idx - 1].round_id);
     }
   };
 
   const handleNextRound = () => {
     const idx = rounds.findIndex((r) => String(r.round_id) === String(activeRoundId));
     if (idx < rounds.length - 1) {
-      updateParams(null, rounds[idx + 1].round_id);
+      updateParams(rounds[idx + 1].round_id);
     }
   };
 
@@ -57,54 +55,23 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
         </span>
       </div>
 
-      {/* Control Bar: z-index ensures dropdowns go over sticky headers */}
       <div className="relative z-30 flex items-center p-1 bg-popover border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-2xl flex-1">
-        {/* 1. USER SELECTOR */}
-        <Dropdown icon={<User size={16} />} label={activeUser?.name || 'Select User'} align="left">
-          {(close) => (
-            <div className="p-1 min-w-[200px] bg-zinc-950">
-              <div className="px-2 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border mb-1">
-                Managers
-              </div>
-              {users.map((u) => {
-                const color = getColorForUser(u.id, u.name, u.color_index);
-                const isActive = String(u.id) === String(activeUserId);
-                return (
-                  <button
-                    key={u.id}
-                    onClick={() => {
-                      updateParams(u.id, null);
-                      close();
-                    }}
-                    className={clsx(
-                      'w-full text-left px-3 py-2 text-sm rounded-md flex items-center justify-between group transition-colors my-0.5 cursor-pointer',
-                      isActive
-                        ? 'bg-muted text-white font-medium'
-                        : 'text-zinc-400 hover:bg-muted/50 hover:text-zinc-200'
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2.5 h-2.5 rounded-full ring-1 ring-white/10 ${color.text.replace('text-', 'bg-')}`}
-                        style={{
-                          backgroundColor: color.stroke,
-                          boxShadow: `0 0 8px ${color.stroke}40`,
-                        }}
-                      />
-                      <span>{u.name}</span>
-                    </div>
-                    {isActive && (
-                      <Check size={14} className={activeColor?.text || 'text-primary'} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </Dropdown>
+        {/* 1. MANAGER IDENTITY (Locked) */}
+        <div className="flex items-center gap-3 px-4 py-2 mr-1">
+          <div
+            className={`w-2 h-2 rounded-full ring-1 ring-white/10 ${activeColor?.text.replace('text-', 'bg-')}`}
+            style={{
+              backgroundColor: activeColor?.stroke,
+              boxShadow: `0 0 8px ${activeColor?.stroke}40`,
+            }}
+          />
+          <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">
+            {activeUser?.name}
+          </span>
+        </div>
 
         {/* Divider */}
-        <div className="w-px h-6 bg-white/10 mx-1" />
+        <div className="w-px h-4 bg-white/10 mx-1" />
 
         {/* 2. ROUND SELECTOR */}
         <div className="flex-1 flex items-center">
@@ -137,7 +104,7 @@ export default function ScheduleControls({ users, activeUserId, activeRoundId, r
                         <button
                           key={r.round_id}
                           onClick={() => {
-                            updateParams(null, r.round_id);
+                            updateParams(r.round_id);
                             close();
                           }}
                           className={clsx(

@@ -53,15 +53,19 @@ export const metadata = {
   },
 };
 
+import { SessionProvider } from 'next-auth/react';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body
         className={`${outfit.variable} ${inter.variable} ${bebasNeue.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
       >
-        <ThemeProvider>
-          <CardThemeProvider>{children}</CardThemeProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <CardThemeProvider>{children}</CardThemeProvider>
+          </ThemeProvider>
+        </SessionProvider>
         <Analytics />
       </body>
     </html>

@@ -1,12 +1,11 @@
 import { NextRequest } from 'next/server';
 import { fetchUserSeasonStats } from '@/lib/services';
 import { CACHE_DURATIONS, successResponse, errorResponse } from '@/lib/utils/response';
-import { validateUserId } from '@/lib/utils/validation';
+import { getRequestUserId } from '@/lib/utils/api-auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userIdValidation = validateUserId(searchParams.get('userId'));
+    const userIdValidation = await getRequestUserId(request);
 
     if (!userIdValidation.valid) {
       return errorResponse(userIdValidation.error, 400);

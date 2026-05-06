@@ -1,46 +1,59 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import { db } from '@/lib/db';
+import { users } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
+import authConfig from './auth.config';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
-      name: 'Access Code',
-      credentials: {
-        password: { label: 'Password', type: 'password' },
-      },
-      authorize: async (credentials) => {
-        const accessPassword = process.env.ACCESS_PASSWORD;
+      async authorize(credentials) {
+        console.log('LOGIN ATTEMPT:', credentials?.name);
 
-        if (!accessPassword) {
-          console.error('ACCESS_PASSWORD environment variable is not set');
+        if (!credentials?.name || !credentials?.password) {
+          console.log('LOGIN FAILED: Missing credentials');
           return null;
         }
 
-        if (credentials.password === accessPassword) {
-          return {
-            id: '1',
-            name: 'Authorized User',
-            email: 'admin@biwengerstats.com',
-          };
+        // Find user by name
+        const user = await db.query.users.findFirst({
+          where: eq(users.name, credentials.name),
+        });
+
+        if (!user) {
+          console.log('LOGIN FAILED: User not found:', credentials.name);
+          return null;
         }
-        return null;
+
+        if (!user.password) {
+          console.log('LOGIN FAILED: User has no password set:', credentials.name);
+          return null;
+        }
+
+        // Compare password
+        const isMatch = await bcrypt.compare(credentials.password, user.password);
+
+        if (!isMatch) {
+          console.log('LOGIN FAILED: Password mismatch for:', credentials.name);
+          return null;
+        }
+
+        console.log('LOGIN SUCCESS:', user.name);
+
+        // Return user object for the session
+        return {
+          id: user.id,
+          name: user.name,
+          image: user.icon,
+          biwengerToken: user.biwengerToken,
+        };
       },
     }),
   ],
-  pages: {
-    signIn: '/login',
-  },
-  callbacks: {
-    authorized: async ({ auth, request: { nextUrl } }) => {
-      const isLoggedIn = !!auth;
-      const isOnLoginPage = nextUrl.pathname.startsWith('/login');
-
-      if (isOnLoginPage) {
-        if (isLoggedIn) return Response.redirect(new URL('/', nextUrl));
-        return true;
-      }
-
-      return isLoggedIn;
-    },
+  session: {
+    strategy: 'jwt',
   },
 });

@@ -24,19 +24,9 @@ export async function GET(request: Request) {
       challenge = await hoopgridService.generateDailyChallenge(targetDate, minComplexity);
     }
 
-    // 2. Get user from cookie or session fallback
-    const cookieStore = await cookies();
-    let userId = cookieStore.get('NEXT_USER_ID')?.value;
-
-    if (!userId) {
-      const session = await auth();
-      userId = session?.user?.id;
-    }
-
-    if (!userId) {
-      const fallbackUser = await db.query.users.findFirst();
-      userId = fallbackUser?.id;
-    }
+    // 2. Get user from session (Required)
+    const session = await auth();
+    const userId = session?.user?.id;
 
     let userGuesses: any[] = [];
     if (userId) {

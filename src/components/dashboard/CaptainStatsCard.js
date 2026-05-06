@@ -10,7 +10,7 @@ export default function CaptainStatsCard() {
   const { currentUser, isReady } = useClientUser();
 
   const { data: stats, loading } = useApiData(
-    () => (currentUser ? `/api/dashboard/captain-stats?userId=${currentUser.id}` : null),
+    () => (currentUser?.id ? `/api/dashboard/captain-stats?userId=${currentUser.id}` : null),
     {
       transform: (d) => d?.stats || d,
       dependencies: [currentUser?.id],

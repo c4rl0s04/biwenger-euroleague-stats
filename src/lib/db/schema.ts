@@ -14,8 +14,10 @@ import {
 
 // 1. Users Table
 export const users = pgTable('users', {
-  id: text('id').primaryKey(), // Using TEXT as per schema.js
+  id: text('id').primaryKey(),
   name: text('name'),
+  email: text('email').unique(),
+  password: text('password'),
   icon: text('icon'),
   colorIndex: integer('color_index').default(0),
   biwengerToken: text('biwenger_token'),

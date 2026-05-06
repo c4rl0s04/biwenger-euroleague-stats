@@ -10,7 +10,7 @@ export default function LeagueComparisonCard() {
 
   // Fetch user stats
   const { data: userStats, loading: userLoading } = useApiData(
-    () => (currentUser ? `/api/player/stats?userId=${currentUser.id}` : null),
+    () => (currentUser?.id ? `/api/player/stats?userId=${currentUser.id}` : null),
     {
       transform: (d) => d?.stats || d,
       dependencies: [currentUser?.id],

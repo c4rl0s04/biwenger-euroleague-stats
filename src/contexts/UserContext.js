@@ -1,28 +1,51 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 const UserContext = createContext();
 
 export function UserProvider({ children, users }) {
+  const { data: session, status } = useSession();
+
   const [currentUser, setCurrentUser] = useState(() => {
-    // Lazy initialization: read from localStorage on first render (client-side only)
     if (typeof window === 'undefined') return null;
     try {
       const savedUser = localStorage.getItem('selectedUser');
       return savedUser ? JSON.parse(savedUser) : null;
     } catch (e) {
-      console.error('Error parsing saved user:', e);
       return null;
     }
   });
+
+  // Sync with Auth.js session
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      const userData = {
+        id: session.user.id,
+        name: session.user.name,
+        icon: session.user.image,
+      };
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentUser(userData);
+      localStorage.setItem('selectedUser', JSON.stringify(userData));
+      document.cookie = `NEXT_USER_ID=${session.user.id}; path=/; max-age=31536000; SameSite=Lax`;
+    } else if (status === 'unauthenticated') {
+      // Clear state on sign out
+       
+      setCurrentUser(null);
+      localStorage.removeItem('selectedUser');
+      document.cookie = 'NEXT_USER_ID=; path=/; max-age=0; SameSite=Lax';
+    }
+  }, [session, status]);
+
   const [isLoading] = useState(false);
 
   const selectUser = (userId) => {
-    if (!users || !Array.isArray(users)) {
-      console.warn('Users not available yet');
-      return;
-    }
+    // Disable manual selection if logged in
+    if (status === 'authenticated') return;
+
+    if (!users || !Array.isArray(users)) return;
     const user = users.find((u) => u.user_id === userId);
     if (user) {
       const userData = {
@@ -32,11 +55,7 @@ export function UserProvider({ children, users }) {
       };
       setCurrentUser(userData);
       localStorage.setItem('selectedUser', JSON.stringify(userData));
-
-      // Sync to cookie for server-side access (1 year expiry)
       document.cookie = `NEXT_USER_ID=${user.user_id}; path=/; max-age=31536000; SameSite=Lax`;
-
-      // Force reload to ensure all components/APIs sync with the new identity
       window.location.reload();
     }
   };
@@ -44,12 +63,20 @@ export function UserProvider({ children, users }) {
   const clearUser = () => {
     setCurrentUser(null);
     localStorage.removeItem('selectedUser');
-    // Clear cookie
     document.cookie = 'NEXT_USER_ID=; path=/; max-age=0; SameSite=Lax';
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, selectUser, clearUser, isLoading, users }}>
+    <UserContext.Provider
+      value={{
+        currentUser,
+        selectUser,
+        clearUser,
+        isLoading,
+        users,
+        isAuthenticated: status === 'authenticated',
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

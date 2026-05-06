@@ -4,13 +4,13 @@ import { useClientUser } from '@/lib/hooks/useClientUser';
 import Image from 'next/image';
 
 export default function UserSelectionModal() {
-  const { currentUser, selectUser, users, isClient } = useClientUser();
+  const { currentUser, selectUser, users, isClient, isAuthenticated } = useClientUser();
 
   // Don't render on server to prevent hydration mismatch
   if (!isClient) return null;
 
-  // User already selected, hide modal
-  if (currentUser) return null;
+  // User already selected or authenticated, hide modal
+  if (currentUser || isAuthenticated) return null;
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">

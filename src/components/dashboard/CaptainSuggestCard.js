@@ -11,7 +11,7 @@ export default function CaptainSuggestCard() {
   const { currentUser, isReady } = useClientUser();
 
   const { data: players = [], loading } = useApiData(
-    () => (currentUser ? `/api/dashboard/captain-suggest?userId=${currentUser.id}` : null),
+    () => (currentUser?.id ? `/api/dashboard/captain-suggest?userId=${currentUser.id}` : null),
     {
       dependencies: [currentUser?.id],
       skip: !currentUser,

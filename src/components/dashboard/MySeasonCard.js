@@ -14,7 +14,7 @@ export default function MySeasonCard() {
   const { currentUser, isReady } = useClientUser();
 
   const { data: stats, loading } = useApiData(
-    () => (currentUser ? `/api/player/stats?userId=${currentUser.id}` : null),
+    () => (currentUser?.id ? `/api/player/stats?userId=${currentUser.id}` : null),
     {
       transform: (d) => d?.stats || d,
       dependencies: [currentUser?.id],

@@ -15,7 +15,7 @@ export default function SquadValueCard() {
   const { currentUser, isReady } = useClientUser();
 
   const { data, loading } = useApiData(
-    () => (currentUser ? `/api/player/squad?userId=${currentUser.id}` : null),
+    () => (currentUser?.id ? `/api/player/squad?userId=${currentUser.id}` : null),
     {
       dependencies: [currentUser?.id],
       skip: !currentUser,

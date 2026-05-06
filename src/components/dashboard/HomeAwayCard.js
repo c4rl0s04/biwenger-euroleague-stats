@@ -9,7 +9,7 @@ export default function HomeAwayCard() {
   const { currentUser, isReady } = useClientUser();
 
   const { data: stats, loading } = useApiData(
-    () => (currentUser ? `/api/dashboard/home-away?userId=${currentUser.id}` : null),
+    () => (currentUser?.id ? `/api/dashboard/home-away?userId=${currentUser.id}` : null),
     {
       transform: (d) => d?.stats || d,
       dependencies: [currentUser?.id],
