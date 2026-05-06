@@ -606,3 +606,11 @@ export async function getPersonalizedAlerts(
 
   return alerts.slice(0, limit);
 }
+
+/**
+ * Get a user by ID including their hashed password
+ */
+export async function getUserWithPassword(userId: string) {
+  const result = await pgClient.query('SELECT * FROM users WHERE id = $1', [userId]);
+  return result.rows[0];
+}

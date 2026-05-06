@@ -82,6 +82,7 @@ export interface UserMutations {
   getTransfersForBacktracking: () => Promise<
     { timestamp: number; player_id: number; vendedor: string; comprador: string }[]
   >;
+  updateUserPassword: (password: string, userId: string) => Promise<void>;
 }
 
 /**
@@ -259,6 +260,10 @@ export function prepareUserMutations(db: DbClient): UserMutations {
         ORDER BY timestamp DESC
       `);
       return res.rows;
+    },
+
+    updateUserPassword: async (password: string, userId: string) => {
+      await db.query('UPDATE users SET password = $1 WHERE id = $2', [password, userId]);
     },
   };
 }

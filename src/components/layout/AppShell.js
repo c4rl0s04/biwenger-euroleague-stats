@@ -20,7 +20,7 @@ export default function AppShell({ children }) {
         <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar">
           <NewsTicker />
           <main className="flex-grow w-full">{children}</main>
 
