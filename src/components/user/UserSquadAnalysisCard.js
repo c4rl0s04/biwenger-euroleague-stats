@@ -104,18 +104,18 @@ function PlayerCompactCard({ player, index }) {
 
           <div className="flex px-3 pb-3 pt-1 gap-3 relative z-10">
             {/* Player Image */}
-            <div className="relative w-16 h-16 shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative w-16 h-16 shrink-0 overflow-hidden rounded-xl bg-white/[0.02]">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
               {player.img ? (
                 <Image
                   src={player.img}
                   alt={player.name}
                   fill
-                  className="object-contain object-bottom transition-transform duration-500 group-hover:scale-110 drop-shadow-lg"
+                  className="object-contain object-top transition-transform duration-500 scale-125 group-hover:scale-150 origin-top drop-shadow-lg"
                   unoptimized
                 />
               ) : (
-                <div className="w-full h-full bg-white/5 rounded-xl flex items-center justify-center">
+                <div className="w-full h-full bg-white/5 flex items-center justify-center">
                   <Activity className="w-6 h-6 text-white/10" />
                 </div>
               )}
@@ -154,7 +154,7 @@ function PlayerCompactCard({ player, index }) {
               scores.map((score, i) => (
                 <div
                   key={i}
-                  className={`flex-1 text-[9px] font-black py-0.5 rounded-sm flex items-center justify-center transition-all duration-300 ${getScoreColor(score)} border border-black/20`}
+                  className={`flex-1 text-[11px] font-black py-1 rounded-sm flex items-center justify-center transition-all duration-300 ${getScoreColor(score)} border border-black/20`}
                 >
                   {score === 'X' ? '-' : score}
                 </div>
