@@ -1,4 +1,4 @@
-export default {
+const authConfig = {
   trustHost: true,
   providers: [],
   pages: {
@@ -13,11 +13,18 @@ export default {
       if (pathname.startsWith('/api/auth')) return true;
 
       // 2. Allow Login page
-      if (pathname === '/login') {
+      if (pathname === '/login') return true;
+
+      // 3. Allow Next.js internals and static public assets
+      if (
+        pathname.startsWith('/_next/') ||
+        pathname.startsWith('/favicon') ||
+        /\.(png|jpg|jpeg|svg|ico|webp|gif|woff2?|ttf|otf)$/.test(pathname)
+      ) {
         return true;
       }
 
-      // 3. Everything else requires login
+      // 4. Everything else requires login
       return isLoggedIn;
     },
     async jwt({ token, user }) {
@@ -34,3 +41,5 @@ export default {
     },
   },
 };
+
+export default authConfig;

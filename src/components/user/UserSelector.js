@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useClientUser } from '@/lib/hooks/useClientUser';
-import { ChevronDown, UserCircle2, LogOut, Settings, Shield } from 'lucide-react';
+import { ChevronDown, UserCircle2, LogOut, LogIn } from 'lucide-react';
 import { UserAvatar } from '@/components/ui';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ export default function UserSelector() {
         href="/login"
         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/50 rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95 group"
       >
-        <Shield className="w-4 h-4" />
+        <LogIn className="w-4 h-4" />
         <span className="text-xs font-bold uppercase tracking-widest">Acceso Manager</span>
       </Link>
     );
@@ -63,29 +63,15 @@ export default function UserSelector() {
 
             <div className="p-1.5">
               <Link
-                href="/settings"
+                href={`/user/${currentUser.id}`}
                 onClick={() => setIsOpen(false)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 text-zinc-400 hover:text-white transition-colors text-left rounded-xl group"
               >
                 <div className="p-2 rounded-lg bg-zinc-900 group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
-                  <Settings size={16} />
+                  <UserCircle2 size={16} />
                 </div>
-                <span className="text-sm font-medium">Ajustes del Perfil</span>
+                <span className="text-sm font-medium">Ver Perfil</span>
               </Link>
-
-              {/* Admin/Sync link if authenticated */}
-              {isAuthenticated && (
-                <Link
-                  href="/rounds"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 text-zinc-400 hover:text-white transition-colors text-left rounded-xl group"
-                >
-                  <div className="p-2 rounded-lg bg-zinc-900 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors">
-                    <Shield size={16} />
-                  </div>
-                  <span className="text-sm font-medium">Gestión de Jornadas</span>
-                </Link>
-              )}
 
               <div className="h-px bg-white/5 my-1.5 mx-1.5" />
 

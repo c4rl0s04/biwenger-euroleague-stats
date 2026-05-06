@@ -10,6 +10,7 @@ const nextConfig = {
   serverExternalPackages: [],
   allowedDevOrigins: ['192.168.1.40', '192.168.1.68', 'localhost'],
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
