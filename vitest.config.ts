@@ -8,5 +8,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    setupFiles: ['./src/tests/setup.ts'],
   },
 });

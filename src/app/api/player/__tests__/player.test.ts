@@ -11,7 +11,12 @@ vi.mock('@/lib/services', () => ({
   fetchPlayerStreaks: vi.fn(),
 }));
 
+vi.mock('@/auth', () => ({
+  auth: vi.fn(),
+}));
+
 import * as services from '@/lib/services';
+import { auth } from '@/auth';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);

@@ -32,7 +32,7 @@ export function UserProvider({ children, users }) {
       document.cookie = `NEXT_USER_ID=${session.user.id}; path=/; max-age=31536000; SameSite=Lax`;
     } else if (status === 'unauthenticated') {
       // Clear state on sign out
-       
+
       setCurrentUser(null);
       localStorage.removeItem('selectedUser');
       document.cookie = 'NEXT_USER_ID=; path=/; max-age=0; SameSite=Lax';

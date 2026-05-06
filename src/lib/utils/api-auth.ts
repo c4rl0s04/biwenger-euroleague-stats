@@ -14,10 +14,16 @@ export async function getRequestUserId(request: Request): Promise<AuthResult> {
 
   console.log(`[API-AUTH] Checking userId. Query: "${queryId}"`);
 
-  // If query ID is present and valid, use it
+  // If query ID is present, validate and use it
   if (queryId && queryId !== 'undefined' && queryId !== 'null' && queryId !== '') {
-    console.log(`[API-AUTH] Using Query ID: ${queryId}`);
-    return { valid: true, value: queryId };
+    const validation = validateUserId(queryId);
+    if (validation.valid) {
+      console.log(`[API-AUTH] Using Valid Query ID: ${queryId}`);
+      return { valid: true, value: String(queryId) };
+    } else {
+      console.log(`[API-AUTH] Invalid Query ID: ${queryId} - ${validation.error}`);
+      return { valid: false, error: validation.error };
+    }
   }
 
   // Fallback to session
@@ -25,8 +31,14 @@ export async function getRequestUserId(request: Request): Promise<AuthResult> {
   const sessionUserId = session?.user?.id;
 
   if (sessionUserId) {
-    console.log(`[API-AUTH] Using Session ID: ${sessionUserId}`);
-    return { valid: true, value: sessionUserId };
+    const validation = validateUserId(sessionUserId);
+    if (validation.valid) {
+      console.log(`[API-AUTH] Using Valid Session ID: ${sessionUserId}`);
+      return { valid: true, value: String(sessionUserId) };
+    } else {
+      console.log(`[API-AUTH] Invalid Session ID: ${sessionUserId} - ${validation.error}`);
+      return { valid: false, error: validation.error };
+    }
   }
 
   console.log(`[API-AUTH] FAILED: No ID found in query or session. Session exists? ${!!session}`);
