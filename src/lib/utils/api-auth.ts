@@ -1,12 +1,14 @@
 import { auth } from '@/auth';
 import { validateUserId } from './validation';
 
+export type AuthResult = { valid: true; value: string } | { valid: false; error: string };
+
 /**
  * Gets the userId from the request, either from query params or from the authenticated session.
  * @param request The incoming NextRequest
  * @returns The userId if valid, otherwise an error object
  */
-export async function getRequestUserId(request: Request) {
+export async function getRequestUserId(request: Request): Promise<AuthResult> {
   const { searchParams } = new URL(request.url);
   const queryId = searchParams.get('userId');
 

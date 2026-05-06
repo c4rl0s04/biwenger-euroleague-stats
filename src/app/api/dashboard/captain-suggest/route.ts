@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const userIdValidation = await getRequestUserId(request);
 
-    if (!userIdValidation.valid) {
+    if (userIdValidation.valid === false) {
       return errorResponse(userIdValidation.error, 400);
     }
 
