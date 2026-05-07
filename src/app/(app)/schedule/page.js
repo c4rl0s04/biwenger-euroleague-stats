@@ -54,7 +54,7 @@ export default async function SchedulePage({ searchParams }) {
     <div className="min-h-screen">
       {/* Page Header */}
       <PageHeader
-        title="Alineaciones"
+        title="Horario Jugadores"
         description={schedule.found ? schedule.round.round_name : 'Selecciona una jornada'}
       />
 

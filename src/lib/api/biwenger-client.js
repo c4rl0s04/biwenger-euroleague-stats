@@ -66,6 +66,7 @@ export async function biwengerFetch(endpoint, options = {}) {
     body,
     customToken,
     customUserId,
+    cache,
   } = options;
 
   if (!tokenRaw) throw new Error('BIWENGER_TOKEN is missing');
@@ -113,7 +114,7 @@ export async function biwengerFetch(endpoint, options = {}) {
   await sleep(safeDelay);
 
   try {
-    const fetchOptions = { headers, method };
+    const fetchOptions = { headers, method, cache };
     if (body) {
       fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
     }

@@ -31,4 +31,28 @@ export const lineupService = {
       customUserId: userId,
     });
   },
+
+  /**
+   * Fetches the current lineup configuration from Biwenger
+   */
+  async getLineup(userId: string) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { biwengerToken: true },
+    });
+
+    if (!user || !user.biwengerToken) {
+      throw new Error(`No se encontró un token de Biwenger configurado para el usuario ${userId}`);
+    }
+
+    const fields =
+      '*,lineup(type,playersID,reservesID,captain,striker,coach,date),players(id,owner)';
+    const userData = await biwengerFetch(`/user?fields=${fields}`, {
+      customToken: user.biwengerToken,
+      customUserId: userId,
+      cache: 'no-store',
+    });
+
+    return userData.data;
+  },
 };
