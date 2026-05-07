@@ -47,12 +47,53 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return {
           id: user.id,
           name: user.name,
+          email: user.email,
           image: user.icon,
           biwengerToken: user.biwengerToken,
         };
       },
     }),
   ],
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt({ token, user, trigger, session: sessionData }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.biwengerToken = user.biwengerToken;
+      }
+
+      // If biwengerToken or email is missing but we have an id, refresh from DB
+      // This helps with existing sessions after a schema/logic update
+      if (token.id && (!token.biwengerToken || token.email === undefined)) {
+        try {
+          const dbUser = await db.query.users.findFirst({
+            where: eq(users.id, token.id),
+          });
+          if (dbUser) {
+            token.biwengerToken = dbUser.biwengerToken;
+            token.email = dbUser.email;
+          }
+        } catch (e) {
+          console.error('Error auto-refreshing JWT from DB:', e);
+        }
+      }
+
+      if (trigger === 'update' && sessionData) {
+        if (sessionData.biwengerToken) token.biwengerToken = sessionData.biwengerToken;
+        if (sessionData.email) token.email = sessionData.email;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.biwengerToken = token.biwengerToken;
+      }
+      return session;
+    },
+  },
   session: {
     strategy: 'jwt',
   },
