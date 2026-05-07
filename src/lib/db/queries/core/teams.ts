@@ -7,6 +7,61 @@ export interface Team {
   logo: string;
 }
 
+export interface TeamDetails extends Team {
+  total_fantasy_points: number;
+  total_real_points: number;
+  avg_pir: number;
+  total_value: number;
+  roster_size: number;
+  matches_played: number;
+  playoff_probability: number;
+  wins: number;
+  losses: number;
+  rank: number;
+}
+
+/**
+ * Get regular season standings for all teams
+ */
+export async function getTeamRegularSeasonStandings() {
+  const query = `
+    WITH TeamStats AS (
+      SELECT 
+        team_id,
+        SUM(win) as wins,
+        SUM(loss) as losses,
+        SUM(points_for) as points_for,
+        SUM(points_against) as points_against
+      FROM (
+        SELECT 
+          home_id as team_id,
+          CASE WHEN home_score_regtime + COALESCE(home_ot, 0) > away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as win,
+          CASE WHEN home_score_regtime + COALESCE(home_ot, 0) < away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as loss,
+          home_score_regtime + COALESCE(home_ot, 0) as points_for,
+          away_score_regtime + COALESCE(away_ot, 0) as points_against
+        FROM matches WHERE status = 'finished' AND round_name LIKE 'Jornada %'
+        UNION ALL
+        SELECT 
+          away_id as team_id,
+          CASE WHEN away_score_regtime + COALESCE(away_ot, 0) > home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as win,
+          CASE WHEN away_score_regtime + COALESCE(away_ot, 0) < home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as loss,
+          away_score_regtime + COALESCE(away_ot, 0) as points_for,
+          home_score_regtime + COALESCE(home_ot, 0) as points_against
+        FROM matches WHERE status = 'finished' AND round_name LIKE 'Jornada %'
+      ) all_matches
+      GROUP BY team_id
+    )
+    SELECT 
+      team_id,
+      wins,
+      losses,
+      RANK() OVER (ORDER BY wins DESC, (points_for - points_against) DESC) as rank
+    FROM TeamStats
+  `;
+  const res = await pgClient.query(query);
+  return res.rows;
+}
+
 /**
  * Get team details by ID
  */
@@ -21,6 +76,81 @@ export async function getTeamById(id: number | string): Promise<Team | undefined
     WHERE id = $1
   `;
   return (await pgClient.query(query, [id])).rows[0];
+}
+
+/**
+ * Get full team details including aggregated stats
+ */
+export async function getTeamDetails(id: number | string): Promise<TeamDetails | null> {
+  const numericId = Number(id);
+  if (isNaN(numericId)) return null;
+
+  const query = `
+    WITH TeamMatchStats AS (
+      SELECT 
+        team_id,
+        SUM(win) as wins,
+        SUM(loss) as losses
+      FROM (
+        SELECT 
+          home_id as team_id,
+          CASE WHEN home_score_regtime + COALESCE(home_ot, 0) > away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as win,
+          CASE WHEN home_score_regtime + COALESCE(home_ot, 0) < away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as loss
+        FROM matches WHERE status = 'finished' AND home_id = $1 AND round_name LIKE 'Jornada %'
+        UNION ALL
+        SELECT 
+          away_id as team_id,
+          CASE WHEN away_score_regtime + COALESCE(away_ot, 0) > home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as win,
+          CASE WHEN away_score_regtime + COALESCE(away_ot, 0) < home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as loss
+        FROM matches WHERE status = 'finished' AND away_id = $1 AND round_name LIKE 'Jornada %'
+      ) all_matches
+      GROUP BY team_id
+    )
+    SELECT 
+      t.id,
+      t.name,
+      t.short_name,
+      t.img as logo,
+      COALESCE(SUM(prs.fantasy_points), 0) as total_fantasy_points,
+      COALESCE(SUM(prs.points), 0) as total_real_points,
+      COALESCE(ROUND(AVG(prs.valuation), 1), 0) as avg_pir,
+      COALESCE(SUM(p.price), 0) as total_value,
+      (SELECT COUNT(*) FROM players WHERE team_id = t.id) as roster_size,
+      COALESCE(tms.wins, 0) as wins,
+      COALESCE(tms.losses, 0) as losses
+    FROM teams t
+    LEFT JOIN players p ON t.id = p.team_id
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id
+    LEFT JOIN TeamMatchStats tms ON t.id = tms.team_id
+    WHERE t.id = $1
+    GROUP BY t.id, t.name, t.short_name, t.img, tms.wins, tms.losses
+  `;
+
+  const [res, matchesCount, playoffProb, allStandings] = await Promise.all([
+    pgClient.query(query, [numericId]),
+    getTeamMatchesCount(numericId),
+    getTeamPlayoffProbability(numericId),
+    getTeamRegularSeasonStandings(),
+  ]);
+
+  if (res.rows.length === 0) return null;
+
+  const teamRank = allStandings.find((s: any) => Number(s.team_id) === numericId)?.rank || 0;
+
+  const row = res.rows[0];
+  return {
+    ...row,
+    total_fantasy_points: parseInt(row.total_fantasy_points),
+    total_real_points: parseInt(row.total_real_points),
+    avg_pir: parseFloat(row.avg_pir),
+    total_value: parseInt(row.total_value),
+    roster_size: parseInt(row.roster_size),
+    wins: parseInt(row.wins),
+    losses: parseInt(row.losses),
+    rank: parseInt(teamRank),
+    matches_played: matchesCount,
+    playoff_probability: playoffProb,
+  };
 }
 
 /**

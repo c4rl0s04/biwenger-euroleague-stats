@@ -630,3 +630,33 @@ export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
     return [];
   }
 }
+/**
+ * Get all players belonging to a specific team
+ */
+export async function getPlayersByTeam(teamId: number | string): Promise<CorePlayer[]> {
+  const numericId = Number(teamId);
+  if (isNaN(numericId)) return [];
+
+  const query = `
+    SELECT 
+      p.id, p.name, p.img, p.position, p.price, p.price_increment,
+      p.puntos as points, 
+      ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
+      p.owner_id, u.name as owner_name, u.color_index as owner_color_index, u.icon as owner_icon
+    FROM players p
+    LEFT JOIN users u ON p.owner_id = u.id
+    WHERE p.team_id = $1
+    ORDER BY p.puntos DESC
+  `;
+
+  const [rows, formMap] = await Promise.all([
+    pgClient.query(query, [numericId]).then((r) => r.rows),
+    getPlayerFormMap(),
+  ]);
+
+  return rows.map((row: any) => ({
+    ...row,
+    average: parseFloat(row.average) || 0,
+    recent_scores: formMap.get(Number(row.id))?.recent_scores ?? null,
+  }));
+}

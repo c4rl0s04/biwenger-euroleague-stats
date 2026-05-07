@@ -300,3 +300,51 @@ export async function getTeamUpcomingMatches(
     };
   }) as TeamUpcomingMatch[];
 }
+/**
+ * Get the most recent matches for a specific team
+ */
+export async function getTeamRecentMatches(
+  teamId: number,
+  limit = 5
+): Promise<TeamUpcomingMatch[]> {
+  const th = alias(teams, 'th');
+  const ta = alias(teams, 'ta');
+
+  const rows = await db
+    .select({
+      date: matches.date,
+      home_team: th.name,
+      away_team: ta.name,
+      home_img: th.img,
+      away_img: ta.img,
+      home_id: matches.homeId,
+      away_id: matches.awayId,
+      home_score: matches.homeScore,
+      away_score: matches.awayScore,
+      round_name: matches.roundName,
+    })
+    .from(matches)
+    .leftJoin(th, eq(matches.homeId, th.id))
+    .leftJoin(ta, eq(matches.awayId, ta.id))
+    .where(
+      and(
+        or(eq(matches.homeId, teamId), eq(matches.awayId, teamId)),
+        eq(matches.status, 'finished')
+      )
+    )
+    .orderBy(desc(matches.date))
+    .limit(limit);
+
+  return rows.map((r) => ({
+    date: r.date || new Date(),
+    home_team: r.home_team || 'TBD',
+    away_team: r.away_team || 'TBD',
+    home_img: r.home_img || '',
+    away_img: r.away_img || '',
+    home_id: r.home_id || 0,
+    away_id: r.away_id || 0,
+    home_score: r.home_score,
+    away_score: r.away_score,
+    round_name: r.round_name || '',
+  })) as TeamUpcomingMatch[];
+}
