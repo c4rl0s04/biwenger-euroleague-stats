@@ -20,7 +20,7 @@ export default function LineupCourtSection({ starters, captainName, onPlayerClic
           players={starters}
           onPlayerClick={onPlayerClick}
           className="h-[650px]"
-          playerSize="medium"
+          playerSize="large"
         />
       </FadeIn>
     </div>

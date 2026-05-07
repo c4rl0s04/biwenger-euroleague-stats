@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
+import { PageHeader } from '@/components/ui';
 import LineupControlBar from './LineupControlBar';
 import LineupCourtSection from './LineupCourtSection';
 import LineupBenchSection from './LineupBenchSection';
+import LineupTacticsModal from './LineupTacticsModal';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -49,6 +51,7 @@ export default function LineupClient({ userId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [isTacticsOpen, setIsTacticsOpen] = useState(false);
   const [squad, setSquad] = useState([]);
   const [lineupConfig, setLineupConfig] = useState({
     playersID: [],
@@ -127,27 +130,46 @@ export default function LineupClient({ userId }) {
 
   // ── Render ──────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-12 pb-24">
-      <LineupControlBar
-        loading={loading}
-        error={error}
-        success={success}
-        onSave={handleSave}
-        onReset={() => window.location.reload()}
+    <div className="min-h-screen">
+      <PageHeader
+        title="Alineación Predeterminada"
+        description="Configura tu equipo para las próximas jornadas"
       />
 
-      <div className="max-w-5xl mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        <LineupCourtSection
-          starters={starters}
-          captainName={captainName}
-          onPlayerClick={(p) => console.log('Starter clicked:', p)}
-        />
+      <div className="max-w-5xl mx-auto px-4 md:px-8 space-y-12 pb-24">
+        {/* Action Controls */}
+        <div className="flex justify-center pt-2">
+          <LineupControlBar
+            loading={loading}
+            error={error}
+            success={success}
+            currentType={lineupConfig.type}
+            onSave={handleSave}
+            onReset={() => window.location.reload()}
+            onChangeType={() => setIsTacticsOpen(true)}
+          />
+        </div>
 
-        <LineupBenchSection
-          benchPlayers={bench}
-          onPlayerClick={(p) => console.log('Bench clicked:', p)}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+          <LineupCourtSection
+            starters={starters}
+            captainName={captainName}
+            onPlayerClick={(p) => console.log('Starter clicked:', p)}
+          />
+
+          <LineupBenchSection
+            benchPlayers={bench}
+            onPlayerClick={(p) => console.log('Bench clicked:', p)}
+          />
+        </div>
       </div>
+
+      <LineupTacticsModal
+        isOpen={isTacticsOpen}
+        onClose={() => setIsTacticsOpen(false)}
+        currentType={lineupConfig.type}
+        onSelect={(newType) => setLineupConfig((prev) => ({ ...prev, type: newType }))}
+      />
     </div>
   );
 }
