@@ -16,3 +16,4 @@ export { default as LeagueDominanceCard } from './LeagueDominanceCard';
 export { default as UserTournamentsCard } from './UserTournamentsCard';
 export { default as UserTrophyCabinetCard } from './UserTrophyCabinetCard';
 export { default as UserSquadAnalysisCard } from './UserSquadAnalysisCard';
+export { default as PointsEvolutionChart } from './PointsEvolutionChart';

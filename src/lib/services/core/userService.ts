@@ -29,5 +29,5 @@ export async function fetchUserSquadDetails(userId: string | number) {
 }
 
 export async function fetchUserRecentRounds(userId: string | number) {
-  return await getUserRecentRounds(String(userId));
+  return await getUserRecentRounds(String(userId), 100);
 }

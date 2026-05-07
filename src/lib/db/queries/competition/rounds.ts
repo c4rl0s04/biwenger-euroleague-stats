@@ -370,7 +370,7 @@ export async function getLastRoundWinner(): Promise<any> {
 /**
  * Get user's recent rounds performance
  */
-export async function getUserRecentRounds(userId: string, limit = 10) {
+export async function getUserRecentRounds(userId: string, limit = 100) {
   // Get all rounds (including non-participated) with position when participated
   const allRoundsSubquery = db
     .selectDistinct({ round_id: userRounds.roundId, round_name: userRounds.roundName })

@@ -22,6 +22,7 @@ import LeagueDominanceCard from './LeagueDominanceCard';
 import UserTournamentsCard from './UserTournamentsCard';
 import UserTrophyCabinetCard from './UserTrophyCabinetCard';
 import UserSquadAnalysisCard from './UserSquadAnalysisCard';
+import PointsEvolutionChart from './PointsEvolutionChart';
 
 export default function ManagerProfileClient({ stats, squad, recentRounds, tournaments }) {
   if (!stats) return null;
@@ -92,13 +93,7 @@ export default function ManagerProfileClient({ stats, squad, recentRounds, tourn
         id="points-evolution"
         delay={450}
       >
-        <ElegantCard title="Gráfico de Progresión" icon={LineChart} color="cyan">
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-muted-foreground italic">
-              Próximamente: Gráfico interactivo de progresión de puntos y posición.
-            </p>
-          </div>
-        </ElegantCard>
+        <PointsEvolutionChart recentRounds={recentRounds} />
       </Section>
 
       {/* SECTION 4: HISTORIAL RECIENTE */}
