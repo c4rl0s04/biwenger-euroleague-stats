@@ -85,6 +85,15 @@ export interface JinxStat {
   jinxed_count: number;
 }
 
+export interface ContributorStat {
+  player_id: number;
+  player_name: string;
+  player_img: string;
+  total_base_points: number;
+  total_contribution: number;
+  games_played: number;
+}
+
 /**
  * Get volatility stats (Standard Deviation of points)
  * @returns {Promise<VolatilityStat[]>} Users sorted by consistency (lower std_dev is better)
@@ -482,5 +491,40 @@ export async function getJinxStats(): Promise<JinxStat[]> {
   return (await pgClient.query(query)).rows.map((row: any) => ({
     ...row,
     jinxed_count: parseInt(row.jinxed_count) || 0,
+  }));
+}
+
+/**
+ * Get the players who contributed the most points to a user's total score.
+ * Only counts points from rounds where the player was in the user's lineup.
+ * Handles captain doubling.
+ * @param userId - The ID of the user to get stats for
+ * @returns {Promise<ContributorStat[]>} Top contributing players
+ */
+export async function getUserTopContributors(userId: string): Promise<ContributorStat[]> {
+  const query = `
+    SELECT 
+      p.id as player_id,
+      p.name as player_name,
+      p.img as player_img,
+      SUM(prs.fantasy_points) as total_base_points,
+      SUM(CASE 
+        WHEN l.role IN ('titular', '6th_man') AND l.is_captain = TRUE THEN prs.fantasy_points * 2 
+        WHEN l.role IN ('titular', '6th_man') THEN prs.fantasy_points 
+        ELSE 0 
+      END) as total_contribution,
+      COUNT(prs.round_id) as games_played
+    FROM lineups l
+    JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    JOIN players p ON l.player_id = p.id
+    WHERE l.user_id = $1
+    GROUP BY p.id, p.name, p.img
+    ORDER BY total_contribution DESC
+  `;
+  return (await pgClient.query(query, [userId])).rows.map((row: any) => ({
+    ...row,
+    total_base_points: parseInt(row.total_base_points) || 0,
+    total_contribution: parseInt(row.total_contribution) || 0,
+    games_played: parseInt(row.games_played) || 0,
   }));
 }

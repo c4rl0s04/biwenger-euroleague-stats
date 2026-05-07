@@ -23,8 +23,15 @@ import UserTournamentsCard from './UserTournamentsCard';
 import UserTrophyCabinetCard from './UserTrophyCabinetCard';
 import UserSquadAnalysisCard from './UserSquadAnalysisCard';
 import PointsEvolutionChart from './PointsEvolutionChart';
+import UserTopContributorsCard from './UserTopContributorsCard';
 
-export default function ManagerProfileClient({ stats, squad, recentRounds, tournaments }) {
+export default function ManagerProfileClient({
+  stats,
+  squad,
+  recentRounds,
+  tournaments,
+  topContributors,
+}) {
   if (!stats) return null;
 
   return (
@@ -63,19 +70,6 @@ export default function ManagerProfileClient({ stats, squad, recentRounds, tourn
         </div>
       </Section>
 
-      {/* SECTION 2: COMPETICIONES */}
-      <Section
-        title="Competiciones y Copas"
-        subtitle="Rendimiento en porras y torneos eliminatorios."
-        id="tournaments"
-        delay={250}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <UserTournamentsCard tournaments={tournaments} />
-          <UserTrophyCabinetCard stats={stats} tournaments={tournaments} />
-        </div>
-      </Section>
-
       {/* SECTION 2: PLANTILLA ACTUAL */}
       <Section
         title="Análisis de Plantilla"
@@ -96,20 +90,27 @@ export default function ManagerProfileClient({ stats, squad, recentRounds, tourn
         <PointsEvolutionChart recentRounds={recentRounds} />
       </Section>
 
-      {/* SECTION 4: HISTORIAL RECIENTE */}
+      {/* SECTION 4: MÁXIMOS CONTRIBUIDORES */}
       <Section
-        title="Últimas Jornadas"
-        subtitle="Rendimiento en los encuentros más recientes."
-        id="recent-history"
+        title="Máximos Contribuidores"
+        subtitle="Los jugadores que más puntos han aportado al equipo mientras han estado alineados."
+        id="top-contributors"
         delay={600}
       >
-        <ElegantCard title="Registro de Resultados" icon={Clock} color="emerald">
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-muted-foreground italic">
-              Próximamente: Tabla de resultados detallados por jornada.
-            </p>
-          </div>
-        </ElegantCard>
+        <UserTopContributorsCard contributors={topContributors} />
+      </Section>
+
+      {/* SECTION 5: COMPETICIONES */}
+      <Section
+        title="Competiciones y Copas"
+        subtitle="Rendimiento en porras y torneos eliminatorios."
+        id="tournaments"
+        delay={750}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <UserTournamentsCard tournaments={tournaments} />
+          <UserTrophyCabinetCard stats={stats} tournaments={tournaments} />
+        </div>
       </Section>
     </div>
   );

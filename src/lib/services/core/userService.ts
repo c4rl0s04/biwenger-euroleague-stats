@@ -10,6 +10,7 @@ import {
   getUserSeasonStats,
   getUserSquadDetails,
   getUserRecentRounds,
+  getUserTopContributors,
 } from '../../db';
 
 /**
@@ -30,4 +31,8 @@ export async function fetchUserSquadDetails(userId: string | number) {
 
 export async function fetchUserRecentRounds(userId: string | number) {
   return await getUserRecentRounds(String(userId), 100);
+}
+
+export async function fetchUserTopContributors(userId: string | number) {
+  return await getUserTopContributors(String(userId));
 }

@@ -96,6 +96,7 @@ export {
   fetchUserSeasonStats,
   fetchUserRecentRounds,
   fetchUserSquadDetails,
+  fetchUserTopContributors,
 } from './core/userService';
 
 // Tournament Service

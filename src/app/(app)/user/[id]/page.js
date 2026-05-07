@@ -3,6 +3,7 @@ import {
   fetchUserSquadDetails,
   fetchUserRecentRounds,
   fetchUserTournaments,
+  fetchUserTopContributors,
 } from '@/lib/services';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -15,11 +16,12 @@ export default async function ManagerPage({ params }) {
   const { id } = await params;
 
   // Fetch all necessary data for the manager profile
-  const [stats, squad, recentRounds, tournaments] = await Promise.all([
+  const [stats, squad, recentRounds, tournaments, topContributors] = await Promise.all([
     fetchUserSeasonStats(id),
     fetchUserSquadDetails(id),
     fetchUserRecentRounds(id),
     fetchUserTournaments(id),
+    fetchUserTopContributors(id),
   ]);
 
   if (!stats || !stats.name || stats.name === 'Desconocido') {
@@ -50,6 +52,7 @@ export default async function ManagerPage({ params }) {
           squad={squad}
           recentRounds={recentRounds}
           tournaments={tournaments}
+          topContributors={topContributors}
         />
       </div>
     </>
