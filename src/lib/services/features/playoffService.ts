@@ -33,11 +33,17 @@ export async function getPlayoffLeaderboard() {
 
     let totalPoints = 0;
     let correctCount = 0;
+    let finishedCount = 0;
+
     const predictionStats = userPredictions.map((p) => {
       const result = results.find((r) => r.matchId === p.matchId);
       const isCorrect =
         result && result.isCompleted ? result.winnerId === p.predictedWinnerId : null;
       const points = isCorrect ? SCORING_RULES[p.stage as keyof typeof SCORING_RULES] || 0 : 0;
+
+      if (result && result.isCompleted) {
+        finishedCount++;
+      }
 
       if (isCorrect) {
         totalPoints += points;
@@ -59,8 +65,8 @@ export async function getPlayoffLeaderboard() {
       colorIndex: user.colorIndex,
       points: totalPoints,
       correctCount,
-      totalCount: userPredictions.length,
-      accuracy: userPredictions.length > 0 ? (correctCount / userPredictions.length) * 100 : 0,
+      totalCount: finishedCount,
+      accuracy: finishedCount > 0 ? (correctCount / finishedCount) * 100 : 0,
       imageUrl: userMedia?.predictionImageUrl,
       predictions: predictionStats,
     };
