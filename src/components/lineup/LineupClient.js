@@ -7,43 +7,7 @@ import LineupControlBar from './LineupControlBar';
 import LineupCourtSection from './LineupCourtSection';
 import LineupBenchSection from './LineupBenchSection';
 import LineupTacticsModal from './LineupTacticsModal';
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-/** Map a raw Biwenger lineup object into a normalized config */
-function normalizeLineupConfig(lineup = {}) {
-  let captainId = lineup.captain;
-  if (captainId && typeof captainId === 'object') captainId = captainId.id;
-  return {
-    playersID: lineup.playersID || [],
-    reservesID: lineup.reservesID || [],
-    captain: captainId || null,
-    type: lineup.type || '5-0-0',
-  };
-}
-
-/** Derive starters and bench player objects from IDs + squad */
-function deriveRotation(lineupConfig, squad) {
-  const safeSquad = Array.isArray(squad) ? squad : [];
-  const getById = (id) => safeSquad.find((p) => p && String(p.id) === String(id));
-
-  const allIds = Array.isArray(lineupConfig.playersID) ? lineupConfig.playersID : [];
-  const reserveIds = Array.isArray(lineupConfig.reservesID) ? lineupConfig.reservesID : [];
-
-  const starterIds = allIds.slice(0, 5);
-  const benchIds = [...allIds.slice(5), ...reserveIds];
-
-  const starters = starterIds
-    .map((id) => {
-      const p = getById(id);
-      return p ? { ...p, is_captain: String(id) === String(lineupConfig.captain) } : null;
-    })
-    .filter(Boolean);
-
-  const bench = benchIds.map((id) => getById(id)).filter(Boolean);
-
-  return { starters, bench };
-}
+import { realignTactics, normalizeLineupConfig, deriveRotation } from '@/lib/utils/lineup-logic';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -57,7 +21,7 @@ export default function LineupClient({ userId }) {
     playersID: [],
     reservesID: [],
     captain: null,
-    type: '5-0-0',
+    type: '2-2-1',
   });
 
   // ── Data Loading ────────────────────────────────────────────────────────
@@ -168,7 +132,15 @@ export default function LineupClient({ userId }) {
         isOpen={isTacticsOpen}
         onClose={() => setIsTacticsOpen(false)}
         currentType={lineupConfig.type}
-        onSelect={(newType) => setLineupConfig((prev) => ({ ...prev, type: newType }))}
+        onSelect={(newType) => {
+          const updatedLineup = realignTactics(newType, squad, lineupConfig);
+          setLineupConfig((prev) => ({
+            ...prev,
+            type: newType,
+            playersID: updatedLineup.playersID,
+            reservesID: updatedLineup.reservesID,
+          }));
+        }}
       />
     </div>
   );

@@ -104,12 +104,11 @@ export default function LineupCourt({
 
   return (
     <div
-      className={`w-full flex items-center justify-center bg-slate-950/50 rounded-xl overflow-hidden relative ${className || 'h-[650px]'}`}
+      className={`w-full flex items-center justify-center bg-zinc-950/40 rounded-2xl border border-white/5 backdrop-blur-sm shadow-xl overflow-hidden relative ${className || 'h-[650px]'}`}
     >
-      <div className="relative h-full w-full shadow-2xl shadow-black/50 rounded-xl overflow-hidden bg-zinc-950">
+      <div className="relative h-full w-full overflow-hidden bg-zinc-950/20">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 opacity-10 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/80" />
+          <div className="absolute inset-0 bg-zinc-900/50" />
         </div>
 
         <GeometricLayer />

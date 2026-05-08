@@ -8,25 +8,22 @@ export const metadata = {
   description: 'Configura tu alineación predeterminada para las próximas jornadas.',
 };
 
-export default async function LineupPage() {
+export default async function LineupPage({ searchParams }) {
+  const params = await searchParams;
   const session = await auth();
 
   if (!session) {
     redirect('/login');
   }
 
-  const userId = session.user.id;
+  const sessionUserId = session.user.id;
+  const targetUserId = params?.userId;
 
-  return (
-    <div className="min-h-screen bg-background">
-      <PageHeader
-        title="Alineación"
-        description="Gestiona tu quinteto inicial, reservas y capitán para la próxima jornada."
-      />
+  // Security check: Only allow users to see/edit their own lineup
+  if (targetUserId && String(targetUserId) !== String(sessionUserId)) {
+    // Optional: Redirect to their own lineup if they try to snoope
+    redirect('/lineup');
+  }
 
-      <div className="container mx-auto px-4 md:px-8">
-        <LineupClient userId={userId} />
-      </div>
-    </div>
-  );
+  return <LineupClient userId={sessionUserId} />;
 }
