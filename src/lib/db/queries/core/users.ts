@@ -319,6 +319,7 @@ export async function getUserSquadDetails(userId: number | string): Promise<User
       p.price, 
       p.price_increment, 
       p.puntos as points,
+      ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
       p.img
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id

@@ -133,9 +133,65 @@ export function realignTactics(newType, squad, currentLineup) {
   });
 
   // Return exactly 10 in playersID (5 sorted starters + 5 bench)
+  // Ensure we have exactly 10 unique IDs as strings
+  const finalIds = [...new Set([...sortedS, ...finalB].map((p) => String(p.id)))].slice(0, 10);
+
   return {
-    playersID: [...sortedS, ...finalB].map((p) => String(p.id)),
-    reservesID: finalR.map((p) => String(p.id)),
+    playersID: finalIds,
+    reservesID: [...new Set(finalR.map((p) => String(p.id)))],
+  };
+}
+
+/**
+ * Perform a manual player swap or replacement
+ */
+export function performSwap(targetId, newId, currentLineup) {
+  // Normalize all input IDs to strings for reliable comparison
+  const tId = String(targetId);
+  const nId = String(newId);
+
+  let playersID = [...(currentLineup.playersID || [])].map(String);
+  let reservesID = [...(currentLineup.reservesID || [])].map(String);
+
+  const targetIdx = playersID.findIndex((id) => id === tId);
+  const newActiveIdx = playersID.findIndex((id) => id === nId);
+  const newReserveIdx = reservesID.findIndex((id) => id === nId);
+
+  if (targetIdx === -1) return currentLineup; // Safety check
+
+  if (newActiveIdx !== -1) {
+    // SCENARIO 1: Swap between two active players (Starters/Bench)
+    const temp = playersID[targetIdx];
+    playersID[targetIdx] = playersID[newActiveIdx];
+    playersID[newActiveIdx] = temp;
+  } else {
+    // SCENARIO 2: Replace active player with someone from squad/reserves
+    // (They are not in playersID, so they must be entering from the outside)
+    const oldId = playersID[targetIdx];
+    playersID[targetIdx] = nId;
+
+    // Move old player to reserves, remove new player from reserves
+    reservesID = reservesID.filter((id) => id !== nId);
+    if (!reservesID.includes(oldId)) {
+      reservesID.push(oldId);
+    }
+  }
+
+  // Deduplicate just in case
+  playersID = [...new Set(playersID)].slice(0, 10);
+  reservesID = [...new Set(reservesID)];
+
+  // If the target was the captain, transfer captaincy to the new player
+  let captain = currentLineup.captain;
+  if (String(captain) === tId) {
+    captain = nId;
+  }
+
+  return {
+    ...currentLineup,
+    playersID,
+    reservesID,
+    captain,
   };
 }
 

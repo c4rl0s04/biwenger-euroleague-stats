@@ -7,7 +7,13 @@ import LineupControlBar from './LineupControlBar';
 import LineupCourtSection from './LineupCourtSection';
 import LineupBenchSection from './LineupBenchSection';
 import LineupTacticsModal from './LineupTacticsModal';
-import { realignTactics, normalizeLineupConfig, deriveRotation } from '@/lib/utils/lineup-logic';
+import LineupPlayerSwapModal from './LineupPlayerSwapModal';
+import {
+  realignTactics,
+  normalizeLineupConfig,
+  deriveRotation,
+  performSwap,
+} from '@/lib/utils/lineup-logic';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -23,6 +29,10 @@ export default function LineupClient({ userId }) {
     captain: null,
     type: '2-2-1',
   });
+
+  // ── Swap State ──────────────────────────────────────────────────────────
+  const [swapTarget, setSwapTarget] = useState(null); // { player, isStarter }
+  const [isSwapOpen, setIsSwapOpen] = useState(false);
 
   // ── Data Loading ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -55,6 +65,21 @@ export default function LineupClient({ userId }) {
 
     loadData();
   }, [userId]);
+
+  // ── Handlers ────────────────────────────────────────────────────────────
+  const handlePlayerClick = (player, isStarter) => {
+    setSwapTarget({ player, isStarter });
+    setIsSwapOpen(true);
+  };
+
+  const handlePlayerSelect = (newPlayer) => {
+    if (!swapTarget) return;
+
+    const updatedLineup = performSwap(swapTarget.player.id, newPlayer.id, lineupConfig);
+    setLineupConfig(updatedLineup);
+    setIsSwapOpen(false);
+    setSwapTarget(null);
+  };
 
   // ── Save Handler ────────────────────────────────────────────────────────
   const handleSave = async () => {
@@ -118,12 +143,12 @@ export default function LineupClient({ userId }) {
           <LineupCourtSection
             starters={starters}
             captainName={captainName}
-            onPlayerClick={(p) => console.log('Starter clicked:', p)}
+            onPlayerClick={(p) => handlePlayerClick(p, true)}
           />
 
           <LineupBenchSection
             benchPlayers={bench}
-            onPlayerClick={(p) => console.log('Bench clicked:', p)}
+            onPlayerClick={(p) => handlePlayerClick(p, false)}
           />
         </div>
       </div>
@@ -141,6 +166,16 @@ export default function LineupClient({ userId }) {
             reservesID: updatedLineup.reservesID,
           }));
         }}
+      />
+
+      <LineupPlayerSwapModal
+        isOpen={isSwapOpen}
+        onClose={() => setIsSwapOpen(false)}
+        targetPlayer={swapTarget?.player}
+        isStarter={swapTarget?.isStarter}
+        squad={squad}
+        activeIds={new Set(lineupConfig.playersID)}
+        onSelect={handlePlayerSelect}
       />
     </div>
   );
