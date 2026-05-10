@@ -23,18 +23,47 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
     setSellPrice((prev) => Math.max(0, prev + amount));
   };
 
-  // Position theme colors (Matching the rest of the app)
+  // Position theme colors
   const positionThemes = {
-    Base: 'text-blue-400 border-blue-400/30 bg-blue-400/10 shadow-blue-500/20',
-    Alero: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/10 shadow-emerald-500/20',
-    Pivot: 'text-rose-400 border-rose-400/30 bg-rose-400/10 shadow-rose-500/20',
+    Base: 'border-blue-400/50 shadow-blue-500/10',
+    Alero: 'border-emerald-400/50 shadow-emerald-500/10',
+    Pivot: 'border-rose-400/50 shadow-rose-500/10',
   };
   const theme = positionThemes[player.position] || positionThemes.Base;
+
+  const getButtonStyles = () => {
+    switch (activeTab) {
+      case 'vender':
+        return 'bg-white text-black hover:bg-zinc-200';
+      case 'inmediata':
+        return 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20';
+      case 'subasta':
+        return 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-indigo-500/20';
+      case 'cedible':
+        return 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/20';
+      default:
+        return 'bg-white text-black';
+    }
+  };
+
+  const getButtonLabel = () => {
+    switch (activeTab) {
+      case 'vender':
+        return 'Poner en Venta';
+      case 'inmediata':
+        return 'Venta Inmediata';
+      case 'subasta':
+        return 'Iniciar Subasta';
+      case 'cedible':
+        return 'Poner Cedible';
+      default:
+        return 'Confirmar';
+    }
+  };
 
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -43,45 +72,39 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
           className="absolute inset-0 bg-black/90 backdrop-blur-md cursor-pointer"
         />
 
-        {/* Modal Content */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 30 }}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 30 }}
-          className="relative w-full max-w-xl bg-zinc-950 border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative w-full max-w-md bg-zinc-950 border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
         >
-          {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-8 right-8 p-3 rounded-full hover:bg-white/10 text-zinc-500 hover:text-white transition-all cursor-pointer z-50"
+            className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 text-zinc-500 hover:text-white transition-all cursor-pointer z-50"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
 
-          {/* Player Header */}
-          <div className="p-10 pb-6 flex flex-col items-center text-center">
-            <div
-              className={`relative w-28 h-28 rounded-full border-2 ${theme} p-1 mb-4 shadow-2xl`}
-            >
+          <div className="p-8 pb-4 flex flex-col items-center text-center">
+            <div className={`relative w-20 h-20 rounded-full border ${theme} p-0.5 mb-3`}>
               <div className="w-full h-full rounded-full bg-zinc-900 overflow-hidden relative">
                 {player.img && (
                   <Image
                     src={player.img}
                     alt={player.name}
                     fill
-                    className="object-cover object-top scale-[1.6] origin-top pt-2"
+                    className="object-cover object-top scale-[1.6] origin-top pt-1"
                   />
                 )}
               </div>
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tight uppercase mb-1">
+            <h2 className="text-xl font-black text-white tracking-tight uppercase">
               {player.name}
             </h2>
-            <p className="text-zinc-400 font-bold text-lg">{formatCurrency(player.price)}</p>
+            <p className="text-zinc-500 font-bold text-sm">{formatCurrency(player.price)}</p>
           </div>
 
-          {/* Custom Tabs */}
-          <div className="px-6 flex items-center justify-between border-b border-white/5">
+          <div className="px-4 flex items-center justify-between border-b border-white/5">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
               const Icon = tab.icon;
@@ -90,18 +113,18 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex-1 flex flex-col items-center gap-2 py-4 px-2 transition-all relative cursor-pointer
+                    flex-1 flex flex-col items-center gap-1.5 py-3 px-1 transition-all relative cursor-pointer
                     ${isActive ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}
                   `}
                 >
-                  <Icon size={18} className={isActive ? 'text-primary' : ''} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">
-                    {tab.label}
+                  <Icon size={16} />
+                  <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
+                    {tab.label.split(' ')[0]}
                   </span>
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-white"
                     />
                   )}
                 </button>
@@ -109,48 +132,45 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
             })}
           </div>
 
-          {/* Price Selector */}
-          <div className="p-10 space-y-10">
-            <div className="flex flex-col items-center gap-6">
-              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500">
-                Precio de Venta
-              </span>
+          <div className="p-8 space-y-8">
+            {(activeTab === 'vender' || activeTab === 'subasta') && (
+              <div className="flex flex-col items-center gap-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Precio Sugerido
+                </span>
 
-              <div className="flex items-center gap-8">
-                <button
-                  onClick={() => handlePriceChange(-10000)}
-                  className="w-14 h-14 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer active:scale-90"
-                >
-                  <Minus size={24} />
-                </button>
+                <div className="flex items-center gap-6">
+                  <button
+                    onClick={() => handlePriceChange(-10000)}
+                    className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer"
+                  >
+                    <Minus size={18} />
+                  </button>
 
-                <div className="flex flex-col items-center">
-                  <span className="text-4xl font-black text-white tracking-tight">
+                  <span className="text-2xl font-black text-white tracking-tight min-w-[140px] text-center">
                     {formatCurrency(sellPrice)}
                   </span>
-                  <div className="w-48 h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent mt-4" />
+
+                  <button
+                    onClick={() => handlePriceChange(10000)}
+                    className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer"
+                  >
+                    <Plus size={18} />
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => handlePriceChange(10000)}
-                  className="w-14 h-14 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer active:scale-90"
-                >
-                  <Plus size={24} />
-                </button>
               </div>
-            </div>
+            )}
 
-            {/* Actions */}
-            <div className="space-y-4">
-              <button className="w-full py-5 rounded-2xl bg-zinc-900 border border-white/5 text-white font-black uppercase tracking-widest hover:bg-zinc-800 transition-all cursor-pointer text-sm">
+            <div className="space-y-3">
+              <button className="w-full py-4 rounded-xl bg-zinc-900 border border-white/5 text-zinc-400 font-black uppercase tracking-widest hover:bg-zinc-800 transition-all cursor-pointer text-xs">
                 Añadir Jugador
               </button>
 
               <button
                 onClick={() => onConfirm?.(player, sellPrice)}
-                className="w-full py-5 rounded-2xl bg-white text-black font-black uppercase tracking-widest hover:bg-zinc-200 transition-all cursor-pointer text-sm shadow-[0_10px_30px_rgba(255,255,255,0.15)]"
+                className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all cursor-pointer text-xs shadow-lg ${getButtonStyles()}`}
               >
-                Poner en Venta
+                {getButtonLabel()}
               </button>
             </div>
           </div>

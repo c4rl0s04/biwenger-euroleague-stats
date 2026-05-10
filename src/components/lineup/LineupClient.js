@@ -182,6 +182,7 @@ export default function LineupClient({ userId }) {
       </div>
 
       <LineupSellModal
+        key={sellTarget?.id}
         isOpen={isSellOpen}
         onClose={() => setIsSellOpen(false)}
         player={sellTarget}
