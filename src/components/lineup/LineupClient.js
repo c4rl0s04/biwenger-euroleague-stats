@@ -9,6 +9,7 @@ import LineupBenchSection from './LineupBenchSection';
 import LineupTacticsModal from './LineupTacticsModal';
 import LineupPlayerSwapModal from './LineupPlayerSwapModal';
 import LineupSquadAnalysis from './LineupSquadAnalysis';
+import LineupSellModal from './LineupSellModal';
 import {
   realignTactics,
   normalizeLineupConfig,
@@ -34,6 +35,10 @@ export default function LineupClient({ userId }) {
   // ── Swap State ──────────────────────────────────────────────────────────
   const [swapTarget, setSwapTarget] = useState(null); // { player, isStarter }
   const [isSwapOpen, setIsSwapOpen] = useState(false);
+
+  // ── Sell State ──────────────────────────────────────────────────────────
+  const [sellTarget, setSellTarget] = useState(null);
+  const [isSellOpen, setIsSellOpen] = useState(false);
 
   // ── Data Loading ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -86,6 +91,18 @@ export default function LineupClient({ userId }) {
     setLineupConfig(updatedLineup);
     setIsSwapOpen(false);
     setSwapTarget(null);
+  };
+
+  const handleSellClick = (player) => {
+    setSellTarget(player);
+    setIsSellOpen(true);
+  };
+
+  const handleSellConfirm = (player, price) => {
+    console.log(`Poniendo a la venta a ${player.name} por ${price}`);
+    // Endpoint logic will go here in the future
+    setIsSellOpen(false);
+    setSellTarget(null);
   };
 
   // ── Save Handler ────────────────────────────────────────────────────────
@@ -157,8 +174,19 @@ export default function LineupClient({ userId }) {
         </div>
 
         {/* Squad Analysis Section */}
-        <LineupSquadAnalysis squad={squad} onPlayerClick={(p) => handlePlayerClick(p)} />
+        <LineupSquadAnalysis
+          squad={squad}
+          onPlayerClick={(p) => handlePlayerClick(p)}
+          onSellClick={handleSellClick}
+        />
       </div>
+
+      <LineupSellModal
+        isOpen={isSellOpen}
+        onClose={() => setIsSellOpen(false)}
+        player={sellTarget}
+        onConfirm={handleSellConfirm}
+      />
 
       <LineupTacticsModal
         isOpen={isTacticsOpen}

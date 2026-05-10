@@ -18,6 +18,8 @@ import {
   AlertCircle,
   Activity,
   ChevronDown,
+  ChevronUp,
+  HandCoins,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,6 +35,7 @@ const POSITION_COLORS = {
     shadow: 'shadow-blue-500/30',
     line: 'from-blue-500/40',
     hoverText: 'hover:text-blue-400',
+    hoverBg: 'hover:bg-blue-500/20',
   },
   Alero: {
     text: 'text-white',
@@ -41,6 +44,7 @@ const POSITION_COLORS = {
     shadow: 'shadow-emerald-500/30',
     line: 'from-emerald-500/40',
     hoverText: 'hover:text-emerald-400',
+    hoverBg: 'hover:bg-emerald-500/20',
   },
   Pivot: {
     text: 'text-white',
@@ -49,10 +53,11 @@ const POSITION_COLORS = {
     shadow: 'shadow-rose-500/30',
     line: 'from-rose-500/40',
     hoverText: 'hover:text-rose-400',
+    hoverBg: 'hover:bg-rose-500/20',
   },
 };
 
-export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
+export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellClick }) {
   const [expanded, setExpanded] = useState({
     Base: true,
     Alero: true,
@@ -257,14 +262,14 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                   >
                     <Table tableClassName="table-fixed">
                       <TableHeader>
-                        <TableRow hovering={false} className="bg-transparent border-none">
-                          <TableHeaderCell
-                            align="left"
-                            className="text-zinc-500 border-none pb-2 w-[35%] cursor-pointer hover:text-zinc-300 transition-colors"
-                            onClick={() => handleSort('name')}
-                          >
-                            <div className="flex items-center gap-1 whitespace-nowrap">
-                              Jugador <SortIcon columnKey="name" />
+                        <TableRow className="hover:bg-transparent">
+                          <TableHeaderCell className="w-[30%] pl-6">
+                            <div
+                              className="flex items-center gap-2 cursor-pointer group/h text-zinc-500 hover:text-zinc-300 transition-colors"
+                              onClick={() => handleSort('name')}
+                            >
+                              <span>JUGADOR</span>
+                              <SortIcon columnKey="name" />
                             </div>
                           </TableHeaderCell>
                           <TableHeaderCell
@@ -287,7 +292,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-rose-400/60 border-none pb-2 w-[20%] cursor-pointer hover:text-rose-400 transition-colors"
+                            className="text-rose-400/60 border-none pb-2 w-[15%] cursor-pointer hover:text-rose-400 transition-colors"
                             onClick={() => handleSort('forma')}
                           >
                             <div className="flex items-center justify-center gap-1 whitespace-nowrap">
@@ -303,14 +308,19 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                               Valor <SortIcon columnKey="price" />
                             </div>
                           </TableHeaderCell>
-                          <TableHeaderCell
-                            align="center"
-                            className="text-indigo-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-indigo-400 transition-colors"
-                            onClick={() => handleSort('price_increment')}
-                          >
-                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
-                              Tend. <SortIcon columnKey="price_increment" />
+                          <TableHeaderCell className="w-[10%] text-center">
+                            <div
+                              className="flex items-center justify-center gap-2 cursor-pointer text-indigo-400/60 hover:text-indigo-400 transition-colors"
+                              onClick={() => handleSort('price_increment')}
+                            >
+                              <span>TEND.</span>
+                              <SortIcon columnKey="price_increment" />
                             </div>
+                          </TableHeaderCell>
+                          <TableHeaderCell className="w-[10%] text-center pr-6">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                              ACC.
+                            </span>
                           </TableHeaderCell>
                         </TableRow>
                       </TableHeader>
@@ -321,7 +331,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                             className="cursor-pointer hover:bg-white/[0.03] transition-all group border-b border-white/[0.02] last:border-none"
                             onClick={() => onPlayerClick?.(player)}
                           >
-                            <TableCell align="left" className="py-4 border-none">
+                            <TableCell align="left" className="py-4 border-none pl-6">
                               <TableIdentity
                                 name={player.name}
                                 image={player.img}
@@ -355,11 +365,27 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                             >
                               {formatPrice(player.price)}
                             </TableCell>
-                            <TableCell align="center" className="border-none">
+                            <TableCell className="text-center">
                               <div className="flex flex-col items-center gap-1.5">
                                 {renderTrend(player.price_increment)}
                                 {renderStatus(player.status)}
                               </div>
+                            </TableCell>
+                            <TableCell className="text-center pr-6">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSellClick?.(player);
+                                }}
+                                title="Poner en venta"
+                                className={cn(
+                                  'p-2 rounded-lg transition-all text-zinc-500 cursor-pointer active:scale-90',
+                                  colors.hoverText,
+                                  colors.hoverBg
+                                )}
+                              >
+                                <HandCoins size={18} />
+                              </button>
                             </TableCell>
                           </TableRow>
                         ))}
