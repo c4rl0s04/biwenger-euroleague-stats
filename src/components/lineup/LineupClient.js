@@ -8,6 +8,7 @@ import LineupCourtSection from './LineupCourtSection';
 import LineupBenchSection from './LineupBenchSection';
 import LineupTacticsModal from './LineupTacticsModal';
 import LineupPlayerSwapModal from './LineupPlayerSwapModal';
+import LineupSquadAnalysis from './LineupSquadAnalysis';
 import {
   realignTactics,
   normalizeLineupConfig,
@@ -67,8 +68,14 @@ export default function LineupClient({ userId }) {
   }, [userId]);
 
   // ── Handlers ────────────────────────────────────────────────────────────
-  const handlePlayerClick = (player, isStarter) => {
-    setSwapTarget({ player, isStarter });
+  const handlePlayerClick = (player, forceStarter = null) => {
+    // Detect if player is currently in the starting 5
+    const isActuallyStarter =
+      forceStarter !== null
+        ? forceStarter
+        : lineupConfig.playersID.slice(0, 5).includes(String(player.id));
+
+    setSwapTarget({ player, isStarter: isActuallyStarter });
     setIsSwapOpen(true);
   };
 
@@ -151,6 +158,9 @@ export default function LineupClient({ userId }) {
             onPlayerClick={(p) => handlePlayerClick(p, false)}
           />
         </div>
+
+        {/* Squad Analysis Section */}
+        <LineupSquadAnalysis squad={squad} onPlayerClick={(p) => handlePlayerClick(p)} />
       </div>
 
       <LineupTacticsModal

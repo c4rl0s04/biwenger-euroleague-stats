@@ -107,7 +107,16 @@ export function TableCell({ children, className, align = 'center', color, colSpa
  * TableIdentity - A component for displaying an entity's identity (avatar + name + optional subtitle).
  * Used for both Managers and Teams.
  */
-export function TableIdentity({ name, image, subtitle, link, color, size = 'md', className }) {
+export function TableIdentity({
+  name,
+  image,
+  subtitle,
+  link,
+  color,
+  size = 'md',
+  className,
+  imageClassName,
+}) {
   const isSm = size === 'sm';
 
   const content = (
@@ -119,7 +128,7 @@ export function TableIdentity({ name, image, subtitle, link, color, size = 'md',
     >
       <div
         className={cn(
-          'relative shrink-0',
+          'relative shrink-0 overflow-hidden rounded-full border border-white/5 shadow-md',
           isSm ? 'w-7 h-7 md:w-8 md:h-8' : 'w-9 h-9 md:w-10 md:h-10'
         )}
       >
@@ -128,16 +137,17 @@ export function TableIdentity({ name, image, subtitle, link, color, size = 'md',
             src={image}
             alt={name}
             fill
-            className="rounded-full object-cover border border-white/5 shadow-md"
+            className={cn(
+              'object-cover object-top scale-125 transition-transform duration-500 group-hover/link:scale-150 origin-top',
+              imageClassName
+            )}
             sizes={isSm ? '32px' : '40px'}
           />
         ) : (
           <div
             className={cn(
-              'rounded-full bg-slate-800 flex items-center justify-center font-black text-white shadow-md border border-white/5',
-              isSm
-                ? 'w-7 h-7 md:w-8 md:h-8 text-xs'
-                : 'w-9 h-9 md:w-10 md:h-10 text-sm md:text-base'
+              'w-full h-full bg-slate-800 flex items-center justify-center font-black text-white',
+              isSm ? 'text-xs' : 'text-sm md:text-base'
             )}
           >
             {name.charAt(0)}
