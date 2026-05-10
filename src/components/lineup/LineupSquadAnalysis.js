@@ -325,6 +325,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                                 subtitle={player.team}
                                 size="sm"
                                 className="group-hover:translate-x-1 transition-transform"
+                                nameClassName="hover:underline hover:text-blue-400 cursor-pointer transition-colors"
                               />
                             </TableCell>
                             <TableCell

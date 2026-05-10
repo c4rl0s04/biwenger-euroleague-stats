@@ -116,6 +116,7 @@ export function TableIdentity({
   size = 'md',
   className,
   imageClassName,
+  nameClassName,
 }) {
   const isSm = size === 'sm';
 
@@ -159,7 +160,8 @@ export function TableIdentity({
           className={cn(
             'font-bold transition-all group-hover/link:scale-105 origin-left tracking-tight whitespace-nowrap',
             isSm ? 'text-sm md:text-base' : 'text-base md:text-lg',
-            color
+            color,
+            nameClassName
           )}
         >
           {name}
