@@ -10,20 +10,20 @@ export default function LineupPlayerCard({ player, onClick, size = 'base', isSel
   const handleImageError = () => setImgError(true);
 
   const positionColors = {
-    PG: { border: 'border-blue-500', bg: 'bg-slate-900' },
-    Base: { border: 'border-blue-500', bg: 'bg-slate-900' },
-    SG: { border: 'border-blue-500', bg: 'bg-slate-900' },
-    SF: { border: 'border-green-500', bg: 'bg-slate-900' },
-    Alero: { border: 'border-green-500', bg: 'bg-slate-900' },
-    PF: { border: 'border-green-500', bg: 'bg-slate-900' },
-    C: { border: 'border-red-500', bg: 'bg-slate-900' },
-    Pivot: { border: 'border-red-500', bg: 'bg-slate-900' },
+    PG: { border: 'border-blue-400', bg: 'bg-blue-900/40' },
+    Base: { border: 'border-blue-400', bg: 'bg-blue-900/40' },
+    SG: { border: 'border-blue-400', bg: 'bg-blue-900/40' },
+    SF: { border: 'border-emerald-400', bg: 'bg-emerald-900/40' },
+    Alero: { border: 'border-emerald-400', bg: 'bg-emerald-900/40' },
+    PF: { border: 'border-emerald-400', bg: 'bg-emerald-900/40' },
+    C: { border: 'border-rose-400', bg: 'bg-rose-900/40' },
+    Pivot: { border: 'border-rose-400', bg: 'bg-rose-900/40' },
   };
 
   const isCaptain = player.is_captain;
   const baseColors = positionColors[player.position] || {
-    border: 'border-white',
-    bg: 'bg-slate-900',
+    border: 'border-white/40',
+    bg: 'bg-zinc-900/40',
   };
 
   const colors = {
@@ -58,7 +58,7 @@ export default function LineupPlayerCard({ player, onClick, size = 'base', isSel
       <div
         className={`relative ${s.avatar} rounded-full ${s.border} ${colors.border} 
           ${isCaptain ? 'shadow-[0_0_30px_rgba(250,204,21,0.9),0_0_60px_rgba(250,204,21,0.6)]' : 'shadow-[0_6px_16px_rgba(0,0,0,0.6)]'} 
-          bg-slate-900 overflow-hidden z-20`}
+          ${colors.bg} overflow-hidden z-20`}
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none z-30" />
 
