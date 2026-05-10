@@ -193,25 +193,25 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-zinc-500 border-none pb-2 w-[10%]"
+                            className="text-blue-400/60 border-none pb-2 w-[10%]"
                           >
                             Media
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-zinc-500 border-none pb-2 w-[10%]"
+                            className="text-amber-400/60 border-none pb-2 w-[10%]"
                           >
                             Puntos
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-zinc-500 border-none pb-2 w-[20%]"
+                            className="text-rose-400/60 border-none pb-2 w-[20%]"
                           >
                             Forma
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="right"
-                            className="text-zinc-500 border-none pb-2 w-[15%]"
+                            className="text-emerald-400/60 border-none pb-2 w-[15%]"
                           >
                             Valor
                           </TableHeaderCell>
@@ -241,13 +241,13 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                             </TableCell>
                             <TableCell
                               align="center"
-                              className="border-none font-mono text-zinc-200 font-black text-sm"
+                              className="border-none font-mono text-blue-400 font-black text-sm"
                             >
                               {player.average || 0}
                             </TableCell>
                             <TableCell
                               align="center"
-                              className="border-none text-zinc-400 font-bold text-sm"
+                              className="border-none text-amber-400 font-bold text-sm"
                             >
                               {player.points || 0}
                             </TableCell>
@@ -256,7 +256,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                             </TableCell>
                             <TableCell
                               align="right"
-                              className="border-none text-zinc-200 font-bold text-sm whitespace-nowrap"
+                              className="border-none text-emerald-400 font-bold text-sm whitespace-nowrap"
                             >
                               {formatPrice(player.price)}
                             </TableCell>
