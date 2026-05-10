@@ -24,7 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { getScoreColor } from '@/lib/utils/format';
+import { formatCurrency, formatPrice, getScoreColor } from '@/lib/utils/format';
 
 const POSITIONS = ['Base', 'Alero', 'Pivot'];
 const POSITION_COLORS = {
@@ -200,11 +200,6 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
         ))}
       </div>
     );
-  };
-
-  const formatPrice = (price) => {
-    if (!price) return '0 €';
-    return (price / 1000000).toFixed(2) + ' M€';
   };
 
   return (
