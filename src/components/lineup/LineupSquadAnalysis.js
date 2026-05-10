@@ -155,13 +155,13 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
     if (val > 0)
       return (
         <div className="flex items-center justify-center text-emerald-400">
-          <span className="text-[11px] font-black">+{(val / 1000).toFixed(0)}k</span>
+          <span className="font-black">+{(val / 1000).toFixed(0)}k</span>
         </div>
       );
     if (val < 0)
       return (
         <div className="flex items-center justify-center text-rose-400">
-          <span className="text-[11px] font-black">{(val / 1000).toFixed(0)}k</span>
+          <span className="font-black">{(val / 1000).toFixed(0)}k</span>
         </div>
       );
     return <Minus className="w-3 h-3 text-zinc-500 mx-auto" />;
@@ -203,7 +203,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
   };
 
   return (
-    <ElegantCard title="Análisis de Plantilla" icon={BarChart3} color="zinc" className="mt-8">
+    <ElegantCard hideHeader={true} color="zinc" className="mt-8">
       <div className="space-y-10">
         {POSITIONS.map((pos) => {
           const players = groupedSquad[pos];
@@ -258,64 +258,68 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
                     <Table tableClassName="table-fixed">
                       <TableHeader>
                         <TableRow className="hover:bg-transparent">
-                          <TableHeaderCell className="w-[30%] pl-6">
+                          <TableHeaderCell className="w-[35%] pl-6">
                             <div
-                              className="flex items-center gap-2 cursor-pointer group/h text-zinc-500 hover:text-zinc-300 transition-colors"
+                              className="flex items-center gap-2 cursor-pointer group/h text-zinc-500"
                               onClick={() => handleSort('name')}
                             >
-                              <span>JUGADOR</span>
+                              <span className="uppercase text-[11px] font-black tracking-[0.2em]">
+                                Jugador
+                              </span>
                               <SortIcon columnKey="name" />
                             </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-blue-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-blue-400 transition-colors"
+                            className="border-none pb-2 w-[8%] cursor-pointer group/h"
                             onClick={() => handleSort('average')}
                           >
-                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap text-blue-400 uppercase text-[11px] font-black tracking-[0.2em]">
                               Media <SortIcon columnKey="average" />
                             </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-amber-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-amber-400 transition-colors"
+                            className="border-none pb-2 w-[8%] cursor-pointer group/h"
                             onClick={() => handleSort('points')}
                           >
-                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap text-amber-400 uppercase text-[11px] font-black tracking-[0.2em]">
                               Puntos <SortIcon columnKey="points" />
                             </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-rose-400/60 border-none pb-2 w-[15%] cursor-pointer hover:text-rose-400 transition-colors"
+                            className="border-none pb-2 w-[18%] cursor-pointer group/h"
                             onClick={() => handleSort('forma')}
                           >
-                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap text-rose-400 uppercase text-[11px] font-black tracking-[0.2em]">
                               Forma <SortIcon columnKey="forma" />
                             </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="right"
-                            className="text-emerald-400/60 border-none pb-2 w-[15%] cursor-pointer hover:text-emerald-400 transition-colors"
+                            className="border-none pb-2 w-[10%] cursor-pointer group/h"
                             onClick={() => handleSort('price')}
                           >
-                            <div className="flex items-center justify-end gap-1 whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1 whitespace-nowrap text-emerald-400 uppercase text-[11px] font-black tracking-[0.2em]">
                               Valor <SortIcon columnKey="price" />
                             </div>
                           </TableHeaderCell>
-                          <TableHeaderCell className="w-[10%] text-center">
+                          <TableHeaderCell className="w-[8%] text-center">
                             <div
-                              className="flex items-center justify-center gap-2 cursor-pointer text-indigo-400/60 hover:text-indigo-400 transition-colors"
+                              className="flex items-center justify-center gap-2 cursor-pointer group/h text-indigo-400"
                               onClick={() => handleSort('price_increment')}
                             >
-                              <span>TEND.</span>
+                              <span className="uppercase text-[11px] font-black tracking-[0.2em]">
+                                Tend.
+                              </span>
                               <SortIcon columnKey="price_increment" />
                             </div>
                           </TableHeaderCell>
-                          <TableHeaderCell className="w-[10%] text-center pr-6">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                              ACC.
-                            </span>
+                          <TableHeaderCell className="w-[13%] text-center pr-6">
+                            <div className="flex items-center justify-center text-white uppercase text-[11px] font-black tracking-[0.2em]">
+                              Mercado
+                            </div>
                           </TableHeaderCell>
                         </TableRow>
                       </TableHeader>
@@ -372,14 +376,17 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
                                   e.stopPropagation();
                                   onSellClick?.(player);
                                 }}
-                                title="Poner en venta"
-                                className={cn(
-                                  'p-2 rounded-lg transition-all text-zinc-500 cursor-pointer active:scale-90',
-                                  colors.hoverText,
-                                  colors.hoverBg
-                                )}
+                                className="px-3 py-1.5 rounded-lg border border-white/40 text-white transition-all hover:bg-white hover:text-zinc-900 cursor-pointer active:scale-95 group/sell"
                               >
-                                <HandCoins size={18} />
+                                <div className="flex items-center justify-center gap-2">
+                                  <HandCoins
+                                    size={14}
+                                    className="transition-transform group-hover/sell:scale-110"
+                                  />
+                                  <span className="text-[10px] font-black uppercase tracking-widest">
+                                    Vender
+                                  </span>
+                                </div>
                               </button>
                             </TableCell>
                           </TableRow>

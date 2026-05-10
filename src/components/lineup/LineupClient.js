@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
-import { PageHeader } from '@/components/ui';
 import LineupControlBar from './LineupControlBar';
 import LineupCourtSection from './LineupCourtSection';
 import LineupBenchSection from './LineupBenchSection';
@@ -10,6 +9,9 @@ import LineupTacticsModal from './LineupTacticsModal';
 import LineupPlayerSwapModal from './LineupPlayerSwapModal';
 import LineupSquadAnalysis from './LineupSquadAnalysis';
 import LineupSellModal from './LineupSellModal';
+import { PageHeader } from '@/components/ui';
+import { LayoutGrid, HandCoins, TrendingUp } from 'lucide-react';
+import { Section } from '@/components/layout';
 import {
   realignTactics,
   normalizeLineupConfig,
@@ -141,44 +143,50 @@ export default function LineupClient({ userId }) {
     );
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
       <PageHeader title="Alineación" description="Configura tu equipo para las próximas jornadas" />
 
-      <div className="max-w-5xl mx-auto px-4 md:px-8 space-y-12 pb-24">
-        {/* Action Controls */}
-        <div className="flex justify-center pt-2">
-          <LineupControlBar
-            loading={loading}
-            error={error}
-            success={success}
-            currentType={lineupConfig.type}
-            onSave={handleSave}
-            onReset={() => window.location.reload()}
-            onChangeType={() => setIsTacticsOpen(true)}
-          />
-        </div>
+      <div className="space-y-12">
+        {/* Main Lineup Visualization */}
+        <Section title="Tu Alineación" delay={100} background="section-base">
+          <div className="max-w-5xl mx-auto space-y-10">
+            {/* Action Controls */}
+            <div className="flex justify-center">
+              <LineupControlBar
+                loading={loading}
+                error={error}
+                success={success}
+                currentType={lineupConfig.type}
+                onSave={handleSave}
+                onReset={() => window.location.reload()}
+                onChangeType={() => setIsTacticsOpen(true)}
+              />
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-          <LineupCourtSection
-            starters={starters}
-            captainName={captainName}
-            onPlayerClick={(p) => handlePlayerClick(p, true)}
-          />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+              <LineupCourtSection
+                starters={starters}
+                captainName={captainName}
+                onPlayerClick={(p) => handlePlayerClick(p, true)}
+              />
 
-          <LineupBenchSection
-            benchPlayers={bench}
-            onPlayerClick={(p) => handlePlayerClick(p, false)}
-          />
-        </div>
+              <LineupBenchSection
+                benchPlayers={bench}
+                onPlayerClick={(p) => handlePlayerClick(p, false)}
+              />
+            </div>
+          </div>
+        </Section>
 
         {/* Squad Analysis Section */}
-        <LineupSquadAnalysis
-          squad={squad}
-          onPlayerClick={(p) => handlePlayerClick(p)}
-          onSellClick={handleSellClick}
-        />
+        <Section title="Mercado y Plantilla" delay={200} background="section-raised">
+          <LineupSquadAnalysis
+            squad={squad}
+            onPlayerClick={(p) => handlePlayerClick(p)}
+            onSellClick={handleSellClick}
+          />
+        </Section>
       </div>
 
       <LineupSellModal

@@ -55,7 +55,7 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
       case 'subasta':
         return 'Iniciar Subasta';
       case 'cedible':
-        return 'Poner Cedible';
+        return 'Cesión';
       default:
         return 'Confirmar';
     }
@@ -98,10 +98,12 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
                 )}
               </div>
             </div>
-            <h2 className="text-xl font-black text-white tracking-tight uppercase">
+            <h2 className="text-3xl font-black text-white tracking-tight uppercase">
               {player.name}
             </h2>
-            <p className="text-zinc-500 font-bold text-sm">{formatCurrency(player.price)}</p>
+            <p className="text-2xl font-black text-white tracking-tight">
+              {formatCurrency(player.price)}
+            </p>
           </div>
 
           <div className="px-4 flex items-center justify-between border-b border-white/5">
@@ -132,48 +134,52 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
             })}
           </div>
 
-          <div className="p-8 space-y-8">
-            {(activeTab === 'vender' || activeTab === 'subasta') && (
-              <div className="flex flex-col items-center gap-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                  Precio Sugerido
-                </span>
-
-                <div className="flex items-center gap-6">
-                  <button
-                    onClick={() => handlePriceChange(-10000)}
-                    className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer"
-                  >
-                    <Minus size={18} />
-                  </button>
-
-                  <span className="text-2xl font-black text-white tracking-tight min-w-[140px] text-center">
-                    {formatCurrency(sellPrice)}
+          <motion.div layout className="p-8">
+            <AnimatePresence mode="wait">
+              {(activeTab === 'vender' || activeTab === 'subasta') && (
+                <motion.div
+                  key="price-selector"
+                  layout
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="flex flex-col items-center gap-4 mb-8 overflow-hidden"
+                >
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                    Precio Sugerido
                   </span>
 
-                  <button
-                    onClick={() => handlePriceChange(10000)}
-                    className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-            )}
+                  <div className="flex items-center gap-6">
+                    <button
+                      onClick={() => handlePriceChange(-10000)}
+                      className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer"
+                    >
+                      <Minus size={18} />
+                    </button>
 
-            <div className="space-y-3">
-              <button className="w-full py-4 rounded-xl bg-zinc-900 border border-white/5 text-zinc-400 font-black uppercase tracking-widest hover:bg-zinc-800 transition-all cursor-pointer text-xs">
-                Añadir Jugador
-              </button>
+                    <span className="text-3xl font-black text-white tracking-tight min-w-[140px] text-center">
+                      {formatCurrency(sellPrice)}
+                    </span>
 
-              <button
-                onClick={() => onConfirm?.(player, sellPrice)}
-                className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all cursor-pointer text-xs shadow-lg ${getButtonStyles()}`}
-              >
-                {getButtonLabel()}
-              </button>
-            </div>
-          </div>
+                    <button
+                      onClick={() => handlePriceChange(10000)}
+                      className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition-all text-white cursor-pointer"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <motion.button
+              layout
+              onClick={() => onConfirm?.(player, sellPrice)}
+              className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all cursor-pointer text-xs shadow-lg ${getButtonStyles()}`}
+            >
+              {getButtonLabel()}
+            </motion.button>
+          </motion.div>
         </motion.div>
       </div>
     </AnimatePresence>
