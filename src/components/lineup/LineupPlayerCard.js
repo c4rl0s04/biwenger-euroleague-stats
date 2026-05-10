@@ -83,7 +83,7 @@ export default function LineupPlayerCard({ player, onClick, size = 'base', isSel
       <div className="absolute top-[85%] left-1/2 -translate-x-1/2 z-30">
         <div className="flex flex-col items-center">
           <span
-            className={`${colors.bg} ${s.nameText} text-white ${s.namePad} rounded-full border border-white/20 shadow-md whitespace-nowrap font-bold tracking-wider backdrop-blur-md max-w-[150px] truncate`}
+            className={`bg-zinc-900/80 ${s.nameText} text-white ${s.namePad} rounded-full border border-white/20 shadow-md whitespace-nowrap font-bold tracking-wider backdrop-blur-md max-w-[150px] truncate`}
           >
             {player.name || 'Player'}
           </span>
