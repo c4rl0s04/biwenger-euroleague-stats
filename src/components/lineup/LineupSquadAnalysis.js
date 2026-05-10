@@ -74,25 +74,45 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
       });
 
     acc[pos] = [...players].sort((a, b) => {
-      let aVal = a[sortConfig.key];
-      let bVal = b[sortConfig.key];
+      let aVal, bVal;
 
-      // Special case for stats that might be null
-      if (sortConfig.key === 'average') {
-        aVal = a.average || 0;
-        bVal = b.average || 0;
-      }
-      if (sortConfig.key === 'forma') {
-        aVal = a.forma_avg || 0;
-        bVal = b.forma_avg || 0;
-      }
-      if (sortConfig.key === 'price_increment') {
-        aVal = a.price_increment || 0;
-        bVal = b.price_increment || 0;
-      }
+      // Extract and normalize values based on the sort key
+      switch (sortConfig.key) {
+        case 'name':
+          aVal = a.name || '';
+          bVal = b.name || '';
+          return sortConfig.direction === 'asc'
+            ? aVal.localeCompare(bVal)
+            : bVal.localeCompare(aVal);
 
-      if (typeof aVal === 'string') {
-        return sortConfig.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        case 'average':
+          aVal = parseFloat(a.average) || 0;
+          bVal = parseFloat(b.average) || 0;
+          break;
+
+        case 'points':
+          aVal = parseInt(a.points) || 0;
+          bVal = parseInt(b.points) || 0;
+          break;
+
+        case 'forma':
+          aVal = a.forma_avg || 0;
+          bVal = b.forma_avg || 0;
+          break;
+
+        case 'price':
+          aVal = parseInt(a.price) || 0;
+          bVal = parseInt(b.price) || 0;
+          break;
+
+        case 'price_increment':
+          aVal = parseInt(a.price_increment) || 0;
+          bVal = parseInt(b.price_increment) || 0;
+          break;
+
+        default:
+          aVal = a[sortConfig.key] || 0;
+          bVal = b[sortConfig.key] || 0;
       }
 
       return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
