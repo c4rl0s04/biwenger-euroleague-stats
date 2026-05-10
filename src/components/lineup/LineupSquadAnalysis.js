@@ -115,9 +115,9 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
   const SortIcon = ({ columnKey }) => {
     if (sortConfig.key !== columnKey) return null;
     return sortConfig.direction === 'asc' ? (
-      <TrendingUp className="w-2.5 h-2.5 ml-1 inline-block" />
+      <TrendingUp className="w-3 h-3 shrink-0" />
     ) : (
-      <TrendingDown className="w-2.5 h-2.5 ml-1 inline-block" />
+      <TrendingDown className="w-3 h-3 shrink-0" />
     );
   };
 
@@ -243,42 +243,54 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                             className="text-zinc-500 border-none pb-2 w-[35%] cursor-pointer hover:text-zinc-300 transition-colors"
                             onClick={() => handleSort('name')}
                           >
-                            Jugador <SortIcon columnKey="name" />
+                            <div className="flex items-center gap-1 whitespace-nowrap">
+                              Jugador <SortIcon columnKey="name" />
+                            </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
                             className="text-blue-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-blue-400 transition-colors"
                             onClick={() => handleSort('average')}
                           >
-                            Media <SortIcon columnKey="average" />
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                              Media <SortIcon columnKey="average" />
+                            </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
                             className="text-amber-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-amber-400 transition-colors"
                             onClick={() => handleSort('points')}
                           >
-                            Puntos <SortIcon columnKey="points" />
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                              Puntos <SortIcon columnKey="points" />
+                            </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
                             className="text-rose-400/60 border-none pb-2 w-[20%] cursor-pointer hover:text-rose-400 transition-colors"
                             onClick={() => handleSort('forma')}
                           >
-                            Forma <SortIcon columnKey="forma" />
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                              Forma <SortIcon columnKey="forma" />
+                            </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="right"
                             className="text-emerald-400/60 border-none pb-2 w-[15%] cursor-pointer hover:text-emerald-400 transition-colors"
                             onClick={() => handleSort('price')}
                           >
-                            Valor <SortIcon columnKey="price" />
+                            <div className="flex items-center justify-end gap-1 whitespace-nowrap">
+                              Valor <SortIcon columnKey="price" />
+                            </div>
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
                             className="text-indigo-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-indigo-400 transition-colors"
                             onClick={() => handleSort('price_increment')}
                           >
-                            Tend. <SortIcon columnKey="price_increment" />
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                              Tend. <SortIcon columnKey="price_increment" />
+                            </div>
                           </TableHeaderCell>
                         </TableRow>
                       </TableHeader>
