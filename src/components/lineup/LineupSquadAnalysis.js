@@ -128,14 +128,14 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
       return (
         <div className="flex items-center justify-center gap-1 text-emerald-400">
           <TrendingUp className="w-3 h-3" />
-          <span className="text-[10px] font-bold">+{(val / 1000).toFixed(0)}k</span>
+          <span className="text-[11px] font-black">+{(val / 1000).toFixed(0)}k</span>
         </div>
       );
     if (val < 0)
       return (
         <div className="flex items-center justify-center gap-1 text-rose-400">
           <TrendingDown className="w-3 h-3" />
-          <span className="text-[10px] font-bold">{(val / 1000).toFixed(0)}k</span>
+          <span className="text-[11px] font-black">{(val / 1000).toFixed(0)}k</span>
         </div>
       );
     return <Minus className="w-3 h-3 text-zinc-500 mx-auto" />;
@@ -326,7 +326,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                             </TableCell>
                             <TableCell
                               align="right"
-                              className="border-none text-emerald-400 font-bold text-sm whitespace-nowrap"
+                              className="border-none text-emerald-400 font-black text-base whitespace-nowrap"
                             >
                               {formatPrice(player.price)}
                             </TableCell>
