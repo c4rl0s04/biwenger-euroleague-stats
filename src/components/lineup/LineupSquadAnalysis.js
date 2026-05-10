@@ -55,17 +55,70 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
     Alero: true,
     Pivot: true,
   });
+  const [sortConfig, setSortConfig] = useState({ key: 'points', direction: 'desc' });
 
-  // Group players by position
+  // Group players by position with sorting
   const groupedSquad = POSITIONS.reduce((acc, pos) => {
-    acc[pos] = squad
+    const players = squad
       .filter((p) => p.position === pos)
-      .sort((a, b) => (b.points || 0) - (a.points || 0));
+      .map((p) => {
+        // Calculate a numeric average for "Forma" sorting
+        const scores = p.recent_scores
+          ? p.recent_scores
+              .split(',')
+              .filter((s) => s !== 'X')
+              .map(Number)
+          : [];
+        const formaAvg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+        return { ...p, forma_avg: formaAvg };
+      });
+
+    acc[pos] = [...players].sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+
+      // Special case for stats that might be null
+      if (sortConfig.key === 'average') {
+        aVal = a.average || 0;
+        bVal = b.average || 0;
+      }
+      if (sortConfig.key === 'forma') {
+        aVal = a.forma_avg || 0;
+        bVal = b.forma_avg || 0;
+      }
+      if (sortConfig.key === 'price_increment') {
+        aVal = a.price_increment || 0;
+        bVal = b.price_increment || 0;
+      }
+
+      if (typeof aVal === 'string') {
+        return sortConfig.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+
+      return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+
     return acc;
   }, {});
 
   const toggleSection = (pos) => {
     setExpanded((prev) => ({ ...prev, [pos]: !prev[pos] }));
+  };
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc',
+    }));
+  };
+
+  const SortIcon = ({ columnKey }) => {
+    if (sortConfig.key !== columnKey) return null;
+    return sortConfig.direction === 'asc' ? (
+      <TrendingUp className="w-2.5 h-2.5 ml-1 inline-block" />
+    ) : (
+      <TrendingDown className="w-2.5 h-2.5 ml-1 inline-block" />
+    );
   };
 
   const renderTrend = (trend) => {
@@ -187,39 +240,45 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                         <TableRow hovering={false} className="bg-transparent border-none">
                           <TableHeaderCell
                             align="left"
-                            className="text-zinc-500 border-none pb-2 w-[35%]"
+                            className="text-zinc-500 border-none pb-2 w-[35%] cursor-pointer hover:text-zinc-300 transition-colors"
+                            onClick={() => handleSort('name')}
                           >
-                            Jugador
+                            Jugador <SortIcon columnKey="name" />
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-blue-400/60 border-none pb-2 w-[10%]"
+                            className="text-blue-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-blue-400 transition-colors"
+                            onClick={() => handleSort('average')}
                           >
-                            Media
+                            Media <SortIcon columnKey="average" />
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-amber-400/60 border-none pb-2 w-[10%]"
+                            className="text-amber-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-amber-400 transition-colors"
+                            onClick={() => handleSort('points')}
                           >
-                            Puntos
+                            Puntos <SortIcon columnKey="points" />
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-rose-400/60 border-none pb-2 w-[20%]"
+                            className="text-rose-400/60 border-none pb-2 w-[20%] cursor-pointer hover:text-rose-400 transition-colors"
+                            onClick={() => handleSort('forma')}
                           >
-                            Forma
+                            Forma <SortIcon columnKey="forma" />
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="right"
-                            className="text-emerald-400/60 border-none pb-2 w-[15%]"
+                            className="text-emerald-400/60 border-none pb-2 w-[15%] cursor-pointer hover:text-emerald-400 transition-colors"
+                            onClick={() => handleSort('price')}
                           >
-                            Valor
+                            Valor <SortIcon columnKey="price" />
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-indigo-400/60 border-none pb-2 w-[10%]"
+                            className="text-indigo-400/60 border-none pb-2 w-[10%] cursor-pointer hover:text-indigo-400 transition-colors"
+                            onClick={() => handleSort('price_increment')}
                           >
-                            Tend.
+                            Tend. <SortIcon columnKey="price_increment" />
                           </TableHeaderCell>
                         </TableRow>
                       </TableHeader>
