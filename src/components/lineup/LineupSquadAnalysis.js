@@ -28,26 +28,26 @@ const POSITIONS = ['Base', 'Alero', 'Pivot'];
 const POSITION_COLORS = {
   Base: {
     text: 'text-white',
-    bg: 'bg-blue-500/30',
-    border: 'border-blue-400/50',
-    shadow: 'shadow-blue-500/10',
-    line: 'from-blue-500/30',
+    bg: 'bg-blue-600',
+    border: 'border-blue-400',
+    shadow: 'shadow-blue-500/40',
+    line: 'from-blue-600',
     hoverText: 'hover:text-blue-400',
   },
   Alero: {
     text: 'text-white',
-    bg: 'bg-emerald-500/30',
-    border: 'border-emerald-400/50',
-    shadow: 'shadow-emerald-500/10',
-    line: 'from-emerald-500/30',
+    bg: 'bg-emerald-600',
+    border: 'border-emerald-400',
+    shadow: 'shadow-emerald-500/40',
+    line: 'from-emerald-600',
     hoverText: 'hover:text-emerald-400',
   },
   Pivot: {
     text: 'text-white',
-    bg: 'bg-rose-500/30',
-    border: 'border-rose-400/50',
-    shadow: 'shadow-rose-500/10',
-    line: 'from-rose-500/30',
+    bg: 'bg-rose-600',
+    border: 'border-rose-400',
+    shadow: 'shadow-rose-500/40',
+    line: 'from-rose-600',
     hoverText: 'hover:text-rose-400',
   },
 };
@@ -225,7 +225,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                     colors.bg,
                     colors.border,
                     colors.shadow,
-                    isExpanded ? 'scale-100' : 'scale-95 opacity-60'
+                    isExpanded ? 'scale-100' : 'scale-95'
                   )}
                 >
                   {pos}s
