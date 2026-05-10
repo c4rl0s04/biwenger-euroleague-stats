@@ -126,15 +126,13 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
     const val = parseInt(trend);
     if (val > 0)
       return (
-        <div className="flex items-center justify-center gap-1 text-emerald-400">
-          <TrendingUp className="w-3 h-3" />
+        <div className="flex items-center justify-center text-emerald-400">
           <span className="text-[11px] font-black">+{(val / 1000).toFixed(0)}k</span>
         </div>
       );
     if (val < 0)
       return (
-        <div className="flex items-center justify-center gap-1 text-rose-400">
-          <TrendingDown className="w-3 h-3" />
+        <div className="flex items-center justify-center text-rose-400">
           <span className="text-[11px] font-black">{(val / 1000).toFixed(0)}k</span>
         </div>
       );
