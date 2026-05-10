@@ -151,8 +151,13 @@ export async function biwengerFetch(endpoint, options = {}) {
       );
     }
 
-    const data = await response.json();
-    return data;
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : { success: true, status: response.status };
+    } catch (e) {
+      // If it's not JSON but has content, return as text
+      return { success: true, status: response.status, raw: text };
+    }
   } catch (error) {
     // Avoid logging error if it's an internal retry, unless it's the final one
     if (retries === 0 || !error.message.includes('429')) {

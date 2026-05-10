@@ -100,11 +100,31 @@ export default function LineupClient({ userId }) {
     setIsSellOpen(true);
   };
 
-  const handleSellConfirm = (player, price) => {
-    console.log(`Poniendo a la venta a ${player.name} por ${price}`);
-    // Endpoint logic will go here in the future
-    setIsSellOpen(false);
-    setSellTarget(null);
+  const handleSellConfirm = async (player, price) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(false);
+
+      const res = await apiClient.sellPlayer({
+        playerId: player.id,
+        price: price,
+      });
+
+      if (res.success) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        throw new Error(res.message || 'Error al poner en venta');
+      }
+    } catch (err) {
+      console.error('Error selling player:', err);
+      setError(err.message || 'Error al conectar con Biwenger');
+    } finally {
+      setLoading(false);
+      setIsSellOpen(false);
+      setSellTarget(null);
+    }
   };
 
   // ── Save Handler ────────────────────────────────────────────────────────

@@ -172,10 +172,28 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
               )}
             </AnimatePresence>
 
+            <AnimatePresence>
+              {activeTab === 'vender' && sellPrice < player.price && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-[10px] font-black uppercase tracking-widest text-rose-400 text-center mb-4"
+                >
+                  El precio no puede ser menor al valor de mercado
+                </motion.p>
+              )}
+            </AnimatePresence>
+
             <motion.button
               layout
+              disabled={activeTab === 'vender' && sellPrice < player.price}
               onClick={() => onConfirm?.(player, sellPrice)}
-              className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all cursor-pointer text-xs shadow-lg ${getButtonStyles()}`}
+              className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all cursor-pointer text-xs shadow-lg ${
+                activeTab === 'vender' && sellPrice < player.price
+                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'
+                  : getButtonStyles()
+              }`}
             >
               {getButtonLabel()}
             </motion.button>
