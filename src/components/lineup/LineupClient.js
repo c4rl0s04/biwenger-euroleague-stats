@@ -127,10 +127,7 @@ export default function LineupClient({ userId }) {
   // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
-      <PageHeader
-        title="Alineación Predeterminada"
-        description="Configura tu equipo para las próximas jornadas"
-      />
+      <PageHeader title="Alineación" description="Configura tu equipo para las próximas jornadas" />
 
       <div className="max-w-5xl mx-auto px-4 md:px-8 space-y-12 pb-24">
         {/* Action Controls */}
