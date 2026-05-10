@@ -32,6 +32,7 @@ const POSITION_COLORS = {
     border: 'border-blue-400/20',
     shadow: 'shadow-blue-400/5',
     line: 'from-blue-400/20',
+    hoverText: 'hover:text-blue-400',
   },
   Alero: {
     text: 'text-emerald-400',
@@ -39,6 +40,7 @@ const POSITION_COLORS = {
     border: 'border-emerald-400/20',
     shadow: 'shadow-emerald-400/5',
     line: 'from-emerald-400/20',
+    hoverText: 'hover:text-emerald-400',
   },
   Pivot: {
     text: 'text-rose-400',
@@ -46,6 +48,7 @@ const POSITION_COLORS = {
     border: 'border-rose-400/20',
     shadow: 'shadow-rose-400/5',
     line: 'from-rose-400/20',
+    hoverText: 'hover:text-rose-400',
   },
 };
 
@@ -325,7 +328,10 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                                 subtitle={player.team}
                                 size="sm"
                                 className="group-hover:translate-x-1 transition-transform"
-                                nameClassName="hover:text-blue-400 cursor-pointer transition-colors"
+                                nameClassName={cn(
+                                  colors.hoverText,
+                                  'cursor-pointer transition-colors'
+                                )}
                               />
                             </TableCell>
                             <TableCell
