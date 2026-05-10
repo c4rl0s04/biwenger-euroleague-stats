@@ -217,7 +217,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick }) {
                           </TableHeaderCell>
                           <TableHeaderCell
                             align="center"
-                            className="text-zinc-500 border-none pb-2 w-[10%]"
+                            className="text-indigo-400/60 border-none pb-2 w-[10%]"
                           >
                             Tend.
                           </TableHeaderCell>
