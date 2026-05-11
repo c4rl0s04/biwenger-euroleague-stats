@@ -225,7 +225,7 @@ export default function LineupClient({ userId }) {
       <div className="space-y-12">
         {/* Main Lineup Visualization */}
         <Section title="Tu Alineación" delay={100} background="section-base">
-          <div className="max-w-5xl mx-auto space-y-10">
+          <div className="max-w-5xl mx-auto space-y-2">
             {/* Action Controls */}
             <div className="flex justify-center">
               <LineupControlBar

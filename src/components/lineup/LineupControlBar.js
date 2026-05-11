@@ -12,23 +12,25 @@ export default function LineupControlBar({
   onChangeType,
 }) {
   return (
-    <div className="flex flex-col items-center gap-6 w-full">
+    <div className="flex flex-col items-center gap-2 w-full">
       {/* Status Messages (Centered) */}
-      <div className="flex flex-col items-center gap-2 min-h-[32px]">
-        {error && (
-          <div className="flex items-center gap-2 text-rose-500 bg-rose-500/10 px-4 py-1.5 rounded-full text-xs font-medium border border-rose-500/20 animate-in fade-in zoom-in duration-300">
-            <AlertCircle size={14} />
-            {error}
-          </div>
-        )}
+      {(error || success) && (
+        <div className="flex flex-col items-center gap-2">
+          {error && (
+            <div className="flex items-center gap-2 text-rose-500 bg-rose-500/10 px-4 py-1.5 rounded-full text-xs font-medium border border-rose-500/20 animate-in fade-in zoom-in duration-300">
+              <AlertCircle size={14} />
+              {error}
+            </div>
+          )}
 
-        {success && (
-          <div className="flex items-center gap-2 text-emerald-500 bg-emerald-500/10 px-4 py-1.5 rounded-full text-xs font-medium border border-emerald-500/20 animate-in fade-in zoom-in duration-300">
-            <CheckCircle2 size={14} />
-            Guardado correctamente
-          </div>
-        )}
-      </div>
+          {success && (
+            <div className="flex items-center gap-2 text-emerald-500 bg-emerald-500/10 px-4 py-1.5 rounded-full text-xs font-medium border border-emerald-500/20 animate-in fade-in zoom-in duration-300">
+              <CheckCircle2 size={14} />
+              Guardado correctamente
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Buttons (Centered) */}
       <div className="flex items-center justify-center gap-4 w-full">
