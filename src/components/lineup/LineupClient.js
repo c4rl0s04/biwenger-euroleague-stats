@@ -56,12 +56,38 @@ export default function LineupClient({ userId }) {
           apiClient.get(`/api/users/lineup?userId=${userId}`).catch(() => ({ success: false })),
         ]);
 
-        if (squadRes.success && squadRes.data) {
-          setSquad(squadRes.data.players || []);
-        }
+        let onSaleIds = new Set();
+        let listingPrices = new Map();
 
         if (lineupRes.success && lineupRes.data) {
           setLineupConfig(normalizeLineupConfig(lineupRes.data.lineup));
+
+          // Extract players currently on sale
+          const marketListings = lineupRes.data.market || [];
+          const offersListings = lineupRes.data.offers || [];
+
+          marketListings.forEach((m) => {
+            const id = m.playerID || m.player?.id || m.id;
+            if (id) {
+              onSaleIds.add(String(id));
+              if (m.price) listingPrices.set(String(id), m.price);
+            }
+          });
+
+          offersListings.forEach((o) => {
+            if (Array.isArray(o.requestedPlayers)) {
+              o.requestedPlayers.forEach((id) => onSaleIds.add(String(id)));
+            }
+          });
+        }
+
+        if (squadRes.success && squadRes.data) {
+          const enrichedPlayers = (squadRes.data.players || []).map((p) => ({
+            ...p,
+            isOnSale: onSaleIds.has(String(p.id)),
+            listingPrice: listingPrices.get(String(p.id)) || null,
+          }));
+          setSquad(enrichedPlayers);
         }
       } catch (err) {
         console.error('Error loading lineup data:', err);
@@ -75,6 +101,32 @@ export default function LineupClient({ userId }) {
   }, [userId]);
 
   // ── Handlers ────────────────────────────────────────────────────────────
+  const handleWithdrawConfirm = async (player) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(false);
+
+      const res = await apiClient.withdrawPlayer(player.id);
+
+      if (res.success) {
+        setSuccess(true);
+        // Update local state immediately so the button changes back to "Vender"
+        setSquad((prev) =>
+          prev.map((p) => (p.id === player.id ? { ...p, isOnSale: false, listingPrice: null } : p))
+        );
+        setTimeout(() => setSuccess(false), 3000);
+        setTimeout(() => setIsSellOpen(false), 1500);
+      } else {
+        throw new Error(res.message || 'Error al retirar de la venta');
+      }
+    } catch (err) {
+      console.error('Error withdrawing from market:', err);
+      setError(err.message || 'Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
   const handlePlayerClick = (player, forceStarter = null) => {
     // Detect if player is currently in the starting 5
     const isActuallyStarter =
@@ -113,7 +165,10 @@ export default function LineupClient({ userId }) {
 
       if (res.success) {
         setSuccess(true);
+        // Update local state immediately so the button changes to "En Venta"
+        setSquad((prev) => prev.map((p) => (p.id === player.id ? { ...p, isOnSale: true } : p)));
         setTimeout(() => setSuccess(false), 3000);
+        setTimeout(() => setIsSellOpen(false), 1500);
       } else {
         throw new Error(res.message || 'Error al poner en venta');
       }
@@ -210,11 +265,12 @@ export default function LineupClient({ userId }) {
       </div>
 
       <LineupSellModal
-        key={sellTarget?.id}
+        key={`${sellTarget?.id}-${isSellOpen}`}
         isOpen={isSellOpen}
         onClose={() => setIsSellOpen(false)}
         player={sellTarget}
         onConfirm={handleSellConfirm}
+        onWithdraw={handleWithdrawConfirm}
       />
 
       <LineupTacticsModal

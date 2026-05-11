@@ -376,15 +376,23 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
                                   e.stopPropagation();
                                   onSellClick?.(player);
                                 }}
-                                className="px-3 py-1.5 rounded-lg border border-white/40 text-white transition-all hover:bg-white hover:text-zinc-900 cursor-pointer active:scale-95 group/sell"
+                                className={cn(
+                                  'px-3 py-1.5 rounded-lg border transition-all cursor-pointer active:scale-95 group/sell',
+                                  player.isOnSale
+                                    ? 'bg-white text-zinc-900 border-white font-bold'
+                                    : 'border-white/40 text-white hover:bg-white hover:text-zinc-900'
+                                )}
                               >
                                 <div className="flex items-center justify-center gap-2">
                                   <HandCoins
                                     size={14}
-                                    className="transition-transform group-hover/sell:scale-110"
+                                    className={cn(
+                                      'transition-transform group-hover/sell:scale-110',
+                                      player.isOnSale && 'animate-pulse'
+                                    )}
                                   />
                                   <span className="text-[10px] font-black uppercase tracking-widest">
-                                    Vender
+                                    {player.isOnSale ? 'En Venta' : 'Vender'}
                                   </span>
                                 </div>
                               </button>

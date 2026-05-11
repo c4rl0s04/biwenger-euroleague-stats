@@ -57,6 +57,29 @@ export const apiClient = {
       throw error;
     }
   },
+
+  /**
+   * Generic DELETE request
+   */
+  async delete(endpoint) {
+    const url = endpoint.startsWith('/') ? endpoint : `/api/${endpoint}`;
+
+    try {
+      const res = await fetch(url, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      }
+
+      return await res.json();
+    } catch (error) {
+      console.error(`[ApiClient] DELETE ${url} failed:`, error);
+      throw error;
+    }
+  },
+
   /**
    * Sends a lineup object to the backend to be saved on Biwenger
    * @param {Object} lineup - The lineup payload { type, playersID, reservesID, captain }
@@ -71,5 +94,12 @@ export const apiClient = {
    */
   async sellPlayer({ playerId, price }) {
     return this.post('/api/market/sell', { playerId, price });
+  },
+
+  /**
+   * Withdraws a player from the Biwenger market
+   */
+  async withdrawPlayer(playerId) {
+    return this.delete(`/api/market/remove?playerId=${playerId}`);
   },
 };

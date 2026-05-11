@@ -46,7 +46,7 @@ export const lineupService = {
     }
 
     const fields =
-      '*,lineup(type,playersID,reservesID,captain,striker,coach,date),players(id,owner)';
+      '*,lineup(type,playersID,reservesID,captain,striker,coach,date),players(id,owner),market,offers,-trophies';
     const userData = await biwengerFetch(`/user?fields=${fields}`, {
       customToken: user.biwengerToken,
       customUserId: userId,

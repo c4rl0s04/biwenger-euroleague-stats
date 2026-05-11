@@ -13,15 +13,18 @@ const TABS = [
   { id: 'cedible', label: 'Cedible', icon: UserPlus },
 ];
 
-export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) {
+export default function LineupSellModal({ isOpen, onClose, player, onConfirm, onWithdraw }) {
   const [activeTab, setActiveTab] = useState('vender');
-  const [sellPrice, setSellPrice] = useState(player?.price || 0);
+  const [sellPrice, setSellPrice] = useState(player?.listingPrice || player?.price || 0);
 
   if (!isOpen || !player) return null;
 
   const handlePriceChange = (amount) => {
     setSellPrice((prev) => Math.max(0, prev + amount));
   };
+
+  const isPriceTooLow =
+    (activeTab === 'vender' || activeTab === 'subasta') && sellPrice < player.price;
 
   // Position theme colors
   const positionThemes = {
@@ -173,7 +176,7 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
             </AnimatePresence>
 
             <AnimatePresence>
-              {activeTab === 'vender' && sellPrice < player.price && (
+              {isPriceTooLow && (
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -187,16 +190,26 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm }) 
 
             <motion.button
               layout
-              disabled={activeTab === 'vender' && sellPrice < player.price}
+              disabled={isPriceTooLow}
               onClick={() => onConfirm?.(player, sellPrice)}
               className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all cursor-pointer text-xs shadow-lg ${
-                activeTab === 'vender' && sellPrice < player.price
+                isPriceTooLow
                   ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'
                   : getButtonStyles()
               }`}
             >
               {getButtonLabel()}
             </motion.button>
+
+            {player.isOnSale && (
+              <motion.button
+                layout
+                onClick={() => onWithdraw?.(player)}
+                className="w-full mt-3 py-3 rounded-xl font-bold uppercase tracking-widest transition-all cursor-pointer text-[10px] border border-rose-500/50 text-rose-400 hover:bg-rose-500/10"
+              >
+                Retirar de la venta
+              </motion.button>
+            )}
           </motion.div>
         </motion.div>
       </div>
