@@ -66,4 +66,51 @@ export const marketActionsService = {
       customUserId: userId,
     });
   },
+
+  /**
+   * Accepts a transfer offer
+   */
+  async acceptOffer({ offerId, userId }: { offerId: number; userId: string }) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { biwengerToken: true },
+    });
+
+    if (!user || !user.biwengerToken) {
+      throw new Error(`No se encontró un token de Biwenger configurado para el usuario ${userId}`);
+    }
+
+    // POST https://biwenger.as.com/api/v2/market
+    // Payload: { type: "accept", offer: ID }
+    return await biwengerFetch('/market', {
+      method: 'POST',
+      body: {
+        type: 'accept',
+        offer: offerId,
+      },
+      customToken: user.biwengerToken,
+      customUserId: userId,
+    });
+  },
+
+  /**
+   * Rejects a transfer offer
+   */
+  async rejectOffer({ offerId, userId }: { offerId: number; userId: string }) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { biwengerToken: true },
+    });
+
+    if (!user || !user.biwengerToken) {
+      throw new Error(`No se encontró un token de Biwenger configurado para el usuario ${userId}`);
+    }
+
+    // DELETE https://biwenger.as.com/api/v2/market?offer=ID
+    return await biwengerFetch(`/market?offer=${offerId}`, {
+      method: 'DELETE',
+      customToken: user.biwengerToken,
+      customUserId: userId,
+    });
+  },
 };

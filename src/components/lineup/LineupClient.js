@@ -9,6 +9,7 @@ import LineupTacticsModal from './LineupTacticsModal';
 import LineupPlayerSwapModal from './LineupPlayerSwapModal';
 import LineupSquadAnalysis from './LineupSquadAnalysis';
 import LineupSellModal from './LineupSellModal';
+import LineupOffersSection from './LineupOffersSection';
 import { PageHeader } from '@/components/ui';
 import { LayoutGrid, HandCoins, TrendingUp } from 'lucide-react';
 import { Section } from '@/components/layout';
@@ -58,13 +59,21 @@ export default function LineupClient({ userId }) {
 
         let onSaleIds = new Set();
         let listingPrices = new Map();
+        let playerOffers = new Map();
+        let purchaseMap = new Map(); // Map<playerId, OwnerObject>
 
         if (lineupRes.success && lineupRes.data) {
           setLineupConfig(normalizeLineupConfig(lineupRes.data.lineup));
 
-          // Extract players currently on sale
+          // Extract players currently on sale and pending offers
           const marketListings = lineupRes.data.market || [];
           const offersListings = lineupRes.data.offers || [];
+          const biwengerPlayers = lineupRes.data.players || [];
+
+          // Map purchase prices from Biwenger
+          biwengerPlayers.forEach((p) => {
+            if (p.id && p.owner) purchaseMap.set(String(p.id), p.owner);
+          });
 
           marketListings.forEach((m) => {
             const id = m.playerID || m.player?.id || m.id;
@@ -76,7 +85,14 @@ export default function LineupClient({ userId }) {
 
           offersListings.forEach((o) => {
             if (Array.isArray(o.requestedPlayers)) {
-              o.requestedPlayers.forEach((id) => onSaleIds.add(String(id)));
+              o.requestedPlayers.forEach((id) => {
+                const pid = String(id);
+                onSaleIds.add(pid);
+
+                // Group offers by player
+                if (!playerOffers.has(pid)) playerOffers.set(pid, []);
+                playerOffers.get(pid).push(o);
+              });
             }
           });
         }
@@ -86,6 +102,8 @@ export default function LineupClient({ userId }) {
             ...p,
             isOnSale: onSaleIds.has(String(p.id)),
             listingPrice: listingPrices.get(String(p.id)) || null,
+            offers: playerOffers.get(String(p.id)) || [],
+            owner: purchaseMap.get(String(p.id)) || null, // Inject Biwenger ownership data
           }));
           setSquad(enrichedPlayers);
         }
@@ -127,6 +145,55 @@ export default function LineupClient({ userId }) {
       setLoading(false);
     }
   };
+
+  const handleAcceptOffer = async (player, offer) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await apiClient.acceptOffer(offer.id);
+
+      if (res.success) {
+        // When an offer is accepted, the player is sold and leaves your squad
+        setSquad((prev) => prev.filter((p) => p.id !== player.id));
+      } else {
+        throw new Error(res.message || 'Error al aceptar la oferta');
+      }
+    } catch (err) {
+      console.error('Error accepting offer:', err);
+      setError(err.message || 'Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectOffer = async (player, offer) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await apiClient.rejectOffer(offer.id);
+
+      if (res.success) {
+        // When an offer is rejected, remove only that offer from the player's list
+        setSquad((prev) =>
+          prev.map((p) =>
+            p.id === player.id
+              ? { ...p, offers: (p.offers || []).filter((o) => o.id !== offer.id) }
+              : p
+          )
+        );
+      } else {
+        throw new Error(res.message || 'Error al rechazar la oferta');
+      }
+    } catch (err) {
+      console.error('Error rejecting offer:', err);
+      setError(err.message || 'Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePlayerClick = (player, forceStarter = null) => {
     // Detect if player is currently in the starting 5
     const isActuallyStarter =
@@ -252,6 +319,15 @@ export default function LineupClient({ userId }) {
               />
             </div>
           </div>
+        </Section>
+
+        <Section title="Centro de Fichajes" delay={150} background="section-base">
+          <LineupOffersSection
+            squad={squad}
+            onAccept={handleAcceptOffer}
+            onReject={handleRejectOffer}
+            loading={loading}
+          />
         </Section>
 
         {/* Squad Analysis Section */}

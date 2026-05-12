@@ -102,4 +102,18 @@ export const apiClient = {
   async withdrawPlayer(playerId) {
     return this.delete(`/api/market/remove?playerId=${playerId}`);
   },
+
+  /**
+   * Accepts a transfer offer
+   */
+  async acceptOffer(offerId) {
+    return this.post('/api/market/offers/accept', { offerId });
+  },
+
+  /**
+   * Rejects a transfer offer
+   */
+  async rejectOffer(offerId) {
+    return this.delete(`/api/market/offers/reject?offerId=${offerId}`);
+  },
 };
