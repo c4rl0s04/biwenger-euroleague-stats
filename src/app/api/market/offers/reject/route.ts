@@ -2,15 +2,14 @@ import { auth } from '@/auth';
 import { marketActionsService } from '@/lib/services/marketActionsService';
 import { successResponse, errorResponse } from '@/lib/utils/response';
 
-export async function DELETE(request: Request) {
+export async function POST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return errorResponse('No autorizado', 401);
     }
 
-    const { searchParams } = new URL(request.url);
-    const offerId = searchParams.get('offerId');
+    const { offerId } = await request.json();
 
     if (!offerId) {
       return errorResponse('ID de oferta no proporcionado', 400);

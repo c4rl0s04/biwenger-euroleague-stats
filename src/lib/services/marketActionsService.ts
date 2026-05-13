@@ -80,13 +80,12 @@ export const marketActionsService = {
       throw new Error(`No se encontró un token de Biwenger configurado para el usuario ${userId}`);
     }
 
-    // POST https://biwenger.as.com/api/v2/market
-    // Payload: { type: "accept", offer: ID }
-    return await biwengerFetch('/market', {
-      method: 'POST',
+    // Correct Biwenger endpoint for accepting: PUT /offers/:id
+    // Payload: { status: "accepted" }
+    return await biwengerFetch(`/offers/${offerId}`, {
+      method: 'PUT',
       body: {
-        type: 'accept',
-        offer: offerId,
+        status: 'accepted',
       },
       customToken: user.biwengerToken,
       customUserId: userId,
@@ -106,9 +105,13 @@ export const marketActionsService = {
       throw new Error(`No se encontró un token de Biwenger configurado para el usuario ${userId}`);
     }
 
-    // DELETE https://biwenger.as.com/api/v2/market?offer=ID
-    return await biwengerFetch(`/market?offer=${offerId}`, {
-      method: 'DELETE',
+    // Correct Biwenger endpoint for rejecting: PUT /offers/:id
+    // Payload: { status: "rejected" }
+    return await biwengerFetch(`/offers/${offerId}`, {
+      method: 'PUT',
+      body: {
+        status: 'rejected',
+      },
       customToken: user.biwengerToken,
       customUserId: userId,
     });

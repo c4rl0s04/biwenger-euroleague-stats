@@ -2,29 +2,114 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, Clock, TrendingUp, TrendingDown, ArrowUpRight } from 'lucide-react';
+import {
+  Check,
+  X,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ShieldCheck,
+  ShieldAlert,
+  HandCoins,
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/format';
 import Image from 'next/image';
 
-export default function LineupOffersSection({ squad, onAccept, onReject, loading }) {
+export default function LineupOffersSection({
+  squad,
+  onAccept,
+  onReject,
+  loading,
+  isSimulationMode,
+  onToggleSimulation,
+}) {
   // Filter for players who have pending offers
   const playersWithOffers = squad.filter((p) => p.offers && p.offers.length > 0);
 
-  if (playersWithOffers.length === 0) return null;
+  if (playersWithOffers.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 px-4 bg-white/5 rounded-3xl border border-dashed border-white/10 backdrop-blur-sm">
+        <div className="p-4 rounded-2xl bg-zinc-800/50 text-zinc-500 mb-4">
+          <HandCoins size={32} strokeWidth={1.5} />
+        </div>
+        <h4 className="text-lg font-black text-white uppercase tracking-tight mb-1">
+          Sin ofertas activas
+        </h4>
+        <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest text-center max-w-xs">
+          Actualmente no tienes pujas de otros managers por tus jugadores.
+        </p>
+
+        {/* Helper Badge */}
+        <div className="mt-8 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+            {isSimulationMode ? 'Modo Simulación: Escuchando...' : 'Modo Real: Sincronizado'}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <AnimatePresence mode="popLayout">
-        {playersWithOffers.map((player) => (
-          <OfferCard
-            key={player.id}
-            player={player}
-            onAccept={onAccept}
-            onReject={onReject}
-            loading={loading}
-          />
-        ))}
-      </AnimatePresence>
+    <div className="space-y-6">
+      {/* Simulation Control Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/5 rounded-3xl border border-white/5 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div
+            className={`p-2.5 rounded-2xl ${isSimulationMode ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-400'}`}
+          >
+            {isSimulationMode ? <ShieldCheck size={20} /> : <ShieldAlert size={20} />}
+          </div>
+          <div>
+            <h4 className="text-sm font-black text-white uppercase tracking-tight">
+              {isSimulationMode ? 'Modo Simulación Activo' : 'Conexión Real Biwenger'}
+            </h4>
+            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+              {isSimulationMode
+                ? 'Las acciones no afectarán a tu cuenta'
+                : 'Cuidado: Las acciones son irreversibles'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={onToggleSimulation}
+          className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl border transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
+            isSimulationMode
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500/20'
+              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+          }`}
+        >
+          <span className="text-xs font-black uppercase tracking-widest">
+            Cambiar a {isSimulationMode ? 'Modo Real' : 'Modo Seguro'}
+          </span>
+          <div
+            className={`w-8 h-4 rounded-full p-1 transition-colors duration-300 relative ${
+              isSimulationMode ? 'bg-amber-500/40' : 'bg-emerald-500/40'
+            }`}
+          >
+            <div
+              className={`w-2 h-2 rounded-full bg-white transition-transform duration-300 ${
+                isSimulationMode ? 'translate-x-0' : 'translate-x-4'
+              }`}
+            />
+          </div>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <AnimatePresence mode="popLayout">
+          {playersWithOffers.map((player) => (
+            <OfferCard
+              key={player.id}
+              player={player}
+              onAccept={onAccept}
+              onReject={onReject}
+              loading={loading}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

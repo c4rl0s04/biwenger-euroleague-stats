@@ -10,6 +10,7 @@ import LineupPlayerSwapModal from './LineupPlayerSwapModal';
 import LineupSquadAnalysis from './LineupSquadAnalysis';
 import LineupSellModal from './LineupSellModal';
 import LineupOffersSection from './LineupOffersSection';
+import LineupOfferModal from './LineupOfferModal';
 import { PageHeader } from '@/components/ui';
 import { LayoutGrid, HandCoins, TrendingUp } from 'lucide-react';
 import { Section } from '@/components/layout';
@@ -39,9 +40,14 @@ export default function LineupClient({ userId }) {
   const [swapTarget, setSwapTarget] = useState(null); // { player, isStarter }
   const [isSwapOpen, setIsSwapOpen] = useState(false);
 
-  // ── Sell State ──────────────────────────────────────────────────────────
   const [sellTarget, setSellTarget] = useState(null);
   const [isSellOpen, setIsSellOpen] = useState(false);
+
+  // ── Offer Management States ─────────────────────────────────────────────
+  const [isSimulationMode, setIsSimulationMode] = useState(true);
+  const [isOfferOpen, setIsOfferOpen] = useState(false);
+  const [offerTarget, setOfferTarget] = useState(null);
+  const [offerActionType, setOfferActionType] = useState('accept'); // 'accept' or 'reject'
 
   // ── Data Loading ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -146,51 +152,71 @@ export default function LineupClient({ userId }) {
     }
   };
 
-  const handleAcceptOffer = async (player, offer) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const res = await apiClient.acceptOffer(offer.id);
-
-      if (res.success) {
-        // When an offer is accepted, the player is sold and leaves your squad
-        setSquad((prev) => prev.filter((p) => p.id !== player.id));
-      } else {
-        throw new Error(res.message || 'Error al aceptar la oferta');
-      }
-    } catch (err) {
-      console.error('Error accepting offer:', err);
-      setError(err.message || 'Error de conexión');
-    } finally {
-      setLoading(false);
-    }
+  const handleAcceptOffer = (player, offer) => {
+    setOfferTarget({ player, offer });
+    setOfferActionType('accept');
+    setIsOfferOpen(true);
   };
 
-  const handleRejectOffer = async (player, offer) => {
+  const handleRejectOffer = (player, offer) => {
+    setOfferTarget({ player, offer });
+    setOfferActionType('reject');
+    setIsOfferOpen(true);
+  };
+
+  const handleOfferConfirm = async (player, offer) => {
     try {
       setLoading(true);
       setError(null);
 
-      const res = await apiClient.rejectOffer(offer.id);
+      const isAccept = offerActionType === 'accept';
+
+      if (isSimulationMode) {
+        // Simulation Logic: Just wait a bit and update UI
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        if (isAccept) {
+          setSquad((prev) => prev.filter((p) => p.id !== player.id));
+        } else {
+          setSquad((prev) =>
+            prev.map((p) =>
+              p.id === player.id
+                ? { ...p, offers: (p.offers || []).filter((o) => o.id !== offer.id) }
+                : p
+            )
+          );
+        }
+        setIsOfferOpen(false);
+        return;
+      }
+
+      // Real API Logic
+      const res = isAccept
+        ? await apiClient.acceptOffer(offer.id)
+        : await apiClient.rejectOffer(offer.id);
 
       if (res.success) {
-        // When an offer is rejected, remove only that offer from the player's list
-        setSquad((prev) =>
-          prev.map((p) =>
-            p.id === player.id
-              ? { ...p, offers: (p.offers || []).filter((o) => o.id !== offer.id) }
-              : p
-          )
-        );
+        if (isAccept) {
+          setSquad((prev) => prev.filter((p) => p.id !== player.id));
+        } else {
+          setSquad((prev) =>
+            prev.map((p) =>
+              p.id === player.id
+                ? { ...p, offers: (p.offers || []).filter((o) => o.id !== offer.id) }
+                : p
+            )
+          );
+        }
       } else {
-        throw new Error(res.message || 'Error al rechazar la oferta');
+        throw new Error(res.message || `Error al ${isAccept ? 'aceptar' : 'rechazar'} la oferta`);
       }
     } catch (err) {
-      console.error('Error rejecting offer:', err);
+      console.error(`Error processing offer ${offerActionType}:`, err);
       setError(err.message || 'Error de conexión');
     } finally {
       setLoading(false);
+      setIsOfferOpen(false);
+      setOfferTarget(null);
     }
   };
 
@@ -212,6 +238,13 @@ export default function LineupClient({ userId }) {
     setLineupConfig(updatedLineup);
     setIsSwapOpen(false);
     setSwapTarget(null);
+  };
+
+  const handleSetCaptain = (playerId) => {
+    setLineupConfig((prev) => ({
+      ...prev,
+      captain: prev.captain === Number(playerId) ? null : Number(playerId),
+    }));
   };
 
   const handleSellClick = (player) => {
@@ -327,6 +360,8 @@ export default function LineupClient({ userId }) {
             onAccept={handleAcceptOffer}
             onReject={handleRejectOffer}
             loading={loading}
+            isSimulationMode={isSimulationMode}
+            onToggleSimulation={() => setIsSimulationMode(!isSimulationMode)}
           />
         </Section>
 
@@ -372,6 +407,22 @@ export default function LineupClient({ userId }) {
         squad={squad}
         activeIds={new Set(lineupConfig.playersID)}
         onSelect={handlePlayerSelect}
+        captainId={lineupConfig.captain}
+        onSetCaptain={handleSetCaptain}
+      />
+
+      <LineupOfferModal
+        isOpen={isOfferOpen}
+        onClose={() => {
+          setIsOfferOpen(false);
+          setOfferTarget(null);
+        }}
+        player={offerTarget?.player}
+        offer={offerTarget?.offer}
+        actionType={offerActionType}
+        onConfirm={handleOfferConfirm}
+        loading={loading}
+        isSimulationMode={isSimulationMode}
       />
     </div>
   );

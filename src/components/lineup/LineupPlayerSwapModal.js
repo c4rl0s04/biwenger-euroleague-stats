@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Search, UserPlus, ArrowLeftRight } from 'lucide-react';
+import { X, Search, UserPlus, ArrowLeftRight, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
@@ -13,6 +13,8 @@ export default function LineupPlayerSwapModal({
   squad,
   activeIds,
   onSelect,
+  captainId,
+  onSetCaptain,
 }) {
   const [search, setSearch] = useState('');
 
@@ -66,13 +68,7 @@ export default function LineupPlayerSwapModal({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-xl font-bold text-white tracking-tight">
-                  {isStarter ? (
-                    <>
-                      Cambiar a <span className="text-primary">{targetPlayer.name}</span>
-                    </>
-                  ) : (
-                    <>Reemplazar en Banquillo</>
-                  )}
+                  {isStarter ? 'Cambiar' : 'Reemplazar'}
                 </h2>
                 <p className="text-xs text-zinc-500 mt-1">
                   {isStarter
@@ -80,6 +76,30 @@ export default function LineupPlayerSwapModal({
                     : 'Selecciona un jugador para entrar en la rotación.'}
                 </p>
               </div>
+
+              {/* Captain Action (Only for starters) */}
+              {isStarter && (
+                <button
+                  onClick={() => {
+                    onSetCaptain(targetPlayer.id);
+                    onClose();
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all duration-300 cursor-pointer ${
+                    String(captainId) === String(targetPlayer.id)
+                      ? 'bg-amber-500/20 border-amber-500/50 text-amber-500'
+                      : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Star
+                    size={16}
+                    fill={String(captainId) === String(targetPlayer.id) ? 'currentColor' : 'none'}
+                  />
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    {String(captainId) === String(targetPlayer.id) ? 'Capitán' : 'Hacer Capitán'}
+                  </span>
+                </button>
+              )}
+
               <button
                 onClick={onClose}
                 className="p-2 rounded-full hover:bg-white/5 text-zinc-500 hover:text-white transition-all cursor-pointer"

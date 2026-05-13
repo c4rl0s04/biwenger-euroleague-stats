@@ -114,6 +114,6 @@ export const apiClient = {
    * Rejects a transfer offer
    */
   async rejectOffer(offerId) {
-    return this.delete(`/api/market/offers/reject?offerId=${offerId}`);
+    return this.post('/api/market/offers/reject', { offerId });
   },
 };
