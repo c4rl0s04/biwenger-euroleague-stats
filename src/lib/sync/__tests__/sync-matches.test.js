@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncMatches } from '../services/biwenger/matches.js';
 import * as client from '../../api/biwenger-client.js';
+import * as elClient from '../../api/euroleague-client.js';
 
 // Mock biwenger-client
 vi.mock('../../api/biwenger-client.js', () => ({
   fetchRoundGames: vi.fn(),
+}));
+
+// Mock euroleague-client
+vi.mock('../../api/euroleague-client.js', () => ({
+  fetchSchedule: vi.fn(),
+  fetchGameHeader: vi.fn(),
 }));
 
 describe('syncMatches', () => {
@@ -15,6 +22,10 @@ describe('syncMatches', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Default mock values
+    elClient.fetchSchedule.mockResolvedValue({ schedule: { item: [] } });
+    elClient.fetchGameHeader.mockResolvedValue(null);
 
     db = {
       query: vi.fn(async (sql, params) => {
