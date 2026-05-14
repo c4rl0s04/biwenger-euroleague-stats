@@ -1,16 +1,146 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, Clock, TrendingUp, TrendingDown, ArrowUpRight, HandCoins } from 'lucide-react';
+import {
+  Check,
+  X,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  HandCoins,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  LayoutGrid,
+  List,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+} from 'lucide-react';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  TableIdentity,
+} from '@/components/ui/StatsTable';
 import { formatCurrency } from '@/lib/utils/format';
 import Image from 'next/image';
 
-export default function LineupOffersSection({ squad, onAccept, onReject, loading }) {
-  // Filter for players who have pending offers
-  const playersWithOffers = squad.filter((p) => p.offers && p.offers.length > 0);
+function getHoursLeft(until) {
+  return Math.max(0, Math.floor((until - Math.floor(Date.now() / 1000)) / 3600));
+}
 
-  if (playersWithOffers.length === 0) {
+function SortableHeader({ label, sortKey, currentSort, onSort, align = 'center', className }) {
+  const isSorted = currentSort.key === sortKey;
+  return (
+    <TableHeaderCell
+      align={align}
+      className={`cursor-pointer select-none hover:bg-white/5 transition-colors ${className}`}
+      onClick={() => {
+        let direction = 'desc';
+        if (isSorted && currentSort.direction === 'desc') direction = 'asc';
+        onSort({ key: sortKey, direction });
+      }}
+    >
+      <div
+        className={`flex items-center gap-2 ${align === 'left' ? 'justify-start' : 'justify-center'}`}
+      >
+        {label}
+        {isSorted ? (
+          currentSort.direction === 'asc' ? (
+            <ArrowUp size={12} className="text-emerald-500" />
+          ) : (
+            <ArrowDown size={12} className="text-emerald-500" />
+          )
+        ) : (
+          <ArrowUpDown size={12} className="text-white/20" />
+        )}
+      </div>
+    </TableHeaderCell>
+  );
+}
+
+export default function LineupOffersSection({ squad, onAccept, onReject, loading }) {
+  const [expandedId, setExpandedId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'table'
+  const [sortConfig, setSortConfig] = useState({ key: 'profit', direction: 'desc' });
+  const scrollRef = useRef(null);
+
+  // Filter, Search, and Sort players who have pending offers
+  const playersWithOffers = useMemo(() => {
+    let filtered = squad
+      .filter((p) => p.offers && p.offers.length > 0)
+      .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    filtered.sort((a, b) => {
+      const offerA = a.offers[0].amount;
+      const offerB = b.offers[0].amount;
+      const purchasePriceA = a.owner?.price || 0;
+      const purchasePriceB = b.owner?.price || 0;
+      const currentPriceA = a.price || 0;
+      const currentPriceB = b.price || 0;
+
+      let valA, valB;
+      switch (sortConfig.key) {
+        case 'name':
+          valA = a.name;
+          valB = b.name;
+          break;
+        case 'investment':
+          valA = purchasePriceA;
+          valB = purchasePriceB;
+          break;
+        case 'price':
+          valA = currentPriceA;
+          valB = currentPriceB;
+          break;
+        case 'offer':
+          valA = offerA;
+          valB = offerB;
+          break;
+        case 'profitActual':
+          valA = offerA - currentPriceA;
+          valB = offerB - currentPriceB;
+          break;
+        case 'profit':
+          valA = offerA - purchasePriceA;
+          valB = offerB - purchasePriceB;
+          break;
+        case 'expires':
+          valA = a.offers[0].until;
+          valB = b.offers[0].until;
+          break;
+        default:
+          valA = offerA - purchasePriceA;
+          valB = offerB - purchasePriceB;
+      }
+
+      if (typeof valA === 'string') {
+        return sortConfig.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      }
+      return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
+    });
+
+    return filtered;
+  }, [squad, searchQuery, sortConfig]);
+
+  const handleNext = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrev = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  if (squad.filter((p) => p.offers && p.offers.length > 0).length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 bg-white/5 rounded-3xl border border-dashed border-white/10 backdrop-blur-sm">
         <div className="p-4 rounded-2xl bg-zinc-800/50 text-zinc-500 mb-4">
@@ -27,20 +157,337 @@ export default function LineupOffersSection({ squad, onAccept, onReject, loading
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <AnimatePresence mode="popLayout">
-          {playersWithOffers.map((player) => (
-            <OfferCard
-              key={player.id}
-              player={player}
+    <div className="space-y-4">
+      {/* Search and Filters Header */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 md:px-0">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <input
+            type="text"
+            placeholder="Buscar jugador..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-black/20 border border-white/5 hover:border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+          />
+        </div>
+
+        <div className="flex items-center gap-4 self-start sm:self-center">
+          <div className="text-xs font-bold text-white/40 uppercase tracking-widest hidden sm:block">
+            {playersWithOffers.length} {playersWithOffers.length === 1 ? 'Oferta' : 'Ofertas'}
+          </div>
+
+          {/* View Toggle */}
+          <div className="flex bg-black/20 p-1 rounded-xl border border-white/5">
+            <button
+              onClick={() => setViewMode('carousel')}
+              className={`cursor-pointer p-2 rounded-lg transition-all ${viewMode === 'carousel' ? 'bg-zinc-800 text-white shadow-md' : 'text-white/40 hover:text-white/70'}`}
+              title="Vista de Tarjetas"
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`cursor-pointer p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-zinc-800 text-white shadow-md' : 'text-white/40 hover:text-white/70'}`}
+              title="Vista de Tabla"
+            >
+              <List size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {viewMode === 'carousel' ? (
+          <motion.div
+            key="carousel-view"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="relative group/carousel"
+          >
+            {/* Navigation Buttons (Visible when > 1 offer) */}
+            {playersWithOffers.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 rounded-full bg-zinc-800 border border-white/10 text-white shadow-xl opacity-0 group-hover/carousel:opacity-100 transition-all hover:bg-zinc-700 hover:scale-110 active:scale-95 disabled:opacity-0 hidden md:block"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 rounded-full bg-zinc-800 border border-white/10 text-white shadow-xl opacity-0 group-hover/carousel:opacity-100 transition-all hover:bg-zinc-700 hover:scale-110 active:scale-95 disabled:opacity-0 hidden md:block"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+
+            <div
+              ref={scrollRef}
+              className="flex flex-col md:flex-row gap-4 w-full max-w-full overflow-x-auto pb-4 md:pb-2 md:min-h-[380px] items-stretch snap-x snap-mandatory px-2 md:px-0 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              {playersWithOffers.map((player) => {
+                const isExpanded = expandedId === player.id;
+                const playerImage =
+                  player.img ||
+                  `https://biwenger.as.com/resources/images/players/full/${player.id}.png`;
+                const offer = player.offers[0];
+                const profit = offer.amount - (player.owner?.price || 0);
+                const isPositive = profit >= 0;
+
+                return (
+                  <motion.div
+                    layout
+                    key={player.id}
+                    onClick={() => setExpandedId(isExpanded ? null : player.id)}
+                    className={`cursor-pointer overflow-hidden rounded-3xl relative group border shrink-0 transition-all duration-300 flex snap-center ${
+                      isExpanded
+                        ? `w-full md:w-[360px] xl:w-[380px] opacity-100 border-white/5 bg-zinc-900 shadow-2xl`
+                        : `w-full md:w-[80px] h-[80px] md:h-auto opacity-80 hover:opacity-100 border-white/5 bg-white/5 hover:bg-white/10`
+                    }`}
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  >
+                    <div
+                      className={`w-full relative pointer-events-${isExpanded ? 'auto' : 'none'} flex flex-col md:flex-row`}
+                    >
+                      <AnimatePresence mode="popLayout">
+                        {isExpanded ? (
+                          <motion.div
+                            key="full"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full md:min-w-[360px] xl:min-w-[380px]"
+                          >
+                            <OfferCard
+                              player={player}
+                              onAccept={onAccept}
+                              onReject={onReject}
+                              loading={loading}
+                            />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="compact"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full h-[80px] md:h-full md:w-full flex md:flex-col items-center justify-center p-4 gap-3 transition-colors absolute inset-0"
+                          >
+                            <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shrink-0 border border-white/10 bg-zinc-800">
+                              <div className="relative w-full h-full pt-1.5 scale-[1.7] origin-top">
+                                <Image
+                                  src={playerImage}
+                                  alt={player.name}
+                                  fill
+                                  className="object-cover object-top"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Desktop vertical text */}
+                            <div className="hidden md:flex [writing-mode:vertical-rl] rotate-180 text-white/70 group-hover:text-white font-black tracking-[0.2em] uppercase text-xs items-center h-full min-h-0 overflow-hidden whitespace-nowrap">
+                              {player.name}
+                            </div>
+
+                            {/* Mobile horizontal text */}
+                            <div className="md:hidden text-white/70 group-hover:text-white font-black tracking-widest uppercase text-xs truncate flex-1">
+                              {player.name}
+                            </div>
+
+                            {/* Small Indicator */}
+                            <div
+                              className={`w-2 h-2 rounded-full shrink-0 ${isPositive ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="table-view"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="w-full"
+          >
+            <OffersTable
+              players={playersWithOffers}
               onAccept={onAccept}
               onReject={onReject}
               loading={loading}
+              sortConfig={sortConfig}
+              onSort={setSortConfig}
             />
-          ))}
-        </AnimatePresence>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function OffersTable({ players, onAccept, onReject, loading, sortConfig, onSort }) {
+  return (
+    <div className="w-full hide-scrollbar rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-md shadow-2xl overflow-hidden">
+      <Table tableClassName="min-w-[950px]">
+        <TableHeader>
+          <TableRow hovering={false}>
+            <SortableHeader
+              label="Jugador"
+              sortKey="name"
+              currentSort={sortConfig}
+              onSort={onSort}
+              align="center"
+              className="p-3"
+            />
+            <SortableHeader
+              label="Inversión"
+              sortKey="investment"
+              currentSort={sortConfig}
+              onSort={onSort}
+              align="center"
+              className="p-3"
+            />
+            <SortableHeader
+              label="Precio Actual"
+              sortKey="price"
+              currentSort={sortConfig}
+              onSort={onSort}
+              align="center"
+              className="p-3"
+            />
+            <SortableHeader
+              label="Oferta"
+              sortKey="offer"
+              currentSort={sortConfig}
+              onSort={onSort}
+              align="center"
+              className="p-3"
+            />
+            <SortableHeader
+              label="Beneficio Actual"
+              sortKey="profitActual"
+              currentSort={sortConfig}
+              onSort={onSort}
+              align="center"
+              className="p-3"
+            />
+            <SortableHeader
+              label="Beneficio Total"
+              sortKey="profit"
+              currentSort={sortConfig}
+              onSort={onSort}
+              align="center"
+              className="p-3"
+            />
+            <SortableHeader
+              label="Expira"
+              sortKey="expires"
+              currentSort={sortConfig}
+              onSort={onSort}
+              align="center"
+              className="p-3"
+            />
+            <TableHeaderCell align="center" className="p-3">
+              Acciones
+            </TableHeaderCell>
+          </TableRow>
+        </TableHeader>
+        <tbody className="divide-y divide-white/5">
+          {players.map((player) => {
+            const offer = player.offers[0];
+            const purchasePrice = player.owner?.price || 0;
+            const currentPrice = player.price || 0;
+            const profit = offer.amount - purchasePrice;
+            const profitActual = offer.amount - currentPrice;
+            const playerImage =
+              player.img ||
+              `https://biwenger.as.com/resources/images/players/full/${player.id}.png`;
+            const hoursLeft = getHoursLeft(offer.until);
+
+            return (
+              <TableRow key={player.id} className="group">
+                <TableCell align="left" className="p-3 pl-6">
+                  <div className="inline-flex items-center">
+                    <TableIdentity
+                      name={player.name}
+                      image={playerImage}
+                      color="text-white"
+                      size="md"
+                      imageClassName="scale-[1.7] origin-top pt-1"
+                    />
+                  </div>
+                </TableCell>
+                <TableCell align="center" className="p-3">
+                  <span className="text-sm font-bold text-zinc-400">
+                    {formatCurrency(purchasePrice)}
+                  </span>
+                </TableCell>
+                <TableCell align="center" className="p-3">
+                  <span className="text-sm font-bold text-blue-400">
+                    {formatCurrency(currentPrice)}
+                  </span>
+                </TableCell>
+                <TableCell align="center" className="p-3">
+                  <span className="text-sm font-black text-emerald-500">
+                    {formatCurrency(offer.amount)}
+                  </span>
+                </TableCell>
+                <TableCell align="center" className="p-3">
+                  <div
+                    className={`inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black ${profitActual >= 0 ? 'bg-emerald-800/20 text-emerald-500' : 'bg-rose-500/10 text-rose-400'}`}
+                  >
+                    {profitActual >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                    {profitActual >= 0 ? '+' : ''}
+                    {formatCurrency(profitActual)}
+                  </div>
+                </TableCell>
+                <TableCell align="center" className="p-3">
+                  <div
+                    className={`inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black ${profit >= 0 ? 'bg-emerald-800/20 text-emerald-500' : 'bg-rose-500/10 text-rose-400'}`}
+                  >
+                    {profit >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                    {profit >= 0 ? '+' : ''}
+                    {formatCurrency(profit)}
+                  </div>
+                </TableCell>
+                <TableCell align="center" className="p-3">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-zinc-400">
+                    <Clock size={12} className={hoursLeft < 4 ? 'text-rose-500' : ''} />
+                    <span className={hoursLeft < 4 ? 'text-rose-500' : ''}>{hoursLeft}h</span>
+                  </div>
+                </TableCell>
+                <TableCell align="center" className="p-3">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => onReject(player, offer)}
+                      disabled={loading}
+                      className="p-2 rounded-xl bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-all border border-white/5 cursor-pointer disabled:cursor-not-allowed"
+                      title="Rechazar Oferta"
+                    >
+                      <X size={16} />
+                    </button>
+                    <button
+                      onClick={() => onAccept(player, offer)}
+                      disabled={loading}
+                      className="p-2 rounded-xl bg-emerald-800 text-white hover:bg-emerald-700 transition-all shadow-lg cursor-pointer disabled:cursor-not-allowed"
+                      title="Aceptar Oferta"
+                    >
+                      <Check size={16} />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </tbody>
+      </Table>
     </div>
   );
 }
@@ -83,7 +530,7 @@ function OfferCard({ player, onAccept, onReject, loading }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="group relative bg-zinc-900/50 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all duration-300 shadow-xl"
+      className="group relative bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 transition-all duration-300 shadow-2xl shrink-0 snap-center w-[85vw] sm:w-[340px] xl:w-[380px]"
     >
       {/* Expiration Banner */}
       <div className="absolute top-0 right-0 left-0 h-1 bg-zinc-800">
