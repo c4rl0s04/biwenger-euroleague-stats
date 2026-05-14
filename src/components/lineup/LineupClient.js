@@ -44,7 +44,6 @@ export default function LineupClient({ userId }) {
   const [isSellOpen, setIsSellOpen] = useState(false);
 
   // ── Offer Management States ─────────────────────────────────────────────
-  const [isSimulationMode, setIsSimulationMode] = useState(true);
   const [isOfferOpen, setIsOfferOpen] = useState(false);
   const [offerTarget, setOfferTarget] = useState(null);
   const [offerActionType, setOfferActionType] = useState('accept'); // 'accept' or 'reject'
@@ -170,25 +169,6 @@ export default function LineupClient({ userId }) {
       setError(null);
 
       const isAccept = offerActionType === 'accept';
-
-      if (isSimulationMode) {
-        // Simulation Logic: Just wait a bit and update UI
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        if (isAccept) {
-          setSquad((prev) => prev.filter((p) => p.id !== player.id));
-        } else {
-          setSquad((prev) =>
-            prev.map((p) =>
-              p.id === player.id
-                ? { ...p, offers: (p.offers || []).filter((o) => o.id !== offer.id) }
-                : p
-            )
-          );
-        }
-        setIsOfferOpen(false);
-        return;
-      }
 
       // Real API Logic
       const res = isAccept
@@ -360,8 +340,6 @@ export default function LineupClient({ userId }) {
             onAccept={handleAcceptOffer}
             onReject={handleRejectOffer}
             loading={loading}
-            isSimulationMode={isSimulationMode}
-            onToggleSimulation={() => setIsSimulationMode(!isSimulationMode)}
           />
         </Section>
 
@@ -422,7 +400,6 @@ export default function LineupClient({ userId }) {
         actionType={offerActionType}
         onConfirm={handleOfferConfirm}
         loading={loading}
-        isSimulationMode={isSimulationMode}
       />
     </div>
   );
