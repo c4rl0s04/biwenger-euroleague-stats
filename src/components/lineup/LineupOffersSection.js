@@ -420,6 +420,7 @@ function OffersTable({ players, onAccept, onReject, loading, sortConfig, onSort 
                       image={playerImage}
                       color="text-white"
                       size="md"
+                      link={`/player/${player.id}`}
                       imageClassName="scale-[1.7] origin-top pt-1"
                     />
                   </div>
