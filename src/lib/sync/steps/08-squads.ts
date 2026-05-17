@@ -30,6 +30,9 @@ export async function run(manager: SyncManager) {
 
   for (const user of users) {
     try {
+      // Reset squad/ownership for this user before importing their current squad
+      await mutations.resetUserSquad(user.id);
+
       // Fetch user details with players field
       const response = await biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.USER_PLAYERS(user.id));
       const data = response.data;
