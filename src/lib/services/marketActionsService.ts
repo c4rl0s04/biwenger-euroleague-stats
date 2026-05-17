@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, players } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { biwengerFetch } from '../api/biwenger-client.js';
 
@@ -34,7 +34,7 @@ export const marketActionsService = {
 
     // 2. Call Biwenger API
     // Payload format: {type: "sell" | "immediateSell", player: ID, price: Value}
-    return await biwengerFetch('/market', {
+    const result = await biwengerFetch('/market', {
       method: 'POST',
       body: {
         type: type,
@@ -44,6 +44,20 @@ export const marketActionsService = {
       customToken: user.biwengerToken,
       customUserId: userId,
     });
+
+    // Check if the sell was successful on Biwenger.
+    // If it was, and the type is 'immediateSell', set ownerId to null!
+    const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
+    if (result && !hasErrorStatus && !result.error && type === 'immediateSell') {
+      try {
+        await db.update(players).set({ ownerId: null }).where(eq(players.id, playerId));
+        console.log(`[DB] Successfully set player ${playerId} owner to null after immediateSell`);
+      } catch (dbErr) {
+        console.error('Failed to update player owner in DB after immediate sell:', dbErr);
+      }
+    }
+
+    return result;
   },
 
   /**
@@ -106,7 +120,15 @@ export const marketActionsService = {
   /**
    * Accepts a transfer offer
    */
-  async acceptOffer({ offerId, userId }: { offerId: number; userId: string }) {
+  async acceptOffer({
+    offerId,
+    userId,
+    playerId,
+  }: {
+    offerId: number;
+    userId: string;
+    playerId?: number;
+  }) {
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
       columns: { biwengerToken: true },
@@ -118,7 +140,7 @@ export const marketActionsService = {
 
     // Correct Biwenger endpoint for accepting: PUT /offers/:id
     // Payload: { status: "accepted" }
-    return await biwengerFetch(`/offers/${offerId}`, {
+    const result = await biwengerFetch(`/offers/${offerId}`, {
       method: 'PUT',
       body: {
         status: 'accepted',
@@ -126,6 +148,20 @@ export const marketActionsService = {
       customToken: user.biwengerToken,
       customUserId: userId,
     });
+
+    // Check if the accept was successful on Biwenger.
+    // If it was, and playerId is provided, set ownerId to null!
+    const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
+    if (result && !hasErrorStatus && !result.error && playerId) {
+      try {
+        await db.update(players).set({ ownerId: null }).where(eq(players.id, playerId));
+        console.log(`[DB] Successfully set player ${playerId} owner to null after accepting offer`);
+      } catch (dbErr) {
+        console.error('Failed to update player owner in DB after offer acceptance:', dbErr);
+      }
+    }
+
+    return result;
   },
 
   /**

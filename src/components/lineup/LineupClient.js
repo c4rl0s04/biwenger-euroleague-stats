@@ -174,7 +174,7 @@ export default function LineupClient({ userId }) {
 
       // Real API Logic
       const res = isAccept
-        ? await apiClient.acceptOffer(offer.id)
+        ? await apiClient.acceptOffer(offer.id, player.id)
         : await apiClient.rejectOffer(offer.id);
 
       if (res.success) {

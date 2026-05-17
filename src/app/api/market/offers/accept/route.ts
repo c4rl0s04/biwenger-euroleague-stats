@@ -9,15 +9,16 @@ export async function POST(request: Request) {
       return errorResponse('No autorizado', 401);
     }
 
-    const { offerId } = await request.json();
+    const { offerId, playerId } = await request.json();
 
     if (!offerId) {
       return errorResponse('ID de oferta no proporcionado', 400);
     }
 
     const result = await marketActionsService.acceptOffer({
-      offerId: parseInt(offerId),
+      offerId: Number(offerId),
       userId: session.user.id,
+      playerId: playerId ? Number(playerId) : undefined,
     });
 
     return successResponse(result, 200);

@@ -106,8 +106,8 @@ export const apiClient = {
   /**
    * Accepts a transfer offer
    */
-  async acceptOffer(offerId) {
-    return this.post('/api/market/offers/accept', { offerId });
+  async acceptOffer(offerId, playerId) {
+    return this.post('/api/market/offers/accept', { offerId, playerId });
   },
 
   /**
