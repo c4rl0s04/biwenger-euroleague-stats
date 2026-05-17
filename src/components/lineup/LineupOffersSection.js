@@ -17,6 +17,7 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  Store,
 } from 'lucide-react';
 import {
   Table,
@@ -63,7 +64,13 @@ function SortableHeader({ label, sortKey, currentSort, onSort, align = 'center',
   );
 }
 
-export default function LineupOffersSection({ squad, onAccept, onReject, loading }) {
+export default function LineupOffersSection({
+  squad,
+  onAccept,
+  onReject,
+  onPutAllOnMarket,
+  loading,
+}) {
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'table'
@@ -149,9 +156,19 @@ export default function LineupOffersSection({ squad, onAccept, onReject, loading
         <h4 className="text-lg font-black text-white uppercase tracking-tight mb-1">
           Sin ofertas activas
         </h4>
-        <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest text-center max-w-xs">
+        <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest text-center max-w-xs mb-6">
           Actualmente no tienes pujas de otros managers por tus jugadores.
         </p>
+        {onPutAllOnMarket && (
+          <button
+            onClick={onPutAllOnMarket}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-bold text-sm border border-blue-500/20 shadow-lg cursor-pointer"
+          >
+            <Store size={18} />
+            <span>Poner toda la plantilla en mercado</span>
+          </button>
+        )}
       </div>
     );
   }
@@ -175,6 +192,18 @@ export default function LineupOffersSection({ squad, onAccept, onReject, loading
           <div className="text-xs font-bold text-white/40 uppercase tracking-widest hidden sm:block">
             {playersWithOffers.length} {playersWithOffers.length === 1 ? 'Oferta' : 'Ofertas'}
           </div>
+
+          {onPutAllOnMarket && (
+            <button
+              onClick={onPutAllOnMarket}
+              disabled={loading}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors font-bold text-xs cursor-pointer shadow-md"
+              title="Poner todos los jugadores en venta"
+            >
+              <Store size={14} />
+              <span className="hidden lg:inline">Alinear Mercado</span>
+            </button>
+          )}
 
           {/* View Toggle */}
           <div className="flex bg-black/20 p-1 rounded-xl border border-white/5">

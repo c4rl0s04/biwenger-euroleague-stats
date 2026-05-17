@@ -11,6 +11,7 @@ import LineupSquadAnalysis from './LineupSquadAnalysis';
 import LineupSellModal from './LineupSellModal';
 import LineupOffersSection from './LineupOffersSection';
 import LineupOfferModal from './LineupOfferModal';
+import LineupPutAllOnMarketModal from './LineupPutAllOnMarketModal';
 import { PageHeader } from '@/components/ui';
 import { LayoutGrid, HandCoins, TrendingUp } from 'lucide-react';
 import { Section } from '@/components/layout';
@@ -42,6 +43,7 @@ export default function LineupClient({ userId }) {
 
   const [sellTarget, setSellTarget] = useState(null);
   const [isSellOpen, setIsSellOpen] = useState(false);
+  const [isBulkSellOpen, setIsBulkSellOpen] = useState(false);
 
   // ── Offer Management States ─────────────────────────────────────────────
   const [isOfferOpen, setIsOfferOpen] = useState(false);
@@ -298,6 +300,37 @@ export default function LineupClient({ userId }) {
     );
   }
 
+  const handlePutAllOnMarket = () => {
+    setIsBulkSellOpen(true);
+  };
+
+  const confirmBulkSell = async (percentage) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await apiClient.post('/api/market/sell-all', { pricePercentage: percentage });
+      if (res.success) {
+        setSuccess(`¡Plantilla entera puesta en el mercado al ${percentage}%!`);
+        setIsBulkSellOpen(false);
+        // Local state update so buttons change instantly
+        setSquad((prev) =>
+          prev.map((p) => ({
+            ...p,
+            isOnSale: true,
+            listingPrice: p.price * (percentage / 100),
+          }))
+        );
+      } else {
+        setError(res.error || 'Error al enviar plantilla al mercado');
+      }
+    } catch (err) {
+      setError('Error de conexión al alinear mercado');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <PageHeader title="Alineación" description="Configura tu equipo para las próximas jornadas" />
@@ -339,6 +372,7 @@ export default function LineupClient({ userId }) {
             squad={squad}
             onAccept={handleAcceptOffer}
             onReject={handleRejectOffer}
+            onPutAllOnMarket={handlePutAllOnMarket}
             loading={loading}
           />
         </Section>
@@ -399,6 +433,13 @@ export default function LineupClient({ userId }) {
         offer={offerTarget?.offer}
         actionType={offerActionType}
         onConfirm={handleOfferConfirm}
+        loading={loading}
+      />
+
+      <LineupPutAllOnMarketModal
+        isOpen={isBulkSellOpen}
+        onClose={() => setIsBulkSellOpen(false)}
+        onConfirm={confirmBulkSell}
         loading={loading}
       />
     </div>

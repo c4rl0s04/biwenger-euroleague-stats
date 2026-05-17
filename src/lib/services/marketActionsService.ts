@@ -45,6 +45,40 @@ export const marketActionsService = {
   },
 
   /**
+   * Places all team players on the market at a given percentage of their value
+   * @param params - { pricePercentage, userId }
+   */
+  async placeAllOnMarket({
+    pricePercentage = 100,
+    userId,
+  }: {
+    pricePercentage?: number;
+    userId: string;
+  }) {
+    // 1. Fetch user token from DB
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { biwengerToken: true },
+    });
+
+    if (!user || !user.biwengerToken) {
+      throw new Error(`No se encontró un token de Biwenger configurado para el usuario ${userId}`);
+    }
+
+    // 2. Call Biwenger API native team sell
+    // Payload format: {type: "team", price: 100}
+    return await biwengerFetch('/market', {
+      method: 'POST',
+      body: {
+        type: 'team',
+        price: pricePercentage,
+      },
+      customToken: user.biwengerToken,
+      customUserId: userId,
+    });
+  },
+
+  /**
    * Withdraws a player from the market
    */
   async withdrawFromMarket({ playerId, userId }: { playerId: number; userId: string }) {
