@@ -452,7 +452,7 @@ function OffersTable({ players, onAccept, onReject, loading, sortConfig, onSort 
                       size="md"
                       link={`/player/${player.id}`}
                       imageClassName="scale-[1.7] origin-top pt-1"
-                      nameClassName="hover:underline hover:text-emerald-400 transition-colors cursor-pointer font-bold"
+                      nameClassName="text-white hover:scale-105 transition-all duration-300 origin-left cursor-pointer font-bold"
                     />
                   </div>
                 </TableCell>
@@ -591,7 +591,7 @@ function OfferCard({ player, onAccept, onReject, loading }) {
             <Link
               href={`/player/${player.id}`}
               onClick={(e) => e.stopPropagation()}
-              className="text-lg font-black text-white hover:text-emerald-400 hover:underline transition-colors truncate tracking-tight block"
+              className="text-lg font-black text-white hover:scale-105 transition-all duration-300 origin-left cursor-pointer truncate tracking-tight block"
             >
               {player.name}
             </Link>

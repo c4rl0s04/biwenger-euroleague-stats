@@ -344,10 +344,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
                                   link={`/player/${player.id}`}
                                   size="sm"
                                   className="group-hover:translate-x-1 transition-transform"
-                                  nameClassName={cn(
-                                    colors.hoverText,
-                                    'cursor-pointer transition-colors hover:underline text-emerald-400 font-bold'
-                                  )}
+                                  nameClassName="text-white hover:scale-105 transition-all duration-300 origin-left cursor-pointer font-bold"
                                 />
                               </div>
                             </TableCell>
