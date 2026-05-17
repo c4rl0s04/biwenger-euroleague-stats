@@ -25,6 +25,14 @@ export async function POST(request: NextRequest) {
       userId: session.user.id as string,
     });
 
+    // 3.5 Check for Biwenger API-level errors wrapped in 200 OK responses
+    if (result && ((result.status && result.status !== 200) || result.error)) {
+      return errorResponse(
+        result.error || `Error de Biwenger (Código ${result.status})`,
+        result.status || 400
+      );
+    }
+
     // 4. Return success stats
     return successResponse({
       message: 'Plantilla entera puesta en mercado',
