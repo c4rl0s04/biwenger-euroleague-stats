@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import {
   Table,
@@ -331,17 +332,24 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
                             onClick={() => onPlayerClick?.(player)}
                           >
                             <TableCell align="left" className="py-4 border-none pl-6">
-                              <TableIdentity
-                                name={player.name}
-                                image={player.img}
-                                subtitle={player.team}
-                                size="sm"
-                                className="group-hover:translate-x-1 transition-transform"
-                                nameClassName={cn(
-                                  colors.hoverText,
-                                  'cursor-pointer transition-colors'
-                                )}
-                              />
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <TableIdentity
+                                  name={player.name}
+                                  image={player.img}
+                                  subtitle={player.team}
+                                  link={`/player/${player.id}`}
+                                  size="sm"
+                                  className="group-hover:translate-x-1 transition-transform"
+                                  nameClassName={cn(
+                                    colors.hoverText,
+                                    'cursor-pointer transition-colors hover:underline text-emerald-400 font-bold'
+                                  )}
+                                />
+                              </div>
                             </TableCell>
                             <TableCell
                               align="center"

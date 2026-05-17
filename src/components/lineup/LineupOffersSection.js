@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -451,6 +452,7 @@ function OffersTable({ players, onAccept, onReject, loading, sortConfig, onSort 
                       size="md"
                       link={`/player/${player.id}`}
                       imageClassName="scale-[1.7] origin-top pt-1"
+                      nameClassName="hover:underline hover:text-emerald-400 transition-colors cursor-pointer font-bold"
                     />
                   </div>
                 </TableCell>
@@ -586,7 +588,13 @@ function OfferCard({ player, onAccept, onReject, loading }) {
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-black text-white truncate tracking-tight">{player.name}</h3>
+            <Link
+              href={`/player/${player.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-lg font-black text-white hover:text-emerald-400 hover:underline transition-colors truncate tracking-tight block"
+            >
+              {player.name}
+            </Link>
             <div className="flex items-center gap-2 text-xs text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
               <Clock size={12} className={hoursLeft < 4 ? 'text-rose-500' : ''} />
               <span className={hoursLeft < 4 ? 'text-rose-500' : ''}>
