@@ -40,7 +40,7 @@ export default function RecentRoundsCard() {
 
   // Find latest participated round for hero display
   const latestParticipated = rounds.find((r) => r.participated);
-  const allRounds = rounds.slice(0, 5);
+  const allRounds = rounds.slice(0, 10);
 
   return (
     <Card
