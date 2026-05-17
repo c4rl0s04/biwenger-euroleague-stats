@@ -37,10 +37,11 @@ export async function POST(request: NextRequest) {
 
     // 3.5 Check for Biwenger API-level errors wrapped in 200 OK responses
     console.log('Biwenger API response for sell:', result);
-    if (result && ((result.status && result.status !== 200) || result.error)) {
+    const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
+    if (result && (hasErrorStatus || result.error)) {
       return errorResponse(
         result.error || `Error de Biwenger (Código ${result.status})`,
-        result.status || 400
+        result.status && result.status >= 400 && result.status < 600 ? result.status : 400
       );
     }
 
