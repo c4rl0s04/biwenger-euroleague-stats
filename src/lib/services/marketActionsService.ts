@@ -8,17 +8,19 @@ import { biwengerFetch } from '../api/biwenger-client.js';
  */
 export const marketActionsService = {
   /**
-   * Places a player on the market
-   * @param params - { playerId, price, userId }
+   * Places a player on the market or sells them immediately
+   * @param params - { playerId, price, userId, type }
    */
   async placeOnMarket({
     playerId,
     price,
     userId,
+    type = 'sell',
   }: {
     playerId: number;
     price: number;
     userId: string;
+    type?: 'sell' | 'immediateSell';
   }) {
     // 1. Fetch user token from DB
     const user = await db.query.users.findFirst({
@@ -31,11 +33,11 @@ export const marketActionsService = {
     }
 
     // 2. Call Biwenger API
-    // Payload format: {type: "sell", player: ID, price: Value}
+    // Payload format: {type: "sell" | "immediateSell", player: ID, price: Value}
     return await biwengerFetch('/market', {
       method: 'POST',
       body: {
-        type: 'sell',
+        type: type,
         player: playerId,
         price: price,
       },

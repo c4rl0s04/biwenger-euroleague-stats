@@ -191,7 +191,7 @@ export default function LineupSellModal({ isOpen, onClose, player, onConfirm, on
             <motion.button
               layout
               disabled={isPriceTooLow}
-              onClick={() => onConfirm?.(player, sellPrice)}
+              onClick={() => onConfirm?.(player, sellPrice, activeTab)}
               className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all cursor-pointer text-xs shadow-lg ${
                 isPriceTooLow
                   ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'

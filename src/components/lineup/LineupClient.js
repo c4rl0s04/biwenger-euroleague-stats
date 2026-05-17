@@ -234,21 +234,35 @@ export default function LineupClient({ userId }) {
     setIsSellOpen(true);
   };
 
-  const handleSellConfirm = async (player, price) => {
+  const handleSellConfirm = async (player, price, actionType = 'vender') => {
     try {
       setLoading(true);
       setError(null);
       setSuccess(false);
 
+      const isImmediate = actionType === 'inmediata';
+      const apiType = isImmediate ? 'immediateSell' : 'sell';
+      const apiPrice = isImmediate ? player.price : price;
+
       const res = await apiClient.sellPlayer({
         playerId: player.id,
-        price: price,
+        price: apiPrice,
+        type: apiType,
       });
 
       if (res.success) {
         setSuccess(true);
-        // Update local state immediately so the button changes to "En Venta"
-        setSquad((prev) => prev.map((p) => (p.id === player.id ? { ...p, isOnSale: true } : p)));
+        // If immediate sell, remove player from the squad locally
+        if (isImmediate) {
+          setSquad((prev) => prev.filter((p) => p.id !== player.id));
+        } else {
+          // Update local state immediately so the button changes to "En Venta"
+          setSquad((prev) =>
+            prev.map((p) =>
+              p.id === player.id ? { ...p, isOnSale: true, listingPrice: apiPrice } : p
+            )
+          );
+        }
         setTimeout(() => setSuccess(false), 3000);
         setTimeout(() => setIsSellOpen(false), 1500);
       } else {

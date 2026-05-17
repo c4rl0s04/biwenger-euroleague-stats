@@ -92,8 +92,8 @@ export const apiClient = {
    * Places a player on the Biwenger market
    * @param {Object} params - { playerId, price }
    */
-  async sellPlayer({ playerId, price }) {
-    return this.post('/api/market/sell', { playerId, price });
+  async sellPlayer({ playerId, price, type }) {
+    return this.post('/api/market/sell', { playerId, price, type });
   },
 
   /**

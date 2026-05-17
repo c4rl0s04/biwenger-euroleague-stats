@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse and validate the body
     const body = await request.json();
-    const { playerId, price } = body;
+    const { playerId, price, type = 'sell' } = body;
 
     if (!playerId) {
       return errorResponse('ID de jugador faltante.', 400);
@@ -27,11 +27,12 @@ export async function POST(request: NextRequest) {
       return errorResponse('Precio de venta faltante.', 400);
     }
 
-    // 3. Call the service to place the player on the market
+    // 3. Call the service to place the player on the market or sell immediately
     const result = await marketActionsService.placeOnMarket({
       playerId: Number(playerId),
       price: Number(price),
-      userId: session.user.id,
+      type,
+      userId: session.user.id as string,
     });
 
     // 4. Return success
