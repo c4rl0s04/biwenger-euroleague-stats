@@ -49,7 +49,7 @@ export function SectionProvider({ children }) {
         requestAnimationFrame(() => setSections(sorted));
       }
     }
-  }, [sections.length]); // Re-sort when count changes
+  }, [sections]);
 
   return (
     <SectionContext.Provider value={{ sections, registerSection, unregisterSection }}>

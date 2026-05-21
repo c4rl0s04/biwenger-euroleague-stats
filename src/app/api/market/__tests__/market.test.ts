@@ -212,3 +212,36 @@ describe('GET /api/market/duels/details', () => {
     expect(services.fetchBiddingDuelDetails).toHaveBeenCalledWith(4, 7);
   });
 });
+
+// --- /api/market/stats and /api/market/stats/value-details ---
+describe('market stats route contracts', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns 200 with market stats', async () => {
+    vi.mocked(services.fetchMarketStats).mockResolvedValue({ totals: [] } as any);
+
+    const { GET } = await import('@/app/api/market/stats/route');
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual({ totals: [] });
+  });
+
+  it('returns 200 with value details and 400 for invalid transferId', async () => {
+    vi.mocked(services.fetchBestValueDetails).mockResolvedValue({ transferId: 10 } as any);
+
+    const { GET } = await import('@/app/api/market/stats/value-details/route');
+    const response = await GET(
+      makeRequest('http://localhost/api/market/stats/value-details', { transferId: '10' })
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).data).toEqual({ transferId: 10 });
+
+    const invalid = await GET(
+      makeRequest('http://localhost/api/market/stats/value-details', { transferId: 'abc' })
+    );
+    expect(invalid.status).toBe(400);
+  });
+});

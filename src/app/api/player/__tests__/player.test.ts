@@ -9,6 +9,9 @@ vi.mock('@/lib/services', () => ({
   fetchUserRecentRounds: vi.fn(),
   fetchUserSquadDetails: vi.fn(),
   fetchPlayerStreaks: vi.fn(),
+  getPlayerProfile: vi.fn(),
+  fetchLeagueAveragePoints: vi.fn(),
+  fetchStatLeaders: vi.fn(),
 }));
 
 vi.mock('@/auth', () => ({
@@ -117,5 +120,59 @@ describe('GET /api/player/squad', () => {
 
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
+  });
+});
+
+describe('player and stats route contract coverage', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('covers GET /api/player/streaks', async () => {
+    vi.mocked(services.fetchPlayerStreaks).mockResolvedValue([{ playerId: 1 }] as any);
+
+    const { GET } = await import('@/app/api/player/streaks/route');
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual([{ playerId: 1 }]);
+  });
+
+  it('covers GET /api/players/[id]/stats success and not found', async () => {
+    vi.mocked(services.getPlayerProfile).mockResolvedValue({ id: '1', name: 'Player' } as any);
+
+    const { GET } = await import('@/app/api/players/[id]/stats/route');
+    const response = await GET(makeRequest('http://localhost/api/players/1/stats'), {
+      params: Promise.resolve({ id: '1' }),
+    });
+    expect(response.status).toBe(200);
+    expect((await response.json()).success).toBe(true);
+
+    vi.mocked(services.getPlayerProfile).mockResolvedValue(null as any);
+    const notFound = await GET(makeRequest('http://localhost/api/players/999/stats'), {
+      params: Promise.resolve({ id: '999' }),
+    });
+    expect(notFound.status).toBe(404);
+  });
+
+  it('covers league-average and stat leaders routes', async () => {
+    vi.mocked(services.fetchLeagueAveragePoints).mockResolvedValue(75 as any);
+    vi.mocked(services.fetchStatLeaders).mockResolvedValue([{ playerId: 1 }] as any);
+
+    const leagueAverage = await import('@/app/api/league-average/route');
+    const leaders = await import('@/app/api/stats/leaders/route');
+
+    const averageResponse = await leagueAverage.GET();
+    expect(averageResponse.status).toBe(200);
+    expect((await averageResponse.json()).data).toEqual({ average: 75 });
+
+    const leadersResponse = await leaders.GET(
+      makeRequest('http://localhost/api/stats/leaders', { type: 'rebounds' })
+    );
+    expect(leadersResponse.status).toBe(200);
+    expect(await leadersResponse.json()).toEqual({
+      success: true,
+      data: [{ playerId: 1 }],
+    });
   });
 });

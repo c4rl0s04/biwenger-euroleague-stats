@@ -28,14 +28,17 @@ async function syncData() {
     process.exit(1);
   }
 
-  const DB_PATH = CONFIG.DB.PATH;
-  const manager = new SyncManager(DB_PATH);
-
   // Register Pipeline Steps (Fixed Order)
   // Parse CLI Args
   const args = process.argv.slice(2);
   const onlyStep = args.find((a) => a.startsWith('--step='))?.split('=')[1] || null;
   const isDaily = args.includes('--daily');
+  const continueOnError =
+    args.includes('--continue-on-error') || process.env.SYNC_CONTINUE_ON_ERROR === 'true';
+  const mode = isDaily ? 'daily' : 'full';
+
+  const DB_PATH = CONFIG.DB.PATH;
+  const manager = new SyncManager(DB_PATH, { mode, continueOnError });
 
   if (isDaily) {
     console.log('📅 Daily Sync Mode Active: Skipping heavy steps (9-12).');
@@ -59,38 +62,58 @@ async function syncData() {
     return true;
   };
 
-  if (shouldRun(1)) manager.addStep('Sync Players (Biwenger)', stepPlayers.run);
-  if (shouldRun(2)) manager.addStep('Sync Master Data (Linking)', stepMaster.run);
-  if (shouldRun(3)) manager.addStep('Sync Match Schedule', stepMatches.run);
-  if (shouldRun(4)) manager.addStep('Sync Standings (Users)', stepStandings.run);
-  if (shouldRun(5)) manager.addStep('Sync Player Stats', stepStats.run);
-  if (shouldRun(6)) manager.addStep('Sync User Lineups', stepLineups.run);
-  if (shouldRun(7)) manager.addStep('Sync Market (Transfers/Bids)', stepMarket.run);
-  if (shouldRun(8)) manager.addStep('Sync Squads (Ownership)', stepSquads.run);
-  if (shouldRun(9)) manager.addStep('Sync Initial Squads', stepInitial.run);
+  if (shouldRun(1)) manager.addStep('Sync Players (Biwenger)', stepPlayers.run, { number: 1 });
+  if (shouldRun(2))
+    manager.addStep('Sync Master Data (Linking)', stepMaster.run, { number: 2, dependencies: [1] });
+  if (shouldRun(3))
+    manager.addStep('Sync Match Schedule', stepMatches.run, { number: 3, dependencies: [1, 2] });
+  if (shouldRun(4))
+    manager.addStep('Sync Standings (Users)', stepStandings.run, { number: 4, dependencies: [1] });
+  if (shouldRun(5))
+    manager.addStep('Sync Player Stats', stepStats.run, { number: 5, dependencies: [1, 2, 3] });
+  if (shouldRun(6))
+    manager.addStep('Sync User Lineups', stepLineups.run, { number: 6, dependencies: [1, 4, 5] });
+  if (shouldRun(7))
+    manager.addStep('Sync Market (Transfers/Bids)', stepMarket.run, {
+      number: 7,
+      dependencies: [1],
+    });
+  if (shouldRun(8))
+    manager.addStep('Sync Squads (Ownership)', stepSquads.run, { number: 8, dependencies: [1, 4] });
+  if (shouldRun(9))
+    manager.addStep('Sync Initial Squads', stepInitial.run, { number: 9, dependencies: [1, 8] });
 
   // New Image Sync Steps
   const stepTeams = await import('./steps/10-team-logos.js'); // Step 10
   const stepImages = await import('./steps/11-official-images.js'); // Step 11
 
-  if (shouldRun(10)) manager.addStep('Sync Team Logos', stepTeams.run);
-  if (shouldRun(11)) manager.addStep('Sync Player Images', stepImages.run);
+  if (shouldRun(10))
+    manager.addStep('Sync Team Logos', stepTeams.run, { number: 10, critical: false });
+  if (shouldRun(11))
+    manager.addStep('Sync Player Images', stepImages.run, { number: 11, critical: false });
 
   // New User Color Step
   const stepColors = await import('./steps/12-user-colors.js'); // Step 12
-  if (shouldRun(12)) manager.addStep('Sync User Colors', stepColors.run);
+  if (shouldRun(12))
+    manager.addStep('Sync User Colors', stepColors.run, { number: 12, critical: false });
 
   // New Porras Step
   const stepPorras = await import('./steps/13-porras.js'); // Step 13
-  if (shouldRun(13)) manager.addStep('Sync Porras', stepPorras.run);
+  if (shouldRun(13))
+    manager.addStep('Sync Porras', stepPorras.run, { number: 13, dependencies: [4] });
 
   // New Tournaments Step
   const stepTournaments = await import('./steps/14-tournaments.js'); // Step 14
-  if (shouldRun(14)) manager.addStep('Sync Tournaments', stepTournaments.run);
+  if (shouldRun(14))
+    manager.addStep('Sync Tournaments', stepTournaments.run, { number: 14, dependencies: [4] });
 
   // Market Listings Snapshot Step
   const stepMarketListings = await import('./steps/15-market-listings.js'); // Step 15
-  if (shouldRun(15)) manager.addStep('Sync Market Listings', stepMarketListings.run);
+  if (shouldRun(15))
+    manager.addStep('Sync Market Listings', stepMarketListings.run, {
+      number: 15,
+      dependencies: [1, 7, 8],
+    });
 
   // Execute
   await manager.run();

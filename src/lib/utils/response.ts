@@ -17,6 +17,18 @@ export const CACHE_DURATIONS = {
 
 export type CacheDuration = (typeof CACHE_DURATIONS)[keyof typeof CACHE_DURATIONS];
 
+export type ApiSuccessResponse<T> = {
+  success: true;
+  data: T;
+};
+
+export type ApiErrorResponse = {
+  success: false;
+  error: string;
+};
+
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+
 interface CachedResponseOptions {
   maxAge?: number;
   stale?: number;
@@ -26,7 +38,7 @@ interface CachedResponseOptions {
 /**
  * Creates a JSON response with caching headers
  */
-export function cachedResponse(data: unknown, options: CachedResponseOptions = {}): NextResponse {
+export function cachedResponse<T>(data: T, options: CachedResponseOptions = {}): NextResponse {
   const { maxAge = CACHE_DURATIONS.MEDIUM, stale = CACHE_DURATIONS.STALE, status = 200 } = options;
 
   return NextResponse.json(data, {
@@ -44,7 +56,7 @@ export function successResponse(
   data: unknown,
   maxAge: number = CACHE_DURATIONS.MEDIUM
 ): NextResponse {
-  return cachedResponse({ success: true, data }, { maxAge });
+  return cachedResponse<ApiSuccessResponse<unknown>>({ success: true, data }, { maxAge });
 }
 
 /**

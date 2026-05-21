@@ -5,40 +5,40 @@ import { prepareUserMutations } from '@/lib/db/mutations/users';
 import { pgClient } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
     const session = await auth();
 
-    if (!session || !session.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: 'No autorizado' }, { status: 401 });
     }
+    const userId = session.user.id;
 
-    const { currentPassword, newPassword } = await req.json();
+    const { currentPassword, newPassword } = (await req.json()) as {
+      currentPassword?: string;
+      newPassword?: string;
+    };
 
     if (!currentPassword || !newPassword) {
       return NextResponse.json({ message: 'Faltan campos obligatorios' }, { status: 400 });
     }
 
-    // 1. Fetch user to get current hashed password
-    const user = await getUserWithPassword(session.user.id);
+    const user = await getUserWithPassword(userId);
 
     if (!user) {
       return NextResponse.json({ message: 'Usuario no encontrado' }, { status: 404 });
     }
 
-    // 2. Verify current password
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    const isMatch = await bcrypt.compare(currentPassword, user.password as string);
 
     if (!isMatch) {
       return NextResponse.json({ message: 'La contraseña actual es incorrecta' }, { status: 400 });
     }
 
-    // 3. Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // 4. Update password in database
     const mutations = prepareUserMutations(pgClient);
-    await mutations.updateUserPassword(hashedPassword, session.user.id);
+    await mutations.updateUserPassword(hashedPassword, userId);
 
     return NextResponse.json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {

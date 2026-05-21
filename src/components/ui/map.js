@@ -132,6 +132,15 @@ export const Map = forwardRef(function Map(
     }),
     [styles]
   );
+  const initialConfigRef = useRef({
+    bounds,
+    mapStyles,
+    padding,
+    projection,
+    props,
+    resolvedTheme,
+    viewport,
+  });
 
   useImperativeHandle(ref, () => mapInstance, [mapInstance]);
 
@@ -145,7 +154,11 @@ export const Map = forwardRef(function Map(
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const initialStyle = resolvedTheme === 'dark' ? mapStyles.dark : mapStyles.light;
+    const initialConfig = initialConfigRef.current;
+    const initialStyle =
+      initialConfig.resolvedTheme === 'dark'
+        ? initialConfig.mapStyles.dark
+        : initialConfig.mapStyles.light;
     currentStyleRef.current = initialStyle;
 
     const map = new MapLibreGL.Map({
@@ -155,20 +168,23 @@ export const Map = forwardRef(function Map(
       attributionControl: {
         compact: true,
       },
-      ...props,
-      ...viewport,
+      ...initialConfig.props,
+      ...initialConfig.viewport,
     });
 
-    if (bounds) {
-      map.fitBounds(bounds, { padding, animate: false });
+    if (initialConfig.bounds) {
+      map.fitBounds(initialConfig.bounds, {
+        padding: initialConfig.padding,
+        animate: false,
+      });
     }
 
     const styleDataHandler = () => {
       clearStyleTimeout();
       styleTimeoutRef.current = setTimeout(() => {
         setIsStyleLoaded(true);
-        if (projection && map.setProjection) {
-          map.setProjection(projection);
+        if (initialConfig.projection && map.setProjection) {
+          map.setProjection(initialConfig.projection);
         }
       }, 100);
     };
@@ -194,7 +210,7 @@ export const Map = forwardRef(function Map(
       setIsStyleLoaded(false);
       setMapInstance(null);
     };
-  }, []);
+  }, [clearStyleTimeout]);
 
   useEffect(() => {
     if (!mapInstance || !isControlled || !viewport) return;

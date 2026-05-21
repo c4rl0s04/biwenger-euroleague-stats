@@ -9,6 +9,10 @@ on:
 
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
+concurrency:
+  group: live-sync-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   live-sync:
     name: 🏀 Live Euroleague Sync

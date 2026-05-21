@@ -10,13 +10,17 @@ vi.mock('@/lib/services', () => ({
   fetchRoundLeaderboard: vi.fn(),
   fetchRoundsList: vi.fn(),
   fetchRoundStandings: vi.fn(),
-  fetchRoundHistory: vi.fn(),
-  fetchAllRoundHistory: vi.fn(),
-  fetchRoundLineup: vi.fn(),
-  fetchRoundLineupStats: vi.fn(),
+  fetchAllUsersPerformanceHistory: vi.fn(),
+  getUserPerformanceHistoryService: vi.fn(),
+  fetchUserLineup: vi.fn(),
+}));
+
+vi.mock('@/lib/services/core/roundsService', () => ({
+  fetchLineupStats: vi.fn(),
 }));
 
 import * as services from '@/lib/services';
+import { fetchLineupStats } from '@/lib/services/core/roundsService';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
@@ -98,5 +102,71 @@ describe('GET /api/rounds/list', () => {
     const { GET } = await import('@/app/api/rounds/list/route');
     const response = await GET();
     expect(response.status).toBe(500);
+  });
+});
+
+describe('rounds route contract coverage', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('covers history and all-history response envelopes', async () => {
+    vi.mocked(services.getUserPerformanceHistoryService).mockResolvedValue([{ roundId: 1 }] as any);
+    vi.mocked(services.fetchAllUsersPerformanceHistory).mockResolvedValue([{ userId: '1' }] as any);
+
+    const history = await import('@/app/api/rounds/history/route');
+    const allHistory = await import('@/app/api/rounds/all-history/route');
+
+    const historyResponse = await history.GET(
+      makeRequest('http://localhost/api/rounds/history', { userId: '42' })
+    );
+    const allHistoryResponse = await allHistory.GET();
+
+    expect(historyResponse.status).toBe(200);
+    expect((await historyResponse.json()).data).toEqual({ history: [{ roundId: 1 }] });
+    expect(allHistoryResponse.status).toBe(200);
+    expect((await allHistoryResponse.json()).data).toEqual({
+      allUsersHistory: [{ userId: '1' }],
+    });
+  });
+
+  it('covers leaderboard, standings, lineup, and lineup-stats envelopes', async () => {
+    vi.mocked(services.fetchRoundLeaderboard).mockResolvedValue([{ userId: '1' }] as any);
+    vi.mocked(services.fetchRoundStandings).mockResolvedValue([{ userId: '2' }] as any);
+    vi.mocked(services.fetchUserLineup).mockResolvedValue([{ playerId: 1 }] as any);
+    vi.mocked(fetchLineupStats).mockResolvedValue([{ roundId: 1 }] as any);
+
+    const leaderboard = await import('@/app/api/rounds/leaderboard/route');
+    const standings = await import('@/app/api/rounds/standings/route');
+    const lineup = await import('@/app/api/rounds/lineup/route');
+    const lineupStats = await import('@/app/api/rounds/lineup-stats/route');
+
+    const leaderboardResponse = await leaderboard.GET();
+    const standingsResponse = await standings.GET(
+      makeRequest('http://localhost/api/rounds/standings', { roundId: '5' })
+    );
+    const lineupResponse = await lineup.GET(
+      makeRequest('http://localhost/api/rounds/lineup', { roundId: '5', userId: '42' })
+    );
+    const lineupStatsResponse = await lineupStats.GET();
+
+    expect((await leaderboardResponse.json()).data).toEqual({
+      leaderboard: [{ userId: '1' }],
+    });
+    expect((await standingsResponse.json()).success).toBe(true);
+    expect((await lineupResponse.json()).success).toBe(true);
+    expect((await lineupStatsResponse.json()).success).toBe(true);
+  });
+
+  it('keeps required-param failures stable', async () => {
+    const history = await import('@/app/api/rounds/history/route');
+    const standings = await import('@/app/api/rounds/standings/route');
+    const lineup = await import('@/app/api/rounds/lineup/route');
+
+    expect((await history.GET(makeRequest('http://localhost/api/rounds/history'))).status).toBe(
+      400
+    );
+    expect((await standings.GET(makeRequest('http://localhost/api/rounds/standings'))).status).toBe(
+      400
+    );
+    expect((await lineup.GET(makeRequest('http://localhost/api/rounds/lineup'))).status).toBe(400);
   });
 });

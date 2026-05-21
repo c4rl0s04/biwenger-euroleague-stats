@@ -78,7 +78,9 @@ Key properties:
 - **Idempotent** — Every step uses `INSERT ... ON CONFLICT DO UPDATE`, so re-running the sync never produces duplicate data
 - **Ordered** — Steps are sequentially numbered because later steps depend on earlier ones (e.g., lineups require players and rounds to exist)
 - **Isolated** — Each step can be run independently for debugging
-- **Resumable** — Failures in step N don't corrupt steps 1–N-1
+- **Guarded** — Full, daily, and live syncs use PostgreSQL advisory locks so two sync processes do not write the same database concurrently
+- **Fail-fast by default** — Critical step failures stop later dependent work; legacy continuation is available only with `--continue-on-error` or `SYNC_CONTINUE_ON_ERROR=true`
+- **Resumable** — Completed steps remain valid because writes are idempotent and later reruns upsert the same records
 
 ---
 
@@ -235,7 +237,7 @@ Rather than converting the entire codebase at once (expensive, high churn) or st
 | API routes       | TypeScript | Validates request/response shapes at compile time                                  |
 | UI components    | JavaScript | Display logic; errors are visible immediately; 242 files = high churn for low gain |
 
-This approach delivers ~80% of TypeScript's error-catching value (the backend) at ~20% of the full migration cost.
+This approach delivers most of TypeScript's error-catching value at the backend/API/database boundary while avoiding high-churn UI conversion. CI intentionally runs `npm run typecheck`, which checks TypeScript files only. JavaScript UI files remain protected by ESLint, focused route contract tests, and runtime behavior tests rather than global `checkJs`.
 
 Type safety "stops at the API boundary" — the UI talks to the API over HTTP (not direct function calls), so typed API routes give confidence that the contract is correct even though the consuming component is JavaScript.
 

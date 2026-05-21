@@ -10,6 +10,7 @@ import {
 import { prepareEuroleagueMutations } from '../db/mutations/euroleague';
 import { prepareMatchMutations } from '../db/mutations/matches';
 import { calculateBiwengerPoints } from '../utils/fantasy-scoring';
+import { acquireAdvisoryLock } from './advisory-lock';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -19,7 +20,7 @@ dotenv.config();
 
 const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 
-async function runLiveSync() {
+async function runLiveSync(): Promise<number> {
   console.log('📡 Starting Euroleague Live Sync...');
 
   // 1. Get Active Round and Matches
@@ -62,7 +63,7 @@ async function runLiveSync() {
 
   if (matches.length === 0) {
     console.log('   😴 No active games found. Exiting.');
-    process.exit(0);
+    return 0;
   }
 
   console.log(`   🔥 Found ${matches.length} potentially active matches.`);
@@ -96,7 +97,7 @@ async function runLiveSync() {
     }
   } catch (e: any) {
     console.error('   ❌ Failed to fetch schedule:', e.message);
-    process.exit(1);
+    return 1;
   }
 
   // 3. Loop Matches
@@ -253,7 +254,27 @@ async function runLiveSync() {
   }
 
   console.log('\n🏁 Live Sync Completed.');
-  process.exit(0);
+  return 0;
 }
 
-runLiveSync();
+async function main() {
+  const lock = await acquireAdvisoryLock(db as any, 823745, 'live');
+  if (!lock.acquired) {
+    console.log('⏭️  Another live sync is already running. Skipping this run.');
+    return 0;
+  }
+
+  try {
+    return await runLiveSync();
+  } finally {
+    await lock.release();
+    if (typeof db.end === 'function') await db.end();
+  }
+}
+
+main()
+  .then((code) => process.exit(code))
+  .catch((error) => {
+    console.error('Live sync failed:', error);
+    process.exit(1);
+  });

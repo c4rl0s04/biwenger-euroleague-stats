@@ -204,7 +204,11 @@ export default function SquadInsightsSection({ initialPlayers = [] }) {
                   <div className="flex-1 min-w-0">
                     <h5 className="font-black text-xs uppercase truncate">{squad.mvp.name}</h5>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <img src={squad.mvp.team_img} className="w-3 h-3 object-contain opacity-70" />
+                      <img
+                        src={squad.mvp.team_img}
+                        alt=""
+                        className="w-3 h-3 object-contain opacity-70"
+                      />
                       <span className="text-[10px] text-muted-foreground uppercase font-medium">
                         {squad.mvp.team_name}
                       </span>
@@ -227,7 +231,7 @@ export default function SquadInsightsSection({ initialPlayers = [] }) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 bg-secondary/30 px-2 py-1 rounded-md border border-border/30">
-                    <img src={squad.favTeam.img} className="w-4 h-4 object-contain" />
+                    <img src={squad.favTeam.img} alt="" className="w-4 h-4 object-contain" />
                     <span className="text-[10px] font-bold uppercase truncate max-w-[80px]">
                       {squad.favTeam.name}
                     </span>

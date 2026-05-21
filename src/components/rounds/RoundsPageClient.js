@@ -92,7 +92,7 @@ export default function RoundsPageClient() {
     ) {
       setComparisonUserIds([selectedUserId]);
     }
-  }, [selectedUserId]);
+  }, [selectedUserId, comparisonUserIds]);
 
   // --- 2. QUICK FETCH (Only selected user's data) ---
   const { data: quickRoundData, loading: quickDataLoading } = useApiData(

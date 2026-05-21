@@ -19,9 +19,29 @@ vi.mock('@/lib/services', () => ({
   fetchLeagueComparisonStats: vi.fn(),
   fetchPointsProgression: vi.fn(),
   fetchInitialSquadStats: vi.fn(),
+  fetchInitialSquadAnalytics: vi.fn(),
+  fetchHeatCheckStats: vi.fn(),
+  fetchHunterStats: vi.fn(),
+  fetchRollingAverageStats: vi.fn(),
+  fetchFloorCeilingStats: vi.fn(),
+  fetchPointDistributionStats: vi.fn(),
+  fetchAllPlayAllStats: vi.fn(),
+  fetchDominanceStats: vi.fn(),
+  fetchTheoreticalGapStats: vi.fn(),
+  fetchHeatmapStats: vi.fn(),
+  fetchPositionChangesStats: vi.fn(),
+  fetchReliabilityStats: vi.fn(),
+  fetchRivalryMatrixStats: vi.fn(),
+  fetchDetailedCaptainStats: vi.fn(),
+  getLeagueOverview: vi.fn(),
+}));
+
+vi.mock('@/lib/services/app/standingsService', () => ({
+  fetchTheoreticalStandings: vi.fn(),
 }));
 
 import * as services from '@/lib/services';
+import { fetchTheoreticalStandings } from '@/lib/services/app/standingsService';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
@@ -228,5 +248,78 @@ describe('GET /api/standings/initial-squad-stats', () => {
     const { GET } = await import('@/app/api/standings/initial-squad-stats/route');
     const response = await GET();
     expect(response.status).toBe(500);
+  });
+});
+
+describe('standings route contract coverage', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const routeModules = {
+    analytics: () => import('@/app/api/standings/analytics/route'),
+    bottlers: () => import('@/app/api/standings/bottlers/route'),
+    heartbreakers: () => import('@/app/api/standings/heartbreakers/route'),
+    jinx: () => import('@/app/api/standings/jinx/route'),
+    'league-comparison': () => import('@/app/api/standings/league-comparison/route'),
+    'league-totals': () => import('@/app/api/standings/league-totals/route'),
+    'no-glory': () => import('@/app/api/standings/no-glory/route'),
+    placements: () => import('@/app/api/standings/placements/route'),
+    'value-ranking': () => import('@/app/api/standings/value-ranking/route'),
+  };
+
+  it.each([
+    ['analytics', 'fetchInitialSquadAnalytics'],
+    ['bottlers', 'fetchBottlerStats'],
+    ['heartbreakers', 'fetchHeartbreakerStats'],
+    ['jinx', 'fetchJinxStats'],
+    ['league-comparison', 'fetchLeagueComparisonStats'],
+    ['league-totals', 'getLeagueOverview'],
+    ['no-glory', 'fetchNoGloryStats'],
+    ['placements', 'fetchPlacementStats'],
+    ['value-ranking', 'fetchValueRanking'],
+  ] as const)('covers GET /api/standings/%s', async (route, serviceName) => {
+    vi.mocked(services[serviceName]).mockResolvedValue([{ id: route }] as any);
+
+    const { GET } = await routeModules[route]();
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual([{ id: route }]);
+  });
+
+  it('covers captains and theoretical standings route envelopes', async () => {
+    vi.mocked(services.fetchDetailedCaptainStats).mockResolvedValue([{ userId: '1' }] as any);
+    vi.mocked(fetchTheoreticalStandings).mockResolvedValue([{ userId: '2' }] as any);
+
+    const captains = await import('@/app/api/standings/captains/route');
+    const theoretical = await import('@/app/api/standings/theoretical/route');
+
+    const captainsResponse = await captains.GET(
+      makeRequest('http://localhost/api/standings/captains')
+    );
+    const theoreticalResponse = await theoretical.GET();
+
+    expect(captainsResponse.status).toBe(200);
+    expect((await captainsResponse.json()).data).toEqual({ stats: [{ userId: '1' }] });
+    expect(theoreticalResponse.status).toBe(200);
+    expect((await theoreticalResponse.json()).data).toEqual([{ userId: '2' }]);
+  });
+
+  it('covers advanced stats valid and invalid type contracts', async () => {
+    vi.mocked(services.fetchHeatCheckStats).mockResolvedValue([{ id: 'heat-check' }] as any);
+
+    const { GET } = await import('@/app/api/standings/advanced/route');
+    const response = await GET(
+      makeRequest('http://localhost/api/standings/advanced', { type: 'heat-check' })
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ success: true, data: [{ id: 'heat-check' }] });
+
+    const invalid = await GET(
+      makeRequest('http://localhost/api/standings/advanced', { type: 'unknown' })
+    );
+    expect(invalid.status).toBe(400);
+    expect(await invalid.json()).toEqual({ error: 'Invalid stat type' });
   });
 });

@@ -1,12 +1,28 @@
 import { db } from '../db/client';
 import { ensureSchema } from '../db/schema_init';
 import { clearCache } from '../utils/cache';
+import { acquireAdvisoryLock, type AdvisoryLock } from './advisory-lock';
+
+export type SyncMode = 'full' | 'daily' | 'live';
+
+export interface SyncStepResult {
+  success?: boolean;
+  message?: string;
+  error?: unknown;
+  data?: unknown;
+}
+
+export interface SyncStepMetadata {
+  number: number;
+  critical: boolean;
+  dependencies: number[];
+  modes: SyncMode[];
+}
 
 export interface SyncStep {
   name: string;
-  runFn: (
-    manager: SyncManager
-  ) => Promise<{ success?: boolean; message?: string; error?: any; data?: any } | void>;
+  runFn: (manager: SyncManager) => Promise<SyncStepResult | void>;
+  metadata: SyncStepMetadata;
 }
 
 export interface SyncContext {
@@ -25,8 +41,21 @@ export class SyncManager {
   logs: { type: string; message: string; timestamp: Date; error?: any }[];
   hasErrors: boolean;
   roundNameMap: Map<string, number>;
+  mode: SyncMode;
+  continueOnError: boolean;
+  useAdvisoryLock: boolean;
+  lockKey: number;
+  lockUnavailable: boolean;
 
-  constructor(dbPath: string) {
+  constructor(
+    dbPath: string,
+    options: {
+      mode?: SyncMode;
+      continueOnError?: boolean;
+      useAdvisoryLock?: boolean;
+      lockKey?: number;
+    } = {}
+  ) {
     this.dbPath = dbPath; // Unused for Postgres, kept for signature compat
     this.steps = [];
     this.context = {
@@ -39,6 +68,11 @@ export class SyncManager {
     this.logs = [];
     this.hasErrors = false;
     this.roundNameMap = new Map(); // Store canonical round mapping (normalized name -> id)
+    this.mode = options.mode ?? 'full';
+    this.continueOnError = options.continueOnError ?? process.env.SYNC_CONTINUE_ON_ERROR === 'true';
+    this.useAdvisoryLock = options.useAdvisoryLock ?? true;
+    this.lockKey = options.lockKey ?? 823744;
+    this.lockUnavailable = false;
   }
 
   /**
@@ -80,8 +114,17 @@ export class SyncManager {
    * @param name - Step name for logging
    * @param runFn - Async function (manager) => Promise<{success, message, data?}>
    */
-  addStep(name: string, runFn: SyncStep['runFn']) {
-    this.steps.push({ name, runFn });
+  addStep(name: string, runFn: SyncStep['runFn'], metadata: Partial<SyncStepMetadata> = {}) {
+    this.steps.push({
+      name,
+      runFn,
+      metadata: {
+        number: metadata.number ?? this.steps.length + 1,
+        critical: metadata.critical ?? true,
+        dependencies: metadata.dependencies ?? [],
+        modes: metadata.modes ?? ['full', 'daily', 'live'],
+      },
+    });
   }
 
   log(message: string) {
@@ -97,9 +140,19 @@ export class SyncManager {
 
   async run() {
     this.log('🚀 Starting Data Sync (Postgres Manager Mode)...');
+    let advisoryLock: AdvisoryLock | null = null;
 
     // Use the singleton pool from client.js
     this.context.db = db;
+
+    if (this.useAdvisoryLock) {
+      advisoryLock = await acquireAdvisoryLock(this.context.db as any, this.lockKey, this.mode);
+      if (!advisoryLock.acquired) {
+        this.lockUnavailable = true;
+        this.log('⏭️  Another sync is already running. Skipping this run.');
+        return;
+      }
+    }
 
     // Ensure Schema Exists (Async now)
     this.log('   🔨 Verifying/Creating Database Schema...');
@@ -107,12 +160,25 @@ export class SyncManager {
       await ensureSchema(this.context.db as any);
     } catch (e) {
       this.error('❌ Failed to verify schema:', e);
-      process.exit(1);
+      if (advisoryLock?.acquired) {
+        await advisoryLock.release();
+      }
+      if (this.context.db && typeof this.context.db.end === 'function') {
+        await this.context.db.end();
+      }
+      return;
     }
 
     try {
       for (const step of this.steps) {
-        this.log(`\n▶️  Running Step: ${step.name}...`);
+        if (!step.metadata.modes.includes(this.mode)) {
+          this.log(
+            `\n⏭️  Skipping Step ${step.metadata.number}: ${step.name} for ${this.mode} mode.`
+          );
+          continue;
+        }
+
+        this.log(`\n▶️  Running Step ${step.metadata.number}: ${step.name}...`);
         try {
           const result = await step.runFn(this);
 
@@ -122,8 +188,10 @@ export class SyncManager {
 
           if (result && result.success === false) {
             this.error(`❌ Step ${step.name} failed`, result.error || new Error('Unknown error'));
-            // Depending on policy, we might break or continue
-            // For now, continue but mark hasErrors
+            if (step.metadata.critical && !this.continueOnError) {
+              this.log(`🛑 Stopping sync because critical step ${step.metadata.number} failed.`);
+              break;
+            }
           } else {
             this.log(`✅ Step ${step.name} completed.`);
           }
@@ -132,6 +200,10 @@ export class SyncManager {
           // But usually steps modify context.db or context.playersList directly
         } catch (err) {
           this.error(`❌ Critical Error in step ${step.name}:`, err);
+          if (step.metadata.critical && !this.continueOnError) {
+            this.log(`🛑 Stopping sync because critical step ${step.metadata.number} threw.`);
+            break;
+          }
         }
       }
     } catch (err) {
@@ -142,6 +214,9 @@ export class SyncManager {
         clearCache();
       }
 
+      if (advisoryLock?.acquired) {
+        await advisoryLock.release();
+      }
       if (this.context.db && typeof this.context.db.end === 'function') {
         this.log('\n🔒 Closing Database connection...');
         await this.context.db.end();

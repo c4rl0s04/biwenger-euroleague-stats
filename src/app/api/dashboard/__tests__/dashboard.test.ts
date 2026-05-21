@@ -20,6 +20,7 @@ vi.mock('@/lib/services', () => ({
   fetchTopPlayersByForm: vi.fn(),
   fetchLeaderComparison: vi.fn(),
   getNextRoundData: vi.fn(),
+  fetchMarketOpportunities: vi.fn(),
 }));
 
 import * as services from '@/lib/services';
@@ -128,5 +129,91 @@ describe('GET /api/dashboard/top-form', () => {
 
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
+  });
+});
+
+describe('dashboard route contract coverage', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('covers captain-stats success and missing userId error envelope', async () => {
+    vi.mocked(services.fetchCaptainStats).mockResolvedValue({ total: 1 } as any);
+
+    const { GET } = await import('@/app/api/dashboard/captain-stats/route');
+    const okResponse = await GET(
+      mockRequest('http://localhost/api/dashboard/captain-stats', { userId: '42' })
+    );
+    const okJson = await okResponse.json();
+    expect(okResponse.status).toBe(200);
+    expect(okJson).toEqual({ success: true, data: { stats: { total: 1 } } });
+
+    const badResponse = await GET(mockRequest('http://localhost/api/dashboard/captain-stats'));
+    const badJson = await badResponse.json();
+    expect(badResponse.status).toBe(400);
+    expect(badJson.success).toBe(false);
+  });
+
+  it('covers captain-suggest success envelope', async () => {
+    vi.mocked(services.fetchCaptainRecommendations).mockResolvedValue([{ id: 1 }] as any);
+
+    const { GET } = await import('@/app/api/dashboard/captain-suggest/route');
+    const response = await GET(
+      mockRequest('http://localhost/api/dashboard/captain-suggest', { userId: '42' })
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual([{ id: 1 }]);
+  });
+
+  it('covers home-away and leader-gap user-scoped routes', async () => {
+    vi.mocked(services.fetchHomeAwayStats).mockResolvedValue({ home: 1 } as any);
+    vi.mocked(services.fetchLeaderComparison).mockResolvedValue({ gap: 10 } as any);
+
+    const homeAway = await import('@/app/api/dashboard/home-away/route');
+    const leaderGap = await import('@/app/api/dashboard/leader-gap/route');
+
+    const homeResponse = await homeAway.GET(
+      mockRequest('http://localhost/api/dashboard/home-away', { userId: '42' })
+    );
+    const gapResponse = await leaderGap.GET(
+      mockRequest('http://localhost/api/dashboard/leader-gap', { userId: '42' })
+    );
+
+    expect(homeResponse.status).toBe(200);
+    expect((await homeResponse.json()).data).toEqual({ stats: { home: 1 } });
+    expect(gapResponse.status).toBe(200);
+    expect((await gapResponse.json()).data).toEqual({ gap: 10 });
+  });
+
+  it('covers simple dashboard data routes and cache envelopes', async () => {
+    vi.mocked(services.fetchLastRoundStats).mockResolvedValue([
+      { player_id: 1, round_name: 'J1', position: 'Base', points: 10 },
+    ] as any);
+    vi.mocked(services.fetchMarketOpportunities).mockResolvedValue([{ id: 2 }] as any);
+    vi.mocked(services.fetchLastRoundMVPs).mockResolvedValue([{ id: 3 }] as any);
+    vi.mocked(services.fetchNextRound).mockResolvedValue({ id: 4 } as any);
+    vi.mocked(services.getRecentActivityData).mockResolvedValue([{ id: 5 }] as any);
+
+    const ideal = await import('@/app/api/dashboard/ideal-lineup/route');
+    const market = await import('@/app/api/dashboard/market-opportunities/route');
+    const mvps = await import('@/app/api/dashboard/mvps/route');
+    const next = await import('@/app/api/dashboard/next-round/route');
+    const recent = await import('@/app/api/dashboard/recent-activity/route');
+
+    for (const response of [
+      await ideal.GET(),
+      await market.GET(),
+      await mvps.GET(),
+      await next.GET(),
+      await recent.GET(
+        mockRequest('http://localhost/api/dashboard/recent-activity', { userId: '42' })
+      ),
+    ]) {
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      expect(json.success).toBe(true);
+      expect(response.headers.get('Cache-Control')).toContain('stale-while-revalidate');
+    }
   });
 });
