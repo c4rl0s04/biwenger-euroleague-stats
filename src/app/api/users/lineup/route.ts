@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { auth } from '@/auth';
 import { lineupService } from '@/lib/services/lineupService';
 import { successResponse, errorResponse } from '@/lib/utils/response';
 
@@ -9,18 +10,25 @@ import { successResponse, errorResponse } from '@/lib/utils/response';
  */
 export async function POST(request: NextRequest) {
   try {
-    const { lineup, userId } = await request.json();
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return errorResponse(
+        'No autorizado. Debes iniciar sesion para actualizar tu alineacion.',
+        401
+      );
+    }
+
+    const { lineup } = await request.json();
 
     if (!lineup) {
       return errorResponse('Se requiere el objeto "lineup"', 400);
     }
 
-    if (!userId) {
-      return errorResponse('Se requiere el "userId" para seleccionar el token', 400);
-    }
-
-    // Forward the lineup and userId to the service
-    const result = await lineupService.updateLineup({ lineup, userId });
+    const result = await lineupService.updateLineup({
+      lineup,
+      userId: session.user.id as string,
+    });
 
     return successResponse({
       message: 'Alineación actualizada en Biwenger',
@@ -33,18 +41,20 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET /api/users/lineup?userId=...
+ * GET /api/users/lineup
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const session = await auth();
 
-    if (!userId) {
-      return errorResponse('Se requiere el "userId"', 400);
+    if (!session?.user?.id) {
+      return errorResponse(
+        'No autorizado. Debes iniciar sesion para consultar tu alineacion.',
+        401
+      );
     }
 
-    const lineup = await lineupService.getLineup(userId);
+    const lineup = await lineupService.getLineup(session.user.id as string);
 
     return successResponse(lineup, 0);
   } catch (error: any) {

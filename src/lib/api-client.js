@@ -84,8 +84,8 @@ export const apiClient = {
    * Sends a lineup object to the backend to be saved on Biwenger
    * @param {Object} lineup - The lineup payload { type, playersID, reservesID, captain }
    */
-  async saveLineup({ userId, ...lineup }) {
-    return this.post('/api/users/lineup', { lineup, userId });
+  async saveLineup(lineup) {
+    return this.post('/api/users/lineup', { lineup });
   },
 
   /**

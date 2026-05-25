@@ -16,7 +16,7 @@ import LineupModal from './LineupModal';
  * 5. Fill bench with next 5 earliest.
  * 6. Send to Biwenger via API.
  */
-export default function AutoAlignButton({ userId, matches, userName, discrete = false }) {
+export default function AutoAlignButton({ matches, userName, discrete = false }) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lineupPreview, setLineupPreview] = useState(null);
@@ -96,7 +96,7 @@ export default function AutoAlignButton({ userId, matches, userName, discrete = 
       };
 
       // 6. Send to API
-      const result = await apiClient.saveLineup({ ...lineupPayload, userId });
+      const result = await apiClient.saveLineup(lineupPayload);
 
       setLineupPreview({
         starters,

@@ -61,7 +61,7 @@ export default function LineupClient({ userId }) {
 
         const [squadRes, lineupRes] = await Promise.all([
           apiClient.get(`/api/player/squad?userId=${userId}`).catch(() => ({ success: false })),
-          apiClient.get(`/api/users/lineup?userId=${userId}`).catch(() => ({ success: false })),
+          apiClient.get('/api/users/lineup').catch(() => ({ success: false })),
         ]);
 
         let onSaleIds = new Set();
@@ -285,7 +285,7 @@ export default function LineupClient({ userId }) {
       setError(null);
       setSuccess(false);
 
-      const res = await apiClient.saveLineup({ userId, ...lineupConfig });
+      const res = await apiClient.saveLineup(lineupConfig);
 
       if (res.success) {
         setSuccess(true);

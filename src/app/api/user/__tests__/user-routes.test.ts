@@ -96,18 +96,14 @@ describe('user and lineup route contracts', () => {
     vi.mocked(lineupService.updateLineup).mockResolvedValue({ ok: true } as any);
 
     const { GET, POST } = await import('@/app/api/users/lineup/route');
-    const getResponse = await GET(
-      makeRequest('http://localhost/api/users/lineup', { userId: '42' })
-    );
+    const getResponse = await GET(makeRequest('http://localhost/api/users/lineup'));
     expect(getResponse.status).toBe(200);
     expect((await getResponse.json()).success).toBe(true);
-
-    const missingGet = await GET(makeRequest('http://localhost/api/users/lineup'));
-    expect(missingGet.status).toBe(400);
+    expect(lineupService.getLineup).toHaveBeenCalledWith('42');
 
     const postResponse = await POST(
       jsonRequest('http://localhost/api/users/lineup', {
-        userId: '42',
+        userId: 'not-the-session-user',
         lineup: { type: '1-2-2', playersID: [1], reservesID: [], captain: 1 },
       })
     );
@@ -115,11 +111,30 @@ describe('user and lineup route contracts', () => {
     expect(postResponse.status).toBe(200);
     expect(postJson.success).toBe(true);
     expect(postJson.data.message).toBe('Alineación actualizada en Biwenger');
+    expect(lineupService.updateLineup).toHaveBeenCalledWith({
+      lineup: { type: '1-2-2', playersID: [1], reservesID: [], captain: 1 },
+      userId: '42',
+    });
 
-    const missingPost = await POST(
-      jsonRequest('http://localhost/api/users/lineup', { userId: '42' })
-    );
+    const missingPost = await POST(jsonRequest('http://localhost/api/users/lineup', {}));
     expect(missingPost.status).toBe(400);
+  });
+
+  it('rejects unauthenticated lineup reads and writes', async () => {
+    vi.mocked(auth).mockResolvedValue(null as any);
+
+    const { GET, POST } = await import('@/app/api/users/lineup/route');
+    const getResponse = await GET(makeRequest('http://localhost/api/users/lineup'));
+    const postResponse = await POST(
+      jsonRequest('http://localhost/api/users/lineup', {
+        lineup: { type: '1-2-2', playersID: [1], reservesID: [], captain: 1 },
+      })
+    );
+
+    expect(getResponse.status).toBe(401);
+    expect(postResponse.status).toBe(401);
+    expect(lineupService.getLineup).not.toHaveBeenCalled();
+    expect(lineupService.updateLineup).not.toHaveBeenCalled();
   });
 
   it('covers /api/user/change-password auth and success contracts', async () => {
