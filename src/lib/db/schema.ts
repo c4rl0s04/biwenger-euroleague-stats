@@ -8,6 +8,7 @@ import {
   doublePrecision,
   bigint,
   date,
+  index,
   unique,
 } from 'drizzle-orm/pg-core';
 
@@ -414,3 +415,40 @@ export const userPlayoffMedia = pgTable('user_playoff_media', {
   predictionImageUrl: text('prediction_image_url'),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+// 25. Assistant Conversations Table
+export const assistantConversations = pgTable(
+  'assistant_conversations',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    userUpdatedIdx: index('idx_assistant_conversations_user_updated').on(t.userId, t.updatedAt),
+  })
+);
+
+// 26. Assistant Messages Table
+export const assistantMessages = pgTable(
+  'assistant_messages',
+  {
+    id: text('id').primaryKey(),
+    conversationId: text('conversation_id')
+      .notNull()
+      .references(() => assistantConversations.id, { onDelete: 'cascade' }),
+    role: text('role').notNull(),
+    content: text('content').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    conversationCreatedIdx: index('idx_assistant_messages_conversation_created').on(
+      t.conversationId,
+      t.createdAt
+    ),
+  })
+);

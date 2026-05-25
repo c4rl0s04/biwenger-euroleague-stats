@@ -11,6 +11,12 @@ interface RouteContractEntry {
 }
 
 const ROUTE_CONTRACT_MANIFEST: Record<string, RouteContractEntry> = {
+  '/api/assistant': { status: 'covered', reason: 'assistant handler contract tests' },
+  '/api/assistant/conversations': { status: 'covered', reason: 'assistant handler contract tests' },
+  '/api/assistant/conversations/[id]': {
+    status: 'covered',
+    reason: 'assistant handler contract tests',
+  },
   '/api/auth/[...nextauth]': { status: 'exempted', reason: 'NextAuth handler passthrough' },
   '/api/compare/data': { status: 'covered', reason: 'compare handler contract tests' },
   '/api/compare/data/lite': { status: 'covered', reason: 'compare handler contract tests' },

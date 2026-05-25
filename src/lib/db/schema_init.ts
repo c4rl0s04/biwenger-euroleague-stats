@@ -296,6 +296,28 @@ export async function ensureSchema(db: DbClient) {
     )
   `);
 
+  // 19. Assistant Conversations Table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS assistant_conversations (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // 20. Assistant Messages Table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS assistant_messages (
+      id TEXT PRIMARY KEY,
+      conversation_id TEXT NOT NULL REFERENCES assistant_conversations(id) ON DELETE CASCADE,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `);
+
   // --- INDEXES ---
   const indexes = [
     // User rounds
@@ -339,6 +361,10 @@ export async function ensureSchema(db: DbClient) {
     'CREATE INDEX IF NOT EXISTS idx_tournament_fixtures_tournament ON tournament_fixtures(tournament_id)',
     'CREATE INDEX IF NOT EXISTS idx_tournament_fixtures_round ON tournament_fixtures(round_id)',
     'CREATE INDEX IF NOT EXISTS idx_tournament_standings_tournament ON tournament_standings(tournament_id)',
+
+    // Assistant
+    'CREATE INDEX IF NOT EXISTS idx_assistant_conversations_user_updated ON assistant_conversations(user_id, updated_at DESC)',
+    'CREATE INDEX IF NOT EXISTS idx_assistant_messages_conversation_created ON assistant_messages(conversation_id, created_at)',
   ];
 
   for (const indexSql of indexes) {

@@ -20,6 +20,7 @@ import {
   LayoutGrid,
   Swords,
   Scale,
+  Bot,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSections } from './SectionContext';
@@ -27,6 +28,7 @@ import { useSections } from './SectionContext';
 const navItems = [
   { name: 'Inicio', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Asistente IA', href: '/assistant', icon: Bot },
   { name: 'Clasificación', href: '/standings', icon: Trophy },
   { name: 'Jugadores', href: '/players', icon: User },
   { name: 'Mercado', href: '/market', icon: ShoppingCart },
