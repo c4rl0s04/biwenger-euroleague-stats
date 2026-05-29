@@ -137,6 +137,7 @@ describe('assistant route contracts', () => {
     );
     expect(createResponse).toHaveBeenCalledWith(
       expect.objectContaining({
+        instructions: expect.stringContaining('BiwengerStats assistant'),
         model: 'openai/gpt-oss-20b',
         input: [userMessage],
       })

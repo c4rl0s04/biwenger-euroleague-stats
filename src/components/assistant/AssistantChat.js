@@ -6,9 +6,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 const STARTERS = [
-  'Explícame qué es un agente de IA.',
-  '¿Qué diferencia hay entre un chatbot y un agente?',
-  'Dame una idea sencilla para practicar con IA.',
+  'Ayúdame a decidir entre dos jugadores para mi lineup.',
+  '¿Cómo debería pensar una venta en el mercado?',
+  'Explícame cómo analizar la regularidad de un jugador.',
 ];
 
 function AssistantMarkdown({ content }) {
@@ -337,9 +337,11 @@ export default function AssistantChat() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate font-semibold text-foreground">
-              {activeConversation?.title || 'BiwengerStats Assistant'}
+              {activeConversation?.title || 'Asistente BiwengerStats'}
             </p>
-            <p className="text-xs text-muted-foreground">Conversaciones guardadas en tu cuenta</p>
+            <p className="text-xs text-muted-foreground">
+              Estrategia fantasy y conversaciones guardadas en tu cuenta
+            </p>
           </div>
         </div>
 
@@ -355,10 +357,12 @@ export default function AssistantChat() {
           {!loadingMessages && messages.length === 0 && (
             <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
               <div className="max-w-md space-y-2">
-                <p className="text-lg font-semibold text-foreground">Inicia una conversación</p>
+                <p className="text-lg font-semibold text-foreground">
+                  Pregunta sobre estrategia fantasy
+                </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  El historial queda asociado a tu usuario. El asistente todavía no conoce tus
-                  estadísticas ni puede realizar acciones.
+                  Puedes pedir ayuda para razonar lineups, mercado, tendencias y decisiones de
+                  Biwenger. Todavía no consulta tus datos en vivo ni ejecuta acciones.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -441,7 +445,7 @@ export default function AssistantChat() {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Pregunta algo al asistente..."
+              placeholder="Pregunta sobre lineup, mercado o estrategia..."
               rows={1}
               maxLength={4000}
               disabled={loadingMessages}
@@ -457,7 +461,8 @@ export default function AssistantChat() {
             </button>
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Las respuestas de IA pueden contener errores. Esta etapa no utiliza datos de Biwenger.
+            Esta etapa no consulta datos en vivo de BiwengerStats. No tomes sus respuestas como
+            datos oficiales.
           </p>
         </form>
       </div>

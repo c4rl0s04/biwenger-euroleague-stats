@@ -4,7 +4,7 @@ import AssistantChat from '@/components/assistant/AssistantChat';
 
 export const metadata = {
   title: 'Asistente IA | BiwengerStats',
-  description: 'Laboratorio de chat con inteligencia artificial para BiwengerStats.',
+  description: 'Asistente de estrategia fantasy para BiwengerStats.',
 };
 
 export default function AssistantPage() {
@@ -12,12 +12,12 @@ export default function AssistantPage() {
     <div className="min-h-screen bg-background">
       <PageHeader
         title="Asistente IA"
-        description="Primera etapa del laboratorio: conversa con un modelo de IA antes de añadir datos, personalidad y herramientas."
+        description="Asistente de estrategia fantasy para razonar lineups, mercado y decisiones de BiwengerStats."
       />
 
       <Section
-        title="Chat Experimental"
-        subtitle="Etapa 2: conversaciones persistentes y conexión con el modelo"
+        title="Asistente BiwengerStats"
+        subtitle="Personalidad fantasy activa. Próximamente: datos reales y herramientas de la app."
         background="section-base"
       >
         <AssistantChat />
