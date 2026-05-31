@@ -6,6 +6,7 @@ import {
   findAssistantConversation,
   getAssistantModelContext,
 } from '@/lib/services/features/assistantService';
+import { buildPlayerContextForMessage } from '@/lib/services/features/assistantPlayerContextService';
 import { errorResponse } from '@/lib/utils/response';
 import { NextResponse } from 'next/server';
 
@@ -28,11 +29,24 @@ Style:
 - Use Markdown when it makes the answer easier to scan.
 
 Current limitations:
-- You do not yet have live access to BiwengerStats data, user squads, market values, standings, player stats, or app actions.
-- Do not invent specific player stats, prices, ownership data, standings, injury updates, or lineup data.
+- You only have live BiwengerStats data when a "BiwengerStats data context" block is provided in this request.
+- If player data context is provided, use it as the source of truth for that answer.
+- You still do not have live access to user squads, standings, market listings, injuries, or app actions.
+- Do not invent specific player stats, prices, ownership data, standings, injury updates, or lineup data that are not present in the provided context.
 - If the user asks for data you cannot access, say that clearly and explain what data would be needed.
 - You can still help with general fantasy strategy, decision frameworks, interpretation of stats provided by the user, and app usage guidance.
 `.trim();
+
+function buildInstructions(playerContext: string | null): string {
+  if (!playerContext) return ASSISTANT_INSTRUCTIONS;
+
+  return `${ASSISTANT_INSTRUCTIONS}
+
+BiwengerStats data context:
+${playerContext}
+
+Use the data context above when it is relevant to the user's latest question. If the context does not answer the question, say what is missing instead of guessing.`;
+}
 
 type AssistantProvider = keyof typeof DEFAULT_MODELS;
 
@@ -111,6 +125,14 @@ export async function POST(request: Request) {
       'user',
       parsedRequest.data.message
     );
+    let playerContext: string | null = null;
+
+    try {
+      playerContext = await buildPlayerContextForMessage(parsedRequest.data.message);
+    } catch (contextError) {
+      console.error('[API Assistant] Player context error:', contextError);
+    }
+
     const messages = await getAssistantModelContext(conversation.id);
     const client = new OpenAI({
       apiKey: providerConfig.apiKey,
@@ -118,7 +140,7 @@ export async function POST(request: Request) {
     });
     const response = await client.responses.create({
       model: providerConfig.model,
-      instructions: ASSISTANT_INSTRUCTIONS,
+      instructions: buildInstructions(playerContext),
       input: messages,
     });
     const message = response.output_text?.trim();

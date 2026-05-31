@@ -17,6 +17,11 @@ const { assistantService } = vi.hoisted(() => ({
     listAssistantConversations: vi.fn(),
   },
 }));
+const { playerContextService } = vi.hoisted(() => ({
+  playerContextService: {
+    buildPlayerContextForMessage: vi.fn(),
+  },
+}));
 
 vi.mock('openai', () => ({
   default: class MockOpenAI {
@@ -31,6 +36,7 @@ vi.mock('openai', () => ({
 }));
 
 vi.mock('@/lib/services/features/assistantService', () => assistantService);
+vi.mock('@/lib/services/features/assistantPlayerContextService', () => playerContextService);
 
 const CONVERSATION_ID = '2ebbd3be-c3d5-405d-86c6-d688946955bc';
 const conversation = {
@@ -76,6 +82,7 @@ describe('assistant route contracts', () => {
     assistantService.createAssistantConversation.mockResolvedValue(conversation);
     assistantService.getAssistantMessages.mockResolvedValue([userMessage, assistantMessage]);
     assistantService.deleteAssistantConversation.mockResolvedValue(true);
+    playerContextService.buildPlayerContextForMessage.mockResolvedValue(null);
   });
 
   it('rejects unauthenticated requests before calling the model', async () => {
@@ -135,6 +142,9 @@ describe('assistant route contracts', () => {
       'user',
       'Que es un agente?'
     );
+    expect(playerContextService.buildPlayerContextForMessage).toHaveBeenCalledWith(
+      'Que es un agente?'
+    );
     expect(createResponse).toHaveBeenCalledWith(
       expect.objectContaining({
         instructions: expect.stringContaining('BiwengerStats assistant'),
@@ -151,6 +161,30 @@ describe('assistant route contracts', () => {
       apiKey: 'test-groq-api-key',
       baseURL: 'https://api.groq.com/openai/v1',
     });
+  });
+
+  it('passes read-only player context to the model when a player is found', async () => {
+    playerContextService.buildPlayerContextForMessage.mockResolvedValue(
+      'Jugador: Walter Tavares\nEquipo: Real Madrid\nMedia fantasy temporada: 16.4'
+    );
+    createResponse.mockResolvedValue({ output_text: 'Tavares tiene un perfil muy estable.' });
+    const { POST } = await import('@/app/api/assistant/route');
+
+    const response = await POST(
+      jsonRequest({ conversationId: CONVERSATION_ID, message: 'Qué opinas de Tavares?' })
+    );
+
+    expect(response.status).toBe(200);
+    expect(createResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        instructions: expect.stringContaining('Jugador: Walter Tavares'),
+      })
+    );
+    expect(createResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        instructions: expect.stringContaining('source of truth'),
+      })
+    );
   });
 
   it('reports missing server configuration without calling the model', async () => {
