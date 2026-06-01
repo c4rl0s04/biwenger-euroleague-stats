@@ -19,7 +19,8 @@ const { assistantService } = vi.hoisted(() => ({
 }));
 const { playerContextService } = vi.hoisted(() => ({
   playerContextService: {
-    buildPlayerContextForMessage: vi.fn(),
+    buildAssistantContext: vi.fn(),
+    formatAssistantContextBlocks: vi.fn(),
   },
 }));
 
@@ -36,7 +37,7 @@ vi.mock('openai', () => ({
 }));
 
 vi.mock('@/lib/services/features/assistantService', () => assistantService);
-vi.mock('@/lib/services/features/assistantPlayerContextService', () => playerContextService);
+vi.mock('@/lib/services/features/assistantContextService', () => playerContextService);
 
 const CONVERSATION_ID = '2ebbd3be-c3d5-405d-86c6-d688946955bc';
 const conversation = {
@@ -82,7 +83,8 @@ describe('assistant route contracts', () => {
     assistantService.createAssistantConversation.mockResolvedValue(conversation);
     assistantService.getAssistantMessages.mockResolvedValue([userMessage, assistantMessage]);
     assistantService.deleteAssistantConversation.mockResolvedValue(true);
-    playerContextService.buildPlayerContextForMessage.mockResolvedValue(null);
+    playerContextService.buildAssistantContext.mockResolvedValue([]);
+    playerContextService.formatAssistantContextBlocks.mockReturnValue(null);
   });
 
   it('rejects unauthenticated requests before calling the model', async () => {
@@ -142,9 +144,10 @@ describe('assistant route contracts', () => {
       'user',
       'Que es un agente?'
     );
-    expect(playerContextService.buildPlayerContextForMessage).toHaveBeenCalledWith(
-      'Que es un agente?'
-    );
+    expect(playerContextService.buildAssistantContext).toHaveBeenCalledWith({
+      userId: '42',
+      message: 'Que es un agente?',
+    });
     expect(createResponse).toHaveBeenCalledWith(
       expect.objectContaining({
         instructions: expect.stringContaining('BiwengerStats assistant'),
@@ -164,8 +167,14 @@ describe('assistant route contracts', () => {
   });
 
   it('passes read-only player context to the model when a player is found', async () => {
-    playerContextService.buildPlayerContextForMessage.mockResolvedValue(
-      'Jugador: Walter Tavares\nEquipo: Real Madrid\nMedia fantasy temporada: 16.4'
+    playerContextService.buildAssistantContext.mockResolvedValue([
+      {
+        label: 'Player context',
+        content: 'Jugador: Walter Tavares\nEquipo: Real Madrid\nMedia fantasy temporada: 16.4',
+      },
+    ]);
+    playerContextService.formatAssistantContextBlocks.mockReturnValue(
+      '## Player context\nJugador: Walter Tavares\nEquipo: Real Madrid\nMedia fantasy temporada: 16.4'
     );
     createResponse.mockResolvedValue({ output_text: 'Tavares tiene un perfil muy estable.' });
     const { POST } = await import('@/app/api/assistant/route');

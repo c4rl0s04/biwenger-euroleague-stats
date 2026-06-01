@@ -6,7 +6,10 @@ import {
   findAssistantConversation,
   getAssistantModelContext,
 } from '@/lib/services/features/assistantService';
-import { buildPlayerContextForMessage } from '@/lib/services/features/assistantPlayerContextService';
+import {
+  buildAssistantContext,
+  formatAssistantContextBlocks,
+} from '@/lib/services/features/assistantContextService';
 import { errorResponse } from '@/lib/utils/response';
 import { NextResponse } from 'next/server';
 
@@ -30,20 +33,21 @@ Style:
 
 Current limitations:
 - You only have live BiwengerStats data when a "BiwengerStats data context" block is provided in this request.
-- If player data context is provided, use it as the source of truth for that answer.
-- You still do not have live access to user squads, standings, market listings, injuries, or app actions.
+- If data context is provided, use it as the source of truth for that answer.
+- The server may provide read-only context about players, the signed-in user's squad, standings, market activity, rounds, schedule, lineups, and manager comparisons.
 - Do not invent specific player stats, prices, ownership data, standings, injury updates, or lineup data that are not present in the provided context.
 - If the user asks for data you cannot access, say that clearly and explain what data would be needed.
+- Do not claim you can buy, sell, bid, change lineups, or mutate Biwenger data. This phase is read-only.
 - You can still help with general fantasy strategy, decision frameworks, interpretation of stats provided by the user, and app usage guidance.
 `.trim();
 
-function buildInstructions(playerContext: string | null): string {
-  if (!playerContext) return ASSISTANT_INSTRUCTIONS;
+function buildInstructions(dataContext: string | null): string {
+  if (!dataContext) return ASSISTANT_INSTRUCTIONS;
 
   return `${ASSISTANT_INSTRUCTIONS}
 
 BiwengerStats data context:
-${playerContext}
+${dataContext}
 
 Use the data context above when it is relevant to the user's latest question. If the context does not answer the question, say what is missing instead of guessing.`;
 }
@@ -125,12 +129,16 @@ export async function POST(request: Request) {
       'user',
       parsedRequest.data.message
     );
-    let playerContext: string | null = null;
+    let dataContext: string | null = null;
 
     try {
-      playerContext = await buildPlayerContextForMessage(parsedRequest.data.message);
+      const contextBlocks = await buildAssistantContext({
+        userId: session.user.id,
+        message: parsedRequest.data.message,
+      });
+      dataContext = formatAssistantContextBlocks(contextBlocks);
     } catch (contextError) {
-      console.error('[API Assistant] Player context error:', contextError);
+      console.error('[API Assistant] Context error:', contextError);
     }
 
     const messages = await getAssistantModelContext(conversation.id);
@@ -140,7 +148,7 @@ export async function POST(request: Request) {
     });
     const response = await client.responses.create({
       model: providerConfig.model,
-      instructions: buildInstructions(playerContext),
+      instructions: buildInstructions(dataContext),
       input: messages,
     });
     const message = response.output_text?.trim();
