@@ -12,6 +12,7 @@ import {
   fetchReliabilityStats,
   fetchRoundStandings,
   fetchRoundWinners,
+  fetchTopPlayersByForm,
   fetchUserLineup,
   fetchUserRecentRounds,
   fetchUserSeasonStats,
@@ -39,7 +40,14 @@ export interface AssistantContextRequest {
   message: string;
 }
 
-type ContextProviderName = 'players' | 'my_team' | 'market' | 'standings' | 'rounds' | 'compare';
+type ContextProviderName =
+  | 'players'
+  | 'my_team'
+  | 'market'
+  | 'standings'
+  | 'rounds'
+  | 'compare'
+  | 'predictions';
 
 interface ContextProvider {
   name: ContextProviderName;
@@ -116,6 +124,17 @@ const INTENT_PATTERNS: Record<ContextProviderName, RegExp[]> = {
     /\bqui[eé]n\s+es\s+m[aá]s\b/i,
     /\bficha\s+mejor\b/i,
     /\bd[oó]nde\s+estoy\s+perdiendo\b/i,
+  ],
+  predictions: [
+    /\bpredic(?:e|ci[oó]n|ciones|tivo|tir)\b/i,
+    /\bpron[oó]stic(?:o|os|ar)\b/i,
+    /\bproyect(?:a|ar|ado|ados|ada|adas|ci[oó]n|ciones)\b/i,
+    /\bforecast\b/i,
+    /\bestimaci[oó]n\b/i,
+    /\bestimar\b/i,
+    /\bcu[aá]ntos\s+puntos\b/i,
+    /\bqu[eé]\s+esperar\b/i,
+    /\brendimiento\s+(?:esperado|pr[oó]xim[oa])\b/i,
   ],
 };
 
@@ -262,6 +281,101 @@ function formatSellCandidates(players: Record<string, unknown>[]): string {
       return `${compactValue(pickFirst(player, ['name']))}: ${reasons.join(', ') || 'revisar rol/forma'}`;
     })
     .join('; ');
+}
+
+function parseRecentScores(value: unknown): number[] {
+  if (!value || typeof value !== 'string') return [];
+
+  return value
+    .split(',')
+    .map((score) => score.trim())
+    .filter((score) => score !== '' && score.toUpperCase() !== 'X')
+    .map(Number)
+    .filter(Number.isFinite);
+}
+
+function average(values: number[]): number {
+  if (values.length === 0) return 0;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function findScheduleSignal(
+  player: Record<string, unknown>,
+  schedule: Record<string, unknown>
+): Record<string, unknown> | null {
+  const playerId = getRecordId(player);
+  const playerName = normalizeText(getRecordName(player));
+
+  for (const match of asArray(schedule.matches)) {
+    for (const scheduledPlayer of asArray(match.user_players)) {
+      const scheduledPlayerId = getRecordId(scheduledPlayer);
+      const scheduledPlayerName = normalizeText(getRecordName(scheduledPlayer));
+      const isMatch =
+        (playerId && scheduledPlayerId === playerId) ||
+        (playerName.length >= 3 && scheduledPlayerName === playerName);
+
+      if (isMatch) {
+        return {
+          opponent: pickFirst(scheduledPlayer, ['opponent']),
+          is_home: pickFirst(scheduledPlayer, ['is_home']),
+          match: `${compactValue(pickFirst(match, ['home_team', 'home_name']))} vs ${compactValue(
+            pickFirst(match, ['away_team', 'away_name'])
+          )}`,
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+function formatProjection(
+  player: Record<string, unknown>,
+  schedule: Record<string, unknown>
+): string {
+  const recentScores = parseRecentScores(pickFirst(player, ['recent_scores']));
+  const recentAverage =
+    pickNumeric(player, ['avg_recent_points', 'avg_points']) || average(recentScores);
+  const seasonAverage = pickNumeric(player, ['average', 'season_avg']);
+  const priceIncrement = pickNumeric(player, ['price_increment', 'price_trend']);
+  const baseProjection =
+    recentAverage > 0 && seasonAverage > 0
+      ? recentAverage * 0.55 + seasonAverage * 0.35
+      : recentAverage || seasonAverage;
+  const priceAdjustment = clamp(priceIncrement / 500000, -2, 2);
+  const scheduleSignal = findScheduleSignal(player, schedule);
+  const homeAdjustment = scheduleSignal?.is_home === true ? 0.5 : scheduleSignal ? -0.2 : 0;
+  const projectedPoints = Math.max(0, baseProjection + priceAdjustment + homeAdjustment);
+  const recentGames = recentScores.length || pickNumeric(player, ['recent_games', 'games_played']);
+  const confidence =
+    recentGames >= 3 && seasonAverage > 0 && scheduleSignal
+      ? 'alta'
+      : recentGames >= 2 || seasonAverage > 0
+        ? 'media'
+        : 'baja';
+  const status = compactValue(pickFirst(player, ['status']));
+  const riskSignals = [
+    recentGames < 2 ? 'muestra reciente corta' : null,
+    priceIncrement < -250000 ? 'tendencia de precio negativa' : null,
+    !scheduleSignal ? 'sin partido detectado en calendario del usuario' : null,
+    status !== 'N/D' && status.toLowerCase() !== 'ok' ? `estado ${status}` : null,
+  ].filter(Boolean);
+
+  return `${compactValue(pickFirst(player, ['name', 'player_name']))}: proyección ${projectedPoints.toFixed(
+    1
+  )} pts, confianza ${confidence}, forma reciente ${recentAverage.toFixed(
+    1
+  )}, media temporada ${seasonAverage.toFixed(1)}, variación precio ${compactValue(
+    priceIncrement
+  )}, calendario ${
+    scheduleSignal
+      ? `${compactValue(scheduleSignal.match)}, rival ${compactValue(scheduleSignal.opponent)}`
+      : 'N/D'
+  }, riesgos ${riskSignals.length > 0 ? riskSignals.join(', ') : 'sin señales fuertes'}`;
 }
 
 async function buildPlayerContext(request: AssistantContextRequest): Promise<string | null> {
@@ -648,6 +762,73 @@ async function buildComparisonContext(request: AssistantContextRequest): Promise
   ].join('\n');
 }
 
+async function buildPredictionContext(request: AssistantContextRequest): Promise<string | null> {
+  const [squad, schedule, captainRecommendations, marketOpportunities, topFormPlayers] =
+    await Promise.all([
+      fetchUserSquadDetails(request.userId),
+      getUserScheduleService(request.userId),
+      fetchCaptainRecommendations(request.userId, 8),
+      fetchMarketOpportunities(8),
+      fetchTopPlayersByForm(8, 3),
+    ]);
+  const squadRecord = asRecord(squad);
+  const scheduleRecord = asRecord(schedule);
+  const players = asArray(squadRecord.players);
+  const projectionCandidates = players
+    .map((player) => ({
+      player,
+      projection: formatProjection(player, scheduleRecord),
+      score:
+        (pickNumeric(player, ['avg_recent_points', 'avg_points']) ||
+          average(parseRecentScores(pickFirst(player, ['recent_scores']))) ||
+          pickNumeric(player, ['average'])) +
+        clamp(pickNumeric(player, ['price_increment']) / 500000, -2, 2),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  return [
+    'Prediction context:',
+    'Modelo usado: heurística transparente, no modelo entrenado. Combina forma reciente, media de temporada, tendencia de precio, presencia en calendario y señales de riesgo. Las proyecciones son estimaciones, no garantías.',
+    `Proyecciones de plantilla: ${
+      projectionCandidates.length > 0
+        ? projectionCandidates.map((candidate) => candidate.projection).join('; ')
+        : 'N/D'
+    }`,
+    `Mejores candidatos a capitán por predicción/form: ${formatItems(
+      captainRecommendations,
+      (player) => {
+        return `${compactValue(pickFirst(player, ['name']))}: media reciente ${compactValue(
+          pickFirst(player, ['avg_recent_points'])
+        )}, partidos recientes ${compactValue(pickFirst(player, ['recent_games']))}, forma ${compactValue(
+          pickFirst(player, ['form_label'])
+        )}`;
+      },
+      8
+    )}`,
+    `Jugadores top forma liga: ${formatItems(
+      topFormPlayers,
+      (player) => {
+        return `${compactValue(pickFirst(player, ['name', 'player_name']))}: media reciente ${compactValue(
+          pickFirst(player, ['avg_points', 'avg_recent_points'])
+        )}, scores ${compactValue(pickFirst(player, ['recent_scores']))}`;
+      },
+      8
+    )}`,
+    `Oportunidades predictivas de mercado: ${formatItems(
+      marketOpportunities,
+      (player) => {
+        return `${compactValue(pickFirst(player, ['name', 'player_name']))}: score ${compactValue(
+          pickFirst(player, ['recommendation_score', 'value_score'])
+        )}, media reciente ${compactValue(pickFirst(player, ['avg_recent_points']))}, precio ${compactValue(
+          pickFirst(player, ['price', 'precio'])
+        )}`;
+      },
+      8
+    )}`,
+  ].join('\n');
+}
+
 const PROVIDERS: ContextProvider[] = [
   {
     name: 'players',
@@ -684,6 +865,12 @@ const PROVIDERS: ContextProvider[] = [
     label: 'Comparison context',
     matches: (message) => matchesIntent('compare', message),
     build: buildComparisonContext,
+  },
+  {
+    name: 'predictions',
+    label: 'Prediction context',
+    matches: (message) => matchesIntent('predictions', message),
+    build: buildPredictionContext,
   },
 ];
 

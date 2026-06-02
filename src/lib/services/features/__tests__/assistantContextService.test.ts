@@ -13,6 +13,7 @@ const { services, playerContextService } = vi.hoisted(() => ({
     fetchReliabilityStats: vi.fn(),
     fetchRoundStandings: vi.fn(),
     fetchRoundWinners: vi.fn(),
+    fetchTopPlayersByForm: vi.fn(),
     fetchUserLineup: vi.fn(),
     fetchUserRecentRounds: vi.fn(),
     fetchUserSeasonStats: vi.fn(),
@@ -52,6 +53,7 @@ describe('assistant context service', () => {
     services.fetchReliabilityStats.mockResolvedValue([]);
     services.fetchRoundStandings.mockResolvedValue([]);
     services.fetchRoundWinners.mockResolvedValue([]);
+    services.fetchTopPlayersByForm.mockResolvedValue([]);
     services.fetchUserLineup.mockResolvedValue({ players: [] });
     services.fetchUserRecentRounds.mockResolvedValue([]);
     services.fetchUserSeasonStats.mockResolvedValue({});
@@ -217,6 +219,63 @@ describe('assistant context service', () => {
 
     debugSpy.mockRestore();
     vi.unstubAllEnvs();
+  });
+
+  it('adds prediction context for projection questions', async () => {
+    const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
+      await import('@/lib/services/features/assistantContextService');
+    services.fetchUserSquadDetails.mockResolvedValue({
+      players: [
+        {
+          id: '10',
+          name: 'Tavares',
+          average: 14,
+          recent_scores: '18,12,20',
+          price_increment: 500000,
+        },
+      ],
+    });
+    services.getUserScheduleService.mockResolvedValue({
+      matches: [
+        {
+          home_team: 'Real Madrid',
+          away_team: 'Barça',
+          user_players: [{ id: '10', name: 'Tavares', opponent: 'Barça', is_home: true }],
+        },
+      ],
+      userPlayers: [],
+    });
+    services.fetchCaptainRecommendations.mockResolvedValue([
+      {
+        name: 'Tavares',
+        avg_recent_points: 16.7,
+        recent_games: 3,
+        form_label: 'Buena forma',
+      },
+    ]);
+    services.fetchMarketOpportunities.mockResolvedValue([
+      { name: 'Jugador mercado', recommendation_score: 82, avg_recent_points: 14, price: 1000 },
+    ]);
+    services.fetchTopPlayersByForm.mockResolvedValue([
+      { name: 'Top forma', avg_points: 20, recent_scores: '22,18,20' },
+    ]);
+
+    const blocks = await buildAssistantContext({
+      userId: '42',
+      message: 'Predice cuántos puntos puede hacer mi plantilla',
+    });
+    const contextText = blocks.map((block) => block.content).join('\n');
+
+    expect(
+      getAssistantContextProviderNamesForMessage('Predice cuántos puntos puede hacer mi plantilla')
+    ).toContain('predictions');
+    expect(services.fetchUserSquadDetails).toHaveBeenCalledWith('42');
+    expect(services.fetchTopPlayersByForm).toHaveBeenCalledWith(8, 3);
+    expect(blocks.some((block) => block.label === 'Prediction context')).toBe(true);
+    expect(contextText).toContain('Modelo usado: heurística transparente');
+    expect(contextText).toContain('Tavares: proyección');
+    expect(contextText).toContain('confianza alta');
+    expect(contextText).toContain('Oportunidades predictivas de mercado');
   });
 
   it('does not load DB-heavy context for unrelated generic questions', async () => {
