@@ -173,6 +173,12 @@ function pickFirst(record: Record<string, unknown>, keys: string[]): unknown {
   return undefined;
 }
 
+function pickNumeric(record: Record<string, unknown>, keys: string[]): number {
+  const value = pickFirst(record, keys);
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue : 0;
+}
+
 function formatNameValue(record: Record<string, unknown>, label: string, keys: string[]): string {
   return `${label}: ${compactValue(pickFirst(record, keys))}`;
 }
@@ -194,6 +200,68 @@ function redactSensitiveText(value: string): string {
       /\b(password|biwenger_token|biwengerToken|token|secret|api[_-]?key|authorization)\b\s*[:=]\s*[^,\n;}]+/gi,
       '$1: [redacted]'
     );
+}
+
+function getRecordName(record: Record<string, unknown>): string {
+  return compactValue(pickFirst(record, ['name', 'user_name', 'manager_name']));
+}
+
+function getRecordId(record: Record<string, unknown>): string | null {
+  const id = pickFirst(record, ['id', 'user_id', 'manager_id']);
+  return id === undefined ? null : String(id);
+}
+
+function nameMatchesMessage(record: Record<string, unknown>, message: string): boolean {
+  const name = normalizeText(getRecordName(record));
+  const normalizedMessage = normalizeText(message);
+  return name.length >= 3 && normalizedMessage.includes(name);
+}
+
+function filterRowsForUsers(
+  rows: unknown,
+  users: Record<string, unknown>[]
+): Record<string, unknown>[] {
+  const userIds = new Set(users.map(getRecordId).filter(Boolean));
+  const userNames = new Set(users.map((user) => normalizeText(getRecordName(user))));
+
+  return asArray(rows).filter((row) => {
+    const rowId = getRecordId(row);
+    const rowName = normalizeText(getRecordName(row));
+    return (rowId && userIds.has(rowId)) || userNames.has(rowName);
+  });
+}
+
+function formatSellCandidates(players: Record<string, unknown>[]): string {
+  const candidates = [...players]
+    .map((player) => {
+      const priceIncrement = pickNumeric(player, ['price_increment']);
+      const points = pickNumeric(player, ['points', 'total_points']);
+      const average = pickNumeric(player, ['average', 'avg_points']);
+      const price = pickNumeric(player, ['price']);
+      const sellScore =
+        (priceIncrement < 0 ? Math.abs(priceIncrement) / 100000 : 0) +
+        (average > 0 ? Math.max(0, 8 - average) : 2) +
+        (points > 0 ? 0 : 2);
+
+      return { player, sellScore, priceIncrement, average, price };
+    })
+    .filter((candidate) => candidate.sellScore > 0)
+    .sort((a, b) => b.sellScore - a.sellScore)
+    .slice(0, 6);
+
+  if (candidates.length === 0) return 'N/D';
+
+  return candidates
+    .map(({ player, priceIncrement, average, price }) => {
+      const reasons = [
+        priceIncrement < 0 ? `baja de precio ${compactValue(priceIncrement)}` : null,
+        average > 0 && average < 8 ? `media baja ${compactValue(average)}` : null,
+        price > 0 ? `precio ${compactValue(price)}` : null,
+      ].filter(Boolean);
+
+      return `${compactValue(pickFirst(player, ['name']))}: ${reasons.join(', ') || 'revisar rol/forma'}`;
+    })
+    .join('; ');
 }
 
 async function buildPlayerContext(request: AssistantContextRequest): Promise<string | null> {
@@ -255,6 +323,7 @@ async function buildMyTeamContext(request: AssistantContextRequest): Promise<str
         pickFirst(player, ['price_increment'])
       )}`;
     })}`,
+    `Candidatos a venta por señales de plantilla: ${formatSellCandidates(players)}`,
     `Últimas jornadas usuario: ${formatItems(
       recentRounds,
       (round) => {
@@ -519,13 +588,20 @@ async function buildComparisonContext(request: AssistantContextRequest): Promise
   const signedInUser = users.find(
     (user) => String(pickFirst(user, ['id', 'user_id'])) === request.userId
   );
+  const mentionedUsers = users.filter((user) => nameMatchesMessage(user, request.message));
+  const focusUsers = [signedInUser, ...mentionedUsers].filter(Boolean) as Record<string, unknown>[];
+  const focusedStandings = filterRowsForUsers(compareRecord.standings, focusUsers);
+  const focusedLeagueComparison = filterRowsForUsers(leagueComparison, focusUsers);
+  const focusedEfficiency = filterRowsForUsers(efficiency, focusUsers);
+  const focusedReliability = filterRowsForUsers(reliability, focusUsers);
 
   return [
     'Comparison context:',
     `Managers disponibles: ${formatItems(users, (user) => compactValue(pickFirst(user, ['name'])), 20)}`,
     `Usuario firmado: ${compactValue(pickFirst(asRecord(signedInUser), ['name']))}`,
+    `Managers mencionados en la pregunta: ${formatItems(mentionedUsers, (user) => compactValue(pickFirst(user, ['name'])), 6)}`,
     `Clasificación comparativa: ${formatItems(
-      compareRecord.standings,
+      focusedStandings.length > 0 ? focusedStandings : compareRecord.standings,
       (row, index) => {
         return `${compactValue(pickFirst(row, ['position', 'rank']) ?? index + 1)}. ${compactValue(
           pickFirst(row, ['name', 'user_name'])
@@ -534,7 +610,7 @@ async function buildComparisonContext(request: AssistantContextRequest): Promise
       10
     )}`,
     `Comparación con liga: ${formatItems(
-      leagueComparison,
+      focusedLeagueComparison.length > 0 ? focusedLeagueComparison : leagueComparison,
       (row) => {
         return `${compactValue(pickFirst(row, ['name', 'user_name']))}: ${compactValue(
           pickFirst(row, ['metric', 'category', 'label'])
@@ -543,7 +619,7 @@ async function buildComparisonContext(request: AssistantContextRequest): Promise
       8
     )}`,
     `Eficiencia: ${formatItems(
-      efficiency,
+      focusedEfficiency.length > 0 ? focusedEfficiency : efficiency,
       (row) => {
         return `${compactValue(pickFirst(row, ['name', 'user_name']))}: ${compactValue(
           pickFirst(row, ['efficiency', 'efficiency_rating', 'value'])
@@ -552,7 +628,7 @@ async function buildComparisonContext(request: AssistantContextRequest): Promise
       8
     )}`,
     `Regularidad: ${formatItems(
-      reliability,
+      focusedReliability.length > 0 ? focusedReliability : reliability,
       (row) => {
         return `${compactValue(pickFirst(row, ['name', 'user_name']))}: ${compactValue(
           pickFirst(row, ['reliability', 'consistency', 'value'])
@@ -621,6 +697,13 @@ export async function buildAssistantContext(
   const selectedProviders = PROVIDERS.filter((provider) => provider.matches(request.message));
   const blocks: AssistantContextBlock[] = [];
   let remainingChars = MAX_TOTAL_CONTEXT_CHARS;
+
+  if (process.env.NODE_ENV === 'development') {
+    console.debug(
+      '[Assistant Context] selected providers:',
+      selectedProviders.map((provider) => provider.name)
+    );
+  }
 
   for (const provider of selectedProviders) {
     if (remainingChars <= 0) break;

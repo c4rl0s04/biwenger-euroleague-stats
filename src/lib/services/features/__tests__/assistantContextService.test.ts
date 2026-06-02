@@ -108,7 +108,10 @@ describe('assistant context service', () => {
       total_value: 123000000,
       price_trend: 750000,
       player_count: 12,
-      players: [{ name: 'Tavares', team_short_name: 'RMA', position: 'C', points: 300 }],
+      players: [
+        { name: 'Tavares', team_short_name: 'RMA', position: 'C', points: 300, average: 15 },
+        { name: 'Jugador en caída', price: 2000000, price_increment: -350000, average: 4 },
+      ],
     });
 
     const blocks = await buildAssistantContext({
@@ -122,7 +125,10 @@ describe('assistant context service', () => {
     expect(services.fetchUserSquadDetails).toHaveBeenCalledWith('42');
     expect(services.fetchUserSeasonStats).toHaveBeenCalledWith('42');
     expect(blocks.some((block) => block.label === 'Signed-in user context')).toBe(true);
-    expect(blocks.map((block) => block.content).join('\n')).toContain('Carlos');
+    const contextText = blocks.map((block) => block.content).join('\n');
+    expect(contextText).toContain('Carlos');
+    expect(contextText).toContain('Candidatos a venta');
+    expect(contextText).toContain('Jugador en caída');
   });
 
   it('selects market context for market questions', async () => {
@@ -163,19 +169,54 @@ describe('assistant context service', () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
       await import('@/lib/services/features/assistantContextService');
     services.getCompareDataLite.mockResolvedValue({
-      users: [{ id: '42', name: 'Carlos' }],
-      standings: [{ name: 'Carlos', total_points: 900 }],
+      users: [
+        { id: '42', name: 'Carlos' },
+        { id: '7', name: 'Andrés' },
+        { id: '99', name: 'No mencionado' },
+      ],
+      standings: [
+        { id: '42', name: 'Carlos', total_points: 900 },
+        { id: '7', name: 'Andrés', total_points: 875 },
+        { id: '99', name: 'No mencionado', total_points: 1000 },
+      ],
       predictions: { promedios: [] },
     });
+    services.fetchEfficiencyStats.mockResolvedValue([
+      { id: '42', name: 'Carlos', efficiency: 91 },
+      { id: '7', name: 'Andrés', efficiency: 88 },
+      { id: '99', name: 'No mencionado', efficiency: 99 },
+    ]);
 
     const blocks = await buildAssistantContext({
       userId: '42',
-      message: 'Compárame con Carlos',
+      message: 'Compárame con Andrés',
     });
+    const contextText = blocks.map((block) => block.content).join('\n');
 
-    expect(getAssistantContextProviderNamesForMessage('Compárame con Carlos')).toContain('compare');
+    expect(getAssistantContextProviderNamesForMessage('Compárame con Andrés')).toContain('compare');
     expect(services.getCompareDataLite).toHaveBeenCalled();
     expect(blocks.some((block) => block.label === 'Comparison context')).toBe(true);
+    expect(contextText).toContain('Managers mencionados en la pregunta: Andrés');
+    expect(contextText).toContain('Carlos');
+    expect(contextText).toContain('Andrés');
+    expect(contextText).not.toContain('No mencionado: 99');
+  });
+
+  it('logs selected providers only in development', async () => {
+    const { buildAssistantContext } =
+      await import('@/lib/services/features/assistantContextService');
+    const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+    vi.stubEnv('NODE_ENV', 'development');
+
+    await buildAssistantContext({
+      userId: '42',
+      message: '¿Qué oportunidades hay en mercado?',
+    });
+
+    expect(debugSpy).toHaveBeenCalledWith('[Assistant Context] selected providers:', ['market']);
+
+    debugSpy.mockRestore();
+    vi.unstubAllEnvs();
   });
 
   it('does not load DB-heavy context for unrelated generic questions', async () => {
