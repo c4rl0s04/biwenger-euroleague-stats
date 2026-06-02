@@ -13,6 +13,7 @@ const { services, playerContextService } = vi.hoisted(() => ({
     fetchReliabilityStats: vi.fn(),
     fetchRoundStandings: vi.fn(),
     fetchRoundWinners: vi.fn(),
+    fetchNextRound: vi.fn(),
     fetchTopPlayersByForm: vi.fn(),
     fetchUserLineup: vi.fn(),
     fetchUserRecentRounds: vi.fn(),
@@ -53,6 +54,7 @@ describe('assistant context service', () => {
     services.fetchReliabilityStats.mockResolvedValue([]);
     services.fetchRoundStandings.mockResolvedValue([]);
     services.fetchRoundWinners.mockResolvedValue([]);
+    services.fetchNextRound.mockResolvedValue({ matches: [] });
     services.fetchTopPlayersByForm.mockResolvedValue([]);
     services.fetchUserLineup.mockResolvedValue({ players: [] });
     services.fetchUserRecentRounds.mockResolvedValue([]);
@@ -236,14 +238,22 @@ describe('assistant context service', () => {
       ],
     });
     services.getUserScheduleService.mockResolvedValue({
+      round: { round_name: 'Jornada 20' },
       matches: [
         {
+          home_id: 1,
+          away_id: 2,
           home_team: 'Real Madrid',
           away_team: 'Barça',
-          user_players: [{ id: '10', name: 'Tavares', opponent: 'Barça', is_home: true }],
+          user_players: [
+            { id: '10', name: 'Tavares', team_id: 1, opponent: 'Barça', is_home: true },
+          ],
         },
       ],
       userPlayers: [],
+    });
+    services.fetchNextRound.mockResolvedValue({
+      matches: [{ home_id: 1, away_id: 2, home_position: 3, away_position: 14 }],
     });
     services.fetchCaptainRecommendations.mockResolvedValue([
       {
@@ -275,7 +285,103 @@ describe('assistant context service', () => {
     expect(contextText).toContain('Modelo usado: heurística transparente');
     expect(contextText).toContain('Tavares: proyección');
     expect(contextText).toContain('confianza alta');
+    expect(contextText).toContain('dificultad Fácil');
+    expect(contextText).toContain('posición rival 14');
     expect(contextText).toContain('Oportunidades predictivas de mercado');
+  });
+
+  it('adds recommended lineup context for lineup questions', async () => {
+    const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
+      await import('@/lib/services/features/assistantContextService');
+    services.fetchUserSquadDetails.mockResolvedValue({
+      players: [
+        {
+          id: '1',
+          name: 'Base fuerte',
+          position: 'Base',
+          average: 14,
+          recent_scores: '18,16,14',
+          price_increment: 300000,
+        },
+        {
+          id: '2',
+          name: 'Alero sólido',
+          position: 'Alero',
+          average: 12,
+          recent_scores: '12,13,11',
+        },
+        {
+          id: '3',
+          name: 'Pivot top',
+          position: 'Pivot',
+          average: 16,
+          recent_scores: '20,18,15',
+        },
+        {
+          id: '4',
+          name: 'Base dos',
+          position: 'Base',
+          average: 10,
+          recent_scores: '9,11,10',
+        },
+        {
+          id: '5',
+          name: 'Alero dos',
+          position: 'Alero',
+          average: 9,
+          recent_scores: '8,10,9',
+        },
+        {
+          id: '6',
+          name: 'Pivot sexto',
+          position: 'Pivot',
+          average: 8,
+          recent_scores: '8,8,9',
+        },
+      ],
+    });
+    services.getUserScheduleService.mockResolvedValue({
+      round: { round_name: 'Jornada 20' },
+      matches: [
+        {
+          home_id: 1,
+          away_id: 2,
+          home_team: 'RMA',
+          away_team: 'BAR',
+          user_players: [
+            { id: '1', name: 'Base fuerte', team_id: 1, opponent: 'BAR', is_home: true },
+            { id: '2', name: 'Alero sólido', team_id: 1, opponent: 'BAR', is_home: true },
+            { id: '3', name: 'Pivot top', team_id: 1, opponent: 'BAR', is_home: true },
+            { id: '4', name: 'Base dos', team_id: 1, opponent: 'BAR', is_home: true },
+            { id: '5', name: 'Alero dos', team_id: 1, opponent: 'BAR', is_home: true },
+            { id: '6', name: 'Pivot sexto', team_id: 1, opponent: 'BAR', is_home: true },
+          ],
+        },
+      ],
+      userPlayers: [],
+    });
+    services.fetchNextRound.mockResolvedValue({
+      matches: [{ home_id: 1, away_id: 2, home_position: 2, away_position: 4 }],
+    });
+    services.fetchCaptainRecommendations.mockResolvedValue([
+      { name: 'Pivot top', avg_recent_points: 17.7, form_label: 'Buena forma' },
+    ]);
+
+    const blocks = await buildAssistantContext({
+      userId: '42',
+      message: '¿Qué alineación pongo y quién de capitán?',
+    });
+    const contextText = blocks.map((block) => block.content).join('\n');
+
+    expect(
+      getAssistantContextProviderNamesForMessage('¿Qué alineación pongo y quién de capitán?')
+    ).toContain('lineup_recommendation');
+    expect(blocks.some((block) => block.label === 'Recommended lineup context')).toBe(true);
+    expect(contextText).toContain('Puntos esperados alineación');
+    expect(contextText).toContain('Capitán recomendado');
+    expect(contextText).toContain('Titulares recomendados');
+    expect(contextText).toContain('Sexto hombre recomendado');
+    expect(contextText).toContain('rival difícil');
   });
 
   it('does not load DB-heavy context for unrelated generic questions', async () => {

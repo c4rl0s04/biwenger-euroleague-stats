@@ -12,6 +12,7 @@ import {
   fetchReliabilityStats,
   fetchRoundStandings,
   fetchRoundWinners,
+  fetchNextRound,
   fetchTopPlayersByForm,
   fetchUserLineup,
   fetchUserRecentRounds,
@@ -47,7 +48,8 @@ type ContextProviderName =
   | 'standings'
   | 'rounds'
   | 'compare'
-  | 'predictions';
+  | 'predictions'
+  | 'lineup_recommendation';
 
 interface ContextProvider {
   name: ContextProviderName;
@@ -135,6 +137,17 @@ const INTENT_PATTERNS: Record<ContextProviderName, RegExp[]> = {
     /\bcu[aá]ntos\s+puntos\b/i,
     /\bqu[eé]\s+esperar\b/i,
     /\brendimiento\s+(?:esperado|pr[oó]xim[oa])\b/i,
+  ],
+  lineup_recommendation: [
+    /\balineaci[oó]n\b/i,
+    /\blineup\b/i,
+    /\btitulares?\b/i,
+    /\bsuplentes?\b/i,
+    /\bsexto\b/i,
+    /\b6th\b/i,
+    /\ba\s+qui[eé]n\s+pongo\b/i,
+    /\bqui[eé]n\s+dejo\s+fuera\b/i,
+    /\bcapit[aá]n\b/i,
   ],
 };
 
@@ -303,14 +316,42 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+function formatDifficultyFromPosition(position: unknown): string {
+  const numericPosition = Number(position);
+  if (!Number.isFinite(numericPosition) || numericPosition <= 0) return 'N/D';
+  if (numericPosition <= 4) return 'Duro';
+  if (numericPosition >= 13) return 'Fácil';
+  return 'Normal';
+}
+
+function findRoundMatch(
+  scheduleMatch: Record<string, unknown>,
+  roundDetails: Record<string, unknown>
+): Record<string, unknown> | null {
+  const homeId = pickFirst(scheduleMatch, ['home_id']);
+  const awayId = pickFirst(scheduleMatch, ['away_id']);
+
+  return (
+    asArray(roundDetails.matches).find((match) => {
+      return (
+        String(pickFirst(match, ['home_id'])) === String(homeId) &&
+        String(pickFirst(match, ['away_id'])) === String(awayId)
+      );
+    }) || null
+  );
+}
+
 function findScheduleSignal(
   player: Record<string, unknown>,
-  schedule: Record<string, unknown>
+  schedule: Record<string, unknown>,
+  roundDetails: Record<string, unknown> = {}
 ): Record<string, unknown> | null {
   const playerId = getRecordId(player);
   const playerName = normalizeText(getRecordName(player));
 
   for (const match of asArray(schedule.matches)) {
+    const roundMatch = findRoundMatch(match, roundDetails);
+
     for (const scheduledPlayer of asArray(match.user_players)) {
       const scheduledPlayerId = getRecordId(scheduledPlayer);
       const scheduledPlayerName = normalizeText(getRecordName(scheduledPlayer));
@@ -319,12 +360,20 @@ function findScheduleSignal(
         (playerName.length >= 3 && scheduledPlayerName === playerName);
 
       if (isMatch) {
+        const isHome = pickFirst(scheduledPlayer, ['is_home']) === true;
+        const opponentPosition = roundMatch
+          ? pickFirst(roundMatch, isHome ? ['away_position'] : ['home_position'])
+          : undefined;
+
         return {
           opponent: pickFirst(scheduledPlayer, ['opponent']),
-          is_home: pickFirst(scheduledPlayer, ['is_home']),
+          is_home: isHome,
           match: `${compactValue(pickFirst(match, ['home_team', 'home_name']))} vs ${compactValue(
             pickFirst(match, ['away_team', 'away_name'])
           )}`,
+          opponent_position: opponentPosition,
+          difficulty:
+            pickFirst(match, ['difficulty']) || formatDifficultyFromPosition(opponentPosition),
         };
       }
     }
@@ -335,8 +384,35 @@ function findScheduleSignal(
 
 function formatProjection(
   player: Record<string, unknown>,
-  schedule: Record<string, unknown>
+  schedule: Record<string, unknown>,
+  roundDetails: Record<string, unknown> = {}
 ): string {
+  const projection = buildProjection(player, schedule, roundDetails);
+
+  return `${compactValue(pickFirst(player, ['name', 'player_name']))}: proyección ${projection.projectedPoints.toFixed(
+    1
+  )} pts, confianza ${projection.confidence}, forma reciente ${projection.recentAverage.toFixed(
+    1
+  )}, media temporada ${projection.seasonAverage.toFixed(1)}, variación precio ${compactValue(
+    projection.priceIncrement
+  )}, calendario ${
+    projection.scheduleSignal
+      ? `${compactValue(projection.scheduleSignal.match)}, rival ${compactValue(
+          projection.scheduleSignal.opponent
+        )}, dificultad ${compactValue(projection.scheduleSignal.difficulty)}, posición rival ${compactValue(
+          projection.scheduleSignal.opponent_position
+        )}`
+      : 'N/D'
+  }, riesgos ${
+    projection.riskSignals.length > 0 ? projection.riskSignals.join(', ') : 'sin señales fuertes'
+  }`;
+}
+
+function buildProjection(
+  player: Record<string, unknown>,
+  schedule: Record<string, unknown>,
+  roundDetails: Record<string, unknown> = {}
+) {
   const recentScores = parseRecentScores(pickFirst(player, ['recent_scores']));
   const recentAverage =
     pickNumeric(player, ['avg_recent_points', 'avg_points']) || average(recentScores);
@@ -347,9 +423,14 @@ function formatProjection(
       ? recentAverage * 0.55 + seasonAverage * 0.35
       : recentAverage || seasonAverage;
   const priceAdjustment = clamp(priceIncrement / 500000, -2, 2);
-  const scheduleSignal = findScheduleSignal(player, schedule);
+  const scheduleSignal = findScheduleSignal(player, schedule, roundDetails);
   const homeAdjustment = scheduleSignal?.is_home === true ? 0.5 : scheduleSignal ? -0.2 : 0;
-  const projectedPoints = Math.max(0, baseProjection + priceAdjustment + homeAdjustment);
+  const difficulty = compactValue(scheduleSignal?.difficulty);
+  const difficultyAdjustment = difficulty === 'Duro' ? -1.2 : difficulty === 'Fácil' ? 1 : 0;
+  const projectedPoints = Math.max(
+    0,
+    baseProjection + priceAdjustment + homeAdjustment + difficultyAdjustment
+  );
   const recentGames = recentScores.length || pickNumeric(player, ['recent_games', 'games_played']);
   const confidence =
     recentGames >= 3 && seasonAverage > 0 && scheduleSignal
@@ -362,20 +443,20 @@ function formatProjection(
     recentGames < 2 ? 'muestra reciente corta' : null,
     priceIncrement < -250000 ? 'tendencia de precio negativa' : null,
     !scheduleSignal ? 'sin partido detectado en calendario del usuario' : null,
+    difficulty === 'Duro' ? 'rival difícil' : null,
     status !== 'N/D' && status.toLowerCase() !== 'ok' ? `estado ${status}` : null,
   ].filter(Boolean);
 
-  return `${compactValue(pickFirst(player, ['name', 'player_name']))}: proyección ${projectedPoints.toFixed(
-    1
-  )} pts, confianza ${confidence}, forma reciente ${recentAverage.toFixed(
-    1
-  )}, media temporada ${seasonAverage.toFixed(1)}, variación precio ${compactValue(
-    priceIncrement
-  )}, calendario ${
-    scheduleSignal
-      ? `${compactValue(scheduleSignal.match)}, rival ${compactValue(scheduleSignal.opponent)}`
-      : 'N/D'
-  }, riesgos ${riskSignals.length > 0 ? riskSignals.join(', ') : 'sin señales fuertes'}`;
+  return {
+    confidence,
+    priceIncrement,
+    projectedPoints,
+    recentAverage,
+    recentGames,
+    riskSignals,
+    scheduleSignal,
+    seasonAverage,
+  };
 }
 
 async function buildPlayerContext(request: AssistantContextRequest): Promise<string | null> {
@@ -762,22 +843,138 @@ async function buildComparisonContext(request: AssistantContextRequest): Promise
   ].join('\n');
 }
 
+function buildRecommendedLineup(
+  players: Record<string, unknown>[],
+  schedule: Record<string, unknown>,
+  roundDetails: Record<string, unknown>
+) {
+  const projectedPlayers = players
+    .map((player) => ({
+      player,
+      projection: buildProjection(player, schedule, roundDetails),
+      position: compactValue(pickFirst(player, ['position'])),
+    }))
+    .sort((a, b) => b.projection.projectedPoints - a.projection.projectedPoints);
+
+  const starters: typeof projectedPlayers = [];
+  const positionCounts: Record<string, number> = {};
+
+  for (const candidate of projectedPlayers) {
+    if (starters.length >= 5) break;
+
+    const position = candidate.position || 'N/D';
+    const currentCount = positionCounts[position] || 0;
+    if (currentCount >= 3) continue;
+
+    starters.push(candidate);
+    positionCounts[position] = currentCount + 1;
+  }
+
+  if (starters.length < 5) {
+    for (const candidate of projectedPlayers) {
+      if (starters.includes(candidate)) continue;
+      starters.push(candidate);
+      if (starters.length >= 5) break;
+    }
+  }
+
+  const bench = projectedPlayers.filter((candidate) => !starters.includes(candidate));
+  const sixthMan = bench[0] || null;
+  const captain = starters[0] || null;
+  const expectedPoints =
+    starters.reduce((sum, candidate) => {
+      return sum + candidate.projection.projectedPoints * (candidate === captain ? 2 : 1);
+    }, 0) +
+    (sixthMan ? sixthMan.projection.projectedPoints * 0.75 : 0) +
+    bench.slice(1).reduce((sum, candidate) => sum + candidate.projection.projectedPoints * 0.5, 0);
+
+  return {
+    bench,
+    captain,
+    expectedPoints,
+    sixthMan,
+    starters,
+  };
+}
+
+function formatLineupPlayer(
+  candidate: ReturnType<typeof buildRecommendedLineup>['starters'][number]
+): string {
+  const player = candidate.player;
+  const projection = candidate.projection;
+
+  return `${compactValue(pickFirst(player, ['name', 'player_name']))} (${candidate.position}): ${projection.projectedPoints.toFixed(
+    1
+  )} pts, confianza ${projection.confidence}, rival ${compactValue(
+    projection.scheduleSignal?.opponent
+  )}, dificultad ${compactValue(projection.scheduleSignal?.difficulty)}, riesgos ${
+    projection.riskSignals.length > 0 ? projection.riskSignals.join(', ') : 'sin señales fuertes'
+  }`;
+}
+
+async function buildLineupRecommendationContext(
+  request: AssistantContextRequest
+): Promise<string | null> {
+  const [squad, schedule, captainRecommendations, nextRound] = await Promise.all([
+    fetchUserSquadDetails(request.userId),
+    getUserScheduleService(request.userId),
+    fetchCaptainRecommendations(request.userId, 8),
+    fetchNextRound(),
+  ]);
+  const squadRecord = asRecord(squad);
+  const scheduleRecord = asRecord(schedule);
+  const nextRoundRecord = asRecord(nextRound);
+  const players = asArray(squadRecord.players);
+
+  if (players.length === 0) {
+    return 'Recommended lineup context:\nNo hay jugadores de plantilla disponibles para recomendar alineación.';
+  }
+
+  const lineup = buildRecommendedLineup(players, scheduleRecord, nextRoundRecord);
+
+  return [
+    'Recommended lineup context:',
+    'Modelo usado: recomendación heurística read-only. Ordena jugadores por proyección, respeta un máximo de 3 titulares por posición cuando es posible y asigna capitán al titular con mayor proyección.',
+    `Jornada objetivo: ${compactValue(
+      pickFirst(asRecord(scheduleRecord.round), ['round_name', 'name', 'round_id'])
+    )}`,
+    `Puntos esperados alineación: ${lineup.expectedPoints.toFixed(1)}`,
+    `Capitán recomendado: ${lineup.captain ? formatLineupPlayer(lineup.captain) : 'N/D'}`,
+    `Titulares recomendados: ${lineup.starters.map(formatLineupPlayer).join('; ') || 'N/D'}`,
+    `Sexto hombre recomendado: ${lineup.sixthMan ? formatLineupPlayer(lineup.sixthMan) : 'N/D'}`,
+    `Banquillo recomendado: ${
+      lineup.bench.length > 0 ? lineup.bench.slice(1).map(formatLineupPlayer).join('; ') : 'N/D'
+    }`,
+    `Capitanes por servicio existente: ${formatItems(
+      captainRecommendations,
+      (player) => {
+        return `${compactValue(pickFirst(player, ['name']))}: media reciente ${compactValue(
+          pickFirst(player, ['avg_recent_points'])
+        )}, forma ${compactValue(pickFirst(player, ['form_label']))}`;
+      },
+      8
+    )}`,
+  ].join('\n');
+}
+
 async function buildPredictionContext(request: AssistantContextRequest): Promise<string | null> {
-  const [squad, schedule, captainRecommendations, marketOpportunities, topFormPlayers] =
+  const [squad, schedule, captainRecommendations, marketOpportunities, topFormPlayers, nextRound] =
     await Promise.all([
       fetchUserSquadDetails(request.userId),
       getUserScheduleService(request.userId),
       fetchCaptainRecommendations(request.userId, 8),
       fetchMarketOpportunities(8),
       fetchTopPlayersByForm(8, 3),
+      fetchNextRound(),
     ]);
   const squadRecord = asRecord(squad);
   const scheduleRecord = asRecord(schedule);
+  const nextRoundRecord = asRecord(nextRound);
   const players = asArray(squadRecord.players);
   const projectionCandidates = players
     .map((player) => ({
       player,
-      projection: formatProjection(player, scheduleRecord),
+      projection: formatProjection(player, scheduleRecord, nextRoundRecord),
       score:
         (pickNumeric(player, ['avg_recent_points', 'avg_points']) ||
           average(parseRecentScores(pickFirst(player, ['recent_scores']))) ||
@@ -871,6 +1068,12 @@ const PROVIDERS: ContextProvider[] = [
     label: 'Prediction context',
     matches: (message) => matchesIntent('predictions', message),
     build: buildPredictionContext,
+  },
+  {
+    name: 'lineup_recommendation',
+    label: 'Recommended lineup context',
+    matches: (message) => matchesIntent('lineup_recommendation', message),
+    build: buildLineupRecommendationContext,
   },
 ];
 
