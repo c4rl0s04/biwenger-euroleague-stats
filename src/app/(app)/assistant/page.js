@@ -17,7 +17,7 @@ export default function AssistantPage() {
 
       <Section
         title="Asistente BiwengerStats"
-        subtitle="Personalidad fantasy activa. Próximamente: datos reales y herramientas de la app."
+        subtitle="Contexto read-only de liga, mercado, plantilla, predicciones y recomendaciones de alineación."
         background="section-base"
       >
         <AssistantChat />

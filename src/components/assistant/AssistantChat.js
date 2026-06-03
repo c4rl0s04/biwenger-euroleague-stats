@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bot, MessageSquare, Plus, SendHorizontal, Trash2, User } from 'lucide-react';
+import { Bot, Bug, MessageSquare, Plus, SendHorizontal, Trash2, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 const STARTERS = [
   'Ayúdame a decidir entre dos jugadores para mi lineup.',
   '¿Cómo debería pensar una venta en el mercado?',
@@ -79,6 +80,43 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function AssistantDebugPanel({ debug }) {
+  if (!IS_DEVELOPMENT || !debug) return null;
+
+  return (
+    <details className="mt-3 rounded-xl border border-dashed border-orange-400/30 bg-orange-500/5 p-3 text-xs text-orange-100">
+      <summary className="flex cursor-pointer list-none items-center gap-2 font-medium text-orange-200">
+        <Bug size={14} />
+        Debug contexto
+        <span className="ml-auto text-[11px] font-normal text-orange-200/70">
+          {debug.totalContextChars || 0} chars
+        </span>
+      </summary>
+      <div className="mt-3 space-y-3">
+        <div>
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-orange-200/70">
+            Providers
+          </p>
+          <p className="rounded-lg bg-black/20 px-2 py-1 text-orange-50">
+            {debug.selectedProviders?.length ? debug.selectedProviders.join(', ') : 'none'}
+          </p>
+        </div>
+
+        {(debug.blocks || []).map((block) => (
+          <div key={`${block.label}-${block.chars}`}>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-orange-200/70">
+              {block.label} · {block.chars} chars
+            </p>
+            <pre className="max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border border-orange-400/20 bg-black/30 p-3 text-[11px] leading-relaxed text-orange-50">
+              {block.content}
+            </pre>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 async function parseResponse(response, fallbackMessage) {
   const data = await response.json();
   if (!response.ok || !data.success) {
@@ -96,6 +134,7 @@ export default function AssistantChat() {
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState('');
+  const [debugByMessageId, setDebugByMessageId] = useState({});
   const chatViewportRef = useRef(null);
   const messageRequestRef = useRef(0);
 
@@ -112,6 +151,7 @@ export default function AssistantChat() {
       const data = await parseResponse(response, 'No se ha podido cargar la conversación.');
       if (messageRequestRef.current === requestId) {
         setMessages(data.messages);
+        setDebugByMessageId({});
       }
     } catch (requestError) {
       if (messageRequestRef.current === requestId) {
@@ -169,6 +209,7 @@ export default function AssistantChat() {
     setMessages([]);
     setInput('');
     setError('');
+    setDebugByMessageId({});
     setLoadingMessages(false);
   }
 
@@ -213,6 +254,12 @@ export default function AssistantChat() {
         data.userMessage,
         data.assistantMessage,
       ]);
+      if (IS_DEVELOPMENT && data.debug) {
+        setDebugByMessageId((current) => ({
+          ...current,
+          [data.assistantMessage.id]: data.debug,
+        }));
+      }
       setConversations((current) => {
         const selected = current.find((conversation) => conversation.id === conversationId);
         if (!selected) return current;
@@ -362,7 +409,7 @@ export default function AssistantChat() {
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   Puedes pedir ayuda para razonar lineups, mercado, tendencias y decisiones de
-                  Biwenger. Todavía no consulta tus datos en vivo ni ejecuta acciones.
+                  Biwenger con contexto read-only de tu liga. No ejecuta acciones.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -404,7 +451,10 @@ export default function AssistantChat() {
                     {isUser ? (
                       <span className="whitespace-pre-wrap break-words">{message.content}</span>
                     ) : (
-                      <AssistantMarkdown content={message.content} />
+                      <>
+                        <AssistantMarkdown content={message.content} />
+                        <AssistantDebugPanel debug={debugByMessageId[message.id]} />
+                      </>
                     )}
                   </div>
                   {isUser && (
@@ -461,8 +511,8 @@ export default function AssistantChat() {
             </button>
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Esta etapa no consulta datos en vivo de BiwengerStats. No tomes sus respuestas como
-            datos oficiales.
+            El asistente puede usar contexto read-only de BiwengerStats. No ejecuta compras, ventas
+            ni cambios de alineación.
           </p>
         </form>
       </div>

@@ -21,6 +21,7 @@ const { playerContextService } = vi.hoisted(() => ({
   playerContextService: {
     buildAssistantContext: vi.fn(),
     formatAssistantContextBlocks: vi.fn(),
+    getAssistantContextProviderNamesForMessage: vi.fn(),
   },
 }));
 
@@ -85,6 +86,7 @@ describe('assistant route contracts', () => {
     assistantService.deleteAssistantConversation.mockResolvedValue(true);
     playerContextService.buildAssistantContext.mockResolvedValue([]);
     playerContextService.formatAssistantContextBlocks.mockReturnValue(null);
+    playerContextService.getAssistantContextProviderNamesForMessage.mockReturnValue([]);
   });
 
   it('rejects unauthenticated requests before calling the model', async () => {
@@ -194,6 +196,42 @@ describe('assistant route contracts', () => {
         instructions: expect.stringContaining('source of truth'),
       })
     );
+  });
+
+  it('includes assistant context debug details only in development', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    playerContextService.buildAssistantContext.mockResolvedValue([
+      {
+        label: 'Prediction context',
+        content: 'Modelo usado: heurística transparente\nTavares: proyección 16.2 pts',
+      },
+    ]);
+    playerContextService.formatAssistantContextBlocks.mockReturnValue(
+      '## Prediction context\nModelo usado: heurística transparente\nTavares: proyección 16.2 pts'
+    );
+    playerContextService.getAssistantContextProviderNamesForMessage.mockReturnValue([
+      'predictions',
+    ]);
+    createResponse.mockResolvedValue({ output_text: 'Tavares proyecta bien.' });
+    const { POST } = await import('@/app/api/assistant/route');
+
+    const response = await POST(
+      jsonRequest({ conversationId: CONVERSATION_ID, message: 'Predice a Tavares' })
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.data.debug).toEqual({
+      selectedProviders: ['predictions'],
+      totalContextChars: 66,
+      blocks: [
+        {
+          label: 'Prediction context',
+          chars: 66,
+          content: 'Modelo usado: heurística transparente\nTavares: proyección 16.2 pts',
+        },
+      ],
+    });
   });
 
   it('reports missing server configuration without calling the model', async () => {

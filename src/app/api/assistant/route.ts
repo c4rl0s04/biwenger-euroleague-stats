@@ -9,6 +9,7 @@ import {
 import {
   buildAssistantContext,
   formatAssistantContextBlocks,
+  getAssistantContextProviderNamesForMessage,
 } from '@/lib/services/features/assistantContextService';
 import { errorResponse } from '@/lib/utils/response';
 import { NextResponse } from 'next/server';
@@ -89,6 +90,20 @@ const chatRequestSchema = z.object({
   message: z.string().trim().min(1).max(4000),
 });
 
+function buildDebugPayload(message: string, contextBlocks: { label: string; content: string }[]) {
+  if (process.env.NODE_ENV !== 'development') return undefined;
+
+  return {
+    selectedProviders: getAssistantContextProviderNamesForMessage(message),
+    totalContextChars: contextBlocks.reduce((sum, block) => sum + block.content.length, 0),
+    blocks: contextBlocks.map((block) => ({
+      label: block.label,
+      chars: block.content.length,
+      content: block.content,
+    })),
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -130,6 +145,7 @@ export async function POST(request: Request) {
       parsedRequest.data.message
     );
     let dataContext: string | null = null;
+    let debugPayload: ReturnType<typeof buildDebugPayload> | undefined;
 
     try {
       const contextBlocks = await buildAssistantContext({
@@ -137,6 +153,7 @@ export async function POST(request: Request) {
         message: parsedRequest.data.message,
       });
       dataContext = formatAssistantContextBlocks(contextBlocks);
+      debugPayload = buildDebugPayload(parsedRequest.data.message, contextBlocks);
     } catch (contextError) {
       console.error('[API Assistant] Context error:', contextError);
     }
@@ -160,7 +177,15 @@ export async function POST(request: Request) {
     const assistantMessage = await addAssistantMessage(conversation.id, 'assistant', message);
 
     return NextResponse.json(
-      { success: true, data: { conversationId: conversation.id, userMessage, assistantMessage } },
+      {
+        success: true,
+        data: {
+          conversationId: conversation.id,
+          userMessage,
+          assistantMessage,
+          ...(debugPayload ? { debug: debugPayload } : {}),
+        },
+      },
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (error) {
