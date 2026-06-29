@@ -96,7 +96,8 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
           points_home = GREATEST(players.points_home, excluded.points_home),
           points_away = GREATEST(players.points_away, excluded.points_away),
           points_last_season = GREATEST(players.points_last_season, excluded.points_last_season),
-          price = GREATEST(players.price, excluded.price),
+          -- players.price is a latest-price cache. Historical peaks/decrements live in market_values.
+          price = excluded.price,
           status = excluded.status,
           price_increment = excluded.price_increment,
           -- COALESCE: never overwrite existing team_id or img with incoming data if already set

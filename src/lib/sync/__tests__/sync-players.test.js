@@ -88,5 +88,11 @@ describe('syncPlayers', () => {
       expect.stringContaining('INSERT INTO players'),
       expect.arrayContaining([101, 'Campazzo', 5, 'Base', 150])
     );
+
+    const playerUpsertSql = db.query.mock.calls.find(([sql]) =>
+      sql.includes('INSERT INTO players')
+    )?.[0];
+    expect(playerUpsertSql).toContain('price = excluded.price');
+    expect(playerUpsertSql).not.toContain('price = GREATEST(players.price, excluded.price)');
   });
 });

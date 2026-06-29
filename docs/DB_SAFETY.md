@@ -27,3 +27,21 @@ npm run db:audit:schema:metadata
 - Keep `ensureSchema()` only as a transitional bootstrap path until source schema, migrations, and production metadata have been audited.
 - Prefer additive migrations. Any destructive migration must have a verified backup and a rollback script.
 - Optional DB-backed tests must use a disposable local database unless `ALLOW_REMOTE_TEST_DB=true` is explicitly set.
+
+## Player Price Cache Repair
+
+`market_values` is the durable price history and records both increases and decreases. `players.price` is only a latest-price cache for application queries.
+
+To inspect drift without changing data:
+
+```bash
+npm run db:repair:player-prices
+```
+
+To repair `players.price` from the latest `market_values` row, first create a fresh backup, then run:
+
+```bash
+ALLOW_REMOTE_PRICE_REPAIR=true npm run db:repair:player-prices -- --apply
+```
+
+The repair updates only `players.price`; it never deletes or rewrites `market_values`.
