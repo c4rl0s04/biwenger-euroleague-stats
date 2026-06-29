@@ -11,7 +11,7 @@ export async function run(manager: SyncManager) {
   manager.log('\n🎨 Syncing User Colors...');
 
   try {
-    const mutations = prepareUserMutations(db as any);
+    const mutations = prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
 
     // 2. Fetch all users
     const usersRes = await mutations.getAllUsers();

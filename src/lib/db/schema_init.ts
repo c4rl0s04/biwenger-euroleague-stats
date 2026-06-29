@@ -32,6 +32,33 @@ export async function ensureSchema(db: DbClient) {
     )
   `);
 
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS seasons (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      status TEXT NOT NULL CHECK (status IN ('active', 'frozen', 'archived')),
+      starts_at DATE,
+      ends_at DATE,
+      frozen_at TIMESTAMP,
+      source_league_id TEXT,
+      notes TEXT,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    INSERT INTO seasons (id, name, status, frozen_at, notes)
+    VALUES (
+      '2025-26',
+      'EuroLeague Fantasy 2025-26',
+      'frozen',
+      NOW(),
+      'Canonical frozen snapshot created from the repaired production database.'
+    )
+    ON CONFLICT (id) DO NOTHING
+  `);
+
   // 2. Players Table
   await db.query(`
     CREATE TABLE IF NOT EXISTS players (
@@ -57,6 +84,44 @@ export async function ensureSchema(db: DbClient) {
       country TEXT,
       team_id INTEGER,
       img TEXT
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS player_seasons (
+      id SERIAL PRIMARY KEY,
+      season_id TEXT NOT NULL DEFAULT '2025-26' REFERENCES seasons(id),
+      player_id INTEGER NOT NULL REFERENCES players(id),
+      team_id INTEGER,
+      owner_id TEXT,
+      puntos INTEGER,
+      partidos_jugados INTEGER,
+      played_home INTEGER,
+      played_away INTEGER,
+      points_home INTEGER,
+      points_away INTEGER,
+      points_last_season INTEGER,
+      status TEXT,
+      price_increment INTEGER,
+      price INTEGER,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      UNIQUE(season_id, player_id)
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS user_seasons (
+      id SERIAL PRIMARY KEY,
+      season_id TEXT NOT NULL DEFAULT '2025-26' REFERENCES seasons(id),
+      user_id TEXT NOT NULL REFERENCES users(id),
+      name TEXT,
+      icon TEXT,
+      color_index INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'active',
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      UNIQUE(season_id, user_id)
     )
   `);
 
@@ -374,5 +439,34 @@ export async function ensureSchema(db: DbClient) {
       // Index might already exist
       console.warn(`Index creation warning: ${e.message}`);
     }
+  }
+
+  const seasonScopedTables = [
+    'user_rounds',
+    'fichajes',
+    'transfer_bids',
+    'lineups',
+    'matches',
+    'player_round_stats',
+    'porras',
+    'market_values',
+    'market_listings',
+    'initial_squads',
+    'finances',
+    'tournaments',
+    'tournament_phases',
+    'tournament_fixtures',
+    'tournament_standings',
+    'playoff_predictions',
+    'playoff_results',
+    'user_playoff_media',
+  ];
+
+  for (const table of seasonScopedTables) {
+    const exists = await db.query('SELECT to_regclass($1) AS table_name', [`public.${table}`]);
+    if (!exists.rows[0]?.table_name) continue;
+    await db.query(
+      `ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS season_id TEXT DEFAULT '2025-26'`
+    );
   }
 }

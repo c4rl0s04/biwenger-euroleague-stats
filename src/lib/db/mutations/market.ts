@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -67,11 +68,20 @@ export interface MarketMutations {
   insertPlayerFallback: (params: InsertPlayerFallbackParams) => Promise<void>;
 }
 
+export interface MarketMutationOptions {
+  seasonId?: string;
+}
+
 /**
  * Market & Board Mutations (Postgres)
  * Handles Write operations for transfers, finances, betting pool (porras).
  */
-export function prepareMarketMutations(db: DbClient): MarketMutations {
+export function prepareMarketMutations(
+  db: DbClient,
+  options: MarketMutationOptions = {}
+): MarketMutations {
+  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+
   return {
     insertTransfer: async (params: InsertTransferParams) => {
       // Postgres: INSERT ... ON CONFLICT DO NOTHING RETURNING id
@@ -79,12 +89,13 @@ export function prepareMarketMutations(db: DbClient): MarketMutations {
       // we need to handle it.
       // If it exists, we don't need the ID because we wouldn't add bids again.
       const sql = `
-        INSERT INTO fichajes (timestamp, fecha, player_id, precio, vendedor, comprador)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (timestamp, player_id, vendedor, comprador, precio) DO NOTHING
+        INSERT INTO fichajes (season_id, timestamp, fecha, player_id, precio, vendedor, comprador)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (season_id, timestamp, player_id, vendedor, comprador, precio) DO NOTHING
         RETURNING id
       `;
       const res = await db.query(sql, [
+        seasonId,
         params.timestamp,
         params.fecha,
         params.player_id,
@@ -102,15 +113,16 @@ export function prepareMarketMutations(db: DbClient): MarketMutations {
 
     insertBid: async (params: InsertBidParams) => {
       await db.query(
-        'INSERT INTO transfer_bids (transfer_id, bidder_id, bidder_name, amount) VALUES ($1, $2, $3, $4)',
-        [params.transfer_id, params.bidder_id, params.bidder_name, params.amount]
+        'INSERT INTO transfer_bids (season_id, transfer_id, bidder_id, bidder_name, amount) VALUES ($1, $2, $3, $4, $5)',
+        [seasonId, params.transfer_id, params.bidder_id, params.bidder_name, params.amount]
       );
     },
 
     insertFinance: async (params: InsertFinanceParams) => {
       await db.query(
-        'INSERT INTO finances (user_id, round_id, date, type, amount, description) VALUES ($1, $2, $3, $4, $5, $6)',
+        'INSERT INTO finances (season_id, user_id, round_id, date, type, amount, description) VALUES ($1, $2, $3, $4, $5, $6, $7)',
         [
+          seasonId,
           params.user_id,
           params.round_id,
           params.date,
@@ -123,13 +135,14 @@ export function prepareMarketMutations(db: DbClient): MarketMutations {
 
     insertPorra: async (params: InsertPorraParams) => {
       const sql = `
-        INSERT INTO porras (user_id, round_id, round_name, result, aciertos)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT(user_id, round_id) DO UPDATE SET
+        INSERT INTO porras (season_id, user_id, round_id, round_name, result, aciertos)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT(season_id, user_id, round_id) DO UPDATE SET
           result=excluded.result,
           aciertos=excluded.aciertos
       `;
       await db.query(sql, [
+        seasonId,
         params.user_id,
         params.round_id,
         params.round_name,

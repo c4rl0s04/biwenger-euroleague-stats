@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -86,27 +87,59 @@ export interface UserMutations {
   updateUserPassword: (password: string, userId: string) => Promise<void>;
 }
 
+export interface UserMutationOptions {
+  seasonId?: string;
+}
+
 /**
  * User & Squad Mutations (Postgres)
  * Handles Write operations for users, squads, lineups, and initial squad inference.
  */
-export function prepareUserMutations(db: DbClient): UserMutations {
+export function prepareUserMutations(
+  db: DbClient,
+  options: UserMutationOptions = {}
+): UserMutations {
+  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+
   return {
     resetAllOwners: async () => {
-      await db.query('UPDATE players SET owner_id = NULL');
+      if (seasonId === DEFAULT_SEASON_ID) {
+        await db.query('UPDATE players SET owner_id = NULL');
+      }
+      await db.query(
+        'UPDATE player_seasons SET owner_id = NULL, updated_at = NOW() WHERE season_id = $1',
+        [seasonId]
+      );
     },
 
     resetActiveOwners: async () => {
       // Only reset owners for players belonging to active teams
-      await db.query(`
-        UPDATE players 
-        SET owner_id = NULL 
-        WHERE team_id IN (SELECT id FROM teams WHERE is_active = true)
-      `);
+      if (seasonId === DEFAULT_SEASON_ID) {
+        await db.query(`
+          UPDATE players
+          SET owner_id = NULL
+          WHERE team_id IN (SELECT id FROM teams WHERE is_active = true)
+        `);
+      }
+      await db.query(
+        `
+        UPDATE player_seasons
+        SET owner_id = NULL, updated_at = NOW()
+        WHERE season_id = $1
+          AND team_id IN (SELECT id FROM teams WHERE is_active = true)
+      `,
+        [seasonId]
+      );
     },
 
     resetUserSquad: async (userId: string) => {
-      await db.query('UPDATE players SET owner_id = NULL WHERE owner_id = $1', [userId]);
+      if (seasonId === DEFAULT_SEASON_ID) {
+        await db.query('UPDATE players SET owner_id = NULL WHERE owner_id = $1', [userId]);
+      }
+      await db.query(
+        'UPDATE player_seasons SET owner_id = NULL, updated_at = NOW() WHERE season_id = $1 AND owner_id = $2',
+        [seasonId, userId]
+      );
     },
 
     getAllUsers: async () => {
@@ -119,14 +152,38 @@ export function prepareUserMutations(db: DbClient): UserMutations {
     },
 
     updatePlayerOwner: async (params: UpdatePlayerOwnerParams) => {
-      await db.query('UPDATE players SET owner_id = $1 WHERE id = $2', [
-        params.owner_id,
-        params.player_id,
-      ]);
+      if (seasonId === DEFAULT_SEASON_ID) {
+        await db.query('UPDATE players SET owner_id = $1 WHERE id = $2', [
+          params.owner_id,
+          params.player_id,
+        ]);
+      }
+      await db.query(
+        `
+        INSERT INTO player_seasons (season_id, player_id, owner_id, updated_at)
+        VALUES ($1, $2, $3, NOW())
+        ON CONFLICT(season_id, player_id) DO UPDATE SET
+          owner_id = excluded.owner_id,
+          updated_at = NOW()
+      `,
+        [seasonId, params.player_id, params.owner_id]
+      );
     },
 
     updateUserColor: async (colorIndex: number, userId: string) => {
-      await db.query('UPDATE users SET color_index = $1 WHERE id = $2', [colorIndex, userId]);
+      if (seasonId === DEFAULT_SEASON_ID) {
+        await db.query('UPDATE users SET color_index = $1 WHERE id = $2', [colorIndex, userId]);
+      }
+      await db.query(
+        `
+        INSERT INTO user_seasons (season_id, user_id, color_index, updated_at)
+        VALUES ($1, $2, $3, NOW())
+        ON CONFLICT(season_id, user_id) DO UPDATE SET
+          color_index = excluded.color_index,
+          updated_at = NOW()
+      `,
+        [seasonId, userId, colorIndex]
+      );
     },
 
     upsertUser: async (params: UpsertUserParams) => {
@@ -135,43 +192,56 @@ export function prepareUserMutations(db: DbClient): UserMutations {
         ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=COALESCE(excluded.icon, users.icon)
       `;
       await db.query(sql, [params.id, params.name, params.icon]);
+      await db.query(
+        `
+        INSERT INTO user_seasons (season_id, user_id, name, icon, status, updated_at)
+        VALUES ($1, $2, $3, $4, 'active', NOW())
+        ON CONFLICT(season_id, user_id) DO UPDATE SET
+          name = excluded.name,
+          icon = COALESCE(excluded.icon, user_seasons.icon),
+          status = 'active',
+          updated_at = NOW()
+      `,
+        [seasonId, params.id, params.name, params.icon]
+      );
     },
 
     insertInitialSquad: async (params: InsertInitialSquadParams) => {
       const sql = `
-        INSERT INTO initial_squads (user_id, player_id, price) 
-        VALUES ($1, $2, $3)
-        ON CONFLICT(user_id, player_id) DO NOTHING
+        INSERT INTO initial_squads (season_id, user_id, player_id, price)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT(season_id, user_id, player_id) DO NOTHING
       `;
-      await db.query(sql, [params.user_id, params.player_id, params.price]);
+      await db.query(sql, [seasonId, params.user_id, params.player_id, params.price]);
     },
 
     getInitialPrice: async (playerId: number, date: string) => {
       const sql = `
-        SELECT price FROM market_values 
-        WHERE player_id = $1 AND date <= $2
+        SELECT price FROM market_values
+        WHERE season_id = $1 AND player_id = $2 AND date <= $3
         ORDER BY date DESC
         LIMIT 1
       `;
-      const res = await db.query(sql, [playerId, date]);
+      const res = await db.query(sql, [seasonId, playerId, date]);
       return res.rows[0];
     },
 
     getPlayersSoldByUser: async (sellerName1: string, sellerName2: string) => {
       // sellerName2 is same as 1 usually, logic copied from SQLite params
       const sql = `
-        SELECT DISTINCT player_id 
-        FROM fichajes 
-        WHERE vendedor = $1 OR vendedor = $2
+        SELECT DISTINCT player_id
+        FROM fichajes
+        WHERE season_id = $1 AND (vendedor = $2 OR vendedor = $3)
       `;
-      const res = await db.query(sql, [sellerName1, sellerName2]);
+      const res = await db.query(sql, [seasonId, sellerName1, sellerName2]);
       return res.rows;
     },
 
     getPlayersOwnedByUser: async (ownerId: string) => {
-      const res = await db.query('SELECT id as player_id FROM players WHERE owner_id = $1', [
-        ownerId,
-      ]);
+      const res = await db.query(
+        'SELECT player_id FROM player_seasons WHERE season_id = $1 AND owner_id = $2',
+        [seasonId, ownerId]
+      );
       return res.rows;
     },
 
@@ -183,10 +253,10 @@ export function prepareUserMutations(db: DbClient): UserMutations {
       const sql = `
         SELECT timestamp, 'buy' as type
         FROM fichajes
-        WHERE player_id = $1 AND (comprador = $2 OR comprador = $3)
+        WHERE season_id = $1 AND player_id = $2 AND (comprador = $3 OR comprador = $4)
         ORDER BY timestamp ASC
       `;
-      const res = await db.query(sql, [playerId, buyerName1, buyerName2]);
+      const res = await db.query(sql, [seasonId, playerId, buyerName1, buyerName2]);
       return res.rows;
     },
 
@@ -194,22 +264,23 @@ export function prepareUserMutations(db: DbClient): UserMutations {
       const sql = `
         SELECT timestamp, 'sell' as type
         FROM fichajes
-        WHERE player_id = $1 AND (vendedor = $2 OR vendedor = $3)
+        WHERE season_id = $1 AND player_id = $2 AND (vendedor = $3 OR vendedor = $4)
         ORDER BY timestamp ASC
       `;
-      const res = await db.query(sql, [playerId, sellerName1, sellerName2]);
+      const res = await db.query(sql, [seasonId, playerId, sellerName1, sellerName2]);
       return res.rows;
     },
 
     upsertLineup: async (params: UpsertLineupParams) => {
       const sql = `
-        INSERT INTO lineups (user_id, round_id, round_name, player_id, is_captain, role)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT(user_id, round_id, player_id) DO UPDATE SET
+        INSERT INTO lineups (season_id, user_id, round_id, round_name, player_id, is_captain, role)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT(season_id, user_id, round_id, player_id) DO UPDATE SET
         is_captain=excluded.is_captain,
         role=excluded.role
       `;
       await db.query(sql, [
+        seasonId,
         params.user_id,
         params.round_id,
         params.round_name,
@@ -220,8 +291,8 @@ export function prepareUserMutations(db: DbClient): UserMutations {
     },
 
     deleteUserLineup: async (params: DeleteUserLineupParams) => {
-      const sql = `DELETE FROM lineups WHERE user_id = $1 AND round_id = $2`;
-      await db.query(sql, [params.user_id, params.round_id]);
+      const sql = `DELETE FROM lineups WHERE season_id = $1 AND user_id = $2 AND round_id = $3`;
+      await db.query(sql, [seasonId, params.user_id, params.round_id]);
     },
 
     upsertUserRound: async (params: UpsertUserRoundParams) => {
@@ -235,15 +306,16 @@ export function prepareUserMutations(db: DbClient): UserMutations {
       // I WILL NEED TO UPDATE 06-lineups.js to pass an object { user_id, ... }
 
       const sql = `
-        INSERT INTO user_rounds (user_id, round_id, round_name, points, participated, alineacion)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT(user_id, round_id) DO UPDATE SET
+        INSERT INTO user_rounds (season_id, user_id, round_id, round_name, points, participated, alineacion)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT(season_id, user_id, round_id) DO UPDATE SET
         points=excluded.points,
         participated=excluded.participated,
         round_name=excluded.round_name,
         alineacion=excluded.alineacion
       `;
       await db.query(sql, [
+        seasonId,
         params.user_id,
         params.round_id,
         params.round_name,
@@ -255,15 +327,19 @@ export function prepareUserMutations(db: DbClient): UserMutations {
 
     // Step 9 Helpers
     clearInitialSquads: async () => {
-      await db.query('DELETE FROM initial_squads');
+      await db.query('DELETE FROM initial_squads WHERE season_id = $1', [seasonId]);
     },
 
     getTransfersForBacktracking: async () => {
-      const res = await db.query(`
-        SELECT timestamp, player_id, vendedor, comprador 
-        FROM fichajes 
+      const res = await db.query(
+        `
+        SELECT timestamp, player_id, vendedor, comprador
+        FROM fichajes
+        WHERE season_id = $1
         ORDER BY timestamp DESC
-      `);
+      `,
+        [seasonId]
+      );
       return res.rows;
     },
 

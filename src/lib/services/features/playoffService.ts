@@ -1,13 +1,14 @@
 import 'server-only';
 import { db } from '../../db';
 import {
+  DEFAULT_SEASON_ID,
   playoffPredictions,
   playoffResults,
   userPlayoffMedia,
   users,
   teams,
 } from '../../db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 /**
  * Playoff Service
@@ -22,10 +23,20 @@ export const SCORING_RULES = {
 };
 
 export async function getPlayoffLeaderboard() {
+  const seasonId = process.env.DEFAULT_SEASON_ID || DEFAULT_SEASON_ID;
   const allUsers = await db.select().from(users);
-  const predictions = await db.select().from(playoffPredictions);
-  const results = await db.select().from(playoffResults);
-  const media = await db.select().from(userPlayoffMedia);
+  const predictions = await db
+    .select()
+    .from(playoffPredictions)
+    .where(eq(playoffPredictions.seasonId, seasonId));
+  const results = await db
+    .select()
+    .from(playoffResults)
+    .where(eq(playoffResults.seasonId, seasonId));
+  const media = await db
+    .select()
+    .from(userPlayoffMedia)
+    .where(eq(userPlayoffMedia.seasonId, seasonId));
 
   const leaderboard = allUsers.map((user) => {
     const userPredictions = predictions.filter((p) => p.userId === user.id);
@@ -76,7 +87,8 @@ export async function getPlayoffLeaderboard() {
 }
 
 export async function getPlayoffResults() {
-  return await db.select().from(playoffResults);
+  const seasonId = process.env.DEFAULT_SEASON_ID || DEFAULT_SEASON_ID;
+  return await db.select().from(playoffResults).where(eq(playoffResults.seasonId, seasonId));
 }
 
 export async function getTeams() {

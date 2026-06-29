@@ -7,7 +7,7 @@ export async function run(manager: SyncManager) {
   manager.log('\n🎱 Syncing Porras History (from Board)...');
 
   const db = manager.context.db;
-  const mutations = prepareMarketMutations(db as any);
+  const mutations = prepareMarketMutations(db as any, { seasonId: manager.context.seasonId });
   const leagueId = CONFIG.API.LEAGUE_ID;
 
   let offset = 0;

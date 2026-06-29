@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -61,11 +62,20 @@ export interface MatchMutations {
   deleteLineups: (roundId: number) => Promise<void>;
 }
 
+export interface MatchMutationOptions {
+  seasonId?: string;
+}
+
 /**
  * Match & Round Mutations (Postgres)
  * Handles Write operations for matches, rounds, and legacy cleanup tasks.
  */
-export function prepareMatchMutations(db: DbClient): MatchMutations {
+export function prepareMatchMutations(
+  db: DbClient,
+  options: MatchMutationOptions = {}
+): MatchMutations {
+  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+
   return {
     getMappedTeams: async () => {
       const res = await db.query('SELECT id, code, name FROM teams WHERE code IS NOT NULL');
@@ -75,16 +85,16 @@ export function prepareMatchMutations(db: DbClient): MatchMutations {
     upsertMatch: async (params: UpsertMatchParams) => {
       const sql = `
         INSERT INTO matches (
-          round_id, round_name, home_id, away_id, date, status, 
+          season_id, round_id, round_name, home_id, away_id, date, status,
           home_score, away_score, home_score_regtime, away_score_regtime,
           home_q1, away_q1, home_q2, away_q2, home_q3, away_q3, home_q4, away_q4, home_ot, away_ot
         )
         VALUES (
-          $1, $2, $3, $4, $5, $6, 
-          $7, $8, $9, $10,
-          $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+          $1, $2, $3, $4, $5, $6, $7,
+          $8, $9, $10, $11,
+          $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
         )
-        ON CONFLICT(round_id, home_id, away_id) DO UPDATE SET
+        ON CONFLICT(season_id, round_id, home_id, away_id) DO UPDATE SET
           round_name=excluded.round_name,
           status=excluded.status,
           home_score=excluded.home_score,
@@ -104,6 +114,7 @@ export function prepareMatchMutations(db: DbClient): MatchMutations {
           date=excluded.date
       `;
       const values = [
+        seasonId,
         params.round_id,
         params.round_name,
         params.home_id,
@@ -130,19 +141,19 @@ export function prepareMatchMutations(db: DbClient): MatchMutations {
 
     updateMatchScore: async ({ id, home_score, away_score, status }: UpdateMatchScoreParams) => {
       const sql = `
-        UPDATE matches 
+        UPDATE matches
         SET home_score = $2, away_score = $3, status = $4
-        WHERE id = $1
+        WHERE id = $1 AND season_id = $5
       `;
-      await db.query(sql, [id, home_score, away_score, status]);
+      await db.query(sql, [id, home_score, away_score, status, seasonId]);
     },
 
     // --- Round Cleanup (Merging duplicates) ---
 
     findDuplicateRounds: async () => {
       const sql = `
-        SELECT 
-          CASE 
+        SELECT
+          CASE
             WHEN round_name LIKE '%(aplazada)%' THEN TRIM(REPLACE(round_name, '(aplazada)', ''))
             ELSE round_name
           END as base_name,
@@ -150,57 +161,67 @@ export function prepareMatchMutations(db: DbClient): MatchMutations {
           MIN(round_id) as canonical_id,
           COUNT(DISTINCT round_id) as count
         FROM matches
+        WHERE season_id = $1
         GROUP BY base_name
         HAVING COUNT(DISTINCT round_id) > 1
       `;
-      const res = await db.query(sql);
+      const res = await db.query(sql, [seasonId]);
       return res.rows;
     },
 
     deleteMatchesByRound: async (roundId: number) => {
-      await db.query('DELETE FROM matches WHERE round_id = $1', [roundId]);
+      await db.query('DELETE FROM matches WHERE season_id = $1 AND round_id = $2', [
+        seasonId,
+        roundId,
+      ]);
     },
 
     deleteConflictingStats: async (oldRoundId: number, newRoundId: number) => {
       await db.query(
         `
-        DELETE FROM player_round_stats 
-        WHERE round_id = $1 
+        DELETE FROM player_round_stats
+        WHERE season_id = $1 AND round_id = $2
         AND player_id IN (
-          SELECT player_id FROM player_round_stats WHERE round_id = $2
+          SELECT player_id FROM player_round_stats WHERE season_id = $1 AND round_id = $3
         )
         `,
-        [oldRoundId, newRoundId]
+        [seasonId, oldRoundId, newRoundId]
       );
     },
 
     updateStatsRound: async (oldRoundId: number, newRoundId: number) => {
-      await db.query('UPDATE player_round_stats SET round_id = $2 WHERE round_id = $1', [
-        oldRoundId,
-        newRoundId,
-      ]);
+      await db.query(
+        'UPDATE player_round_stats SET round_id = $3 WHERE season_id = $1 AND round_id = $2',
+        [seasonId, oldRoundId, newRoundId]
+      );
     },
 
     mergeUserRoundPoints: async (oldRoundId: number, newRoundId: number) => {
       await db.query(
         `
-        UPDATE user_rounds 
+        UPDATE user_rounds
         SET points = points + COALESCE((
-          SELECT points FROM user_rounds ur2 
-          WHERE ur2.user_id = user_rounds.user_id AND ur2.round_id = $1
+          SELECT points FROM user_rounds ur2
+          WHERE ur2.season_id = $1 AND ur2.user_id = user_rounds.user_id AND ur2.round_id = $2
         ), 0)
-        WHERE round_id = $2
+        WHERE season_id = $1 AND round_id = $3
         `,
-        [oldRoundId, newRoundId]
+        [seasonId, oldRoundId, newRoundId]
       );
     },
 
     deleteUserRounds: async (roundId: number) => {
-      await db.query('DELETE FROM user_rounds WHERE round_id = $1', [roundId]);
+      await db.query('DELETE FROM user_rounds WHERE season_id = $1 AND round_id = $2', [
+        seasonId,
+        roundId,
+      ]);
     },
 
     deleteLineups: async (roundId: number) => {
-      await db.query('DELETE FROM lineups WHERE round_id = $1', [roundId]);
+      await db.query('DELETE FROM lineups WHERE season_id = $1 AND round_id = $2', [
+        seasonId,
+        roundId,
+      ]);
     },
   };
 }

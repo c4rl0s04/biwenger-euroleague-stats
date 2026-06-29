@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -96,11 +97,20 @@ export interface EuroleagueMutations {
   checkStatsExist: (roundId: number) => Promise<{ c: string }>;
 }
 
+export interface EuroleagueMutationOptions {
+  seasonId?: string;
+}
+
 /**
  * EuroLeague Mutations (Postgres)
  * Handles Write operations for EuroLeague master data, linkage, and statistics.
  */
-export function prepareEuroleagueMutations(db: DbClient): EuroleagueMutations {
+export function prepareEuroleagueMutations(
+  db: DbClient,
+  options: EuroleagueMutationOptions = {}
+): EuroleagueMutations {
+  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+
   return {
     upsertSyncMeta: async (params: UpsertSyncMetaParams) => {
       const sql = `
@@ -112,7 +122,7 @@ export function prepareEuroleagueMutations(db: DbClient): EuroleagueMutations {
 
     updateTeamMaster: async (params: UpdateTeamMasterParams) => {
       const sql = `
-        UPDATE teams 
+        UPDATE teams
         SET code = $1, short_name = $2
         WHERE name LIKE $3 OR short_name = $2
       `;
@@ -136,7 +146,7 @@ export function prepareEuroleagueMutations(db: DbClient): EuroleagueMutations {
     updatePlayerLink: async (params: UpdatePlayerLinkParams) => {
       const sql = `
         UPDATE players
-        SET 
+        SET
             euroleague_code = $1,
             dorsal = $2,
             country = $3
@@ -181,19 +191,19 @@ export function prepareEuroleagueMutations(db: DbClient): EuroleagueMutations {
     insertPlayerStats: async (params: InsertPlayerStatsParams) => {
       const sql = `
         INSERT INTO player_round_stats (
-          player_id, round_id, fantasy_points, minutes, points,
+          season_id, player_id, round_id, fantasy_points, minutes, points,
           two_points_made, two_points_attempted,
           three_points_made, three_points_attempted,
           free_throws_made, free_throws_attempted,
           rebounds, assists, steals, blocks, turnovers, fouls_committed, valuation
         ) VALUES (
-          $1, $2, $3, $4, $5,
-          $6, $7,
-          $8, $9,
-          $10, $11,
-          $12, $13, $14, $15, $16, $17, $18
+          $1, $2, $3, $4, $5, $6,
+          $7, $8,
+          $9, $10,
+          $11, $12,
+          $13, $14, $15, $16, $17, $18, $19
         )
-        ON CONFLICT(player_id, round_id) DO UPDATE SET
+        ON CONFLICT(season_id, player_id, round_id) DO UPDATE SET
           minutes=excluded.minutes,
           points=excluded.points,
           two_points_made=excluded.two_points_made,
@@ -211,6 +221,7 @@ export function prepareEuroleagueMutations(db: DbClient): EuroleagueMutations {
           valuation=excluded.valuation
       `;
       await db.query(sql, [
+        seasonId,
         params.player_id,
         params.round_id,
         params.fantasy_points,
@@ -234,12 +245,12 @@ export function prepareEuroleagueMutations(db: DbClient): EuroleagueMutations {
 
     updateFantasyPoints: async (params: UpdateFantasyPointsParams) => {
       const sql = `
-        INSERT INTO player_round_stats (player_id, round_id, fantasy_points)
-        VALUES ($1, $2, $3)
-        ON CONFLICT(player_id, round_id) DO UPDATE SET 
+        INSERT INTO player_round_stats (season_id, player_id, round_id, fantasy_points)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT(season_id, player_id, round_id) DO UPDATE SET
         fantasy_points = excluded.fantasy_points
       `;
-      await db.query(sql, [params.player_id, params.round_id, params.fantasy_points]);
+      await db.query(sql, [seasonId, params.player_id, params.round_id, params.fantasy_points]);
     },
 
     updateTeamImage: async (img: string, code: string) => {
@@ -256,24 +267,25 @@ export function prepareEuroleagueMutations(db: DbClient): EuroleagueMutations {
     },
 
     getMatchesByRound: async (roundId: number) => {
-      const res = await db.query('SELECT home_id, away_id FROM matches WHERE round_id = $1', [
-        roundId,
-      ]);
+      const res = await db.query(
+        'SELECT home_id, away_id FROM matches WHERE season_id = $1 AND round_id = $2',
+        [seasonId, roundId]
+      );
       return res.rows;
     },
 
     checkFinishedMatch: async (roundId: number, teamId1: number, teamId2: number) => {
       const res = await db.query(
-        'SELECT status FROM matches WHERE round_id = $1 AND (home_id = $2 OR away_id = $3)',
-        [roundId, teamId1, teamId2]
+        'SELECT status FROM matches WHERE season_id = $1 AND round_id = $2 AND (home_id = $3 OR away_id = $4)',
+        [seasonId, roundId, teamId1, teamId2]
       );
       return res.rows[0];
     },
 
     checkStatsExist: async (roundId: number) => {
       const res = await db.query(
-        'SELECT COUNT(*) as c FROM player_round_stats WHERE round_id = $1',
-        [roundId]
+        'SELECT COUNT(*) as c FROM player_round_stats WHERE season_id = $1 AND round_id = $2',
+        [seasonId, roundId]
       );
       return res.rows[0];
     },

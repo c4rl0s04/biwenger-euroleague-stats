@@ -2,6 +2,7 @@ import { db } from '../db/client';
 import { ensureSchema } from '../db/schema_init';
 import { clearCache } from '../utils/cache';
 import { acquireAdvisoryLock, type AdvisoryLock } from './advisory-lock';
+import { assertSyncSeasonWritable } from './season-guard';
 
 export type SyncMode = 'full' | 'daily' | 'live';
 
@@ -27,6 +28,7 @@ export interface SyncStep {
 
 export interface SyncContext {
   db: typeof db | null;
+  seasonId?: string;
   playersList: Record<string, any>;
   teams: Record<string, any>;
   competition: { data: { data: { players: Record<string, any>; teams: Record<string, any> } } };
@@ -158,8 +160,11 @@ export class SyncManager {
     this.log('   🔨 Verifying/Creating Database Schema...');
     try {
       await ensureSchema(this.context.db as any);
+      const seasonContext = await assertSyncSeasonWritable(this.context.db as any);
+      this.context.seasonId = seasonContext.seasonId;
+      this.log(`   🗓️ Sync season resolved: ${seasonContext.seasonId} (${seasonContext.status}).`);
     } catch (e) {
-      this.error('❌ Failed to verify schema:', e);
+      this.error('❌ Failed to verify writable sync season:', e);
       if (advisoryLock?.acquired) {
         await advisoryLock.release();
       }

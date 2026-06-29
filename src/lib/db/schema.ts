@@ -12,6 +12,8 @@ import {
   unique,
 } from 'drizzle-orm/pg-core';
 
+export const DEFAULT_SEASON_ID = '2025-26';
+
 // 1. Users Table
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -35,6 +37,26 @@ export const teams = pgTable('teams', {
   latitude: doublePrecision('latitude'),
   longitude: doublePrecision('longitude'),
 });
+
+// 1c. Seasons Table
+export const seasons = pgTable(
+  'seasons',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    status: text('status').notNull(),
+    startsAt: date('starts_at'),
+    endsAt: date('ends_at'),
+    frozenAt: timestamp('frozen_at'),
+    sourceLeagueId: text('source_league_id'),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    statusIdx: index('idx_seasons_status').on(t.status),
+  })
+);
 
 // 2. Players Table
 export const players = pgTable('players', {
@@ -62,11 +84,74 @@ export const players = pgTable('players', {
   img: text('img'),
 });
 
+// 2b. Season-specific player state.
+export const playerSeasons = pgTable(
+  'player_seasons',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    playerId: integer('player_id')
+      .notNull()
+      .references(() => players.id),
+    teamId: integer('team_id'),
+    ownerId: text('owner_id'),
+    puntos: integer('puntos'),
+    partidosJugados: integer('partidos_jugados'),
+    playedHome: integer('played_home'),
+    playedAway: integer('played_away'),
+    pointsHome: integer('points_home'),
+    pointsAway: integer('points_away'),
+    pointsLastSeason: integer('points_last_season'),
+    status: text('status'),
+    priceIncrement: integer('price_increment'),
+    price: integer('price'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    playerSeasonUnique: unique('unique_player_season').on(t.seasonId, t.playerId),
+    seasonOwnerIdx: index('idx_player_seasons_season_owner').on(t.seasonId, t.ownerId),
+    seasonTeamIdx: index('idx_player_seasons_season_team').on(t.seasonId, t.teamId),
+  })
+);
+
+// 2c. Season-specific user state.
+export const userSeasons = pgTable(
+  'user_seasons',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id),
+    name: text('name'),
+    icon: text('icon'),
+    colorIndex: integer('color_index').default(0),
+    status: text('status').default('active'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    userSeasonUnique: unique('unique_user_season').on(t.seasonId, t.userId),
+    seasonUserIdx: index('idx_user_seasons_season_user').on(t.seasonId, t.userId),
+  })
+);
+
 // 3. User Rounds Table
 export const userRounds = pgTable(
   'user_rounds',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     userId: text('user_id'),
     roundId: integer('round_id'),
     roundName: text('round_name'),
@@ -75,7 +160,8 @@ export const userRounds = pgTable(
     alineacion: text('alineacion'), // JSON string?
   },
   (t) => ({
-    unq_user_round: unique('unique_user_round').on(t.userId, t.roundId),
+    unq_user_round: unique('unique_user_round').on(t.seasonId, t.userId, t.roundId),
+    seasonRoundIdx: index('idx_user_rounds_season_round').on(t.seasonId, t.roundId),
   })
 );
 
@@ -84,6 +170,10 @@ export const fichajes = pgTable(
   'fichajes',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     timestamp: bigint('timestamp', { mode: 'number' }),
     fecha: text('fecha'),
     playerId: integer('player_id'),
@@ -93,12 +183,14 @@ export const fichajes = pgTable(
   },
   (t) => ({
     unq_fichaje: unique('unique_fichaje').on(
+      t.seasonId,
       t.timestamp,
       t.playerId,
       t.vendedor,
       t.comprador,
       t.precio
     ),
+    seasonTimestampIdx: index('idx_fichajes_season_timestamp').on(t.seasonId, t.timestamp),
   })
 );
 
@@ -107,6 +199,10 @@ export const lineups = pgTable(
   'lineups',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     userId: text('user_id'),
     roundId: integer('round_id'),
     roundName: text('round_name'),
@@ -115,7 +211,8 @@ export const lineups = pgTable(
     role: text('role'),
   },
   (t) => ({
-    unq_lineup: unique('unique_lineup').on(t.userId, t.roundId, t.playerId),
+    unq_lineup: unique('unique_lineup').on(t.seasonId, t.userId, t.roundId, t.playerId),
+    seasonRoundIdx: index('idx_lineups_season_round').on(t.seasonId, t.roundId),
   })
 );
 
@@ -124,6 +221,10 @@ export const matches = pgTable(
   'matches',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     roundId: integer('round_id'),
     roundName: text('round_name'),
     homeId: integer('home_id'),
@@ -146,7 +247,8 @@ export const matches = pgTable(
     awayOt: integer('away_ot'),
   },
   (t) => ({
-    unq_match: unique('unique_match').on(t.roundId, t.homeId, t.awayId),
+    unq_match: unique('unique_match').on(t.seasonId, t.roundId, t.homeId, t.awayId),
+    seasonRoundIdx: index('idx_matches_season_round').on(t.seasonId, t.roundId),
   })
 );
 
@@ -155,6 +257,10 @@ export const playerRoundStats = pgTable(
   'player_round_stats',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     playerId: integer('player_id'),
     roundId: integer('round_id'),
     fantasyPoints: integer('fantasy_points'),
@@ -175,7 +281,8 @@ export const playerRoundStats = pgTable(
     valuation: integer('valuation'),
   },
   (t) => ({
-    unq_player_round_stat: unique('unique_player_round_stat').on(t.playerId, t.roundId),
+    unq_player_round_stat: unique('unique_player_round_stat').on(t.seasonId, t.playerId, t.roundId),
+    seasonRoundIdx: index('idx_player_round_stats_season_round').on(t.seasonId, t.roundId),
   })
 );
 
@@ -184,6 +291,10 @@ export const porras = pgTable(
   'porras',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     userId: text('user_id'),
     roundId: integer('round_id'),
     roundName: text('round_name'),
@@ -191,7 +302,7 @@ export const porras = pgTable(
     aciertos: integer('aciertos'),
   },
   (t) => ({
-    unq_porra: unique('unique_porra').on(t.userId, t.roundId),
+    unq_porra: unique('unique_porra').on(t.seasonId, t.userId, t.roundId),
   })
 );
 
@@ -200,18 +311,27 @@ export const marketValues = pgTable(
   'market_values',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     playerId: integer('player_id'),
     price: integer('price'),
     date: date('date'), // Stored as DATE
   },
   (t) => ({
-    unq_player_date: unique('unique_player_date').on(t.playerId, t.date),
+    unq_player_date: unique('unique_player_date').on(t.seasonId, t.playerId, t.date),
+    seasonDateIdx: index('idx_market_values_season_date').on(t.seasonId, t.date),
   })
 );
 
 // 10. Transfer Bids Table
 export const transferBids = pgTable('transfer_bids', {
   id: serial('id').primaryKey(),
+  seasonId: text('season_id')
+    .notNull()
+    .default(DEFAULT_SEASON_ID)
+    .references(() => seasons.id),
   transferId: integer('transfer_id').references(() => fichajes.id),
   bidderId: text('bidder_id'),
   bidderName: text('bidder_name'),
@@ -223,18 +343,26 @@ export const initialSquads = pgTable(
   'initial_squads',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     userId: text('user_id'),
     playerId: integer('player_id'),
     price: integer('price'),
   },
   (t) => ({
-    unq_initial_squad: unique('unique_initial_squad').on(t.userId, t.playerId),
+    unq_initial_squad: unique('unique_initial_squad').on(t.seasonId, t.userId, t.playerId),
   })
 );
 
 // 12. Finances Table
 export const finances = pgTable('finances', {
   id: serial('id').primaryKey(),
+  seasonId: text('season_id')
+    .notNull()
+    .default(DEFAULT_SEASON_ID)
+    .references(() => seasons.id),
   userId: text('user_id'),
   roundId: integer('round_id'),
   date: text('date'),
@@ -260,6 +388,10 @@ export const syncMeta = pgTable('sync_meta', {
 // 15. Tournaments Table
 export const tournaments = pgTable('tournaments', {
   id: integer('id').primaryKey(),
+  seasonId: text('season_id')
+    .notNull()
+    .default(DEFAULT_SEASON_ID)
+    .references(() => seasons.id),
   leagueId: integer('league_id'),
   name: text('name'),
   type: text('type'),
@@ -273,13 +405,21 @@ export const tournamentPhases = pgTable(
   'tournament_phases',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     tournamentId: integer('tournament_id').references(() => tournaments.id),
     name: text('name'),
     type: text('type'),
     orderIndex: integer('order_index'),
   },
   (t) => ({
-    unq_tournament_phase: unique('unique_tournament_phase').on(t.tournamentId, t.orderIndex),
+    unq_tournament_phase: unique('unique_tournament_phase').on(
+      t.seasonId,
+      t.tournamentId,
+      t.orderIndex
+    ),
   })
 );
 
@@ -288,6 +428,10 @@ export const tournamentFixtures = pgTable(
   'tournament_fixtures',
   {
     id: integer('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     tournamentId: integer('tournament_id').references(() => tournaments.id),
     phaseId: integer('phase_id').references(() => tournamentPhases.id),
     roundName: text('round_name'),
@@ -301,7 +445,11 @@ export const tournamentFixtures = pgTable(
     status: text('status'),
   },
   (t) => ({
-    unq_tournament_fixture: unique('unique_tournament_fixture').on(t.tournamentId, t.id),
+    unq_tournament_fixture: unique('unique_tournament_fixture').on(
+      t.seasonId,
+      t.tournamentId,
+      t.id
+    ),
   })
 );
 
@@ -310,6 +458,10 @@ export const tournamentStandings = pgTable(
   'tournament_standings',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     tournamentId: integer('tournament_id').references(() => tournaments.id),
     phaseName: text('phase_name'),
     groupName: text('group_name'),
@@ -324,6 +476,7 @@ export const tournamentStandings = pgTable(
   },
   (t) => ({
     unq_tournament_standing: unique('unique_tournament_standing').on(
+      t.seasonId,
       t.tournamentId,
       t.phaseName,
       t.groupName,
@@ -339,13 +492,17 @@ export const marketListings = pgTable(
   'market_listings',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     playerId: integer('player_id'),
     listedAt: date('listed_at'),
     price: integer('price'),
     sellerId: text('seller_id'),
   },
   (t) => ({
-    unq_market_listing: unique('unique_market_listing').on(t.playerId, t.listedAt),
+    unq_market_listing: unique('unique_market_listing').on(t.seasonId, t.playerId, t.listedAt),
   })
 );
 
@@ -383,6 +540,10 @@ export const playoffPredictions = pgTable(
   'playoff_predictions',
   {
     id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
     userId: text('user_id').references(() => users.id),
     stage: text('stage'), // 'play-in', 'quarter', 'semi', 'final'
     matchId: text('match_id'), // 'PI-1', 'QF-1', etc.
@@ -393,28 +554,53 @@ export const playoffPredictions = pgTable(
     createdAt: timestamp('created_at').defaultNow(),
   },
   (t) => ({
-    unq_prediction: unique('unique_playoff_prediction').on(t.userId, t.stage, t.matchId),
+    unq_prediction: unique('unique_playoff_prediction').on(
+      t.seasonId,
+      t.userId,
+      t.stage,
+      t.matchId
+    ),
   })
 );
 
 // 23. Playoff Results Table
-export const playoffResults = pgTable('playoff_results', {
-  matchId: text('match_id').primaryKey(), // 'PI-1', 'QF-1', etc.
-  stage: text('stage'),
-  winnerId: integer('winner_id').references(() => teams.id),
-  score: text('score'), // e.g. "3-1" or "88-75"
-  isCompleted: boolean('is_completed').default(false),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export const playoffResults = pgTable(
+  'playoff_results',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    matchId: text('match_id'), // 'PI-1', 'QF-1', etc.
+    stage: text('stage'),
+    winnerId: integer('winner_id').references(() => teams.id),
+    score: text('score'), // e.g. "3-1" or "88-75"
+    isCompleted: boolean('is_completed').default(false),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  (t) => ({
+    unq_result: unique('unique_playoff_result').on(t.seasonId, t.matchId),
+  })
+);
 
 // 24. User Playoff Media Table
-export const userPlayoffMedia = pgTable('user_playoff_media', {
-  userId: text('user_id')
-    .primaryKey()
-    .references(() => users.id),
-  predictionImageUrl: text('prediction_image_url'),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export const userPlayoffMedia = pgTable(
+  'user_playoff_media',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    userId: text('user_id').references(() => users.id),
+    predictionImageUrl: text('prediction_image_url'),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  (t) => ({
+    unq_user_playoff_media: unique('unique_user_playoff_media').on(t.seasonId, t.userId),
+  })
+);
 
 // 25. Assistant Conversations Table
 export const assistantConversations = pgTable(

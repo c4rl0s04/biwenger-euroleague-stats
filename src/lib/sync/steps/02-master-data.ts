@@ -15,7 +15,7 @@ export async function run(manager: SyncManager) {
   manager.log('\n🌍 Step 2: Syncing Euroleague Master Data...');
 
   const seasonCode = CONFIG.EUROLEAGUE.SEASON_CODE;
-  const mutations = prepareEuroleagueMutations(db as any);
+  const mutations = prepareEuroleagueMutations(db as any, { seasonId: manager.context.seasonId });
 
   // 1. Fetch Euroleague Teams
   const data = await fetchTeams(seasonCode);

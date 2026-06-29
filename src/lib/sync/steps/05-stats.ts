@@ -46,7 +46,7 @@ export async function run(manager: SyncManager) {
   }
 
   // Prepare Mappings
-  const mutations = prepareEuroleagueMutations(db as any);
+  const mutations = prepareEuroleagueMutations(db as any, { seasonId: manager.context.seasonId });
   const teams = await mutations.getTeamsWithCode();
   const teamCodeMap = new Map(teams.map((t: any) => [t.id, t.code]));
 

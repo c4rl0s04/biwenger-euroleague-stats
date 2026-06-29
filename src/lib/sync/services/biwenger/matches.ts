@@ -19,7 +19,7 @@ export async function run(manager: SyncManager, round: any, playersList: any = {
 
   manager.log(`   🌍 Syncing Matches for Round ${roundName} (using Biwenger API)...`);
 
-  const mutations = prepareMatchMutations(db as any);
+  const mutations = prepareMatchMutations(db as any, { seasonId: manager.context.seasonId });
 
   // --- Euroleague Data Setup ---
   // Fetch team codes from DB

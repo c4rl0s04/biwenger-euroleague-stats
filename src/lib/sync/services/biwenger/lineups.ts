@@ -41,8 +41,10 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
 
     if (standings) {
       // Initialize Mutations
-      const mutations = prepareUserMutations(db as any);
-      const playerMutations = preparePlayerMutations(db as any);
+      const mutations = prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
+      const playerMutations = preparePlayerMutations(db as any, {
+        seasonId: manager.context.seasonId,
+      });
       const positions: any = CONFIG.POSITIONS;
 
       for (const user of standings) {

@@ -31,7 +31,7 @@ export async function runGame(
   manager.log(`📊 Syncing Euroleague game ${gameCode} for round ${roundId}...`);
 
   // Initialize Mutations
-  const mutations = prepareEuroleagueMutations(db as any);
+  const mutations = prepareEuroleagueMutations(db as any, { seasonId: manager.context.seasonId });
 
   try {
     // 1. Fetch game header to check if game exists and is finished
@@ -165,7 +165,7 @@ export async function runBiwengerPoints(manager: SyncManager, round: any, player
   // Import dynamically to avoid circular dependencies
   const { fetchRoundGames } = await import('../../../api/biwenger-client');
 
-  const mutations = prepareEuroleagueMutations(db as any);
+  const mutations = prepareEuroleagueMutations(db as any, { seasonId: manager.context.seasonId });
 
   const roundId = round.id;
   const dbRoundId = round.dbId || round.id;

@@ -12,7 +12,7 @@ export async function run(manager: SyncManager) {
   manager.log('\n📥 Syncing Squads (Ownership)...');
 
   // Initialize Mutations
-  const mutations = prepareUserMutations(db as any);
+  const mutations = prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
 
   // 1. Reset ownerships for active teams only (preserves historical info for eliminated teams)
   await mutations.resetActiveOwners();

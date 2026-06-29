@@ -19,6 +19,10 @@ vi.mock('../../utils/cache', () => ({
   clearCache: vi.fn(),
 }));
 
+vi.mock('../season-guard', () => ({
+  assertSyncSeasonWritable: vi.fn(async () => ({ seasonId: '2026-27', status: 'active' })),
+}));
+
 describe('SyncManager hardening behavior', () => {
   beforeEach(() => {
     vi.clearAllMocks();

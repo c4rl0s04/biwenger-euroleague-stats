@@ -18,7 +18,7 @@ import { SyncManager } from '../manager';
 export async function run(manager: SyncManager) {
   manager.log('\n🕰️  Step 9: Inferring Initial Squads (Backtracking)...');
   const db = manager.context.db;
-  const mutations = prepareUserMutations(db as any);
+  const mutations = prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
 
   // 0. Clear existing data
   await mutations.clearInitialSquads();

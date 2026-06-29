@@ -74,7 +74,7 @@ export async function run(manager: SyncManager) {
   manager.context.teams =
     (competition.data.data ? competition.data.data.teams : competition.data.teams) || {};
 
-  const mutations = preparePlayerMutations(db as any);
+  const mutations = preparePlayerMutations(db as any, { seasonId: manager.context.seasonId });
   const positions: any = CONFIG.POSITIONS;
   const teams = manager.context.teams;
 

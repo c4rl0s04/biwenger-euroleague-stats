@@ -19,7 +19,7 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
   manager.log('\n📥 Fetching Full Board History...');
 
   // Initialize Mutations
-  const mutations = prepareMarketMutations(db as any);
+  const mutations = prepareMarketMutations(db as any, { seasonId: manager.context.seasonId });
   const usersResult = await (db as any).query(
     "SELECT name FROM users WHERE name IS NOT NULL AND TRIM(name) != ''"
   );
@@ -194,7 +194,9 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
         // Since we process newest items first (offset 0),
         // the first time we see a player, it's their latest movement.
         if (!processedPlayerIds.has(playerId)) {
-          const userMutations = (manager as any).userMutations || prepareUserMutations(db as any);
+          const userMutations =
+            (manager as any).userMutations ||
+            prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
           (manager as any).userMutations = userMutations; // Cache it in manager context
 
           let newOwnerId: string | null = null;

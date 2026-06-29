@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -62,72 +63,136 @@ export interface PlayerMutations {
   setAllTeamsInactive: () => Promise<void>;
 }
 
+export interface PlayerMutationOptions {
+  seasonId?: string;
+}
+
 /**
  * Player Mutations (Postgres)
  * Handles Write operations for users, players, and teams tables.
  */
-export function preparePlayerMutations(db: DbClient): PlayerMutations {
+export function preparePlayerMutations(
+  db: DbClient,
+  options: PlayerMutationOptions = {}
+): PlayerMutations {
+  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+
   return {
     // Insert/Update Player Core Data
     upsertPlayer: async (params: UpsertPlayerParams) => {
-      const sql = `
-        INSERT INTO players (
-          id, name, team_id, position, 
-          puntos, partidos_jugados, 
-          played_home, played_away, 
+      if (seasonId === DEFAULT_SEASON_ID) {
+        const sql = `
+          INSERT INTO players (
+            id, name, team_id, position,
+            puntos, partidos_jugados,
+            played_home, played_away,
+            points_home, points_away, points_last_season,
+            status, price_increment, price, img
+          )
+          VALUES (
+            $1, $2, $3, $4,
+            $5, $6,
+            $7, $8,
+            $9, $10,
+            $11,
+            $12, $13, $14, $15
+          )
+          ON CONFLICT(id) DO UPDATE SET
+            name=excluded.name,
+            position=excluded.position,
+            puntos = GREATEST(players.puntos, excluded.puntos),
+            partidos_jugados = GREATEST(players.partidos_jugados, excluded.partidos_jugados),
+            played_home = GREATEST(players.played_home, excluded.played_home),
+            played_away = GREATEST(players.played_away, excluded.played_away),
+            points_home = GREATEST(players.points_home, excluded.points_home),
+            points_away = GREATEST(players.points_away, excluded.points_away),
+            points_last_season = GREATEST(players.points_last_season, excluded.points_last_season),
+            -- players.price is a latest-price cache. Historical peaks/decrements live in market_values.
+            price = excluded.price,
+            status = excluded.status,
+            price_increment = excluded.price_increment,
+            -- COALESCE: never overwrite existing team_id or img with incoming data if already set
+            team_id = COALESCE(players.team_id, excluded.team_id),
+            img = COALESCE(players.img, excluded.img)
+        `;
+        const values = [
+          params.id,
+          params.name,
+          params.team_id,
+          params.position,
+          params.puntos,
+          params.partidos_jugados,
+          params.played_home,
+          params.played_away,
+          params.points_home,
+          params.points_away,
+          params.points_last_season,
+          params.status,
+          params.price_increment,
+          params.price,
+          params.img,
+        ];
+        await db.query(sql, values);
+      } else {
+        await db.query(
+          `
+          INSERT INTO players (id, name, position, img)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT(id) DO UPDATE SET
+            name = excluded.name,
+            position = excluded.position,
+            img = COALESCE(players.img, excluded.img)
+        `,
+          [params.id, params.name, params.position, params.img]
+        );
+      }
+
+      await db.query(
+        `
+        INSERT INTO player_seasons (
+          season_id, player_id, team_id,
+          puntos, partidos_jugados,
+          played_home, played_away,
           points_home, points_away, points_last_season,
-          status, price_increment, price, img
-        ) 
-        VALUES (
-          $1, $2, $3, $4, 
-          $5, $6, 
-          $7, $8, 
-          $9, $10, 
-          $11,
-          $12, $13, $14, $15
+          status, price_increment, price, updated_at
         )
-        ON CONFLICT(id) DO UPDATE SET 
-          name=excluded.name, 
-          position=excluded.position,
-          puntos = GREATEST(players.puntos, excluded.puntos),
-          partidos_jugados = GREATEST(players.partidos_jugados, excluded.partidos_jugados),
-          played_home = GREATEST(players.played_home, excluded.played_home),
-          played_away = GREATEST(players.played_away, excluded.played_away),
-          points_home = GREATEST(players.points_home, excluded.points_home),
-          points_away = GREATEST(players.points_away, excluded.points_away),
-          points_last_season = GREATEST(players.points_last_season, excluded.points_last_season),
-          -- players.price is a latest-price cache. Historical peaks/decrements live in market_values.
-          price = excluded.price,
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+        ON CONFLICT(season_id, player_id) DO UPDATE SET
+          team_id = COALESCE(player_seasons.team_id, excluded.team_id),
+          puntos = GREATEST(player_seasons.puntos, excluded.puntos),
+          partidos_jugados = GREATEST(player_seasons.partidos_jugados, excluded.partidos_jugados),
+          played_home = GREATEST(player_seasons.played_home, excluded.played_home),
+          played_away = GREATEST(player_seasons.played_away, excluded.played_away),
+          points_home = GREATEST(player_seasons.points_home, excluded.points_home),
+          points_away = GREATEST(player_seasons.points_away, excluded.points_away),
+          points_last_season = GREATEST(player_seasons.points_last_season, excluded.points_last_season),
           status = excluded.status,
           price_increment = excluded.price_increment,
-          -- COALESCE: never overwrite existing team_id or img with incoming data if already set
-          team_id = COALESCE(players.team_id, excluded.team_id),
-          img = COALESCE(players.img, excluded.img)
-      `;
-      const values = [
-        params.id,
-        params.name,
-        params.team_id,
-        params.position,
-        params.puntos,
-        params.partidos_jugados,
-        params.played_home,
-        params.played_away,
-        params.points_home,
-        params.points_away,
-        params.points_last_season,
-        params.status,
-        params.price_increment,
-        params.price,
-        params.img,
-      ];
-      await db.query(sql, values);
+          price = excluded.price,
+          updated_at = NOW()
+      `,
+        [
+          seasonId,
+          params.id,
+          params.team_id,
+          params.puntos,
+          params.partidos_jugados,
+          params.played_home,
+          params.played_away,
+          params.points_home,
+          params.points_away,
+          params.points_last_season,
+          params.status,
+          params.price_increment,
+          params.price,
+        ]
+      );
     },
 
     // Update bio data fetched from details API
     updatePlayerDetails: async (params: UpdatePlayerDetailsParams) => {
       const sql = `
-        UPDATE players 
+        UPDATE players
         SET birth_date = $1, height = $2, weight = $3
         WHERE id = $4
       `;
@@ -137,18 +202,18 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
     // Insert Market Value History
     insertMarketValue: async (params: InsertMarketValueParams) => {
       const sql = `
-        INSERT INTO market_values (player_id, price, date)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (player_id, date) DO NOTHING
+        INSERT INTO market_values (season_id, player_id, price, date)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (season_id, player_id, date) DO NOTHING
       `;
-      await db.query(sql, [params.player_id, params.price, params.date]);
+      await db.query(sql, [seasonId, params.player_id, params.price, params.date]);
     },
 
     // Get Last Market Value Date (for incremental sync)
     getLastDate: async (playerId: number) => {
       const res = await db.query(
-        'SELECT max(date) as last_date FROM market_values WHERE player_id = $1',
-        [playerId]
+        'SELECT max(date) as last_date FROM market_values WHERE season_id = $1 AND player_id = $2',
+        [seasonId, playerId]
       );
       return res.rows[0];
     },
@@ -165,9 +230,9 @@ export function preparePlayerMutations(db: DbClient): PlayerMutations {
     upsertTeam: async (params: UpsertTeamParams) => {
       const sql = `
         INSERT INTO teams (id, name, short_name, img, is_active) VALUES ($1, $2, $3, $4, true)
-        ON CONFLICT(id) DO UPDATE SET 
-          name=excluded.name, 
-          short_name=excluded.short_name, 
+        ON CONFLICT(id) DO UPDATE SET
+          name=excluded.name,
+          short_name=excluded.short_name,
           img=COALESCE(teams.img, excluded.img),
           is_active=excluded.is_active
       `;

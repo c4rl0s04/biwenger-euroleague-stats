@@ -17,7 +17,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function run(manager: SyncManager) {
   manager.log('\n🛡️  Step 10: Syncing Official Euroleague Team Logos...');
   const db = manager.context.db;
-  const mutations = prepareEuroleagueMutations(db as any);
+  const mutations = prepareEuroleagueMutations(db as any, { seasonId: manager.context.seasonId });
   const seasonCode = CONFIG.EUROLEAGUE.SEASON_CODE;
 
   manager.log(`   Fetching official team list for season ${seasonCode}...`);

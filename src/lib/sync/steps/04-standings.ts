@@ -15,7 +15,7 @@ export async function run(manager: SyncManager) {
     const standings = league.data.standings;
 
     // Initialize Mutations
-    const mutations = prepareUserMutations(db as any);
+    const mutations = prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
 
     for (const user of standings) {
       await mutations.upsertUser({

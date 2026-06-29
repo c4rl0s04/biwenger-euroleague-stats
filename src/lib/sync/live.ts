@@ -11,6 +11,7 @@ import { prepareEuroleagueMutations } from '../db/mutations/euroleague';
 import { prepareMatchMutations } from '../db/mutations/matches';
 import { calculateBiwengerPoints } from '../utils/fantasy-scoring';
 import { acquireAdvisoryLock } from './advisory-lock';
+import { assertSyncSeasonWritable } from './season-guard';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -22,6 +23,8 @@ const CURRENT_SEASON = CONFIG.EUROLEAGUE.SEASON_CODE;
 
 async function runLiveSync(): Promise<number> {
   console.log('📡 Starting Euroleague Live Sync...');
+  const seasonContext = await assertSyncSeasonWritable(db as any);
+  console.log(`   🗓️ Sync season resolved: ${seasonContext.seasonId} (${seasonContext.status}).`);
 
   // 1. Get Active Round and Matches
   console.log('   🔎 Checking for live games...');
@@ -42,6 +45,8 @@ async function runLiveSync(): Promise<number> {
     JOIN teams th ON m.home_id = th.id
     JOIN teams ta ON m.away_id = ta.id
     WHERE 
+      m.season_id = $1
+      AND
       m.status != 'finished' 
       AND m.date < NOW() + INTERVAL '1 hour'
       AND m.date > NOW() - INTERVAL '5 hours'
@@ -59,7 +64,7 @@ async function runLiveSync(): Promise<number> {
   // But Biwenger status might be slow. Trusted source is Euroleague.
   // Let's rely on DB 'status' not being finished, OR date being very recent.
 
-  const matches = (await db.query(activeMatchesQuery)).rows;
+  const matches = (await db.query(activeMatchesQuery, [seasonContext.seasonId])).rows;
 
   if (matches.length === 0) {
     console.log('   😴 No active games found. Exiting.');
@@ -69,8 +74,8 @@ async function runLiveSync(): Promise<number> {
   console.log(`   🔥 Found ${matches.length} potentially active matches.`);
 
   // 2. Prepare Maps
-  const mutations = prepareEuroleagueMutations(db);
-  const matchMutations = prepareMatchMutations(db);
+  const mutations = prepareEuroleagueMutations(db, { seasonId: seasonContext.seasonId });
+  const matchMutations = prepareMatchMutations(db, { seasonId: seasonContext.seasonId });
   const allPlayers = await mutations.getAllPlayers();
 
   // Name Normalization Map
@@ -119,11 +124,11 @@ async function runLiveSync(): Promise<number> {
     if (!(global as any).lineupsChecked.has(match.round_id)) {
       (global as any).lineupsChecked.add(match.round_id);
 
-      const hasLineups =
-        (await db.query('SELECT 1 FROM lineups WHERE round_id = $1 LIMIT 1', [match.round_id]))
-          .rowCount !== null &&
-        (await db.query('SELECT 1 FROM lineups WHERE round_id = $1 LIMIT 1', [match.round_id]))
-          .rowCount! > 0;
+      const lineupsResult = await db.query(
+        'SELECT 1 FROM lineups WHERE season_id = $1 AND round_id = $2 LIMIT 1',
+        [seasonContext.seasonId, match.round_id]
+      );
+      const hasLineups = (lineupsResult.rowCount ?? 0) > 0;
 
       if (!hasLineups) {
         console.log(`   ⚠️ Lineups missing for Round ${match.round_id}. Syncing...`);
@@ -135,7 +140,7 @@ async function runLiveSync(): Promise<number> {
         }, {});
 
         const mockManager = {
-          context: { db },
+          context: { db, seasonId: seasonContext.seasonId },
           log: (msg: string) => console.log(`      [Lineups] ${msg}`),
           error: (msg: string) => console.error(`      [Lineups] ❌ ${msg}`),
         };

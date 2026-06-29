@@ -15,7 +15,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function run(manager: SyncManager) {
   manager.log('\n🖼️  Step 11: Syncing Official Euroleague Player Images...');
   const db = manager.context.db;
-  const mutations = prepareEuroleagueMutations(db as any);
+  const mutations = prepareEuroleagueMutations(db as any, { seasonId: manager.context.seasonId });
 
   // Get players with Euroleague Code
   const allPlayers = await mutations.getAllPlayers();

@@ -1,10 +1,10 @@
 import { db } from '../../db';
-import { playoffPredictions, userPlayoffMedia, teams, playoffResults } from '../../db/schema';
-import { sql } from 'drizzle-orm';
+import { DEFAULT_SEASON_ID, playoffPredictions, teams, playoffResults } from '../../db/schema';
 import * as fs from 'fs';
 import * as path from 'path';
 
 async function syncPlayoffData() {
+  const seasonId = process.env.SYNC_SEASON_ID || DEFAULT_SEASON_ID;
   const dataPath = path.join(process.cwd(), 'src/lib/sync/playoffs/playoff-data.json');
   const rawData = fs.readFileSync(dataPath, 'utf-8');
   const { predictions, media, results } = JSON.parse(rawData);
@@ -43,13 +43,19 @@ async function syncPlayoffData() {
       .insert(playoffPredictions)
       .values({
         userId: pred.userId,
+        seasonId,
         stage: pred.stage,
         matchId: pred.matchId,
         predictedWinnerId: winnerId,
         predictionDetails: pred.predictionDetails,
       })
       .onConflictDoUpdate({
-        target: [playoffPredictions.userId, playoffPredictions.stage, playoffPredictions.matchId],
+        target: [
+          playoffPredictions.seasonId,
+          playoffPredictions.userId,
+          playoffPredictions.stage,
+          playoffPredictions.matchId,
+        ],
         set: {
           predictedWinnerId: winnerId,
           predictionDetails: pred.predictionDetails,
@@ -74,13 +80,14 @@ async function syncPlayoffData() {
         .insert(playoffResults)
         .values({
           matchId: res.matchId,
+          seasonId,
           stage: res.stage || res.matchId.split('-')[0].toLowerCase(),
           winnerId: winnerId,
           score: res.score,
           isCompleted: res.isCompleted ?? true,
         })
         .onConflictDoUpdate({
-          target: [playoffResults.matchId],
+          target: [playoffResults.seasonId, playoffResults.matchId],
           set: {
             winnerId: winnerId,
             score: res.score,

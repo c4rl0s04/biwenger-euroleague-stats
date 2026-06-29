@@ -11,7 +11,9 @@ export async function run(manager: SyncManager): Promise<void> {
 
   try {
     const db = manager.context.db;
-    const mutations = prepareMarketListingMutations(db as any);
+    const mutations = prepareMarketListingMutations(db as any, {
+      seasonId: manager.context.seasonId,
+    });
 
     // Biwenger market rolls over at 5:00 AM (Spanish time)
     // To handle syncs between 00:00 and 04:59, we subtract 5 hours from the current date.
