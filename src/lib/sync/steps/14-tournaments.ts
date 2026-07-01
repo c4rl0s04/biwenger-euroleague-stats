@@ -1,9 +1,13 @@
 import { fetchTournament, fetchRoundsLeague, fetchCompetition } from '../../api/biwenger-client';
-import * as tournamentMutations from '../../db/mutations/tournaments';
+import { prepareTournamentMutations } from '../../db/mutations/tournaments';
 import { CONFIG } from '../../config';
+import type { SyncManager } from '../manager';
 
-export async function run() {
+export async function run(manager?: SyncManager) {
   console.log('🏆 Starting Tournament Sync...');
+  const tournamentMutations = prepareTournamentMutations(manager?.context.db as any, {
+    seasonId: manager?.context.seasonId,
+  });
 
   // 1. Discovery: Scan FULL SEASON to find all tournaments (Active & Finished)
   console.log('   > Discovering tournaments from Full Season Schedule...');

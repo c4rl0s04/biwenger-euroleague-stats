@@ -1,10 +1,11 @@
-import { db } from '../../db';
-import { DEFAULT_SEASON_ID, playoffPredictions, teams, playoffResults } from '../../db/schema';
+import { db, pgClient } from '../../db';
+import { playoffPredictions, teams, playoffResults } from '../../db/schema';
+import { assertSyncSeasonWritable } from '../season-guard';
 import * as fs from 'fs';
 import * as path from 'path';
 
 async function syncPlayoffData() {
-  const seasonId = process.env.SYNC_SEASON_ID || DEFAULT_SEASON_ID;
+  const { seasonId } = await assertSyncSeasonWritable(pgClient as any);
   const dataPath = path.join(process.cwd(), 'src/lib/sync/playoffs/playoff-data.json');
   const rawData = fs.readFileSync(dataPath, 'utf-8');
   const { predictions, media, results } = JSON.parse(rawData);

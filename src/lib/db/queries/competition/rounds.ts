@@ -8,12 +8,15 @@ import {
   lineups,
   teams,
   players,
+  playerSeasons,
+  userSeasons,
 } from '../../schema';
 import { eq, asc, desc, sql, and, gte, lt, sum, count, max, min } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { calcEfficiency } from '@/lib/utils/efficiency';
 import { getTeamPositions, StandingsMatch } from '../../../logic/standings';
 import { NEXT_ROUND_CTE } from '../../sql_utils';
+import { resolveReadSeasonId } from '../../season-context';
 
 export interface PorrasRound {
   jornada: number;
@@ -88,6 +91,7 @@ export interface UserLineup {
  * Get all Porras rounds
  */
 export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
+  const seasonId = await resolveReadSeasonId();
   const result = await db
     .select({
       jornada: porras.roundName, // mapped from legacy naming
@@ -96,6 +100,7 @@ export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
     })
     .from(porras)
     .leftJoin(users, eq(porras.userId, users.id))
+    .where(eq(porras.seasonId, seasonId))
     .orderBy(desc(porras.roundId), desc(porras.aciertos));
 
   return result as any[];
@@ -107,6 +112,7 @@ export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
  * Handles postponed matches by looking at individual match dates.
  */
 export async function getCurrentRoundState(): Promise<RoundState> {
+  const seasonId = await resolveReadSeasonId();
   const now = new Date();
 
   // 1. Get all matches to analyze chronology
@@ -119,6 +125,7 @@ export async function getCurrentRoundState(): Promise<RoundState> {
       round_name: matches.roundName,
     })
     .from(matches)
+    .where(eq(matches.seasonId, seasonId))
     .orderBy(asc(matches.date), asc(matches.id));
 
   if (allMatches.length === 0) return { currentRound: null, nextRound: null };
@@ -204,6 +211,7 @@ export async function getCurrentRoundState(): Promise<RoundState> {
  */
 export async function getRoundDetails(roundId: string | number): Promise<Round | null> {
   if (!roundId) return null;
+  const seasonId = await resolveReadSeasonId();
 
   // 1. Basic info
   const basicInfo = await db
@@ -214,7 +222,7 @@ export async function getRoundDetails(roundId: string | number): Promise<Round |
       end_date: max(matches.date),
     })
     .from(matches)
-    .where(eq(matches.roundId, Number(roundId)))
+    .where(and(eq(matches.seasonId, seasonId), eq(matches.roundId, Number(roundId))))
     .groupBy(matches.roundId);
 
   if (basicInfo.length === 0) return null;
@@ -238,6 +246,7 @@ export async function getRoundDetails(roundId: string | number): Promise<Round |
         .where(
           and(
             eq(matches.status, 'finished'),
+            eq(matches.seasonId, seasonId),
             sql`${matches.homeScore} IS NOT NULL`,
             sql`${matches.awayScore} IS NOT NULL`
           )
@@ -276,7 +285,7 @@ export async function getRoundDetails(roundId: string | number): Promise<Round |
     .from(matches)
     .leftJoin(homeTeam, eq(matches.homeId, homeTeam.id))
     .leftJoin(awayTeam, eq(matches.awayId, awayTeam.id))
-    .where(eq(matches.roundId, Number(roundId)))
+    .where(and(eq(matches.seasonId, seasonId), eq(matches.roundId, Number(roundId))))
     .orderBy(asc(matches.date));
 
   round.matches = roundMatches.map((match: any) => ({
@@ -340,9 +349,11 @@ export async function getLastCompletedRound(): Promise<any> {
  * Get the winner of the last completed round
  */
 export async function getLastRoundWinner(): Promise<any> {
+  const seasonId = await resolveReadSeasonId();
   const lastRoundIdQuery = db
     .select({ round_id: matches.roundId })
     .from(matches)
+    .where(eq(matches.seasonId, seasonId))
     .groupBy(matches.roundId)
     .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
     .orderBy(desc(matches.roundId))
@@ -351,15 +362,23 @@ export async function getLastRoundWinner(): Promise<any> {
   const result = await db
     .select({
       user_id: userRounds.userId,
-      name: users.name,
-      icon: users.icon,
+      name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
+      icon: sql<string>`COALESCE(${userSeasons.icon}, ${users.icon})`,
       points: userRounds.points,
       round_name: userRounds.roundName,
     })
     .from(userRounds)
     .innerJoin(users, eq(userRounds.userId, users.id))
+    .innerJoin(
+      userSeasons,
+      and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+    )
     .where(
-      and(eq(userRounds.roundId, sql`(${lastRoundIdQuery})`), eq(userRounds.participated, true))
+      and(
+        eq(userRounds.seasonId, seasonId),
+        eq(userRounds.roundId, sql`(${lastRoundIdQuery})`),
+        eq(userRounds.participated, true)
+      )
     )
     .orderBy(desc(userRounds.points))
     .limit(1);
@@ -371,10 +390,12 @@ export async function getLastRoundWinner(): Promise<any> {
  * Get user's recent rounds performance
  */
 export async function getUserRecentRounds(userId: string, limit = 100) {
+  const seasonId = await resolveReadSeasonId();
   // Get all rounds (including non-participated) with position when participated
   const allRoundsSubquery = db
     .selectDistinct({ round_id: userRounds.roundId, round_name: userRounds.roundName })
     .from(userRounds)
+    .where(eq(userRounds.seasonId, seasonId))
     .orderBy(desc(userRounds.roundId))
     .limit(limit)
     .as('all_rounds_sq');
@@ -391,7 +412,7 @@ export async function getUserRecentRounds(userId: string, limit = 100) {
         ),
     })
     .from(userRounds)
-    .where(eq(userRounds.participated, true))
+    .where(and(eq(userRounds.seasonId, seasonId), eq(userRounds.participated, true)))
     .as('rp_sq');
 
   const rows = await db
@@ -422,14 +443,21 @@ export async function getUserRecentRounds(userId: string, limit = 100) {
   const countRes = await db
     .select({ total_played: count() })
     .from(userRounds)
-    .where(and(eq(userRounds.userId, userId), eq(userRounds.participated, true)));
+    .where(
+      and(
+        eq(userRounds.seasonId, seasonId),
+        eq(userRounds.userId, userId),
+        eq(userRounds.participated, true)
+      )
+    );
 
   const total_played = Number(countRes[0]?.total_played) || 0;
 
   // Count total rounds in the season (distinct round_ids)
   const totalRoundsRes = await db
     .select({ total_rounds: sql<number>`COUNT(DISTINCT ${userRounds.roundId})`.mapWith(Number) })
-    .from(userRounds);
+    .from(userRounds)
+    .where(eq(userRounds.seasonId, seasonId));
 
   const total_rounds = totalRoundsRes[0]?.total_rounds || 0;
 
@@ -440,11 +468,13 @@ export async function getUserRecentRounds(userId: string, limit = 100) {
  * Get best performers from the last completed round
  */
 export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
+  const seasonId = await resolveReadSeasonId();
   const lastRoundRes = await db
     .select({
       last_round_id: matches.roundId,
     })
     .from(matches)
+    .where(eq(matches.seasonId, seasonId))
     .groupBy(matches.roundId)
     .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
     .orderBy(desc(matches.roundId))
@@ -460,14 +490,24 @@ export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
       team: teams.name,
       position: players.position,
       points: playerRoundStats.fantasyPoints,
-      owner_name: users.name,
-      owner_color_index: users.colorIndex,
+      owner_name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
+      owner_color_index: sql<number>`COALESCE(${userSeasons.colorIndex}, ${users.colorIndex}, 0)`,
     })
     .from(playerRoundStats)
     .innerJoin(players, eq(playerRoundStats.playerId, players.id))
-    .leftJoin(teams, eq(players.teamId, teams.id))
-    .leftJoin(users, eq(players.ownerId, users.id))
-    .where(eq(playerRoundStats.roundId, lastRoundId as any))
+    .innerJoin(
+      playerSeasons,
+      and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
+    )
+    .leftJoin(teams, eq(sql`COALESCE(${playerSeasons.teamId}, ${players.teamId})`, teams.id))
+    .leftJoin(users, eq(playerSeasons.ownerId, users.id))
+    .leftJoin(
+      userSeasons,
+      and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+    )
+    .where(
+      and(eq(playerRoundStats.roundId, lastRoundId as any), eq(playerRoundStats.seasonId, seasonId))
+    )
     .orderBy(desc(playerRoundStats.fantasyPoints))
     .limit(limit);
 }
@@ -476,11 +516,13 @@ export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
  * Get all player stats for the last completed round to calculate ideal lineup
  */
 export async function getLastRoundStats(): Promise<any[]> {
+  const seasonId = await resolveReadSeasonId();
   const lastRoundRes = await db
     .select({
       last_round_id: matches.roundId,
     })
     .from(matches)
+    .where(eq(matches.seasonId, seasonId))
     .groupBy(matches.roundId)
     .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
     .orderBy(desc(matches.roundId))
@@ -495,16 +537,22 @@ export async function getLastRoundStats(): Promise<any[]> {
       name: players.name,
       team: teams.name,
       position: players.position,
-      price: players.price,
+      price: sql<number>`COALESCE(${playerSeasons.price}, ${players.price})`,
       points: playerRoundStats.fantasyPoints,
       owner_name: users.name,
-      round_name: sql<string>`(SELECT round_name FROM matches WHERE round_id = ${playerRoundStats.roundId} LIMIT 1)`,
+      round_name: sql<string>`(SELECT round_name FROM matches WHERE season_id = ${seasonId} AND round_id = ${playerRoundStats.roundId} LIMIT 1)`,
     })
     .from(playerRoundStats)
     .innerJoin(players, eq(playerRoundStats.playerId, players.id))
-    .leftJoin(teams, eq(players.teamId, teams.id))
-    .leftJoin(users, eq(players.ownerId, users.id))
-    .where(eq(playerRoundStats.roundId, lastRoundId as any))
+    .innerJoin(
+      playerSeasons,
+      and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
+    )
+    .leftJoin(teams, eq(sql`COALESCE(${playerSeasons.teamId}, ${players.teamId})`, teams.id))
+    .leftJoin(users, eq(playerSeasons.ownerId, users.id))
+    .where(
+      and(eq(playerRoundStats.roundId, lastRoundId as any), eq(playerRoundStats.seasonId, seasonId))
+    )
     .orderBy(desc(playerRoundStats.fantasyPoints));
 }
 
@@ -512,12 +560,14 @@ export async function getLastRoundStats(): Promise<any[]> {
  * Get all rounds available in the system
  */
 export async function getAllRounds(): Promise<any[]> {
+  const seasonId = await resolveReadSeasonId();
   return await db
     .select({
       round_id: matches.roundId,
       round_name: matches.roundName,
     })
     .from(matches)
+    .where(eq(matches.seasonId, seasonId))
     .groupBy(matches.roundId, matches.roundName)
     .orderBy(desc(matches.roundId));
 }
@@ -592,9 +642,10 @@ function calculateWeightedSum(players: LineupPlayer[]): number {
  * Includes dynamic calculation of missing player stats (players who left competition)
  */
 export async function getUserLineup(userId: string, roundId: string | number): Promise<UserLineup> {
+  const seasonId = await resolveReadSeasonId();
   // 1. Get detailed lineup stats
   const query = `
-    SELECT 
+    SELECT
       l.player_id,
       COALESCE(p.name, 'Unknown Player') as name,
       COALESCE(p.position, 'Bench') as position,
@@ -610,15 +661,16 @@ export async function getUserLineup(userId: string, roundId: string | number): P
       COALESCE(prs.rebounds, 0) as stats_rebounds,
       COALESCE(prs.assists, 0) as stats_assists,
       prs.minutes,
-      p.status as current_status,
+      COALESCE(ps.status, p.status) as current_status,
       p.id as player_exists
     FROM lineups l
     LEFT JOIN players p ON l.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
-    WHERE l.user_id = $1 AND l.round_id = $2
-    ORDER BY 
-      CASE 
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = l.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
+    WHERE l.season_id = $3 AND l.user_id = $1 AND l.round_id = $2
+    ORDER BY
+      CASE
         WHEN p.position = 'Base' THEN 1
         WHEN p.position = 'Alero' THEN 2
         WHEN p.position = 'Pivot' THEN 3
@@ -626,22 +678,22 @@ export async function getUserLineup(userId: string, roundId: string | number): P
       END
   `;
 
-  const rawLineup: any[] = (await pgClient.query(query, [userId, roundId])).rows;
+  const rawLineup: any[] = (await pgClient.query(query, [userId, roundId, seasonId])).rows;
 
   // 2. Get User Round totals
   const totalsQuery = `
-    SELECT 
-      ur.points, 
+    SELECT
+      ur.points,
       ur.participated,
       (
-        SELECT COUNT(*) + 1 
-        FROM user_rounds ur2 
-        WHERE ur2.round_id = $2 AND ur2.points > ur.points
+        SELECT COUNT(*) + 1
+        FROM user_rounds ur2
+        WHERE ur2.season_id = ur.season_id AND ur2.round_id = $2 AND ur2.points > ur.points
       ) as position
     FROM user_rounds ur
-    WHERE ur.user_id = $1 AND ur.round_id = $2
+    WHERE ur.season_id = $3 AND ur.user_id = $1 AND ur.round_id = $2
   `;
-  const totals = (await pgClient.query(totalsQuery, [userId, roundId])).rows[0];
+  const totals = (await pgClient.query(totalsQuery, [userId, roundId, seasonId])).rows[0];
 
   // 3. Process lineup and detect missing players (ghost players)
   const lineup: LineupPlayer[] = rawLineup.map((p) => ({
@@ -702,13 +754,14 @@ export async function getUserLineup(userId: string, roundId: string | number): P
  * Check if a round has official stats in user_rounds
  */
 export async function hasOfficialStats(roundId: string | number): Promise<boolean> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT EXISTS(
-      SELECT 1 FROM user_rounds 
-      WHERE round_id = $1 AND participated = TRUE
+      SELECT 1 FROM user_rounds
+      WHERE season_id = $2 AND round_id = $1 AND participated = TRUE
     ) as exists
   `;
-  const res = await pgClient.query(query, [roundId]);
+  const res = await pgClient.query(query, [roundId, seasonId]);
   return res.rows[0]?.exists || false;
 }
 
@@ -717,27 +770,31 @@ export async function hasOfficialStats(roundId: string | number): Promise<boolea
  * Returns both round points and cumulative (total) points up to the selected round.
  */
 export async function getOfficialStandings(roundId: string | number): Promise<any[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
-      u.id, 
-      u.name, 
-      u.icon, 
-      u.color_index,
+    SELECT
+      u.id,
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
       COALESCE(ur.points, 0) as round_points,
       COALESCE(
-        (SELECT SUM(ur2.points) 
-         FROM user_rounds ur2 
-         WHERE ur2.user_id = u.id 
+        (SELECT SUM(ur2.points)
+         FROM user_rounds ur2
+         WHERE ur2.season_id = $2
+           AND ur2.user_id = u.id
            AND ur2.round_id <= $1
-           AND ur2.participated = true), 
+           AND ur2.participated = true),
         0
       ) as total_points,
       ur.participated
     FROM users u
-    LEFT JOIN user_rounds ur ON u.id = ur.user_id AND ur.round_id = $1
-    ORDER BY round_points DESC, u.name ASC
+    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
+    LEFT JOIN user_rounds ur ON u.id = ur.user_id AND ur.season_id = $2 AND ur.round_id = $1
+    WHERE COALESCE(us.status, 'active') <> 'inactive'
+    ORDER BY round_points DESC, COALESCE(us.name, u.name) ASC
   `;
-  return (await pgClient.query(query, [roundId])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [roundId, seasonId])).rows.map((row: any) => ({
     ...row,
     points: parseInt(row.round_points) || 0,
     round_points: parseInt(row.round_points) || 0,
@@ -752,40 +809,44 @@ export async function getOfficialStandings(roundId: string | number): Promise<an
  * Returns both calculated round points and cumulative total_points from past rounds.
  */
 export async function getLivingStandings(roundId: string | number): Promise<any[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
-      u.id, 
-      u.name, 
-      u.icon, 
-      u.color_index,
+    SELECT
+      u.id,
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
       COALESCE(
         SUM(
-          COALESCE(prs.fantasy_points, 0) * 
-          CASE 
+          COALESCE(prs.fantasy_points, 0) *
+          CASE
             WHEN l.is_captain::int = 1 THEN 2.0
             WHEN l.role = 'titular' THEN 1.0
             WHEN l.role = '6th_man' THEN 0.75
             ELSE 0.5
           END
-        ), 
+        ),
       0) as round_points,
       COALESCE(
-        (SELECT SUM(ur2.points) 
-         FROM user_rounds ur2 
-         WHERE ur2.user_id = u.id 
+        (SELECT SUM(ur2.points)
+         FROM user_rounds ur2
+         WHERE ur2.season_id = $2
+           AND ur2.user_id = u.id
            AND ur2.round_id < $1
-           AND ur2.participated = true), 
+           AND ur2.participated = true),
         0
       ) as past_total,
       MAX(CASE WHEN l.player_id IS NOT NULL THEN 1 ELSE 0 END) as participated
     FROM users u
-    LEFT JOIN lineups l ON u.id = l.user_id AND l.round_id = $1
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND prs.round_id = $1
-    GROUP BY u.id
-    ORDER BY round_points DESC, u.name ASC
+    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
+    LEFT JOIN lineups l ON u.id = l.user_id AND l.season_id = $2 AND l.round_id = $1
+    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND prs.season_id = $2 AND prs.round_id = $1
+    WHERE COALESCE(us.status, 'active') <> 'inactive'
+    GROUP BY u.id, us.name, us.icon, us.color_index
+    ORDER BY round_points DESC, COALESCE(us.name, u.name) ASC
   `;
 
-  return (await pgClient.query(query, [roundId])).rows.map((row: any) => {
+  return (await pgClient.query(query, [roundId, seasonId])).rows.map((row: any) => {
     const round_points = Math.round(parseFloat(row.round_points) || 0);
     const past_total = parseInt(row.past_total) || 0;
     return {
@@ -802,54 +863,59 @@ export async function getLivingStandings(roundId: string | number): Promise<any[
  * Get detailed statistics for a specific round
  */
 export async function getRoundGlobalStats(roundId: string | number): Promise<any> {
+  const seasonId = await resolveReadSeasonId();
   // 1. Round MVP (Fantasy Points Leader)
   const mvpQuery = `
-    SELECT 
+    SELECT
       p.id, p.name, p.img, p.position, t.short_name as team_name,
       prs.fantasy_points as points, prs.valuation
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE prs.round_id = $1
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.fantasy_points DESC NULLS LAST
     LIMIT 1
   `;
 
   // 2. Top Scorer (Real Points Leader)
   const topScorerQuery = `
-    SELECT 
+    SELECT
       p.id, p.name, p.img, p.position, t.short_name as team_name,
       prs.points as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE prs.round_id = $1
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.points DESC NULLS LAST
     LIMIT 1
   `;
 
   // 3. Top Rebounder
   const topRebounderQuery = `
-    SELECT 
+    SELECT
       p.id, p.name, p.img, p.position, t.short_name as team_name,
       prs.rebounds as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE prs.round_id = $1
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.rebounds DESC NULLS LAST
     LIMIT 1
   `;
 
   // 4. Top Assister
   const topAssisterQuery = `
-    SELECT 
+    SELECT
       p.id, p.name, p.img, p.position, t.short_name as team_name,
       prs.assists as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE prs.round_id = $1
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.assists DESC NULLS LAST
     LIMIT 1
   `;
@@ -858,27 +924,28 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<any
   const avgQuery = `
     SELECT ROUND(AVG(points), 1) as avg_score
     FROM user_rounds
-    WHERE round_id = $1 AND participated = TRUE
+    WHERE season_id = $2 AND round_id = $1 AND participated = TRUE
   `;
 
   // 6. Highest Score (Round Winner)
   const winnerQuery = `
-    SELECT u.name, ur.points, u.icon
+    SELECT COALESCE(us.name, u.name) as name, ur.points, COALESCE(us.icon, u.icon) as icon
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
-    WHERE ur.round_id = $1 AND ur.participated = TRUE
+    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ur.season_id
+    WHERE ur.season_id = $2 AND ur.round_id = $1 AND ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1
   `;
 
   const [mvpRes, topScorerRes, topRebounderRes, topAssisterRes, avgRes, winnerRes] =
     await Promise.all([
-      pgClient.query(mvpQuery, [roundId]),
-      pgClient.query(topScorerQuery, [roundId]),
-      pgClient.query(topRebounderQuery, [roundId]),
-      pgClient.query(topAssisterQuery, [roundId]),
-      pgClient.query(avgQuery, [roundId]),
-      pgClient.query(winnerQuery, [roundId]),
+      pgClient.query(mvpQuery, [roundId, seasonId]),
+      pgClient.query(topScorerQuery, [roundId, seasonId]),
+      pgClient.query(topRebounderQuery, [roundId, seasonId]),
+      pgClient.query(topAssisterQuery, [roundId, seasonId]),
+      pgClient.query(avgQuery, [roundId, seasonId]),
+      pgClient.query(winnerQuery, [roundId, seasonId]),
     ]);
 
   return {
@@ -895,21 +962,23 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<any
  * Get the Ideal Lineup (Best 5 players) for a round
  */
 export async function getIdealLineup(roundId: string | number): Promise<LineupPlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   // Fetch top 50 to ensure we have enough for valid formations
   const query = `
-    SELECT 
-      p.id as player_id, p.name, p.position, p.img, p.team_id,
+    SELECT
+      p.id as player_id, p.name, p.position, p.img, COALESCE(ps.team_id, p.team_id) as team_id,
       t.short_name as team_short, t.img as team_img,
       prs.fantasy_points as points, prs.valuation
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE prs.round_id = $1
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.fantasy_points DESC
     LIMIT 50
   `;
 
-  const allStats: any[] = (await pgClient.query(query, [roundId])).rows;
+  const allStats: any[] = (await pgClient.query(query, [roundId, seasonId])).rows;
 
   // LOGIC: Valid Formation Greedy Algorithm (Same as Coach Rating)
   // - Starts: 5 players. Max 3 per position (Base, Alero, Pivot).
@@ -987,15 +1056,24 @@ export async function getIdealLineup(roundId: string | number): Promise<LineupPl
  */
 async function getHistoricSquad(userId: string, roundId: string | number): Promise<Set<number>> {
   try {
+    const seasonId = await resolveReadSeasonId();
     // 1. Get User Name (fichajes table stores names, not IDs)
-    const userRes = await pgClient.query('SELECT name FROM users WHERE id = $1', [userId]);
+    const userRes = await pgClient.query(
+      `
+      SELECT COALESCE(us.name, u.name) as name
+      FROM users u
+      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
+      WHERE u.id = $1
+    `,
+      [userId, seasonId]
+    );
     if (userRes.rows.length === 0) return new Set();
     const userName = userRes.rows[0].name;
 
     // 2. Get Round Start Date (Lock Time)
     const roundRes = await pgClient.query(
-      'SELECT MIN(date) as start_date FROM matches WHERE round_id = $1',
-      [roundId]
+      'SELECT MIN(date) as start_date FROM matches WHERE season_id = $2 AND round_id = $1',
+      [roundId, seasonId]
     );
     if (!roundRes.rows[0]?.start_date) return new Set();
 
@@ -1009,20 +1087,24 @@ async function getHistoricSquad(userId: string, roundId: string | number): Promi
     const adjustedRoundTs = roundTs + 3600;
 
     // 3. Get Current Squad
-    const squadRes = await pgClient.query('SELECT id FROM players WHERE owner_id = $1', [userId]);
-    const squad = new Set<number>(squadRes.rows.map((r: any) => r.id));
+    const squadRes = await pgClient.query(
+      'SELECT player_id FROM player_seasons WHERE season_id = $2 AND owner_id = $1',
+      [userId, seasonId]
+    );
+    const squad = new Set<number>(squadRes.rows.map((r: any) => r.player_id));
 
     // 4. Fetch Transfers that happened AFTER the round start
     // We need to reverse these actions to get back to the state at round_start.
     const transfersRes = await pgClient.query(
       `
       SELECT player_id, vendedor, comprador, timestamp
-      FROM fichajes 
-      WHERE (vendedor = $1 OR comprador = $1)
+      FROM fichajes
+      WHERE season_id = $3
+        AND (vendedor = $1 OR comprador = $1)
         AND timestamp >= $2
       ORDER BY timestamp DESC
       `,
-      [userName, adjustedRoundTs]
+      [userName, adjustedRoundTs, seasonId]
     );
 
     // 5. Replay history BACKWARDS
@@ -1050,15 +1132,16 @@ async function getHistoricSquad(userId: string, roundId: string | number): Promi
  * Get the players left out of the lineup who performed well
  */
 export async function getPlayersLeftOut(userId: string, roundId: string | number) {
+  const seasonId = await resolveReadSeasonId();
   // 1. Get Historic Squad at round start
   const historicSquad = await getHistoricSquad(userId, roundId);
   if (historicSquad.size === 0) return [];
 
   // 2. Get User's Actual Lineup
   const lineupQuery = `
-    SELECT player_id FROM lineups WHERE user_id = $1 AND round_id = $2
+    SELECT player_id FROM lineups WHERE season_id = $3 AND user_id = $1 AND round_id = $2
   `;
-  const lineupRes = await pgClient.query(lineupQuery, [userId, roundId]);
+  const lineupRes = await pgClient.query(lineupQuery, [userId, roundId, seasonId]);
   const lineupIds = new Set(lineupRes.rows.map((r: any) => r.player_id));
 
   // 3. Find players in Squad but NOT in Lineup
@@ -1068,7 +1151,7 @@ export async function getPlayersLeftOut(userId: string, roundId: string | number
 
   // 4. Get stats for left out players
   const statsQuery = `
-    SELECT 
+    SELECT
       prs.player_id,
       p.name,
       p.position,
@@ -1078,25 +1161,27 @@ export async function getPlayersLeftOut(userId: string, roundId: string | number
       prs.fantasy_points as points
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE prs.round_id = $1 AND prs.player_id = ANY($2)
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE prs.season_id = $3 AND prs.round_id = $1 AND prs.player_id = ANY($2)
     ORDER BY prs.fantasy_points DESC
   `;
 
-  return (await pgClient.query(statsQuery, [roundId, leftOutIds])).rows;
+  return (await pgClient.query(statsQuery, [roundId, leftOutIds, seasonId])).rows;
 }
 
 /**
  * Get the optimal lineup a user COULD have fielded
  */
 export async function getUserOptimization(userId: string, roundId: string | number) {
+  const seasonId = await resolveReadSeasonId();
   // 1. Get Historic Squad
   const historicSquad = await getHistoricSquad(userId, roundId);
   if (historicSquad.size === 0) return null;
 
   // 2. Get Stats for ALL squad players
   const statsQuery = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name,
       p.position,
@@ -1106,13 +1191,16 @@ export async function getUserOptimization(userId: string, roundId: string | numb
       COALESCE(prs.fantasy_points, 0) as points,
       COALESCE(prs.valuation, 0) as valuation
     FROM players p
-    LEFT JOIN player_round_stats prs ON prs.player_id = p.id AND prs.round_id = $1
-    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $3
+    LEFT JOIN player_round_stats prs ON prs.player_id = p.id AND prs.season_id = $3 AND prs.round_id = $1
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
     WHERE p.id = ANY($2)
     ORDER BY COALESCE(prs.fantasy_points, 0) DESC
   `;
 
-  const squadStats = (await pgClient.query(statsQuery, [roundId, Array.from(historicSquad)])).rows;
+  const squadStats = (
+    await pgClient.query(statsQuery, [roundId, Array.from(historicSquad), seasonId])
+  ).rows;
 
   // 3. Inject ghost players (players in lineups but deleted from the players table).
   //    getHistoricSquad cannot find them because it queries players.owner_id, and ghost
@@ -1213,28 +1301,31 @@ export async function getUserOptimization(userId: string, roundId: string | numb
  * Get full user history for all rounds (DAO)
  */
 export async function getUserRoundsHistoryDAO(userId: string) {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       ur.round_id,
       ur.points as actual_points,
       ur.participated,
       m.round_name
     FROM user_rounds ur
     JOIN (
-      SELECT round_id, MAX(round_name) as round_name 
-      FROM matches 
+      SELECT round_id, MAX(round_name) as round_name
+      FROM matches
+      WHERE season_id = $2
       GROUP BY round_id
     ) m ON ur.round_id = m.round_id
-    WHERE ur.user_id = $1
+    WHERE ur.season_id = $2 AND ur.user_id = $1
     ORDER BY ur.round_id ASC
   `;
-  return (await pgClient.query(query, [userId])).rows;
+  return (await pgClient.query(query, [userId, seasonId])).rows;
 }
 
 /**
  * Get usage stats for different lineup formations
  */
 export async function getLineupUsageStats() {
+  const seasonId = await resolveReadSeasonId();
   const globalQuery = `
     WITH PerRoundFormation AS (
       SELECT
@@ -1247,7 +1338,7 @@ export async function getLineupUsageStats() {
         SUM(CASE WHEN p.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END)::int as known_pos_count
       FROM lineups l
       LEFT JOIN players p ON l.player_id = p.id
-      WHERE l.role = 'titular'
+      WHERE l.season_id = $1 AND l.role = 'titular'
       GROUP BY l.round_id, l.user_id
       HAVING COUNT(*) = 5
          AND SUM(CASE WHEN p.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END) = 5
@@ -1300,8 +1391,8 @@ export async function getLineupUsageStats() {
   `;
 
   const [globalRes, userRes] = await Promise.all([
-    pgClient.query(finalGlobalQuery),
-    pgClient.query(userQuery),
+    pgClient.query(finalGlobalQuery, [seasonId]),
+    pgClient.query(userQuery, [seasonId]),
   ]);
 
   return {

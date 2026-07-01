@@ -29,7 +29,7 @@ describe('syncBoard', () => {
 
     db = {
       query: vi.fn(async (sql) => {
-        if (sql.includes('SELECT name FROM users')) {
+        if (sql.includes('FROM user_seasons us')) {
           return {
             rows: [{ name: 'June' }, { name: 'All Stars' }],
             rowCount: 2,

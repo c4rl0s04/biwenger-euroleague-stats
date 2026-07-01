@@ -1,4 +1,5 @@
 import { pgClient } from '../../index';
+import { resolveReadSeasonId } from '../../season-context';
 
 /**
  * Represents the recent form data for a single player.
@@ -27,6 +28,7 @@ export interface PlayerFormEntry {
  * @returns Map keyed by player_id
  */
 export async function getPlayerFormMap(limit: number = 5): Promise<Map<number, PlayerFormEntry>> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RecentMatchInfo AS (
       SELECT
@@ -36,7 +38,7 @@ export async function getPlayerFormMap(limit: number = 5): Promise<Map<number, P
         ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date DESC) AS team_rn
       FROM teams t
       JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
-      WHERE m.status = 'finished'
+      WHERE m.season_id = $2 AND m.status = 'finished'
     )
     SELECT
       p.id AS player_id,
@@ -46,13 +48,14 @@ export async function getPlayerFormMap(limit: number = 5): Promise<Map<number, P
       ) AS recent_scores,
       AVG(prs.fantasy_points) AS avg_recent_points
     FROM players p
-    JOIN RecentMatchInfo rmi ON p.team_id = rmi.team_id
-    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND rmi.round_id = prs.round_id
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
+    JOIN RecentMatchInfo rmi ON COALESCE(ps.team_id, p.team_id) = rmi.team_id
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND rmi.round_id = prs.round_id AND prs.season_id = $2
     WHERE rmi.team_rn <= $1
     GROUP BY p.id
   `;
 
-  const rows = (await pgClient.query(query, [limit])).rows;
+  const rows = (await pgClient.query(query, [limit, seasonId])).rows;
 
   const map = new Map<number, PlayerFormEntry>();
   for (const row of rows) {

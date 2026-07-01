@@ -9,6 +9,7 @@ import { SyncManager } from '../manager';
 export async function run(manager: SyncManager) {
   manager.log('\n📅 Step 3: Syncing Match Schedule...');
   const competition = manager.context.competition;
+  const seasonId = manager.context.seasonId;
 
   const rounds =
     (competition as any)?.data?.rounds ||
@@ -61,8 +62,8 @@ export async function run(manager: SyncManager) {
                     BOOL_AND(status = 'finished') as all_finished,
                     COUNT(*) as match_count
                  FROM matches 
-                 WHERE round_id = $1`,
-          [roundId]
+                 WHERE season_id = $2 AND round_id = $1`,
+          [roundId, seasonId]
         );
 
         const row = res.rows[0];

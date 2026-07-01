@@ -3,12 +3,15 @@ import {
   hoopgridChallenges,
   hoopgridGuesses,
   players,
+  playerSeasons,
   playerRoundStats,
   initialSquads,
   fichajes,
   users,
+  userSeasons,
 } from '@/lib/db/schema';
 import { eq, and, avg, count, sql, sum, max } from 'drizzle-orm';
+import { resolveReadSeasonId } from '@/lib/db/season-context';
 import {
   HOOPGRID_TEAMS,
   HOOPGRID_POSITIONS,
@@ -49,7 +52,45 @@ export interface Criteria {
 }
 
 export class HoopgridService {
+  private static mergeSeasonPlayer(row: { player: any; season: any }) {
+    return {
+      ...row.player,
+      ownerId: row.season.ownerId,
+      teamId: row.season.teamId ?? row.player.teamId,
+      price: row.season.price ?? row.player.price,
+      priceIncrement: row.season.priceIncrement ?? row.player.priceIncrement,
+      puntos: row.season.puntos ?? row.player.puntos,
+      status: row.season.status ?? row.player.status,
+    };
+  }
+
+  private static async getSeasonPlayer(playerId: number, seasonId: string) {
+    const [row] = await db
+      .select({ player: players, season: playerSeasons })
+      .from(players)
+      .innerJoin(
+        playerSeasons,
+        and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
+      )
+      .where(eq(players.id, playerId));
+
+    return row ? this.mergeSeasonPlayer(row) : null;
+  }
+
+  private static async getSeasonPlayers(seasonId: string) {
+    const rows = await db
+      .select({ player: players, season: playerSeasons })
+      .from(players)
+      .innerJoin(
+        playerSeasons,
+        and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
+      );
+
+    return rows.map((row) => this.mergeSeasonPlayer(row));
+  }
+
   static async checkCriteria(playerId: number, criteria: Criteria): Promise<boolean> {
+    const seasonId = await resolveReadSeasonId();
     if (criteria.type === 'stat_avg') {
       const field = criteria.value.field as keyof typeof playerRoundStats;
       const column = playerRoundStats[field];
@@ -60,7 +101,9 @@ export class HoopgridService {
           average: avg(column as any),
         })
         .from(playerRoundStats)
-        .where(eq(playerRoundStats.playerId, playerId));
+        .where(
+          and(eq(playerRoundStats.playerId, playerId), eq(playerRoundStats.seasonId, seasonId))
+        );
 
       const averageValue = Number(stats[0]?.average || 0);
       return averageValue >= criteria.value.threshold;
@@ -77,7 +120,9 @@ export class HoopgridService {
           maximum: max(column as any),
         })
         .from(playerRoundStats)
-        .where(eq(playerRoundStats.playerId, playerId));
+        .where(
+          and(eq(playerRoundStats.playerId, playerId), eq(playerRoundStats.seasonId, seasonId))
+        );
 
       const maxValue = Number(stats[0]?.maximum || 0);
       return maxValue >= criteria.value.threshold;
@@ -94,7 +139,9 @@ export class HoopgridService {
           total: sum(column as any),
         })
         .from(playerRoundStats)
-        .where(eq(playerRoundStats.playerId, playerId));
+        .where(
+          and(eq(playerRoundStats.playerId, playerId), eq(playerRoundStats.seasonId, seasonId))
+        );
 
       const totalValue = Number(stats[0]?.total || 0);
       return totalValue >= criteria.value.threshold;
@@ -104,7 +151,9 @@ export class HoopgridService {
       const allStats = await db
         .select()
         .from(playerRoundStats)
-        .where(eq(playerRoundStats.playerId, playerId));
+        .where(
+          and(eq(playerRoundStats.playerId, playerId), eq(playerRoundStats.seasonId, seasonId))
+        );
 
       return allStats.some((s) => {
         const counts = [
@@ -139,7 +188,9 @@ export class HoopgridService {
           att: sum(attColumn as any),
         })
         .from(playerRoundStats)
-        .where(eq(playerRoundStats.playerId, playerId));
+        .where(
+          and(eq(playerRoundStats.playerId, playerId), eq(playerRoundStats.seasonId, seasonId))
+        );
 
       const made = Number(stats[0]?.made || 0);
       const att = Number(stats[0]?.att || 0);
@@ -147,9 +198,7 @@ export class HoopgridService {
       return made / att >= criteria.value.threshold;
     }
 
-    const player = await db.query.players.findFirst({
-      where: eq(players.id, playerId),
-    });
+    const player = await this.getSeasonPlayer(playerId, seasonId);
 
     if (!player) return false;
 
@@ -163,11 +212,24 @@ export class HoopgridService {
         const [initial] = await db
           .select()
           .from(initialSquads)
-          .where(and(eq(initialSquads.playerId, playerId), eq(initialSquads.userId, userId)));
+          .where(
+            and(
+              eq(initialSquads.seasonId, seasonId),
+              eq(initialSquads.playerId, playerId),
+              eq(initialSquads.userId, userId)
+            )
+          );
         if (initial) return true;
 
         // Check transfers (might use Name)
-        const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+        const [user] = await db
+          .select({ name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})` })
+          .from(users)
+          .innerJoin(
+            userSeasons,
+            and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+          )
+          .where(eq(users.id, userId));
         const name = user?.name;
 
         const [transfer] = await db
@@ -176,6 +238,7 @@ export class HoopgridService {
           .where(
             and(
               eq(fichajes.playerId, playerId),
+              eq(fichajes.seasonId, seasonId),
               sql`${fichajes.comprador} IN (${userId}, ${name || ''})`
             )
           );
@@ -193,8 +256,11 @@ export class HoopgridService {
         const [initial] = await db
           .select()
           .from(initialSquads)
-          .where(eq(initialSquads.playerId, playerId));
-        const [transfer] = await db.select().from(fichajes).where(eq(fichajes.playerId, playerId));
+          .where(and(eq(initialSquads.seasonId, seasonId), eq(initialSquads.playerId, playerId)));
+        const [transfer] = await db
+          .select()
+          .from(fichajes)
+          .where(and(eq(fichajes.seasonId, seasonId), eq(fichajes.playerId, playerId)));
         const wasEverOwned = !!(initial || transfer);
 
         if (criteria.value === 'ever') return wasEverOwned;
@@ -205,8 +271,11 @@ export class HoopgridService {
         const [initial] = await db
           .select()
           .from(initialSquads)
-          .where(eq(initialSquads.playerId, playerId));
-        const [transfer] = await db.select().from(fichajes).where(eq(fichajes.playerId, playerId));
+          .where(and(eq(initialSquads.seasonId, seasonId), eq(initialSquads.playerId, playerId)));
+        const [transfer] = await db
+          .select()
+          .from(fichajes)
+          .where(and(eq(fichajes.seasonId, seasonId), eq(fichajes.playerId, playerId)));
         return !initial && !transfer;
       }
     }
@@ -355,13 +424,34 @@ export class HoopgridService {
     playerId: number,
     dryRun: boolean = false
   ) {
+    const seasonId = await resolveReadSeasonId();
     const [challenge, player, stats, initials, transfers, allUsers] = await Promise.all([
       db.query.hoopgridChallenges.findFirst({ where: eq(hoopgridChallenges.id, challengeId) }),
-      db.query.players.findFirst({ where: eq(players.id, playerId) }),
-      db.select().from(playerRoundStats).where(eq(playerRoundStats.playerId, playerId)),
-      db.select().from(initialSquads).where(eq(initialSquads.playerId, playerId)),
-      db.select().from(fichajes).where(eq(fichajes.playerId, playerId)),
-      db.select().from(users),
+      this.getSeasonPlayer(playerId, seasonId),
+      db
+        .select()
+        .from(playerRoundStats)
+        .where(
+          and(eq(playerRoundStats.seasonId, seasonId), eq(playerRoundStats.playerId, playerId))
+        ),
+      db
+        .select()
+        .from(initialSquads)
+        .where(and(eq(initialSquads.seasonId, seasonId), eq(initialSquads.playerId, playerId))),
+      db
+        .select()
+        .from(fichajes)
+        .where(and(eq(fichajes.seasonId, seasonId), eq(fichajes.playerId, playerId))),
+      db
+        .select({
+          id: users.id,
+          name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
+        })
+        .from(users)
+        .innerJoin(
+          userSeasons,
+          and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+        ),
     ]);
 
     const userMap = new Map(allUsers.map((u) => [u.id, u.name]));
@@ -528,14 +618,30 @@ export class HoopgridService {
 
     let rows, cols, possibleCounts;
     let attempts = 0;
+    const seasonId = await resolveReadSeasonId();
 
     // 1. Fetch all data once to process in memory
-    const allPlayers = await db.select().from(players);
-    const allStats = await db.select().from(playerRoundStats);
-    const allInitial = await db.select().from(initialSquads);
-    const allFichajes = await db.select().from(fichajes);
+    const allPlayers = await this.getSeasonPlayers(seasonId);
+    const allStats = await db
+      .select()
+      .from(playerRoundStats)
+      .where(eq(playerRoundStats.seasonId, seasonId));
+    const allInitial = await db
+      .select()
+      .from(initialSquads)
+      .where(eq(initialSquads.seasonId, seasonId));
+    const allFichajes = await db.select().from(fichajes).where(eq(fichajes.seasonId, seasonId));
 
-    const allUsersList = await db.select().from(users);
+    const allUsersList = await db
+      .select({
+        id: users.id,
+        name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
+      })
+      .from(users)
+      .innerJoin(
+        userSeasons,
+        and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+      );
     const idToName = new Map(allUsersList.map((u) => [u.id, u.name]));
 
     const userOwnershipHistory = new Map();

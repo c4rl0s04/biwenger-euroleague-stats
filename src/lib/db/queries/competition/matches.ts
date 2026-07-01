@@ -3,8 +3,10 @@ import { matches, teams } from '../../schema';
 import { eq, asc, desc, gt, and, sql, or } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
+import { resolveReadSeasonId } from '../../season-context';
 
 export async function getMatchesGroupedByRound() {
+  const seasonId = await resolveReadSeasonId();
   const homeTeam = alias(teams, 'homeTeam');
   const awayTeam = alias(teams, 'awayTeam');
 
@@ -39,6 +41,7 @@ export async function getMatchesGroupedByRound() {
     .from(matches)
     .innerJoin(homeTeam, eq(matches.homeId, homeTeam.id))
     .innerJoin(awayTeam, eq(matches.awayId, awayTeam.id))
+    .where(eq(matches.seasonId, seasonId))
     .orderBy(matches.roundId, matches.date, matches.id);
 
   // Group by round
@@ -107,6 +110,7 @@ export async function getMatchesGroupedByRound() {
 }
 
 export async function getUpcomingMatches(limit = 5) {
+  const seasonId = await resolveReadSeasonId();
   const homeTeam = alias(teams, 'homeTeam');
   const awayTeam = alias(teams, 'awayTeam');
 
@@ -120,7 +124,7 @@ export async function getUpcomingMatches(limit = 5) {
     .from(matches)
     .innerJoin(homeTeam, eq(matches.homeId, homeTeam.id))
     .innerJoin(awayTeam, eq(matches.awayId, awayTeam.id))
-    .where(sql`${matches.date} > NOW()`)
+    .where(and(eq(matches.seasonId, seasonId), sql`${matches.date} > NOW()`))
     .orderBy(matches.date)
     .limit(limit);
 
@@ -128,6 +132,7 @@ export async function getUpcomingMatches(limit = 5) {
 }
 
 export async function getRecentResults(limit = 5) {
+  const seasonId = await resolveReadSeasonId();
   const homeTeam = alias(teams, 'homeTeam');
   const awayTeam = alias(teams, 'awayTeam');
 
@@ -143,7 +148,7 @@ export async function getRecentResults(limit = 5) {
     .from(matches)
     .innerJoin(homeTeam, eq(matches.homeId, homeTeam.id))
     .innerJoin(awayTeam, eq(matches.awayId, awayTeam.id))
-    .where(eq(matches.status, 'finished'))
+    .where(and(eq(matches.seasonId, seasonId), eq(matches.status, 'finished')))
     .orderBy(desc(matches.date))
     .limit(limit);
 
@@ -168,6 +173,7 @@ export interface TeamUpcomingMatch {
  * Get a performance map of all teams (wins/losses home and away)
  */
 export async function getTeamPerformanceMap(): Promise<Record<number, any>> {
+  const seasonId = await resolveReadSeasonId();
   const allFinishedMatches = await db
     .select({
       homeId: matches.homeId,
@@ -176,7 +182,7 @@ export async function getTeamPerformanceMap(): Promise<Record<number, any>> {
       awayScore: matches.awayScore,
     })
     .from(matches)
-    .where(eq(matches.status, 'finished'));
+    .where(and(eq(matches.seasonId, seasonId), eq(matches.status, 'finished')));
 
   const teamStats: Record<number, any> = {};
 
@@ -235,6 +241,7 @@ export async function getTeamUpcomingMatches(
   teamId: number,
   limit = 3
 ): Promise<TeamUpcomingMatch[]> {
+  const seasonId = await resolveReadSeasonId();
   const th = alias(teams, 'th');
   const ta = alias(teams, 'ta');
 
@@ -255,7 +262,11 @@ export async function getTeamUpcomingMatches(
     .leftJoin(th, eq(matches.homeId, th.id))
     .leftJoin(ta, eq(matches.awayId, ta.id))
     .where(
-      and(or(eq(matches.homeId, teamId), eq(matches.awayId, teamId)), sql`${matches.date} > NOW()`)
+      and(
+        or(eq(matches.homeId, teamId), eq(matches.awayId, teamId)),
+        eq(matches.seasonId, seasonId),
+        sql`${matches.date} > NOW()`
+      )
     )
     .orderBy(asc(matches.date))
     .limit(limit);
@@ -307,6 +318,7 @@ export async function getTeamRecentMatches(
   teamId: number,
   limit = 5
 ): Promise<TeamUpcomingMatch[]> {
+  const seasonId = await resolveReadSeasonId();
   const th = alias(teams, 'th');
   const ta = alias(teams, 'ta');
 
@@ -329,6 +341,7 @@ export async function getTeamRecentMatches(
     .where(
       and(
         or(eq(matches.homeId, teamId), eq(matches.awayId, teamId)),
+        eq(matches.seasonId, seasonId),
         eq(matches.status, 'finished')
       )
     )

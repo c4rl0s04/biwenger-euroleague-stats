@@ -1,4 +1,5 @@
 import { db, pgClient } from '../index';
+import { resolveReadSeasonId } from '../season-context';
 
 // ==========================================
 // INTERFACES
@@ -63,26 +64,7 @@ export interface TournamentFixture {
 // ==========================================
 
 export async function getTournaments(): Promise<Tournament[]> {
-  const { rows } = await pgClient.query(`
-    SELECT 
-      t.id, 
-      t.name, 
-      t.type, 
-      t.status, 
-      t.data_json
-    FROM tournaments t
-    ORDER BY 
-      CASE WHEN t.status = 'active' THEN 1 ELSE 2 END,
-      t.updated_at DESC
-  `);
-
-  return rows.map((t: any) => ({
-    ...t,
-    data: t.data_json ? JSON.parse(t.data_json) : null,
-  }));
-}
-
-export async function getTournamentById(id: number): Promise<Tournament | null> {
+  const seasonId = await resolveReadSeasonId();
   const { rows } = await pgClient.query(
     `
     SELECT 
@@ -92,9 +74,34 @@ export async function getTournamentById(id: number): Promise<Tournament | null> 
       t.status, 
       t.data_json
     FROM tournaments t
-    WHERE t.id = $1
+    WHERE t.season_id = $1
+    ORDER BY 
+      CASE WHEN t.status = 'active' THEN 1 ELSE 2 END,
+      t.updated_at DESC
   `,
-    [id]
+    [seasonId]
+  );
+
+  return rows.map((t: any) => ({
+    ...t,
+    data: t.data_json ? JSON.parse(t.data_json) : null,
+  }));
+}
+
+export async function getTournamentById(id: number): Promise<Tournament | null> {
+  const seasonId = await resolveReadSeasonId();
+  const { rows } = await pgClient.query(
+    `
+    SELECT 
+      t.id, 
+      t.name, 
+      t.type, 
+      t.status, 
+      t.data_json
+    FROM tournaments t
+    WHERE t.season_id = $2 AND t.id = $1
+  `,
+    [id, seasonId]
   );
 
   if (rows.length === 0) return null;
@@ -110,19 +117,22 @@ export async function getTournamentById(id: number): Promise<Tournament | null> 
 export async function getTournamentStandings(
   tournamentId: number | null
 ): Promise<TournamentStanding[]> {
+  const seasonId = await resolveReadSeasonId();
   const { rows } = await pgClient.query(
     `
         SELECT 
             ts.*,
-            u.name as user_name,
-            u.icon as user_icon,
-            u.color_index as user_color
+            COALESCE(us.name, u.name) as user_name,
+            COALESCE(us.icon, u.icon) as user_icon,
+            COALESCE(us.color_index, u.color_index, 0) as user_color
         FROM tournament_standings ts
+        JOIN tournaments t ON t.id = ts.tournament_id AND t.season_id = ts.season_id
         LEFT JOIN users u ON ts.user_id = u.id
-        WHERE ($1::int IS NULL OR ts.tournament_id = $1)
+        LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ts.season_id
+        WHERE ts.season_id = $2 AND ($1::int IS NULL OR ts.tournament_id = $1)
         ORDER BY ts.position ASC
     `,
-    [tournamentId]
+    [tournamentId, seasonId]
   );
 
   return rows.map((row: any) => ({
@@ -143,26 +153,41 @@ export async function getTournamentStandings(
 export async function getTournamentFixtures(
   tournamentId: number | null
 ): Promise<TournamentFixture[]> {
+  const seasonId = await resolveReadSeasonId();
   const { rows } = await pgClient.query(
     `
-    SELECT 
-      tf.*,
+    SELECT
+      tf.id,
+      tf.tournament_id,
+      tf.phase_id,
+      tf.round_name,
+      tf.round_id,
+      tf.group_name,
+      tf.home_user_id,
+      tf.away_user_id,
+      tf.home_score,
+      tf.away_score,
+      tf.date,
+      tf.status,
       tp.name as phase_name,
       tp.type as phase_type,
-      uh.name as home_user_name,
-      uh.icon as home_user_icon,
-      uh.color_index as home_user_color,
-      ua.name as away_user_name,
-      ua.icon as away_user_icon,
-      ua.color_index as away_user_color
+      COALESCE(ush.name, uh.name) as home_user_name,
+      COALESCE(ush.icon, uh.icon) as home_user_icon,
+      COALESCE(ush.color_index, uh.color_index, 0) as home_user_color,
+      COALESCE(usa.name, ua.name) as away_user_name,
+      COALESCE(usa.icon, ua.icon) as away_user_icon,
+      COALESCE(usa.color_index, ua.color_index, 0) as away_user_color
     FROM tournament_fixtures tf
-    LEFT JOIN tournament_phases tp ON tf.phase_id = tp.id
+    JOIN tournaments t ON t.id = tf.tournament_id AND t.season_id = tf.season_id
+    LEFT JOIN tournament_phases tp ON tf.phase_id = tp.id AND tp.season_id = tf.season_id
     LEFT JOIN users uh ON tf.home_user_id = uh.id
     LEFT JOIN users ua ON tf.away_user_id = ua.id
-    WHERE ($1::int IS NULL OR tf.tournament_id = $1)
+    LEFT JOIN user_seasons ush ON ush.user_id = uh.id AND ush.season_id = tf.season_id
+    LEFT JOIN user_seasons usa ON usa.user_id = ua.id AND usa.season_id = tf.season_id
+    WHERE tf.season_id = $2 AND ($1::int IS NULL OR tf.tournament_id = $1)
     ORDER BY tf.date ASC
     `,
-    [tournamentId]
+    [tournamentId, seasonId]
   );
 
   return rows.map((row: any) => ({
@@ -182,6 +207,7 @@ export async function getTournamentFixtures(
 }
 
 export async function getUserTournaments(userId: string | number) {
+  const seasonId = await resolveReadSeasonId();
   const { rows } = await pgClient.query(
     `
     WITH user_leagues AS (
@@ -199,8 +225,8 @@ export async function getUserTournaments(userId: string | number) {
         ts.phase_name,
         ts.group_name
       FROM tournament_standings ts
-      JOIN tournaments t ON ts.tournament_id = t.id
-      WHERE ts.user_id = $1::text
+      JOIN tournaments t ON ts.tournament_id = t.id AND t.season_id = ts.season_id
+      WHERE ts.season_id = $2 AND ts.user_id = $1::text
     ),
     user_playoffs AS (
       SELECT 
@@ -217,7 +243,8 @@ export async function getUserTournaments(userId: string | number) {
         NULL::text as phase_name,
         NULL::text as group_name
       FROM tournaments t
-      WHERE t.type = 'playoff'
+      WHERE t.season_id = $2
+        AND t.type = 'playoff'
         AND t.data_json::text LIKE '%' || $1::text || '%'
     )
     SELECT * FROM user_leagues
@@ -225,7 +252,7 @@ export async function getUserTournaments(userId: string | number) {
     SELECT * FROM user_playoffs
     ORDER BY tournament_id DESC
     `,
-    [String(userId)]
+    [String(userId), seasonId]
   );
 
   return rows.map((row: any) => ({

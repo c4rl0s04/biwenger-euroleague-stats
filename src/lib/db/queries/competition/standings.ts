@@ -1,10 +1,12 @@
 import { db } from '../../index';
-import { users, userRounds, players, matches } from '../../schema';
+import { matches, playerSeasons, userRounds, users, userSeasons } from '../../schema';
+import { resolveReadSeasonId } from '../../season-context';
 import { sql } from 'drizzle-orm';
 
 export async function getExtendedStandings(
   options: { sortBy?: string; direction?: 'asc' | 'desc' } = {}
 ) {
+  const seasonId = await resolveReadSeasonId();
   const { sortBy = 'total_points', direction = 'desc' } = options;
 
   const sortDir = direction === 'asc' ? sql`ASC` : sql`DESC`;
@@ -20,7 +22,7 @@ export async function getExtendedStandings(
     rounds_played: sql`rounds_played`,
     best_round: sql`best_round`,
     worst_round: sql`worst_round`,
-    name: sql`u.name`,
+    name: sql`name`,
   };
 
   const orderBy = sortMap[sortBy] || sortMap.total_points;
@@ -35,7 +37,8 @@ export async function getExtendedStandings(
         MAX(points) as best_round,
         MIN(points) as worst_round
       FROM ${userRounds}
-      WHERE ${userRounds.participated} = TRUE
+      WHERE ${userRounds.seasonId} = ${seasonId}
+        AND ${userRounds.participated} = TRUE
       GROUP BY user_id
     ),
     RoundWins AS (
@@ -48,16 +51,17 @@ export async function getExtendedStandings(
           points,
           RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
         FROM ${userRounds}
-        WHERE ${userRounds.participated} = TRUE
+        WHERE ${userRounds.seasonId} = ${seasonId}
+          AND ${userRounds.participated} = TRUE
       ) sub
       WHERE position = 1
       GROUP BY user_id
     )
     SELECT 
       u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
       COALESCE(ut.total_points, 0)::int as total_points,
       COALESCE(ut.rounds_played, 0)::int as rounds_played,
       COALESCE(ut.avg_points, 0)::float as avg_points,
@@ -67,7 +71,8 @@ export async function getExtendedStandings(
       COALESCE(sq.team_value, 0)::int as team_value,
       COALESCE(sq.price_trend, 0)::int as price_trend,
       RANK() OVER (ORDER BY COALESCE(ut.total_points, 0) DESC)::int as position
-    FROM ${users} u
+    FROM ${userSeasons} us
+    JOIN ${users} u ON u.id = us.user_id
     LEFT JOIN UserTotals ut ON u.id = ut.user_id
     LEFT JOIN RoundWins rw ON u.id = rw.user_id
     LEFT JOIN (
@@ -75,10 +80,12 @@ export async function getExtendedStandings(
         owner_id, 
         SUM(price) as team_value,
         SUM(price_increment) as price_trend
-      FROM ${players}
-      WHERE owner_id IS NOT NULL
+      FROM ${playerSeasons}
+      WHERE season_id = ${seasonId} AND owner_id IS NOT NULL
       GROUP BY owner_id
     ) sq ON u.id = sq.owner_id
+    WHERE us.season_id = ${seasonId}
+      AND COALESCE(us.status, 'active') = 'active'
     ORDER BY ${orderBy} ${sortDir} NULLS LAST
   `);
 
@@ -86,20 +93,24 @@ export async function getExtendedStandings(
 }
 
 export async function getRoundWinners(limit = 15) {
+  const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     WITH RoundResults AS (
       SELECT 
         ur.round_id,
         ur.round_name,
         ur.user_id,
-        u.name,
-        u.icon,
-        u.color_index,
+        COALESCE(us.name, u.name) as name,
+        COALESCE(us.icon, u.icon) as icon,
+        COALESCE(us.color_index, u.color_index, 0) as color_index,
         ur.points,
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM ${userRounds} ur
       JOIN ${users} u ON ur.user_id = u.id
-      WHERE ur.participated = TRUE
+      JOIN ${userSeasons} us ON us.user_id = u.id AND us.season_id = ur.season_id
+      WHERE ur.season_id = ${seasonId}
+        AND ur.participated = TRUE
+        AND COALESCE(us.status, 'active') = 'active'
     )
     SELECT 
       round_id,
@@ -119,20 +130,28 @@ export async function getRoundWinners(limit = 15) {
 }
 
 export async function getLeagueTotals() {
+  const seasonId = await resolveReadSeasonId();
   // Query for general stats filtered by COMPLETED rounds
   const statistics = await db.execute(sql`
     WITH CompletedRounds AS (
       SELECT round_id
       FROM ${matches}
+      WHERE season_id = ${seasonId}
       GROUP BY round_id
       HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
     )
     SELECT 
       SUM(points)::int as total_points,
       COUNT(DISTINCT round_id)::int as total_rounds,
-      (SELECT COUNT(*) FROM ${users})::int as total_users
+      (
+        SELECT COUNT(*)
+        FROM ${userSeasons}
+        WHERE season_id = ${seasonId}
+          AND COALESCE(status, 'active') = 'active'
+      )::int as total_users
     FROM ${userRounds}
-    WHERE participated = TRUE
+    WHERE season_id = ${seasonId}
+    AND participated = TRUE
     AND round_id IN (SELECT round_id FROM CompletedRounds)
   `);
 
@@ -150,8 +169,8 @@ export async function getLeagueTotals() {
       MIN(team_value)::bigint as min_team_value
     FROM (
       SELECT owner_id, SUM(price) as team_value
-      FROM ${players}
-      WHERE owner_id IS NOT NULL
+      FROM ${playerSeasons}
+      WHERE season_id = ${seasonId} AND owner_id IS NOT NULL
       GROUP BY owner_id
     ) t
   `)
@@ -165,19 +184,23 @@ export async function getLeagueTotals() {
     await db.execute(sql`
     SELECT COUNT(DISTINCT round_id)::int as total_season_rounds
     FROM ${matches}
+    WHERE season_id = ${seasonId}
   `)
   ).rows[0] as { total_season_rounds: number };
 
   const mostValuable = (
     await db.execute(sql`
     SELECT 
-      u.name,
-      u.icon,
-      u.color_index,
-      SUM(p.price)::bigint as team_value
-    FROM ${users} u
-    JOIN ${players} p ON u.id = p.owner_id
-    GROUP BY u.id
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      SUM(ps.price)::bigint as team_value
+    FROM ${userSeasons} us
+    JOIN ${users} u ON u.id = us.user_id
+    JOIN ${playerSeasons} ps ON u.id = ps.owner_id AND ps.season_id = us.season_id
+    WHERE us.season_id = ${seasonId}
+      AND COALESCE(us.status, 'active') = 'active'
+    GROUP BY u.id, us.name, us.icon, us.color_index
     ORDER BY team_value DESC
     LIMIT 1
   `)
@@ -188,19 +211,23 @@ export async function getLeagueTotals() {
     WITH CompletedRounds AS (
       SELECT round_id
       FROM ${matches}
+      WHERE season_id = ${seasonId}
       GROUP BY round_id
       HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
     )
     SELECT 
       ur.user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
       ur.round_name,
       ur.points
     FROM ${userRounds} ur
     JOIN ${users} u ON ur.user_id = u.id
+    JOIN ${userSeasons} us ON us.user_id = u.id AND us.season_id = ur.season_id
     WHERE ur.round_id IN (SELECT round_id FROM CompletedRounds)
+    AND ur.season_id = ${seasonId}
+    AND COALESCE(us.status, 'active') = 'active'
     ORDER BY ur.points DESC
     LIMIT 1
   `)
@@ -212,6 +239,7 @@ export async function getLeagueTotals() {
       WITH CompletedRounds AS (
         SELECT round_id
         FROM ${matches}
+        WHERE season_id = ${seasonId}
         GROUP BY round_id
         HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
       ),
@@ -222,17 +250,20 @@ export async function getLeagueTotals() {
           RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as pos
         FROM ${userRounds}
         WHERE participated = TRUE
+        AND season_id = ${seasonId}
         AND round_id IN (SELECT round_id FROM CompletedRounds)
       ),
       LatestCompletedRound AS (
         SELECT MAX(round_id) as rid FROM CompletedRounds
       ),
       TargetUser AS (
-        SELECT ur.user_id, u.name
+        SELECT ur.user_id, COALESCE(us.name, u.name) as name
         FROM RoundWinners ur
         JOIN ${users} u ON ur.user_id = u.id
+        JOIN ${userSeasons} us ON us.user_id = u.id AND us.season_id = ${seasonId}
         WHERE ur.pos = 1 
         AND ur.round_id = (SELECT rid FROM LatestCompletedRound)
+        AND COALESCE(us.status, 'active') = 'active'
         LIMIT 1
       ),
       WinningRounds AS (
@@ -291,24 +322,29 @@ export async function getLeagueTotals() {
 }
 
 export async function getPointsProgression(limit = 10) {
+  const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     WITH RecentRounds AS (
       SELECT DISTINCT round_id, round_name
       FROM ${userRounds}
+      WHERE season_id = ${seasonId}
       ORDER BY round_id DESC
       LIMIT ${limit}
     )
     SELECT 
       ur.user_id,
-      u.name,
-      u.color_index,
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
       ur.round_id,
       ur.round_name,
       CASE WHEN ur.participated = TRUE THEN ur.points ELSE 0 END as points,
       SUM(CASE WHEN ur.participated = TRUE THEN ur.points ELSE 0 END) OVER (PARTITION BY ur.user_id ORDER BY ur.round_id)::int as cumulative_points
     FROM ${userRounds} ur
     JOIN ${users} u ON ur.user_id = u.id
+    JOIN ${userSeasons} us ON us.user_id = u.id AND us.season_id = ur.season_id
     WHERE ur.round_id IN (SELECT round_id FROM RecentRounds)
+    AND ur.season_id = ${seasonId}
+    AND COALESCE(us.status, 'active') = 'active'
     ORDER BY ur.round_id ASC, ur.points DESC
   `);
 
@@ -316,19 +352,23 @@ export async function getPointsProgression(limit = 10) {
 }
 
 export async function getValueRanking() {
+  const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     SELECT 
       u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
-      COALESCE(SUM(p.price), 0)::bigint as team_value,
-      COALESCE(SUM(p.price_increment), 0)::int as price_trend,
-      COUNT(p.id)::int as squad_size,
-      RANK() OVER (ORDER BY COALESCE(SUM(p.price), 0) DESC)::int as value_position
-    FROM ${users} u
-    LEFT JOIN ${players} p ON u.id = p.owner_id
-    GROUP BY u.id
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      COALESCE(SUM(ps.price), 0)::bigint as team_value,
+      COALESCE(SUM(ps.price_increment), 0)::int as price_trend,
+      COUNT(ps.player_id)::int as squad_size,
+      RANK() OVER (ORDER BY COALESCE(SUM(ps.price), 0) DESC)::int as value_position
+    FROM ${userSeasons} us
+    JOIN ${users} u ON u.id = us.user_id
+    LEFT JOIN ${playerSeasons} ps ON u.id = ps.owner_id AND ps.season_id = us.season_id
+    WHERE us.season_id = ${seasonId}
+      AND COALESCE(us.status, 'active') = 'active'
+    GROUP BY u.id, us.name, us.icon, us.color_index
     ORDER BY team_value DESC
   `);
 
@@ -336,6 +376,7 @@ export async function getValueRanking() {
 }
 
 export async function getWinCounts() {
+  const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     WITH RoundWinners AS (
       SELECT 
@@ -343,17 +384,21 @@ export async function getWinCounts() {
         round_id,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM ${userRounds}
-      WHERE participated = TRUE
+      WHERE season_id = ${seasonId}
+        AND participated = TRUE
     )
     SELECT 
       u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
       COUNT(rw.round_id)::int as wins
-    FROM ${users} u
+    FROM ${userSeasons} us
+    JOIN ${users} u ON u.id = us.user_id
     LEFT JOIN RoundWinners rw ON u.id = rw.user_id AND rw.position = 1
-    GROUP BY u.id
+    WHERE us.season_id = ${seasonId}
+      AND COALESCE(us.status, 'active') = 'active'
+    GROUP BY u.id, us.name, us.icon, us.color_index
     ORDER BY wins DESC
   `);
 
@@ -361,35 +406,40 @@ export async function getWinCounts() {
 }
 
 export async function getSimpleStandings() {
+  const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     WITH UserTotals AS (
       SELECT 
         user_id,
         SUM(points) as total_points
       FROM ${userRounds}
-      WHERE participated = TRUE
+      WHERE season_id = ${seasonId}
+        AND participated = TRUE
       GROUP BY user_id
     )
     SELECT 
       u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      COALESCE(us.name, u.name) as name,
+      COALESCE(us.icon, u.icon) as icon,
+      COALESCE(us.color_index, u.color_index, 0) as color_index,
       COALESCE(ut.total_points, 0)::int as total_points,
       COALESCE(sq.team_value, 0)::bigint as team_value,
       COALESCE(sq.price_trend, 0)::int as price_trend,
       RANK() OVER (ORDER BY COALESCE(ut.total_points, 0) DESC)::int as position
-    FROM ${users} u
+    FROM ${userSeasons} us
+    JOIN ${users} u ON u.id = us.user_id
     LEFT JOIN UserTotals ut ON u.id = ut.user_id
     LEFT JOIN (
       SELECT 
         owner_id, 
         SUM(price) as team_value,
         SUM(price_increment) as price_trend
-      FROM ${players}
-      WHERE owner_id IS NOT NULL
+      FROM ${playerSeasons}
+      WHERE season_id = ${seasonId} AND owner_id IS NOT NULL
       GROUP BY owner_id
     ) sq ON u.id = sq.owner_id
+    WHERE us.season_id = ${seasonId}
+      AND COALESCE(us.status, 'active') = 'active'
     ORDER BY position ASC
   `);
 
@@ -430,10 +480,12 @@ export async function getLeaderComparison(userId: string) {
 }
 
 export async function getLeagueAveragePoints() {
+  const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     SELECT ROUND(AVG(points), 1)::float as avg_points
     FROM ${userRounds}
-    WHERE participated = TRUE
+    WHERE season_id = ${seasonId}
+      AND participated = TRUE
   `);
 
   return result.rows[0] ? result.rows[0].avg_points : 0;

@@ -1,4 +1,5 @@
 import { db, pgClient } from '../../index';
+import { resolveReadSeasonId } from '../../season-context';
 
 export interface VolatilityStat {
   user_id: number;
@@ -99,18 +100,19 @@ export interface ContributorStat {
  * @returns {Promise<VolatilityStat[]>} Users sorted by consistency (lower std_dev is better)
  */
 export async function getVolatilityStats(): Promise<VolatilityStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH Stats AS (
-      SELECT 
+      SELECT
         user_id,
         AVG(points) as avg_points,
         -- Postgres has STDDEV, but for consistency with previous manual calculation logic:
         STDDEV(points) as std_dev
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
       GROUP BY user_id
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -122,7 +124,7 @@ export async function getVolatilityStats(): Promise<VolatilityStat[]> {
     ORDER BY s.std_dev ASC
   `;
   // Note: Postgres `STDDEV` returns numeric/float, `ROUND` works fine.
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     avg_points: parseFloat(row.avg_points) || 0,
     std_dev: parseFloat(row.std_dev) || 0,
@@ -134,17 +136,18 @@ export async function getVolatilityStats(): Promise<VolatilityStat[]> {
  * @returns {Promise<PlacementStat[]>} Users with their podium and relegation zone counts
  */
 export async function getPlacementStats(): Promise<PlacementStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RoundRanks AS (
-      SELECT 
+      SELECT
         user_id,
         round_id,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position,
         COUNT(*) OVER (PARTITION BY round_id) as total_participants
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -157,7 +160,7 @@ export async function getPlacementStats(): Promise<PlacementStat[]> {
     GROUP BY u.id
     ORDER BY top_3_count DESC, bottom_3_count ASC
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     top_3_count: parseInt(row.top_3_count) || 0,
     bottom_3_count: parseInt(row.bottom_3_count) || 0,
@@ -170,16 +173,17 @@ export async function getPlacementStats(): Promise<PlacementStat[]> {
  * @returns {Promise<LeagueComparisonStat[]>} Users with counts of above/below average rounds
  */
 export async function getLeagueComparisonStats(): Promise<LeagueComparisonStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RoundAverages AS (
-      SELECT 
+      SELECT
         round_id,
         AVG(points) as league_avg
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
       GROUP BY round_id
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -190,11 +194,11 @@ export async function getLeagueComparisonStats(): Promise<LeagueComparisonStat[]
     FROM users u
     JOIN user_rounds ur ON u.id = ur.user_id
     JOIN RoundAverages ra ON ur.round_id = ra.round_id
-    WHERE ur.participated = TRUE
+    WHERE ur.season_id = $1 AND ur.participated = TRUE
     GROUP BY u.id
     ORDER BY above_avg_count DESC
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     above_avg_count: parseInt(row.above_avg_count) || 0,
     below_avg_count: parseInt(row.below_avg_count) || 0,
@@ -208,20 +212,21 @@ export async function getLeagueComparisonStats(): Promise<LeagueComparisonStat[]
  * @returns {Promise<EfficiencyStat[]>} Users sorted by ROI
  */
 export async function getEfficiencyStats(): Promise<EfficiencyStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH UserPoints AS (
       SELECT user_id, SUM(points) as total_points
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
       GROUP BY user_id
     ),
     UserValue AS (
       SELECT owner_id, SUM(price) as team_value
-      FROM players
-      WHERE owner_id IS NOT NULL
+      FROM player_seasons
+      WHERE season_id = $1 AND owner_id IS NOT NULL
       GROUP BY owner_id
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -236,7 +241,7 @@ export async function getEfficiencyStats(): Promise<EfficiencyStat[]> {
     WHERE uv.team_value > 0
     ORDER BY points_per_million DESC
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     total_points: parseInt(row.total_points) || 0,
     team_value: parseInt(row.team_value) || 0,
@@ -249,17 +254,18 @@ export async function getEfficiencyStats(): Promise<EfficiencyStat[]> {
  * @returns {Promise<StreakStat[]>} Users with their longest 175+ point streak
  */
 export async function getStreakStats(): Promise<StreakStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH Scores AS (
-      SELECT 
-        user_id, 
-        round_id, 
+      SELECT
+        user_id,
+        round_id,
         CASE WHEN points >= 175 THEN 1 ELSE 0 END as is_high_score
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
     ),
     Streaks AS (
-      SELECT 
+      SELECT
         user_id,
         round_id,
         is_high_score,
@@ -267,9 +273,9 @@ export async function getStreakStats(): Promise<StreakStat[]> {
       FROM Scores
     ),
     GroupedStreaks AS (
-      SELECT 
-        user_id, 
-        grp, 
+      SELECT
+        user_id,
+        grp,
         COUNT(*) as streak_length
       FROM Streaks
       WHERE is_high_score = 1
@@ -277,11 +283,11 @@ export async function getStreakStats(): Promise<StreakStat[]> {
     ),
     RecentFailures AS (
       -- Find the most recent round where the user failed to score >= 175
-      SELECT 
+      SELECT
         user_id,
         MAX(round_id) as last_failure_round
       FROM user_rounds
-      WHERE participated = TRUE AND points < 175
+      WHERE season_id = $1 AND participated = TRUE AND points < 175
       GROUP BY user_id
     ),
     CurrentStreakCalc AS (
@@ -291,11 +297,11 @@ export async function getStreakStats(): Promise<StreakStat[]> {
          COUNT(*) as current_streak
        FROM user_rounds ur
        LEFT JOIN RecentFailures rf ON ur.user_id = rf.user_id
-       WHERE ur.participated = TRUE 
+       WHERE ur.season_id = $1 AND ur.participated = TRUE
          AND (rf.last_failure_round IS NULL OR ur.round_id > rf.last_failure_round)
        GROUP BY ur.user_id
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -308,7 +314,7 @@ export async function getStreakStats(): Promise<StreakStat[]> {
     GROUP BY u.id, u.name, u.icon, u.color_index, csc.current_streak
     ORDER BY longest_streak DESC, current_streak DESC
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     longest_streak: parseInt(row.longest_streak) || 0,
     current_streak: parseInt(row.current_streak) || 0,
@@ -322,15 +328,16 @@ export async function getStreakStats(): Promise<StreakStat[]> {
  * @returns {Promise<BottlerStat[]>} Users sorted by bottler score
  */
 export async function getBottlerStats(): Promise<BottlerStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RoundRanks AS (
-      SELECT 
+      SELECT
         user_id,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -338,8 +345,8 @@ export async function getBottlerStats(): Promise<BottlerStat[]> {
       SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) as wins,
       SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) as seconds,
       SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) as thirds,
-      (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) * 3 + 
-       SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) * 1) - 
+      (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) * 3 +
+       SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) * 1) -
        (SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) * 2)
        as bottler_score
     FROM users u
@@ -348,7 +355,7 @@ export async function getBottlerStats(): Promise<BottlerStat[]> {
     HAVING (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) > 0 OR SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) > 0)
     ORDER BY bottler_score DESC
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     wins: parseInt(row.wins) || 0,
     seconds: parseInt(row.seconds) || 0,
@@ -362,26 +369,27 @@ export async function getBottlerStats(): Promise<BottlerStat[]> {
  * @returns {Promise<HeartbreakerStat[]>} Users sorted by total points missed by
  */
 export async function getHeartbreakerStats(): Promise<HeartbreakerStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const refinedQuery = `
     WITH RoundRanks AS (
-      SELECT 
+      SELECT
         user_id,
         round_id,
         points,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position,
         MAX(points) OVER (PARTITION BY round_id) as winner_points
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
     ),
     HeartbreakEvents AS (
-      SELECT 
+      SELECT
         user_id,
         round_id,
         (winner_points - points) as diff
       FROM RoundRanks
       WHERE position = 2
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -390,11 +398,11 @@ export async function getHeartbreakerStats(): Promise<HeartbreakerStat[]> {
       COALESCE(SUM(he.diff), 0) as total_diff
     FROM users u
     LEFT JOIN HeartbreakEvents he ON u.id = he.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = TRUE) -- Only active users
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = u.id AND ur.participated = TRUE) -- Only active users
     GROUP BY u.id
     ORDER BY (CASE WHEN COALESCE(SUM(he.diff), 0) = 0 THEN 1 ELSE 0 END) ASC, total_diff ASC
   `;
-  return (await pgClient.query(refinedQuery)).rows.map((row: any) => ({
+  return (await pgClient.query(refinedQuery, [seasonId])).rows.map((row: any) => ({
     ...row,
     count: parseInt(row.count) || 0,
     total_diff: parseInt(row.total_diff) || 0,
@@ -406,24 +414,25 @@ export async function getHeartbreakerStats(): Promise<HeartbreakerStat[]> {
  * @returns {Promise<NoGloryStat[]>} Users sorted by points scored without winning
  */
 export async function getNoGloryStats(): Promise<NoGloryStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RoundRanks AS (
-      SELECT 
+      SELECT
         user_id,
         round_id,
         points,
         RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
     ),
     NoGloryEvents AS (
-      SELECT 
+      SELECT
         user_id,
         points
       FROM RoundRanks
       WHERE position > 1
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -432,11 +441,11 @@ export async function getNoGloryStats(): Promise<NoGloryStat[]> {
       COUNT(nge.points) as rounds_count
     FROM users u
     LEFT JOIN NoGloryEvents nge ON u.id = nge.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = TRUE)
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = u.id AND ur.participated = TRUE)
     GROUP BY u.id
     ORDER BY total_points_no_glory DESC
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     total_points_no_glory: parseInt(row.total_points_no_glory) || 0,
     rounds_count: parseInt(row.rounds_count) || 0,
@@ -448,35 +457,36 @@ export async function getNoGloryStats(): Promise<NoGloryStat[]> {
  * @returns {Promise<JinxStat[]>} Users sorted by count of "jinxed" rounds
  */
 export async function getJinxStats(): Promise<JinxStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RoundStats AS (
-      SELECT 
+      SELECT
         round_id,
         AVG(points) as league_avg,
         COUNT(user_id) as participant_count
       FROM user_rounds
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
       GROUP BY round_id
     ),
     UserRoundsWithRank AS (
-      SELECT 
+      SELECT
         ur.user_id,
         ur.round_id,
         ur.points,
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
-      WHERE participated = TRUE
+      WHERE season_id = $1 AND participated = TRUE
     ),
     JinxEvents AS (
-      SELECT 
+      SELECT
         urr.user_id,
         urr.round_id
       FROM UserRoundsWithRank urr
       JOIN RoundStats rs ON urr.round_id = rs.round_id
-      WHERE urr.points > rs.league_avg 
+      WHERE urr.points > rs.league_avg
         AND urr.position > (rs.participant_count / 2)
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name,
       u.icon,
@@ -484,11 +494,11 @@ export async function getJinxStats(): Promise<JinxStat[]> {
       COUNT(je.round_id) as jinxed_count
     FROM users u
     LEFT JOIN JinxEvents je ON u.id = je.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.user_id = u.id AND ur.participated = TRUE)
+    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = u.id AND ur.participated = TRUE)
     GROUP BY u.id
     ORDER BY jinxed_count DESC
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     jinxed_count: parseInt(row.jinxed_count) || 0,
   }));
@@ -502,26 +512,27 @@ export async function getJinxStats(): Promise<JinxStat[]> {
  * @returns {Promise<ContributorStat[]>} Top contributing players
  */
 export async function getUserTopContributors(userId: string): Promise<ContributorStat[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
       SUM(prs.fantasy_points) as total_base_points,
-      SUM(CASE 
-        WHEN l.role IN ('titular', '6th_man') AND l.is_captain = TRUE THEN prs.fantasy_points * 2 
-        WHEN l.role IN ('titular', '6th_man') THEN prs.fantasy_points 
-        ELSE 0 
+      SUM(CASE
+        WHEN l.role IN ('titular', '6th_man') AND l.is_captain = TRUE THEN prs.fantasy_points * 2
+        WHEN l.role IN ('titular', '6th_man') THEN prs.fantasy_points
+        ELSE 0
       END) as total_contribution,
       COUNT(prs.round_id) as games_played
     FROM lineups l
-    JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id
+    JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
     JOIN players p ON l.player_id = p.id
-    WHERE l.user_id = $1
+    WHERE l.season_id = $2 AND l.user_id = $1
     GROUP BY p.id, p.name, p.img
     ORDER BY total_contribution DESC
   `;
-  return (await pgClient.query(query, [userId])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [userId, seasonId])).rows.map((row: any) => ({
     ...row,
     total_base_points: parseInt(row.total_base_points) || 0,
     total_contribution: parseInt(row.total_contribution) || 0,

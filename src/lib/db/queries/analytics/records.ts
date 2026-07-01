@@ -1,4 +1,5 @@
 import { db, pgClient } from '../../index';
+import { resolveReadSeasonId } from '../../season-context';
 
 export interface RecordItem {
   type: 'highest_round' | 'highest_transfer' | 'biggest_gain';
@@ -14,21 +15,23 @@ export interface RecordItem {
  * @returns {Promise<RecordItem[]>} Recent league records
  */
 export async function getRecentRecords(): Promise<RecordItem[]> {
+  const seasonId = await resolveReadSeasonId();
   const records: RecordItem[] = [];
 
   const highestRoundQuery = `
     SELECT 
       ur.user_id,
-      u.name as user_name,
+      COALESCE(us.name, u.name) as user_name,
       ur.round_name,
       ur.points
     FROM user_rounds ur
     JOIN users u ON ur.user_id = u.id
-    WHERE ur.participated = TRUE
+    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ur.season_id
+    WHERE ur.season_id = $1 AND ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1
   `;
-  const highestRound = (await pgClient.query(highestRoundQuery)).rows[0];
+  const highestRound = (await pgClient.query(highestRoundQuery, [seasonId])).rows[0];
   if (highestRound) {
     records.push({
       type: 'highest_round',
@@ -47,10 +50,11 @@ export async function getRecentRecords(): Promise<RecordItem[]> {
       f.fecha
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
+    WHERE f.season_id = $1
     ORDER BY f.precio DESC
     LIMIT 1
   `;
-  const highestTransfer = (await pgClient.query(highestTransferQuery)).rows[0];
+  const highestTransfer = (await pgClient.query(highestTransferQuery, [seasonId])).rows[0];
   if (highestTransfer) {
     records.push({
       type: 'highest_transfer',
@@ -63,16 +67,17 @@ export async function getRecentRecords(): Promise<RecordItem[]> {
 
   const biggestGainQuery = `
     SELECT 
-      id,
-      name,
-      price_increment,
-      owner_id
-    FROM players
-    WHERE price_increment > 0
-    ORDER BY price_increment DESC
+      p.id,
+      p.name,
+      ps.price_increment,
+      ps.owner_id
+    FROM players p
+    JOIN player_seasons ps ON ps.player_id = p.id
+    WHERE ps.season_id = $1 AND ps.price_increment > 0
+    ORDER BY ps.price_increment DESC
     LIMIT 1
   `;
-  const biggestGain = (await pgClient.query(biggestGainQuery)).rows[0];
+  const biggestGain = (await pgClient.query(biggestGainQuery, [seasonId])).rows[0];
   if (biggestGain && biggestGain.price_increment > 0) {
     records.push({
       type: 'biggest_gain',

@@ -1,4 +1,5 @@
 import { db, pgClient } from '../../index';
+import { resolveReadSeasonId } from '../../season-context';
 
 // ==========================================
 // INTERFACES
@@ -180,9 +181,10 @@ export async function getPorrasStats(): Promise<PorrasStats> {
  * Normalizes all partitioned rounds and merges prediction strings correctly.
  */
 export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH BaseRoundInfo AS (
-        -- Consolidate round names and restrict to the current season (Rounds > 4000)
+        -- Consolidate round names and restrict to the resolved season.
         SELECT 
             id as match_id,
             home_score,
@@ -197,7 +199,7 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
                 '\\s*\\(.*', '', 'gi'
             ))) as base_round_id
         FROM matches
-        WHERE round_id > 4000
+        WHERE season_id = $1
     ),
     MatchSequences AS (
         -- Assign a global 1...N index to matches within each conceptual round
@@ -227,7 +229,7 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
         FROM porras p,
         unnest(string_to_array(p.result, '-')) WITH ORDINALITY AS prediction(pred, idx)
         WHERE p.result IS NOT NULL AND p.result != ''
-        AND p.round_id > 4000
+        AND p.season_id = $1
     ),
     UserPredictionSequences AS (
         -- Assign final global position based on chronlogical round order + array index
@@ -278,7 +280,7 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
     ORDER BY base_round_id ASC, total_aciertos DESC
   `;
 
-  const res = await pgClient.query(query);
+  const res = await pgClient.query(query, [seasonId]);
   return res.rows.map((row: any) => ({
     ...row,
     aciertos: parseInt(row.total_aciertos),
@@ -461,6 +463,7 @@ export async function getVictorias(data: NormalizedPrediction[]): Promise<Victor
 }
 
 export async function getPredictableTeams(): Promise<PredictableTeam[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH MatchOutcomes AS (
         SELECT 
@@ -474,7 +477,7 @@ export async function getPredictableTeams(): Promise<PredictableTeam[]> {
             END as outcome,
             ROW_NUMBER() OVER (PARTITION BY round_id ORDER BY date ASC, id ASC) as match_idx
         FROM matches
-        WHERE round_id > 4000
+        WHERE season_id = $1
     ),
     UserPredictions AS (
         SELECT 
@@ -485,7 +488,7 @@ export async function getPredictableTeams(): Promise<PredictableTeam[]> {
         FROM porras p,
         unnest(string_to_array(p.result, '-')) WITH ORDINALITY AS prediction(pred, idx)
         WHERE p.aciertos IS NOT NULL
-        AND p.round_id > 4000
+        AND p.season_id = $1
     ),
     PredictionResults AS (
         SELECT 
@@ -543,7 +546,7 @@ export async function getPredictableTeams(): Promise<PredictableTeam[]> {
     ORDER BY percentage DESC
   `;
 
-  const res = await pgClient.query(query);
+  const res = await pgClient.query(query, [seasonId]);
   return res.rows.map((row: any) => ({
     ...row,
     total: parseInt(row.total),

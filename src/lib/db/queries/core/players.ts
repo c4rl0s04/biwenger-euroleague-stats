@@ -1,5 +1,6 @@
 import { db, pgClient } from '../../index';
 import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
+import { resolveReadSeasonId } from '../../season-context';
 import { getPlayerFormMap } from './playerForm';
 import { getPlayerPriceHistory, getPlayerTransfers } from '../features/market';
 import { getTeamUpcomingMatches } from '../competition/matches';
@@ -71,14 +72,15 @@ export interface PlayerDetails extends CorePlayer {
 export async function getPlayerMatchesPlayed(playerId: number | string): Promise<number> {
   const numericPlayerId = Number(playerId);
   if (isNaN(numericPlayerId)) return 0;
+  const seasonId = await resolveReadSeasonId();
 
   const query = `
     SELECT COUNT(DISTINCT round_id) as count
     FROM player_round_stats
-    WHERE player_id = $1 AND minutes > 0
+    WHERE season_id = $2 AND player_id = $1 AND minutes > 0
   `;
 
-  const res = await pgClient.query(query, [numericPlayerId]);
+  const res = await pgClient.query(query, [numericPlayerId, seasonId]);
   return parseInt(res.rows[0]?.count || '0', 10);
 }
 
@@ -86,23 +88,27 @@ export async function getPlayerMatchesPlayed(playerId: number | string): Promise
  * Get top performing players
  */
 export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT 
       p.id, p.name, p.img, t.id as team_id, t.name as team_name,
-        t.code as team_code, p.position, p.price,
-      p.puntos as points, 
-      ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
-      p.owner_id,
-      u.name as owner_name, u.color_index as owner_color_index
+        t.code as team_code, p.position, COALESCE(ps.price, p.price) as price,
+      COALESCE(ps.puntos, p.puntos) as points,
+      ROUND(CAST(COALESCE(ps.puntos, p.puntos) AS NUMERIC) / NULLIF(COALESCE(ps.partidos_jugados, p.partidos_jugados), 0), 1) as average,
+      ps.owner_id,
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
     FROM players p
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
-    ORDER BY p.puntos DESC 
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    ORDER BY COALESCE(ps.puntos, p.puntos) DESC
     LIMIT $1
   `;
 
   const [rows, formMap] = await Promise.all([
-    pgClient.query(query, [limit]).then((r) => r.rows),
+    pgClient.query(query, [limit, seasonId]).then((r) => r.rows),
     getPlayerFormMap(),
   ]);
 
@@ -120,6 +126,7 @@ export async function getTopPlayersByForm(
   limit: number = 5,
   rounds: number = 3
 ): Promise<PlayerRecentForm[]> {
+  const seasonId = await resolveReadSeasonId();
   // 1. Get the form map for everyone with the specified round window
   const formMap = await getPlayerFormMap(rounds);
 
@@ -143,22 +150,26 @@ export async function getTopPlayersByForm(
       t.name as team_name,
       t.code as team_code,
       t.img as team_img,
-      p.owner_id,
-      u.name as owner_name, u.color_index as owner_color_index,
+      ps.owner_id,
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
       COALESCE(pa.total_points, 0) as total_points,
       COALESCE(pa.played_count, 0) as games_played
     FROM players p
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     LEFT JOIN (
       SELECT player_id, SUM(fantasy_points) as total_points, COUNT(*) as played_count
       FROM player_round_stats
+      WHERE season_id = $2
       GROUP BY player_id
     ) pa ON p.id = pa.player_id
     WHERE p.id = ANY($1)
   `;
 
-  const rows = (await pgClient.query(query, [playerIds])).rows;
+  const rows = (await pgClient.query(query, [playerIds, seasonId])).rows;
 
   // 4. Merge metadata with form data and sort final list
   return rows
@@ -183,30 +194,42 @@ export async function getTopPlayersByForm(
 export async function getPlayerDetails(playerId: number | string): Promise<PlayerDetails | null> {
   const numericPlayerId = Number(playerId);
   if (isNaN(numericPlayerId)) return null;
+  const seasonId = await resolveReadSeasonId();
 
   // 1. Base Player Info
   const query = `
     SELECT 
       p.*,
-      u.name as owner_name, u.color_index as owner_color_index, u.icon as owner_icon,
-      (SELECT COUNT(*) FROM player_round_stats WHERE player_id = p.id) as games_played,
-      (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE player_id = p.id) as season_avg,
-      (SELECT SUM(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as total_points,
-      (SELECT MAX(points) FROM player_round_stats WHERE player_id = p.id) as best_real_points,
-      (SELECT MIN(points) FROM player_round_stats WHERE player_id = p.id) as worst_real_points,
-      (SELECT MAX(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as best_fantasy,
-      (SELECT MIN(fantasy_points) FROM player_round_stats WHERE player_id = p.id) as worst_fantasy,
+      COALESCE(ps.team_id, p.team_id) as team_id,
+      COALESCE(ps.price, p.price) as price,
+      COALESCE(ps.price_increment, p.price_increment) as price_increment,
+      COALESCE(ps.puntos, p.puntos) as puntos,
+      COALESCE(ps.partidos_jugados, p.partidos_jugados) as partidos_jugados,
+      COALESCE(ps.status, p.status) as status,
+      ps.owner_id,
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
+      COALESCE(us.icon, u.icon) as owner_icon,
+      (SELECT COUNT(*) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as games_played,
+      (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as season_avg,
+      (SELECT SUM(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as total_points,
+      (SELECT MAX(points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as best_real_points,
+      (SELECT MIN(points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as worst_real_points,
+      (SELECT MAX(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as best_fantasy,
+      (SELECT MIN(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as worst_fantasy,
       t.id as team_id,
       t.name as team_name,
       t.img as team_img,
       t.code as team_code
     FROM players p
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     WHERE p.id = $1
   `;
 
-  const playerRes = await pgClient.query(query, [numericPlayerId]);
+  const playerRes = await pgClient.query(query, [numericPlayerId, seasonId]);
   const player = playerRes.rows[0];
 
   if (!player) return null;
@@ -243,16 +266,18 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       prs.valuation
     FROM matches m
     JOIN players p ON p.id = $1
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN teams th ON m.home_id = th.id
     LEFT JOIN teams ta ON m.away_id = ta.id
-    LEFT JOIN player_round_stats prs ON m.round_id = prs.round_id AND prs.player_id = p.id
-    WHERE (m.home_id = p.team_id OR m.away_id = p.team_id)
+    LEFT JOIN player_round_stats prs ON m.round_id = prs.round_id AND prs.player_id = p.id AND prs.season_id = m.season_id
+    WHERE m.season_id = $2
+      AND (m.home_id = COALESCE(ps.team_id, p.team_id) OR m.away_id = COALESCE(ps.team_id, p.team_id))
       AND m.date < NOW()
-      AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats)
+      AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats WHERE season_id = $2)
     ORDER BY m.round_id DESC
   `;
 
-  const recentMatches = (await pgClient.query(matchesQuery, [numericPlayerId])).rows;
+  const recentMatches = (await pgClient.query(matchesQuery, [numericPlayerId, seasonId])).rows;
 
   // 3. Extracted modular queries
   const [
@@ -352,6 +377,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
  * Get players with birthdays today
  */
 export async function getPlayersBirthday(): Promise<CorePlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT 
       p.id,
@@ -361,16 +387,19 @@ export async function getPlayersBirthday(): Promise<CorePlayer[]> {
         t.code as team_code,
       p.position,
       p.birth_date,
-      u.name as owner_name, u.color_index as owner_color_index
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
     FROM players p
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     WHERE p.birth_date IS NOT NULL
       AND TO_CHAR(CAST(p.birth_date AS DATE), 'MM-DD') = TO_CHAR(NOW(), 'MM-DD')
     ORDER BY p.name
   `;
 
-  return (await pgClient.query(query)).rows;
+  return (await pgClient.query(query, [seasonId])).rows;
 }
 
 /**
@@ -379,10 +408,12 @@ export async function getPlayersBirthday(): Promise<CorePlayer[]> {
 export async function getPlayerStreaks(
   minGames: number = 3
 ): Promise<{ hot: PlayerRecentForm[]; cold: PlayerRecentForm[] }> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id
       FROM player_round_stats
+      WHERE season_id = $2
       ORDER BY round_id DESC
       LIMIT 5
     ),
@@ -396,14 +427,18 @@ export async function getPlayerStreaks(
         p.position,
         COUNT(*) as games,
         AVG(prs.fantasy_points) as recent_avg,
-        p.owner_id,
-        u.name as owner_name, u.color_index as owner_color_index
+        ps.owner_id,
+        COALESCE(us.name, u.name) as owner_name,
+        COALESCE(us.color_index, u.color_index, 0) as owner_color_index
       FROM player_round_stats prs
       JOIN players p ON prs.player_id = p.id
-      LEFT JOIN teams t ON p.team_id = t.id
-      LEFT JOIN users u ON p.owner_id = u.id
+      JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+      LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+      LEFT JOIN users u ON ps.owner_id = u.id
+      LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
       WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
-      GROUP BY prs.player_id, p.name, t.id, t.name, p.position, p.owner_id, u.name, u.color_index
+      AND prs.season_id = $2
+      GROUP BY prs.player_id, p.name, t.id, t.name, p.position, ps.owner_id, us.name, u.name, us.color_index, u.color_index
       HAVING COUNT(*) >= $1
     ),
     SeasonAvg AS (
@@ -411,6 +446,7 @@ export async function getPlayerStreaks(
         player_id,
         AVG(fantasy_points) as season_avg
       FROM player_round_stats
+      WHERE season_id = $2
       GROUP BY player_id
     )
     SELECT 
@@ -433,7 +469,7 @@ export async function getPlayerStreaks(
     LIMIT 20
   `;
 
-  const allPlayers = (await pgClient.query(query, [minGames])).rows.map((p: any) => ({
+  const allPlayers = (await pgClient.query(query, [minGames, seasonId])).rows.map((p: any) => ({
     ...p,
     recent_avg: parseFloat(p.recent_avg) || 0,
     season_avg: parseFloat(p.season_avg) || 0,
@@ -451,17 +487,19 @@ export async function getPlayerStreaks(
  * Get players showing improvement trend
  */
 export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RecentRounds AS (
       SELECT DISTINCT round_id
       FROM player_round_stats
+      WHERE season_id = $2
       ORDER BY round_id DESC
       LIMIT 5
     ),
     EarlierRounds AS (
       SELECT DISTINCT round_id
       FROM player_round_stats
-      WHERE round_id NOT IN (SELECT round_id FROM RecentRounds)
+      WHERE season_id = $2 AND round_id NOT IN (SELECT round_id FROM RecentRounds)
       ORDER BY round_id DESC
       LIMIT 5
     ),
@@ -471,7 +509,7 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
         AVG(fantasy_points) as recent_avg,
         COUNT(*) as recent_games
       FROM player_round_stats
-      WHERE round_id IN (SELECT round_id FROM RecentRounds)
+      WHERE season_id = $2 AND round_id IN (SELECT round_id FROM RecentRounds)
       GROUP BY player_id
       HAVING COUNT(*) >= 3
     ),
@@ -480,7 +518,7 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
         player_id,
         AVG(fantasy_points) as earlier_avg
       FROM player_round_stats
-      WHERE round_id IN (SELECT round_id FROM EarlierRounds)
+      WHERE season_id = $2 AND round_id IN (SELECT round_id FROM EarlierRounds)
       GROUP BY player_id
     )
     SELECT 
@@ -494,19 +532,22 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
       COALESCE(ep.earlier_avg, 0) as earlier_avg,
       ROUND(rp.recent_avg - COALESCE(ep.earlier_avg, 0), 1) as improvement,
       ROUND((rp.recent_avg - COALESCE(ep.earlier_avg, 0)) / NULLIF(ep.earlier_avg, 0) * 100, 1) as improvement_pct,
-      u.name as owner_name, u.color_index as owner_color_index
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
     FROM RecentPerformance rp
     JOIN players p ON rp.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
     LEFT JOIN EarlierPerformance ep ON rp.player_id = ep.player_id
-    LEFT JOIN users u ON p.owner_id = u.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     WHERE rp.recent_avg > COALESCE(ep.earlier_avg, 0)
       AND (rp.recent_avg - COALESCE(ep.earlier_avg, 0)) >= 3
     ORDER BY improvement DESC
     LIMIT $1
   `;
 
-  return (await pgClient.query(query, [limit])).rows.map((row: any) => ({
+  return (await pgClient.query(query, [limit, seasonId])).rows.map((row: any) => ({
     ...row,
     recent_avg: parseFloat(row.recent_avg) || 0,
     earlier_avg: parseFloat(row.earlier_avg) || 0,
@@ -519,6 +560,7 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
  * Get all players with basic stats for the players list
  */
 export async function getAllPlayers(): Promise<CorePlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
      WITH PlayerAggregates AS (
        SELECT 
@@ -529,6 +571,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
          MAX(fantasy_points) as best_score,
          MIN(fantasy_points) as worst_score
        FROM player_round_stats
+       WHERE season_id = $1
        GROUP BY player_id
      )
      SELECT 
@@ -536,17 +579,18 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
        p.name,
        p.img,
        p.position,
-       p.price,
-       p.price_increment,
-       p.team_id,
+       COALESCE(ps.price, p.price) as price,
+       COALESCE(ps.price_increment, p.price_increment) as price_increment,
+       COALESCE(ps.team_id, p.team_id) as team_id,
        t.name as team_name,
         t.code as team_code,
        t.short_name as team_short_name,
        t.img as team_img,
 
-       p.owner_id,
-       u.name as owner_name, u.color_index as owner_color_index,
-       u.icon as owner_icon,
+       ps.owner_id,
+       COALESCE(us.name, u.name) as owner_name,
+       COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
+       COALESCE(us.icon, u.icon) as owner_icon,
        
        -- Use aggregated stats from player_round_stats as requested
        COALESCE(pa.total_points, 0) as total_points,
@@ -555,16 +599,18 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
        COALESCE(pa.best_score, 0) as best_score,
        COALESCE(pa.worst_score, 0) as worst_score,
        
-       p.status
+       COALESCE(ps.status, p.status) as status
      FROM players p
-     LEFT JOIN teams t ON p.team_id = t.id
-     LEFT JOIN users u ON p.owner_id = u.id
+     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
+     LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+     LEFT JOIN users u ON ps.owner_id = u.id
+     LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
      LEFT JOIN PlayerAggregates pa ON p.id = pa.player_id
      ORDER BY COALESCE(pa.total_points, 0) DESC
   `;
 
   const [rows, formMap] = await Promise.all([
-    pgClient.query(query).then((r) => r.rows),
+    pgClient.query(query, [seasonId]).then((r) => r.rows),
     getPlayerFormMap(),
   ]);
 
@@ -585,6 +631,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
  * Get stat leaders (Top 5)
  */
 export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
+  const seasonId = await resolveReadSeasonId();
   const columnMap: Record<string, string> = {
     real_points: 'points',
     points: 'points',
@@ -603,24 +650,27 @@ export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
       t.id as team_id,
       t.name as team_name,
         t.code as team_code,
-      p.owner_id,
-      u.name as owner_name,
-      u.color_index as owner_color_index,
+      ps.owner_id,
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
       SUM(prs.${column}) as value,
       COUNT(prs.id) as games_played,
       ROUND(AVG(prs.${column}), 1) as avg_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
-    GROUP BY p.id, p.name, t.id, t.name, p.owner_id, u.name, u.color_index
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    WHERE prs.season_id = $1
+    GROUP BY p.id, p.name, t.id, t.name, ps.owner_id, us.name, u.name, us.color_index, u.color_index
     HAVING SUM(prs.${column}) > 0
     ORDER BY value DESC
     LIMIT 5
   `;
 
   try {
-    return (await pgClient.query(query)).rows.map((row: any) => ({
+    return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
       ...row,
       value: parseFloat(row.value) || 0,
       avg_value: parseFloat(row.avg_value) || 0,
@@ -636,21 +686,29 @@ export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
 export async function getPlayersByTeam(teamId: number | string): Promise<CorePlayer[]> {
   const numericId = Number(teamId);
   if (isNaN(numericId)) return [];
+  const seasonId = await resolveReadSeasonId();
 
   const query = `
     SELECT 
-      p.id, p.name, p.img, p.position, p.price, p.price_increment,
-      p.puntos as points, 
-      ROUND(CAST(p.puntos AS NUMERIC) / NULLIF(p.partidos_jugados, 0), 1) as average,
-      p.owner_id, u.name as owner_name, u.color_index as owner_color_index, u.icon as owner_icon
+      p.id, p.name, p.img, p.position,
+      COALESCE(ps.price, p.price) as price,
+      COALESCE(ps.price_increment, p.price_increment) as price_increment,
+      COALESCE(ps.puntos, p.puntos) as points,
+      ROUND(CAST(COALESCE(ps.puntos, p.puntos) AS NUMERIC) / NULLIF(COALESCE(ps.partidos_jugados, p.partidos_jugados), 0), 1) as average,
+      ps.owner_id,
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
+      COALESCE(us.icon, u.icon) as owner_icon
     FROM players p
-    LEFT JOIN users u ON p.owner_id = u.id
-    WHERE p.team_id = $1
-    ORDER BY p.puntos DESC
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    WHERE COALESCE(ps.team_id, p.team_id) = $1
+    ORDER BY COALESCE(ps.puntos, p.puntos) DESC
   `;
 
   const [rows, formMap] = await Promise.all([
-    pgClient.query(query, [numericId]).then((r) => r.rows),
+    pgClient.query(query, [numericId, seasonId]).then((r) => r.rows),
     getPlayerFormMap(),
   ]);
 

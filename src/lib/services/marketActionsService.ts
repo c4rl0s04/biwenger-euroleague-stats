@@ -1,7 +1,23 @@
 import { db } from '../db';
-import { users, players } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { DEFAULT_SEASON_ID, playerSeasons, players, users } from '../db/schema';
+import { and, eq } from 'drizzle-orm';
 import { biwengerFetch } from '../api/biwenger-client.js';
+import { resolveReadSeasonId } from '../db/season-context';
+import { assertWritableSeason } from '../seasons';
+
+async function clearLocalPlayerOwner(playerId: number) {
+  const seasonId = await resolveReadSeasonId();
+  await assertWritableSeason(seasonId);
+
+  await db
+    .update(playerSeasons)
+    .set({ ownerId: null, updatedAt: new Date() })
+    .where(and(eq(playerSeasons.seasonId, seasonId), eq(playerSeasons.playerId, playerId)));
+
+  if (seasonId === DEFAULT_SEASON_ID) {
+    await db.update(players).set({ ownerId: null }).where(eq(players.id, playerId));
+  }
+}
 
 /**
  * Service to handle Market Write operations on Biwenger
@@ -50,8 +66,10 @@ export const marketActionsService = {
     const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
     if (result && !hasErrorStatus && !result.error && type === 'immediateSell') {
       try {
-        await db.update(players).set({ ownerId: null }).where(eq(players.id, playerId));
-        console.log(`[DB] Successfully set player ${playerId} owner to null after immediateSell`);
+        await clearLocalPlayerOwner(playerId);
+        console.log(
+          `[DB] Successfully set player ${playerId} season owner to null after immediateSell`
+        );
       } catch (dbErr) {
         console.error('Failed to update player owner in DB after immediate sell:', dbErr);
       }
@@ -154,8 +172,10 @@ export const marketActionsService = {
     const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
     if (result && !hasErrorStatus && !result.error && playerId) {
       try {
-        await db.update(players).set({ ownerId: null }).where(eq(players.id, playerId));
-        console.log(`[DB] Successfully set player ${playerId} owner to null after accepting offer`);
+        await clearLocalPlayerOwner(playerId);
+        console.log(
+          `[DB] Successfully set player ${playerId} season owner to null after accepting offer`
+        );
       } catch (dbErr) {
         console.error('Failed to update player owner in DB after offer acceptance:', dbErr);
       }

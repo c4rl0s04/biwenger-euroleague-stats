@@ -24,8 +24,8 @@ export async function run(manager: SyncManager) {
   await mutations.clearInitialSquads();
   manager.log('   🧹 Cleared previous initial squads data.');
 
-  // 1. Load All Users and their CURRENT Squads
-  // Step 8 must have run before this to populate `players.owner_id`
+  // 1. Load season users and their current squads.
+  // Step 8 must have run before this to populate `player_seasons.owner_id`.
   const usersRes = await mutations.getAllUsers();
   const users = usersRes.all();
   const userSquads = new Map<string, Set<number>>(); // UserId -> Set<PlayerId>

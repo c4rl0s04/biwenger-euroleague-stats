@@ -8,6 +8,7 @@ import {
   doublePrecision,
   bigint,
   date,
+  foreignKey,
   index,
   unique,
 } from 'drizzle-orm/pg-core';
@@ -386,19 +387,26 @@ export const syncMeta = pgTable('sync_meta', {
 });
 
 // 15. Tournaments Table
-export const tournaments = pgTable('tournaments', {
-  id: integer('id').primaryKey(),
-  seasonId: text('season_id')
-    .notNull()
-    .default(DEFAULT_SEASON_ID)
-    .references(() => seasons.id),
-  leagueId: integer('league_id'),
-  name: text('name'),
-  type: text('type'),
-  status: text('status'),
-  dataJson: text('data_json'),
-  updatedAt: integer('updated_at'),
-});
+export const tournaments = pgTable(
+  'tournaments',
+  {
+    internalId: serial('internal_id').primaryKey(),
+    id: integer('id').notNull(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    leagueId: integer('league_id'),
+    name: text('name'),
+    type: text('type'),
+    status: text('status'),
+    dataJson: text('data_json'),
+    updatedAt: integer('updated_at'),
+  },
+  (t) => ({
+    unq_tournament: unique('unique_tournament').on(t.seasonId, t.id),
+  })
+);
 
 // 16. Tournament Phases Table
 export const tournamentPhases = pgTable(
@@ -409,12 +417,17 @@ export const tournamentPhases = pgTable(
       .notNull()
       .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
-    tournamentId: integer('tournament_id').references(() => tournaments.id),
+    tournamentId: integer('tournament_id'),
     name: text('name'),
     type: text('type'),
     orderIndex: integer('order_index'),
   },
   (t) => ({
+    tournamentSeasonFk: foreignKey({
+      columns: [t.seasonId, t.tournamentId],
+      foreignColumns: [tournaments.seasonId, tournaments.id],
+      name: 'tournament_phases_season_tournament_fk',
+    }),
     unq_tournament_phase: unique('unique_tournament_phase').on(
       t.seasonId,
       t.tournamentId,
@@ -427,12 +440,13 @@ export const tournamentPhases = pgTable(
 export const tournamentFixtures = pgTable(
   'tournament_fixtures',
   {
-    id: integer('id').primaryKey(),
+    internalId: serial('internal_id').primaryKey(),
+    id: integer('id').notNull(),
     seasonId: text('season_id')
       .notNull()
       .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
-    tournamentId: integer('tournament_id').references(() => tournaments.id),
+    tournamentId: integer('tournament_id'),
     phaseId: integer('phase_id').references(() => tournamentPhases.id),
     roundName: text('round_name'),
     roundId: integer('round_id'),
@@ -445,6 +459,11 @@ export const tournamentFixtures = pgTable(
     status: text('status'),
   },
   (t) => ({
+    tournamentSeasonFk: foreignKey({
+      columns: [t.seasonId, t.tournamentId],
+      foreignColumns: [tournaments.seasonId, tournaments.id],
+      name: 'tournament_fixtures_season_tournament_fk',
+    }),
     unq_tournament_fixture: unique('unique_tournament_fixture').on(
       t.seasonId,
       t.tournamentId,
@@ -462,7 +481,7 @@ export const tournamentStandings = pgTable(
       .notNull()
       .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
-    tournamentId: integer('tournament_id').references(() => tournaments.id),
+    tournamentId: integer('tournament_id'),
     phaseName: text('phase_name'),
     groupName: text('group_name'),
     userId: text('user_id'),
@@ -475,6 +494,11 @@ export const tournamentStandings = pgTable(
     against: integer('against'),
   },
   (t) => ({
+    tournamentSeasonFk: foreignKey({
+      columns: [t.seasonId, t.tournamentId],
+      foreignColumns: [tournaments.seasonId, tournaments.id],
+      name: 'tournament_standings_season_tournament_fk',
+    }),
     unq_tournament_standing: unique('unique_tournament_standing').on(
       t.seasonId,
       t.tournamentId,

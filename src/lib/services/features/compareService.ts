@@ -6,6 +6,7 @@ import 'server-only';
  */
 
 import { db } from '../../db/client';
+import { resolveReadSeasonId } from '../../db/season-context';
 import {
   getExtendedStandings as getStandings,
   getPorrasStats,
@@ -49,25 +50,27 @@ export interface UserSquadMember {
  * Helper: Get User Squad (Inlined to avoid circular dependency issues)
  */
 async function getUserSquad(userId: number): Promise<UserSquadMember[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT 
       p.id,
       p.name,
       p.position,
       t.name as team,
-      p.price,
+      COALESCE(ps.price, p.price) AS price,
       COALESCE(SUM(prs.fantasy_points), 0) as points,
       ROUND(AVG(COALESCE(prs.fantasy_points, 0)), 1) as average,
-      p.status
-    FROM players p
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN player_round_stats prs ON p.id = prs.player_id
-    WHERE p.owner_id = $1
-    GROUP BY p.id, p.name, p.position, t.name, p.price, p.status
+      COALESCE(ps.status, p.status) AS status
+    FROM player_seasons ps
+    JOIN players p ON ps.player_id = p.id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.season_id = ps.season_id
+    WHERE ps.season_id = $2 AND ps.owner_id = $1
+    GROUP BY p.id, p.name, p.position, t.name, ps.price, p.price, ps.status, p.status
     ORDER BY points DESC
   `;
 
-  const rows = (await db.query(query, [userId])).rows;
+  const rows = (await db.query(query, [userId, seasonId])).rows;
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
@@ -134,7 +137,14 @@ export interface CompareDataLiteResponse {
  * @returns users, history, standings, porras
  */
 export async function getCompareData(): Promise<CompareDataResponse> {
-  const usersQuery = `SELECT id, name, icon, color_index FROM users ORDER BY name ASC`;
+  const seasonId = await resolveReadSeasonId();
+  const usersQuery = `
+    SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+    FROM user_seasons us
+    JOIN users u ON u.id = us.user_id
+    WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
+    ORDER BY COALESCE(us.name, u.name) ASC
+  `;
 
   const [
     usersResult,
@@ -160,7 +170,7 @@ export async function getCompareData(): Promise<CompareDataResponse> {
     biddingDuelsStats,
     theThiefStats,
   ] = await Promise.all([
-    db.query(usersQuery),
+    db.query(usersQuery, [seasonId]),
     getStandings(),
     getPorrasStats(),
     fetchStreakStats(),
@@ -263,10 +273,17 @@ export async function getCompareData(): Promise<CompareDataResponse> {
  * @returns users, history, standings, porras, predictions (no advanced stats)
  */
 export async function getCompareDataLite(): Promise<CompareDataLiteResponse> {
-  const usersQuery = `SELECT id, name, icon, color_index FROM users ORDER BY name ASC`;
+  const seasonId = await resolveReadSeasonId();
+  const usersQuery = `
+    SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+    FROM user_seasons us
+    JOIN users u ON u.id = us.user_id
+    WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
+    ORDER BY COALESCE(us.name, u.name) ASC
+  `;
 
   const [usersResult, standingsData, porrasData] = await Promise.all([
-    db.query(usersQuery),
+    db.query(usersQuery, [seasonId]),
     getStandings(),
     getPorrasStats(),
   ]);

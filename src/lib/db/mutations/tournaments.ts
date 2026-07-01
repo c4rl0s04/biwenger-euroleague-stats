@@ -1,4 +1,5 @@
-import { db } from '../client';
+import { db as defaultDb } from '../client';
+import { DEFAULT_SEASON_ID } from '../schema';
 
 // ==========================================
 // INTERFACES
@@ -12,6 +13,21 @@ export interface UpsertTournamentParams {
   status: string;
   data_json: string | null;
   updated_at: number;
+}
+
+export interface TournamentMutationOptions {
+  seasonId?: string;
+}
+
+export type TournamentDbClient = {
+  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount?: number | null }>;
+};
+
+export interface TournamentMutations {
+  upsertTournament: (tournament: UpsertTournamentParams) => Promise<void>;
+  upsertPhase: (phase: UpsertPhaseParams) => Promise<number>;
+  upsertFixture: (fixture: UpsertFixtureParams) => Promise<void>;
+  upsertStanding: (standing: UpsertStandingParams) => Promise<void>;
 }
 
 export interface UpsertPhaseParams {
@@ -54,144 +70,172 @@ export interface UpsertStandingParams {
 // MUTATIONS
 // ==========================================
 
-export async function upsertTournament(tournament: UpsertTournamentParams): Promise<void> {
-  const { id, league_id, name, type, status, data_json, updated_at } = tournament;
+export function prepareTournamentMutations(
+  db: TournamentDbClient = defaultDb,
+  options: TournamentMutationOptions = {}
+): TournamentMutations {
+  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
 
-  await db.query(
-    `
-    INSERT INTO tournaments (id, league_id, name, type, status, data_json, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    ON CONFLICT(id) DO UPDATE SET
-      league_id = EXCLUDED.league_id,
-      name = EXCLUDED.name,
-      type = EXCLUDED.type,
-      status = EXCLUDED.status,
-      data_json = EXCLUDED.data_json,
-      updated_at = EXCLUDED.updated_at
-  `,
-    [id, league_id, name, type, status, data_json, updated_at]
-  );
+  return {
+    upsertTournament: async (tournament: UpsertTournamentParams) => {
+      const { id, league_id, name, type, status, data_json, updated_at } = tournament;
+
+      await db.query(
+        `
+        INSERT INTO tournaments (season_id, id, league_id, name, type, status, data_json, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT(season_id, id) DO UPDATE SET
+          league_id = EXCLUDED.league_id,
+          name = EXCLUDED.name,
+          type = EXCLUDED.type,
+          status = EXCLUDED.status,
+          data_json = EXCLUDED.data_json,
+          updated_at = EXCLUDED.updated_at
+      `,
+        [seasonId, id, league_id, name, type, status, data_json, updated_at]
+      );
+    },
+
+    upsertPhase: async (phase: UpsertPhaseParams): Promise<number> => {
+      const { tournament_id, name, type, order_index } = phase;
+
+      // Note: We don't have a stable ID from API for phases usually,
+      // but we have a unique constraint on (season_id, tournament_id, order_index).
+      const res = await db.query(
+        `
+        INSERT INTO tournament_phases (season_id, tournament_id, name, type, order_index)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT(season_id, tournament_id, order_index) DO UPDATE SET
+          name = EXCLUDED.name,
+          type = EXCLUDED.type
+        RETURNING id
+      `,
+        [seasonId, tournament_id, name, type, order_index]
+      );
+
+      return res.rows[0].id; // RETURNING clause ensures we get the ID
+    },
+
+    upsertFixture: async (fixture: UpsertFixtureParams) => {
+      const {
+        id,
+        tournament_id,
+        phase_id,
+        round_name,
+        round_id,
+        group_name,
+        home_user_id,
+        away_user_id,
+        home_score,
+        away_score,
+        date,
+        status,
+      } = fixture;
+
+      await db.query(
+        `
+        INSERT INTO tournament_fixtures (
+          season_id, id, tournament_id, phase_id,
+          round_name, round_id, group_name,
+          home_user_id, away_user_id,
+          home_score, away_score,
+          date, status
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        ON CONFLICT(season_id, tournament_id, id) DO UPDATE SET
+          phase_id = EXCLUDED.phase_id,
+          round_name = EXCLUDED.round_name,
+          round_id = EXCLUDED.round_id,
+          group_name = EXCLUDED.group_name,
+          home_user_id = EXCLUDED.home_user_id,
+          away_user_id = EXCLUDED.away_user_id,
+          home_score = EXCLUDED.home_score,
+          away_score = EXCLUDED.away_score,
+          date = EXCLUDED.date,
+          status = EXCLUDED.status
+      `,
+        [
+          seasonId,
+          id,
+          tournament_id,
+          phase_id,
+          round_name,
+          round_id,
+          group_name,
+          home_user_id,
+          away_user_id,
+          home_score,
+          away_score,
+          date,
+          status,
+        ]
+      );
+    },
+
+    upsertStanding: async (standing: UpsertStandingParams) => {
+      const {
+        tournament_id,
+        phase_name,
+        group_name,
+        user_id,
+        position,
+        points,
+        won,
+        lost,
+        drawn,
+        scored,
+        against,
+      } = standing;
+
+      await db.query(
+        `
+        INSERT INTO tournament_standings (
+          season_id, tournament_id, phase_name, group_name, user_id,
+          position, points, won, lost, drawn, scored, against
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        ON CONFLICT(season_id, tournament_id, phase_name, group_name, user_id) DO UPDATE SET
+          position = EXCLUDED.position,
+          points = EXCLUDED.points,
+          won = EXCLUDED.won,
+          lost = EXCLUDED.lost,
+          drawn = EXCLUDED.drawn,
+          scored = EXCLUDED.scored,
+          against = EXCLUDED.against
+      `,
+        [
+          seasonId,
+          tournament_id,
+          phase_name,
+          group_name,
+          user_id,
+          position,
+          points,
+          won,
+          lost,
+          drawn,
+          scored,
+          against,
+        ]
+      );
+    },
+  };
+}
+
+const defaultMutations = prepareTournamentMutations(defaultDb);
+
+export async function upsertTournament(tournament: UpsertTournamentParams): Promise<void> {
+  return defaultMutations.upsertTournament(tournament);
 }
 
 export async function upsertPhase(phase: UpsertPhaseParams): Promise<number> {
-  const { tournament_id, name, type, order_index } = phase;
-
-  // Note: We don't have a stable ID from API for phases usually,
-  // but we have a unique constraint on (tournament_id, order_index).
-  // Check if we need to return the ID.
-  const res = await db.query(
-    `
-    INSERT INTO tournament_phases (tournament_id, name, type, order_index)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT(tournament_id, order_index) DO UPDATE SET
-      name = EXCLUDED.name,
-      type = EXCLUDED.type
-    RETURNING id
-  `,
-    [tournament_id, name, type, order_index]
-  );
-
-  return res.rows[0].id; // RETURNING clause ensures we get the ID
+  return defaultMutations.upsertPhase(phase);
 }
 
 export async function upsertFixture(fixture: UpsertFixtureParams): Promise<void> {
-  const {
-    id,
-    tournament_id,
-    phase_id,
-    round_name,
-    round_id,
-    group_name,
-    home_user_id,
-    away_user_id,
-    home_score,
-    away_score,
-    date,
-    status,
-  } = fixture;
-
-  await db.query(
-    `
-    INSERT INTO tournament_fixtures (
-      id, tournament_id, phase_id, 
-      round_name, round_id, group_name, 
-      home_user_id, away_user_id, 
-      home_score, away_score, 
-      date, status
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    ON CONFLICT(tournament_id, id) DO UPDATE SET
-      phase_id = EXCLUDED.phase_id,
-      round_name = EXCLUDED.round_name,
-      round_id = EXCLUDED.round_id,
-      group_name = EXCLUDED.group_name,
-      home_user_id = EXCLUDED.home_user_id,
-      away_user_id = EXCLUDED.away_user_id,
-      home_score = EXCLUDED.home_score,
-      away_score = EXCLUDED.away_score,
-      date = EXCLUDED.date,
-      status = EXCLUDED.status
-  `,
-    [
-      id,
-      tournament_id,
-      phase_id,
-      round_name,
-      round_id,
-      group_name,
-      home_user_id,
-      away_user_id,
-      home_score,
-      away_score,
-      date,
-      status,
-    ]
-  );
+  return defaultMutations.upsertFixture(fixture);
 }
 
 export async function upsertStanding(standing: UpsertStandingParams): Promise<void> {
-  const {
-    tournament_id,
-    phase_name,
-    group_name,
-    user_id,
-    position,
-    points,
-    won,
-    lost,
-    drawn,
-    scored,
-    against,
-  } = standing;
-
-  await db.query(
-    `
-    INSERT INTO tournament_standings (
-      tournament_id, phase_name, group_name, user_id,
-      position, points, won, lost, drawn, scored, against
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    ON CONFLICT(tournament_id, phase_name, group_name, user_id) DO UPDATE SET
-      position = EXCLUDED.position,
-      points = EXCLUDED.points,
-      won = EXCLUDED.won,
-      lost = EXCLUDED.lost,
-      drawn = EXCLUDED.drawn,
-      scored = EXCLUDED.scored,
-      against = EXCLUDED.against
-  `,
-    [
-      tournament_id,
-      phase_name,
-      group_name,
-      user_id,
-      position,
-      points,
-      won,
-      lost,
-      drawn,
-      scored,
-      against,
-    ]
-  );
+  return defaultMutations.upsertStanding(standing);
 }

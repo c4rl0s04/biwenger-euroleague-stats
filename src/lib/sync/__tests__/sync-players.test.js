@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { syncPlayers } from '../steps/01-players.js';
+import { run, syncPlayers } from '../steps/01-players.js';
 import * as client from '../../api/biwenger-client.js';
-import { CONFIG } from '../../config.js';
 
 // Mock biwenger-client
 vi.mock('../../api/biwenger-client.js', () => ({
@@ -94,5 +93,66 @@ describe('syncPlayers', () => {
     )?.[0];
     expect(playerUpsertSql).toContain('price = excluded.price');
     expect(playerUpsertSql).not.toContain('price = GREATEST(players.price, excluded.price)');
+  });
+
+  it('uses season-specific existing stats instead of global player stats', async () => {
+    const mockCompetition = {
+      data: {
+        data: {
+          players: {
+            101: {
+              name: 'Campazzo',
+              teamID: 5,
+              position: 1,
+              points: 0,
+              pointsHome: 0,
+              pointsAway: 0,
+              price: 1000000,
+            },
+          },
+          teams: {
+            5: { name: 'Real Madrid' },
+          },
+        },
+      },
+    };
+
+    db.query.mockImplementation(async (sql, params) => {
+      if (sql.includes('FROM player_seasons')) {
+        expect(params).toEqual(['2026-27']);
+        return {
+          rows: [{ id: 101, puntos: 7, points_home: 4, points_away: 3 }],
+          rowCount: 1,
+        };
+      }
+      if (sql === 'SELECT id FROM players') {
+        return { rows: [{ id: 101 }], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 1 };
+    });
+
+    client.fetchAllPlayers.mockResolvedValue(mockCompetition);
+
+    await run({
+      context: {
+        db,
+        seasonId: '2026-27',
+        playersList: {},
+        teams: {},
+      },
+      roundNameMap: new Map(),
+      normalizeRoundName: (name) => name,
+      log: vi.fn(),
+      error: vi.fn(),
+    });
+
+    const playerSeasonUpsert = db.query.mock.calls.find(
+      ([sql, params]) => sql.includes('INSERT INTO player_seasons') && params?.[0] === '2026-27'
+    );
+
+    expect(playerSeasonUpsert?.[1]).toEqual(
+      expect.arrayContaining(['2026-27', 101, 5, 7, 0, 0, 0, 4, 3])
+    );
+    expect(client.fetchPlayerDetails).not.toHaveBeenCalled();
   });
 });

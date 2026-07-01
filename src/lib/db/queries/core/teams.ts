@@ -1,4 +1,5 @@
 import { db, pgClient } from '../../index';
+import { resolveReadSeasonId } from '../../season-context';
 
 export interface Team {
   id: number;
@@ -24,6 +25,7 @@ export interface TeamDetails extends Team {
  * Get regular season standings for all teams
  */
 export async function getTeamRegularSeasonStandings() {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH TeamStats AS (
       SELECT 
@@ -39,7 +41,7 @@ export async function getTeamRegularSeasonStandings() {
           CASE WHEN home_score_regtime + COALESCE(home_ot, 0) < away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as loss,
           home_score_regtime + COALESCE(home_ot, 0) as points_for,
           away_score_regtime + COALESCE(away_ot, 0) as points_against
-        FROM matches WHERE status = 'finished' AND round_name LIKE 'Jornada %'
+        FROM matches WHERE season_id = $1 AND status = 'finished' AND round_name LIKE 'Jornada %'
         UNION ALL
         SELECT 
           away_id as team_id,
@@ -47,7 +49,7 @@ export async function getTeamRegularSeasonStandings() {
           CASE WHEN away_score_regtime + COALESCE(away_ot, 0) < home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as loss,
           away_score_regtime + COALESCE(away_ot, 0) as points_for,
           home_score_regtime + COALESCE(home_ot, 0) as points_against
-        FROM matches WHERE status = 'finished' AND round_name LIKE 'Jornada %'
+        FROM matches WHERE season_id = $1 AND status = 'finished' AND round_name LIKE 'Jornada %'
       ) all_matches
       GROUP BY team_id
     )
@@ -58,7 +60,7 @@ export async function getTeamRegularSeasonStandings() {
       RANK() OVER (ORDER BY wins DESC, (points_for - points_against) DESC) as rank
     FROM TeamStats
   `;
-  const res = await pgClient.query(query);
+  const res = await pgClient.query(query, [seasonId]);
   return res.rows;
 }
 
@@ -84,6 +86,7 @@ export async function getTeamById(id: number | string): Promise<Team | undefined
 export async function getTeamDetails(id: number | string): Promise<TeamDetails | null> {
   const numericId = Number(id);
   if (isNaN(numericId)) return null;
+  const seasonId = await resolveReadSeasonId();
 
   const query = `
     WITH TeamMatchStats AS (
@@ -96,13 +99,13 @@ export async function getTeamDetails(id: number | string): Promise<TeamDetails |
           home_id as team_id,
           CASE WHEN home_score_regtime + COALESCE(home_ot, 0) > away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as win,
           CASE WHEN home_score_regtime + COALESCE(home_ot, 0) < away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as loss
-        FROM matches WHERE status = 'finished' AND home_id = $1 AND round_name LIKE 'Jornada %'
+        FROM matches WHERE season_id = $2 AND status = 'finished' AND home_id = $1 AND round_name LIKE 'Jornada %'
         UNION ALL
         SELECT 
           away_id as team_id,
           CASE WHEN away_score_regtime + COALESCE(away_ot, 0) > home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as win,
           CASE WHEN away_score_regtime + COALESCE(away_ot, 0) < home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as loss
-        FROM matches WHERE status = 'finished' AND away_id = $1 AND round_name LIKE 'Jornada %'
+        FROM matches WHERE season_id = $2 AND status = 'finished' AND away_id = $1 AND round_name LIKE 'Jornada %'
       ) all_matches
       GROUP BY team_id
     )
@@ -114,20 +117,21 @@ export async function getTeamDetails(id: number | string): Promise<TeamDetails |
       COALESCE(SUM(prs.fantasy_points), 0) as total_fantasy_points,
       COALESCE(SUM(prs.points), 0) as total_real_points,
       COALESCE(ROUND(AVG(prs.valuation), 1), 0) as avg_pir,
-      COALESCE(SUM(p.price), 0) as total_value,
-      (SELECT COUNT(*) FROM players WHERE team_id = t.id) as roster_size,
+      COALESCE(SUM(COALESCE(ps.price, p.price)), 0) as total_value,
+      (SELECT COUNT(*) FROM player_seasons WHERE season_id = $2 AND team_id = t.id) as roster_size,
       COALESCE(tms.wins, 0) as wins,
       COALESCE(tms.losses, 0) as losses
     FROM teams t
-    LEFT JOIN players p ON t.id = p.team_id
-    LEFT JOIN player_round_stats prs ON p.id = prs.player_id
+    LEFT JOIN player_seasons ps ON ps.season_id = $2 AND ps.team_id = t.id
+    LEFT JOIN players p ON p.id = ps.player_id
+    LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.season_id = $2
     LEFT JOIN TeamMatchStats tms ON t.id = tms.team_id
     WHERE t.id = $1
     GROUP BY t.id, t.name, t.short_name, t.img, tms.wins, tms.losses
   `;
 
   const [res, matchesCount, playoffProb, allStandings] = await Promise.all([
-    pgClient.query(query, [numericId]),
+    pgClient.query(query, [numericId, seasonId]),
     getTeamMatchesCount(numericId),
     getTeamPlayoffProbability(numericId),
     getTeamRegularSeasonStandings(),
@@ -160,16 +164,18 @@ export async function getTeamDetails(id: number | string): Promise<TeamDetails |
 export async function getTeamMatchesCount(teamId: number | string): Promise<number> {
   const numericTeamId = Number(teamId);
   if (isNaN(numericTeamId)) return 0;
+  const seasonId = await resolveReadSeasonId();
 
   const query = `
     SELECT COUNT(DISTINCT m.id) as count
     FROM matches m
-    WHERE (m.home_id = $1 OR m.away_id = $1)
+    WHERE m.season_id = $2
+      AND (m.home_id = $1 OR m.away_id = $1)
       AND m.date < NOW()
-      AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats)
+      AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats WHERE season_id = $2)
   `;
 
-  const res = await pgClient.query(query, [numericTeamId]);
+  const res = await pgClient.query(query, [numericTeamId, seasonId]);
   return parseInt(res.rows[0]?.count || '0', 10);
 }
 
@@ -178,17 +184,19 @@ export async function getTeamMatchesCount(teamId: number | string): Promise<numb
  * Returns a Record mapping teamId -> matchesCount
  */
 export async function getAllTeamMatchesCount(): Promise<Record<number, number>> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT 
       t.id as team_id,
       COUNT(DISTINCT m.id) as count
     FROM teams t
     JOIN matches m ON (m.home_id = t.id OR m.away_id = t.id)
-    WHERE m.date < NOW()
-      AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats)
+    WHERE m.season_id = $1
+      AND m.date < NOW()
+      AND m.round_id IN (SELECT DISTINCT round_id FROM player_round_stats WHERE season_id = $1)
     GROUP BY t.id
   `;
-  const res = await pgClient.query(query);
+  const res = await pgClient.query(query, [seasonId]);
   const result: Record<number, number> = {};
   for (const row of res.rows) {
     result[Number(row.team_id)] = parseInt(row.count, 10);
@@ -201,6 +209,7 @@ export async function getAllTeamMatchesCount(): Promise<Record<number, number>> 
  * Returns a Record mapping teamId -> probability
  */
 export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, number>> {
+  const seasonId = await resolveReadSeasonId();
   // 1. Get current Euroleague standings based on finished matches
   const standingsQuery = `
     WITH TeamStandings AS (
@@ -216,7 +225,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
           CASE WHEN home_score_regtime + COALESCE(home_ot, 0) < away_score_regtime + COALESCE(away_ot, 0) THEN 1 ELSE 0 END as losses,
           home_score_regtime + COALESCE(home_ot, 0) as points_scored,
           away_score_regtime + COALESCE(away_ot, 0) as points_conceded
-        FROM matches WHERE status = 'finished'
+        FROM matches WHERE season_id = $1 AND status = 'finished'
         UNION ALL
         SELECT 
           away_id as team_id,
@@ -224,7 +233,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
           CASE WHEN away_score_regtime + COALESCE(away_ot, 0) < home_score_regtime + COALESCE(home_ot, 0) THEN 1 ELSE 0 END as losses,
           away_score_regtime + COALESCE(away_ot, 0) as points_scored,
           home_score_regtime + COALESCE(home_ot, 0) as points_conceded
-        FROM matches WHERE status = 'finished'
+        FROM matches WHERE season_id = $1 AND status = 'finished'
       ) all_matches
       GROUP BY team_id
     ),
@@ -237,7 +246,7 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
     )
     SELECT * FROM RankedStandings
   `;
-  const standingsRes = await pgClient.query(standingsQuery);
+  const standingsRes = await pgClient.query(standingsQuery, [seasonId]);
   const standings = standingsRes.rows;
 
   const tenthPlace = standings.find((s) => Number(s.position) === 10);
@@ -254,18 +263,18 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
         m.home_id as team_id,
         CASE WHEN (m.home_score_regtime + COALESCE(m.home_ot, 0) > m.away_score_regtime + COALESCE(m.away_ot, 0)) THEN 1 ELSE 0 END as win,
         ROW_NUMBER() OVER(PARTITION BY m.home_id ORDER BY m.date DESC) as rn
-      FROM matches m WHERE m.status = 'finished'
+      FROM matches m WHERE m.season_id = $1 AND m.status = 'finished'
       UNION ALL
       SELECT 
         m.away_id as team_id,
         CASE WHEN (m.away_score_regtime + COALESCE(m.away_ot, 0) > m.home_score_regtime + COALESCE(m.home_ot, 0)) THEN 1 ELSE 0 END as win,
         ROW_NUMBER() OVER(PARTITION BY m.away_id ORDER BY m.date DESC) as rn
-      FROM matches m WHERE m.status = 'finished'
+      FROM matches m WHERE m.season_id = $1 AND m.status = 'finished'
     ) recent
     WHERE rn <= 5
     GROUP BY team_id
   `;
-  const formRes = await pgClient.query(formQuery);
+  const formRes = await pgClient.query(formQuery, [seasonId]);
   const formData = new Map(formRes.rows.map((r) => [Number(r.team_id), Number(r.recent_wins)]));
 
   // 3. Schedule Difficulty (Next 3 opponents average position) for all teams
@@ -278,17 +287,17 @@ export async function getAllTeamsPlayoffProbabilities(): Promise<Record<number, 
         m.home_id as team_id,
         m.away_id as opponent_id,
         ROW_NUMBER() OVER(PARTITION BY m.home_id ORDER BY m.date ASC) as rn
-      FROM matches m WHERE m.date > NOW()
+      FROM matches m WHERE m.season_id = $1 AND m.date > NOW()
       UNION ALL
       SELECT 
         m.away_id as team_id,
         m.home_id as opponent_id,
         ROW_NUMBER() OVER(PARTITION BY m.away_id ORDER BY m.date ASC) as rn
-      FROM matches m WHERE m.date > NOW()
+      FROM matches m WHERE m.season_id = $1 AND m.date > NOW()
     ) next_matches
     WHERE rn <= 3
   `;
-  const nextMatchesRes = await pgClient.query(nextMatchesQuery);
+  const nextMatchesRes = await pgClient.query(nextMatchesQuery, [seasonId]);
   const nextOpponentsMap = new Map<number, number[]>();
   for (const row of nextMatchesRes.rows) {
     const tid = Number(row.team_id);

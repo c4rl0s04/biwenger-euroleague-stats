@@ -57,6 +57,7 @@ export interface UserMutations {
   resetActiveOwners: () => Promise<void>;
   resetUserSquad: (userId: string) => Promise<void>;
   getAllUsers: () => Promise<{ all: () => any[]; iterate: () => any[] }>;
+  markSeasonUsersInactiveExcept: (activeUserIds: string[]) => Promise<void>;
   updatePlayerOwner: (params: UpdatePlayerOwnerParams) => Promise<void>;
   updateUserColor: (colorIndex: number, userId: string) => Promise<void>;
   upsertUser: (params: UpsertUserParams) => Promise<void>;
@@ -120,13 +121,23 @@ export function prepareUserMutations(
           SET owner_id = NULL
           WHERE team_id IN (SELECT id FROM teams WHERE is_active = true)
         `);
+        await db.query(
+          `
+          UPDATE player_seasons
+          SET owner_id = NULL, updated_at = NOW()
+          WHERE season_id = $1
+            AND team_id IN (SELECT id FROM teams WHERE is_active = true)
+        `,
+          [seasonId]
+        );
+        return;
       }
+
       await db.query(
         `
         UPDATE player_seasons
         SET owner_id = NULL, updated_at = NOW()
         WHERE season_id = $1
-          AND team_id IN (SELECT id FROM teams WHERE is_active = true)
       `,
         [seasonId]
       );
@@ -143,12 +154,49 @@ export function prepareUserMutations(
     },
 
     getAllUsers: async () => {
-      // Return objects with .all() behavior (array of rows)
-      const res = await db.query('SELECT id, name, icon, color_index FROM users');
+      const res = await db.query(
+        `
+        SELECT
+          u.id,
+          COALESCE(us.name, u.name) AS name,
+          COALESCE(us.icon, u.icon) AS icon,
+          COALESCE(us.color_index, u.color_index, 0) AS color_index
+        FROM user_seasons us
+        JOIN users u ON u.id = us.user_id
+        WHERE us.season_id = $1
+          AND COALESCE(us.status, 'active') = 'active'
+        ORDER BY COALESCE(us.name, u.name), u.id
+      `,
+        [seasonId]
+      );
       return {
         all: () => res.rows,
         iterate: () => res.rows, // simplified iterator access
       };
+    },
+
+    markSeasonUsersInactiveExcept: async (activeUserIds: string[]) => {
+      if (activeUserIds.length === 0) {
+        await db.query(
+          `
+          UPDATE user_seasons
+          SET status = 'inactive', updated_at = NOW()
+          WHERE season_id = $1
+        `,
+          [seasonId]
+        );
+        return;
+      }
+
+      await db.query(
+        `
+        UPDATE user_seasons
+        SET status = 'inactive', updated_at = NOW()
+        WHERE season_id = $1
+          AND NOT (user_id = ANY($2::text[]))
+      `,
+        [seasonId, activeUserIds]
+      );
     },
 
     updatePlayerOwner: async (params: UpdatePlayerOwnerParams) => {

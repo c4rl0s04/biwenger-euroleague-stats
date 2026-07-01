@@ -244,7 +244,9 @@ export function preparePlayerMutations(
     },
 
     setAllTeamsInactive: async () => {
-      await db.query('UPDATE teams SET is_active = false');
+      if (seasonId === DEFAULT_SEASON_ID) {
+        await db.query('UPDATE teams SET is_active = false');
+      }
     },
   };
 }

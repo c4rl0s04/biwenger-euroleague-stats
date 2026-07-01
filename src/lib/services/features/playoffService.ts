@@ -1,14 +1,15 @@
 import 'server-only';
 import { db } from '../../db';
 import {
-  DEFAULT_SEASON_ID,
   playoffPredictions,
   playoffResults,
   userPlayoffMedia,
   users,
   teams,
+  userSeasons,
 } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
+import { resolveReadSeasonId } from '../../db/season-context';
 
 /**
  * Playoff Service
@@ -23,8 +24,20 @@ export const SCORING_RULES = {
 };
 
 export async function getPlayoffLeaderboard() {
-  const seasonId = process.env.DEFAULT_SEASON_ID || DEFAULT_SEASON_ID;
-  const allUsers = await db.select().from(users);
+  const seasonId = await resolveReadSeasonId();
+  const allUsers = await db
+    .select({
+      id: users.id,
+      name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
+      icon: sql<string | null>`COALESCE(${userSeasons.icon}, ${users.icon})`,
+      colorIndex: sql<number>`COALESCE(${userSeasons.colorIndex}, ${users.colorIndex}, 0)`,
+    })
+    .from(users)
+    .innerJoin(
+      userSeasons,
+      and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+    )
+    .where(sql`COALESCE(${userSeasons.status}, 'active') <> 'inactive'`);
   const predictions = await db
     .select()
     .from(playoffPredictions)
@@ -87,7 +100,7 @@ export async function getPlayoffLeaderboard() {
 }
 
 export async function getPlayoffResults() {
-  const seasonId = process.env.DEFAULT_SEASON_ID || DEFAULT_SEASON_ID;
+  const seasonId = await resolveReadSeasonId();
   return await db.select().from(playoffResults).where(eq(playoffResults.seasonId, seasonId));
 }
 

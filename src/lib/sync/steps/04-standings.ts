@@ -16,14 +16,17 @@ export async function run(manager: SyncManager) {
 
     // Initialize Mutations
     const mutations = prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
+    const activeUserIds: string[] = [];
 
     for (const user of standings) {
+      activeUserIds.push(user.id.toString());
       await mutations.upsertUser({
         id: user.id.toString(),
         name: user.name,
         icon: user.icon ? `https://cdn.biwenger.com/${user.icon}` : null,
       });
     }
+    await mutations.markSeasonUsersInactiveExcept(activeUserIds);
 
     return {
       success: true,

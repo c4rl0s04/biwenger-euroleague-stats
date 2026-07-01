@@ -43,6 +43,13 @@
       "when": 1782764092053,
       "tag": "0005_brown_lily_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782931055474,
+      "tag": "0006_chilly_sunspot",
+      "breakpoints": true
     }
   ]
 }

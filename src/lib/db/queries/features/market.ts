@@ -1,6 +1,7 @@
 import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '../core/teams';
 import { db, pgClient } from '../../index';
 import { getPlayerFormMap } from '../core/playerForm';
+import { resolveReadSeasonId } from '../../season-context';
 
 // ==========================================
 // INTERFACES
@@ -409,13 +410,14 @@ export interface PlayerTransferEvent {
  * Get the historical price evolution for a specific player
  */
 export async function getPlayerPriceHistory(playerId: number): Promise<PlayerPriceHistoryPoint[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT date, price 
-    FROM market_values 
-    WHERE player_id = $1 
+    SELECT date, price
+    FROM market_values
+    WHERE season_id = $2 AND player_id = $1
     ORDER BY date ASC
   `;
-  return (await pgClient.query(query, [playerId])).rows;
+  return (await pgClient.query(query, [playerId, seasonId])).rows;
 }
 
 /**
@@ -423,11 +425,12 @@ export async function getPlayerPriceHistory(playerId: number): Promise<PlayerPri
  * assignment from the system ("Biwenger").
  */
 export async function getPlayerTransfers(playerId: number): Promise<PlayerTransferEvent[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
-      f.fecha as date, 
-      f.vendedor as from_name, 
-      f.comprador as to_name, 
+    SELECT
+      f.fecha as date,
+      f.vendedor as from_name,
+      f.comprador as to_name,
       f.precio as amount,
       u1.icon as from_img,
       u2.icon as to_img,
@@ -438,21 +441,21 @@ export async function getPlayerTransfers(playerId: number): Promise<PlayerTransf
     FROM fichajes f
     LEFT JOIN users u1 ON f.vendedor = u1.name
     LEFT JOIN users u2 ON f.comprador = u2.name
-    WHERE f.player_id = $1 
+    WHERE f.season_id = $2 AND f.player_id = $1
     ORDER BY f.timestamp DESC
   `;
-  const transfers = (await pgClient.query(query, [playerId])).rows;
+  const transfers = (await pgClient.query(query, [playerId, seasonId])).rows;
 
   // Check for Initial Squad Assignment to complete the full transfer timeline
   const initialSquadQuery = `
-    SELECT 
-      u.id as user_id, u.name as owner_name, u.color_index as owner_color_index, 
-      u.icon as owner_img 
+    SELECT
+      u.id as user_id, u.name as owner_name, u.color_index as owner_color_index,
+      u.icon as owner_img
     FROM initial_squads s
     JOIN users u ON s.user_id = u.id
-    WHERE s.player_id = $1
+    WHERE s.season_id = $2 AND s.player_id = $1
   `;
-  const initialOwnerRes = await pgClient.query(initialSquadQuery, [playerId]);
+  const initialOwnerRes = await pgClient.query(initialSquadQuery, [playerId, seasonId]);
   const initialOwner = initialOwnerRes.rows[0];
 
   if (initialOwner) {
@@ -572,8 +575,9 @@ export interface Devaluation {
  * @returns {Promise<Transfer[]>} List of transfers
  */
 export async function getAllTransfers(limit = 100, offset = 0): Promise<Transfer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       id,
       fecha,
       player_id,
@@ -581,11 +585,12 @@ export async function getAllTransfers(limit = 100, offset = 0): Promise<Transfer
       vendedor,
       comprador
     FROM fichajes
+    WHERE season_id = $3
     ORDER BY timestamp DESC
     LIMIT $1 OFFSET $2
   `;
 
-  return (await pgClient.query(query, [limit, offset])).rows;
+  return (await pgClient.query(query, [limit, offset, seasonId])).rows;
 }
 
 /**
@@ -594,8 +599,9 @@ export async function getAllTransfers(limit = 100, offset = 0): Promise<Transfer
  * @returns {Promise<RecentTransfer[]>} Recent transfers
  */
 export async function getRecentTransfers(limit = 5): Promise<RecentTransfer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       f.*,
       p.name as player_name,
       p.position,
@@ -607,10 +613,11 @@ export async function getRecentTransfers(limit = 5): Promise<RecentTransfer[]> {
     JOIN players p ON f.player_id = p.id
     LEFT JOIN users seller ON f.vendedor = seller.name
     LEFT JOIN users buyer ON f.comprador = buyer.name
+    WHERE f.season_id = $2
     ORDER BY f.timestamp DESC
     LIMIT $1
   `;
-  return (await pgClient.query(query, [limit])).rows;
+  return (await pgClient.query(query, [limit, seasonId])).rows;
 }
 
 /**
@@ -619,17 +626,19 @@ export async function getRecentTransfers(limit = 5): Promise<RecentTransfer[]> {
  * @returns {Promise<MarketTrend[]>} Daily market stats
  */
 export async function getMarketTrends(): Promise<MarketTrend[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       TO_CHAR(fecha::timestamp, 'YYYY-MM-DD') as date,
       COUNT(*) as count,
       ROUND(AVG(precio), 0) as avg_value
     FROM fichajes
+    WHERE season_id = $1
     GROUP BY date
     ORDER BY date ASC
     LIMIT 30
   `;
-  return (await pgClient.query(query)).rows.map((row: any) => ({
+  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,
     count: parseInt(row.count) || 0,
     avg_value: parseFloat(row.avg_value) || 0,
@@ -642,27 +651,30 @@ export async function getMarketTrends(): Promise<MarketTrend[]> {
  * @returns {Promise<MarketOpportunity[]>} List of recommended buys
  */
 export async function getMarketOpportunities(limit = 3): Promise<MarketOpportunity[]> {
+  const seasonId = await resolveReadSeasonId();
   // 1. Fetch available players basic info
   // Fetch more than 'limit' to ensure we can rank them correctly by value_score
   const query = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name,
       p.position,
       t.id as team_id,
       t.name as team,
-      p.price,
-      COALESCE(p.price_increment, 0) as price_trend
-    FROM players p
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE p.owner_id IS NULL
-      AND p.price > 0
-    ORDER BY p.price_increment DESC
+      COALESCE(ps.price, p.price) as price,
+      COALESCE(ps.price_increment, p.price_increment, 0) as price_trend
+    FROM player_seasons ps
+    JOIN players p ON ps.player_id = p.id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE ps.season_id = $1
+      AND ps.owner_id IS NULL
+      AND COALESCE(ps.price, p.price) > 0
+    ORDER BY COALESCE(ps.price_increment, p.price_increment, 0) DESC
     LIMIT 100
   `;
 
   const [rows, formMap] = await Promise.all([
-    pgClient.query(query).then((r) => r.rows),
+    pgClient.query(query, [seasonId]).then((r) => r.rows),
     getPlayerFormMap(3),
   ]);
 
@@ -694,23 +706,26 @@ export async function getSignificantPriceChanges(
   hoursAgo = 24,
   minChange = 500000
 ): Promise<PriceChange[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name,
       p.position,
       t.name as team,
-      p.price,
-      p.price_increment,
-      p.owner_id
-    FROM players p
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE ABS(COALESCE(p.price_increment, 0)) >= $1
-    ORDER BY ABS(price_increment) DESC
+      COALESCE(ps.price, p.price) as price,
+      COALESCE(ps.price_increment, p.price_increment) as price_increment,
+      ps.owner_id
+    FROM player_seasons ps
+    JOIN players p ON ps.player_id = p.id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE ps.season_id = $2
+      AND ABS(COALESCE(ps.price_increment, p.price_increment, 0)) >= $1
+    ORDER BY ABS(COALESCE(ps.price_increment, p.price_increment, 0)) DESC
     LIMIT 5
   `;
 
-  return (await pgClient.query(query, [minChange])).rows;
+  return (await pgClient.query(query, [minChange, seasonId])).rows;
 }
 
 /**
@@ -719,8 +734,9 @@ export async function getSignificantPriceChanges(
  * @returns {Promise<MarketKPIs>} Market statistics
  */
 export async function getMarketKPIs(): Promise<MarketKPIs> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       COUNT(*) as total_transfers,
       ROUND(AVG(precio), 2) as avg_value,
       MAX(precio) as max_value,
@@ -728,9 +744,10 @@ export async function getMarketKPIs(): Promise<MarketKPIs> {
       COUNT(DISTINCT comprador) as active_buyers,
       COUNT(DISTINCT vendedor) as active_sellers
     FROM fichajes
+    WHERE season_id = $1
   `;
 
-  const kpis = (await pgClient.query(query)).rows[0];
+  const kpis = (await pgClient.query(query, [seasonId])).rows[0];
   return {
     ...kpis,
     total_transfers: parseInt(kpis?.total_transfers) || 0,
@@ -753,20 +770,21 @@ export async function getMarketKPIs(): Promise<MarketKPIs> {
  * - Average Price
  */
 export async function getMarketOverviewKPIs(): Promise<MarketOverviewKPIs> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH BidStats AS (
-      SELECT COUNT(*) as losing_bids FROM transfer_bids
+      SELECT COUNT(*) as losing_bids FROM transfer_bids WHERE season_id = $1
     ),
     TransferStats AS (
-      SELECT COUNT(*) as total_transfers FROM fichajes WHERE precio > 0
+      SELECT COUNT(*) as total_transfers FROM fichajes WHERE season_id = $1 AND precio > 0
     )
-    SELECT 
-      (SELECT SUM(precio) FROM fichajes WHERE precio > 0) as total_volume,
+    SELECT
+      (SELECT SUM(precio) FROM fichajes WHERE season_id = $1 AND precio > 0) as total_volume,
       (SELECT total_transfers FROM TransferStats) as total_ops,
-      (SELECT AVG(precio) FROM fichajes WHERE precio > 0) as avg_price,
+      (SELECT AVG(precio) FROM fichajes WHERE season_id = $1 AND precio > 0) as avg_price,
       (SELECT 1.0 + (losing_bids::float / NULLIF(total_transfers, 0)) FROM BidStats, TransferStats) as avg_bids
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   const row = result.rows[0];
 
   return {
@@ -782,27 +800,30 @@ export async function getMarketOverviewKPIs(): Promise<MarketOverviewKPIs> {
  * "El más fichado"
  */
 export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       f.player_id,
       p.name,
       p.img,
       t.code as player_team,
       COUNT(*) as transfer_count,
       AVG(f.precio) as avg_price,
-      p.owner_id,
-      u.name as owner_name,
-      u.color_index as owner_color_index
+      ps.owner_id,
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
-    WHERE f.precio > 0
-    GROUP BY f.player_id, p.name, p.img, t.code, p.owner_id, u.name, u.color_index
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = f.season_id
+    WHERE f.season_id = $1 AND f.precio > 0
+    GROUP BY f.player_id, p.name, p.img, t.code, ps.owner_id, us.name, u.name, us.color_index, u.color_index
     ORDER BY transfer_count DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
 
   return result.rows.map((row: any) => ({
@@ -817,8 +838,9 @@ export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]>
  * "Récord Histórico"
  */
 export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       f.*,
       p.name as player_name,
       p.img as player_img,
@@ -835,13 +857,17 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
       us.color_index as seller_color
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users ub ON f.comprador = ub.name
-    LEFT JOIN users us ON f.vendedor = us.name
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN user_seasons usb ON f.comprador = usb.name AND usb.season_id = f.season_id
+    LEFT JOIN users ub ON COALESCE(usb.user_id, '') = ub.id
+    LEFT JOIN user_seasons uss ON f.vendedor = uss.name AND uss.season_id = f.season_id
+    LEFT JOIN users us ON COALESCE(uss.user_id, '') = us.id
+    WHERE f.season_id = $1
     ORDER BY f.precio DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -854,21 +880,23 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
  * "El Jeque"
  */
 export async function getBigSpender(): Promise<BigSpender[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       f.comprador as name,
-      u.id as user_id,
-      u.color_index as user_color_index,
+      COALESCE(us.user_id, u.id) as user_id,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
       SUM(f.precio) as total_spent,
       COUNT(*) as purchases_count
     FROM fichajes f
-    LEFT JOIN users u ON f.comprador = u.name
-    WHERE f.comprador != 'Mercado'
-    GROUP BY f.comprador, u.id, u.color_index
+    LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
+    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id OR f.comprador = u.name
+    WHERE f.season_id = $1 AND f.comprador != 'Mercado'
+    GROUP BY f.comprador, us.user_id, u.id, us.color_index, u.color_index
     ORDER BY total_spent DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -882,8 +910,9 @@ export async function getBigSpender(): Promise<BigSpender[]> {
  * "Récord Pujas"
  */
 export async function getRecordBid(): Promise<RecordBid[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       t.transfer_id,
       COUNT(*) as bid_count,
       f.player_id,
@@ -897,18 +926,20 @@ export async function getRecordBid(): Promise<RecordBid[]> {
       tm.name as team_name,
       tm.img as team_logo
     FROM transfer_bids t
-    JOIN fichajes f ON t.transfer_id = f.id
-    LEFT JOIN users u ON f.comprador = u.name
+    JOIN fichajes f ON t.transfer_id = f.id AND t.season_id = f.season_id
+    LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
+    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     LEFT JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams tm ON p.team_id = tm.id
-    WHERE f.comprador != 'Mercado'
-    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, u.id, u.color_index, p.name, p.img, tm.code, tm.name, tm.img
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+    LEFT JOIN teams tm ON COALESCE(ps.team_id, p.team_id) = tm.id
+    WHERE f.season_id = $1 AND f.comprador != 'Mercado'
+    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, u.id, us.color_index, u.color_index, p.name, p.img, tm.code, tm.name, tm.img
     HAVING COUNT(*) >= 1 -- At least one loser exists, so at least 2 total bidders
     ORDER BY bid_count DESC
-    
+
   `;
   try {
-    const result = await pgClient.query(query);
+    const result = await pgClient.query(query, [seasonId]);
     if (!result.rows.length) return [];
     return result.rows.map((row: any) => ({
       ...row,
@@ -926,8 +957,9 @@ export async function getRecordBid(): Promise<RecordBid[]> {
  * NEW VERSION used in Market Page Charts
  */
 export async function getMarketTrendsAnalysis(days = 30): Promise<MarketAnalysisDay[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       TO_CHAR(to_timestamp(f.timestamp), 'YYYY-MM-DD') as date,
       SUM(f.precio) as volume,
       AVG(f.precio) as avg_price,
@@ -938,11 +970,11 @@ export async function getMarketTrendsAnalysis(days = 30): Promise<MarketAnalysis
       ) ORDER BY f.precio DESC) as transfers
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
-    WHERE f.timestamp >= extract(epoch from (now() - interval '${days} days'))
+    WHERE f.season_id = $1 AND f.timestamp >= extract(epoch from (now() - interval '${days} days'))
     GROUP BY date
     ORDER BY date ASC
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   return result.rows.map((r: any) => ({
     date: r.date,
     volume: parseInt(r.volume),
@@ -958,21 +990,23 @@ export async function getMarketTrendsAnalysis(days = 30): Promise<MarketAnalysis
  * - Price Stats by position
  */
 export async function getPositionAnalysis(): Promise<PositionAnalysis> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       p.position,
       COUNT(*) as count,
       AVG(f.precio) as avg_price,
       SUM(f.precio) as total_volume
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
-    WHERE f.vendedor = 'Mercado'
+    WHERE f.season_id = $1
+      AND f.vendedor = 'Mercado'
       AND f.comprador != 'Mercado'
       AND f.precio > 0
     GROUP BY p.position
     ORDER BY count DESC
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   const rows = result.rows;
 
   if (!rows.length) return { mostSigned: null, distribution: [] };
@@ -1007,11 +1041,12 @@ export async function getLiveMarketTransfers({
   buyer = 'all',
   seller = 'all',
 }: LiveMarketTransfersParams): Promise<PaginatedTransfers> {
+  const seasonId = await resolveReadSeasonId();
   const offset = (page - 1) * limit;
 
-  let whereClause = 'WHERE f.precio > 0';
-  const params: any[] = [];
-  let paramIndex = 1;
+  let whereClause = 'WHERE f.season_id = $1 AND f.precio > 0';
+  const params: any[] = [seasonId];
+  let paramIndex = 2;
 
   if (buyer && buyer !== 'all' && buyer !== 'Todos') {
     whereClause += ` AND f.comprador ILIKE '%' || $${paramIndex} || '%'`;
@@ -1027,7 +1062,7 @@ export async function getLiveMarketTransfers({
 
   // Row Query
   const query = `
-    SELECT 
+    SELECT
       f.id,
       f.fecha,
       f.precio,
@@ -1047,9 +1082,12 @@ export async function getLiveMarketTransfers({
       (SELECT COUNT(*) + 1 FROM transfer_bids tb WHERE tb.transfer_id = f.id) as bids_count
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users v ON v.name = f.vendedor
-    LEFT JOIN users c ON c.name = f.comprador
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN user_seasons vs ON vs.name = f.vendedor AND vs.season_id = f.season_id
+    LEFT JOIN users v ON COALESCE(vs.user_id, '') = v.id
+    LEFT JOIN user_seasons cs ON cs.name = f.comprador AND cs.season_id = f.season_id
+    LEFT JOIN users c ON COALESCE(cs.user_id, '') = c.id
     ${whereClause}
     ORDER BY f.timestamp DESC
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -1089,30 +1127,32 @@ export async function getLiveMarketTransfers({
  * Get Manager Finances (Purchases/Sales Balance)
  */
 export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH managers AS (
-      SELECT DISTINCT name as user_name
-      FROM users
-      WHERE name IS NOT NULL
+      SELECT COALESCE(us.name, u.name) as user_name, u.id, u.icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+      FROM user_seasons us
+      JOIN users u ON u.id = us.user_id
+      WHERE us.season_id = $1 AND COALESCE(us.name, u.name) IS NOT NULL
     ),
     purchases AS (
-      SELECT f.comprador as user_name, COUNT(*) as count, SUM(f.precio) as total 
+      SELECT f.comprador as user_name, COUNT(*) as count, SUM(f.precio) as total
       FROM fichajes f
       JOIN managers m ON m.user_name = f.comprador
-      WHERE f.comprador != 'Mercado' 
+      WHERE f.season_id = $1 AND f.comprador != 'Mercado'
       GROUP BY f.comprador
     ),
     sales AS (
-      SELECT f.vendedor as user_name, COUNT(*) as count, SUM(f.precio) as total 
+      SELECT f.vendedor as user_name, COUNT(*) as count, SUM(f.precio) as total
       FROM fichajes f
       JOIN managers m ON m.user_name = f.vendedor
-      WHERE f.vendedor != 'Mercado' 
+      WHERE f.season_id = $1 AND f.vendedor != 'Mercado'
       GROUP BY f.vendedor
     )
-    SELECT 
-      u.id as user_id,
-      u.icon as user_icon,
-      u.color_index as color_index,
+    SELECT
+      m.id as user_id,
+      m.icon as user_icon,
+      m.color_index as color_index,
       COALESCE(p.user_name, s.user_name) as user_name,
       COALESCE(p.count, 0) as purchases_count,
       COALESCE(p.total, 0) as purchases_total,
@@ -1120,11 +1160,11 @@ export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
       COALESCE(s.total, 0) as sales_total
     FROM purchases p
     FULL OUTER JOIN sales s ON p.user_name = s.user_name
-    JOIN users u ON u.name = COALESCE(p.user_name, s.user_name)
+    JOIN managers m ON m.user_name = COALESCE(p.user_name, s.user_name)
     ORDER BY (COALESCE(s.total, 0) - COALESCE(p.total, 0)) DESC
   `;
 
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   return result.rows.map((r: any) => ({
     user_id: r.user_id,
     user_icon: r.user_icon,
@@ -1145,31 +1185,34 @@ export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
  * - Excludes unsold players (inventory) and initial team sales (no purchase price).
  */
 export async function getBestSeller(): Promise<BestSeller[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       s.vendedor as name,
       u.id as user_id,
-      u.color_index as user_color_index,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
       SUM(s.precio - p.precio) as net_profit,
       SUM(s.precio) as total_sales,
       COUNT(*) as sales_count
     FROM fichajes s
-    LEFT JOIN users u ON s.vendedor = u.name
+    LEFT JOIN user_seasons us ON us.name = s.vendedor AND us.season_id = s.season_id
+    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     CROSS JOIN LATERAL (
-        SELECT precio 
+        SELECT precio
         FROM fichajes p
-        WHERE p.player_id = s.player_id 
+        WHERE p.season_id = s.season_id
+          AND p.player_id = s.player_id
           AND p.comprador = s.vendedor
           AND p.timestamp < s.timestamp
         ORDER BY p.timestamp DESC
         LIMIT 1
     ) p
-    WHERE s.vendedor != 'Mercado' -- Only check user sales
-    GROUP BY s.vendedor, u.id, u.color_index
+    WHERE s.season_id = $1 AND s.vendedor != 'Mercado' -- Only check user sales
+    GROUP BY s.vendedor, u.id, us.color_index, u.color_index
     ORDER BY net_profit DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1185,8 +1228,9 @@ export async function getBestSeller(): Promise<BestSeller[]> {
  * - Finds active ownership where price increased most since purchase
  */
 export async function getBestRevaluation(): Promise<BestRevaluation[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
@@ -1196,24 +1240,26 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
       u.id as user_id,
       u.name as user_name,
       u.color_index as user_color_index,
-      p.price as current_price,
+      COALESCE(ps.price, p.price) as current_price,
       f.precio as purchase_price,
-      (p.price - f.precio) as revaluation
-    FROM players p
-    JOIN fichajes f ON p.id = f.player_id AND p.owner_id IS NOT NULL
-    LEFT JOIN teams t ON p.team_id = t.id
-    JOIN users u ON p.owner_id = u.id
+      (COALESCE(ps.price, p.price) - f.precio) as revaluation
+    FROM player_seasons ps
+    JOIN players p ON ps.player_id = p.id
+    JOIN fichajes f ON p.id = f.player_id AND f.season_id = ps.season_id AND ps.owner_id IS NOT NULL
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    JOIN users u ON ps.owner_id = u.id
     -- Find the *last* purchase for this player by the CURRENT owner
     WHERE f.id = (
-      SELECT id FROM fichajes 
-      WHERE player_id = p.id AND comprador = u.name 
+      SELECT id FROM fichajes
+      WHERE season_id = ps.season_id AND player_id = p.id AND comprador = u.name
       ORDER BY timestamp DESC LIMIT 1
     )
-    AND (p.price - f.precio) > 0
+    AND ps.season_id = $1
+    AND (COALESCE(ps.price, p.price) - f.precio) > 0
     ORDER BY revaluation DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1230,31 +1276,34 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
  * - Logic: Sum(Points in ownership window) / Purchase Price (in Millions).
  */
 export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RoundStarts AS (
       SELECT round_id, MIN(date) as start_date
       FROM matches
+      WHERE season_id = $1
       GROUP BY round_id
     )
-    SELECT 
+    SELECT
       curr_owner.id as user_id,
-      curr_owner.name as user_name,
-      curr_owner.color_index as user_color_index,
-      
+      COALESCE(us.name, curr_owner.name) as user_name,
+      COALESCE(us.color_index, curr_owner.color_index, 0) as user_color_index,
+
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
-      
+
       f.id as transfer_id,
       f.precio as purchase_price,
-      
+
       -- Calculate total points earned in valid rounds
       (
         SELECT COALESCE(SUM(prs.fantasy_points), 0)
         FROM player_round_stats prs
         JOIN RoundStarts rs ON rs.round_id = prs.round_id
         WHERE prs.player_id = p.id
+          AND prs.season_id = $1
           AND to_timestamp(f.timestamp) < rs.start_date
           AND (
              sale.timestamp IS NULL OR to_timestamp(sale.timestamp) > rs.start_date
@@ -1267,6 +1316,7 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
         FROM player_round_stats prs
         JOIN RoundStarts rs ON rs.round_id = prs.round_id
         WHERE prs.player_id = p.id
+          AND prs.season_id = $1
           AND to_timestamp(f.timestamp) < rs.start_date
           AND (
              sale.timestamp IS NULL OR to_timestamp(sale.timestamp) > rs.start_date
@@ -1275,26 +1325,31 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
 
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    JOIN users curr_owner ON f.comprador = curr_owner.name
-    
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
+    JOIN users curr_owner ON curr_owner.id = us.user_id
+
     LEFT JOIN LATERAL (
-        SELECT timestamp 
+        SELECT timestamp
         FROM fichajes s
-        WHERE s.player_id = f.player_id 
+        WHERE s.season_id = f.season_id
+          AND s.player_id = f.player_id
           AND s.vendedor = f.comprador
           AND s.timestamp > f.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
 
-    WHERE f.precio > 100000 
+    WHERE f.season_id = $1
+      AND f.precio > 100000
       AND f.comprador != 'Mercado'
       AND (
         SELECT COALESCE(SUM(prs.fantasy_points), 0)
         FROM player_round_stats prs
         JOIN RoundStarts rs ON rs.round_id = prs.round_id
         WHERE prs.player_id = p.id
+          AND prs.season_id = $1
           AND to_timestamp(f.timestamp) < rs.start_date
           AND (
              sale.timestamp IS NULL OR to_timestamp(sale.timestamp) > rs.start_date
@@ -1302,9 +1357,9 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
       ) > 0
 
     ORDER BY points_per_million DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1319,22 +1374,25 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
  * Get breakdown of points for a specific transfer ownership window
  */
 export async function getBestValueDetails(transferId: number): Promise<BestValueDetail[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH purchase AS (
-      SELECT 
+      SELECT
         f.id as transfer_id,
         f.player_id,
         f.comprador,
+        f.season_id,
         f.timestamp as start_time,
         f.precio
       FROM fichajes f
-      WHERE f.id = $1
+      WHERE f.season_id = $2 AND f.id = $1
     ),
     sale AS (
-      SELECT 
+      SELECT
         s.timestamp as end_time
       FROM fichajes s, purchase p
-      WHERE s.player_id = p.player_id 
+      WHERE s.season_id = p.season_id
+        AND s.player_id = p.player_id
         AND s.vendedor = p.comprador
         AND s.timestamp > p.start_time
       ORDER BY s.timestamp ASC
@@ -1343,38 +1401,42 @@ export async function getBestValueDetails(transferId: number): Promise<BestValue
     RoundStarts AS (
       SELECT round_id, MIN(date) as start_date
       FROM matches
+      WHERE season_id = $2
       GROUP BY round_id
     )
-    SELECT 
+    SELECT
       m.round_name,
       m.date,
       COALESCE(prs.fantasy_points, 0) as points,
       (
-         CASE 
-           WHEN m.home_id = pl.team_id THEN t_away.name
-           ELSE t_home.name
+         CASE
+          WHEN m.home_id = COALESCE(ps.team_id, pl.team_id) THEN t_away.name
+          ELSE t_home.name
          END
       ) as opponent,
-      pl.team_id
+      COALESCE(ps.team_id, pl.team_id) as team_id
     FROM player_round_stats prs
     JOIN purchase p ON prs.player_id = p.player_id
     JOIN players pl ON p.player_id = pl.id
-    JOIN matches m ON m.round_id = prs.round_id
-      AND (m.home_id = pl.team_id OR m.away_id = pl.team_id)
+    LEFT JOIN player_seasons ps ON ps.player_id = pl.id AND ps.season_id = p.season_id
+    JOIN matches m ON m.season_id = p.season_id
+      AND m.round_id = prs.round_id
+      AND (m.home_id = COALESCE(ps.team_id, pl.team_id) OR m.away_id = COALESCE(ps.team_id, pl.team_id))
     JOIN RoundStarts rs ON rs.round_id = prs.round_id
     LEFT JOIN teams t_home ON m.home_id = t_home.id
     LEFT JOIN teams t_away ON m.away_id = t_away.id
     LEFT JOIN sale s ON true
-    WHERE 
+    WHERE
       -- Ownership must start BEFORE round lock
-      to_timestamp(p.start_time) < rs.start_date
+      prs.season_id = p.season_id
+      AND to_timestamp(p.start_time) < rs.start_date
       -- Must still own player when round starts
       AND (
          s.end_time IS NULL OR to_timestamp(s.end_time) > rs.start_date
       )
     ORDER BY m.date ASC
   `;
-  const result = await pgClient.query(query, [transferId]);
+  const result = await pgClient.query(query, [transferId, seasonId]);
   return result.rows.map((row: any) => ({
     ...row,
     points: parseInt(row.points),
@@ -1385,58 +1447,65 @@ export async function getBestValueDetails(transferId: number): Promise<BestValue
  * Get La Enfermería Players (Expensive players with most missed matches)
  */
 export async function getInfirmaryPlayers(): Promise<InfirmaryPlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH RoundStarts AS (
       SELECT round_id, MIN(date) as start_date
       FROM matches
+      WHERE season_id = $1
       GROUP BY round_id
     ),
     TargetPlayers AS (
-      SELECT 
+      SELECT
         p.id as player_id,
         p.name as player_name,
         p.img as player_img,
-        p.team_id,
+        COALESCE(ps.team_id, p.team_id) as team_id,
         t.code as player_team,
         u.id as user_id,
         u.name as user_name,
         u.color_index as user_color_index,
         f.precio as purchase_price,
         to_timestamp(f.timestamp) as signed_at
-      FROM players p
-      JOIN users u ON p.owner_id = u.id
-      LEFT JOIN teams t ON p.team_id = t.id
+      FROM player_seasons ps
+      JOIN players p ON ps.player_id = p.id
+      JOIN users u ON ps.owner_id = u.id
+      LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
       JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes f2
-        WHERE f2.player_id = p.id
+        WHERE f2.season_id = ps.season_id
+          AND f2.player_id = p.id
           AND f2.comprador = u.name
         ORDER BY timestamp DESC
         LIMIT 1
       ) f ON true
-      WHERE f.precio > 2000000
+      WHERE ps.season_id = $1
+        AND f.precio > 2000000
     ),
     TeamRounds AS (
-      SELECT 
+      SELECT
         tp.player_id,
         count(DISTINCT m.round_id) as total_team_rounds
       FROM TargetPlayers tp
       JOIN matches m ON (m.home_id = tp.team_id OR m.away_id = tp.team_id)
-      WHERE m.date >= tp.signed_at::date
+      WHERE m.season_id = $1
+        AND m.date >= tp.signed_at::date
         AND m.date < NOW()
       GROUP BY tp.player_id
     ),
     PlayedRounds AS (
-      SELECT 
+      SELECT
         tp.player_id,
         count(DISTINCT prs.round_id) as played_rounds
       FROM TargetPlayers tp
       JOIN player_round_stats prs ON prs.player_id = tp.player_id
       JOIN RoundStarts rs ON rs.round_id = prs.round_id
-      WHERE rs.start_date >= tp.signed_at
+      WHERE prs.season_id = $1
+        AND rs.start_date >= tp.signed_at
       GROUP BY tp.player_id
     )
-    SELECT 
+    SELECT
       tp.player_id,
       tp.player_name,
       tp.player_img,
@@ -1455,7 +1524,7 @@ export async function getInfirmaryPlayers(): Promise<InfirmaryPlayer[]> {
     ORDER BY missed_rounds DESC, available_rounds ASC;
   `;
 
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   return result.rows.map((row: any) => ({
     ...row,
     purchase_price: parseInt(row.purchase_price),
@@ -1471,22 +1540,25 @@ export async function getInfirmaryPlayers(): Promise<InfirmaryPlayer[]> {
  * i.e., "Stolen" under their noses.
  */
 export async function getTheThief(): Promise<TheThief[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       f.comprador as name,
       u.id as user_id,
       u.color_index as user_color_index,
       COUNT(DISTINCT f.id) as stolen_count
     FROM fichajes f
-    JOIN transfer_bids tb ON f.id = tb.transfer_id
-    LEFT JOIN users u ON f.comprador = u.name
-    WHERE f.comprador != 'Mercado'
+    JOIN transfer_bids tb ON f.id = tb.transfer_id AND tb.season_id = f.season_id
+    LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
+    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
+    WHERE f.season_id = $1
+      AND f.comprador != 'Mercado'
       AND tb.bidder_name != f.comprador -- Bid was from someone else
-    GROUP BY f.comprador, u.id, u.color_index
+    GROUP BY f.comprador, u.id, us.color_index, u.color_index
     ORDER BY stolen_count DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1499,13 +1571,14 @@ export async function getTheThief(): Promise<TheThief[]> {
  * The transfer with the smallest difference between winning price and second highest bid.
  */
 export async function getBiggestSteal(): Promise<BiggestSteal[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH ValidTransfers AS (
-      SELECT id, precio, comprador, player_id 
-      FROM fichajes 
-      WHERE comprador != 'Mercado'
+      SELECT id, precio, comprador, player_id
+      FROM fichajes
+      WHERE season_id = $1 AND comprador != 'Mercado'
     )
-    SELECT 
+    SELECT
       f.id as transfer_id,
       f.precio as winning_price,
       f.comprador as winner,
@@ -1520,30 +1593,34 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
       (f.precio - second_bid.amount) as price_diff
     FROM ValidTransfers f
     JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON f.comprador = u.name
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = $1
+    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     CROSS JOIN LATERAL (
         SELECT amount, bidder_name, bidder_id, bidder_color_index
         FROM (
-            -- We look for the highest LOSING bid. 
+            -- We look for the highest LOSING bid.
             -- If multiple people bid the same as the winner, we count that as a steal with 0 diff.
             -- One of the bids for this transfer_id in transfer_bids MUST be the winning f.precio.
-            -- So we look for bids where id != (the row that matched f.precio) 
+            -- So we look for bids where id != (the row that matched f.precio)
             -- or more simply: bids that are ONE of the multiple bids.
-            
+
             SELECT tb.amount, tb.bidder_name, u2.id as bidder_id, u2.color_index as bidder_color_index
             FROM transfer_bids tb
-            LEFT JOIN users u2 ON tb.bidder_name = u2.name
-            WHERE tb.transfer_id = f.id
+            LEFT JOIN user_seasons us2 ON us2.name = tb.bidder_name AND us2.season_id = tb.season_id
+            LEFT JOIN users u2 ON COALESCE(us2.user_id, '') = u2.id
+            WHERE tb.season_id = $1
+              AND tb.transfer_id = f.id
               AND tb.bidder_name != f.comprador -- The winner isn't a losing bid
             ORDER BY tb.amount DESC
             LIMIT 1
         ) sub
     ) second_bid
     ORDER BY price_diff ASC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1558,22 +1635,25 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
  * User with the most failed bids (bids that did not result in a purchase).
  */
 export async function getTheVictim(): Promise<TheVictim[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
         tb.bidder_name as name,
         u.id as user_id,
         u.color_index as user_color_index,
         COUNT(*) as failed_bids_count
     FROM transfer_bids tb
-    JOIN fichajes f ON tb.transfer_id = f.id
-    LEFT JOIN users u ON tb.bidder_name = u.name
-    WHERE tb.bidder_name != f.comprador -- The bidder was NOT the winner
+    JOIN fichajes f ON tb.transfer_id = f.id AND tb.season_id = f.season_id
+    LEFT JOIN user_seasons us ON us.name = tb.bidder_name AND us.season_id = tb.season_id
+    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
+    WHERE tb.season_id = $1
+      AND tb.bidder_name != f.comprador -- The bidder was NOT the winner
       AND tb.bidder_name != 'Mercado' -- Exclude system
-    GROUP BY tb.bidder_name, u.id, u.color_index
+    GROUP BY tb.bidder_name, u.id, us.color_index, u.color_index
     ORDER BY failed_bids_count DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -1587,6 +1667,7 @@ export async function getTheVictim(): Promise<TheVictim[]> {
  * - Managers who win contested auctions by paying well above the second-best bid
  */
 export async function getOverpayerManager(): Promise<OverpayerManager[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH CompetitiveWins AS (
       SELECT
@@ -1599,30 +1680,32 @@ export async function getOverpayerManager(): Promise<OverpayerManager[]> {
       JOIN LATERAL (
         SELECT tb.amount
         FROM transfer_bids tb
-        WHERE tb.transfer_id = f.id
+        WHERE tb.season_id = f.season_id
+          AND tb.transfer_id = f.id
           AND tb.bidder_name != f.comprador
           AND tb.amount < f.precio
         ORDER BY tb.amount DESC
         LIMIT 1
       ) second_bid ON true
-      WHERE f.comprador != 'Mercado'
+      WHERE f.season_id = $1 AND f.comprador != 'Mercado'
     )
     SELECT
       cw.name,
       u.id as user_id,
-      u.color_index as user_color_index,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
       COUNT(*) as contested_wins,
       SUM(cw.overpay) as total_overpay,
       AVG(cw.overpay) as avg_overpay
     FROM CompetitiveWins cw
-    LEFT JOIN users u ON cw.name = u.name
+    LEFT JOIN user_seasons us ON us.name = cw.name AND us.season_id = $1
+    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     WHERE cw.overpay > 0
-    GROUP BY cw.name, u.id, u.color_index
+    GROUP BY cw.name, u.id, us.color_index, u.color_index
     ORDER BY total_overpay DESC, avg_overpay DESC
-    
+
   `;
 
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
 
   return result.rows.map((row: any) => ({
@@ -1639,6 +1722,7 @@ export async function getOverpayerManager(): Promise<OverpayerManager[]> {
  * - Players most often bought above their market value on the transfer day
  */
 export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH TransferWithMarketValue AS (
       SELECT
@@ -1652,16 +1736,19 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
         (f.precio - mv.price) as inflation
       FROM fichajes f
       JOIN players p ON p.id = f.player_id
-      LEFT JOIN teams t ON p.team_id = t.id
+      LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+      LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
       JOIN LATERAL (
         SELECT mv.price
         FROM market_values mv
-        WHERE mv.player_id = f.player_id
+        WHERE mv.season_id = f.season_id
+          AND mv.player_id = f.player_id
           AND mv.date <= to_timestamp(f.timestamp)::date
         ORDER BY mv.date DESC
         LIMIT 1
       ) mv ON true
-      WHERE f.comprador != 'Mercado'
+      WHERE f.season_id = $1
+        AND f.comprador != 'Mercado'
         AND f.precio > mv.price
     )
     SELECT
@@ -1677,14 +1764,15 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
       u.color_index as buyer_color,
       t.transfer_id
     FROM TransferWithMarketValue t
-    JOIN fichajes f ON t.transfer_id = f.id
-    JOIN users u ON f.comprador = u.name
+    JOIN fichajes f ON t.transfer_id = f.id AND f.season_id = $1
+    JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
+    JOIN users u ON u.id = us.user_id
     ORDER BY t.inflation DESC
     LIMIT 100;
-    
+
   `;
 
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
 
   return result.rows.map((row: any) => ({
@@ -1700,33 +1788,49 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
  * Uses winner vs second-best bidder as the cleanest definition of a direct auction duel.
  */
 export async function getBiddingDuelsStats(): Promise<BiddingDuelsStats> {
+  const seasonId = await resolveReadSeasonId();
   const [usersResult, duelsResult] = await Promise.all([
-    pgClient.query('SELECT id, name, icon, color_index FROM users ORDER BY name ASC'),
-    pgClient.query(`
+    pgClient.query(
+      `
+      SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+      FROM user_seasons us
+      JOIN users u ON u.id = us.user_id
+      WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
+      ORDER BY COALESCE(us.name, u.name) ASC
+    `,
+      [seasonId]
+    ),
+    pgClient.query(
+      `
       SELECT
         winner.id as winner_id,
-        winner.name as winner_name,
-        winner.icon as winner_icon,
-        winner.color_index as winner_color_index,
+        COALESCE(winner_season.name, winner.name) as winner_name,
+        COALESCE(winner_season.icon, winner.icon) as winner_icon,
+        COALESCE(winner_season.color_index, winner.color_index, 0) as winner_color_index,
         runner.id as runner_id,
-        runner.name as runner_name,
-        runner.icon as runner_icon,
-        runner.color_index as runner_color_index,
+        COALESCE(runner_season.name, runner.name) as runner_name,
+        COALESCE(runner_season.icon, runner.icon) as runner_icon,
+        COALESCE(runner_season.color_index, runner.color_index, 0) as runner_color_index,
         (f.precio - second_bid.amount) as margin
       FROM fichajes f
-      JOIN users winner ON winner.name = f.comprador
+      JOIN user_seasons winner_season ON winner_season.name = f.comprador AND winner_season.season_id = f.season_id
+      JOIN users winner ON winner.id = winner_season.user_id
       JOIN LATERAL (
         SELECT tb.bidder_name, tb.amount
         FROM transfer_bids tb
-        WHERE tb.transfer_id = f.id
+        WHERE tb.season_id = f.season_id
+          AND tb.transfer_id = f.id
           AND tb.bidder_name != f.comprador
           AND tb.amount < f.precio
         ORDER BY tb.amount DESC
         LIMIT 1
       ) second_bid ON true
-      JOIN users runner ON runner.name = second_bid.bidder_name
-      WHERE f.comprador != 'Mercado'
-    `),
+      JOIN user_seasons runner_season ON runner_season.name = second_bid.bidder_name AND runner_season.season_id = f.season_id
+      JOIN users runner ON runner.id = runner_season.user_id
+      WHERE f.season_id = $1 AND f.comprador != 'Mercado'
+    `,
+      [seasonId]
+    ),
   ]);
 
   const users = usersResult.rows.map((user: any) => ({
@@ -1879,6 +1983,7 @@ export async function getBiddingDuelDetails(
   userId: number,
   opponentId: number
 ): Promise<BidDuelDetail[]> {
+  const seasonId = await resolveReadSeasonId();
   const normalizedUserId = Math.trunc(userId);
   const normalizedOpponentId = Math.trunc(opponentId);
 
@@ -1890,39 +1995,47 @@ export async function getBiddingDuelDetails(
       p.name as player_name,
       p.img as player_img,
       winner.id as winner_id,
-      winner.name as winner_name,
-      winner.icon as winner_icon,
-      winner.color_index as winner_color_index,
+      COALESCE(winner_season.name, winner.name) as winner_name,
+      COALESCE(winner_season.icon, winner.icon) as winner_icon,
+      COALESCE(winner_season.color_index, winner.color_index, 0) as winner_color_index,
       runner.id as runner_id,
-      runner.name as runner_name,
-      runner.icon as runner_icon,
-      runner.color_index as runner_color_index,
+      COALESCE(runner_season.name, runner.name) as runner_name,
+      COALESCE(runner_season.icon, runner.icon) as runner_icon,
+      COALESCE(runner_season.color_index, runner.color_index, 0) as runner_color_index,
       f.precio as winning_bid,
       second_bid.amount as second_bid,
       (f.precio - second_bid.amount) as margin
     FROM fichajes f
-    JOIN users winner ON winner.name = f.comprador
+    JOIN user_seasons winner_season ON winner_season.name = f.comprador AND winner_season.season_id = f.season_id
+    JOIN users winner ON winner.id = winner_season.user_id
     JOIN LATERAL (
       SELECT tb.bidder_name, tb.amount
       FROM transfer_bids tb
-      WHERE tb.transfer_id = f.id
+      WHERE tb.season_id = f.season_id
+        AND tb.transfer_id = f.id
         AND tb.bidder_name != f.comprador
         AND tb.amount < f.precio
       ORDER BY tb.amount DESC
       LIMIT 1
     ) second_bid ON true
-    JOIN users runner ON runner.name = second_bid.bidder_name
+    JOIN user_seasons runner_season ON runner_season.name = second_bid.bidder_name AND runner_season.season_id = f.season_id
+    JOIN users runner ON runner.id = runner_season.user_id
     JOIN players p ON p.id = f.player_id
-    WHERE f.comprador != 'Mercado'
+    WHERE f.season_id = $1
+      AND f.comprador != 'Mercado'
       AND (
-        (winner.id = '${normalizedUserId}' AND runner.id = '${normalizedOpponentId}')
+        (winner.id = $2 AND runner.id = $3)
         OR
-        (winner.id = '${normalizedOpponentId}' AND runner.id = '${normalizedUserId}')
+        (winner.id = $3 AND runner.id = $2)
       )
     ORDER BY f.timestamp DESC NULLS LAST, f.id DESC
   `;
 
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [
+    seasonId,
+    String(normalizedUserId),
+    String(normalizedOpponentId),
+  ]);
 
   return result.rows.map((row: any) => ({
     transfer_id: parseInt(row.transfer_id),
@@ -1950,41 +2063,45 @@ export async function getBiddingDuelDetails(
  * - Highest realized profit from a single transaction
  */
 export async function getBestSingleFlip(): Promise<SingleFlip[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
-      
+      COALESCE(us.name, u.name) as user_name,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
-      
+
       purchase.precio as purchase_price,
       sale.precio as sale_price,
       (sale.precio - purchase.precio) as profit
-      
+
     FROM fichajes purchase
-    JOIN users u ON purchase.comprador = u.name
+    JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
+    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
-    
+
     -- Join with the sale
     JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes s
-        WHERE s.player_id = purchase.player_id 
+        WHERE s.season_id = purchase.season_id
+          AND s.player_id = purchase.player_id
           AND s.vendedor = purchase.comprador
           AND s.timestamp > purchase.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
-    
-    WHERE purchase.comprador != 'Mercado'
+
+    WHERE purchase.season_id = $1
+      AND purchase.comprador != 'Mercado'
       AND (sale.precio - purchase.precio) > 0
     ORDER BY profit DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2000,41 +2117,45 @@ export async function getBestSingleFlip(): Promise<SingleFlip[]> {
  * - Biggest loss from a single transaction
  */
 export async function getWorstSingleFlip(): Promise<SingleFlip[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
-      
+      COALESCE(us.name, u.name) as user_name,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
-      
+
       purchase.precio as purchase_price,
       sale.precio as sale_price,
       (sale.precio - purchase.precio) as profit
-      
+
     FROM fichajes purchase
-    JOIN users u ON purchase.comprador = u.name
+    JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
+    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
-    
+
     -- Join with the sale
     JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes s
-        WHERE s.player_id = purchase.player_id 
+        WHERE s.season_id = purchase.season_id
+          AND s.player_id = purchase.player_id
           AND s.vendedor = purchase.comprador
           AND s.timestamp > purchase.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
-    
-    WHERE purchase.comprador != 'Mercado'
+
+    WHERE purchase.season_id = $1
+      AND purchase.comprador != 'Mercado'
       AND (sale.precio - purchase.precio) < 0
     ORDER BY profit ASC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2051,43 +2172,48 @@ export async function getWorstSingleFlip(): Promise<SingleFlip[]> {
  * - Only for currently owned players
  */
 export async function getBestPercentageGain(): Promise<PercentageGain[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
-      
+      COALESCE(us.name, u.name) as user_name,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
-      p.price as current_price,
-      
+      COALESCE(ps.price, p.price) as current_price,
+
       f.precio as purchase_price,
-      ((p.price - f.precio)::float / NULLIF(f.precio, 0)) * 100 as percentage_gain
-      
+      ((COALESCE(ps.price, p.price) - f.precio)::float / NULLIF(f.precio, 0)) * 100 as percentage_gain
+
     FROM fichajes f
-    JOIN users u ON f.comprador = u.name
+    JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
+    JOIN users u ON u.id = us.user_id
     JOIN players p ON f.player_id = p.id
-    
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+
     -- Ensure player is still owned by this purchase (no subsequent sale)
     LEFT JOIN LATERAL (
-        SELECT timestamp 
+        SELECT timestamp
         FROM fichajes s
-        WHERE s.player_id = f.player_id 
+        WHERE s.season_id = f.season_id
+          AND s.player_id = f.player_id
           AND s.vendedor = f.comprador
           AND s.timestamp > f.timestamp
         LIMIT 1
     ) sale ON true
-    
-    WHERE f.comprador != 'Mercado'
+
+    WHERE f.season_id = $1
+      AND f.comprador != 'Mercado'
       AND sale.timestamp IS NULL
-      AND (p.price - f.precio) > 0
+      AND (COALESCE(ps.price, p.price) - f.precio) > 0
       AND f.precio > 150000
 
     ORDER BY percentage_gain DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2102,8 +2228,9 @@ export async function getBestPercentageGain(): Promise<PercentageGain[]> {
  * "El Inquieto"
  */
 export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
@@ -2111,20 +2238,22 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
       t.name as team_name,
       t.img as team_logo,
       COUNT(DISTINCT f.comprador) as distinct_owners_count,
-      p.owner_id,
-      u.name as owner_name,
-      u.color_index as owner_color_index
+      ps.owner_id,
+      COALESCE(us.name, u.name) as owner_name,
+      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN users u ON p.owner_id = u.id
-    WHERE f.comprador != 'Mercado'
-    GROUP BY p.id, p.name, p.img, t.code, t.name, t.img, p.owner_id, u.name, u.color_index
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN users u ON ps.owner_id = u.id
+    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = f.season_id
+    WHERE f.season_id = $1 AND f.comprador != 'Mercado'
+    GROUP BY p.id, p.name, p.img, t.code, t.name, t.img, ps.owner_id, us.name, u.name, us.color_index, u.color_index
     HAVING COUNT(DISTINCT f.comprador) > 1
     ORDER BY distinct_owners_count DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2139,6 +2268,7 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
  * - Shows (Current Price - Sale Price) as missed profit
  */
 export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH LatestSales AS (
       SELECT DISTINCT ON (vendedor, player_id)
@@ -2147,7 +2277,7 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
         precio as sale_price,
         timestamp as sale_timestamp
       FROM fichajes
-      WHERE vendedor != 'Mercado'
+      WHERE season_id = $1 AND vendedor != 'Mercado'
       ORDER BY vendedor, player_id, timestamp DESC
     ),
     LatestPurchases AS (
@@ -2157,50 +2287,51 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
         precio as purchase_price,
         timestamp as purchase_timestamp
       FROM fichajes
-      WHERE comprador != 'Mercado'
+      WHERE season_id = $1 AND comprador != 'Mercado'
       ORDER BY comprador, player_id, timestamp DESC
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       u.name as user_name,
       u.color_index as user_color_index,
-      
+
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
-      
+
       ls.sale_price,
-      CASE 
-        WHEN p.owner_id = u.id THEN lp.purchase_price
-        ELSE p.price
+      CASE
+        WHEN ps.owner_id = u.id THEN lp.purchase_price
+        ELSE COALESCE(ps.price, p.price)
       END as current_price,
-      
-      (p.owner_id = u.id) as is_repurchase,
-      
-      CASE 
-        WHEN p.owner_id = u.id THEN (lp.purchase_price - ls.sale_price)
-        ELSE (p.price - ls.sale_price)
+
+      (ps.owner_id = u.id) as is_repurchase,
+
+      CASE
+        WHEN ps.owner_id = u.id THEN (lp.purchase_price - ls.sale_price)
+        ELSE (COALESCE(ps.price, p.price) - ls.sale_price)
       END as missed_profit
-      
+
     FROM LatestSales ls
     JOIN users u ON ls.user_name = u.name
     JOIN players p ON ls.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    LEFT JOIN LatestPurchases lp ON ls.user_name = lp.user_name 
-      AND ls.player_id = lp.player_id 
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN LatestPurchases lp ON ls.user_name = lp.user_name
+      AND ls.player_id = lp.player_id
       AND lp.purchase_timestamp > ls.sale_timestamp
-    
-    WHERE 
+
+    WHERE
       -- Case 1: Not owned and market price rose since sale
-      (p.owner_id != u.id AND p.price > ls.sale_price)
+      (ps.owner_id != u.id AND COALESCE(ps.price, p.price) > ls.sale_price)
       OR
       -- Case 2: Currently owned and repurchase price was higher than sale price
-      (p.owner_id = u.id AND lp.purchase_price > ls.sale_price)
-      
+      (ps.owner_id = u.id AND lp.purchase_price > ls.sale_price)
+
     ORDER BY missed_profit DESC
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2217,34 +2348,37 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
  * - User with the most completed buy→sell transactions
  */
 export async function getTopTrader(): Promise<TopTrader[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
+      COALESCE(us.name, u.name) as user_name,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
       COUNT(*) as trade_count,
       SUM(sale.precio - purchase.precio) as total_profit
-      
+
     FROM fichajes purchase
-    JOIN users u ON purchase.comprador = u.name
-    
+    JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
+    JOIN users u ON u.id = us.user_id
+
     -- Join with the subsequent sale
     JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes s
-        WHERE s.player_id = purchase.player_id 
+        WHERE s.season_id = purchase.season_id
+          AND s.player_id = purchase.player_id
           AND s.vendedor = purchase.comprador
           AND s.timestamp > purchase.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
-    
-    WHERE purchase.comprador != 'Mercado'
-    GROUP BY u.id, u.name, u.color_index
+
+    WHERE purchase.season_id = $1 AND purchase.comprador != 'Mercado'
+    GROUP BY u.id, u.name, u.color_index, us.name, us.color_index
     ORDER BY trade_count DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2259,36 +2393,39 @@ export async function getTopTrader(): Promise<TopTrader[]> {
  * - Player that has generated the most combined profit for all owners
  */
 export async function getProfitablePlayer(): Promise<PlayerProfitability[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
       COUNT(*) as trade_count,
       SUM(sale.precio - purchase.precio) as total_profit
-      
+
     FROM fichajes purchase
     JOIN players p ON purchase.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = purchase.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+
     JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes s
-        WHERE s.player_id = purchase.player_id 
+        WHERE s.season_id = purchase.season_id
+          AND s.player_id = purchase.player_id
           AND s.vendedor = purchase.comprador
           AND s.timestamp > purchase.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
-    
-    WHERE purchase.comprador != 'Mercado'
+
+    WHERE purchase.season_id = $1 AND purchase.comprador != 'Mercado'
     GROUP BY p.id, p.name, p.img, t.code
     HAVING SUM(sale.precio - purchase.precio) > 0
     ORDER BY total_profit DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2303,36 +2440,39 @@ export async function getProfitablePlayer(): Promise<PlayerProfitability[]> {
  * - Player that has caused the most combined losses for all owners
  */
 export async function getLossyPlayer(): Promise<PlayerProfitability[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
       COUNT(*) as trade_count,
       SUM(sale.precio - purchase.precio) as total_loss
-      
+
     FROM fichajes purchase
     JOIN players p ON purchase.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    
+    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = purchase.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+
     JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes s
-        WHERE s.player_id = purchase.player_id 
+        WHERE s.season_id = purchase.season_id
+          AND s.player_id = purchase.player_id
           AND s.vendedor = purchase.comprador
           AND s.timestamp > purchase.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
-    
-    WHERE purchase.comprador != 'Mercado'
+
+    WHERE purchase.season_id = $1 AND purchase.comprador != 'Mercado'
     GROUP BY p.id, p.name, p.img, t.code
     HAVING SUM(sale.precio - purchase.precio) < 0
     ORDER BY total_loss ASC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2347,41 +2487,45 @@ export async function getLossyPlayer(): Promise<PlayerProfitability[]> {
  * - Fastest buy→sell with profit (shortest time between transactions)
  */
 export async function getQuickestFlip(): Promise<QuickFlip[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
-      
+      COALESCE(us.name, u.name) as user_name,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
-      
+
       purchase.precio as purchase_price,
       sale.precio as sale_price,
       (sale.precio - purchase.precio) as profit,
       (sale.timestamp - purchase.timestamp) / 3600.0 as hours_held
-      
+
     FROM fichajes purchase
-    JOIN users u ON purchase.comprador = u.name
+    JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
+    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
-    
+
     JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes s
-        WHERE s.player_id = purchase.player_id 
+        WHERE s.season_id = purchase.season_id
+          AND s.player_id = purchase.player_id
           AND s.vendedor = purchase.comprador
           AND s.timestamp > purchase.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
-    
-    WHERE purchase.comprador != 'Mercado'
+
+    WHERE purchase.season_id = $1
+      AND purchase.comprador != 'Mercado'
       AND (sale.precio - purchase.precio) > 0
     ORDER BY (sale.timestamp - purchase.timestamp) ASC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2398,41 +2542,45 @@ export async function getQuickestFlip(): Promise<QuickFlip[]> {
  * - Longest ownership period that still resulted in profit
  */
 export async function getLongestProfitableHold(): Promise<LongHold[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
-      
+      COALESCE(us.name, u.name) as user_name,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
-      
+
       purchase.precio as purchase_price,
       sale.precio as sale_price,
       (sale.precio - purchase.precio) as profit,
       (sale.timestamp - purchase.timestamp) / 86400.0 as days_held
-      
+
     FROM fichajes purchase
-    JOIN users u ON purchase.comprador = u.name
+    JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
+    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
-    
+
     JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes s
-        WHERE s.player_id = purchase.player_id 
+        WHERE s.season_id = purchase.season_id
+          AND s.player_id = purchase.player_id
           AND s.vendedor = purchase.comprador
           AND s.timestamp > purchase.timestamp
         ORDER BY s.timestamp ASC
         LIMIT 1
     ) sale ON true
-    
-    WHERE purchase.comprador != 'Mercado'
+
+    WHERE purchase.season_id = $1
+      AND purchase.comprador != 'Mercado'
       AND (sale.precio - purchase.precio) > 0
     ORDER BY (sale.timestamp - purchase.timestamp) DESC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2449,37 +2597,42 @@ export async function getLongestProfitableHold(): Promise<LongHold[]> {
  * - Currently owned players with biggest unrealized losses
  */
 export async function getWorstRevaluation(): Promise<Devaluation[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
+      COALESCE(us.name, u.name) as user_name,
+      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
       t.name as team_name,
       t.img as team_logo,
-      p.price as current_price,
+      COALESCE(ps.price, p.price) as current_price,
       purchase.precio as purchase_price,
-      (p.price - purchase.precio) as devaluation
+      (COALESCE(ps.price, p.price) - purchase.precio) as devaluation
     FROM fichajes purchase
-    JOIN users u ON purchase.comprador = u.name
+    JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
+    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
-    WHERE (p.price - purchase.precio) < 0
-    AND purchase.comprador != 'Mercado'
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = purchase.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    WHERE purchase.season_id = $1
+      AND (COALESCE(ps.price, p.price) - purchase.precio) < 0
+      AND purchase.comprador != 'Mercado'
       AND NOT EXISTS (
           SELECT 1 FROM fichajes s
-          WHERE s.player_id = purchase.player_id 
+          WHERE s.season_id = purchase.season_id
+            AND s.player_id = purchase.player_id
             AND s.vendedor = purchase.comprador
             AND s.timestamp > purchase.timestamp
       )
-      AND p.price < purchase.precio
+      AND COALESCE(ps.price, p.price) < purchase.precio
     ORDER BY devaluation ASC
-    
+
   `;
-  const result = await pgClient.query(query);
+  const result = await pgClient.query(query, [seasonId]);
   if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
@@ -2495,27 +2648,29 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
  * @returns {Promise<CurrentMarketListing[]>}
  */
 export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     WITH PlayerTotals AS (
-      SELECT 
+      SELECT
         player_id,
-        (SELECT COUNT(*) FROM player_round_stats WHERE player_id = prs.player_id) as games_played,
+        (SELECT COUNT(*) FROM player_round_stats WHERE season_id = $1 AND player_id = prs.player_id) as games_played,
         ROUND(AVG(fantasy_points), 1) as season_avg,
         SUM(fantasy_points) as total_points,
         MIN(fantasy_points) as min_points,
         MAX(fantasy_points) as max_points
       FROM player_round_stats prs
+      WHERE season_id = $1
       GROUP BY player_id
     ),
     TeamNextMatch AS (
-      SELECT 
+      SELECT
         team_id,
         opponent_id,
         opponent_name,
         opponent_img,
         date
       FROM (
-        SELECT 
+        SELECT
           t.id as team_id,
           CASE WHEN m.home_id = t.id THEN m.away_id ELSE m.home_id END as opponent_id,
           CASE WHEN m.home_id = t.id THEN ta.name ELSE th.name END as opponent_name,
@@ -2526,11 +2681,11 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
         JOIN matches m ON m.home_id = t.id OR m.away_id = t.id
         LEFT JOIN teams th ON m.home_id = th.id
         LEFT JOIN teams ta ON m.away_id = ta.id
-        WHERE m.date > NOW()
+        WHERE m.season_id = $1 AND m.date > NOW()
       ) sub
       WHERE rn = 1
     )
-    SELECT 
+    SELECT
       ml.player_id,
       p.name,
       p.img,
@@ -2539,8 +2694,8 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       t.name as team,
       t.img as team_img,
       ml.price,
-      p.price as real_price,
-      COALESCE(p.price_increment, 0) as price_trend,
+      COALESCE(ps.price, p.price) as real_price,
+      COALESCE(ps.price_increment, p.price_increment, 0) as price_trend,
       COALESCE(pt.total_points, 0) as total_points,
       COALESCE(pt.season_avg, 0) as season_avg,
       pt.min_points,
@@ -2558,11 +2713,13 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       tnm.date as next_match_date
     FROM market_listings ml
     JOIN players p ON ml.player_id = p.id
-    LEFT JOIN teams t ON p.team_id = t.id
+    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = ml.season_id
+    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
     LEFT JOIN users u ON ml.seller_id::text = u.id::text
     LEFT JOIN PlayerTotals pt ON p.id = pt.player_id
-    LEFT JOIN TeamNextMatch tnm ON tnm.team_id = p.team_id
-    WHERE ml.listed_at = (SELECT MAX(listed_at) FROM market_listings)
+    LEFT JOIN TeamNextMatch tnm ON tnm.team_id = COALESCE(ps.team_id, p.team_id)
+    WHERE ml.season_id = $1
+      AND ml.listed_at = (SELECT MAX(listed_at) FROM market_listings WHERE season_id = $1)
     ORDER BY pt.season_avg DESC NULLS LAST, ml.price DESC
   `;
 
@@ -2572,7 +2729,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     getPlayerFormMap(),
   ]);
 
-  const rows = (await pgClient.query(query)).rows.map((row: any) => {
+  const rows = (await pgClient.query(query, [seasonId])).rows.map((row: any) => {
     const form = formMap.get(Number(row.player_id));
     return {
       ...row,

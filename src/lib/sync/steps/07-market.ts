@@ -2,6 +2,7 @@ import { biwengerFetch } from '../../api/biwenger-client';
 import { CONFIG } from '../../config';
 import { prepareMarketMutations } from '../../db/mutations/market';
 import { prepareUserMutations } from '../../db/mutations/users';
+import { DEFAULT_SEASON_ID } from '../../db/schema';
 import { SyncManager } from '../manager';
 
 /**
@@ -12,6 +13,7 @@ import { SyncManager } from '../manager';
  */
 export async function run(manager: SyncManager, playersListInput?: any, teamsInput?: any) {
   const db = manager.context.db;
+  const seasonId = manager.context.seasonId ?? DEFAULT_SEASON_ID;
   // Use inputs if provided (legacy/compat), otherwise default to context
   const playersList = playersListInput || manager.context.playersList || {};
   const teams = teamsInput || manager.context.teams || {};
@@ -19,9 +21,18 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
   manager.log('\n📥 Fetching Full Board History...');
 
   // Initialize Mutations
-  const mutations = prepareMarketMutations(db as any, { seasonId: manager.context.seasonId });
+  const mutations = prepareMarketMutations(db as any, { seasonId });
   const usersResult = await (db as any).query(
-    "SELECT name FROM users WHERE name IS NOT NULL AND TRIM(name) != ''"
+    `
+    SELECT COALESCE(us.name, u.name) as name
+    FROM user_seasons us
+    JOIN users u ON u.id = us.user_id
+    WHERE us.season_id = $1
+      AND COALESCE(us.status, 'active') = 'active'
+      AND COALESCE(us.name, u.name) IS NOT NULL
+      AND TRIM(COALESCE(us.name, u.name)) != ''
+  `,
+    [seasonId]
   );
   const validUserNames = new Set(
     usersResult.rows.map((row: any) => row.name).filter((name: string | null) => Boolean(name))
@@ -270,7 +281,12 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
 // Legacy export
 export const syncBoard = async (db: any, playersList: any, teams: any) => {
   const mockManager = {
-    context: { db, playersList: playersList || {}, teams: teams || {} },
+    context: {
+      db,
+      seasonId: DEFAULT_SEASON_ID,
+      playersList: playersList || {},
+      teams: teams || {},
+    },
     log: console.log,
     error: console.error,
   };

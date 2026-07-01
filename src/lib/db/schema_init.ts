@@ -302,13 +302,16 @@ export async function ensureSchema(db: DbClient) {
   // 15. Tournaments Table
   await db.query(`
     CREATE TABLE IF NOT EXISTS tournaments (
-      id INTEGER PRIMARY KEY,
+      internal_id SERIAL PRIMARY KEY,
+      id INTEGER NOT NULL,
+      season_id TEXT NOT NULL DEFAULT '2025-26' REFERENCES seasons(id),
       league_id INTEGER,
       name TEXT,
       type TEXT,
       status TEXT,
       data_json TEXT,
-      updated_at INTEGER
+      updated_at INTEGER,
+      UNIQUE(season_id, id)
     )
   `);
 
@@ -316,19 +319,23 @@ export async function ensureSchema(db: DbClient) {
   await db.query(`
     CREATE TABLE IF NOT EXISTS tournament_phases (
       id SERIAL PRIMARY KEY,
-      tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+      season_id TEXT NOT NULL DEFAULT '2025-26' REFERENCES seasons(id),
+      tournament_id INTEGER,
       name TEXT,
       type TEXT,
       order_index INTEGER,
-      UNIQUE(tournament_id, order_index)
+      FOREIGN KEY(season_id, tournament_id) REFERENCES tournaments(season_id, id) ON DELETE CASCADE,
+      UNIQUE(season_id, tournament_id, order_index)
     )
   `);
 
   // 17. Tournament Fixtures Table
   await db.query(`
     CREATE TABLE IF NOT EXISTS tournament_fixtures (
-      id INTEGER PRIMARY KEY,
-      tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+      internal_id SERIAL PRIMARY KEY,
+      id INTEGER NOT NULL,
+      season_id TEXT NOT NULL DEFAULT '2025-26' REFERENCES seasons(id),
+      tournament_id INTEGER,
       phase_id INTEGER REFERENCES tournament_phases(id) ON DELETE CASCADE,
       round_name TEXT,
       round_id INTEGER, -- Link to global round
@@ -338,7 +345,9 @@ export async function ensureSchema(db: DbClient) {
       home_score INTEGER,
       away_score INTEGER,
       date INTEGER,
-      status TEXT
+      status TEXT,
+      FOREIGN KEY(season_id, tournament_id) REFERENCES tournaments(season_id, id) ON DELETE CASCADE,
+      UNIQUE(season_id, tournament_id, id)
     )
   `);
 
@@ -346,7 +355,8 @@ export async function ensureSchema(db: DbClient) {
   await db.query(`
     CREATE TABLE IF NOT EXISTS tournament_standings (
       id SERIAL PRIMARY KEY,
-      tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+      season_id TEXT NOT NULL DEFAULT '2025-26' REFERENCES seasons(id),
+      tournament_id INTEGER,
       phase_name TEXT,
       group_name TEXT,
       user_id TEXT,
@@ -357,7 +367,8 @@ export async function ensureSchema(db: DbClient) {
       drawn INTEGER,
       scored INTEGER,
       against INTEGER,
-      UNIQUE(tournament_id, phase_name, group_name, user_id)
+      FOREIGN KEY(season_id, tournament_id) REFERENCES tournaments(season_id, id) ON DELETE CASCADE,
+      UNIQUE(season_id, tournament_id, phase_name, group_name, user_id)
     )
   `);
 

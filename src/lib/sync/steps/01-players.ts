@@ -2,6 +2,7 @@ import { fetchAllPlayers, fetchPlayerDetails } from '../../api/biwenger-client';
 import { getShortTeamName } from '../../utils/format';
 import { CONFIG } from '../../config';
 import { preparePlayerMutations } from '../../db/mutations/players';
+import { DEFAULT_SEASON_ID } from '../../db/schema';
 import { SyncManager } from '../manager';
 
 const SLEEP_MS = 600;
@@ -40,6 +41,7 @@ const parsePriceDate = (dateInt: number | string): string => {
 
 export async function run(manager: SyncManager) {
   const db = manager.context.db;
+  const seasonId = manager.context.seasonId ?? DEFAULT_SEASON_ID;
   manager.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
 
@@ -78,12 +80,22 @@ export async function run(manager: SyncManager) {
   const positions: any = CONFIG.POSITIONS;
   const teams = manager.context.teams;
 
-  const resExisting = await (db as any).query(
-    'SELECT id, puntos, points_home, points_away FROM players'
+  const resExistingSeason = await (db as any).query(
+    `
+    SELECT player_id AS id, puntos, points_home, points_away
+    FROM player_seasons
+    WHERE season_id = $1
+  `,
+    [seasonId]
   );
-  const existingPlayerMap = new Map(resExisting.rows.map((p: any) => [p.id, p]));
-  const existingPlayerIds = new Set(resExisting.rows.map((p: any) => p.id));
-  manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing players in DB.`);
+  const existingSeasonPlayerMap = new Map(resExistingSeason.rows.map((p: any) => [p.id, p]));
+
+  const resExistingPlayers = await (db as any).query('SELECT id FROM players');
+  const existingPlayerIds = new Set(resExistingPlayers.rows.map((p: any) => p.id));
+  manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing player identities in DB.`);
+  manager.log(
+    `   ℹ️ Found ${existingSeasonPlayerMap.size} existing player season rows for ${seasonId}.`
+  );
 
   manager.log('Syncing Teams...');
   await mutations.setAllTeamsInactive();
@@ -101,7 +113,7 @@ export async function run(manager: SyncManager) {
 
   for (const [id, player] of Object.entries(playersList) as any[]) {
     const playerId = parseInt(id);
-    const existing = existingPlayerMap.get(playerId);
+    const existing = existingSeasonPlayerMap.get(playerId);
 
     let finalPoints = player.points || 0;
     let finalPointsHome = player.pointsHome || 0;
