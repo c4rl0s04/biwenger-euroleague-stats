@@ -18,8 +18,7 @@ editors without Obsidian plugins.
 
 ## Choose your path
 
-- **New to the repository:** start with [local development](getting-started/local-development.md)
-  and [configuration](getting-started/configuration.md).
+- **New to the repository:** start with the [getting-started map](getting-started/README.md).
 - **Exploring the product:** use the [product map](product/README.md).
 - **Changing the system:** read the [architecture map](architecture/README.md) and
   [contributor guides](contributing/README.md).

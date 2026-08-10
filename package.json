@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "docs:check": "prettier --check README.md .agents/INSTRUCTIONS.md \"docs/**/*.md\" && node scripts/dev/check-docs.mjs",
     "format": "prettier --write src/",
     "setup": "node scripts/setup.js",
     "sync": "tsx -r dotenv/config src/lib/sync/index.ts",

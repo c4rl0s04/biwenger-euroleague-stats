@@ -2,8 +2,16 @@
 
 - [ ] `npm run lint`
 - [ ] `npm run typecheck`
+- [ ] `npm run docs:check`
 - [ ] `npm run test:run`
 - [ ] `SKIP_DB=true npm run build`
+
+## Documentation Safety
+
+- [ ] User-visible behavior, routes, configuration, schema, commands, architecture, and operational
+      rules changed by this PR are documented in the canonical `docs/` note.
+- [ ] New or moved notes are linked from the appropriate map of content and contain required
+      frontmatter.
 
 ## API Contract Safety
 
