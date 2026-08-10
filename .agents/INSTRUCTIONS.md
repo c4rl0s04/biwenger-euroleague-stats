@@ -1,77 +1,30 @@
-# Biwenger Stats Project Instructions
+# Biwenger Stats agent instructions
 
-This document centralizes all core engineering patterns for the **Biwenger Stats** repository.
+Use [`docs/README.md`](../docs/README.md) as the canonical project knowledge base. Do not duplicate
+long-form architecture or operational guidance in agent-only files.
 
----
+## Non-negotiable engineering rules
 
-## 🏗️ Pattern 1: Data-Driven Dashboard Features
+- Preserve uncommitted user changes and keep unrelated changes out of the task.
+- Treat production fantasy data as non-reconstructable. Follow the
+  [database safety runbook](../docs/operations/database-safety.md) before schema or repair work.
+- Keep database reads in `src/lib/db/queries/`, writes in `src/lib/db/mutations/`, business logic in
+  `src/lib/services/`, and HTTP concerns in `src/app/api/`.
+- Keep API handlers thin: authenticate and validate input, call the service layer, then return the
+  standard response envelope.
+- Make sync writes idempotent and register pipeline work through the numbered orchestration steps.
+  Never bypass the season guard or advisory lock in production.
+- Add `server-only` to server-exclusive modules and preserve Server/Client Component boundaries.
+- Update the canonical documentation in the same change when behavior, routes, configuration,
+  schema, commands, architecture, or safety rules change.
 
-**Sequence**: Query → Service → Route → Component
+## Required reading by task
 
-### 1. Database Query
-
-**File**: `src/lib/db/queries/<domain>/<file>.ts`
-
-- Use pure SQL via Drizzle's `sql` template tag (or query builder for simple CRUD).
-- Zero business logic. Explicitly type return values.
-- **Export**: Add to `src/lib/db/index.ts`.
-
-### 2. Service Layer
-
-**File**: `src/lib/services/<domain>Service.ts`
-
-- **Mandatory**: Add `import 'server-only';` at the top.
-- Handle business logic, data enrichment, and unified data shapes.
-- Consume queries only from `src/lib/db`.
-
-### 3. API Route
-
-**File**: `src/app/api/<section>/<name>/route.ts`
-
-- Keephandlers thin (~20 lines).
-- Validate input → call service → return via `successResponse` / `errorResponse`.
-- Use `CACHE_DURATIONS` for performance.
-
-### 4. Card Component
-
-**File**: `src/components/<section>/<Name>Card.js`
-
-- **Client Component**: Use `'use client'`.
-- Use `useApiData` for fetching and `useClientUser` for session context.
-- Wrap in the `Card` UI component for consistent styling.
-
----
-
-## 🔄 Pattern 2: Sync & ETL Pipeline
-
-**Sequence**: Mutation → Step → Orchestrator
-
-### 1. Database Mutation (Writes)
-
-**File**: `src/lib/db/mutations/<domain>.ts`
-
-- **Mandatory**: Use `INSERT ... ON CONFLICT DO UPDATE` (Upsert).
-- Ensure operations are **Idempotent** (safe to re-run).
-
-### 2. Sync Step
-
-**File**: `src/lib/sync/steps/<NN>-<name>.ts`
-
-- Fetch from external API → Map fields → Call mutation.
-- Only call **mutations** (writes), never queries (reads).
-- Sequential numbering (e.g., `14-tournaments.ts` → `15-`).
-
-### 3. Orchestration
-
-**File**: `src/lib/sync/index.ts`
-
-- Register the step in the main `sync()` function loop.
-
----
-
-## ✅ Best Practices
-
-- **Design**: Follow the "Premium Dashboard" aesthetic (Glow effects, Spotlight cards).
-- **Types**: Maintain strict TypeScript safety in the backend.
-- **Next.js**: Use v16 conventions (App Router, Metadata API, server-only).
-- **Sync**: Full pipeline via `npm run sync`, live scores via `npm run sync:live`.
+- Feature work: [product map](../docs/product/README.md) and
+  [application layers](../docs/architecture/application-layers.md).
+- Data or sync work: [data and sync architecture](../docs/architecture/data-and-sync.md),
+  [data sync runbook](../docs/operations/data-sync.md), and
+  [database safety](../docs/operations/database-safety.md).
+- Contribution and verification: [development workflow](../docs/contributing/development-workflow.md)
+  and [testing](../docs/contributing/testing.md).
+- Documentation changes: [documentation style](../docs/contributing/documentation-style.md).
