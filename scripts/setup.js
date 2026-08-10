@@ -210,6 +210,18 @@ async function main() {
     print('✓ Using local Docker database (default)', 'green');
   }
 
+  print('\n🗓️  Season Configuration', 'cyan');
+  console.log('-'.repeat(60));
+  config.SEASON_ID = (await ask('? Season ID (YYYY-YY, for example 2026-27): ')).trim();
+  config.SEASON_NAME = (
+    await ask(`? Season name (press Enter for EuroLeague Fantasy ${config.SEASON_ID}): `)
+  ).trim();
+  config.SEASON_NAME = config.SEASON_NAME || `EuroLeague Fantasy ${config.SEASON_ID}`;
+  config.EUROLEAGUE_SEASON_CODE = (
+    await ask('? Official EuroLeague season code (for example E2026): ')
+  ).trim();
+  config.LEAGUE_START_DATE = (await ask('? League start date (YYYY-MM-DD): ')).trim();
+
   // Write .env file
   printHeader('💾 Writing Configuration');
 
@@ -236,6 +248,15 @@ BIWENGER_LEAGUE_ID=${config.BIWENGER_LEAGUE_ID}
 BIWENGER_USER_ID=${config.BIWENGER_USER_ID}
 
 # ==========================================
+# CANONICAL SEASON CONFIGURATION
+# ==========================================
+SEASON_ID=${config.SEASON_ID}
+SEASON_NAME="${config.SEASON_NAME}"
+EUROLEAGUE_SEASON_CODE=${config.EUROLEAGUE_SEASON_CODE}
+LEAGUE_START_DATE=${config.LEAGUE_START_DATE}
+SEASON_AWARE_READS_CONFIRMED=false
+
+# ==========================================
 # APPLICATION AUTH
 # ==========================================
 # Password to access the admin/sync dashboard
@@ -243,11 +264,6 @@ ACCESS_PASSWORD="${config.ACCESS_PASSWORD}"
 # Random string for session encryption (generate with \`openssl rand -base64 32\`)
 AUTH_SECRET="${config.AUTH_SECRET}"
 
-# ==========================================
-# EUROLEAGUE CONFIG
-# ==========================================
-EUROLEAGUE_SEASON_CODE=E2025
-LEAGUE_START_DATE=2025-09-25
 `;
 
   fs.writeFileSync(envPath, envContent);

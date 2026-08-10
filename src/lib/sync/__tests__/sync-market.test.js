@@ -65,7 +65,7 @@ describe('syncBoard', () => {
       })
       .mockResolvedValueOnce({ data: [] });
 
-    const result = await syncBoard(db, {}, {});
+    const result = await syncBoard(db, {}, {}, '2025-26');
 
     expect(result.success).toBe(true);
     expect(db.query).toHaveBeenCalledWith(
@@ -94,7 +94,7 @@ describe('syncBoard', () => {
       })
       .mockResolvedValueOnce({ data: [] });
 
-    await syncBoard(db, {}, {});
+    await syncBoard(db, {}, {}, '2025-26');
 
     const insertCalls = db.query.mock.calls.filter(([sql]) => sql.includes('INSERT INTO fichajes'));
     expect(insertCalls).toHaveLength(0);

@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { CONFIG } from '../../config';
 import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
@@ -75,7 +76,7 @@ export function preparePlayerMutations(
   db: DbClient,
   options: PlayerMutationOptions = {}
 ): PlayerMutations {
-  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+  const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
 
   return {
     // Insert/Update Player Core Data

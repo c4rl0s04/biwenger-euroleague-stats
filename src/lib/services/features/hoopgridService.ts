@@ -7,19 +7,18 @@ import {
   playerRoundStats,
   initialSquads,
   fichajes,
+  teams,
   users,
   userSeasons,
 } from '@/lib/db/schema';
 import { eq, and, avg, count, sql, sum, max } from 'drizzle-orm';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import {
-  HOOPGRID_TEAMS,
   HOOPGRID_POSITIONS,
   HOOPGRID_STATS,
   HOOPGRID_COUNTRIES,
   HOOPGRID_MARKET,
   HOOPGRID_OWNERSHIP,
-  HOOPGRID_USER_OWNERSHIP,
   HOOPGRID_HEIGHT,
   HOOPGRID_AGE,
 } from '@/lib/constants/hoopgridCriteria';
@@ -642,7 +641,36 @@ export class HoopgridService {
         userSeasons,
         and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
       );
+    const seasonTeams = await db
+      .select({ id: teams.id, label: teams.name })
+      .from(teams)
+      .innerJoin(
+        playerSeasons,
+        and(eq(playerSeasons.teamId, teams.id), eq(playerSeasons.seasonId, seasonId))
+      )
+      .groupBy(teams.id, teams.name);
+    const teamCriteria = seasonTeams
+      .filter((team) => Boolean(team.label))
+      .map((team) => ({ id: team.id, label: team.label as string }));
+    const userOwnershipCriteria = allUsersList
+      .filter((user) => Boolean(user.name))
+      .flatMap((user) => [
+        {
+          type: 'user_ownership',
+          value: { userId: user.id, mode: 'current' },
+          label: `Pertenece a ${user.name}`,
+        },
+        {
+          type: 'user_ownership',
+          value: { userId: user.id, mode: 'past' },
+          label: `Ex-jugador de ${user.name}`,
+        },
+      ]);
     const idToName = new Map(allUsersList.map((u) => [u.id, u.name]));
+
+    if (teamCriteria.length < 3) {
+      throw new Error(`Season ${seasonId} has fewer than three teams available for Hoopgrid.`);
+    }
 
     const userOwnershipHistory = new Map();
     const allUsers = Array.from(
@@ -764,7 +792,7 @@ export class HoopgridService {
 
     while (attempts < 1000) {
       attempts++;
-      const rowPool = [...HOOPGRID_TEAMS, ...HOOPGRID_POSITIONS];
+      const rowPool = [...teamCriteria, ...HOOPGRID_POSITIONS];
       rows = pickN(rowPool, 3).map((item) => ({
         type: item.id ? 'team' : 'pos',
         value: item.id || item.value,
@@ -776,7 +804,7 @@ export class HoopgridService {
         ...HOOPGRID_COUNTRIES,
         ...HOOPGRID_MARKET,
         ...HOOPGRID_OWNERSHIP,
-        ...HOOPGRID_USER_OWNERSHIP,
+        ...userOwnershipCriteria,
         ...HOOPGRID_HEIGHT,
         ...HOOPGRID_AGE,
       ];

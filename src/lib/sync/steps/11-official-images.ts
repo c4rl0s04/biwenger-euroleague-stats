@@ -38,7 +38,7 @@ export async function run(manager: SyncManager) {
 
       // Use the Mobile App API which has no firewall
       const res = await fetch(
-        `https://api-live.euroleague.net/v1/players?playerCode=${paddedId}&seasonCode=E2025`
+        `${CONFIG.EUROLEAGUE.API_V1_URL}/v1/players?playerCode=${paddedId}&seasonCode=${CONFIG.SEASON.EUROLEAGUE_CODE}`
       );
 
       if (!res.ok) {

@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { DEFAULT_SEASON_ID } from '../schema';
+import { CONFIG } from '../../config';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -74,7 +74,7 @@ export function prepareMatchMutations(
   db: DbClient,
   options: MatchMutationOptions = {}
 ): MatchMutations {
-  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+  const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
 
   return {
     getMappedTeams: async () => {

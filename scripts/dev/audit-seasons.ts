@@ -1,6 +1,5 @@
 import * as dotenv from 'dotenv';
 import pg from 'pg';
-import { DEFAULT_SEASON_ID } from '../../src/lib/db/schema';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -82,7 +81,8 @@ async function main() {
       });
 
   try {
-    const seasonId = process.env.SEASON_ID || DEFAULT_SEASON_ID;
+    const { getSeasonConfig } = await import('../../src/lib/config.js');
+    const seasonId = getSeasonConfig().ID;
     console.log(`Season readiness audit for ${seasonId} (read-only).`);
 
     const seasons = await pool.query('SELECT id, name, status, frozen_at FROM seasons ORDER BY id');

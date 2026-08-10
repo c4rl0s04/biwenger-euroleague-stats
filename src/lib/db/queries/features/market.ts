@@ -2,6 +2,7 @@ import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '../core
 import { db, pgClient } from '../../index';
 import { getPlayerFormMap } from '../core/playerForm';
 import { resolveReadSeasonId } from '../../season-context';
+import { CONFIG } from '../../../config';
 
 // ==========================================
 // INTERFACES
@@ -463,7 +464,7 @@ export async function getPlayerTransfers(playerId: number): Promise<PlayerTransf
     try {
       // Look up global settings for the precise start date if needed, otherwise fallback
       initialDate = new Date().toISOString();
-      const CONFIG_START_DATE = process.env.LEAGUE_START_DATE;
+      const CONFIG_START_DATE = CONFIG.SEASON.START_DATE;
       if (CONFIG_START_DATE) {
         const d = new Date(CONFIG_START_DATE);
         if (!isNaN(d.getTime())) initialDate = d.toISOString();

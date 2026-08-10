@@ -20,7 +20,6 @@ const getRandomDelay = (min = 2000, max = 5000) => {
  */
 // --- Version Caching State ---
 let cachedVersion = null;
-const DEFAULT_VERSION = 630; // Fallback
 
 /**
  * Ensures we have the API version.
@@ -36,12 +35,20 @@ async function ensureApiVersion() {
     if (res.version) {
       cachedVersion = res.version;
       console.log(`✅ Biwenger API Version Detected: ${cachedVersion}`);
+    } else if (CONFIG.API.VERSION_FALLBACK) {
+      cachedVersion = CONFIG.API.VERSION_FALLBACK;
+      console.warn(`⚠️ Biwenger version missing; using configured fallback ${cachedVersion}`);
     } else {
-      cachedVersion = DEFAULT_VERSION;
+      throw new Error('Biwenger account response did not include an API version');
     }
   } catch (e) {
-    console.warn(`⚠️ Failed to detect API version, using fallback: ${DEFAULT_VERSION}`);
-    cachedVersion = DEFAULT_VERSION;
+    if (!CONFIG.API.VERSION_FALLBACK) {
+      throw new Error(
+        `Failed to detect Biwenger API version and BIWENGER_API_VERSION_FALLBACK is not configured: ${e.message}`
+      );
+    }
+    cachedVersion = CONFIG.API.VERSION_FALLBACK;
+    console.warn(`⚠️ Failed to detect API version, using configured fallback: ${cachedVersion}`);
   }
   return cachedVersion;
 }

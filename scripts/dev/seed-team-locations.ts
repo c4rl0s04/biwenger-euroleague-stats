@@ -2,7 +2,8 @@ import 'dotenv/config';
 import { sql } from 'drizzle-orm';
 
 async function seedTeamLocations() {
-  console.log('🌱 Updating Team Locations for 2025-26 Season...');
+  const { CONFIG } = await import('../../src/lib/config.js');
+  console.log(`🌱 Updating team locations for ${CONFIG.SEASON.ID}...`);
 
   // Dynamically import db after dotenv
   const { db } = await import('../../src/lib/db/index.js');

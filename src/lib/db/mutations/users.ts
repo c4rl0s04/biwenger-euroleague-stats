@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { CONFIG } from '../../config';
 import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
@@ -100,7 +101,7 @@ export function prepareUserMutations(
   db: DbClient,
   options: UserMutationOptions = {}
 ): UserMutations {
-  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+  const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
 
   return {
     resetAllOwners: async () => {

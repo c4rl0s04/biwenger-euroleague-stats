@@ -2,7 +2,6 @@ import { biwengerFetch } from '../../api/biwenger-client';
 import { CONFIG } from '../../config';
 import { prepareMarketMutations } from '../../db/mutations/market';
 import { prepareUserMutations } from '../../db/mutations/users';
-import { DEFAULT_SEASON_ID } from '../../db/schema';
 import { SyncManager } from '../manager';
 
 /**
@@ -13,7 +12,8 @@ import { SyncManager } from '../manager';
  */
 export async function run(manager: SyncManager, playersListInput?: any, teamsInput?: any) {
   const db = manager.context.db;
-  const seasonId = manager.context.seasonId ?? DEFAULT_SEASON_ID;
+  const seasonId = manager.context.seasonId;
+  if (!seasonId) throw new Error('Canonical sync season was not resolved before Step 7.');
   // Use inputs if provided (legacy/compat), otherwise default to context
   const playersList = playersListInput || manager.context.playersList || {};
   const teams = teamsInput || manager.context.teams || {};
@@ -279,11 +279,12 @@ export async function run(manager: SyncManager, playersListInput?: any, teamsInp
 }
 
 // Legacy export
-export const syncBoard = async (db: any, playersList: any, teams: any) => {
+export const syncBoard = async (db: any, playersList: any, teams: any, seasonId: string) => {
+  if (!seasonId) throw new Error('syncBoard requires an explicit seasonId.');
   const mockManager = {
     context: {
       db,
-      seasonId: DEFAULT_SEASON_ID,
+      seasonId,
       playersList: playersList || {},
       teams: teams || {},
     },

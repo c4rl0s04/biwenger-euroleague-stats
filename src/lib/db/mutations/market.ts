@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { DEFAULT_SEASON_ID } from '../schema';
+import { CONFIG } from '../../config';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -80,7 +80,7 @@ export function prepareMarketMutations(
   db: DbClient,
   options: MarketMutationOptions = {}
 ): MarketMutations {
-  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+  const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
 
   return {
     insertTransfer: async (params: InsertTransferParams) => {

@@ -13,6 +13,7 @@ vi.mock('../../db/client', () => ({
 
 vi.mock('../../db/schema_init', () => ({
   ensureSchema: vi.fn(async () => {}),
+  validateSchemaReady: vi.fn(async () => {}),
 }));
 
 vi.mock('../../utils/cache', () => ({
@@ -113,5 +114,18 @@ describe('SyncManager hardening behavior', () => {
 
     expect(step).toHaveBeenCalledTimes(1);
     expect(manager.steps[0].metadata.number).toBe(7);
+  });
+
+  it('uses read-only schema validation in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const schema = await import('../../db/schema_init');
+    const { SyncManager } = await import('../manager');
+    const manager = new SyncManager('unused', { useAdvisoryLock: false });
+
+    await manager.run();
+
+    expect(schema.validateSchemaReady).toHaveBeenCalledTimes(1);
+    expect(schema.ensureSchema).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
   });
 });

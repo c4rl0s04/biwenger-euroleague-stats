@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
+import { CONFIG } from './config';
 import { db } from './db';
-import { DEFAULT_SEASON_ID, seasons } from './db/schema';
+import { seasons } from './db/schema';
 
 export type SeasonStatus = 'active' | 'frozen' | 'archived';
 
@@ -22,7 +23,7 @@ export class SeasonError extends Error {
 }
 
 export function getDefaultSeasonId(): string {
-  return process.env.DEFAULT_SEASON_ID || DEFAULT_SEASON_ID;
+  return CONFIG.SEASON.ID;
 }
 
 export async function getSeasonById(seasonId: string): Promise<SeasonRecord | null> {

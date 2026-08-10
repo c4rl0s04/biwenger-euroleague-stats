@@ -1,24 +1,3 @@
-export const HOOPGRID_TEAMS = [
-  { id: 579, label: 'Real Madrid' },
-  { id: 571, label: 'FC Barcelona' },
-  { id: 578, label: 'Panathinaikos' },
-  { id: 577, label: 'Olympiacos' },
-  { id: 573, label: 'Fenerbahce' },
-  { id: 598, label: 'AS Monaco' },
-  { id: 576, label: 'Maccabi' },
-  { id: 580, label: 'Baskonia' },
-  { id: 560, label: 'Anadolu Efes' },
-  { id: 569, label: 'Crvena Zvezda' },
-  { id: 568, label: 'Milán' },
-  { id: 572, label: 'Bayern Múnich' },
-  { id: 575, label: 'ASVEL' },
-  { id: 713, label: 'Paris' },
-  { id: 642, label: 'Partizan' },
-  { id: 582, label: 'Zalgiris' },
-  { id: 645, label: 'Virtus Bologna' },
-  { id: 581, label: 'Valencia Basket' },
-];
-
 export const HOOPGRID_POSITIONS = [
   { value: 'Base', label: 'Base' },
   { value: 'Alero', label: 'Alero' },
@@ -72,79 +51,6 @@ export const HOOPGRID_OWNERSHIP = [
   { type: 'ownership', value: 'free', label: 'Agente Libre' },
   { type: 'ownership', value: 'past_not_current', label: 'Anteriormente en plantilla' },
   { type: 'ownership', value: 'never', label: 'Nunca Fichado' },
-];
-
-export const HOOPGRID_USER_OWNERSHIP = [
-  {
-    type: 'user_ownership',
-    value: { userId: '13207868', mode: 'current' },
-    label: 'Pertenece a All Stars',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13207868', mode: 'past' },
-    label: 'Ex-jugador de All Stars',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13207924', mode: 'current' },
-    label: 'Pertenece a ask72',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13207924', mode: 'past' },
-    label: 'Ex-jugador de ask72',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13208192', mode: 'current' },
-    label: 'Pertenece a Real Madrid Basket',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13208192', mode: 'past' },
-    label: 'Ex-jugador de Real Madrid Basket',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13207910', mode: 'current' },
-    label: 'Pertenece a June',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13207910', mode: 'past' },
-    label: 'Ex-jugador de June',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13208960', mode: 'current' },
-    label: 'Pertenece a Cactus Team',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13208960', mode: 'past' },
-    label: 'Ex-jugador de Cactus Team',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13209320', mode: 'current' },
-    label: 'Pertenece a Daniel De Castro',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13209320', mode: 'past' },
-    label: 'Ex-jugador de Daniel De Castro',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13207974', mode: 'current' },
-    label: 'Pertenece a Nonameyet',
-  },
-  {
-    type: 'user_ownership',
-    value: { userId: '13207974', mode: 'past' },
-    label: 'Ex-jugador de Nonameyet',
-  },
 ];
 
 export const HOOPGRID_COUNTRIES = [

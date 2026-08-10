@@ -6,6 +6,82 @@ export type DbClient =
       query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
     };
 
+const REQUIRED_SEASON_SCOPED_TABLES = [
+  'player_seasons',
+  'user_seasons',
+  'user_rounds',
+  'fichajes',
+  'lineups',
+  'matches',
+  'player_round_stats',
+  'porras',
+  'market_values',
+  'transfer_bids',
+  'initial_squads',
+  'finances',
+  'tournaments',
+  'tournament_phases',
+  'tournament_fixtures',
+  'tournament_standings',
+  'market_listings',
+  'playoff_predictions',
+  'playoff_results',
+  'user_playoff_media',
+];
+
+const REQUIRED_SEASON_TABLES = ['seasons', ...REQUIRED_SEASON_SCOPED_TABLES];
+
+export async function validateSchemaReady(db: DbClient) {
+  const result = await db.query(
+    `
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = ANY($1::text[])
+  `,
+    [REQUIRED_SEASON_TABLES]
+  );
+  const existing = new Set(result.rows.map((row: any) => row.table_name));
+  const missing = REQUIRED_SEASON_TABLES.filter((table) => !existing.has(table));
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Database schema is not ready; missing tables: ${missing.join(', ')}. Apply committed migrations before syncing.`
+    );
+  }
+
+  const seasonColumns = await db.query(
+    `
+    SELECT table_name
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND column_name = 'season_id'
+      AND table_name = ANY($1::text[])
+  `,
+    [REQUIRED_SEASON_SCOPED_TABLES]
+  );
+  const scoped = new Set(seasonColumns.rows.map((row: any) => row.table_name));
+  const missingSeasonColumns = REQUIRED_SEASON_SCOPED_TABLES.filter((table) => !scoped.has(table));
+  if (missingSeasonColumns.length > 0) {
+    throw new Error(
+      `Database schema is not season-ready; season_id is missing from: ${missingSeasonColumns.join(', ')}.`
+    );
+  }
+
+  const leagueBinding = await db.query(
+    `
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'seasons'
+      AND column_name = 'source_league_id'
+  `
+  );
+  if (leagueBinding.rows.length !== 1) {
+    throw new Error('Database schema is not season-ready; seasons.source_league_id is missing.');
+  }
+}
+
 /**
  * Ensures that all necessary database tables exist and are up to date.
  * Handles migrations (e.g. adding columns).

@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import pg from 'pg';
-import { DEFAULT_SEASON_ID } from '../../src/lib/db/schema';
+import { getSeasonConfig, validateSeasonConfig } from '../../src/lib/config';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -39,7 +39,10 @@ async function assertNoSyncRunning(pool: pg.Pool) {
 }
 
 async function freezeSeason(pool: pg.Pool) {
-  const seasonId = process.env.SEASON_ID || DEFAULT_SEASON_ID;
+  if (!process.env.SEASON_ID?.trim()) {
+    throw new Error('SEASON_ID is required when freezing a season.');
+  }
+  const seasonId = getSeasonConfig().ID;
   requireBackupConfirmation();
   await assertNoSyncRunning(pool);
 
@@ -63,14 +66,11 @@ async function freezeSeason(pool: pg.Pool) {
 }
 
 async function createNextSeason(pool: pg.Pool) {
-  const seasonId = process.env.NEXT_SEASON_ID;
-  const seasonName = process.env.NEXT_SEASON_NAME;
+  const configuredSeason = validateSeasonConfig({ requireToken: false });
+  const seasonId = configuredSeason.ID;
+  const seasonName = configuredSeason.NAME;
   requireBackupConfirmation();
   await assertNoSyncRunning(pool);
-
-  if (!seasonId || !seasonName) {
-    throw new Error('NEXT_SEASON_ID and NEXT_SEASON_NAME are required.');
-  }
 
   await pool.query('BEGIN');
   try {
@@ -84,31 +84,35 @@ async function createNextSeason(pool: pg.Pool) {
       );
     }
 
+    const existing = await pool.query<{ id: string; status: string }>(
+      'SELECT id, status FROM seasons WHERE id = $1 FOR UPDATE',
+      [seasonId]
+    );
+    if (existing.rows.length > 0) {
+      throw new Error(
+        `Cannot create ${seasonId}; that season already exists with status ${existing.rows[0].status}. Existing seasons are never reactivated by create-next.`
+      );
+    }
+
     await pool.query(
       `
       INSERT INTO seasons (id, name, status, starts_at, ends_at, source_league_id, notes)
       VALUES ($1, $2, 'active', $3, $4, $5, $6)
-      ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
-        status = 'active',
-        starts_at = EXCLUDED.starts_at,
-        ends_at = EXCLUDED.ends_at,
-        source_league_id = EXCLUDED.source_league_id,
-        notes = EXCLUDED.notes,
-        updated_at = NOW()
     `,
       [
         seasonId,
         seasonName,
-        process.env.NEXT_SEASON_START || null,
-        process.env.NEXT_SEASON_END || null,
-        process.env.NEXT_SEASON_SOURCE_LEAGUE_ID || null,
-        process.env.NEXT_SEASON_NOTES || null,
+        configuredSeason.START_DATE,
+        process.env.SEASON_END_DATE || null,
+        configuredSeason.BIWENGER_LEAGUE_ID,
+        process.env.SEASON_NOTES || null,
       ]
     );
 
     await pool.query('COMMIT');
-    console.log(`Season ${seasonId} is now active.`);
+    console.log(
+      `Season ${seasonId} is now active for Biwenger league ${configuredSeason.BIWENGER_LEAGUE_ID}.`
+    );
   } catch (error) {
     await pool.query('ROLLBACK');
     throw error;

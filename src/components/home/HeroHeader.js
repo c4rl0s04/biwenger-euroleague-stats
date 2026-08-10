@@ -1,9 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Trophy, TrendingUp, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 const HeroHeader = () => {
   const { data } = useApiData('/api/landing-stats');
@@ -12,6 +10,7 @@ const HeroHeader = () => {
     userCount: 0,
     currentRound: 'Pre-Season',
     weeksToPlayoffs: 0,
+    seasonName: 'Fantasy EuroLeague',
   };
 
   return (
@@ -22,7 +21,9 @@ const HeroHeader = () => {
         <div className="flex flex-col items-center text-center gap-6">
           <div className="flex items-center gap-3 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 animate-fade-in">
             <Trophy className="w-5 h-5 text-primary" />
-            <span className="text-sm font-medium text-primary">Season 2025-26</span>
+            <span className="text-sm font-medium text-primary">
+              {stats.seasonName || 'Fantasy EuroLeague'}
+            </span>
           </div>
 
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl tracking-tight animate-slide-up">

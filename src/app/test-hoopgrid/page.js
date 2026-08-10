@@ -1,13 +1,11 @@
 'use client';
 
 import {
-  HOOPGRID_TEAMS,
   HOOPGRID_POSITIONS,
   HOOPGRID_STATS,
   HOOPGRID_COUNTRIES,
   HOOPGRID_MARKET,
   HOOPGRID_OWNERSHIP,
-  HOOPGRID_USER_OWNERSHIP,
   HOOPGRID_HEIGHT,
   HOOPGRID_AGE,
 } from '@/lib/constants/hoopgridCriteria';
@@ -25,23 +23,6 @@ export default function TestHoopgridPage() {
             Euroleague Hoopgrid.
           </p>
         </div>
-
-        {/* 1. Teams */}
-        <section>
-          <h2 className="text-xl font-display text-foreground border-b border-border pb-2 mb-4 uppercase tracking-widest">
-            Teams ({HOOPGRID_TEAMS.length})
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {HOOPGRID_TEAMS.map((team) => (
-              <div key={team.id} className="bg-card p-4 rounded-xl border border-border shadow-sm">
-                <span className="text-primary font-bold mr-2 text-[10px] opacity-50">
-                  {team.id}
-                </span>
-                <span className="font-medium">{team.label}</span>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* 2. Positions */}
         <section>
@@ -156,20 +137,6 @@ export default function TestHoopgridPage() {
                   <div
                     key={i}
                     className="bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-lg flex flex-col"
-                  >
-                    <span className="font-bold text-sm">{s.label}</span>
-                    <span className="text-[9px] opacity-40 font-mono mt-1">{s.type}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* User Ownership */}
-              <div className="space-y-2">
-                <h4 className="text-[10px] font-black text-blue-500 uppercase">Manager History</h4>
-                {HOOPGRID_USER_OWNERSHIP.map((s, i) => (
-                  <div
-                    key={i}
-                    className="bg-blue-500/5 border border-blue-500/20 p-3 rounded-lg flex flex-col"
                   >
                     <span className="font-bold text-sm">{s.label}</span>
                     <span className="text-[9px] opacity-40 font-mono mt-1">{s.type}</span>

@@ -1,8 +1,10 @@
 import type { Pool } from 'pg';
+import { getSeasonConfig, validateSeasonConfig } from '../config';
 
 export interface SyncSeasonContext {
   seasonId: string;
   status: string;
+  sourceLeagueId: string;
 }
 
 export class SyncSeasonGuardError extends Error {
@@ -22,17 +24,19 @@ function shouldAllowFrozenOverride(): boolean {
 }
 
 export async function assertSyncSeasonWritable(db: Pool): Promise<SyncSeasonContext> {
-  const seasonId = process.env.SYNC_SEASON_ID;
-
-  if (!seasonId) {
+  const configuredSeason = getSeasonConfig();
+  try {
+    validateSeasonConfig();
+  } catch (error) {
     throw new SyncSeasonGuardError(
-      'SYNC_SEASON_ID_REQUIRED',
-      'SYNC_SEASON_ID is required for every mutating sync run.'
+      'INVALID_SEASON_CONFIG',
+      error instanceof Error ? error.message : 'Invalid season configuration.'
     );
   }
+  const seasonId = configuredSeason.ID;
 
-  const result = await db.query<{ id: string; status: string }>(
-    'SELECT id, status FROM seasons WHERE id = $1',
+  const result = await db.query<{ id: string; status: string; source_league_id: string | null }>(
+    'SELECT id, status, source_league_id FROM seasons WHERE id = $1',
     [seasonId]
   );
   const season = result.rows[0];
@@ -40,19 +44,32 @@ export async function assertSyncSeasonWritable(db: Pool): Promise<SyncSeasonCont
   if (!season) {
     throw new SyncSeasonGuardError(
       'SYNC_SEASON_NOT_FOUND',
-      `SYNC_SEASON_ID=${seasonId} does not exist in seasons.`
+      `SEASON_ID=${seasonId} does not exist in seasons.`
     );
   }
 
   if (season.status !== 'active' && !shouldAllowFrozenOverride()) {
     throw new SyncSeasonGuardError(
       'SYNC_SEASON_NOT_WRITABLE',
-      `SYNC_SEASON_ID=${seasonId} is ${season.status}; refusing to sync into a non-active season.`
+      `SEASON_ID=${seasonId} is ${season.status}; refusing to sync into a non-active season.`
+    );
+  }
+
+  if (!season.source_league_id) {
+    throw new SyncSeasonGuardError(
+      'SEASON_SOURCE_LEAGUE_MISSING',
+      `Season ${seasonId} has no source_league_id; refusing to sync without a database/provider binding.`
+    );
+  }
+
+  if (season.source_league_id !== configuredSeason.BIWENGER_LEAGUE_ID) {
+    throw new SyncSeasonGuardError(
+      'SEASON_SOURCE_LEAGUE_MISMATCH',
+      `Season ${seasonId} expects Biwenger league ${season.source_league_id}, but configuration targets ${configuredSeason.BIWENGER_LEAGUE_ID}.`
     );
   }
 
   if (
-    season.id !== '2025-26' &&
     process.env.SEASON_AWARE_READS_CONFIRMED !== 'true' &&
     process.env.NODE_ENV === 'production'
   ) {
@@ -62,5 +79,9 @@ export async function assertSyncSeasonWritable(db: Pool): Promise<SyncSeasonCont
     );
   }
 
-  return { seasonId: season.id, status: season.status };
+  return {
+    seasonId: season.id,
+    status: season.status,
+    sourceLeagueId: season.source_league_id,
+  };
 }

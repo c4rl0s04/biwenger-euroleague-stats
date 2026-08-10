@@ -1,5 +1,5 @@
 import { db } from '../db/client';
-import { ensureSchema } from '../db/schema_init';
+import { ensureSchema, validateSchemaReady } from '../db/schema_init';
 import { clearCache } from '../utils/cache';
 import { acquireAdvisoryLock, type AdvisoryLock } from './advisory-lock';
 import { assertSyncSeasonWritable } from './season-guard';
@@ -156,10 +156,15 @@ export class SyncManager {
       }
     }
 
-    // Ensure Schema Exists (Async now)
-    this.log('   🔨 Verifying/Creating Database Schema...');
+    this.log('   🔎 Verifying database schema and writable season...');
     try {
-      await ensureSchema(this.context.db as any);
+      const allowBootstrap =
+        process.env.NODE_ENV !== 'production' || process.env.ALLOW_SCHEMA_BOOTSTRAP === 'true';
+      if (allowBootstrap) {
+        await ensureSchema(this.context.db as any);
+      } else {
+        await validateSchemaReady(this.context.db as any);
+      }
       const seasonContext = await assertSyncSeasonWritable(this.context.db as any);
       this.context.seasonId = seasonContext.seasonId;
       this.log(`   🗓️ Sync season resolved: ${seasonContext.seasonId} (${seasonContext.status}).`);

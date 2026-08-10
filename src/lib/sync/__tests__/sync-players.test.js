@@ -76,23 +76,25 @@ describe('syncPlayers', () => {
     client.fetchAllPlayers.mockResolvedValue(mockCompetition);
     client.fetchPlayerDetails.mockResolvedValue(mockPlayerDetails);
 
-    await syncPlayers(db);
+    await syncPlayers(db, { seasonId: '2026-27' });
 
     // Verify DB prepare was called (we don't check exact count as it depends on prepared statements bundle)
     // Verify DB query was called
     expect(db.query).toHaveBeenCalled();
 
-    // Verify Player Insert
-    expect(db.query).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO players'),
-      expect.arrayContaining([101, 'Campazzo', 5, 'Base', 150])
-    );
+    // New-season sync only updates global identity fields in players.
+    expect(db.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO players'), [
+      101,
+      'Campazzo',
+      'Base',
+      null,
+    ]);
 
-    const playerUpsertSql = db.query.mock.calls.find(([sql]) =>
-      sql.includes('INSERT INTO players')
-    )?.[0];
-    expect(playerUpsertSql).toContain('price = excluded.price');
-    expect(playerUpsertSql).not.toContain('price = GREATEST(players.price, excluded.price)');
+    // Mutable team, points, and price belong to the configured player_seasons row.
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO player_seasons'),
+      expect.arrayContaining(['2026-27', 101, 5, 150, 1000000])
+    );
   });
 
   it('uses season-specific existing stats instead of global player stats', async () => {

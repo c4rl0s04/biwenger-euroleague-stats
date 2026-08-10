@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Sync Script
+      - name: Validate season and run sync
         env:
           # Database Connection
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
@@ -42,4 +42,11 @@ jobs:
           BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
           BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
           BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
-        run: npm run sync:daily
+
+          # Canonical season configuration
+          SEASON_ID: ${{ vars.SEASON_ID }}
+          SEASON_NAME: ${{ vars.SEASON_NAME }}
+          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
+          LEAGUE_START_DATE: ${{ vars.LEAGUE_START_DATE }}
+          SEASON_AWARE_READS_CONFIRMED: ${{ vars.SEASON_AWARE_READS_CONFIRMED }}
+        run: npm run sync:preflight && npm run sync:daily

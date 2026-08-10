@@ -35,6 +35,7 @@ import {
   getRoundDetails,
   resolveRoundIdByPolicy,
 } from '../../db';
+import { CONFIG } from '../../config';
 
 // ============ DIRECT WRAPPERS ============
 // These wrap query functions 1:1 for consistent service layer usage
@@ -146,6 +147,7 @@ export async function fetchLandingStats() {
   }
 
   return {
+    seasonName: CONFIG.SEASON.NAME,
     userCount,
     currentRound: currentRound?.round_name || 'Pre-Season',
     weeksToPlayoffs,

@@ -3,10 +3,13 @@ import { prepareTournamentMutations } from '../../db/mutations/tournaments';
 import { CONFIG } from '../../config';
 import type { SyncManager } from '../manager';
 
-export async function run(manager?: SyncManager) {
+export async function run(manager: SyncManager) {
   console.log('🏆 Starting Tournament Sync...');
-  const tournamentMutations = prepareTournamentMutations(manager?.context.db as any, {
-    seasonId: manager?.context.seasonId,
+  if (!manager.context.seasonId) {
+    throw new Error('Canonical sync season was not resolved before Step 14.');
+  }
+  const tournamentMutations = prepareTournamentMutations(manager.context.db as any, {
+    seasonId: manager.context.seasonId,
   });
 
   // 1. Discovery: Scan FULL SEASON to find all tournaments (Active & Finished)

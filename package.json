@@ -14,6 +14,7 @@
     "sync": "tsx -r dotenv/config src/lib/sync/index.ts",
     "sync:daily": "tsx -r dotenv/config src/lib/sync/index.ts --daily",
     "sync:live": "tsx -r dotenv/config src/lib/sync/live.ts",
+    "sync:preflight": "tsx -r dotenv/config scripts/dev/sync-preflight.ts",
     "sync:playoffs": "tsx -r dotenv/config src/lib/sync/playoffs/sync.ts",
     "test": "vitest",
     "test:run": "vitest --run",

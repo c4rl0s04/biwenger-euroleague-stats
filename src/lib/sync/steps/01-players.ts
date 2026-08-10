@@ -2,7 +2,6 @@ import { fetchAllPlayers, fetchPlayerDetails } from '../../api/biwenger-client';
 import { getShortTeamName } from '../../utils/format';
 import { CONFIG } from '../../config';
 import { preparePlayerMutations } from '../../db/mutations/players';
-import { DEFAULT_SEASON_ID } from '../../db/schema';
 import { SyncManager } from '../manager';
 
 const SLEEP_MS = 600;
@@ -41,7 +40,8 @@ const parsePriceDate = (dateInt: number | string): string => {
 
 export async function run(manager: SyncManager) {
   const db = manager.context.db;
-  const seasonId = manager.context.seasonId ?? DEFAULT_SEASON_ID;
+  const seasonId = manager.context.seasonId;
+  if (!seasonId) throw new Error('Canonical sync season was not resolved before Step 1.');
   manager.log('\n📥 Fetching Players Database...');
   const competition = await fetchAllPlayers();
 
@@ -213,8 +213,9 @@ export async function run(manager: SyncManager) {
 }
 
 export const syncPlayers = async (db: any, options: any) => {
+  if (!options?.seasonId) throw new Error('syncPlayers requires an explicit seasonId.');
   const mockManager = {
-    context: { db, playersList: {}, teams: {} },
+    context: { db, seasonId: options.seasonId, playersList: {}, teams: {} },
     log: console.log,
     error: console.error,
   } as unknown as SyncManager;

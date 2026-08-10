@@ -1,5 +1,5 @@
 import { db as defaultDb } from '../client';
-import { DEFAULT_SEASON_ID } from '../schema';
+import { CONFIG } from '../../config';
 
 // ==========================================
 // INTERFACES
@@ -74,7 +74,7 @@ export function prepareTournamentMutations(
   db: TournamentDbClient = defaultDb,
   options: TournamentMutationOptions = {}
 ): TournamentMutations {
-  const seasonId = options.seasonId ?? DEFAULT_SEASON_ID;
+  const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
 
   return {
     upsertTournament: async (tournament: UpsertTournamentParams) => {

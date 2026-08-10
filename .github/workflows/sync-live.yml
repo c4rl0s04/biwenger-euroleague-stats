@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Run Live Sync
-        run: npm run sync:live
+        run: npm run sync:preflight -- --skip-provider-probes && npm run sync:live
         env:
           # Database Connection (Individual components, matching local setup)
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
@@ -42,5 +42,14 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
-          # Configuration
-          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE || 'E2025' }}
+          # Biwenger credentials
+          BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
+          BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
+          BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
+
+          # Canonical season configuration
+          SEASON_ID: ${{ vars.SEASON_ID }}
+          SEASON_NAME: ${{ vars.SEASON_NAME }}
+          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
+          LEAGUE_START_DATE: ${{ vars.LEAGUE_START_DATE }}
+          SEASON_AWARE_READS_CONFIRMED: ${{ vars.SEASON_AWARE_READS_CONFIRMED }}
