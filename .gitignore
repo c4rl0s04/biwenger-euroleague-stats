@@ -45,6 +45,9 @@ next-env.d.ts
 *.swo
 *~
 
+# Local Obsidian vault settings
+docs/.obsidian/
+
 # Local Database (keep folder, ignore db files and SQLite temp files)
 data/*.db
 data/*.db-shm
