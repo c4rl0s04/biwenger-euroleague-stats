@@ -55,6 +55,26 @@ describe('season resilience ledger', () => {
     expect(opening.map((snapshot) => snapshot.cash)).toEqual([30_000_000, 20_000_000]);
   });
 
+  it('uses the opening market value when an initial squad price was stored as zero', () => {
+    const ledger = buildEconomicLedger({
+      startingBudget: 40_000_000,
+      users: [{ id: 'june', name: 'June' }],
+      initialSquads: [{ userId: 'june', playerId: 7, price: 0 }],
+      days: ['2025-09-25'],
+      marketValues: [{ day: '2025-09-25', playerId: 7, price: 2_590_000 }],
+      transfers: [],
+      bonuses: [],
+      roundPoints: [],
+    });
+
+    expect(ledger.snapshots[0]).toMatchObject({
+      cash: 37_410_000,
+      squadValue: 2_590_000,
+      totalResources: 40_000_000,
+      initialAssetPnl: 0,
+    });
+  });
+
   it('keeps cash plus squad value equal to resources after market activity and bonuses', () => {
     const ledger = buildEconomicLedger(ledgerInput);
     const closing = ledger.snapshots.filter((snapshot) => snapshot.day === '2025-09-26');

@@ -90,18 +90,27 @@ export function buildEconomicLedger(input: EconomicLedgerInput): EconomicLedger 
     ])
   );
   const prices = new Map<number, number>();
+  const marketValues = [...input.marketValues].sort(
+    (left, right) => left.day.localeCompare(right.day) || left.playerId - right.playerId
+  );
+  const openingDay = Array.from(new Set(input.days)).sort()[0];
+  const openingPrices = new Map<number, number>();
+
+  if (openingDay) {
+    marketValues.forEach((row) => {
+      if (row.day <= openingDay) openingPrices.set(row.playerId, row.price);
+    });
+  }
 
   input.initialSquads.forEach((row) => {
     const user = state.get(row.userId);
     if (!user) return;
-    user.cash -= row.price;
-    user.roster.set(row.playerId, { acquisitionPrice: row.price, source: 'initial' });
-    prices.set(row.playerId, row.price);
+    const openingPrice = openingPrices.get(row.playerId) ?? row.price;
+    user.cash -= openingPrice;
+    user.roster.set(row.playerId, { acquisitionPrice: openingPrice, source: 'initial' });
+    prices.set(row.playerId, openingPrice);
   });
 
-  const marketValues = [...input.marketValues].sort(
-    (left, right) => left.day.localeCompare(right.day) || left.playerId - right.playerId
-  );
   const transfers = [...input.transfers].sort(
     (left, right) => left.day.localeCompare(right.day) || left.timestamp - right.timestamp
   );
