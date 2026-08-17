@@ -24,6 +24,7 @@ export * from './queries/analytics/performance';
 export * from './queries/analytics/advanced_stats';
 export * from './queries/analytics/initial_squads';
 export * from './queries/analytics/records';
+export * from './queries/analytics/season-review';
 
 export * from './queries/features/market';
 export * from './queries/features/search';
