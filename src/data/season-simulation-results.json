@@ -1,8 +1,3613 @@
 {
   "version": 3,
-  "status": "pending",
-  "generatedAt": null,
-  "runsPerConfiguration": 0,
-  "dataset": null,
-  "results": []
+  "status": "ready",
+  "generatedAt": "2026-08-17T22:54:53.517Z",
+  "runsPerConfiguration": 500,
+  "dataset": {
+    "players": 366,
+    "rounds": 45,
+    "users": 7
+  },
+  "results": [
+    {
+      "config": {
+        "rosterCap": 10,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.634,
+        "recoveryInterval95": [
+          0.5909034766847505,
+          0.6750531255489673
+        ],
+        "economicRecoveryProbability": 0.716,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.366,
+        "medianRecoveryRounds": 10,
+        "p90RecoveryRounds": 25,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.059338560840622945,
+        "medianFinalSquadGini": 0.19666829883549264,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 856,
+        "medianPurchases": 428,
+        "medianFinalResourceGap": 29820996,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 10,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.95,
+        "recoveryInterval95": [
+          0.9272313499731688,
+          0.965906493349018
+        ],
+        "economicRecoveryProbability": 0.992,
+        "competitiveRecoveryProbability": 0.978,
+        "lockInProbability": 0.050000000000000044,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0583273822753585,
+        "medianFinalSquadGini": 0.19336122488383678,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 854,
+        "medianPurchases": 427,
+        "medianFinalResourceGap": 30052231,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 10,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.944,
+        "recoveryInterval95": [
+          0.9202547013596158,
+          0.9609746373849419
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.972,
+        "lockInProbability": 0.05600000000000005,
+        "medianRecoveryRounds": 5,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05827047306433819,
+        "medianFinalSquadGini": 0.1963801920441055,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 850,
+        "medianPurchases": 425,
+        "medianFinalResourceGap": 29987521,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 10,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.968,
+        "recoveryInterval95": [
+          0.9486546984063574,
+          0.980208658648717
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.98,
+        "lockInProbability": 0.03200000000000003,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.056537502754058444,
+        "medianFinalSquadGini": 0.19378709489137602,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 840,
+        "medianPurchases": 420,
+        "medianFinalResourceGap": 29402435,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 11,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.66,
+        "recoveryInterval95": [
+          0.617398269756609,
+          0.7001618523135019
+        ],
+        "economicRecoveryProbability": 0.73,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.33999999999999997,
+        "medianRecoveryRounds": 11,
+        "p90RecoveryRounds": 27,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.058718038112903326,
+        "medianFinalSquadGini": 0.18251508574799336,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 878,
+        "medianPurchases": 439,
+        "medianFinalResourceGap": 30845092,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 11,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.95,
+        "recoveryInterval95": [
+          0.9272313499731688,
+          0.965906493349018
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.050000000000000044,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05778170851536246,
+        "medianFinalSquadGini": 0.18107761489195862,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 878,
+        "medianPurchases": 439,
+        "medianFinalResourceGap": 30954364,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 11,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 0.992,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.057799928600235306,
+        "medianFinalSquadGini": 0.18614774955234425,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 874,
+        "medianPurchases": 437,
+        "medianFinalResourceGap": 30899836,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 11,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.956,
+        "recoveryInterval95": [
+          0.9342800855801577,
+          0.9707662623196583
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.04400000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05722794101945783,
+        "medianFinalSquadGini": 0.18160521401858531,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 862,
+        "medianPurchases": 431,
+        "medianFinalResourceGap": 30709448,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 12,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.696,
+        "recoveryInterval95": [
+          0.6543125331560312,
+          0.7346986163798547
+        ],
+        "economicRecoveryProbability": 0.77,
+        "competitiveRecoveryProbability": 0.972,
+        "lockInProbability": 0.30400000000000005,
+        "medianRecoveryRounds": 10,
+        "p90RecoveryRounds": 29,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05746969683277947,
+        "medianFinalSquadGini": 0.17306211136223926,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 902,
+        "medianPurchases": 451,
+        "medianFinalResourceGap": 31634844,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 12,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05624545611964238,
+        "medianFinalSquadGini": 0.17393853288408656,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 900,
+        "medianPurchases": 450,
+        "medianFinalResourceGap": 31321714,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 12,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.942,
+        "recoveryInterval95": [
+          0.9179433020026042,
+          0.9593165352160771
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.05800000000000005,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05696164548503857,
+        "medianFinalSquadGini": 0.17483107372627216,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 896,
+        "medianPurchases": 448,
+        "medianFinalResourceGap": 31463139,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 12,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.96,
+        "recoveryInterval95": [
+          0.9390259449029252,
+          0.9739594060486436
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.040000000000000036,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05487516414004312,
+        "medianFinalSquadGini": 0.1749330438044443,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 882,
+        "medianPurchases": 441,
+        "medianFinalResourceGap": 30874124,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 13,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.724,
+        "recoveryInterval95": [
+          0.6832216523131053,
+          0.76136251858505
+        ],
+        "economicRecoveryProbability": 0.792,
+        "competitiveRecoveryProbability": 0.976,
+        "lockInProbability": 0.276,
+        "medianRecoveryRounds": 10,
+        "p90RecoveryRounds": 29,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05689577158188208,
+        "medianFinalSquadGini": 0.16446126586280085,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 915,
+        "medianPurchases": 460,
+        "medianFinalResourceGap": 31977118,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 13,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.94,
+        "recoveryInterval95": [
+          0.9156384216937552,
+          0.9576519139990498
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.06000000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.055718369456527306,
+        "medianFinalSquadGini": 0.1630098084240652,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 915,
+        "medianPurchases": 460,
+        "medianFinalResourceGap": 31564422,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 13,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.94,
+        "recoveryInterval95": [
+          0.9156384216937552,
+          0.9576519139990498
+        ],
+        "economicRecoveryProbability": 0.994,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.06000000000000005,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05572206234154775,
+        "medianFinalSquadGini": 0.160802540286882,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 909,
+        "medianPurchases": 457,
+        "medianFinalResourceGap": 31513790,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 13,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.956,
+        "recoveryInterval95": [
+          0.9342800855801577,
+          0.9707662623196583
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.04400000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.054971993463976965,
+        "medianFinalSquadGini": 0.1677760010024194,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 895,
+        "medianPurchases": 450,
+        "medianFinalResourceGap": 31059797,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.73,
+        "recoveryInterval95": [
+          0.6894405695613621,
+          0.7670521059144222
+        ],
+        "economicRecoveryProbability": 0.808,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.27,
+        "medianRecoveryRounds": 9,
+        "p90RecoveryRounds": 26,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05462303115054201,
+        "medianFinalSquadGini": 0.155068383557891,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 922,
+        "medianPurchases": 467,
+        "medianFinalResourceGap": 31919484,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.938,
+        "recoveryInterval95": [
+          0.9133397667805389,
+          0.9559810673863897
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.062000000000000055,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0547239744154715,
+        "medianFinalSquadGini": 0.1547165272697113,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 924,
+        "medianPurchases": 468,
+        "medianFinalResourceGap": 31797135,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.93,
+        "recoveryInterval95": [
+          0.9042022712346763,
+          0.9492405568287469
+        ],
+        "economicRecoveryProbability": 0.994,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.06999999999999995,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05444769518331283,
+        "medianFinalSquadGini": 0.1626636657693621,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 920,
+        "medianPurchases": 466,
+        "medianFinalResourceGap": 32003385,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0535329942395768,
+        "medianFinalSquadGini": 0.15967109567609405,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 904,
+        "medianPurchases": 458,
+        "medianFinalResourceGap": 31369946,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 15,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.756,
+        "recoveryInterval95": [
+          0.7164944353121212,
+          0.7916017600000562
+        ],
+        "economicRecoveryProbability": 0.806,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.244,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 27,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05335104395838153,
+        "medianFinalSquadGini": 0.15174482052667781,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 929,
+        "medianPurchases": 474,
+        "medianFinalResourceGap": 31638665,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 15,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.944,
+        "recoveryInterval95": [
+          0.9202547013596158,
+          0.9609746373849419
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.05600000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.053261881002331535,
+        "medianFinalSquadGini": 0.15277141106699577,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 929,
+        "medianPurchases": 474,
+        "medianFinalResourceGap": 32064771,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 15,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.94,
+        "recoveryInterval95": [
+          0.9156384216937552,
+          0.9576519139990498
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.06000000000000005,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05319105898526444,
+        "medianFinalSquadGini": 0.15255401569208615,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 925,
+        "medianPurchases": 472,
+        "medianFinalResourceGap": 31670258,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 15,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05214159334005908,
+        "medianFinalSquadGini": 0.15529530457013974,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 913,
+        "medianPurchases": 466,
+        "medianFinalResourceGap": 30776269,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 16,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.756,
+        "recoveryInterval95": [
+          0.7164944353121212,
+          0.7916017600000562
+        ],
+        "economicRecoveryProbability": 0.818,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.244,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 27,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05122701038978894,
+        "medianFinalSquadGini": 0.1518952615606639,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 932,
+        "medianPurchases": 479,
+        "medianFinalResourceGap": 31095765,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 16,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.956,
+        "recoveryInterval95": [
+          0.9342800855801577,
+          0.9707662623196583
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.04400000000000004,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05230926590628582,
+        "medianFinalSquadGini": 0.1438557477199114,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 934,
+        "medianPurchases": 480,
+        "medianFinalResourceGap": 31667320,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 16,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05122550405822057,
+        "medianFinalSquadGini": 0.1486653051957154,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 928,
+        "medianPurchases": 477,
+        "medianFinalResourceGap": 31032595,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 16,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05018465814442519,
+        "medianFinalSquadGini": 0.14960038469561598,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 918,
+        "medianPurchases": 472,
+        "medianFinalResourceGap": 29766365,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 17,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.794,
+        "recoveryInterval95": [
+          0.7563727994796797,
+          0.8271439248241491
+        ],
+        "economicRecoveryProbability": 0.86,
+        "competitiveRecoveryProbability": 0.978,
+        "lockInProbability": 0.20599999999999996,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 23,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05058074324114159,
+        "medianFinalSquadGini": 0.14594641229776184,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 933,
+        "medianPurchases": 483,
+        "medianFinalResourceGap": 31060554,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 17,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.972,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05010620872283611,
+        "medianFinalSquadGini": 0.13859877630836492,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 937,
+        "medianPurchases": 485,
+        "medianFinalResourceGap": 30940571,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 17,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 12,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05000198175855042,
+        "medianFinalSquadGini": 0.1431527665269523,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 931,
+        "medianPurchases": 482,
+        "medianFinalResourceGap": 31341186,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 17,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 17,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.049543234918436596,
+        "medianFinalSquadGini": 0.15005418717544083,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 919,
+        "medianPurchases": 476,
+        "medianFinalResourceGap": 29856019,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 18,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.81,
+        "recoveryInterval95": [
+          0.7732995724391238,
+          0.8419731640717161
+        ],
+        "economicRecoveryProbability": 0.87,
+        "competitiveRecoveryProbability": 0.972,
+        "lockInProbability": 0.18999999999999995,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 24,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04852966204043119,
+        "medianFinalSquadGini": 0.1381085130509796,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 936,
+        "medianPurchases": 488,
+        "medianFinalResourceGap": 30530345,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 18,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.952,
+        "recoveryInterval95": [
+          0.9295723199393156,
+          0.9675350249087478
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.04800000000000004,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0505612447439272,
+        "medianFinalSquadGini": 0.14164008492066493,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 934,
+        "medianPurchases": 487,
+        "medianFinalResourceGap": 31105424,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 18,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.048732888646041195,
+        "medianFinalSquadGini": 0.14055660003057868,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 934,
+        "medianPurchases": 487,
+        "medianFinalResourceGap": 30555545,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 18,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.962,
+        "recoveryInterval95": [
+          0.9414147746007343,
+          0.9755400778767108
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.038000000000000034,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 17,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0478701529348593,
+        "medianFinalSquadGini": 0.14071405688756133,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 918,
+        "medianPurchases": 479,
+        "medianFinalResourceGap": 29536536,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 19,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.854,
+        "recoveryInterval95": [
+          0.8203500666587293,
+          0.882251703421391
+        ],
+        "economicRecoveryProbability": 0.918,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.14600000000000002,
+        "medianRecoveryRounds": 5,
+        "p90RecoveryRounds": 23,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.047322741009707014,
+        "medianFinalSquadGini": 0.13527086903030838,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 935,
+        "medianPurchases": 491,
+        "medianFinalResourceGap": 30149346,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 19,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04812026182829543,
+        "medianFinalSquadGini": 0.13962281752393357,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 937,
+        "medianPurchases": 492,
+        "medianFinalResourceGap": 29997261,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 19,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04816774623479958,
+        "medianFinalSquadGini": 0.13720174407757502,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 931,
+        "medianPurchases": 489,
+        "medianFinalResourceGap": 29892124,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 19,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.95,
+        "recoveryInterval95": [
+          0.9272313499731688,
+          0.965906493349018
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.050000000000000044,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 17,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.047266843322546714,
+        "medianFinalSquadGini": 0.1378748427397838,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 919,
+        "medianPurchases": 483,
+        "medianFinalResourceGap": 28946279,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 20,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.856,
+        "recoveryInterval95": [
+          0.822508879125479,
+          0.8840623924805179
+        ],
+        "economicRecoveryProbability": 0.932,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.14400000000000002,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 19,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04813754514703761,
+        "medianFinalSquadGini": 0.132139674881395,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 932,
+        "medianPurchases": 493,
+        "medianFinalResourceGap": 29946045,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 20,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04730402727658389,
+        "medianFinalSquadGini": 0.13112379521440132,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 932,
+        "medianPurchases": 493,
+        "medianFinalResourceGap": 30079115,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 20,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.938,
+        "recoveryInterval95": [
+          0.9133397667805389,
+          0.9559810673863897
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.062000000000000055,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 12,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04731399921456059,
+        "medianFinalSquadGini": 0.1326235696167508,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 932,
+        "medianPurchases": 493,
+        "medianFinalResourceGap": 30542992,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 20,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04529528648206327,
+        "medianFinalSquadGini": 0.1385438936809651,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 920,
+        "medianPurchases": 487,
+        "medianFinalResourceGap": 29118567,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 21,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.882,
+        "recoveryInterval95": [
+          0.8507673840349824,
+          0.9074074074074073
+        ],
+        "economicRecoveryProbability": 0.948,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.118,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 22,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04520866520327971,
+        "medianFinalSquadGini": 0.13047313845564323,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 931,
+        "medianPurchases": 496,
+        "medianFinalResourceGap": 28717786,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 21,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.95,
+        "recoveryInterval95": [
+          0.9272313499731688,
+          0.965906493349018
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.050000000000000044,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0468123228049504,
+        "medianFinalSquadGini": 0.12894524699954935,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 931,
+        "medianPurchases": 496,
+        "medianFinalResourceGap": 30033925,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 21,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 12,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.046971361689478686,
+        "medianFinalSquadGini": 0.13239481262474007,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 929,
+        "medianPurchases": 495,
+        "medianFinalResourceGap": 30035591,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 21,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.952,
+        "recoveryInterval95": [
+          0.9295723199393156,
+          0.9675350249087478
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.04800000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04598993385551409,
+        "medianFinalSquadGini": 0.13431137018281425,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 915,
+        "medianPurchases": 488,
+        "medianFinalResourceGap": 28745434,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 22,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.882,
+        "recoveryInterval95": [
+          0.8507673840349824,
+          0.9074074074074073
+        ],
+        "economicRecoveryProbability": 0.944,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.118,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 20,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.044378825578321734,
+        "medianFinalSquadGini": 0.12993504377482168,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 926,
+        "medianPurchases": 497,
+        "medianFinalResourceGap": 28155652,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 22,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.047333317786126816,
+        "medianFinalSquadGini": 0.12762839261633885,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 928,
+        "medianPurchases": 498,
+        "medianFinalResourceGap": 30113128,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 22,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.938,
+        "recoveryInterval95": [
+          0.9133397667805389,
+          0.9559810673863897
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.952,
+        "lockInProbability": 0.062000000000000055,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 11,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04506590573727043,
+        "medianFinalSquadGini": 0.12917454311340326,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 926,
+        "medianPurchases": 497,
+        "medianFinalResourceGap": 29353159,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 22,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.044574990975863704,
+        "medianFinalSquadGini": 0.13346175805391614,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 914,
+        "medianPurchases": 491,
+        "medianFinalResourceGap": 28604745,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 23,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.886,
+        "recoveryInterval95": [
+          0.8551502882823536,
+          0.9109635062117889
+        ],
+        "economicRecoveryProbability": 0.956,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.11399999999999999,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 20,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04408647628982121,
+        "medianFinalSquadGini": 0.12616989623167885,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 921,
+        "medianPurchases": 498,
+        "medianFinalResourceGap": 28176228,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 23,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.95,
+        "recoveryInterval95": [
+          0.9272313499731688,
+          0.965906493349018
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.954,
+        "lockInProbability": 0.050000000000000044,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04596699516649805,
+        "medianFinalSquadGini": 0.12723751927353333,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 923,
+        "medianPurchases": 499,
+        "medianFinalResourceGap": 30246185,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 23,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.942,
+        "recoveryInterval95": [
+          0.9179433020026042,
+          0.9593165352160771
+        ],
+        "economicRecoveryProbability": 0.994,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.05800000000000005,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 12,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04512849593406809,
+        "medianFinalSquadGini": 0.12840783217699125,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 919,
+        "medianPurchases": 497,
+        "medianFinalResourceGap": 29114047,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 23,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04418987099009852,
+        "medianFinalSquadGini": 0.12880689095127407,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 907,
+        "medianPurchases": 491,
+        "medianFinalResourceGap": 28234810,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 24,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.896,
+        "recoveryInterval95": [
+          0.8661551236448682,
+          0.9198061784786563
+        ],
+        "economicRecoveryProbability": 0.958,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.10399999999999998,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 19,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04254065310173849,
+        "medianFinalSquadGini": 0.12456234500851715,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 914,
+        "medianPurchases": 498,
+        "medianFinalResourceGap": 27501297,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 24,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.045131124744865136,
+        "medianFinalSquadGini": 0.12336564091835944,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 916,
+        "medianPurchases": 499,
+        "medianFinalResourceGap": 29778129,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 24,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.936,
+        "recoveryInterval95": [
+          0.9110470662066095,
+          0.954304266434443
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.954,
+        "lockInProbability": 0.06399999999999995,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 11,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04388529778640016,
+        "medianFinalSquadGini": 0.12740505188919182,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 916,
+        "medianPurchases": 499,
+        "medianFinalResourceGap": 28261373,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 24,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.043178763633294315,
+        "medianFinalSquadGini": 0.12512333715316815,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 902,
+        "medianPurchases": 492,
+        "medianFinalResourceGap": 27671008,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.902,
+        "recoveryInterval95": [
+          0.8727933541017654,
+          0.9250764525993884
+        ],
+        "economicRecoveryProbability": 0.96,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.09799999999999998,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 20,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04215125702779887,
+        "medianFinalSquadGini": 0.12063671283286515,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 905,
+        "medianPurchases": 497,
+        "medianFinalResourceGap": 27367699,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.944,
+        "recoveryInterval95": [
+          0.9202547013596158,
+          0.9609746373849419
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.954,
+        "lockInProbability": 0.05600000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 12,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04511732282353531,
+        "medianFinalSquadGini": 0.11909773005974444,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 913,
+        "medianPurchases": 501,
+        "medianFinalResourceGap": 29390419,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.938,
+        "recoveryInterval95": [
+          0.9133397667805389,
+          0.9559810673863897
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.952,
+        "lockInProbability": 0.062000000000000055,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 12,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04431019197622699,
+        "medianFinalSquadGini": 0.12247485967835448,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 907,
+        "medianPurchases": 498,
+        "medianFinalResourceGap": 28478104,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04233053369134687,
+        "medianFinalSquadGini": 0.12081816354244168,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 895,
+        "medianPurchases": 492,
+        "medianFinalResourceGap": 27481762,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.748,
+        "recoveryInterval95": [
+          0.7081514126701541,
+          0.7840667765385178
+        ],
+        "economicRecoveryProbability": 0.808,
+        "competitiveRecoveryProbability": 0.968,
+        "lockInProbability": 0.252,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 28,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06436800580769719,
+        "medianFinalSquadGini": 0.15610778703644046,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 920,
+        "medianPurchases": 466,
+        "medianFinalResourceGap": 32712325,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.902,
+        "recoveryInterval95": [
+          0.8727933541017654,
+          0.9250764525993884
+        ],
+        "economicRecoveryProbability": 0.986,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.09799999999999998,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 17,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.060910251806405524,
+        "medianFinalSquadGini": 0.1547726536413745,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 924,
+        "medianPurchases": 468,
+        "medianFinalResourceGap": 31872626,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.894,
+        "recoveryInterval95": [
+          0.8639484611321094,
+          0.9180433394655388
+        ],
+        "economicRecoveryProbability": 0.974,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.10599999999999998,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06247484766225653,
+        "medianFinalSquadGini": 0.16422509950246034,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 916,
+        "medianPurchases": 464,
+        "medianFinalResourceGap": 32372529,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 14,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.884,
+        "recoveryInterval95": [
+          0.8529575380244137,
+          0.9091867549438526
+        ],
+        "economicRecoveryProbability": 0.978,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.11599999999999999,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 21,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06046430778606893,
+        "medianFinalSquadGini": 0.15894044676857266,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 906,
+        "medianPurchases": 459,
+        "medianFinalResourceGap": 30815926,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.856,
+        "recoveryInterval95": [
+          0.822508879125479,
+          0.8840623924805179
+        ],
+        "economicRecoveryProbability": 0.902,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.14400000000000002,
+        "medianRecoveryRounds": 2,
+        "p90RecoveryRounds": 21,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.07527043158649471,
+        "medianFinalSquadGini": 0.11206719138768739,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 855,
+        "medianPurchases": 472,
+        "medianFinalResourceGap": 34439226,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.89,
+        "recoveryInterval95": [
+          0.8595438141340721,
+          0.9145089834118234
+        ],
+        "economicRecoveryProbability": 0.978,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.10999999999999999,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 17,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.07704401380025816,
+        "medianFinalSquadGini": 0.11224924569407402,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 859,
+        "medianPurchases": 474,
+        "medianFinalResourceGap": 35549047,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.882,
+        "recoveryInterval95": [
+          0.8507673840349824,
+          0.9074074074074073
+        ],
+        "economicRecoveryProbability": 0.976,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.118,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.07556835834951103,
+        "medianFinalSquadGini": 0.11563209034044886,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 859,
+        "medianPurchases": 474,
+        "medianFinalResourceGap": 33368403,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.842,
+        "recoveryInterval95": [
+          0.8074369672976796,
+          0.8713477936271825
+        ],
+        "economicRecoveryProbability": 0.986,
+        "competitiveRecoveryProbability": 0.942,
+        "lockInProbability": 0.15800000000000003,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 19,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.07511040964709736,
+        "medianFinalSquadGini": 0.11201927484614105,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 845,
+        "medianPurchases": 467,
+        "medianFinalResourceGap": 34225878,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.852,
+        "recoveryInterval95": [
+          0.818193200072725,
+          0.8804390684815191
+        ],
+        "economicRecoveryProbability": 0.912,
+        "competitiveRecoveryProbability": 0.972,
+        "lockInProbability": 0.14800000000000002,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 24,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06757637940749261,
+        "medianFinalSquadGini": 0.11903128150993858,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 889,
+        "medianPurchases": 489,
+        "medianFinalResourceGap": 37339436,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.876,
+        "recoveryInterval95": [
+          0.8442119499943469,
+          0.9020543368704138
+        ],
+        "economicRecoveryProbability": 0.972,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.124,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 18,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.07019458541471368,
+        "medianFinalSquadGini": 0.12341871506369761,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 895,
+        "medianPurchases": 492,
+        "medianFinalResourceGap": 39082883,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.908,
+        "recoveryInterval95": [
+          0.8794606777802376,
+          0.9303176334985452
+        ],
+        "economicRecoveryProbability": 0.986,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.09199999999999997,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 18,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06750990851722816,
+        "medianFinalSquadGini": 0.12119684563048083,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 891,
+        "medianPurchases": 490,
+        "medianFinalResourceGap": 37874309,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.862,
+        "recoveryInterval95": [
+          0.8289973296731233,
+          0.8894824465105026
+        ],
+        "economicRecoveryProbability": 0.976,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.138,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 21,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06648999852571413,
+        "medianFinalSquadGini": 0.1195561119663846,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 879,
+        "medianPurchases": 484,
+        "medianFinalResourceGap": 36257396,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.858,
+        "recoveryInterval95": [
+          0.8246696706783865,
+          0.8858711024534867
+        ],
+        "economicRecoveryProbability": 0.92,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.14200000000000002,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 23,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.061071907765251066,
+        "medianFinalSquadGini": 0.122726036931178,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 909,
+        "medianPurchases": 499,
+        "medianFinalResourceGap": 39624945,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.856,
+        "recoveryInterval95": [
+          0.822508879125479,
+          0.8840623924805179
+        ],
+        "economicRecoveryProbability": 0.97,
+        "competitiveRecoveryProbability": 0.95,
+        "lockInProbability": 0.14400000000000002,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 18,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06321709557001265,
+        "medianFinalSquadGini": 0.12522341703926343,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 913,
+        "medianPurchases": 501,
+        "medianFinalResourceGap": 41507296,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.898,
+        "recoveryInterval95": [
+          0.8683647750455783,
+          0.9215660286038228
+        ],
+        "economicRecoveryProbability": 0.978,
+        "competitiveRecoveryProbability": 0.964,
+        "lockInProbability": 0.10199999999999998,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.061455176190364114,
+        "medianFinalSquadGini": 0.12573389614229824,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 909,
+        "medianPurchases": 499,
+        "medianFinalResourceGap": 40191038,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "direct",
+        "eurosPerPoint": 10000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.822,
+        "recoveryInterval95": [
+          0.7860541079213073,
+          0.853035637744791
+        ],
+        "economicRecoveryProbability": 0.966,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.17800000000000005,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 22,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.061085011394401034,
+        "medianFinalSquadGini": 0.1235087178840173,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 899,
+        "medianPurchases": 494,
+        "medianFinalResourceGap": 39840869,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.898,
+        "recoveryInterval95": [
+          0.8683647750455783,
+          0.9215660286038228
+        ],
+        "economicRecoveryProbability": 0.94,
+        "competitiveRecoveryProbability": 0.97,
+        "lockInProbability": 0.10199999999999998,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 22,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05811528456480697,
+        "medianFinalSquadGini": 0.10657159914711478,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 855,
+        "medianPurchases": 472,
+        "medianFinalResourceGap": 26433374,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.94,
+        "recoveryInterval95": [
+          0.9156384216937552,
+          0.9576519139990498
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.966,
+        "lockInProbability": 0.06000000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.060758393120976084,
+        "medianFinalSquadGini": 0.11123902331302449,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 861,
+        "medianPurchases": 475,
+        "medianFinalResourceGap": 27448393,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.93,
+        "recoveryInterval95": [
+          0.9042022712346763,
+          0.9492405568287469
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.952,
+        "lockInProbability": 0.06999999999999995,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 12,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.06031403677282987,
+        "medianFinalSquadGini": 0.11263795297954826,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 857,
+        "medianPurchases": 473,
+        "medianFinalResourceGap": 27290647,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 5000,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.938,
+        "recoveryInterval95": [
+          0.9133397667805389,
+          0.9559810673863897
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.062000000000000055,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05659734702357189,
+        "medianFinalSquadGini": 0.1083952037912066,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 843,
+        "medianPurchases": 466,
+        "medianFinalResourceGap": 26162369,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.89,
+        "recoveryInterval95": [
+          0.8595438141340721,
+          0.9145089834118234
+        ],
+        "economicRecoveryProbability": 0.95,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.10999999999999999,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 19,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04959997631650093,
+        "medianFinalSquadGini": 0.11761331694027599,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 889,
+        "medianPurchases": 489,
+        "medianFinalResourceGap": 27773788,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.942,
+        "recoveryInterval95": [
+          0.9179433020026042,
+          0.9593165352160771
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.956,
+        "lockInProbability": 0.05800000000000005,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.05110867029547017,
+        "medianFinalSquadGini": 0.11540088036699125,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 893,
+        "medianPurchases": 491,
+        "medianFinalResourceGap": 28312943,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.932,
+        "recoveryInterval95": [
+          0.9064785429161282,
+          0.9509337866731715
+        ],
+        "economicRecoveryProbability": 0.996,
+        "competitiveRecoveryProbability": 0.956,
+        "lockInProbability": 0.06799999999999995,
+        "medianRecoveryRounds": 3,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04938371158467825,
+        "medianFinalSquadGini": 0.11569665664089812,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 887,
+        "medianPurchases": 488,
+        "medianFinalResourceGap": 27844746,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 7500,
+        "marketSlots": 20
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.946,
+        "recoveryInterval95": [
+          0.9225729387555679,
+          0.9626259015148662
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.96,
+        "lockInProbability": 0.05400000000000005,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 15,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0483845605189801,
+        "medianFinalSquadGini": 0.11923030969366466,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 877,
+        "medianPurchases": 483,
+        "medianFinalResourceGap": 26613463,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 5
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.778,
+        "recoveryInterval95": [
+          0.7395294756647782,
+          0.8122312364320395
+        ],
+        "economicRecoveryProbability": 0.858,
+        "competitiveRecoveryProbability": 0.972,
+        "lockInProbability": 0.22199999999999998,
+        "medianRecoveryRounds": 12,
+        "p90RecoveryRounds": 31,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04053100286049216,
+        "medianFinalSquadGini": 0.12012450250100071,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 201,
+        "medianPurchases": 144,
+        "medianFinalResourceGap": 23126552,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 5
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.954,
+        "recoveryInterval95": [
+          0.9319217297737272,
+          0.9691551166002124
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.04600000000000004,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.03751851795175565,
+        "medianFinalSquadGini": 0.1198925213934603,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 201,
+        "medianPurchases": 145,
+        "medianFinalResourceGap": 21369432,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 5
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.948,
+        "recoveryInterval95": [
+          0.9248983617059371,
+          0.9642699800903735
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.954,
+        "lockInProbability": 0.052000000000000046,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.0378658475808098,
+        "medianFinalSquadGini": 0.11579901324639086,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 199,
+        "medianPurchases": 144,
+        "medianFinalResourceGap": 21486573,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 5
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.93,
+        "recoveryInterval95": [
+          0.9042022712346763,
+          0.9492405568287469
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.938,
+        "lockInProbability": 0.06999999999999995,
+        "medianRecoveryRounds": 7,
+        "p90RecoveryRounds": 18,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.03945653531718252,
+        "medianFinalSquadGini": 0.12225146498951078,
+        "medianMidseasonContenders": 2,
+        "medianTransactions": 195,
+        "medianPurchases": 142,
+        "medianFinalResourceGap": 22318793,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 10
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.836,
+        "recoveryInterval95": [
+          0.8010046749760953,
+          0.8658715813711375
+        ],
+        "economicRecoveryProbability": 0.936,
+        "competitiveRecoveryProbability": 0.952,
+        "lockInProbability": 0.16400000000000003,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 25,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.038181050924593896,
+        "medianFinalSquadGini": 0.11472674297690366,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 451,
+        "medianPurchases": 270,
+        "medianFinalResourceGap": 23194506,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 10
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.95,
+        "recoveryInterval95": [
+          0.9272313499731688,
+          0.965906493349018
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.958,
+        "lockInProbability": 0.050000000000000044,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.037380747995996444,
+        "medianFinalSquadGini": 0.11873863500612813,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 457,
+        "medianPurchases": 273,
+        "medianFinalResourceGap": 22785027,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 10
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.956,
+        "recoveryInterval95": [
+          0.9342800855801577,
+          0.9707662623196583
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.04400000000000004,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 13,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.037997738856643926,
+        "medianFinalSquadGini": 0.11845510290240657,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 451,
+        "medianPurchases": 270,
+        "medianFinalResourceGap": 22958751,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 10
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.936,
+        "recoveryInterval95": [
+          0.9110470662066095,
+          0.954304266434443
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.938,
+        "lockInProbability": 0.06399999999999995,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 18,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.03731103870149499,
+        "medianFinalSquadGini": 0.11893153517799004,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 443,
+        "medianPurchases": 266,
+        "medianFinalResourceGap": 22516089,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 15
+      },
+      "shock": {
+        "kind": "bad-transfer",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.876,
+        "recoveryInterval95": [
+          0.8442119499943469,
+          0.9020543368704138
+        ],
+        "economicRecoveryProbability": 0.964,
+        "competitiveRecoveryProbability": 0.944,
+        "lockInProbability": 0.124,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 25,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04003431336974539,
+        "medianFinalSquadGini": 0.11758526967324179,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 689,
+        "medianPurchases": 389,
+        "medianFinalResourceGap": 25489131,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 15
+      },
+      "shock": {
+        "kind": "bad-streak",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.958,
+        "recoveryInterval95": [
+          0.9366479487604386,
+          0.9723679006652538
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.962,
+        "lockInProbability": 0.04200000000000004,
+        "medianRecoveryRounds": 6,
+        "p90RecoveryRounds": 14,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04019708051566839,
+        "medianFinalSquadGini": 0.11879369298643572,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 689,
+        "medianPurchases": 389,
+        "medianFinalResourceGap": 25374249,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 15
+      },
+      "shock": {
+        "kind": "star-injury",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.938,
+        "recoveryInterval95": [
+          0.9133397667805389,
+          0.9559810673863897
+        ],
+        "economicRecoveryProbability": 0.998,
+        "competitiveRecoveryProbability": 0.954,
+        "lockInProbability": 0.062000000000000055,
+        "medianRecoveryRounds": 4,
+        "p90RecoveryRounds": 10,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.04013396189398866,
+        "medianFinalSquadGini": 0.12131275797027175,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 687,
+        "medianPurchases": 388,
+        "medianFinalResourceGap": 25737016,
+        "confidence": "medium"
+      }
+    },
+    {
+      "config": {
+        "rosterCap": 25,
+        "payoutDirection": "inverse",
+        "eurosPerPoint": 10000,
+        "marketSlots": 15
+      },
+      "shock": {
+        "kind": "inactivity",
+        "severity": "medium",
+        "appliedRound": 5
+      },
+      "result": {
+        "modelVersion": "agent-season-v3",
+        "simulationCount": 500,
+        "recoveryProbability": 0.938,
+        "recoveryInterval95": [
+          0.9133397667805389,
+          0.9559810673863897
+        ],
+        "economicRecoveryProbability": 1,
+        "competitiveRecoveryProbability": 0.952,
+        "lockInProbability": 0.062000000000000055,
+        "medianRecoveryRounds": 8,
+        "p90RecoveryRounds": 16,
+        "medianRemainingEconomicGap": 0,
+        "medianRemainingCompetitiveGap": 0,
+        "medianFinalResourceGini": 0.03995695758849238,
+        "medianFinalSquadGini": 0.1198634283217681,
+        "medianMidseasonContenders": 3,
+        "medianTransactions": 679,
+        "medianPurchases": 384,
+        "medianFinalResourceGap": 24946773,
+        "confidence": "medium"
+      }
+    }
+  ]
 }
