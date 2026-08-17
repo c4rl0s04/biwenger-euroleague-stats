@@ -1,4 +1,5 @@
 import 'server-only';
+import generatedSimulationResults from '../../../data/season-simulation-results.json';
 import { getSeasonReviewRawData, type SeasonReviewRawData } from '../../db';
 import {
   analyzeRosterCaps,
@@ -7,6 +8,16 @@ import {
   resilienceRequestSchema,
   simulateRecovery,
 } from '../../season-review/resilience';
+import {
+  buildSeasonSimulationDataset,
+  calibrateSeasonSimulator,
+} from '../../season-review/simulation-dataset';
+import { runSeasonMonteCarlo } from '../../season-review/season-simulator';
+import type {
+  SeasonMonteCarloResult,
+  SeasonSimulationArtifact,
+  SeasonSimulationDataset,
+} from '../../season-review/simulation-types';
 import {
   REVIEW_SEASON_ID,
   type EconomicLedger,
@@ -17,6 +28,7 @@ import {
   type HistoricalUserPoint,
   type PairMoment,
   type RecoveryEnvironment,
+  type RecoveryResult,
   type ResilienceConfig,
   type ResilienceRecommendation,
   type ResilienceScores,
@@ -27,6 +39,8 @@ import {
 import { cached, CACHE_TTL } from '../../utils/cache';
 
 const STARTING_BUDGET = 40_000_000;
+const INTERACTIVE_SIMULATION_RUNS = 16;
+const simulationArtifact = generatedSimulationResults as SeasonSimulationArtifact;
 const USER_COLORS = ['#fa5001', '#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#fb7185', '#94a3b8'];
 
 export const HISTORICAL_RESILIENCE_CONFIG: ResilienceConfig = {
@@ -52,6 +66,35 @@ function previousDay(value: string) {
 
 function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+function sameConfig(left: ResilienceConfig, right: ResilienceConfig) {
+  return (
+    left.rosterCap === right.rosterCap &&
+    left.payoutDirection === right.payoutDirection &&
+    left.eurosPerPoint === right.eurosPerPoint &&
+    left.marketSlots === right.marketSlots
+  );
+}
+
+function sameShock(left: ShockConfig, right: ShockConfig) {
+  return (
+    left.kind === right.kind &&
+    left.severity === right.severity &&
+    left.appliedRound === right.appliedRound
+  );
+}
+
+function precomputedSimulation(
+  config: ResilienceConfig,
+  shock: ShockConfig
+): SeasonMonteCarloResult | null {
+  if (simulationArtifact.status !== 'ready') return null;
+  return (
+    simulationArtifact.results.find(
+      (entry) => sameConfig(entry.config, config) && sameShock(entry.shock, shock)
+    )?.result || null
+  );
 }
 
 function normalizeLedgerInput(raw: SeasonReviewRawData) {
@@ -386,10 +429,7 @@ function buildEnvironment(
   };
 }
 
-function scoreAnalysis(
-  config: ResilienceConfig,
-  results: ReturnType<typeof simulateRecovery>[]
-): ResilienceScores {
+function scoreAnalysis(config: ResilienceConfig, results: RecoveryResult[]): ResilienceScores {
   const resilience = average(results.map((result) => result.recoveryProbability)) * 100;
   const equality =
     average(
@@ -418,24 +458,24 @@ function scoreAnalysis(
 }
 
 function analyzeConfiguration(
-  environment: RecoveryEnvironment,
+  simulationDataset: SeasonSimulationDataset,
   config: ResilienceConfig,
-  shock: ShockConfig
+  shock: ShockConfig,
+  runs = INTERACTIVE_SIMULATION_RUNS
 ): SeasonRecoveryAnalysis {
-  const adjustedEnvironment = {
-    ...environment,
-    roundsRemaining: Math.max(
-      1,
-      environment.roundsRemaining + DEFAULT_RECOVERY_SHOCK.appliedRound - shock.appliedRound
-    ),
+  const simulateFullSeason = (scenarioConfig: ResilienceConfig): RecoveryResult => {
+    const summary =
+      precomputedSimulation(scenarioConfig, shock) ||
+      runSeasonMonteCarlo(simulationDataset, scenarioConfig, shock, {
+        runs,
+        baseSeed: 202526,
+      });
+    return { ...summary, config: scenarioConfig, shock };
   };
-  const result = simulateRecovery(adjustedEnvironment, config, shock, 202526);
-  const historicalResult = simulateRecovery(
-    adjustedEnvironment,
-    HISTORICAL_RESILIENCE_CONFIG,
-    shock,
-    202526
-  );
+  const result = simulateFullSeason(config);
+  const historicalResult = sameConfig(config, HISTORICAL_RESILIENCE_CONFIG)
+    ? result
+    : simulateFullSeason(HISTORICAL_RESILIENCE_CONFIG);
   return {
     config,
     shock,
@@ -445,9 +485,10 @@ function analyzeConfiguration(
     deltaRecoveryProbability: result.recoveryProbability - historicalResult.recoveryProbability,
     assumptions: [
       'Todos los escenarios comienzan con 40 M€ por usuario.',
-      'Las oportunidades de recuperación se remuestrean de resultados de fichajes observados.',
-      'Los límites liberan primero el tramo menos valioso; el resultado es una presión estimada.',
-      'No se predicen pujas contrafactuales concretas ni cambios de comportamiento.',
+      `${Math.min(result.simulationCount, historicalResult.simulationCount)} temporadas completas usan las mismas semillas para histórico y escenario.`,
+      'Puntos y revalorizaciones se remuestrean por jugador desde trayectorias de 2025/26.',
+      'Siete agentes con estrategias distintas pujan, venden, alinean y reciben primas.',
+      'Las decisiones humanas se modelan estadísticamente; no son predicciones individuales.',
     ],
   };
 }
@@ -462,20 +503,38 @@ function buildRecommendations(environment: RecoveryEnvironment): ResilienceRecom
   const candidates: Array<{
     config: ResilienceConfig;
     scores: ResilienceScores;
-    results: ReturnType<typeof simulateRecovery>[];
+    results: RecoveryResult[];
   }> = [];
-  for (let rosterCap = 10; rosterCap <= 25; rosterCap += 1) {
-    (['inverse', 'direct'] as const).forEach((payoutDirection) => {
-      [7_500, 10_000].forEach((eurosPerPoint) => {
-        [10, 15, 20].forEach((marketSlots) => {
-          const config = { rosterCap, payoutDirection, eurosPerPoint, marketSlots };
-          const results = shocks.map((shock, index) =>
-            simulateRecovery(environment, config, shock, 202526 + index)
-          );
-          candidates.push({ config, results, scores: scoreAnalysis(config, results) });
+
+  if (simulationArtifact.status === 'ready') {
+    const grouped = new Map<string, { config: ResilienceConfig; results: RecoveryResult[] }>();
+    simulationArtifact.results.forEach((entry) => {
+      if (!shocks.some((shock) => sameShock(shock, entry.shock))) return;
+      const key = JSON.stringify(entry.config);
+      const group = grouped.get(key) || { config: entry.config, results: [] };
+      group.results.push({ ...entry.result, config: entry.config, shock: entry.shock });
+      grouped.set(key, group);
+    });
+    grouped.forEach(({ config, results }) => {
+      if (results.length !== shocks.length) return;
+      candidates.push({ config, results, scores: scoreAnalysis(config, results) });
+    });
+  }
+
+  if (!candidates.length) {
+    for (let rosterCap = 10; rosterCap <= 25; rosterCap += 1) {
+      (['inverse', 'direct'] as const).forEach((payoutDirection) => {
+        [7_500, 10_000].forEach((eurosPerPoint) => {
+          [10, 15, 20].forEach((marketSlots) => {
+            const config = { rosterCap, payoutDirection, eurosPerPoint, marketSlots };
+            const results = shocks.map((shock, index) =>
+              simulateRecovery(environment, config, shock, 202526 + index)
+            );
+            candidates.push({ config, results, scores: scoreAnalysis(config, results) });
+          });
         });
       });
-    });
+    }
   }
 
   const profiles: Array<{
@@ -551,6 +610,8 @@ function buildRecommendations(environment: RecoveryEnvironment): ResilienceRecom
       ),
       averageLockInProbability: average(winner.results.map((result) => result.lockInProbability)),
       runnerUp: runnerUp.config,
+      modelVersion: winner.results[0].modelVersion,
+      simulationCount: Math.min(...winner.results.map((result) => result.simulationCount)),
     };
   });
 }
@@ -564,14 +625,23 @@ async function buildResilienceModel() {
     Array.from({ length: 16 }, (_, index) => 10 + index)
   );
   const environment = buildEnvironment(raw, capDiagnostics);
-  return { raw, input, ledger, capDiagnostics, environment, roundDateById };
+  const simulationDataset = buildSeasonSimulationDataset(raw);
+  return {
+    raw,
+    input,
+    ledger,
+    capDiagnostics,
+    environment,
+    simulationDataset,
+    roundDateById,
+  };
 }
 
 const getCachedResilienceModel = () =>
-  cached('season-review:resilience-model:2025-26:v2', CACHE_TTL.VERY_LONG, buildResilienceModel);
+  cached('season-review:resilience-model:2025-26:v3', CACHE_TTL.VERY_LONG, buildResilienceModel);
 
 async function buildOverview(): Promise<SeasonReviewOverviewV2> {
-  const { raw, input, ledger, capDiagnostics, environment, roundDateById } =
+  const { raw, input, ledger, capDiagnostics, environment, simulationDataset, roundDateById } =
     await getCachedResilienceModel();
   const colors = new Map(
     raw.users.map((user, index) => [
@@ -583,6 +653,25 @@ async function buildOverview(): Promise<SeasonReviewOverviewV2> {
   const marketCoverageStart = raw.marketListingPlayers[0]?.listed_at
     ? dayOf(raw.marketListingPlayers[0].listed_at)
     : null;
+  const timeline = buildTimeline(ledger, colors);
+  const closing = timeline.at(-1);
+  const initialAnalysis = analyzeConfiguration(
+    simulationDataset,
+    HISTORICAL_RESILIENCE_CONFIG,
+    DEFAULT_RECOVERY_SHOCK
+  );
+  const simulationCalibration = calibrateSeasonSimulator(
+    {
+      transfers: raw.counts.transfers,
+      finalResourceGini: closing?.resourceGini || 0,
+      finalSquadGini: closing?.squadGini || 0,
+    },
+    {
+      medianTransactions: initialAnalysis.result.medianTransactions || 0,
+      medianFinalResourceGini: initialAnalysis.result.medianFinalResourceGini || 0,
+      medianFinalSquadGini: initialAnalysis.result.medianFinalSquadGini || 0,
+    }
+  );
   return {
     version: 2,
     seasonId: REVIEW_SEASON_ID,
@@ -593,17 +682,14 @@ async function buildOverview(): Promise<SeasonReviewOverviewV2> {
       name: user.name,
       color: colors.get(user.id) || '#94a3b8',
     })),
-    timeline: buildTimeline(ledger, colors),
+    timeline,
     autopsy: buildAutopsy(raw, ledger, roundDateById, colors),
     capDiagnostics,
     recommendations: buildRecommendations(environment),
     historicalConfig: HISTORICAL_RESILIENCE_CONFIG,
     defaultShock: DEFAULT_RECOVERY_SHOCK,
-    initialAnalysis: analyzeConfiguration(
-      environment,
-      HISTORICAL_RESILIENCE_CONFIG,
-      DEFAULT_RECOVERY_SHOCK
-    ),
+    initialAnalysis,
+    simulationCalibration,
     quality: {
       rawFinanceRows: raw.counts.rawFinanceRows,
       uniqueFinanceEvents: raw.counts.uniqueFinanceEvents,
@@ -617,7 +703,8 @@ async function buildOverview(): Promise<SeasonReviewOverviewV2> {
       warnings: [
         'El saldo se reconstruye desde 40 M€; no existen snapshots históricos de saldo.',
         'Las primas se deduplican y se mantienen separadas de fichajes y revalorizaciones.',
-        'La fuerza competitiva contrafactual usa trayectorias históricas, no decisiones futuras conocidas.',
+        'Las temporadas completas remuestrean trayectorias reales y enfrentan siete estrategias de agente.',
+        'Las pujas y decisiones contrafactuales son comportamiento modelado, no predicciones individuales.',
         'Los snapshots completos de mercado comienzan en marzo; antes se usan fichajes y pujas observadas.',
       ],
     },
@@ -626,10 +713,13 @@ async function buildOverview(): Promise<SeasonReviewOverviewV2> {
 }
 
 export const getSeasonResilienceOverview = () =>
-  cached('season-review:resilience-overview:2025-26:v2', CACHE_TTL.VERY_LONG, buildOverview);
+  cached('season-review:resilience-overview:2025-26:v3', CACHE_TTL.VERY_LONG, buildOverview);
 
 export async function simulateSeasonResilience(input: unknown) {
   const request = resilienceRequestSchema.parse(input);
-  const { environment } = await getCachedResilienceModel();
-  return analyzeConfiguration(environment, request.config, request.shock);
+  const cacheKey = `season-review:resilience-simulation:v3:${JSON.stringify(request)}`;
+  return cached(cacheKey, CACHE_TTL.VERY_LONG, async () => {
+    const { simulationDataset } = await getCachedResilienceModel();
+    return analyzeConfiguration(simulationDataset, request.config, request.shock);
+  });
 }

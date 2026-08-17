@@ -68,6 +68,10 @@ const fullMoney = new Intl.NumberFormat('es-ES', {
 });
 const number = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
 const integer = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
+const giniNumber = new Intl.NumberFormat('es-ES', {
+  minimumFractionDigits: 3,
+  maximumFractionDigits: 3,
+});
 const percent = (value: number) => `${number.format(value * 100)}%`;
 
 const shockLabels: Record<ShockConfig['kind'], string> = {
@@ -422,6 +426,11 @@ function RecommendationCard({
         </div>
       </div>
       <h3 className="mt-4 text-xl font-black text-white">{recommendation.name}</h3>
+      <p className="mt-1 text-[9px] font-black uppercase tracking-wider text-zinc-600">
+        {recommendation.modelVersion === 'agent-season-v3'
+          ? `${integer.format(recommendation.simulationCount)} temporadas completas por shock`
+          : 'Preselección estructural · pendiente de cálculo masivo'}
+      </p>
       <p className="mt-2 min-h-12 text-xs leading-5 text-zinc-500">{recommendation.description}</p>
       <div className="mt-4 flex flex-wrap gap-1.5">
         {configSummary(recommendation.config).map((item) => (
@@ -463,9 +472,11 @@ function RecommendationCard({
 function RecoveryPanel({
   analysis,
   loading,
+  observedTransfers,
 }: {
   analysis: SeasonRecoveryAnalysis;
   loading: boolean;
+  observedTransfers: number;
 }) {
   const result = analysis.result;
   const comparisonData = [
@@ -489,17 +500,63 @@ function RecoveryPanel({
           <p className="mt-2 text-4xl font-black tracking-tight text-white">
             {percent(result.recoveryProbability)}
           </p>
-          <p className="mt-1 text-xs text-zinc-500">probabilidad estimada de recuperación doble</p>
+          <p className="mt-1 text-xs text-zinc-500">
+            temporadas donde el usuario recupera recursos y plantilla
+          </p>
+          {result.recoveryInterval95 ? (
+            <p className="mt-2 text-[10px] font-bold text-zinc-600">
+              Intervalo 95 %: {percent(result.recoveryInterval95[0])}–
+              {percent(result.recoveryInterval95[1])}
+            </p>
+          ) : null}
         </div>
-        <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-amber-300">
-          Confianza{' '}
-          {result.confidence === 'high'
-            ? 'alta'
-            : result.confidence === 'medium'
-              ? 'media'
-              : 'baja'}
-        </span>
+        <div className="text-right">
+          <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-amber-300">
+            Confianza{' '}
+            {result.confidence === 'high'
+              ? 'alta'
+              : result.confidence === 'medium'
+                ? 'media'
+                : 'baja'}
+          </span>
+          <p className="mt-2 text-[9px] font-bold uppercase tracking-wider text-zinc-600">
+            {integer.format(result.simulationCount)} temporadas · modelo por jugadores
+          </p>
+        </div>
       </div>
+      {result.modelVersion === 'agent-season-v3' ? (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+            <p className="text-[8px] uppercase tracking-widest text-zinc-600">Gini económico</p>
+            <p className="mt-1 text-lg font-black text-white">
+              {giniNumber.format(result.medianFinalResourceGini || 0)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+            <p className="text-[8px] uppercase tracking-widest text-zinc-600">Gini plantilla</p>
+            <p className="mt-1 text-lg font-black text-white">
+              {giniNumber.format(result.medianFinalSquadGini || 0)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+            <p className="text-[8px] uppercase tracking-widest text-zinc-600">Aspirantes a mitad</p>
+            <p className="mt-1 text-lg font-black text-white">
+              {number.format(result.medianMidseasonContenders || 0)} de 7
+            </p>
+          </div>
+          <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+            <p className="text-[8px] uppercase tracking-widest text-zinc-600">
+              Movimientos simulados
+            </p>
+            <p className="mt-1 text-lg font-black text-white">
+              {integer.format(result.medianTransactions || 0)}
+            </p>
+            <p className="mt-1 text-[9px] font-bold text-zinc-600">
+              {integer.format(observedTransfers)} movimientos reales
+            </p>
+          </div>
+        </div>
+      ) : null}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
           <p className="text-[8px] uppercase tracking-widest text-zinc-600">
@@ -617,7 +674,7 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
           setError(null);
         } else setError(response.error);
       });
-    }, 450);
+    }, 900);
     return () => window.clearTimeout(timeout);
   }, [config, shock]);
 
@@ -1146,7 +1203,8 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
                 Gana la regla que resiste mejor malos fichajes, lesiones, rachas e inactividad
-                usando los mismos shocks y resultados históricos de mercado.
+                usando los mismos shocks. Mientras no se publique el cálculo masivo, las tarjetas se
+                muestran como una preselección y el laboratorio usa temporadas completas.
               </p>
             </div>
           </div>
@@ -1169,8 +1227,9 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
                 ¿Un error condiciona toda la temporada?
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
-                Aplica el mismo shock a distintas reglas. Recuperación doble significa volver cerca
-                de la mediana tanto en recursos como en capacidad de plantilla.
+                Cada escenario reproduce temporadas completas con jugadores, precios, mercado,
+                pujas, ventas, alineaciones, puntos y primas. Histórico y alternativa usan las
+                mismas temporadas aleatorias.
               </p>
             </div>
             <button
@@ -1180,6 +1239,51 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
             >
               <RotateCcw size={13} /> Reglas históricas
             </button>
+          </div>
+          <div className="mt-5 grid gap-3 rounded-2xl border border-white/[0.07] bg-black/20 p-4 md:grid-cols-[auto_1fr_1fr]">
+            <div>
+              <p className="text-[8px] font-black uppercase tracking-widest text-zinc-600">
+                Calibración del modelo
+              </p>
+              <p
+                className={cx(
+                  'mt-2 text-sm font-black',
+                  overview.simulationCalibration.status === 'strong'
+                    ? 'text-emerald-300'
+                    : overview.simulationCalibration.status === 'acceptable'
+                      ? 'text-amber-300'
+                      : 'text-red-300'
+                )}
+              >
+                {overview.simulationCalibration.status === 'strong'
+                  ? 'Fuerte'
+                  : overview.simulationCalibration.status === 'acceptable'
+                    ? 'Aceptable'
+                    : 'Débil'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[8px] uppercase tracking-widest text-zinc-600">Movimientos</p>
+              <p className="mt-1 text-xs font-bold text-zinc-300">
+                {integer.format(overview.simulationCalibration.simulatedMedianTransactions)}{' '}
+                simulados
+                {' · '}
+                {integer.format(overview.simulationCalibration.observedTransfers)} reales
+              </p>
+            </div>
+            <div>
+              <p className="text-[8px] uppercase tracking-widest text-zinc-600">Gini al cierre</p>
+              <p className="mt-1 text-xs font-bold text-zinc-300">
+                Recursos{' '}
+                {giniNumber.format(overview.simulationCalibration.simulatedFinalResourceGini)}
+                {' / '}
+                {giniNumber.format(overview.simulationCalibration.observedFinalResourceGini)} real
+                {' · '}plantilla{' '}
+                {giniNumber.format(overview.simulationCalibration.simulatedFinalSquadGini)}
+                {' / '}
+                {giniNumber.format(overview.simulationCalibration.observedFinalSquadGini)} real
+              </p>
+            </div>
           </div>
           <div className="mt-7 grid gap-7 xl:grid-cols-[320px_1fr]">
             <div className="space-y-5 rounded-2xl border border-white/[0.07] bg-black/25 p-4">
@@ -1277,7 +1381,11 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
                   {error}
                 </div>
               )}
-              <RecoveryPanel analysis={analysis} loading={isPending} />
+              <RecoveryPanel
+                analysis={analysis}
+                loading={isPending}
+                observedTransfers={overview.quality.transfers}
+              />
             </div>
           </div>
         </Card>
@@ -1355,9 +1463,7 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
 
         <div className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold text-zinc-700">
           <FlaskConical size={13} />
-          <span>
-            Modelo v2 · 500 trayectorias emparejadas por escenario · temporada congelada 2025/26
-          </span>
+          <span>Modelo v3 · temporadas completas emparejadas · jugadores y mercado 2025/26</span>
         </div>
       </div>
     </div>
