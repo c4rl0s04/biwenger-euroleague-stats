@@ -1,0 +1,107 @@
+name: Season simulations
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Seasons per configuration and shock
+        required: true
+        default: '500'
+        type: choice
+        options:
+          - '250'
+          - '500'
+          - '1000'
+          - '2000'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: season-simulations-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  simulate:
+    name: Simulate ${{ matrix.group }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [roster-low, roster-high, payout, market, presets]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run complete-season simulations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          SIMULATION_GROUP: ${{ matrix.group }}
+          SIMULATION_RUNS: ${{ inputs.runs }}
+          SIMULATION_OUTPUT: artifacts/season-simulations-${{ matrix.group }}.json
+        run: npm run simulation:run
+
+      - name: Upload partial results
+        uses: actions/upload-artifact@v4
+        with:
+          name: season-simulations-${{ matrix.group }}
+          path: artifacts/season-simulations-${{ matrix.group }}.json
+          retention-days: 14
+
+  publish:
+    name: Publish simulation summary
+    needs: simulate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download partial results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: season-simulations-*
+          path: artifacts/downloaded
+          merge-multiple: false
+
+      - name: Merge results
+        run: npm run simulation:merge
+
+      - name: Commit generated summary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/season-simulation-results.json
+          if git diff --cached --quiet; then
+            echo "Simulation summary is unchanged"
+          else
+            git commit -m "data: refresh season simulation summary"
+            git push
+          fi

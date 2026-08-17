@@ -29,6 +29,8 @@
     "db:verify": "tsx scripts/dev/verify-db-connection.ts",
     "db:verify:drizzle": "tsx scripts/dev/verify-drizzle.ts",
     "analyze": "ANALYZE=true next build --webpack",
+    "simulation:run": "NODE_OPTIONS=--conditions=react-server tsx -r dotenv/config scripts/analysis/run-season-simulations.ts",
+    "simulation:merge": "tsx scripts/analysis/merge-season-simulations.ts",
     "prepare": "husky"
   },
   "dependencies": {
