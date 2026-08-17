@@ -26,10 +26,11 @@ behavior to its page entries, internal APIs, services, data access, and tests.
 - [Assistant](assistant.md) — conversational analytics over local league context.
 - [Hoopgrid](hoopgrid.md) — daily trivia, rarity, and internal inspection views.
 - [Accounts and settings](accounts-and-settings.md) — login, manager profiles, and preferences.
+- [Season review](season-review.md) — frozen-season economy diagnosis and rules simulator.
 
 ## Page inventory
 
-The App Router currently exposes 23 page entry files:
+The App Router currently exposes 24 page entry files:
 
 | Domain                      | Routes                                                           |
 | --------------------------- | ---------------------------------------------------------------- |
@@ -41,6 +42,7 @@ The App Router currently exposes 23 page entry files:
 | Assistant                   | `/assistant`                                                     |
 | Hoopgrid                    | `/hoopgrid`, `/hoopgrid-cheatsheet`, `/test-hoopgrid`            |
 | Accounts                    | `/login`, `/settings`, `/user/[id]`                              |
+| Season review               | `/season-review`                                                 |
 
 `/test-hoopgrid` is an internal diagnostic page, not a supported end-user destination. All routes
 except the login flow are intended for authenticated use under the current middleware policy.
