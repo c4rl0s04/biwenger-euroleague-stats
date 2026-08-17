@@ -11,6 +11,7 @@ import {
   Calendar,
   Target,
   LayoutGrid,
+  FlaskConical,
 } from 'lucide-react';
 import { UserSelector } from '@/components/user';
 
@@ -26,6 +27,7 @@ const navItems = [
   { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Porras', href: '/predictions', icon: Target },
   { name: 'Playoffs', href: '/playoffs', icon: Trophy },
+  { name: 'Análisis 25/26', href: '/season-review', icon: FlaskConical },
 ];
 
 // Navbar styles for each theme (kept for backend configuration)

@@ -21,6 +21,7 @@ import {
   Swords,
   Scale,
   Bot,
+  FlaskConical,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSections } from './SectionContext';
@@ -41,6 +42,7 @@ const navItems = [
   { name: 'Playoffs', href: '/playoffs', icon: Swords },
   { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Comparativa', href: '/compare', icon: Scale },
+  { name: 'Análisis 25/26', href: '/season-review', icon: FlaskConical },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
