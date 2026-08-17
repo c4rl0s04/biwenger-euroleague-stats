@@ -10,6 +10,7 @@ export interface SeasonReviewRawData {
     round_name: string;
     points: number;
     participated: boolean;
+    round_date: string | null;
   }>;
   lineups: Array<{
     user_id: string;
@@ -32,6 +33,7 @@ export interface SeasonReviewRawData {
   }>;
   initialSquads: Array<{ user_id: string; player_id: number; price: number }>;
   transfers: Array<{
+    id: number;
     timestamp: number;
     fecha: string;
     player_id: number;
@@ -44,6 +46,18 @@ export interface SeasonReviewRawData {
     listed_at: string;
     automatic: number;
     total: number;
+  }>;
+  marketListingPlayers: Array<{
+    listed_at: string;
+    player_id: number;
+    price: number;
+    seller_id: string | null;
+  }>;
+  transferBids: Array<{
+    transfer_id: number;
+    bidder_id: string | null;
+    bidder_name: string | null;
+    amount: number;
   }>;
   counts: {
     rawFinanceRows: number;
@@ -67,6 +81,8 @@ export async function getSeasonReviewRawData(): Promise<SeasonReviewRawData> {
     initialSquads,
     transfers,
     marketValues,
+    marketListingPlayers,
+    transferBids,
     marketListings,
     counts,
   ] = await Promise.all([
@@ -80,11 +96,18 @@ export async function getSeasonReviewRawData(): Promise<SeasonReviewRawData> {
       [seasonId]
     ),
     pgClient.query(
-      `SELECT user_id, round_id, COALESCE(round_name, 'Jornada') AS round_name,
-              COALESCE(points, 0) AS points, COALESCE(participated, true) AS participated
-       FROM user_rounds
-       WHERE season_id = $1
-       ORDER BY round_id, user_id`,
+      `SELECT ur.user_id, ur.round_id, COALESCE(ur.round_name, 'Jornada') AS round_name,
+              COALESCE(ur.points, 0) AS points, COALESCE(ur.participated, true) AS participated,
+              round_dates.round_date::text
+       FROM user_rounds ur
+       LEFT JOIN (
+         SELECT round_id, MAX(date)::date AS round_date
+         FROM matches
+         WHERE season_id = $1
+         GROUP BY round_id
+       ) round_dates ON round_dates.round_id = ur.round_id
+       WHERE ur.season_id = $1
+       ORDER BY ur.round_id, ur.user_id`,
       [seasonId]
     ),
     pgClient.query(
@@ -117,7 +140,7 @@ export async function getSeasonReviewRawData(): Promise<SeasonReviewRawData> {
       [seasonId]
     ),
     pgClient.query(
-      `SELECT timestamp, fecha, player_id, COALESCE(precio, 0) AS precio, vendedor, comprador
+      `SELECT id, timestamp, fecha, player_id, COALESCE(precio, 0) AS precio, vendedor, comprador
        FROM fichajes
        WHERE season_id = $1
        ORDER BY timestamp, id`,
@@ -126,8 +149,24 @@ export async function getSeasonReviewRawData(): Promise<SeasonReviewRawData> {
     pgClient.query(
       `SELECT date::text, player_id, COALESCE(price, 0) AS price
        FROM market_values
-       WHERE season_id = $1 AND date <= DATE '2026-05-25'
+       WHERE season_id = $1
+         AND date BETWEEN DATE '2025-09-01' AND DATE '2026-05-25'
        ORDER BY date, player_id`,
+      [seasonId]
+    ),
+    pgClient.query(
+      `SELECT listed_at::text, player_id, COALESCE(price, 0) AS price, seller_id
+       FROM market_listings
+       WHERE season_id = $1 AND listed_at <= DATE '2026-05-25'
+       ORDER BY listed_at, player_id`,
+      [seasonId]
+    ),
+    pgClient.query(
+      `SELECT tb.transfer_id, tb.bidder_id, tb.bidder_name, COALESCE(tb.amount, 0) AS amount
+       FROM transfer_bids tb
+       JOIN fichajes f ON f.id = tb.transfer_id AND f.season_id = tb.season_id
+       WHERE tb.season_id = $1
+       ORDER BY f.timestamp, tb.transfer_id, tb.amount DESC`,
       [seasonId]
     ),
     pgClient.query(
@@ -167,6 +206,8 @@ export async function getSeasonReviewRawData(): Promise<SeasonReviewRawData> {
     transfers: transfers.rows,
     marketValues: marketValues.rows,
     marketListings: marketListings.rows,
+    marketListingPlayers: marketListingPlayers.rows,
+    transferBids: transferBids.rows,
     counts: {
       rawFinanceRows: Number(countRow.raw_finance_rows),
       uniqueFinanceEvents: Number(countRow.unique_finance_events),

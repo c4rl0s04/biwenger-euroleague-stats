@@ -133,8 +133,13 @@ export { getUserScheduleService, fetchScheduleRounds } from './app/scheduleServi
 // Search Service
 export { performGlobalSearch } from './features/searchService';
 
-// Frozen 2025/26 review and counterfactual simulator
-export { getSeasonReviewOverview, simulateSeasonReview } from './features/seasonReviewService';
+// Frozen 2025/26 resilience review and counterfactual simulator
+export {
+  DEFAULT_RECOVERY_SHOCK,
+  HISTORICAL_RESILIENCE_CONFIG,
+  getSeasonResilienceOverview,
+  simulateSeasonResilience,
+} from './features/seasonResilienceService';
 
 // Player Service Extensions
 export { fetchStatLeaders } from './core/playerService';

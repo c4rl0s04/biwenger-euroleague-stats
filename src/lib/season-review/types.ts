@@ -1,175 +1,211 @@
 export const REVIEW_SEASON_ID = '2025-26' as const;
 
-export type PayoutMode = 'inverse' | 'direct' | 'hybrid' | 'equal';
-export type BudgetMode = 'literal' | 'neutral';
-export type PositionPreset =
-  | 'none'
-  | 'winner'
-  | 'podium-light'
-  | 'podium-strong'
-  | 'bottom-support'
-  | 'custom';
+export type PayoutDirection = 'direct' | 'inverse';
+export type ShockKind = 'bad-transfer' | 'bad-streak' | 'star-injury' | 'inactivity';
+export type ShockSeverity = 'low' | 'medium' | 'high';
 
-export interface ScenarioConfig {
-  rosterCap: 18 | 20 | 22 | 25;
-  payoutMode: PayoutMode;
-  eurosPerPoint: 5000 | 7500 | 10000;
-  meritWeight: 0 | 0.25 | 0.5 | 0.75 | 1;
-  positionPreset: PositionPreset;
-  positionBonuses: number[];
-  idealPlayerBonus: 0 | 50000 | 100000;
-  mvpBonus: 0 | 60000 | 150000;
-  stackMvpAndIdeal: boolean;
-  marketSlots: 10 | 15 | 20 | 25 | 30;
-  squadValueCap: null | 70000000 | 80000000 | 90000000 | 100000000 | 110000000;
-  budgetMode: BudgetMode;
+export interface EconomicLedgerInput {
+  startingBudget: number;
+  users: Array<{ id: string; name: string }>;
+  initialSquads: Array<{ userId: string; playerId: number; price: number }>;
+  days: string[];
+  marketValues: Array<{ day: string; playerId: number; price: number }>;
+  transfers: Array<{
+    day: string;
+    timestamp: number;
+    playerId: number;
+    price: number;
+    sellerId: string | null;
+    buyerId: string | null;
+  }>;
+  bonuses: Array<{ day: string; userId: string; amount: number }>;
+  roundPoints: Array<{ day: string; roundId: number; userId: string; points: number }>;
 }
 
-export interface ReviewUser {
-  id: string;
+export interface OwnedPlayerSnapshot {
+  playerId: number;
+  value: number;
+  acquisitionPrice: number;
+  source: 'initial' | 'market';
+}
+
+export interface EconomicSnapshot {
+  day: string;
+  userId: string;
+  userName: string;
+  cash: number;
+  squadValue: number;
+  totalResources: number;
+  rosterSize: number;
+  cumulativeBonuses: number;
+  cumulativePoints: number;
+  initialAssetPnl: number;
+  marketAssetPnl: number;
+  players: OwnedPlayerSnapshot[];
+}
+
+export interface EconomicLedger {
+  snapshots: EconomicSnapshot[];
+}
+
+export interface RosterCapDiagnostic {
+  cap: number;
+  breachRate: number;
+  affectedUsers: number;
+  breachedUserDays: number;
+  maxExcess: number;
+  averageMinimumReleaseValue: number;
+  averageMaximumReleaseValue: number;
+}
+
+export interface ResilienceConfig {
+  rosterCap: number;
+  payoutDirection: PayoutDirection;
+  eurosPerPoint: number;
+  marketSlots: number;
+}
+
+export interface ShockConfig {
+  kind: ShockKind;
+  severity: ShockSeverity;
+  appliedRound: number;
+}
+
+export interface RecoveryEnvironment {
+  roundsRemaining: number;
+  users: number;
+  averageTopPoints: number;
+  averageMedianPoints: number;
+  averageBottomPoints: number;
+  observedReturnSamples: number[];
+  capLiquidityByLimit: Record<number, number>;
+  marketConfidence: 'high' | 'medium' | 'low';
+}
+
+export interface RecoveryResult {
+  config: ResilienceConfig;
+  shock: ShockConfig;
+  recoveryProbability: number;
+  economicRecoveryProbability: number;
+  competitiveRecoveryProbability: number;
+  lockInProbability: number;
+  medianRecoveryRounds: number;
+  p90RecoveryRounds: number;
+  medianRemainingEconomicGap: number;
+  medianRemainingCompetitiveGap: number;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+export interface HistoricalUserPoint {
+  userId: string;
   name: string;
   color: string;
-  initialSquadValue: number;
-  finalSquadValue: number;
-  finalRosterSize: number;
-  marketNet: number;
+  cash: number;
+  squadValue: number;
+  totalResources: number;
+  rosterSize: number;
+  cumulativeBonuses: number;
+  cumulativePoints: number;
 }
 
-export interface ReviewRoundUser {
-  userId: string;
-  points: number;
-  participated: boolean;
-  recordedBonus: number;
-  porraResidual: number;
-  idealHits: number;
-  mvpHits: number;
+export interface HistoricalTimelinePoint {
+  day: string;
+  resourceGini: number;
+  squadGini: number;
+  absoluteResourceGap: number;
+  absoluteSquadGap: number;
+  users: HistoricalUserPoint[];
 }
 
-export interface ReviewRound {
-  id: number;
-  name: string;
-  users: ReviewRoundUser[];
+export interface PairMoment {
+  day: string;
+  leader: HistoricalUserPoint;
+  laggard: HistoricalUserPoint;
+  resourceGap: number;
+  squadGap: number;
+  pointsGap: number;
 }
 
-export interface StructuralSnapshot {
-  rosterSizes: number[];
-  squadValues: number[];
-  automaticMarketSlots: number[];
-  totalPlayers: number;
-  marketDays: number;
+export interface GapContribution {
+  id: 'initial-assets' | 'market' | 'bonuses';
+  label: string;
+  leaderValue: number;
+  laggardValue: number;
+  gapContribution: number;
+  interpretation: string;
 }
 
-export interface SeasonReviewDataset {
-  seasonId: typeof REVIEW_SEASON_ID;
-  users: ReviewUser[];
-  rounds: ReviewRound[];
-  structural: StructuralSnapshot;
-  baselineRecordedPayout: number;
-  baselinePorraResidual: number;
+export interface GapAutopsy {
+  leaderId: string;
+  leaderName: string;
+  laggardId: string;
+  laggardName: string;
+  firstTenMillionGapDay: string | null;
+  opening: PairMoment;
+  midpoint: PairMoment;
+  closing: PairMoment;
+  midpointContributions: GapContribution[];
+  closingContributions: GapContribution[];
+  initialPotentialPoints: { leader: number; laggard: number };
 }
 
-export interface ScoreBreakdown {
+export interface ResilienceScores {
+  resilience: number;
   equality: number;
-  competitiveness: number;
   merit: number;
   liquidity: number;
   practicality: number;
+  overall: number;
 }
 
-export interface UserScenarioResult {
-  userId: string;
-  name: string;
-  points: number;
-  basePayout: number;
-  positionPayout: number;
-  idealPayout: number;
-  mvpPayout: number;
-  porraPayout: number;
-  totalPayout: number;
-  baselinePayout: number;
-  delta: number;
-  estimatedResources: number;
+export interface SeasonRecoveryAnalysis {
+  config: ResilienceConfig;
+  shock: ShockConfig;
+  result: RecoveryResult;
+  historicalResult: RecoveryResult;
+  scores: ResilienceScores;
+  deltaRecoveryProbability: number;
+  assumptions: string[];
 }
 
-export interface ConfidenceInterval {
-  low: number;
-  high: number;
-}
-
-export interface ScenarioResult {
-  config: ScenarioConfig;
-  users: UserScenarioResult[];
-  scores: ScoreBreakdown;
-  totalPayout: number;
-  baselinePayout: number;
-  inflation: number;
-  gini: number;
-  baselineGini: number;
-  coefficientOfVariation: number;
-  resourceRatio: number;
-  rosterBreachRate: number;
-  rosterMaxExcess: number;
-  valueCapBreachRate: number;
-  valueCapMaxExcess: number;
-  expectedMarketWaitDays: number;
-  confidence: 'high' | 'medium' | 'low';
-  intervals?: {
-    totalPayout: ConfidenceInterval;
-    gini: ConfidenceInterval;
-  };
-}
-
-export interface RecommendationProfile {
-  id: 'equality' | 'balanced' | 'merit';
+export interface ResilienceRecommendation {
+  id: 'resilience' | 'balanced' | 'merit';
   name: string;
   description: string;
-  weights: ScoreBreakdown;
-  winner: ScenarioResult;
-  runnerUp: ScenarioResult;
+  config: ResilienceConfig;
+  scores: ResilienceScores;
+  averageRecoveryProbability: number;
+  worstCaseRecoveryProbability: number;
+  averageLockInProbability: number;
+  runnerUp: ResilienceConfig;
 }
 
-export interface DataQualityReport {
+export interface SeasonReviewQualityV2 {
   rawFinanceRows: number;
   uniqueFinanceEvents: number;
-  comparableRounds: number;
-  financeOnlyRounds: number;
-  users: number;
   transfers: number;
-  initialSquadRows: number;
-  marketValueRows: number;
+  bids: number;
+  transfersWithBids: number;
   marketSnapshotDays: number;
+  marketCoverageStart: string | null;
+  balanceSnapshots: false;
+  salaryHistory: false;
   warnings: string[];
 }
 
-export interface TimelinePoint {
-  roundId: number;
-  roundName: string;
-  cumulativePayout: number;
-  cumulativePoints: number;
-  payoutGini: number;
-}
-
-export interface LeverDiagnostic {
-  value: number | string;
-  label: string;
-  breachRate?: number;
-  maxExcess?: number;
-  expectedWaitDays?: number;
-  confidence: 'high' | 'medium' | 'low';
-}
-
-export interface SeasonReviewOverview {
+export interface SeasonReviewOverviewV2 {
+  version: 2;
   seasonId: typeof REVIEW_SEASON_ID;
-  baseline: ScenarioResult;
-  recommendations: RecommendationProfile[];
-  pareto: ScenarioResult[];
-  timeline: TimelinePoint[];
-  quality: DataQualityReport;
-  diagnostics: {
-    rosterCaps: LeverDiagnostic[];
-    marketSlots: LeverDiagnostic[];
-    squadValueCaps: LeverDiagnostic[];
-  };
-  defaults: ScenarioConfig;
+  startingBudget: number;
+  openingRosterSize: number;
+  users: Array<{ id: string; name: string; color: string }>;
+  timeline: HistoricalTimelinePoint[];
+  autopsy: GapAutopsy;
+  capDiagnostics: RosterCapDiagnostic[];
+  recommendations: ResilienceRecommendation[];
+  historicalConfig: ResilienceConfig;
+  defaultShock: ShockConfig;
+  initialAnalysis: SeasonRecoveryAnalysis;
+  quality: SeasonReviewQualityV2;
   generatedAt: string;
 }

@@ -2,24 +2,24 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import {
+  Activity,
   AlertTriangle,
-  ArrowDownRight,
   ArrowRight,
-  ArrowUpRight,
   BadgeEuro,
   BarChart3,
-  Check,
   ChevronDown,
   CircleGauge,
+  Clock3,
   Download,
   FlaskConical,
-  Goal,
+  Gauge,
   Info,
-  LoaderCircle,
+  RotateCcw,
   Scale,
   ShieldCheck,
   Sparkles,
   Target,
+  TrendingUp,
   Trophy,
   Users,
   WalletCards,
@@ -32,24 +32,22 @@ import {
   Legend,
   Line,
   LineChart,
-  Radar,
-  RadarChart,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
 import { runSeasonReviewScenario } from '@/app/(app)/season-review/actions';
-import { POSITION_PRESETS } from '@/lib/season-review/engine';
 import type {
-  RecommendationProfile,
-  ScenarioConfig,
-  ScenarioResult,
-  ScoreBreakdown,
-  SeasonReviewOverview,
+  GapContribution,
+  PairMoment,
+  ResilienceConfig,
+  ResilienceRecommendation,
+  ResilienceScores,
+  SeasonRecoveryAnalysis,
+  SeasonReviewOverviewV2,
+  ShockConfig,
 } from '@/lib/season-review/types';
 
 const compactMoney = new Intl.NumberFormat('es-ES', {
@@ -64,48 +62,36 @@ const fullMoney = new Intl.NumberFormat('es-ES', {
   maximumFractionDigits: 0,
 });
 const number = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
+const integer = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
 const percent = (value: number) => `${number.format(value * 100)}%`;
-const scoreLabels: Record<keyof ScoreBreakdown, string> = {
+
+const shockLabels: Record<ShockConfig['kind'], string> = {
+  'bad-transfer': 'Mal fichaje',
+  'bad-streak': 'Racha de malas jornadas',
+  'star-injury': 'Lesión del jugador estrella',
+  inactivity: 'Periodo de inactividad',
+};
+const severityLabels: Record<ShockConfig['severity'], string> = {
+  low: 'Leve',
+  medium: 'Medio',
+  high: 'Grave',
+};
+const scoreLabels: Record<keyof Omit<ResilienceScores, 'overall'>, string> = {
+  resilience: 'Recuperación',
   equality: 'Igualdad',
-  competitiveness: 'Competición',
   merit: 'Mérito',
   liquidity: 'Liquidez',
   practicality: 'Facilidad',
 };
-const profileStyles: Record<
-  RecommendationProfile['id'],
-  { color: string; border: string; icon: typeof Scale }
-> = {
-  equality: { color: 'text-sky-300', border: 'border-sky-400/25', icon: Scale },
-  balanced: { color: 'text-orange-300', border: 'border-orange-400/25', icon: CircleGauge },
-  merit: { color: 'text-emerald-300', border: 'border-emerald-400/25', icon: Trophy },
-};
 
-function classNames(...values: Array<string | false | null | undefined>) {
+function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
 }
 
-function configSummary(config: ScenarioConfig) {
-  const payout =
-    config.payoutMode === 'inverse'
-      ? 'Inversa'
-      : config.payoutMode === 'direct'
-        ? 'Directa'
-        : config.payoutMode === 'equal'
-          ? 'Igual'
-          : `Híbrida ${Math.round(config.meritWeight * 100)}/${Math.round((1 - config.meritWeight) * 100)}`;
-  return [
-    `${config.rosterCap} jugadores`,
-    `${payout} · ${compactMoney.format(config.eurosPerPoint)}/pto`,
-    config.positionPreset === 'none' ? 'Sin posiciones' : config.positionPreset,
-    config.idealPlayerBonus ? `${compactMoney.format(config.idealPlayerBonus)} ideal` : 'Sin ideal',
-    config.mvpBonus ? `${compactMoney.format(config.mvpBonus)} MVP` : 'Sin MVP',
-    `${config.marketSlots} en mercado`,
-    config.squadValueCap
-      ? `Tope ${compactMoney.format(config.squadValueCap)}`
-      : 'Sin tope de valor',
-    config.budgetMode === 'neutral' ? 'Presupuesto neutral' : 'Importes literales',
-  ];
+function shortDate(value: string) {
+  return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(
+    new Date(`${value}T12:00:00Z`)
+  );
 }
 
 function Card({
@@ -120,8 +106,8 @@ function Card({
   return (
     <section
       id={id}
-      className={classNames(
-        'relative overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-zinc-950/65 shadow-[0_24px_80px_-40px_rgba(0,0,0,.9)] backdrop-blur-xl',
+      className={cx(
+        'relative overflow-hidden rounded-[1.65rem] border border-white/[0.08] bg-zinc-950/70 shadow-[0_28px_90px_-55px_rgba(0,0,0,.95)] backdrop-blur-xl',
         className
       )}
     >
@@ -135,18 +121,15 @@ function Eyebrow({
   tone = 'orange',
 }: {
   children: React.ReactNode;
-  tone?: 'orange' | 'sky' | 'emerald';
+  tone?: 'orange' | 'sky';
 }) {
-  const tones = {
-    orange: 'border-orange-400/20 bg-orange-400/10 text-orange-300',
-    sky: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
-    emerald: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
-  };
   return (
     <span
-      className={classNames(
-        'inline-flex rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em]',
-        tones[tone]
+      className={cx(
+        'inline-flex rounded-full border px-3 py-1 text-[9px] font-black uppercase tracking-[0.24em]',
+        tone === 'orange'
+          ? 'border-orange-400/25 bg-orange-400/10 text-orange-300'
+          : 'border-sky-400/25 bg-sky-400/10 text-sky-300'
       )}
     >
       {children}
@@ -167,22 +150,17 @@ function Metric({
   icon: typeof Scale;
   tone?: 'orange' | 'sky' | 'emerald' | 'zinc';
 }) {
-  const toneClasses = {
-    orange: 'bg-orange-400/10 text-orange-300 border-orange-400/20',
-    sky: 'bg-sky-400/10 text-sky-300 border-sky-400/20',
-    emerald: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20',
-    zinc: 'bg-white/5 text-zinc-300 border-white/10',
+  const tones = {
+    orange: 'border-orange-400/20 bg-orange-400/10 text-orange-300',
+    sky: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
+    emerald: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+    zinc: 'border-white/10 bg-white/5 text-zinc-300',
   };
   return (
     <div className="rounded-2xl border border-white/[0.07] bg-black/20 p-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">{label}</p>
-        <span
-          className={classNames(
-            'grid size-8 place-items-center rounded-lg border',
-            toneClasses[tone]
-          )}
-        >
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">{label}</p>
+        <span className={cx('grid size-8 place-items-center rounded-lg border', tones[tone])}>
           <Icon size={15} aria-hidden="true" />
         </span>
       </div>
@@ -192,16 +170,167 @@ function Metric({
   );
 }
 
-function ScoreBars({ scores }: { scores: ScoreBreakdown }) {
+function SelectField({
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string | number;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-[9px] font-black uppercase tracking-[0.18em] text-zinc-500">
+        {label}
+      </span>
+      <span className="relative block">
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-11 w-full appearance-none rounded-xl border border-white/[0.09] bg-black/40 px-3 pr-9 text-sm font-bold text-zinc-200 outline-none transition focus:border-orange-400/50 focus:ring-2 focus:ring-orange-400/10"
+        >
+          {children}
+        </select>
+        <ChevronDown
+          className="pointer-events-none absolute right-3 top-3.5 text-zinc-600"
+          size={15}
+        />
+      </span>
+    </label>
+  );
+}
+
+function RangeField({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+  suffix,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+  suffix: string;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 flex items-center justify-between text-[9px] font-black uppercase tracking-[0.18em] text-zinc-500">
+        {label}
+        <span className="rounded-md bg-white/[0.06] px-2 py-1 text-xs text-white">
+          {value} {suffix}
+        </span>
+      </span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-zinc-800 accent-orange-500"
+      />
+      <span className="mt-1.5 flex justify-between text-[9px] font-bold text-zinc-700">
+        <span>{min}</span>
+        <span>{max}</span>
+      </span>
+    </label>
+  );
+}
+
+function MomentCard({ title, moment }: { title: string; moment: PairMoment }) {
+  return (
+    <div className="rounded-2xl border border-white/[0.07] bg-black/25 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">{title}</p>
+        <span className="text-[10px] font-bold text-zinc-600">{shortDate(moment.day)}</span>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div>
+          <p className="truncate text-xs font-black text-orange-300">{moment.leader.name}</p>
+          <p className="mt-1 text-lg font-black text-white">
+            {compactMoney.format(moment.leader.squadValue)}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="truncate text-xs font-black text-sky-300">{moment.laggard.name}</p>
+          <p className="mt-1 text-lg font-black text-white">
+            {compactMoney.format(moment.laggard.squadValue)}
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 h-px bg-white/[0.06]" />
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+        <div>
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Recursos</p>
+          <p className="mt-1 text-xs font-black text-zinc-200">
+            {compactMoney.format(moment.resourceGap)}
+          </p>
+        </div>
+        <div>
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Plantilla</p>
+          <p className="mt-1 text-xs font-black text-zinc-200">
+            {compactMoney.format(moment.squadGap)}
+          </p>
+        </div>
+        <div>
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Puntos</p>
+          <p className="mt-1 text-xs font-black text-zinc-200">
+            {integer.format(moment.pointsGap)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ContributionList({ rows }: { rows: GapContribution[] }) {
+  return (
+    <div className="space-y-3">
+      {rows.map((row) => {
+        const positive = row.gapContribution > 0;
+        return (
+          <div key={row.id} className="rounded-xl border border-white/[0.06] bg-black/25 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-xs font-black text-zinc-200">{row.label}</p>
+              <p
+                className={cx(
+                  'text-sm font-black tabular-nums',
+                  positive ? 'text-orange-300' : 'text-sky-300'
+                )}
+              >
+                {row.gapContribution > 0 ? '+' : ''}
+                {compactMoney.format(row.gapContribution)}
+              </p>
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.05]">
+              <div
+                className={cx('h-full rounded-full', positive ? 'bg-orange-400' : 'bg-sky-400')}
+                style={{ width: `${Math.min(100, Math.abs(row.gapContribution) / 650_000)}%` }}
+              />
+            </div>
+            <p className="mt-2 text-[10px] leading-4 text-zinc-600">{row.interpretation}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ScoreBars({ scores }: { scores: ResilienceScores }) {
   return (
     <div className="space-y-2.5">
-      {(Object.keys(scoreLabels) as Array<keyof ScoreBreakdown>).map((key) => (
+      {(Object.keys(scoreLabels) as Array<keyof typeof scoreLabels>).map((key) => (
         <div key={key} className="grid grid-cols-[88px_1fr_34px] items-center gap-3 text-xs">
           <span className="text-zinc-500">{scoreLabels[key]}</span>
           <span className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
             <span
               className="block h-full rounded-full bg-gradient-to-r from-orange-600 to-orange-300"
-              style={{ width: `${scores[key]}%` }}
+              style={{ width: `${Math.min(100, scores[key])}%` }}
             />
           </span>
           <span className="text-right font-black tabular-nums text-zinc-300">
@@ -213,1043 +342,842 @@ function ScoreBars({ scores }: { scores: ScoreBreakdown }) {
   );
 }
 
+function configSummary(config: ResilienceConfig) {
+  return [
+    `${config.rosterCap} jugadores`,
+    config.payoutDirection === 'inverse' ? 'Prima inversa' : 'Prima directa',
+    `${fullMoney.format(config.eurosPerPoint)}/punto`,
+    `${config.marketSlots} en mercado`,
+  ];
+}
+
 function RecommendationCard({
-  profile,
+  recommendation,
   onApply,
 }: {
-  profile: RecommendationProfile;
-  onApply: (config: ScenarioConfig) => void;
+  recommendation: ResilienceRecommendation;
+  onApply: (config: ResilienceConfig) => void;
 }) {
-  const style = profileStyles[profile.id];
-  const Icon = style.icon;
-  const weighted = (Object.keys(profile.weights) as Array<keyof ScoreBreakdown>).reduce(
-    (sum, key) => sum + profile.winner.scores[key] * profile.weights[key],
-    0
-  );
+  const icons = { resilience: ShieldCheck, balanced: CircleGauge, merit: Trophy };
+  const Icon = icons[recommendation.id];
   return (
-    <Card className={classNames('flex h-full flex-col p-5 md:p-6', style.border)}>
-      <div className="absolute -right-14 -top-16 size-40 rounded-full bg-white/[0.025] blur-2xl" />
+    <Card className="flex h-full flex-col p-5">
+      <div className="absolute -right-10 -top-12 size-36 rounded-full bg-orange-400/[0.05] blur-3xl" />
       <div className="relative flex items-start justify-between gap-4">
-        <div>
-          <span
-            className={classNames(
-              'grid size-10 place-items-center rounded-xl border border-current/20 bg-current/10',
-              style.color
-            )}
-          >
-            <Icon size={19} />
-          </span>
-          <h3 className="mt-4 text-xl font-black text-white">{profile.name}</h3>
-          <p className="mt-2 text-sm leading-6 text-zinc-500">{profile.description}</p>
-        </div>
+        <span className="grid size-10 place-items-center rounded-xl border border-orange-400/20 bg-orange-400/10 text-orange-300">
+          <Icon size={19} />
+        </span>
         <div className="text-right">
-          <p className="text-3xl font-black tabular-nums text-white">{Math.round(weighted)}</p>
-          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">
-            puntuación
+          <p className="text-3xl font-black text-white">
+            {Math.round(recommendation.scores.overall)}
           </p>
+          <p className="text-[8px] font-black uppercase tracking-widest text-zinc-600">robustez</p>
         </div>
       </div>
-      <div className="my-5 h-px bg-white/[0.06]" />
-      <ScoreBars scores={profile.winner.scores} />
-      <div className="mt-5 flex flex-wrap gap-1.5">
-        {configSummary(profile.winner.config).map((item) => (
+      <h3 className="mt-4 text-xl font-black text-white">{recommendation.name}</h3>
+      <p className="mt-2 min-h-12 text-xs leading-5 text-zinc-500">{recommendation.description}</p>
+      <div className="mt-4 flex flex-wrap gap-1.5">
+        {configSummary(recommendation.config).map((item) => (
           <span
             key={item}
-            className="rounded-md border border-white/[0.07] bg-white/[0.035] px-2 py-1 text-[10px] font-semibold text-zinc-400"
+            className="rounded-md border border-white/[0.07] bg-white/[0.035] px-2 py-1 text-[9px] font-bold text-zinc-400"
           >
             {item}
           </span>
         ))}
       </div>
+      <div className="my-5 h-px bg-white/[0.06]" />
+      <ScoreBars scores={recommendation.scores} />
       <div className="mt-5 grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-black/25 p-3">
-          <p className="text-[9px] uppercase tracking-widest text-zinc-600">Dinero</p>
-          <p className="mt-1 text-sm font-black text-zinc-200">
-            {compactMoney.format(profile.winner.totalPayout)}
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Recuperación media</p>
+          <p className="mt-1 text-lg font-black text-emerald-300">
+            {percent(recommendation.averageRecoveryProbability)}
           </p>
         </div>
         <div className="rounded-xl bg-black/25 p-3">
-          <p className="text-[9px] uppercase tracking-widest text-zinc-600">Inflación</p>
-          <p
-            className={classNames(
-              'mt-1 text-sm font-black',
-              Math.abs(profile.winner.inflation) < 0.01 ? 'text-emerald-300' : 'text-amber-300'
-            )}
-          >
-            {profile.winner.inflation >= 0 ? '+' : ''}
-            {percent(profile.winner.inflation)}
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Peor shock</p>
+          <p className="mt-1 text-lg font-black text-white">
+            {percent(recommendation.worstCaseRecoveryProbability)}
           </p>
         </div>
       </div>
       <button
         type="button"
-        onClick={() => onApply(profile.winner.config)}
-        className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-xs font-black text-white transition hover:border-orange-400/40 hover:bg-orange-400/10"
+        onClick={() => onApply(recommendation.config)}
+        className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.055] px-4 py-3 text-xs font-black text-white transition hover:border-orange-400/40 hover:bg-orange-400/10"
       >
-        Probar configuración <ArrowRight size={14} />
+        Probar en el laboratorio <ArrowRight size={14} />
       </button>
     </Card>
   );
 }
 
-function SelectField({
-  label,
-  value,
-  onChange,
-  children,
-  hint,
+function RecoveryPanel({
+  analysis,
+  loading,
 }: {
-  label: string;
-  value: string | number;
-  onChange: (value: string) => void;
-  children: React.ReactNode;
-  hint?: string;
+  analysis: SeasonRecoveryAnalysis;
+  loading: boolean;
 }) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
-        {label}
-      </span>
-      <span className="relative block">
-        <select
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="h-11 w-full appearance-none rounded-xl border border-white/[0.08] bg-black/35 px-3 pr-9 text-sm font-semibold text-zinc-200 outline-none transition focus:border-orange-400/50 focus:ring-2 focus:ring-orange-400/10"
-        >
-          {children}
-        </select>
-        <ChevronDown
-          className="pointer-events-none absolute right-3 top-3.5 text-zinc-600"
-          size={15}
-        />
-      </span>
-      {hint && <span className="mt-1.5 block text-[10px] leading-4 text-zinc-600">{hint}</span>}
-    </label>
-  );
-}
-
-function ConfidenceBadge({ value }: { value: ScenarioResult['confidence'] }) {
-  const data = {
-    high: ['Alta', 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'],
-    medium: ['Media', 'border-amber-400/20 bg-amber-400/10 text-amber-300'],
-    low: ['Baja', 'border-red-400/20 bg-red-400/10 text-red-300'],
-  }[value];
-  return (
-    <span
-      className={classNames(
-        'rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-widest',
-        data[1]
-      )}
-    >
-      Confianza {data[0]}
-    </span>
-  );
-}
-
-function SimulatorResult({ result, loading }: { result: ScenarioResult; loading: boolean }) {
-  const chartData = result.users.map((user) => ({
-    name: user.name.length > 14 ? `${user.name.slice(0, 13)}…` : user.name,
-    actual: user.baselinePayout / 1000000,
-    escenario: user.totalPayout / 1000000,
-  }));
-  const radarData = (Object.keys(scoreLabels) as Array<keyof ScoreBreakdown>).map((key) => ({
-    metric: scoreLabels[key],
-    score: Math.round(result.scores[key]),
-  }));
+  const result = analysis.result;
+  const comparisonData = [
+    { label: 'Histórico', value: analysis.historicalResult.recoveryProbability * 100 },
+    { label: 'Escenario', value: result.recoveryProbability * 100 },
+  ];
   return (
     <div
-      className={classNames('relative space-y-5 transition-opacity', loading && 'opacity-45')}
+      className={cx('relative space-y-5 transition-opacity', loading && 'opacity-45')}
       aria-live="polite"
       aria-busy={loading}
     >
       {loading && (
-        <LoaderCircle
-          className="absolute right-1 top-1 z-10 animate-spin text-orange-400"
-          size={20}
-        />
+        <span className="absolute right-1 top-1 size-5 animate-spin rounded-full border-2 border-orange-400 border-t-transparent" />
       )}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
-            Resultado simulado
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">
+            Resultado del stress test
           </p>
-          <p className="mt-1 text-2xl font-black text-white">
-            {compactMoney.format(result.totalPayout)}
+          <p className="mt-2 text-4xl font-black tracking-tight text-white">
+            {percent(result.recoveryProbability)}
           </p>
+          <p className="mt-1 text-xs text-zinc-500">probabilidad estimada de recuperación doble</p>
         </div>
-        <ConfidenceBadge value={result.confidence} />
+        <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-amber-300">
+          Confianza{' '}
+          {result.confidence === 'high'
+            ? 'alta'
+            : result.confidence === 'medium'
+              ? 'media'
+              : 'baja'}
+        </span>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-          <p className="text-[9px] uppercase tracking-widest text-zinc-600">Gini recursos</p>
-          <p className="mt-1 text-lg font-black text-white">{number.format(result.gini)}</p>
-          <p
-            className={classNames(
-              'mt-1 text-[10px] font-bold',
-              result.gini <= result.baselineGini ? 'text-emerald-300' : 'text-red-300'
-            )}
-          >
-            {result.gini <= result.baselineGini ? 'Mejora' : 'Empeora'} vs{' '}
-            {number.format(result.baselineGini)}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">
+            Recuperación económica
           </p>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-          <p className="text-[9px] uppercase tracking-widest text-zinc-600">Inflación</p>
           <p className="mt-1 text-lg font-black text-white">
-            {result.inflation >= 0 ? '+' : ''}
-            {percent(result.inflation)}
+            {percent(result.economicRecoveryProbability)}
           </p>
-          <p className="mt-1 text-[10px] text-zinc-600">frente al reparto real</p>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-          <p className="text-[9px] uppercase tracking-widest text-zinc-600">Incumple plantilla</p>
-          <p className="mt-1 text-lg font-black text-white">{percent(result.rosterBreachRate)}</p>
-          <p className="mt-1 text-[10px] text-zinc-600">máx. +{result.rosterMaxExcess} jugadores</p>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-          <p className="text-[9px] uppercase tracking-widest text-zinc-600">Espera mercado</p>
+        <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">
+            Recuperación plantilla
+          </p>
           <p className="mt-1 text-lg font-black text-white">
-            ~{result.expectedMarketWaitDays} días
+            {percent(result.competitiveRecoveryProbability)}
           </p>
-          <p className="mt-1 text-[10px] text-zinc-600">estimación de rotación</p>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Tiempo mediano</p>
+          <p className="mt-1 text-lg font-black text-white">
+            {result.medianRecoveryRounds} jornadas
+          </p>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Riesgo de bloqueo</p>
+          <p className="mt-1 text-lg font-black text-red-300">
+            {percent(result.lockInProbability)}
+          </p>
         </div>
       </div>
-      <div className="grid gap-4 xl:grid-cols-[1.45fr_.8fr]">
+      <div className="grid gap-4 xl:grid-cols-[1fr_.85fr]">
         <div
-          className="h-72 rounded-2xl border border-white/[0.06] bg-black/20 p-3"
+          className="h-56 rounded-2xl border border-white/[0.06] bg-black/20 p-3"
           role="img"
-          aria-label="Comparación de primas reales y simuladas por usuario"
+          aria-label="Probabilidad de recuperación histórica frente al escenario"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 14, right: 8, left: -15, bottom: 24 }}>
-              <CartesianGrid stroke="rgba(255,255,255,.05)" vertical={false} />
+            <BarChart
+              data={comparisonData}
+              layout="vertical"
+              margin={{ left: 10, right: 20, top: 12, bottom: 8 }}
+            >
+              <CartesianGrid stroke="rgba(255,255,255,.05)" horizontal={false} />
               <XAxis
-                dataKey="name"
+                type="number"
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
                 stroke="#71717a"
                 fontSize={9}
-                angle={-20}
-                textAnchor="end"
-                interval={0}
               />
-              <YAxis stroke="#71717a" fontSize={9} tickFormatter={(value) => `${value}M`} />
+              <YAxis type="category" dataKey="label" stroke="#a1a1aa" fontSize={10} width={62} />
               <Tooltip
-                cursor={{ fill: 'rgba(255,255,255,.03)' }}
+                formatter={(value) => [`${number.format(Number(value))}%`, 'Recuperación']}
                 contentStyle={{
                   background: '#09090b',
                   border: '1px solid rgba(255,255,255,.1)',
                   borderRadius: 12,
                 }}
-                formatter={(value) => [`${number.format(Number(value))} M€`]}
               />
-              <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-              <Bar dataKey="actual" name="Real" fill="#52525b" radius={[5, 5, 0, 0]} />
-              <Bar dataKey="escenario" name="Escenario" fill="#fa5001" radius={[5, 5, 0, 0]} />
+              <Bar dataKey="value" radius={[0, 7, 7, 0]}>
+                {comparisonData.map((item, index) => (
+                  <Cell key={item.label} fill={index === 0 ? '#52525b' : '#fa5001'} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div
-          className="h-72 rounded-2xl border border-white/[0.06] bg-black/20 p-2"
-          role="img"
-          aria-label="Puntuación del escenario por objetivos"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={radarData} outerRadius="67%">
-              <PolarGrid stroke="rgba(255,255,255,.09)" />
-              <PolarAngleAxis dataKey="metric" tick={{ fill: '#a1a1aa', fontSize: 9 }} />
-              <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-              <Radar dataKey="score" stroke="#fb923c" fill="#fa5001" fillOpacity={0.28} />
-            </RadarChart>
-          </ResponsiveContainer>
+        <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-4">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">
+            Perfil de la configuración
+          </p>
+          <div className="mt-4">
+            <ScoreBars scores={analysis.scores} />
+          </div>
+          <div
+            className={cx(
+              'mt-4 rounded-xl border p-3 text-xs font-bold',
+              analysis.deltaRecoveryProbability >= 0
+                ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
+                : 'border-red-400/20 bg-red-400/10 text-red-300'
+            )}
+          >
+            {analysis.deltaRecoveryProbability >= 0 ? '+' : ''}
+            {percent(analysis.deltaRecoveryProbability)} frente a las reglas históricas.
+          </div>
         </div>
       </div>
-      <details className="group rounded-2xl border border-white/[0.06] bg-black/20">
-        <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-black text-zinc-300">
-          Tabla accesible por usuario{' '}
-          <ChevronDown className="transition group-open:rotate-180" size={15} />
-        </summary>
-        <div className="overflow-x-auto border-t border-white/[0.06]">
-          <table className="w-full min-w-[720px] text-left text-xs">
-            <thead className="text-[9px] uppercase tracking-widest text-zinc-600">
-              <tr>
-                {[
-                  'Usuario',
-                  'Puntos',
-                  'Base',
-                  'Posición',
-                  'Ideal/MVP',
-                  'Porras est.',
-                  'Total',
-                  'Δ real',
-                ].map((label) => (
-                  <th key={label} className="px-4 py-3">
-                    {label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {result.users.map((user) => (
-                <tr key={user.userId} className="border-t border-white/[0.05] text-zinc-400">
-                  <td className="px-4 py-3 font-bold text-white">{user.name}</td>
-                  <td className="px-4 py-3 tabular-nums">{user.points}</td>
-                  <td className="px-4 py-3 tabular-nums">{compactMoney.format(user.basePayout)}</td>
-                  <td className="px-4 py-3 tabular-nums">
-                    {compactMoney.format(user.positionPayout)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums">
-                    {compactMoney.format(user.idealPayout + user.mvpPayout)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums">
-                    {compactMoney.format(user.porraPayout)}
-                  </td>
-                  <td className="px-4 py-3 font-black tabular-nums text-white">
-                    {compactMoney.format(user.totalPayout)}
-                  </td>
-                  <td
-                    className={classNames(
-                      'px-4 py-3 font-bold tabular-nums',
-                      user.delta >= 0 ? 'text-emerald-300' : 'text-red-300'
-                    )}
-                  >
-                    {user.delta >= 0 ? '+' : ''}
-                    {compactMoney.format(user.delta)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
   );
 }
 
-export default function SeasonReviewClient({ overview }: { overview: SeasonReviewOverview }) {
-  const [config, setConfig] = useState<ScenarioConfig>(overview.defaults);
-  const [result, setResult] = useState<ScenarioResult>(overview.baseline);
+export default function SeasonReviewClient({ overview }: { overview: SeasonReviewOverviewV2 }) {
+  const [historyMetric, setHistoryMetric] = useState<'totalResources' | 'squadValue' | 'cash'>(
+    'squadValue'
+  );
+  const [contributionMoment, setContributionMoment] = useState<'midpoint' | 'closing'>('midpoint');
+  const [config, setConfig] = useState<ResilienceConfig>(overview.historicalConfig);
+  const [shock, setShock] = useState<ShockConfig>(overview.defaultShock);
+  const [analysis, setAnalysis] = useState<SeasonRecoveryAnalysis>(overview.initialAnalysis);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const firstRender = useRef(true);
+  const requestId = useRef(0);
 
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
+    const currentRequest = ++requestId.current;
     const timeout = window.setTimeout(() => {
       startTransition(async () => {
-        const response = await runSeasonReviewScenario(config);
+        const response = await runSeasonReviewScenario({ config, shock });
+        if (currentRequest !== requestId.current) return;
         if (response.success) {
-          setResult(response.data);
+          setAnalysis(response.data);
           setError(null);
         } else setError(response.error);
       });
     }, 450);
     return () => window.clearTimeout(timeout);
-  }, [config]);
+  }, [config, shock]);
 
-  const timelineData = useMemo(
-    () =>
-      overview.timeline.map((point, index) => ({
-        jornada: index + 1,
-        primas: point.cumulativePayout / 1000000,
-        gini: point.payoutGini,
-      })),
-    [overview.timeline]
-  );
-  const baselineTop = overview.baseline.users[0];
-  const baselineBottom = overview.baseline.users[overview.baseline.users.length - 1];
+  const historicalChart = useMemo(() => {
+    const { leaderId, laggardId } = overview.autopsy;
+    return overview.timeline.map((point) => {
+      const leader = point.users.find((user) => user.userId === leaderId);
+      const laggard = point.users.find((user) => user.userId === laggardId);
+      return {
+        day: point.day,
+        label: shortDate(point.day),
+        leader: (leader?.[historyMetric] || 0) / 1_000_000,
+        laggard: (laggard?.[historyMetric] || 0) / 1_000_000,
+        resourceGap: point.absoluteResourceGap / 1_000_000,
+      };
+    });
+  }, [historyMetric, overview]);
 
-  function updateConfig<K extends keyof ScenarioConfig>(key: K, value: ScenarioConfig[K]) {
-    setConfig((current) => ({ ...current, [key]: value }));
+  const selectedCap =
+    overview.capDiagnostics.find((item) => item.cap === config.rosterCap) ||
+    overview.capDiagnostics[0];
+  const capChart = overview.capDiagnostics.map((item) => ({
+    cap: item.cap,
+    incumplimiento: item.breachRate * 100,
+    minimo: item.averageMinimumReleaseValue / 1_000_000,
+    maximo: item.averageMaximumReleaseValue / 1_000_000,
+  }));
+  const contributions =
+    contributionMoment === 'midpoint'
+      ? overview.autopsy.midpointContributions
+      : overview.autopsy.closingContributions;
+
+  function applyRecommendation(next: ResilienceConfig) {
+    setConfig(next);
+    document.getElementById('laboratorio')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function applyRecommendation(next: ScenarioConfig) {
-    setConfig(next);
-    window.setTimeout(
-      () =>
-        document
-          .getElementById('laboratorio')
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      50
-    );
+  function resetHistorical() {
+    setConfig(overview.historicalConfig);
+    setShock(overview.defaultShock);
   }
 
   function downloadCsv() {
-    const rows = [
+    const lines = [
       [
-        'Usuario',
-        'Puntos',
-        'Prima base',
-        'Prima posición',
-        'Ideal',
-        'MVP',
-        'Porras estimadas',
-        'Total',
-        'Diferencia real',
-      ],
-      ...result.users.map((user) => [
-        user.name,
-        user.points,
-        user.basePayout,
-        user.positionPayout,
-        user.idealPayout,
-        user.mvpPayout,
-        user.porraPayout,
-        user.totalPayout,
-        user.delta,
-      ]),
+        'fecha',
+        'usuario',
+        'saldo_estimado',
+        'valor_plantilla',
+        'recursos_estimados',
+        'puntos',
+        'jugadores',
+      ].join(','),
+      ...overview.timeline.flatMap((point) =>
+        point.users.map((user) =>
+          [
+            point.day,
+            `"${user.name.replaceAll('"', '""')}"`,
+            Math.round(user.cash),
+            Math.round(user.squadValue),
+            Math.round(user.totalResources),
+            user.cumulativePoints,
+            user.rosterSize,
+          ].join(',')
+        )
+      ),
     ];
-    const csv = rows
-      .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(','))
-      .join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `analisis-2025-26-${config.payoutMode}.csv`;
+    link.download = 'analisis-resiliencia-2025-26.csv';
     link.click();
     URL.revokeObjectURL(url);
   }
 
   return (
     <div className="relative pb-24">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[42rem] overflow-hidden">
-        <div className="absolute left-[8%] top-24 size-72 rounded-full bg-orange-500/[0.07] blur-[110px]" />
-        <div className="absolute right-[5%] top-56 size-80 rounded-full bg-sky-500/[0.05] blur-[120px]" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,.3)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.3)_1px,transparent_1px)] [background-size:48px_48px]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[44rem] overflow-hidden">
+        <div className="absolute left-[4%] top-24 size-80 rounded-full bg-orange-500/[0.075] blur-[120px]" />
+        <div className="absolute right-[4%] top-40 size-96 rounded-full bg-sky-500/[0.055] blur-[140px]" />
+        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,.28)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.28)_1px,transparent_1px)] [background-size:48px_48px]" />
       </div>
       <div className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-        <Card className="p-6 md:p-8">
-          <div className="grid items-end gap-8 lg:grid-cols-[1.3fr_.7fr]">
+        <Card className="p-6 md:p-9">
+          <div className="absolute inset-y-0 right-0 hidden w-[44%] opacity-70 lg:block [background:radial-gradient(circle_at_center,rgba(250,80,1,.15),transparent_62%)]" />
+          <div className="relative grid gap-8 lg:grid-cols-[1.3fr_.7fr] lg:items-end">
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Eyebrow>Temporada congelada</Eyebrow>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                  Solo lectura
-                </span>
-              </div>
-              <h2 className="mt-5 max-w-3xl text-3xl font-black leading-tight tracking-[-0.03em] text-white md:text-5xl">
-                La liga, convertida en una{' '}
-                <span className="text-orange-400">decisión medible.</span>
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400 md:text-base">
-                Reproducimos el reparto real, aislamos el efecto de cada regla y mostramos tres
-                formas honestas de entender qué significa una liga “justa”.
+              <Eyebrow>Nuevo modelo · punto cero</Eyebrow>
+              <h1 className="mt-5 max-w-4xl text-4xl font-black leading-[.98] tracking-[-0.04em] text-white md:text-6xl">
+                Todos empezaron iguales. La brecha no.
+              </h1>
+              <p className="mt-5 max-w-2xl text-sm leading-7 text-zinc-400 md:text-base">
+                Reconstruimos saldo y plantilla desde 40 M€ por usuario para medir qué abrió la
+                distancia, cuándo se volvió difícil de cerrar y qué reglas perdonan un error
+                temprano.
               </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <a
+                  href="#autopsia"
+                  className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-3 text-xs font-black text-black transition hover:bg-orange-400"
+                >
+                  Ver autopsia <ArrowRight size={14} />
+                </a>
+                <button
+                  type="button"
+                  onClick={downloadCsv}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-xs font-black text-white transition hover:bg-white/[0.09]"
+                >
+                  <Download size={14} /> Exportar evolución
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Metric
-                label="Jornadas"
-                value={String(overview.quality.comparableRounds)}
-                detail="comparables"
-                icon={BarChart3}
-                tone="orange"
-              />
-              <Metric
-                label="Usuarios"
-                value={String(overview.quality.users)}
-                detail="managers activos"
-                icon={Users}
-                tone="sky"
-              />
-              <Metric
-                label="Fichajes"
-                value={number.format(overview.quality.transfers)}
-                detail="operaciones únicas"
-                icon={BadgeEuro}
-                tone="emerald"
-              />
-              <Metric
-                label="Primas"
-                value={compactMoney.format(overview.baseline.baselinePayout)}
-                detail="reparto deduplicado"
-                icon={WalletCards}
-                tone="zinc"
-              />
+              <div className="rounded-2xl border border-white/[0.08] bg-black/30 p-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-zinc-600">
+                  Patrimonio inicial
+                </p>
+                <p className="mt-3 text-3xl font-black text-white">40 M€</p>
+                <p className="mt-1 text-xs text-zinc-500">exactos por usuario</p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.08] bg-black/30 p-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-zinc-600">
+                  Plantilla inicial
+                </p>
+                <p className="mt-3 text-3xl font-black text-white">{overview.openingRosterSize}</p>
+                <p className="mt-1 text-xs text-zinc-500">jugadores cada uno</p>
+              </div>
+              <div className="col-span-2 rounded-2xl border border-sky-400/15 bg-sky-400/[0.07] p-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-sky-300">
+                  Primera alarma
+                </p>
+                <p className="mt-2 text-xl font-black text-white">
+                  Brecha de 10 M€ el{' '}
+                  {overview.autopsy.firstTenMillionGapDay
+                    ? shortDate(overview.autopsy.firstTenMillionGapDay)
+                    : '—'}
+                </p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  entre {overview.autopsy.leaderName} y {overview.autopsy.laggardName}
+                </p>
+              </div>
             </div>
           </div>
         </Card>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Metric
-            label="Desigualdad base"
-            value={number.format(overview.baseline.baselineGini)}
-            detail="Gini de recursos estimados"
-            icon={Scale}
+            label="Brecha a mitad"
+            value={compactMoney.format(overview.autopsy.midpoint.resourceGap)}
+            detail="recursos estimados entre líder y último"
+            icon={TrendingUp}
+          />
+          <Metric
+            label="Plantilla final"
+            value={compactMoney.format(overview.autopsy.closing.squadGap)}
+            detail="la diferencia competitiva que el efectivo ocultaba"
+            icon={Users}
             tone="sky"
           />
           <Metric
-            label="Ratio extremo"
-            value={`${number.format(overview.baseline.resourceRatio)}×`}
-            detail={`${baselineTop?.name ?? '—'} frente a ${baselineBottom?.name ?? '—'}`}
-            icon={ArrowUpRight}
-            tone="orange"
-          />
-          <Metric
-            label="Residual porras"
-            value={compactMoney.format(
-              overview.baseline.users.reduce((sum, user) => sum + user.porraPayout, 0)
-            )}
-            detail="estimación conservada"
+            label="Pujas observadas"
+            value={integer.format(overview.quality.bids)}
+            detail={`asociadas a ${overview.quality.transfersWithBids} fichajes`}
             icon={Target}
             tone="emerald"
           />
           <Metric
-            label="Datos duplicados"
-            value={`${overview.quality.rawFinanceRows - overview.quality.uniqueFinanceEvents}`}
-            detail="filas excluidas del cálculo"
+            label="Mercado completo"
+            value={
+              overview.quality.marketCoverageStart
+                ? shortDate(overview.quality.marketCoverageStart)
+                : 'Sin fecha'
+            }
+            detail="desde aquí conocemos todos los libres diarios"
             icon={ShieldCheck}
             tone="zinc"
           />
         </div>
 
-        <Card id="diagnostico" className="p-5 md:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        <Card id="autopsia" className="p-5 md:p-7">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <Eyebrow tone="sky">01 · Radiografía histórica</Eyebrow>
+              <Eyebrow tone="sky">01 · Evolución real</Eyebrow>
               <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
-                Cómo se acumuló el dinero
+                De igualdad contable a desigualdad competitiva
               </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                La curva combina las primas únicas de cada jornada. El Gini muestra cuándo empezó a
-                separarse el reparto entre usuarios.
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
+                Compara saldo, valor de plantilla o recursos. El efectivo no da puntos: por eso la
+                brecha de plantilla puede crecer aunque los recursos totales vuelvan a acercarse.
               </p>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
-              Actualizado {overview.generatedAt.slice(0, 10)}
-            </span>
+            <div className="flex rounded-xl border border-white/[0.08] bg-black/30 p-1">
+              {(
+                [
+                  ['squadValue', 'Plantilla'],
+                  ['totalResources', 'Recursos'],
+                  ['cash', 'Saldo'],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setHistoryMetric(value)}
+                  className={cx(
+                    'rounded-lg px-3 py-2 text-[10px] font-black transition',
+                    historyMetric === value
+                      ? 'bg-white/10 text-white'
+                      : 'text-zinc-600 hover:text-zinc-300'
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
           <div
             className="mt-7 h-80"
             role="img"
-            aria-label="Evolución acumulada de primas y desigualdad por jornada"
+            aria-label={`Evolución de ${historyMetric} para líder y último`}
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={timelineData} margin={{ top: 12, right: 8, left: -10, bottom: 0 }}>
+              <LineChart
+                data={historicalChart}
+                margin={{ top: 12, right: 12, left: -8, bottom: 0 }}
+              >
                 <CartesianGrid stroke="rgba(255,255,255,.055)" vertical={false} />
-                <XAxis dataKey="jornada" stroke="#71717a" fontSize={10} />
-                <YAxis
-                  yAxisId="money"
-                  stroke="#71717a"
-                  fontSize={10}
-                  tickFormatter={(value) => `${value}M`}
-                />
-                <YAxis
-                  yAxisId="gini"
-                  orientation="right"
-                  domain={[0, 0.35]}
-                  stroke="#71717a"
-                  fontSize={10}
-                />
+                <XAxis dataKey="label" stroke="#71717a" fontSize={9} interval="preserveStartEnd" />
+                <YAxis stroke="#71717a" fontSize={9} tickFormatter={(value) => `${value}M`} />
                 <Tooltip
                   contentStyle={{
                     background: '#09090b',
                     border: '1px solid rgba(255,255,255,.1)',
                     borderRadius: 12,
                   }}
-                  formatter={(value, name) => [
-                    name === 'Gini acumulado'
-                      ? number.format(Number(value))
-                      : `${number.format(Number(value))} M€`,
-                    name,
-                  ]}
+                  formatter={(value) => [`${number.format(Number(value))} M€`]}
+                  labelFormatter={(_, rows) => rows?.[0]?.payload?.day || ''}
                 />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Legend wrapperStyle={{ fontSize: 10 }} />
+                <ReferenceLine
+                  y={40}
+                  stroke="rgba(255,255,255,.16)"
+                  strokeDasharray="4 5"
+                  label={{ value: 'Inicio 40 M€', fill: '#71717a', fontSize: 9 }}
+                />
                 <Line
-                  yAxisId="money"
                   type="monotone"
-                  dataKey="primas"
-                  name="Primas acumuladas"
+                  dataKey="leader"
+                  name={overview.autopsy.leaderName}
                   stroke="#fa5001"
                   strokeWidth={3}
                   dot={false}
                 />
                 <Line
-                  yAxisId="gini"
                   type="monotone"
-                  dataKey="gini"
-                  name="Gini acumulado"
+                  dataKey="laggard"
+                  name={overview.autopsy.laggardName}
                   stroke="#38bdf8"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   dot={false}
-                  strokeDasharray="5 5"
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
+          <details className="mt-5 rounded-2xl border border-white/[0.06] bg-black/20">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-black text-zinc-300">
+              Tabla accesible de hitos <ChevronDown size={15} />
+            </summary>
+            <div className="grid gap-3 border-t border-white/[0.06] p-4 md:grid-cols-3">
+              <MomentCard title="Punto de partida" moment={overview.autopsy.opening} />
+              <MomentCard title="Mitad de temporada" moment={overview.autopsy.midpoint} />
+              <MomentCard title="Cierre" moment={overview.autopsy.closing} />
+            </div>
+          </details>
         </Card>
 
-        <section id="recomendaciones">
+        <div className="grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
+          <Card className="p-5 md:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Eyebrow>02 · Autopsia de la brecha</Eyebrow>
+                <h2 className="mt-4 text-2xl font-black text-white">Qué la creó y qué la frenó</h2>
+              </div>
+              <div className="flex rounded-lg border border-white/[0.07] bg-black/25 p-1">
+                {(['midpoint', 'closing'] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setContributionMoment(value)}
+                    className={cx(
+                      'rounded-md px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider',
+                      contributionMoment === value ? 'bg-white/10 text-white' : 'text-zinc-600'
+                    )}
+                  >
+                    {value === 'midpoint' ? 'Mitad' : 'Final'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-6">
+              <ContributionList rows={contributions} />
+            </div>
+            <div className="mt-5 rounded-2xl border border-sky-400/15 bg-sky-400/[0.07] p-4">
+              <p className="text-xs font-black text-sky-300">
+                El reparto inicial no explica el liderazgo
+              </p>
+              <p className="mt-2 text-xs leading-5 text-zinc-500">
+                Con hindsight, los 13 jugadores iniciales de {overview.autopsy.leaderName} sumaron{' '}
+                {integer.format(overview.autopsy.initialPotentialPoints.leader)} puntos potenciales;
+                los de {overview.autopsy.laggardName},{' '}
+                {integer.format(overview.autopsy.initialPotentialPoints.laggard)}. La distancia
+                surgió después.
+              </p>
+            </div>
+          </Card>
+
+          <Card className="p-5 md:p-6">
+            <Eyebrow tone="sky">03 · Límite de plantilla</Eyebrow>
+            <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black text-white">Cada plaza entre 10 y 25</h2>
+                <p className="mt-2 max-w-xl text-xs leading-5 text-zinc-500">
+                  La barra mide cuántos usuario-día habrían superado el límite. El rango de valor
+                  muestra la presión de venta entre liberar los jugadores más baratos o los más
+                  valiosos.
+                </p>
+              </div>
+              <span className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm font-black text-white">
+                Tope {config.rosterCap}
+              </span>
+            </div>
+            <div
+              className="mt-5 h-64"
+              role="img"
+              aria-label="Incumplimientos históricos para límites de plantilla entre 10 y 25"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={capChart} margin={{ top: 10, right: 8, left: -15, bottom: 0 }}>
+                  <CartesianGrid stroke="rgba(255,255,255,.05)" vertical={false} />
+                  <XAxis dataKey="cap" stroke="#71717a" fontSize={9} />
+                  <YAxis stroke="#71717a" fontSize={9} tickFormatter={(value) => `${value}%`} />
+                  <Tooltip
+                    contentStyle={{
+                      background: '#09090b',
+                      border: '1px solid rgba(255,255,255,.1)',
+                      borderRadius: 12,
+                    }}
+                    formatter={(value) => [
+                      `${number.format(Number(value))}%`,
+                      'Usuario-día sobre el tope',
+                    ]}
+                  />
+                  <Bar dataKey="incumplimiento" radius={[5, 5, 0, 0]}>
+                    {capChart.map((item) => (
+                      <Cell
+                        key={item.cap}
+                        fill={item.cap === config.rosterCap ? '#fa5001' : '#3f3f46'}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-xl bg-black/25 p-3">
+                <p className="text-[8px] uppercase tracking-widest text-zinc-600">Incumplimiento</p>
+                <p className="mt-1 text-lg font-black text-white">
+                  {percent(selectedCap.breachRate)}
+                </p>
+              </div>
+              <div className="rounded-xl bg-black/25 p-3">
+                <p className="text-[8px] uppercase tracking-widest text-zinc-600">Afectados</p>
+                <p className="mt-1 text-lg font-black text-white">{selectedCap.affectedUsers}/7</p>
+              </div>
+              <div className="rounded-xl bg-black/25 p-3">
+                <p className="text-[8px] uppercase tracking-widest text-zinc-600">Venta mínima</p>
+                <p className="mt-1 text-lg font-black text-white">
+                  {compactMoney.format(selectedCap.averageMinimumReleaseValue)}
+                </p>
+              </div>
+              <div className="rounded-xl bg-black/25 p-3">
+                <p className="text-[8px] uppercase tracking-widest text-zinc-600">Máx. exceso</p>
+                <p className="mt-1 text-lg font-black text-white">+{selectedCap.maxExcess}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <section>
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <Eyebrow>02 · Tres respuestas</Eyebrow>
+              <Eyebrow>04 · Configuraciones robustas</Eyebrow>
               <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
-                No hay una única liga perfecta
+                No gana quien acaba con menor Gini
               </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                Cada tarjeta optimiza una intención diferente. La configuración ganadora se elige
-                sobre una frontera de alternativas no dominadas.
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
+                Gana la regla que resiste mejor malos fichajes, lesiones, rachas e inactividad
+                usando los mismos shocks y resultados históricos de mercado.
               </p>
             </div>
           </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            {overview.recommendations.map((profile) => (
+          <div className="grid gap-4 xl:grid-cols-3">
+            {overview.recommendations.map((recommendation) => (
               <RecommendationCard
-                key={profile.id}
-                profile={profile}
+                key={recommendation.id}
+                recommendation={recommendation}
                 onApply={applyRecommendation}
               />
             ))}
           </div>
         </section>
 
-        <Card id="laboratorio" className="scroll-mt-24">
-          <div className="border-b border-white/[0.07] p-5 md:p-7">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <Eyebrow tone="emerald">03 · Laboratorio</Eyebrow>
-                <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
-                  Diseña vuestras reglas
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                  Los cálculos se actualizan automáticamente. Ningún control escribe en Biwenger ni
-                  en la base de datos.
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setConfig(overview.defaults)}
-                  className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-black text-zinc-300 transition hover:bg-white/5"
-                >
-                  Restaurar real
-                </button>
-                <button
-                  type="button"
-                  onClick={downloadCsv}
-                  className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-black text-white transition hover:bg-orange-400"
-                >
-                  <Download size={14} /> CSV
-                </button>
-              </div>
+        <Card id="laboratorio" className="p-5 md:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <Eyebrow tone="sky">05 · Laboratorio de recuperación</Eyebrow>
+              <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
+                ¿Un error condiciona toda la temporada?
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
+                Aplica el mismo shock a distintas reglas. Recuperación doble significa volver cerca
+                de la mediana tanto en recursos como en capacidad de plantilla.
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={resetHistorical}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-[10px] font-black text-zinc-300 transition hover:bg-white/[0.09]"
+            >
+              <RotateCcw size={13} /> Reglas históricas
+            </button>
           </div>
-          <div className="grid lg:grid-cols-[340px_1fr]">
-            <aside className="border-b border-white/[0.07] bg-black/15 p-5 lg:border-b-0 lg:border-r md:p-6">
-              <div className="space-y-5">
-                <SelectField
-                  label="Máximo de plantilla"
-                  value={config.rosterCap}
-                  onChange={(value) =>
-                    updateConfig('rosterCap', Number(value) as ScenarioConfig['rosterCap'])
-                  }
-                  hint="El histórico llegó a 25; la mediana fue 18."
-                >
-                  {[18, 20, 22, 25].map((value) => (
-                    <option key={value} value={value}>
-                      {value} jugadores
-                    </option>
-                  ))}
-                </SelectField>
-                <SelectField
-                  label="Prima por puntos"
-                  value={config.payoutMode}
-                  onChange={(value) =>
-                    updateConfig('payoutMode', value as ScenarioConfig['payoutMode'])
-                  }
-                >
-                  <option value="inverse">Inversa</option>
-                  <option value="hybrid">Híbrida</option>
-                  <option value="direct">Directa</option>
-                  <option value="equal">Igual para todos</option>
-                </SelectField>
-                {config.payoutMode === 'hybrid' && (
-                  <SelectField
-                    label="Peso del mérito"
-                    value={config.meritWeight}
-                    onChange={(value) =>
-                      updateConfig('meritWeight', Number(value) as ScenarioConfig['meritWeight'])
-                    }
-                  >
-                    <option value={0.25}>25% propio / 75% inverso</option>
-                    <option value={0.5}>50% / 50%</option>
-                    <option value={0.75}>75% propio / 25% inverso</option>
-                  </SelectField>
-                )}
-                <SelectField
-                  label="Euros por punto"
-                  value={config.eurosPerPoint}
-                  onChange={(value) =>
-                    updateConfig('eurosPerPoint', Number(value) as ScenarioConfig['eurosPerPoint'])
-                  }
-                >
-                  {[5000, 7500, 10000].map((value) => (
-                    <option key={value} value={value}>
-                      {fullMoney.format(value)}
-                    </option>
-                  ))}
-                </SelectField>
-                <SelectField
-                  label="Prima por posición"
-                  value={config.positionPreset}
-                  onChange={(value) => {
-                    const preset = value as ScenarioConfig['positionPreset'];
-                    setConfig((current) => ({
-                      ...current,
-                      positionPreset: preset,
-                      positionBonuses: POSITION_PRESETS[preset],
-                    }));
-                  }}
-                >
-                  <option value="none">Sin prima</option>
-                  <option value="winner">Ganador · 500k</option>
-                  <option value="podium-light">Podio moderado</option>
-                  <option value="podium-strong">Podio fuerte</option>
-                  <option value="bottom-support">Compensar últimos</option>
-                  <option value="custom">Personalizada</option>
-                </SelectField>
-                {config.positionPreset === 'custom' && (
-                  <div>
-                    <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
-                      Importe por puesto
-                    </p>
-                    <div className="grid grid-cols-4 gap-2">
-                      {config.positionBonuses.map((value, index) => (
-                        <label key={index} className="text-[9px] text-zinc-600">
-                          {index + 1}º
-                          <input
-                            type="number"
-                            min={0}
-                            step={50000}
-                            value={value}
-                            onChange={(event) => {
-                              const next = [...config.positionBonuses];
-                              next[index] = Math.max(0, Number(event.target.value));
-                              updateConfig('positionBonuses', next);
-                            }}
-                            className="mt-1 h-9 w-full rounded-lg border border-white/[0.08] bg-black/35 px-2 text-xs text-white outline-none focus:border-orange-400/50"
-                          />
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-3">
-                  <SelectField
-                    label="Por ideal"
-                    value={config.idealPlayerBonus}
-                    onChange={(value) =>
-                      updateConfig(
-                        'idealPlayerBonus',
-                        Number(value) as ScenarioConfig['idealPlayerBonus']
-                      )
-                    }
-                  >
-                    {[0, 50000, 100000].map((value) => (
-                      <option key={value} value={value}>
-                        {fullMoney.format(value)}
-                      </option>
-                    ))}
-                  </SelectField>
-                  <SelectField
-                    label="Por MVP"
-                    value={config.mvpBonus}
-                    onChange={(value) =>
-                      updateConfig('mvpBonus', Number(value) as ScenarioConfig['mvpBonus'])
-                    }
-                  >
-                    {[0, 60000, 150000].map((value) => (
-                      <option key={value} value={value}>
-                        {fullMoney.format(value)}
-                      </option>
-                    ))}
-                  </SelectField>
-                </div>
-                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-white/[0.07] bg-black/20 p-3 text-xs font-semibold text-zinc-400">
-                  MVP acumulable con ideal
-                  <input
-                    type="checkbox"
-                    checked={config.stackMvpAndIdeal}
-                    onChange={(event) => updateConfig('stackMvpAndIdeal', event.target.checked)}
-                    className="size-4 accent-orange-500"
-                  />
-                </label>
-                <SelectField
-                  label="Jugadores en mercado"
-                  value={config.marketSlots}
-                  onChange={(value) =>
-                    updateConfig('marketSlots', Number(value) as ScenarioConfig['marketSlots'])
-                  }
-                  hint="Los datos de este apartado empiezan en marzo."
-                >
-                  {[10, 15, 20, 25, 30].map((value) => (
-                    <option key={value} value={value}>
-                      {value} diarios
-                    </option>
-                  ))}
-                </SelectField>
-                <SelectField
-                  label="Límite de valor"
-                  value={config.squadValueCap ?? 'none'}
-                  onChange={(value) =>
-                    updateConfig(
-                      'squadValueCap',
-                      value === 'none' ? null : (Number(value) as ScenarioConfig['squadValueCap'])
-                    )
-                  }
-                >
-                  <option value="none">Sin límite</option>
-                  {[70000000, 80000000, 90000000, 100000000, 110000000].map((value) => (
-                    <option key={value} value={value}>
-                      {compactMoney.format(value)}
-                    </option>
-                  ))}
-                </SelectField>
-                <SelectField
-                  label="Comparación monetaria"
-                  value={config.budgetMode}
-                  onChange={(value) =>
-                    updateConfig('budgetMode', value as ScenarioConfig['budgetMode'])
-                  }
-                >
-                  <option value="literal">Importes literales</option>
-                  <option value="neutral">Mismo presupuesto total</option>
-                </SelectField>
-              </div>
-            </aside>
-            <div className="p-5 md:p-7">
-              {error && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-xs font-semibold text-red-300">
-                  <AlertTriangle size={15} /> {error}
+          <div className="mt-7 grid gap-7 xl:grid-cols-[320px_1fr]">
+            <div className="space-y-5 rounded-2xl border border-white/[0.07] bg-black/25 p-4">
+              <RangeField
+                label="Máximo de plantilla"
+                value={config.rosterCap}
+                min={10}
+                max={25}
+                suffix="jug."
+                onChange={(rosterCap) => setConfig((current) => ({ ...current, rosterCap }))}
+              />
+              <RangeField
+                label="Jugadores diarios de mercado"
+                value={config.marketSlots}
+                min={1}
+                max={20}
+                suffix="jug."
+                onChange={(marketSlots) => setConfig((current) => ({ ...current, marketSlots }))}
+              />
+              <SelectField
+                label="Dirección de la prima"
+                value={config.payoutDirection}
+                onChange={(payoutDirection) =>
+                  setConfig((current) => ({
+                    ...current,
+                    payoutDirection: payoutDirection as ResilienceConfig['payoutDirection'],
+                  }))
+                }
+              >
+                <option value="inverse">Inversa</option>
+                <option value="direct">Directa</option>
+              </SelectField>
+              <SelectField
+                label="Importe por punto"
+                value={config.eurosPerPoint}
+                onChange={(eurosPerPoint) =>
+                  setConfig((current) => ({ ...current, eurosPerPoint: Number(eurosPerPoint) }))
+                }
+              >
+                <option value={5000}>5.000 €</option>
+                <option value={7500}>7.500 €</option>
+                <option value={10000}>10.000 €</option>
+              </SelectField>
+              <div className="h-px bg-white/[0.06]" />
+              <SelectField
+                label="Shock"
+                value={shock.kind}
+                onChange={(kind) =>
+                  setShock((current) => ({ ...current, kind: kind as ShockConfig['kind'] }))
+                }
+              >
+                {Object.entries(shockLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </SelectField>
+              <SelectField
+                label="Gravedad"
+                value={shock.severity}
+                onChange={(severity) =>
+                  setShock((current) => ({
+                    ...current,
+                    severity: severity as ShockConfig['severity'],
+                  }))
+                }
+              >
+                {Object.entries(severityLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </SelectField>
+              <RangeField
+                label="Jornada del error"
+                value={shock.appliedRound}
+                min={1}
+                max={35}
+                suffix="J"
+                onChange={(appliedRound) => setShock((current) => ({ ...current, appliedRound }))}
+              />
+              {config.rosterCap < overview.openingRosterSize && (
+                <div className="flex gap-2 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-[10px] leading-4 text-amber-200">
+                  <AlertTriangle className="mt-0.5 shrink-0" size={14} />
+                  <span>
+                    Este límite exige repartir menos de {overview.openingRosterSize} jugadores o
+                    realizar cortes antes de empezar.
+                  </span>
                 </div>
               )}
-              <SimulatorResult result={result} loading={isPending} />
             </div>
-          </div>
-        </Card>
-
-        <section id="limites">
-          <div className="mb-5">
-            <Eyebrow tone="sky">04 · Presión estructural</Eyebrow>
-            <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
-              Qué exigiría cada límite
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
-              Estos resultados describen incumplimientos históricos. No adivinan qué jugadores
-              habría vendido cada manager.
-            </p>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="p-5">
-              <div className="flex items-center gap-3">
-                <Users className="text-orange-300" size={18} />
-                <h3 className="font-black text-white">Máximo de plantilla</h3>
-              </div>
-              <div className="mt-5 space-y-3">
-                {overview.diagnostics.rosterCaps.map((item) => (
-                  <div
-                    key={item.label}
-                    className="grid grid-cols-[85px_1fr_52px] items-center gap-3 text-xs"
-                  >
-                    <span className="font-bold text-zinc-300">{item.label}</span>
-                    <span className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
-                      <span
-                        className="block h-full rounded-full bg-orange-400"
-                        style={{ width: `${(item.breachRate || 0) * 100}%` }}
-                      />
-                    </span>
-                    <span className="text-right tabular-nums text-zinc-500">
-                      {percent(item.breachRate || 0)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-            <Card className="p-5">
-              <div className="flex items-center gap-3">
-                <WalletCards className="text-sky-300" size={18} />
-                <h3 className="font-black text-white">Tope de valor</h3>
-              </div>
-              <div className="mt-5 space-y-3">
-                {overview.diagnostics.squadValueCaps.map((item) => (
-                  <div
-                    key={item.label}
-                    className="grid grid-cols-[72px_1fr_52px] items-center gap-3 text-xs"
-                  >
-                    <span className="font-bold text-zinc-300">{item.label}</span>
-                    <span className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
-                      <span
-                        className="block h-full rounded-full bg-sky-400"
-                        style={{ width: `${(item.breachRate || 0) * 100}%` }}
-                      />
-                    </span>
-                    <span className="text-right tabular-nums text-zinc-500">
-                      {percent(item.breachRate || 0)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-            <Card className="p-5">
-              <div className="flex items-center gap-3">
-                <Goal className="text-emerald-300" size={18} />
-                <h3 className="font-black text-white">Oferta automática</h3>
-              </div>
-              <div className="mt-5 grid grid-cols-5 gap-2">
-                {overview.diagnostics.marketSlots.map((item) => (
-                  <div
-                    key={item.label}
-                    className={classNames(
-                      'rounded-xl border p-3 text-center',
-                      Number(item.value) === 20
-                        ? 'border-emerald-400/30 bg-emerald-400/10'
-                        : 'border-white/[0.06] bg-black/20'
-                    )}
-                  >
-                    <p className="text-lg font-black text-white">{item.value}</p>
-                    <p className="mt-1 text-[9px] text-zinc-500">~{item.expectedWaitDays} días</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-4 flex items-start gap-2 text-[10px] leading-5 text-zinc-600">
-                <Info className="mt-0.5 shrink-0" size={12} /> Confianza baja: solo hay{' '}
-                {overview.quality.marketSnapshotDays} días de snapshots.
-              </p>
-            </Card>
-          </div>
-        </section>
-
-        <Card id="pareto" className="p-5 md:p-7">
-          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <Eyebrow>05 · Frontera de Pareto</Eyebrow>
-              <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
-                Alternativas que merecen debate
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                Ninguna de estas configuraciones puede mejorar una dimensión sin ceder en otra.
-              </p>
-            </div>
-            <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-black text-zinc-500">
-              {overview.pareto.length} escenarios
-            </span>
-          </div>
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-white/[0.06]">
-            <table className="w-full min-w-[920px] text-left text-xs">
-              <thead className="bg-white/[0.025] text-[9px] uppercase tracking-[0.18em] text-zinc-600">
-                <tr>
-                  {[
-                    'Configuración',
-                    'Igualdad',
-                    'Competición',
-                    'Mérito',
-                    'Liquidez',
-                    'Facilidad',
-                    'Dinero',
-                    '',
-                  ].map((label) => (
-                    <th key={label} className="px-4 py-3">
-                      {label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {overview.pareto.slice(0, 12).map((scenario, index) => (
-                  <tr
-                    key={`${scenario.config.payoutMode}-${index}`}
-                    className="border-t border-white/[0.05] text-zinc-400"
-                  >
-                    <td className="max-w-xs px-4 py-3 font-semibold text-zinc-200">
-                      {configSummary(scenario.config).slice(0, 3).join(' · ')}
-                    </td>
-                    {(
-                      ['equality', 'competitiveness', 'merit', 'liquidity', 'practicality'] as const
-                    ).map((key) => (
-                      <td key={key} className="px-4 py-3 font-black tabular-nums text-white">
-                        {Math.round(scenario.scores[key])}
-                      </td>
-                    ))}
-                    <td className="px-4 py-3 tabular-nums">
-                      {compactMoney.format(scenario.totalPayout)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => applyRecommendation(scenario.config)}
-                        className="rounded-lg border border-white/10 px-3 py-1.5 font-bold text-orange-300 transition hover:bg-orange-400/10"
-                      >
-                        Probar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-
-        <Card id="metodologia" className="p-5 md:p-7">
-          <div className="grid gap-8 lg:grid-cols-[.8fr_1.2fr]">
-            <div>
-              <Eyebrow tone="emerald">06 · Metodología</Eyebrow>
-              <h2 className="mt-4 text-2xl font-black text-white">
-                Lo que sabemos.
-                <br />
-                <span className="text-zinc-600">Y lo que no.</span>
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-zinc-500">
-                La honestidad del modelo importa más que una falsa precisión. Los pagos se
-                reproducen sobre decisiones reales; los límites estructurales se muestran como
-                rangos de presión.
-              </p>
-              <a
-                href="https://biwenger.as.com/blog/guias/consejos-para-configurar-tu-liga-biwenger-y-hacerla-mas-competitiva/"
-                target="_blank"
-                rel="noreferrer"
-                className="mt-5 inline-flex items-center gap-2 text-xs font-black text-orange-300 hover:text-orange-200"
-              >
-                Referencia oficial de Biwenger <ArrowUpRight size={13} />
-              </a>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {overview.quality.warnings.map((warning, index) => (
-                <div
-                  key={warning}
-                  className="rounded-2xl border border-white/[0.06] bg-black/20 p-4"
-                >
-                  <span className="grid size-7 place-items-center rounded-lg bg-white/[0.05] text-[10px] font-black text-zinc-500">
-                    0{index + 1}
-                  </span>
-                  <p className="mt-3 text-xs leading-6 text-zinc-400">{warning}</p>
+              {error && (
+                <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-xs font-bold text-red-300">
+                  {error}
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="mt-7 grid gap-3 border-t border-white/[0.06] pt-6 sm:grid-cols-3">
-            <div className="flex gap-3">
-              <Check className="mt-0.5 shrink-0 text-emerald-400" size={16} />
-              <p className="text-xs leading-5 text-zinc-500">
-                <strong className="block text-zinc-200">1.000 remuestreos</strong>Intervalos del 90%
-                para escenarios finales.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <FlaskConical className="mt-0.5 shrink-0 text-sky-400" size={16} />
-              <p className="text-xs leading-5 text-zinc-500">
-                <strong className="block text-zinc-200">Solo lectura</strong>Sin tablas nuevas ni
-                cambios remotos.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Sparkles className="mt-0.5 shrink-0 text-orange-400" size={16} />
-              <p className="text-xs leading-5 text-zinc-500">
-                <strong className="block text-zinc-200">Decisión colectiva</strong>Tres objetivos,
-                no una verdad impuesta.
-              </p>
+              )}
+              <RecoveryPanel analysis={analysis} loading={isPending} />
             </div>
           </div>
         </Card>
+
+        <Card className="p-5 md:p-7">
+          <div className="grid gap-7 lg:grid-cols-[.85fr_1.15fr]">
+            <div>
+              <Eyebrow>06 · Lectura correcta</Eyebrow>
+              <h2 className="mt-4 text-2xl font-black text-white">Qué podemos afirmar</h2>
+              <div className="mt-5 space-y-3">
+                {[
+                  [
+                    'El mercado abrió la brecha',
+                    'A mitad de temporada, fichajes y revalorizaciones aportaban la mayor diferencia entre líder y último.',
+                    BarChart3,
+                  ],
+                  [
+                    'La inversa amortiguó, no reparó',
+                    'El último recibió más primas, pero acabó con mucho efectivo y una plantilla muy inferior.',
+                    BadgeEuro,
+                  ],
+                  [
+                    'El límite afecta a la liquidez',
+                    'Reducir plazas libera jugadores; no garantiza por sí solo que el rezagado acierte en la siguiente compra.',
+                    Gauge,
+                  ],
+                ].map(([title, detail, Icon]) => (
+                  <div
+                    key={String(title)}
+                    className="flex gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-4"
+                  >
+                    <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-orange-400/20 bg-orange-400/10 text-orange-300">
+                      <Icon size={16} />
+                    </span>
+                    <div>
+                      <p className="text-xs font-black text-zinc-200">{String(title)}</p>
+                      <p className="mt-1 text-[11px] leading-5 text-zinc-600">{String(detail)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <Info size={16} className="text-sky-300" />
+                <h3 className="text-sm font-black text-white">Supuestos y calidad</h3>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {overview.quality.warnings.map((warning) => (
+                  <div
+                    key={warning}
+                    className="rounded-xl border border-white/[0.06] bg-black/20 p-4 text-[11px] leading-5 text-zinc-500"
+                  >
+                    {warning}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-widest text-zinc-600">
+                <span className="rounded-full border border-white/10 px-3 py-1.5">
+                  {integer.format(overview.quality.transfers)} fichajes
+                </span>
+                <span className="rounded-full border border-white/10 px-3 py-1.5">
+                  {integer.format(overview.quality.uniqueFinanceEvents)} primas únicas
+                </span>
+                <span className="rounded-full border border-white/10 px-3 py-1.5">
+                  {integer.format(overview.quality.marketSnapshotDays)} días de mercado
+                </span>
+                <span className="rounded-full border border-white/10 px-3 py-1.5">
+                  solo lectura
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <div className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold text-zinc-700">
+          <FlaskConical size={13} />
+          <span>
+            Modelo v2 · 500 trayectorias emparejadas por escenario · temporada congelada 2025/26
+          </span>
+        </div>
       </div>
     </div>
   );
