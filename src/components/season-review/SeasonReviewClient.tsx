@@ -39,6 +39,10 @@ import {
   YAxis,
 } from 'recharts';
 import { runSeasonReviewScenario } from '@/app/(app)/season-review/actions';
+import {
+  buildEvolutionChartModel,
+  type EvolutionMetric,
+} from '@/lib/season-review/evolution-chart';
 import type {
   GapContribution,
   PairMoment,
@@ -545,9 +549,12 @@ function RecoveryPanel({
 }
 
 export default function SeasonReviewClient({ overview }: { overview: SeasonReviewOverviewV2 }) {
-  const [historyMetric, setHistoryMetric] = useState<'totalResources' | 'squadValue' | 'cash'>(
-    'squadValue'
-  );
+  const [historyMetric, setHistoryMetric] = useState<EvolutionMetric>('squadValue');
+  const [historyView, setHistoryView] = useState<'all' | 'comparison'>('all');
+  const [comparisonUsers, setComparisonUsers] = useState<[string, string]>([
+    overview.autopsy.leaderId,
+    overview.autopsy.laggardId,
+  ]);
   const [contributionMoment, setContributionMoment] = useState<'midpoint' | 'closing'>('midpoint');
   const [config, setConfig] = useState<ResilienceConfig>(overview.historicalConfig);
   const [shock, setShock] = useState<ShockConfig>(overview.defaultShock);
@@ -571,20 +578,21 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
     return () => window.clearTimeout(timeout);
   }, [config, shock]);
 
+  const allEvolutionUsers = useMemo(
+    () => buildEvolutionChartModel(overview.timeline, historyMetric).series,
+    [historyMetric, overview.timeline]
+  );
   const historicalChart = useMemo(() => {
-    const { leaderId, laggardId } = overview.autopsy;
-    return overview.timeline.map((point) => {
-      const leader = point.users.find((user) => user.userId === leaderId);
-      const laggard = point.users.find((user) => user.userId === laggardId);
-      return {
-        day: point.day,
-        label: shortDate(point.day),
-        leader: (leader?.[historyMetric] || 0) / 1_000_000,
-        laggard: (laggard?.[historyMetric] || 0) / 1_000_000,
-        resourceGap: point.absoluteResourceGap / 1_000_000,
-      };
-    });
-  }, [historyMetric, overview]);
+    const model = buildEvolutionChartModel(
+      overview.timeline,
+      historyMetric,
+      historyView === 'comparison' ? comparisonUsers : undefined
+    );
+    return {
+      series: model.series,
+      data: model.data.map((point) => ({ ...point, label: shortDate(point.day) })),
+    };
+  }, [comparisonUsers, historyMetric, historyView, overview.timeline]);
 
   const selectedCap =
     overview.capDiagnostics.find((item) => item.cap === config.rosterCap) ||
@@ -784,14 +792,97 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
               ))}
             </div>
           </div>
+          <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-black/25 p-4 lg:flex-row lg:items-end">
+            <div>
+              <span className="mb-2 block text-[9px] font-black uppercase tracking-[0.18em] text-zinc-500">
+                Usuarios visibles
+              </span>
+              <div
+                className="flex rounded-xl border border-white/[0.08] bg-zinc-950 p-1"
+                aria-label="Usuarios visibles en la gráfica"
+              >
+                <button
+                  type="button"
+                  onClick={() => setHistoryView('all')}
+                  aria-pressed={historyView === 'all'}
+                  className={cx(
+                    'rounded-lg px-4 py-2 text-[10px] font-black transition',
+                    historyView === 'all'
+                      ? 'bg-orange-500 text-black'
+                      : 'text-zinc-500 hover:text-white'
+                  )}
+                >
+                  Todos ({allEvolutionUsers.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHistoryView('comparison')}
+                  aria-pressed={historyView === 'comparison'}
+                  className={cx(
+                    'rounded-lg px-4 py-2 text-[10px] font-black transition',
+                    historyView === 'comparison'
+                      ? 'bg-sky-400 text-black'
+                      : 'text-zinc-500 hover:text-white'
+                  )}
+                >
+                  Comparar dos
+                </button>
+              </div>
+            </div>
+            {historyView === 'comparison' ? (
+              <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:max-w-xl">
+                <SelectField
+                  label="Primer usuario"
+                  value={comparisonUsers[0]}
+                  onChange={(userId) => setComparisonUsers([userId, comparisonUsers[1]])}
+                >
+                  {allEvolutionUsers.map((user) => (
+                    <option
+                      key={user.userId}
+                      value={user.userId}
+                      disabled={user.userId === comparisonUsers[1]}
+                    >
+                      {user.name}
+                    </option>
+                  ))}
+                </SelectField>
+                <SelectField
+                  label="Segundo usuario"
+                  value={comparisonUsers[1]}
+                  onChange={(userId) => setComparisonUsers([comparisonUsers[0], userId])}
+                >
+                  {allEvolutionUsers.map((user) => (
+                    <option
+                      key={user.userId}
+                      value={user.userId}
+                      disabled={user.userId === comparisonUsers[0]}
+                    >
+                      {user.name}
+                    </option>
+                  ))}
+                </SelectField>
+              </div>
+            ) : (
+              <p className="text-xs leading-5 text-zinc-500 lg:ml-auto lg:max-w-sm lg:text-right">
+                Se muestran las {allEvolutionUsers.length} trayectorias. Usa “Comparar dos” para
+                aislar cualquier duelo.
+              </p>
+            )}
+          </div>
           <div
             className="mt-7 h-80"
             role="img"
-            aria-label={`Evolución de ${historyMetric} para líder y último`}
+            aria-label={
+              historyView === 'all'
+                ? `Evolución de ${historyMetric} para todos los usuarios`
+                : `Comparación de ${historyMetric} entre ${historicalChart.series
+                    .map((user) => user.name)
+                    .join(' y ')}`
+            }
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={historicalChart}
+                data={historicalChart.data}
                 margin={{ top: 12, right: 12, left: -8, bottom: 0 }}
               >
                 <CartesianGrid stroke="rgba(255,255,255,.055)" vertical={false} />
@@ -807,28 +898,26 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
                   labelFormatter={(_, rows) => rows?.[0]?.payload?.day || ''}
                 />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
-                <ReferenceLine
-                  y={40}
-                  stroke="rgba(255,255,255,.16)"
-                  strokeDasharray="4 5"
-                  label={{ value: 'Inicio 40 M€', fill: '#71717a', fontSize: 9 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="leader"
-                  name={overview.autopsy.leaderName}
-                  stroke="#fa5001"
-                  strokeWidth={3}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="laggard"
-                  name={overview.autopsy.laggardName}
-                  stroke="#38bdf8"
-                  strokeWidth={3}
-                  dot={false}
-                />
+                {historyMetric === 'totalResources' ? (
+                  <ReferenceLine
+                    y={40}
+                    stroke="rgba(255,255,255,.16)"
+                    strokeDasharray="4 5"
+                    label={{ value: 'Inicio 40 M€', fill: '#71717a', fontSize: 9 }}
+                  />
+                ) : null}
+                {historicalChart.series.map((user) => (
+                  <Line
+                    key={user.userId}
+                    type="monotone"
+                    dataKey={user.key}
+                    name={user.name}
+                    stroke={user.color}
+                    strokeWidth={historyView === 'comparison' ? 3 : 2}
+                    strokeOpacity={historyView === 'comparison' ? 1 : 0.82}
+                    dot={false}
+                  />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
