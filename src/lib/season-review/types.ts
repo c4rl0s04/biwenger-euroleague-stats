@@ -83,9 +83,12 @@ export interface RecoveryEnvironment {
 }
 
 export interface RecoveryResult {
+  modelVersion: 'gap-v2' | 'agent-season-v3';
+  simulationCount: number;
   config: ResilienceConfig;
   shock: ShockConfig;
   recoveryProbability: number;
+  recoveryInterval95?: [number, number];
   economicRecoveryProbability: number;
   competitiveRecoveryProbability: number;
   lockInProbability: number;
@@ -93,6 +96,12 @@ export interface RecoveryResult {
   p90RecoveryRounds: number;
   medianRemainingEconomicGap: number;
   medianRemainingCompetitiveGap: number;
+  medianFinalResourceGini?: number;
+  medianFinalSquadGini?: number;
+  medianMidseasonContenders?: number;
+  medianTransactions?: number;
+  medianPurchases?: number;
+  medianFinalResourceGap?: number;
   confidence: 'high' | 'medium' | 'low';
 }
 
@@ -178,6 +187,8 @@ export interface ResilienceRecommendation {
   worstCaseRecoveryProbability: number;
   averageLockInProbability: number;
   runnerUp: ResilienceConfig;
+  modelVersion: RecoveryResult['modelVersion'];
+  simulationCount: number;
 }
 
 export interface SeasonReviewQualityV2 {
@@ -193,6 +204,19 @@ export interface SeasonReviewQualityV2 {
   warnings: string[];
 }
 
+export interface SimulationCalibrationReport {
+  observedTransfers: number;
+  simulatedMedianTransactions: number;
+  transferRelativeError: number;
+  observedFinalResourceGini: number;
+  simulatedFinalResourceGini: number;
+  resourceGiniAbsoluteError: number;
+  observedFinalSquadGini: number;
+  simulatedFinalSquadGini: number;
+  squadGiniAbsoluteError: number;
+  status: 'strong' | 'acceptable' | 'weak';
+}
+
 export interface SeasonReviewOverviewV2 {
   version: 2;
   seasonId: typeof REVIEW_SEASON_ID;
@@ -206,6 +230,7 @@ export interface SeasonReviewOverviewV2 {
   historicalConfig: ResilienceConfig;
   defaultShock: ShockConfig;
   initialAnalysis: SeasonRecoveryAnalysis;
+  simulationCalibration: SimulationCalibrationReport;
   quality: SeasonReviewQualityV2;
   generatedAt: string;
 }

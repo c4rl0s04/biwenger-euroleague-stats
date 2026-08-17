@@ -346,6 +346,8 @@ export function simulateRecovery(
 
   const recoveryProbability = recoveryRounds.length / pathCount;
   return {
+    modelVersion: 'gap-v2',
+    simulationCount: pathCount,
     config,
     shock,
     recoveryProbability,
