@@ -15,6 +15,8 @@ status: active
 - [Data sync](data-sync.md) — preflight and execute full, daily, live, or targeted ingestion.
 - [Database safety](database-safety.md) — backups, audits, migrations, and price-cache repair.
 - [Season lifecycle](season-lifecycle.md) — freeze a completed season and activate the next one.
+- [Season simulations](season-simulations.md) — calculate and publish complete-season Monte Carlo
+  results.
 - [Troubleshooting](troubleshooting.md) — diagnose common application, database, and sync failures.
 
 Operational notes contain commands that can mutate databases or external Biwenger state. Confirm the
