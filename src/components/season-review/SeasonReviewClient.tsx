@@ -255,82 +255,81 @@ const milestoneLabels: Record<EvolutionMilestone['id'], string> = {
 
 function MilestoneTable({ milestones }: { milestones: EvolutionMilestone[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] border-collapse text-left">
-        <caption className="sr-only">
-          Plantilla, saldo, recursos totales y puntos de los usuarios visibles en cada hito
-        </caption>
-        <thead>
-          <tr className="border-b border-white/[0.08] text-[9px] font-black uppercase tracking-[0.18em] text-zinc-600">
-            <th scope="col" className="px-4 py-3">
-              Hito
-            </th>
-            <th scope="col" className="px-4 py-3">
-              Usuario
-            </th>
-            <th scope="col" className="px-4 py-3 text-right">
-              Plantilla
-            </th>
-            <th scope="col" className="px-4 py-3 text-right">
-              Saldo
-            </th>
-            <th scope="col" className="px-4 py-3 text-right text-sky-400">
-              Recursos
-            </th>
-            <th scope="col" className="px-4 py-3 text-right">
-              Puntos
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {milestones.flatMap((milestone) =>
-            milestone.users.map((user, userIndex) => (
-              <tr
-                key={`${milestone.id}-${user.userId}`}
-                className="border-b border-white/[0.05] text-xs text-zinc-300 last:border-0"
-              >
-                {userIndex === 0 ? (
-                  <th
-                    scope="rowgroup"
-                    rowSpan={milestone.users.length}
-                    className="w-40 border-r border-white/[0.05] px-4 py-3 align-top"
-                  >
-                    <span className="block font-black text-white">
-                      {milestoneLabels[milestone.id]}
+    <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-black/25">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[680px] border-collapse text-left">
+          <caption className="sr-only">
+            Plantilla, saldo, recursos totales y puntos de los usuarios visibles en cada hito
+          </caption>
+          <thead className="bg-zinc-950/80">
+            <tr className="border-b border-white/[0.08] text-[9px] font-black uppercase tracking-[0.18em] text-zinc-500">
+              <th scope="col" className="px-5 py-3.5">
+                Usuario
+              </th>
+              <th scope="col" className="px-4 py-3.5 text-right">
+                Plantilla
+              </th>
+              <th scope="col" className="px-4 py-3.5 text-right">
+                Saldo
+              </th>
+              <th scope="col" className="bg-sky-400/[0.045] px-4 py-3.5 text-right text-sky-300">
+                Recursos totales
+              </th>
+              <th scope="col" className="px-5 py-3.5 text-right">
+                Puntos
+              </th>
+            </tr>
+          </thead>
+          {milestones.map((milestone, milestoneIndex) => (
+            <tbody key={milestone.id} className="border-b border-white/[0.08] last:border-0">
+              <tr>
+                <th scope="rowgroup" colSpan={5} className="p-0">
+                  <span className="flex items-center gap-3 border-y border-white/[0.04] bg-white/[0.025] px-5 py-3 first:border-t-0">
+                    <span className="grid size-7 place-items-center rounded-lg border border-orange-400/20 bg-orange-400/10 text-[9px] font-black text-orange-300">
+                      {String(milestoneIndex + 1).padStart(2, '0')}
                     </span>
-                    <span className="mt-1 block text-[10px] font-bold text-zinc-600">
-                      {shortDate(milestone.day)}
+                    <span>
+                      <span className="block text-xs font-black text-white">
+                        {milestoneLabels[milestone.id]}
+                      </span>
+                      <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-[0.16em] text-zinc-600">
+                        {shortDate(milestone.day)} · {milestone.users.length}{' '}
+                        {milestone.users.length === 1 ? 'usuario' : 'usuarios'}
+                      </span>
                     </span>
-                  </th>
-                ) : null}
-                <th scope="row" className="px-4 py-3 font-black text-zinc-200">
-                  <span
-                    className="mr-2 inline-block size-2 rounded-full"
-                    style={{ backgroundColor: user.color }}
-                    aria-hidden="true"
-                  />
-                  {user.name}
+                  </span>
                 </th>
-                <td className="px-4 py-3 text-right tabular-nums">
-                  {compactMoney.format(user.squadValue)}
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums">
-                  {compactMoney.format(user.cash)}
-                </td>
-                <td className="px-4 py-3 text-right font-black tabular-nums text-sky-300">
-                  {compactMoney.format(user.totalResources)}
-                </td>
-                <td className="px-4 py-3 text-right font-bold tabular-nums text-zinc-400">
-                  {integer.format(user.cumulativePoints)}
-                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      <div className="border-t border-white/[0.06] px-4 py-3 text-[10px] leading-5 text-zinc-600">
-        Recursos = valor de plantilla + saldo estimado. Son cifras individuales, no diferencias
-        entre usuarios.
+              {milestone.users.map((user) => (
+                <tr
+                  key={`${milestone.id}-${user.userId}`}
+                  className="border-t border-white/[0.045] text-xs text-zinc-300 transition-colors hover:bg-white/[0.025]"
+                >
+                  <th scope="row" className="px-5 py-3.5 font-black text-zinc-200">
+                    <span
+                      className="mr-2.5 inline-block size-2 rounded-full ring-2 ring-white/[0.06]"
+                      style={{ backgroundColor: user.color }}
+                      aria-hidden="true"
+                    />
+                    {user.name}
+                  </th>
+                  <td className="px-4 py-3.5 text-right tabular-nums text-zinc-400">
+                    {compactMoney.format(user.squadValue)}
+                  </td>
+                  <td className="px-4 py-3.5 text-right tabular-nums text-zinc-400">
+                    {compactMoney.format(user.cash)}
+                  </td>
+                  <td className="bg-sky-400/[0.035] px-4 py-3.5 text-right font-black tabular-nums text-sky-200">
+                    {compactMoney.format(user.totalResources)}
+                  </td>
+                  <td className="px-5 py-3.5 text-right font-bold tabular-nums text-zinc-500">
+                    {integer.format(user.cumulativePoints)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          ))}
+        </table>
       </div>
     </div>
   );
@@ -809,7 +808,7 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
           />
         </div>
 
-        <Card id="autopsia" className="p-5 md:p-7">
+        <Card id="evolucion" className="p-5 md:p-7">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <Eyebrow tone="sky">01 · Evolución real</Eyebrow>
@@ -974,22 +973,63 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <details className="mt-5 rounded-2xl border border-white/[0.06] bg-black/20">
-            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-black text-zinc-300">
-              Tabla accesible de hitos · {historyView === 'all' ? 'todos' : 'comparación'}{' '}
-              <ChevronDown size={15} />
-            </summary>
-            <div className="border-t border-white/[0.06]">
+        </Card>
+
+        <Card id="hitos" className="p-5 md:p-7">
+          <div className="pointer-events-none absolute right-0 top-0 size-72 rounded-full bg-sky-400/[0.055] blur-[110px]" />
+          <div className="relative">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <Eyebrow tone="sky">02 · Hitos comparables</Eyebrow>
+                <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
+                  La temporada, en tres cortes
+                </h2>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">
+                  Una lectura contable del inicio, la mitad y el cierre. La tarjeta sigue el filtro
+                  de usuarios elegido en la gráfica anterior.
+                </p>
+              </div>
+              <div
+                className="flex items-center gap-3 rounded-2xl border border-sky-400/15 bg-sky-400/[0.065] px-4 py-3"
+                aria-live="polite"
+              >
+                <span className="grid size-9 place-items-center rounded-xl border border-sky-400/20 bg-sky-400/10 text-sky-300">
+                  <Clock3 size={16} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-300">
+                    Vista activa
+                  </p>
+                  <p className="mt-1 text-xs font-black text-white">
+                    {historyView === 'all'
+                      ? `${allEvolutionUsers.length} usuarios`
+                      : historicalChart.series.map((user) => user.name).join(' vs. ')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-7">
               <MilestoneTable milestones={evolutionMilestones} />
             </div>
-          </details>
+
+            <div className="mt-4 flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[10px] leading-5 text-zinc-500">
+                <span className="font-black text-zinc-300">Recursos totales</span> = valor de
+                plantilla + saldo estimado.
+              </p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+                Cifras individuales · no son brechas
+              </p>
+            </div>
+          </div>
         </Card>
 
         <div className="grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
-          <Card className="p-5 md:p-6">
+          <Card id="autopsia" className="p-5 md:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <Eyebrow>02 · Autopsia de la brecha</Eyebrow>
+                <Eyebrow>03 · Autopsia de la brecha</Eyebrow>
                 <h2 className="mt-4 text-2xl font-black text-white">Qué la creó y qué la frenó</h2>
               </div>
               <div className="flex rounded-lg border border-white/[0.07] bg-black/25 p-1">
@@ -1026,7 +1066,7 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
           </Card>
 
           <Card className="p-5 md:p-6">
-            <Eyebrow tone="sky">03 · Límite de plantilla</Eyebrow>
+            <Eyebrow tone="sky">04 · Límite de plantilla</Eyebrow>
             <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-black text-white">Cada plaza entre 10 y 25</h2>
@@ -1100,7 +1140,7 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
         <section>
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <Eyebrow>04 · Configuraciones robustas</Eyebrow>
+              <Eyebrow>05 · Configuraciones robustas</Eyebrow>
               <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
                 No gana quien acaba con menor Gini
               </h2>
@@ -1124,7 +1164,7 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
         <Card id="laboratorio" className="p-5 md:p-7">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <Eyebrow tone="sky">05 · Laboratorio de recuperación</Eyebrow>
+              <Eyebrow tone="sky">06 · Laboratorio de recuperación</Eyebrow>
               <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
                 ¿Un error condiciona toda la temporada?
               </h2>
@@ -1245,7 +1285,7 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
         <Card className="p-5 md:p-7">
           <div className="grid gap-7 lg:grid-cols-[.85fr_1.15fr]">
             <div>
-              <Eyebrow>06 · Lectura correcta</Eyebrow>
+              <Eyebrow>07 · Lectura correcta</Eyebrow>
               <h2 className="mt-4 text-2xl font-black text-white">Qué podemos afirmar</h2>
               <div className="mt-5 space-y-3">
                 {[
