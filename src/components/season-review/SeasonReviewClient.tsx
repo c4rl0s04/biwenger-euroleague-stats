@@ -41,11 +41,12 @@ import {
 import { runSeasonReviewScenario } from '@/app/(app)/season-review/actions';
 import {
   buildEvolutionChartModel,
+  buildEvolutionMilestones,
   type EvolutionMetric,
+  type EvolutionMilestone,
 } from '@/lib/season-review/evolution-chart';
 import type {
   GapContribution,
-  PairMoment,
   ResilienceConfig,
   ResilienceRecommendation,
   ResilienceScores,
@@ -246,47 +247,90 @@ function RangeField({
   );
 }
 
-function MomentCard({ title, moment }: { title: string; moment: PairMoment }) {
+const milestoneLabels: Record<EvolutionMilestone['id'], string> = {
+  opening: 'Punto de partida',
+  midpoint: 'Mitad de temporada',
+  closing: 'Cierre',
+};
+
+function MilestoneTable({ milestones }: { milestones: EvolutionMilestone[] }) {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-black/25 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">{title}</p>
-        <span className="text-[10px] font-bold text-zinc-600">{shortDate(moment.day)}</span>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div>
-          <p className="truncate text-xs font-black text-orange-300">{moment.leader.name}</p>
-          <p className="mt-1 text-lg font-black text-white">
-            {compactMoney.format(moment.leader.squadValue)}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="truncate text-xs font-black text-sky-300">{moment.laggard.name}</p>
-          <p className="mt-1 text-lg font-black text-white">
-            {compactMoney.format(moment.laggard.squadValue)}
-          </p>
-        </div>
-      </div>
-      <div className="mt-4 h-px bg-white/[0.06]" />
-      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-        <div>
-          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Recursos</p>
-          <p className="mt-1 text-xs font-black text-zinc-200">
-            {compactMoney.format(moment.resourceGap)}
-          </p>
-        </div>
-        <div>
-          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Plantilla</p>
-          <p className="mt-1 text-xs font-black text-zinc-200">
-            {compactMoney.format(moment.squadGap)}
-          </p>
-        </div>
-        <div>
-          <p className="text-[8px] uppercase tracking-widest text-zinc-600">Puntos</p>
-          <p className="mt-1 text-xs font-black text-zinc-200">
-            {integer.format(moment.pointsGap)}
-          </p>
-        </div>
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[720px] border-collapse text-left">
+        <caption className="sr-only">
+          Plantilla, saldo, recursos totales y puntos de los usuarios visibles en cada hito
+        </caption>
+        <thead>
+          <tr className="border-b border-white/[0.08] text-[9px] font-black uppercase tracking-[0.18em] text-zinc-600">
+            <th scope="col" className="px-4 py-3">
+              Hito
+            </th>
+            <th scope="col" className="px-4 py-3">
+              Usuario
+            </th>
+            <th scope="col" className="px-4 py-3 text-right">
+              Plantilla
+            </th>
+            <th scope="col" className="px-4 py-3 text-right">
+              Saldo
+            </th>
+            <th scope="col" className="px-4 py-3 text-right text-sky-400">
+              Recursos
+            </th>
+            <th scope="col" className="px-4 py-3 text-right">
+              Puntos
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {milestones.flatMap((milestone) =>
+            milestone.users.map((user, userIndex) => (
+              <tr
+                key={`${milestone.id}-${user.userId}`}
+                className="border-b border-white/[0.05] text-xs text-zinc-300 last:border-0"
+              >
+                {userIndex === 0 ? (
+                  <th
+                    scope="rowgroup"
+                    rowSpan={milestone.users.length}
+                    className="w-40 border-r border-white/[0.05] px-4 py-3 align-top"
+                  >
+                    <span className="block font-black text-white">
+                      {milestoneLabels[milestone.id]}
+                    </span>
+                    <span className="mt-1 block text-[10px] font-bold text-zinc-600">
+                      {shortDate(milestone.day)}
+                    </span>
+                  </th>
+                ) : null}
+                <th scope="row" className="px-4 py-3 font-black text-zinc-200">
+                  <span
+                    className="mr-2 inline-block size-2 rounded-full"
+                    style={{ backgroundColor: user.color }}
+                    aria-hidden="true"
+                  />
+                  {user.name}
+                </th>
+                <td className="px-4 py-3 text-right tabular-nums">
+                  {compactMoney.format(user.squadValue)}
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums">
+                  {compactMoney.format(user.cash)}
+                </td>
+                <td className="px-4 py-3 text-right font-black tabular-nums text-sky-300">
+                  {compactMoney.format(user.totalResources)}
+                </td>
+                <td className="px-4 py-3 text-right font-bold tabular-nums text-zinc-400">
+                  {integer.format(user.cumulativePoints)}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+      <div className="border-t border-white/[0.06] px-4 py-3 text-[10px] leading-5 text-zinc-600">
+        Recursos = valor de plantilla + saldo estimado. Son cifras individuales, no diferencias
+        entre usuarios.
       </div>
     </div>
   );
@@ -593,6 +637,15 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
       data: model.data.map((point) => ({ ...point, label: shortDate(point.day) })),
     };
   }, [comparisonUsers, historyMetric, historyView, overview.timeline]);
+  const evolutionMilestones = useMemo(
+    () =>
+      buildEvolutionMilestones(
+        overview.timeline,
+        overview.autopsy.midpoint.day,
+        historyView === 'comparison' ? comparisonUsers : undefined
+      ),
+    [comparisonUsers, historyView, overview.autopsy.midpoint.day, overview.timeline]
+  );
 
   const selectedCap =
     overview.capDiagnostics.find((item) => item.cap === config.rosterCap) ||
@@ -923,12 +976,11 @@ export default function SeasonReviewClient({ overview }: { overview: SeasonRevie
           </div>
           <details className="mt-5 rounded-2xl border border-white/[0.06] bg-black/20">
             <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-black text-zinc-300">
-              Tabla accesible de hitos <ChevronDown size={15} />
+              Tabla accesible de hitos · {historyView === 'all' ? 'todos' : 'comparación'}{' '}
+              <ChevronDown size={15} />
             </summary>
-            <div className="grid gap-3 border-t border-white/[0.06] p-4 md:grid-cols-3">
-              <MomentCard title="Punto de partida" moment={overview.autopsy.opening} />
-              <MomentCard title="Mitad de temporada" moment={overview.autopsy.midpoint} />
-              <MomentCard title="Cierre" moment={overview.autopsy.closing} />
+            <div className="border-t border-white/[0.06]">
+              <MilestoneTable milestones={evolutionMilestones} />
             </div>
           </details>
         </Card>
