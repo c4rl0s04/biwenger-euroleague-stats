@@ -1,6 +1,6 @@
 ---
 title: Season review
-description: Read-only 2025/26 league economy analysis and counterfactual rules simulator.
+description: Read-only 2025/26 inequality autopsy and recovery stress-test simulator.
 audience:
   - user
   - contributor
@@ -10,29 +10,35 @@ status: active
 
 # Season review
 
-`/season-review` is a temporary authenticated workspace for comparing league rules against the
-frozen `2025-26` season. It does not update Biwenger settings or write analysis results to the
-database.
+`/season-review` is a temporary authenticated workspace for measuring how quickly inequality
+appeared after every manager started with exactly €40 million between cash and a random squad. It
+does not update Biwenger settings or write analysis results to the database.
 
 ## Behavior
 
-The page combines the historical diagnosis with an interactive simulator for squad size, round
-bonuses, placement bonuses, ideal-lineup and MVP bonuses, automatic market supply, squad-value
-limits, and prize-budget normalization. It publishes separate recommendations for equality,
-competitive balance, and merit rather than presenting one scoring philosophy as objectively best.
+The page reconstructs a daily economic ledger, separates cash from productive squad value, and
+decomposes the gap between the final leader and laggard into initial-player returns, market returns,
+and round bonuses. The simulator then applies the same bad-signing, bad-streak, injury, and
+inactivity shocks to valid Biwenger configurations.
 
-Finance events are deduplicated before aggregation. The simulator holds the estimated prediction
-pool component constant and labels total resources as an estimate because historical cash balances
-and salaries are not available. Market, roster, and squad-value constraints are shown as compliance
-pressure rather than deterministic alternative history.
+Squad limits cover every integer from 10 to 25, automatic market supply is capped at 20, and round
+bonuses can be direct or inverse only. Recovery is reported separately for economic resources and
+competitive squad capacity. Recommendations cover maximum resilience, competitive balance, and
+merit.
+
+Finance events are deduplicated before aggregation. Cash and total resources remain estimates
+because historical balance snapshots and salaries are not available. Complete free-agent snapshots
+start in March; earlier market opportunity analysis uses completed transfers and their recorded
+bids. Counterfactual outputs are stress tests rather than claims about decisions users would
+definitely have made.
 
 ## Internal flow
 
 - The page entry authenticates and loads a cached server-side overview.
-- [`seasonReviewService.ts`](../../src/lib/services/features/seasonReviewService.ts) normalizes the
-  frozen data and coordinates recommendations.
-- [`engine.ts`](../../src/lib/season-review/engine.ts) contains deterministic scoring and simulation
-  logic.
+- [`seasonResilienceService.ts`](../../src/lib/services/features/seasonResilienceService.ts)
+  normalizes the frozen data, builds the historical autopsy, and coordinates recommendations.
+- [`resilience.ts`](../../src/lib/season-review/resilience.ts) contains the pure daily-ledger,
+  payout, roster-pressure, and recovery simulation logic.
 - A validated authenticated server action recalculates custom scenarios after the controls settle.
 
 The feature adds no schema objects, migrations, or database mutations.

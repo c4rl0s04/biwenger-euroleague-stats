@@ -26,7 +26,7 @@ behavior to its page entries, internal APIs, services, data access, and tests.
 - [Assistant](assistant.md) — conversational analytics over local league context.
 - [Hoopgrid](hoopgrid.md) — daily trivia, rarity, and internal inspection views.
 - [Accounts and settings](accounts-and-settings.md) — login, manager profiles, and preferences.
-- [Season review](season-review.md) — frozen-season economy diagnosis and rules simulator.
+- [Season review](season-review.md) — frozen-season inequality autopsy and recovery simulator.
 
 ## Page inventory
 
