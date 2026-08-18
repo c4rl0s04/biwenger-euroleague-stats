@@ -5,22 +5,30 @@ import { InfoTooltip } from '@/components/ui/Tooltip';
 
 /**
  * ElegantCard - Minimal, clean card design
- * - Dark solid background
- * - Left border accent in primary color
- * - Simple border on other sides
- * - Subtle border color change on hover
- * - Added `info` prop for tooltips
+ * @param {Object} props
+ * @param {React.ReactNode} [props.children]
+ * @param {string} [props.title]
+ * @param {any} [props.icon]
+ * @param {string} [props.color='primary']
+ * @param {string} [props.bgColor]
+ * @param {boolean} [props.loading=false]
+ * @param {string} [props.className='']
+ * @param {React.ReactNode} [props.actionRight]
+ * @param {string} [props.info]
+ * @param {boolean} [props.hideHeader=false]
+ * @param {string} [props.padding='p-6']
+ * @param {string} [props.id]
  */
 export default function ElegantCard({
   children,
   title,
   icon,
   color = 'primary',
-  bgColor = null, // New prop for background tinting
+  bgColor,
   loading = false,
   className = '',
-  actionRight = null,
-  info = null,
+  actionRight,
+  info,
   hideHeader = false,
   padding = 'p-6',
   ...rest
