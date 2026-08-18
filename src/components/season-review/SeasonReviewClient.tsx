@@ -511,7 +511,7 @@ export default function SeasonReviewClient({
                     padding="p-5"
                   >
                     <div className="space-y-3">
-                      {profile.entries.slice(0, 3).map((entry, idx) => {
+                      {profile.entries.slice(0, 5).map((entry, idx) => {
                         const isSelected = selectedConfigId === entry.configId;
                         return (
                           <div
@@ -622,6 +622,86 @@ export default function SeasonReviewClient({
                 </p>
               </div>
             </div>
+
+            {/* Narrative section */}
+            <div className="mt-8 rounded-2xl border border-white/[0.06] bg-sky-950/20 p-5 md:p-6">
+              <h4 className="text-[11px] font-black uppercase tracking-widest text-sky-400">
+                Interpretación Práctica
+              </h4>
+              <p className="mt-3 text-sm leading-7 text-zinc-300">
+                En base a las{' '}
+                <strong>
+                  {integer.format(selectedConfigData.sampleSize)} temporadas simuladas
+                </strong>{' '}
+                bajo estas reglas, observamos que si un mánager sufre una crisis o comete un error
+                grave, tiene un{' '}
+                <strong>
+                  {percent(selectedConfigData.probabilities.absoluteRecovery.value)} de probabilidad
+                  de recuperarse
+                </strong>{' '}
+                y volver a ser competitivo. El riesgo de que la liga se bloquee irremediablemente
+                (quedando el último clasificado sin opciones matemáticas o económicas) es de solo el{' '}
+                <strong>{percent(selectedConfigData.probabilities.lockIn.value)}</strong>.
+              </p>
+
+              {selectedConfigData.probabilities.targetWinsTitle.value > 0.05 && (
+                <p className="mt-2 text-sm leading-7 text-zinc-300">
+                  Destaca además que, incluso sufriendo el mayor de los contratiempos iniciales, en
+                  un{' '}
+                  <strong>
+                    {percent(selectedConfigData.probabilities.targetWinsTitle.value)} de los casos
+                    ese mánager logró sobreponerse y ganar la liga
+                  </strong>
+                  , demostrando que esta configuración premia enormemente el mérito y la buena
+                  gestión a largo plazo.
+                </p>
+              )}
+            </div>
+
+            {/* Scenarios Breakdown */}
+            {selectedConfigData.scenarios &&
+              Object.keys(selectedConfigData.scenarios).length > 0 && (
+                <div className="mt-8">
+                  <h4 className="mb-4 text-[11px] font-black uppercase tracking-widest text-zinc-500">
+                    Tasa de fracaso (bloqueo) según el tipo de crisis
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    {Object.entries(selectedConfigData.scenarios).map(
+                      ([kind, scenario]: [string, any]) => {
+                        const shockLabels: Record<string, string> = {
+                          'bad-transfer': 'Fichaje ruinoso',
+                          'bad-streak': 'Mala racha',
+                          'star-injury': 'Lesión de estrella',
+                          inactivity: 'Inactividad temporal',
+                        };
+                        const label = shockLabels[kind] || kind;
+                        const nonRecovery = 1 - scenario.absoluteRecovery.value;
+                        const severityColor =
+                          nonRecovery > 0.4
+                            ? 'text-red-400'
+                            : nonRecovery > 0.2
+                              ? 'text-orange-400'
+                              : 'text-emerald-400';
+
+                        return (
+                          <div
+                            key={kind}
+                            className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-4 text-center transition-colors hover:bg-white/[0.04]"
+                          >
+                            <p className="text-[10px] font-bold text-zinc-400">{label}</p>
+                            <p className={`mt-2 text-2xl font-black ${severityColor}`}>
+                              {percent(nonRecovery)}
+                            </p>
+                            <p className="mt-1 text-[9px] text-zinc-600 uppercase tracking-widest">
+                              imposible recuperar
+                            </p>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+              )}
 
             <div className="mt-8 grid gap-8 lg:grid-cols-2">
               <div>
