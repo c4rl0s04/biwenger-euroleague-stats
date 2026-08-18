@@ -27,15 +27,23 @@ bonuses can be direct or inverse only. Recovery is reported separately for econo
 competitive squad capacity. Recommendations cover maximum resilience, competitive balance, and
 merit.
 
-Interactive custom scenarios use a small paired sample and expose its 95% interval. The manual
-GitHub workflow runs 250–2,000 seasons per configuration and publishes the aggregate JSON consumed
-by the page. Historical and alternative rules reuse identical seeds so rule effects are not mixed
-with different random seasons.
+The analysis backend evaluates all 1,920 combinations of squad limit, daily market size, bonus
+direction, and bonus amount. It uses a staged paired design: each shocked season has an otherwise
+identical no-shock twin, and every configuration reuses the same exogenous seed manifest. Screening,
+refinement, and final stages prevent clearly dominated configurations from consuming final-sample
+compute.
+
+Agents use only information observed before each decision. Player performance and price paths are
+resampled in shared round blocks to preserve league-level relationships; agent archetypes receive
+continuous per-season variation. The engine also models historical lineup-position composition,
+background unavailability, voluntary sales, market exposure, bids, and forced roster releases.
 
 The laboratory also shows calibration against the observed number of transfers and the closing
-resource and squad Gini. Recommendation cards are labelled as a structural preselection until the
-offline artifact is ready; after publication they are selected and scored from full-season results
-covering the four supported shocks.
+resource and squad Gini. The current page remains on the interactive v3 presentation until the
+separate frontend phase consumes
+[`season-simulation-analysis.json`](../../src/data/season-simulation-analysis.json). That v4 artifact
+already exposes rankings, Pareto membership, intervals, percentiles, histograms, and breakdowns by
+shock, severity, and season phase.
 
 Finance events are deduplicated before aggregation. Cash and total resources remain estimates
 because historical balance snapshots and salaries are not available. Complete free-agent snapshots
@@ -54,6 +62,8 @@ definitely have made.
   simulation and paired Monte Carlo aggregation.
 - [`simulation-dataset.ts`](../../src/lib/season-review/simulation-dataset.ts) aligns historical
   player points and prices to simulation rounds.
+- [`simulation-analysis.ts`](../../src/lib/season-review/simulation-analysis.ts) defines the complete
+  grid, paired experiments, statistical aggregation, Pareto frontier, and public ranking profiles.
 - A validated authenticated server action recalculates custom scenarios after the controls settle.
 
 See the [season simulation runbook](../operations/season-simulations.md) for offline execution and
