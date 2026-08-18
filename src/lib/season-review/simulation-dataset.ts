@@ -148,10 +148,32 @@ export function buildSeasonSimulationDataset(
     );
 
   const lineupCounts = new Map<string, number>();
+  const lineupPositions = new Map<string, Map<string, number>>();
   source.lineups.forEach((row) => {
     const key = `${row.user_id}:${row.round_id}`;
     lineupCounts.set(key, (lineupCounts.get(key) || 0) + 1);
+    const position = positions.get(Number(row.player_id));
+    if (!position) return;
+    const counts = lineupPositions.get(key) || new Map<string, number>();
+    counts.set(position, (counts.get(position) || 0) + 1);
+    lineupPositions.set(key, counts);
   });
+  const positionNames = new Set(
+    Array.from(lineupPositions.values()).flatMap((counts) => Array.from(counts.keys()))
+  );
+  const lineupPositionTargets = Object.fromEntries(
+    Array.from(positionNames)
+      .sort()
+      .map((position) => [
+        position,
+        median(
+          Array.from(lineupCounts.keys()).map(
+            (lineupKey) => lineupPositions.get(lineupKey)?.get(position) || 0
+          )
+        ),
+      ])
+      .filter(([, count]) => Number(count) > 0)
+  );
   const userCount = Math.max(1, source.users.length);
 
   return {
@@ -159,6 +181,7 @@ export function buildSeasonSimulationDataset(
     userCount,
     initialRosterSize: Math.max(1, Math.round(source.initialSquads.length / userCount)),
     lineupSize: Math.max(1, median(Array.from(lineupCounts.values())) || 10),
+    lineupPositionTargets,
     marketDaysPerRound: 5,
     rounds,
     players,

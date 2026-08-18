@@ -11,6 +11,7 @@ const dataset: SeasonSimulationDataset = {
   userCount: 3,
   initialRosterSize: 2,
   lineupSize: 2,
+  lineupPositionTargets: { base: 1, pivot: 1 },
   marketDaysPerRound: 2,
   rounds: [1, 2, 3, 4],
   players: Array.from({ length: 12 }, (_, index) => ({
@@ -45,6 +46,11 @@ describe('complete season simulator', () => {
     ]);
     expect(first.timeline).toHaveLength(5);
     expect(first.timeline.at(-1)?.users.every((user) => user.rosterSize <= 3)).toBe(true);
+    first.timeline.forEach((point) => {
+      expect(point.users.every((user) => user.cash >= 0)).toBe(true);
+      const ownership = point.users.flatMap((user) => user.rosterPlayerIds);
+      expect(new Set(ownership).size).toBe(ownership.length);
+    });
     expect(first.transactions.length).toBeGreaterThan(0);
     expect(first.timeline.at(-1)?.users.some((user) => user.points > 0)).toBe(true);
   });
@@ -126,5 +132,37 @@ describe('complete season simulator', () => {
           transaction.round === 2 && transaction.userId === outcome.recovery.targetUserId
       )
     ).toBe(true);
+  });
+
+  it('does not use current or future performance when making first-round market decisions', () => {
+    const request = {
+      config: {
+        rosterCap: 3,
+        payoutDirection: 'inverse' as const,
+        eurosPerPoint: 10_000,
+        marketSlots: 8,
+      },
+      shock: { kind: 'bad-streak' as const, severity: 'medium' as const, appliedRound: 3 },
+      seed: 42,
+    };
+    const alteredDataset: SeasonSimulationDataset = {
+      ...dataset,
+      players: dataset.players.map((player, index) => ({
+        ...player,
+        roundPoints: player.roundPoints.map((value) => value + 500 + index * 100),
+        priceChanges: player.priceChanges.map(() => (index % 2 ? 0.3 : -0.3)),
+      })),
+    };
+
+    const originalRound = simulateSeason({ ...request, dataset }).transactions.filter(
+      (transaction) => transaction.round === 1
+    );
+    const alteredRound = simulateSeason({
+      ...request,
+      dataset: alteredDataset,
+    }).transactions.filter((transaction) => transaction.round === 1);
+
+    expect(originalRound.length).toBeGreaterThan(0);
+    expect(alteredRound).toEqual(originalRound);
   });
 });

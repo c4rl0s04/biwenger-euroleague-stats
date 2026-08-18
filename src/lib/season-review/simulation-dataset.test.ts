@@ -38,6 +38,7 @@ describe('historical simulation dataset', () => {
     expect(dataset.rounds).toEqual([1, 2]);
     expect(dataset.userCount).toBe(2);
     expect(dataset.lineupSize).toBe(2);
+    expect(dataset.lineupPositionTargets).toEqual({ base: 1, pivot: 1 });
     expect(dataset.players.find((player) => player.id === '1')).toMatchObject({
       initialPrice: 1_000_000,
       roundPoints: [20, 30],

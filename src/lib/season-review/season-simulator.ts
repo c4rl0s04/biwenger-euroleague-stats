@@ -36,7 +36,9 @@ interface SimulatedPlayerState {
   definition: SeasonSimulationPlayer;
   price: number;
   ownerId: string | null;
-  trajectoryOffset: number;
+  trajectory: number[];
+  observedPoints: number[];
+  observedPriceChanges: number[];
 }
 
 const AGENT_PROFILES: AgentProfile[] = [
@@ -146,15 +148,24 @@ function deterministicUnit(seed: number, ...parts: Array<string | number>) {
 }
 
 function sourceRound(player: SimulatedPlayerState, roundIndex: number, totalRounds: number) {
-  return (roundIndex + player.trajectoryOffset) % Math.max(1, totalRounds);
+  return player.trajectory[roundIndex] ?? roundIndex % Math.max(1, totalRounds);
 }
 
-function projectedPoints(player: SimulatedPlayerState, roundIndex: number, totalRounds: number) {
-  const values = Array.from({ length: Math.min(3, totalRounds) }, (_, offset) => {
-    const index = sourceRound(player, roundIndex + offset, totalRounds);
-    return player.definition.roundPoints[index] || 0;
-  });
-  return average(values);
+function buildJointTrajectory(seed: number, totalRounds: number, blockSize = 3) {
+  const trajectory: number[] = [];
+  let block = 0;
+  while (trajectory.length < totalRounds) {
+    const start = Math.floor(deterministicUnit(seed, 'trajectory-block', block) * totalRounds);
+    for (let offset = 0; offset < blockSize && trajectory.length < totalRounds; offset += 1)
+      trajectory.push((start + offset) % totalRounds);
+    block += 1;
+  }
+  return trajectory;
+}
+
+function projectedPoints(player: SimulatedPlayerState, _roundIndex: number, _totalRounds: number) {
+  if (player.observedPoints.length) return average(player.observedPoints.slice(-3));
+  return Math.max(2, Math.log1p(player.price / 100_000) * 3);
 }
 
 function playerUtility(
@@ -165,8 +176,9 @@ function playerUtility(
   noise: number
 ) {
   const points = projectedPoints(player, roundIndex, totalRounds);
-  const priceChange =
-    player.definition.priceChanges[sourceRound(player, roundIndex, totalRounds)] || 0;
+  const priceChange = player.observedPriceChanges.length
+    ? average(player.observedPriceChanges.slice(-3))
+    : 0;
   const priceMillions = Math.max(0.15, player.price / 1_000_000);
   return (
     (points / priceMillions) * profile.pointsFocus +
@@ -203,8 +215,16 @@ function snapshot(
         ? average(user.roundScores.slice(-3))
         : potential,
       rosterSize: user.roster.size,
+      rosterPlayerIds: Array.from(user.roster).sort(),
       points: user.points,
       bonuses: user.bonuses,
+      decisionQuality: clamp(
+        user.profile.lineupAccuracy * 0.55 +
+          (1 - user.profile.decisionNoise) * 0.25 +
+          ((user.profile.pointsFocus + user.profile.valueFocus) / 2) * 0.2,
+        0,
+        1
+      ),
     };
   });
   const leaderPoints = Math.max(0, ...rows.map((row) => row.points));
@@ -256,8 +276,34 @@ function isShockActive(roundNumber: number, appliedRound: number, duration: numb
   return roundNumber >= appliedRound && roundNumber < appliedRound + duration;
 }
 
+function positionAwareLineup(
+  ranked: Array<{ player: SimulatedPlayerState; perceived: number }>,
+  lineupSize: number,
+  positionTargets: Record<string, number>
+) {
+  const selected: SimulatedPlayerState[] = [];
+  const selectedIds = new Set<string>();
+  Object.entries(positionTargets).forEach(([position, target]) => {
+    ranked
+      .filter(({ player }) => player.definition.position === position)
+      .slice(0, Math.max(0, target))
+      .forEach(({ player }) => {
+        if (selected.length >= lineupSize || selectedIds.has(player.definition.id)) return;
+        selected.push(player);
+        selectedIds.add(player.definition.id);
+      });
+  });
+  ranked.forEach(({ player }) => {
+    if (selected.length >= lineupSize || selectedIds.has(player.definition.id)) return;
+    selected.push(player);
+    selectedIds.add(player.definition.id);
+  });
+  return selected;
+}
+
 export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulationOutcome {
   const { dataset, config, shock, seed } = request;
+  const shockEnabled = request.shockEnabled !== false;
   if (dataset.userCount < 2) throw new Error('A season simulation needs at least two users');
   if (!dataset.rounds.length || !dataset.players.length)
     throw new Error('A season simulation needs rounds and players');
@@ -269,9 +315,22 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
     (left, right) =>
       deterministicUnit(seed, 'profile', left.id) - deterministicUnit(seed, 'profile', right.id)
   );
+  const sampledProfiles = profiles.map((profile, index) => {
+    const jitter = (field: keyof AgentProfile, scale: number) =>
+      (deterministicUnit(seed, 'profile-trait', index, field) - 0.5) * scale;
+    return {
+      ...profile,
+      marketActivity: clamp(profile.marketActivity + jitter('marketActivity', 0.18), 0.2, 1),
+      bidAggression: clamp(profile.bidAggression + jitter('bidAggression', 0.2), 0.1, 1),
+      pointsFocus: clamp(profile.pointsFocus + jitter('pointsFocus', 0.16), 0.1, 1),
+      valueFocus: clamp(profile.valueFocus + jitter('valueFocus', 0.16), 0.1, 1),
+      decisionNoise: clamp(profile.decisionNoise + jitter('decisionNoise', 0.12), 0.04, 0.6),
+      lineupAccuracy: clamp(profile.lineupAccuracy + jitter('lineupAccuracy', 0.1), 0.6, 0.98),
+    };
+  });
   const users: SimulatedUserState[] = Array.from({ length: dataset.userCount }, (_, index) => ({
     id: `user-${index + 1}`,
-    profile: profiles[index],
+    profile: sampledProfiles[index],
     cash: dataset.startingBudget,
     roster: new Set<string>(),
     points: 0,
@@ -279,6 +338,7 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
     lastLineup: [],
     roundScores: [],
   }));
+  const jointTrajectory = buildJointTrajectory(seed, dataset.rounds.length);
   const players = new Map<string, SimulatedPlayerState>(
     dataset.players.map((definition) => [
       definition.id,
@@ -286,9 +346,9 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
         definition,
         price: Math.max(100_000, definition.initialPrice),
         ownerId: null,
-        trajectoryOffset: Math.floor(
-          deterministicUnit(seed, 'trajectory', definition.id) * dataset.rounds.length
-        ),
+        trajectory: jointTrajectory,
+        observedPoints: [],
+        observedPriceChanges: [],
       },
     ])
   );
@@ -324,6 +384,7 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
       user.roster.add(player.definition.id);
       player.ownerId = user.id;
     });
+  let openingForcedReleases = 0;
   users.forEach((user) => {
     const squadValue = Array.from(user.roster).reduce(
       (sum, id) => sum + (players.get(id)?.price || 0),
@@ -336,6 +397,7 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
       user.roster.delete(released.definition.id);
       released.ownerId = null;
       user.cash += released.price;
+      openingForcedReleases += 1;
     }
   });
 
@@ -345,6 +407,7 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
   const duration = shockDuration(shock.kind, multiplier);
   const timeline = [snapshot(dataset, 0, 0, users, players)];
   const transactions: SimulatedTransaction[] = [];
+  const marketListings: SeasonSimulationOutcome['marketListings'] = [];
   const marketOrder = Array.from(players.keys()).sort(
     (left, right) =>
       deterministicUnit(seed, 'market-order', left) - deterministicUnit(seed, 'market-order', right)
@@ -354,6 +417,30 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
   dataset.rounds.forEach((_roundId, roundIndex) => {
     const roundNumber = roundIndex + 1;
     for (let marketDay = 0; marketDay < dataset.marketDaysPerRound; marketDay += 1) {
+      users.forEach((user) => {
+        if (user.roster.size <= dataset.lineupSize + 1) return;
+        const liquidityPressure = user.cash < 2_000_000 ? 0.025 : 0.004;
+        if (
+          deterministicUnit(seed, 'voluntary-sale', roundNumber, marketDay, user.id) >=
+          liquidityPressure
+        )
+          return;
+        const released = worstRosterPlayer(user, players, roundIndex, dataset.rounds.length, seed);
+        if (!released) return;
+        const saleAmount = Math.round(released.price * 0.97);
+        user.roster.delete(released.definition.id);
+        released.ownerId = null;
+        user.cash += saleAmount;
+        transactions.push({
+          round: roundNumber,
+          marketDay,
+          type: 'sell',
+          userId: user.id,
+          playerId: released.definition.id,
+          amount: saleAmount,
+          marketValue: released.price,
+        });
+      });
       const candidates: SimulatedPlayerState[] = [];
       const startIndex = Math.floor(
         deterministicUnit(seed, 'market-start', roundNumber, marketDay) * marketOrder.length
@@ -375,11 +462,13 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
         }> = [];
         users.forEach((user) => {
           const inactive =
+            shockEnabled &&
             user.id === targetUser.id &&
             shock.kind === 'inactivity' &&
             isShockActive(roundNumber, shock.appliedRound, duration);
           if (inactive) return;
           const forcedBadTransfer =
+            shockEnabled &&
             !badTransferApplied &&
             user.id === targetUser.id &&
             shock.kind === 'bad-transfer' &&
@@ -454,6 +543,13 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
         const winner = bids.sort(
           (left, right) => right.amount - left.amount || left.user.id.localeCompare(right.user.id)
         )[0];
+        marketListings.push({
+          round: roundNumber,
+          marketDay,
+          playerId: candidate.definition.id,
+          bidCount: bids.length,
+          sold: Boolean(winner),
+        });
         if (!winner) return;
         if (winner.replacement) {
           winner.user.roster.delete(winner.replacement.definition.id);
@@ -483,6 +579,7 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
           marketValue: candidate.price,
         });
         if (
+          shockEnabled &&
           winner.user.id === targetUser.id &&
           shock.kind === 'bad-transfer' &&
           roundNumber === shock.appliedRound
@@ -492,7 +589,11 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
     }
 
     let injuredPlayerId: string | null = null;
-    if (shock.kind === 'star-injury' && isShockActive(roundNumber, shock.appliedRound, duration)) {
+    if (
+      shockEnabled &&
+      shock.kind === 'star-injury' &&
+      isShockActive(roundNumber, shock.appliedRound, duration)
+    ) {
       injuredPlayerId = Array.from(targetUser.roster)
         .map((id) => players.get(id))
         .filter((player): player is SimulatedPlayerState => Boolean(player))
@@ -509,6 +610,7 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
 
     const roundScores = users.map((user) => {
       const inactive =
+        shockEnabled &&
         user.id === targetUser.id &&
         shock.kind === 'inactivity' &&
         isShockActive(roundNumber, shock.appliedRound, duration);
@@ -516,7 +618,12 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
         .map((id) => players.get(id))
         .filter((player): player is SimulatedPlayerState => Boolean(player));
       const ranked = roster
-        .filter((player) => player.definition.id !== injuredPlayerId)
+        .filter(
+          (player) =>
+            player.definition.id !== injuredPlayerId &&
+            deterministicUnit(seed, 'background-availability', roundNumber, player.definition.id) >=
+              0.02
+        )
         .map((player) => ({
           player,
           perceived:
@@ -532,19 +639,21 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
           ? user.lastLineup
               .map((id) => players.get(id))
               .filter((player): player is SimulatedPlayerState => Boolean(player))
-          : ranked.slice(0, dataset.lineupSize).map(({ player }) => player);
+          : positionAwareLineup(ranked, dataset.lineupSize, dataset.lineupPositionTargets);
       user.lastLineup = lineup.map((player) => player.definition.id);
       let points = lineup.reduce((sum, player) => {
         const index = sourceRound(player, roundIndex, dataset.rounds.length);
         return sum + (player.definition.roundPoints[index] || 0);
       }, 0);
       if (
+        shockEnabled &&
         user.id === targetUser.id &&
         shock.kind === 'bad-streak' &&
         isShockActive(roundNumber, shock.appliedRound, duration)
       )
         points *= clamp(1 - 0.38 * multiplier, 0.3, 0.8);
       if (
+        shockEnabled &&
         user.id === targetUser.id &&
         shock.kind === 'inactivity' &&
         isShockActive(roundNumber, shock.appliedRound, duration)
@@ -572,13 +681,10 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
       const observedChange = player.definition.priceChanges[index] || 0;
       const commonNoise =
         (deterministicUnit(seed, 'price', roundNumber, player.definition.id) - 0.5) * 0.025;
-      player.price = Math.round(
-        clamp(
-          player.price * (1 + clamp(observedChange + commonNoise, -0.3, 0.3)),
-          100_000,
-          40_000_000
-        )
-      );
+      const simulatedChange = clamp(observedChange + commonNoise, -0.3, 0.3);
+      player.observedPoints.push(player.definition.roundPoints[index] || 0);
+      player.observedPriceChanges.push(simulatedChange);
+      player.price = Math.round(clamp(player.price * (1 + simulatedChange), 100_000, 40_000_000));
     });
     timeline.push(snapshot(dataset, roundNumber, roundIndex, users, players));
   });
@@ -628,6 +734,9 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
     shock,
     timeline,
     transactions,
+    marketListings,
+    catalogSize: players.size,
+    openingForcedReleases,
     recovery: {
       targetUserId: targetUser.id,
       economicRecovered,

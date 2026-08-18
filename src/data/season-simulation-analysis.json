@@ -1,0 +1,15 @@
+{
+  "version": 4,
+  "kind": "analysis",
+  "status": "pending",
+  "modelVersion": "agent-season-v4",
+  "stage": null,
+  "generatedAt": null,
+  "dataset": null,
+  "pairCount": 0,
+  "configurationCount": 0,
+  "configurations": [],
+  "ranking": null,
+  "shortlistConfigIds": [],
+  "calibration": null
+}
