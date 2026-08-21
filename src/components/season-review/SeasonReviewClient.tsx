@@ -514,7 +514,7 @@ export default function SeasonReviewClient({
                     title={profile.label}
                     icon={Icon}
                     color="primary"
-                    padding="p-0 overflow-hidden"
+                    padding="p-5"
                   >
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[700px] text-left text-sm text-zinc-300">
