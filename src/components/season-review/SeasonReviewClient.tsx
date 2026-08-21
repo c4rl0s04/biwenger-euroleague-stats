@@ -66,6 +66,12 @@ const giniNumber = new Intl.NumberFormat('es-ES', {
 });
 const percent = (value: number) => `${number.format(value * 100)}%`;
 
+function getScoreColor(score: number) {
+  if (score >= 75) return 'text-emerald-400';
+  if (score >= 40) return 'text-orange-400';
+  return 'text-red-400';
+}
+
 function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
 }
@@ -499,7 +505,7 @@ export default function SeasonReviewClient({
               </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="space-y-8">
               {simulationAnalysis.ranking.profiles.map((profile) => {
                 const Icon = profileIcons[profile.profileId] || Medal;
                 return (
@@ -508,45 +514,73 @@ export default function SeasonReviewClient({
                     title={profile.label}
                     icon={Icon}
                     color="primary"
-                    padding="p-5"
+                    padding="p-0 overflow-hidden"
                   >
-                    <div className="space-y-3">
-                      {profile.entries.slice(0, 5).map((entry, idx) => {
-                        const isSelected = selectedConfigId === entry.configId;
-                        return (
-                          <div
-                            key={entry.configId}
-                            onClick={() => setSelectedConfigId(entry.configId)}
-                            className={cx(
-                              'cursor-pointer rounded-xl border p-3 transition-all duration-300 hover:scale-[1.02]',
-                              isSelected
-                                ? 'border-orange-500/50 bg-orange-500/10'
-                                : 'border-white/[0.06] bg-black/20 hover:border-white/[0.15]'
-                            )}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-black text-white">
-                                {idx + 1}. Puntuación: {number.format(entry.score)}
-                              </span>
-                              {entry.isParetoOptimal && (
-                                <span className="rounded bg-sky-400/20 px-1.5 py-0.5 text-[9px] font-black text-sky-300">
-                                  PARETO
-                                </span>
-                              )}
-                            </div>
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {configSummary(entry.config).map((item) => (
-                                <span
-                                  key={item}
-                                  className="rounded border border-white/[0.07] bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-bold text-zinc-400"
-                                >
-                                  {item}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[700px] text-left text-sm text-zinc-300">
+                        <thead className="border-b border-white/[0.05] bg-black/40 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500">
+                          <tr>
+                            <th className="px-5 py-4 w-12 text-center">#</th>
+                            <th className="px-4 py-4">Configuración</th>
+                            <th className="px-4 py-4 text-center">Nota Global</th>
+                            <th className="px-4 py-4 text-center">Igualdad</th>
+                            <th className="px-4 py-4 text-center">Competit.</th>
+                            <th className="px-4 py-4 text-center">Resiliencia</th>
+                            <th className="px-4 py-4 text-center">Mérito</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/[0.02]">
+                          {profile.entries.slice(0, 5).map((entry, idx) => {
+                            const isSelected = selectedConfigId === entry.configId;
+                            return (
+                              <tr
+                                key={entry.configId}
+                                onClick={() => setSelectedConfigId(entry.configId)}
+                                className={cx(
+                                  'cursor-pointer transition-colors hover:bg-white/[0.02]',
+                                  isSelected ? 'bg-orange-500/10' : ''
+                                )}
+                              >
+                                <td className="px-5 py-4 text-center font-black">
+                                  {idx + 1}
+                                </td>
+                                <td className="px-4 py-4">
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    {configSummary(entry.config).map((item) => (
+                                      <span
+                                        key={item}
+                                        className="whitespace-nowrap rounded border border-white/[0.07] bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-bold text-zinc-400"
+                                      >
+                                        {item}
+                                      </span>
+                                    ))}
+                                    {entry.isParetoOptimal && (
+                                      <span className="whitespace-nowrap rounded bg-sky-400/20 px-1.5 py-0.5 text-[9px] font-black text-sky-300 ml-1">
+                                        PARETO
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-4 py-4 text-center font-black text-white">
+                                  {number.format(entry.score)}
+                                </td>
+                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.equality))}>
+                                  {number.format(entry.dimensions.equality)}
+                                </td>
+                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.competitiveness))}>
+                                  {number.format(entry.dimensions.competitiveness)}
+                                </td>
+                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.resilience))}>
+                                  {number.format(entry.dimensions.resilience)}
+                                </td>
+                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.merit))}>
+                                  {number.format(entry.dimensions.merit)}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   </ElegantCard>
                 );
