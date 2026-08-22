@@ -46,6 +46,8 @@ import type {
   SimulationAnalysisArtifact,
   SimulationRankingProfileId,
 } from '@/lib/season-review/simulation-types';
+import type { EmergentPublicCatalog } from '@/lib/season-review/emergent-artifacts';
+import EmergentAnalysisExplorer from './EmergentAnalysisExplorer';
 
 const compactMoney = new Intl.NumberFormat('es-ES', {
   notation: 'compact',
@@ -183,9 +185,11 @@ const profileIcons: Record<SimulationRankingProfileId, any> = {
 export default function SeasonReviewClient({
   overview,
   simulationAnalysis,
+  emergentCatalog,
 }: {
   overview: SeasonReviewOverviewV2;
-  simulationAnalysis: SimulationAnalysisArtifact;
+  simulationAnalysis: SimulationAnalysisArtifact | null;
+  emergentCatalog: EmergentPublicCatalog | null;
 }) {
   const [historyMetric, setHistoryMetric] = useState<EvolutionMetric>('squadValue');
   const [historyView, setHistoryView] = useState<'all' | 'comparison'>('all');
@@ -194,7 +198,7 @@ export default function SeasonReviewClient({
     overview.autopsy.laggardId,
   ]);
 
-  const initialConfigId = simulationAnalysis.ranking?.profiles[0]?.entries[0]?.configId ?? null;
+  const initialConfigId = simulationAnalysis?.ranking?.profiles[0]?.entries[0]?.configId ?? null;
   const [selectedConfigId, setSelectedConfigId] = useState<string | null>(initialConfigId);
 
   const allEvolutionUsers = useMemo(
@@ -215,7 +219,7 @@ export default function SeasonReviewClient({
   }, [comparisonUsers, historyMetric, historyView, overview.timeline]);
 
   const selectedConfigData = useMemo(() => {
-    if (!selectedConfigId || !simulationAnalysis.configurations) return null;
+    if (!selectedConfigId || !simulationAnalysis?.configurations) return null;
     return simulationAnalysis.configurations.find((c) => c.config.configId === selectedConfigId);
   }, [selectedConfigId, simulationAnalysis]);
 
@@ -491,315 +495,340 @@ export default function SeasonReviewClient({
           </div>
         </ElegantCard>
 
-        {/* Top Configurations by Category */}
-        {simulationAnalysis?.ranking && (
-          <section className="space-y-6">
-            <div>
-              <Eyebrow tone="orange">Preselección V4</Eyebrow>
-              <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
-                Mejores Configuraciones
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-500">
-                Selecciona una configuración para ver sus métricas en detalle. Los resultados son
-                fruto de miles de simulaciones Monte Carlo.
-              </p>
-            </div>
+        <EmergentAnalysisExplorer catalog={emergentCatalog} />
 
-            <div className="space-y-8">
-              {simulationAnalysis.ranking.profiles.map((profile) => {
-                const Icon = profileIcons[profile.profileId] || Medal;
-                return (
-                  <ElegantCard
-                    key={profile.profileId}
-                    title={profile.label}
-                    icon={Icon}
-                    color="primary"
-                    padding="p-5 overflow-hidden"
-                  >
-                    <div className="-mx-5 -mb-5 overflow-x-auto">
-                      <table className="w-full min-w-[700px] text-left text-sm text-zinc-300">
-                        <thead className="border-b border-white/[0.05] bg-black/40 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500">
-                          <tr>
-                            <th className="px-5 py-4 w-12 text-center">#</th>
-                            <th className="px-4 py-4">Configuración</th>
-                            <th className="px-4 py-4 text-center">Nota Global</th>
-                            <th className="px-4 py-4 text-center">Igualdad</th>
-                            <th className="px-4 py-4 text-center">Competit.</th>
-                            <th className="px-4 py-4 text-center">Resiliencia</th>
-                            <th className="px-4 py-4 text-center">Mérito</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/[0.02]">
-                          {profile.entries.slice(0, 5).map((entry, idx) => {
-                            const isSelected = selectedConfigId === entry.configId;
-                            return (
-                              <tr
-                                key={entry.configId}
-                                onClick={() => setSelectedConfigId(entry.configId)}
-                                className={cx(
-                                  'cursor-pointer transition-colors hover:bg-white/[0.02]',
-                                  isSelected ? 'bg-orange-500/10' : ''
-                                )}
-                              >
-                                <td className="px-5 py-4 text-center font-black">
-                                  {idx + 1}
-                                </td>
-                                <td className="px-4 py-4">
-                                  <div className="flex flex-wrap items-center gap-1.5">
-                                    {configSummary(entry.config).map((item) => (
-                                      <span
-                                        key={item}
-                                        className="whitespace-nowrap rounded border border-white/[0.07] bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-bold text-zinc-400"
-                                      >
-                                        {item}
-                                      </span>
-                                    ))}
-                                    {entry.isParetoOptimal && (
-                                      <span className="whitespace-nowrap rounded bg-sky-400/20 px-1.5 py-0.5 text-[9px] font-black text-sky-300 ml-1">
-                                        PARETO
-                                      </span>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="px-4 py-4 text-center font-black text-white">
-                                  {number.format(entry.score)}
-                                </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.equality))}>
-                                  {number.format(entry.dimensions.equality)}
-                                </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.competitiveness))}>
-                                  {number.format(entry.dimensions.competitiveness)}
-                                </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.resilience))}>
-                                  {number.format(entry.dimensions.resilience)}
-                                </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.merit))}>
-                                  {number.format(entry.dimensions.merit)}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </ElegantCard>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {/* Detailed Stats (Replaces Lab) */}
-        {selectedConfigData && (
-          <ElegantCard
-            id="detailed-stats"
-            title="Análisis Detallado de la Configuración"
-            icon={Zap}
-            color="emerald"
-            padding="p-6 md:p-8"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
-              <div>
-                <h3 className="text-2xl font-black text-white">Métricas y Distribuciones</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {configSummary(selectedConfigData.config).map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-1 text-xs font-bold text-zinc-300"
-                    >
-                      {item}
-                    </span>
-                  ))}
+        {!emergentCatalog && (
+          <>
+            {/* Top Configurations by Category */}
+            {simulationAnalysis?.ranking && (
+              <section className="space-y-6">
+                <div>
+                  <Eyebrow tone="orange">Preselección V4</Eyebrow>
+                  <h2 className="mt-4 text-2xl font-black text-white md:text-3xl">
+                    Mejores Configuraciones
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-zinc-500">
+                    Selecciona una configuración para ver sus métricas en detalle. Los resultados
+                    son fruto de miles de simulaciones Monte Carlo.
+                  </p>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                  Muestra
-                </p>
-                <p className="text-xl font-black text-emerald-400">
-                  {integer.format(selectedConfigData.sampleSize)} sim.
-                </p>
-              </div>
-            </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
-                <p className="text-[9px] uppercase tracking-widest text-zinc-500">
-                  Gini Económico (Mediana)
-                </p>
-                <p className="mt-2 text-2xl font-black text-white">
-                  {giniNumber.format(selectedConfigData.metrics.finalResourceGini.median)}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
-                <p className="text-[9px] uppercase tracking-widest text-zinc-500">
-                  Recuperación (Absoluta)
-                </p>
-                <p className="mt-2 text-2xl font-black text-white">
-                  {percent(selectedConfigData.probabilities.absoluteRecovery.value)}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
-                <p className="text-[9px] uppercase tracking-widest text-zinc-500">
-                  Tiempo de Recuperación
-                </p>
-                <p className="mt-2 text-2xl font-black text-white">
-                  {integer.format(selectedConfigData.metrics.recoveryRounds.median)} jor.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
-                <p className="text-[9px] uppercase tracking-widest text-zinc-500">
-                  Riesgo de Bloqueo
-                </p>
-                <p className="mt-2 text-2xl font-black text-red-400">
-                  {percent(selectedConfigData.probabilities.lockIn.value)}
-                </p>
-              </div>
-            </div>
+                <div className="space-y-8">
+                  {simulationAnalysis.ranking.profiles.map((profile) => {
+                    const Icon = profileIcons[profile.profileId] || Medal;
+                    return (
+                      <ElegantCard
+                        key={profile.profileId}
+                        title={profile.label}
+                        icon={Icon}
+                        color="primary"
+                        padding="p-5 overflow-hidden"
+                      >
+                        <div className="-mx-5 -mb-5 overflow-x-auto">
+                          <table className="w-full min-w-[700px] text-left text-sm text-zinc-300">
+                            <thead className="border-b border-white/[0.05] bg-black/40 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500">
+                              <tr>
+                                <th className="px-5 py-4 w-12 text-center">#</th>
+                                <th className="px-4 py-4">Configuración</th>
+                                <th className="px-4 py-4 text-center">Nota Global</th>
+                                <th className="px-4 py-4 text-center">Igualdad</th>
+                                <th className="px-4 py-4 text-center">Competit.</th>
+                                <th className="px-4 py-4 text-center">Resiliencia</th>
+                                <th className="px-4 py-4 text-center">Mérito</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/[0.02]">
+                              {profile.entries.slice(0, 5).map((entry, idx) => {
+                                const isSelected = selectedConfigId === entry.configId;
+                                return (
+                                  <tr
+                                    key={entry.configId}
+                                    onClick={() => setSelectedConfigId(entry.configId)}
+                                    className={cx(
+                                      'cursor-pointer transition-colors hover:bg-white/[0.02]',
+                                      isSelected ? 'bg-orange-500/10' : ''
+                                    )}
+                                  >
+                                    <td className="px-5 py-4 text-center font-black">{idx + 1}</td>
+                                    <td className="px-4 py-4">
+                                      <div className="flex flex-wrap items-center gap-1.5">
+                                        {configSummary(entry.config).map((item) => (
+                                          <span
+                                            key={item}
+                                            className="whitespace-nowrap rounded border border-white/[0.07] bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-bold text-zinc-400"
+                                          >
+                                            {item}
+                                          </span>
+                                        ))}
+                                        {entry.isParetoOptimal && (
+                                          <span className="whitespace-nowrap rounded bg-sky-400/20 px-1.5 py-0.5 text-[9px] font-black text-sky-300 ml-1">
+                                            PARETO
+                                          </span>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="px-4 py-4 text-center font-black text-white">
+                                      {number.format(entry.score)}
+                                    </td>
+                                    <td
+                                      className={cx(
+                                        'px-4 py-4 text-center font-black',
+                                        getScoreColor(entry.dimensions.equality)
+                                      )}
+                                    >
+                                      {number.format(entry.dimensions.equality)}
+                                    </td>
+                                    <td
+                                      className={cx(
+                                        'px-4 py-4 text-center font-black',
+                                        getScoreColor(entry.dimensions.competitiveness)
+                                      )}
+                                    >
+                                      {number.format(entry.dimensions.competitiveness)}
+                                    </td>
+                                    <td
+                                      className={cx(
+                                        'px-4 py-4 text-center font-black',
+                                        getScoreColor(entry.dimensions.resilience)
+                                      )}
+                                    >
+                                      {number.format(entry.dimensions.resilience)}
+                                    </td>
+                                    <td
+                                      className={cx(
+                                        'px-4 py-4 text-center font-black',
+                                        getScoreColor(entry.dimensions.merit)
+                                      )}
+                                    >
+                                      {number.format(entry.dimensions.merit)}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </ElegantCard>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
-            {/* Narrative section */}
-            <div className="mt-8 rounded-2xl border border-white/[0.06] bg-sky-950/20 p-5 md:p-6">
-              <h4 className="text-[11px] font-black uppercase tracking-widest text-sky-400">
-                Interpretación Práctica
-              </h4>
-              <p className="mt-3 text-sm leading-7 text-zinc-300">
-                En base a las{' '}
-                <strong>
-                  {integer.format(selectedConfigData.sampleSize)} temporadas simuladas
-                </strong>{' '}
-                bajo estas reglas, observamos que si un mánager sufre una crisis o comete un error
-                grave, tiene un{' '}
-                <strong>
-                  {percent(selectedConfigData.probabilities.absoluteRecovery.value)} de probabilidad
-                  de recuperarse
-                </strong>{' '}
-                y volver a ser competitivo. El riesgo de que la liga se bloquee irremediablemente
-                (quedando el último clasificado sin opciones matemáticas o económicas) es de solo el{' '}
-                <strong>{percent(selectedConfigData.probabilities.lockIn.value)}</strong>.
-              </p>
-
-              {selectedConfigData.probabilities.targetWinsTitle.value > 0.05 && (
-                <p className="mt-2 text-sm leading-7 text-zinc-300">
-                  Destaca además que, incluso sufriendo el mayor de los contratiempos iniciales, en
-                  un{' '}
-                  <strong>
-                    {percent(selectedConfigData.probabilities.targetWinsTitle.value)} de los casos
-                    ese mánager logró sobreponerse y ganar la liga
-                  </strong>
-                  , demostrando que esta configuración premia enormemente el mérito y la buena
-                  gestión a largo plazo.
-                </p>
-              )}
-            </div>
-
-            {/* Scenarios Breakdown */}
-            {selectedConfigData.scenarios &&
-              Object.keys(selectedConfigData.scenarios).length > 0 && (
-                <div className="mt-8">
-                  <h4 className="mb-4 text-[11px] font-black uppercase tracking-widest text-zinc-500">
-                    Tasa de fracaso (bloqueo) según el tipo de crisis
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    {Object.entries(selectedConfigData.scenarios).map(
-                      ([kind, scenario]: [string, any]) => {
-                        const shockLabels: Record<string, string> = {
-                          'bad-transfer': 'Fichaje ruinoso',
-                          'bad-streak': 'Mala racha',
-                          'star-injury': 'Lesión de estrella',
-                          inactivity: 'Inactividad temporal',
-                        };
-                        const label = shockLabels[kind] || kind;
-                        const nonRecovery = 1 - scenario.absoluteRecovery.value;
-                        const severityColor =
-                          nonRecovery > 0.4
-                            ? 'text-red-400'
-                            : nonRecovery > 0.2
-                              ? 'text-orange-400'
-                              : 'text-emerald-400';
-
-                        return (
-                          <div
-                            key={kind}
-                            className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-4 text-center transition-colors hover:bg-white/[0.04]"
-                          >
-                            <p className="text-[10px] font-bold text-zinc-400">{label}</p>
-                            <p className={`mt-2 text-2xl font-black ${severityColor}`}>
-                              {percent(nonRecovery)}
-                            </p>
-                            <p className="mt-1 text-[9px] text-zinc-600 uppercase tracking-widest">
-                              imposible recuperar
-                            </p>
-                          </div>
-                        );
-                      }
-                    )}
+            {/* Detailed Stats (Replaces Lab) */}
+            {selectedConfigData && (
+              <ElegantCard
+                id="detailed-stats"
+                title="Análisis Detallado de la Configuración"
+                icon={Zap}
+                color="emerald"
+                padding="p-6 md:p-8"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
+                  <div>
+                    <h3 className="text-2xl font-black text-white">Métricas y Distribuciones</h3>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {configSummary(selectedConfigData.config).map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-1 text-xs font-bold text-zinc-300"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                      Muestra
+                    </p>
+                    <p className="text-xl font-black text-emerald-400">
+                      {integer.format(selectedConfigData.sampleSize)} sim.
+                    </p>
                   </div>
                 </div>
-              )}
 
-            <div className="mt-8 grid gap-8 lg:grid-cols-2">
-              <div>
-                <p className="mb-4 text-xs font-black uppercase tracking-widest text-zinc-500">
-                  Distribución: Gini de Recursos Final
-                </p>
-                <div className="h-64 rounded-2xl border border-white/[0.06] bg-black/20 p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={selectedConfigData.metrics.finalResourceGini.histogram}
-                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                    >
-                      <CartesianGrid stroke="rgba(255,255,255,.05)" vertical={false} />
-                      <XAxis
-                        dataKey="start"
-                        tickFormatter={(v) => giniNumber.format(v)}
-                        stroke="#71717a"
-                        fontSize={9}
-                      />
-                      <YAxis stroke="#71717a" fontSize={9} />
-                      <Tooltip
-                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                        contentStyle={{
-                          background: '#09090b',
-                          border: '1px solid rgba(255,255,255,.1)',
-                          borderRadius: 12,
-                        }}
-                        formatter={(value) => [integer.format(Number(value)), 'Simulaciones']}
-                      />
-                      <Bar dataKey="count" fill="#34d399" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
+                    <p className="text-[9px] uppercase tracking-widest text-zinc-500">
+                      Gini Económico (Mediana)
+                    </p>
+                    <p className="mt-2 text-2xl font-black text-white">
+                      {giniNumber.format(selectedConfigData.metrics.finalResourceGini.median)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
+                    <p className="text-[9px] uppercase tracking-widest text-zinc-500">
+                      Recuperación (Absoluta)
+                    </p>
+                    <p className="mt-2 text-2xl font-black text-white">
+                      {percent(selectedConfigData.probabilities.absoluteRecovery.value)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
+                    <p className="text-[9px] uppercase tracking-widest text-zinc-500">
+                      Tiempo de Recuperación
+                    </p>
+                    <p className="mt-2 text-2xl font-black text-white">
+                      {integer.format(selectedConfigData.metrics.recoveryRounds.median)} jor.
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/[0.06] bg-black/25 p-4">
+                    <p className="text-[9px] uppercase tracking-widest text-zinc-500">
+                      Riesgo de Bloqueo
+                    </p>
+                    <p className="mt-2 text-2xl font-black text-red-400">
+                      {percent(selectedConfigData.probabilities.lockIn.value)}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <p className="mb-4 text-xs font-black uppercase tracking-widest text-zinc-500">
-                  Distribución: Jornadas de Recuperación
-                </p>
-                <div className="h-64 rounded-2xl border border-white/[0.06] bg-black/20 p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={selectedConfigData.metrics.recoveryRounds.histogram}
-                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                    >
-                      <CartesianGrid stroke="rgba(255,255,255,.05)" vertical={false} />
-                      <XAxis dataKey="start" stroke="#71717a" fontSize={9} />
-                      <YAxis stroke="#71717a" fontSize={9} />
-                      <Tooltip
-                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                        contentStyle={{
-                          background: '#09090b',
-                          border: '1px solid rgba(255,255,255,.1)',
-                          borderRadius: 12,
-                        }}
-                        formatter={(value) => [integer.format(Number(value)), 'Simulaciones']}
-                      />
-                      <Bar dataKey="count" fill="#38bdf8" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                {/* Narrative section */}
+                <div className="mt-8 rounded-2xl border border-white/[0.06] bg-sky-950/20 p-5 md:p-6">
+                  <h4 className="text-[11px] font-black uppercase tracking-widest text-sky-400">
+                    Interpretación Práctica
+                  </h4>
+                  <p className="mt-3 text-sm leading-7 text-zinc-300">
+                    En base a las{' '}
+                    <strong>
+                      {integer.format(selectedConfigData.sampleSize)} temporadas simuladas
+                    </strong>{' '}
+                    bajo estas reglas, observamos que si un mánager sufre una crisis o comete un
+                    error grave, tiene un{' '}
+                    <strong>
+                      {percent(selectedConfigData.probabilities.absoluteRecovery.value)} de
+                      probabilidad de recuperarse
+                    </strong>{' '}
+                    y volver a ser competitivo. El riesgo de que la liga se bloquee
+                    irremediablemente (quedando el último clasificado sin opciones matemáticas o
+                    económicas) es de solo el{' '}
+                    <strong>{percent(selectedConfigData.probabilities.lockIn.value)}</strong>.
+                  </p>
+
+                  {selectedConfigData.probabilities.targetWinsTitle.value > 0.05 && (
+                    <p className="mt-2 text-sm leading-7 text-zinc-300">
+                      Destaca además que, incluso sufriendo el mayor de los contratiempos iniciales,
+                      en un{' '}
+                      <strong>
+                        {percent(selectedConfigData.probabilities.targetWinsTitle.value)} de los
+                        casos ese mánager logró sobreponerse y ganar la liga
+                      </strong>
+                      , demostrando que esta configuración premia enormemente el mérito y la buena
+                      gestión a largo plazo.
+                    </p>
+                  )}
                 </div>
-              </div>
-            </div>
-          </ElegantCard>
+
+                {/* Scenarios Breakdown */}
+                {selectedConfigData.scenarios &&
+                  Object.keys(selectedConfigData.scenarios).length > 0 && (
+                    <div className="mt-8">
+                      <h4 className="mb-4 text-[11px] font-black uppercase tracking-widest text-zinc-500">
+                        Tasa de fracaso (bloqueo) según el tipo de crisis
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        {Object.entries(selectedConfigData.scenarios).map(
+                          ([kind, scenario]: [string, any]) => {
+                            const shockLabels: Record<string, string> = {
+                              'bad-transfer': 'Fichaje ruinoso',
+                              'bad-streak': 'Mala racha',
+                              'star-injury': 'Lesión de estrella',
+                              inactivity: 'Inactividad temporal',
+                            };
+                            const label = shockLabels[kind] || kind;
+                            const nonRecovery = 1 - scenario.absoluteRecovery.value;
+                            const severityColor =
+                              nonRecovery > 0.4
+                                ? 'text-red-400'
+                                : nonRecovery > 0.2
+                                  ? 'text-orange-400'
+                                  : 'text-emerald-400';
+
+                            return (
+                              <div
+                                key={kind}
+                                className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-4 text-center transition-colors hover:bg-white/[0.04]"
+                              >
+                                <p className="text-[10px] font-bold text-zinc-400">{label}</p>
+                                <p className={`mt-2 text-2xl font-black ${severityColor}`}>
+                                  {percent(nonRecovery)}
+                                </p>
+                                <p className="mt-1 text-[9px] text-zinc-600 uppercase tracking-widest">
+                                  imposible recuperar
+                                </p>
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                <div className="mt-8 grid gap-8 lg:grid-cols-2">
+                  <div>
+                    <p className="mb-4 text-xs font-black uppercase tracking-widest text-zinc-500">
+                      Distribución: Gini de Recursos Final
+                    </p>
+                    <div className="h-64 rounded-2xl border border-white/[0.06] bg-black/20 p-4">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={selectedConfigData.metrics.finalResourceGini.histogram}
+                          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                        >
+                          <CartesianGrid stroke="rgba(255,255,255,.05)" vertical={false} />
+                          <XAxis
+                            dataKey="start"
+                            tickFormatter={(v) => giniNumber.format(v)}
+                            stroke="#71717a"
+                            fontSize={9}
+                          />
+                          <YAxis stroke="#71717a" fontSize={9} />
+                          <Tooltip
+                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                            contentStyle={{
+                              background: '#09090b',
+                              border: '1px solid rgba(255,255,255,.1)',
+                              borderRadius: 12,
+                            }}
+                            formatter={(value) => [integer.format(Number(value)), 'Simulaciones']}
+                          />
+                          <Bar dataKey="count" fill="#34d399" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-4 text-xs font-black uppercase tracking-widest text-zinc-500">
+                      Distribución: Jornadas de Recuperación
+                    </p>
+                    <div className="h-64 rounded-2xl border border-white/[0.06] bg-black/20 p-4">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={selectedConfigData.metrics.recoveryRounds.histogram}
+                          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                        >
+                          <CartesianGrid stroke="rgba(255,255,255,.05)" vertical={false} />
+                          <XAxis dataKey="start" stroke="#71717a" fontSize={9} />
+                          <YAxis stroke="#71717a" fontSize={9} />
+                          <Tooltip
+                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                            contentStyle={{
+                              background: '#09090b',
+                              border: '1px solid rgba(255,255,255,.1)',
+                              borderRadius: 12,
+                            }}
+                            formatter={(value) => [integer.format(Number(value)), 'Simulaciones']}
+                          />
+                          <Bar dataKey="count" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </ElegantCard>
+            )}
+          </>
         )}
       </div>
     </div>
