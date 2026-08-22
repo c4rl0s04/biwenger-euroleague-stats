@@ -216,6 +216,16 @@ function snapshot(
         : potential,
       rosterSize: user.roster.size,
       rosterPlayerIds: Array.from(user.roster).sort(),
+      rosterPlayers: roster
+        .map((player) => ({
+          playerId: player.definition.id,
+          position: player.definition.position,
+          price: player.price,
+          projectedPoints: projectedPoints(player, roundIndex, dataset.rounds.length),
+        }))
+        .sort((left, right) => left.playerId.localeCompare(right.playerId)),
+      lineupPlayerIds: [...user.lastLineup],
+      roundPoints: user.roundScores.at(-1) || 0,
       points: user.points,
       bonuses: user.bonuses,
       decisionQuality: clamp(
@@ -547,8 +557,16 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
           round: roundNumber,
           marketDay,
           playerId: candidate.definition.id,
+          marketValue: candidate.price,
           bidCount: bids.length,
+          bids: bids.map((bid) => ({
+            userId: bid.user.id,
+            amount: bid.amount,
+            replacementPlayerId: bid.replacement?.definition.id || null,
+          })),
           sold: Boolean(winner),
+          winnerUserId: winner?.user.id || null,
+          winningAmount: winner?.amount || null,
         });
         if (!winner) return;
         if (winner.replacement) {
@@ -732,6 +750,7 @@ export function simulateSeason(request: SeasonSimulationRequest): SeasonSimulati
     seed,
     config,
     shock,
+    profiles: users.map((user) => ({ userId: user.id, profile: { ...user.profile } })),
     timeline,
     transactions,
     marketListings,
