@@ -13,7 +13,11 @@ export default function LineupBenchSection({ benchPlayers, onPlayerClick }) {
           <h3 className="text-xl font-bold uppercase tracking-widest text-white">Banquillo</h3>
         </div>
 
-        <LineupBench players={benchPlayers} onPlayerClick={onPlayerClick} className="h-[650px]" />
+        <LineupBench
+          players={benchPlayers}
+          onPlayerClick={onPlayerClick}
+          className="h-auto min-h-44 lg:h-[650px]"
+        />
       </FadeIn>
     </div>
   );

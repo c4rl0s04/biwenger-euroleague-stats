@@ -338,29 +338,29 @@ export default function RoundsPageClient() {
           {/* RIGHT COLUMN: COURT + BENCH (2/3 width) */}
           <div className="xl:w-2/3 flex flex-col gap-4">
             {/* View Toggles */}
-            <div className="flex p-1 bg-secondary/30 backdrop-blur-md rounded-xl border border-white/5 w-fit mx-auto transition-all duration-300 hover:border-white/10 shadow-inner">
+            <div className="mx-auto flex w-full max-w-full overflow-x-auto rounded-xl border border-white/5 bg-secondary/30 p-1 shadow-inner backdrop-blur-md transition-all duration-300 hover:border-white/10 sm:w-fit">
               <button
                 onClick={() => setViewMode('user')}
-                className={`px-5 py-2 text-xs font-black uppercase tracking-tighter rounded-lg transition-all flex items-center gap-2 cursor-pointer ${viewMode === 'user' ? 'bg-primary text-white shadow-[0_0_15px_rgba(250,80,1,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user' ? 'bg-primary text-white shadow-[0_0_15px_rgba(250,80,1,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               >
                 <User size={14} /> Alineación
               </button>
               <button
                 onClick={() => setViewMode('user_ideal')}
-                className={`px-5 py-2 text-xs font-black uppercase tracking-tighter rounded-lg transition-all flex items-center gap-2 cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               >
                 <BrainCircuit size={14} /> Mi Ideal
               </button>
               <button
                 onClick={() => setViewMode('ideal')}
-                className={`px-5 py-2 text-xs font-black uppercase tracking-tighter rounded-lg transition-all flex items-center gap-2 cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               >
                 <Star size={14} /> Global
               </button>
             </div>
 
             <ElegantCard title={title} icon={icon} color={color} className="w-full">
-              <div className="w-full aspect-[4/3] lg:aspect-[16/10] min-h-[500px] xl:min-h-[600px]">
+              <div className="aspect-[3/4] min-h-[360px] w-full sm:aspect-[4/3] sm:min-h-[500px] lg:aspect-[16/10] xl:min-h-[600px]">
                 {isCourtLoading ? (
                   <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
                     Cargando datos...

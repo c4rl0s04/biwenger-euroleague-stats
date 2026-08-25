@@ -191,7 +191,7 @@ export default function PlayerPointsGraph({ matches, playerTeam, className = '' 
       title="Evolución de Puntos"
       icon={TrendingUp}
       color="rose"
-      className={`${className} min-h-[400px]`}
+      className={`${className} min-h-[340px] sm:min-h-[400px]`}
       actionRight={
         <div className="flex bg-black/40 backdrop-blur-md rounded-xl p-1 border border-white/5 shadow-inner">
           {[
@@ -213,7 +213,7 @@ export default function PlayerPointsGraph({ matches, playerTeam, className = '' 
         </div>
       }
     >
-      <div className="h-[280px] w-full mt-2">
+      <div className="mt-2 h-[260px] w-full sm:h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             key={viewMode}

@@ -566,15 +566,15 @@ export default function HeadToHeadCard({
         </div>
 
         {/* LOWER VALUE & BAR AREA - Perfectly Centered */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* USER A VALUE */}
           <div
-            className={`w-32 text-right font-bold text-sm flex items-center justify-end gap-3 ${winA ? userColor.text : 'text-zinc-500'}`}
+            className={`w-[5.75rem] text-right font-bold text-xs flex items-center justify-end gap-1.5 sm:w-32 sm:gap-3 sm:text-sm ${winA ? userColor.text : 'text-zinc-500'}`}
           >
             <RankBadge rank={rankA} />
             <div className="flex flex-col items-end">
               {nameA && (
-                <span className="text-xs font-bold text-white/90 leading-tight mb-0.5 max-w-[120px] truncate">
+                <span className="max-w-[4.5rem] truncate text-[10px] font-bold leading-tight text-white/90 sm:max-w-[120px] sm:text-xs">
                   {nameA}
                 </span>
               )}
@@ -609,11 +609,11 @@ export default function HeadToHeadCard({
 
           {/* USER B VALUE */}
           <div
-            className={`w-32 text-left font-bold text-sm flex items-center justify-start gap-3 ${winB ? rivalColor.text : 'text-zinc-500'}`}
+            className={`w-[5.75rem] text-left font-bold text-xs flex items-center justify-start gap-1.5 sm:w-32 sm:gap-3 sm:text-sm ${winB ? rivalColor.text : 'text-zinc-500'}`}
           >
             <div className="flex flex-col items-start">
               {nameB && (
-                <span className="text-xs font-bold text-white/90 leading-tight mb-0.5 max-w-[120px] truncate">
+                <span className="max-w-[4.5rem] truncate text-[10px] font-bold leading-tight text-white/90 sm:max-w-[120px] sm:text-xs">
                   {nameB}
                 </span>
               )}

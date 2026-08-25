@@ -89,7 +89,7 @@ export default function PointsEvolutionChart({ recentRounds }) {
       className="overflow-hidden relative group"
     >
       <div className="relative z-10">
-        <div className="h-[340px] w-full mt-4">
+        <div className="mt-4 h-[270px] w-full sm:h-[340px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 30, right: 10, left: -20, bottom: 0 }}>
               <defs>

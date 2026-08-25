@@ -232,7 +232,7 @@ export default function PositionEvolutionCard() {
           </div>
 
           {/* Line Chart */}
-          <div className="h-[420px] w-full mt-4">
+          <div className="mt-4 h-[280px] w-full sm:h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 40, right: 16, left: 8, bottom: 30 }}>
                 <CartesianGrid

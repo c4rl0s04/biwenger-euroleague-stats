@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Map as MapComponent, MapControls, MarkerContent } from '@/components/ui/map';
 import { getTeamColor } from '@/lib/constants/teamColors';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ import { formatMatchDateShort, formatMatchTime } from '@/lib/utils/date';
  * Individual venue marker for standard round view mode.
  */
 function NormalMarker({ match, isAlternate }) {
+  const [isOpen, setIsOpen] = useState(false);
   const { img: homeImg, code, name } = match.home;
   const { img: awayImg, code: awayCode, name: awayName } = match.away || {};
   const teamColor = getTeamColor(code);
@@ -20,6 +21,18 @@ function NormalMarker({ match, isAlternate }) {
         <div
           className="group relative flex items-center justify-center pointer-events-auto cursor-pointer"
           style={{ width: '16px', height: '16px', zIndex: '10' }}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isOpen}
+          aria-label={`Ver partido ${name} contra ${awayName}`}
+          onClick={() => setIsOpen((open) => !open)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setIsOpen((open) => !open);
+            }
+            if (event.key === 'Escape') setIsOpen(false);
+          }}
           onMouseEnter={(e) => {
             const markerEl = e.currentTarget.closest('.maplibregl-marker');
             if (markerEl) markerEl.style.zIndex = '1000';
@@ -64,7 +77,10 @@ function NormalMarker({ match, isAlternate }) {
           {/* Hover Tooltip */}
           <div
             className={cn(
-              'absolute left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 p-3 rounded-2xl text-white min-w-[200px] opacity-0 group-hover:opacity-100 transition-all transform pointer-events-none z-[1100] shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10',
+              'absolute left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 p-3 rounded-2xl text-white min-w-[200px] transition-all transform pointer-events-none z-[1100] shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10',
+              isOpen
+                ? 'visible opacity-100'
+                : 'invisible opacity-0 group-hover:visible group-hover:opacity-100',
               isAlternate
                 ? 'top-[calc(100%+12px)] translate-y-2 group-hover:translate-y-0'
                 : 'bottom-[calc(100%+40px)] -translate-y-2 group-hover:-translate-y-0'
@@ -100,6 +116,7 @@ function NormalMarker({ match, isAlternate }) {
  * Individual stop marker for European Tour mode.
  */
 function TourMarker({ venue, selectedTeamId }) {
+  const [isOpen, setIsOpen] = useState(false);
   const { latitude, longitude, code, img: homeImg, match, sequence } = venue;
   const { img: awayImg, name: awayName } = match.away || {};
   const teamColor = getTeamColor(code);
@@ -115,6 +132,18 @@ function TourMarker({ venue, selectedTeamId }) {
         <div
           className="group relative pointer-events-auto cursor-pointer flex flex-col items-center"
           style={{ zIndex: '10' }}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isOpen}
+          aria-label={`Ver parada ${sequence}: ${match.home.name} contra ${awayName}`}
+          onClick={() => setIsOpen((open) => !open)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setIsOpen((open) => !open);
+            }
+            if (event.key === 'Escape') setIsOpen(false);
+          }}
           onMouseEnter={(e) => {
             const markerEl = e.currentTarget.closest('.maplibregl-marker');
             if (markerEl) markerEl.style.zIndex = '1000';
@@ -139,7 +168,14 @@ function TourMarker({ venue, selectedTeamId }) {
           </div>
 
           {/* Enhanced Tooltip */}
-          <div className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 p-3 rounded-2xl text-white min-w-[220px] opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 pointer-events-none z-[1100] shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10">
+          <div
+            className={cn(
+              'absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 p-3 rounded-2xl text-white min-w-[220px] transition-all transform translate-y-2 group-hover:translate-y-0 pointer-events-none z-[1100] shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10',
+              isOpen
+                ? 'visible opacity-100'
+                : 'invisible opacity-0 group-hover:visible group-hover:opacity-100'
+            )}
+          >
             <div className="flex justify-between items-center gap-4 mb-3 pb-2.5 border-b border-zinc-900">
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-tighter">
                 {formatMatchDateShort(match.date)}
@@ -287,7 +323,7 @@ export default function MatchesMap({ matches = [], selectedTeamId = null }) {
   }, [teams, tourVenues, isTourMode]);
 
   return (
-    <div className="w-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative h-[600px]">
+    <div className="relative h-[55dvh] min-h-[360px] max-h-[540px] w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 lg:h-[600px] lg:max-h-none">
       <MapComponent bounds={bounds} padding={50} className="h-full w-full">
         <MapControls position="bottom-right" />
 
