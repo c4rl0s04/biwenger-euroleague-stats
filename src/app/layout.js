@@ -3,6 +3,7 @@ import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CardThemeProvider } from '@/contexts/CardThemeContext';
+import PwaProvider from '@/components/pwa/PwaProvider';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -49,8 +50,20 @@ export const metadata = {
   icons: {
     icon: '/favicon.png',
     shortcut: '/favicon.png',
-    apple: '/brand-logo.png',
+    apple: '/icons/apple-touch-icon.png',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BiwengerStats',
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#050506',
 };
 
 import { SessionProvider } from 'next-auth/react';
@@ -62,9 +75,11 @@ export default function RootLayout({ children }) {
         className={`${outfit.variable} ${inter.variable} ${bebasNeue.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
       >
         <SessionProvider>
-          <ThemeProvider>
-            <CardThemeProvider>{children}</CardThemeProvider>
-          </ThemeProvider>
+          <PwaProvider>
+            <ThemeProvider>
+              <CardThemeProvider>{children}</CardThemeProvider>
+            </ThemeProvider>
+          </PwaProvider>
         </SessionProvider>
         <Analytics />
       </body>

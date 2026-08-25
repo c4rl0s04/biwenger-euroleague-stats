@@ -15,10 +15,62 @@ import {
   Link2,
   Mail,
   Database,
+  Download,
+  Smartphone,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { PageHeader, ElegantCard, FadeIn } from '@/components/ui';
 import Section from '@/components/layout/Section';
+import { usePwa } from '@/components/pwa/PwaProvider';
+
+function InstallationSettings() {
+  const { isStandalone, canInstall, install } = usePwa();
+
+  return (
+    <Section
+      title="Aplicación móvil"
+      subtitle="Instala BiwengerStats en iPhone, iPad o Android sin pasar por una tienda."
+      className="!px-0 !py-0"
+    >
+      <ElegantCard padding="p-5 sm:p-8" hideHeader>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Smartphone size={24} aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-bold text-white">
+                {isStandalone ? 'Aplicación instalada' : 'Añadir a la pantalla de inicio'}
+              </p>
+              <p className="mt-1 max-w-xl text-sm leading-6 text-zinc-400">
+                Se abrirá a pantalla completa. Tus estadísticas privadas seguirán cargándose desde
+                el servidor y no se guardarán para uso sin conexión.
+              </p>
+            </div>
+          </div>
+          {!isStandalone &&
+            (canInstall ? (
+              <button
+                type="button"
+                onClick={install}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-white"
+              >
+                <Download size={18} aria-hidden="true" /> Instalar
+              </button>
+            ) : (
+              <Link
+                href="/install"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-white"
+              >
+                <Download size={18} aria-hidden="true" /> Ver instrucciones
+              </Link>
+            ))}
+        </div>
+      </ElegantCard>
+    </Section>
+  );
+}
 
 /**
  * BiwengerSettings Component
@@ -84,11 +136,11 @@ function BiwengerSettings() {
         subtitle="Vincular tu cuenta oficial permite sincronizar tus plantillas, puntos y mercado en tiempo real."
         className="!px-0 !py-0"
       >
-        <ElegantCard padding="p-8 md:p-10" hideHeader className="overflow-visible">
+        <ElegantCard padding="p-5 sm:p-8 md:p-10" hideHeader className="overflow-visible">
           <div className="space-y-8">
             {/* Connection Status */}
             <div
-              className={`p-6 rounded-2xl border flex items-center justify-between transition-all duration-500 ${
+              className={`flex flex-col items-start justify-between gap-4 rounded-2xl border p-4 transition-all duration-500 sm:flex-row sm:items-center sm:p-6 ${
                 isLinked
                   ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400'
                   : 'bg-zinc-950/50 border-white/5 text-zinc-400'
@@ -314,7 +366,7 @@ function SecuritySettings() {
         subtitle="Actualiza tus credenciales de acceso para mantener la máxima protección."
         className="!px-0 !py-0"
       >
-        <ElegantCard padding="p-8 md:p-10" hideHeader className="overflow-visible">
+        <ElegantCard padding="p-5 sm:p-8 md:p-10" hideHeader className="overflow-visible">
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Current Password */}
             <div className="space-y-3">
@@ -448,6 +500,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'security', name: 'Seguridad', icon: KeyRound, component: <SecuritySettings /> },
     { id: 'biwenger', name: 'Biwenger', icon: Link2, component: <BiwengerSettings /> },
+    { id: 'install', name: 'Instalar app', icon: Download, component: <InstallationSettings /> },
     { id: 'profile', name: 'Perfil Público', icon: UserCircle2, disabled: true },
   ];
 
@@ -461,11 +514,11 @@ export default function SettingsPage() {
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 mt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-12">
             {/* Sidebar Navigation */}
             <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-3">
-                <div className="mb-6 px-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 lg:sticky lg:top-24 lg:block lg:space-y-3 lg:overflow-visible lg:pb-0">
+                <div className="mb-6 hidden px-2 lg:block">
                   <h3 className="text-xl font-display uppercase tracking-widest text-zinc-400 flex items-center gap-2">
                     <div className="w-1 h-4 bg-primary rounded-full" />
                     Categorías
@@ -477,7 +530,7 @@ export default function SettingsPage() {
                     disabled={tab.disabled}
                     onClick={() => setActiveTab(tab.id)}
                     className={`
-                      w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm uppercase tracking-widest text-left group relative
+                      relative flex min-h-11 shrink-0 items-center gap-3 rounded-2xl px-4 py-3 text-left text-xs font-bold uppercase tracking-widest transition-all duration-300 group lg:w-full lg:gap-4 lg:px-5 lg:py-4 lg:text-sm
                       ${
                         activeTab === tab.id
                           ? 'bg-primary/10 text-primary border border-primary/20 shadow-lg shadow-primary/5'
