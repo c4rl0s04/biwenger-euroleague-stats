@@ -5,20 +5,13 @@ import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Eye, EyeOff, User, Lock, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import { sanitizeCallbackUrl } from '@/lib/auth/safe-callback-url';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  let callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  if (callbackUrl.includes('localhost')) {
-    try {
-      const url = new URL(callbackUrl);
-      callbackUrl = url.pathname + url.search;
-    } catch {
-      callbackUrl = '/dashboard';
-    }
-  }
+  const callbackUrl = sanitizeCallbackUrl(searchParams.get('callbackUrl'));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -176,7 +169,7 @@ export default function LoginPage() {
       {/* ─────────────────────────────────────────
           RIGHT PANEL — Login Form
       ───────────────────────────────────────── */}
-      <div className="flex flex-1 items-center justify-center px-6 py-16 md:py-0 relative">
+      <div className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-10 md:py-0">
         {/* Mobile-only background glow */}
         <div className="absolute inset-0 md:hidden pointer-events-none">
           <div
@@ -187,8 +180,8 @@ export default function LoginPage() {
 
         <div className="relative z-10 w-full max-w-sm">
           {/* Mobile logo */}
-          <div className="flex flex-col items-center mb-10 md:hidden">
-            <div className="relative w-24 h-24 mb-4">
+          <div className="mb-6 flex flex-col items-center md:hidden">
+            <div className="relative mb-2 h-20 w-20">
               <Image
                 src="/brand-logo.png"
                 alt="Biwenger Stats"
@@ -205,7 +198,7 @@ export default function LoginPage() {
           </div>
 
           {/* Heading */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h2 className="font-display text-4xl text-foreground tracking-wider mb-1.5">Acceder</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Introduce tus credenciales de manager para continuar.
@@ -213,7 +206,7 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {/* Manager name */}
             <div>
               <label
@@ -232,11 +225,14 @@ export default function LoginPage() {
                   id="login-name"
                   type="text"
                   autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: All Stars"
-                  className="w-full h-12 bg-card border border-border rounded-xl pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                  className="w-full h-12 bg-card border border-border rounded-xl pl-10 pr-4 text-base md:text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                 />
               </div>
             </div>
@@ -263,7 +259,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-12 bg-card border border-border rounded-xl pl-10 pr-12 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                  className="w-full h-12 bg-card border border-border rounded-xl pl-10 pr-12 text-base md:text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                 />
                 <button
                   type="button"
@@ -312,7 +308,7 @@ export default function LoginPage() {
           </form>
 
           {/* Footer note */}
-          <p className="mt-10 text-center text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] leading-relaxed">
+          <p className="mt-6 text-center text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/40 sm:mt-10">
             Sistema de acceso restringido · Liga Euroleague
           </p>
         </div>

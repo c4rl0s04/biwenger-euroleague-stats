@@ -1,8 +1,6 @@
 import NextAuth from 'next-auth';
 import authConfig from './auth.config';
 
-console.log('--- PROXY ACTIVE ---');
-
 export default NextAuth(authConfig).auth;
 
 export const config = {
