@@ -1,3 +1,22 @@
+const PUBLIC_PWA_PATHS = new Set([
+  '/login',
+  '/install',
+  '/offline',
+  '/sw.js',
+  '/manifest.webmanifest',
+]);
+
+export function isPublicPath(pathname) {
+  if (PUBLIC_PWA_PATHS.has(pathname)) return true;
+  if (pathname.startsWith('/api/auth')) return true;
+  if (pathname.startsWith('/_next/')) return true;
+  if (pathname.startsWith('/_vercel/')) return true;
+  if (pathname.startsWith('/icons/')) return true;
+  if (pathname.startsWith('/favicon') || pathname === '/brand-logo.png') return true;
+
+  return /\.(png|jpg|jpeg|svg|ico|webp|gif|woff2?|ttf|otf)$/.test(pathname);
+}
+
 const authConfig = {
   trustHost: true,
   providers: [],
@@ -9,22 +28,9 @@ const authConfig = {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
 
-      // 1. Allow all API Auth routes
-      if (pathname.startsWith('/api/auth')) return true;
+      if (isPublicPath(pathname)) return true;
 
-      // 2. Allow Login page
-      if (pathname === '/login') return true;
-
-      // 3. Allow Next.js internals and static public assets
-      if (
-        pathname.startsWith('/_next/') ||
-        pathname.startsWith('/favicon') ||
-        /\.(png|jpg|jpeg|svg|ico|webp|gif|woff2?|ttf|otf)$/.test(pathname)
-      ) {
-        return true;
-      }
-
-      // 4. Everything else requires login
+      // Everything else requires login
       return isLoggedIn;
     },
     async jwt({ token, user, trigger, session }) {
