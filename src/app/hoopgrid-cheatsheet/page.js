@@ -209,7 +209,7 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
           {solutions.map((cell, idx) => (
             <div
               key={idx}
-              className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-[650px] shadow-sm"
+              className="flex min-h-[28rem] max-h-[70dvh] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm md:h-[650px] md:max-h-none"
             >
               <div className="p-5 border-b border-border bg-muted/30">
                 <div className="flex justify-between items-center mb-1">

@@ -1,4 +1,17 @@
-import { Search, X, SortAsc, SortDesc, LayoutGrid, List, Euro, RotateCcw } from 'lucide-react';
+'use client';
+
+import { useEffect, useState } from 'react';
+import {
+  Search,
+  X,
+  SortAsc,
+  SortDesc,
+  LayoutGrid,
+  List,
+  Euro,
+  RotateCcw,
+  SlidersHorizontal,
+} from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
@@ -25,10 +38,79 @@ export default function PlayerFilters({
   handleResetFilters,
   setCurrentPage,
 }) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilters = [
+    search,
+    teamFilter !== 'ALL',
+    ownerFilter !== 'ALL',
+    positionFilter !== 'ALL',
+    statusFilter !== 'ALL',
+    maxPrice,
+  ].filter(Boolean).length;
+
+  useEffect(() => {
+    if (!filtersOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setFiltersOpen(false);
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [filtersOpen]);
+
   return (
     <ElegantCard hideHeader padding="p-3" className="mb-6 relative z-30 overflow-visible">
+      <button
+        type="button"
+        onClick={() => setFiltersOpen(true)}
+        className="flex min-h-11 w-full items-center justify-between rounded-xl border border-border/60 bg-secondary/40 px-4 text-sm font-bold md:hidden"
+        aria-expanded={filtersOpen}
+        aria-controls="mobile-player-filters"
+      >
+        <span className="flex items-center gap-2">
+          <SlidersHorizontal size={18} aria-hidden="true" />
+          Filtros
+        </span>
+        <span className="rounded-full bg-primary/15 px-2 py-1 text-xs text-primary">
+          {activeFilters ? `${activeFilters} activos` : 'Todos'}
+        </span>
+      </button>
+
+      {filtersOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-[119] bg-black/70 backdrop-blur-sm md:hidden"
+          onClick={() => setFiltersOpen(false)}
+          aria-label="Cerrar filtros"
+        />
+      )}
+
       {/* Unified Filter Row - Full width distribution */}
-      <div className="flex flex-row flex-wrap xl:flex-nowrap gap-x-2 gap-y-4 xl:gap-x-0 w-full items-end justify-between">
+      <div
+        id="mobile-player-filters"
+        role={filtersOpen ? 'dialog' : undefined}
+        aria-modal={filtersOpen || undefined}
+        aria-label="Filtros de jugadores"
+        className={`${filtersOpen ? 'flex' : 'hidden'} fixed inset-x-0 bottom-0 z-[120] max-h-[88dvh] flex-row flex-wrap items-end justify-between gap-x-2 gap-y-4 overflow-y-auto rounded-t-3xl border-t border-white/10 bg-zinc-950 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl md:static md:flex md:max-h-none md:overflow-visible md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none xl:flex-nowrap xl:gap-x-0`}
+      >
+        <div className="flex w-full items-center justify-between md:hidden">
+          <div>
+            <p className="font-bold text-white">Filtrar jugadores</p>
+            <p className="text-xs text-muted-foreground">Ajusta la búsqueda y el orden</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(false)}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full bg-white/5"
+            aria-label="Cerrar filtros"
+          >
+            <X size={20} />
+          </button>
+        </div>
         {/* Search */}
         <div className="w-full md:w-[220px] shrink-0 space-y-1">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">
@@ -88,7 +170,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Team */}
-        <div className="w-[48%] md:w-[135px] shrink-0 space-y-1">
+        <div className="w-full shrink-0 space-y-1 sm:w-[48%] md:w-[135px]">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             EQUIPO
           </span>
@@ -107,7 +189,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Owner */}
-        <div className="w-[48%] md:w-[115px] shrink-0 space-y-1 text-ellipsis overflow-hidden">
+        <div className="w-full shrink-0 space-y-1 overflow-hidden text-ellipsis sm:w-[48%] md:w-[115px]">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             MANAGER
           </span>
@@ -126,7 +208,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Position */}
-        <div className="w-[30%] md:w-[105px] shrink-0 space-y-1">
+        <div className="w-full shrink-0 space-y-1 sm:w-[48%] md:w-[105px]">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             POSICIÓN
           </span>
@@ -146,7 +228,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Status */}
-        <div className="w-[30%] md:w-[105px] shrink-0 space-y-1">
+        <div className="w-full shrink-0 space-y-1 sm:w-[48%] md:w-[105px]">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             ESTADO
           </span>
@@ -165,7 +247,7 @@ export default function PlayerFilters({
         </div>
 
         {/* Sort Key */}
-        <div className="w-[30%] md:w-[120px] shrink-0 space-y-1">
+        <div className="w-full shrink-0 space-y-1 sm:w-[48%] md:w-[120px]">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
             ORDENAR
           </span>
@@ -239,6 +321,14 @@ export default function PlayerFilters({
             <span className="hidden 2xl:inline">Limpiar</span>
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setFiltersOpen(false)}
+          className="min-h-11 w-full rounded-xl bg-primary px-4 text-sm font-bold text-white md:hidden"
+        >
+          Ver resultados
+        </button>
       </div>
     </ElegantCard>
   );

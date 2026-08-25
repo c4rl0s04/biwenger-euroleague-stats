@@ -23,49 +23,56 @@ export default function PlayerList({
   return (
     <div className="space-y-6">
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {players.map((player) => (
             <PlayerGridItem key={player.id} player={player} sortConfig={sortConfig} />
           ))}
         </div>
       ) : (
-        <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl overflow-hidden shadow-xl">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-secondary/20 border-b border-border/20">
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                  Jugador
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                  Equipo
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                  Manager
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                  Valor
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  Puntos
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  Media
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  Mejor
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-                  Peor
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/20">
-              {players.map((player) => (
-                <PlayerRow key={player.id} player={player} sortConfig={sortConfig} />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:hidden">
+            {players.map((player) => (
+              <PlayerGridItem key={player.id} player={player} sortConfig={sortConfig} />
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto rounded-xl border border-border/50 bg-card/30 shadow-xl backdrop-blur-sm md:block">
+            <table className="min-w-[900px] w-full text-left">
+              <thead>
+                <tr className="bg-secondary/20 border-b border-border/20">
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Jugador
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Equipo
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Manager
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Valor
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
+                    Puntos
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
+                    Media
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
+                    Mejor
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
+                    Peor
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/20">
+                {players.map((player) => (
+                  <PlayerRow key={player.id} player={player} sortConfig={sortConfig} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Pagination */}

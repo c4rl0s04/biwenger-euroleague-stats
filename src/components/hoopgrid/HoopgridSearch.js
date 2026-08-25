@@ -70,15 +70,15 @@ export default function HoopgridSearch({
   }, [query]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 bg-background/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-background/80 px-0 pt-0 backdrop-blur-sm sm:items-start sm:px-4 sm:pt-[15vh]">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="w-full max-w-2xl"
+        className="w-full max-w-2xl pb-[env(safe-area-inset-bottom)] sm:pb-0"
       >
         <Command
-          className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden glass-panel"
+          className="glass-panel overflow-hidden rounded-t-3xl border border-border bg-card shadow-2xl sm:rounded-2xl"
           shouldFilter={false} // We filter on server
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
@@ -87,14 +87,17 @@ export default function HoopgridSearch({
             }
           }}
         >
-          <div className="flex items-center border-b border-border px-6 py-2" cmdk-input-wrapper="">
+          <div
+            className="flex items-center border-b border-border px-4 py-2 sm:px-6"
+            cmdk-input-wrapper=""
+          >
             <Search className="w-6 h-6 text-muted-foreground mr-4" />
             <Command.Input
               ref={inputRef}
               value={query}
               onValueChange={setQuery}
               placeholder="Escribe el nombre del jugador..."
-              className="flex-1 h-20 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-2xl"
+              className="h-16 min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground sm:h-20 sm:text-2xl"
             />
             <button
               onClick={onClose}

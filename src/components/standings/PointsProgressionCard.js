@@ -170,7 +170,7 @@ export default function PointsProgressionCard() {
             })}
           </div>
 
-          <div className="h-[500px] w-full mt-2">
+          <div className="mt-2 h-[300px] w-full sm:h-[500px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid

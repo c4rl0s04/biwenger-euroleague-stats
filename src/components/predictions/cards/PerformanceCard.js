@@ -178,7 +178,7 @@ export function PerformanceCard({ data }) {
           })}
         </div>
 
-        <div className="h-[350px] w-full mt-2">
+        <div className="mt-2 h-[270px] w-full sm:h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid

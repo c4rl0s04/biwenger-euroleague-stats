@@ -120,7 +120,7 @@ export default function PlacementStatsCard() {
       icon={Trophy}
       color="amber"
       loading={loading}
-      className="h-[600px] flex flex-col"
+      className="flex min-h-[480px] flex-col sm:h-[600px]"
     >
       {!loading &&
         (data.length > 0 ? (

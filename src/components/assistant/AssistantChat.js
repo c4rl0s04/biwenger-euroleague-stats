@@ -319,7 +319,7 @@ export default function AssistantChat() {
   );
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/40 shadow-2xl shadow-black/20 backdrop-blur-xl lg:min-h-[650px] lg:flex-row">
+    <div className="mx-auto flex min-h-[calc(100dvh-11rem)] max-w-6xl flex-col overflow-hidden border-y border-border/60 bg-card/40 shadow-2xl shadow-black/20 backdrop-blur-xl sm:rounded-2xl sm:border lg:min-h-[650px] lg:flex-row">
       <aside className="border-b border-border/50 bg-background/20 p-3 lg:w-64 lg:border-r lg:border-b-0">
         <button
           type="button"
@@ -367,7 +367,7 @@ export default function AssistantChat() {
                 type="button"
                 onClick={() => removeConversation(conversation.id)}
                 disabled={loading}
-                className="rounded-lg p-2 text-muted-foreground opacity-0 transition hover:text-red-300 group-hover:opacity-100 focus:opacity-100 disabled:opacity-0"
+                className="min-h-11 min-w-11 rounded-lg p-2 text-muted-foreground opacity-100 transition hover:text-red-300 focus:opacity-100 disabled:opacity-0 lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Eliminar conversación"
               >
                 <Trash2 size={14} />
@@ -394,7 +394,7 @@ export default function AssistantChat() {
 
         <div
           ref={chatViewportRef}
-          className="flex min-h-[420px] flex-1 flex-col gap-4 overflow-y-auto p-5 md:p-7"
+          className="flex min-h-[48dvh] flex-1 flex-col gap-4 overflow-y-auto p-3 sm:p-5 md:p-7 lg:min-h-[420px]"
           aria-live="polite"
         >
           {loadingMessages && (
@@ -442,7 +442,7 @@ export default function AssistantChat() {
                     </div>
                   )}
                   <div
-                    className={`max-w-[85%] overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    className={`max-w-[92%] overflow-hidden rounded-2xl px-3 py-3 text-sm leading-relaxed sm:max-w-[85%] sm:px-4 ${
                       isUser
                         ? 'bg-primary text-white'
                         : 'border border-border/50 bg-background/60 text-foreground'
@@ -458,7 +458,7 @@ export default function AssistantChat() {
                     )}
                   </div>
                   {isUser && (
-                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-muted-foreground">
+                    <div className="mt-1 hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-muted-foreground sm:flex">
                       <User size={16} />
                     </div>
                   )}
@@ -484,7 +484,10 @@ export default function AssistantChat() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="border-t border-border/50 p-4 md:p-5">
+        <form
+          onSubmit={handleSubmit}
+          className="sticky bottom-0 z-10 border-t border-border/50 bg-zinc-950/95 p-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl sm:p-4 md:p-5"
+        >
           {error && (
             <p className="mb-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
               {error}
@@ -499,7 +502,7 @@ export default function AssistantChat() {
               rows={1}
               maxLength={4000}
               disabled={loadingMessages}
-              className="min-h-12 flex-1 resize-none rounded-xl border border-border/60 bg-background/60 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/60 disabled:opacity-50"
+              className="min-h-12 min-w-0 flex-1 resize-none rounded-xl border border-border/60 bg-background/60 px-4 py-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/60 disabled:opacity-50 sm:text-sm"
             />
             <button
               type="submit"
