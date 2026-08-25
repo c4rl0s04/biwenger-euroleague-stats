@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -21,15 +21,36 @@ export default function Drawer({
   color = 'blue',
   className = '',
 }) {
+  const panelRef = useRef(null);
+  const closeRef = useRef(null);
+  const previousFocusRef = useRef(null);
+
   // Handle Escape key and body scroll lock
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) onClose();
+      if (e.key !== 'Tab' || !isOpen || !panelRef.current) return;
+
+      const focusable = panelRef.current.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
 
     if (isOpen) {
+      previousFocusRef.current = document.activeElement;
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
+      requestAnimationFrame(() => closeRef.current?.focus());
     } else {
       document.body.style.overflow = 'auto';
     }
@@ -37,6 +58,7 @@ export default function Drawer({
     return () => {
       document.body.style.overflow = 'auto';
       window.removeEventListener('keydown', handleKeyDown);
+      if (isOpen) previousFocusRef.current?.focus?.();
     };
   }, [isOpen, onClose]);
 
@@ -131,21 +153,28 @@ export default function Drawer({
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] cursor-pointer"
+            aria-hidden="true"
           />
 
           {/* Drawer Panel */}
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 200 }}
-            className={`fixed top-0 right-0 h-screen w-full ${width} bg-zinc-950/95 backdrop-blur-3xl border-l border-white/5 z-[201] flex flex-col shadow-[-10px_0_50px_rgba(0,0,0,0.8)] ${className}`}
+            className={`fixed inset-x-0 bottom-0 h-[92dvh] w-full rounded-t-[1.75rem] border-t border-white/5 bg-zinc-950/95 backdrop-blur-3xl z-[201] flex flex-col shadow-[-10px_0_50px_rgba(0,0,0,0.8)] sm:inset-y-0 sm:right-0 sm:left-auto sm:h-[100dvh] sm:rounded-none sm:border-t-0 sm:border-l ${width} ${className}`}
           >
             {/* Header */}
-            <div className="relative p-8 pb-6 border-b border-white/5 bg-zinc-900/40">
+            <div className="relative p-5 sm:p-8 pb-5 sm:pb-6 border-b border-white/5 bg-zinc-900/40">
               <button
+                ref={closeRef}
                 onClick={onClose}
-                className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors text-zinc-500 hover:text-white cursor-pointer"
+                aria-label={`Cerrar ${title}`}
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 flex h-11 w-11 items-center justify-center rounded-full hover:bg-white/10 transition-colors text-zinc-500 hover:text-white cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -171,11 +200,13 @@ export default function Drawer({
             </div>
 
             {/* Content List */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">{children}</div>
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 custom-scrollbar">
+              {children}
+            </div>
 
             {/* Footer */}
             {footer && (
-              <div className="px-8 py-3 border-t border-white/5 bg-zinc-900/40 flex items-center justify-between shrink-0">
+              <div className="px-5 sm:px-8 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] border-t border-white/5 bg-zinc-900/40 flex items-center justify-between shrink-0">
                 {footer}
               </div>
             )}

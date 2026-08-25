@@ -26,6 +26,15 @@ export default function CustomSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
+
   const selectedOption = options.find((opt) => opt.value === value);
 
   const isCentered =
@@ -34,7 +43,10 @@ export default function CustomSelect({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
         className={`w-full h-[38px] appearance-none bg-secondary/50 border border-border/50 rounded-lg px-3 py-2 text-left focus:outline-none focus:ring-1 focus:ring-primary/50 hover:bg-secondary/70 transition-colors flex items-center cursor-pointer ${isCentered ? 'justify-center' : 'justify-between'} ${buttonClassName}`}
       >
         <span
@@ -51,10 +63,16 @@ export default function CustomSelect({
 
       {isOpen && (
         <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 origin-top">
-          <div className="max-h-80 overflow-y-auto p-1 py-1.5 space-y-0.5 sidebar-scroll">
+          <div
+            role="listbox"
+            className="max-h-80 overflow-y-auto p-1 py-1.5 space-y-0.5 sidebar-scroll"
+          >
             {options.map((option) => (
               <button
+                type="button"
                 key={option.value}
+                role="option"
+                aria-selected={value === option.value}
                 onClick={() => {
                   onChange(option.value);
                   setIsOpen(false);

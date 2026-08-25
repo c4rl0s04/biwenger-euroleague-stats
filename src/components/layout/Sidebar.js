@@ -2,50 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Trophy,
-  Users,
-  User,
-  ShoppingCart,
-  Calendar,
-  Target,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Sparkles,
-  Clock,
-  Medal,
-  LayoutGrid,
-  Swords,
-  Scale,
-  Bot,
-  FlaskConical,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSections } from './SectionContext';
+import { NAV_ITEMS, isNavigationItemActive } from './navigation';
 
-const navItems = [
-  { name: 'Inicio', href: '/', icon: Home },
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Asistente IA', href: '/assistant', icon: Bot },
-  { name: 'Clasificación', href: '/standings', icon: Trophy },
-  { name: 'Jugadores', href: '/players', icon: User },
-  { name: 'Mercado', href: '/market', icon: ShoppingCart },
-  { name: 'Partidos', href: '/matches', icon: Calendar },
-  { name: 'Alineación', href: '/lineup', icon: Sparkles },
-  { name: 'Horario Jugadores', href: '/schedule', icon: Users },
-  { name: 'Jornadas', href: '/rounds', icon: Clock },
-  { name: 'Torneos', href: '/tournaments', icon: Medal },
-  { name: 'Porras', href: '/predictions', icon: Target },
-  { name: 'Playoffs', href: '/playoffs', icon: Swords },
-  { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
-  { name: 'Comparativa', href: '/compare', icon: Scale },
-  { name: 'Análisis 25/26', href: '/season-review', icon: FlaskConical },
-];
-
-export default function Sidebar({ isOpen, onClose }) {
+export default function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { sections } = useSections();
@@ -63,45 +25,18 @@ export default function Sidebar({ isOpen, onClose }) {
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {isOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-          onClick={onClose}
-        />
-      )}
-
       {/* Sidebar */}
       <aside
         className={`
-          fixed md:sticky top-0 left-0 h-screen z-50
+          hidden lg:sticky lg:flex top-16 left-0 h-[calc(100dvh-4rem)] z-30
           ${sidebarWidth}
           bg-card/40 backdrop-blur-xl border-r border-border/40
-          flex flex-col
+          flex-col
           transition-all duration-300 ease-in-out
-          md:top-16 md:h-[calc(100vh-4rem)]
-          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
-        {/* Mobile Header (only visible on mobile) */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-border/20 md:hidden">
-          <Link href="/" className="flex items-center gap-2" onClick={onClose}>
-            <span className="text-lg font-bold font-sans bg-gradient-to-br from-white via-white to-primary/80 bg-clip-text text-transparent tracking-tight">
-              Biwenger<span className="text-primary">Stats</span>
-            </span>
-          </Link>
-
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-white/5 text-muted-foreground"
-            aria-label="Close menu"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
         {/* Desktop Toggle */}
-        <div className="hidden md:flex items-center h-14 px-4 border-b border-white/5 justify-center">
+        <div className="flex items-center h-14 px-4 border-b border-white/5 justify-center">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-2 rounded-xl hover:bg-white/5 text-muted-foreground transition-all duration-300 hover:text-foreground group cursor-pointer"
@@ -118,12 +53,8 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Navigation Items */}
         <nav className="flex-1 py-6 overflow-y-auto overflow-x-hidden sidebar-scroll">
           <ul className="space-y-1 px-3">
-            {navItems.map((item) => {
-              const isPlayersList = item.href === '/players';
-              const isActive =
-                pathname === item.href ||
-                pathname.startsWith(item.href + '/') ||
-                (isPlayersList && pathname.startsWith('/player/'));
+            {NAV_ITEMS.map((item) => {
+              const isActive = isNavigationItemActive(pathname, item.href);
               const hasSections = isActive && sections.length > 0;
 
               return (
@@ -131,7 +62,6 @@ export default function Sidebar({ isOpen, onClose }) {
                   <div className="relative flex items-center">
                     <Link
                       href={item.href}
-                      onClick={onClose}
                       className={`
                         group flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
                         transition-all duration-300 relative overflow-hidden

@@ -159,7 +159,7 @@ export default function Home() {
                 >
                   <div className="flex flex-col h-full">
                     <p className="text-muted-foreground text-base mb-6">{card.description}</p>
-                    <div className="mt-auto flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                    <div className="mt-auto flex translate-x-0 items-center text-sm font-medium text-primary opacity-100 transition-all duration-300 lg:-translate-x-2 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100">
                       Abrir Página <ArrowRight size={16} className="ml-1" />
                     </div>
                   </div>

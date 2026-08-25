@@ -35,7 +35,12 @@ const COLUMN_COLOR_MAP = {
  */
 export function Table({ children, className, tableClassName }) {
   return (
-    <div className={cn('overflow-x-auto rounded-xl overflow-hidden', className)}>
+    <div
+      className={cn('overflow-x-auto rounded-xl', className)}
+      tabIndex={0}
+      role="region"
+      aria-label="Tabla desplazable"
+    >
       <table className={cn('w-full text-sm text-left border-collapse', tableClassName)}>
         {children}
       </table>
@@ -309,6 +314,29 @@ export default function StatsTable({
     setSortConfig({ key, direction });
   };
 
+  const renderManagerIdentity = (row) => {
+    const uName = row[managerKey] || 'Unknown';
+    const uId = row[managerIdKey];
+    const uIcon = row[managerIconKey];
+    const uColorIdx = row[managerColorIndexKey];
+    const userColor = getColorForUser(uId, uName, uColorIdx);
+    return (
+      <TableIdentity
+        name={uName}
+        image={uIcon}
+        link={`/user/${uId || uName}`}
+        color={userColor.text}
+        subtitle={
+          managerSubtitleKey || managerSubtitleRender
+            ? managerSubtitleRender
+              ? managerSubtitleRender(row[managerSubtitleKey], row)
+              : row[managerSubtitleKey]
+            : null
+        }
+      />
+    );
+  };
+
   return (
     <ElegantCard
       title={title}
@@ -317,7 +345,55 @@ export default function StatsTable({
       padding="p-3 md:p-6"
       className={cn('h-full', className)}
     >
-      <Table>
+      {!children && (
+        <div className="space-y-3 md:hidden">
+          {columns.some((column) => column.sortable !== false) && (
+            <label className="block text-xs font-bold text-muted-foreground">
+              Ordenar resultados
+              <select
+                value={sortConfig.key}
+                onChange={(event) => handleSort(event.target.value)}
+                className="mt-2 h-11 w-full rounded-xl border border-border bg-secondary px-3 text-base text-foreground"
+              >
+                {showManagerColumn && <option value={managerKey}>Manager</option>}
+                {columns
+                  .filter((column) => column.sortable !== false)
+                  .map((column) => (
+                    <option key={column.key} value={column.key}>
+                      {column.label}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          )}
+          <ul className="space-y-3">
+            {sortedData.map((row, idx) => (
+              <li
+                key={row[managerIdKey] || idx}
+                className="rounded-2xl border border-border/70 bg-white/[0.025] p-4"
+              >
+                {showManagerColumn && <div className="mb-4">{renderManagerIdentity(row)}</div>}
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  {columns.map((column) => {
+                    const value = row[column.key];
+                    return (
+                      <div key={column.key} className="min-w-0 border-t border-white/5 pt-2">
+                        <dt className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                          {column.label}
+                        </dt>
+                        <dd className="mt-1 break-words text-sm font-bold text-foreground">
+                          {column.render ? column.render(value, row, idx) : value}
+                        </dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <Table className={children ? '' : 'hidden md:block'}>
         <TableHeader>
           <TableRow hovering={false}>
             {(() => {
@@ -358,12 +434,6 @@ export default function StatsTable({
         ) : (
           <tbody className="">
             {sortedData.map((row, idx) => {
-              const uName = row[managerKey] || 'Unknown';
-              const uId = row[managerIdKey];
-              const uIcon = row[managerIconKey];
-              const uColorIdx = row[managerColorIndexKey];
-              const userColor = getColorForUser(uId, uName, uColorIdx);
-
               return (
                 <TableRow key={idx}>
                   {(() => {
@@ -392,19 +462,7 @@ export default function StatsTable({
                         managerColumnIndex,
                         0,
                         <TableCell key="manager-cell" align={managerAlign}>
-                          <TableIdentity
-                            name={uName}
-                            image={uIcon}
-                            link={`/user/${uId || uName}`}
-                            color={userColor.text}
-                            subtitle={
-                              managerSubtitleKey || managerSubtitleRender
-                                ? managerSubtitleRender
-                                  ? managerSubtitleRender(row[managerSubtitleKey], row)
-                                  : row[managerSubtitleKey]
-                                : null
-                            }
-                          />
+                          {renderManagerIdentity(row)}
                         </TableCell>
                       );
                     }
