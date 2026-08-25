@@ -60,13 +60,20 @@ export const InfoTooltip = ({ content, iconSize = 14 }) => {
   if (!content) return null;
 
   return (
-    <div className="group/info relative cursor-help inline-flex items-center">
-      <Info size={iconSize} className="text-slate-400 hover:text-primary transition-colors" />
+    <details className="group/info relative inline-flex items-center">
+      <summary
+        className="flex min-h-11 min-w-11 cursor-help list-none items-center justify-center rounded-full text-slate-400 transition-colors hover:text-primary focus-visible:text-primary [&::-webkit-details-marker]:hidden"
+        aria-label="Mostrar información"
+      >
+        <Info size={iconSize} aria-hidden="true" />
+      </summary>
 
       <div
         className="
-        absolute left-1/2 -translate-x-1/2 bottom-full mb-3 min-w-[240px] max-w-[320px]
-        opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible 
+        fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))]
+        opacity-0 invisible group-open/info:opacity-100 group-open/info:visible
+        sm:absolute sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:bottom-full sm:mb-3
+        sm:min-w-[240px] sm:max-w-[320px] sm:group-hover/info:opacity-100 sm:group-hover/info:visible
         transition-all duration-300 z-50 text-left
       "
       >
@@ -74,6 +81,6 @@ export const InfoTooltip = ({ content, iconSize = 14 }) => {
           {content}
         </GlassTooltip>
       </div>
-    </div>
+    </details>
   );
 };

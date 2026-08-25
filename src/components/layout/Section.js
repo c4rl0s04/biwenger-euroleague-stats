@@ -52,15 +52,19 @@ export default function Section({
     <FadeIn delay={delay}>
       <section
         id={sectionId}
-        className={`${background} px-4 sm:px-6 lg:px-8 py-10 scroll-mt-16 ${className}`}
+        className={`${background} px-4 sm:px-6 lg:px-8 py-7 sm:py-8 lg:py-10 scroll-mt-20 ${className}`}
       >
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
           <div className="space-y-1">
-            <h2 className="font-display text-5xl tracking-wide">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl leading-none tracking-wide break-words">
               <span className="text-foreground">{firstWord}</span>
               {restWords && <span className="text-gradient"> {restWords}</span>}
             </h2>
-            {subtitle && <p className="text-xl text-gradient font-medium">{subtitle}</p>}
+            {subtitle && (
+              <p className="text-sm sm:text-base lg:text-xl text-gradient font-medium leading-relaxed">
+                {subtitle}
+              </p>
+            )}
           </div>
           {children}
         </div>

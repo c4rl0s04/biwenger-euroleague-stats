@@ -1,36 +1,39 @@
 'use client';
 
-import { useState } from 'react';
 import TopHeader from './TopHeader';
 import Sidebar from './Sidebar';
+import MobileNavigation from './MobileNavigation';
 import Link from 'next/link';
 import { Github, Twitter, Instagram } from 'lucide-react';
 import NewsTicker from '../ui/NewsTicker';
 
 export default function AppShell({ children }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen flex flex-col">
+      <a href="#main-content" className="skip-link">
+        Saltar al contenido
+      </a>
       {/* Top Header - always visible */}
-      <TopHeader onMobileMenuClick={() => setIsMobileMenuOpen(true)} />
+      <TopHeader />
 
       <div className="flex flex-1">
         {/* Sidebar - hidden on mobile unless open */}
-        <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+        <Sidebar />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar">
           <NewsTicker />
-          <main className="flex-grow w-full">{children}</main>
+          <main id="main-content" tabIndex={-1} className="flex-grow w-full app-main-content">
+            {children}
+          </main>
 
           {/* Premium Footer */}
           <footer className="border-t border-white/5 mt-auto bg-card/20 backdrop-blur-md relative overflow-hidden">
             {/* Subtle accent glow */}
             <div className="absolute bottom-0 left-1/4 w-[500px] h-[200px] bg-primary/5 blur-[120px] rounded-full -z-10" />
 
-            <div className="max-w-7xl mx-auto px-6 py-16">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-16">
+              <div className="mb-8 grid grid-cols-1 gap-8 md:mb-12 md:grid-cols-4 md:gap-12">
                 {/* Brand Section */}
                 <div className="col-span-1 md:col-span-2 space-y-6">
                   <div className="flex items-center gap-2">
@@ -46,7 +49,7 @@ export default function AppShell({ children }) {
                 </div>
 
                 {/* Navigation Columns */}
-                <div className="space-y-6">
+                <div className="hidden space-y-6 md:block">
                   <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-sans">
                     Project
                   </h4>
@@ -82,7 +85,7 @@ export default function AppShell({ children }) {
                 </div>
 
                 {/* Social & Version */}
-                <div className="space-y-6">
+                <div className="hidden space-y-6 md:block">
                   <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-sans">
                     Comunidad
                   </h4>
@@ -120,7 +123,7 @@ export default function AppShell({ children }) {
                 </div>
               </div>
 
-              <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-6 text-center md:flex-row md:gap-6 md:pt-8 md:text-left">
                 <p className="text-[11px] font-medium text-slate-500 font-sans tracking-wide">
                   © 2026 BiwengerStats. Built for the European Basketball Community.
                 </p>
@@ -140,6 +143,7 @@ export default function AppShell({ children }) {
           </footer>
         </div>
       </div>
+      <MobileNavigation />
     </div>
   );
 }
