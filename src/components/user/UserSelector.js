@@ -5,7 +5,7 @@ import { useClientUser } from '@/lib/hooks/useClientUser';
 import { ChevronDown, UserCircle2, LogOut, LogIn } from 'lucide-react';
 import { UserAvatar } from '@/components/ui';
 import { signOut } from 'next-auth/react';
-import Link from 'next/link';
+import { NavigationLink } from '@/components/layout/NavigationFeedback';
 
 export default function UserSelector() {
   const { currentUser, users, isClient, isAuthenticated } = useClientUser();
@@ -18,13 +18,14 @@ export default function UserSelector() {
 
   if (!isAuthenticated) {
     return (
-      <Link
+      <NavigationLink
         href="/login"
+        navigationLabel="Acceso Manager"
         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/50 rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95 group"
       >
         <LogIn className="w-4 h-4" />
         <span className="text-xs font-bold uppercase tracking-widest">Acceso Manager</span>
-      </Link>
+      </NavigationLink>
     );
   }
 
@@ -33,8 +34,12 @@ export default function UserSelector() {
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-card/40 hover:bg-white/5 border border-white/10 rounded-xl transition-all cursor-pointer group"
+        className="shell-action touch-target flex items-center gap-2 px-3 py-2 bg-card/40 hover:bg-white/5 border border-white/10 rounded-xl transition-all cursor-pointer group"
+        aria-label={isOpen ? 'Cerrar perfil' : 'Abrir perfil'}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
         <UserAvatar
           src={currentUser.icon}
@@ -62,8 +67,9 @@ export default function UserSelector() {
             </div>
 
             <div className="p-1.5">
-              <Link
+              <NavigationLink
                 href={`/user/${currentUser.id}`}
+                navigationLabel="Perfil"
                 onClick={() => setIsOpen(false)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 text-zinc-400 hover:text-white transition-colors text-left rounded-xl group"
               >
@@ -71,11 +77,12 @@ export default function UserSelector() {
                   <UserCircle2 size={16} />
                 </div>
                 <span className="text-sm font-medium">Ver Perfil</span>
-              </Link>
+              </NavigationLink>
 
               <div className="h-px bg-white/5 my-1.5 mx-1.5" />
 
               <button
+                type="button"
                 onClick={async () => {
                   setIsOpen(false);
                   await signOut({ redirect: false });

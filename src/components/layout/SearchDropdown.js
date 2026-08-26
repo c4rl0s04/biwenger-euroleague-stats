@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Search, User, Users, Trophy, X, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
+import { useNavigationFeedback } from './NavigationFeedback';
 
 /**
  * SearchDropdown - Global search with dropdown results
@@ -18,6 +19,7 @@ export default function SearchDropdown({ onClose }) {
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
   const router = useRouter();
+  const { beginNavigation } = useNavigationFeedback();
 
   // Debounced search
   useEffect(() => {
@@ -71,15 +73,18 @@ export default function SearchDropdown({ onClose }) {
       setIsOpen(false);
       setQuery('');
       if (item.type === 'player') {
+        beginNavigation(`/player/${item.id}`, item.name);
         router.push(`/player/${item.id}`);
       } else if (item.type === 'team') {
+        beginNavigation(`/team/${item.id}`, item.name);
         router.push(`/team/${item.id}`);
       } else if (item.type === 'user') {
+        beginNavigation(`/user/${item.id}`, item.name);
         router.push(`/user/${item.id}`);
       }
       onClose?.();
     },
-    [router, onClose]
+    [router, onClose, beginNavigation]
   );
 
   const handleKeyDown = useCallback(

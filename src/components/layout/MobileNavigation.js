@@ -1,11 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Download, MoreHorizontal, Settings, X } from 'lucide-react';
+import { Download, LoaderCircle, MoreHorizontal, Settings, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import SearchDropdown from './SearchDropdown';
 import { MOBILE_PRIMARY_ITEMS, NAV_ITEMS, isNavigationItemActive } from './navigation';
+import { NavigationLink, useNavigationFeedback } from './NavigationFeedback';
 
 function MoreSheet({ isOpen, onClose }) {
   const pathname = usePathname();
@@ -101,27 +101,38 @@ function MoreSheet({ isOpen, onClose }) {
               const active = isNavigationItemActive(pathname, item.href);
               return (
                 <li key={item.href}>
-                  <Link
+                  <NavigationLink
                     href={item.href}
+                    navigationLabel={item.name}
                     onClick={onClose}
                     aria-current={active ? 'page' : undefined}
                     className={`mobile-more-link ${active ? 'mobile-more-link-active' : ''}`}
                   >
                     <item.icon size={20} aria-hidden="true" />
                     <span>{item.name}</span>
-                  </Link>
+                  </NavigationLink>
                 </li>
               );
             })}
           </ul>
 
           <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/8 pt-4">
-            <Link href="/settings" onClick={onClose} className="mobile-more-link">
+            <NavigationLink
+              href="/settings"
+              navigationLabel="Ajustes"
+              onClick={onClose}
+              className="mobile-more-link"
+            >
               <Settings size={20} aria-hidden="true" /> Ajustes
-            </Link>
-            <Link href="/install" onClick={onClose} className="mobile-more-link">
+            </NavigationLink>
+            <NavigationLink
+              href="/install"
+              navigationLabel="Instalar"
+              onClick={onClose}
+              className="mobile-more-link"
+            >
               <Download size={20} aria-hidden="true" /> Instalar
-            </Link>
+            </NavigationLink>
           </div>
         </nav>
       </section>
@@ -132,6 +143,7 @@ function MoreSheet({ isOpen, onClose }) {
 export default function MobileNavigation() {
   const pathname = usePathname();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const { isNavigatingTo } = useNavigationFeedback();
   const primaryActive = MOBILE_PRIMARY_ITEMS.some((item) =>
     isNavigationItemActive(pathname, item.href)
   );
@@ -142,16 +154,22 @@ export default function MobileNavigation() {
         <div className="mobile-bottom-nav-inner">
           {MOBILE_PRIMARY_ITEMS.map((item) => {
             const active = isNavigationItemActive(pathname, item.href);
+            const pending = isNavigatingTo(item.href);
             return (
-              <Link
+              <NavigationLink
                 key={item.href}
                 href={item.href}
+                navigationLabel={item.shortName || item.name}
                 aria-current={active ? 'page' : undefined}
-                className={`mobile-nav-item ${active ? 'mobile-nav-item-active' : ''}`}
+                className={`mobile-nav-item ${active ? 'mobile-nav-item-active' : ''} ${pending ? 'mobile-nav-item-pending' : ''}`}
               >
-                <item.icon size={21} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
+                {pending ? (
+                  <LoaderCircle className="mobile-nav-spinner" size={21} aria-hidden="true" />
+                ) : (
+                  <item.icon size={21} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
+                )}
                 <span>{item.shortName || item.name}</span>
-              </Link>
+              </NavigationLink>
             );
           })}
           <button

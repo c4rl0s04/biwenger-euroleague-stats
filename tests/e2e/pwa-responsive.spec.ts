@@ -51,8 +51,46 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
   await expect(page).toHaveURL(/\/dashboard/);
 
   if ((page.viewportSize()?.width || 0) < 1024) {
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty('--app-safe-area-top', '32px');
+    });
+
+    const header = page.getByRole('banner');
+    const searchButton = page.getByRole('button', { name: 'Abrir búsqueda' });
+    const profileButton = page.getByRole('button', { name: 'Abrir perfil' });
+    const [headerBox, searchBox, profileBox] = await Promise.all([
+      header.boundingBox(),
+      searchButton.boundingBox(),
+      profileButton.boundingBox(),
+    ]);
+
+    expect(headerBox?.height).toBeGreaterThanOrEqual(96);
+    expect(searchBox?.y).toBeGreaterThanOrEqual(32);
+    expect(profileBox?.y).toBeGreaterThanOrEqual(32);
+
     const navigation = page.getByRole('navigation', { name: 'Navegación principal móvil' });
     await expect(navigation).toBeVisible();
+
+    let releaseStandingsRequest = () => {};
+    const standingsRequestBlocked = new Promise<void>((resolve) => {
+      releaseStandingsRequest = resolve;
+    });
+    await page.route('**/*', async (route) => {
+      const url = new URL(route.request().url());
+      if (url.pathname === '/standings') {
+        await standingsRequestBlocked;
+      }
+      await route.continue();
+    });
+
+    const standingsLink = navigation.getByRole('link', { name: 'Clasificación' });
+    const navigationPromise = standingsLink.click();
+    await expect(standingsLink).toHaveAttribute('aria-busy', 'true');
+    await expect(page.getByRole('status', { name: 'Cargando Clasificación' })).toBeVisible();
+    releaseStandingsRequest();
+    await navigationPromise;
+    await expect(page).toHaveURL(/\/standings/);
+
     await navigation.getByRole('button', { name: 'Más' }).click();
     await expect(page.getByRole('dialog', { name: /Más secciones/i })).toBeVisible();
     await page.keyboard.press('Escape');

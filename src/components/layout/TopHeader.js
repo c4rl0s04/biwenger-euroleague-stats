@@ -1,25 +1,36 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import { Search, Bell } from 'lucide-react';
 import { UserSelector } from '@/components/user';
 import { useState } from 'react';
 import SearchDropdown from './SearchDropdown';
 import SettingsDropdown from './SettingsDropdown';
+import { NavigationLink } from './NavigationFeedback';
 
 export default function TopHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <header className="h-16 bg-card/60 backdrop-blur-xl border-b border-border/40 sticky top-0 z-40 transition-all duration-300">
+    <header
+      className="app-top-header bg-card/60 backdrop-blur-xl border-b border-border/40 sticky top-0 z-40 transition-colors duration-300"
+      style={{
+        boxSizing: 'border-box',
+        height: 'calc(var(--app-header-height) + var(--app-safe-area-top))',
+        paddingTop: 'var(--app-safe-area-top)',
+      }}
+    >
       {/* Subtle premium gradient line at top */}
       <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-70" />
 
-      <div className="h-full flex items-center justify-between px-3 sm:px-4 lg:px-6">
+      <div className="app-top-header-inner h-16 flex items-center justify-between px-3 sm:px-4 lg:px-6">
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <NavigationLink
+            href="/"
+            navigationLabel="Inicio"
+            className="flex items-center gap-2 group"
+          >
             {/* Logo icon */}
             <div className="relative w-12 h-12 lg:w-16 lg:h-16 transition-transform group-hover:scale-105 duration-500">
               <Image
@@ -38,7 +49,7 @@ export default function TopHeader() {
                 Stats
               </span>
             </span>
-          </Link>
+          </NavigationLink>
         </div>
 
         {/* Center: Search Bar (desktop) */}
@@ -50,11 +61,13 @@ export default function TopHeader() {
         <div className="flex items-center gap-2 md:gap-3">
           {/* Mobile Search Toggle */}
           <button
+            type="button"
             onClick={() => setSearchOpen(!searchOpen)}
-            className="lg:hidden touch-target rounded-lg hover:bg-secondary text-muted-foreground"
+            className="shell-action lg:hidden touch-target rounded-lg hover:bg-secondary text-muted-foreground"
             aria-label={searchOpen ? 'Cerrar búsqueda' : 'Abrir búsqueda'}
+            aria-expanded={searchOpen}
           >
-            <Search size={20} />
+            <Search size={20} aria-hidden="true" />
           </button>
 
           {/* Notifications */}
