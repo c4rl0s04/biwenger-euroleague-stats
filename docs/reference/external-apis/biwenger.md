@@ -44,8 +44,8 @@ three times with exponential delay. Other non-success responses are surfaced wit
 | Offers                  | `/offers/{id}`                                           | Accept/reject user offers                          |
 
 Exact query fields are centralized in [`config.js`](../../../src/lib/config.js) and wrappers in the
-client. The numbered steps map provider payloads into the tables described by the
-[data model](../data-model.md).
+client. Descriptive, source-specific pipeline steps map provider payloads into the tables described
+by the [data model](../data-model.md).
 
 ## Failure handling
 

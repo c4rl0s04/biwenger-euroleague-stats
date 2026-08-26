@@ -28,7 +28,7 @@ status: active
 - Services: `predictionsService`, `playoffService`, `tournamentService`, and `statsService` under
   [`src/lib/services`](../../src/lib/services).
 - Data: feature queries and tournament queries/mutations under [`src/lib/db`](../../src/lib/db).
-- Sync: numbered steps 13 and 14 plus the separate playoff command and
+- Sync: `biwenger-board` and `biwenger-tournaments`, plus the separate playoff command and
   [`playoff-data.json`](../../src/lib/sync/playoffs/playoff-data.json).
 
 ## Source distinctions

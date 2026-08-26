@@ -11,7 +11,7 @@ status: active
 
 # ADR-0003: Guarded idempotent sync pipeline
 
-- **Status:** accepted
+- **Status:** superseded by [ADR-0004](0004-single-source-declarative-sync.md)
 - **Date:** 2026-08-10
 - **Supersedes:** none
 

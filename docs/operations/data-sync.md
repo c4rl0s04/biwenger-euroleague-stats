@@ -35,44 +35,42 @@ accidentally enabling sync for a frozen season.
 
 ## Modes
 
-| Command                                      | Purpose                                                                |
-| -------------------------------------------- | ---------------------------------------------------------------------- |
-| `npm run sync`                               | Full ordered pipeline using the configured official provider.          |
-| `npm run sync:daily`                         | Routine refresh; skips initial squads, logos, images, and user colors. |
-| `npm run sync:live`                          | Live-focused match, score, and lineup updates.                         |
-| `npm run sync:playoffs`                      | Apply custom playoff metadata and results from checked-in JSON.        |
-| `npm run sync -- --step=N`                   | Run one numbered main-pipeline step for diagnosis or recovery.         |
-| `npm run sync -- --step=5 --force-game=CODE` | Reconcile one old finalized official game.                             |
-| `npm run sync:official:mappings -- report`   | Print the reproducible season mapping report.                          |
+| Command                                                     | Purpose                                                         |
+| ----------------------------------------------------------- | --------------------------------------------------------------- |
+| `npm run sync`                                              | Routine ordered refresh.                                        |
+| `npm run sync:bootstrap`                                    | Routine pipeline plus one-time initial squads and user colors.  |
+| `npm run sync:live`                                         | Official game data and missing Biwenger lineups only.           |
+| `npm run sync:playoffs`                                     | Apply custom playoff metadata and results from checked-in JSON. |
+| `npm run sync -- --step=match-linking`                      | Run one descriptive step for diagnosis or recovery.             |
+| `npm run sync -- --step=euroleague-games --force-game=CODE` | Reconcile one old finalized official game.                      |
+| `npm run sync:official:mappings -- report`                  | Print the reproducible season mapping report.                   |
 
-The normal full pipeline registers:
+The declarative pipeline is:
 
-1. Players
-2. Master data
-3. Matches
-4. Standings and users
-5. Player statistics
-6. User lineups
-7. Market transfers and bids
-8. Current squad ownership
-9. Initial squads
-10. Retired (logos moved to step 2)
-11. Retired (player images moved to step 2)
-12. User colors
-13. Prediction pools
-14. Tournaments
-15. Current market listings
+| Order | Step ID                   | Source              | Main storage owned                                                     | Modes              |
+| ----: | ------------------------- | ------------------- | ---------------------------------------------------------------------- | ------------------ |
+|     1 | `biwenger-catalog`        | Biwenger            | `players`, `teams`, `player_seasons`, `market_values`                  | routine, bootstrap |
+|     2 | `euroleague-master-data`  | EuroLeague          | `official_games`, standings, team/player mappings                      | routine, bootstrap |
+|     3 | `match-linking`           | Biwenger + database | `matches` links and official sporting fields                           | routine, bootstrap |
+|     4 | `biwenger-users`          | Biwenger            | `users`, `user_seasons`                                                | routine, bootstrap |
+|     5 | `euroleague-games`        | EuroLeague          | game state, boxscores, events, shots, sporting round statistics        | all                |
+|     6 | `biwenger-fantasy-points` | Biwenger            | only `player_round_stats.fantasy_points`                               | routine, bootstrap |
+|     7 | `biwenger-lineups`        | Biwenger            | `lineups`, `user_rounds`                                               | all                |
+|     8 | `biwenger-board`          | Biwenger            | transfers, bids, finances, and prediction pools in one pagination pass | routine, bootstrap |
+|     9 | `biwenger-squads`         | Biwenger            | current `player_seasons.owner_id`                                      | routine, bootstrap |
+|    10 | `biwenger-market`         | Biwenger            | current-day `market_listings` snapshot                                 | routine, bootstrap |
+|    11 | `biwenger-tournaments`    | Biwenger            | tournaments, phases, fixtures, and standings                           | routine, bootstrap |
+|    12 | `initial-squads`          | Database            | `initial_squads`                                                       | bootstrap          |
+|    13 | `user-colors`             | Database            | `user_seasons.color_index`                                             | bootstrap          |
 
-Step 2 imports the official schedule, standings, crests, and available profiles. Step 3 calls
-Biwenger only for fantasy identities and links them to that calendar. Step 5 imports reports,
-metadata, boxscores, play-by-play, and shots, materializes sports totals, and finally applies
-Biwenger fantasy points. Steps 10 and 11 are intentionally no-ops and numbering 12–15 is retained.
+Running a single step is an explicit recovery operation and does not automatically run its declared
+dependencies. Check that prerequisite data is current first. Numeric `--step` values are rejected.
 
 Before first activation, apply additive migrations `0007` and `0008`, freeze and fingerprint `2025-26` with
 `npm run db:season:fingerprint -- --season=2025-26`, create/activate
-`2026-27`, and run `npm run sync:preflight`. Set
-`EUROLEAGUE_OFFICIAL_PROVIDER=advanced`; changing it to `legacy` is a deliberate rollback and never
-happens automatically.
+`2026-27`, and run `npm run sync:preflight`. The active implementation has one official source and
+does not contain a runtime provider selector. The removed implementation can be inspected from the
+`archive/euroleague-legacy-2025-26` tag if historical diagnosis is required.
 
 Before production, run the two-pass isolation harness against a migrated local database whose name
 contains `test` or `disposable`:
@@ -106,10 +104,8 @@ domain. A zero exit code does not prove that the provider supplied every optiona
   stop that job safely.
 - If season validation fails, correct configuration or use the season lifecycle. Never normalize a
   production frozen-season override.
-- Critical steps stop subsequent work by default. Fix the cause and rerun the pipeline or the
-  affected step; writes are designed to be idempotent.
-- `--continue-on-error` and `SYNC_CONTINUE_ON_ERROR=true` are diagnostic compatibility options. Use
-  them only when later steps are known not to depend on the failure.
+- Every failure stops subsequent work. Fix the cause and rerun the pipeline or the affected step;
+  writes are designed to be idempotent.
 - Provider authentication errors require a valid token; rate or incomplete-data errors may require a
   later retry.
 
