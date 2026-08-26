@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import path from 'path';
 
 export default defineConfig({
@@ -8,6 +8,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: [...configDefaults.exclude, 'tests/e2e/**'],
     setupFiles: ['./src/tests/setup.ts'],
   },
 });
