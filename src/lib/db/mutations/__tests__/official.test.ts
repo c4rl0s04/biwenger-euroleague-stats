@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { prepareOfficialMutations } from '../official';
+import { prepareOfficialGameMutations } from '../official/game-data';
 
 const stat = {
   gameCode: 1,
@@ -49,7 +49,7 @@ function database() {
 describe('official game reconciliation', () => {
   it('upserts partial live data without deleting possibly missing events', async () => {
     const { db, client } = database();
-    const mutations = prepareOfficialMutations(db as any, '2026-27');
+    const mutations = prepareOfficialGameMutations(db as any, '2026-27');
     await mutations.persistGameData({
       gameCode: 1,
       report: null,
@@ -68,7 +68,7 @@ describe('official game reconciliation', () => {
 
   it('replaces all granular datasets transactionally when a game finishes', async () => {
     const { db, client } = database();
-    const mutations = prepareOfficialMutations(db as any, '2026-27');
+    const mutations = prepareOfficialGameMutations(db as any, '2026-27');
     await mutations.persistGameData({
       gameCode: 1,
       report: null,
@@ -90,7 +90,7 @@ describe('official game reconciliation', () => {
 
   it('materializes sporting fields without overwriting Biwenger fantasy points', async () => {
     const { db } = database();
-    const mutations = prepareOfficialMutations(db as any, '2026-27');
+    const mutations = prepareOfficialGameMutations(db as any, '2026-27');
     await mutations.materializeRoundStats(10);
     const sql = db.query.mock.calls[0][0];
     expect(sql).not.toContain('fantasy_points');

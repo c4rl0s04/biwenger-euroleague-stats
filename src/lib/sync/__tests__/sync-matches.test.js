@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { syncMatches } from '../services/biwenger/matches.js';
+import { run as syncMatches } from '../services/biwenger/matches.js';
 import * as client from '../../api/biwenger-client.js';
 
 // Mock biwenger-client
 vi.mock('../../api/biwenger-client.js', () => ({
+  biwengerFetch: vi.fn(),
+  fetchAllPlayers: vi.fn(),
+  fetchPlayerDetails: vi.fn(),
   fetchRoundGames: vi.fn(),
 }));
 
@@ -63,6 +66,12 @@ describe('syncMatches', () => {
     };
   });
 
+  const manager = () => ({
+    context: { db, seasonId: '2026-27' },
+    resolveRoundId: (round) => round.dbId || round.id,
+    log: vi.fn(),
+  });
+
   it('should sync matches correctly when data is returned', async () => {
     const mockGamesData = {
       data: {
@@ -81,7 +90,7 @@ describe('syncMatches', () => {
     client.fetchRoundGames.mockResolvedValue(mockGamesData);
 
     const round = { id: 4746, name: 'Jornada 1', dbId: 4746 };
-    await syncMatches(db, round);
+    await syncMatches(manager(), round);
 
     // Verify fetchRoundGames was called
     expect(client.fetchRoundGames).toHaveBeenCalledWith(4746);
@@ -96,11 +105,13 @@ describe('syncMatches', () => {
     expect(insert[1]).not.toContain(80);
   });
 
-  it('should handle API errors gracefully', async () => {
+  it('fails fast when Biwenger cannot return the round games', async () => {
     client.fetchRoundGames.mockRejectedValue(new Error('API Error'));
 
     const round = { id: 4746, name: 'Jornada 1' };
-    await syncMatches(db, round);
+    await expect(syncMatches(manager(), round)).rejects.toThrow(
+      'Could not load fantasy and official match inputs'
+    );
 
     expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('INSERT INTO matches'));
   });

@@ -84,8 +84,7 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
       ),
     ]);
   } catch (error: any) {
-    manager.error(`   ❌ Could not load fantasy/official match inputs: ${error.message}`);
-    return { success: false, message: error.message, error };
+    throw new Error('Could not load fantasy and official match inputs.', { cause: error });
   }
 
   const games = gamesData?.data?.games || gamesData?.games || [];
@@ -147,15 +146,8 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
   manager.log(
     `   ✅ Linked ${synced} fantasy matches to official games (${unresolved} unresolved).`
   );
-  return { success: unresolved === 0, message: `Linked ${synced} matches.`, data: games };
+  if (unresolved > 0) {
+    throw new Error(`${unresolved} Biwenger matches could not be linked to official games.`);
+  }
+  return { synced, games: games.length };
 }
-
-export const syncMatches = async (db: any, round: any, playersList: any) => {
-  const mockManager = {
-    context: { db, seasonId: process.env.SEASON_ID || '2026-27' },
-    resolveRoundId: (value: any) => value.id,
-    log: console.log,
-    error: console.error,
-  } as unknown as SyncManager;
-  return run(mockManager, round, playersList);
-};

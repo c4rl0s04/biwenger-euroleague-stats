@@ -27,12 +27,17 @@ describe('sync workflow season configuration', () => {
     });
   }
 
-  it('the official image sync uses the canonical EuroLeague code', () => {
-    const source = fs.readFileSync(
-      path.join(process.cwd(), 'src', 'lib', 'sync', 'steps', '11-official-images.ts'),
+  it('scheduled workflows use the simplified routine and live commands', () => {
+    const routine = fs.readFileSync(
+      path.join(process.cwd(), '.github', 'workflows', 'sync.yml'),
       'utf8'
     );
-    expect(source).toContain('CONFIG.SEASON.EUROLEAGUE_CODE');
-    expect(source).not.toContain('E2025');
+    const live = fs.readFileSync(
+      path.join(process.cwd(), '.github', 'workflows', 'sync-live.yml'),
+      'utf8'
+    );
+    expect(routine).toContain('npm run sync:preflight && npm run sync');
+    expect(routine).not.toContain('sync:daily');
+    expect(live).toContain('npm run sync:live');
   });
 });

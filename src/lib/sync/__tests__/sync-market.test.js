@@ -1,10 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { syncBoard } from '../steps/07-market.js';
-import * as client from '../../api/biwenger-client.js';
-
-vi.mock('../../api/biwenger-client.js', () => ({
-  biwengerFetch: vi.fn(),
-}));
+import { run } from '../steps/biwenger-board.js';
 
 vi.mock('../../config.js', () => ({
   CONFIG: {
@@ -23,9 +18,11 @@ vi.mock('../../config.js', () => ({
 
 describe('syncBoard', () => {
   let db;
+  let fetchBoard;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    fetchBoard = vi.fn();
 
     db = {
       query: vi.fn(async (sql) => {
@@ -45,8 +42,20 @@ describe('syncBoard', () => {
     };
   });
 
+  const manager = () => ({
+    context: { db, seasonId: '2026-27' },
+    mode: 'bootstrap',
+    getBiwengerCompetition: vi.fn(async () => ({
+      players: {},
+      teams: { 1: { name: 'Real Madrid' } },
+      rounds: [],
+    })),
+    resolveRoundId: (round) => round.id,
+    log: vi.fn(),
+  });
+
   it('inserts transfers even when the player is missing from playersList', async () => {
-    client.biwengerFetch
+    fetchBoard
       .mockResolvedValueOnce({
         data: [
           {
@@ -65,9 +74,9 @@ describe('syncBoard', () => {
       })
       .mockResolvedValueOnce({ data: [] });
 
-    const result = await syncBoard(db, {}, {}, '2025-26');
+    const result = await run(manager(), { fetch: fetchBoard });
 
-    expect(result.success).toBe(true);
+    expect(result.counts.transfers).toBe(1);
     expect(db.query).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO fichajes'),
       expect.arrayContaining([1759685765, 'June', 'Mercado', 24806, 1872600])
@@ -75,7 +84,7 @@ describe('syncBoard', () => {
   });
 
   it('skips transfers involving actors outside users and market', async () => {
-    client.biwengerFetch
+    fetchBoard
       .mockResolvedValueOnce({
         data: [
           {
@@ -94,9 +103,36 @@ describe('syncBoard', () => {
       })
       .mockResolvedValueOnce({ data: [] });
 
-    await syncBoard(db, {}, {}, '2025-26');
+    await run(manager(), { fetch: fetchBoard });
 
     const insertCalls = db.query.mock.calls.filter(([sql]) => sql.includes('INSERT INTO fichajes'));
     expect(insertCalls).toHaveLength(0);
+  });
+
+  it('stores prediction pools in the same pass without changing ownership', async () => {
+    fetchBoard
+      .mockResolvedValueOnce({
+        data: [
+          {
+            type: 'bettingPool',
+            date: 1759685765,
+            content: {
+              pool: {
+                round: { id: 7, name: 'Jornada 7' },
+                responses: [{ id: 10, response: [80, 75], hits: 1 }],
+              },
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ data: [] });
+
+    const result = await run(manager(), { fetch: fetchBoard });
+    expect(result.counts.pools).toBe(1);
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO porras'),
+      expect.arrayContaining(['2026-27', '10', 7, '80-75'])
+    );
+    expect(db.query.mock.calls.map(([sql]) => sql).join('\n')).not.toContain('owner_id');
   });
 });
