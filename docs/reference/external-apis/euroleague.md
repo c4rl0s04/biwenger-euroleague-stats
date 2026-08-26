@@ -11,14 +11,15 @@ status: active
 
 # EuroLeague Advanced API
 
-From `2026-27`, [`euroleague-advanced-client.ts`](../../../src/lib/api/euroleague-advanced-client.ts)
-is the primary sporting-data source. The old official client remains behind the manual
-`EUROLEAGUE_OFFICIAL_PROVIDER=legacy` switch for the first two rounds only. There is no automatic
-fallback because one run must never mix official providers.
+From `2026-27`, the modules under
+[`src/lib/api/euroleague`](../../../src/lib/api/euroleague) are the only active sporting-data source.
+The previous XML/API implementation is not bundled into the runtime and is preserved for reference
+in the `archive/euroleague-legacy-2025-26` Git tag.
 
-The client validates every response boundary with Zod, times out after 20 seconds, retries `429`,
-network errors, and `5xx`, and treats future-game `404` responses as data not yet available. An
-optional bearer token is supported, but the initial integration only consumes free endpoints.
+Each endpoint has its own Zod boundary schema. The client times out after 20 seconds, retries `429`,
+network errors, and `5xx`, and treats a `404` as “not available yet” only for game-scoped endpoints.
+A `404` or malformed response from schedule, standings, or season profiles is an error. An optional
+bearer token is supported, but the integration only consumes free endpoints.
 
 ## Free endpoint ownership
 
@@ -52,7 +53,7 @@ official storage with `review_required` and do not enter `player_round_stats`.
 
 At most two games are processed concurrently. Live events and shots are upserted without deleting
 temporarily absent rows. A finished game is replaced transactionally and receives a checksum and
-`finalized_at`. Daily sync rechecks finals for 48 hours, replacing only a changed checksum; older
+`finalized_at`. Routine sync rechecks finals for 48 hours, replacing only a changed checksum; older
 games require `--force-game=<code>`.
 
 The API's current individual/non-commercial terms must be reviewed before any commercial use.

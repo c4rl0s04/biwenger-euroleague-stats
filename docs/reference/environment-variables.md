@@ -37,7 +37,6 @@ scripts load dotenv before importing shared configuration. Do not commit real va
 | `SEASON_ID`                     | Canonical `YYYY-YY` season identifier. Required for mutating sync.     |
 | `SEASON_NAME`                   | Human-readable season name.                                            |
 | `EUROLEAGUE_SEASON_CODE`        | Official provider code in `EYYYY` form matching the season start year. |
-| `EUROLEAGUE_OFFICIAL_PROVIDER`  | Manual official-source selector: `advanced` or emergency `legacy`.     |
 | `EUROLEAGUE_ADVANCED_API_URL`   | Optional Advanced API base URL override.                               |
 | `EUROLEAGUE_ADVANCED_API_TOKEN` | Optional bearer token; free endpoints do not require one.              |
 | `LEAGUE_START_DATE`             | Season start date in `YYYY-MM-DD` form.                                |
@@ -63,17 +62,16 @@ selects OpenAI. Provider keys are server-only.
 
 These flags are not normal persistent configuration:
 
-| Variable                      | Purpose                                                                     |
-| ----------------------------- | --------------------------------------------------------------------------- |
-| `BACKUP_CONFIRMED`            | Required acknowledgement for season mutations.                              |
-| `ALLOW_REMOTE_SCHEMA_AUDIT`   | Permit schema audit against a remote-looking target.                        |
-| `ALLOW_REMOTE_SEASON_AUDIT`   | Permit season audit against a remote-looking target.                        |
-| `ALLOW_REMOTE_PRICE_REPAIR`   | Permit applying price repair to a remote-looking target.                    |
-| `ALLOW_REMOTE_TEST_DB`        | Permit optional DB tests against a remote target.                           |
-| `ALLOW_SCHEMA_BOOTSTRAP`      | Explicitly permit transitional schema bootstrap where normally disabled.    |
-| `ALLOW_SYNC_ON_FROZEN_SEASON` | Non-production diagnostic override for the season guard.                    |
-| `SYNC_CONTINUE_ON_ERROR`      | Continue after critical step failures; use only for understood diagnostics. |
-| `RUN_DB_TESTS`                | Enable optional database-backed integration tests.                          |
-| `ANALYZE`                     | Enable bundle-analyzer configuration during the analyze build.              |
+| Variable                      | Purpose                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `BACKUP_CONFIRMED`            | Required acknowledgement for season mutations.                           |
+| `ALLOW_REMOTE_SCHEMA_AUDIT`   | Permit schema audit against a remote-looking target.                     |
+| `ALLOW_REMOTE_SEASON_AUDIT`   | Permit season audit against a remote-looking target.                     |
+| `ALLOW_REMOTE_PRICE_REPAIR`   | Permit applying price repair to a remote-looking target.                 |
+| `ALLOW_REMOTE_TEST_DB`        | Permit optional DB tests against a remote target.                        |
+| `ALLOW_SCHEMA_BOOTSTRAP`      | Explicitly permit transitional schema bootstrap where normally disabled. |
+| `ALLOW_SYNC_ON_FROZEN_SEASON` | Non-production diagnostic override for the season guard.                 |
+| `RUN_DB_TESTS`                | Enable optional database-backed integration tests.                       |
+| `ANALYZE`                     | Enable bundle-analyzer configuration during the analyze build.           |
 
 Review the relevant [operations runbook](../operations/README.md) before setting a safety flag.

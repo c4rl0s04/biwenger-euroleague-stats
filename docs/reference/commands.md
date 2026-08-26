@@ -32,12 +32,16 @@ status: active
 | Command                                    | Behavior                                                                         |
 | ------------------------------------------ | -------------------------------------------------------------------------------- |
 | `npm run setup`                            | Interactive local environment setup.                                             |
-| `npm run sync`                             | Full guarded pipeline; retired steps 10/11 preserve numbering.                   |
-| `npm run sync:daily`                       | Routine pipeline with heavy/static steps skipped.                                |
-| `npm run sync:live`                        | Live match/stat/lineup synchronization.                                          |
+| `npm run sync`                             | Routine guarded synchronization pipeline.                                        |
+| `npm run sync:bootstrap`                   | Routine pipeline plus bootstrap-only derived data.                               |
+| `npm run sync:live`                        | Official game data and missing-lineup synchronization.                           |
 | `npm run sync:preflight`                   | Validate configuration and workflow readiness without running the main pipeline. |
 | `npm run sync:playoffs`                    | Apply checked-in custom playoff data.                                            |
 | `npm run sync:official:mappings -- report` | Print season-scoped official mappings and pending reviews.                       |
+
+Use descriptive step IDs for targeted recovery, for example
+`npm run sync -- --step=biwenger-market`. Only
+`--step=euroleague-games` accepts `--force-game=<positive game code>`.
 
 Manual mappings use `assign-team --code=XXX --team-id=N` or
 `assign-player --code=P000000 --player-id=N`. The command accepts only the configured active season;

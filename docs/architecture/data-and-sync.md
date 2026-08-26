@@ -35,24 +35,40 @@ Use the [data model reference](../reference/data-model.md) for table-level owner
 
 ```mermaid
 flowchart TD
-  Command["Full, daily, live, or playoff command"] --> Preflight["Configuration and workflow preflight"]
+  Command["Routine, bootstrap, live, or playoff command"] --> Preflight["Configuration and workflow preflight"]
   Preflight --> Lock["PostgreSQL advisory lock"]
   Lock --> Schema["Schema readiness"]
   Schema --> Season["Writable season guard"]
-  Season --> Steps["Ordered provider and transformation steps"]
+  Season --> Pipeline["Declarative pipeline selection"]
+  Pipeline --> Steps["Ordered source-specific steps"]
   Steps --> Upserts["Idempotent mutations"]
   Upserts --> Cache["Clear in-memory cache on success"]
   Cache --> Unlock["Release lock and close connection"]
 ```
 
-The main orchestrator is [`src/lib/sync/index.ts`](../../src/lib/sync/index.ts). It registers 15
-numbered steps and supports full, daily, and single-step execution. Step 11 is intentionally skipped
-in normal full/daily runs because its upstream image source is blocked; it can be invoked explicitly
-or replaced by the maintained CSV/image tooling.
+The command boundary is [`src/lib/sync/index.ts`](../../src/lib/sync/index.ts). The ordered contract
+lives in [`pipeline.ts`](../../src/lib/sync/pipeline.ts): every step declares a descriptive ID, its
+source, the tables or fields it owns, its supported modes, and its dependencies. There are no
+numeric aliases or hidden retired steps.
 
 [`SyncManager`](../../src/lib/sync/manager.ts) acquires the advisory lock, verifies schema readiness,
-resolves a writable season, executes registered steps, and fails fast on critical errors unless the
-explicit continuation option is used.
+resolves a writable season, executes the selected steps in order, and stops on the first failure.
+Routine, bootstrap, and live execution share the same advisory-lock key, so they cannot overlap.
+
+Provider boundaries are explicit:
+
+- Biwenger owns fantasy identities, users, rounds, fantasy points, lineups, board history,
+  ownership, market listings, and tournaments.
+- EuroLeague Advanced API owns the official calendar, mappings, standings, sporting game data,
+  profiles, crests, play-by-play, and shots.
+- `matches` joins both worlds, but its sporting fields are copied only from `official_games`.
+
+The EuroLeague integration is split into a validated HTTP client under
+[`src/lib/api/euroleague`](../../src/lib/api/euroleague), orchestration services under
+[`src/lib/sync/services/euroleague`](../../src/lib/sync/services/euroleague), and focused database
+mutations under [`src/lib/db/mutations/official`](../../src/lib/db/mutations/official). The legacy
+XML/API implementation is preserved in the `archive/euroleague-legacy-2025-26` Git tag rather than
+remaining on the active execution path.
 
 ## Invariants
 
@@ -61,8 +77,11 @@ explicit continuation option is used.
 - Production future-season writes require confirmed season-aware reads.
 - Concurrent sync workers must not write through the same advisory-lock scope.
 - Sync mutations should be idempotent so a stopped pipeline can be safely rerun.
-- Critical-step failure stops dependent work by default.
+- Any step failure stops the current pipeline; partial successful writes remain safe to rerun.
 - Production schema mutation must never be hidden inside routine sync execution.
+- Sporting totals and Biwenger fantasy points have separate mutations and cannot overwrite one
+  another.
+- Current ownership has a single writer (`biwenger-squads`); board ingestion never infers ownership.
 
 Follow [database safety](../operations/database-safety.md), [season lifecycle](../operations/season-lifecycle.md),
 and the [data sync runbook](../operations/data-sync.md) before executing commands.
