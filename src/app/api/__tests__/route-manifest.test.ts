@@ -64,6 +64,14 @@ const ROUTE_CONTRACT_MANIFEST: Record<string, RouteContractEntry> = {
   },
   '/api/market/transfers': { status: 'covered', reason: 'market handler contract tests' },
   '/api/market/trends': { status: 'covered', reason: 'market handler contract tests' },
+  '/api/matches/[id]/play-by-play': {
+    status: 'covered',
+    reason: 'official game handler contract tests',
+  },
+  '/api/matches/[id]/shots': {
+    status: 'covered',
+    reason: 'official game handler contract tests',
+  },
   '/api/news': { status: 'covered', reason: 'handler contract tests' },
   '/api/player/rounds': { status: 'covered', reason: 'player handler contract tests' },
   '/api/player/squad': { status: 'covered', reason: 'player handler contract tests' },

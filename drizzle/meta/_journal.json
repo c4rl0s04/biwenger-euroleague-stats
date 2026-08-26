@@ -50,6 +50,20 @@
       "when": 1782931055474,
       "tag": "0006_chilly_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787697850753,
+      "tag": "0007_euroleague_advanced_2026",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787730035282,
+      "tag": "0008_official_schedule_raw_payload",
+      "breakpoints": true
     }
   ]
 }

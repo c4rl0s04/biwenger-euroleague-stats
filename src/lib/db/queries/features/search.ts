@@ -49,7 +49,7 @@ export async function globalSearch(query: string, limit: number = 5): Promise<Gl
       SELECT
         p.id,
         p.name,
-        p.img,
+        COALESCE(opm.image_url,p.img) AS img,
         p.position,
         t.name as team,
         COALESCE(ps.price, p.price) as price,
@@ -57,10 +57,13 @@ export async function globalSearch(query: string, limit: number = 5): Promise<Gl
       FROM players p
       JOIN player_seasons ps ON ps.player_id = p.id
       LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+      LEFT JOIN official_player_mappings opm
+        ON opm.player_id=p.id AND opm.season_id=ps.season_id
+       AND opm.provider='euroleague_advanced' AND opm.status='matched'
       WHERE p.name ILIKE $1 
         AND ps.season_id = $2
         AND p.name IS NOT NULL 
-        AND p.img IS NOT NULL 
+        AND COALESCE(opm.image_url,p.img) IS NOT NULL
         AND COALESCE(ps.team_id, p.team_id) IS NOT NULL
       ORDER BY COALESCE(ps.puntos, p.puntos) DESC
       LIMIT $3

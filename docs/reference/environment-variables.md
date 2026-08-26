@@ -37,6 +37,9 @@ scripts load dotenv before importing shared configuration. Do not commit real va
 | `SEASON_ID`                     | Canonical `YYYY-YY` season identifier. Required for mutating sync.     |
 | `SEASON_NAME`                   | Human-readable season name.                                            |
 | `EUROLEAGUE_SEASON_CODE`        | Official provider code in `EYYYY` form matching the season start year. |
+| `EUROLEAGUE_OFFICIAL_PROVIDER`  | Manual official-source selector: `advanced` or emergency `legacy`.     |
+| `EUROLEAGUE_ADVANCED_API_URL`   | Optional Advanced API base URL override.                               |
+| `EUROLEAGUE_ADVANCED_API_TOKEN` | Optional bearer token; free endpoints do not require one.              |
 | `LEAGUE_START_DATE`             | Season start date in `YYYY-MM-DD` form.                                |
 | `SEASON_AWARE_READS_CONFIRMED`  | Production operator assertion that reads isolate the activated season. |
 

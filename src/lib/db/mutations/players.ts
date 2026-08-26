@@ -139,10 +139,7 @@ export function preparePlayerMutations(
           `
           INSERT INTO players (id, name, position, img)
           VALUES ($1, $2, $3, $4)
-          ON CONFLICT(id) DO UPDATE SET
-            name = excluded.name,
-            position = excluded.position,
-            img = COALESCE(players.img, excluded.img)
+          ON CONFLICT(id) DO NOTHING
         `,
           [params.id, params.name, params.position, params.img]
         );
@@ -229,14 +226,22 @@ export function preparePlayerMutations(
 
     // Insert/Update Team (for Team Sync)
     upsertTeam: async (params: UpsertTeamParams) => {
-      const sql = `
-        INSERT INTO teams (id, name, short_name, img, is_active) VALUES ($1, $2, $3, $4, true)
-        ON CONFLICT(id) DO UPDATE SET
-          name=excluded.name,
-          short_name=excluded.short_name,
-          img=COALESCE(teams.img, excluded.img),
-          is_active=excluded.is_active
-      `;
+      const sql =
+        seasonId === DEFAULT_SEASON_ID
+          ? `
+            INSERT INTO teams (id, name, short_name, img, is_active)
+            VALUES ($1, $2, $3, $4, true)
+            ON CONFLICT(id) DO UPDATE SET
+              name=excluded.name,
+              short_name=excluded.short_name,
+              img=COALESCE(teams.img, excluded.img),
+              is_active=excluded.is_active
+          `
+          : `
+            INSERT INTO teams (id, name, short_name, img, is_active)
+            VALUES ($1, $2, $3, $4, true)
+            ON CONFLICT(id) DO NOTHING
+          `;
       await db.query(sql, [params.id, params.name, params.short_name, params.img]);
     },
 

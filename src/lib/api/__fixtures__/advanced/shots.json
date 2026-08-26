@@ -1,0 +1,22 @@
+[
+  {
+    "NUM_ANOT": 4,
+    "TEAM": "MAD",
+    "ID_PLAYER": "14102",
+    "PLAYER": "JONES, KAI",
+    "ID_ACTION": "2FGM",
+    "ACTION": "Two Pointer",
+    "POINTS": 2,
+    "COORD_X": -12,
+    "COORD_Y": -6,
+    "ZONE": "A",
+    "FASTBREAK": "0",
+    "SECOND_CHANCE": "0",
+    "POINTS_OFF_TURNOVER": "0",
+    "MINUTE": 1,
+    "CONSOLE": "09:39",
+    "POINTS_A": 2,
+    "POINTS_B": 0,
+    "UTC": "20260930183049"
+  }
+]

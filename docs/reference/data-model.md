@@ -17,22 +17,27 @@ constraints, or indexes.
 
 ## Core identities and seasons
 
-| Tables                           | Responsibility                                               |
-| -------------------------------- | ------------------------------------------------------------ |
-| `seasons`                        | Lifecycle state and provider binding for one fantasy season. |
-| `users`, `teams`, `players`      | Cross-feature identities synchronized from providers.        |
-| `user_seasons`, `player_seasons` | Season-specific user and player attributes.                  |
-| `player_mappings`                | EuroLeague-to-Biwenger player identity links.                |
+| Tables                                               | Responsibility                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------ |
+| `seasons`                                            | Lifecycle state and provider binding for one fantasy season. |
+| `users`, `teams`, `players`                          | Cross-feature identities synchronized from providers.        |
+| `user_seasons`, `player_seasons`                     | Season-specific user and player attributes.                  |
+| `player_mappings`                                    | Historical global EuroLeague links (read-only fallback).     |
+| `official_team_mappings`, `official_player_mappings` | Season-scoped official identity links and review state.      |
 
 ## Competition and performance
 
-| Tables               | Responsibility                                           |
-| -------------------- | -------------------------------------------------------- |
-| `matches`            | Official schedule, participants, status, and results.    |
-| `user_rounds`        | Manager points and placement by round/season.            |
-| `lineups`            | Historical selected players, roles, and fantasy results. |
-| `player_round_stats` | Official/player fantasy performance by round.            |
-| `initial_squads`     | Starting squad snapshot used by draft analytics.         |
+| Tables                                    | Responsibility                                                    |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `matches`                                 | Official schedule, participants, status, and results.             |
+| `user_rounds`                             | Manager points and placement by round/season.                     |
+| `lineups`                                 | Historical selected players, roles, and fantasy results.          |
+| `player_round_stats`                      | Official/player fantasy performance by round.                     |
+| `official_games`                          | Canonical official schedule, score, metadata, and final checksum. |
+| `official_player_game_stats`              | Canonical per-game boxscore rows.                                 |
+| `official_play_by_play`, `official_shots` | Granular official event and shot data.                            |
+| `official_team_standings`                 | Official team standings snapshots by round.                       |
+| `initial_squads`                          | Starting squad snapshot used by draft analytics.                  |
 
 ## Market and finance
 

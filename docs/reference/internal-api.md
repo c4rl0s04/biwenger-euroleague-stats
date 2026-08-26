@@ -60,6 +60,16 @@ All routes below use GET.
 | `/api/standings/placements`, `/api/standings/points-progression`, `/api/standings/round-winners`                    |
 | `/api/standings/streaks`, `/api/standings/theoretical`, `/api/standings/value-ranking`, `/api/standings/volatility` |
 
+## Official game detail
+
+| Method | Route                            | Optional filters                 |
+| ------ | -------------------------------- | -------------------------------- |
+| GET    | `/api/matches/[id]/play-by-play` | `period`, `teamCode`, `playerId` |
+| GET    | `/api/matches/[id]/shots`        | `period`, `teamCode`, `playerId` |
+
+Both endpoints resolve the server season, read PostgreSQL only, return official sequence order, and
+use a 15-second cache while live and a one-hour cache after finalization.
+
 ## Market
 
 | Methods | Routes                                                                                                                                            |

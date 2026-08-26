@@ -1,0 +1,1 @@
+ALTER TABLE "official_games" ADD COLUMN "raw_schedule" jsonb;

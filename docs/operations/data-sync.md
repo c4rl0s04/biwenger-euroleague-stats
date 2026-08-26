@@ -35,13 +35,15 @@ accidentally enabling sync for a frozen season.
 
 ## Modes
 
-| Command                    | Purpose                                                                  |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `npm run sync`             | Full ordered pipeline. Heavy metadata steps are included except step 11. |
-| `npm run sync:daily`       | Routine refresh; skips initial squads, logos, images, and user colors.   |
-| `npm run sync:live`        | Live-focused match, score, and lineup updates.                           |
-| `npm run sync:playoffs`    | Apply custom playoff metadata and results from checked-in JSON.          |
-| `npm run sync -- --step=N` | Run one numbered main-pipeline step for diagnosis or recovery.           |
+| Command                                      | Purpose                                                                |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `npm run sync`                               | Full ordered pipeline using the configured official provider.          |
+| `npm run sync:daily`                         | Routine refresh; skips initial squads, logos, images, and user colors. |
+| `npm run sync:live`                          | Live-focused match, score, and lineup updates.                         |
+| `npm run sync:playoffs`                      | Apply custom playoff metadata and results from checked-in JSON.        |
+| `npm run sync -- --step=N`                   | Run one numbered main-pipeline step for diagnosis or recovery.         |
+| `npm run sync -- --step=5 --force-game=CODE` | Reconcile one old finalized official game.                             |
+| `npm run sync:official:mappings -- report`   | Print the reproducible season mapping report.                          |
 
 The normal full pipeline registers:
 
@@ -54,15 +56,34 @@ The normal full pipeline registers:
 7. Market transfers and bids
 8. Current squad ownership
 9. Initial squads
-10. Team logos
-11. Official player images
+10. Retired (logos moved to step 2)
+11. Retired (player images moved to step 2)
 12. User colors
 13. Prediction pools
 14. Tournaments
 15. Current market listings
 
-Step 11 is disabled in normal global runs because the upstream official source is blocked. It runs
-only when selected explicitly; maintained CSV/image utilities provide the alternative workflow.
+Step 2 imports the official schedule, standings, crests, and available profiles. Step 3 calls
+Biwenger only for fantasy identities and links them to that calendar. Step 5 imports reports,
+metadata, boxscores, play-by-play, and shots, materializes sports totals, and finally applies
+Biwenger fantasy points. Steps 10 and 11 are intentionally no-ops and numbering 12–15 is retained.
+
+Before first activation, apply additive migrations `0007` and `0008`, freeze and fingerprint `2025-26` with
+`npm run db:season:fingerprint -- --season=2025-26`, create/activate
+`2026-27`, and run `npm run sync:preflight`. Set
+`EUROLEAGUE_OFFICIAL_PROVIDER=advanced`; changing it to `legacy` is a deliberate rollback and never
+happens automatically.
+
+Before production, run the two-pass isolation harness against a migrated local database whose name
+contains `test` or `disposable`:
+
+```bash
+RUN_DB_TESTS=true TEST_DATABASE_URL=postgresql://.../biwenger_disposable \
+  npm run test:official-integration
+```
+
+It verifies stable canonical row counts, a frozen `2025-26` fingerprint, unchanged historical
+global identities, and absence of official writes outside the active season.
 
 ## Execute and verify
 

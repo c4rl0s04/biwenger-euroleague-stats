@@ -11,6 +11,7 @@ import {
   foreignKey,
   index,
   unique,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 
 export const DEFAULT_SEASON_ID = '2025-26';
@@ -246,9 +247,11 @@ export const matches = pgTable(
     awayQ4: integer('away_q4'),
     homeOt: integer('home_ot'),
     awayOt: integer('away_ot'),
+    officialGameCode: integer('official_game_code'),
   },
   (t) => ({
     unq_match: unique('unique_match').on(t.seasonId, t.roundId, t.homeId, t.awayId),
+    unqOfficialGame: unique('unique_match_official_game').on(t.seasonId, t.officialGameCode),
     seasonRoundIdx: index('idx_matches_season_round').on(t.seasonId, t.roundId),
   })
 );
@@ -280,6 +283,12 @@ export const playerRoundStats = pgTable(
     turnovers: integer('turnovers'),
     foulsCommitted: integer('fouls_committed'),
     valuation: integer('valuation'),
+    offensiveRebounds: integer('offensive_rebounds'),
+    defensiveRebounds: integer('defensive_rebounds'),
+    foulsReceived: integer('fouls_received'),
+    blocksAgainst: integer('blocks_against'),
+    plusMinus: integer('plus_minus'),
+    gamesStarted: integer('games_started'),
   },
   (t) => ({
     unq_player_round_stat: unique('unique_player_round_stat').on(t.seasonId, t.playerId, t.roundId),
@@ -385,6 +394,275 @@ export const syncMeta = pgTable('sync_meta', {
   value: text('value'),
   updatedAt: text('updated_at'),
 });
+
+// 14b. Season-scoped mappings from Biwenger identities to the official provider.
+export const officialTeamMappings = pgTable(
+  'official_team_mappings',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    provider: text('provider').notNull().default('euroleague_advanced'),
+    providerTeamCode: text('provider_team_code').notNull(),
+    providerName: text('provider_name').notNull(),
+    crestUrl: text('crest_url'),
+    matchMethod: text('match_method').notNull(),
+    confidence: doublePrecision('confidence').notNull().default(1),
+    rawPayload: jsonb('raw_payload'),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    seasonTeamUnique: unique('unique_official_team_mapping').on(t.seasonId, t.provider, t.teamId),
+    seasonCodeUnique: unique('unique_official_team_code').on(
+      t.seasonId,
+      t.provider,
+      t.providerTeamCode
+    ),
+  })
+);
+
+export const officialPlayerMappings = pgTable(
+  'official_player_mappings',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    playerId: integer('player_id').references(() => players.id),
+    provider: text('provider').notNull().default('euroleague_advanced'),
+    providerPlayerCode: text('provider_player_code').notNull(),
+    providerName: text('provider_name').notNull(),
+    providerTeamCode: text('provider_team_code'),
+    imageUrl: text('image_url'),
+    age: integer('age'),
+    matchMethod: text('match_method').notNull(),
+    confidence: doublePrecision('confidence').notNull().default(1),
+    status: text('status').notNull().default('review_required'),
+    rawPayload: jsonb('raw_payload'),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    seasonCodeUnique: unique('unique_official_player_code').on(
+      t.seasonId,
+      t.provider,
+      t.providerPlayerCode
+    ),
+    seasonPlayerUnique: unique('unique_official_player_mapping').on(
+      t.seasonId,
+      t.provider,
+      t.playerId
+    ),
+  })
+);
+
+// 14c. Canonical official game data for the configured season.
+export const officialGames = pgTable(
+  'official_games',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    provider: text('provider').notNull().default('euroleague_advanced'),
+    gameCode: integer('game_code').notNull(),
+    gameId: text('game_id').notNull(),
+    roundNumber: integer('round_number'),
+    roundCode: text('round_code'),
+    phase: text('phase'),
+    homeTeamCode: text('home_team_code').notNull(),
+    awayTeamCode: text('away_team_code').notNull(),
+    scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
+    isDateConfirmed: boolean('is_date_confirmed').default(false),
+    isTimeConfirmed: boolean('is_time_confirmed').default(false),
+    isPlayed: boolean('is_played').default(false),
+    isLive: boolean('is_live').default(false),
+    status: text('status').notNull().default('scheduled'),
+    homeScore: integer('home_score'),
+    awayScore: integer('away_score'),
+    homeScoreRegtime: integer('home_score_regtime'),
+    awayScoreRegtime: integer('away_score_regtime'),
+    homeQ1: integer('home_q1'),
+    awayQ1: integer('away_q1'),
+    homeQ2: integer('home_q2'),
+    awayQ2: integer('away_q2'),
+    homeQ3: integer('home_q3'),
+    awayQ3: integer('away_q3'),
+    homeQ4: integer('home_q4'),
+    awayQ4: integer('away_q4'),
+    homeOt: integer('home_ot'),
+    awayOt: integer('away_ot'),
+    arenaCode: text('arena_code'),
+    arenaName: text('arena_name'),
+    arenaCapacity: integer('arena_capacity'),
+    homeCoach: text('home_coach'),
+    awayCoach: text('away_coach'),
+    referee1: text('referee_1'),
+    referee2: text('referee_2'),
+    referee3: text('referee_3'),
+    payloadChecksum: text('payload_checksum'),
+    rawSchedule: jsonb('raw_schedule'),
+    rawReport: jsonb('raw_report'),
+    rawMetadata: jsonb('raw_metadata'),
+    finalizedAt: timestamp('finalized_at', { withTimezone: true }),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    seasonGameUnique: unique('unique_official_game').on(t.seasonId, t.provider, t.gameCode),
+    seasonGameIdUnique: unique('unique_official_game_id').on(t.seasonId, t.provider, t.gameId),
+    seasonScheduleIdx: index('idx_official_games_season_schedule').on(t.seasonId, t.scheduledAt),
+  })
+);
+
+export const officialPlayerGameStats = pgTable(
+  'official_player_game_stats',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    gameCode: integer('game_code').notNull(),
+    providerPlayerCode: text('provider_player_code').notNull(),
+    providerName: text('provider_name').notNull(),
+    teamCode: text('team_code').notNull(),
+    isHome: boolean('is_home'),
+    isStarter: boolean('is_starter'),
+    isPlaying: boolean('is_playing'),
+    dorsal: text('dorsal'),
+    minutes: text('minutes'),
+    minutesSeconds: integer('minutes_seconds'),
+    points: integer('points'),
+    twoPointsMade: integer('two_points_made'),
+    twoPointsAttempted: integer('two_points_attempted'),
+    threePointsMade: integer('three_points_made'),
+    threePointsAttempted: integer('three_points_attempted'),
+    freeThrowsMade: integer('free_throws_made'),
+    freeThrowsAttempted: integer('free_throws_attempted'),
+    offensiveRebounds: integer('offensive_rebounds'),
+    defensiveRebounds: integer('defensive_rebounds'),
+    totalRebounds: integer('total_rebounds'),
+    assists: integer('assists'),
+    steals: integer('steals'),
+    turnovers: integer('turnovers'),
+    blocks: integer('blocks'),
+    blocksAgainst: integer('blocks_against'),
+    foulsCommitted: integer('fouls_committed'),
+    foulsReceived: integer('fouls_received'),
+    valuation: integer('valuation'),
+    plusMinus: integer('plus_minus'),
+    rawPayload: jsonb('raw_payload'),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    seasonPlayerGameUnique: unique('unique_official_player_game_stat').on(
+      t.seasonId,
+      t.gameCode,
+      t.providerPlayerCode
+    ),
+    seasonGameIdx: index('idx_official_player_game_stats_game').on(t.seasonId, t.gameCode),
+  })
+);
+
+export const officialPlayByPlay = pgTable(
+  'official_play_by_play',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    gameCode: integer('game_code').notNull(),
+    sequence: integer('sequence').notNull(),
+    providerPlayNumber: integer('provider_play_number'),
+    period: integer('period'),
+    minute: integer('minute'),
+    markerTime: text('marker_time'),
+    playType: text('play_type'),
+    teamCode: text('team_code'),
+    providerPlayerCode: text('provider_player_code'),
+    playerName: text('player_name'),
+    teamName: text('team_name'),
+    dorsal: text('dorsal'),
+    homeScore: integer('home_score'),
+    awayScore: integer('away_score'),
+    comment: text('comment'),
+    playInfo: text('play_info'),
+    rawPayload: jsonb('raw_payload'),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    seasonGameSequenceUnique: unique('unique_official_play').on(t.seasonId, t.gameCode, t.sequence),
+    seasonGameIdx: index('idx_official_play_by_play_game').on(t.seasonId, t.gameCode),
+  })
+);
+
+export const officialShots = pgTable(
+  'official_shots',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    gameCode: integer('game_code').notNull(),
+    annotationNumber: integer('annotation_number').notNull(),
+    teamCode: text('team_code'),
+    providerPlayerCode: text('provider_player_code'),
+    playerName: text('player_name'),
+    actionId: text('action_id'),
+    action: text('action'),
+    points: integer('points'),
+    coordinateX: integer('coordinate_x'),
+    coordinateY: integer('coordinate_y'),
+    zone: text('zone'),
+    isFastbreak: boolean('is_fastbreak'),
+    isSecondChance: boolean('is_second_chance'),
+    isPointsOffTurnover: boolean('is_points_off_turnover'),
+    minute: integer('minute'),
+    markerTime: text('marker_time'),
+    homeScore: integer('home_score'),
+    awayScore: integer('away_score'),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }),
+    rawPayload: jsonb('raw_payload'),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    seasonGameAnnotationUnique: unique('unique_official_shot').on(
+      t.seasonId,
+      t.gameCode,
+      t.annotationNumber
+    ),
+    seasonGameIdx: index('idx_official_shots_game').on(t.seasonId, t.gameCode),
+  })
+);
+
+export const officialTeamStandings = pgTable(
+  'official_team_standings',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    roundNumber: integer('round_number').notNull(),
+    teamCode: text('team_code').notNull(),
+    position: integer('position'),
+    gamesPlayed: integer('games_played'),
+    gamesWon: integer('games_won'),
+    gamesLost: integer('games_lost'),
+    pointsFor: integer('points_for'),
+    pointsAgainst: integer('points_against'),
+    rawPayload: jsonb('raw_payload'),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    seasonRoundTeamUnique: unique('unique_official_team_standing').on(
+      t.seasonId,
+      t.roundNumber,
+      t.teamCode
+    ),
+  })
+);
 
 // 15. Tournaments Table
 export const tournaments = pgTable(

@@ -1,6 +1,6 @@
 ---
-title: EuroLeague APIs
-description: Official team, schedule, header, and box-score endpoints used during synchronization.
+title: EuroLeague Advanced API
+description: Official sporting-data provider contract used from the 2026-27 season.
 audience:
   - contributor
   - maintainer
@@ -9,43 +9,50 @@ audience:
 status: active
 ---
 
-# EuroLeague APIs
+# EuroLeague Advanced API
 
-[`euroleague-client.js`](../../../src/lib/api/euroleague-client.js) consumes two public official API
-families and normalizes their results for sync.
+From `2026-27`, [`euroleague-advanced-client.ts`](../../../src/lib/api/euroleague-advanced-client.ts)
+is the primary sporting-data source. The old official client remains behind the manual
+`EUROLEAGUE_OFFICIAL_PROVIDER=legacy` switch for the first two rounds only. There is no automatic
+fallback because one run must never mix official providers.
 
-## Endpoints
+The client validates every response boundary with Zod, times out after 20 seconds, retries `429`,
+network errors, and `5xx`, and treats future-game `404` responses as data not yet available. An
+optional bearer token is supported, but the initial integration only consumes free endpoints.
 
-| Data        | Endpoint                                                                            | Format        |
-| ----------- | ----------------------------------------------------------------------------------- | ------------- |
-| Teams       | `https://api-live.euroleague.net/v1/teams?seasonCode={EYYYY}&competitionCode=E`     | XML           |
-| Schedule    | `https://api-live.euroleague.net/v1/schedules?seasonCode={EYYYY}&competitionCode=E` | XML           |
-| Box score   | `https://live.euroleague.net/api/Boxscore?gamecode={code}&seasoncode={EYYYY}`       | JSON or empty |
-| Game header | `https://live.euroleague.net/api/Header?gamecode={code}&seasoncode={EYYYY}`         | JSON or empty |
+## Free endpoint ownership
 
-The client uses `fast-xml-parser` for v1 XML and preserves string attributes so identifiers with
-leading zeros are not coerced. A schedule with one item is normalized to an array.
+| Dataset                                           | Advanced API path                   |
+| ------------------------------------------------- | ----------------------------------- |
+| Schedule and arenas                               | `/Euroleague/schedule`              |
+| Standings and crests                              | `/Euroleague/standings`             |
+| Season player profiles                            | `/Euroleague/players/season`        |
+| Game report                                       | `/Euroleague/games/report/game`     |
+| Live metadata, score, quarters, coaches, referees | `/Euroleague/games/metadata/game`   |
+| Player boxscore                                   | `/Euroleague/boxscore/players/game` |
+| Play-by-play                                      | `/Euroleague/play-by-play/game`     |
+| Shots                                             | `/Euroleague/shot-data/game`        |
 
-## Request and retry behavior
+The provider year is derived from `EUROLEAGUE_SEASON_CODE=E2026` and must match
+`SEASON_ID=2026-27`. The sync rejects a mismatched season before writing.
 
-Requests include a browser-like user agent, wait 300 ms before sending, and retry network failures
-or HTTP 500/502/503/504 up to three times with exponential delay. Normal 4xx responses are not
-retriable. Empty box-score/header responses for future games resolve to no data rather than a fake
-completed record.
+## Persistence and matching
 
-## Identity mapping
+`official_games` is the canonical calendar. Granular boxscores, play-by-play, shots, and standings
+are stored in their corresponding `official_*` tables with season IDs and raw JSON payloads.
+Round-level player totals are materialized locally; provider leader/all-time endpoints are neither
+called nor persisted.
 
-EuroLeague player codes and team codes are matched to Biwenger identities during master-data sync.
-Player names are normalized from `LASTNAME, FIRSTNAME`, case-folded, and stripped of accents as one
-matching aid. Persisted provider mappings take precedence over repeated fuzzy matching.
+Team mappings first reuse an existing exact legacy code, then require an exact normalized name.
+Player mappings first reuse an exact legacy player code, then require exact normalized name inside
+the mapped official team. Fuzzy results are report-only suggestions. Unresolved players remain in
+official storage with `review_required` and do not enter `player_round_stats`.
 
-Box-score parsing skips `DNP` entries and maps official fields into `player_round_stats`. The match
-and stats services can supplement official data with Biwenger round data, but the sources remain
-distinguishable during transformation.
+## Live and final behavior
 
-## Website scraping
+At most two games are processed concurrently. Live events and shots are upserted without deleting
+temporarily absent rows. A finished game is replaced transactionally and receives a checksum and
+`finalized_at`. Daily sync rechecks finals for 48 hours, replacing only a changed checksum; older
+games require `--force-game=<code>`.
 
-Team logos and attempted official player images use public EuroLeague website profiles outside the
-API client. The player-image source is currently blocked, so numbered step 11 is skipped in normal
-pipeline runs. Treat HTML scraping as less stable than the API endpoints and avoid making it a
-critical dependency.
+The API's current individual/non-commercial terms must be reviewed before any commercial use.

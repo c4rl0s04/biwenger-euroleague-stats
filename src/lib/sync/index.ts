@@ -49,9 +49,8 @@ async function syncData() {
   const shouldRun = (num: number) => {
     if (onlyStep) return String(onlyStep) === String(num);
 
-    // Step 11 is disabled in global runs because it's blocked by Euroleague.
-    // We handle this manually via the CSV injection script.
-    if (num === 11) return false;
+    // Steps 10/11 were retired: official logos and player images are now imported in Step 2.
+    if (num === 10 || num === 11) return false;
 
     if (isDaily) {
       // Daily mode: Skip steps 9 (Initial Squads), 10 (Logos), 11 (Images), 12 (Colors)
@@ -82,15 +81,6 @@ async function syncData() {
     manager.addStep('Sync Squads (Ownership)', stepSquads.run, { number: 8, dependencies: [1, 4] });
   if (shouldRun(9))
     manager.addStep('Sync Initial Squads', stepInitial.run, { number: 9, dependencies: [1, 8] });
-
-  // New Image Sync Steps
-  const stepTeams = await import('./steps/10-team-logos.js'); // Step 10
-  const stepImages = await import('./steps/11-official-images.js'); // Step 11
-
-  if (shouldRun(10))
-    manager.addStep('Sync Team Logos', stepTeams.run, { number: 10, critical: false });
-  if (shouldRun(11))
-    manager.addStep('Sync Player Images', stepImages.run, { number: 11, critical: false });
 
   // New User Color Step
   const stepColors = await import('./steps/12-user-colors.js'); // Step 12
