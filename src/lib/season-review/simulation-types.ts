@@ -33,6 +33,23 @@ export interface SeasonSimulationDataset {
   players: SeasonSimulationPlayer[];
 }
 
+export interface SimulatedAgentProfile {
+  id: string;
+  marketActivity: number;
+  bidAggression: number;
+  pointsFocus: number;
+  valueFocus: number;
+  decisionNoise: number;
+  lineupAccuracy: number;
+}
+
+export interface SimulatedRosterPlayer {
+  playerId: string;
+  position: string;
+  price: number;
+  projectedPoints: number;
+}
+
 export interface SimulatedUserSnapshot {
   userId: string;
   profileId: string;
@@ -43,6 +60,9 @@ export interface SimulatedUserSnapshot {
   competitiveStrength: number;
   rosterSize: number;
   rosterPlayerIds: string[];
+  rosterPlayers: SimulatedRosterPlayer[];
+  lineupPlayerIds: string[];
+  roundPoints: number;
   points: number;
   bonuses: number;
   decisionQuality: number;
@@ -70,8 +90,16 @@ export interface SimulatedMarketListing {
   round: number;
   marketDay: number;
   playerId: string;
+  marketValue: number;
   bidCount: number;
+  bids: Array<{
+    userId: string;
+    amount: number;
+    replacementPlayerId: string | null;
+  }>;
   sold: boolean;
+  winnerUserId: string | null;
+  winningAmount: number | null;
 }
 
 export interface SimulatedRecovery {
@@ -87,6 +115,7 @@ export interface SeasonSimulationOutcome {
   seed: number;
   config: ResilienceConfig;
   shock: ShockConfig;
+  profiles: Array<{ userId: string; profile: SimulatedAgentProfile }>;
   timeline: SimulatedSeasonPoint[];
   transactions: SimulatedTransaction[];
   marketListings: SimulatedMarketListing[];

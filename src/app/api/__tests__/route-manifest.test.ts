@@ -79,6 +79,22 @@ const ROUTE_CONTRACT_MANIFEST: Record<string, RouteContractEntry> = {
   '/api/rounds/standings': { status: 'covered', reason: 'handler contract tests' },
   '/api/rounds/stats': { status: 'covered', reason: 'handler contract tests' },
   '/api/search': { status: 'covered', reason: 'search handler contract tests' },
+  '/api/season-review/configurations': {
+    status: 'covered',
+    reason: 'season review V5 handler contract tests',
+  },
+  '/api/season-review/configurations/[configId]': {
+    status: 'covered',
+    reason: 'season review V5 handler contract tests',
+  },
+  '/api/season-review/configurations/[configId]/runs': {
+    status: 'covered',
+    reason: 'season review V5 handler contract tests',
+  },
+  '/api/season-review/configurations/[configId]/runs/[runId]': {
+    status: 'covered',
+    reason: 'season review V5 handler contract tests',
+  },
   '/api/standings/advanced': { status: 'covered', reason: 'handler contract tests' },
   '/api/standings/analytics': { status: 'covered', reason: 'handler contract tests' },
   '/api/standings/bottlers': { status: 'covered', reason: 'handler contract tests' },
