@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
-import { EuroleagueAdvancedProvider } from '../euroleague-advanced-client';
+import { EuroleagueApiError, EuroleagueClient } from '../euroleague/client';
 
 const fixture = (name: string) =>
   JSON.parse(
@@ -17,7 +17,7 @@ const response = (body: unknown, status = 200) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
-describe('EuroleagueAdvancedProvider contracts', () => {
+describe('EuroleagueClient contracts', () => {
   it('normalizes every free granular response used by the sync', async () => {
     const fetchImpl = vi.fn(async (url: URL | RequestInfo) => {
       const path = new URL(String(url)).pathname;
@@ -30,7 +30,7 @@ describe('EuroleagueAdvancedProvider contracts', () => {
       if (path.endsWith('/play-by-play/game')) return response(fixture('play-by-play'));
       return response(fixture('shots'));
     });
-    const provider = new EuroleagueAdvancedProvider({ fetchImpl: fetchImpl as typeof fetch });
+    const provider = new EuroleagueClient({ fetchImpl: fetchImpl as typeof fetch });
 
     await expect(provider.getSchedule(2026)).resolves.toMatchObject([
       { seasonYear: 2026, gameCode: 1, homeTeamCode: 'MAD' },
@@ -51,7 +51,7 @@ describe('EuroleagueAdvancedProvider contracts', () => {
   });
 
   it('accepts future-game 404s as unavailable data', async () => {
-    const provider = new EuroleagueAdvancedProvider({
+    const provider = new EuroleagueClient({
       fetchImpl: vi.fn(async () => response(null, 404)) as unknown as typeof fetch,
     });
     await expect(provider.getGameMetadata(2026, 380)).resolves.toBeNull();
@@ -63,7 +63,7 @@ describe('EuroleagueAdvancedProvider contracts', () => {
       .fn()
       .mockResolvedValueOnce(response([], 429))
       .mockResolvedValueOnce(response(fixture('schedule')));
-    const provider = new EuroleagueAdvancedProvider({
+    const provider = new EuroleagueClient({
       token: 'test-token',
       retries: 1,
       fetchImpl: fetchImpl as typeof fetch,
@@ -71,5 +71,17 @@ describe('EuroleagueAdvancedProvider contracts', () => {
     await expect(provider.getSchedule(2026)).resolves.toHaveLength(1);
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(fetchImpl.mock.calls[0][1]?.headers).toEqual({ Authorization: 'Bearer test-token' });
+  });
+
+  it('rejects a missing master-data endpoint and malformed provider rows', async () => {
+    const missing = new EuroleagueClient({
+      fetchImpl: vi.fn(async () => response(null, 404)) as unknown as typeof fetch,
+    });
+    await expect(missing.getSchedule(2026)).rejects.toBeInstanceOf(EuroleagueApiError);
+
+    const malformed = new EuroleagueClient({
+      fetchImpl: vi.fn(async () => response([{ game: 1 }])) as unknown as typeof fetch,
+    });
+    await expect(malformed.getSchedule(2026)).rejects.toMatchObject({ name: 'ZodError' });
   });
 });

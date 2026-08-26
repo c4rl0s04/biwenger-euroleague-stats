@@ -374,7 +374,7 @@ export function prepareUserMutations(
       ]);
     },
 
-    // Step 9 Helpers
+    // Initial-squad derivation helpers
     clearInitialSquads: async () => {
       await db.query('DELETE FROM initial_squads WHERE season_id = $1', [seasonId]);
     },

@@ -62,17 +62,16 @@ async function main() {
 
     const { biwengerFetch, fetchCompetition, fetchLeague } =
       await import('../../src/lib/api/biwenger-client.js');
-    const { getOfficialBasketballProvider } =
-      await import('../../src/lib/api/official-provider-factory.js');
-    const { officialSeasonYear } = await import('../../src/lib/api/official-provider.js');
+    const { getEuroleagueClient } = await import('../../src/lib/api/euroleague/runtime.js');
+    const { euroleagueSeasonYear } = await import('../../src/lib/api/euroleague/normalization.js');
     const { validateProviderSnapshot, validateAdvancedProviderSnapshot } =
       await import('../../src/lib/sync/preflight.js');
 
     const account = await biwengerFetch('/account', { skipVersionCheck: true });
     const league = await fetchLeague();
     const competition = await fetchCompetition();
-    const seasonYear = officialSeasonYear(season.EUROLEAGUE_CODE, season.ID);
-    const provider = await getOfficialBasketballProvider();
+    const seasonYear = euroleagueSeasonYear(season.EUROLEAGUE_CODE, season.ID);
+    const provider = getEuroleagueClient();
     const [schedule, standings] = await Promise.all([
       provider.getSchedule(seasonYear),
       provider.getStandings(seasonYear, 1),

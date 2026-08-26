@@ -8,6 +8,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['node_modules/**', '.next/**', 'tests/e2e/**'],
     setupFiles: ['./src/tests/setup.ts'],
   },
 });

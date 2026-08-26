@@ -128,8 +128,6 @@ export const CONFIG = {
    */
   EUROLEAGUE: {
     SEASON_CODE: SEASON_CONFIG.EUROLEAGUE_CODE,
-    API_V1_URL: 'https://api-live.euroleague.net',
-    API_LEGACY_URL: 'https://live.euroleague.net/api',
   },
 
   /**

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { reconcilePlayerMappings, reconcileTeamMappings } from '../services/official/mapping';
+import { reconcilePlayerMappings, reconcileTeamMappings } from '../services/euroleague/mappings';
 
 function mutations(overrides: Record<string, unknown> = {}) {
   return {
@@ -67,6 +67,40 @@ describe('season-scoped official mapping', () => {
     );
     expect(store.upsertPlayerMapping).toHaveBeenCalledWith(
       expect.objectContaining({ playerId: null, status: 'review_required' })
+    );
+  });
+
+  it('refreshes official metadata without changing an existing manual player relation', async () => {
+    const store = mutations({
+      getPlayerMappings: vi.fn(async () => [
+        {
+          player_id: 7,
+          provider_player_code: 'P014102',
+          provider_team_code: 'MAD',
+          status: 'matched',
+        },
+      ]),
+    });
+
+    const result = await reconcilePlayerMappings(store, [
+      {
+        playerCode: 'P014102',
+        playerName: 'Kai Jones',
+        teamCode: 'MAD',
+        imageUrl: 'https://example.com/kai.png',
+        age: 25,
+        raw: {},
+      } as any,
+    ]);
+
+    expect(result.mapped).toBe(1);
+    expect(store.upsertPlayerMapping).toHaveBeenCalledWith(
+      expect.objectContaining({
+        playerId: 7,
+        providerPlayerCode: 'P014102',
+        imageUrl: 'https://example.com/kai.png',
+        status: 'matched',
+      })
     );
   });
 });

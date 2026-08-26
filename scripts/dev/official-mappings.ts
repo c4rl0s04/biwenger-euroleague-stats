@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import { db } from '../../src/lib/db/client';
-import { normalizeOfficialPlayerCode } from '../../src/lib/api/official-provider';
+import { normalizeEuroleaguePlayerCode } from '../../src/lib/api/euroleague/normalization';
 import { assertSyncSeasonWritable } from '../../src/lib/sync/season-guard';
 
 dotenv.config({ path: '.env.local' });
@@ -73,6 +73,10 @@ async function main() {
                 $2
               ),
               'manual',1,NOW()
+       WHERE EXISTS (
+         SELECT 1 FROM official_games
+         WHERE season_id=$1 AND (home_team_code=$2 OR away_team_code=$2)
+       )
        ON CONFLICT (season_id,provider,provider_team_code) DO UPDATE SET
          team_id=EXCLUDED.team_id,match_method='manual',confidence=1,updated_at=NOW()
        RETURNING provider_name`,
@@ -84,7 +88,7 @@ async function main() {
   }
 
   if (command === 'assign-player') {
-    const code = normalizeOfficialPlayerCode(argument('code'));
+    const code = normalizeEuroleaguePlayerCode(argument('code'));
     const playerId = Number(argument('player-id'));
     if (!code || !Number.isInteger(playerId)) {
       throw new Error('Usage: assign-player --code=P000000 --player-id=123');

@@ -13,7 +13,7 @@ import { SyncManager } from '../../manager';
  */
 export async function run(manager: SyncManager, round: any, playersListInput?: any) {
   const db = manager.context.db;
-  const playersList = playersListInput || manager.context.playersList || {};
+  const playersList = playersListInput || manager.context.biwenger?.players || {};
 
   const roundId = round.id;
   const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id; // Use mapped ID for DB if present
@@ -36,7 +36,7 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
         }
       }
     } catch (e: any) {
-      manager.error(`Error fetching round details for ${roundId}: ${e.message}`);
+      throw new Error(`Failed to fetch Biwenger round ${roundId}.`, { cause: e });
     }
 
     if (standings) {
@@ -69,7 +69,7 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
               alineacion: alineacion,
             });
           } catch (e: any) {
-            manager.error(`Error inserting user_round for ${user.name}: ${e.message}`);
+            throw new Error(`Failed to store round result for ${user.name}.`, { cause: e });
           }
         }
 
@@ -125,9 +125,9 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
                     playersList[playerId] = { id: playerId, name: d.name };
                   }
                 } catch (repairError: any) {
-                  manager.error(
-                    `      ❌ Failed to repair player ${playerId}: ${repairError.message}`
-                  );
+                  throw new Error(`Failed to repair missing player ${playerId}.`, {
+                    cause: repairError,
+                  });
                 }
               }
 
@@ -144,7 +144,7 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
               });
               insertedCount++;
             } catch (e) {
-              // Ignore duplicates
+              throw new Error(`Failed to store lineup player ${playerId}.`, { cause: e });
             }
           }
         }
@@ -155,22 +155,5 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
     manager.log('Skipping lineups (round not finished/active).');
   }
 
-  return { success: true, insertedCount, message: `Synced ${insertedCount} lineup entries.` };
+  return { insertedCount };
 }
-
-// Legacy export
-export const syncLineups = async (
-  db: any,
-  round: any,
-  existingLineupRounds: any,
-  lastLineupRoundId: any,
-  playersList: any
-) => {
-  const mockManager = {
-    context: { db, playersList: playersList || {} },
-    log: console.log,
-    error: console.error,
-  } as unknown as SyncManager;
-  const res = await run(mockManager, round, playersList);
-  return res.insertedCount;
-};
