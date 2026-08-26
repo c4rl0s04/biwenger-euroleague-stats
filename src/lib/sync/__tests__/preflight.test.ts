@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateProviderSnapshot } from '../preflight';
+import { validateAdvancedProviderSnapshot, validateProviderSnapshot } from '../preflight';
 
 const validSnapshot = {
   seasonId: '2026-27',
@@ -37,5 +37,46 @@ describe('sync provider preflight', () => {
         league: { data: { id: 123, standings: [{ id: 999 }] } },
       })
     ).toThrow(/user 456 is not present/);
+  });
+});
+
+describe('advanced official provider preflight', () => {
+  const schedule = [
+    {
+      seasonYear: 2026,
+      gameCode: 1,
+      homeTeamCode: 'MAD',
+      awayTeamCode: 'BAR',
+    },
+  ];
+
+  it('requires a coherent non-empty schedule and standings snapshot', () => {
+    expect(
+      validateAdvancedProviderSnapshot({
+        seasonYear: 2026,
+        expectedSeasonId: '2026-27',
+        schedule,
+        standings: [{ teamCode: 'MAD' }],
+      })
+    ).toEqual({ games: 1, teams: 2, standings: 1 });
+  });
+
+  it('rejects duplicate game codes and cross-season payloads', () => {
+    expect(() =>
+      validateAdvancedProviderSnapshot({
+        seasonYear: 2026,
+        expectedSeasonId: '2026-27',
+        schedule: [...schedule, { ...schedule[0], awayTeamCode: 'OLY' }],
+        standings: [{ teamCode: 'MAD' }],
+      })
+    ).toThrow(/Duplicate/);
+    expect(() =>
+      validateAdvancedProviderSnapshot({
+        seasonYear: 2026,
+        expectedSeasonId: '2025-26',
+        schedule,
+        standings: [{ teamCode: 'MAD' }],
+      })
+    ).toThrow(/does not match/);
   });
 });

@@ -27,6 +27,13 @@ const REQUIRED_SEASON_SCOPED_TABLES = [
   'playoff_predictions',
   'playoff_results',
   'user_playoff_media',
+  'official_games',
+  'official_team_mappings',
+  'official_player_mappings',
+  'official_player_game_stats',
+  'official_play_by_play',
+  'official_shots',
+  'official_team_standings',
 ];
 
 const REQUIRED_SEASON_TABLES = ['seasons', ...REQUIRED_SEASON_SCOPED_TABLES];
@@ -79,6 +86,30 @@ export async function validateSchemaReady(db: DbClient) {
   );
   if (leagueBinding.rows.length !== 1) {
     throw new Error('Database schema is not season-ready; seasons.source_league_id is missing.');
+  }
+
+  const officialColumns = await db.query(
+    `SELECT table_name,column_name FROM information_schema.columns
+     WHERE table_schema='public' AND (
+       (table_name='matches' AND column_name='official_game_code') OR
+       (table_name='official_games' AND column_name='raw_schedule') OR
+       (table_name='player_round_stats' AND column_name = ANY($1::text[]))
+     )`,
+    [
+      [
+        'offensive_rebounds',
+        'defensive_rebounds',
+        'fouls_received',
+        'blocks_against',
+        'plus_minus',
+        'games_started',
+      ],
+    ]
+  );
+  if (officialColumns.rows.length !== 8) {
+    throw new Error(
+      'Database schema is missing Euroleague Advanced API columns. Apply migrations 0007 and 0008.'
+    );
   }
 }
 

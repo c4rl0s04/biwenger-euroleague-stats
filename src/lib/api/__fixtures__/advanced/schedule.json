@@ -1,0 +1,21 @@
+[
+  {
+    "game": 1,
+    "gamecode": "E2026_1",
+    "gameday": 1,
+    "round": "RS1",
+    "group": "Regular Season",
+    "homecode": "MAD",
+    "hometeam": "Real Madrid",
+    "awaycode": "BAR",
+    "awayteam": "FC Barcelona",
+    "date": "2026-09-30",
+    "startime": "18:30",
+    "arenacode": "MAD",
+    "arenaname": "Arena",
+    "arenacapacity": 12000,
+    "confirmeddate": true,
+    "confirmedtime": true,
+    "played": false
+  }
+]

@@ -162,9 +162,8 @@ export class SyncManager {
         process.env.NODE_ENV !== 'production' || process.env.ALLOW_SCHEMA_BOOTSTRAP === 'true';
       if (allowBootstrap) {
         await ensureSchema(this.context.db as any);
-      } else {
-        await validateSchemaReady(this.context.db as any);
       }
+      await validateSchemaReady(this.context.db as any);
       const seasonContext = await assertSyncSeasonWritable(this.context.db as any);
       this.context.seasonId = seasonContext.seasonId;
       this.log(`   🗓️ Sync season resolved: ${seasonContext.seasonId} (${seasonContext.status}).`);

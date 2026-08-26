@@ -1,17 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { syncMatches } from '../services/biwenger/matches.js';
 import * as client from '../../api/biwenger-client.js';
-import * as elClient from '../../api/euroleague-client.js';
 
 // Mock biwenger-client
 vi.mock('../../api/biwenger-client.js', () => ({
   fetchRoundGames: vi.fn(),
-}));
-
-// Mock euroleague-client
-vi.mock('../../api/euroleague-client.js', () => ({
-  fetchSchedule: vi.fn(),
-  fetchGameHeader: vi.fn(),
 }));
 
 describe('syncMatches', () => {
@@ -23,15 +16,43 @@ describe('syncMatches', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default mock values
-    elClient.fetchSchedule.mockResolvedValue({ schedule: { item: [] } });
-    elClient.fetchGameHeader.mockResolvedValue(null);
-
     db = {
       query: vi.fn(async (sql, params) => {
-        // Mock getMappedTeams response
-        if (sql.includes && sql.includes('SELECT id, code, name FROM teams')) {
-          return { rows: [] };
+        if (sql.includes('official_team_mappings')) {
+          return {
+            rows: [
+              { team_id: 10, provider_team_code: 'MAD' },
+              { team_id: 20, provider_team_code: 'BAR' },
+            ],
+          };
+        }
+        if (sql.includes('FROM official_games')) {
+          return {
+            rows: [
+              {
+                game_code: 1,
+                round_number: 1,
+                scheduled_at: new Date('2026-09-30T18:30:00Z'),
+                status: 'scheduled',
+                home_team_code: 'MAD',
+                away_team_code: 'BAR',
+                home_score: null,
+                away_score: null,
+                home_score_regtime: null,
+                away_score_regtime: null,
+                home_q1: null,
+                away_q1: null,
+                home_q2: null,
+                away_q2: null,
+                home_q3: null,
+                away_q3: null,
+                home_q4: null,
+                away_q4: null,
+                home_ot: null,
+                away_ot: null,
+              },
+            ],
+          };
         }
         return { rows: [], rowCount: 1 };
       }),
@@ -65,12 +86,14 @@ describe('syncMatches', () => {
     // Verify fetchRoundGames was called
     expect(client.fetchRoundGames).toHaveBeenCalledWith(4746);
 
-    // Verify Match Upsert
-    // Verify Match Upsert (checking SQL text roughly)
+    // Sporting fields come from official_games, not the Biwenger score/date.
     expect(db.query).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO matches'),
-      expect.arrayContaining([10, 20, 85, 80, 'finished'])
+      expect.arrayContaining(['2026-27', 4746, 'Jornada 1', 10, 20, 'scheduled'])
     );
+    const insert = db.query.mock.calls.find(([sql]) => sql.includes('INSERT INTO matches'));
+    expect(insert[1]).not.toContain(85);
+    expect(insert[1]).not.toContain(80);
   });
 
   it('should handle API errors gracefully', async () => {
@@ -79,8 +102,6 @@ describe('syncMatches', () => {
     const round = { id: 4746, name: 'Jornada 1' };
     await syncMatches(db, round);
 
-    // Check that it didn't crash but likely logged error
-    // Check that it didn't crash but likely logged error
     expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('INSERT INTO matches'));
   });
 });
