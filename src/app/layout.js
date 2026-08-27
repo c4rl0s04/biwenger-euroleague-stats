@@ -1,5 +1,6 @@
 import { Outfit, Bebas_Neue, Inter } from 'next/font/google';
 import './globals.css';
+import './mobile-native.css';
 import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CardThemeProvider } from '@/contexts/CardThemeContext';
