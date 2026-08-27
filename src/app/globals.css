@@ -128,20 +128,33 @@ body {
 
 .skip-link {
   position: fixed;
-  top: calc(0.5rem + var(--app-safe-area-top));
-  left: 0.5rem;
+  top: calc(0.75rem + var(--app-safe-area-top));
+  left: 0.75rem;
   z-index: 9999;
-  transform: translateY(-150%);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
   border-radius: 0.75rem;
   background: hsl(var(--primary));
-  padding: 0.75rem 1rem;
+  padding: 0;
   color: white;
   font-weight: 800;
-  transition: transform 160ms ease;
 }
 
-.skip-link:focus {
-  transform: translateY(0);
+.skip-link:focus-visible {
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: inset(0);
+  pointer-events: auto;
+  padding: 0.75rem 1rem;
 }
 
 .touch-target {
