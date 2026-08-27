@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { PlayerProfileClient } from '@/components/player-profile';
 import { ThemeBackground } from '@/components/ui';
+import MobilePlayerProfileScreen from '@/components/mobile/screens/MobilePlayerProfileScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,8 @@ export default async function PlayerPage({ params }) {
       </div>
     );
   }
+
+  if (await isPhonePresentation()) return <MobilePlayerProfileScreen player={player} />;
 
   // Pass plain object to client component
   return (

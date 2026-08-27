@@ -9,11 +9,24 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ManagerProfileClient from '@/components/user/ManagerProfileClient';
 import { ThemeBackground } from '@/components/ui';
+import MobileManagerProfileScreen from '@/components/mobile/screens/MobileManagerProfileScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ManagerPage({ params }) {
   const { id } = await params;
+
+  if (await isPhonePresentation()) {
+    const [stats, squad] = await Promise.all([
+      fetchUserSeasonStats(id),
+      fetchUserSquadDetails(id),
+    ]);
+    if (!stats || !stats.name || stats.name === 'Desconocido') {
+      return <div className="mobile-record-empty">Mánager no encontrado.</div>;
+    }
+    return <MobileManagerProfileScreen stats={stats} squad={squad} />;
+  }
 
   // Fetch all necessary data for the manager profile
   const [stats, squad, recentRounds, tournaments, topContributors] = await Promise.all([

@@ -269,6 +269,184 @@
   text-align: center;
 }
 
+.mobile-player-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 0.55rem;
+  margin: 0.9rem 0 0;
+}
+
+.mobile-player-toolbar form {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid hsl(var(--border) / 0.75);
+  border-radius: 0.95rem;
+  background: hsl(var(--card) / 0.78);
+  padding: 0 0.8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.mobile-player-toolbar input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: white;
+  outline: 0;
+}
+
+.mobile-player-toolbar > button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid hsl(var(--border) / 0.75);
+  border-radius: 0.95rem;
+  background: hsl(var(--card) / 0.78);
+  color: hsl(var(--muted-foreground));
+}
+
+.mobile-player-toolbar > .mobile-filter-active {
+  border-color: hsl(var(--primary) / 0.45);
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.mobile-active-filters {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  margin-top: 0.55rem;
+}
+
+.mobile-active-filters span {
+  flex-shrink: 0;
+  border: 1px solid hsl(var(--primary) / 0.22);
+  border-radius: 999px;
+  background: hsl(var(--primary) / 0.07);
+  padding: 0.35rem 0.65rem;
+  color: hsl(var(--primary));
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.mobile-player-points {
+  color: hsl(var(--primary));
+  font-family: var(--font-bebas);
+  font-size: 1.2rem;
+}
+
+.mobile-filter-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mobile-filter-form > label,
+.mobile-filter-form legend {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mobile-filter-form > input {
+  min-height: 48px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.85rem;
+  background: hsl(var(--background));
+  padding: 0.75rem;
+  color: white;
+}
+
+.mobile-filter-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.mobile-filter-options input {
+  position: absolute;
+  opacity: 0;
+}
+
+.mobile-filter-options span {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.8rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.mobile-filter-options input:checked + span {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+}
+
+.mobile-filter-options input:focus-visible + span {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+.mobile-primary-action {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 0.9rem;
+  background: hsl(var(--primary));
+  color: white;
+  font-size: 0.76rem;
+  font-weight: 900;
+  box-shadow: 0 12px 28px hsl(var(--primary) / 0.2);
+}
+
+.mobile-profile-identity {
+  position: relative;
+  display: flex;
+  min-height: 8.5rem;
+  align-items: flex-end;
+  gap: 0.9rem;
+  overflow: hidden;
+  margin: 1rem 0;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.18), transparent 55%),
+    linear-gradient(145deg, hsl(var(--card)), hsl(var(--background)));
+  padding: 1rem;
+}
+
+.mobile-profile-badge {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid hsl(var(--primary) / 0.28);
+  border-radius: 1rem;
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  font-family: var(--font-bebas);
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mobile-profile-identity div { min-width: 0; }
+.mobile-profile-identity p { color: hsl(var(--primary)); font-size: 0.62rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
+.mobile-profile-identity h2 { overflow: hidden; color: white; font-size: 2rem; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+.mobile-profile-identity div > span { color: hsl(var(--muted-foreground)); font-size: 0.7rem; }
+
 .mobile-rank-1 { background: rgb(250 204 21 / 0.15); color: #facc15; }
 .mobile-rank-2 { background: rgb(226 232 240 / 0.12); color: #e2e8f0; }
 .mobile-rank-3 { background: rgb(234 88 12 / 0.15); color: #fb923c; }

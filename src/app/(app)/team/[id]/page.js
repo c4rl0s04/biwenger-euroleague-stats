@@ -1,6 +1,8 @@
 import { fetchTeamProfile } from '@/lib/services';
 import TeamProfileClient from '@/components/team/TeamProfileClient';
 import { BackButton, ThemeBackground } from '@/components/ui';
+import MobileTeamProfileScreen from '@/components/mobile/screens/MobileTeamProfileScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +20,8 @@ export default async function TeamPage({ params }) {
       </div>
     );
   }
+
+  if (await isPhonePresentation()) return <MobileTeamProfileScreen team={team} />;
 
   return (
     <>
