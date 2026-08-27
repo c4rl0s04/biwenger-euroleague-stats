@@ -60,8 +60,6 @@ export interface PlayerMutations {
     playerId: number
   ) => Promise<{ birth_date: string; height: number; weight: number } | undefined>;
   upsertTeam: (params: UpsertTeamParams) => Promise<void>;
-  updateTeamActiveStatus: (id: number, active: boolean) => Promise<void>;
-  setAllTeamsInactive: () => Promise<void>;
 }
 
 export interface PlayerMutationOptions {
@@ -229,30 +227,19 @@ export function preparePlayerMutations(
       const sql =
         seasonId === DEFAULT_SEASON_ID
           ? `
-            INSERT INTO teams (id, name, short_name, img, is_active)
-            VALUES ($1, $2, $3, $4, true)
+            INSERT INTO teams (id, name, short_name, img)
+            VALUES ($1, $2, $3, $4)
             ON CONFLICT(id) DO UPDATE SET
               name=excluded.name,
               short_name=excluded.short_name,
-              img=COALESCE(teams.img, excluded.img),
-              is_active=excluded.is_active
+              img=COALESCE(teams.img, excluded.img)
           `
           : `
-            INSERT INTO teams (id, name, short_name, img, is_active)
-            VALUES ($1, $2, $3, $4, true)
+            INSERT INTO teams (id, name, short_name, img)
+            VALUES ($1, $2, $3, $4)
             ON CONFLICT(id) DO NOTHING
           `;
       await db.query(sql, [params.id, params.name, params.short_name, params.img]);
-    },
-
-    updateTeamActiveStatus: async (id: number, active: boolean) => {
-      await db.query('UPDATE teams SET is_active = $1 WHERE id = $2', [active, id]);
-    },
-
-    setAllTeamsInactive: async () => {
-      if (seasonId === DEFAULT_SEASON_ID) {
-        await db.query('UPDATE teams SET is_active = false');
-      }
     },
   };
 }

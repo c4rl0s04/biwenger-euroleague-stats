@@ -60,12 +60,18 @@ async function main() {
       return;
     }
 
-    const { biwengerFetch, fetchCompetition, fetchLeague } =
+    const { biwengerFetch, fetchCompetition, fetchLeague, fetchRoundGames } =
       await import('../../src/lib/api/biwenger-client.js');
     const { getEuroleagueClient } = await import('../../src/lib/api/euroleague/runtime.js');
     const { euroleagueSeasonYear } = await import('../../src/lib/api/euroleague/normalization.js');
-    const { validateProviderSnapshot, validateAdvancedProviderSnapshot } =
+    const {
+      validateProviderSnapshot,
+      validateAdvancedProviderSnapshot,
+      validateBiwengerRoundSeason,
+    } =
       await import('../../src/lib/sync/preflight.js');
+    const { parseBiwengerCompetition } = await import('../../src/lib/sync/context.js');
+    const { relevantRounds } = await import('../../src/lib/sync/rounds.js');
 
     const account = await biwengerFetch('/account', { skipVersionCheck: true });
     const league = await fetchLeague();
@@ -76,6 +82,15 @@ async function main() {
       provider.getSchedule(seasonYear),
       provider.getStandings(seasonYear, 1),
     ]);
+    const competitionSnapshot = parseBiwengerCompetition(competition);
+    const firstRound = relevantRounds(competitionSnapshot.rounds)[0];
+    if (!firstRound) throw new Error('Biwenger competition contains no syncable rounds.');
+    const firstRoundResponse = await fetchRoundGames(firstRound.id);
+    const firstRoundGames = firstRoundResponse?.data?.games || firstRoundResponse?.games || [];
+    const biwengerReadiness = validateBiwengerRoundSeason({
+      seasonId: season.ID,
+      games: firstRoundGames,
+    });
 
     const providerCounts = validateProviderSnapshot({
       seasonId: season.ID,
@@ -109,6 +124,7 @@ async function main() {
 
     console.log(`Biwenger account probe: ${accountId}`);
     console.log(`Provider snapshot: ${JSON.stringify(providerCounts)}`);
+    console.log(`Biwenger season readiness: ${JSON.stringify(biwengerReadiness)}`);
     console.log(`Official snapshot: ${JSON.stringify(officialCounts)}`);
     console.log(`Mapping coverage: ${JSON.stringify(mappingCoverage.rows[0])}`);
 

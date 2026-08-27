@@ -1,8 +1,10 @@
-import { fetchAllPlayers, fetchPlayerDetails } from '../../api/biwenger-client';
+import { fetchAllPlayers, fetchPlayerDetails, fetchRoundGames } from '../../api/biwenger-client';
 import { getShortTeamName } from '../../utils/format';
 import { CONFIG } from '../../config';
 import { preparePlayerMutations } from '../../db/mutations/players';
 import { SyncManager } from '../manager';
+import { validateBiwengerRoundSeason } from '../preflight';
+import { relevantRounds } from '../rounds';
 
 const SLEEP_MS = 600;
 
@@ -47,6 +49,15 @@ export async function run(manager: SyncManager) {
   const snapshot = manager.setBiwengerCompetition(competition);
   const playersList = snapshot.players;
 
+  const firstRound = relevantRounds(snapshot.rounds)[0];
+  if (!firstRound) throw new Error('Biwenger competition contains no syncable rounds.');
+  const firstRoundResponse = await fetchRoundGames(firstRound.id);
+  const firstRoundGames = firstRoundResponse?.data?.games || firstRoundResponse?.games || [];
+  const readiness = validateBiwengerRoundSeason({ seasonId, games: firstRoundGames });
+  manager.log(
+    `   ✅ Biwenger season readiness: ${readiness.datedGames}/${readiness.games} first-round games belong to ${readiness.seasonYear}.`
+  );
+
   manager.log(
     `Found ${Object.keys(playersList).length} players. Updating DB and fetching details...`
   );
@@ -73,7 +84,6 @@ export async function run(manager: SyncManager) {
   );
 
   manager.log('Syncing Teams...');
-  await mutations.setAllTeamsInactive();
   for (const [teamId, teamData] of Object.entries(teams) as any[]) {
     await mutations.upsertTeam({
       id: parseInt(teamId),

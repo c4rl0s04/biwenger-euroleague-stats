@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { validateAdvancedProviderSnapshot, validateProviderSnapshot } from '../preflight';
+import {
+  validateAdvancedProviderSnapshot,
+  validateBiwengerRoundSeason,
+  validateProviderSnapshot,
+} from '../preflight';
 
 const validSnapshot = {
   seasonId: '2026-27',
@@ -78,5 +82,34 @@ describe('advanced official provider preflight', () => {
         standings: [{ teamCode: 'MAD' }],
       })
     ).toThrow(/does not match/);
+  });
+});
+
+describe('Biwenger season readiness', () => {
+  it('accepts first-round games from the configured season start year', () => {
+    expect(
+      validateBiwengerRoundSeason({
+        seasonId: '2026-27',
+        games: [{ id: 1, date: Date.parse('2026-09-30T18:00:00Z') / 1000 }],
+      })
+    ).toMatchObject({ games: 1, seasonYear: 2026 });
+  });
+
+  it('rejects the previous Biwenger season before any sync writes occur', () => {
+    expect(() =>
+      validateBiwengerRoundSeason({
+        seasonId: '2026-27',
+        games: [{ id: 49683, date: Date.parse('2025-09-30T18:00:00Z') / 1000 }],
+      })
+    ).toThrow(/still belongs to 2025.*expected 2026/);
+  });
+
+  it('rejects an unavailable or undated first round', () => {
+    expect(() => validateBiwengerRoundSeason({ seasonId: '2026-27', games: [] })).toThrow(
+      /no first-round games/
+    );
+    expect(() =>
+      validateBiwengerRoundSeason({ seasonId: '2026-27', games: [{ id: 1 }] })
+    ).toThrow(/no dated first-round games/);
   });
 });

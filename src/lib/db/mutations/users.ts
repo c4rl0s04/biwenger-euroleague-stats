@@ -115,25 +115,6 @@ export function prepareUserMutations(
     },
 
     resetActiveOwners: async () => {
-      // Only reset owners for players belonging to active teams
-      if (seasonId === DEFAULT_SEASON_ID) {
-        await db.query(`
-          UPDATE players
-          SET owner_id = NULL
-          WHERE team_id IN (SELECT id FROM teams WHERE is_active = true)
-        `);
-        await db.query(
-          `
-          UPDATE player_seasons
-          SET owner_id = NULL, updated_at = NOW()
-          WHERE season_id = $1
-            AND team_id IN (SELECT id FROM teams WHERE is_active = true)
-        `,
-          [seasonId]
-        );
-        return;
-      }
-
       await db.query(
         `
         UPDATE player_seasons
