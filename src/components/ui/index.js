@@ -12,7 +12,7 @@
  */
 
 // Loading & Skeletons
-export { default as LoadingSkeleton, CardSkeleton, TableRowSkeleton } from './LoadingSkeleton';
+export { default as LoadingSkeleton, CardSkeleton } from './LoadingSkeleton';
 
 // Animation
 export { default as FadeIn } from './FadeIn';

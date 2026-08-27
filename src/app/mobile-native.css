@@ -804,6 +804,37 @@
   color: inherit;
 }
 
+.mobile-list-row {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 74px;
+}
+
+.mobile-app .app-route-loading {
+  min-height: calc(100dvh - var(--mobile-nav-height));
+  padding: calc(1rem + env(safe-area-inset-top, 0px)) var(--mobile-gutter)
+    calc(var(--mobile-nav-height) + 1rem);
+}
+
+.mobile-app .app-route-loading-header {
+  min-height: 5rem;
+  margin-bottom: 1rem;
+}
+
+.mobile-app .app-route-loading-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.mobile-app .app-route-loading-card {
+  min-height: 7.4rem;
+  border-radius: 1.1rem;
+}
+
+.mobile-app .app-route-loading-card-wide {
+  min-height: 4.6rem;
+  grid-column: 1 / -1;
+}
+
 .mobile-section-link:first-child,
 .mobile-list-row:first-child {
   border-top: 1px solid hsl(var(--border) / 0.52);

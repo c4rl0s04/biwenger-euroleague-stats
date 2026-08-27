@@ -308,7 +308,7 @@ export default function LoginPage() {
           </form>
 
           {/* Footer note */}
-          <p className="mt-6 text-center text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/40 sm:mt-10">
+          <p className="mt-6 text-center text-[10px] uppercase leading-relaxed tracking-[0.15em] text-zinc-400 sm:mt-10">
             Sistema de acceso restringido · Liga Euroleague
           </p>
         </div>

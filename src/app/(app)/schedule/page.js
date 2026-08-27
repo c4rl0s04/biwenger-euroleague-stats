@@ -10,17 +10,14 @@ import { PageHeader } from '@/components/ui';
 import MobileScheduleScreen from '@/components/mobile/screens/MobileScheduleScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
-import { cookies } from 'next/headers';
-
 export default async function SchedulePage({ searchParams }) {
-  // Await params for Next.js 15+
-  const params = await searchParams;
-  const cookieStore = await cookies();
-
-  // Fetch data in parallel
-  const [users, rounds] = await Promise.all([fetchAllUsers(), fetchScheduleRounds()]);
-
-  const session = await auth();
+  const [params, users, rounds, session, phone] = await Promise.all([
+    searchParams,
+    fetchAllUsers(),
+    fetchScheduleRounds(),
+    auth(),
+    isPhonePresentation(),
+  ]);
   const userId = session?.user?.id;
   const roundId = params?.roundId ? parseInt(params.roundId) : null;
 
@@ -28,7 +25,16 @@ export default async function SchedulePage({ searchParams }) {
     ? await getUserScheduleService(userId, roundId)
     : { found: false, message: 'No user selected' };
 
-  // Helper to group matches by date
+  if (phone) {
+    return (
+      <MobileScheduleScreen
+        schedule={schedule}
+        rounds={rounds}
+        userName={users.find((user) => String(user.id) === String(userId))?.name}
+      />
+    );
+  }
+
   const groupedMatches = schedule.found
     ? schedule.matches.reduce((acc, match) => {
         const date = new Date(match.date);
@@ -44,23 +50,11 @@ export default async function SchedulePage({ searchParams }) {
       }, {})
     : {};
 
-  // Flatten all active players for the summary
   const allActivePlayers = schedule.found
     ? schedule.matches
-        .flatMap((m) => m.user_players)
-        // Sort by fantasy points descending globally for the summary
-        .sort((a, b) => (b.puntos || 0) - (a.puntos || 0))
+        .flatMap((match) => match.user_players)
+        .sort((left, right) => (right.puntos || 0) - (left.puntos || 0))
     : [];
-
-  if (await isPhonePresentation()) {
-    return (
-      <MobileScheduleScreen
-        schedule={schedule}
-        rounds={rounds}
-        userName={users.find((user) => String(user.id) === String(userId))?.name}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen">

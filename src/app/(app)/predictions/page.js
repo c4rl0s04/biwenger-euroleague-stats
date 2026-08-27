@@ -13,9 +13,9 @@ export const metadata = {
 export const revalidate = 300;
 
 export default async function PredictionsPage() {
-  const stats = await fetchPredictionsStats();
+  const [stats, phone] = await Promise.all([fetchPredictionsStats(), isPhonePresentation()]);
 
-  if (await isPhonePresentation()) return <MobilePredictionsScreen stats={stats} />;
+  if (phone) return <MobilePredictionsScreen stats={stats} />;
 
   return (
     <div className="min-h-screen bg-background">

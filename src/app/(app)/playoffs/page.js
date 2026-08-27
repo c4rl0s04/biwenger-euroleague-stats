@@ -13,10 +13,14 @@ export const metadata = {
 export const revalidate = 600;
 
 export default async function PlayoffPage() {
-  const leaderboard = await getPlayoffLeaderboard();
-  const teams = await getTeams();
+  const [leaderboard, phone] = await Promise.all([
+    getPlayoffLeaderboard(),
+    isPhonePresentation(),
+  ]);
 
-  if (await isPhonePresentation()) return <MobilePlayoffsScreen leaderboard={leaderboard} />;
+  if (phone) return <MobilePlayoffsScreen leaderboard={leaderboard} />;
+
+  const teams = await getTeams();
 
   return (
     <div className="min-h-screen bg-background">

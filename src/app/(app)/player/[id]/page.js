@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function PlayerPage({ params }) {
   const { id } = await params;
-  const player = await getPlayerProfile(id);
+  const [player, phone] = await Promise.all([getPlayerProfile(id), isPhonePresentation()]);
 
   if (!player) {
     return (
@@ -26,7 +26,7 @@ export default async function PlayerPage({ params }) {
     );
   }
 
-  if (await isPhonePresentation()) return <MobilePlayerProfileScreen player={player} />;
+  if (phone) return <MobilePlayerProfileScreen player={player} />;
 
   // Pass plain object to client component
   return (

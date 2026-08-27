@@ -14,19 +14,21 @@ export const dynamic = 'force-dynamic';
 
 export default async function TournamentDetailsPage({ params }) {
   const { id } = await params;
-  const tournament = await getTournamentDetails(id);
+  const [tournament, phone] = await Promise.all([
+    getTournamentDetails(id),
+    isPhonePresentation(),
+  ]);
 
   if (!tournament) {
     notFound();
   }
 
-  const standings = await getStandings(id);
-  const fixtures = await getFixtures(id);
+  const [standings, fixtures] = await Promise.all([getStandings(id), getFixtures(id)]);
 
   const isActive = tournament.status === 'active';
   const data = tournament.data || {};
 
-  if (await isPhonePresentation()) {
+  if (phone) {
     return <MobileTournamentDetailScreen tournament={tournament} standings={standings} fixtures={fixtures} />;
   }
 

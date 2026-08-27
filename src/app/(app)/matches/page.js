@@ -7,11 +7,14 @@ import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function MatchesPage({ searchParams }) {
-  const { rounds, currentRoundId } = await fetchMatchesGrouped();
-  const params = await searchParams;
+  const [{ rounds, currentRoundId }, params, phone] = await Promise.all([
+    fetchMatchesGrouped(),
+    searchParams,
+    isPhonePresentation(),
+  ]);
   const selectedRoundId = params?.roundId ?? currentRoundId ?? rounds[0]?.round_id;
 
-  if (await isPhonePresentation()) {
+  if (phone) {
     return <MobileMatchesScreen rounds={rounds} activeRoundId={selectedRoundId} />;
   }
 

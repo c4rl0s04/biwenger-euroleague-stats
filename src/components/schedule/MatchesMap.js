@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useMemo, useState } from 'react';
 import { Map as MapComponent, MapControls, MarkerContent } from '@/components/ui/map';
 import { getTeamColor } from '@/lib/constants/teamColors';

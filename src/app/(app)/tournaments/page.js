@@ -12,17 +12,14 @@ import MobileTournamentsScreen from '@/components/mobile/screens/MobileTournamen
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export default async function TournamentsPage() {
-  const [tournamentsData, statsData] = await Promise.all([
-    getAllTournaments(),
-    getGlobalTournamentStats(),
-  ]);
-
+  const [tournamentsData, phone] = await Promise.all([getAllTournaments(), isPhonePresentation()]);
   const { active, finished } = tournamentsData;
-  const { hallOfFame, globalStats, leagueStats, records } = statsData;
 
-  if (await isPhonePresentation()) {
+  if (phone) {
     return <MobileTournamentsScreen active={active} finished={finished} />;
   }
+
+  const { hallOfFame, globalStats, leagueStats, records } = await getGlobalTournamentStats();
 
   return (
     <div>
