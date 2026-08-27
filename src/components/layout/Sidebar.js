@@ -23,12 +23,19 @@ export default function Sidebar() {
     return () => clearTimeout(t);
   }, [pathname]);
 
+  useEffect(() => {
+    const tablet = window.matchMedia('(min-width: 768px) and (max-width: 1023px)');
+    if (!tablet.matches) return undefined;
+    const collapseTimer = window.setTimeout(() => setIsCollapsed(true), 0);
+    return () => window.clearTimeout(collapseTimer);
+  }, []);
+
   return (
     <>
       {/* Sidebar */}
       <aside
         className={`
-          hidden lg:sticky lg:flex top-16 left-0 h-[calc(100dvh-4rem)] z-30
+          hidden md:sticky md:flex top-16 left-0 h-[calc(100dvh-4rem)] z-30
           ${sidebarWidth}
           bg-card/40 backdrop-blur-xl border-r border-border/40
           flex-col

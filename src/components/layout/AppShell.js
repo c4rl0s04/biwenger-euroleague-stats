@@ -7,28 +7,28 @@ import { Github, Twitter, Instagram } from 'lucide-react';
 import NewsTicker from '../ui/NewsTicker';
 import { NavigationFeedbackProvider, NavigationLink } from './NavigationFeedback';
 
-export default function AppShell({ children }) {
+export default function AppShell({ children, presentationMode = 'desktop' }) {
+  const isPhone = presentationMode === 'phone';
+
   return (
     <NavigationFeedbackProvider>
-      <div className="min-h-screen flex flex-col">
+      <div className={`${isPhone ? 'mobile-app' : ''} min-h-screen flex flex-col`} data-presentation={presentationMode}>
         <a href="#main-content" className="skip-link">
           Saltar al contenido
         </a>
-        {/* Top Header - always visible */}
-        <TopHeader />
+        {!isPhone && <TopHeader />}
 
         <div className="flex flex-1">
-          {/* Sidebar - hidden on mobile unless open */}
-          <Sidebar />
+          {!isPhone && <Sidebar />}
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar">
-            <NewsTicker />
+            {!isPhone && <NewsTicker />}
             <main id="main-content" tabIndex={-1} className="flex-grow w-full app-main-content">
               {children}
             </main>
 
-            {/* Premium Footer */}
+            {!isPhone && (
             <footer className="border-t border-white/5 mt-auto bg-card/20 backdrop-blur-md relative overflow-hidden">
               {/* Subtle accent glow */}
               <div className="absolute bottom-0 left-1/4 w-[500px] h-[200px] bg-primary/5 blur-[120px] rounded-full -z-10" />
@@ -145,9 +145,10 @@ export default function AppShell({ children }) {
                 </div>
               </div>
             </footer>
+            )}
           </div>
         </div>
-        <MobileNavigation />
+        {isPhone && <MobileNavigation />}
       </div>
     </NavigationFeedbackProvider>
   );

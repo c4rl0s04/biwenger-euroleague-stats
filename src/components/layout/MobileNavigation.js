@@ -15,6 +15,15 @@ function MoreSheet({ isOpen, onClose }) {
   const secondaryItems = NAV_ITEMS.filter(
     (item) => !MOBILE_PRIMARY_ITEMS.some((primary) => primary.href === item.href)
   );
+  const categories = [
+    { name: 'Equipo', hrefs: ['/players', '/market', '/lineup'] },
+    { name: 'Liga', hrefs: ['/matches', '/rounds', '/compare'] },
+    { name: 'Competición', hrefs: ['/tournaments', '/predictions', '/playoffs'] },
+    { name: 'Herramientas', hrefs: ['/assistant', '/hoopgrid', '/season-review'] },
+  ].map((category) => ({
+    ...category,
+    items: secondaryItems.filter((item) => category.hrefs.includes(item.href)),
+  }));
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -56,7 +65,7 @@ function MoreSheet({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="mobile-more-layer lg:hidden">
+    <div className="mobile-more-layer">
       <button
         type="button"
         className="mobile-more-backdrop"
@@ -96,25 +105,30 @@ function MoreSheet({ isOpen, onClose }) {
         </div>
 
         <nav aria-label="Resto de secciones" className="mobile-more-content">
-          <ul className="grid grid-cols-2 gap-2">
-            {secondaryItems.map((item) => {
-              const active = isNavigationItemActive(pathname, item.href);
-              return (
-                <li key={item.href}>
-                  <NavigationLink
-                    href={item.href}
-                    navigationLabel={item.name}
-                    onClick={onClose}
-                    aria-current={active ? 'page' : undefined}
-                    className={`mobile-more-link ${active ? 'mobile-more-link-active' : ''}`}
-                  >
-                    <item.icon size={20} aria-hidden="true" />
-                    <span>{item.name}</span>
-                  </NavigationLink>
-                </li>
-              );
-            })}
-          </ul>
+          {categories.map((category) => (
+            <section key={category.name} className="mobile-more-category" aria-labelledby={`mobile-more-${category.name}`}>
+              <h3 id={`mobile-more-${category.name}`}>{category.name}</h3>
+              <ul className="grid grid-cols-2 gap-2">
+                {category.items.map((item) => {
+                  const active = isNavigationItemActive(pathname, item.href);
+                  return (
+                    <li key={item.href}>
+                      <NavigationLink
+                        href={item.href}
+                        navigationLabel={item.name}
+                        onClick={onClose}
+                        aria-current={active ? 'page' : undefined}
+                        className={`mobile-more-link ${active ? 'mobile-more-link-active' : ''}`}
+                      >
+                        <item.icon size={20} aria-hidden="true" />
+                        <span>{item.name}</span>
+                      </NavigationLink>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
 
           <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/8 pt-4">
             <NavigationLink
@@ -150,7 +164,7 @@ export default function MobileNavigation() {
 
   return (
     <>
-      <nav aria-label="Navegación principal móvil" className="mobile-bottom-nav lg:hidden">
+      <nav aria-label="Navegación principal móvil" className="mobile-bottom-nav">
         <div className="mobile-bottom-nav-inner">
           {MOBILE_PRIMARY_ITEMS.map((item) => {
             const active = isNavigationItemActive(pathname, item.href);
