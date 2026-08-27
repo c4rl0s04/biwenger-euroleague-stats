@@ -7,6 +7,8 @@ import { StandingsTable, TournamentFixtures, TournamentBracket } from '@/compone
 import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { resolveRoundIdByPolicy } from '@/lib/db';
+import MobileTournamentDetailScreen from '@/components/mobile/screens/MobileTournamentDetailScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,10 @@ export default async function TournamentDetailsPage({ params }) {
 
   const isActive = tournament.status === 'active';
   const data = tournament.data || {};
+
+  if (await isPhonePresentation()) {
+    return <MobileTournamentDetailScreen tournament={tournament} standings={standings} fixtures={fixtures} />;
+  }
 
   // Determine initial round to show
   let initialRoundId = null;

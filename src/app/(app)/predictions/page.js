@@ -1,6 +1,8 @@
 import { fetchPredictionsStats } from '@/lib/services/features/predictionsService';
 import PredictionsClient from '@/components/predictions/PredictionsClient';
 import { PageHeader } from '@/components/ui';
+import MobilePredictionsScreen from '@/components/mobile/screens/MobilePredictionsScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const metadata = {
   title: 'Porras - BiwengerStats',
@@ -12,6 +14,8 @@ export const revalidate = 300;
 
 export default async function PredictionsPage() {
   const stats = await fetchPredictionsStats();
+
+  if (await isPhonePresentation()) return <MobilePredictionsScreen stats={stats} />;
 
   return (
     <div className="min-h-screen bg-background">
