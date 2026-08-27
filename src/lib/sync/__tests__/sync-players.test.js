@@ -26,6 +26,9 @@ describe('syncPlayers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    client.fetchRoundGames.mockResolvedValue({
+      data: { games: [{ id: 1, date: Date.parse('2026-09-30T18:00:00Z') / 1000 }] },
+    });
 
     db = {
       query: vi.fn(async (sql, params) => {
@@ -61,6 +64,7 @@ describe('syncPlayers', () => {
   it('should sync players correctly', async () => {
     const mockCompetition = {
       data: {
+        rounds: [{ id: 1, name: 'Jornada 1' }],
         data: {
           players: {
             101: {
@@ -114,6 +118,7 @@ describe('syncPlayers', () => {
   it('uses season-specific existing stats instead of global player stats', async () => {
     const mockCompetition = {
       data: {
+        rounds: [{ id: 1, name: 'Jornada 1' }],
         data: {
           players: {
             101: {

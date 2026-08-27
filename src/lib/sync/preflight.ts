@@ -22,6 +22,53 @@ export interface ProviderSnapshotCounts {
   games: number;
 }
 
+export interface BiwengerRoundSeasonInput {
+  seasonId: string;
+  games: { id?: number; date?: number | string | null }[];
+}
+
+function biwengerGameDate(value: number | string | null | undefined): Date | null {
+  if (value == null || value === '') return null;
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  const milliseconds = numeric < 10_000_000_000 ? numeric * 1000 : numeric;
+  const date = new Date(milliseconds);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Biwenger keeps the previous season's rounds available until its fantasy game rolls over.
+ * Refuse those payloads before catalogue identities are written into the active season.
+ */
+export function validateBiwengerRoundSeason(input: BiwengerRoundSeasonInput) {
+  if (input.games.length === 0) {
+    throw new Error(`Biwenger ${input.seasonId} readiness probe returned no first-round games.`);
+  }
+
+  const expectedYear = Number(input.seasonId.slice(0, 4));
+  const dates = input.games
+    .map((game) => biwengerGameDate(game.date))
+    .filter((date): date is Date => date !== null);
+  if (dates.length === 0) {
+    throw new Error(`Biwenger ${input.seasonId} readiness probe returned no dated first-round games.`);
+  }
+
+  const years = Array.from(new Set(dates.map((date) => date.getUTCFullYear())));
+  if (years.length !== 1 || years[0] !== expectedYear) {
+    throw new Error(
+      `Biwenger first round still belongs to ${years.join(', ') || 'an unknown year'}; expected ${expectedYear} for ${input.seasonId}. The provider has not rolled over to the configured season.`
+    );
+  }
+
+  return {
+    games: input.games.length,
+    datedGames: dates.length,
+    seasonYear: years[0],
+    earliestGame: new Date(Math.min(...dates.map((date) => date.getTime()))).toISOString(),
+    latestGame: new Date(Math.max(...dates.map((date) => date.getTime()))).toISOString(),
+  };
+}
+
 function countCollection(value: unknown): number {
   if (Array.isArray(value)) return value.length;
   if (value && typeof value === 'object') return Object.keys(value).length;

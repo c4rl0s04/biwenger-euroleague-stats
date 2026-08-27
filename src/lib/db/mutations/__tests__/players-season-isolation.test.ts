@@ -44,5 +44,6 @@ describe('new-season identity isolation', () => {
       img: 'new-image',
     });
     expect(db.query.mock.calls[0][0]).toContain('ON CONFLICT(id) DO NOTHING');
+    expect(db.query.mock.calls[0][0]).not.toContain('is_active');
   });
 });
