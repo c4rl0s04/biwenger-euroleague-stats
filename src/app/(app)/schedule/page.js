@@ -7,6 +7,8 @@ import RoundSummary from '@/components/schedule/RoundSummary';
 import AutoAlignButton from '@/components/schedule/AutoAlignButton';
 import { Section } from '@/components/layout';
 import { PageHeader } from '@/components/ui';
+import MobileScheduleScreen from '@/components/mobile/screens/MobileScheduleScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 import { cookies } from 'next/headers';
 
@@ -49,6 +51,16 @@ export default async function SchedulePage({ searchParams }) {
         // Sort by fantasy points descending globally for the summary
         .sort((a, b) => (b.puntos || 0) - (a.puntos || 0))
     : [];
+
+  if (await isPhonePresentation()) {
+    return (
+      <MobileScheduleScreen
+        schedule={schedule}
+        rounds={rounds}
+        userName={users.find((user) => String(user.id) === String(userId))?.name}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen">

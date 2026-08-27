@@ -2,6 +2,8 @@ import { PageHeader } from '@/components/ui';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import LineupClient from '@/components/lineup/LineupClient';
+import MobileLineupClient from '@/components/mobile/screens/MobileLineupClient';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const metadata = {
   title: 'Configurar Alineación - BiwengerStats',
@@ -25,5 +27,6 @@ export default async function LineupPage({ searchParams }) {
     redirect('/lineup');
   }
 
+  if (await isPhonePresentation()) return <MobileLineupClient userId={sessionUserId} />;
   return <LineupClient userId={sessionUserId} />;
 }
