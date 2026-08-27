@@ -15,7 +15,7 @@ Authentication uses Auth.js v5 with a custom credentials provider and JWT sessio
 
 ## Page protection
 
-[`src/middleware.js`](../../src/middleware.js) initializes Auth.js from the edge-safe
+[`src/proxy.js`](../../src/proxy.js) initializes Auth.js from the edge-safe
 [`auth.config.js`](../../src/auth.config.js). Its matcher excludes API routes and static Next.js
 resources; the authorization callback permits `/login` and requires a session for other matched
 pages.
