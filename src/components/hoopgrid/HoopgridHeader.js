@@ -5,6 +5,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
  * Centered header section for the Hoopgrid game with navigation.
  */
 export default function HoopgridHeader({
+  mobile = false,
   diffDays,
   challengeDate,
   currentDateStr,
@@ -51,7 +52,7 @@ export default function HoopgridHeader({
           onChange={onNavigate}
           options={options}
           placeholder={allChallenges.length > 0 ? `Reto #${diffDays}` : 'Cargando...'}
-          className="min-w-[220px] md:min-w-[380px]"
+          className={mobile ? 'min-w-[148px]' : 'min-w-[220px] md:min-w-[380px]'}
           buttonClassName="!bg-transparent !border-none !h-auto !p-0 !text-4xl md:!text-6xl !font-display !uppercase !tracking-normal !text-white !leading-tight !justify-center hover:!text-primary transition-colors"
         />
 

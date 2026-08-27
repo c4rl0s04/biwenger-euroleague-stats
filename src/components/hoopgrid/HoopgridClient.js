@@ -22,7 +22,8 @@ import HoopgridCalendar from './HoopgridCalendar';
  * Main Hoopgrid Orchestrator.
  * Symmetrical and Modular.
  */
-export default function HoopgridClient() {
+/** @param {{ mobile?: boolean }} props */
+export default function HoopgridClient({ mobile = false }) {
   const gridRef = useRef(null);
   const { currentUser } = useUser();
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -65,9 +66,10 @@ export default function HoopgridClient() {
   if (!challenge) return null;
 
   return (
-    <div className="w-full flex flex-col items-center pt-12">
+    <div className={`w-full flex flex-col items-center ${mobile ? 'mobile-hoopgrid-client' : 'pt-12'}`}>
       {/* 1. Header Section */}
       <HoopgridHeader
+        mobile={mobile}
         diffDays={diffDays}
         challengeDate={challengeDate}
         currentDateStr={rawGameDate}

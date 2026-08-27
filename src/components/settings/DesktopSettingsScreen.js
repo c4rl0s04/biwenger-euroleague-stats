@@ -494,7 +494,7 @@ function SecuritySettings() {
   );
 }
 
-export default function SettingsPage() {
+export default function DesktopSettingsScreen() {
   const [activeTab, setActiveTab] = useState('security');
 
   const tabs = [

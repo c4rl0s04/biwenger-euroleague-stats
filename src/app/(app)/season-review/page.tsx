@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 import { auth } from '@/auth';
 import { PageHeader } from '@/components/ui';
 import SeasonReviewClient from '@/components/season-review/SeasonReviewClient';
-import { getSeasonResilienceOverview } from '@/lib/services';
-import type { SimulationAnalysisArtifact } from '@/lib/season-review/simulation-types';
+import MobileSeasonReviewScreen from '@/components/mobile/screens/MobileSeasonReviewScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
+import { getSeasonReviewPageData } from '@/lib/season-review/read-analysis';
 
 export const metadata: Metadata = {
   title: 'Análisis 25/26 | Biwenger Stats',
@@ -17,11 +16,12 @@ export default async function SeasonReviewPage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
-  const overview = await getSeasonResilienceOverview();
+  const [{ overview, simulationAnalysis }, phone] = await Promise.all([
+    getSeasonReviewPageData(),
+    isPhonePresentation(),
+  ]);
 
-  const jsonPath = join(process.cwd(), 'src/data/season-simulation-analysis.json');
-  const analysisRaw = await readFile(jsonPath, 'utf8');
-  const simulationAnalysis = JSON.parse(analysisRaw) as SimulationAnalysisArtifact;
+  if (phone) return <MobileSeasonReviewScreen overview={overview} simulationAnalysis={simulationAnalysis} />;
 
   return (
     <main className="min-h-screen overflow-hidden bg-background">

@@ -11,6 +11,7 @@ import { eq, and, desc } from 'drizzle-orm';
 import Image from 'next/image';
 import { HoopgridService } from '@/lib/services/features/hoopgridService';
 import HoopgridCheatsheetHeader from '@/components/hoopgrid/HoopgridCheatsheetHeader';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 // We'll replicate the checkCriteria logic here to keep it self-contained
 // and avoid issues with private methods in HoopgridService
@@ -88,6 +89,7 @@ function checkCriteriaInMemory(player, criteria, statsMap, everOwnedIds, userOwn
 }
 
 export default async function HoopgridCheatsheetPage({ searchParams }) {
+  const phone = await isPhonePresentation();
   const params = await searchParams;
   const dateParam = params.date;
   const today = new Date().toISOString().split('T')[0];
@@ -194,7 +196,7 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-10 font-sans">
+    <div className={`min-h-screen bg-background text-foreground font-sans ${phone ? 'mobile-cheatsheet-page' : 'p-6 md:p-10'}`}>
       <div className="max-w-7xl mx-auto">
         <HoopgridCheatsheetHeader
           allChallenges={allChallenges}
@@ -209,7 +211,7 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
           {solutions.map((cell, idx) => (
             <div
               key={idx}
-              className="flex min-h-[28rem] max-h-[70dvh] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm md:h-[650px] md:max-h-none"
+              className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm md:h-[650px]"
             >
               <div className="p-5 border-b border-border bg-muted/30">
                 <div className="flex justify-between items-center mb-1">

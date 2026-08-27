@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bot, Bug, MessageSquare, Plus, SendHorizontal, Trash2, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import MobileBottomSheet from '@/components/mobile/MobileBottomSheet';
 
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 const STARTERS = [
@@ -125,7 +126,10 @@ async function parseResponse(response, fallbackMessage) {
   return data.data;
 }
 
-export default function AssistantChat() {
+/**
+ * @param {{ mobile?: boolean, initialConversationId?: string | null }} props
+ */
+export default function AssistantChat({ mobile = false, initialConversationId = null }) {
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -135,6 +139,7 @@ export default function AssistantChat() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState('');
   const [debugByMessageId, setDebugByMessageId] = useState({});
+  const [conversationsOpen, setConversationsOpen] = useState(false);
   const chatViewportRef = useRef(null);
   const messageRequestRef = useRef(0);
 
@@ -175,7 +180,10 @@ export default function AssistantChat() {
         if (cancelled) return;
         setConversations(data.conversations);
         if (data.conversations.length > 0) {
-          await loadConversation(data.conversations[0].id);
+          const initial = data.conversations.find(
+            (conversation) => String(conversation.id) === String(initialConversationId)
+          );
+          await loadConversation(initial?.id ?? data.conversations[0].id);
         }
       } catch (requestError) {
         if (!cancelled) {
@@ -193,7 +201,7 @@ export default function AssistantChat() {
     return () => {
       cancelled = true;
     };
-  }, [loadConversation]);
+  }, [initialConversationId, loadConversation]);
 
   useEffect(() => {
     const viewport = chatViewportRef.current;
@@ -320,7 +328,8 @@ export default function AssistantChat() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-11rem)] max-w-6xl flex-col overflow-hidden border-y border-border/60 bg-card/40 shadow-2xl shadow-black/20 backdrop-blur-xl sm:rounded-2xl sm:border lg:min-h-[650px] lg:flex-row">
-      <aside className="border-b border-border/50 bg-background/20 p-3 lg:w-64 lg:border-r lg:border-b-0">
+      {!mobile && (
+        <aside className="border-b border-border/50 bg-background/20 p-3 lg:w-64 lg:border-r lg:border-b-0">
         <button
           type="button"
           onClick={beginNewConversation}
@@ -375,7 +384,8 @@ export default function AssistantChat() {
             </div>
           ))}
         </div>
-      </aside>
+        </aside>
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-3 border-b border-border/50 px-5 py-4">
@@ -390,6 +400,15 @@ export default function AssistantChat() {
               Estrategia fantasy y conversaciones guardadas en tu cuenta
             </p>
           </div>
+          {mobile && (
+            <button
+              type="button"
+              onClick={() => setConversationsOpen(true)}
+              className="mobile-chat-history-button"
+            >
+              <MessageSquare size={17} aria-hidden="true" /> Chats
+            </button>
+          )}
         </div>
 
         <div
@@ -519,6 +538,41 @@ export default function AssistantChat() {
           </p>
         </form>
       </div>
+      {mobile && (
+        <MobileBottomSheet
+          open={conversationsOpen}
+          onClose={() => setConversationsOpen(false)}
+          title="Conversaciones"
+          description="Continúa un chat o empieza uno nuevo"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              beginNewConversation();
+              setConversationsOpen(false);
+            }}
+            className="mobile-primary-action w-full"
+          >
+            <Plus size={17} aria-hidden="true" /> Nuevo chat
+          </button>
+          <div className="mobile-chat-conversation-list">
+            {conversations.map((conversation) => (
+              <button
+                key={conversation.id}
+                type="button"
+                onClick={() => {
+                  loadConversation(conversation.id);
+                  setConversationsOpen(false);
+                }}
+                aria-current={conversation.id === activeConversationId ? 'true' : undefined}
+              >
+                <span>{conversation.title}</span>
+                <small>{formatDate(conversation.updatedAt)}</small>
+              </button>
+            ))}
+          </div>
+        </MobileBottomSheet>
+      )}
     </div>
   );
 }

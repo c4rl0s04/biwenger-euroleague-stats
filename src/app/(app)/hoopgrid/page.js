@@ -1,5 +1,7 @@
 import HoopgridClient from '@/components/hoopgrid/HoopgridClient';
+import MobileHoopgridScreen from '@/components/mobile/screens/MobileHoopgridScreen';
 import { PageHeader } from '@/components/ui';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 import { Suspense } from 'react';
 
 /**
@@ -13,7 +15,9 @@ export const metadata = {
   description: 'Pon a prueba tus conocimientos de la Euroliga con el desafío diario de Hoopgrid.',
 };
 
-export default function HoopgridPage() {
+export default async function HoopgridPage() {
+  if (await isPhonePresentation()) return <MobileHoopgridScreen />;
+
   return (
     <div className="min-h-screen bg-background">
       <main className="w-full relative z-10">
