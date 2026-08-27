@@ -4,6 +4,7 @@
 import pg, { Pool, PoolConfig } from 'pg';
 
 import { CONFIG } from '../config.js';
+import { buildPoolConfig } from './connection-config';
 
 // Skip database connection in CI/build environment
 const skipDb = CONFIG.DB.SKIP;
@@ -28,25 +29,7 @@ if (skipDb) {
   // Connect to the POSTGRES database
   // Defaults match docker-compose.yml
   const connectionString = process.env.DATABASE_URL;
-  const isRemote =
-    (process.env.POSTGRES_HOST && process.env.POSTGRES_HOST !== 'localhost') ||
-    (connectionString &&
-      !connectionString.includes('localhost') &&
-      !connectionString.includes('127.0.0.1'));
-
-  const poolConfig: PoolConfig = connectionString
-    ? {
-        connectionString,
-        ssl: isRemote ? { rejectUnauthorized: false } : false,
-      }
-    : {
-        user: process.env.POSTGRES_USER,
-        password: process.env.POSTGRES_PASSWORD,
-        host: process.env.POSTGRES_HOST,
-        port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT, 10) : 5432,
-        database: process.env.POSTGRES_DB,
-        ssl: isRemote ? { rejectUnauthorized: false } : false,
-      };
+  const poolConfig: PoolConfig = buildPoolConfig(process.env);
 
   const pool = new pg.Pool({
     ...poolConfig,
