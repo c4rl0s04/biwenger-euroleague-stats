@@ -84,6 +84,7 @@ export {
 // Market Service (Root)
 export {
   fetchMarketStats,
+  fetchCurrentMarketListings,
   fetchLiveMarketTransfers,
   fetchMarketTrendsAnalysis,
   fetchBestValueDetails,

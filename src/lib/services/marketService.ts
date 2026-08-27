@@ -221,6 +221,11 @@ export async function fetchMarketStats() {
   };
 }
 
+/** Lightweight listing loader for the phone market overview. */
+export async function fetchCurrentMarketListings() {
+  return await getCurrentMarketListings();
+}
+
 export interface LiveMarketTransfersParams {
   page?: number;
   limit?: number;

@@ -233,6 +233,54 @@
   line-height: 1.4;
 }
 
+.mobile-rank,
+.mobile-position-chip {
+  display: grid;
+  width: 2.15rem;
+  height: 2.15rem;
+  place-items: center;
+  border-radius: 0.72rem;
+  background: hsl(var(--secondary));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.mobile-record-index {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  background: hsl(var(--secondary));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.mobile-record-empty {
+  margin-top: 0.75rem;
+  border: 1px dashed hsl(var(--border));
+  border-radius: 1rem;
+  padding: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.mobile-rank-1 { background: rgb(250 204 21 / 0.15); color: #facc15; }
+.mobile-rank-2 { background: rgb(226 232 240 / 0.12); color: #e2e8f0; }
+.mobile-rank-3 { background: rgb(234 88 12 / 0.15); color: #fb923c; }
+
+.mobile-position-chip {
+  width: 2.6rem;
+  color: hsl(var(--primary));
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .mobile-metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
