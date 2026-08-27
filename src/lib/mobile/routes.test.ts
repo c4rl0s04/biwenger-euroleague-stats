@@ -42,4 +42,39 @@ describe('mobile route registry', () => {
     expect(getDesktopDestination('/dashboard')).toBeNull();
     expect(getDesktopDestination('/players')).toBeNull();
   });
+
+  it('registers every planned native analytical destination', () => {
+    const paths = new Set(MOBILE_ROUTE_DEFINITIONS.map((route) => route.href));
+    const plannedSections = [
+      '/dashboard/season',
+      '/standings/progression',
+      '/market/transfers',
+      '/players/insights',
+      '/player/[id]/performance',
+      '/schedule/map',
+      '/lineup/analysis',
+      '/matches/round/[roundId]',
+      '/rounds/[roundId]/comparison',
+      '/tournaments/[id]/bracket',
+      '/predictions/history',
+      '/playoffs/predictions/[userId]',
+      '/compare/[userId]',
+      '/assistant/[conversationId]',
+      '/user/[id]/contributors',
+      '/team/[id]/roster',
+      '/settings/appearance',
+      '/season-review/configurations',
+    ];
+
+    plannedSections.forEach((path) => expect(paths.has(path), path).toBe(true));
+  });
+
+  it('gives every mobile-only subpage a deterministic desktop destination', () => {
+    const subpages = MOBILE_ROUTE_DEFINITIONS.filter((route) => route.parentHref);
+
+    subpages.forEach((route) => {
+      const examplePath = route.href.replace(/\[[^\]]+\]/g, '42');
+      expect(getDesktopDestination(examplePath), route.href).toBeTruthy();
+    });
+  });
 });

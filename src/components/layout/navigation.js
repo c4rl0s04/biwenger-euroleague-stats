@@ -40,7 +40,7 @@ const MOBILE_PRIMARY_HREFS = ['/', '/schedule', '/dashboard', '/standings'];
 
 export const MOBILE_PRIMARY_ITEMS = MOBILE_PRIMARY_HREFS.map((href) =>
   NAV_ITEMS.find((item) => item.href === href)
-);
+).filter((item) => item !== undefined);
 
 export function isNavigationItemActive(pathname, href) {
   if (href === '/') return pathname === '/';

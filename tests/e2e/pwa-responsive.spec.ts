@@ -50,7 +50,9 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/dashboard/);
 
-  if ((page.viewportSize()?.width || 0) < 1024) {
+  const presentation = await page.locator('[data-presentation]').getAttribute('data-presentation');
+
+  if (presentation === 'phone') {
     await page.evaluate(() => {
       document.documentElement.style.setProperty('--app-safe-area-top', '32px');
     });
@@ -95,6 +97,10 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
     await expect(page.getByRole('dialog', { name: /Más secciones/i })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog', { name: /Más secciones/i })).toBeHidden();
+  } else {
+    await expect(
+      page.getByRole('navigation', { name: 'Navegación principal móvil' })
+    ).toHaveCount(0);
   }
 
   await expectNoGlobalOverflow(page);

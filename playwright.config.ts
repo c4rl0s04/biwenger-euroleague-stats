@@ -1,15 +1,4 @@
-import { defineConfig } from 'playwright/test';
-
-const viewports = [
-  ['mobile-320', { width: 320, height: 568 }],
-  ['mobile-375', { width: 375, height: 667 }],
-  ['mobile-393', { width: 393, height: 852 }],
-  ['mobile-412', { width: 412, height: 915 }],
-  ['mobile-430', { width: 430, height: 932 }],
-  ['tablet', { width: 768, height: 1024 }],
-  ['desktop-1280', { width: 1280, height: 800 }],
-  ['desktop-1440', { width: 1440, height: 900 }],
-] as const;
+import { defineConfig, devices } from 'playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -24,7 +13,23 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: viewports.map(([name, viewport]) => ({ name, use: { viewport } })),
+  projects: [
+    { name: 'iphone-se', use: { ...devices['iPhone SE'] } },
+    { name: 'iphone-13', use: { ...devices['iPhone 13'] } },
+    { name: 'iphone-15-pro-max', use: { ...devices['iPhone 15 Pro Max'] } },
+    { name: 'iphone-13-landscape', use: { ...devices['iPhone 13 landscape'] } },
+    { name: 'pixel-7', use: { ...devices['Pixel 7'] } },
+    { name: 'android-compact', use: { ...devices['Galaxy S8'] } },
+    {
+      name: 'tablet-768',
+      use: {
+        ...devices['iPad (gen 7)'],
+        viewport: { width: 768, height: 1024 },
+      },
+    },
+    { name: 'desktop-1280', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
+    { name: 'desktop-1440', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+  ],
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {

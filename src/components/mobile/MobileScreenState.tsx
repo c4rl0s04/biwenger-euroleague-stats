@@ -1,3 +1,5 @@
+'use client';
+
 import { AlertTriangle, Inbox, LoaderCircle, RotateCcw } from 'lucide-react';
 
 export function MobileScreenLoading({ label = 'Cargando datos' }: { label?: string }) {
@@ -27,7 +29,7 @@ export function MobileScreenError({
     <div className="mobile-screen-state mobile-screen-state-error" role="alert">
       <AlertTriangle size={28} aria-hidden="true" />
       <p>{message}</p>
-      <button type="button" onClick={undefined} className="mobile-retry-button">
+      <button type="button" onClick={() => window.location.reload()} className="mobile-retry-button">
         <RotateCcw size={17} aria-hidden="true" /> Reintentar
       </button>
     </div>
