@@ -1,6 +1,7 @@
-'use client';
-
 import HeroHeader from '@/components/home/HeroHeader';
+import MobileHomeScreen from '@/components/mobile/screens/MobileHomeScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
+import { fetchNewsFeed } from '@/lib/services/app/dashboardService';
 import {
   LayoutDashboard,
   Users,
@@ -19,7 +20,7 @@ import {
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
-export default function Home() {
+function DesktopHome() {
   const cards = [
     {
       title: 'Dashboard',
@@ -171,4 +172,20 @@ export default function Home() {
       </main>
     </div>
   );
+}
+
+export default async function Home() {
+  if (await isPhonePresentation()) {
+    const news = await fetchNewsFeed();
+    return (
+      <MobileHomeScreen
+        news={news.slice(0, 3).map((item, index) => ({
+          id: `${item.type}-${item.timestamp}-${index}`,
+          title: item.text,
+        }))}
+      />
+    );
+  }
+
+  return <DesktopHome />;
 }

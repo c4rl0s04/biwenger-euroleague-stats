@@ -81,6 +81,13 @@
   line-height: 1.35;
 }
 
+.mobile-detail-intro {
+  margin: 1rem 0 0.2rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
 .mobile-native-header-actions {
   display: flex;
   flex-shrink: 0;
@@ -138,6 +145,92 @@
   font-weight: 900;
   letter-spacing: 0.15em;
   text-transform: uppercase;
+}
+
+.mobile-news-strip {
+  margin: 0 calc(var(--mobile-gutter) * -1);
+  border-bottom: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--card) / 0.42);
+}
+
+.mobile-news-strip summary {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem var(--mobile-gutter);
+  cursor: pointer;
+  list-style: none;
+}
+
+.mobile-news-strip summary::-webkit-details-marker { display: none; }
+
+.mobile-news-live {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.28rem;
+  color: hsl(var(--primary));
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mobile-news-headline {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: hsl(var(--foreground) / 0.88);
+  font-size: 0.68rem;
+  font-weight: 680;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-news-expand {
+  flex-shrink: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+
+.mobile-news-strip ul {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0 1rem 0.85rem;
+}
+
+.mobile-news-strip li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.mobile-news-strip li strong { color: hsl(var(--foreground)); }
+
+.mobile-alert-list .mobile-list-leading { color: #fbbf24; }
+
+.mobile-inline-callout {
+  display: flex;
+  min-height: 4rem;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid rgb(34 211 166 / 0.18);
+  border-radius: 1rem;
+  background: rgb(34 211 166 / 0.055);
+  padding: 0.85rem;
+  color: #22d3a6;
+}
+
+.mobile-inline-callout p {
+  color: hsl(var(--foreground) / 0.86);
+  font-size: 0.75rem;
+  font-weight: 750;
+  line-height: 1.4;
 }
 
 .mobile-metric-grid {

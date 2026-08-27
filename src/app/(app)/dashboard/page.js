@@ -14,6 +14,16 @@ import {
 
 // Below-the-fold: Lazy load for better initial page load
 import { fetchNextRound } from '@/lib/services';
+import { auth } from '@/auth';
+import MobileDashboardScreen from '@/components/mobile/screens/MobileDashboardScreen';
+import { isPhonePresentation } from '@/lib/mobile/presentation-server';
+import { toMobileDashboardViewModel } from '@/lib/mobile/view-models/dashboard';
+import {
+  getLeagueDashboardData,
+  getNextRoundData,
+  getUserDashboardData,
+} from '@/lib/services';
+import { fetchNewsFeed } from '@/lib/services/app/dashboardService';
 
 const TopFormCard = nextDynamic(() => import('@/components/dashboard/TopFormCard'), {
   loading: () => <CardSkeleton />,
@@ -84,7 +94,7 @@ const NextMatchesCardDynamic = nextDynamic(() => import('@/components/dashboard/
 
 export const dynamic = 'force-dynamic';
 
-export default function Dashboard() {
+function DesktopDashboard() {
   return (
     <div>
       {/* Header Section */}
@@ -156,5 +166,29 @@ export default function Dashboard() {
         <BirthdayCard />
       </Section>
     </div>
+  );
+}
+
+export default async function Dashboard() {
+  if (!(await isPhonePresentation())) return <DesktopDashboard />;
+
+  const session = await auth();
+  const userId = session?.user?.id;
+  const [userDashboard, leagueDashboard, nextRoundData, news] = await Promise.all([
+    userId ? getUserDashboardData(userId) : Promise.resolve({}),
+    getLeagueDashboardData(),
+    getNextRoundData(userId ?? null),
+    fetchNewsFeed(),
+  ]);
+
+  return (
+    <MobileDashboardScreen
+      data={toMobileDashboardViewModel({
+        userDashboard,
+        leagueDashboard,
+        nextRoundData,
+        news,
+      })}
+    />
   );
 }
