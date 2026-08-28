@@ -147,3 +147,6 @@ export { fetchStatLeaders } from './core/playerService';
 
 // Dashboard Extensions
 export { fetchLandingStats, fetchNewsFeed } from './app/dashboardService';
+
+// Mobile Home Service
+export { getHomeFeedPage, getHomeSummary } from './app/homeService';

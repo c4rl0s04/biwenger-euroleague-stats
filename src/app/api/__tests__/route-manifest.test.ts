@@ -48,6 +48,7 @@ const ROUTE_CONTRACT_MANIFEST: Record<string, RouteContractEntry> = {
   '/api/hoopgrid/guess': { status: 'covered', reason: 'handler contract tests' },
   '/api/hoopgrid/list': { status: 'covered', reason: 'handler contract tests' },
   '/api/hoopgrid/today': { status: 'covered', reason: 'handler contract tests' },
+  '/api/home/activity': { status: 'covered', reason: 'home activity handler contract tests' },
   '/api/landing-stats': { status: 'covered', reason: 'handler contract tests' },
   '/api/league-average': { status: 'covered', reason: 'handler contract tests' },
   '/api/market': { status: 'covered', reason: 'market handler contract tests' },
