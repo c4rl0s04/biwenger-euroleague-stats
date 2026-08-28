@@ -28,17 +28,35 @@ describe('GET /api/home/activity', () => {
     expect(getHomeFeedPage).not.toHaveBeenCalled();
   });
 
-  it('passes only the opaque cursor and returns private data', async () => {
+  it('passes the validated filter and opaque cursor and returns private data', async () => {
     const page = { items: [], nextCursor: 'next', hasMore: true };
     getHomeFeedPage.mockResolvedValue(page);
     const { GET } = await import('./route');
 
-    const response = await GET(request('?cursor=opaque'));
+    const response = await GET(request('?type=transfers&cursor=opaque'));
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(await response.json()).toEqual(page);
-    expect(getHomeFeedPage).toHaveBeenCalledWith('opaque');
+    expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'transfers', cursor: 'opaque' });
+  });
+
+  it('uses all activity when the type is omitted', async () => {
+    const { GET } = await import('./route');
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(200);
+    expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'all', cursor: null });
+  });
+
+  it('rejects unknown activity filters', async () => {
+    const { GET } = await import('./route');
+
+    const response = await GET(request('?type=unknown'));
+
+    expect(response.status).toBe(400);
+    expect(getHomeFeedPage).not.toHaveBeenCalled();
   });
 
   it('rejects invalid cursors', async () => {
