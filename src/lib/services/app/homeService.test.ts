@@ -2,16 +2,30 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { decodeHomeFeedCursor } from '@/lib/home/cursor';
 
-const { queryHomeActivityRows } = vi.hoisted(() => ({
+const {
+  queryHomeActivityRows,
+  queryHomeSeasonMetadata,
+  getCurrentRoundState,
+  getPersonalizedAlerts,
+  getAppStandings,
+} = vi.hoisted(() => ({
   queryHomeActivityRows: vi.fn(),
+  queryHomeSeasonMetadata: vi.fn(),
+  getCurrentRoundState: vi.fn(),
+  getPersonalizedAlerts: vi.fn(),
+  getAppStandings: vi.fn(),
 }));
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db/queries/features/home-feed', () => ({
   queryHomeActivityRows,
 }));
+vi.mock('@/lib/db/queries/features/home-summary', () => ({ queryHomeSeasonMetadata }));
+vi.mock('@/lib/db/queries/competition/rounds', () => ({ getCurrentRoundState }));
+vi.mock('@/lib/db/queries/core/users', () => ({ getPersonalizedAlerts }));
+vi.mock('./appShellService', () => ({ getAppStandings }));
 
-import { getHomeFeedPage } from './homeService';
+import { getHomeFeedPage, getHomeSummary } from './homeService';
 
 const transferRow = (id: number) => ({
   id: `transfer:${id}`,
@@ -32,10 +46,12 @@ const transferRow = (id: number) => ({
 });
 
 describe('mobile home feed service', () => {
-  beforeEach(() => queryHomeActivityRows.mockReset());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns fifteen normalized events and a cursor when more activity exists', async () => {
-    queryHomeActivityRows.mockResolvedValue(Array.from({ length: 16 }, (_, index) => transferRow(index + 1)));
+    queryHomeActivityRows.mockResolvedValue(
+      Array.from({ length: 16 }, (_, index) => transferRow(index + 1))
+    );
 
     const page = await getHomeFeedPage();
 
@@ -65,7 +81,15 @@ describe('mobile home feed service', () => {
           roundName: 'Jornada 4',
           totalBonus: '2100000',
           participants: [
-            { userId: '1', name: 'June', icon: null, colorIndex: 2, position: 1, points: 201, bonus: '300000' },
+            {
+              userId: '1',
+              name: 'June',
+              icon: null,
+              colorIndex: 2,
+              position: 1,
+              points: 201,
+              bonus: '300000',
+            },
           ],
         },
       },
@@ -74,8 +98,12 @@ describe('mobile home feed service', () => {
         type: 'admin_bonus',
         occurred_at: '2026-10-09T10:00:00.000Z',
         payload: {
-          recipientId: '1', recipientName: 'June', icon: null, colorIndex: 2,
-          amount: '500000', description: 'Premio especial',
+          recipientId: '1',
+          recipientName: 'June',
+          icon: null,
+          colorIndex: 2,
+          amount: '500000',
+          description: 'Premio especial',
         },
       },
       {
@@ -86,11 +114,21 @@ describe('mobile home feed service', () => {
           roundId: 4,
           roundName: 'Jornada 4',
           sessionDate: '2026-10-08',
-          matches: [{
-            id: 44,
-            homeId: 1, homeName: 'Madrid', homeCode: 'RMB', homeImage: null, homeScore: 90,
-            awayId: 2, awayName: 'París', awayCode: 'PAR', awayImage: null, awayScore: 84,
-          }],
+          matches: [
+            {
+              id: 44,
+              homeId: 1,
+              homeName: 'Madrid',
+              homeCode: 'RMB',
+              homeImage: null,
+              homeScore: 90,
+              awayId: 2,
+              awayName: 'París',
+              awayCode: 'PAR',
+              awayImage: null,
+              awayScore: 84,
+            },
+          ],
         },
       },
     ]);
@@ -106,5 +144,77 @@ describe('mobile home feed service', () => {
         matches: [expect.objectContaining({ home: expect.objectContaining({ score: 90 }) })],
       }),
     ]);
+  });
+
+  it('keeps an empty configured season in preseason without historical fallback', async () => {
+    queryHomeSeasonMetadata.mockResolvedValue({
+      id: '2026-27',
+      name: 'Temporada 2026/27',
+      status: 'active',
+      completedRounds: 0,
+    });
+    getAppStandings.mockResolvedValue([
+      {
+        user_id: '7',
+        name: 'All Stars',
+        rounds_played: 0,
+        position: 1,
+        total_points: 0,
+        team_value: 40000000,
+        price_trend: 0,
+      },
+    ]);
+    getCurrentRoundState.mockResolvedValue({ currentRound: null, nextRound: null });
+    getPersonalizedAlerts.mockResolvedValue([]);
+
+    const summary = await getHomeSummary('7');
+
+    expect(summary).toMatchObject({
+      seasonId: '2026-27',
+      phase: 'preseason',
+      user: { name: 'All Stars', position: null, teamValue: 40000000 },
+      round: { status: 'unavailable' },
+    });
+  });
+
+  it('maps the active round and personal pulse from shared standings', async () => {
+    queryHomeSeasonMetadata.mockResolvedValue({
+      id: '2026-27',
+      name: 'Temporada 2026/27',
+      status: 'active',
+      completedRounds: 3,
+    });
+    getAppStandings.mockResolvedValue([
+      {
+        user_id: '7',
+        name: 'All Stars',
+        rounds_played: 3,
+        position: 2,
+        total_points: 512,
+        team_value: 42500000,
+        price_trend: 350000,
+      },
+    ]);
+    getCurrentRoundState.mockResolvedValue({
+      currentRound: {
+        round_id: 4,
+        round_name: 'Jornada 4',
+        status_calc: 'live',
+        start_date: '2026-10-15T18:00:00.000Z',
+      },
+      nextRound: null,
+    });
+    getPersonalizedAlerts.mockResolvedValue([
+      { type: 'price_gain', message: 'Subida de valor', severity: 'success' },
+    ]);
+
+    const summary = await getHomeSummary('7');
+
+    expect(summary).toMatchObject({
+      phase: 'active',
+      user: { position: 2, totalPoints: 512, priceTrend: 350000 },
+      round: { id: 4, name: 'Jornada 4', status: 'live' },
+      alerts: [{ type: 'price_gain', message: 'Subida de valor' }],
+    });
   });
 });

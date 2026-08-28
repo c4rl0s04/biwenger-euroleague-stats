@@ -10,7 +10,7 @@ describe('web app manifest contract', () => {
       short_name: 'BiwengerStats',
       id: '/',
       scope: '/',
-      start_url: '/dashboard?source=pwa',
+      start_url: '/?source=pwa',
       display: 'standalone',
       lang: 'es',
     });

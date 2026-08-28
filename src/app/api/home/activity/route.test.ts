@@ -8,8 +8,7 @@ const { getHomeFeedPage } = vi.hoisted(() => ({ getHomeFeedPage: vi.fn() }));
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/services/app/homeService', () => ({ getHomeFeedPage }));
 
-const request = (query = '') =>
-  new NextRequest(`http://localhost/api/home/activity${query}`);
+const request = (query = '') => new NextRequest(`http://localhost/api/home/activity${query}`);
 
 describe('GET /api/home/activity', () => {
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('GET /api/home/activity', () => {
   });
 
   it('requires an authenticated server session', async () => {
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as never);
     const { GET } = await import('./route');
 
     const response = await GET(request());
