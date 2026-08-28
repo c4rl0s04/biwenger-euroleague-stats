@@ -27,21 +27,32 @@ vi.mock('./appShellService', () => ({ getAppStandings }));
 
 import { getHomeFeedPage, getHomeSummary } from './homeService';
 
-const transferRow = (id: number) => ({
-  id: `transfer:${id}`,
-  type: 'transfer',
+const transferDayRow = (id: number) => ({
+  id: `transfer_day:2026-10-${String(id).padStart(2, '0')}`,
+  type: 'transfer_day',
   occurred_at: new Date(Date.UTC(2026, 9, 20, 20, 0, 20 - id)).toISOString(),
   payload: {
-    playerId: 1000 + id,
-    playerName: `Jugador ${id}`,
-    position: 'Base',
-    playerImage: null,
-    teamCode: 'RMB',
-    sellerId: null,
-    sellerName: 'Mercado',
-    buyerId: '7',
-    buyerName: 'All Stars',
-    amount: String(id * 100000),
+    date: `2026-10-${String(id).padStart(2, '0')}`,
+    transfers: [
+      {
+        id: `transfer:${id}`,
+        occurredAt: new Date(Date.UTC(2026, 9, 20, 20, 0, 20 - id)).toISOString(),
+        playerId: 1000 + id,
+        playerName: `Jugador ${id}`,
+        position: 'Base',
+        playerImage: null,
+        teamCode: 'RMB',
+        sellerId: null,
+        sellerName: 'Mercado',
+        sellerIcon: null,
+        sellerColorIndex: 0,
+        buyerId: '7',
+        buyerName: 'All Stars',
+        buyerIcon: 'https://example.com/all-stars.png',
+        buyerColorIndex: 4,
+        amount: String(id * 100000),
+      },
+    ],
   },
 });
 
@@ -50,23 +61,35 @@ describe('mobile home feed service', () => {
 
   it('returns fifteen normalized events and a cursor when more activity exists', async () => {
     queryHomeActivityRows.mockResolvedValue(
-      Array.from({ length: 16 }, (_, index) => transferRow(index + 1))
+      Array.from({ length: 16 }, (_, index) => transferDayRow(index + 1))
     );
 
-    const page = await getHomeFeedPage();
+    const page = await getHomeFeedPage({ filter: 'transfers' });
 
     expect(page.items).toHaveLength(15);
     expect(page.items[0]).toMatchObject({
-      id: 'transfer:1',
-      type: 'transfer',
-      amount: 100000,
-      buyer: { id: '7', name: 'All Stars' },
+      id: 'transfer_day:2026-10-01',
+      type: 'transfer_day',
+      date: '2026-10-01',
+      transfers: [
+        expect.objectContaining({
+          id: 'transfer:1',
+          amount: 100000,
+          buyer: expect.objectContaining({ id: '7', name: 'All Stars', colorIndex: 4 }),
+        }),
+      ],
+    });
+    expect(queryHomeActivityRows).toHaveBeenCalledWith({
+      cursor: null,
+      filter: 'transfers',
+      limit: 16,
     });
     expect(page.hasMore).toBe(true);
     expect(page.nextCursor).not.toBeNull();
-    expect(decodeHomeFeedCursor(page.nextCursor!)).toEqual({
-      occurredAt: transferRow(15).occurred_at,
-      id: 'transfer:15',
+    expect(decodeHomeFeedCursor(page.nextCursor!, 'transfers')).toEqual({
+      occurredAt: transferDayRow(15).occurred_at,
+      id: 'transfer_day:2026-10-15',
+      filter: 'transfers',
     });
   });
 
@@ -133,7 +156,7 @@ describe('mobile home feed service', () => {
       },
     ]);
 
-    const page = await getHomeFeedPage();
+    const page = await getHomeFeedPage({ filter: 'all' });
 
     expect(page).toMatchObject({ hasMore: false, nextCursor: null });
     expect(page.items).toEqual([

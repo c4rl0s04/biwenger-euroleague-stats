@@ -1,12 +1,27 @@
 export const HOME_FEED_PAGE_SIZE = 15;
 
+export const HOME_ACTIVITY_FILTERS = ['all', 'transfers', 'rounds', 'bonuses', 'results'] as const;
+
+export type HomeActivityFilter = (typeof HOME_ACTIVITY_FILTERS)[number];
+
+export function isHomeActivityFilter(value: unknown): value is HomeActivityFilter {
+  return typeof value === 'string' && (HOME_ACTIVITY_FILTERS as readonly string[]).includes(value);
+}
+
 export interface HomeActivityBase {
   id: string;
   occurredAt: string;
 }
 
-export interface TransferActivity extends HomeActivityBase {
-  type: 'transfer';
+export interface TransferParty {
+  id: string | null;
+  name: string;
+  icon: string | null;
+  colorIndex: number;
+  isMarket: boolean;
+}
+
+export interface TransferActivityItem extends HomeActivityBase {
   player: {
     id: number;
     name: string;
@@ -14,9 +29,15 @@ export interface TransferActivity extends HomeActivityBase {
     image: string | null;
     teamCode: string | null;
   };
-  seller: { id: string | null; name: string };
-  buyer: { id: string | null; name: string };
+  seller: TransferParty;
+  buyer: TransferParty;
   amount: number;
+}
+
+export interface TransferDayActivity extends HomeActivityBase {
+  type: 'transfer_day';
+  date: string;
+  transfers: TransferActivityItem[];
 }
 
 export interface RoundParticipant {
@@ -64,7 +85,7 @@ export interface MatchSessionActivity extends HomeActivityBase {
 }
 
 export type HomeActivityEvent =
-  | TransferActivity
+  | TransferDayActivity
   | RoundCompletedActivity
   | AdminBonusActivity
   | MatchSessionActivity;
@@ -101,4 +122,3 @@ export interface HomeSummary {
   };
   alerts: HomeAlert[];
 }
-

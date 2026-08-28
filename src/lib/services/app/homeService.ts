@@ -1,15 +1,13 @@
 import 'server-only';
 
-import {
-  queryHomeActivityRows,
-  type HomeActivityRow,
-} from '@/lib/db/queries/features/home-feed';
+import { queryHomeActivityRows, type HomeActivityRow } from '@/lib/db/queries/features/home-feed';
 import { queryHomeSeasonMetadata } from '@/lib/db/queries/features/home-summary';
 import { getCurrentRoundState } from '@/lib/db/queries/competition/rounds';
 import { getPersonalizedAlerts } from '@/lib/db/queries/core/users';
 import { decodeHomeFeedCursor, encodeHomeFeedCursor } from '@/lib/home/cursor';
 import {
   HOME_FEED_PAGE_SIZE,
+  type HomeActivityFilter,
   type HomeActivityEvent,
   type HomeFeedPage,
   type HomeSummary,
@@ -26,27 +24,49 @@ function normalizeActivityRow(row: HomeActivityRow): HomeActivityEvent {
   const payload = row.payload;
   const occurredAt = new Date(row.occurred_at).toISOString();
 
-  if (row.type === 'transfer') {
+  if (row.type === 'transfer_day') {
+    const transfers = Array.isArray(payload.transfers) ? payload.transfers : [];
+
     return {
       id: row.id,
-      type: 'transfer',
+      type: 'transfer_day',
       occurredAt,
-      player: {
-        id: asNumber(payload.playerId),
-        name: asString(payload.playerName, 'Jugador'),
-        position: nullableString(payload.position),
-        image: nullableString(payload.playerImage),
-        teamCode: nullableString(payload.teamCode),
-      },
-      seller: {
-        id: nullableString(payload.sellerId),
-        name: asString(payload.sellerName, 'Mercado'),
-      },
-      buyer: {
-        id: nullableString(payload.buyerId),
-        name: asString(payload.buyerName, 'Mercado'),
-      },
-      amount: asNumber(payload.amount),
+      date: asString(payload.date),
+      transfers: transfers.map((transfer) => {
+        const item = transfer as Record<string, unknown>;
+        const sellerId = nullableString(item.sellerId);
+        const buyerId = nullableString(item.buyerId);
+        const itemOccurredAt = new Date(asString(item.occurredAt, occurredAt));
+
+        return {
+          id: asString(item.id),
+          occurredAt: Number.isNaN(itemOccurredAt.getTime())
+            ? occurredAt
+            : itemOccurredAt.toISOString(),
+          player: {
+            id: asNumber(item.playerId),
+            name: asString(item.playerName, 'Jugador'),
+            position: nullableString(item.position),
+            image: nullableString(item.playerImage),
+            teamCode: nullableString(item.teamCode),
+          },
+          seller: {
+            id: sellerId,
+            name: asString(item.sellerName, 'Mercado'),
+            icon: nullableString(item.sellerIcon),
+            colorIndex: asNumber(item.sellerColorIndex),
+            isMarket: sellerId === null,
+          },
+          buyer: {
+            id: buyerId,
+            name: asString(item.buyerName, 'Mercado'),
+            icon: nullableString(item.buyerIcon),
+            colorIndex: asNumber(item.buyerColorIndex),
+            isMarket: buyerId === null,
+          },
+          amount: asNumber(item.amount),
+        };
+      }),
     };
   }
 
@@ -122,10 +142,19 @@ function normalizeActivityRow(row: HomeActivityRow): HomeActivityEvent {
   };
 }
 
-export async function getHomeFeedPage(cursorValue?: string | null): Promise<HomeFeedPage> {
-  const cursor = cursorValue ? decodeHomeFeedCursor(cursorValue) : null;
+interface GetHomeFeedPageInput {
+  filter?: HomeActivityFilter;
+  cursor?: string | null;
+}
+
+export async function getHomeFeedPage({
+  filter = 'all',
+  cursor: cursorValue = null,
+}: GetHomeFeedPageInput = {}): Promise<HomeFeedPage> {
+  const cursor = cursorValue ? decodeHomeFeedCursor(cursorValue, filter) : null;
   const rows = await queryHomeActivityRows({
     cursor,
+    filter,
     limit: HOME_FEED_PAGE_SIZE + 1,
   });
   const pageRows = rows.slice(0, HOME_FEED_PAGE_SIZE);
@@ -140,6 +169,7 @@ export async function getHomeFeedPage(cursorValue?: string | null): Promise<Home
         ? encodeHomeFeedCursor({
             occurredAt: new Date(boundary.occurred_at).toISOString(),
             id: boundary.id,
+            filter,
           })
         : null,
   };
@@ -184,9 +214,7 @@ export async function getHomeSummary(userId: string): Promise<HomeSummary> {
         normalizedStatus === 'upcoming'
           ? normalizedStatus
           : 'unavailable',
-      startsAt: activeRound?.start_date
-        ? new Date(activeRound.start_date).toISOString()
-        : null,
+      startsAt: activeRound?.start_date ? new Date(activeRound.start_date).toISOString() : null,
     },
     alerts: alerts.map((alert) => ({
       type:
@@ -197,9 +225,7 @@ export async function getHomeSummary(userId: string): Promise<HomeSummary> {
           : 'info',
       message: alert.message,
       severity:
-        alert.severity === 'success' ||
-        alert.severity === 'warning' ||
-        alert.severity === 'error'
+        alert.severity === 'success' || alert.severity === 'warning' || alert.severity === 'error'
           ? alert.severity
           : 'info',
     })),

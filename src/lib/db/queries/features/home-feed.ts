@@ -1,10 +1,15 @@
 import 'server-only';
 
 import type { HomeFeedCursor } from '@/lib/home/cursor';
+import type { HomeActivityFilter } from '@/lib/home/contracts';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { db as pgClient } from '@/lib/db/client';
 
-export type HomeActivityRowType = 'transfer' | 'round_completed' | 'admin_bonus' | 'match_session';
+export type HomeActivityRowType =
+  | 'transfer_day'
+  | 'round_completed'
+  | 'admin_bonus'
+  | 'match_session';
 
 export interface HomeActivityRow {
   id: string;
@@ -15,6 +20,7 @@ export interface HomeActivityRow {
 
 interface QueryHomeActivityRowsInput {
   cursor?: HomeFeedCursor | null;
+  filter: HomeActivityFilter;
   limit: number;
 }
 
@@ -24,9 +30,20 @@ interface QueryHomeActivityRowsInput {
  */
 export async function queryHomeActivityRows({
   cursor = null,
+  filter,
   limit,
 }: QueryHomeActivityRowsInput): Promise<HomeActivityRow[]> {
   const seasonId = await resolveReadSeasonId();
+  const filteredType: HomeActivityRowType | null =
+    filter === 'transfers'
+      ? 'transfer_day'
+      : filter === 'rounds'
+        ? 'round_completed'
+        : filter === 'bonuses'
+          ? 'admin_bonus'
+          : filter === 'results'
+            ? 'match_session'
+            : null;
 
   const query = `
     WITH deduplicated_finances AS (
@@ -108,26 +125,31 @@ export async function queryHomeActivityRows({
       GROUP BY rr.round_id
       HAVING MAX(rb.occurred_at) IS NOT NULL OR BOOL_AND(COALESCE(m.fully_finished, FALSE))
     ),
-    transfer_events AS (
+    transfer_rows AS (
       SELECT
-        'transfer:' || f.id::text AS id,
-        'transfer'::text AS type,
+        f.id AS transfer_id,
         COALESCE(
           to_timestamp(f.timestamp),
           NULLIF(f.fecha, '')::timestamptz
         ) AS occurred_at,
-        jsonb_build_object(
-          'playerId', f.player_id,
-          'playerName', COALESCE(p.name, 'Jugador'),
-          'position', p.position,
-          'playerImage', p.img,
-          'teamCode', t.code,
-          'sellerId', seller.user_id,
-          'sellerName', COALESCE(seller.name, NULLIF(f.vendedor, ''), 'Mercado'),
-          'buyerId', buyer.user_id,
-          'buyerName', COALESCE(buyer.name, NULLIF(f.comprador, ''), 'Mercado'),
-          'amount', COALESCE(f.precio, 0)
-        ) AS payload
+        (COALESCE(
+          to_timestamp(f.timestamp),
+          NULLIF(f.fecha, '')::timestamptz
+        ) AT TIME ZONE 'Europe/Madrid')::date AS local_date,
+        f.player_id,
+        COALESCE(p.name, 'Jugador') AS player_name,
+        p.position,
+        p.img AS player_image,
+        t.code AS team_code,
+        seller.user_id AS seller_id,
+        COALESCE(seller.name, seller_user.name, NULLIF(f.vendedor, ''), 'Mercado') AS seller_name,
+        COALESCE(seller.icon, seller_user.icon) AS seller_icon,
+        COALESCE(seller.color_index, seller_user.color_index, 0) AS seller_color_index,
+        buyer.user_id AS buyer_id,
+        COALESCE(buyer.name, buyer_user.name, NULLIF(f.comprador, ''), 'Mercado') AS buyer_name,
+        COALESCE(buyer.icon, buyer_user.icon) AS buyer_icon,
+        COALESCE(buyer.color_index, buyer_user.color_index, 0) AS buyer_color_index,
+        COALESCE(f.precio, 0) AS amount
       FROM fichajes f
       LEFT JOIN players p ON p.id = f.player_id
       LEFT JOIN player_seasons ps
@@ -137,7 +159,41 @@ export async function queryHomeActivityRows({
         ON seller.season_id = f.season_id AND lower(seller.name) = lower(f.vendedor)
       LEFT JOIN user_seasons buyer
         ON buyer.season_id = f.season_id AND lower(buyer.name) = lower(f.comprador)
+      LEFT JOIN users seller_user ON seller_user.id = seller.user_id
+      LEFT JOIN users buyer_user ON buyer_user.id = buyer.user_id
       WHERE f.season_id = $1
+    ),
+    transfer_events AS (
+      SELECT
+        'transfer_day:' || to_char(local_date, 'YYYY-MM-DD') AS id,
+        'transfer_day'::text AS type,
+        MAX(occurred_at) AS occurred_at,
+        jsonb_build_object(
+          'date', to_char(local_date, 'YYYY-MM-DD'),
+          'transfers', jsonb_agg(
+            jsonb_build_object(
+              'id', 'transfer:' || transfer_id::text,
+              'occurredAt', occurred_at,
+              'playerId', player_id,
+              'playerName', player_name,
+              'position', position,
+              'playerImage', player_image,
+              'teamCode', team_code,
+              'sellerId', seller_id,
+              'sellerName', seller_name,
+              'sellerIcon', seller_icon,
+              'sellerColorIndex', seller_color_index,
+              'buyerId', buyer_id,
+              'buyerName', buyer_name,
+              'buyerIcon', buyer_icon,
+              'buyerColorIndex', buyer_color_index,
+              'amount', amount
+            ) ORDER BY occurred_at DESC, transfer_id DESC
+          )
+        ) AS payload
+      FROM transfer_rows
+      WHERE occurred_at IS NOT NULL
+      GROUP BY local_date
     ),
     admin_bonus_events AS (
       SELECT
@@ -199,19 +255,21 @@ export async function queryHomeActivityRows({
     SELECT id, type, occurred_at, payload
     FROM activity
     WHERE occurred_at IS NOT NULL
+      AND ($4::text IS NULL OR type = $4::text)
       AND (
         $2::timestamptz IS NULL
         OR occurred_at < $2::timestamptz
         OR (occurred_at = $2::timestamptz AND id < $3::text)
       )
     ORDER BY occurred_at DESC, id DESC
-    LIMIT $4
+    LIMIT $5
   `;
 
   const result = await pgClient.query(query, [
     seasonId,
     cursor?.occurredAt ?? null,
     cursor?.id ?? null,
+    filteredType,
     limit,
   ]);
 
