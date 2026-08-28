@@ -50,13 +50,13 @@ services:
           tail -f /dev/null
         else
           echo 'Starting sync service...'
-          echo '[Sync] Running initial full sync...'
+          echo '[Sync] Running initial routine sync...'
           npm run sync || echo '[Sync] Initial sync failed'
           while true; do
             echo '[Sync] Sync complete. Sleeping for 6 hours...'
             sleep 21600
-            echo '[Sync] Starting scheduled daily sync at $(date)'
-            npm run sync:daily || echo '[Sync] Failed'
+            echo '[Sync] Starting scheduled routine sync at $(date)'
+            npm run sync || echo '[Sync] Failed'
           done
         fi
       "

@@ -1,0 +1,14 @@
+[
+  {
+    "Round": 1,
+    "phaseType.code": "RS",
+    "local.club.code": "MAD",
+    "road.club.code": "BAR",
+    "local.score": 88,
+    "road.score": 81,
+    "utcDate": "2026-09-30T18:30:00Z",
+    "played": true,
+    "local.club.images.crest": "https://example.test/mad.png",
+    "road.club.images.crest": "https://example.test/bar.png"
+  }
+]

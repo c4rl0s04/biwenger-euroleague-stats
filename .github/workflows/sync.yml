@@ -42,6 +42,7 @@ jobs:
           BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
           BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
           BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
+          BIWENGER_API_VERSION_FALLBACK: ${{ vars.BIWENGER_API_VERSION_FALLBACK }}
 
           # Canonical season configuration
           SEASON_ID: ${{ vars.SEASON_ID }}
@@ -49,4 +50,4 @@ jobs:
           EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
           LEAGUE_START_DATE: ${{ vars.LEAGUE_START_DATE }}
           SEASON_AWARE_READS_CONFIRMED: ${{ vars.SEASON_AWARE_READS_CONFIRMED }}
-        run: npm run sync:preflight && npm run sync:daily
+        run: npm run sync:preflight && npm run sync

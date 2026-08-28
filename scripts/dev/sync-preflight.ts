@@ -60,15 +60,37 @@ async function main() {
       return;
     }
 
-    const { biwengerFetch, fetchCompetition, fetchLeague } =
+    const { biwengerFetch, fetchCompetition, fetchLeague, fetchRoundGames } =
       await import('../../src/lib/api/biwenger-client.js');
-    const { fetchSchedule } = await import('../../src/lib/api/euroleague-client.js');
-    const { validateProviderSnapshot } = await import('../../src/lib/sync/preflight.js');
+    const { getEuroleagueClient } = await import('../../src/lib/api/euroleague/runtime.js');
+    const { euroleagueSeasonYear } = await import('../../src/lib/api/euroleague/normalization.js');
+    const {
+      validateProviderSnapshot,
+      validateAdvancedProviderSnapshot,
+      validateBiwengerRoundSeason,
+    } =
+      await import('../../src/lib/sync/preflight.js');
+    const { parseBiwengerCompetition } = await import('../../src/lib/sync/context.js');
+    const { relevantRounds } = await import('../../src/lib/sync/rounds.js');
 
     const account = await biwengerFetch('/account', { skipVersionCheck: true });
     const league = await fetchLeague();
     const competition = await fetchCompetition();
-    const schedule = await fetchSchedule(season.EUROLEAGUE_CODE);
+    const seasonYear = euroleagueSeasonYear(season.EUROLEAGUE_CODE, season.ID);
+    const provider = getEuroleagueClient();
+    const [schedule, standings] = await Promise.all([
+      provider.getSchedule(seasonYear),
+      provider.getStandings(seasonYear, 1),
+    ]);
+    const competitionSnapshot = parseBiwengerCompetition(competition);
+    const firstRound = relevantRounds(competitionSnapshot.rounds)[0];
+    if (!firstRound) throw new Error('Biwenger competition contains no syncable rounds.');
+    const firstRoundResponse = await fetchRoundGames(firstRound.id);
+    const firstRoundGames = firstRoundResponse?.data?.games || firstRoundResponse?.games || [];
+    const biwengerReadiness = validateBiwengerRoundSeason({
+      seasonId: season.ID,
+      games: firstRoundGames,
+    });
 
     const providerCounts = validateProviderSnapshot({
       seasonId: season.ID,
@@ -79,10 +101,32 @@ async function main() {
       competition,
       schedule,
     });
+    const officialCounts = validateAdvancedProviderSnapshot({
+      seasonYear,
+      expectedSeasonId: season.ID,
+      schedule,
+      standings,
+    });
+    const mappingCoverage = await pool.query<{
+      official_teams: string;
+      mapped_teams: string;
+      pending_players: string;
+    }>(
+      `SELECT
+         (SELECT COUNT(DISTINCT code) FROM unnest($2::text[]) AS code)::text AS official_teams,
+         (SELECT COUNT(*) FROM official_team_mappings
+          WHERE season_id=$1 AND provider='euroleague_advanced')::text AS mapped_teams,
+         (SELECT COUNT(*) FROM official_player_mappings
+          WHERE season_id=$1 AND status='review_required')::text AS pending_players`,
+      [season.ID, [...new Set(schedule.flatMap((game) => [game.homeTeamCode, game.awayTeamCode]))]]
+    );
     const accountId = account?.data?.id ?? account?.id ?? 'available';
 
     console.log(`Biwenger account probe: ${accountId}`);
     console.log(`Provider snapshot: ${JSON.stringify(providerCounts)}`);
+    console.log(`Biwenger season readiness: ${JSON.stringify(biwengerReadiness)}`);
+    console.log(`Official snapshot: ${JSON.stringify(officialCounts)}`);
+    console.log(`Mapping coverage: ${JSON.stringify(mappingCoverage.rows[0])}`);
 
     console.log('Sync preflight passed. No database rows were modified.');
   } finally {

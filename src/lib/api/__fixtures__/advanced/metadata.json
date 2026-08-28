@@ -1,0 +1,24 @@
+[
+  {
+    "Live": false,
+    "ScoreA": 88,
+    "ScoreB": 81,
+    "ScoreQuarter1A": 20,
+    "ScoreQuarter2A": 42,
+    "ScoreQuarter3A": 65,
+    "ScoreQuarter4A": 88,
+    "ScoreQuarter1B": 18,
+    "ScoreQuarter2B": 39,
+    "ScoreQuarter3B": 60,
+    "ScoreQuarter4B": 81,
+    "ScoreExtraTimeA": 0,
+    "ScoreExtraTimeB": 0,
+    "Stadium": "Arena",
+    "Capacity": 12000,
+    "CoachA": "Coach A",
+    "CoachB": "Coach B",
+    "Referee1": "One",
+    "Referee2": "Two",
+    "Referee3": "Three"
+  }
+]

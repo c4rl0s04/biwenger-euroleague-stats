@@ -3,7 +3,7 @@ import { prepareUserMutations } from '../users';
 
 function createMockDb(rows: any[] = []) {
   return {
-    query: vi.fn(async () => ({ rows, rowCount: rows.length })),
+    query: vi.fn(async (_sql: string, _params?: any[]) => ({ rows, rowCount: rows.length })),
   };
 }
 
@@ -62,6 +62,7 @@ describe('user mutations season isolation', () => {
     expect(db.query).toHaveBeenCalledWith(expect.stringContaining('UPDATE player_seasons'), [
       '2026-27',
     ]);
+    expect(db.query.mock.calls[0][0]).not.toContain('is_active');
     expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('UPDATE players'), undefined);
   });
 });

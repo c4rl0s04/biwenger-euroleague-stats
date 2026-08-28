@@ -95,14 +95,15 @@ When a computation needs to produce the same result whether called from a servic
 
 ## ETL Sync Pipeline
 
-Data is sourced from the Biwenger private API and the official Euroleague API.
+Data is sourced from the Biwenger private API and EuroLeague Advanced API.
 
 ```bash
-npm run sync          # Full sync (14 sequential idempotent steps)
-npm run sync:live     # Lightweight live-scores-only sync
+npm run sync            # Routine ordered pipeline
+npm run sync:bootstrap  # Routine pipeline plus initial derived data
+npm run sync:live       # Official games and missing lineups
 ```
 
-Steps are in `src/lib/sync/steps/` (numbered `01-` to `14-`). Every step uses `INSERT ... ON CONFLICT DO UPDATE` — re-running is always safe.
+The declarative registry is `src/lib/sync/pipeline.ts`. Steps in `src/lib/sync/steps/` use descriptive IDs and declare their source, writes, modes, and dependencies. All modes share one advisory lock and stop on the first failure. Re-running is safe because mutations are idempotent.
 
 Required env vars for sync: `BIWENGER_TOKEN`, `BIWENGER_LEAGUE_ID`, `BIWENGER_USER_ID`.
 

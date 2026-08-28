@@ -1,0 +1,31 @@
+[
+  {
+    "Player_ID": "14102",
+    "Player": "JONES, KAI",
+    "Team": "MAD",
+    "Home": 1,
+    "IsStarter": 1,
+    "IsPlaying": 0,
+    "Dorsal": "5",
+    "Minutes": "21:05",
+    "Points": 12,
+    "FieldGoalsMade2": 4,
+    "FieldGoalsAttempted2": 6,
+    "FieldGoalsMade3": 1,
+    "FieldGoalsAttempted3": 2,
+    "FreeThrowsMade": 1,
+    "FreeThrowsAttempted": 2,
+    "OffensiveRebounds": 2,
+    "DefensiveRebounds": 4,
+    "TotalRebounds": 6,
+    "Assistances": 3,
+    "Steals": 1,
+    "Turnovers": 2,
+    "BlocksFavour": 1,
+    "BlocksAgainst": 1,
+    "FoulsCommited": 2,
+    "FoulsReceived": 3,
+    "Valuation": 16,
+    "Plusminus": 7
+  }
+]

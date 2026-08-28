@@ -69,8 +69,8 @@ export async function fetchMatchesForRound(roundId: number) {
       away_id: matches.awayId,
       home_team: homeTeam.shortName, // mapped from 'short_name'
       away_team: awayTeam.shortName,
-      home_code: homeTeam.code,
-      away_code: awayTeam.code,
+      home_code: sql<string>`COALESCE((SELECT provider_team_code FROM official_team_mappings WHERE season_id=${seasonId} AND team_id=${homeTeam.id} AND provider='euroleague_advanced'), ${homeTeam.code})`,
+      away_code: sql<string>`COALESCE((SELECT provider_team_code FROM official_team_mappings WHERE season_id=${seasonId} AND team_id=${awayTeam.id} AND provider='euroleague_advanced'), ${awayTeam.code})`,
     })
     .from(matches)
     .leftJoin(homeTeam, eq(matches.homeId, homeTeam.id))
@@ -90,10 +90,10 @@ export async function fetchUserPlayers(userId: number) {
       name: players.name,
       team_id: sql<number>`COALESCE(${playerSeasons.teamId}, ${players.teamId})`,
       team_name: teams.shortName,
-      team_code: teams.code,
+      team_code: sql<string>`COALESCE((SELECT provider_team_code FROM official_team_mappings WHERE season_id=${seasonId} AND team_id=${teams.id} AND provider='euroleague_advanced'), ${teams.code})`,
       position: players.position,
       price: sql<number>`COALESCE(${playerSeasons.price}, ${players.price})`,
-      img: players.img,
+      img: sql<string>`COALESCE((SELECT image_url FROM official_player_mappings WHERE season_id=${seasonId} AND player_id=${players.id} AND provider='euroleague_advanced' AND status='matched'), ${players.img})`,
       puntos: sql<number>`COALESCE(${playerSeasons.puntos}, ${players.puntos})`,
     })
     .from(playerSeasons)

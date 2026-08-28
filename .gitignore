@@ -60,3 +60,4 @@ data/*_backup*
 
 # Local folders
 backups/
+artifacts/emergent-v5/

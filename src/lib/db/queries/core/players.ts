@@ -91,8 +91,8 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT 
-      p.id, p.name, p.img, t.id as team_id, t.name as team_name,
-        t.code as team_code, p.position, COALESCE(ps.price, p.price) as price,
+      p.id, p.name, COALESCE(opm.image_url,p.img) AS img, t.id as team_id, t.name as team_name,
+        COALESCE(otm.provider_team_code,t.code) as team_code, p.position, COALESCE(ps.price, p.price) as price,
       COALESCE(ps.puntos, p.puntos) as points,
       ROUND(CAST(COALESCE(ps.puntos, p.puntos) AS NUMERIC) / NULLIF(COALESCE(ps.partidos_jugados, p.partidos_jugados), 0), 1) as average,
       ps.owner_id,
@@ -101,6 +101,11 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
     LEFT JOIN users u ON ps.owner_id = u.id
     LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     ORDER BY COALESCE(ps.puntos, p.puntos) DESC
@@ -145,11 +150,11 @@ export async function getTopPlayersByForm(
       p.id,
       p.name,
       p.position,
-      p.img,
+      COALESCE(opm.image_url,p.img) AS img,
       t.id as team_id,
       t.name as team_name,
-      t.code as team_code,
-      t.img as team_img,
+      COALESCE(otm.provider_team_code,t.code) as team_code,
+      COALESCE(otm.crest_url,t.img) as team_img,
       ps.owner_id,
       COALESCE(us.name, u.name) as owner_name,
       COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
@@ -158,6 +163,11 @@ export async function getTopPlayersByForm(
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
     LEFT JOIN users u ON ps.owner_id = u.id
     LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     LEFT JOIN (
@@ -200,6 +210,7 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
   const query = `
     SELECT 
       p.*,
+      COALESCE(opm.image_url,p.img) as img,
       COALESCE(ps.team_id, p.team_id) as team_id,
       COALESCE(ps.price, p.price) as price,
       COALESCE(ps.price_increment, p.price_increment) as price_increment,
@@ -219,11 +230,16 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       (SELECT MIN(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as worst_fantasy,
       t.id as team_id,
       t.name as team_name,
-      t.img as team_img,
-      t.code as team_code
+      COALESCE(otm.crest_url,t.img) as team_img,
+      COALESCE(otm.provider_team_code,t.code) as team_code
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
     LEFT JOIN users u ON ps.owner_id = u.id
     LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     WHERE p.id = $1
@@ -241,9 +257,9 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
       m.round_name,
       m.date as match_date,
       th.name as home_team,
-      th.img as home_img,
+      COALESCE(hmap.crest_url,th.img) as home_img,
       ta.name as away_team,
-      ta.img as away_img,
+      COALESCE(amap.crest_url,ta.img) as away_img,
       m.home_id,
       m.away_id,
       m.home_score,
@@ -269,6 +285,10 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN teams th ON m.home_id = th.id
     LEFT JOIN teams ta ON m.away_id = ta.id
+    LEFT JOIN official_team_mappings hmap
+      ON hmap.team_id=th.id AND hmap.season_id=m.season_id AND hmap.provider='euroleague_advanced'
+    LEFT JOIN official_team_mappings amap
+      ON amap.team_id=ta.id AND amap.season_id=m.season_id AND amap.provider='euroleague_advanced'
     LEFT JOIN player_round_stats prs ON m.round_id = prs.round_id AND prs.player_id = p.id AND prs.season_id = m.season_id
     WHERE m.season_id = $2
       AND (m.home_id = COALESCE(ps.team_id, p.team_id) OR m.away_id = COALESCE(ps.team_id, p.team_id))
@@ -577,15 +597,15 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
      SELECT 
        p.id,
        p.name,
-       p.img,
+       COALESCE(opm.image_url,p.img) AS img,
        p.position,
        COALESCE(ps.price, p.price) as price,
        COALESCE(ps.price_increment, p.price_increment) as price_increment,
        COALESCE(ps.team_id, p.team_id) as team_id,
        t.name as team_name,
-        t.code as team_code,
+       COALESCE(otm.provider_team_code,t.code) as team_code,
        t.short_name as team_short_name,
-       t.img as team_img,
+       COALESCE(otm.crest_url,t.img) as team_img,
 
        ps.owner_id,
        COALESCE(us.name, u.name) as owner_name,
@@ -603,6 +623,11 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
      FROM players p
      JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
      LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+     LEFT JOIN official_player_mappings opm
+       ON opm.player_id=p.id AND opm.season_id=ps.season_id
+      AND opm.provider='euroleague_advanced' AND opm.status='matched'
+     LEFT JOIN official_team_mappings otm
+       ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
      LEFT JOIN users u ON ps.owner_id = u.id
      LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
      LEFT JOIN PlayerAggregates pa ON p.id = pa.player_id
@@ -690,7 +715,7 @@ export async function getPlayersByTeam(teamId: number | string): Promise<CorePla
 
   const query = `
     SELECT 
-      p.id, p.name, p.img, p.position,
+      p.id, p.name, COALESCE(opm.image_url,p.img) AS img, p.position,
       COALESCE(ps.price, p.price) as price,
       COALESCE(ps.price_increment, p.price_increment) as price_increment,
       COALESCE(ps.puntos, p.puntos) as points,
@@ -701,6 +726,9 @@ export async function getPlayersByTeam(teamId: number | string): Promise<CorePla
       COALESCE(us.icon, u.icon) as owner_icon
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
     LEFT JOIN users u ON ps.owner_id = u.id
     LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
     WHERE COALESCE(ps.team_id, p.team_id) = $1

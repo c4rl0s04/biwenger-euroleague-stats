@@ -1,276 +1,153 @@
 import { fetchRoundGames } from '../../../api/biwenger-client';
-import { fetchGameHeader, fetchSchedule } from '../../../api/euroleague-client';
 import { prepareMatchMutations } from '../../../db/mutations/matches';
 import { SyncManager } from '../../manager';
 
-/**
- * Syncs matches (games) for a specific round using Biwenger API.
- * Uses fetchRoundGames to retrieve match schedule, scores, and status.
- *
- * @param manager
- * @param round - Round object (id, name, status)
- * @param playersList - Map of player IDs to player objects (unused explicitly but kept for signature consistency)
- */
-export async function run(manager: SyncManager, round: any, playersList: any = {}) {
-  const db = manager.context.db;
-  const roundId = round.id;
-  const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id;
-  const roundName = round.name;
-
-  manager.log(`   🌍 Syncing Matches for Round ${roundName} (using Biwenger API)...`);
-
-  const mutations = prepareMatchMutations(db as any, { seasonId: manager.context.seasonId });
-
-  // --- Euroleague Data Setup ---
-  // Fetch team codes from DB
-  const teams = await mutations.getMappedTeams();
-  const teamCodeMap = new Map<number, string>(teams.map((t) => [t.id, t.code]));
-
-  // Fetch Euroleague Schedule for Game Code mapping
-  // Map Key: "HOMECODE_AWAYCODE" -> Value: GameCode
-  const gameCodeMap = new Map<string, string>();
-  try {
-    const schedule = await fetchSchedule();
-    if (schedule && schedule.schedule && schedule.schedule.item) {
-      const items = Array.isArray(schedule.schedule.item)
-        ? schedule.schedule.item
-        : [schedule.schedule.item];
-      for (const item of items) {
-        if (item.homecode && item.awaycode && item.game) {
-          // Keys are lowercase in the parsed XML result
-          const codeA = item.homecode.trim();
-          const codeB = item.awaycode.trim();
-          gameCodeMap.set(`${codeA}_${codeB}`, item.game);
-        }
-      }
-    }
-  } catch (err: any) {
-    manager.error(
-      `   ⚠️ Failed to fetch EL schedule: ${err.message}. Regular time scores may be missing.`
-    );
-  }
-
-  let gamesData: any;
-  try {
-    gamesData = await fetchRoundGames(roundId);
-  } catch (e: any) {
-    manager.error(`   ❌ Error fetching games for round ${roundId}: ${e.message}`);
-    return { success: false, message: e.message, error: e };
-  }
-
-  let games: any[] = [];
-  if (gamesData.data && Array.isArray(gamesData.data.games)) {
-    games = gamesData.data.games;
-  } else if (Array.isArray(gamesData.games)) {
-    games = gamesData.games;
-  } else {
-    manager.error(`   ⚠️ No 'games' array found in response for round ${roundId}`);
-    return { success: true, message: `No matches found for round ${roundName}`, data: [] };
-  }
-
-  if (games.length === 0) {
-    manager.log(`   ⚠️ No games found for Round ${roundName}`);
-    return { success: true, message: `No games`, data: [] };
-  }
-
-  manager.log(`   -> Found ${games.length} games.`);
-
-  let syncedCount = 0;
-
-  for (const game of games) {
-    try {
-      // Map Teams
-      const homeTeam = game.home;
-      const awayTeam = game.away;
-
-      if (!homeTeam || !awayTeam) {
-        manager.log(`      ⚠️ Missing team data for game ${game.id}`);
-        continue;
-      }
-
-      // Safe IDs
-      const homeId = homeTeam.id;
-      const awayId = awayTeam.id;
-
-      // Status Mapping
-      let status = 'scheduled';
-      if (game.status === 'finished') {
-        status = 'finished';
-      } else if (game.status === 'playing' || game.status === 'live') {
-        status = 'live';
-      }
-
-      // Date Handling
-      let matchDate = null;
-      if (game.date) {
-        matchDate = new Date(game.date * 1000).toISOString();
-      }
-
-      const homeScore = typeof homeTeam.score === 'number' ? homeTeam.score : 0;
-      const awayScore = typeof awayTeam.score === 'number' ? awayTeam.score : 0;
-
-      // Calculate regular time scores (excluding overtime)
-      let homeScoreRegtime = null;
-      let awayScoreRegtime = null;
-      let homeQ1 = null,
-        awayQ1 = null;
-      let homeQ2 = null,
-        awayQ2 = null;
-      let homeQ3 = null,
-        awayQ3 = null;
-      let homeQ4 = null,
-        awayQ4 = null;
-      let homeOT = null,
-        awayOT = null;
-
-      // Determine if we should fetch Euroleague Data
-      const now = Date.now();
-      const gameTimeMs = game.date * 1000;
-      const isPastStartTime = matchDate && now > gameTimeMs - 15 * 60 * 1000;
-
-      const shouldFetchEuroleague =
-        (status === 'finished' ||
-          status === 'live' ||
-          (status === 'scheduled' && isPastStartTime)) &&
-        game.id;
-
-      if (shouldFetchEuroleague) {
-        try {
-          // Map Biwenger team IDs to Euroleague codes
-          const homeCode = teamCodeMap.get(homeId);
-          const awayCode = teamCodeMap.get(awayId);
-
-          if (homeCode && awayCode) {
-            // Find game code using Home+Away combination
-            const gameKey = `${homeCode}_${awayCode}`;
-            const gameCodeObj = gameCodeMap.get(gameKey);
-
-            if (gameCodeObj) {
-              const header = await fetchGameHeader(gameCodeObj as any);
-
-              if (header) {
-                // Update Status from Euroleague (Source of Truth)
-                if (header.Live) {
-                  status = 'live';
-                } else if (
-                  status !== 'finished' &&
-                  (parseInt(header.ScoreA) > 0 || parseInt(header.ScoreB) > 0)
-                ) {
-                  status = 'finished';
-                }
-
-                const getCumulative = (q: number, team: 'A' | 'B') => {
-                  return parseInt(header[`ScoreQuarter${q}${team}`] ?? 0);
-                };
-
-                const hQ1_cum = getCumulative(1, 'A');
-                const hQ2_cum = getCumulative(2, 'A');
-                const hQ3_cum = getCumulative(3, 'A');
-                const hQ4_cum = getCumulative(4, 'A');
-
-                const aQ1_cum = getCumulative(1, 'B');
-                const aQ2_cum = getCumulative(2, 'B');
-                const aQ3_cum = getCumulative(3, 'B');
-                const aQ4_cum = getCumulative(4, 'B');
-
-                // Calculate points per quarter (Delta)
-                homeQ1 = hQ1_cum;
-                homeQ2 = hQ2_cum - hQ1_cum;
-                homeQ3 = hQ3_cum - hQ2_cum;
-                homeQ4 = hQ4_cum - hQ3_cum;
-
-                // Sanity check for negative quarters (if data is messy during live)
-                if (status === 'live') {
-                  homeQ2 = Math.max(0, homeQ2);
-                  homeQ3 = Math.max(0, homeQ3);
-                  homeQ4 = Math.max(0, homeQ4);
-                }
-
-                awayQ1 = aQ1_cum;
-                awayQ2 = aQ2_cum - aQ1_cum;
-                awayQ3 = aQ3_cum - aQ2_cum;
-                awayQ4 = aQ4_cum - aQ3_cum;
-
-                // Regular time score is score at end of Q4
-                homeScoreRegtime = hQ4_cum;
-                awayScoreRegtime = aQ4_cum;
-
-                // OT Score is Total - Regular
-                const totalHome = parseInt(header.ScoreA ?? 0);
-                const totalAway = parseInt(header.ScoreB ?? 0);
-
-                if (status === 'live') {
-                  homeScoreRegtime = totalHome;
-                  awayScoreRegtime = totalAway;
-                  homeOT = 0;
-                  awayOT = 0;
-                } else {
-                  if (totalHome > homeScoreRegtime || totalAway > awayScoreRegtime) {
-                    homeOT = totalHome - homeScoreRegtime;
-                    awayOT = totalAway - awayScoreRegtime;
-                  } else {
-                    homeOT = 0;
-                    awayOT = 0;
-                  }
-                }
-
-                manager.log(
-                  `      ✅ Found Euroleague data for ${homeCode} vs ${awayCode} (Game ${gameCodeObj}) [${status.toUpperCase()}]: ${totalHome}-${totalAway}`
-                );
-              }
-            } else {
-              manager.log(`      ⚠️  No Euroleague game found for ${homeCode} vs ${awayCode}`);
-            }
-          }
-        } catch (e: any) {
-          manager.error(`      Error fetching EL data: ${e.message}`);
-        }
-      }
-
-      // If regular time scores not available, use final scores (fallback)
-      if (homeScoreRegtime === null) {
-        homeScoreRegtime = homeScore;
-        awayScoreRegtime = awayScore;
-      }
-
-      await mutations.upsertMatch({
-        round_id: dbRoundId,
-        round_name: roundName,
-        home_id: homeId,
-        away_id: awayId,
-        date: matchDate,
-        status: status,
-        home_score: homeScore,
-        away_score: awayScore,
-        home_score_regtime: homeScoreRegtime,
-        away_score_regtime: awayScoreRegtime,
-        home_q1: homeQ1,
-        away_q1: awayQ1,
-        home_q2: homeQ2,
-        away_q2: awayQ2,
-        home_q3: homeQ3,
-        away_q3: awayQ3,
-        home_q4: homeQ4,
-        away_q4: awayQ4,
-        home_ot: homeOT,
-        away_ot: awayOT,
-      });
-
-      syncedCount++;
-    } catch (e: any) {
-      manager.error(`      Error syncing game ${game.id}: ${e.message}`);
-    }
-  }
-
-  return { success: true, message: `Synced ${syncedCount} matches for ${roundName}.`, data: games };
+interface OfficialMatchRow {
+  game_code: number;
+  round_number: number | null;
+  scheduled_at: Date | null;
+  status: string;
+  home_team_code: string;
+  away_team_code: string;
+  home_score: number | null;
+  away_score: number | null;
+  home_score_regtime: number | null;
+  away_score_regtime: number | null;
+  home_q1: number | null;
+  away_q1: number | null;
+  home_q2: number | null;
+  away_q2: number | null;
+  home_q3: number | null;
+  away_q3: number | null;
+  home_q4: number | null;
+  away_q4: number | null;
+  home_ot: number | null;
+  away_ot: number | null;
 }
 
-// Legacy export
-export const syncMatches = async (db: any, round: any, playersList: any) => {
-  const mockManager = {
-    context: { db },
-    log: console.log,
-    error: console.error,
-  } as unknown as SyncManager;
-  return run(mockManager, round, playersList);
-};
+function roundNumber(name: string): number | null {
+  const match = /(?:Jornada|Round)\s+(\d+)/i.exec(name);
+  return match ? Number(match[1]) : null;
+}
+
+function closestOfficialGame(
+  candidates: OfficialMatchRow[],
+  expectedRound: number | null,
+  biwengerDate: number | null
+): OfficialMatchRow | null {
+  if (candidates.length === 0) return null;
+  const ranked = [...candidates].sort((left, right) => {
+    const leftRoundPenalty = expectedRound != null && left.round_number !== expectedRound ? 1 : 0;
+    const rightRoundPenalty = expectedRound != null && right.round_number !== expectedRound ? 1 : 0;
+    if (leftRoundPenalty !== rightRoundPenalty) return leftRoundPenalty - rightRoundPenalty;
+    if (!biwengerDate) return left.game_code - right.game_code;
+    const expected = biwengerDate * 1000;
+    const leftDistance = left.scheduled_at
+      ? Math.abs(new Date(left.scheduled_at).getTime() - expected)
+      : Number.MAX_SAFE_INTEGER;
+    const rightDistance = right.scheduled_at
+      ? Math.abs(new Date(right.scheduled_at).getTime() - expected)
+      : Number.MAX_SAFE_INTEGER;
+    return leftDistance - rightDistance;
+  });
+  return ranked[0];
+}
+
+/**
+ * Biwenger supplies fantasy round/team identities only. Every sporting field written to
+ * matches comes from official_games.
+ */
+export async function run(manager: SyncManager, round: any, _playersList: any = {}) {
+  const db = manager.context.db as any;
+  const seasonId = manager.context.seasonId;
+  const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id;
+  const mutations = prepareMatchMutations(db, { seasonId });
+
+  let gamesData: any;
+  let mappingResult: any;
+  let officialResult: any;
+  try {
+    [gamesData, mappingResult, officialResult] = await Promise.all([
+      fetchRoundGames(round.id),
+      db.query(
+        `SELECT team_id,provider_team_code FROM official_team_mappings
+       WHERE season_id=$1 AND provider='euroleague_advanced'`,
+        [seasonId]
+      ),
+      db.query(
+        `SELECT game_code,round_number,scheduled_at,status,home_team_code,away_team_code,
+              home_score,away_score,home_score_regtime,away_score_regtime,
+              home_q1,away_q1,home_q2,away_q2,home_q3,away_q3,home_q4,away_q4,home_ot,away_ot
+       FROM official_games
+       WHERE season_id=$1 AND provider='euroleague_advanced'`,
+        [seasonId]
+      ),
+    ]);
+  } catch (error: any) {
+    throw new Error('Could not load fantasy and official match inputs.', { cause: error });
+  }
+
+  const games = gamesData?.data?.games || gamesData?.games || [];
+  const codeByTeam = new Map<number, string>(
+    mappingResult.rows.map((row: any) => [row.team_id, row.provider_team_code])
+  );
+  const officialGames = officialResult.rows as OfficialMatchRow[];
+  let synced = 0;
+  let unresolved = 0;
+
+  for (const game of games) {
+    const homeId = game.home?.id;
+    const awayId = game.away?.id;
+    const homeCode = codeByTeam.get(homeId);
+    const awayCode = codeByTeam.get(awayId);
+    const candidates = officialGames.filter(
+      (item) => item.home_team_code === homeCode && item.away_team_code === awayCode
+    );
+    const official = closestOfficialGame(
+      candidates,
+      roundNumber(round.name),
+      typeof game.date === 'number' ? game.date : null
+    );
+
+    if (!homeId || !awayId || !official) {
+      unresolved++;
+      manager.log(
+        `      ⚠️ Official game not linked for Biwenger game ${game.id} (${homeCode || homeId} vs ${awayCode || awayId}).`
+      );
+      continue;
+    }
+
+    await mutations.upsertMatch({
+      round_id: dbRoundId,
+      round_name: round.name,
+      home_id: homeId,
+      away_id: awayId,
+      date: official.scheduled_at ? new Date(official.scheduled_at).toISOString() : null,
+      status: official.status,
+      home_score: official.home_score,
+      away_score: official.away_score,
+      home_score_regtime: official.home_score_regtime,
+      away_score_regtime: official.away_score_regtime,
+      home_q1: official.home_q1,
+      away_q1: official.away_q1,
+      home_q2: official.home_q2,
+      away_q2: official.away_q2,
+      home_q3: official.home_q3,
+      away_q3: official.away_q3,
+      home_q4: official.home_q4,
+      away_q4: official.away_q4,
+      home_ot: official.home_ot,
+      away_ot: official.away_ot,
+      official_game_code: official.game_code,
+    });
+    synced++;
+  }
+
+  manager.log(
+    `   ✅ Linked ${synced} fantasy matches to official games (${unresolved} unresolved).`
+  );
+  if (unresolved > 0) {
+    throw new Error(`${unresolved} Biwenger matches could not be linked to official games.`);
+  }
+  return { synced, games: games.length };
+}

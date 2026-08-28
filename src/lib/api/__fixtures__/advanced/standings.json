@@ -1,0 +1,13 @@
+[
+  {
+    "club.code": "MAD",
+    "club.name": "Real Madrid",
+    "club.images.crest": "https://example.test/mad.png",
+    "position": 1,
+    "gamesPlayed": 0,
+    "gamesWon": 0,
+    "gamesLost": 0,
+    "pointsFor": 0,
+    "pointsAgainst": 0
+  }
+]

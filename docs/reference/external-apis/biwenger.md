@@ -29,23 +29,23 @@ three times with exponential delay. Other non-success responses are surfaced wit
 
 ## Endpoint families
 
-| Family                  | Representative path                                      | Primary ownership                                 |
-| ----------------------- | -------------------------------------------------------- | ------------------------------------------------- |
-| Account/version         | `/account`                                               | API version discovery                             |
-| Competition master data | `/competitions/euroleague/data?lang=es`                  | Players, teams, rounds, current values            |
-| League standings        | `/league/{leagueId}?fields=standings`                    | Users and standings                               |
-| League board            | `/league/{leagueId}/board?offset={offset}&limit={limit}` | Transfers, bids, finances, predictions            |
-| Round league data       | `/rounds/league/{roundId}`                               | Manager results and lineups                       |
-| Round games             | `/rounds/euroleague/{roundId}?score=1`                   | Fantasy match/score mapping                       |
-| Player detail           | `/players/euroleague/{id}`                               | Biography, price history, and metadata enrichment |
-| User squad              | `/user/{id}?fields=players`                              | Current ownership                                 |
-| Home and tournaments    | `/home`, `/tournaments/{id}`                             | Tournament discovery and structures               |
-| Market                  | `/market`                                                | Current listings and user market actions          |
-| Offers                  | `/offers/{id}`                                           | Accept/reject user offers                         |
+| Family                  | Representative path                                      | Primary ownership                                  |
+| ----------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| Account/version         | `/account`                                               | API version discovery                              |
+| Competition master data | `/competitions/euroleague/data?lang=es`                  | Players, teams, rounds, current values             |
+| League standings        | `/league/{leagueId}?fields=standings`                    | Users and standings                                |
+| League board            | `/league/{leagueId}/board?offset={offset}&limit={limit}` | Transfers, bids, finances, predictions             |
+| Round league data       | `/rounds/league/{roundId}`                               | Manager results and lineups                        |
+| Round games             | `/rounds/euroleague/{roundId}?score=1`                   | Fantasy round/team IDs and official fantasy points |
+| Player detail           | `/players/euroleague/{id}`                               | Biography, price history, and metadata enrichment  |
+| User squad              | `/user/{id}?fields=players`                              | Current ownership                                  |
+| Home and tournaments    | `/home`, `/tournaments/{id}`                             | Tournament discovery and structures                |
+| Market                  | `/market`                                                | Current listings and user market actions           |
+| Offers                  | `/offers/{id}`                                           | Accept/reject user offers                          |
 
 Exact query fields are centralized in [`config.js`](../../../src/lib/config.js) and wrappers in the
-client. The numbered steps map provider payloads into the tables described by the
-[data model](../data-model.md).
+client. Descriptive, source-specific pipeline steps map provider payloads into the tables described
+by the [data model](../data-model.md).
 
 ## Failure handling
 

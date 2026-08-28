@@ -541,9 +541,7 @@ export default function SeasonReviewClient({
                                   isSelected ? 'bg-orange-500/10' : ''
                                 )}
                               >
-                                <td className="px-5 py-4 text-center font-black">
-                                  {idx + 1}
-                                </td>
+                                <td className="px-5 py-4 text-center font-black">{idx + 1}</td>
                                 <td className="px-4 py-4">
                                   <div className="flex flex-wrap items-center gap-1.5">
                                     {configSummary(entry.config).map((item) => (
@@ -564,16 +562,36 @@ export default function SeasonReviewClient({
                                 <td className="px-4 py-4 text-center font-black text-white">
                                   {number.format(entry.score)}
                                 </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.equality))}>
+                                <td
+                                  className={cx(
+                                    'px-4 py-4 text-center font-black',
+                                    getScoreColor(entry.dimensions.equality)
+                                  )}
+                                >
                                   {number.format(entry.dimensions.equality)}
                                 </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.competitiveness))}>
+                                <td
+                                  className={cx(
+                                    'px-4 py-4 text-center font-black',
+                                    getScoreColor(entry.dimensions.competitiveness)
+                                  )}
+                                >
                                   {number.format(entry.dimensions.competitiveness)}
                                 </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.resilience))}>
+                                <td
+                                  className={cx(
+                                    'px-4 py-4 text-center font-black',
+                                    getScoreColor(entry.dimensions.resilience)
+                                  )}
+                                >
                                   {number.format(entry.dimensions.resilience)}
                                 </td>
-                                <td className={cx("px-4 py-4 text-center font-black", getScoreColor(entry.dimensions.merit))}>
+                                <td
+                                  className={cx(
+                                    'px-4 py-4 text-center font-black',
+                                    getScoreColor(entry.dimensions.merit)
+                                  )}
+                                >
                                   {number.format(entry.dimensions.merit)}
                                 </td>
                               </tr>

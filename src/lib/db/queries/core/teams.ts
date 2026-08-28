@@ -68,16 +68,19 @@ export async function getTeamRegularSeasonStandings() {
  * Get team details by ID
  */
 export async function getTeamById(id: number | string): Promise<Team | undefined> {
+  const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT 
-      id,
-      name,
-      short_name,
-      img as logo
-    FROM teams
-    WHERE id = $1
+      t.id,
+      t.name,
+      t.short_name,
+      COALESCE(otm.crest_url, t.img) as logo
+    FROM teams t
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=$2 AND otm.provider='euroleague_advanced'
+    WHERE t.id = $1
   `;
-  return (await pgClient.query(query, [id])).rows[0];
+  return (await pgClient.query(query, [id, seasonId])).rows[0];
 }
 
 /**
@@ -113,7 +116,7 @@ export async function getTeamDetails(id: number | string): Promise<TeamDetails |
       t.id,
       t.name,
       t.short_name,
-      t.img as logo,
+      COALESCE(otm.crest_url, t.img) as logo,
       COALESCE(SUM(prs.fantasy_points), 0) as total_fantasy_points,
       COALESCE(SUM(prs.points), 0) as total_real_points,
       COALESCE(ROUND(AVG(prs.valuation), 1), 0) as avg_pir,
@@ -126,8 +129,10 @@ export async function getTeamDetails(id: number | string): Promise<TeamDetails |
     LEFT JOIN players p ON p.id = ps.player_id
     LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.season_id = $2
     LEFT JOIN TeamMatchStats tms ON t.id = tms.team_id
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=$2 AND otm.provider='euroleague_advanced'
     WHERE t.id = $1
-    GROUP BY t.id, t.name, t.short_name, t.img, tms.wins, tms.losses
+    GROUP BY t.id, t.name, t.short_name, t.img, otm.crest_url, tms.wins, tms.losses
   `;
 
   const [res, matchesCount, playoffProb, allStandings] = await Promise.all([

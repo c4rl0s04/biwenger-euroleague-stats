@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { run, syncPlayers } from '../steps/01-players.js';
+import { run } from '../steps/biwenger-catalog.js';
 import * as client from '../../api/biwenger-client.js';
 
 // Mock biwenger-client
 vi.mock('../../api/biwenger-client.js', () => ({
+  biwengerFetch: vi.fn(),
   fetchAllPlayers: vi.fn(),
   fetchPlayerDetails: vi.fn(),
+  fetchRoundGames: vi.fn(),
 }));
 
 // Mock config
@@ -24,6 +26,9 @@ describe('syncPlayers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    client.fetchRoundGames.mockResolvedValue({
+      data: { games: [{ id: 1, date: Date.parse('2026-09-30T18:00:00Z') / 1000 }] },
+    });
 
     db = {
       query: vi.fn(async (sql, params) => {
@@ -44,9 +49,22 @@ describe('syncPlayers', () => {
     };
   });
 
+  const manager = (competition) => ({
+    context: { db, seasonId: '2026-27' },
+    setBiwengerCompetition: () => ({
+      raw: competition,
+      players: competition.data.data.players,
+      teams: competition.data.data.teams,
+      rounds: competition.data.rounds || [],
+    }),
+    log: vi.fn(),
+    error: vi.fn(),
+  });
+
   it('should sync players correctly', async () => {
     const mockCompetition = {
       data: {
+        rounds: [{ id: 1, name: 'Jornada 1' }],
         data: {
           players: {
             101: {
@@ -76,7 +94,7 @@ describe('syncPlayers', () => {
     client.fetchAllPlayers.mockResolvedValue(mockCompetition);
     client.fetchPlayerDetails.mockResolvedValue(mockPlayerDetails);
 
-    await syncPlayers(db, { seasonId: '2026-27' });
+    await run(manager(mockCompetition));
 
     // Verify DB prepare was called (we don't check exact count as it depends on prepared statements bundle)
     // Verify DB query was called
@@ -100,6 +118,7 @@ describe('syncPlayers', () => {
   it('uses season-specific existing stats instead of global player stats', async () => {
     const mockCompetition = {
       data: {
+        rounds: [{ id: 1, name: 'Jornada 1' }],
         data: {
           players: {
             101: {
@@ -135,18 +154,7 @@ describe('syncPlayers', () => {
 
     client.fetchAllPlayers.mockResolvedValue(mockCompetition);
 
-    await run({
-      context: {
-        db,
-        seasonId: '2026-27',
-        playersList: {},
-        teams: {},
-      },
-      roundNameMap: new Map(),
-      normalizeRoundName: (name) => name,
-      log: vi.fn(),
-      error: vi.fn(),
-    });
+    await run(manager(mockCompetition));
 
     const playerSeasonUpsert = db.query.mock.calls.find(
       ([sql, params]) => sql.includes('INSERT INTO player_seasons') && params?.[0] === '2026-27'
