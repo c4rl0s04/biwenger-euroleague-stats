@@ -42,6 +42,7 @@ jobs:
           BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
           BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
           BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
+          BIWENGER_API_VERSION_FALLBACK: ${{ vars.BIWENGER_API_VERSION_FALLBACK }}
 
           # Canonical season configuration
           SEASON_ID: ${{ vars.SEASON_ID }}

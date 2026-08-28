@@ -108,8 +108,8 @@ describe('Biwenger season readiness', () => {
     expect(() => validateBiwengerRoundSeason({ seasonId: '2026-27', games: [] })).toThrow(
       /no first-round games/
     );
-    expect(() =>
-      validateBiwengerRoundSeason({ seasonId: '2026-27', games: [{ id: 1 }] })
-    ).toThrow(/no dated first-round games/);
+    expect(() => validateBiwengerRoundSeason({ seasonId: '2026-27', games: [{ id: 1 }] })).toThrow(
+      /no dated first-round games/
+    );
   });
 });

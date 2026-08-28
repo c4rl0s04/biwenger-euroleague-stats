@@ -50,7 +50,9 @@ export function validateBiwengerRoundSeason(input: BiwengerRoundSeasonInput) {
     .map((game) => biwengerGameDate(game.date))
     .filter((date): date is Date => date !== null);
   if (dates.length === 0) {
-    throw new Error(`Biwenger ${input.seasonId} readiness probe returned no dated first-round games.`);
+    throw new Error(
+      `Biwenger ${input.seasonId} readiness probe returned no dated first-round games.`
+    );
   }
 
   const years = Array.from(new Set(dates.map((date) => date.getUTCFullYear())));

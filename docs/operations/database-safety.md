@@ -36,6 +36,28 @@ To compare source schema with committed Drizzle metadata without connecting to a
 npm run db:audit:schema:metadata
 ```
 
+## Production readiness reconciliation
+
+The 2026-27 production reconciliation has a read-only default:
+
+```bash
+npm run db:production:check
+```
+
+It validates migration hashes, column compatibility, unique constraints, foreign keys, indexes,
+duplicate keys, orphaned references, RLS, and direct `anon`/`authenticated` grants. Known legacy
+columns `players.profile_url` and `teams.is_active` are tolerated but never removed.
+
+After a verified backup, apply the additive repair with both confirmations:
+
+```bash
+BACKUP_CONFIRMED=true ALLOW_REMOTE_SCHEMA_REPAIR=true npm run db:production:apply
+```
+
+The apply path acquires the sync advisory locks, runs in one transaction, and verifies the complete
+result before committing. Do not use `drizzle-kit migrate` directly against a partially provisioned
+production database; the reconciliation records the verified historical migration hashes safely.
+
 ## Rules
 
 - Do not drop, truncate, rename, or rewrite production tables without a tested restore plan.

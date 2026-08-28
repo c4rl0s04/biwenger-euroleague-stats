@@ -70,6 +70,8 @@ integration. Database-backed tests require the explicit safety configuration des
 | `npm run db:verify:drizzle`        | Verify the Drizzle client over the configured connection.                    |
 | `npm run db:audit:schema`          | Compare runtime database state with schema expectations.                     |
 | `npm run db:audit:schema:metadata` | Compare source schema with committed metadata without a DB connection.       |
+| `npm run db:production:check`      | Audit production migration, constraint, index, FK, RLS, and grant readiness. |
+| `npm run db:production:apply`      | Apply the guarded additive repair after backup confirmation.                 |
 | `npm run db:season:audit`          | Read-only multi-season integrity audit.                                      |
 | `npm run db:season:fingerprint`    | Emit deterministic row counts and hashes for a season (defaults to 2025-26). |
 | `npm run db:season:freeze`         | Freeze a season after explicit backup confirmation.                          |
