@@ -3,12 +3,12 @@ import type { HomeActivityEvent } from '@/lib/home/contracts';
 import AdminBonusActivityCard from './AdminBonusActivityCard';
 import MatchSessionActivityCard from './MatchSessionActivityCard';
 import RoundActivityCard from './RoundActivityCard';
-import TransferActivityCard from './TransferActivityCard';
+import TransferDayActivityCard from './TransferDayActivityCard';
 
 export default function HomeActivityEventCard({ event }: { event: HomeActivityEvent }) {
   switch (event.type) {
-    case 'transfer':
-      return <TransferActivityCard event={event} />;
+    case 'transfer_day':
+      return <TransferDayActivityCard event={event} />;
     case 'round_completed':
       return <RoundActivityCard event={event} />;
     case 'admin_bonus':

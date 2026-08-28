@@ -1,11 +1,7 @@
 import { Activity, CalendarClock, CircleAlert, TrendingDown, TrendingUp } from 'lucide-react';
 
 import type { HomeSummary } from '@/lib/home/contracts';
-
-const compactNumber = new Intl.NumberFormat('es-ES', {
-  notation: 'compact',
-  maximumFractionDigits: 1,
-});
+import { formatCompactMoney, formatExactPoints } from '@/lib/home/formatters';
 
 function roundLabel(summary: HomeSummary) {
   if (!summary.round.name) return 'Calendario pendiente';
@@ -43,11 +39,11 @@ export default function HomePulseCard({ summary }: { summary: HomeSummary }) {
         </div>
         <div>
           <span>Puntos</span>
-          <strong>{compactNumber.format(summary.user.totalPoints)}</strong>
+          <strong>{formatExactPoints(summary.user.totalPoints)}</strong>
         </div>
         <div>
           <span>Plantilla</span>
-          <strong>{compactNumber.format(summary.user.teamValue)} €</strong>
+          <strong>{formatCompactMoney(summary.user.teamValue)}</strong>
         </div>
       </div>
 
@@ -57,7 +53,7 @@ export default function HomePulseCard({ summary }: { summary: HomeSummary }) {
         </span>
         <span className={summary.user.priceTrend < 0 ? 'is-negative' : 'is-positive'}>
           <TrendIcon size={15} aria-hidden="true" />{' '}
-          {compactNumber.format(Math.abs(summary.user.priceTrend))} €
+          {formatCompactMoney(Math.abs(summary.user.priceTrend))}
         </span>
       </div>
 

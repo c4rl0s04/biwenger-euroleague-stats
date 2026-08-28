@@ -6,13 +6,38 @@ import HomeActivityEventCard from './HomeActivityEventCard';
 
 const events: HomeActivityEvent[] = [
   {
-    id: 'transfer:1',
-    type: 'transfer',
+    id: 'transfer_day:2026-10-20',
+    type: 'transfer_day',
     occurredAt: '2026-10-20T20:00:00.000Z',
-    player: { id: 10, name: 'Mike James', position: 'Base', image: null, teamCode: 'MON' },
-    seller: { id: null, name: 'Mercado' },
-    buyer: { id: '7', name: 'All Stars' },
-    amount: 3500000,
+    date: '2026-10-20',
+    transfers: [
+      {
+        id: 'transfer:1',
+        occurredAt: '2026-10-20T20:00:00.000Z',
+        player: {
+          id: 10,
+          name: 'Mike James',
+          position: 'Base',
+          image: null,
+          teamCode: 'MON',
+        },
+        seller: {
+          id: null,
+          name: 'Mercado',
+          icon: null,
+          colorIndex: 0,
+          isMarket: true,
+        },
+        buyer: {
+          id: '7',
+          name: 'All Stars',
+          icon: null,
+          colorIndex: 2,
+          isMarket: false,
+        },
+        amount: 3500000,
+      },
+    ],
   },
   {
     id: 'round_completed:4',
@@ -21,17 +46,15 @@ const events: HomeActivityEvent[] = [
     roundId: 4,
     roundName: 'Jornada 4',
     totalBonus: 2100000,
-    participants: [
-      {
-        userId: '7',
-        name: 'All Stars',
-        icon: null,
-        colorIndex: 1,
-        position: 1,
-        points: 201,
-        bonus: 300000,
-      },
-    ],
+    participants: Array.from({ length: 7 }, (_, index) => ({
+      userId: '7',
+      name: index === 6 ? 'No Name Yet' : `Manager ${index + 1}`,
+      icon: null,
+      colorIndex: 1,
+      position: index + 1,
+      points: 201 - index * 10,
+      bonus: index === 6 ? 0 : 300000,
+    })),
   },
   {
     id: 'admin_bonus:1',
@@ -60,8 +83,8 @@ const events: HomeActivityEvent[] = [
 
 describe('home activity event renderer', () => {
   it.each([
-    ['transfer', 'Mike James'],
-    ['round_completed', 'Jornada 4'],
+    ['transfer_day', 'Mike James'],
+    ['round_completed', 'No Name Yet'],
     ['admin_bonus', 'Premio especial'],
     ['match_session', 'RMB'],
   ] as const)('renders the %s visual variant', (type, expectedText) => {
@@ -70,5 +93,12 @@ describe('home activity event renderer', () => {
 
     expect(html).toContain(expectedText);
     expect(html).toContain('<time');
+  });
+
+  it('labels a zero round payment without an ambiguous +0 amount', () => {
+    const event = events.find((item) => item.type === 'round_completed')!;
+    const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
+
+    expect(html).toContain('Sin prima');
   });
 });

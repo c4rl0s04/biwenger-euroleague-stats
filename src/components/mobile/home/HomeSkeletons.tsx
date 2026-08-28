@@ -2,6 +2,11 @@ export function HomeSummarySkeleton() {
   return (
     <div className="mobile-home-skeleton-summary" aria-label="Cargando resumen">
       <div className="mobile-home-skeleton-header skeleton" />
+      <div className="mobile-home-skeleton-filters">
+        <span className="skeleton" />
+        <span className="skeleton" />
+        <span className="skeleton" />
+      </div>
       <div className="mobile-home-skeleton-pulse skeleton" />
       <div className="mobile-home-skeleton-actions">
         <span className="skeleton" />

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { isHomeActivityFilter } from '@/lib/home/contracts';
 
 function DesktopHome() {
   const cards = [
@@ -175,11 +176,14 @@ function DesktopHome() {
   );
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }) {
   if (await isPhonePresentation()) {
     const session = await auth();
     if (!session?.user?.id) redirect('/login?callbackUrl=%2F');
-    return <MobileHomeScreen userId={String(session.user.id)} />;
+    const params = await searchParams;
+    const requestedFilter = Array.isArray(params?.activity) ? params.activity[0] : params?.activity;
+    const initialFilter = isHomeActivityFilter(requestedFilter) ? requestedFilter : 'all';
+    return <MobileHomeScreen userId={String(session.user.id)} initialFilter={initialFilter} />;
   }
 
   return <DesktopHome />;
