@@ -1,8 +1,8 @@
 import 'server-only';
 
 import type { HomeFeedCursor } from '@/lib/home/cursor';
-import { pgClient } from '@/lib/db';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
+import { db as pgClient } from '@/lib/db/client';
 
 export type HomeActivityRowType =
   | 'transfer'
