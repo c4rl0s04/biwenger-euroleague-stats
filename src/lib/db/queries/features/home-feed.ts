@@ -4,11 +4,7 @@ import type { HomeFeedCursor } from '@/lib/home/cursor';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { db as pgClient } from '@/lib/db/client';
 
-export type HomeActivityRowType =
-  | 'transfer'
-  | 'round_completed'
-  | 'admin_bonus'
-  | 'match_session';
+export type HomeActivityRowType = 'transfer' | 'round_completed' | 'admin_bonus' | 'match_session';
 
 export interface HomeActivityRow {
   id: string;
@@ -145,7 +141,7 @@ export async function queryHomeActivityRows({
     ),
     admin_bonus_events AS (
       SELECT
-        'admin_bonus:' || md5(concat_ws('|', user_id, round_id, date, type, amount, description)) AS id,
+        'admin_bonus:' || md5(concat_ws('|', df.user_id, df.round_id, df.date, df.type, df.amount, df.description)) AS id,
         'admin_bonus'::text AS type,
         NULLIF(date, '')::timestamptz AS occurred_at,
         jsonb_build_object(
