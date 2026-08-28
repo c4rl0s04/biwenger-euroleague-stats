@@ -28,6 +28,8 @@
     "db:season:fingerprint": "tsx -r dotenv/config scripts/dev/fingerprint-season.ts",
     "db:season:freeze": "tsx -r dotenv/config scripts/dev/season-lifecycle.ts freeze",
     "db:season:create-next": "tsx -r dotenv/config scripts/dev/season-lifecycle.ts create-next",
+    "db:production:check": "tsx scripts/dev/production-readiness.ts check",
+    "db:production:apply": "tsx scripts/dev/production-readiness.ts apply",
     "db:repair:player-prices": "tsx -r dotenv/config scripts/dev/repair-player-prices-from-history.ts",
     "db:check": "tsx scripts/dev/db-check.ts",
     "db:verify": "tsx scripts/dev/verify-db-connection.ts",

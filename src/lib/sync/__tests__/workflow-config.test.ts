@@ -10,6 +10,7 @@ const requiredConfiguration = [
   'EUROLEAGUE_SEASON_CODE',
   'LEAGUE_START_DATE',
   'SEASON_AWARE_READS_CONFIRMED',
+  'BIWENGER_API_VERSION_FALLBACK',
 ];
 
 describe('sync workflow season configuration', () => {

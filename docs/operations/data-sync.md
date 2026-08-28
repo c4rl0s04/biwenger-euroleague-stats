@@ -66,10 +66,11 @@ The declarative pipeline is:
 Running a single step is an explicit recovery operation and does not automatically run its declared
 dependencies. Check that prerequisite data is current first. Numeric `--step` values are rejected.
 
-Before first activation, apply additive migrations `0007` and `0008`, freeze and fingerprint `2025-26` with
-`npm run db:season:fingerprint -- --season=2025-26`, create/activate
-`2026-27`, and run `npm run sync:preflight`. The active implementation has one official source and
-does not contain a runtime provider selector. The removed implementation can be inspected from the
+Before first activation, run `npm run db:production:check`, apply the additive readiness repair
+through the [database safety](database-safety.md) runbook, and fingerprint `2025-26` with
+`npm run db:season:fingerprint -- --season=2025-26`. Then create/activate `2026-27` and run
+`npm run sync:preflight`. The active implementation has one official source and does not contain a
+runtime provider selector. The removed implementation can be inspected from the
 `archive/euroleague-legacy-2025-26` tag if historical diagnosis is required.
 
 Before production, run the two-pass isolation harness against a migrated local database whose name
