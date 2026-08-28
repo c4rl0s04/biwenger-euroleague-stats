@@ -1,7 +1,8 @@
 import HeroHeader from '@/components/home/HeroHeader';
 import MobileHomeScreen from '@/components/mobile/screens/MobileHomeScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-import { fetchNewsFeed } from '@/lib/services/app/dashboardService';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
@@ -176,15 +177,9 @@ function DesktopHome() {
 
 export default async function Home() {
   if (await isPhonePresentation()) {
-    const news = await fetchNewsFeed();
-    return (
-      <MobileHomeScreen
-        news={news.slice(0, 3).map((item, index) => ({
-          id: `${item.type}-${item.timestamp}-${index}`,
-          title: item.text,
-        }))}
-      />
-    );
+    const session = await auth();
+    if (!session?.user?.id) redirect('/login?callbackUrl=%2F');
+    return <MobileHomeScreen userId={String(session.user.id)} />;
   }
 
   return <DesktopHome />;

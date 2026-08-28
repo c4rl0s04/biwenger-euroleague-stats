@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Estadísticas y herramientas para tu liga Biwenger de Euroliga.',
     id: '/',
     scope: '/',
-    start_url: '/dashboard?source=pwa',
+    start_url: '/?source=pwa',
     display: 'standalone',
     background_color: '#050506',
     theme_color: '#050506',
