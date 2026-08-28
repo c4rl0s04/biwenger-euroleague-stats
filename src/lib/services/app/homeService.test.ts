@@ -169,6 +169,27 @@ describe('mobile home feed service', () => {
     ]);
   });
 
+  it('keeps every transfer inside a busy market day', async () => {
+    const row = transferDayRow(1);
+    row.payload.transfers = Array.from({ length: 20 }, (_, index) => ({
+      ...row.payload.transfers[0],
+      id: `transfer:${20 - index}`,
+      playerId: 2000 + index,
+      playerName: `Jugador ${20 - index}`,
+      amount: String((20 - index) * 100000),
+    }));
+    queryHomeActivityRows.mockResolvedValue([row]);
+
+    const page = await getHomeFeedPage({ filter: 'transfers' });
+    const event = page.items[0];
+
+    expect(event).toMatchObject({ type: 'transfer_day' });
+    if (event.type !== 'transfer_day') throw new Error('Expected transfer day');
+    expect(event.transfers).toHaveLength(20);
+    expect(event.transfers[0].id).toBe('transfer:20');
+    expect(event.transfers[19].id).toBe('transfer:1');
+  });
+
   it('keeps an empty configured season in preseason without historical fallback', async () => {
     queryHomeSeasonMetadata.mockResolvedValue({
       id: '2026-27',

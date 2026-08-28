@@ -20,7 +20,18 @@ test('phone home opens as the league activity cover', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Inicio' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Accesos rápidos' })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Filtrar actividad' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Actividad reciente' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Fichajes' }).click();
+  await expect(page).toHaveURL(/activity=transfers/);
+  await expect(page.getByRole('button', { name: 'Fichajes' })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+
+  await page.getByRole('button', { name: 'Todos' }).click();
+  await expect(page).not.toHaveURL(/activity=/);
 
   const overflow = await page.evaluate(() => ({
     viewport: window.innerWidth,
