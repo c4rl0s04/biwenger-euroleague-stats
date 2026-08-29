@@ -17,6 +17,18 @@ export function formatExactMoney(value: number): string {
   return `${formatSpanishInteger(value)} €`;
 }
 
+export function formatSignedMoney(value: number): string {
+  if (value === 0) return formatExactMoney(0);
+  const sign = value > 0 ? '+' : '−';
+  return `${sign}${formatSpanishInteger(Math.abs(value))} €`;
+}
+
+export function formatSignedPercentage(value: number): string {
+  if (value === 0) return '0 %';
+  const sign = value > 0 ? '+' : '−';
+  return `${sign}${oneDecimal.format(Math.abs(value))} %`;
+}
+
 export function formatCompactMoney(value: number): string {
   const absoluteValue = Math.abs(value);
   const sign = value < 0 ? '-' : '';

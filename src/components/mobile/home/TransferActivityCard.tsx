@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 import type { TransferActivityItem, TransferParty } from '@/lib/home/contracts';
-import { formatExactMoney } from '@/lib/home/formatters';
+import { formatExactMoney, formatSignedMoney, formatSignedPercentage } from '@/lib/home/formatters';
+import { compareTransferValue, type TransferValueAssessment } from '@/lib/home/transfer-value';
 import HomeManagerAvatar from './HomeManagerAvatar';
 
 const hourFormatter = new Intl.DateTimeFormat('es-ES', {
@@ -11,6 +12,15 @@ const hourFormatter = new Intl.DateTimeFormat('es-ES', {
   minute: '2-digit',
   timeZone: 'Europe/Madrid',
 });
+
+const assessmentLabels: Record<TransferValueAssessment, string> = {
+  saving: 'Ahorro',
+  overpay: 'Sobreprecio',
+  favorable_sale: 'Venta favorable',
+  below_market_sale: 'Venta por debajo',
+  at_market: 'A precio de mercado',
+  unavailable: 'Valor no disponible',
+};
 
 function positionTone(position: string | null) {
   const normalized = position?.toLocaleLowerCase('es-ES') ?? '';
@@ -53,6 +63,13 @@ export default function TransferActivityCard({
   total: number;
 }) {
   const tone = positionTone(transfer.player.position);
+  const comparison = compareTransferValue({
+    transactionPrice: transfer.amount,
+    marketValue: transfer.marketValue,
+    sellerIsMarket: transfer.seller.isMarket,
+    buyerIsMarket: transfer.buyer.isMarket,
+  });
+  const comparisonLabel = assessmentLabels[comparison.assessment];
 
   return (
     <article
@@ -95,10 +112,28 @@ export default function TransferActivityCard({
                 {hourFormatter.format(new Date(transfer.occurredAt))}
               </time>
             </div>
+            <span className="mobile-home-transfer-price-label">Operación</span>
             <strong className="mobile-home-transfer-price">
               {formatExactMoney(transfer.amount)}
             </strong>
           </div>
+        </div>
+        <div className={`mobile-home-transfer-values is-${comparison.tone}`}>
+          {transfer.marketValue !== null && comparison.difference !== null ? (
+            <>
+              <div className="mobile-home-transfer-market-value">
+                <span>Valor de mercado</span>
+                <strong>{formatExactMoney(transfer.marketValue)}</strong>
+              </div>
+              <div className="mobile-home-transfer-difference">
+                <span>{comparisonLabel}</span>
+                <strong>{formatSignedMoney(comparison.difference)}</strong>
+                <small>{formatSignedPercentage(comparison.percentage ?? 0)}</small>
+              </div>
+            </>
+          ) : (
+            <span className="mobile-home-transfer-value-unavailable">Valor no disponible</span>
+          )}
         </div>
         <div
           className="mobile-home-transfer-flow"

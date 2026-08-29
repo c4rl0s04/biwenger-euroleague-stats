@@ -51,6 +51,8 @@ const transferDayRow = (id: number) => ({
         buyerIcon: 'https://example.com/all-stars.png',
         buyerColorIndex: 4,
         amount: String(id * 100000),
+        marketValue: String(id * 90_000),
+        marketValueAt: '2026-10-20',
       },
     ],
   },
@@ -75,6 +77,8 @@ describe('mobile home feed service', () => {
         expect.objectContaining({
           id: 'transfer:1',
           amount: 100000,
+          marketValue: 90000,
+          marketValueAt: '2026-10-20',
           buyer: expect.objectContaining({ id: '7', name: 'All Stars', colorIndex: 4 }),
         }),
       ],

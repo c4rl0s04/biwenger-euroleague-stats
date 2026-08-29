@@ -32,6 +32,8 @@ export interface TransferActivityItem extends HomeActivityBase {
   seller: TransferParty;
   buyer: TransferParty;
   amount: number;
+  marketValue: number | null;
+  marketValueAt: string | null;
 }
 
 export interface TransferDayActivity extends HomeActivityBase {

@@ -149,7 +149,9 @@ export async function queryHomeActivityRows({
         COALESCE(buyer.name, buyer_user.name, NULLIF(f.comprador, ''), 'Mercado') AS buyer_name,
         COALESCE(buyer.icon, buyer_user.icon) AS buyer_icon,
         COALESCE(buyer.color_index, buyer_user.color_index, 0) AS buyer_color_index,
-        COALESCE(f.precio, 0) AS amount
+        COALESCE(f.precio, 0) AS amount,
+        historical_value.price AS market_value,
+        historical_value.date AS market_value_at
       FROM fichajes f
       LEFT JOIN players p ON p.id = f.player_id
       LEFT JOIN player_seasons ps
@@ -161,6 +163,20 @@ export async function queryHomeActivityRows({
         ON buyer.season_id = f.season_id AND lower(buyer.name) = lower(f.comprador)
       LEFT JOIN users seller_user ON seller_user.id = seller.user_id
       LEFT JOIN users buyer_user ON buyer_user.id = buyer.user_id
+      LEFT JOIN LATERAL (
+        SELECT mv.price, mv.date
+        FROM market_values mv
+        WHERE mv.season_id = f.season_id
+          AND mv.player_id = f.player_id
+          AND mv.date <= (
+            COALESCE(
+              to_timestamp(f.timestamp),
+              NULLIF(f.fecha, '')::timestamptz
+            ) AT TIME ZONE 'Europe/Madrid'
+          )::date
+        ORDER BY mv.date DESC, mv.id DESC
+        LIMIT 1
+      ) historical_value ON TRUE
       WHERE f.season_id = $1
     ),
     transfer_events AS (
@@ -187,7 +203,12 @@ export async function queryHomeActivityRows({
               'buyerName', buyer_name,
               'buyerIcon', buyer_icon,
               'buyerColorIndex', buyer_color_index,
-              'amount', amount
+              'amount', amount,
+              'marketValue', market_value,
+              'marketValueAt', CASE
+                WHEN market_value_at IS NULL THEN NULL
+                ELSE to_char(market_value_at, 'YYYY-MM-DD')
+              END
             ) ORDER BY occurred_at DESC, transfer_id DESC
           )
         ) AS payload

@@ -19,6 +19,11 @@ const asString = (value: unknown, fallback = '') =>
   typeof value === 'string' && value.length > 0 ? value : fallback;
 const nullableString = (value: unknown) =>
   typeof value === 'string' && value.length > 0 ? value : null;
+const nullableNumber = (value: unknown) => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
 function normalizeActivityRow(row: HomeActivityRow): HomeActivityEvent {
   const payload = row.payload;
@@ -65,6 +70,8 @@ function normalizeActivityRow(row: HomeActivityRow): HomeActivityEvent {
             isMarket: buyerId === null,
           },
           amount: asNumber(item.amount),
+          marketValue: nullableNumber(item.marketValue),
+          marketValueAt: nullableString(item.marketValueAt),
         };
       }),
     };

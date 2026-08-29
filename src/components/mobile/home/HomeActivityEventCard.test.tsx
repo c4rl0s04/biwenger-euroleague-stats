@@ -36,6 +36,8 @@ const events: HomeActivityEvent[] = [
           isMarket: false,
         },
         amount: 3500000,
+        marketValue: 3000000,
+        marketValueAt: '2026-10-20',
       },
     ],
   },

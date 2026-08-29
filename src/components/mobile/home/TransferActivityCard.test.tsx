@@ -30,6 +30,8 @@ const baseTransfer: TransferActivityItem = {
     isMarket: false,
   },
   amount: 3_500_000,
+  marketValue: 3_000_000,
+  marketValueAt: '2026-10-20',
 };
 
 describe('mobile transfer card', () => {
@@ -88,5 +90,44 @@ describe('mobile transfer card', () => {
     expect(css).toMatch(
       /\.mobile-home-transfer-portrait\s*\{[\s\S]*?width:\s*5\.5rem;[\s\S]*?aspect-ratio:\s*1;/
     );
+  });
+
+  it('shows transaction value, historical market value, and a buyer-facing overprice', () => {
+    const html = renderToStaticMarkup(
+      <TransferActivityCard transfer={baseTransfer} position={1} total={1} />
+    );
+
+    expect(html).toContain('Operación');
+    expect(html).toContain('3.500.000 €');
+    expect(html).toContain('Valor de mercado');
+    expect(html).toContain('3.000.000 €');
+    expect(html).toContain('Sobreprecio');
+    expect(html).toContain('+500.000 €');
+    expect(html).toContain('+16,7 %');
+    expect(html).toContain('is-negative');
+  });
+
+  it('shows a favorable sale in green when a manager sells above market', () => {
+    const transfer = {
+      ...baseTransfer,
+      seller: { ...baseTransfer.buyer, name: 'All Stars' },
+      buyer: { ...baseTransfer.seller, name: 'Mercado' },
+    };
+    const html = renderToStaticMarkup(
+      <TransferActivityCard transfer={transfer} position={1} total={1} />
+    );
+
+    expect(html).toContain('Venta favorable');
+    expect(html).toContain('is-positive');
+  });
+
+  it('states when the historical market value is unavailable without estimating it', () => {
+    const transfer = { ...baseTransfer, marketValue: null, marketValueAt: null };
+    const html = renderToStaticMarkup(
+      <TransferActivityCard transfer={transfer} position={1} total={1} />
+    );
+
+    expect(html).toContain('Valor no disponible');
+    expect(html).not.toContain('Sobreprecio');
   });
 });
