@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import type { TransferActivityItem } from '@/lib/home/contracts';
@@ -73,5 +74,19 @@ describe('mobile transfer card', () => {
 
     expect(html).toContain('Foto de Mike James');
     expect(html).toContain('manager.png');
+  });
+
+  it('uses a square portrait beside the player summary instead of a panoramic header', () => {
+    const html = renderToStaticMarkup(
+      <TransferActivityCard transfer={baseTransfer} position={1} total={1} />
+    );
+    const css = readFileSync(new URL('../../../app/mobile-native.css', import.meta.url), 'utf8');
+
+    expect(html).toMatch(
+      /mobile-home-transfer-overview[\s\S]*mobile-home-transfer-portrait[\s\S]*mobile-home-transfer-summary/
+    );
+    expect(css).toMatch(
+      /\.mobile-home-transfer-portrait\s*\{[\s\S]*?width:\s*5\.5rem;[\s\S]*?aspect-ratio:\s*1;/
+    );
   });
 });

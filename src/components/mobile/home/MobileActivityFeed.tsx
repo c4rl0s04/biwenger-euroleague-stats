@@ -189,7 +189,11 @@ export default function MobileActivityFeed({ initialPage, initialFilter, initial
           <span>La liga, ahora</span>
           <h2 id="activity-title">Actividad reciente</h2>
         </div>
-        <span>{items.length > 0 ? 'En vivo' : 'Sin estrenar'}</span>
+        <span
+          className={`mobile-home-feed-live-state ${items.length > 0 ? 'is-live' : ''}`}
+        >
+          {items.length > 0 ? 'En vivo' : 'Sin estrenar'}
+        </span>
       </div>
 
       {loading && items.length === 0 ? (

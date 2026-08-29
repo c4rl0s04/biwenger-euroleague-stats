@@ -63,37 +63,43 @@ export default function TransferActivityCard({
       aria-posinset={position}
       aria-setsize={total}
     >
-      <Link
-        href={`/player/${transfer.player.id}`}
-        prefetch
-        className="mobile-home-transfer-portrait"
-        aria-label={`Abrir perfil de ${transfer.player.name}`}
-      >
-        {transfer.player.image ? (
-          <Image
-            src={transfer.player.image}
-            alt={`Foto de ${transfer.player.name}`}
-            fill
-            sizes="(max-width: 767px) 72vw, 300px"
-          />
-        ) : (
-          <span>{transfer.player.teamCode ?? transfer.player.name.slice(0, 2)}</span>
-        )}
-        <span className={`mobile-home-position-badge is-${tone}`}>
-          {transfer.player.position ?? 'Jugador'}
-        </span>
-      </Link>
-
       <div className="mobile-home-transfer-body">
-        <div className="mobile-home-transfer-identity">
-          <Link href={`/player/${transfer.player.id}`} prefetch>
-            {transfer.player.name}
+        <div className="mobile-home-transfer-overview">
+          <Link
+            href={`/player/${transfer.player.id}`}
+            prefetch
+            className="mobile-home-transfer-portrait"
+            aria-label={`Abrir perfil de ${transfer.player.name}`}
+          >
+            {transfer.player.image ? (
+              <Image
+                src={transfer.player.image}
+                alt={`Foto de ${transfer.player.name}`}
+                fill
+                sizes="88px"
+              />
+            ) : (
+              <span>{transfer.player.teamCode ?? transfer.player.name.slice(0, 2)}</span>
+            )}
+            <span className={`mobile-home-position-badge is-${tone}`}>
+              {transfer.player.position ?? 'Jugador'}
+            </span>
           </Link>
-          <time dateTime={transfer.occurredAt}>
-            {hourFormatter.format(new Date(transfer.occurredAt))}
-          </time>
+
+          <div className="mobile-home-transfer-summary">
+            <div className="mobile-home-transfer-identity">
+              <Link href={`/player/${transfer.player.id}`} prefetch>
+                {transfer.player.name}
+              </Link>
+              <time dateTime={transfer.occurredAt}>
+                {hourFormatter.format(new Date(transfer.occurredAt))}
+              </time>
+            </div>
+            <strong className="mobile-home-transfer-price">
+              {formatExactMoney(transfer.amount)}
+            </strong>
+          </div>
         </div>
-        <strong className="mobile-home-transfer-price">{formatExactMoney(transfer.amount)}</strong>
         <div
           className="mobile-home-transfer-flow"
           aria-label={`${transfer.seller.name} vende a ${transfer.buyer.name}`}

@@ -1974,19 +1974,23 @@
   text-transform: uppercase;
 }
 
-.mobile-home-feed-heading > span {
+.mobile-home-feed-live-state {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   padding-bottom: 0.1rem;
-  color: rgb(52 211 153);
+  color: hsl(var(--muted-foreground));
   font-size: 0.57rem;
   font-weight: 850;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.mobile-home-feed-heading > span::before {
+.mobile-home-feed-live-state.is-live {
+  color: rgb(52 211 153);
+}
+
+.mobile-home-feed-live-state.is-live::before {
   width: 0.36rem;
   height: 0.36rem;
   border-radius: 50%;
@@ -2185,9 +2189,13 @@
 .mobile-home-transfer-portrait {
   position: relative;
   display: grid;
-  height: 7.5rem;
+  width: 5.5rem;
+  aspect-ratio: 1;
   overflow: hidden;
+  flex-shrink: 0;
   place-items: center;
+  border: 1px solid hsl(var(--border) / 0.52);
+  border-radius: 0.78rem;
   background:
     radial-gradient(circle at 50% 18%, hsl(var(--primary) / 0.16), transparent 55%),
     hsl(var(--background) / 0.82);
@@ -2200,14 +2208,12 @@
 .mobile-home-transfer-portrait img {
   object-fit: cover;
   object-position: center top;
-  transform: scale(1.55) translateY(4%);
-  transform-origin: 50% 0;
 }
 
 .mobile-home-position-badge {
   position: absolute;
-  right: 0.55rem;
-  bottom: 0.5rem;
+  right: 0.35rem;
+  bottom: 0.35rem;
   z-index: 1;
   display: inline-flex;
   min-height: 1.45rem;
@@ -2215,8 +2221,8 @@
   border: 1px solid currentColor;
   border-radius: 999px;
   background: rgb(5 7 10 / 0.82);
-  padding: 0.18rem 0.48rem;
-  font-size: 0.55rem;
+  padding: 0.16rem 0.4rem;
+  font-size: 0.5rem;
   font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2240,11 +2246,25 @@
   padding: 0.7rem;
 }
 
-.mobile-home-transfer-identity {
+.mobile-home-transfer-overview {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.68rem;
+}
+
+.mobile-home-transfer-summary {
   display: flex;
-  align-items: baseline;
+  min-width: 0;
+  flex-direction: column;
   justify-content: space-between;
-  gap: 0.5rem;
+  padding: 0.16rem 0;
+}
+
+.mobile-home-transfer-identity {
+  display: grid;
+  min-width: 0;
+  gap: 0.12rem;
 }
 
 .mobile-home-transfer-identity > a {
@@ -2265,7 +2285,7 @@
 
 .mobile-home-transfer-price {
   display: block;
-  margin-top: 0.18rem;
+  margin-top: 0.35rem;
   color: hsl(var(--primary));
   font-family: var(--font-display);
   font-size: 1.62rem;
