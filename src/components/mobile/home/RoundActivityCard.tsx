@@ -5,12 +5,14 @@ import type { RoundCompletedActivity } from '@/lib/home/contracts';
 import { formatCompactMoney, formatExactPoints } from '@/lib/home/formatters';
 import ActivityTime from './ActivityTime';
 import HomeManagerAvatar from './HomeManagerAvatar';
+import HomeRankBadge from './HomeRankBadge';
 
 export default function RoundActivityCard({ event }: { event: RoundCompletedActivity }) {
   const participants = [...event.participants].sort(
     (left, right) => left.position - right.position || right.points - left.points
   );
-  const winner = participants[0];
+  const winners = participants.filter((participant) => participant.position === 1);
+  const lastPosition = Math.max(...participants.map((participant) => participant.position));
 
   return (
     <article className="mobile-home-event mobile-home-event-round">
@@ -26,25 +28,43 @@ export default function RoundActivityCard({ event }: { event: RoundCompletedActi
           <div>
             <strong>{event.roundName}</strong>
             <small>
-              {winner ? `${winner.name} gana con ${winner.points} puntos` : 'Clasificación cerrada'}
+              {winners.length > 1
+                ? `Victoria compartida: ${winners.map((winner) => winner.name).join(' · ')}`
+                : winners[0]
+                  ? `${winners[0].name} gana con ${winners[0].points} puntos`
+                  : 'Clasificación cerrada'}
             </small>
           </div>
-          <span>{formatCompactMoney(event.totalBonus)}</span>
+          <span className="mobile-home-round-total">
+            <small>Repartido</small>
+            <strong>{formatCompactMoney(event.totalBonus)}</strong>
+          </span>
         </div>
         <ol className="mobile-home-podium" aria-label={`Clasificación de ${event.roundName}`}>
           {participants.map((participant) => (
             <li key={participant.userId}>
-              <span>{participant.position}</span>
+              <HomeRankBadge
+                position={participant.position}
+                isLast={participant.position === lastPosition && participant.position > 3}
+              />
               <HomeManagerAvatar
                 name={participant.name}
                 icon={participant.icon}
                 colorIndex={participant.colorIndex}
               />
-              <strong>{participant.name}</strong>
-              <small>
-                {formatExactPoints(participant.points)} ·{' '}
-                {participant.bonus > 0 ? formatCompactMoney(participant.bonus) : 'Sin prima'}
-              </small>
+              <strong className="mobile-home-round-manager">{participant.name}</strong>
+              <div className="mobile-home-round-metrics">
+                <span>
+                  <small>Puntos</small>
+                  <strong>{formatExactPoints(participant.points)}</strong>
+                </span>
+                <span>
+                  <small>Prima</small>
+                  <strong>
+                    {participant.bonus > 0 ? formatCompactMoney(participant.bonus) : 'Sin prima'}
+                  </strong>
+                </span>
+              </div>
             </li>
           ))}
         </ol>

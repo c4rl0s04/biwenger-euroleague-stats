@@ -2514,6 +2514,30 @@
   letter-spacing: 0.03em;
 }
 
+.mobile-home-round-total {
+  display: grid;
+  flex-shrink: 0;
+  justify-items: end;
+  gap: 0.02rem;
+}
+
+.mobile-home-round-total small {
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-body);
+  font-size: 0.45rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mobile-home-round-total strong {
+  color: rgb(52 211 153);
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
 .mobile-home-podium {
   display: grid;
   gap: 0.32rem;
@@ -2521,32 +2545,101 @@
 }
 .mobile-home-podium li {
   display: grid;
-  grid-template-columns: 1.25rem 1.55rem minmax(0, 1fr) auto;
+  grid-template-columns: 1.25rem 1.55rem minmax(3.5rem, 1fr) minmax(6.4rem, auto);
   align-items: center;
   gap: 0.35rem;
-  min-height: 1.55rem;
+  min-height: 2.65rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.28);
 }
-.mobile-home-podium li > span {
+
+.mobile-home-podium li:last-child {
+  border-bottom: 0;
+}
+
+.mobile-home-rank-badge {
   display: grid;
   width: 1.15rem;
   height: 1.15rem;
   place-items: center;
+  border: 1px solid transparent;
   border-radius: 50%;
-  background: rgb(250 204 21 / 0.1);
-  color: rgb(250 204 21);
   font-size: 0.55rem;
   font-weight: 900;
 }
-.mobile-home-podium strong {
+
+.mobile-home-rank-badge.is-rank-gold {
+  border-color: rgb(250 204 21 / 0.35);
+  background: rgb(250 204 21 / 0.13);
+  color: rgb(250 204 21);
+}
+
+.mobile-home-rank-badge.is-rank-silver {
+  border-color: rgb(203 213 225 / 0.32);
+  background: rgb(203 213 225 / 0.11);
+  color: rgb(226 232 240);
+}
+
+.mobile-home-rank-badge.is-rank-bronze {
+  border-color: rgb(217 119 6 / 0.38);
+  background: rgb(217 119 6 / 0.12);
+  color: rgb(251 146 60);
+}
+
+.mobile-home-rank-badge.is-rank-neutral {
+  border-color: hsl(var(--border) / 0.52);
+  background: hsl(var(--secondary) / 0.52);
+  color: hsl(var(--muted-foreground));
+}
+
+.mobile-home-rank-badge.is-rank-last {
+  border-color: rgb(251 113 133 / 0.36);
+  background: rgb(251 113 133 / 0.1);
+  color: rgb(251 113 133);
+}
+
+.mobile-home-round-manager {
   overflow: hidden;
   color: hsl(var(--foreground) / 0.9);
   font-size: 0.65rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.mobile-home-podium small {
+
+.mobile-home-round-metrics {
+  display: grid;
+  grid-template-columns: minmax(2.55rem, 0.85fr) minmax(3.5rem, 1.15fr);
+  gap: 0.28rem;
+}
+
+.mobile-home-round-metrics > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.05rem;
+  justify-items: end;
+}
+
+.mobile-home-round-metrics small {
   color: hsl(var(--muted-foreground));
-  font-size: 0.57rem;
+  font-size: 0.43rem;
+  font-weight: 780;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.mobile-home-round-metrics strong {
+  overflow: hidden;
+  max-width: 100%;
+  color: hsl(var(--foreground) / 0.94);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-home-round-metrics > span:last-child strong {
+  color: rgb(52 211 153);
 }
 
 .mobile-home-prediction-card {
@@ -3264,10 +3357,15 @@
     gap: 0.18rem;
   }
   .mobile-home-podium li {
-    grid-template-columns: 1.25rem 1.55rem minmax(0, 1fr);
+    grid-template-columns: 1.15rem 1.45rem minmax(2.8rem, 1fr) minmax(5.65rem, auto);
+    gap: 0.25rem;
   }
-  .mobile-home-podium small {
-    grid-column: 3;
+  .mobile-home-round-metrics {
+    grid-template-columns: minmax(2.25rem, 0.75fr) minmax(3.15rem, 1.25fr);
+    gap: 0.18rem;
+  }
+  .mobile-home-round-metrics strong {
+    font-size: 0.68rem;
   }
 }
 

@@ -53,7 +53,7 @@ const events: HomeActivityEvent[] = [
       name: index === 6 ? 'No Name Yet' : `Manager ${index + 1}`,
       icon: null,
       colorIndex: 1,
-      position: index + 1,
+      position: [1, 2, 2, 4, 5, 6, 7][index],
       points: 201 - index * 10,
       bonus: index === 6 ? 0 : 300000,
     })),
@@ -235,5 +235,18 @@ describe('home activity event renderer', () => {
     const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
 
     expect(html).toContain('Sin prima');
+  });
+
+  it('separates round points and bonuses and colors tied ranks and the last place', () => {
+    const event = events.find((item) => item.type === 'round_completed')!;
+    const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
+
+    expect(html).toContain('Repartido');
+    expect(html).toContain('Puntos');
+    expect(html).toContain('Prima');
+    expect(html.match(/is-rank-silver/g)).toHaveLength(2);
+    expect(html).toContain('is-rank-gold');
+    expect(html).toContain('is-rank-neutral');
+    expect(html).toContain('is-rank-last');
   });
 });
