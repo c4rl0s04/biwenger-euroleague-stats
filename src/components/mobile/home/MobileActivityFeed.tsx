@@ -21,10 +21,10 @@ interface FeedSnapshot {
 }
 
 const emptyCopy: Record<HomeActivityFilter, string> = {
-  all: 'Los fichajes, primas, jornadas y resultados aparecerán aquí en cuanto se produzcan.',
+  all: 'Los fichajes, jornadas, porras y resultados aparecerán aquí en cuanto se produzcan.',
   transfers: 'Los fichajes aparecerán aquí en cuanto haya movimientos de mercado.',
-  rounds: 'Las clasificaciones fantasy aparecerán cuando finalice una jornada.',
-  bonuses: 'Las primas administrativas aparecerán aquí cuando se repartan.',
+  rounds: 'Las clasificaciones, primas y protagonistas aparecerán cuando finalice una jornada.',
+  predictions: 'Las porras aparecerán cuando finalicen todos los partidos de la jornada.',
   results: 'Los marcadores aparecerán aquí cuando terminen los partidos.',
 };
 
@@ -189,9 +189,7 @@ export default function MobileActivityFeed({ initialPage, initialFilter, initial
           <span>La liga, ahora</span>
           <h2 id="activity-title">Actividad reciente</h2>
         </div>
-        <span
-          className={`mobile-home-feed-live-state ${items.length > 0 ? 'is-live' : ''}`}
-        >
+        <span className={`mobile-home-feed-live-state ${items.length > 0 ? 'is-live' : ''}`}>
           {items.length > 0 ? 'En vivo' : 'Sin estrenar'}
         </span>
       </div>

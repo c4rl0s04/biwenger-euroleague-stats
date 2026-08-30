@@ -12,9 +12,10 @@ describe('mobile home activity filters', () => {
       </MobileHomeActivityProvider>
     );
 
-    for (const label of ['Todos', 'Fichajes', 'Jornadas', 'Primas', 'Resultados']) {
+    for (const label of ['Todos', 'Fichajes', 'Jornadas + primas', 'Porras', 'Resultados']) {
       expect(html).toContain(label);
     }
+    expect(html).not.toMatch(/>Primas</);
     expect(html).toContain('aria-label="Filtrar actividad"');
     expect(html).toMatch(/aria-pressed="true"[^>]*>[\s\S]*Fichajes/);
   });

@@ -50,6 +50,24 @@ describe('GET /api/home/activity', () => {
     expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'all', cursor: null });
   });
 
+  it('normalizes the legacy bonuses filter to the combined rounds feed', async () => {
+    const { GET } = await import('./route');
+
+    const response = await GET(request('?type=bonuses'));
+
+    expect(response.status).toBe(200);
+    expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'rounds', cursor: null });
+  });
+
+  it('accepts the predictions filter', async () => {
+    const { GET } = await import('./route');
+
+    const response = await GET(request('?type=predictions'));
+
+    expect(response.status).toBe(200);
+    expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'predictions', cursor: null });
+  });
+
   it('rejects unknown activity filters', async () => {
     const { GET } = await import('./route');
 

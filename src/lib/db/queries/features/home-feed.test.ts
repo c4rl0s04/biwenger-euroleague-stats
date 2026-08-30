@@ -29,6 +29,21 @@ describe('home activity feed query', () => {
     expect(sql).toContain('ORDER BY mv.date DESC, mv.id DESC');
     expect(sql).toContain("'marketValue', market_value");
     expect(sql).toContain("'marketValueAt', CASE");
-    expect(params).toEqual(['2025-26', null, null, 'transfer_day', 16]);
+    expect(params).toEqual(['2025-26', null, null, ['transfer_day'], 16]);
+  });
+
+  it('maps combined filters to every event family represented by the chip', async () => {
+    await queryHomeActivityRows({ filter: 'rounds', limit: 16 });
+    const [, roundsParams] = query.mock.calls.at(-1)!;
+
+    await queryHomeActivityRows({ filter: 'predictions', limit: 16 });
+    const [, predictionsParams] = query.mock.calls.at(-1)!;
+
+    await queryHomeActivityRows({ filter: 'results', limit: 16 });
+    const [, resultsParams] = query.mock.calls.at(-1)!;
+
+    expect(roundsParams[3]).toEqual(['round_completed', 'admin_bonus', 'round_highlight']);
+    expect(predictionsParams[3]).toEqual(['prediction_round']);
+    expect(resultsParams[3]).toEqual(['match_session', 'tournament_round']);
   });
 });

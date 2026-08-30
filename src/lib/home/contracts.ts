@@ -1,11 +1,22 @@
 export const HOME_FEED_PAGE_SIZE = 15;
 
-export const HOME_ACTIVITY_FILTERS = ['all', 'transfers', 'rounds', 'bonuses', 'results'] as const;
+export const HOME_ACTIVITY_FILTERS = [
+  'all',
+  'transfers',
+  'rounds',
+  'predictions',
+  'results',
+] as const;
 
 export type HomeActivityFilter = (typeof HOME_ACTIVITY_FILTERS)[number];
 
 export function isHomeActivityFilter(value: unknown): value is HomeActivityFilter {
   return typeof value === 'string' && (HOME_ACTIVITY_FILTERS as readonly string[]).includes(value);
+}
+
+export function normalizeHomeActivityFilter(value: unknown): HomeActivityFilter | null {
+  if (value === 'bonuses') return 'rounds';
+  return isHomeActivityFilter(value) ? value : null;
 }
 
 export interface HomeActivityBase {

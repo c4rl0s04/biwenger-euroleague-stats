@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { auth } from '@/auth';
-import { isHomeActivityFilter } from '@/lib/home/contracts';
+import { normalizeHomeActivityFilter } from '@/lib/home/contracts';
 import { getHomeFeedPage } from '@/lib/services/app/homeService';
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +28,8 @@ export async function GET(request: NextRequest) {
   }
 
   const requestedType = searchParams.get('type') ?? 'all';
-  if (!isHomeActivityFilter(requestedType)) {
+  const normalizedType = normalizeHomeActivityFilter(requestedType);
+  if (!normalizedType) {
     return NextResponse.json(
       { error: 'Filtro de actividad no válido' },
       { status: 400, headers: privateHeaders }
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const page = await getHomeFeedPage({
-      filter: requestedType,
+      filter: normalizedType,
       cursor: searchParams.get('cursor'),
     });
     return NextResponse.json(page, { headers: privateHeaders });

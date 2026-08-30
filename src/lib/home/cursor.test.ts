@@ -27,6 +27,17 @@ describe('home activity cursor', () => {
     expect(() => decodeHomeFeedCursor(cursor, 'rounds')).toThrow('Cursor de actividad no válido');
   });
 
+  it('isolates prediction pages from the other activity filters', () => {
+    const cursor = encodeHomeFeedCursor({
+      occurredAt: '2026-10-02T20:30:00.000Z',
+      id: 'prediction_round:Jornada_4',
+      filter: 'predictions',
+    });
+
+    expect(decodeHomeFeedCursor(cursor, 'predictions').filter).toBe('predictions');
+    expect(() => decodeHomeFeedCursor(cursor, 'rounds')).toThrow('Cursor de actividad no válido');
+  });
+
   it.each(['', 'not-base64', 'e30', 'eyJvY2N1cnJlZEF0IjoieCIsImlkIjoiMSJ9'])(
     'rejects an invalid cursor: %s',
     (cursor) => {

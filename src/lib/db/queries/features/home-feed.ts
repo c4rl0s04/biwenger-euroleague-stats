@@ -9,7 +9,10 @@ export type HomeActivityRowType =
   | 'transfer_day'
   | 'round_completed'
   | 'admin_bonus'
-  | 'match_session';
+  | 'match_session'
+  | 'prediction_round'
+  | 'round_highlight'
+  | 'tournament_round';
 
 export interface HomeActivityRow {
   id: string;
@@ -34,15 +37,15 @@ export async function queryHomeActivityRows({
   limit,
 }: QueryHomeActivityRowsInput): Promise<HomeActivityRow[]> {
   const seasonId = await resolveReadSeasonId();
-  const filteredType: HomeActivityRowType | null =
+  const filteredTypes: HomeActivityRowType[] | null =
     filter === 'transfers'
-      ? 'transfer_day'
+      ? ['transfer_day']
       : filter === 'rounds'
-        ? 'round_completed'
-        : filter === 'bonuses'
-          ? 'admin_bonus'
+        ? ['round_completed', 'admin_bonus', 'round_highlight']
+        : filter === 'predictions'
+          ? ['prediction_round']
           : filter === 'results'
-            ? 'match_session'
+            ? ['match_session', 'tournament_round']
             : null;
 
   const query = `
@@ -276,7 +279,7 @@ export async function queryHomeActivityRows({
     SELECT id, type, occurred_at, payload
     FROM activity
     WHERE occurred_at IS NOT NULL
-      AND ($4::text IS NULL OR type = $4::text)
+      AND ($4::text[] IS NULL OR type = ANY($4::text[]))
       AND (
         $2::timestamptz IS NULL
         OR occurred_at < $2::timestamptz
@@ -290,7 +293,7 @@ export async function queryHomeActivityRows({
     seasonId,
     cursor?.occurredAt ?? null,
     cursor?.id ?? null,
-    filteredType,
+    filteredTypes,
     limit,
   ]);
 
