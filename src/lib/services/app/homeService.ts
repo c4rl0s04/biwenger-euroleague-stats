@@ -259,14 +259,15 @@ function normalizeActivityRow(
       roundId: asNumber(payload.roundId),
       roundName: asString(payload.roundName, 'Jornada'),
       fixtures,
-      champion: parsedWinner
-        ? {
-            id: parsedWinner.id ?? matchingManager?.id ?? '',
-            name: parsedWinner.name ?? matchingManager?.name ?? 'Campeón',
-            icon: parsedWinner.icon ?? matchingManager?.icon ?? null,
-            colorIndex: matchingManager?.colorIndex ?? 0,
-          }
-        : null,
+      champion:
+        parsedWinner && matchingManager
+          ? {
+              id: matchingManager.id,
+              name: matchingManager.name,
+              icon: matchingManager.icon,
+              colorIndex: matchingManager.colorIndex,
+            }
+          : null,
     };
   }
 

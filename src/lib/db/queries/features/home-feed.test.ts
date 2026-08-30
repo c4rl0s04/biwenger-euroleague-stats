@@ -56,6 +56,9 @@ describe('home activity feed query', () => {
     expect(sql).toContain("'participation'");
     expect(sql).toContain("'actualResults'");
     expect(sql).toContain('complete_prediction_rankings');
+    expect(sql).toMatch(
+      /EXISTS\s*\(\s*SELECT 1\s*FROM conceptual_totals existing_totals\s*WHERE existing_totals\.jornada = crs\.base_round\s*\)/
+    );
   });
 
   it('loads all visible highlight players in one ordered batch', async () => {
@@ -75,6 +78,11 @@ describe('home activity feed query', () => {
     expect(sql).toContain('tf.home_score IS NOT NULL');
     expect(sql).toContain('tf.away_score IS NOT NULL');
     expect(sql).toContain('real_round_states');
+    expect(sql).toContain('terminal_tournament_rounds AS');
+    expect(sql).toMatch(
+      /ORDER BY\s+tf\.season_id,\s+tf\.tournament_id,\s+COALESCE\(tp\.order_index, -1\) DESC,\s+tf\.round_id DESC/
+    );
+    expect(sql).toContain('terminal_round.round_id = tf.round_id AS is_final_round');
     expect(sql).not.toContain('to_timestamp(tf.date)');
   });
 });

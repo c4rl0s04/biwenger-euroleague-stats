@@ -1,4 +1,5 @@
-function rankTone(position: number, isLast: boolean) {
+function rankTone(position: number | null, isLast: boolean) {
+  if (position === null) return 'unranked';
   if (position === 1) return 'gold';
   if (position === 2) return 'silver';
   if (position === 3) return 'bronze';
@@ -10,15 +11,15 @@ export default function HomeRankBadge({
   position,
   isLast = false,
 }: {
-  position: number;
+  position: number | null;
   isLast?: boolean;
 }) {
   return (
     <span
       className={`mobile-home-rank-badge is-rank-${rankTone(position, isLast)}`}
-      aria-label={`Posición ${position}`}
+      aria-label={position === null ? 'Sin posición' : `Posición ${position}`}
     >
-      {position}
+      {position ?? '—'}
     </span>
   );
 }

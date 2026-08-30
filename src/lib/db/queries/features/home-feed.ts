@@ -361,6 +361,11 @@ export async function queryHomeActivityRows({
       LEFT JOIN complete_prediction_rankings rankings
         ON rankings.jornada = crs.base_round AND rankings.user_id = manager.user_id
       WHERE crs.fully_finished
+        AND EXISTS (
+          SELECT 1
+          FROM conceptual_totals existing_totals
+          WHERE existing_totals.jornada = crs.base_round
+        )
       GROUP BY
         crs.base_round,
         crs.base_round_id,
@@ -396,6 +401,21 @@ export async function queryHomeActivityRows({
       WHERE season_id = $1
       GROUP BY round_id
     ),
+    terminal_tournament_rounds AS (
+      SELECT DISTINCT ON (tf.season_id, tf.tournament_id)
+        tf.season_id,
+        tf.tournament_id,
+        tf.round_id
+      FROM tournament_fixtures tf
+      LEFT JOIN tournament_phases tp
+        ON tp.season_id = tf.season_id AND tp.id = tf.phase_id
+      WHERE tf.season_id = $1 AND tf.round_id IS NOT NULL
+      ORDER BY
+        tf.season_id,
+        tf.tournament_id,
+        COALESCE(tp.order_index, -1) DESC,
+        tf.round_id DESC
+    ),
     complete_tournament_fixture_rows AS (
       SELECT
         t.id AS tournament_id,
@@ -416,12 +436,15 @@ export async function queryHomeActivityRows({
         COALESCE(away_season.color_index, away_user.color_index, 0)::int AS away_color_index,
         tf.away_score,
         round_state.occurred_at,
-        MAX(round_state.occurred_at) OVER (PARTITION BY t.id) AS final_occurred_at
+        terminal_round.round_id = tf.round_id AS is_final_round
       FROM tournament_fixtures tf
       JOIN tournaments t
         ON t.season_id = tf.season_id AND t.id = tf.tournament_id
       JOIN real_round_states round_state
         ON round_state.round_id = tf.round_id AND round_state.fully_finished
+      LEFT JOIN terminal_tournament_rounds terminal_round
+        ON terminal_round.season_id = tf.season_id
+        AND terminal_round.tournament_id = tf.tournament_id
       LEFT JOIN users home_user ON home_user.id = tf.home_user_id
       LEFT JOIN user_seasons home_season
         ON home_season.season_id = tf.season_id AND home_season.user_id = tf.home_user_id
@@ -445,7 +468,7 @@ export async function queryHomeActivityRows({
           'roundId', round_id,
           'roundName', MAX(round_name),
           'tournamentStatus', MAX(tournament_status),
-          'isFinalRound', MAX(occurred_at) = MAX(final_occurred_at),
+          'isFinalRound', BOOL_OR(is_final_round),
           'dataJson', MAX(tournament_data_json),
           'fixtures', jsonb_agg(
             jsonb_build_object(

@@ -2597,6 +2597,11 @@
   color: rgb(251 113 133);
 }
 
+.mobile-home-rank-badge.is-rank-unranked {
+  background: hsl(var(--muted) / 0.45);
+  color: hsl(var(--muted-foreground));
+}
+
 .mobile-home-round-manager {
   overflow: hidden;
   color: hsl(var(--foreground) / 0.9);
@@ -3100,7 +3105,7 @@
 .mobile-home-tournament-fixtures a {
   display: grid;
   grid-template-columns: 1.55rem minmax(0, 1fr) auto;
-  min-height: 2.25rem;
+  min-height: 2.75rem;
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.46rem;

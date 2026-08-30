@@ -4,6 +4,7 @@ import { Target } from 'lucide-react';
 import type { PredictionRoundActivity } from '@/lib/home/contracts';
 import ActivityTime from './ActivityTime';
 import HomeManagerAvatar from './HomeManagerAvatar';
+import HomeRankBadge from './HomeRankBadge';
 
 function participantSummary(
   participation: PredictionRoundActivity['participants'][number]['participation'],
@@ -47,14 +48,7 @@ export default function PredictionActivityCard({ event }: { event: PredictionRou
         <ol className="mobile-home-prediction-ranking" aria-label={`Porra de ${event.roundName}`}>
           {event.participants.map((participant) => (
             <li key={participant.userId}>
-              <span
-                className={participant.position ? `is-rank-${participant.position}` : 'is-unranked'}
-                aria-label={
-                  participant.position ? `Posición ${participant.position}` : 'Sin posición'
-                }
-              >
-                {participant.position ?? '—'}
-              </span>
+              <HomeRankBadge position={participant.position} />
               <HomeManagerAvatar
                 name={participant.name}
                 icon={participant.icon}
