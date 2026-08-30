@@ -9,7 +9,7 @@ vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db/client', () => ({ db: { query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId }));
 
-import { queryHomeActivityRows } from './home-feed';
+import { queryHomeActivityRows, queryHomeRoundHighlightPlayers } from './home-feed';
 
 describe('home activity feed query', () => {
   beforeEach(() => {
@@ -56,5 +56,14 @@ describe('home activity feed query', () => {
     expect(sql).toContain("'participation'");
     expect(sql).toContain("'actualResults'");
     expect(sql).toContain('complete_prediction_rankings');
+  });
+
+  it('loads all visible highlight players in one ordered batch', async () => {
+    await queryHomeRoundHighlightPlayers([8, 4, 8]);
+
+    const [sql, params] = query.mock.calls.at(-1)!;
+    expect(sql).toContain('prs.round_id = ANY($2::int[])');
+    expect(sql).toContain('ORDER BY prs.round_id, prs.fantasy_points DESC NULLS LAST, p.id');
+    expect(params).toEqual(['2025-26', [4, 8]]);
   });
 });

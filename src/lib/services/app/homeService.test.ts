@@ -4,12 +4,14 @@ import { decodeHomeFeedCursor } from '@/lib/home/cursor';
 
 const {
   queryHomeActivityRows,
+  queryHomeRoundHighlightPlayers,
   queryHomeSeasonMetadata,
   getCurrentRoundState,
   getPersonalizedAlerts,
   getAppStandings,
 } = vi.hoisted(() => ({
   queryHomeActivityRows: vi.fn(),
+  queryHomeRoundHighlightPlayers: vi.fn(),
   queryHomeSeasonMetadata: vi.fn(),
   getCurrentRoundState: vi.fn(),
   getPersonalizedAlerts: vi.fn(),
@@ -19,6 +21,7 @@ const {
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db/queries/features/home-feed', () => ({
   queryHomeActivityRows,
+  queryHomeRoundHighlightPlayers,
 }));
 vi.mock('@/lib/db/queries/features/home-summary', () => ({ queryHomeSeasonMetadata }));
 vi.mock('@/lib/db/queries/competition/rounds', () => ({ getCurrentRoundState }));
@@ -59,7 +62,10 @@ const transferDayRow = (id: number) => ({
 });
 
 describe('mobile home feed service', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryHomeRoundHighlightPlayers.mockResolvedValue([]);
+  });
 
   it('returns fifteen normalized events and a cursor when more activity exists', async () => {
     queryHomeActivityRows.mockResolvedValue(
@@ -235,6 +241,44 @@ describe('mobile home feed service', () => {
           expect.objectContaining({ name: 'All Stars', participation: 'partial', position: null }),
           expect.objectContaining({ name: 'No Name Yet', participation: 'absent', position: null }),
         ],
+      }),
+    ]);
+  });
+
+  it('enriches every visible highlight with one batched player-stat query and keeps tied MVPs', async () => {
+    queryHomeActivityRows.mockResolvedValue([
+      {
+        id: 'round_highlight:4',
+        type: 'round_highlight',
+        occurred_at: '2026-10-10T21:00:00.000Z',
+        payload: { roundId: 4, roundName: 'Jornada 4' },
+      },
+    ]);
+    queryHomeRoundHighlightPlayers.mockResolvedValue(
+      Array.from({ length: 10 }, (_, index) => ({
+        round_id: 4,
+        player_id: 10 + index,
+        name: `Jugador ${index + 1}`,
+        position: index < 3 ? 'Base' : index < 7 ? 'Alero' : 'Pivot',
+        img: index === 0 ? 'https://example.com/mvp.png' : null,
+        team_short: 'RMB',
+        points: index < 2 ? 30 : 29 - index,
+        valuation: 20 - index,
+      }))
+    );
+
+    const page = await getHomeFeedPage({ filter: 'rounds' });
+
+    expect(queryHomeRoundHighlightPlayers).toHaveBeenCalledWith([4]);
+    expect(page.items).toEqual([
+      expect.objectContaining({
+        type: 'round_highlight',
+        roundId: 4,
+        mvps: [expect.objectContaining({ id: 10 }), expect.objectContaining({ id: 11 })],
+        idealLineup: expect.arrayContaining([
+          expect.objectContaining({ id: 10, role: 'titular', multiplier: 2 }),
+          expect.objectContaining({ role: '6th_man', multiplier: 0.75 }),
+        ]),
       }),
     ]);
   });

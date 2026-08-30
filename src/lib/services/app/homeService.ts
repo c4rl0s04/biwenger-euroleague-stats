@@ -1,6 +1,11 @@
 import 'server-only';
 
-import { queryHomeActivityRows, type HomeActivityRow } from '@/lib/db/queries/features/home-feed';
+import {
+  queryHomeActivityRows,
+  queryHomeRoundHighlightPlayers,
+  type HomeActivityRow,
+  type HomeRoundHighlightPlayerRow,
+} from '@/lib/db/queries/features/home-feed';
 import { queryHomeSeasonMetadata } from '@/lib/db/queries/features/home-summary';
 import { getCurrentRoundState } from '@/lib/db/queries/competition/rounds';
 import { getPersonalizedAlerts } from '@/lib/db/queries/core/users';
@@ -13,6 +18,7 @@ import {
   type HomeSummary,
 } from '@/lib/home/contracts';
 import { getAppStandings } from './appShellService';
+import { selectIdealLineup } from '@/lib/logic/ideal-lineup';
 
 const asNumber = (value: unknown) => Number(value ?? 0);
 const asString = (value: unknown, fallback = '') =>
@@ -25,7 +31,10 @@ const nullableNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-function normalizeActivityRow(row: HomeActivityRow): HomeActivityEvent {
+function normalizeActivityRow(
+  row: HomeActivityRow,
+  highlightRows: HomeRoundHighlightPlayerRow[] = []
+): HomeActivityEvent | null {
   const payload = row.payload;
   const occurredAt = new Date(row.occurred_at).toISOString();
 
@@ -154,6 +163,57 @@ function normalizeActivityRow(row: HomeActivityRow): HomeActivityEvent {
     };
   }
 
+  if (row.type === 'round_highlight') {
+    if (highlightRows.length < 10) return null;
+    const candidates = highlightRows.map((player) => ({
+      player_id: asNumber(player.player_id),
+      name: asString(player.name, 'Jugador'),
+      position: nullableString(player.position),
+      img: nullableString(player.img),
+      team_short: nullableString(player.team_short),
+      points: asNumber(player.points),
+      valuation: asNumber(player.valuation),
+    }));
+    const selected = selectIdealLineup(candidates);
+    const toPlayer = (player: (typeof selected.idealLineup)[number]) => ({
+      id: player.player_id,
+      name: player.name,
+      position: player.position,
+      image: player.img,
+      teamName: player.team_short,
+      points: player.points,
+      valuation: player.valuation,
+      role: player.role,
+      multiplier: player.multiplier,
+      isCaptain: player.is_captain,
+    });
+    const maximum = Math.max(...candidates.map((player) => player.points));
+    const idealById = new Map(selected.idealLineup.map((player) => [player.player_id, player]));
+
+    return {
+      id: row.id,
+      type: 'round_highlight',
+      occurredAt,
+      roundId: asNumber(payload.roundId),
+      roundName: asString(payload.roundName, 'Jornada'),
+      mvps: candidates
+        .filter((player) => player.points === maximum)
+        .map((player) =>
+          toPlayer(
+            idealById.get(player.player_id) ?? {
+              ...player,
+              role: 'bench',
+              multiplier: 0.5,
+              is_captain: false,
+              stats_points: player.points,
+            }
+          )
+        ),
+      idealLineup: selected.idealLineup.map(toPlayer),
+      totalPoints: selected.totalPoints,
+    };
+  }
+
   const matches = Array.isArray(payload.matches) ? payload.matches : [];
   return {
     id: row.id,
@@ -203,9 +263,29 @@ export async function getHomeFeedPage({
   const pageRows = rows.slice(0, HOME_FEED_PAGE_SIZE);
   const hasMore = rows.length > HOME_FEED_PAGE_SIZE;
   const boundary = pageRows.at(-1);
+  const highlightRoundIds = pageRows
+    .filter((row) => row.type === 'round_highlight')
+    .map((row) => asNumber(row.payload.roundId));
+  const highlightPlayers = await queryHomeRoundHighlightPlayers(highlightRoundIds);
+  const highlightsByRound = new Map<number, HomeRoundHighlightPlayerRow[]>();
+  for (const player of highlightPlayers) {
+    const roundPlayers = highlightsByRound.get(asNumber(player.round_id)) ?? [];
+    roundPlayers.push(player);
+    highlightsByRound.set(asNumber(player.round_id), roundPlayers);
+  }
+  const items = pageRows
+    .map((row) =>
+      normalizeActivityRow(
+        row,
+        row.type === 'round_highlight'
+          ? (highlightsByRound.get(asNumber(row.payload.roundId)) ?? [])
+          : []
+      )
+    )
+    .filter((item): item is HomeActivityEvent => item !== null);
 
   return {
-    items: pageRows.map(normalizeActivityRow),
+    items,
     hasMore,
     nextCursor:
       hasMore && boundary

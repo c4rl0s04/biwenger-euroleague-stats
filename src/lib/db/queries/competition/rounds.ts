@@ -17,6 +17,7 @@ import { calcEfficiency } from '@/lib/utils/efficiency';
 import { getTeamPositions, StandingsMatch } from '../../../logic/standings';
 import { NEXT_ROUND_CTE } from '../../sql_utils';
 import { resolveReadSeasonId } from '../../season-context';
+import { selectIdealLineup } from '@/lib/logic/ideal-lineup';
 
 export interface PorrasRound {
   jornada: number;
@@ -980,69 +981,7 @@ export async function getIdealLineup(roundId: string | number): Promise<LineupPl
 
   const allStats: any[] = (await pgClient.query(query, [roundId, seasonId])).rows;
 
-  // LOGIC: Valid Formation Greedy Algorithm (Same as Coach Rating)
-  // - Starts: 5 players. Max 3 per position (Base, Alero, Pivot).
-  // - Bench: Next 5 best players.
-
-  const starters: any[] = [];
-  const bench: any[] = [];
-  const rolesCount: Record<string, number> = { Base: 0, Alero: 0, Pivot: 0 };
-  const usedIds = new Set<number>();
-
-  // A. Select Starters
-  for (const p of allStats) {
-    if (starters.length >= 5) break;
-
-    const pos = p.position || 'Base';
-    if ((rolesCount[pos] || 0) < 3) {
-      starters.push(p);
-      rolesCount[pos] = (rolesCount[pos] || 0) + 1;
-      usedIds.add(p.player_id);
-    }
-  }
-
-  // B. Select Bench (Next 5)
-  for (const p of allStats) {
-    if (bench.length >= 5) break;
-    if (!usedIds.has(p.player_id)) {
-      bench.push(p);
-      usedIds.add(p.player_id);
-    }
-  }
-
-  const idealLineupRaw = [...starters, ...bench];
-
-  const idealLineup = idealLineupRaw.map((p, index) => {
-    let multiplier = 0;
-    let role = 'bench';
-    let is_captain = false;
-
-    // Starters
-    if (index < 5) {
-      role = 'titular';
-      if (index === 0) {
-        multiplier = 2.0;
-        is_captain = true;
-      } else {
-        multiplier = 1.0;
-      }
-    }
-    // Bench
-    else {
-      role = index === 5 ? '6th_man' : 'bench';
-      multiplier = index === 5 ? 0.75 : 0.5;
-    }
-
-    return {
-      ...p,
-      role,
-      is_captain,
-      stats_points: p.points,
-      multiplier,
-    } as LineupPlayer;
-  });
-
-  const totalPoints = Math.round(calculateWeightedSum(idealLineup));
+  const { idealLineup, totalPoints } = selectIdealLineup(allStats);
 
   return {
     idealLineup,

@@ -120,12 +120,37 @@ export interface PredictionRoundActivity extends HomeActivityBase {
   participants: PredictionParticipant[];
 }
 
+export type RoundHighlightRole = 'titular' | '6th_man' | 'bench';
+
+export interface RoundHighlightPlayer {
+  id: number;
+  name: string;
+  position: string | null;
+  image: string | null;
+  teamName: string | null;
+  points: number;
+  valuation: number;
+  role: RoundHighlightRole;
+  multiplier: number;
+  isCaptain: boolean;
+}
+
+export interface RoundHighlightActivity extends HomeActivityBase {
+  type: 'round_highlight';
+  roundId: number;
+  roundName: string;
+  mvps: RoundHighlightPlayer[];
+  idealLineup: RoundHighlightPlayer[];
+  totalPoints: number;
+}
+
 export type HomeActivityEvent =
   | TransferDayActivity
   | RoundCompletedActivity
   | AdminBonusActivity
   | MatchSessionActivity
-  | PredictionRoundActivity;
+  | PredictionRoundActivity
+  | RoundHighlightActivity;
 
 export interface HomeFeedPage {
   items: HomeActivityEvent[];

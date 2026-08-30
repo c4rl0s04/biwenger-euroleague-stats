@@ -106,6 +106,53 @@ const events: HomeActivityEvent[] = [
       predictions: index === 6 ? [] : ['1', index === 0 ? 'X' : '2', index < 5 ? '2' : null],
     })),
   },
+  {
+    id: 'round_highlight:4',
+    type: 'round_highlight',
+    occurredAt: '2026-10-17T22:00:00.000Z',
+    roundId: 4,
+    roundName: 'Jornada 4',
+    mvps: [
+      {
+        id: 1,
+        name: 'Mike James',
+        position: 'Base',
+        image: null,
+        teamName: 'MON',
+        points: 35,
+        valuation: 30,
+        role: 'titular',
+        multiplier: 2,
+        isCaptain: true,
+      },
+      {
+        id: 2,
+        name: 'Kendrick Nunn',
+        position: 'Base',
+        image: null,
+        teamName: 'PAN',
+        points: 35,
+        valuation: 29,
+        role: 'titular',
+        multiplier: 1,
+        isCaptain: false,
+      },
+    ],
+    idealLineup: Array.from({ length: 10 }, (_, index) => ({
+      id: index + 1,
+      name: index === 0 ? 'Mike James' : index === 1 ? 'Kendrick Nunn' : `Jugador ${index + 1}`,
+      position: index < 3 ? 'Base' : index < 7 ? 'Alero' : 'Pivot',
+      image: null,
+      teamName: 'RMB',
+      points: 35 - index,
+      valuation: 25 - index,
+      role:
+        index < 5 ? ('titular' as const) : index === 5 ? ('6th_man' as const) : ('bench' as const),
+      multiplier: index === 0 ? 2 : index < 5 ? 1 : index === 5 ? 0.75 : 0.5,
+      isCaptain: index === 0,
+    })),
+    totalPoints: 245,
+  },
 ];
 
 describe('home activity event renderer', () => {
@@ -115,12 +162,25 @@ describe('home activity event renderer', () => {
     ['admin_bonus', 'Premio especial'],
     ['match_session', 'RMB'],
     ['prediction_round', 'Manager 7'],
+    ['round_highlight', 'Kendrick Nunn'],
   ] as const)('renders the %s visual variant', (type, expectedText) => {
     const event = events.find((item) => item.type === type)!;
     const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
 
     expect(html).toContain(expectedText);
     expect(html).toContain('<time');
+  });
+
+  it('shows tied MVPs and the complete ideal lineup with explicit roles', () => {
+    const event = events.find((item) => item.type === 'round_highlight')!;
+    const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
+
+    expect(html).toContain('MVP compartido');
+    expect(html).toContain('Equipo ideal');
+    expect(html).toContain('Capitán');
+    expect(html).toContain('Sexto hombre');
+    expect(html).toContain('245 pts');
+    expect(html).toContain('/rounds/4/stats');
   });
 
   it('describes partial and absent predictions and exposes exact picks without relying on color', () => {

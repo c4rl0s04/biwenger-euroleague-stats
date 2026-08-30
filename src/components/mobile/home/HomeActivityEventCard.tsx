@@ -4,6 +4,7 @@ import AdminBonusActivityCard from './AdminBonusActivityCard';
 import MatchSessionActivityCard from './MatchSessionActivityCard';
 import PredictionActivityCard from './PredictionActivityCard';
 import RoundActivityCard from './RoundActivityCard';
+import RoundHighlightActivityCard from './RoundHighlightActivityCard';
 import TransferDayActivityCard from './TransferDayActivityCard';
 
 export default function HomeActivityEventCard({ event }: { event: HomeActivityEvent }) {
@@ -18,5 +19,7 @@ export default function HomeActivityEventCard({ event }: { event: HomeActivityEv
       return <MatchSessionActivityCard event={event} />;
     case 'prediction_round':
       return <PredictionActivityCard event={event} />;
+    case 'round_highlight':
+      return <RoundHighlightActivityCard event={event} />;
   }
 }

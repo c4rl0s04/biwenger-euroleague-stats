@@ -22,6 +22,17 @@ export interface HomeActivityRow {
   payload: Record<string, unknown>;
 }
 
+export interface HomeRoundHighlightPlayerRow {
+  round_id: number;
+  player_id: number;
+  name: string;
+  position: string | null;
+  img: string | null;
+  team_short: string | null;
+  points: number | string | null;
+  valuation: number | string | null;
+}
+
 interface QueryHomeActivityRowsInput {
   cursor?: HomeFeedCursor | null;
   filter: HomeActivityFilter;
@@ -356,12 +367,33 @@ export async function queryHomeActivityRows({
         crs.occurred_at,
         crs.total_matches
     ),
+    round_highlight_events AS (
+      SELECT
+        'round_highlight:' || m.round_id::text AS id,
+        'round_highlight'::text AS type,
+        MAX(m.date) AS occurred_at,
+        jsonb_build_object(
+          'roundId', m.round_id,
+          'roundName', COALESCE(MAX(m.round_name), 'Jornada ' || m.round_id::text)
+        ) AS payload
+      FROM matches m
+      WHERE m.season_id = $1
+        AND (
+          SELECT COUNT(*)
+          FROM player_round_stats prs
+          WHERE prs.season_id = m.season_id AND prs.round_id = m.round_id
+        ) >= 10
+      GROUP BY m.round_id
+      HAVING BOOL_AND(m.status = 'finished')
+        AND BOOL_AND(m.home_score IS NOT NULL AND m.away_score IS NOT NULL)
+    ),
     activity AS (
       SELECT * FROM transfer_events
       UNION ALL SELECT * FROM round_events
       UNION ALL SELECT * FROM admin_bonus_events
       UNION ALL SELECT * FROM match_session_events
       UNION ALL SELECT * FROM prediction_round_events
+      UNION ALL SELECT * FROM round_highlight_events
     )
     SELECT id, type, occurred_at, payload
     FROM activity
@@ -385,4 +417,34 @@ export async function queryHomeActivityRows({
   ]);
 
   return result.rows as HomeActivityRow[];
+}
+
+export async function queryHomeRoundHighlightPlayers(
+  roundIds: number[]
+): Promise<HomeRoundHighlightPlayerRow[]> {
+  const uniqueRoundIds = Array.from(new Set(roundIds)).sort((left, right) => left - right);
+  if (uniqueRoundIds.length === 0) return [];
+  const seasonId = await resolveReadSeasonId();
+  const result = await pgClient.query(
+    `
+      SELECT
+        prs.round_id,
+        p.id AS player_id,
+        p.name,
+        p.position,
+        p.img,
+        t.short_name AS team_short,
+        prs.fantasy_points AS points,
+        prs.valuation
+      FROM player_round_stats prs
+      JOIN players p ON p.id = prs.player_id
+      LEFT JOIN player_seasons ps
+        ON ps.season_id = prs.season_id AND ps.player_id = prs.player_id
+      LEFT JOIN teams t ON t.id = COALESCE(ps.team_id, p.team_id)
+      WHERE prs.season_id = $1 AND prs.round_id = ANY($2::int[])
+      ORDER BY prs.round_id, prs.fantasy_points DESC NULLS LAST, p.id
+    `,
+    [seasonId, uniqueRoundIds]
+  );
+  return result.rows as HomeRoundHighlightPlayerRow[];
 }
