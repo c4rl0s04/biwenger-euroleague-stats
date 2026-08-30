@@ -144,13 +144,38 @@ export interface RoundHighlightActivity extends HomeActivityBase {
   totalPoints: number;
 }
 
+export interface TournamentActivityManager {
+  id: string;
+  name: string;
+  icon: string | null;
+  colorIndex: number;
+  score: number;
+}
+
+export interface TournamentActivityFixture {
+  id: number;
+  home: TournamentActivityManager;
+  away: TournamentActivityManager;
+}
+
+export interface TournamentRoundActivity extends HomeActivityBase {
+  type: 'tournament_round';
+  tournamentId: number;
+  tournamentName: string;
+  roundId: number;
+  roundName: string;
+  fixtures: TournamentActivityFixture[];
+  champion: Omit<TournamentActivityManager, 'score'> | null;
+}
+
 export type HomeActivityEvent =
   | TransferDayActivity
   | RoundCompletedActivity
   | AdminBonusActivity
   | MatchSessionActivity
   | PredictionRoundActivity
-  | RoundHighlightActivity;
+  | RoundHighlightActivity
+  | TournamentRoundActivity;
 
 export interface HomeFeedPage {
   items: HomeActivityEvent[];

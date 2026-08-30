@@ -66,4 +66,15 @@ describe('home activity feed query', () => {
     expect(sql).toContain('ORDER BY prs.round_id, prs.fantasy_points DESC NULLS LAST, p.id');
     expect(params).toEqual(['2025-26', [4, 8]]);
   });
+
+  it('dates complete tournament fixtures from their linked real round', async () => {
+    await queryHomeActivityRows({ filter: 'results', limit: 16 });
+
+    const [sql] = query.mock.calls.at(-1)!;
+    expect(sql).toContain('tournament_round_events AS');
+    expect(sql).toContain('tf.home_score IS NOT NULL');
+    expect(sql).toContain('tf.away_score IS NOT NULL');
+    expect(sql).toContain('real_round_states');
+    expect(sql).not.toContain('to_timestamp(tf.date)');
+  });
 });

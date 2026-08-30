@@ -283,6 +283,80 @@ describe('mobile home feed service', () => {
     ]);
   });
 
+  it('normalizes tournament fixtures and resolves a champion only on the final finished round', async () => {
+    queryHomeActivityRows.mockResolvedValue([
+      {
+        id: 'tournament_round:9:40',
+        type: 'tournament_round',
+        occurred_at: '2026-05-20T21:00:00.000Z',
+        payload: {
+          tournamentId: 9,
+          tournamentName: 'Copa Primavera',
+          roundId: 40,
+          roundName: 'Final',
+          tournamentStatus: 'finished',
+          isFinalRound: true,
+          dataJson: JSON.stringify({ winner: { id: 7, name: 'All Stars' } }),
+          fixtures: [
+            {
+              id: 44,
+              homeUserId: '7',
+              homeName: 'All Stars',
+              homeIcon: 'bear.png',
+              homeColorIndex: 2,
+              homeScore: 185,
+              awayUserId: '3',
+              awayName: 'June',
+              awayIcon: null,
+              awayColorIndex: 4,
+              awayScore: 172,
+            },
+          ],
+        },
+      },
+    ]);
+
+    const page = await getHomeFeedPage({ filter: 'results' });
+
+    expect(page.items).toEqual([
+      expect.objectContaining({
+        type: 'tournament_round',
+        tournamentId: 9,
+        fixtures: [
+          expect.objectContaining({
+            home: expect.objectContaining({ name: 'All Stars', score: 185 }),
+            away: expect.objectContaining({ name: 'June', score: 172 }),
+          }),
+        ],
+        champion: expect.objectContaining({ id: '7', name: 'All Stars', icon: 'bear.png' }),
+      }),
+    ]);
+  });
+
+  it('keeps tournament results when winner metadata is malformed', async () => {
+    queryHomeActivityRows.mockResolvedValue([
+      {
+        id: 'tournament_round:9:39',
+        type: 'tournament_round',
+        occurred_at: '2026-05-18T21:00:00.000Z',
+        payload: {
+          tournamentId: 9,
+          tournamentName: 'Copa Primavera',
+          roundId: 39,
+          roundName: 'Semifinal',
+          tournamentStatus: 'finished',
+          isFinalRound: false,
+          dataJson: '{invalid',
+          fixtures: [],
+        },
+      },
+    ]);
+
+    const page = await getHomeFeedPage({ filter: 'results' });
+
+    expect(page.items[0]).toMatchObject({ type: 'tournament_round', champion: null });
+  });
+
   it('keeps every transfer inside a busy market day', async () => {
     const row = transferDayRow(1);
     row.payload.transfers = Array.from({ length: 20 }, (_, index) => ({

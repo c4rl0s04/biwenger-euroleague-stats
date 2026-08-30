@@ -2067,6 +2067,12 @@
   color: rgb(251 191 36);
 }
 
+.mobile-home-event-tournament .mobile-home-event-icon {
+  border-color: rgb(245 158 11 / 0.5);
+  box-shadow: 0 0 0 4px rgb(245 158 11 / 0.045);
+  color: rgb(245 158 11);
+}
+
 .mobile-home-event-transfer-day .mobile-home-event-icon {
   border-color: hsl(var(--primary) / 0.5);
   box-shadow: 0 0 0 4px hsl(var(--primary) / 0.045);
@@ -2920,6 +2926,117 @@
 .mobile-home-highlight-details small {
   color: hsl(var(--muted-foreground));
   font-size: 0.49rem;
+}
+
+.mobile-home-tournament-card {
+  background:
+    radial-gradient(circle at 100% 0%, rgb(245 158 11 / 0.1), transparent 11rem),
+    linear-gradient(155deg, hsl(var(--card) / 0.88), hsl(var(--card) / 0.5));
+}
+
+.mobile-home-tournament-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.mobile-home-tournament-heading strong {
+  overflow: hidden;
+  color: white;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-home-tournament-heading small {
+  flex-shrink: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.53rem;
+}
+
+.mobile-home-tournament-champion {
+  display: grid;
+  grid-template-columns: 2.15rem minmax(0, 1fr) auto;
+  min-height: 3.25rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  border: 1px solid rgb(245 158 11 / 0.34);
+  border-radius: 0.78rem;
+  background: linear-gradient(100deg, rgb(245 158 11 / 0.12), rgb(245 158 11 / 0.035));
+  padding: 0.45rem;
+  color: rgb(251 191 36);
+}
+
+.mobile-home-tournament-champion > span {
+  display: grid;
+  min-width: 0;
+}
+
+.mobile-home-tournament-champion small {
+  color: rgb(251 191 36);
+  font-size: 0.48rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.mobile-home-tournament-champion strong {
+  overflow: hidden;
+  color: white;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-home-tournament-fixtures {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.mobile-home-tournament-fixtures li {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 0.48);
+  border-radius: 0.68rem;
+  background: hsl(var(--background) / 0.42);
+}
+
+.mobile-home-tournament-fixtures a {
+  display: grid;
+  grid-template-columns: 1.55rem minmax(0, 1fr) auto;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.46rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.mobile-home-tournament-fixtures a + a {
+  border-top: 1px solid hsl(var(--border) / 0.36);
+}
+
+.mobile-home-tournament-fixtures a.is-winner {
+  background: rgb(52 211 153 / 0.055);
+  color: hsl(var(--foreground));
+}
+
+.mobile-home-tournament-fixtures a > span:nth-child(2) {
+  overflow: hidden;
+  font-size: 0.61rem;
+  font-weight: 720;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-home-tournament-fixtures strong {
+  color: white;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .mobile-home-score-list {

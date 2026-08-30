@@ -19,6 +19,7 @@ import {
 } from '@/lib/home/contracts';
 import { getAppStandings } from './appShellService';
 import { selectIdealLineup } from '@/lib/logic/ideal-lineup';
+import { parseTournamentWinner } from '@/lib/home/tournament-winner';
 
 const asNumber = (value: unknown) => Number(value ?? 0);
 const asString = (value: unknown, fallback = '') =>
@@ -211,6 +212,61 @@ function normalizeActivityRow(
         ),
       idealLineup: selected.idealLineup.map(toPlayer),
       totalPoints: selected.totalPoints,
+    };
+  }
+
+  if (row.type === 'tournament_round') {
+    const rawFixtures = Array.isArray(payload.fixtures) ? payload.fixtures : [];
+    const fixtures = rawFixtures.map((fixture) => {
+      const item = fixture as Record<string, unknown>;
+      return {
+        id: asNumber(item.id),
+        home: {
+          id: asString(item.homeUserId),
+          name: asString(item.homeName, 'Manager'),
+          icon: nullableString(item.homeIcon),
+          colorIndex: asNumber(item.homeColorIndex),
+          score: asNumber(item.homeScore),
+        },
+        away: {
+          id: asString(item.awayUserId),
+          name: asString(item.awayName, 'Manager'),
+          icon: nullableString(item.awayIcon),
+          colorIndex: asNumber(item.awayColorIndex),
+          score: asNumber(item.awayScore),
+        },
+      };
+    });
+    const parsedWinner =
+      payload.tournamentStatus === 'finished' && payload.isFinalRound === true
+        ? parseTournamentWinner(payload.dataJson)
+        : null;
+    const managers = fixtures.flatMap((fixture) => [fixture.home, fixture.away]);
+    const matchingManager = parsedWinner
+      ? managers.find(
+          (manager) =>
+            (parsedWinner.id !== null && manager.id === parsedWinner.id) ||
+            (parsedWinner.id === null && manager.name === parsedWinner.name)
+        )
+      : null;
+
+    return {
+      id: row.id,
+      type: 'tournament_round',
+      occurredAt,
+      tournamentId: asNumber(payload.tournamentId),
+      tournamentName: asString(payload.tournamentName, 'Torneo'),
+      roundId: asNumber(payload.roundId),
+      roundName: asString(payload.roundName, 'Jornada'),
+      fixtures,
+      champion: parsedWinner
+        ? {
+            id: parsedWinner.id ?? matchingManager?.id ?? '',
+            name: parsedWinner.name ?? matchingManager?.name ?? 'Campeón',
+            icon: parsedWinner.icon ?? matchingManager?.icon ?? null,
+            colorIndex: matchingManager?.colorIndex ?? 0,
+          }
+        : null,
     };
   }
 

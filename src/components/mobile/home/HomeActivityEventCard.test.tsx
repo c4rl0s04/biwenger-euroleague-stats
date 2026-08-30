@@ -153,6 +153,28 @@ const events: HomeActivityEvent[] = [
     })),
     totalPoints: 245,
   },
+  {
+    id: 'tournament_round:9:40',
+    type: 'tournament_round',
+    occurredAt: '2026-05-20T21:00:00.000Z',
+    tournamentId: 9,
+    tournamentName: 'Copa Primavera',
+    roundId: 40,
+    roundName: 'Final',
+    fixtures: [
+      {
+        id: 44,
+        home: { id: '7', name: 'All Stars', icon: null, colorIndex: 2, score: 185 },
+        away: { id: '3', name: 'June', icon: null, colorIndex: 4, score: 172 },
+      },
+      {
+        id: 45,
+        home: { id: '1', name: 'ask72', icon: null, colorIndex: 1, score: 164 },
+        away: { id: '2', name: 'No Name Yet', icon: null, colorIndex: 5, score: 170 },
+      },
+    ],
+    champion: { id: '7', name: 'All Stars', icon: null, colorIndex: 2 },
+  },
 ];
 
 describe('home activity event renderer', () => {
@@ -163,12 +185,25 @@ describe('home activity event renderer', () => {
     ['match_session', 'RMB'],
     ['prediction_round', 'Manager 7'],
     ['round_highlight', 'Kendrick Nunn'],
+    ['tournament_round', 'No Name Yet'],
   ] as const)('renders the %s visual variant', (type, expectedText) => {
     const event = events.find((item) => item.type === type)!;
     const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
 
     expect(html).toContain(expectedText);
     expect(html).toContain('<time');
+  });
+
+  it('renders every tournament fixture and the champion banner', () => {
+    const event = events.find((item) => item.type === 'tournament_round')!;
+    const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
+
+    expect(html).toContain('Copa Primavera');
+    expect(html).toContain('Campeón');
+    expect(html).toContain('All Stars');
+    expect(html).toContain('185');
+    expect(html).toContain('170');
+    expect(html).toContain('/tournaments/9/results');
   });
 
   it('shows tied MVPs and the complete ideal lineup with explicit roles', () => {

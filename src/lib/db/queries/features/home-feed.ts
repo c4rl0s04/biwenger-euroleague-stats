@@ -387,6 +387,85 @@ export async function queryHomeActivityRows({
       HAVING BOOL_AND(m.status = 'finished')
         AND BOOL_AND(m.home_score IS NOT NULL AND m.away_score IS NOT NULL)
     ),
+    real_round_states AS (
+      SELECT
+        round_id,
+        MAX(date) AS occurred_at,
+        BOOL_AND(status = 'finished' AND home_score IS NOT NULL AND away_score IS NOT NULL) AS fully_finished
+      FROM matches
+      WHERE season_id = $1
+      GROUP BY round_id
+    ),
+    complete_tournament_fixture_rows AS (
+      SELECT
+        t.id AS tournament_id,
+        COALESCE(t.name, 'Torneo') AS tournament_name,
+        t.status AS tournament_status,
+        t.data_json AS tournament_data_json,
+        tf.round_id,
+        COALESCE(tf.round_name, 'Jornada ' || tf.round_id::text) AS round_name,
+        tf.id AS fixture_id,
+        tf.home_user_id,
+        COALESCE(home_season.name, home_user.name, 'Manager') AS home_name,
+        COALESCE(home_season.icon, home_user.icon) AS home_icon,
+        COALESCE(home_season.color_index, home_user.color_index, 0)::int AS home_color_index,
+        tf.home_score,
+        tf.away_user_id,
+        COALESCE(away_season.name, away_user.name, 'Manager') AS away_name,
+        COALESCE(away_season.icon, away_user.icon) AS away_icon,
+        COALESCE(away_season.color_index, away_user.color_index, 0)::int AS away_color_index,
+        tf.away_score,
+        round_state.occurred_at,
+        MAX(round_state.occurred_at) OVER (PARTITION BY t.id) AS final_occurred_at
+      FROM tournament_fixtures tf
+      JOIN tournaments t
+        ON t.season_id = tf.season_id AND t.id = tf.tournament_id
+      JOIN real_round_states round_state
+        ON round_state.round_id = tf.round_id AND round_state.fully_finished
+      LEFT JOIN users home_user ON home_user.id = tf.home_user_id
+      LEFT JOIN user_seasons home_season
+        ON home_season.season_id = tf.season_id AND home_season.user_id = tf.home_user_id
+      LEFT JOIN users away_user ON away_user.id = tf.away_user_id
+      LEFT JOIN user_seasons away_season
+        ON away_season.season_id = tf.season_id AND away_season.user_id = tf.away_user_id
+      WHERE tf.season_id = $1
+        AND tf.home_user_id IS NOT NULL
+        AND tf.away_user_id IS NOT NULL
+        AND tf.home_score IS NOT NULL
+        AND tf.away_score IS NOT NULL
+    ),
+    tournament_round_events AS (
+      SELECT
+        'tournament_round:' || tournament_id::text || ':' || round_id::text AS id,
+        'tournament_round'::text AS type,
+        MAX(occurred_at) AS occurred_at,
+        jsonb_build_object(
+          'tournamentId', tournament_id,
+          'tournamentName', MAX(tournament_name),
+          'roundId', round_id,
+          'roundName', MAX(round_name),
+          'tournamentStatus', MAX(tournament_status),
+          'isFinalRound', MAX(occurred_at) = MAX(final_occurred_at),
+          'dataJson', MAX(tournament_data_json),
+          'fixtures', jsonb_agg(
+            jsonb_build_object(
+              'id', fixture_id,
+              'homeUserId', home_user_id,
+              'homeName', home_name,
+              'homeIcon', home_icon,
+              'homeColorIndex', home_color_index,
+              'homeScore', home_score,
+              'awayUserId', away_user_id,
+              'awayName', away_name,
+              'awayIcon', away_icon,
+              'awayColorIndex', away_color_index,
+              'awayScore', away_score
+            ) ORDER BY fixture_id
+          )
+        ) AS payload
+      FROM complete_tournament_fixture_rows
+      GROUP BY tournament_id, round_id
+    ),
     activity AS (
       SELECT * FROM transfer_events
       UNION ALL SELECT * FROM round_events
@@ -394,6 +473,7 @@ export async function queryHomeActivityRows({
       UNION ALL SELECT * FROM match_session_events
       UNION ALL SELECT * FROM prediction_round_events
       UNION ALL SELECT * FROM round_highlight_events
+      UNION ALL SELECT * FROM tournament_round_events
     )
     SELECT id, type, occurred_at, payload
     FROM activity
