@@ -2,6 +2,7 @@ import type { HomeActivityEvent } from '@/lib/home/contracts';
 
 import AdminBonusActivityCard from './AdminBonusActivityCard';
 import MatchSessionActivityCard from './MatchSessionActivityCard';
+import PredictionActivityCard from './PredictionActivityCard';
 import RoundActivityCard from './RoundActivityCard';
 import TransferDayActivityCard from './TransferDayActivityCard';
 
@@ -15,5 +16,7 @@ export default function HomeActivityEventCard({ event }: { event: HomeActivityEv
       return <AdminBonusActivityCard event={event} />;
     case 'match_session':
       return <MatchSessionActivityCard event={event} />;
+    case 'prediction_round':
+      return <PredictionActivityCard event={event} />;
   }
 }

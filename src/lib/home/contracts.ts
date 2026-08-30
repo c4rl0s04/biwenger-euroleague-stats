@@ -97,11 +97,35 @@ export interface MatchSessionActivity extends HomeActivityBase {
   matches: MatchResult[];
 }
 
+export type PredictionParticipation = 'complete' | 'partial' | 'absent';
+
+export interface PredictionParticipant {
+  userId: string;
+  name: string;
+  icon: string | null;
+  colorIndex: number;
+  participation: PredictionParticipation;
+  hits: number;
+  position: number | null;
+  userMatches: number;
+  predictions: Array<'1' | 'X' | '2' | null>;
+}
+
+export interface PredictionRoundActivity extends HomeActivityBase {
+  type: 'prediction_round';
+  roundId: number;
+  roundName: string;
+  totalMatches: number;
+  actualResults: Array<'1' | 'X' | '2'>;
+  participants: PredictionParticipant[];
+}
+
 export type HomeActivityEvent =
   | TransferDayActivity
   | RoundCompletedActivity
   | AdminBonusActivity
-  | MatchSessionActivity;
+  | MatchSessionActivity
+  | PredictionRoundActivity;
 
 export interface HomeFeedPage {
   items: HomeActivityEvent[];

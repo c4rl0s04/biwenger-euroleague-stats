@@ -1,5 +1,6 @@
 import { db, pgClient } from '../../index';
 import { resolveReadSeasonId } from '../../season-context';
+import { PREDICTION_NORMALIZATION_CTES } from './prediction-normalization-sql';
 
 // ==========================================
 // INTERFACES
@@ -183,100 +184,11 @@ export async function getPorrasStats(): Promise<PorrasStats> {
 export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
-    WITH BaseRoundInfo AS (
-        -- Consolidate round names and restrict to the resolved season.
-        SELECT 
-            id as match_id,
-            home_score,
-            away_score,
-            date,
-            TRIM(REGEXP_REPLACE(
-                REGEXP_REPLACE(round_name, 'Round', 'Jornada', 'gi'),
-                '\\s*\\(.*', '', 'gi'
-            )) AS base_round,
-            MIN(round_id) OVER (PARTITION BY TRIM(REGEXP_REPLACE(
-                REGEXP_REPLACE(round_name, 'Round', 'Jornada', 'gi'),
-                '\\s*\\(.*', '', 'gi'
-            ))) as base_round_id
-        FROM matches
-        WHERE season_id = $1
-    ),
-    MatchSequences AS (
-        -- Assign a global 1...N index to matches within each conceptual round
-        SELECT 
-            match_id,
-            base_round,
-            base_round_id,
-            CASE 
-                WHEN home_score > away_score THEN '1'
-                WHEN away_score > home_score THEN '2'
-                ELSE 'X'
-            END as outcome,
-            ROW_NUMBER() OVER (PARTITION BY base_round ORDER BY date ASC, match_id ASC) as global_pos
-        FROM BaseRoundInfo
-    ),
-    UserPredictionsUnnested AS (
-        -- Use WITH ORDINALITY to get array position correctly and avoid SRF cross-join issues
-        SELECT 
-            p.user_id,
-            p.round_id,
-            TRIM(REGEXP_REPLACE(
-                REGEXP_REPLACE(p.round_name, 'Round', 'Jornada', 'gi'),
-                '\\s*\\(.*', '', 'gi'
-            )) AS base_round,
-            prediction.pred,
-            prediction.idx as array_pos
-        FROM porras p,
-        unnest(string_to_array(p.result, '-')) WITH ORDINALITY AS prediction(pred, idx)
-        WHERE p.result IS NOT NULL AND p.result != ''
-        AND p.season_id = $1
-    ),
-    UserPredictionSequences AS (
-        -- Assign final global position based on chronlogical round order + array index
-        SELECT 
-            user_id,
-            base_round,
-            pred,
-            ROW_NUMBER() OVER (
-                PARTITION BY user_id, base_round 
-                ORDER BY round_id ASC, array_pos ASC
-            ) as global_pos
-        FROM UserPredictionsUnnested
-    ),
-    MatchedData AS (
-        -- ZIP matches and predictions by their global position in the round
-        SELECT 
-            ups.user_id,
-            ms.base_round,
-            ms.base_round_id,
-            ms.outcome,
-            ups.pred,
-            ms.global_pos,
-            (CASE WHEN ms.outcome = ups.pred THEN 1 ELSE 0 END) as is_correct
-        FROM MatchSequences ms
-        JOIN UserPredictionSequences ups ON ms.base_round = ups.base_round AND ms.global_pos = ups.global_pos
-    ),
-    ConceptualTotals AS (
-        -- Final Aggregation
-        SELECT 
-            md.user_id,
-            u.name as usuario,
-            u.icon as user_icon,
-            u.color_index,
-            md.base_round as jornada,
-            md.base_round_id,
-            SUM(md.is_correct) as total_aciertos,
-            string_agg(md.pred, '-' ORDER BY md.global_pos) as result,
-            COUNT(md.global_pos) as user_matches,
-            (SELECT COUNT(*) FROM MatchSequences ms2 WHERE ms2.base_round = md.base_round) as total_matches
-        FROM MatchedData md
-        JOIN users u ON md.user_id = u.id
-        GROUP BY md.user_id, u.name, u.icon, u.color_index, md.base_round, md.base_round_id
-    )
+    WITH ${PREDICTION_NORMALIZATION_CTES}
     SELECT 
         *,
         (user_matches < total_matches) as is_partial
-    FROM ConceptualTotals
+    FROM conceptual_totals
     ORDER BY base_round_id ASC, total_aciertos DESC
   `;
 

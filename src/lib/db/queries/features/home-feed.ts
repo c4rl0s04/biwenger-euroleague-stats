@@ -4,6 +4,7 @@ import type { HomeFeedCursor } from '@/lib/home/cursor';
 import type { HomeActivityFilter } from '@/lib/home/contracts';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { db as pgClient } from '@/lib/db/client';
+import { PREDICTION_NORMALIZATION_CTES } from './prediction-normalization-sql';
 
 export type HomeActivityRowType =
   | 'transfer_day'
@@ -49,7 +50,8 @@ export async function queryHomeActivityRows({
             : null;
 
   const query = `
-    WITH deduplicated_finances AS (
+    WITH ${PREDICTION_NORMALIZATION_CTES},
+    deduplicated_finances AS (
       SELECT DISTINCT
         user_id,
         round_id,
@@ -270,11 +272,96 @@ export async function queryHomeActivityRows({
       WHERE m.season_id = $1 AND m.status = 'finished'
       GROUP BY m.round_id, (m.date AT TIME ZONE 'Europe/Madrid')::date
     ),
+    conceptual_round_states AS (
+      SELECT
+        base_round,
+        MIN(base_round_id)::int AS base_round_id,
+        MAX(date) AS occurred_at,
+        COUNT(*)::int AS total_matches,
+        BOOL_AND(status = 'finished' AND home_score IS NOT NULL AND away_score IS NOT NULL) AS fully_finished
+      FROM base_round_info
+      GROUP BY base_round
+    ),
+    active_prediction_managers AS (
+      SELECT
+        us.user_id,
+        COALESCE(us.name, u.name, 'Manager') AS user_name,
+        COALESCE(us.icon, u.icon) AS user_icon,
+        COALESCE(us.color_index, u.color_index, 0)::int AS color_index
+      FROM user_seasons us
+      LEFT JOIN users u ON u.id = us.user_id
+      WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
+    ),
+    complete_prediction_rankings AS (
+      SELECT
+        user_id,
+        jornada,
+        RANK() OVER (PARTITION BY jornada ORDER BY total_aciertos DESC)::int AS position
+      FROM conceptual_totals
+      WHERE user_matches = total_matches
+    ),
+    prediction_round_events AS (
+      SELECT
+        'prediction_round:' || crs.base_round_id::text AS id,
+        'prediction_round'::text AS type,
+        crs.occurred_at,
+        jsonb_build_object(
+          'roundId', crs.base_round_id,
+          'roundName', crs.base_round,
+          'totalMatches', crs.total_matches,
+          'actualResults', (
+            SELECT jsonb_agg(ms.outcome ORDER BY ms.global_pos)
+            FROM match_sequences ms
+            WHERE ms.base_round = crs.base_round
+          ),
+          'participants', jsonb_agg(
+            jsonb_build_object(
+              'userId', manager.user_id,
+              'name', manager.user_name,
+              'icon', manager.user_icon,
+              'colorIndex', manager.color_index,
+              'participation', CASE
+                WHEN totals.user_id IS NULL THEN 'absent'
+                WHEN totals.user_matches < totals.total_matches THEN 'partial'
+                ELSE 'complete'
+              END,
+              'hits', COALESCE(totals.total_aciertos, 0),
+              'position', rankings.position,
+              'userMatches', COALESCE(totals.user_matches, 0),
+              'predictions', CASE
+                WHEN totals.result IS NULL THEN '[]'::jsonb
+                ELSE to_jsonb(string_to_array(totals.result, '-'))
+              END
+            ) ORDER BY
+              CASE
+                WHEN totals.user_id IS NULL THEN 3
+                WHEN totals.user_matches < totals.total_matches THEN 2
+                ELSE 1
+              END,
+              rankings.position NULLS LAST,
+              totals.total_aciertos DESC NULLS LAST,
+              manager.user_name
+          )
+        ) AS payload
+      FROM conceptual_round_states crs
+      CROSS JOIN active_prediction_managers manager
+      LEFT JOIN conceptual_totals totals
+        ON totals.jornada = crs.base_round AND totals.user_id = manager.user_id
+      LEFT JOIN complete_prediction_rankings rankings
+        ON rankings.jornada = crs.base_round AND rankings.user_id = manager.user_id
+      WHERE crs.fully_finished
+      GROUP BY
+        crs.base_round,
+        crs.base_round_id,
+        crs.occurred_at,
+        crs.total_matches
+    ),
     activity AS (
       SELECT * FROM transfer_events
       UNION ALL SELECT * FROM round_events
       UNION ALL SELECT * FROM admin_bonus_events
       UNION ALL SELECT * FROM match_session_events
+      UNION ALL SELECT * FROM prediction_round_events
     )
     SELECT id, type, occurred_at, payload
     FROM activity

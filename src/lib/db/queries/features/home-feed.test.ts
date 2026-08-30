@@ -46,4 +46,15 @@ describe('home activity feed query', () => {
     expect(predictionsParams[3]).toEqual(['prediction_round']);
     expect(resultsParams[3]).toEqual(['match_session', 'tournament_round']);
   });
+
+  it('publishes predictions only after every conceptual-round match has finished', async () => {
+    await queryHomeActivityRows({ filter: 'predictions', limit: 16 });
+
+    const [sql] = query.mock.calls.at(-1)!;
+    expect(sql).toContain('prediction_round_events AS');
+    expect(sql).toContain("BOOL_AND(status = 'finished'");
+    expect(sql).toContain("'participation'");
+    expect(sql).toContain("'actualResults'");
+    expect(sql).toContain('complete_prediction_rankings');
+  });
 });

@@ -81,6 +81,31 @@ const events: HomeActivityEvent[] = [
       },
     ],
   },
+  {
+    id: 'prediction_round:4',
+    type: 'prediction_round',
+    occurredAt: '2026-10-17T22:00:00.000Z',
+    roundId: 4,
+    roundName: 'Jornada 4',
+    totalMatches: 3,
+    actualResults: ['1', 'X', '2'],
+    participants: Array.from({ length: 7 }, (_, index) => ({
+      userId: String(index + 1),
+      name: `Manager ${index + 1}`,
+      icon: null,
+      colorIndex: index,
+      participation:
+        index < 5
+          ? ('complete' as const)
+          : index === 5
+            ? ('partial' as const)
+            : ('absent' as const),
+      hits: index < 5 ? 3 - (index % 3) : index === 5 ? 1 : 0,
+      position: index < 5 ? index + 1 : null,
+      userMatches: index < 5 ? 3 : index === 5 ? 2 : 0,
+      predictions: index === 6 ? [] : ['1', index === 0 ? 'X' : '2', index < 5 ? '2' : null],
+    })),
+  },
 ];
 
 describe('home activity event renderer', () => {
@@ -89,12 +114,25 @@ describe('home activity event renderer', () => {
     ['round_completed', 'No Name Yet'],
     ['admin_bonus', 'Premio especial'],
     ['match_session', 'RMB'],
+    ['prediction_round', 'Manager 7'],
   ] as const)('renders the %s visual variant', (type, expectedText) => {
     const event = events.find((item) => item.type === type)!;
     const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
 
     expect(html).toContain(expectedText);
     expect(html).toContain('<time');
+  });
+
+  it('describes partial and absent predictions and exposes exact picks without relying on color', () => {
+    const event = events.find((item) => item.type === 'prediction_round')!;
+    const html = renderToStaticMarkup(<HomeActivityEventCard event={event} />);
+
+    expect(html).toContain('Parcial 2/3');
+    expect(html).toContain('No participó');
+    expect(html).toContain('Ver pronósticos');
+    expect(html).toContain('Acierto');
+    expect(html).toContain('Fallo');
+    expect(html).toContain('/predictions/history');
   });
 
   it('labels a zero round payment without an ambiguous +0 amount', () => {

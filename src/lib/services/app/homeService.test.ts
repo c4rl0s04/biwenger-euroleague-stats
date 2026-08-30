@@ -173,6 +173,72 @@ describe('mobile home feed service', () => {
     ]);
   });
 
+  it('normalizes a completed prediction round with complete, partial, and absent managers', async () => {
+    queryHomeActivityRows.mockResolvedValue([
+      {
+        id: 'prediction_round:4',
+        type: 'prediction_round',
+        occurred_at: '2026-10-10T21:00:00.000Z',
+        payload: {
+          roundId: 4,
+          roundName: 'Jornada 4',
+          totalMatches: 3,
+          actualResults: ['1', 'X', '2'],
+          participants: [
+            {
+              userId: '1',
+              name: 'June',
+              icon: null,
+              colorIndex: 2,
+              participation: 'complete',
+              hits: 2,
+              position: 1,
+              userMatches: 3,
+              predictions: ['1', '2', '2'],
+            },
+            {
+              userId: '2',
+              name: 'All Stars',
+              icon: null,
+              colorIndex: 3,
+              participation: 'partial',
+              hits: 1,
+              position: null,
+              userMatches: 2,
+              predictions: ['1', 'X'],
+            },
+            {
+              userId: '3',
+              name: 'No Name Yet',
+              icon: null,
+              colorIndex: 4,
+              participation: 'absent',
+              hits: 0,
+              position: null,
+              userMatches: 0,
+              predictions: [],
+            },
+          ],
+        },
+      },
+    ]);
+
+    const page = await getHomeFeedPage({ filter: 'predictions' });
+
+    expect(page.items).toEqual([
+      expect.objectContaining({
+        type: 'prediction_round',
+        roundId: 4,
+        actualResults: ['1', 'X', '2'],
+        participants: [
+          expect.objectContaining({ name: 'June', participation: 'complete', position: 1 }),
+          expect.objectContaining({ name: 'All Stars', participation: 'partial', position: null }),
+          expect.objectContaining({ name: 'No Name Yet', participation: 'absent', position: null }),
+        ],
+      }),
+    ]);
+  });
+
   it('keeps every transfer inside a busy market day', async () => {
     const row = transferDayRow(1);
     row.payload.transfers = Array.from({ length: 20 }, (_, index) => ({

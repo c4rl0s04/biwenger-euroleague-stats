@@ -118,6 +118,42 @@ function normalizeActivityRow(row: HomeActivityRow): HomeActivityEvent {
     };
   }
 
+  if (row.type === 'prediction_round') {
+    const participants = Array.isArray(payload.participants) ? payload.participants : [];
+    const actualResults = Array.isArray(payload.actualResults) ? payload.actualResults : [];
+
+    return {
+      id: row.id,
+      type: 'prediction_round',
+      occurredAt,
+      roundId: asNumber(payload.roundId),
+      roundName: asString(payload.roundName, 'Jornada'),
+      totalMatches: asNumber(payload.totalMatches),
+      actualResults: actualResults.filter(
+        (result): result is '1' | 'X' | '2' => result === '1' || result === 'X' || result === '2'
+      ),
+      participants: participants.map((participant) => {
+        const item = participant as Record<string, unknown>;
+        const participation = item.participation;
+        const predictions = Array.isArray(item.predictions) ? item.predictions : [];
+        return {
+          userId: asString(item.userId),
+          name: asString(item.name, 'Manager'),
+          icon: nullableString(item.icon),
+          colorIndex: asNumber(item.colorIndex),
+          participation:
+            participation === 'complete' || participation === 'partial' ? participation : 'absent',
+          hits: asNumber(item.hits),
+          position: nullableNumber(item.position),
+          userMatches: asNumber(item.userMatches),
+          predictions: predictions.map((prediction) =>
+            prediction === '1' || prediction === 'X' || prediction === '2' ? prediction : null
+          ),
+        };
+      }),
+    };
+  }
+
   const matches = Array.isArray(payload.matches) ? payload.matches : [];
   return {
     id: row.id,
