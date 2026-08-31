@@ -1,6 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 interface MobileBottomSheetProps {
@@ -64,11 +65,16 @@ export default function MobileBottomSheet({
     };
   }, [onClose, open]);
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <div className="mobile-native-sheet-layer">
-      <button type="button" className="mobile-native-sheet-backdrop" onClick={onClose} aria-label="Cerrar" />
+      <button
+        type="button"
+        className="mobile-native-sheet-backdrop"
+        onClick={onClose}
+        aria-label="Cerrar"
+      />
       <div
         ref={dialogRef}
         role="dialog"
@@ -83,12 +89,19 @@ export default function MobileBottomSheet({
             <h2 id={titleId}>{title}</h2>
             {description && <p id={descriptionId}>{description}</p>}
           </div>
-          <button ref={closeRef} type="button" onClick={onClose} className="mobile-native-icon-button" aria-label="Cerrar hoja">
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            className="mobile-native-icon-button"
+            aria-label="Cerrar hoja"
+          >
             <X size={20} aria-hidden="true" />
           </button>
         </div>
         <div className="mobile-native-sheet-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

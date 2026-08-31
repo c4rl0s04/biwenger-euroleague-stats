@@ -8,11 +8,6 @@ export function HomeSummarySkeleton() {
         <span className="skeleton" />
       </div>
       <div className="mobile-home-skeleton-pulse skeleton" />
-      <div className="mobile-home-skeleton-actions">
-        <span className="skeleton" />
-        <span className="skeleton" />
-        <span className="skeleton" />
-      </div>
     </div>
   );
 }

@@ -19,9 +19,17 @@ test('phone home opens as the league activity cover', async ({ page }) => {
   }
 
   await expect(page.getByRole('heading', { name: 'Inicio' })).toBeVisible();
-  await expect(page.getByRole('navigation', { name: 'Accesos rápidos' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Accesos rápidos' })).toHaveCount(0);
   await expect(page.getByRole('group', { name: 'Filtrar actividad' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Actividad reciente' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Abrir búsqueda' }).click();
+  await expect(page.getByRole('dialog', { name: 'Buscar' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar hoja' }).click();
+
+  await page.getByRole('button', { name: 'Abrir perfil' }).click();
+  await expect(page.getByRole('dialog', { name: 'Cuenta' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar hoja' }).click();
 
   await page.getByRole('button', { name: 'Fichajes' }).click();
   await expect(page).toHaveURL(/activity=transfers/);
