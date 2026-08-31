@@ -30,7 +30,8 @@ describe('mobile home pulse', () => {
       />
     );
 
-    expect(html).toContain('8.256 pts');
+    expect(html).toContain('8.256');
+    expect(html).not.toContain('8.256 pts');
     expect(html).toContain('94,4 M€');
     expect(html).toContain('550 mil €');
     expect(html).not.toContain('8,3 mil');

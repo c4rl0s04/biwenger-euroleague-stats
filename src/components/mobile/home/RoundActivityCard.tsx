@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Trophy } from 'lucide-react';
 
 import type { RoundCompletedActivity } from '@/lib/home/contracts';
-import { formatCompactMoney, formatExactPoints } from '@/lib/home/formatters';
+import { formatCompactMoney, formatSpanishInteger } from '@/lib/home/formatters';
 import ActivityTime from './ActivityTime';
 import HomeManagerAvatar from './HomeManagerAvatar';
 import HomeRankBadge from './HomeRankBadge';
@@ -56,7 +56,7 @@ export default function RoundActivityCard({ event }: { event: RoundCompletedActi
               <div className="mobile-home-round-metrics">
                 <span>
                   <small>Puntos</small>
-                  <strong>{formatExactPoints(participant.points)}</strong>
+                  <strong>{formatSpanishInteger(participant.points)}</strong>
                 </span>
                 <span>
                   <small>Prima</small>

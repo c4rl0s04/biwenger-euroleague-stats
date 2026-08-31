@@ -4,6 +4,7 @@ import {
   formatCompactMoney,
   formatExactMoney,
   formatExactPoints,
+  formatSpanishInteger,
   formatSignedMoney,
   formatSignedPercentage,
 } from './formatters';
@@ -11,6 +12,7 @@ import {
 describe('mobile home number formatters', () => {
   it('formats points as an exact spanish integer instead of an ambiguous compact value', () => {
     expect(formatExactPoints(8256)).toBe('8.256 pts');
+    expect(formatSpanishInteger(8256)).toBe('8.256');
   });
 
   it('uses explicit compact money units', () => {

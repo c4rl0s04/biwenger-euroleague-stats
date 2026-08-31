@@ -244,6 +244,9 @@ describe('home activity event renderer', () => {
     expect(html).toContain('Repartido');
     expect(html).toContain('Puntos');
     expect(html).toContain('Prima');
+    expect(html).toContain('>201</strong>');
+    expect(html).not.toContain('201 pts');
+    expect(html).toContain('300 mil €');
     expect(html.match(/is-rank-silver/g)).toHaveLength(2);
     expect(html).toContain('is-rank-gold');
     expect(html).toContain('is-rank-neutral');

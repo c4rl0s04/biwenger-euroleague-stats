@@ -1,7 +1,7 @@
 import { Activity, CalendarClock, CircleAlert, TrendingDown, TrendingUp } from 'lucide-react';
 
 import type { HomeSummary } from '@/lib/home/contracts';
-import { formatCompactMoney, formatExactPoints } from '@/lib/home/formatters';
+import { formatCompactMoney, formatSpanishInteger } from '@/lib/home/formatters';
 
 function roundLabel(summary: HomeSummary) {
   if (!summary.round.name) return 'Calendario pendiente';
@@ -39,7 +39,7 @@ export default function HomePulseCard({ summary }: { summary: HomeSummary }) {
         </div>
         <div>
           <span>Puntos</span>
-          <strong>{formatExactPoints(summary.user.totalPoints)}</strong>
+          <strong>{formatSpanishInteger(summary.user.totalPoints)}</strong>
         </div>
         <div>
           <span>Plantilla</span>

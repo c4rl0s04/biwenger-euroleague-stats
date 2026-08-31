@@ -1830,14 +1830,14 @@
 }
 
 .mobile-home-pulse-metrics strong {
-  overflow: hidden;
+  overflow: visible;
   color: white;
   font-family: var(--font-display);
   font-size: clamp(1.45rem, 7.5vw, 2rem);
   font-weight: 500;
   letter-spacing: 0.015em;
   line-height: 1.05;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   white-space: nowrap;
 }
 
@@ -1846,7 +1846,7 @@
 }
 
 .mobile-home-pulse-metrics > div:nth-child(2) strong {
-  font-size: clamp(1.2rem, 6vw, 1.65rem);
+  font-size: clamp(1.18rem, 5.5vw, 1.55rem);
 }
 
 .mobile-home-pulse-footer {
@@ -2545,7 +2545,7 @@
 }
 .mobile-home-podium li {
   display: grid;
-  grid-template-columns: 1.25rem 1.55rem minmax(3.5rem, 1fr) minmax(6.4rem, auto);
+  grid-template-columns: 1.25rem 1.55rem minmax(2.8rem, 1fr) max-content;
   align-items: center;
   gap: 0.35rem;
   min-height: 2.65rem;
@@ -2612,8 +2612,8 @@
 
 .mobile-home-round-metrics {
   display: grid;
-  grid-template-columns: minmax(2.55rem, 0.85fr) minmax(3.5rem, 1.15fr);
-  gap: 0.28rem;
+  grid-template-columns: minmax(2.25rem, auto) minmax(4.15rem, auto);
+  gap: 0.38rem;
 }
 
 .mobile-home-round-metrics > span {
@@ -2632,14 +2632,14 @@
 }
 
 .mobile-home-round-metrics strong {
-  overflow: hidden;
-  max-width: 100%;
+  overflow: visible;
+  max-width: none;
   color: hsl(var(--foreground) / 0.94);
   font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   white-space: nowrap;
 }
 
@@ -2878,14 +2878,18 @@
 
 .mobile-home-highlight-mvps > a {
   display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr);
-  min-height: 3rem;
+  grid-template-columns: 4.25rem minmax(0, 1fr);
+  min-height: 4.5rem;
   align-items: center;
   gap: 0.55rem;
   border: 1px solid rgb(251 191 36 / 0.18);
   border-radius: 0.72rem;
   background: rgb(251 191 36 / 0.045);
-  padding: 0.35rem;
+  padding: 0.42rem;
+}
+
+.mobile-home-highlight-mvps .mobile-home-highlight-portrait {
+  width: 4rem;
 }
 
 .mobile-home-highlight-mvps > a > span:last-child {
@@ -2944,19 +2948,29 @@
 
 .mobile-home-highlight-preview > div {
   display: flex;
-  justify-content: space-between;
-  gap: 0.32rem;
+  overflow-x: auto;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.05rem 0 0.28rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.mobile-home-highlight-preview > div::-webkit-scrollbar {
+  display: none;
 }
 
 .mobile-home-highlight-preview a {
   position: relative;
   display: block;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 52px;
+  min-height: 52px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
 }
 
 .mobile-home-highlight-preview .mobile-home-highlight-portrait {
-  width: 44px;
+  width: 52px;
 }
 
 .mobile-home-highlight-preview b {
@@ -2995,15 +3009,15 @@
 
 .mobile-home-highlight-details li {
   display: grid;
-  grid-template-columns: 2.15rem minmax(0, 1fr) auto;
-  min-height: 2.35rem;
+  grid-template-columns: 2.65rem minmax(0, 1fr) auto;
+  min-height: 3rem;
   align-items: center;
   gap: 0.45rem;
   border-bottom: 1px solid hsl(var(--border) / 0.28);
 }
 
 .mobile-home-highlight-details .mobile-home-highlight-portrait {
-  width: 2rem;
+  width: 2.5rem;
 }
 
 .mobile-home-highlight-details li > span:nth-child(2),
@@ -3362,12 +3376,12 @@
     gap: 0.18rem;
   }
   .mobile-home-podium li {
-    grid-template-columns: 1.15rem 1.45rem minmax(2.8rem, 1fr) minmax(5.65rem, auto);
+    grid-template-columns: 1.15rem 1.45rem minmax(2.2rem, 1fr) max-content;
     gap: 0.25rem;
   }
   .mobile-home-round-metrics {
-    grid-template-columns: minmax(2.25rem, 0.75fr) minmax(3.15rem, 1.25fr);
-    gap: 0.18rem;
+    grid-template-columns: minmax(1.9rem, auto) minmax(3.8rem, auto);
+    gap: 0.25rem;
   }
   .mobile-home-round-metrics strong {
     font-size: 0.68rem;

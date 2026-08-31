@@ -3,7 +3,7 @@ const oneDecimal = new Intl.NumberFormat('es-ES', {
   maximumFractionDigits: 1,
 });
 
-function formatSpanishInteger(value: number): string {
+export function formatSpanishInteger(value: number): string {
   const rounded = Math.round(value);
   const sign = rounded < 0 ? '-' : '';
   return `${sign}${String(Math.abs(rounded)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
