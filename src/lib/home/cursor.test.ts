@@ -38,6 +38,17 @@ describe('home activity cursor', () => {
     expect(() => decodeHomeFeedCursor(cursor, 'rounds')).toThrow('Cursor de actividad no válido');
   });
 
+  it('isolates MVP and ideal-lineup pages from round pages', () => {
+    const cursor = encodeHomeFeedCursor({
+      occurredAt: '2026-10-02T20:30:00.000Z',
+      id: 'round_highlight:4',
+      filter: 'highlights',
+    });
+
+    expect(decodeHomeFeedCursor(cursor, 'highlights').filter).toBe('highlights');
+    expect(() => decodeHomeFeedCursor(cursor, 'rounds')).toThrow('Cursor de actividad no válido');
+  });
+
   it.each(['', 'not-base64', 'e30', 'eyJvY2N1cnJlZEF0IjoieCIsImlkIjoiMSJ9'])(
     'rejects an invalid cursor: %s',
     (cursor) => {

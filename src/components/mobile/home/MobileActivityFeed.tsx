@@ -23,7 +23,8 @@ interface FeedSnapshot {
 const emptyCopy: Record<HomeActivityFilter, string> = {
   all: 'Los fichajes, jornadas, porras y resultados aparecerán aquí en cuanto se produzcan.',
   transfers: 'Los fichajes aparecerán aquí en cuanto haya movimientos de mercado.',
-  rounds: 'Las clasificaciones, primas y protagonistas aparecerán cuando finalice una jornada.',
+  rounds: 'Las clasificaciones y primas aparecerán cuando finalice una jornada.',
+  highlights: 'El MVP y el equipo ideal aparecerán cuando finalice una jornada.',
   predictions: 'Las porras aparecerán cuando finalicen todos los partidos de la jornada.',
   results: 'Los marcadores aparecerán aquí cuando terminen los partidos.',
 };

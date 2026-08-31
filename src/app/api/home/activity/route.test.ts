@@ -68,6 +68,15 @@ describe('GET /api/home/activity', () => {
     expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'predictions', cursor: null });
   });
 
+  it('keeps MVP and ideal-lineup events in their own filter', async () => {
+    const { GET } = await import('./route');
+
+    const response = await GET(request('?type=highlights'));
+
+    expect(response.status).toBe(200);
+    expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'highlights', cursor: null });
+  });
+
   it('rejects unknown activity filters', async () => {
     const { GET } = await import('./route');
 

@@ -33,6 +33,9 @@ test('phone home opens as the league activity cover', async ({ page }) => {
   await page.getByRole('button', { name: 'Jornadas + primas' }).click();
   await expect(page).toHaveURL(/activity=rounds/);
 
+  await page.getByRole('button', { name: 'MVP + ideal' }).click();
+  await expect(page).toHaveURL(/activity=highlights/);
+
   await page.getByRole('button', { name: 'Porras' }).click();
   await expect(page).toHaveURL(/activity=predictions/);
   await expect(page.getByRole('button', { name: 'Porras' })).toHaveAttribute(

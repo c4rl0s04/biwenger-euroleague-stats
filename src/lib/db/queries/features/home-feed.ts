@@ -53,12 +53,14 @@ export async function queryHomeActivityRows({
     filter === 'transfers'
       ? ['transfer_day']
       : filter === 'rounds'
-        ? ['round_completed', 'admin_bonus', 'round_highlight']
-        : filter === 'predictions'
-          ? ['prediction_round']
-          : filter === 'results'
-            ? ['match_session', 'tournament_round']
-            : null;
+        ? ['round_completed', 'admin_bonus']
+        : filter === 'highlights'
+          ? ['round_highlight']
+          : filter === 'predictions'
+            ? ['prediction_round']
+            : filter === 'results'
+              ? ['match_session', 'tournament_round']
+              : null;
 
   const query = `
     WITH ${PREDICTION_NORMALIZATION_CTES},

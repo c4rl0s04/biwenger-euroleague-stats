@@ -4,6 +4,7 @@ export const HOME_ACTIVITY_FILTERS = [
   'all',
   'transfers',
   'rounds',
+  'highlights',
   'predictions',
   'results',
 ] as const;

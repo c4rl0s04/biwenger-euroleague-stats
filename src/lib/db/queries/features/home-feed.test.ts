@@ -39,10 +39,14 @@ describe('home activity feed query', () => {
     await queryHomeActivityRows({ filter: 'predictions', limit: 16 });
     const [, predictionsParams] = query.mock.calls.at(-1)!;
 
+    await queryHomeActivityRows({ filter: 'highlights', limit: 16 });
+    const [, highlightsParams] = query.mock.calls.at(-1)!;
+
     await queryHomeActivityRows({ filter: 'results', limit: 16 });
     const [, resultsParams] = query.mock.calls.at(-1)!;
 
-    expect(roundsParams[3]).toEqual(['round_completed', 'admin_bonus', 'round_highlight']);
+    expect(roundsParams[3]).toEqual(['round_completed', 'admin_bonus']);
+    expect(highlightsParams[3]).toEqual(['round_highlight']);
     expect(predictionsParams[3]).toEqual(['prediction_round']);
     expect(resultsParams[3]).toEqual(['match_session', 'tournament_round']);
   });

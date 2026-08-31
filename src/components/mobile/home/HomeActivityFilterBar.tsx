@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleDot, Goal, Target, Trophy, UserRoundSearch } from 'lucide-react';
+import { CircleDot, Goal, Sparkles, Target, Trophy, UserRoundSearch } from 'lucide-react';
 
 import type { HomeActivityFilter } from '@/lib/home/contracts';
 import { useMobileHomeActivity } from './MobileHomeActivityProvider';
@@ -13,6 +13,7 @@ const options: Array<{
   { value: 'all', label: 'Todos', icon: CircleDot },
   { value: 'transfers', label: 'Fichajes', icon: UserRoundSearch },
   { value: 'rounds', label: 'Jornadas + primas', icon: Trophy },
+  { value: 'highlights', label: 'MVP + ideal', icon: Sparkles },
   { value: 'predictions', label: 'Porras', icon: Target },
   { value: 'results', label: 'Resultados', icon: Goal },
 ];
