@@ -21,8 +21,9 @@ The client sends a bearer token plus `X-League` and `X-User` headers. It discove
 version from `/account`, caches it in memory, and appends it to normal requests. A configured
 `BIWENGER_API_VERSION_FALLBACK` is used only if detection fails.
 
-Normal reads use the server ingestion token. User-triggered market mutations use the requesting
-manager's stored Biwenger token and identity.
+Normal ingestion reads use the global server ingestion token. User-triggered market and lineup
+operations request the authenticated actor's temporarily decrypted credential through the
+server-only credential boundary. A viewed public manager never selects the command credential.
 
 The client delays each request by a random two-to-five-second interval and retries HTTP 429 up to
 three times with exponential delay. Other non-success responses are surfaced with provider details.
@@ -54,4 +55,5 @@ by the [data model](../data-model.md).
 - Missing optional fields must not erase durable history.
 - Provider ID/name mismatches are resolved through stored mappings and controlled matching logic,
   not by changing primary identities opportunistically.
-- Log endpoint context, status, and sanitized details without bearer tokens or private payloads.
+- Log endpoint context, status, and sanitized details without bearer tokens, encrypted envelopes,
+  or private payloads.

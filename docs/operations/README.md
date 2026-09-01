@@ -14,6 +14,8 @@ status: active
 - [Docker](docker.md) — start and inspect the provided three-service environment.
 - [Data sync](data-sync.md) — preflight and execute full, daily, live, or targeted ingestion.
 - [Database safety](database-safety.md) — backups, audits, migrations, and price-cache repair.
+- [Credential encryption](credential-encryption.md) — manager credential deployment, migration,
+  rotation, rollback, and cleanup gates.
 - [Season lifecycle](season-lifecycle.md) — freeze a completed season and activate the next one.
 - [Season simulations](season-simulations.md) — calculate and publish complete-season Monte Carlo
   results.

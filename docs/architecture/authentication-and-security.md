@@ -22,7 +22,8 @@ pages.
 
 The full credentials provider lives in [`src/auth.js`](../../src/auth.js) because it requires
 PostgreSQL and bcrypt. It looks up a user by name, verifies the stored password hash, and includes
-the user ID, email, and personal Biwenger token in the JWT-backed session.
+only the user ID, email, and a safe Biwenger linked-state boolean in the JWT-backed session. Personal
+Biwenger credentials are encrypted at rest and remain behind a server-only credential boundary.
 
 ## API responsibility
 
@@ -36,7 +37,8 @@ page middleware protects it.
 
 - Keep `.env`, provider tokens, `AUTH_SECRET`, `ACCESS_PASSWORD`, connection strings, and AI provider
   keys outside Git.
-- Never expose the server-side Biwenger token to arbitrary clients or logs.
+- Never expose plaintext or encrypted Biwenger credential material to clients, sessions, public
+  contracts, or logs.
 - Treat production exports and private league records as sensitive data.
 - Use sanitized examples in tests and documentation.
 - Report vulnerabilities privately rather than through a public issue containing exploit details.

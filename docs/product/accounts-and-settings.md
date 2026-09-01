@@ -35,6 +35,7 @@ Authentication mechanics and route boundaries are documented in
 
 ## Security constraints
 
-Passwords are stored as bcrypt hashes. Personal Biwenger tokens are server-side credentials and
-must not be displayed to other managers. A user may update their own account and linkage; routes
-performing those mutations must validate both the session and target identity.
+Passwords are stored as bcrypt hashes. Personal Biwenger credentials are authenticated-encrypted
+at rest and can be used only through a server-only boundary. They must not enter sessions, public
+responses, UI props, or other managers' requests. A user may update their own account and linkage;
+routes performing those mutations derive the actor from the verified session.
