@@ -13,6 +13,12 @@ vi.mock('@/lib/services/lineupService', () => ({
   },
 }));
 
+vi.mock('@/lib/credentials/service', () => ({
+  biwengerCredentials: {
+    storeCredential: vi.fn(),
+  },
+}));
+
 vi.mock('@/lib/db/queries/core/users', () => ({
   getUserWithPassword: vi.fn(),
 }));
@@ -54,6 +60,7 @@ import { getUserWithPassword } from '@/lib/db/queries/core/users';
 import { prepareUserMutations } from '@/lib/db/mutations/users';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { biwengerCredentials } from '@/lib/credentials/service';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
@@ -214,6 +221,11 @@ describe('user and lineup route contracts', () => {
     expect(JSON.stringify(json)).not.toContain('privateProviderPayload');
     expect(response.headers.get('cache-control')).toContain('private');
     expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(biwengerCredentials.storeCredential).toHaveBeenCalledWith({
+      userId: '42',
+      credential: canaryToken,
+      email: 'u@example.com',
+    });
 
     const missingPassword = await POST(
       jsonRequest('http://localhost/api/user/link-biwenger', {}) as any
@@ -252,6 +264,39 @@ describe('user and lineup route contracts', () => {
     expect(response.status).toBe(401);
     expect(JSON.stringify(json)).not.toContain(canaryToken);
     expect(JSON.stringify(warn.mock.calls)).not.toContain(canaryToken);
+    expect(biwengerCredentials.storeCredential).not.toHaveBeenCalled();
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+
+  it('keeps credential storage failures and logs free of sensitive material', async () => {
+    const canaryToken = 'storage-failure-canary-token';
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      id: '42',
+      email: 'u@example.com',
+    } as any);
+    vi.mocked(biwengerCredentials.storeCredential).mockRejectedValueOnce(
+      new Error(`synthetic envelope failure containing ${canaryToken}`)
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ token: canaryToken }),
+      }))
+    );
+
+    const { POST } = await import('@/app/api/user/link-biwenger/route');
+    const response = await POST(
+      jsonRequest('http://localhost/api/user/link-biwenger', {
+        password: 'synthetic-secret',
+      }) as any
+    );
+
+    expect(response.status).toBe(500);
+    expect(JSON.stringify(await response.json())).not.toContain(canaryToken);
+    expect(JSON.stringify(error.mock.calls)).not.toContain(canaryToken);
     expect(response.headers.get('cache-control')).toContain('no-store');
   });
 });

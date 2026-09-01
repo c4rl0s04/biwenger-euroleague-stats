@@ -11,6 +11,7 @@ import {
   createSafeBrowserSession,
   sanitizeAuthToken,
 } from '@/lib/auth/session-safety';
+import { biwengerCredentials } from '@/lib/credentials/service';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -27,6 +28,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Find user by name
         const user = await db.query.users.findFirst({
           where: eq(users.name, credentials.name),
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            password: true,
+            icon: true,
+          },
         });
 
         if (!user) {
@@ -55,7 +63,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           email: user.email,
           image: user.icon,
-          biwengerLinked: Boolean(user.biwengerToken),
+          biwengerLinked: await biwengerCredentials.hasCredential(user.id),
         };
       },
     }),
@@ -76,9 +84,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const dbUser = await db.query.users.findFirst({
             where: eq(users.id, safeToken.id),
-            columns: { email: true, biwengerToken: true },
+            columns: { email: true },
           });
-          safeToken = applyAccountStateToAuthToken(safeToken, dbUser);
+          safeToken = applyAccountStateToAuthToken(safeToken, {
+            email: dbUser?.email,
+            biwengerLinked: await biwengerCredentials.hasCredential(safeToken.id),
+          });
         } catch {
           console.error('Error refreshing safe account state for JWT');
         }

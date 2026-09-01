@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { privateJsonResponse } from '@/lib/utils/response';
+import { biwengerCredentials } from '@/lib/credentials/service';
 
 interface BiwengerLoginResponse {
   token?: string;
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, session.user.id),
+      columns: { id: true, email: true },
     });
 
     if (!user) {
@@ -82,7 +84,7 @@ export async function POST(req: Request) {
       return privateJsonResponse({ message: 'Error al obtener el acceso desde Biwenger.' }, 502);
     }
 
-    await db.update(users).set({ biwengerToken: token, email }).where(eq(users.id, user.id));
+    await biwengerCredentials.storeCredential({ userId: user.id, credential: token, email });
 
     return privateJsonResponse({
       message: '¡Cuenta vinculada con éxito! Tus datos se sincronizarán de forma segura.',

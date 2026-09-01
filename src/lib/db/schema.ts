@@ -27,6 +27,27 @@ export const users = pgTable('users', {
   biwengerToken: text('biwenger_token'),
 });
 
+// Server-only encrypted Biwenger credentials. The legacy users.biwenger_token
+// column remains temporarily for staged migration and rollback compatibility.
+export const userBiwengerCredentials = pgTable(
+  'user_biwenger_credentials',
+  {
+    userId: text('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    version: integer('version').notNull(),
+    keyId: text('key_id').notNull(),
+    ciphertext: text('ciphertext').notNull(),
+    iv: text('iv').notNull(),
+    authTag: text('auth_tag').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    keyIdIdx: index('idx_user_biwenger_credentials_key_id').on(t.keyId),
+  })
+);
+
 // 1b. Teams Table
 export const teams = pgTable('teams', {
   id: integer('id').primaryKey(),

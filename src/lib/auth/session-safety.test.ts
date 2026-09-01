@@ -30,7 +30,7 @@ describe('Auth.js Biwenger credential boundary', () => {
     );
     const refreshed = applyAccountStateToAuthToken(token, {
       email: 'safe@example.com',
-      biwengerToken: CANARY_TOKEN,
+      biwengerLinked: true,
     });
 
     expect((refreshed as { biwengerLinked?: boolean }).biwengerLinked).toBe(true);

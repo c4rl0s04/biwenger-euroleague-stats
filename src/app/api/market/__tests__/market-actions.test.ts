@@ -89,12 +89,19 @@ describe('market mutation route contracts', () => {
     expectSafeMutationResponse(removeResponse, removeBody);
 
     const sellResponse = await sell.POST(
-      jsonRequest('http://localhost/api/market/sell', { playerId: 1, price: 1000 })
+      jsonRequest('http://localhost/api/market/sell', {
+        playerId: 1,
+        price: 1000,
+        userId: 'public-viewed-manager',
+      })
     );
     const sellBody = await sellResponse.json();
     expect(sellResponse.status).toBe(200);
     expect(sellBody.data.message).toBe('Jugador procesado en el mercado correctamente');
     expectSafeMutationResponse(sellResponse, sellBody);
+    expect(marketActionsService.placeOnMarket).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: '42' })
+    );
 
     const sellAllResponse = await sellAll.POST(
       jsonRequest('http://localhost/api/market/sell-all', { pricePercentage: 95 })

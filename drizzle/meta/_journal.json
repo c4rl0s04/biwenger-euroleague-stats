@@ -71,6 +71,13 @@
       "when": 1787842388189,
       "tag": "0009_production_season_readiness",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788264506174,
+      "tag": "0010_encrypted_biwenger_credentials",
+      "breakpoints": true
     }
   ]
 }

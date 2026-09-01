@@ -35,7 +35,7 @@ export function applyAccountStateToAuthToken(token, account) {
   return {
     ...safeToken,
     email: account.email,
-    biwengerLinked: Boolean(account.biwengerToken),
+    biwengerLinked: Boolean(account.biwengerLinked),
   };
 }
 
