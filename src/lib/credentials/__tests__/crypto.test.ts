@@ -19,6 +19,12 @@ function expectCode(action: () => unknown, code: CredentialError['code']) {
   expect(action).toThrowError(expect.objectContaining({ code }));
 }
 
+function tamperEncodedBytes(value: string): string {
+  const decoded = Buffer.from(value, 'base64url');
+  decoded[0] ^= 1;
+  return decoded.toString('base64url');
+}
+
 describe('Biwenger credential authenticated encryption', () => {
   const credential = 'synthetic-biwenger-token';
 
@@ -36,11 +42,11 @@ describe('Biwenger credential authenticated encryption', () => {
     const envelope = encryptCredential(credential, 'user-1', keyring());
     const modified: CredentialEnvelope = {
       ...envelope,
-      [field]: `${envelope[field].slice(0, -1)}${envelope[field].endsWith('A') ? 'B' : 'A'}`,
+      [field]: tamperEncodedBytes(envelope[field]),
     };
     expectCode(
       () => decryptCredential(modified, 'user-1', keyring()),
-      field === 'iv' ? 'credential_integrity_failure' : 'credential_integrity_failure'
+      'credential_integrity_failure'
     );
   });
 
