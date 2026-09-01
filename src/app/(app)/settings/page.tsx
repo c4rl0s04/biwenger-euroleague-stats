@@ -11,9 +11,15 @@ export default async function SettingsPage() {
 
   return phone ? (
     <MobileSettingsScreen
-      biwengerLinked={Boolean((session.user as typeof session.user & { biwengerToken?: string }).biwengerToken)}
+      biwengerLinked={Boolean(
+        (session.user as typeof session.user & { biwengerLinked?: boolean }).biwengerLinked
+      )}
     />
   ) : (
-    <DesktopSettingsScreen />
+    <DesktopSettingsScreen
+      biwengerLinked={Boolean(
+        (session.user as typeof session.user & { biwengerLinked?: boolean }).biwengerLinked
+      )}
+    />
   );
 }

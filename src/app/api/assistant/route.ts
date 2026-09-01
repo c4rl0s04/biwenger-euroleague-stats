@@ -11,8 +11,7 @@ import {
   formatAssistantContextBlocks,
   getAssistantContextProviderNamesForMessage,
 } from '@/lib/services/features/assistantContextService';
-import { errorResponse } from '@/lib/utils/response';
-import { NextResponse } from 'next/server';
+import { errorResponse, privateJsonResponse } from '@/lib/utils/response';
 
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
 const DEFAULT_MODELS = {
@@ -176,18 +175,15 @@ export async function POST(request: Request) {
 
     const assistantMessage = await addAssistantMessage(conversation.id, 'assistant', message);
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          conversationId: conversation.id,
-          userMessage,
-          assistantMessage,
-          ...(debugPayload ? { debug: debugPayload } : {}),
-        },
+    return privateJsonResponse({
+      success: true,
+      data: {
+        conversationId: conversation.id,
+        userMessage,
+        assistantMessage,
+        ...(debugPayload ? { debug: debugPayload } : {}),
       },
-      { headers: { 'Cache-Control': 'no-store' } }
-    );
+    });
   } catch (error) {
     console.error('[API Assistant] Error:', error);
 

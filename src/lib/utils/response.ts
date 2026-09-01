@@ -29,6 +29,10 @@ export type ApiErrorResponse = {
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
+export const PRIVATE_NO_STORE_HEADERS = {
+  'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+} as const;
+
 interface CachedResponseOptions {
   maxAge?: number;
   stale?: number;
@@ -60,8 +64,22 @@ export function successResponse(
 }
 
 /**
+ * Creates a private response for authenticated or mutation data.
+ */
+export function privateJsonResponse<T>(data: T, status: number = 200): NextResponse {
+  return NextResponse.json(data, { status, headers: PRIVATE_NO_STORE_HEADERS });
+}
+
+/**
+ * Creates an allowlisted mutation success envelope that cannot be cached.
+ */
+export function mutationSuccessResponse<T>(data: T, status: number = 200): NextResponse {
+  return privateJsonResponse<ApiSuccessResponse<T>>({ success: true, data }, status);
+}
+
+/**
  * Creates an error response (no caching)
  */
 export function errorResponse(message: string, status: number = 500): NextResponse {
-  return NextResponse.json({ success: false, error: message }, { status });
+  return privateJsonResponse<ApiErrorResponse>({ success: false, error: message }, status);
 }

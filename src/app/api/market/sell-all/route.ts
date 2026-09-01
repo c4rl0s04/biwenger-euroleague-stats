@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { marketActionsService } from '@/lib/services/marketActionsService';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 /**
  * Market Sell All API Route
@@ -20,28 +20,17 @@ export async function POST(request: NextRequest) {
     const { pricePercentage = 100 } = body;
 
     // 3. Call the service to place all players on the market
-    const result = await marketActionsService.placeAllOnMarket({
+    await marketActionsService.placeAllOnMarket({
       pricePercentage: Number(pricePercentage),
       userId: session.user.id as string,
     });
 
-    // 3.5 Check for Biwenger API-level errors wrapped in 200 OK responses
-    console.log('Biwenger API response for sell-all:', result);
-    const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
-    if (result && (hasErrorStatus || result.error)) {
-      return errorResponse(
-        result.error || `Error de Biwenger (Código ${result.status})`,
-        result.status && result.status >= 400 && result.status < 600 ? result.status : 400
-      );
-    }
-
-    // 4. Return success stats
-    return successResponse({
+    return mutationSuccessResponse({
       message: 'Plantilla entera puesta en mercado',
-      biwengerResponse: result,
+      status: 'completed',
     });
-  } catch (error: any) {
-    console.error('Market Sell All API Error:', error);
-    return errorResponse(error.message || 'Error masivo al poner en el mercado', 500);
+  } catch {
+    console.error('Market sell-all mutation failed');
+    return errorResponse('Error masivo al poner en el mercado', 500);
   }
 }

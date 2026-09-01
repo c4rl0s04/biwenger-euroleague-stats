@@ -76,8 +76,9 @@ function InstallationSettings() {
  * BiwengerSettings Component
  * Handles linking the user's Biwenger account using their credentials
  */
-function BiwengerSettings() {
+function BiwengerSettings({ initialLinked }) {
   const { data: session, update } = useSession();
+  const [isLinked, setIsLinked] = useState(initialLinked);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -90,8 +91,6 @@ function BiwengerSettings() {
       setEmail(session.user.email);
     }
   }, [session?.user?.email]);
-
-  const isLinked = !!session?.user?.biwengerToken;
 
   const handleLink = async (e) => {
     e.preventDefault();
@@ -113,14 +112,12 @@ function BiwengerSettings() {
       }
 
       setSuccess(true);
+      setIsLinked(Boolean(data.biwengerLinked));
       setPassword('');
 
-      // Update session to reflect the new token and email immediately
+      // Refresh server-derived safe session state without sending credentials.
       if (update) {
-        await update({
-          biwengerToken: data.token,
-          email: data.email,
-        });
+        await update();
       }
     } catch (err) {
       setError(err.message || 'Ocurrió un error inesperado.');
@@ -494,12 +491,17 @@ function SecuritySettings() {
   );
 }
 
-export default function DesktopSettingsScreen() {
+export default function DesktopSettingsScreen({ biwengerLinked = false }) {
   const [activeTab, setActiveTab] = useState('security');
 
   const tabs = [
     { id: 'security', name: 'Seguridad', icon: KeyRound, component: <SecuritySettings /> },
-    { id: 'biwenger', name: 'Biwenger', icon: Link2, component: <BiwengerSettings /> },
+    {
+      id: 'biwenger',
+      name: 'Biwenger',
+      icon: Link2,
+      component: <BiwengerSettings initialLinked={biwengerLinked} />,
+    },
     { id: 'install', name: 'Instalar app', icon: Download, component: <InstallationSettings /> },
     { id: 'profile', name: 'Perfil Público', icon: UserCircle2, disabled: true },
   ];

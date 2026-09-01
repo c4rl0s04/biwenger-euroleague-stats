@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserWithPassword } from '@/lib/db/queries/core/users';
 import { prepareUserMutations } from '@/lib/db/mutations/users';
 import { pgClient } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { privateJsonResponse } from '@/lib/utils/response';
 
 export async function POST(req: Request) {
   try {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ message: 'No autorizado' }, { status: 401 });
+      return privateJsonResponse({ message: 'No autorizado' }, 401);
     }
     const userId = session.user.id;
 
@@ -20,19 +20,19 @@ export async function POST(req: Request) {
     };
 
     if (!currentPassword || !newPassword) {
-      return NextResponse.json({ message: 'Faltan campos obligatorios' }, { status: 400 });
+      return privateJsonResponse({ message: 'Faltan campos obligatorios' }, 400);
     }
 
     const user = await getUserWithPassword(userId);
 
     if (!user) {
-      return NextResponse.json({ message: 'Usuario no encontrado' }, { status: 404 });
+      return privateJsonResponse({ message: 'Usuario no encontrado' }, 404);
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password as string);
 
     if (!isMatch) {
-      return NextResponse.json({ message: 'La contraseña actual es incorrecta' }, { status: 400 });
+      return privateJsonResponse({ message: 'La contraseña actual es incorrecta' }, 400);
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -40,9 +40,9 @@ export async function POST(req: Request) {
     const mutations = prepareUserMutations(pgClient);
     await mutations.updateUserPassword(hashedPassword, userId);
 
-    return NextResponse.json({ message: 'Contraseña actualizada correctamente' });
-  } catch (error) {
-    console.error('Error changing password:', error);
-    return NextResponse.json({ message: 'Error interno del servidor' }, { status: 500 });
+    return privateJsonResponse({ message: 'Contraseña actualizada correctamente' });
+  } catch {
+    console.error('Password change request failed');
+    return privateJsonResponse({ message: 'Error interno del servidor' }, 500);
   }
 }

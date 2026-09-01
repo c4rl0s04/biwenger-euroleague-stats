@@ -1,3 +1,9 @@
+import {
+  applyUserToAuthToken,
+  createSafeBrowserSession,
+  sanitizeAuthToken,
+} from '@/lib/auth/session-safety';
+
 const PUBLIC_PWA_PATHS = new Set([
   '/login',
   '/install',
@@ -33,26 +39,11 @@ const authConfig = {
       // Everything else requires login
       return isLoggedIn;
     },
-    async jwt({ token, user, trigger, session }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.biwengerToken = user.biwengerToken;
-      }
-      // Handle session update
-      if (trigger === 'update' && session) {
-        if (session.biwengerToken) token.biwengerToken = session.biwengerToken;
-        if (session.email) token.email = session.email;
-      }
-      return token;
+    async jwt({ token, user }) {
+      return sanitizeAuthToken(applyUserToAuthToken(token, user));
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.biwengerToken = token.biwengerToken;
-      }
-      return session;
+      return createSafeBrowserSession(session, token);
     },
   },
 };

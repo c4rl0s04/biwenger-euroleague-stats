@@ -1,5 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { cachedResponse, successResponse, errorResponse, CACHE_DURATIONS } from '../response.js';
+import {
+  cachedResponse,
+  successResponse,
+  mutationSuccessResponse,
+  privateJsonResponse,
+  errorResponse,
+  CACHE_DURATIONS,
+} from '../response.js';
 
 // Mock NextResponse
 vi.mock('next/server', () => ({
@@ -72,5 +79,29 @@ describe('errorResponse', () => {
   it('should accept custom status code', () => {
     const result = errorResponse('Not found', 404);
     expect(result.status).toBe(404);
+  });
+
+  it('should prevent private errors from being cached', () => {
+    const result = errorResponse('Private error');
+    expect(result.headers['Cache-Control']).toContain('private');
+    expect(result.headers['Cache-Control']).toContain('no-store');
+    expect(result.headers['Cache-Control']).not.toContain('public');
+  });
+});
+
+describe('private response helpers', () => {
+  it('returns private no-store JSON without changing its shape', () => {
+    const result = privateJsonResponse({ message: 'ok' }, 201);
+    expect(result.data).toEqual({ message: 'ok' });
+    expect(result.status).toBe(201);
+    expect(result.headers['Cache-Control']).toContain('private');
+    expect(result.headers['Cache-Control']).toContain('no-store');
+  });
+
+  it('keeps HTTP status separate from cache duration for mutations', () => {
+    const result = mutationSuccessResponse({ status: 'completed' }, 201);
+    expect(result.status).toBe(201);
+    expect(result.data).toEqual({ success: true, data: { status: 'completed' } });
+    expect(result.headers['Cache-Control']).not.toContain('max-age=201');
   });
 });

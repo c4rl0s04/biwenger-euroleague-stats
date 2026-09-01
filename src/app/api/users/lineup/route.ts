@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { lineupService } from '@/lib/services/lineupService';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { errorResponse, mutationSuccessResponse, privateJsonResponse } from '@/lib/utils/response';
 
 /**
  * Lineup Management API
@@ -25,18 +25,18 @@ export async function POST(request: NextRequest) {
       return errorResponse('Se requiere el objeto "lineup"', 400);
     }
 
-    const result = await lineupService.updateLineup({
+    await lineupService.updateLineup({
       lineup,
       userId: session.user.id as string,
     });
 
-    return successResponse({
+    return mutationSuccessResponse({
       message: 'Alineación actualizada en Biwenger',
-      biwengerResponse: result,
+      status: 'completed',
     });
-  } catch (error: any) {
-    console.error('[API Lineup] Error:', error);
-    return errorResponse(error.message || 'Error al procesar la solicitud de alineación');
+  } catch {
+    console.error('[API Lineup] Mutation failed');
+    return errorResponse('Error al procesar la solicitud de alineación');
   }
 }
 
@@ -56,9 +56,9 @@ export async function GET(_request: NextRequest) {
 
     const lineup = await lineupService.getLineup(session.user.id as string);
 
-    return successResponse(lineup, 0);
-  } catch (error: any) {
-    console.error('[API Lineup GET] Error:', error);
-    return errorResponse(error.message || 'Error al obtener la alineación');
+    return privateJsonResponse({ success: true, data: lineup });
+  } catch {
+    console.error('[API Lineup GET] Request failed');
+    return errorResponse('Error al obtener la alineación');
   }
 }

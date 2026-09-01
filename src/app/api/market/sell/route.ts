@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { marketActionsService } from '@/lib/services/marketActionsService';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 /**
  * Market Sell API Route
@@ -28,33 +28,22 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Call the service to place the player on the market or sell immediately
-    const result = await marketActionsService.placeOnMarket({
-      playerId: Number(playerId),
+    const parsedPlayerId = Number(playerId);
+    await marketActionsService.placeOnMarket({
+      playerId: parsedPlayerId,
       price: Number(price),
       type,
       userId: session.user.id as string,
     });
 
-    // 3.5 Check for Biwenger API-level errors wrapped in 200 OK responses
-    console.log('Biwenger API response for sell:', result);
-    const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
-    if (result && (hasErrorStatus || result.error)) {
-      return errorResponse(
-        result.error || `Error de Biwenger (Código ${result.status})`,
-        result.status && result.status >= 400 && result.status < 600 ? result.status : 400
-      );
-    }
-
-    // 4. Return success
-    return successResponse({
+    return mutationSuccessResponse({
       message: 'Jugador procesado en el mercado correctamente',
-      biwengerResponse: result,
+      status: 'completed',
+      playerId: parsedPlayerId,
+      mode: type,
     });
-  } catch (error: any) {
-    console.error('Market Sell API Error:', error);
-
-    // Check if it's a Biwenger-specific error
-    const message = error.message || 'Error al poner el jugador en el mercado';
-    return errorResponse(message, 500);
+  } catch {
+    console.error('Market sell mutation failed');
+    return errorResponse('Error al poner el jugador en el mercado', 500);
   }
 }

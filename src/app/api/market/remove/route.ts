@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { marketActionsService } from '@/lib/services/marketActionsService';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 export async function DELETE(request: Request) {
   try {
@@ -16,14 +16,15 @@ export async function DELETE(request: Request) {
       return errorResponse('ID de jugador no proporcionado', 400);
     }
 
-    const result = await marketActionsService.withdrawFromMarket({
-      playerId: parseInt(playerId),
+    const parsedPlayerId = parseInt(playerId);
+    await marketActionsService.withdrawFromMarket({
+      playerId: parsedPlayerId,
       userId: session.user.id,
     });
 
-    return successResponse(result, 200);
-  } catch (error: any) {
-    console.error('Market Remove API Error:', error);
-    return errorResponse(error.message || 'Error al retirar del mercado', 500);
+    return mutationSuccessResponse({ status: 'completed', playerId: parsedPlayerId });
+  } catch {
+    console.error('Market remove mutation failed');
+    return errorResponse('Error al retirar del mercado', 500);
   }
 }

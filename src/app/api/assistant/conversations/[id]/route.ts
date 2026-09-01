@@ -5,8 +5,7 @@ import {
   findAssistantConversation,
   getAssistantMessages,
 } from '@/lib/services/features/assistantService';
-import { errorResponse } from '@/lib/utils/response';
-import { NextResponse } from 'next/server';
+import { errorResponse, privateJsonResponse } from '@/lib/utils/response';
 
 const idSchema = z.string().uuid();
 
@@ -33,10 +32,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
     const messages = await getAssistantMessages(conversation.id);
 
-    return NextResponse.json(
-      { success: true, data: { conversation, messages } },
-      { headers: { 'Cache-Control': 'no-store' } }
-    );
+    return privateJsonResponse({ success: true, data: { conversation, messages } });
   } catch (error) {
     console.error('[API Assistant Conversation] Error:', error);
     return errorResponse('No se ha podido cargar la conversación.', 500);
@@ -60,10 +56,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
     await deleteAssistantConversation(session.user.id, conversation.id);
 
-    return NextResponse.json(
-      { success: true, data: { id: conversation.id } },
-      { headers: { 'Cache-Control': 'no-store' } }
-    );
+    return privateJsonResponse({ success: true, data: { id: conversation.id } });
   } catch (error) {
     console.error('[API Assistant Conversation] Error:', error);
     return errorResponse('No se ha podido eliminar la conversación.', 500);

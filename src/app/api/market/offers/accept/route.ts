@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { marketActionsService } from '@/lib/services/marketActionsService';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 export async function POST(request: Request) {
   try {
@@ -15,15 +15,21 @@ export async function POST(request: Request) {
       return errorResponse('ID de oferta no proporcionado', 400);
     }
 
-    const result = await marketActionsService.acceptOffer({
-      offerId: Number(offerId),
+    const parsedOfferId = Number(offerId);
+    const parsedPlayerId = playerId ? Number(playerId) : undefined;
+    await marketActionsService.acceptOffer({
+      offerId: parsedOfferId,
       userId: session.user.id,
-      playerId: playerId ? Number(playerId) : undefined,
+      playerId: parsedPlayerId,
     });
 
-    return successResponse(result, 200);
-  } catch (error: any) {
-    console.error('Offer Accept API Error:', error);
-    return errorResponse(error.message || 'Error al aceptar la oferta', 500);
+    return mutationSuccessResponse({
+      status: 'completed',
+      offerId: parsedOfferId,
+      ...(parsedPlayerId ? { playerId: parsedPlayerId } : {}),
+    });
+  } catch {
+    console.error('Offer accept mutation failed');
+    return errorResponse('Error al aceptar la oferta', 500);
   }
 }

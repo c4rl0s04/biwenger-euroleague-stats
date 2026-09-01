@@ -5,6 +5,12 @@ import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import authConfig from './auth.config';
+import {
+  applyAccountStateToAuthToken,
+  applyUserToAuthToken,
+  createSafeBrowserSession,
+  sanitizeAuthToken,
+} from '@/lib/auth/session-safety';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -49,49 +55,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           email: user.email,
           image: user.icon,
-          biwengerToken: user.biwengerToken,
+          biwengerLinked: Boolean(user.biwengerToken),
         };
       },
     }),
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user, trigger, session: sessionData }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.biwengerToken = user.biwengerToken;
-      }
+    async jwt({ token, user, trigger }) {
+      let safeToken = applyUserToAuthToken(token, user);
 
-      // If biwengerToken or email is missing but we have an id, refresh from DB
-      // This helps with existing sessions after a schema/logic update
-      if (token.id && (!token.biwengerToken || token.email === undefined)) {
+      // Refresh browser-safe account state from the database. Client session
+      // update payloads are deliberately ignored.
+      if (
+        safeToken.id &&
+        (trigger === 'update' ||
+          safeToken.biwengerLinked === undefined ||
+          safeToken.email === undefined)
+      ) {
         try {
           const dbUser = await db.query.users.findFirst({
-            where: eq(users.id, token.id),
+            where: eq(users.id, safeToken.id),
+            columns: { email: true, biwengerToken: true },
           });
-          if (dbUser) {
-            token.biwengerToken = dbUser.biwengerToken;
-            token.email = dbUser.email;
-          }
-        } catch (e) {
-          console.error('Error auto-refreshing JWT from DB:', e);
+          safeToken = applyAccountStateToAuthToken(safeToken, dbUser);
+        } catch {
+          console.error('Error refreshing safe account state for JWT');
         }
       }
 
-      if (trigger === 'update' && sessionData) {
-        if (sessionData.biwengerToken) token.biwengerToken = sessionData.biwengerToken;
-        if (sessionData.email) token.email = sessionData.email;
-      }
-      return token;
+      return sanitizeAuthToken(safeToken);
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.biwengerToken = token.biwengerToken;
-      }
-      return session;
+      return createSafeBrowserSession(session, token);
     },
   },
   session: {

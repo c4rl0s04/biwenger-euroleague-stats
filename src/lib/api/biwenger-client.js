@@ -146,16 +146,9 @@ export async function biwengerFetch(endpoint, options = {}) {
     // ------------------------------------
 
     if (!response.ok) {
-      let errorDetails = '';
-      try {
-        const errorData = await response.text(); // Use text() to be safe if not JSON
-        errorDetails = ` - Details: ${errorData}`;
-      } catch (e) {
-        // Ignore read error
-      }
-      throw new Error(
-        `Biwenger API Error: ${response.status} ${response.statusText}${errorDetails}`
-      );
+      // Provider response bodies are deliberately excluded because they may
+      // contain credentials or other private account data.
+      throw new Error(`Biwenger API Error: ${response.status} ${response.statusText}`);
     }
 
     const text = await response.text();

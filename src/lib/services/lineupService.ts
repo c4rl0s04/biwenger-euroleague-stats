@@ -2,6 +2,8 @@ import { db } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { biwengerFetch } from '../api/biwenger-client.js';
+import { createSafeLineupResponse } from './lineupResponse';
+import { assertProviderMutationSucceeded } from './providerMutationResult';
 
 /**
  * Service to handle raw Lineup operations
@@ -24,12 +26,15 @@ export const lineupService = {
 
     // 2. Call Biwenger API with the custom token
     // Lineup updates are PATCH requests to /user, with the payload wrapped in a 'lineup' key
-    return await biwengerFetch('/user', {
+    const result = await biwengerFetch('/user', {
       method: 'PUT',
       body: { lineup },
       customToken: user.biwengerToken,
       customUserId: userId,
     });
+
+    assertProviderMutationSucceeded(result);
+    return { status: 'completed' as const };
   },
 
   /**
@@ -53,6 +58,6 @@ export const lineupService = {
       cache: 'no-store',
     });
 
-    return userData.data;
+    return createSafeLineupResponse(userData.data);
   },
 };

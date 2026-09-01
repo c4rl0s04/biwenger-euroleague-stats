@@ -1,7 +1,6 @@
-import { NextResponse } from 'next/server';
-import { HoopgridService, hoopgridService } from '@/lib/services/features/hoopgridService';
+import { hoopgridService } from '@/lib/services/features/hoopgridService';
 import { auth } from '@/auth';
-import { cookies } from 'next/headers';
+import { privateJsonResponse } from '@/lib/utils/response';
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +11,7 @@ export async function POST(request: Request) {
     const userId = session?.user?.id;
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return privateJsonResponse({ error: 'Unauthorized' }, 401);
     }
 
     if (action === 'submitBatch') {
@@ -31,7 +30,7 @@ export async function POST(request: Request) {
         );
         results.push({ cellIndex: cellIdx, ...res });
       }
-      return NextResponse.json({ success: true, results });
+      return privateJsonResponse({ success: true, results });
     }
 
     // 2. Submit guess via service
@@ -43,9 +42,9 @@ export async function POST(request: Request) {
       dryRun
     );
 
-    return NextResponse.json(result);
+    return privateJsonResponse(result);
   } catch (error: any) {
     console.error('Hoopgrid Guess Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return privateJsonResponse({ error: error.message }, 500);
   }
 }

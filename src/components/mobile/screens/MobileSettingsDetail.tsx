@@ -76,16 +76,14 @@ function AccountSettings() {
   );
 }
 
-function BiwengerSettings() {
+function BiwengerSettings({ initialLinked }: { initialLinked: boolean }) {
   const { data: session, update } = useSession();
+  const [isLinked, setIsLinked] = useState(initialLinked);
   const [email, setEmail] = useState(session?.user?.email ?? '');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const isLinked = Boolean(
-    (session?.user as { biwengerToken?: string } | undefined)?.biwengerToken
-  );
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -100,7 +98,8 @@ function BiwengerSettings() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'No se ha podido vincular la cuenta.');
-      await update?.({ biwengerToken: data.token, email: data.email });
+      setIsLinked(Boolean(data.biwengerLinked));
+      await update?.();
       setPassword('');
       setSuccess('Cuenta vinculada y lista para sincronizar.');
     } catch (requestError) {
@@ -167,12 +166,18 @@ const copy: Record<SettingsSection, { title: string; description: string }> = {
   install: { title: 'Instalación', description: 'Estado e instrucciones de la aplicación.' },
 };
 
-export default function MobileSettingsDetail({ section }: { section: SettingsSection }) {
+export default function MobileSettingsDetail({
+  section,
+  biwengerLinked = false,
+}: {
+  section: SettingsSection;
+  biwengerLinked?: boolean;
+}) {
   const current = copy[section];
   return (
     <MobileDetailScaffold title={current.title} context="Ajustes" backHref="/settings" description={current.description}>
       {section === 'account' && <AccountSettings />}
-      {section === 'biwenger' && <BiwengerSettings />}
+      {section === 'biwenger' && <BiwengerSettings initialLinked={biwengerLinked} />}
       {section === 'appearance' && <AppearanceSettings />}
       {section === 'install' && <InstallSettings />}
     </MobileDetailScaffold>

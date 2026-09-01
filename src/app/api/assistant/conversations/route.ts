@@ -4,8 +4,7 @@ import {
   createAssistantConversation,
   listAssistantConversations,
 } from '@/lib/services/features/assistantService';
-import { errorResponse } from '@/lib/utils/response';
-import { NextResponse } from 'next/server';
+import { errorResponse, privateJsonResponse } from '@/lib/utils/response';
 
 const createConversationSchema = z.object({
   firstPrompt: z.string().trim().min(1).max(4000),
@@ -21,10 +20,7 @@ export async function GET() {
 
     const conversations = await listAssistantConversations(session.user.id);
 
-    return NextResponse.json(
-      { success: true, data: { conversations } },
-      { headers: { 'Cache-Control': 'no-store' } }
-    );
+    return privateJsonResponse({ success: true, data: { conversations } });
   } catch (error) {
     console.error('[API Assistant Conversations] Error:', error);
     return errorResponse('No se han podido cargar las conversaciones.', 500);
@@ -50,10 +46,7 @@ export async function POST(request: Request) {
       parsedRequest.data.firstPrompt
     );
 
-    return NextResponse.json(
-      { success: true, data: { conversation } },
-      { status: 201, headers: { 'Cache-Control': 'no-store' } }
-    );
+    return privateJsonResponse({ success: true, data: { conversation } }, 201);
   } catch (error) {
     console.error('[API Assistant Conversations] Error:', error);
     return errorResponse('No se ha podido crear la conversación.', 500);

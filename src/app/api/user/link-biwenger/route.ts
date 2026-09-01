@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { privateJsonResponse } from '@/lib/utils/response';
 
 interface BiwengerLoginResponse {
   token?: string;
@@ -20,10 +20,7 @@ export async function POST(req: Request) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json(
-      { message: 'No autorizado. Por favor, inicia sesión.' },
-      { status: 401 }
-    );
+    return privateJsonResponse({ message: 'No autorizado. Por favor, inicia sesión.' }, 401);
   }
 
   try {
@@ -33,10 +30,7 @@ export async function POST(req: Request) {
     };
 
     if (!password) {
-      return NextResponse.json(
-        { message: 'La contraseña de Biwenger es obligatoria.' },
-        { status: 400 }
-      );
+      return privateJsonResponse({ message: 'La contraseña de Biwenger es obligatoria.' }, 400);
     }
 
     const user = await db.query.users.findFirst({
@@ -44,19 +38,17 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
-      return NextResponse.json({ message: 'Usuario no encontrado.' }, { status: 404 });
+      return privateJsonResponse({ message: 'Usuario no encontrado.' }, 404);
     }
 
     const email = providedEmail || user.email;
 
     if (!email) {
-      return NextResponse.json(
+      return privateJsonResponse(
         { message: 'Por favor, proporciona un email para realizar la vinculación.' },
-        { status: 400 }
+        400
       );
     }
-
-    console.log(`🔗 Intentando vincular Biwenger para: ${email}`);
 
     const biwengerRes = await fetch('https://biwenger.as.com/api/v2/auth/login', {
       method: 'POST',
@@ -77,37 +69,31 @@ export async function POST(req: Request) {
     const responseData = (await biwengerRes.json()) as BiwengerLoginResponse;
 
     if (!biwengerRes.ok) {
-      const errorMsg =
-        responseData.message || responseData.error || 'Credenciales de Biwenger incorrectas.';
-      console.warn(`❌ Fallo en autenticación Biwenger (${biwengerRes.status}):`, errorMsg);
-      return NextResponse.json({ message: errorMsg }, { status: biwengerRes.status });
+      const status =
+        biwengerRes.status >= 400 && biwengerRes.status < 500 ? biwengerRes.status : 502;
+      console.warn(`Biwenger link authentication failed with status ${biwengerRes.status}`);
+      return privateJsonResponse({ message: 'Credenciales de Biwenger incorrectas.' }, status);
     }
 
     const token = responseData.token || responseData.data?.token;
 
     if (!token) {
-      console.error('⚠️ Autenticación exitosa pero no se recibió un token válido:', responseData);
-      return NextResponse.json(
-        { message: 'Error al obtener el token de acceso desde Biwenger.' },
-        { status: 500 }
-      );
+      console.error('Biwenger link authentication returned no usable credential');
+      return privateJsonResponse({ message: 'Error al obtener el acceso desde Biwenger.' }, 502);
     }
 
     await db.update(users).set({ biwengerToken: token, email }).where(eq(users.id, user.id));
 
-    console.log(`✅ Cuenta de Biwenger vinculada con éxito para: ${email}`);
-
-    return NextResponse.json({
-      message: '¡Cuenta vinculada con éxito! Tus datos se sincronizarán usando este token.',
+    return privateJsonResponse({
+      message: '¡Cuenta vinculada con éxito! Tus datos se sincronizarán de forma segura.',
       status: 'linked',
-      token,
-      email,
+      biwengerLinked: true,
     });
-  } catch (error) {
-    console.error('💥 Error crítico en /api/user/link-biwenger:', error);
-    return NextResponse.json(
+  } catch {
+    console.error('Unexpected Biwenger link request failure');
+    return privateJsonResponse(
       { message: 'Ocurrió un error inesperado al conectar con Biwenger.' },
-      { status: 500 }
+      500
     );
   }
 }

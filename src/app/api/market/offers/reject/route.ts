@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { marketActionsService } from '@/lib/services/marketActionsService';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 export async function POST(request: Request) {
   try {
@@ -15,14 +15,15 @@ export async function POST(request: Request) {
       return errorResponse('ID de oferta no proporcionado', 400);
     }
 
-    const result = await marketActionsService.rejectOffer({
-      offerId: parseInt(offerId),
+    const parsedOfferId = parseInt(offerId);
+    await marketActionsService.rejectOffer({
+      offerId: parsedOfferId,
       userId: session.user.id,
     });
 
-    return successResponse(result, 200);
-  } catch (error: any) {
-    console.error('Offer Reject API Error:', error);
-    return errorResponse(error.message || 'Error al rechazar la oferta', 500);
+    return mutationSuccessResponse({ status: 'completed', offerId: parsedOfferId });
+  } catch {
+    console.error('Offer reject mutation failed');
+    return errorResponse('Error al rechazar la oferta', 500);
   }
 }

@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { biwengerFetch } from '../api/biwenger-client.js';
 import { resolveReadSeasonId } from '../db/season-context';
 import { assertWritableSeason } from '../seasons';
+import { assertProviderMutationSucceeded } from './providerMutationResult';
 
 async function clearLocalPlayerOwner(playerId: number) {
   const seasonId = await resolveReadSeasonId();
@@ -63,8 +64,9 @@ export const marketActionsService = {
 
     // Check if the sell was successful on Biwenger.
     // If it was, and the type is 'immediateSell', set ownerId to null!
-    const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
-    if (result && !hasErrorStatus && !result.error && type === 'immediateSell') {
+    assertProviderMutationSucceeded(result);
+
+    if (type === 'immediateSell') {
       try {
         await clearLocalPlayerOwner(playerId);
         console.log(
@@ -75,7 +77,7 @@ export const marketActionsService = {
       }
     }
 
-    return result;
+    return { status: 'completed' as const, playerId, mode: type };
   },
 
   /**
@@ -101,7 +103,7 @@ export const marketActionsService = {
 
     // 2. Call Biwenger API native team sell
     // Payload format: {type: "team", price: 100}
-    return await biwengerFetch('/market', {
+    const result = await biwengerFetch('/market', {
       method: 'POST',
       body: {
         type: 'team',
@@ -110,6 +112,9 @@ export const marketActionsService = {
       customToken: user.biwengerToken,
       customUserId: userId,
     });
+
+    assertProviderMutationSucceeded(result);
+    return { status: 'completed' as const };
   },
 
   /**
@@ -128,11 +133,14 @@ export const marketActionsService = {
 
     // 2. Call Biwenger API
     // DELETE https://biwenger.as.com/api/v2/market?player=ID
-    return await biwengerFetch(`/market?player=${playerId}`, {
+    const result = await biwengerFetch(`/market?player=${playerId}`, {
       method: 'DELETE',
       customToken: user.biwengerToken,
       customUserId: userId,
     });
+
+    assertProviderMutationSucceeded(result);
+    return { status: 'completed' as const, playerId };
   },
 
   /**
@@ -169,8 +177,9 @@ export const marketActionsService = {
 
     // Check if the accept was successful on Biwenger.
     // If it was, and playerId is provided, set ownerId to null!
-    const hasErrorStatus = result && result.status && (result.status < 200 || result.status >= 300);
-    if (result && !hasErrorStatus && !result.error && playerId) {
+    assertProviderMutationSucceeded(result);
+
+    if (playerId) {
       try {
         await clearLocalPlayerOwner(playerId);
         console.log(
@@ -181,7 +190,7 @@ export const marketActionsService = {
       }
     }
 
-    return result;
+    return { status: 'completed' as const, offerId, ...(playerId ? { playerId } : {}) };
   },
 
   /**
@@ -199,7 +208,7 @@ export const marketActionsService = {
 
     // Correct Biwenger endpoint for rejecting: PUT /offers/:id
     // Payload: { status: "rejected" }
-    return await biwengerFetch(`/offers/${offerId}`, {
+    const result = await biwengerFetch(`/offers/${offerId}`, {
       method: 'PUT',
       body: {
         status: 'rejected',
@@ -207,5 +216,8 @@ export const marketActionsService = {
       customToken: user.biwengerToken,
       customUserId: userId,
     });
+
+    assertProviderMutationSucceeded(result);
+    return { status: 'completed' as const, offerId };
   },
 };

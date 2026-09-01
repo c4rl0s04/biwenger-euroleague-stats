@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 
@@ -75,6 +75,11 @@ describe('user and lineup route contracts', () => {
     vi.mocked(auth).mockResolvedValue({ user: { id: '42' } } as any);
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
   it('covers GET /api/users success and error envelopes', async () => {
     vi.mocked(services.fetchAllUsers).mockResolvedValue([{ id: '1', name: 'User' }] as any);
 
@@ -93,7 +98,11 @@ describe('user and lineup route contracts', () => {
 
   it('covers GET and POST /api/users/lineup contracts', async () => {
     vi.mocked(lineupService.getLineup).mockResolvedValue({ playersID: [1] } as any);
-    vi.mocked(lineupService.updateLineup).mockResolvedValue({ ok: true } as any);
+    vi.mocked(lineupService.updateLineup).mockResolvedValue({
+      status: 200,
+      token: 'lineup-provider-canary-token',
+      privateProviderPayload: { authorization: 'Bearer lineup-provider-canary-token' },
+    } as any);
 
     const { GET, POST } = await import('@/app/api/users/lineup/route');
     const getResponse = await GET(makeRequest('http://localhost/api/users/lineup'));
@@ -111,6 +120,10 @@ describe('user and lineup route contracts', () => {
     expect(postResponse.status).toBe(200);
     expect(postJson.success).toBe(true);
     expect(postJson.data.message).toBe('Alineación actualizada en Biwenger');
+    expect(JSON.stringify(postJson)).not.toContain('lineup-provider-canary-token');
+    expect(JSON.stringify(postJson)).not.toContain('privateProviderPayload');
+    expect(postResponse.headers.get('cache-control')).toContain('private');
+    expect(postResponse.headers.get('cache-control')).toContain('no-store');
     expect(lineupService.updateLineup).toHaveBeenCalledWith({
       lineup: { type: '1-2-2', playersID: [1], reservesID: [], captain: 1 },
       userId: '42',
@@ -118,6 +131,7 @@ describe('user and lineup route contracts', () => {
 
     const missingPost = await POST(jsonRequest('http://localhost/api/users/lineup', {}));
     expect(missingPost.status).toBe(400);
+    expect(missingPost.headers.get('cache-control')).toContain('no-store');
   });
 
   it('rejects unauthenticated lineup reads and writes', async () => {
@@ -154,6 +168,8 @@ describe('user and lineup route contracts', () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ message: 'Contraseña actualizada correctamente' });
+    expect(response.headers.get('cache-control')).toContain('private');
+    expect(response.headers.get('cache-control')).toContain('no-store');
     expect(updateUserPassword).toHaveBeenCalledWith('new-hash', '42');
 
     vi.mocked(auth).mockResolvedValue(null as any);
@@ -167,6 +183,7 @@ describe('user and lineup route contracts', () => {
   });
 
   it('covers /api/user/link-biwenger validation and success contracts', async () => {
+    const canaryToken = 'link-biwenger-canary-token';
     vi.mocked(db.query.users.findFirst).mockResolvedValue({
       id: '42',
       email: 'u@example.com',
@@ -175,7 +192,11 @@ describe('user and lineup route contracts', () => {
       'fetch',
       vi.fn(async () => ({
         ok: true,
-        json: async () => ({ token: 'token-123' }),
+        status: 200,
+        json: async () => ({
+          token: canaryToken,
+          privateProviderPayload: { authorization: `Bearer ${canaryToken}` },
+        }),
       }))
     );
 
@@ -187,11 +208,50 @@ describe('user and lineup route contracts', () => {
 
     expect(response.status).toBe(200);
     expect(json.status).toBe('linked');
-    expect(json.token).toBe('token-123');
+    expect(json.biwengerLinked).toBe(true);
+    expect(JSON.stringify(json)).not.toContain(canaryToken);
+    expect(JSON.stringify(json)).not.toContain('token');
+    expect(JSON.stringify(json)).not.toContain('privateProviderPayload');
+    expect(response.headers.get('cache-control')).toContain('private');
+    expect(response.headers.get('cache-control')).toContain('no-store');
 
     const missingPassword = await POST(
       jsonRequest('http://localhost/api/user/link-biwenger', {}) as any
     );
     expect(missingPassword.status).toBe(400);
+    expect(missingPassword.headers.get('cache-control')).toContain('no-store');
   }, 10000);
+
+  it('does not forward or log an unsafe Biwenger authentication response', async () => {
+    const canaryToken = 'provider-error-canary-token';
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      id: '42',
+      email: 'u@example.com',
+    } as any);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: false,
+        status: 401,
+        json: async () => ({
+          token: canaryToken,
+          message: `Authorization Bearer ${canaryToken}`,
+        }),
+      }))
+    );
+
+    const { POST } = await import('@/app/api/user/link-biwenger/route');
+    const response = await POST(
+      jsonRequest('http://localhost/api/user/link-biwenger', {
+        password: 'synthetic-secret',
+      }) as any
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(JSON.stringify(json)).not.toContain(canaryToken);
+    expect(JSON.stringify(warn.mock.calls)).not.toContain(canaryToken);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
 });
