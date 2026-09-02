@@ -1,12 +1,16 @@
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const queries = vi.hoisted(() => ({
-  getOfficialPlayByPlay: vi.fn(),
-  getOfficialShots: vi.fn(),
-}));
+const feature = vi.hoisted(() => {
+  class MatchesInputError extends Error {}
+  return {
+    MatchesInputError,
+    getOfficialPlayByPlayData: vi.fn(),
+    getOfficialShotData: vi.fn(),
+  };
+});
 
-vi.mock('@/lib/db/queries/competition/official-game-data', () => queries);
+vi.mock('@/features/matches/server', () => feature);
 
 import { GET as getPlays } from '../play-by-play/route';
 import { GET as getShots } from '../shots/route';
@@ -15,10 +19,9 @@ describe('official game detail routes', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('passes play filters and uses short live caching', async () => {
-    queries.getOfficialPlayByPlay.mockResolvedValue({
-      match: { id: 42, status: 'live' },
-      finalizedAt: null,
-      items: [],
+    feature.getOfficialPlayByPlayData.mockResolvedValue({
+      data: { match: { id: 42, status: 'live' }, finalizedAt: null, items: [] },
+      cacheSeconds: 15,
     });
     const response = await getPlays(
       new NextRequest(
@@ -26,19 +29,21 @@ describe('official game detail routes', () => {
       ),
       { params: Promise.resolve({ id: '42' }) }
     );
-    expect(queries.getOfficialPlayByPlay).toHaveBeenCalledWith(42, {
-      period: 2,
-      teamCode: 'MAD',
-      playerId: 7,
+    expect(feature.getOfficialPlayByPlayData).toHaveBeenCalledWith({
+      matchId: '42',
+      filters: { period: '2', teamCode: 'mad', playerId: '7' },
     });
     expect(response.headers.get('Cache-Control')).toContain('max-age=15');
   });
 
   it('uses long caching for finalized shots and rejects invalid filters', async () => {
-    queries.getOfficialShots.mockResolvedValue({
-      match: { id: 42, status: 'finished' },
-      finalizedAt: new Date().toISOString(),
-      items: [],
+    feature.getOfficialShotData.mockResolvedValueOnce({
+      data: {
+        match: { id: 42, status: 'finished' },
+        finalizedAt: new Date().toISOString(),
+        items: [],
+      },
+      cacheSeconds: 3600,
     });
     const response = await getShots(
       new NextRequest('http://localhost/api/matches/42/shots?period=4'),
@@ -46,11 +51,14 @@ describe('official game detail routes', () => {
     );
     expect(response.headers.get('Cache-Control')).toContain('max-age=3600');
 
+    feature.getOfficialShotData.mockRejectedValueOnce(
+      new feature.MatchesInputError('playerId must be a positive integer.')
+    );
     const invalid = await getShots(
       new NextRequest('http://localhost/api/matches/42/shots?playerId=oops'),
       { params: Promise.resolve({ id: '42' }) }
     );
     expect(invalid.status).toBe(400);
-    expect(queries.getOfficialShots).toHaveBeenCalledTimes(1);
+    expect(feature.getOfficialShotData).toHaveBeenCalledTimes(2);
   });
 });
