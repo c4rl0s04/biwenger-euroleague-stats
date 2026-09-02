@@ -58,7 +58,7 @@ export function TeamSelector({ teams, selectedTeamId, onTeamChange, className })
                       : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
                   )}
                 >
-                  <img src={team.img} alt="" className="w-6 h-6 object-contain" />
+                  <img src={team.imageUrl} alt="" className="w-6 h-6 object-contain" />
                   <span className="truncate">{team.name}</span>
                   {team.id === selectedTeamId && (
                     <div className="ml-auto w-2 h-2 rounded-full bg-blue-500" />

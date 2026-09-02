@@ -20,8 +20,8 @@ export function MatchCard({ match }) {
   const isLive = matchDate && matchDate <= now && !isPlayed;
 
   // Determine winner for highlighting
-  const homeScore = match.home?.score ?? match.home_score ?? 0;
-  const awayScore = match.away?.score ?? match.away_score ?? 0;
+  const homeScore = match.home.score ?? 0;
+  const awayScore = match.away.score ?? 0;
   const homeWinner = isPlayed && homeScore > awayScore;
   const awayWinner = isPlayed && awayScore > homeScore;
 
@@ -52,7 +52,7 @@ export function MatchCard({ match }) {
         <div className="relative w-8 h-8 sm:w-10 sm:h-10 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={match.home.img}
+            src={match.home.imageUrl}
             alt={match.home.name}
             className="w-full h-full object-contain"
           />
@@ -97,7 +97,7 @@ export function MatchCard({ match }) {
         <div className="relative w-8 h-8 sm:w-10 sm:h-10 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={match.away.img}
+            src={match.away.imageUrl}
             alt={match.away.name}
             className="w-full h-full object-contain"
           />

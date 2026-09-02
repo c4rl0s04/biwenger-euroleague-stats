@@ -125,9 +125,6 @@ export {
 // Compare Service
 export { getCompareData, getCompareDataLite } from './features/compareService';
 
-// Matches Service
-export { fetchMatchesGrouped } from './app/matchesService';
-
 // Schedule Service
 export { getUserScheduleService, fetchScheduleRounds } from './app/scheduleService';
 

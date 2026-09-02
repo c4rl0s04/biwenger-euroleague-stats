@@ -5,15 +5,15 @@ import { Dropdown } from '@/components/ui/Dropdown';
 import { cn } from '@/lib/utils';
 
 export function RoundSelector({ rounds, selectedRoundId, onRoundChange, className }) {
-  const activeRound = rounds.find((r) => r.round_id === selectedRoundId);
-  const roundIndex = rounds.findIndex((r) => r.round_id === selectedRoundId);
+  const activeRound = rounds.find((r) => r.roundId === selectedRoundId);
+  const roundIndex = rounds.findIndex((r) => r.roundId === selectedRoundId);
 
   const handlePrev = () => {
-    if (roundIndex > 0) onRoundChange(rounds[roundIndex - 1].round_id);
+    if (roundIndex > 0) onRoundChange(rounds[roundIndex - 1].roundId);
   };
 
   const handleNext = () => {
-    if (roundIndex < rounds.length - 1) onRoundChange(rounds[roundIndex + 1].round_id);
+    if (roundIndex < rounds.length - 1) onRoundChange(rounds[roundIndex + 1].roundId);
   };
 
   if (!activeRound) return null;
@@ -39,7 +39,7 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
       <div className="flex-1">
         <Dropdown
           icon={<Calendar size={16} />}
-          label={activeRound.round_name}
+          label={activeRound.roundName}
           align="center"
           fullWidth
         >
@@ -51,20 +51,20 @@ export function RoundSelector({ rounds, selectedRoundId, onRoundChange, classNam
               <div className="p-1">
                 {rounds.map((r) => (
                   <button
-                    key={r.round_id}
+                    key={r.roundId}
                     onClick={() => {
-                      onRoundChange(r.round_id);
+                      onRoundChange(r.roundId);
                       close();
                     }}
                     className={cn(
                       'w-full text-left px-3 py-2 text-sm rounded-md flex items-center justify-between transition-colors my-0.5 cursor-pointer',
-                      r.round_id === selectedRoundId
+                      r.roundId === selectedRoundId
                         ? 'bg-muted text-white font-medium'
                         : 'text-zinc-400 hover:bg-muted/50 hover:text-zinc-200'
                     )}
                   >
-                    {r.round_name}
-                    {r.round_id === selectedRoundId && (
+                    {r.roundName}
+                    {r.roundId === selectedRoundId && (
                       <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_var(--glow-primary)]" />
                     )}
                   </button>

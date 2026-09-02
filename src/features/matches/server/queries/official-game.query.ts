@@ -1,5 +1,5 @@
-import { db } from '../../client';
-import { resolveReadSeasonId } from '../../season-context';
+import { db } from '@/lib/db/client';
+import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface OfficialGameFilters {
   period?: number;

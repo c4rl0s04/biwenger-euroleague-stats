@@ -13,8 +13,8 @@ import { formatMatchDateShort, formatMatchTime } from '@/lib/utils/date';
  */
 function NormalMarker({ match, isAlternate }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { img: homeImg, code, name } = match.home;
-  const { img: awayImg, code: awayCode, name: awayName } = match.away || {};
+  const { imageUrl: homeImg, code, name } = match.home;
+  const { imageUrl: awayImg, code: awayCode, name: awayName } = match.away || {};
   const teamColor = getTeamColor(code);
 
   return (
@@ -119,14 +119,14 @@ function NormalMarker({ match, isAlternate }) {
  */
 function TourMarker({ venue, selectedTeamId }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { latitude, longitude, code, img: homeImg, match, sequence } = venue;
-  const { img: awayImg, name: awayName } = match.away || {};
+  const { latitude, longitude, code, imageUrl: homeImg, match, sequence } = venue;
+  const { imageUrl: awayImg, name: awayName } = match.away || {};
   const teamColor = getTeamColor(code);
   const isAway = match.away?.id === selectedTeamId;
   const isFinished = match.status === 'finished';
 
-  const homeScore = match.home?.score ?? match.home_score;
-  const awayScore = match.away?.score ?? match.away_score;
+  const homeScore = match.home?.score;
+  const awayScore = match.away?.score;
 
   return (
     <TeamMarker longitude={longitude} latitude={latitude}>
@@ -239,7 +239,7 @@ function TourMarker({ venue, selectedTeamId }) {
  * @param {Array} props.matches - List of matches to display
  * @param {number|string} props.selectedTeamId - ID of the selected team for Tour Mode
  */
-export default function MatchesMap({ matches = [], selectedTeamId = null }) {
+export default function MatchVenueMap({ matches = [], selectedTeamId = null }) {
   const isTourMode = selectedTeamId !== null;
 
   // Process venues and bounds...

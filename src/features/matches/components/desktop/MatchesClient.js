@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { MatchCard } from './MatchCard';
-import MatchesMap from '@/components/schedule/MatchesMap';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Section } from '@/components/layout';
+import MatchVenueMap from '../map/MatchVenueMap';
 
 import { RoundSelector } from './RoundSelector';
 import { TeamSelector } from './TeamSelector';
@@ -50,7 +49,7 @@ function groupMatchesByStatus(matches) {
  */
 export default function MatchesClient({ rounds, defaultRoundId }) {
   const [selectedRoundId, setSelectedRoundId] = useState(
-    defaultRoundId || (rounds.length > 0 ? rounds[0].round_id : null)
+    defaultRoundId || (rounds.length > 0 ? rounds[0].roundId : null)
   );
   const [selectedTeamId, setSelectedTeamId] = useState(null);
 
@@ -69,7 +68,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
   // Derived data based on mode (Round vs Team)
   const isTeamMode = selectedTeamId !== null;
 
-  const activeRound = rounds.find((r) => r.round_id === selectedRoundId);
+  const activeRound = rounds.find((r) => r.roundId === selectedRoundId);
 
   // Get matches based on active filter
   const matchesToDisplay = useMemo(() => {
@@ -166,8 +165,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
               </div>
             )}
 
-            <MatchesMap
-              roundName={activeRound?.round_name}
+            <MatchVenueMap
               matches={matchesToDisplay}
               selectedTeamId={selectedTeamId}
             />
