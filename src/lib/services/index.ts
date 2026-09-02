@@ -106,9 +106,6 @@ export * from './tournamentService';
 // Stats Service
 export * from './statsService';
 
-// Team Service
-export { fetchTeamProfile } from './core/teamService';
-
 // Rounds Service
 export {
   fetchRoundsList,

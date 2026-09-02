@@ -3,24 +3,21 @@
 import { Trophy, Wallet, CheckCircle2, XCircle } from 'lucide-react';
 import { ElegantCard } from '@/components/ui';
 import Image from 'next/image';
-import { cloneElement } from 'react';
+import { cloneElement, type ReactElement } from 'react';
 
-export default function TeamIdentityCard({ team }) {
+import type { TeamProfileViewModel } from '../../models/team-profile';
+
+export default function TeamIdentityCard({ team }: { team: TeamProfileViewModel }) {
   if (!team) return null;
 
   const {
     name,
-    logo,
-    total_fantasy_points,
-    total_value,
-    roster_size,
-    matches_played,
-    wins,
-    losses,
+    logoUrl,
+    metrics: { totalFantasyPoints, totalValue, rosterSize, matchesPlayed, wins, losses, rank },
   } = team;
 
   // Formatters
-  const formatPrice = (price) => {
+  const formatPrice = (price: number) => {
     if (Math.abs(price) >= 1000000) {
       return (price / 1000000).toFixed(1) + 'M€';
     }
@@ -39,9 +36,9 @@ export default function TeamIdentityCard({ team }) {
           <div className="relative shrink-0">
             <div className="absolute -inset-4 rounded-full blur-2xl opacity-10 bg-blue-500 group-hover:opacity-20 transition-opacity" />
             <div className="relative w-20 h-20 lg:w-28 lg:h-28 flex items-center justify-center">
-              {logo ? (
+              {logoUrl ? (
                 <Image
-                  src={logo}
+                  src={logoUrl}
                   alt={name}
                   fill
                   className="object-contain"
@@ -55,14 +52,14 @@ export default function TeamIdentityCard({ team }) {
               )}
 
               {/* Position Badge */}
-              {team.rank > 0 && (
+              {rank > 0 && (
                 <div className="absolute -bottom-1 -right-1 w-9 h-9 lg:w-12 lg:h-12 bg-[#0a0a0a]/90 backdrop-blur-xl rounded-xl flex flex-col items-center justify-center border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] group-hover:scale-110 group-hover:border-primary/40 transition-all duration-500 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
                   <span className="relative z-10 text-[7px] lg:text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-0.5">
                     POS
                   </span>
                   <span className="relative z-10 text-sm lg:text-xl font-black text-white leading-none font-display">
-                    {team.rank}
+                    {rank}
                   </span>
                 </div>
               )}
@@ -77,7 +74,7 @@ export default function TeamIdentityCard({ team }) {
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white/50 uppercase tracking-wider">
-                  {roster_size} Jugadores
+                  {rosterSize} Jugadores
                 </span>
               </div>
             </div>
@@ -88,8 +85,8 @@ export default function TeamIdentityCard({ team }) {
         <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/20">
           <KPICell
             label="Puntos Fantasy"
-            value={total_fantasy_points}
-            sub={`Media: ${(total_fantasy_points / (matches_played || 1)).toFixed(1)}`}
+            value={totalFantasyPoints}
+            sub={`Media: ${(totalFantasyPoints / (matchesPlayed || 1)).toFixed(1)}`}
             icon={<Trophy />}
             color="text-amber-400"
           />
@@ -112,7 +109,7 @@ export default function TeamIdentityCard({ team }) {
 
           <KPICell
             label="Valor Plantilla"
-            value={formatPrice(total_value)}
+            value={formatPrice(totalValue)}
             sub="Total Biwenger"
             icon={<Wallet />}
             color="text-blue-400"
@@ -123,7 +120,21 @@ export default function TeamIdentityCard({ team }) {
   );
 }
 
-function KPICell({ label, value, sub, icon, color = 'text-primary', className = '' }) {
+function KPICell({
+  label,
+  value,
+  sub,
+  icon,
+  color = 'text-primary',
+  className = '',
+}: {
+  label: string;
+  value: string | number;
+  sub: string;
+  icon: ReactElement<{ size?: number }>;
+  color?: string;
+  className?: string;
+}) {
   return (
     <div
       className={`flex flex-col justify-center p-6 lg:p-8 bg-black/20 hover:bg-white/[0.03] transition-colors group/kpi ${className}`}

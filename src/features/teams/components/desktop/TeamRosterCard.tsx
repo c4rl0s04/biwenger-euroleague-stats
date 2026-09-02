@@ -9,7 +9,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getScoreColor } from '@/lib/utils/format';
 import { getColorForUser } from '@/lib/constants/colors';
 
-export default function TeamRosterCard({ roster }) {
+import type { TeamRosterPlayerViewModel } from '../../models/team-profile';
+
+export default function TeamRosterCard({ roster }: { roster: TeamRosterPlayerViewModel[] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all'); // all, base, alero, pivot, free, owned
 
@@ -28,9 +30,9 @@ export default function TeamRosterCard({ roster }) {
     const matchesFilter =
       activeFilter === 'all' ||
       (activeFilter === 'free'
-        ? !player.owner_id
+        ? !player.ownerId
         : activeFilter === 'owned'
-          ? player.owner_id
+          ? Boolean(player.ownerId)
           : player.position.toLowerCase() === activeFilter);
     return matchesSearch && matchesFilter;
   });
@@ -96,13 +98,13 @@ export default function TeamRosterCard({ roster }) {
   );
 }
 
-function PlayerCard({ player, index }) {
-  const formatMoney = (amount) => {
+function PlayerCard({ player, index }: { player: TeamRosterPlayerViewModel; index: number }) {
+  const formatMoney = (amount: number) => {
     if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
     return (amount / 1000).toFixed(0) + 'K';
   };
 
-  const getPositionStyles = (pos) => {
+  const getPositionStyles = (pos: string) => {
     switch (pos) {
       case 'Base':
         return 'text-blue-400 border-blue-400/30 bg-blue-400/10';
@@ -115,11 +117,11 @@ function PlayerCard({ player, index }) {
     }
   };
 
-  const userColor = player.owner_id
-    ? getColorForUser(player.owner_id, player.owner_name, player.owner_color_index)
+  const userColor = player.ownerId
+    ? getColorForUser(player.ownerId, player.ownerName, player.ownerColorIndex)
     : null;
 
-  const scores = player.recent_scores ? player.recent_scores.split(',').slice(0, 5) : [];
+  const scores = player.recentScores ? player.recentScores.split(',').slice(0, 5) : [];
 
   return (
     <motion.div
@@ -142,23 +144,23 @@ function PlayerCard({ player, index }) {
 
             <div
               className={`flex items-center gap-1.5 px-2 py-1 rounded-full border transition-all ${
-                player.owner_id
-                  ? `${userColor?.bgLight || 'bg-amber-500/10'} ${userColor?.border || 'border-amber-500/20'}`
+                player.ownerId
+                  ? `bg-amber-500/10 ${userColor?.border || 'border-amber-500/20'}`
                   : 'bg-emerald-500/10 border-emerald-500/20'
               }`}
             >
               <User
                 size={10}
                 className={
-                  player.owner_id ? userColor?.text || 'text-amber-500' : 'text-emerald-500'
+                  player.ownerId ? userColor?.text || 'text-amber-500' : 'text-emerald-500'
                 }
               />
               <span
                 className={`text-[9px] font-black uppercase tracking-tighter truncate max-w-[60px] ${
-                  player.owner_id ? userColor?.text || 'text-amber-500' : 'text-emerald-500'
+                  player.ownerId ? userColor?.text || 'text-amber-500' : 'text-emerald-500'
                 }`}
               >
-                {player.owner_name || 'Libre'}
+                {player.ownerName || 'Libre'}
               </span>
             </div>
           </div>
@@ -168,9 +170,9 @@ function PlayerCard({ player, index }) {
             <div className="relative w-24 h-24 mb-3">
               <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all" />
               <div className="relative w-full h-full overflow-hidden rounded-full border border-white/5 bg-white/[0.02] group-hover:border-blue-500/20 transition-all">
-                {player.img ? (
+                {player.imageUrl ? (
                   <Image
-                    src={player.img}
+                    src={player.imageUrl}
                     alt={player.name}
                     fill
                     className="object-contain object-top scale-125 pt-2 group-hover:scale-135 transition-transform duration-500"
@@ -184,7 +186,7 @@ function PlayerCard({ player, index }) {
 
             <h4
               className={`text-sm font-black text-white leading-tight transition-colors line-clamp-1 ${
-                player.owner_id
+                player.ownerId
                   ? userColor?.groupHover || 'group-hover:text-blue-400'
                   : 'group-hover:text-emerald-400'
               }`}
@@ -231,13 +233,13 @@ function PlayerCard({ player, index }) {
           </div>
 
           {/* Price Trend Indicator */}
-          {player.price_increment !== 0 && (
+          {player.priceIncrement !== 0 && (
             <div
-              className={`absolute top-12 right-4 flex flex-col items-center ${player.price_increment > 0 ? 'text-emerald-500' : 'text-rose-500'}`}
+              className={`absolute top-12 right-4 flex flex-col items-center ${player.priceIncrement > 0 ? 'text-emerald-500' : 'text-rose-500'}`}
             >
-              {player.price_increment > 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+              {player.priceIncrement > 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
               <span className="text-[8px] font-black">
-                {formatMoney(Math.abs(player.price_increment))}
+                {formatMoney(Math.abs(player.priceIncrement))}
               </span>
             </div>
           )}

@@ -1,13 +1,21 @@
 'use client';
 
-import { Calendar, ChevronRight, MapPin, Clock, Trophy } from 'lucide-react';
+import { Calendar, Trophy } from 'lucide-react';
 import { ElegantCard } from '@/components/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function TeamMatchesCard({ upcoming, recent }) {
+import type { TeamProfileMatchViewModel } from '../../models/team-profile';
+
+export default function TeamMatchesCard({
+  upcoming,
+  recent,
+}: {
+  upcoming: TeamProfileMatchViewModel[];
+  recent: TeamProfileMatchViewModel[];
+}) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Upcoming Matches */}
@@ -35,9 +43,15 @@ export default function TeamMatchesCard({ upcoming, recent }) {
   );
 }
 
-function MatchRow({ match, type }) {
+function MatchRow({
+  match,
+  type,
+}: {
+  match: TeamProfileMatchViewModel;
+  type: 'upcoming' | 'recent';
+}) {
   const isUpcoming = type === 'upcoming';
-  const matchDate = new Date(match.date);
+  const matchDate = new Date(match.date ?? 0);
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] transition-all p-4 group">
@@ -45,7 +59,7 @@ function MatchRow({ match, type }) {
         {/* Date / Round Info */}
         <div className="flex flex-col min-w-[90px]">
           <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">
-            {match.round_name || 'Euroleague'}
+            {match.roundName || 'Euroleague'}
           </span>
           <span className="text-sm font-black text-white uppercase tracking-tight">
             {format(matchDate, 'd MMM', { locale: es })}
@@ -58,20 +72,20 @@ function MatchRow({ match, type }) {
         {/* Teams Cluster */}
         <div className="flex-1 flex items-center justify-center gap-4">
           <Link
-            href={`/team/${match.home_id}`}
+            href={`/team/${match.home.id}`}
             className="flex flex-col items-center gap-2 w-24 group/team hover:scale-105 transition-transform duration-300"
           >
             <div className="relative w-10 h-10 group-hover/team:drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-all">
               <Image
-                src={match.home_img}
-                alt={match.home_team}
+                src={match.home.imageUrl}
+                alt={match.home.name}
                 fill
                 className="object-contain"
                 unoptimized
               />
             </div>
             <span className="text-[10px] font-bold text-white/60 group-hover/team:text-white transition-colors truncate w-full text-center">
-              {match.home_team}
+              {match.home.name}
             </span>
           </Link>
 
@@ -81,35 +95,35 @@ function MatchRow({ match, type }) {
             ) : (
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-xl font-black ${match.home_score > match.away_score ? 'text-white' : 'text-white/40'}`}
+                  className={`text-xl font-black ${(match.home.score ?? 0) > (match.away.score ?? 0) ? 'text-white' : 'text-white/40'}`}
                 >
-                  {match.home_score}
+                  {match.home.score}
                 </span>
                 <span className="text-white/20">-</span>
                 <span
-                  className={`text-xl font-black ${match.away_score > match.home_score ? 'text-white' : 'text-white/40'}`}
+                  className={`text-xl font-black ${(match.away.score ?? 0) > (match.home.score ?? 0) ? 'text-white' : 'text-white/40'}`}
                 >
-                  {match.away_score}
+                  {match.away.score}
                 </span>
               </div>
             )}
           </div>
 
           <Link
-            href={`/team/${match.away_id}`}
+            href={`/team/${match.away.id}`}
             className="flex flex-col items-center gap-2 w-24 group/team hover:scale-105 transition-transform duration-300"
           >
             <div className="relative w-10 h-10 group-hover/team:drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-all">
               <Image
-                src={match.away_img}
-                alt={match.away_team}
+                src={match.away.imageUrl}
+                alt={match.away.name}
                 fill
                 className="object-contain"
                 unoptimized
               />
             </div>
             <span className="text-[10px] font-bold text-white/60 group-hover/team:text-white transition-colors truncate w-full text-center">
-              {match.away_team}
+              {match.away.name}
             </span>
           </Link>
         </div>
