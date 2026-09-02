@@ -6,7 +6,8 @@ const bundleAnalyzer = withBundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone', // Enabled for Docker builds
+  // Vercel supplies its own build adapter; standalone output is only needed by Docker/self-hosting.
+  output: process.env.VERCEL ? undefined : 'standalone',
   serverExternalPackages: [],
   allowedDevOrigins: ['192.168.1.40', '192.168.1.68', 'localhost'],
   images: {
