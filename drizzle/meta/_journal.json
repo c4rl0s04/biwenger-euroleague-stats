@@ -78,6 +78,13 @@
       "when": 1788264506174,
       "tag": "0010_encrypted_biwenger_credentials",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788338331482,
+      "tag": "0011_lock_down_biwenger_credentials",
+      "breakpoints": true
     }
   ]
 }
