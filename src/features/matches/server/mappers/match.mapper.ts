@@ -1,5 +1,6 @@
 import type {
   MatchRoundViewModel,
+  MatchScheduleViewModel,
   MatchTeamViewModel,
   MatchViewModel,
 } from '../../models/match';
@@ -11,10 +12,7 @@ function serializeDate(value: Date | string | null): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
-function mapTeam(
-  row: MatchListRow,
-  side: 'home' | 'away'
-): MatchTeamViewModel {
+function mapTeam(row: MatchListRow, side: 'home' | 'away'): MatchTeamViewModel {
   const home = side === 'home';
   return {
     id: home ? row.homeId : row.awayId,
@@ -61,4 +59,8 @@ export function mapMatchRowsToRounds(rows: MatchListRow[]): MatchRoundViewModel[
   return Array.from(grouped.values())
     .sort((left, right) => left.roundId - right.roundId)
     .map((round, index) => ({ ...round, roundIndex: index + 1 }));
+}
+
+export function mapMatchRowsToSchedule(rows: MatchListRow[]): MatchScheduleViewModel[] {
+  return rows.map((row) => ({ ...mapMatch(row), roundName: row.roundName || '' }));
 }

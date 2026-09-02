@@ -1,7 +1,7 @@
 import { cache } from 'react';
 
-import type { MatchesScreenViewModel } from '@/features/matches/public';
-import { getMatchesScreenData } from '@/features/matches/server';
+import type { MatchScheduleViewModel } from '@/features/matches/public';
+import { getSeasonScheduleData } from '@/features/matches/server';
 
 import type { TeamProfileViewModel } from '../../models/team-profile';
 import { parseTeamId } from '../../validation/team-profile-input';
@@ -26,7 +26,7 @@ export const TEAM_PROFILE_ACCESS_POLICY = Object.freeze({
 export interface TeamProfileServiceDependencies {
   findDetails(teamId: number): Promise<TeamProfileDetailsQueryResult | null>;
   listRoster(teamId: number): Promise<TeamRosterRow[]>;
-  getSeasonMatches(): Promise<MatchesScreenViewModel>;
+  getSeasonSchedule(): Promise<MatchScheduleViewModel[]>;
   now(): Date;
 }
 
@@ -35,17 +35,17 @@ export function createTeamProfileService(dependencies: TeamProfileServiceDepende
     const teamId = parseTeamId(teamIdInput);
     if (teamId == null) return null;
 
-    const [details, rosterRows, matchesScreen] = await Promise.all([
+    const [details, rosterRows, teamSchedule] = await Promise.all([
       dependencies.findDetails(teamId),
       dependencies.listRoster(teamId),
-      dependencies.getSeasonMatches(),
+      dependencies.getSeasonSchedule(),
     ]);
     if (!details) return null;
 
     return {
       ...mapTeamProfileDetails(details),
       roster: mapTeamRoster(rosterRows),
-      ...mapTeamProfileMatches(matchesScreen, teamId, dependencies.now()),
+      ...mapTeamProfileMatches(teamSchedule, teamId, dependencies.now()),
     };
   }
 
@@ -55,7 +55,7 @@ export function createTeamProfileService(dependencies: TeamProfileServiceDepende
 const teamProfileService = createTeamProfileService({
   findDetails: findTeamProfileDetails,
   listRoster: listTeamRoster,
-  getSeasonMatches: getMatchesScreenData,
+  getSeasonSchedule: getSeasonScheduleData,
   now: () => new Date(),
 });
 

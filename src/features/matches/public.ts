@@ -6,6 +6,7 @@ export type {
   MatchListItemViewModel,
   MatchRoundScreenViewModel,
   MatchRoundViewModel,
+  MatchScheduleViewModel,
   MatchesScreenViewModel,
   MatchTeamSummaryViewModel,
   MatchTeamViewModel,

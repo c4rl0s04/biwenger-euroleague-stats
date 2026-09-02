@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { MatchesScreenViewModel } from '@/features/matches/public';
+import type { MatchesScreenViewModel, MatchScheduleViewModel } from '@/features/matches/public';
 
 import type { TeamProfileDetailsQueryResult, TeamRosterRow } from '../queries/team-profile.query';
 import {
@@ -149,6 +149,10 @@ const matchScreen: MatchesScreenViewModel = {
   ],
 };
 
+const schedule = matchScreen.rounds.flatMap((round) =>
+  round.matches.map((match) => ({ ...match, roundName: round.roundName }))
+) satisfies MatchScheduleViewModel[];
+
 describe('team profile mappers', () => {
   it('normalizes database-shaped details and roster rows into serializable models', () => {
     const model = {
@@ -169,9 +173,17 @@ describe('team profile mappers', () => {
   });
 
   it('derives Team-owned recent, upcoming and difficulty projections from Matches models', () => {
-    const result = mapTeamProfileMatches(matchScreen, 7, new Date('2026-09-02T12:00:00.000Z'));
+    const result = mapTeamProfileMatches(
+      [...schedule, { ...schedule[1], id: 32, date: null, roundName: '' }],
+      7,
+      new Date('2026-09-02T12:00:00.000Z')
+    );
 
-    expect(result.recentMatches.map((match) => match.id)).toEqual([31]);
+    expect(result.recentMatches.map((match) => match.id)).toEqual([31, 32]);
+    expect(result.recentMatches[1]).toMatchObject({
+      roundName: '',
+      date: '2026-09-02T12:00:00.000Z',
+    });
     expect(result.upcomingMatches).toMatchObject([
       { id: 50, roundName: 'Jornada 5', difficulty: 'Duro' },
     ]);
@@ -180,7 +192,7 @@ describe('team profile mappers', () => {
 
   it('preserves the existing snake_case HTTP payload while hiding database records internally', () => {
     const matchProjection = mapTeamProfileMatches(
-      matchScreen,
+      schedule,
       7,
       new Date('2026-09-02T12:00:00.000Z')
     );

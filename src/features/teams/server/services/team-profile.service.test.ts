@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/features/matches/server', () => ({ getMatchesScreenData: vi.fn() }));
+vi.mock('@/features/matches/server', () => ({ getSeasonScheduleData: vi.fn() }));
 vi.mock('../queries/team-profile.query', () => ({
   findTeamProfileDetails: vi.fn(),
   listTeamRoster: vi.fn(),
 }));
 
-import type { MatchesScreenViewModel } from '@/features/matches/public';
+import type { MatchScheduleViewModel } from '@/features/matches/public';
 
 import {
   createTeamProfileService,
@@ -17,11 +17,11 @@ import {
 describe('team profile service', () => {
   const findDetails = vi.fn();
   const listRoster = vi.fn();
-  const getSeasonMatches = vi.fn();
+  const getSeasonSchedule = vi.fn();
   const service = createTeamProfileService({
     findDetails,
     listRoster,
-    getSeasonMatches,
+    getSeasonSchedule,
     now: () => new Date('2026-09-02T12:00:00.000Z'),
   });
 
@@ -46,11 +46,7 @@ describe('team profile service', () => {
       rank: 4,
     });
     listRoster.mockResolvedValue([]);
-    getSeasonMatches.mockResolvedValue({
-      rounds: [],
-      currentRoundId: null,
-      selectedRoundId: null,
-    } satisfies MatchesScreenViewModel);
+    getSeasonSchedule.mockResolvedValue([] satisfies MatchScheduleViewModel[]);
   });
 
   it('declares public read-only access and the existing five-minute HTTP cache policy', () => {
@@ -69,14 +65,14 @@ describe('team profile service', () => {
     });
     expect(findDetails).toHaveBeenCalledWith(7);
     expect(listRoster).toHaveBeenCalledWith(7);
-    expect(getSeasonMatches).toHaveBeenCalledOnce();
+    expect(getSeasonSchedule).toHaveBeenCalledOnce();
   });
 
   it('rejects invalid identifiers before any query and preserves not-found behavior', async () => {
     await expect(service.getTeamProfileData('invalid')).resolves.toBeNull();
     expect(findDetails).not.toHaveBeenCalled();
     expect(listRoster).not.toHaveBeenCalled();
-    expect(getSeasonMatches).not.toHaveBeenCalled();
+    expect(getSeasonSchedule).not.toHaveBeenCalled();
 
     findDetails.mockResolvedValueOnce(null);
     await expect(service.getTeamProfileData('999')).resolves.toBeNull();

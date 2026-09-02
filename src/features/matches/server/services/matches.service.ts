@@ -4,10 +4,11 @@ import { resolveRoundIdByPolicy } from '@/lib/db';
 
 import type {
   MatchRoundScreenViewModel,
+  MatchScheduleViewModel,
   MatchesScreenViewModel,
 } from '../../models/match';
 import { parseRoundId } from '../../validation/match-input';
-import { mapMatchRowsToRounds } from '../mappers/match.mapper';
+import { mapMatchRowsToRounds, mapMatchRowsToSchedule } from '../mappers/match.mapper';
 import { listMatchRows, type MatchListRow } from '../queries/match-list.query';
 
 export const MATCHES_REVALIDATE_SECONDS = 300;
@@ -47,11 +48,16 @@ export function createMatchesService(dependencies: MatchesServiceDependencies) {
       round:
         selectedRoundId == null
           ? null
-          : screen.rounds.find((entry) => entry.roundId === selectedRoundId) ?? null,
+          : (screen.rounds.find((entry) => entry.roundId === selectedRoundId) ?? null),
     };
   }
 
-  return { getMatchesScreenData, getMatchRoundScreenData };
+  async function getSeasonScheduleData(): Promise<MatchScheduleViewModel[]> {
+    const rows = await dependencies.listRows();
+    return mapMatchRowsToSchedule(rows);
+  }
+
+  return { getMatchesScreenData, getMatchRoundScreenData, getSeasonScheduleData };
 }
 
 const matchesService = createMatchesService({
@@ -66,3 +72,4 @@ const matchesService = createMatchesService({
 // request the same screen model. Route-level revalidation remains the cross-request policy.
 export const getMatchesScreenData = cache(matchesService.getMatchesScreenData);
 export const getMatchRoundScreenData = cache(matchesService.getMatchRoundScreenData);
+export const getSeasonScheduleData = cache(matchesService.getSeasonScheduleData);

@@ -28,6 +28,10 @@ export interface MatchViewModel extends MatchListItemViewModel {
   away: MatchTeamViewModel;
 }
 
+export interface MatchScheduleViewModel extends MatchViewModel {
+  roundName: string;
+}
+
 export interface MatchRoundViewModel {
   roundId: number;
   roundName: string;

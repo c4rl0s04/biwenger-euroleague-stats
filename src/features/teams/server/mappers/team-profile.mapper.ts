@@ -1,4 +1,4 @@
-import type { MatchesScreenViewModel } from '@/features/matches/public';
+import type { MatchScheduleViewModel } from '@/features/matches/public';
 
 import type {
   TeamMatchDifficulty,
@@ -110,17 +110,14 @@ function difficultyFor(
 }
 
 export function mapTeamProfileMatches(
-  screen: MatchesScreenViewModel,
+  schedule: MatchScheduleViewModel[],
   teamId: number,
   now: Date
 ): Pick<TeamProfileViewModel, 'upcomingMatches' | 'recentMatches'> {
-  const matches = screen.rounds.flatMap((round) =>
-    round.matches.map((match) => ({ ...match, roundName: round.roundName }))
-  );
-  const teamMatches = matches.filter(
+  const performance = buildPerformanceMap(schedule);
+  const teamMatches = schedule.filter(
     (match) => match.home.id === teamId || match.away.id === teamId
   );
-  const performance = buildPerformanceMap(matches);
 
   const upcomingMatches = teamMatches
     .filter((match) => matchTime(match) > now.getTime())
@@ -133,7 +130,8 @@ export function mapTeamProfileMatches(
   const recentMatches = teamMatches
     .filter((match) => match.status === 'finished')
     .sort((left, right) => matchTime(right) - matchTime(left))
-    .slice(0, 5);
+    .slice(0, 5)
+    .map((match) => (match.date ? match : { ...match, date: now.toISOString() }));
 
   return { upcomingMatches, recentMatches };
 }

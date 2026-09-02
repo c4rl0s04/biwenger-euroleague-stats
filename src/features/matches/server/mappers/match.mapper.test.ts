@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { MatchListRow } from '../queries/match-list.query';
-import { mapMatchRowsToRounds } from './match.mapper';
+import { mapMatchRowsToRounds, mapMatchRowsToSchedule } from './match.mapper';
 
 function row(overrides: Partial<MatchListRow> = {}): MatchListRow {
   return {
@@ -52,5 +52,12 @@ describe('match view-model mapper', () => {
       away: { id: 2, name: 'Away', imageUrl: '/away.png', score: 79 },
     });
     expect(JSON.parse(JSON.stringify(rounds))).toEqual(rounds);
+  });
+
+  it('keeps unassigned matches in the published season schedule contract', () => {
+    const schedule = mapMatchRowsToSchedule([row({ id: 99, roundId: null, roundName: null })]);
+
+    expect(schedule).toMatchObject([{ id: 99, roundName: '' }]);
+    expect(JSON.parse(JSON.stringify(schedule))).toEqual(schedule);
   });
 });

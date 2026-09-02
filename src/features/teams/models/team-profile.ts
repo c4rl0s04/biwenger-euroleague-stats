@@ -1,4 +1,4 @@
-import type { MatchViewModel } from '@/features/matches/public';
+import type { MatchScheduleViewModel } from '@/features/matches/public';
 
 export type TeamMatchDifficulty = 'Fácil' | 'Normal' | 'Duro';
 export type TeamProfileSection = 'roster' | 'matches';
@@ -32,8 +32,7 @@ export interface TeamRosterPlayerViewModel {
   recentScores: string | null;
 }
 
-export interface TeamProfileMatchViewModel extends MatchViewModel {
-  roundName: string;
+export interface TeamProfileMatchViewModel extends MatchScheduleViewModel {
   difficulty?: TeamMatchDifficulty;
 }
 

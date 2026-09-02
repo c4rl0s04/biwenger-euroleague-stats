@@ -3,6 +3,7 @@ import 'server-only';
 export {
   getMatchRoundScreenData,
   getMatchesScreenData,
+  getSeasonScheduleData,
   MATCHES_ACCESS_POLICY,
   MATCHES_REVALIDATE_SECONDS,
 } from './server/services/matches.service';

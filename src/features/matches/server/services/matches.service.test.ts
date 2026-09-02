@@ -68,4 +68,11 @@ describe('matches service', () => {
       round: null,
     });
   });
+
+  it('publishes the complete normalized season schedule for feature consumers', async () => {
+    await expect(service.getSeasonScheduleData()).resolves.toMatchObject([
+      { id: 1, roundName: 'Jornada 3' },
+    ]);
+    expect(listRows).toHaveBeenCalledOnce();
+  });
 });
