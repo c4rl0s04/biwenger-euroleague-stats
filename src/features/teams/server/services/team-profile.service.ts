@@ -3,7 +3,7 @@ import { cache } from 'react';
 import type { MatchScheduleViewModel } from '@/features/matches/public';
 import { getSeasonScheduleData } from '@/features/matches/server';
 
-import type { TeamProfileViewModel } from '../../models/team-profile';
+import type { TeamProfileMetricsViewModel, TeamProfileViewModel } from '../../models/team-profile';
 import { parseTeamId } from '../../validation/team-profile-input';
 import {
   mapTeamProfileDetails,
@@ -31,6 +31,16 @@ export interface TeamProfileServiceDependencies {
 }
 
 export function createTeamProfileService(dependencies: TeamProfileServiceDependencies) {
+  async function getTeamProfileMetricsData(
+    teamIdInput: unknown
+  ): Promise<TeamProfileMetricsViewModel | null> {
+    const teamId = parseTeamId(teamIdInput);
+    if (teamId == null) return null;
+
+    const details = await dependencies.findDetails(teamId);
+    return details ? mapTeamProfileDetails(details).metrics : null;
+  }
+
   async function getTeamProfileData(teamIdInput: unknown): Promise<TeamProfileViewModel | null> {
     const teamId = parseTeamId(teamIdInput);
     if (teamId == null) return null;
@@ -49,7 +59,14 @@ export function createTeamProfileService(dependencies: TeamProfileServiceDepende
     };
   }
 
-  return { getTeamProfileData };
+  async function getTeamProfileUpcomingMatchesData(teamIdInput: unknown) {
+    const teamId = parseTeamId(teamIdInput);
+    if (teamId == null) return [];
+    const schedule = await dependencies.getSeasonSchedule();
+    return mapTeamProfileMatches(schedule, teamId, dependencies.now()).upcomingMatches;
+  }
+
+  return { getTeamProfileData, getTeamProfileMetricsData, getTeamProfileUpcomingMatchesData };
 }
 
 const teamProfileService = createTeamProfileService({
@@ -62,3 +79,7 @@ const teamProfileService = createTeamProfileService({
 // The route and pages remain force-dynamic. React cache only deduplicates reads
 // within a single server request and does not change cross-request freshness.
 export const getTeamProfileData = cache(teamProfileService.getTeamProfileData);
+export const getTeamProfileMetricsData = cache(teamProfileService.getTeamProfileMetricsData);
+export const getTeamProfileUpcomingMatchesData = cache(
+  teamProfileService.getTeamProfileUpcomingMatchesData
+);

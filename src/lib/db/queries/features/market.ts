@@ -2,7 +2,6 @@ import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '../core
 import { db, pgClient } from '../../index';
 import { getPlayerFormMap } from '../core/playerForm';
 import { resolveReadSeasonId } from '../../season-context';
-import { CONFIG } from '../../../config';
 
 // ==========================================
 // INTERFACES
@@ -383,122 +382,6 @@ export interface PercentageGain {
   purchase_price: number;
   percentage_gain: number;
   player_team: string | null;
-}
-
-// ==========================================
-// INDIVIDUAL PLAYER MARKET QUERIES
-// ==========================================
-
-export interface PlayerPriceHistoryPoint {
-  date: string;
-  price: number;
-}
-
-export interface PlayerTransferEvent {
-  date: string;
-  from_name: string;
-  to_name: string;
-  amount: number;
-  from_img: string | null;
-  to_img: string | null;
-  from_color: number | null;
-  to_color: number | null;
-  from_id: number | string | null;
-  to_id: number | string | null;
-}
-
-/**
- * Get the historical price evolution for a specific player
- */
-export async function getPlayerPriceHistory(playerId: number): Promise<PlayerPriceHistoryPoint[]> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT date, price
-    FROM market_values
-    WHERE season_id = $2 AND player_id = $1
-    ORDER BY date ASC
-  `;
-  return (await pgClient.query(query, [playerId, seasonId])).rows;
-}
-
-/**
- * Get all transfer events for a specific player, including the initial
- * assignment from the system ("Biwenger").
- */
-export async function getPlayerTransfers(playerId: number): Promise<PlayerTransferEvent[]> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT
-      f.fecha as date,
-      f.vendedor as from_name,
-      f.comprador as to_name,
-      f.precio as amount,
-      u1.icon as from_img,
-      u2.icon as to_img,
-      u1.color_index as from_color,
-      u2.color_index as to_color,
-      u1.id as from_id,
-      u2.id as to_id
-    FROM fichajes f
-    LEFT JOIN users u1 ON f.vendedor = u1.name
-    LEFT JOIN users u2 ON f.comprador = u2.name
-    WHERE f.season_id = $2 AND f.player_id = $1
-    ORDER BY f.timestamp DESC
-  `;
-  const transfers = (await pgClient.query(query, [playerId, seasonId])).rows;
-
-  // Check for Initial Squad Assignment to complete the full transfer timeline
-  const initialSquadQuery = `
-    SELECT
-      u.id as user_id, u.name as owner_name, u.color_index as owner_color_index,
-      u.icon as owner_img
-    FROM initial_squads s
-    JOIN users u ON s.user_id = u.id
-    WHERE s.season_id = $2 AND s.player_id = $1
-  `;
-  const initialOwnerRes = await pgClient.query(initialSquadQuery, [playerId, seasonId]);
-  const initialOwner = initialOwnerRes.rows[0];
-
-  if (initialOwner) {
-    let initialDate;
-    try {
-      // Look up global settings for the precise start date if needed, otherwise fallback
-      initialDate = new Date().toISOString();
-      const CONFIG_START_DATE = CONFIG.SEASON.START_DATE;
-      if (CONFIG_START_DATE) {
-        const d = new Date(CONFIG_START_DATE);
-        if (!isNaN(d.getTime())) initialDate = d.toISOString();
-      }
-    } catch (e) {
-      initialDate = new Date().toISOString();
-    }
-
-    if (transfers.length > 0) {
-      const lastTransfer = transfers[transfers.length - 1];
-      if (lastTransfer && lastTransfer.date) {
-        const oldestTransfer = new Date(lastTransfer.date);
-        if (!isNaN(oldestTransfer.getTime())) {
-          oldestTransfer.setHours(oldestTransfer.getHours() - 24);
-          initialDate = oldestTransfer.toISOString();
-        }
-      }
-    }
-
-    transfers.push({
-      date: initialDate,
-      from_name: 'Biwenger',
-      to_name: initialOwner.owner_name,
-      amount: 0,
-      from_img: null,
-      to_img: initialOwner.owner_img,
-      from_color: null,
-      to_color: initialOwner.owner_color_index,
-      from_id: null,
-      to_id: initialOwner.user_id,
-    });
-  }
-
-  return transfers;
 }
 
 export interface MostOwnersPlayer {

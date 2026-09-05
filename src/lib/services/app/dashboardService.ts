@@ -8,7 +8,6 @@ import 'server-only';
  */
 
 import {
-  getTopPlayersByForm,
   getCaptainRecommendations,
   getMarketOpportunities,
   getUserSeasonStats,
@@ -18,12 +17,9 @@ import {
   getUserSquadDetails,
   getLeagueAveragePoints,
   getLastRoundMVPs,
-  getRisingStars,
   getSimpleStandings as getStandings,
   getLastRoundWinner,
   getLeaderComparison,
-  getTopPlayers,
-  getPlayersBirthday,
   getLastRoundStats,
   getRecentTransfers,
   getSignificantPriceChanges,
@@ -35,6 +31,12 @@ import {
   getRoundDetails,
   resolveRoundIdByPolicy,
 } from '../../db';
+import {
+  getDashboardPlayerBirthdays,
+  getDashboardRisingStars,
+  getDashboardTopPlayers,
+  getDashboardTopPlayersByForm,
+} from '@/features/players/server';
 import { CONFIG } from '../../config';
 
 // ============ DIRECT WRAPPERS ============
@@ -57,7 +59,7 @@ export async function fetchLastRoundMVPs() {
 }
 
 export async function fetchRisingStars() {
-  return await getRisingStars();
+  return await getDashboardRisingStars();
 }
 
 export async function fetchLeaderComparison(userId: string | number) {
@@ -65,11 +67,11 @@ export async function fetchLeaderComparison(userId: string | number) {
 }
 
 export async function fetchTopPlayers() {
-  return await getTopPlayers();
+  return await getDashboardTopPlayers();
 }
 
 export async function fetchPlayerBirthdays() {
-  return await getPlayersBirthday();
+  return await getDashboardPlayerBirthdays();
 }
 
 export async function fetchLastRoundStats() {
@@ -77,7 +79,7 @@ export async function fetchLastRoundStats() {
 }
 
 export async function fetchTopPlayersByForm(limit: number = 5, rounds: number = 3) {
-  return await getTopPlayersByForm(limit, rounds);
+  return await getDashboardTopPlayersByForm(limit, rounds);
 }
 
 export async function fetchCaptainRecommendations(userId: string | number, limit: number = 6) {
@@ -107,7 +109,7 @@ export async function getNextRoundData(userId: string | number | null = null) {
   const [roundState, topPlayersForm, captainRecommendations, marketOpportunities, nextRound] =
     await Promise.all([
       getCurrentRoundState(),
-      getTopPlayersByForm(6, 3),
+      getDashboardTopPlayersByForm(6, 3),
       userId ? getCaptainRecommendations(userId, 6) : [],
       getMarketOpportunities(6),
       targetId ? getRoundDetails(targetId) : null,
@@ -282,7 +284,7 @@ export async function getLeagueDashboardData() {
     getStreakStats(),
     getLeagueAveragePoints(),
     getLastRoundMVPs(5),
-    getPlayersBirthday(),
+    getDashboardPlayerBirthdays(),
   ]);
 
   return {

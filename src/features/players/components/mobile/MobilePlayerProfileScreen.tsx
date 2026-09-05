@@ -15,12 +15,13 @@ import {
   MobileScreen,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type Player = Record<string, any>;
+import type { PlayerProfileViewModel } from '../../models/player-profile';
+
 const money = new Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 });
 
-export default function MobilePlayerProfileScreen({ player }: { player: Player }) {
+export default function MobilePlayerProfileScreen({ player }: { player: PlayerProfileViewModel }) {
   const next = player.nextMatch;
   return (
     <MobileScreen labelledBy="mobile-screen-title">

@@ -11,18 +11,16 @@ import {
 } from 'lucide-react';
 import { FadeIn, BackButton } from '@/components/ui';
 import Section from '@/components/layout/Section';
-import {
-  PlayerIdentityCard,
-  PlayerMarketCard,
-  PlayerStatsCard,
-  PlayerHistoryCard,
-  PlayerNextMatchCard,
-  PlayerPriceHistoryCard,
-  PlayerAdvancedStatsCard,
-  PlayerOwnershipCard,
-  PlayerPointsGraph,
-  PlayerSplitsCard,
-} from '@/components/player-profile';
+import PlayerIdentityCard from './PlayerIdentityCard';
+import PlayerMarketCard from './PlayerMarketCard';
+import PlayerStatsCard from './PlayerStatsCard';
+import PlayerHistoryCard from './PlayerHistoryCard';
+import PlayerNextMatchCard from './PlayerNextMatchCard';
+import PlayerPriceHistoryCard from './PlayerPriceHistoryCard';
+import PlayerAdvancedStatsCard from './PlayerAdvancedStatsCard';
+import PlayerOwnershipCard from './PlayerOwnershipCard';
+import PlayerPointsGraph from './PlayerPointsGraph';
+import PlayerSplitsCard from './PlayerSplitsCard';
 
 export default function PlayerProfileClient({ player }) {
   if (!player) return null;

@@ -11,6 +11,9 @@ import PlayerFilters from './PlayerFilters';
 import PlayerList from './PlayerList';
 import SquadSectionDrawer from './SquadSectionDrawer';
 
+/**
+ * @param {{ initialPlayers?: import('../../../models/player-catalogue').PlayerCatalogueItemViewModel[] }} props
+ */
 export default function PlayersDiscovery({ initialPlayers = [] }) {
   // --- STATE ---
   const [search, setSearch] = useState('');

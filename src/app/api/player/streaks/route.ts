@@ -1,11 +1,11 @@
-import { fetchPlayerStreaks } from '@/lib/services';
+import { getPlayerStreaksData } from '@/features/players/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const streaks = await fetchPlayerStreaks();
+    const streaks = await getPlayerStreaksData();
     return successResponse(streaks, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching player streaks:', error);

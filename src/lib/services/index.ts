@@ -60,16 +60,6 @@ export {
   fetchNextRound,
 } from './app/dashboardService';
 
-// Player Service
-export {
-  getPlayerProfile,
-  getPlayerPerformanceSummary,
-  searchPlayers,
-  getTopPerformers,
-  fetchPlayerStreaks,
-  fetchAllPlayers,
-} from './core/playerService';
-
 // Market Service (Features)
 export {
   getMarketPageData,
@@ -135,9 +125,6 @@ export {
   getSeasonResilienceOverview,
   simulateSeasonResilience,
 } from './features/seasonResilienceService';
-
-// Player Service Extensions
-export { fetchStatLeaders } from './core/playerService';
 
 // Dashboard Extensions
 export { fetchLandingStats, fetchNewsFeed } from './app/dashboardService';

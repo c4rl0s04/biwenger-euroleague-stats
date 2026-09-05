@@ -4,23 +4,23 @@ import { Filter, Search, SlidersHorizontal, Sparkles, Users } from 'lucide-react
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
-import MobileBottomSheet from '../MobileBottomSheet';
+import MobileBottomSheet from '@/components/mobile/MobileBottomSheet';
 import {
   MobileListRow,
   MobileScreen,
   MobileScreenHeader,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type Player = Record<string, any>;
+import type { PlayerCatalogueItemViewModel } from '../../models/player-catalogue';
 
 export default function MobilePlayersScreen({
   players,
   query = '',
   position = '',
 }: {
-  players: Player[];
+  players: PlayerCatalogueItemViewModel[];
   query?: string;
   position?: string;
 }) {

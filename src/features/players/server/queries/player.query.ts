@@ -1,69 +1,239 @@
-import { db, pgClient } from '../../index';
-import { FUTURE_MATCH_CONDITION } from '../../sql_utils';
-import { resolveReadSeasonId } from '../../season-context';
-import { getPlayerFormMap } from './playerForm';
-import { getPlayerPriceHistory, getPlayerTransfers } from '../features/market';
-import { getTeamUpcomingMatches } from '../competition/matches';
-import { getTeamMatchesCount, getTeamPlayoffProbability } from './teams';
+import 'server-only';
+
+import { CONFIG } from '@/lib/config';
+import { db as pgClient } from '@/lib/db/client';
+import { resolveReadSeasonId } from '@/lib/db/season-context';
+import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
 
 export interface CorePlayer {
-  id: number;
-  name: string;
-  img: string;
-  position: string;
-  price: number;
-  price_increment?: number;
-  team_id: number;
-  team_name: string;
-  team_short_name?: string;
-  team_code?: string;
-  team_img?: string;
-  owner_id: number;
-  owner_name: string;
-  owner_color_index: number;
-  owner_icon?: string;
-  points: number;
-  average: number;
-  recent_scores?: string;
-  status?: string;
-  total_points?: number;
-  played?: number;
-  best_score?: number;
-  worst_score?: number;
+  id: number | string;
+  name: string | null;
+  img: string | null;
+  position: string | null;
+  price: number | string | null;
+  price_increment?: number | string | null;
+  team_id: number | string | null;
+  team_name: string | null;
+  team_short_name?: string | null;
+  team_code?: string | null;
+  team_img?: string | null;
+  owner_id: number | string | null;
+  owner_name: string | null;
+  owner_color_index: number | string | null;
+  owner_icon?: string | null;
+  points?: number | string | null;
+  average?: number | string | null;
+  recent_scores?: string | null;
+  status?: string | null;
+  total_points?: number | string | null;
+  played?: number | string | null;
+  best_score?: number | string | null;
+  worst_score?: number | string | null;
 }
 
 export interface PlayerRecentForm extends CorePlayer {
-  games_played: number;
-  avg_points: number;
-  total_points: number;
+  games_played: number | string;
+  avg_points: number | string;
+  total_points: number | string;
   recent_scores: string;
-  season_avg?: number;
-  avg_diff?: number;
-  trend_pct?: number;
-  games?: number; // Alias for games_played in some queries
-  recent_avg?: number; // Alias for avg_points in some queries
+  season_avg?: number | string;
+  avg_diff?: number | string;
+  trend_pct?: number | string;
+  games?: number | string; // Alias for games_played in some queries
+  recent_avg?: number | string; // Alias for avg_points in some queries
 }
 
 export interface RisingStar extends CorePlayer {
-  recent_avg: number;
-  earlier_avg: number;
-  improvement: number;
-  improvement_pct: number;
+  recent_avg: number | string;
+  earlier_avg: number | string;
+  improvement: number | string;
+  improvement_pct: number | string;
 }
 
-export interface PlayerDetails extends CorePlayer {
-  games_played: number;
-  season_avg: number;
-  total_points: number;
-  team_total_matches: number;
-  player_total_matches: number;
-  recentMatches: any[]; // Could type this further if useful
-  priceHistory: any[];
-  transfers: any[];
-  nextMatch: any;
-  nextMatches: any[];
-  advancedStats: any;
-  playoff_probability: number;
+export interface PlayerBirthdayRow {
+  id: number | string;
+  name: string | null;
+  team_id: number | string | null;
+  team_name: string | null;
+  team_code: string | null;
+  position: string | null;
+  birth_date: Date | string | null;
+  owner_name: string | null;
+  owner_color_index: number | string | null;
+}
+
+export interface PlayerStatLeader {
+  player_id: number;
+  name: string;
+  team_id: number | null;
+  team_name: string;
+  team_code: string;
+  owner_id: number | string | null;
+  owner_name: string | null;
+  owner_color_index: number;
+  value: number;
+  games_played: number | string;
+  avg_value: number;
+}
+
+export interface PlayerDetailsRow extends CorePlayer {
+  puntos: number | string | null;
+  partidos_jugados: number | string | null;
+  played_home: number | string | null;
+  played_away: number | string | null;
+  points_home: number | string | null;
+  points_away: number | string | null;
+  points_last_season: number | string | null;
+  birth_date: Date | string | null;
+  height: number | string | null;
+  weight: number | string | null;
+  euroleague_code: string | null;
+  dorsal: string | null;
+  country: string | null;
+  profile_url: string | null;
+  games_played: number | string;
+  season_avg: number | string | null;
+  total_points: number | string | null;
+  best_real_points: number | string | null;
+  worst_real_points: number | string | null;
+  best_fantasy: number | string | null;
+  worst_fantasy: number | string | null;
+}
+
+export interface PlayerMatchRow {
+  round_id: number | string | null;
+  round_name: string | null;
+  match_date: Date | string | null;
+  home_team: string | null;
+  home_img: string | null;
+  away_team: string | null;
+  away_img: string | null;
+  home_id: number | string | null;
+  away_id: number | string | null;
+  home_score: number | string | null;
+  away_score: number | string | null;
+  fantasy_points: number | string | null;
+  minutes_played: number | string | null;
+  points_scored: number | string | null;
+  rebounds: number | string | null;
+  assists: number | string | null;
+  steals: number | string | null;
+  blocks: number | string | null;
+  turnovers: number | string | null;
+  two_points_made: number | string | null;
+  two_points_attempted: number | string | null;
+  three_points_made: number | string | null;
+  three_points_attempted: number | string | null;
+  free_throws_made: number | string | null;
+  free_throws_attempted: number | string | null;
+  fouls_committed: number | string | null;
+  valuation: number | string | null;
+}
+
+export interface PlayerDetailsQueryResult {
+  player: PlayerDetailsRow;
+  recentMatches: PlayerMatchRow[];
+  priceHistory: PlayerPriceHistoryRow[];
+  transfers: PlayerTransferRow[];
+  playerTotalMatches: number;
+}
+
+export interface PlayerPriceHistoryRow {
+  date: Date | string;
+  price: number | string;
+}
+
+export interface PlayerTransferRow {
+  date: Date | string;
+  from_name: string | null;
+  to_name: string | null;
+  amount: number | string | null;
+  from_img: string | null;
+  to_img: string | null;
+  from_color: number | string | null;
+  to_color: number | string | null;
+  from_id: number | string | null;
+  to_id: number | string | null;
+}
+
+async function listPlayerPriceHistory(playerId: number): Promise<PlayerPriceHistoryRow[]> {
+  const seasonId = await resolveReadSeasonId();
+  const query = `
+    SELECT date, price
+    FROM market_values
+    WHERE season_id = $2 AND player_id = $1
+    ORDER BY date ASC
+  `;
+  return (await pgClient.query(query, [playerId, seasonId])).rows as PlayerPriceHistoryRow[];
+}
+
+async function listPlayerTransfers(playerId: number): Promise<PlayerTransferRow[]> {
+  const seasonId = await resolveReadSeasonId();
+  const query = `
+    SELECT
+      f.fecha as date,
+      f.vendedor as from_name,
+      f.comprador as to_name,
+      f.precio as amount,
+      u1.icon as from_img,
+      u2.icon as to_img,
+      u1.color_index as from_color,
+      u2.color_index as to_color,
+      u1.id as from_id,
+      u2.id as to_id
+    FROM fichajes f
+    LEFT JOIN users u1 ON f.vendedor = u1.name
+    LEFT JOIN users u2 ON f.comprador = u2.name
+    WHERE f.season_id = $2 AND f.player_id = $1
+    ORDER BY f.timestamp DESC
+  `;
+  const transfers = (await pgClient.query(query, [playerId, seasonId])).rows as PlayerTransferRow[];
+  const initialOwnerQuery = `
+    SELECT
+      u.id as user_id, u.name as owner_name, u.color_index as owner_color_index,
+      u.icon as owner_img
+    FROM initial_squads s
+    JOIN users u ON s.user_id = u.id
+    WHERE s.season_id = $2 AND s.player_id = $1
+  `;
+  const initialOwner = (await pgClient.query(initialOwnerQuery, [playerId, seasonId])).rows[0] as
+    | {
+        user_id: number | string;
+        owner_name: string;
+        owner_color_index: number | string | null;
+        owner_img: string | null;
+      }
+    | undefined;
+
+  if (initialOwner) {
+    let initialDate = new Date().toISOString();
+    const configuredStartDate = CONFIG.SEASON.START_DATE;
+    if (configuredStartDate) {
+      const configured = new Date(configuredStartDate);
+      if (!Number.isNaN(configured.getTime())) initialDate = configured.toISOString();
+    }
+    const oldestTransfer = transfers.at(-1);
+    if (oldestTransfer?.date) {
+      const date = new Date(oldestTransfer.date);
+      if (!Number.isNaN(date.getTime())) {
+        date.setHours(date.getHours() - 24);
+        initialDate = date.toISOString();
+      }
+    }
+    transfers.push({
+      date: initialDate,
+      from_name: 'Biwenger',
+      to_name: initialOwner.owner_name,
+      amount: 0,
+      from_img: null,
+      to_img: initialOwner.owner_img,
+      from_color: null,
+      to_color: initialOwner.owner_color_index,
+      from_id: null,
+      to_id: initialOwner.user_id,
+    });
+  }
+  return transfers;
 }
 
 /**
@@ -113,13 +283,13 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
   `;
 
   const [rows, formMap] = await Promise.all([
-    pgClient.query(query, [limit, seasonId]).then((r) => r.rows),
+    pgClient.query(query, [limit, seasonId]).then((result) => result.rows as CorePlayer[]),
     getPlayerFormMap(),
   ]);
 
-  return rows.map((row: any) => ({
+  return rows.map((row) => ({
     ...row,
-    average: parseFloat(row.average) || 0,
+    average: parseFloat(String(row.average)) || 0,
     recent_scores: formMap.get(Number(row.id))?.recent_scores ?? null,
   }));
 }
@@ -179,17 +349,19 @@ export async function getTopPlayersByForm(
     WHERE p.id = ANY($1)
   `;
 
-  const rows = (await pgClient.query(query, [playerIds, seasonId])).rows;
+  const rows = (await pgClient.query(query, [playerIds, seasonId])).rows as Array<
+    CorePlayer & { total_points: number | string; games_played: number | string }
+  >;
 
   // 4. Merge metadata with form data and sort final list
   return rows
-    .map((row: any) => {
+    .map((row) => {
       const form = formMap.get(Number(row.id));
       return {
         ...row,
         id: Number(row.id),
-        total_points: parseInt(row.total_points) || 0,
-        games_played: parseInt(row.games_played) || 0,
+        total_points: parseInt(String(row.total_points)) || 0,
+        games_played: parseInt(String(row.games_played)) || 0,
         avg_points: form?.avg_form_score || 0,
         recent_scores: form?.recent_scores || '',
       };
@@ -201,7 +373,9 @@ export async function getTopPlayersByForm(
 /**
  * Get detailed player information by ID
  */
-export async function getPlayerDetails(playerId: number | string): Promise<PlayerDetails | null> {
+export async function getPlayerDetails(
+  playerId: number | string
+): Promise<PlayerDetailsQueryResult | null> {
   const numericPlayerId = Number(playerId);
   if (isNaN(numericPlayerId)) return null;
   const seasonId = await resolveReadSeasonId();
@@ -297,106 +471,28 @@ export async function getPlayerDetails(playerId: number | string): Promise<Playe
     ORDER BY m.round_id DESC
   `;
 
-  const recentMatches = (await pgClient.query(matchesQuery, [numericPlayerId, seasonId])).rows;
+  const recentMatches = (await pgClient.query(matchesQuery, [numericPlayerId, seasonId]))
+    .rows as PlayerMatchRow[];
 
-  // 3. Extracted modular queries
-  const [
-    priceHistory,
-    transfers,
-    nextMatches,
-    team_total_matches,
-    player_total_matches,
-    playoff_probability,
-  ] = await Promise.all([
-    getPlayerPriceHistory(numericPlayerId),
-    getPlayerTransfers(numericPlayerId),
-    getTeamUpcomingMatches(player.team_id, 3),
-    getTeamMatchesCount(player.team_id),
+  const [priceHistory, transfers, playerTotalMatches] = await Promise.all([
+    listPlayerPriceHistory(numericPlayerId),
+    listPlayerTransfers(numericPlayerId),
     getPlayerMatchesPlayed(numericPlayerId),
-    getTeamPlayoffProbability(player.team_id),
   ]);
 
-  const nextMatch = nextMatches[0] || null;
-
-  // 4. Advanced Stats Aggregates (Season Totals)
-  const advancedStats = recentMatches.reduce(
-    (acc: any, m: any) => {
-      acc.two_points_made += m.two_points_made || 0;
-      acc.two_points_attempted += m.two_points_attempted || 0;
-      acc.three_points_made += m.three_points_made || 0;
-      acc.three_points_attempted += m.three_points_attempted || 0;
-      acc.free_throws_made += m.free_throws_made || 0;
-      acc.free_throws_attempted += m.free_throws_attempted || 0;
-      acc.blocks += m.blocks || 0;
-      acc.turnovers += m.turnovers || 0;
-      acc.fouls += m.fouls_committed || 0;
-      acc.rebounds += m.rebounds || 0;
-      acc.assists += m.assists || 0;
-      acc.steals += m.steals || 0;
-      acc.minutes_played += m.minutes_played || 0;
-      acc.points_scored += m.points_scored || 0;
-      acc.valuation += m.valuation || 0;
-      acc.games_played += m.minutes_played ? 1 : 0;
-      return acc;
-    },
-    {
-      two_points_made: 0,
-      two_points_attempted: 0,
-      three_points_made: 0,
-      three_points_attempted: 0,
-      free_throws_made: 0,
-      free_throws_attempted: 0,
-      blocks: 0,
-      turnovers: 0,
-      fouls: 0,
-      rebounds: 0,
-      assists: 0,
-      steals: 0,
-      minutes_played: 0,
-      points_scored: 0,
-      valuation: 0,
-      games_played: 0,
-    }
-  );
-
-  // Add the records to advancedStats
-  advancedStats.season_avg = player.season_avg; // Still keeping BW avg just in case
-  advancedStats.best_real_points = player.best_real_points;
-  advancedStats.worst_real_points = player.worst_real_points;
-
-  const gp_stat = Math.max(advancedStats.games_played, 1);
-  advancedStats.avg_real_points = parseFloat((advancedStats.points_scored / gp_stat).toFixed(1));
-  advancedStats.avg_pir = parseFloat((advancedStats.valuation / gp_stat).toFixed(1));
-
-  // Advanced Ratios
-  advancedStats.ast_to_ratio =
-    advancedStats.turnovers > 0
-      ? parseFloat((advancedStats.assists / advancedStats.turnovers).toFixed(2))
-      : advancedStats.assists;
-
-  advancedStats.pts_per_40 =
-    advancedStats.minutes_played > 0
-      ? parseFloat(((advancedStats.points_scored / advancedStats.minutes_played) * 40).toFixed(1))
-      : 0;
-
   return {
-    ...player,
-    team_total_matches,
-    player_total_matches,
+    player: player as PlayerDetailsRow,
     recentMatches,
     priceHistory,
     transfers,
-    nextMatch,
-    nextMatches,
-    advancedStats,
-    playoff_probability,
-  } as PlayerDetails;
+    playerTotalMatches,
+  };
 }
 
 /**
  * Get players with birthdays today
  */
-export async function getPlayersBirthday(): Promise<CorePlayer[]> {
+export async function getPlayersBirthday(): Promise<PlayerBirthdayRow[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT 
@@ -419,7 +515,7 @@ export async function getPlayersBirthday(): Promise<CorePlayer[]> {
     ORDER BY p.name
   `;
 
-  return (await pgClient.query(query, [seasonId])).rows;
+  return (await pgClient.query(query, [seasonId])).rows as PlayerBirthdayRow[];
 }
 
 /**
@@ -489,17 +585,19 @@ export async function getPlayerStreaks(
     LIMIT 20
   `;
 
-  const allPlayers = (await pgClient.query(query, [minGames, seasonId])).rows.map((p: any) => ({
-    ...p,
-    recent_avg: parseFloat(p.recent_avg) || 0,
-    season_avg: parseFloat(p.season_avg) || 0,
-    avg_diff: parseFloat(p.avg_diff) || 0,
-    trend_pct: parseFloat(p.trend_pct) || 0,
+  const allPlayers = (
+    (await pgClient.query(query, [minGames, seasonId])).rows as PlayerRecentForm[]
+  ).map((player) => ({
+    ...player,
+    recent_avg: parseFloat(String(player.recent_avg)) || 0,
+    season_avg: parseFloat(String(player.season_avg)) || 0,
+    avg_diff: parseFloat(String(player.avg_diff)) || 0,
+    trend_pct: parseFloat(String(player.trend_pct)) || 0,
   }));
 
   return {
-    hot: allPlayers.filter((p: any) => p.trend_pct > 20).slice(0, 5),
-    cold: allPlayers.filter((p: any) => p.trend_pct < -20).slice(0, 5),
+    hot: allPlayers.filter((player) => (player.trend_pct ?? 0) > 20).slice(0, 5),
+    cold: allPlayers.filter((player) => (player.trend_pct ?? 0) < -20).slice(0, 5),
   };
 }
 
@@ -567,12 +665,12 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
     LIMIT $1
   `;
 
-  return (await pgClient.query(query, [limit, seasonId])).rows.map((row: any) => ({
+  return ((await pgClient.query(query, [limit, seasonId])).rows as RisingStar[]).map((row) => ({
     ...row,
-    recent_avg: parseFloat(row.recent_avg) || 0,
-    earlier_avg: parseFloat(row.earlier_avg) || 0,
-    improvement: parseFloat(row.improvement) || 0,
-    improvement_pct: parseFloat(row.improvement_pct) || 0,
+    recent_avg: parseFloat(String(row.recent_avg)) || 0,
+    earlier_avg: parseFloat(String(row.earlier_avg)) || 0,
+    improvement: parseFloat(String(row.improvement)) || 0,
+    improvement_pct: parseFloat(String(row.improvement_pct)) || 0,
   }));
 }
 
@@ -635,27 +733,37 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
   `;
 
   const [rows, formMap] = await Promise.all([
-    pgClient.query(query, [seasonId]).then((r) => r.rows),
+    pgClient.query(query, [seasonId]).then(
+      (result) =>
+        result.rows as Array<
+          CorePlayer & {
+            played: number | string;
+            total_points: number | string;
+            best_score: number | string;
+            worst_score: number | string;
+          }
+        >
+    ),
     getPlayerFormMap(),
   ]);
 
-  return rows.map((p: any) => ({
-    ...p,
-    total_points: parseFloat(p.total_points) || 0,
-    played: parseInt(p.played) || 0,
-    average: parseFloat(p.average) || 0,
-    best_score: parseFloat(p.best_score) || 0,
-    worst_score: parseFloat(p.worst_score) || 0,
-    price: parseInt(p.price) || 0,
-    recent_scores: formMap.get(Number(p.id))?.recent_scores ?? null,
-    avg_form_score: formMap.get(Number(p.id))?.avg_form_score ?? 0,
+  return rows.map((player) => ({
+    ...player,
+    total_points: parseFloat(String(player.total_points)) || 0,
+    played: parseInt(String(player.played)) || 0,
+    average: parseFloat(String(player.average)) || 0,
+    best_score: parseFloat(String(player.best_score)) || 0,
+    worst_score: parseFloat(String(player.worst_score)) || 0,
+    price: parseInt(String(player.price)) || 0,
+    recent_scores: formMap.get(Number(player.id))?.recent_scores ?? null,
+    avg_form_score: formMap.get(Number(player.id))?.avg_form_score ?? 0,
   }));
 }
 
 /**
  * Get stat leaders (Top 5)
  */
-export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
+export async function getStatLeaders(type: string = 'points'): Promise<PlayerStatLeader[]> {
   const seasonId = await resolveReadSeasonId();
   const columnMap: Record<string, string> = {
     real_points: 'points',
@@ -695,10 +803,10 @@ export async function getStatLeaders(type: string = 'points'): Promise<any[]> {
   `;
 
   try {
-    return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
+    return ((await pgClient.query(query, [seasonId])).rows as PlayerStatLeader[]).map((row) => ({
       ...row,
-      value: parseFloat(row.value) || 0,
-      avg_value: parseFloat(row.avg_value) || 0,
+      value: parseFloat(String(row.value)) || 0,
+      avg_value: parseFloat(String(row.avg_value)) || 0,
     }));
   } catch (error) {
     console.error('Error fetching stat leaders:', error);

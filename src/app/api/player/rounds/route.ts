@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { fetchUserRecentRounds } from '@/lib/services';
+import { getPlayerUserRoundsData } from '@/features/players/server';
 import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 import { getRequestUserId } from '@/lib/utils/api-auth';
 
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return errorResponse(userIdValidation.error, 400);
     }
 
-    const data = await fetchUserRecentRounds(userIdValidation.value);
+    const data = await getPlayerUserRoundsData(userIdValidation.value);
     return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('API Error:', error);

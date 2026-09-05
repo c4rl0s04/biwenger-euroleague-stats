@@ -1,8 +1,9 @@
 import 'server-only';
 
-import { getPlayerProfile, performGlobalSearch } from '@/lib/services';
+import { getPlayerProfileData } from '@/features/players/server';
+import { performGlobalSearch } from '@/lib/services';
 
-type PlayerProfile = Awaited<ReturnType<typeof getPlayerProfile>>;
+type PlayerProfile = Awaited<ReturnType<typeof getPlayerProfileData>>;
 
 const MAX_CANDIDATES = 8;
 const MAX_PLAYERS = 3;
@@ -159,7 +160,7 @@ export async function buildPlayerContextForMessage(message: string): Promise<str
   if (playerIds.size === 0) return null;
 
   const profiles = (
-    await Promise.all(Array.from(playerIds).map((playerId) => getPlayerProfile(playerId)))
+    await Promise.all(Array.from(playerIds).map((playerId) => getPlayerProfileData(playerId)))
   ).filter(Boolean) as NonNullable<PlayerProfile>[];
 
   if (profiles.length === 0) return null;

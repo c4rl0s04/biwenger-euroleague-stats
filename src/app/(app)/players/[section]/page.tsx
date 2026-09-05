@@ -1,32 +1,28 @@
-import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
-import MobileRecordList from '@/components/mobile/MobileRecordList';
-import { MobileSectionHeading } from '@/components/mobile/MobileScreen';
+import {
+  getPlayerCatalogueData,
+  getPlayerCatalogueInsightsData,
+  parsePlayerCatalogueSection,
+  PlayerCatalogueSectionScreen,
+} from '@/features/players/server';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
-import { fetchAllPlayers, fetchPlayerStreaks, getTopPerformers } from '@/lib/services';
 
 type PageProps = { params: Promise<{ section: string }> };
 
 export default async function PlayersSectionPage({ params }: PageProps) {
   const { section } = await params;
   const route = await requireMobileRoute(`/players/${section}`);
-  const data =
-    section === 'insights'
-      ? await Promise.all([getTopPerformers(20), fetchPlayerStreaks(3)])
-      : await fetchAllPlayers();
+  const parsedSection = parsePlayerCatalogueSection(section);
+  if (!parsedSection) return null;
+  const insights =
+    parsedSection === 'insights' ? await getPlayerCatalogueInsightsData() : undefined;
+  const players = parsedSection === 'squads' ? await getPlayerCatalogueData() : undefined;
 
   return (
-    <MobileDetailScaffold
+    <PlayerCatalogueSectionScreen
+      section={parsedSection}
       title={route.definition.title}
-      context="Jugadores"
-      backHref="/players"
-      description={
-        section === 'insights'
-          ? 'Forma y producción reciente para encontrar oportunidades.'
-          : 'Cómo se distribuye el talento entre las plantillas de la liga.'
-      }
-    >
-      <MobileSectionHeading>Detalle</MobileSectionHeading>
-      <MobileRecordList data={data} linkPrefix="/player" />
-    </MobileDetailScaffold>
+      insights={insights}
+      players={players}
+    />
   );
 }
