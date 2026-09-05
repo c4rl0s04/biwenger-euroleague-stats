@@ -68,6 +68,47 @@ describe('team profile service', () => {
     expect(getSeasonSchedule).toHaveBeenCalledOnce();
   });
 
+  it('publishes focused metrics and upcoming-match contracts for Player consumers', async () => {
+    getSeasonSchedule.mockResolvedValueOnce([
+      {
+        id: 1,
+        date: '2026-09-03T18:00:00.000Z',
+        status: 'scheduled',
+        roundName: 'Jornada 1',
+        home: {
+          id: 7,
+          name: 'Madrid',
+          code: 'MAD',
+          imageUrl: '/madrid.png',
+          score: null,
+          city: null,
+          arena: null,
+          latitude: null,
+          longitude: null,
+        },
+        away: {
+          id: 8,
+          name: 'Rival',
+          code: 'RIV',
+          imageUrl: '/rival.png',
+          score: null,
+          city: null,
+          arena: null,
+          latitude: null,
+          longitude: null,
+        },
+      },
+    ] satisfies MatchScheduleViewModel[]);
+
+    await expect(service.getTeamProfileMetricsData('7')).resolves.toMatchObject({
+      matchesPlayed: 3,
+      playoffProbability: 75,
+    });
+    await expect(service.getTeamProfileUpcomingMatchesData('7')).resolves.toMatchObject([
+      { roundName: 'Jornada 1', home: { id: 7 }, away: { id: 8 } },
+    ]);
+  });
+
   it('rejects invalid identifiers before any query and preserves not-found behavior', async () => {
     await expect(service.getTeamProfileData('invalid')).resolves.toBeNull();
     expect(findDetails).not.toHaveBeenCalled();
