@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { resolveReadSeasonId } from '@/lib/db/season-context';
+import { resolveCalendarSeasonId } from '../queries/calendar-season.query';
 import type { CalendarRound, RoundSelectionPolicy } from '../../models/calendar';
 import { deriveRoundCalendar, selectRoundId } from '../calendar-policy';
 import { mapCalendarMatch } from '../mappers/calendar.mapper';
@@ -48,7 +48,7 @@ export const {
   getLastCompletedRoundId,
   getLastCompletedCalendarRound,
 } = createCalendarService({
-  resolveSeason: resolveReadSeasonId,
+  resolveSeason: resolveCalendarSeasonId,
   listRows: listCalendarRows,
   now: () => new Date(),
 });

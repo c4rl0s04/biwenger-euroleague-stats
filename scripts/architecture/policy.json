@@ -10,9 +10,9 @@
   ],
   "exceptions": [
     {
-      "edge": "persistence-owner: src/features/matches/server/services/matches.service.ts -> src/lib/db/index.ts",
-      "reason": "Existing resolveRoundIdByPolicy adapter; Rounds is not migrated yet. No direct SQL is added here.",
-      "removeWhen": "Rounds exposes its current-round policy through a server contract."
+      "edge": "legacy-service: src/features/players/server/services/player-user-read.service.ts -> src/lib/services/core/userService.ts",
+      "reason": "Temporary manager-read adapter preserves existing player rounds/stats/squad HTTP contracts, including the Lineup squad consumer, until Managers owns these reads. No new legacy dependency is allowed.",
+      "removeWhen": "Managers exposes round, season-statistics and squad read services and the Players compatibility adapter consumes that server contract."
     }
   ]
 }

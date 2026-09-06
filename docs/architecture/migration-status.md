@@ -306,6 +306,35 @@ Lint passed with the same 25 image warnings; the database-disabled production
 build passed with baseline missing-provider-environment and Node warnings. Docs
 check passed all 49 notes; schema metadata (38 tables), Drizzle, production audit
 (zero findings), formatting and diff checks passed. No production database was
-used for validation. Release verification is pending.
+used for validation. Released at `e3919a4dc8d80483ec002ccb0471ef73064b5372`:
+Vercel `dpl_PdbmWB33c5kZHLm2jd6hvNLXZC4d` READY with matching production alias;
+GitHub CI `34063449939` passed. Landing stats, next-round and rounds-list responses
+matched pre-release hashes. Protected redirects and private session-read headers
+passed; scoped logs had no error/fatal or 5xx entries or sampled sensitive patterns.
 The next planned domain is Manager Profile and squad reads, retaining Lineup's
 existing HTTP contract and separating fantasy manager identity from accounts.
+
+## Architecture-check reconciliation
+
+`chore/architecture-reconciliation` starts from the independent workflow merge
+`1cf5cfd8`. Baseline typecheck and 24 focused tests passed, while the newly merged
+architecture checker reported three findings. The obsolete Matches-to-database
+exception is removed. One exact, documented Players-to-legacy-manager-service
+exception preserves the already approved temporary read adapter until Managers
+owns its contracts; it does not permit other legacy imports. Rounds now delegates
+season resolution through a server-only query adapter because the shared helper
+performs a database existence check. Season validation, call order, uncached
+freshness, errors and HTTP behavior are unchanged. No shared season helper or
+checker implementation is modified.
+
+Regression tests reject sibling legacy imports, reject obsolete exceptions and
+enforce season persistence through queries. Query tests preserve no-argument
+default-season resolution, repeated reads and error identity. Architecture check
+passes (693 modules, seven protected entrypoints), and all 50 focused tests pass.
+`npm run verify` passed on pinned Node 24.20.0: skills, architecture, docs (52 notes),
+typecheck, all 784 tests (one existing skip), lint (25 existing image warnings),
+database-disabled production build, schema metadata (38 tables), Drizzle and diff
+check. The build retained expected missing-provider-environment warnings. Production
+dependency audit reported zero findings. No presentation moved; local browser
+screenshots were not rerun. Release checks are pending. No UI or Managers work is
+part of this maintenance slice.

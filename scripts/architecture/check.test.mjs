@@ -31,6 +31,52 @@ function check(files, policy = { entrypoints: [], exceptions: [] }) {
 }
 
 describe('feature import graph', () => {
+  it('keeps the manager-read exception exact and rejects it once the adapter disappears', () => {
+    const adapter = 'src/features/players/server/services/player-user-read.service.ts';
+    const legacy = 'src/lib/services/core/userService.ts';
+    const policy = {
+      entrypoints: [],
+      exceptions: [
+        {
+          edge: `legacy-service: ${adapter} -> ${legacy}`,
+          reason: 'Temporary manager adapter',
+          removeWhen: 'Managers owns these reads',
+        },
+      ],
+    };
+    const files = {
+      [adapter]: "import '@/lib/services/core/userService';",
+      [legacy]: 'export {};',
+    };
+    expect(check(files, policy)).toEqual([]);
+    expect(
+      check(
+        { ...files, 'src/features/players/server/services/other.service.ts': files[adapter] },
+        policy
+      )
+    ).toContain(
+      `legacy-service: src/features/players/server/services/other.service.ts -> ${legacy}`
+    );
+    expect(check({ [adapter]: 'export {};', [legacy]: 'export {};' }, policy)).toContain(
+      `Stale exception: legacy-service: ${adapter} -> ${legacy}`
+    );
+  });
+
+  it('requires season persistence behind a query rather than a service', () => {
+    const service = 'src/features/rounds/server/services/calendar.service.ts';
+    const query = 'src/features/rounds/server/queries/calendar-season.query.ts';
+    const season = 'src/lib/db/season-context.ts';
+    const files = { [service]: "import '@/lib/db/season-context';", [season]: 'export {};' };
+    expect(check(files)).toContain(`persistence-owner: ${service} -> ${season}`);
+    expect(
+      check({
+        ...files,
+        [service]: "import '../queries/calendar-season.query';",
+        [query]: "import 'server-only'; import '@/lib/db/season-context';",
+      })
+    ).toEqual([]);
+  });
+
   it('detects persistence hidden behind a page helper', () => {
     const errors = check(
       {

@@ -77,8 +77,9 @@ resolution in protected code fails and needs an exact reviewed exception because
 cannot determine its target.
 
 Existing debt uses exact edge exceptions with a reason and removal condition. Unused exceptions
-fail, so resolved debt is removed. The current Matches-to-global-round-policy edge awaits the
-Rounds server contract. Do not add broad directory exemptions to silence failures.
+fail, so resolved debt is removed. Matches now consumes the Rounds server contract.
+The one temporary Players-to-legacy-manager-service exception must disappear when Managers
+owns those read contracts. Do not add broad directory exemptions to silence failures.
 
 ## Verification and handoff
 
