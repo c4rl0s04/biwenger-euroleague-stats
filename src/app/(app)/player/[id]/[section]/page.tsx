@@ -2,8 +2,8 @@ import {
   getPlayerPerformanceSummaryForProfile,
   getPlayerProfileData,
   parsePlayerProfileSection,
-  PlayerProfileSectionScreen,
 } from '@/features/players/server';
+import { PlayerProfileSectionScreen } from '@/features/players/public';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
 
 type PageProps = { params: Promise<{ id: string; section: string }> };

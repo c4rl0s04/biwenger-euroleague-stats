@@ -6,11 +6,8 @@
  * See PAGE_ARCHITECTURE.md section 3 for full layout specification.
  */
 
-import {
-  getPlayerCatalogueData,
-  parsePlayerCatalogueFilters,
-  PlayersScreen,
-} from '@/features/players/server';
+import { getPlayerCatalogueData, parsePlayerCatalogueFilters } from '@/features/players/server';
+import { PlayersScreen } from '@/features/players/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const dynamic = 'force-dynamic';

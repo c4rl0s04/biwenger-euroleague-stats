@@ -147,7 +147,33 @@ production dependency audit zero findings. Production build passed with baseline
 environment/Node warnings. A public production Player profile was replayed through
 the new mappers in memory: no JSON value/field differences. This confirmed that
 the existing HTTP `profile_url` field must be retained despite its absence from
-the local schema declaration; no schema was changed. Release verification remains
-the next gate. Then refine reference boundaries before the Rounds foundation.
+the local schema declaration; no schema was changed.
+
+Players released at `7712910f08c5d02c485f44c2f22895a42be7469c` by clean
+fast-forward and main push. Vercel `dpl_BofXVYwjBW9wWCMfbFoqyoqpoqgi` is READY
+on the matching SHA and production alias; GitHub CI `34052043965` passed.
+Public profile and streak responses matched the pre-release canonical JSON hashes
+exactly. Team and player APIs returned 200; protected Players/Teams/Matches/Dashboard
+routes retained login redirects. All seven session-dependent APIs retained exact
+private/no-store headers for successful, anonymous and invalid-ID reads. The
+deployment-scoped log sample had no error/fatal or 5xx entries and no sensitive-value
+patterns. Authenticated desktop/mobile visual verification remains manual.
+
+Reference refinement starts with entrypoint separation: four Players pages now
+import screens from the existing client-safe public contract and services from
+the server contract. Redundant presentation re-exports are removed from Players
+server.ts. AST-based tests guard the three reference server barrels and all four
+page import contracts. Baseline: typecheck and 209 focused tests passed. This
+bounded sub-slice does not claim complete transitive import-graph enforcement;
+independent DTO review, allowlisting and graph enforcement remain next, before
+the Rounds foundation.
+
+Entrypoint validation: typecheck passed, 216 focused tests passed and the full
+suite passed 714 tests with one existing skip. Lint passed with the same 25 image
+warnings after correcting a reserved variable name in the new test. Production
+build, documentation check (49 notes), schema metadata (38 tables), Drizzle check
+and diff whitespace check passed. AST comparison confirmed all four pages retain
+identical non-import logic. No HTTP, database, authentication or component
+implementation changed. Release verification is pending for this sub-slice.
 The full migration objective remains incomplete. Protected pages, credentials,
 fallback configuration, database schema and provider operations are unchanged.

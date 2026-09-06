@@ -1,13 +1,5 @@
 import 'server-only';
 
-export { default as MobilePlayerProfileScreen } from './components/mobile/MobilePlayerProfileScreen';
-export { default as MobilePlayersScreen } from './components/mobile/MobilePlayersScreen';
-export { default as PlayerProfileClient } from './components/desktop/profile/PlayerProfileClient';
-export { default as PlayersDiscovery } from './components/desktop/catalogue/PlayersDiscovery';
-export { PlayerProfileNotFoundScreen, PlayerProfileScreen } from './components/PlayerProfileScreen';
-export { PlayersScreen } from './components/PlayersScreen';
-export { PlayerCatalogueSectionScreen } from './components/mobile/PlayerCatalogueSectionScreen';
-export { PlayerProfileSectionScreen } from './components/mobile/PlayerProfileSectionScreen';
 export {
   getDashboardPlayerBirthdays,
   getDashboardRisingStars,

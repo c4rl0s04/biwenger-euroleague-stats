@@ -2,8 +2,8 @@ import {
   getPlayerCatalogueData,
   getPlayerCatalogueInsightsData,
   parsePlayerCatalogueSection,
-  PlayerCatalogueSectionScreen,
 } from '@/features/players/server';
+import { PlayerCatalogueSectionScreen } from '@/features/players/public';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
 
 type PageProps = { params: Promise<{ section: string }> };

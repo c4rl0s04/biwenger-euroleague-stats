@@ -1,8 +1,5 @@
-import {
-  getPlayerProfileData,
-  PlayerProfileNotFoundScreen,
-  PlayerProfileScreen,
-} from '@/features/players/server';
+import { getPlayerProfileData } from '@/features/players/server';
+import { PlayerProfileNotFoundScreen, PlayerProfileScreen } from '@/features/players/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const dynamic = 'force-dynamic';
