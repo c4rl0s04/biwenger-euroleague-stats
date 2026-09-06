@@ -99,14 +99,26 @@ requires approval or reliable usage evidence. No alias has been added by this ob
   `docs/product/players-and-teams.md`.
 - Existing main CI run `33683750294`: documentation failure and formatting debt
   in 60 files. Repair separately; do not mix mass formatting with domain work.
-- Read-only formatting inspection confirms 60 existing source files spanning
-  multiple domains, including Lineup, Market, Settings and Assistant. No mass
-  formatting has been applied; approval is needed for that broader maintenance
-  scope before integration. No CI checks have been weakened or bypassed.
+- Formatting cleanup explicitly approved on 2026-09-06 and completed in four
+  separate commits: `c0a53c79` route adapters, `9c342593` mobile screens,
+  `5dd6994a` shared presentation/helpers, `450ee236` Matches. All 60 files match
+  Prettier output from their original source. Normalized emitted JavaScript is
+  identical in 59 files; the remaining Lineup change only splits the save-button
+  label into adjacent text children with identical text. No CI checks were changed.
+- Formatting-only validation: typecheck, lint (29 existing warnings), production
+  build, schema metadata, Drizzle and diff checks passed. An overloaded concurrent
+  test run failed with timeouts and a subsequent assertion failure; an isolated
+  full run with two workers passed all 538 tests (one existing skip). No timeout
+  configuration or tests were changed.
+- The separate Team documentation-link correction was rebased as `b97ef625`.
+  Maintenance and cache branches rebased without conflicts; Players remains untouched.
+- Combined branch: the default-worker full suite passed 678 tests (one existing
+  skip); docs check passed all 49 notes; typecheck, production dependency audit
+  (zero findings), schema metadata and Drizzle checks passed again.
 
 ## Next gate
 
-Resolve the existing CI maintenance scope, independently integrate/deploy Slice 1,
+Finish combined validation, independently integrate/deploy Slice 1,
 then verify production SHA and safe responses/logs. Only afterwards rebase Players.
 The full migration objective remains incomplete. Protected pages, credentials,
 fallback configuration, database schema and provider operations are unchanged.
