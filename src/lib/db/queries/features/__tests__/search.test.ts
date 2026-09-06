@@ -5,14 +5,15 @@ const mocks = vi.hoisted(() => ({
   resolveReadSeasonId: vi.fn(),
 }));
 
-vi.mock('../../../index', () => ({
+vi.mock('server-only', () => ({}));
+vi.mock('@/lib/db/connection', () => ({
   db: {},
   pgClient: {
     query: mocks.query,
   },
 }));
 
-vi.mock('../../../season-context', () => ({
+vi.mock('@/lib/db/season-context', () => ({
   resolveReadSeasonId: mocks.resolveReadSeasonId,
 }));
 

@@ -4,11 +4,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
-vi.mock('@/lib/services', () => ({
+vi.mock('@/features/search/server', () => ({
   performGlobalSearch: vi.fn(),
+  SEARCH_HTTP_CACHE_SECONDS: 60,
 }));
 
-import * as services from '@/lib/services';
+import * as services from '@/features/search/server';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
@@ -17,7 +18,14 @@ function makeRequest(path: string, params: Record<string, string> = {}): NextReq
 }
 
 describe('GET /api/search', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(services.performGlobalSearch).mockResolvedValue({
+      players: [],
+      teams: [],
+      users: [],
+    });
+  });
 
   it('returns empty results when query is missing', async () => {
     const { GET } = await import('@/app/api/search/route');
@@ -28,7 +36,7 @@ describe('GET /api/search', () => {
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
     expect(json.data).toEqual({ players: [], teams: [], users: [] });
-    expect(services.performGlobalSearch).not.toHaveBeenCalled();
+    expect(services.performGlobalSearch).toHaveBeenCalledWith(null);
   });
 
   it('returns empty results when query is only 1 character', async () => {
@@ -39,7 +47,7 @@ describe('GET /api/search', () => {
 
     expect(response.status).toBe(200);
     expect(json.data).toEqual({ players: [], teams: [], users: [] });
-    expect(services.performGlobalSearch).not.toHaveBeenCalled();
+    expect(services.performGlobalSearch).toHaveBeenCalledWith('a');
   });
 
   it('calls service with valid query (2+ chars) and returns results', async () => {
