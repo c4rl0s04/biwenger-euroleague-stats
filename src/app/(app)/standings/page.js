@@ -1,7 +1,7 @@
 import DesktopStandingsScreen from '@/components/standings/DesktopStandingsScreen';
 import MobileStandingsScreen from '@/components/mobile/screens/MobileStandingsScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-import { getFullStandings, getLeagueOverview } from '@/lib/services/app/standingsService';
+import { getFullStandings, getLeagueOverview } from '@/features/standings/server';
 
 export const dynamic = 'force-dynamic';
 

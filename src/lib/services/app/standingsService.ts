@@ -63,7 +63,7 @@ export interface StandingsOptions {
  * @param options - Configuration options
  */
 export async function getFullStandings(options: StandingsOptions = {}) {
-  return await getExtendedStandings(options as any);
+  return await getExtendedStandings(options);
 }
 
 /**

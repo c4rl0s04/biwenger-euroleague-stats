@@ -4,6 +4,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+vi.mock('@/features/standings/server', async () => {
+  const legacy = await import('@/lib/services');
+  const { parseStandingsSearchParams } =
+    await import('@/features/standings/validation/standings-input');
+  return {
+    getFullStandings: legacy.getFullStandings,
+    getLeagueOverview: legacy.getLeagueOverview,
+    fetchValueRanking: legacy.fetchValueRanking,
+    parseStandingsSearchParams,
+    STANDINGS_CACHE_POLICY: {
+      fullHttpSeconds: 60,
+      overviewHttpSeconds: 900,
+      valueHttpSeconds: 900,
+    },
+  };
+});
+
 vi.mock('@/lib/services', () => ({
   getFullStandings: vi.fn(),
   fetchRoundWinners: vi.fn(),
@@ -54,7 +71,23 @@ describe('GET /api/standings/full', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with standings data using default sort', async () => {
-    const mockStandings = [{ user_id: 1, total_points: 800 }];
+    const mockStandings = [
+      {
+        user_id: '1',
+        name: null,
+        icon: null,
+        color_index: 0,
+        total_points: 800,
+        rounds_played: 2,
+        avg_points: 400,
+        best_round: 450,
+        worst_round: 350,
+        round_wins: 1,
+        team_value: 100,
+        price_trend: 0,
+        position: 1,
+      },
+    ];
     vi.mocked(services.getFullStandings).mockResolvedValue(mockStandings);
 
     const { GET } = await import('@/app/api/standings/full/route');
