@@ -11,7 +11,11 @@ export function MobileScreenLoading({ label = 'Cargando datos' }: { label?: stri
   );
 }
 
-export function MobileScreenEmpty({ message = 'Todavía no hay datos para mostrar.' }: { message?: string }) {
+export function MobileScreenEmpty({
+  message = 'Todavía no hay datos para mostrar.',
+}: {
+  message?: string;
+}) {
   return (
     <div className="mobile-screen-state">
       <Inbox size={28} aria-hidden="true" />
@@ -29,7 +33,11 @@ export function MobileScreenError({
     <div className="mobile-screen-state mobile-screen-state-error" role="alert">
       <AlertTriangle size={28} aria-hidden="true" />
       <p>{message}</p>
-      <button type="button" onClick={() => window.location.reload()} className="mobile-retry-button">
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="mobile-retry-button"
+      >
         <RotateCcw size={17} aria-hidden="true" /> Reintentar
       </button>
     </div>

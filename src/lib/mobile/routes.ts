@@ -220,22 +220,8 @@ export const MOBILE_ROUTE_DEFINITIONS: readonly MobileRouteDefinition[] = [
     )
   ),
   main('/team/[id]', 'Perfil de equipo', 'Liga'),
-  section(
-    '/team/[id]/roster',
-    '/team/[id]',
-    'roster',
-    'Plantilla',
-    'Liga',
-    '/team/:id#roster'
-  ),
-  section(
-    '/team/[id]/matches',
-    '/team/[id]',
-    'matches',
-    'Partidos',
-    'Liga',
-    '/team/:id#matches'
-  ),
+  section('/team/[id]/roster', '/team/[id]', 'roster', 'Plantilla', 'Liga', '/team/:id#roster'),
+  section('/team/[id]/matches', '/team/[id]', 'matches', 'Partidos', 'Liga', '/team/:id#matches'),
 
   main('/settings', 'Ajustes', 'Cuenta'),
   section('/settings/account', '/settings', 'account', 'Cuenta', 'Cuenta'),
@@ -286,7 +272,9 @@ function matchPattern(pattern: string, pathname: string): Record<string, string>
   const matched = pathname.match(new RegExp(`^${expression}/?$`));
   if (!matched) return null;
 
-  return Object.fromEntries(names.map((name, index) => [name, decodeURIComponent(matched[index + 1])]));
+  return Object.fromEntries(
+    names.map((name, index) => [name, decodeURIComponent(matched[index + 1])])
+  );
 }
 
 export function findMobileRoute(pathname: string): MobileRouteMatch | null {

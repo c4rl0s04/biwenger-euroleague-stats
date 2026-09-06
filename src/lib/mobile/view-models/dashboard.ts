@@ -52,11 +52,13 @@ export function toMobileDashboardViewModel({
           name: String(round.round_name ?? round.name ?? 'Próxima jornada'),
         }
       : null,
-    alerts: (userDashboard?.alerts ?? []).slice(0, 3).map((alert: UnknownRecord, index: number) => ({
-      id: String(alert.id ?? index),
-      title: String(alert.title ?? alert.message ?? 'Aviso de tu equipo'),
-      severity: String(alert.severity ?? alert.type ?? 'info'),
-    })),
+    alerts: (userDashboard?.alerts ?? [])
+      .slice(0, 3)
+      .map((alert: UnknownRecord, index: number) => ({
+        id: String(alert.id ?? index),
+        title: String(alert.title ?? alert.message ?? 'Aviso de tu equipo'),
+        severity: String(alert.severity ?? alert.type ?? 'info'),
+      })),
     formPlayers: (leagueDashboard?.hotStreaks ?? [])
       .slice(0, 3)
       .map((player: UnknownRecord) => String(player.name ?? player.player_name ?? ''))

@@ -22,7 +22,8 @@ function firstValue(record: RecordValue, keys: string[]): unknown {
 }
 
 export function normalizeMobileRecords(value: unknown, limit = 20): RecordValue[] {
-  if (Array.isArray(value)) return value.filter((item) => item && typeof item === 'object').slice(0, limit);
+  if (Array.isArray(value))
+    return value.filter((item) => item && typeof item === 'object').slice(0, limit);
   if (!value || typeof value !== 'object') return [];
 
   const record = value as RecordValue;

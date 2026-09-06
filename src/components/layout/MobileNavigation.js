@@ -106,7 +106,11 @@ function MoreSheet({ isOpen, onClose }) {
 
         <nav aria-label="Resto de secciones" className="mobile-more-content">
           {categories.map((category) => (
-            <section key={category.name} className="mobile-more-category" aria-labelledby={`mobile-more-${category.name}`}>
+            <section
+              key={category.name}
+              className="mobile-more-category"
+              aria-labelledby={`mobile-more-${category.name}`}
+            >
               <h3 id={`mobile-more-${category.name}`}>{category.name}</h3>
               <ul className="grid grid-cols-2 gap-2">
                 {category.items.map((item) => {

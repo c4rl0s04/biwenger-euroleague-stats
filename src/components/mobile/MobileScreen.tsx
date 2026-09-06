@@ -64,7 +64,11 @@ interface MobileBackHeaderProps {
 export function MobileBackHeader({ title, backHref, context, action }: MobileBackHeaderProps) {
   return (
     <header className="mobile-native-back-header">
-      <Link href={backHref} className="mobile-native-icon-button" aria-label={`Volver a ${context ?? 'la pantalla anterior'}`}>
+      <Link
+        href={backHref}
+        className="mobile-native-icon-button"
+        aria-label={`Volver a ${context ?? 'la pantalla anterior'}`}
+      >
         <ArrowLeft size={21} aria-hidden="true" />
       </Link>
       <div className="min-w-0 flex-1">
@@ -177,7 +181,11 @@ export function MobileActionTile({
   featured = false,
 }: MobileActionTileProps) {
   return (
-    <Link href={href} prefetch className={`mobile-action-tile ${featured ? 'mobile-action-tile-featured' : ''}`}>
+    <Link
+      href={href}
+      prefetch
+      className={`mobile-action-tile ${featured ? 'mobile-action-tile-featured' : ''}`}
+    >
       <span className="mobile-action-tile-icon">
         <Icon size={23} strokeWidth={2.1} aria-hidden="true" />
       </span>

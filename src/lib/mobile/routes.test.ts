@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  MOBILE_ROUTE_DEFINITIONS,
-  findMobileRoute,
-  getDesktopDestination,
-} from './routes';
+import { MOBILE_ROUTE_DEFINITIONS, findMobileRoute, getDesktopDestination } from './routes';
 
 describe('mobile route registry', () => {
   it('contains unique paths and excludes the internal Hoopgrid route', () => {
@@ -17,15 +13,11 @@ describe('mobile route registry', () => {
   it('maps analytic subpages to the equivalent desktop section', () => {
     expect(getDesktopDestination('/standings/progression')).toBe('/standings#progression');
     expect(getDesktopDestination('/market/bids')).toBe('/market#bids');
-    expect(getDesktopDestination('/season-review/methodology')).toBe(
-      '/season-review#methodology'
-    );
+    expect(getDesktopDestination('/season-review/methodology')).toBe('/season-review#methodology');
   });
 
   it('preserves meaningful route state when redirecting desktop users', () => {
-    expect(getDesktopDestination('/assistant/thread-7')).toBe(
-      '/assistant?conversation=thread-7'
-    );
+    expect(getDesktopDestination('/assistant/thread-7')).toBe('/assistant?conversation=thread-7');
     expect(getDesktopDestination('/compare/23')).toBe('/compare?opponent=23');
     expect(getDesktopDestination('/rounds/12/stats')).toBe('/rounds?roundId=12#stats');
   });

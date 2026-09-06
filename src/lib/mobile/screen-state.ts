@@ -10,10 +10,7 @@ function isEmpty(data: unknown): boolean {
   return data == null || data === '' || (Array.isArray(data) && data.length === 0);
 }
 
-export function createMobileScreenState<T>(
-  data: T | null,
-  error?: unknown
-): MobileScreenState<T> {
+export function createMobileScreenState<T>(data: T | null, error?: unknown): MobileScreenState<T> {
   if (error) {
     return { data: null, status: 'error', errorMessage: DEFAULT_ERROR_MESSAGE };
   }

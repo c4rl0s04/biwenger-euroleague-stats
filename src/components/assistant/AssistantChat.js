@@ -330,60 +330,60 @@ export default function AssistantChat({ mobile = false, initialConversationId = 
     <div className="mx-auto flex min-h-[calc(100dvh-11rem)] max-w-6xl flex-col overflow-hidden border-y border-border/60 bg-card/40 shadow-2xl shadow-black/20 backdrop-blur-xl sm:rounded-2xl sm:border lg:min-h-[650px] lg:flex-row">
       {!mobile && (
         <aside className="border-b border-border/50 bg-background/20 p-3 lg:w-64 lg:border-r lg:border-b-0">
-        <button
-          type="button"
-          onClick={beginNewConversation}
-          disabled={loading}
-          className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-primary/35 bg-primary/10 px-3 py-2.5 text-sm text-primary transition-colors hover:bg-primary/15 disabled:opacity-40"
-        >
-          <Plus size={16} />
-          Nuevo chat
-        </button>
-        <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Conversaciones
-        </p>
-        <div className="flex max-h-44 gap-2 overflow-x-auto lg:max-h-[550px] lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden">
-          {loadingConversations && (
-            <p className="px-2 py-3 text-sm text-muted-foreground">Cargando...</p>
-          )}
-          {!loadingConversations && conversations.length === 0 && (
-            <p className="px-2 py-3 text-sm text-muted-foreground">Aún no hay chats guardados.</p>
-          )}
-          {conversations.map((conversation) => (
-            <div
-              key={conversation.id}
-              className={`group flex min-w-52 items-center gap-1 rounded-xl border p-1 lg:min-w-0 ${
-                conversation.id === activeConversationId
-                  ? 'border-primary/35 bg-primary/10'
-                  : 'border-transparent hover:bg-white/5'
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => loadConversation(conversation.id)}
-                disabled={loading}
-                className="min-w-0 flex-1 px-2 py-2 text-left disabled:opacity-50"
+          <button
+            type="button"
+            onClick={beginNewConversation}
+            disabled={loading}
+            className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-primary/35 bg-primary/10 px-3 py-2.5 text-sm text-primary transition-colors hover:bg-primary/15 disabled:opacity-40"
+          >
+            <Plus size={16} />
+            Nuevo chat
+          </button>
+          <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Conversaciones
+          </p>
+          <div className="flex max-h-44 gap-2 overflow-x-auto lg:max-h-[550px] lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden">
+            {loadingConversations && (
+              <p className="px-2 py-3 text-sm text-muted-foreground">Cargando...</p>
+            )}
+            {!loadingConversations && conversations.length === 0 && (
+              <p className="px-2 py-3 text-sm text-muted-foreground">Aún no hay chats guardados.</p>
+            )}
+            {conversations.map((conversation) => (
+              <div
+                key={conversation.id}
+                className={`group flex min-w-52 items-center gap-1 rounded-xl border p-1 lg:min-w-0 ${
+                  conversation.id === activeConversationId
+                    ? 'border-primary/35 bg-primary/10'
+                    : 'border-transparent hover:bg-white/5'
+                }`}
               >
-                <span className="flex items-center gap-2 text-sm text-foreground">
-                  <MessageSquare size={14} className="shrink-0 text-muted-foreground" />
-                  <span className="truncate">{conversation.title}</span>
-                </span>
-                <span className="ml-6 text-xs text-muted-foreground">
-                  {formatDate(conversation.updatedAt)}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => removeConversation(conversation.id)}
-                disabled={loading}
-                className="min-h-11 min-w-11 rounded-lg p-2 text-muted-foreground opacity-100 transition hover:text-red-300 focus:opacity-100 disabled:opacity-0 lg:opacity-0 lg:group-hover:opacity-100"
-                aria-label="Eliminar conversación"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
+                <button
+                  type="button"
+                  onClick={() => loadConversation(conversation.id)}
+                  disabled={loading}
+                  className="min-w-0 flex-1 px-2 py-2 text-left disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2 text-sm text-foreground">
+                    <MessageSquare size={14} className="shrink-0 text-muted-foreground" />
+                    <span className="truncate">{conversation.title}</span>
+                  </span>
+                  <span className="ml-6 text-xs text-muted-foreground">
+                    {formatDate(conversation.updatedAt)}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeConversation(conversation.id)}
+                  disabled={loading}
+                  className="min-h-11 min-w-11 rounded-lg p-2 text-muted-foreground opacity-100 transition hover:text-red-300 focus:opacity-100 disabled:opacity-0 lg:opacity-0 lg:group-hover:opacity-100"
+                  aria-label="Eliminar conversación"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
         </aside>
       )}
 

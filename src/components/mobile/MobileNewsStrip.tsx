@@ -12,7 +12,9 @@ export default function MobileNewsStrip({ items }: { items: MobileNewsItem[] }) 
   return (
     <details className="mobile-news-strip">
       <summary>
-        <span className="mobile-news-live"><Radio size={14} aria-hidden="true" /> Liga</span>
+        <span className="mobile-news-live">
+          <Radio size={14} aria-hidden="true" /> Liga
+        </span>
         <span className="mobile-news-headline">{items[0].title}</span>
         <span className="mobile-news-expand">+{items.length}</span>
       </summary>

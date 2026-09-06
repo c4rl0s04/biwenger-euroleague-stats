@@ -26,10 +26,7 @@ export function detectPresentationMode({
 
   if (isIpad || isAndroidTablet) return 'desktop';
 
-  if (
-    IPHONE_PATTERN.test(agent) ||
-    (ANDROID_PATTERN.test(agent) && MOBILE_PATTERN.test(agent))
-  ) {
+  if (IPHONE_PATTERN.test(agent) || (ANDROID_PATTERN.test(agent) && MOBILE_PATTERN.test(agent))) {
     return 'phone';
   }
 

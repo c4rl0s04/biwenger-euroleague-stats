@@ -66,7 +66,9 @@ export default function HoopgridClient({ mobile = false }) {
   if (!challenge) return null;
 
   return (
-    <div className={`w-full flex flex-col items-center ${mobile ? 'mobile-hoopgrid-client' : 'pt-12'}`}>
+    <div
+      className={`w-full flex flex-col items-center ${mobile ? 'mobile-hoopgrid-client' : 'pt-12'}`}
+    >
       {/* 1. Header Section */}
       <HoopgridHeader
         mobile={mobile}

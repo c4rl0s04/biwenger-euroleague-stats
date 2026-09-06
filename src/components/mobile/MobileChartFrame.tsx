@@ -7,7 +7,12 @@ interface MobileChartFrameProps {
   table?: ReactNode;
 }
 
-export default function MobileChartFrame({ title, summary, children, table }: MobileChartFrameProps) {
+export default function MobileChartFrame({
+  title,
+  summary,
+  children,
+  table,
+}: MobileChartFrameProps) {
   return (
     <figure className="mobile-chart-frame">
       <figcaption>
