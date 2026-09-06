@@ -17,30 +17,30 @@ status: active
   `dpl_4x574BXXGf882revQKAa9YVCMs8S` READY at the same main SHA.
 - Players is unpublished at `5c546983` on `refactor/players-feature-architecture`.
 - Slice 1: `fix/session-read-cache-policy`, based on the main SHA above.
-- No architecture-objective deployment has occurred yet.
+- These are historical starting-point SHAs; the completed cache release is recorded below.
 
 ## Domain ledger
 
-| Domains                                                  | Status / next boundary                                                              |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Matches, Teams                                           | Integrated; official DTOs, persistence guards and graph enforcement need refinement |
-| Players                                                  | Pending integration after cache correction; manager adapter is temporary            |
-| Rounds                                                   | Calendar foundation, then historical results and analysis                           |
-| Managers                                                 | Profile, directory and squads remain legacy                                         |
-| Standings                                                | Base rankings, performance analytics and draft analytics are separate slices        |
-| Tournaments                                              | Legacy read services and components                                                 |
-| Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                            |
-| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                      |
-| Market public reads                                      | Legacy analytics; separate from private operations                                  |
-| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                             |
-| Home, News, Search                                       | Existing partial layers; migrate contracts and screens                              |
-| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                 |
-| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                 |
-| Lineup, Market operations                                | Deferred pending provider-operation security gate                                   |
-| Accounts, Settings                                       | Deferred pending credential observation gate                                        |
-| Assistant                                                | Deferred pending privacy/provider review                                            |
-| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                |
-| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                      |
+| Domains                                                  | Status / next boundary                                                                              |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Matches, Teams                                           | Integrated; official DTOs, persistence guards and graph enforcement need refinement                 |
+| Players                                                  | Rebased on the cache release; integration validation in progress; manager adapter remains temporary |
+| Rounds                                                   | Calendar foundation, then historical results and analysis                                           |
+| Managers                                                 | Profile, directory and squads remain legacy                                                         |
+| Standings                                                | Base rankings, performance analytics and draft analytics are separate slices                        |
+| Tournaments                                              | Legacy read services and components                                                                 |
+| Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                                            |
+| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                                      |
+| Market public reads                                      | Legacy analytics; separate from private operations                                                  |
+| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                             |
+| Home, News, Search                                       | Existing partial layers; migrate contracts and screens                                              |
+| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                 |
+| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                 |
+| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                   |
+| Accounts, Settings                                       | Deferred pending credential observation gate                                                        |
+| Assistant                                                | Deferred pending privacy/provider review                                                            |
+| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                |
+| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                      |
 
 ## HTTP contracts and compatibility
 
@@ -118,7 +118,36 @@ requires approval or reliable usage evidence. No alias has been added by this ob
 
 ## Next gate
 
-Finish combined validation, independently integrate/deploy Slice 1,
-then verify production SHA and safe responses/logs. Only afterwards rebase Players.
+Slice 1 completed at `376814b6b2ff550cad9f298fa3e405d250458344`: Vercel
+`dpl_J82oACGcjZUTHGs4SzJ1Zc3qyR23` READY, matching main; GitHub CI
+`34026360593` passed. All seven endpoint success/anonymous/invalid-ID smoke
+checks preserved envelopes and exact private/no-store headers. Protected routes
+redirected normally; deployment-scoped error/fatal and 5xx queries found no logs.
+
+Players rebase mapping:
+
+- `5ba86e43` → `0d8d859f` (feature boundary).
+- `0a2d5fb8` → `77197963` (boundary/contract tests).
+- `5c546983` → `9162c3d8` (obsolete component removal).
+
+Straightforward conflicts retained Players services with private HTTP responses
+and removed the obsolete mobile screen after consumer checks. The 140-case
+session-cache matrix now mocks the deliberate Players service contract.
+
+Compatibility review corrected legacy profile aggregate nulls/decimal strings,
+nullable match stats, date serialization and streak count strings. HTTP services
+produce explicit allowlisted projections; UI services keep normalized models.
+No URL or ID-validation semantics changed. Manager reads still delegate to the
+legacy user service until the Managers slice; no duplicate manager queries were added.
+
+Players validation so far: typecheck passed; 179 focused tests passed; full suite
+707 passed, one existing skip; documentation/formatting passed; lint passed with
+25 existing image warnings; schema metadata/Drizzle passed (38 tables, no drift);
+production dependency audit zero findings. Production build passed with baseline
+environment/Node warnings. A public production Player profile was replayed through
+the new mappers in memory: no JSON value/field differences. This confirmed that
+the existing HTTP `profile_url` field must be retained despite its absence from
+the local schema declaration; no schema was changed. Release verification remains
+the next gate. Then refine reference boundaries before the Rounds foundation.
 The full migration objective remains incomplete. Protected pages, credentials,
 fallback configuration, database schema and provider operations are unchanged.

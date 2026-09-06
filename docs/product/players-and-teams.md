@@ -25,10 +25,10 @@ The global search endpoint also links users into player, team, and manager desti
 
 - Pages: [`players`](<../../src/app/(app)/players>), [`player/[id]`](<../../src/app/(app)/player/[id]>),
   and [`team/[id]`](<../../src/app/(app)/team/[id]>).
-- UI: [`players-list`](../../src/components/players-list),
-  [`player-profile`](../../src/components/player-profile), and
+- UI: [Player catalogue](../../src/features/players/components/desktop/catalogue),
+  [Player profiles](../../src/features/players/components/desktop/profile), and
   [`Team components`](../../src/features/teams/components).
-- Services: [`playerService.ts`](../../src/lib/services/core/playerService.ts),
+- Services: [Players server contract](../../src/features/players/server.ts),
   [`team-profile.service.ts`](../../src/features/teams/server/services/team-profile.service.ts), and
   [`searchService.ts`](../../src/lib/services/features/searchService.ts).
 - Data: core player/team queries and player-form queries under
