@@ -6,10 +6,7 @@ import { getAppStandings } from '@/lib/services/app/appShellService';
 
 export default async function AppLayout({ children }) {
   // Fetch users for the UserProvider
-  const [users, presentationMode] = await Promise.all([
-    getAppStandings(),
-    getPresentationMode(),
-  ]);
+  const [users, presentationMode] = await Promise.all([getAppStandings(), getPresentationMode()]);
 
   return (
     <ClientWrapper users={users}>

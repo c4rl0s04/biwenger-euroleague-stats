@@ -21,7 +21,8 @@ export default async function SeasonReviewPage() {
     isPhonePresentation(),
   ]);
 
-  if (phone) return <MobileSeasonReviewScreen overview={overview} simulationAnalysis={simulationAnalysis} />;
+  if (phone)
+    return <MobileSeasonReviewScreen overview={overview} simulationAnalysis={simulationAnalysis} />;
 
   return (
     <main className="min-h-screen overflow-hidden bg-background">

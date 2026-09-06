@@ -20,8 +20,16 @@ export default async function LineupsPage({ searchParams }) {
     const params = await searchParams;
     const lists = await fetchRoundsList();
     const activeRoundId = params?.roundId ?? lists.defaultRoundId ?? lists.rounds[0]?.round_id;
-    const roundData = userId && activeRoundId ? await fetchRoundCompleteData(activeRoundId, userId) : null;
-    return <MobileRoundsScreen rounds={lists.rounds} activeRoundId={activeRoundId} roundData={roundData} userId={userId} />;
+    const roundData =
+      userId && activeRoundId ? await fetchRoundCompleteData(activeRoundId, userId) : null;
+    return (
+      <MobileRoundsScreen
+        rounds={lists.rounds}
+        activeRoundId={activeRoundId}
+        roundData={roundData}
+        userId={userId}
+      />
+    );
   }
 
   return (

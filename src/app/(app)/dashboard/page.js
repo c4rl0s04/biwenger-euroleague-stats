@@ -18,11 +18,7 @@ import { auth } from '@/auth';
 import MobileDashboardScreen from '@/components/mobile/screens/MobileDashboardScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 import { toMobileDashboardViewModel } from '@/lib/mobile/view-models/dashboard';
-import {
-  getLeagueDashboardData,
-  getNextRoundData,
-  getUserDashboardData,
-} from '@/lib/services';
+import { getLeagueDashboardData, getNextRoundData, getUserDashboardData } from '@/lib/services';
 import { fetchNewsFeed } from '@/lib/services/app/dashboardService';
 
 const TopFormCard = nextDynamic(() => import('@/components/dashboard/TopFormCard'), {

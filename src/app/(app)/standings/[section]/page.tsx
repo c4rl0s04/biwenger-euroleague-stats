@@ -54,7 +54,8 @@ async function loadSection(section: string): Promise<unknown> {
 }
 
 const descriptions: Record<string, string> = {
-  progression: 'La evolución jornada a jornada, presentada sin leyendas saturadas ni tarjetas gigantes.',
+  progression:
+    'La evolución jornada a jornada, presentada sin leyendas saturadas ni tarjetas gigantes.',
   rounds: 'Quién domina cada jornada y con qué frecuencia cambia el control de la liga.',
   draft: 'El rendimiento real de los jugadores que llegaron en el reparto inicial.',
   form: 'Rachas recientes para distinguir tendencia de ruido puntual.',

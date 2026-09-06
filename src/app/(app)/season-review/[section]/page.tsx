@@ -11,5 +11,11 @@ export default async function SeasonReviewSectionPage({ params }: PageProps) {
   await requireMobileRoute(`/season-review/${section}`);
   if (!valid.includes(section)) return null;
   const { overview, simulationAnalysis } = await getSeasonReviewPageData();
-  return <MobileSeasonReviewDetail section={section as ReviewSection} overview={overview} analysis={simulationAnalysis} />;
+  return (
+    <MobileSeasonReviewDetail
+      section={section as ReviewSection}
+      overview={overview}
+      analysis={simulationAnalysis}
+    />
+  );
 }

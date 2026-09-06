@@ -18,10 +18,7 @@ export default async function ManagerPage({ params }) {
   const { id } = await params;
 
   if (await isPhonePresentation()) {
-    const [stats, squad] = await Promise.all([
-      fetchUserSeasonStats(id),
-      fetchUserSquadDetails(id),
-    ]);
+    const [stats, squad] = await Promise.all([fetchUserSeasonStats(id), fetchUserSquadDetails(id)]);
     if (!stats || !stats.name || stats.name === 'Desconocido') {
       return <div className="mobile-record-empty">Mánager no encontrado.</div>;
     }

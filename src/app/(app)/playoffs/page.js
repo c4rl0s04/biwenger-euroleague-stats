@@ -13,10 +13,7 @@ export const metadata = {
 export const revalidate = 600;
 
 export default async function PlayoffPage() {
-  const [leaderboard, phone] = await Promise.all([
-    getPlayoffLeaderboard(),
-    isPhonePresentation(),
-  ]);
+  const [leaderboard, phone] = await Promise.all([getPlayoffLeaderboard(), isPhonePresentation()]);
 
   if (phone) return <MobilePlayoffsScreen leaderboard={leaderboard} />;
 

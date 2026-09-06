@@ -18,8 +18,14 @@ export default async function TournamentSectionPage({ params }: PageProps) {
   const data = section === 'standings' ? standings : fixtures;
 
   return (
-    <MobileDetailScaffold title={route.definition.title} context={tournament.name} backHref={`/tournaments/${id}`}>
-      <MobileSectionHeading>{section === 'standings' ? 'Clasificación' : 'Enfrentamientos'}</MobileSectionHeading>
+    <MobileDetailScaffold
+      title={route.definition.title}
+      context={tournament.name}
+      backHref={`/tournaments/${id}`}
+    >
+      <MobileSectionHeading>
+        {section === 'standings' ? 'Clasificación' : 'Enfrentamientos'}
+      </MobileSectionHeading>
       <MobileRecordList data={data} linkPrefix={section === 'standings' ? '/user' : undefined} />
     </MobileDetailScaffold>
   );

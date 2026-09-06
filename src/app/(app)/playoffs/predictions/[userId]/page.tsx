@@ -1,6 +1,10 @@
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import MobileRecordList from '@/components/mobile/MobileRecordList';
-import { MobileMetric, MobileMetricGrid, MobileSectionHeading } from '@/components/mobile/MobileScreen';
+import {
+  MobileMetric,
+  MobileMetricGrid,
+  MobileSectionHeading,
+} from '@/components/mobile/MobileScreen';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
 import { getPlayoffLeaderboard } from '@/lib/services/features/playoffService';
 
@@ -14,7 +18,11 @@ export default async function PlayoffPredictionPage({ params }: PageProps) {
   if (!user) return null;
 
   return (
-    <MobileDetailScaffold title={route.definition.title} context={user.userName} backHref="/playoffs">
+    <MobileDetailScaffold
+      title={route.definition.title}
+      context={user.userName}
+      backHref="/playoffs"
+    >
       <MobileMetricGrid>
         <MobileMetric label="Puntos" value={user.points} tone="accent" />
         <MobileMetric label="Aciertos" value={`${user.correctCount}/${user.totalCount}`} />

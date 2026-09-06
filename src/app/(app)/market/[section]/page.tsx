@@ -2,11 +2,7 @@ import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import MobileRecordList from '@/components/mobile/MobileRecordList';
 import { MobileSectionHeading } from '@/components/mobile/MobileScreen';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
-import {
-  fetchAllTransfers,
-  fetchMarketStats,
-  fetchMarketTrendsAnalysis,
-} from '@/lib/services';
+import { fetchAllTransfers, fetchMarketStats, fetchMarketTrendsAnalysis } from '@/lib/services';
 
 type PageProps = { params: Promise<{ section: string }> };
 type RecordValue = Record<string, any>;

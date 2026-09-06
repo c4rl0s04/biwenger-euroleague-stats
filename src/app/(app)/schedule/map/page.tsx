@@ -12,7 +12,12 @@ export default async function ScheduleMapPage({ searchParams }: PageProps) {
   const round = model.rounds.find((entry) => entry.roundId === model.selectedRoundId);
 
   return (
-    <MobileDetailScaffold title="Mapa de partidos" context="Horario" backHref={`/schedule${model.selectedRoundId ? `?roundId=${model.selectedRoundId}` : ''}`} description="Sedes y desplazamientos de los partidos de la jornada.">
+    <MobileDetailScaffold
+      title="Mapa de partidos"
+      context="Horario"
+      backHref={`/schedule${model.selectedRoundId ? `?roundId=${model.selectedRoundId}` : ''}`}
+      description="Sedes y desplazamientos de los partidos de la jornada."
+    >
       <div className="mobile-full-map">
         <MatchVenueMap matches={round?.matches ?? []} selectedTeamId={0} />
       </div>

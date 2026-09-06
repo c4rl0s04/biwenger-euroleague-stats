@@ -14,10 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function TournamentDetailsPage({ params }) {
   const { id } = await params;
-  const [tournament, phone] = await Promise.all([
-    getTournamentDetails(id),
-    isPhonePresentation(),
-  ]);
+  const [tournament, phone] = await Promise.all([getTournamentDetails(id), isPhonePresentation()]);
 
   if (!tournament) {
     notFound();
@@ -29,7 +26,13 @@ export default async function TournamentDetailsPage({ params }) {
   const data = tournament.data || {};
 
   if (phone) {
-    return <MobileTournamentDetailScreen tournament={tournament} standings={standings} fixtures={fixtures} />;
+    return (
+      <MobileTournamentDetailScreen
+        tournament={tournament}
+        standings={standings}
+        fixtures={fixtures}
+      />
+    );
   }
 
   // Determine initial round to show

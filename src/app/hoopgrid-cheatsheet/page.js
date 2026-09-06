@@ -196,7 +196,9 @@ export default async function HoopgridCheatsheetPage({ searchParams }) {
   }
 
   return (
-    <div className={`min-h-screen bg-background text-foreground font-sans ${phone ? 'mobile-cheatsheet-page' : 'p-6 md:p-10'}`}>
+    <div
+      className={`min-h-screen bg-background text-foreground font-sans ${phone ? 'mobile-cheatsheet-page' : 'p-6 md:p-10'}`}
+    >
       <div className="max-w-7xl mx-auto">
         <HoopgridCheatsheetHeader
           allChallenges={allChallenges}

@@ -28,7 +28,11 @@ export default async function ManagerSectionPage({ params }: PageProps) {
             : await fetchUserTournaments(id);
 
   return (
-    <MobileDetailScaffold title={route.definition.title} context={stats.name} backHref={`/user/${id}`}>
+    <MobileDetailScaffold
+      title={route.definition.title}
+      context={stats.name}
+      backHref={`/user/${id}`}
+    >
       <MobileSectionHeading>Detalle</MobileSectionHeading>
       <MobileRecordList
         data={data}
