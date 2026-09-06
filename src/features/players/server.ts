@@ -1,4 +1,5 @@
 import 'server-only';
+export { getPlayerRecentScores } from './server/services/player-form.service';
 
 export {
   getDashboardPlayerBirthdays,
@@ -19,11 +20,6 @@ export {
   getPlayerProfileData,
   getPlayerProfileApiData,
 } from './server/services/player-profile.service';
-export {
-  getPlayerUserRoundsData,
-  getPlayerUserSeasonStatsData,
-  getPlayerUserSquadData,
-} from './server/services/player-user-read.service';
 export {
   parsePlayerCatalogueFilters,
   parsePlayerCatalogueSection,

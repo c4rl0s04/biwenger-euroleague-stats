@@ -1,6 +1,5 @@
 import { db as pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
-import { getSimpleStandings as getStandings } from '../competition/standings';
 import { getPlayerFormMap } from './playerForm';
 
 export interface User {
@@ -28,41 +27,10 @@ export interface UserSquadPlayer {
   status?: string;
 }
 
-export interface UserSeasonStats {
-  id: string;
-  name: string;
-  icon: string;
-  color_index: number;
-  total_points: number;
-  best_round: number;
-  worst_round: number;
-  average_points: number;
-  rounds_played: number;
-  best_position: number;
-  worst_position: number;
-  average_position: number;
-  victories: number;
-  podiums: number;
-  purchases: number;
-  sales: number;
-  total_spent: number;
-  total_received: number;
-  last_transfers: any[];
-  position: number;
-  team_value: number;
-  price_trend: number;
-}
-
-export interface UserSquadDetails {
-  total_value: number;
-  price_trend: number;
-  total_points: number;
-  player_count: number;
-  position: number;
-  top_rising: any[];
-  top_falling: any[];
-  players: any[];
-}
+export type {
+  ManagerSeasonStatsViewModel as UserSeasonStats,
+  ManagerSquadViewModel as UserSquadDetails,
+} from '@/features/managers/public';
 
 export interface CaptainStats {
   total_rounds: number;
@@ -194,219 +162,12 @@ export async function getUserSquad(userId: number | string): Promise<UserSquadPl
 /**
  * Get detailed season statistics for a specific user
  */
-export async function getUserSeasonStats(userId: number | string): Promise<UserSeasonStats> {
-  const seasonId = await resolveReadSeasonId();
-  // First get user details for name
-  const userRes = await (pgClient as any).query(
-    `
-    SELECT
-      COALESCE(us.name, u.name) AS name,
-      COALESCE(us.icon, u.icon) AS icon,
-      COALESCE(us.color_index, u.color_index, 0) AS color_index
-    FROM users u
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
-    WHERE u.id = $1
-  `,
-    [userId, seasonId]
-  );
-  const user = userRes.rows[0];
-
-  const statsQuery = `
-    WITH UserRounds AS (
-      SELECT 
-        user_id,
-        points,
-        participated
-      FROM user_rounds
-      WHERE season_id = $2 AND user_id = $1 AND participated = TRUE
-    )
-    SELECT 
-      COALESCE(SUM(points), 0) as total_points,
-      COALESCE(MAX(points), 0) as best_round,
-      COALESCE(MIN(points), 0) as worst_round,
-      COALESCE(ROUND(AVG(points), 1), 0) as average_points,
-      COUNT(*) as rounds_played
-    FROM UserRounds
-  `;
-
-  const statsRes = await (pgClient as any).query(statsQuery, [userId, seasonId]);
-  const stats = statsRes.rows[0];
-
-  const positionsQuery = `
-    WITH RoundPositions AS (
-      SELECT 
-        ur.round_id,
-        ur.user_id,
-        RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
-      FROM user_rounds ur
-      WHERE ur.season_id = $2 AND ur.participated = TRUE
-    )
-    SELECT 
-      MIN(position) as best_position,
-      MAX(position) as worst_position,
-      ROUND(AVG(position), 1) as average_position,
-      COUNT(CASE WHEN position = 1 THEN 1 END) as victories,
-      COUNT(CASE WHEN position <= 3 THEN 1 END) as podiums
-    FROM RoundPositions
-    WHERE user_id = $1
-  `;
-
-  // Transfers query
-  const transfersQuery = `
-    SELECT
-      COUNT(CASE WHEN comprador = $1 THEN 1 END) as purchases,
-      COUNT(CASE WHEN vendedor = $2 THEN 1 END) as sales,
-      SUM(CASE WHEN comprador = $1 THEN precio ELSE 0 END) as total_spent,
-      SUM(CASE WHEN vendedor = $2 THEN precio ELSE 0 END) as total_received
-    FROM fichajes
-    WHERE season_id = $3
-  `;
-
-  const positionsRes = await (pgClient as any).query(positionsQuery, [userId, seasonId]);
-  const positions = positionsRes.rows[0];
-
-  let transfers = {
-    purchases: 0,
-    sales: 0,
-    total_spent: 0,
-    total_received: 0,
-    last_transfers: [] as any[],
-  };
-  if (user) {
-    const transfersRes = await (pgClient as any).query(transfersQuery, [
-      user.name,
-      user.name,
-      seasonId,
-    ]);
-    transfers = transfersRes.rows[0] || transfers;
-
-    // Get last 3 transfers
-    const lastTransfersQuery = `
-      SELECT 
-        f.player_id,
-        p.name as player_name,
-        f.precio as price,
-        f.comprador,
-        f.vendedor,
-        f.fecha,
-        CASE WHEN f.comprador = $1 THEN 'purchase' ELSE 'sale' END as type
-      FROM fichajes f
-      LEFT JOIN players p ON f.player_id = p.id
-      WHERE f.season_id = $2 AND (f.comprador = $1 OR f.vendedor = $1)
-      ORDER BY f.fecha DESC, f.id DESC
-      LIMIT 3
-    `;
-    const lastTransfersRes = await (pgClient as any).query(lastTransfersQuery, [
-      user.name,
-      seasonId,
-    ]);
-    transfers.last_transfers = lastTransfersRes.rows;
-  }
-
-  const standings = await getStandings();
-  // Ensure ID type comparison safety
-  const userStanding = standings.find((u: any) => String(u.user_id) === String(userId));
-
-  return {
-    id: String(userId),
-    name: user?.name || 'Desconocido',
-    icon: user?.icon || '',
-    color_index: user?.color_index ?? 0,
-
-    // Stats Parsing
-    total_points: parseInt(stats?.total_points) || 0,
-    best_round: parseInt(stats?.best_round) || 0,
-    worst_round: parseInt(stats?.worst_round) || 0,
-    average_points: parseFloat(stats?.average_points) || 0,
-    rounds_played: parseInt(stats?.rounds_played) || 0,
-
-    // Positions Parsing
-    best_position: parseInt(positions?.best_position) || 0,
-    worst_position: parseInt(positions?.worst_position) || 0,
-    average_position: parseFloat(positions?.average_position) || 0,
-    victories: parseInt(positions?.victories) || 0,
-    podiums: parseInt(positions?.podiums) || 0,
-
-    // Transfers Parsing
-    purchases: Number(transfers?.purchases) || 0,
-    sales: Number(transfers?.sales) || 0,
-    total_spent: Number(transfers?.total_spent) || 0,
-    total_received: Number(transfers?.total_received) || 0,
-    last_transfers: transfers?.last_transfers || [],
-
-    position: Number((userStanding as any)?.position) || 0,
-    team_value: Number((userStanding as any)?.team_value) || 0,
-    price_trend: Number((userStanding as any)?.price_trend) || 0,
-  };
-}
+export { getManagerSeasonStatsData as getUserSeasonStats } from '@/features/managers/server';
 
 /**
  * Get user's squad with price trends
  */
-export async function getUserSquadDetails(userId: number | string): Promise<UserSquadDetails> {
-  const seasonId = await resolveReadSeasonId();
-  const squadQuery = `
-    SELECT 
-      p.id, 
-      p.name, 
-      p.position, 
-      t.name as team, 
-      t.img as team_img,
-      t.short_name as team_short_name,
-      COALESCE(ps.price, p.price) AS price,
-      COALESCE(ps.price_increment, p.price_increment) AS price_increment,
-      COALESCE(ps.puntos, p.puntos) as points,
-      ROUND(CAST(COALESCE(ps.puntos, p.puntos) AS NUMERIC) / NULLIF(COALESCE(ps.partidos_jugados, p.partidos_jugados), 0), 1) as average,
-      p.img
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2
-    ORDER BY COALESCE(ps.puntos, p.puntos) DESC
-  `;
-
-  const squadRes = await (pgClient as any).query(squadQuery, [seasonId, userId]);
-  const formMap = await getPlayerFormMap(5);
-
-  const squad = squadRes.rows.map((p: any) => ({
-    ...p,
-    recent_scores: formMap.get(Number(p.id))?.recent_scores || '',
-  }));
-
-  // Get user's actual competition points from user_rounds
-  const userPointsQuery = `
-    SELECT COALESCE(SUM(points), 0) as total_points
-    FROM user_rounds
-    WHERE season_id = $1 AND user_id = $2 AND participated = TRUE
-  `;
-  const userPointsRes = await (pgClient as any).query(userPointsQuery, [seasonId, userId]);
-  const userPoints = userPointsRes.rows[0];
-
-  // Convert to numbers explicitly to assume safety
-  const totalValue = squad.reduce((sum: number, p: any) => sum + (parseInt(p.price) || 0), 0);
-  const totalTrend = squad.reduce(
-    (sum: number, p: any) => sum + (parseInt(p.price_increment) || 0),
-    0
-  );
-
-  // Get standings for position
-  const standings = await getStandings();
-  const userStanding = standings.find((u: any) => String(u.user_id) === String(userId));
-
-  return {
-    total_value: totalValue,
-    price_trend: totalTrend,
-    total_points: userPoints?.total_points || 0,
-    player_count: squad.length,
-    position: Number((userStanding as any)?.position) || 0,
-    top_rising: squad.filter((p: any) => (parseInt(p.price_increment) || 0) > 0).slice(0, 7),
-    top_falling: squad
-      .filter((p: any) => (parseInt(p.price_increment) || 0) < 0)
-      .slice(-7)
-      .reverse(),
-    players: squad,
-  };
-}
+export { getManagerSquadData as getUserSquadDetails } from '@/features/managers/server';
 
 /**
  * Get user's captain statistics

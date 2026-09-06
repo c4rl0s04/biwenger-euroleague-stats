@@ -13,10 +13,10 @@ const reads = vi.hoisted(() => ({
   fetchLeaderComparison: vi.fn(),
 }));
 vi.mock('@/lib/services', () => reads);
-vi.mock('@/features/players/server', () => ({
-  getPlayerUserRoundsData: reads.fetchUserRecentRounds,
-  getPlayerUserSeasonStatsData: reads.fetchUserSeasonStats,
-  getPlayerUserSquadData: reads.fetchUserSquadDetails,
+vi.mock('@/features/managers/server', () => ({
+  getManagerRoundsData: reads.fetchUserRecentRounds,
+  getManagerSeasonStatsData: reads.fetchUserSeasonStats,
+  getManagerSquadData: reads.fetchUserSquadDetails,
 }));
 
 import { GET as rounds } from '../player/rounds/route';

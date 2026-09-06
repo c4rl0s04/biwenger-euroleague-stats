@@ -22,10 +22,7 @@ describe('players feature boundaries', () => {
       '../../app/(app)/players/[section]/page.tsx',
       '../../app/(app)/player/[id]/page.js',
       '../../app/(app)/player/[id]/[section]/page.tsx',
-      '../../app/api/player/rounds/route.ts',
-      '../../app/api/player/stats/route.ts',
       '../../app/api/player/streaks/route.ts',
-      '../../app/api/player/squad/route.ts',
       '../../app/api/players/[id]/stats/route.ts',
     ].map(source);
     for (const entryPoint of entryPoints) {
@@ -54,12 +51,12 @@ describe('players feature boundaries', () => {
     );
   });
 
-  it('preserves the Lineup squad URL while the route reuses the Players adapter', () => {
+  it('preserves the Lineup squad URL while the route reuses the Managers contract', () => {
     const lineupSource = source('../../components/mobile/screens/MobileLineupClient.tsx');
     const routeSource = source('../../app/api/player/squad/route.ts');
     expect(lineupSource).toContain('/api/player/squad?userId=${userId}');
     expect(routeSource).toContain('getRequestUserId(request)');
-    expect(routeSource).toContain('getPlayerUserSquadData(userIdValidation.value)');
+    expect(routeSource).toContain('getManagerSquadData(userIdValidation.value)');
   });
 
   it('keeps the existing Player profile HTTP shape behind an explicit adapter', () => {

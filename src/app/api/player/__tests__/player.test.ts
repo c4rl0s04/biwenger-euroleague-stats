@@ -4,10 +4,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+vi.mock('@/features/managers/server', () => ({
+  getManagerSeasonStatsData: vi.fn(),
+  getManagerRoundsData: vi.fn(),
+  getManagerSquadData: vi.fn(),
+}));
 vi.mock('@/features/players/server', () => ({
-  getPlayerUserSeasonStatsData: vi.fn(),
-  getPlayerUserRoundsData: vi.fn(),
-  getPlayerUserSquadData: vi.fn(),
   getPlayerStreaksApiData: vi.fn(),
   getPlayerProfileApiData: vi.fn(),
   getPlayerStatLeaders: vi.fn(),
@@ -22,6 +24,7 @@ vi.mock('@/auth', () => ({
 }));
 
 import * as services from '@/lib/services';
+import * as managerServices from '@/features/managers/server';
 import * as playerServices from '@/features/players/server';
 import { auth } from '@/auth';
 
@@ -78,7 +81,7 @@ describe('GET /api/player/stats', () => {
       team_value: 0,
       price_trend: 0,
     };
-    vi.mocked(playerServices.getPlayerUserSeasonStatsData).mockResolvedValue(mockStats);
+    vi.mocked(managerServices.getManagerSeasonStatsData).mockResolvedValue(mockStats);
 
     const { GET } = await import('@/app/api/player/stats/route');
     const request = makeRequest('http://localhost/api/player/stats', { userId: '42' });
@@ -94,7 +97,7 @@ describe('GET /api/player/stats', () => {
   });
 
   it('returns 500 on service error', async () => {
-    vi.mocked(playerServices.getPlayerUserSeasonStatsData).mockRejectedValue(new Error('DB error'));
+    vi.mocked(managerServices.getManagerSeasonStatsData).mockRejectedValue(new Error('DB error'));
 
     const { GET } = await import('@/app/api/player/stats/route');
     const request = makeRequest('http://localhost/api/player/stats', { userId: '42' });
@@ -121,7 +124,7 @@ describe('GET /api/player/rounds', () => {
       total_played: 1,
       total_rounds: 1,
     };
-    vi.mocked(playerServices.getPlayerUserRoundsData).mockResolvedValue(mockRounds);
+    vi.mocked(managerServices.getManagerRoundsData).mockResolvedValue(mockRounds);
 
     const { GET } = await import('@/app/api/player/rounds/route');
     const request = makeRequest('http://localhost/api/player/rounds', { userId: '42' });
@@ -131,7 +134,7 @@ describe('GET /api/player/rounds', () => {
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
     expect(json.data).toEqual(mockRounds);
-    expect(playerServices.getPlayerUserRoundsData).toHaveBeenCalledWith('42');
+    expect(managerServices.getManagerRoundsData).toHaveBeenCalledWith('42');
   });
 });
 
@@ -157,7 +160,7 @@ describe('GET /api/player/squad', () => {
       player_count: 0,
       position: 0,
     };
-    vi.mocked(playerServices.getPlayerUserSquadData).mockResolvedValue(squad);
+    vi.mocked(managerServices.getManagerSquadData).mockResolvedValue(squad);
 
     const { GET } = await import('@/app/api/player/squad/route');
     const request = makeRequest('http://localhost/api/player/squad', { userId: '42' });
@@ -167,7 +170,7 @@ describe('GET /api/player/squad', () => {
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
     expect(json.data).toEqual(squad);
-    expect(playerServices.getPlayerUserSquadData).toHaveBeenCalledWith('42');
+    expect(managerServices.getManagerSquadData).toHaveBeenCalledWith('42');
   });
 });
 
