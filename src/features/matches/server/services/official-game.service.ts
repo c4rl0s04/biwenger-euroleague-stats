@@ -1,3 +1,7 @@
+import 'server-only';
+
+import type { OfficialPlaysViewModel, OfficialShotsViewModel } from '../../models/official-game';
+import { mapOfficialPlays, mapOfficialShots } from '../mappers/official-game.mapper';
 import type { OfficialGameFilterInput } from '../../validation/match-input';
 import {
   MatchesInputError,
@@ -30,18 +34,16 @@ function parseRequest(request: OfficialGameRequest) {
 
 export async function getOfficialPlayByPlayData(
   request: OfficialGameRequest
-): Promise<
-  OfficialGameServiceResult<NonNullable<Awaited<ReturnType<typeof getOfficialPlayByPlay>>>>
-> {
+): Promise<OfficialGameServiceResult<OfficialPlaysViewModel>> {
   const input = parseRequest(request);
   const data = await getOfficialPlayByPlay(input.matchId, input.filters);
-  return { data, cacheSeconds: cacheSecondsFor(data) };
+  return { data: data ? mapOfficialPlays(data) : null, cacheSeconds: cacheSecondsFor(data) };
 }
 
 export async function getOfficialShotData(
   request: OfficialGameRequest
-): Promise<OfficialGameServiceResult<NonNullable<Awaited<ReturnType<typeof getOfficialShots>>>>> {
+): Promise<OfficialGameServiceResult<OfficialShotsViewModel>> {
   const input = parseRequest(request);
   const data = await getOfficialShots(input.matchId, input.filters);
-  return { data, cacheSeconds: cacheSecondsFor(data) };
+  return { data: data ? mapOfficialShots(data) : null, cacheSeconds: cacheSecondsFor(data) };
 }

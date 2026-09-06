@@ -2,6 +2,25 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 describe('matches feature boundaries', () => {
+  it('keeps official-game persistence guarded and public DTOs independent of queries', () => {
+    for (const path of [
+      './server/queries/official-game.query.ts',
+      './server/services/official-game.service.ts',
+    ]) {
+      expect(readFileSync(new URL(path, import.meta.url), 'utf8').trimStart()).toMatch(
+        /^import ['"]server-only['"]/
+      );
+    }
+    const models = readFileSync(new URL('./models/official-game.ts', import.meta.url), 'utf8');
+    expect(models).not.toMatch(/ReturnType|typeof|from .*server|from .*db/);
+    const service = readFileSync(
+      new URL('./server/services/official-game.service.ts', import.meta.url),
+      'utf8'
+    );
+    expect(service).not.toContain('ReturnType');
+    expect(service).toContain('mapOfficialPlays(data)');
+    expect(service).toContain('mapOfficialShots(data)');
+  });
   it('keeps the public barrel client-safe and marks the server barrel explicitly', () => {
     const publicSource = readFileSync(new URL('./public.ts', import.meta.url), 'utf8');
     const serverSource = readFileSync(new URL('./server.ts', import.meta.url), 'utf8');

@@ -1,5 +1,17 @@
+import 'server-only';
+
+import type { Pool } from 'pg';
 import { db } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
+import type { OfficialGameRow, OfficialPlayRow, OfficialShotRow } from './official-game.records';
+
+interface ResolvedGameRow {
+  id: number;
+  status: string | null;
+  date: Date | string | null;
+  official_game_code: number | null;
+  finalized_at: Date | string | null;
+}
 
 export interface OfficialGameFilters {
   period?: number;
@@ -9,7 +21,7 @@ export interface OfficialGameFilters {
 
 async function resolveGame(matchId: number, seasonId: string) {
   return (
-    await (db as any).query(
+    await (db as Pool).query<ResolvedGameRow>(
       `SELECT m.id,m.status,m.date,m.official_game_code,og.finalized_at
        FROM matches m
        LEFT JOIN official_games og
@@ -41,14 +53,14 @@ export async function getOfficialPlayByPlay(
   matchId: number,
   filters: OfficialGameFilters,
   requestedSeasonId?: string
-) {
+): Promise<OfficialGameRow<OfficialPlayRow> | null> {
   const seasonId = await resolveReadSeasonId(requestedSeasonId);
   const game = await resolveGame(matchId, seasonId);
   if (!game?.official_game_code) return null;
   const values: unknown[] = [seasonId, game.official_game_code];
   const where = filtersSql(filters, values);
   const items = (
-    await (db as any).query(
+    await (db as Pool).query<OfficialPlayRow>(
       `SELECT d.sequence,d.provider_play_number,d.period,d.minute,d.marker_time,d.play_type,
               d.team_code,d.provider_player_code,pm.player_id,d.player_name,d.team_name,d.dorsal,
               d.home_score,d.away_score,d.comment,d.play_info
@@ -73,7 +85,7 @@ export async function getOfficialShots(
   matchId: number,
   filters: OfficialGameFilters,
   requestedSeasonId?: string
-) {
+): Promise<OfficialGameRow<OfficialShotRow> | null> {
   const seasonId = await resolveReadSeasonId(requestedSeasonId);
   const game = await resolveGame(matchId, seasonId);
   if (!game?.official_game_code) return null;
@@ -96,7 +108,7 @@ export async function getOfficialShots(
   }
   const where = clauses.length ? ` AND ${clauses.join(' AND ')}` : '';
   const items = (
-    await (db as any).query(
+    await (db as Pool).query<OfficialShotRow>(
       `SELECT d.annotation_number,d.team_code,d.provider_player_code,pm.player_id,d.player_name,
               d.action_id,d.action,d.points,d.coordinate_x,d.coordinate_y,d.zone,
               d.is_fastbreak,d.is_second_chance,d.is_points_off_turnover,d.minute,

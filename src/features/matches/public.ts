@@ -12,3 +12,9 @@ export type {
   MatchTeamViewModel,
   MatchViewModel,
 } from './models/match';
+export type {
+  OfficialPlayViewModel,
+  OfficialShotViewModel,
+  OfficialPlaysViewModel,
+  OfficialShotsViewModel,
+} from './models/official-game';

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+vi.mock('server-only', () => ({}));
 
 const queries = vi.hoisted(() => ({
   getOfficialPlayByPlay: vi.fn(),
@@ -17,8 +18,15 @@ describe('official game service', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('normalizes HTTP input and owns live/finalized cache policy', async () => {
-    queries.getOfficialPlayByPlay.mockResolvedValue({ finalizedAt: null, items: [] });
+    queries.getOfficialPlayByPlay.mockResolvedValue({
+      match: { id: 42, status: 'live' },
+      scheduledAt: null,
+      finalizedAt: null,
+      items: [],
+    });
     queries.getOfficialShots.mockResolvedValue({
+      match: { id: 42, status: 'finished' },
+      scheduledAt: null,
       finalizedAt: '2026-09-02T10:00:00.000Z',
       items: [],
     });
