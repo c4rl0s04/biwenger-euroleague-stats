@@ -21,26 +21,26 @@ status: active
 
 ## Domain ledger
 
-| Domains                                                  | Status / next boundary                                                                         |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Matches, Teams                                           | Integrated; official DTOs, persistence guards and graph enforcement need refinement            |
-| Players                                                  | Integrated and deployed; manager adapter remains temporary; transitive boundary review pending |
-| Rounds                                                   | Calendar foundation, then historical results and analysis                                      |
-| Managers                                                 | Profile, directory and squads remain legacy                                                    |
-| Standings                                                | Base rankings, performance analytics and draft analytics are separate slices                   |
-| Tournaments                                              | Legacy read services and components                                                            |
-| Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                                       |
-| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                                 |
-| Market public reads                                      | Legacy analytics; separate from private operations                                             |
-| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                        |
-| Home, News, Search                                       | Existing partial layers; migrate contracts and screens                                         |
-| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                            |
-| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                            |
-| Lineup, Market operations                                | Deferred pending provider-operation security gate                                              |
-| Accounts, Settings                                       | Deferred pending credential observation gate                                                   |
-| Assistant                                                | Deferred pending privacy/provider review                                                       |
-| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                           |
-| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                 |
+| Domains                                                  | Status / next boundary                                                             |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |
+| Players                                                  | Integrated and deployed; manager adapter remains temporary                         |
+| Rounds                                                   | Calendar foundation implemented; historical results and analysis remain legacy     |
+| Managers                                                 | Profile, directory and squads remain legacy                                        |
+| Standings                                                | Base rankings, performance analytics and draft analytics are separate slices       |
+| Tournaments                                              | Legacy read services and components                                                |
+| Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                           |
+| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                     |
+| Market public reads                                      | Legacy analytics; separate from private operations                                 |
+| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                            |
+| Home, News, Search                                       | Existing partial layers; migrate contracts and screens                             |
+| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                |
+| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                |
+| Lineup, Market operations                                | Deferred pending provider-operation security gate                                  |
+| Accounts, Settings                                       | Deferred pending credential observation gate                                       |
+| Assistant                                                | Deferred pending privacy/provider review                                           |
+| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                               |
+| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                     |
 
 ## HTTP contracts and compatibility
 
@@ -255,6 +255,57 @@ tables), Drizzle and production dependency audit (zero findings) passed. A full
 suite run concurrent with lint timed out in the graph scan while 745 tests passed;
 an isolated default-worker rerun passed all 746 tests (one existing skip) without
 changing any timeout or assertion. Production build, docs (49 notes), and diff
-check passed. Release verification is pending for this slice.
+check passed. Released at `4cf8446d91eb28dce01786e1d9f40af6b336b173`:
+Vercel `dpl_D8BpL3rVvvxcGb9h7pWze5deWB1b` READY on the matching production alias;
+GitHub CI `34062607177` passed. Login/session, protected redirects, public reads
+and private session-dependent cache headers passed smoke checks. Deployment-scoped
+logs had no error/fatal or 5xx entries and no sampled sensitive-value patterns.
 The full migration objective remains incomplete. Protected pages, credentials,
 fallback configuration, database schema and provider operations are unchanged.
+
+## Round calendar foundation
+
+`refactor/round-calendar` introduces `src/features/rounds` for current/next/last
+round chronology only. Its five-field season-scoped projection is distinct from
+the richer Matches game/schedule query: Rounds owns round grouping and selection,
+while Matches consumes the deliberate Rounds server policy contract. There is no
+reverse dependency. The existing shared Drizzle singleton moves unchanged into
+`src/lib/db/connection.ts` so new queries do not depend on the legacy query barrel.
+The old database index re-exports that same singleton; pool configuration is unchanged.
+
+The feature contains independent serializable calendar models, an allowlisting
+date mapper, pure selection policy, a server-only query and an injected service.
+Each call resolves the existing season, captures time before querying and rereads
+the database. No request memoization or persistent cache is added. This is public
+competition chronology without identity input; caller authentication and HTTP
+headers are unchanged. No route, section or ID validation is changed, and no new
+endpoint is introduced. The policy enum is trusted internal input, not a new
+external validation boundary. Unknown runtime policy values still return null.
+
+Legacy `getCurrentRoundState`, `getLastCompletedRound`, `getLastCompletedRoundId`
+and `resolveRoundIdByPolicy` remain adapters in the old rounds query module.
+They preserve snake_case fields, Date objects for server callers and identical
+JSON serialization. This temporary Date projection is not the new feature model.
+Home, Dashboard, Schedule, Rounds, Tournaments and Assistant keep their existing
+call sites. Postponed/past unfinished matches, null groups/dates, first-match names,
+zero-ID truthiness, preseason defaults and the second completed-round snapshot
+remain deliberate compatibility behavior rather than opportunistic fixes.
+
+`getRoundDetails`, `getAllRounds`, history, rankings, lineup calculations and all
+presentation remain untouched. This is not the complete Rounds migration.
+Baseline: typecheck and 107 focused tests passed. New tests cover query projection,
+season/order, mapping, policy edge cases, service ordering/freshness/errors and
+real-service legacy response compatibility. Typecheck and 62 focused Rounds,
+Matches and architecture tests passed. The default-worker full suite had 761
+passes and the known five-second graph timeout; a two-worker rerun passed all
+762 tests with one existing skip. No timeout or assertion changed. An additional
+in-memory comparison of 1,000 deterministic chronological fixtures against the
+original committed algorithm produced identical serialized results.
+
+Lint passed with the same 25 image warnings; the database-disabled production
+build passed with baseline missing-provider-environment and Node warnings. Docs
+check passed all 49 notes; schema metadata (38 tables), Drizzle, production audit
+(zero findings), formatting and diff checks passed. No production database was
+used for validation. Release verification is pending.
+The next planned domain is Manager Profile and squad reads, retaining Lineup's
+existing HTTP contract and separating fantasy manager identity from accounts.

@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cache } from 'react';
 
-import { resolveRoundIdByPolicy } from '@/lib/db';
+import { resolveRoundIdByPolicy } from '@/features/rounds/server';
 
 import type {
   MatchRoundScreenViewModel,

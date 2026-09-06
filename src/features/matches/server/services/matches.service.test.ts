@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-vi.mock('@/lib/db', () => ({ resolveRoundIdByPolicy: vi.fn() }));
+vi.mock('@/features/rounds/server', () => ({ resolveRoundIdByPolicy: vi.fn() }));
 vi.mock('../queries/match-list.query', () => ({ listMatchRows: vi.fn() }));
 
 import type { MatchListRow } from '../queries/match-list.query';

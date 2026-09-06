@@ -1,4 +1,11 @@
 import { db, pgClient } from '../../index';
+import type { CalendarRound } from '@/features/rounds/public';
+import {
+  getRoundCalendar,
+  resolveRoundIdByPolicy,
+  getLastCompletedRoundId,
+  getLastCompletedCalendarRound,
+} from '@/features/rounds/server';
 import {
   matches,
   porras,
@@ -26,8 +33,8 @@ export interface PorrasRound {
 }
 
 export interface RoundState {
-  currentRound: any | null; // Ideally type this `Round` interface below if specific enough
-  nextRound: any | null;
+  currentRound: ReturnType<typeof toLegacyRound>;
+  nextRound: ReturnType<typeof toLegacyRound>;
 }
 
 export interface Round {
@@ -113,98 +120,32 @@ export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
  * Handles postponed matches by looking at individual match dates.
  */
 export async function getCurrentRoundState(): Promise<RoundState> {
-  const seasonId = await resolveReadSeasonId();
-  const now = new Date();
+  const state = await getRoundCalendar();
+  return {
+    currentRound: toLegacyRound(state.currentRound),
+    nextRound: toLegacyRound(state.nextRound),
+  };
+}
 
-  // 1. Get all matches to analyze chronology
-  const allMatches = await db
-    .select({
-      id: matches.id,
-      date: matches.date,
-      status: matches.status,
-      round_id: matches.roundId,
-      round_name: matches.roundName,
-    })
-    .from(matches)
-    .where(eq(matches.seasonId, seasonId))
-    .orderBy(asc(matches.date), asc(matches.id));
-
-  if (allMatches.length === 0) return { currentRound: null, nextRound: null };
-
-  // 2. Aggregate rounds metadata from the flat match list
-  const roundsMap = new Map<number, any>();
-  allMatches.forEach((m) => {
-    const rid = m.round_id!;
-    if (!roundsMap.has(rid)) {
-      roundsMap.set(rid, {
-        round_id: rid,
-        round_name: m.round_name,
-        start_date: m.date,
-        end_date: m.date,
-        total_matches: 0,
-        finished_matches: 0,
-        matches: [],
-      });
-    }
-    const r = roundsMap.get(rid);
-    r.total_matches++;
-    if (m.status === 'finished') r.finished_matches++;
-    r.matches.push(m);
-    // Update boundaries
-    if (m.date && (!r.start_date || new Date(m.date) < new Date(r.start_date)))
-      r.start_date = m.date;
-    if (m.date && (!r.end_date || new Date(m.date) > new Date(r.end_date))) r.end_date = m.date;
-  });
-
-  const allRounds = Array.from(roundsMap.values()).map((r) => {
-    let status_calc = 'upcoming';
-    const startDate = r.start_date ? new Date(r.start_date) : null;
-    if (startDate && now >= startDate) {
-      status_calc = r.finished_matches < r.total_matches ? 'live' : 'finished';
-    }
-    return { ...r, status_calc };
-  });
-
-  // 3. Current Round: The round of the earliest match that is truly LIVE (playing now).
-  // Priority 1: A match currently playing (started but not finished)
-  const liveMatch = allMatches.find(
-    (m) => m.status !== 'finished' && m.date && new Date(m.date) <= now
-  );
-
-  let currentRound: any = null;
-  if (liveMatch) {
-    currentRound = allRounds.find((r) => r.round_id === liveMatch.round_id);
-  } else {
-    // Priority 2: If nothing is live, current is the LATEST round that has at least one match that started in the past.
-    const startedMatchRounds = allMatches
-      .filter((m) => m.date && new Date(m.date) <= now)
-      .map((m) => m.round_id);
-
-    if (startedMatchRounds.length > 0) {
-      const latestStartedRoundId = startedMatchRounds[startedMatchRounds.length - 1];
-      currentRound = allRounds.find((r) => r.round_id === latestStartedRoundId);
-    } else {
-      // Fallback: If no matches have started EVER (e.g. pre-season), pick first round.
-      currentRound = allRounds[0];
-    }
-  }
-
-  // 4. Next Round: The round of the EARLIEST match that is FUTURE and from a DIFFERENT round than current
-  const nextMatch = allMatches.find((m) => {
-    const isFuture = m.date && new Date(m.date) > now;
-    const isDifferentRound = !currentRound || m.round_id !== currentRound.round_id;
-    return isFuture && isDifferentRound;
-  });
-
-  let nextRound = nextMatch ? allRounds.find((r) => r.round_id === nextMatch.round_id) : null;
-
-  // Final validation: If no current was found (e.g. pre-season), next becomes the first round.
-  if (!currentRound && allRounds.length > 0) {
-    currentRound = allRounds[0];
-    nextRound = allRounds[1] || null;
-  }
-
-  return { currentRound, nextRound };
+/** Temporary compatibility projection: preserve Date values for existing server callers. */
+function toLegacyRound(round: CalendarRound | null) {
+  if (!round) return null;
+  return {
+    round_id: round.roundId,
+    round_name: round.roundName,
+    start_date: round.startDate ? new Date(round.startDate) : null,
+    end_date: round.endDate ? new Date(round.endDate) : null,
+    total_matches: round.totalMatches,
+    finished_matches: round.finishedMatches,
+    matches: round.matches.map((match) => ({
+      id: match.id,
+      date: match.date ? new Date(match.date) : null,
+      status: match.status,
+      round_id: match.roundId,
+      round_name: match.roundName,
+    })),
+    status_calc: round.status,
+  };
 }
 
 /**
@@ -304,46 +245,10 @@ export async function getRoundDetails(roundId: string | number): Promise<Round |
  *   - 'active_or_next': Priority Live > Next Upcoming > Last Finished (Dashboard/Schedule/Matches)
  *   - 'active_or_last': Priority Live > Last Finished > Next Upcoming (Rounds Page)
  */
-export async function resolveRoundIdByPolicy(
-  policy: 'active_or_next' | 'active_or_last'
-): Promise<number | null> {
-  const { currentRound, nextRound } = await getCurrentRoundState();
+export { resolveRoundIdByPolicy, getLastCompletedRoundId };
 
-  const isLive = currentRound?.status_calc === 'live';
-  const isFinished = currentRound?.status_calc === 'finished';
-
-  if (policy === 'active_or_next') {
-    if (isLive) return currentRound.round_id;
-    if (nextRound) return nextRound.round_id;
-    return currentRound?.round_id || null;
-  }
-
-  if (policy === 'active_or_last') {
-    if (isLive) return currentRound.round_id;
-    if (isFinished) return currentRound.round_id;
-    return nextRound?.round_id || null;
-  }
-
-  return null;
-}
-
-/**
- * Get the current active or last completed round ID using the 'active_or_last' policy.
- */
-export async function getLastCompletedRoundId(): Promise<number | null> {
-  return await resolveRoundIdByPolicy('active_or_last');
-}
-
-/**
- * Get the current active or last completed round object
- */
-export async function getLastCompletedRound(): Promise<any> {
-  const roundId = await getLastCompletedRoundId();
-  if (!roundId) return null;
-
-  // We need to fetch the round details since it's used as an object in many places
-  const { currentRound, nextRound } = await getCurrentRoundState();
-  return currentRound?.round_id === roundId ? currentRound : nextRound;
+export async function getLastCompletedRound() {
+  return toLegacyRound(await getLastCompletedCalendarRound());
 }
 
 /**
