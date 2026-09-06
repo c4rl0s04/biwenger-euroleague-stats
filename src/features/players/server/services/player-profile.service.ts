@@ -10,7 +10,11 @@ import type {
   PlayerProfileViewModel,
 } from '../../models/player-profile';
 import { parsePlayerId } from '../../validation/player-input';
-import { mapPlayerPerformanceSummary, mapPlayerProfile } from '../mappers/player.mapper';
+import {
+  mapPlayerPerformanceSummary,
+  mapPlayerProfile,
+  toPlayerProfileApiModel,
+} from '../mappers/player.mapper';
 import { getPlayerDetails, type PlayerDetailsQueryResult } from '../queries/player.query';
 
 export interface PlayerProfileServiceDependencies {
@@ -20,9 +24,7 @@ export interface PlayerProfileServiceDependencies {
 }
 
 export function createPlayerProfileService(dependencies: PlayerProfileServiceDependencies) {
-  async function getPlayerProfileData(
-    playerIdInput: unknown
-  ): Promise<PlayerProfileViewModel | null> {
+  async function readPlayerProfile(playerIdInput: unknown) {
     const playerId = parsePlayerId(playerIdInput);
     if (playerId == null) return null;
 
@@ -33,7 +35,18 @@ export function createPlayerProfileService(dependencies: PlayerProfileServiceDep
       dependencies.getTeamMetrics(Number(result.player.team_id)),
       dependencies.getUpcomingMatches(Number(result.player.team_id)),
     ]);
-    return mapPlayerProfile(result, teamMetrics, upcomingMatches);
+    return { result, model: mapPlayerProfile(result, teamMetrics, upcomingMatches) };
+  }
+
+  async function getPlayerProfileData(
+    playerIdInput: unknown
+  ): Promise<PlayerProfileViewModel | null> {
+    return (await readPlayerProfile(playerIdInput))?.model ?? null;
+  }
+
+  async function getPlayerProfileApiData(playerIdInput: unknown) {
+    const read = await readPlayerProfile(playerIdInput);
+    return read ? toPlayerProfileApiModel(read.model, read.result) : null;
   }
 
   async function getPlayerPerformanceSummaryData(
@@ -43,7 +56,7 @@ export function createPlayerProfileService(dependencies: PlayerProfileServiceDep
     return player ? mapPlayerPerformanceSummary(player) : null;
   }
 
-  return { getPlayerProfileData, getPlayerPerformanceSummaryData };
+  return { getPlayerProfileData, getPlayerProfileApiData, getPlayerPerformanceSummaryData };
 }
 
 const playerProfileService = createPlayerProfileService({
@@ -53,6 +66,7 @@ const playerProfileService = createPlayerProfileService({
 });
 
 export const getPlayerProfileData = cache(playerProfileService.getPlayerProfileData);
+export const getPlayerProfileApiData = cache(playerProfileService.getPlayerProfileApiData);
 export const getPlayerPerformanceSummaryData = cache(
   playerProfileService.getPlayerPerformanceSummaryData
 );

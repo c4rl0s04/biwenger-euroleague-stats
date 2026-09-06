@@ -54,4 +54,30 @@ describe('player profile service', () => {
     expect(getTeamMetrics).not.toHaveBeenCalled();
     expect(getUpcomingMatches).not.toHaveBeenCalled();
   });
+
+  it('uses the same read orchestration for the legacy HTTP projection', async () => {
+    findPlayer.mockResolvedValue({
+      player: {
+        id: 7,
+        name: 'Player',
+        team_id: 2,
+        games_played: '0',
+        season_avg: null,
+        total_points: null,
+      },
+      recentMatches: [],
+      priceHistory: [],
+      transfers: [],
+      playerTotalMatches: 0,
+    });
+    await expect(service.getPlayerProfileApiData('7')).resolves.toMatchObject({
+      id: 7,
+      games_played: '0',
+      season_avg: null,
+      total_points: null,
+    });
+    expect(findPlayer).toHaveBeenCalledOnce();
+    expect(getTeamMetrics).toHaveBeenCalledOnce();
+    expect(getUpcomingMatches).toHaveBeenCalledOnce();
+  });
 });

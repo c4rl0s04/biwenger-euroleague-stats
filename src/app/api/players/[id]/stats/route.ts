@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getPlayerProfileData, toPlayerProfileApiModel } from '@/features/players/server';
+import { getPlayerProfileApiData } from '@/features/players/server';
 import { CACHE_DURATIONS, successResponse, errorResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -10,14 +10,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return errorResponse('Player ID is required', 400);
     }
 
-    const stats = await getPlayerProfileData(id);
+    const stats = await getPlayerProfileApiData(id);
 
     if (!stats) {
       return errorResponse('Player not found', 404);
     }
 
     // Return the full player profile which includes matches, historical performance, and next matches
-    return successResponse(toPlayerProfileApiModel(stats), CACHE_DURATIONS.MEDIUM);
+    return successResponse(stats, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error(`Error fetching player stats for ${params}:`, error);
     const message = error instanceof Error ? error.message : 'Internal Server Error';

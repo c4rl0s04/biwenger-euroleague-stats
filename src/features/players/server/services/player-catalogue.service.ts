@@ -58,7 +58,26 @@ export function createPlayerCatalogueService(dependencies: PlayerCatalogueServic
     return mapPlayerStreaks(await dependencies.listStreaks(minGames));
   }
 
-  return { getPlayerCatalogueData, getPlayerCatalogueInsightsData, getPlayerStreaksData };
+  async function getPlayerStreaksApiData(minGames?: number) {
+    const rows = await dependencies.listStreaks(minGames);
+    const mapped = mapPlayerStreaks(rows);
+    const adapt = (items: typeof rows.hot, models: typeof mapped.hot) =>
+      models.map((model, index) => ({
+        ...model,
+        name: items[index].name,
+        team_name: items[index].team_name,
+        position: items[index].position,
+        games: String(items[index].games ?? items[index].games_played),
+      }));
+    return { hot: adapt(rows.hot, mapped.hot), cold: adapt(rows.cold, mapped.cold) };
+  }
+
+  return {
+    getPlayerCatalogueData,
+    getPlayerCatalogueInsightsData,
+    getPlayerStreaksData,
+    getPlayerStreaksApiData,
+  };
 }
 
 const playerCatalogueService = createPlayerCatalogueService({
@@ -73,6 +92,7 @@ export const getPlayerCatalogueInsightsData = cache(
   playerCatalogueService.getPlayerCatalogueInsightsData
 );
 export const getPlayerStreaksData = cache(playerCatalogueService.getPlayerStreaksData);
+export const getPlayerStreaksApiData = cache(playerCatalogueService.getPlayerStreaksApiData);
 
 // Deliberate mapped server contracts for existing Dashboard and stats consumers.
 export async function getDashboardTopPlayers(limit = 6) {

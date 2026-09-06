@@ -146,6 +146,54 @@ const upcoming = [
 ] satisfies TeamProfileMatchViewModel[];
 
 describe('player mappers', () => {
+  it('preserves legacy nulls, decimal spelling, date serialization and field allowlists', () => {
+    const source = {
+      ...details,
+      player: {
+        ...details.player,
+        name: null,
+        season_avg: '12.0',
+        total_points: null,
+        best_real_points: null,
+        worst_real_points: null,
+        token: 'synthetic-secret-canary',
+      },
+      recentMatches: [
+        { ...details.recentMatches[0], fantasy_points: null, token: 'synthetic-secret-canary' },
+      ],
+      priceHistory: [{ date: new Date('2026-09-01T00:00:00.000Z'), price: 900000 }],
+      transfers: [{ ...details.transfers[0], from_name: null, amount: null }],
+    };
+    const model = mapPlayerProfile(source, metrics, upcoming);
+    const wire = toPlayerProfileApiModel(model, source);
+    expect(model.season_avg).toBe(12);
+    expect(model.total_points).toBe(0);
+    expect(wire).toMatchObject({
+      name: null,
+      season_avg: '12.0',
+      total_points: null,
+      advancedStats: { season_avg: '12.0', best_real_points: null, worst_real_points: null },
+      recentMatches: [{ fantasy_points: null }],
+      priceHistory: [{ date: '2026-09-01T00:00:00.000Z', price: 900000 }],
+      transfers: [{ from_name: null, amount: null }],
+    });
+    expect(JSON.stringify(wire)).not.toContain('synthetic-secret-canary');
+    expect(wire.profile_url).toBe('/players/7');
+  });
+
+  it('keeps absent season aggregates null on the wire', () => {
+    const source = {
+      ...details,
+      player: { ...details.player, games_played: '0', season_avg: null, total_points: null },
+    };
+    expect(toPlayerProfileApiModel(mapPlayerProfile(source, null, []), source)).toMatchObject({
+      games_played: '0',
+      season_avg: null,
+      total_points: null,
+      advancedStats: { season_avg: null },
+    });
+  });
+
   it('normalizes catalogue and streak query values into serializable models', () => {
     const catalogue = mapPlayerCatalogue([
       {
@@ -264,7 +312,7 @@ describe('player mappers', () => {
   });
 
   it('preserves aggregate string types in the existing HTTP profile contract', () => {
-    const api = toPlayerProfileApiModel(mapPlayerProfile(details, metrics, upcoming));
+    const api = toPlayerProfileApiModel(mapPlayerProfile(details, metrics, upcoming), details);
 
     expect(api).toMatchObject({
       profile_url: '/players/7',

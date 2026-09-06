@@ -12,6 +12,7 @@ import type {
   PlayerAdvancedStatsViewModel,
   PlayerPerformanceSummaryViewModel,
   PlayerProfileApiModel,
+  PlayerProfileLegacyScalarKey,
   PlayerProfileMatchViewModel,
   PlayerProfileViewModel,
   PlayerUpcomingMatchViewModel,
@@ -421,16 +422,92 @@ export function mapPlayerPerformanceSummary(
 }
 
 export function toPlayerProfileApiModel(
-  player: PlayerProfileViewModel
+  player: PlayerProfileViewModel,
+  source: PlayerDetailsQueryResult
 ): PlayerProfileApiModel {
+  // Preserve PostgreSQL aggregate spelling/nulls at the legacy HTTP boundary.
+  // Numeric UI models must never be used to reconstruct these wire values.
+  const seasonAverage = source.player.season_avg == null ? null : String(source.player.season_avg);
+  const keys = [
+    'id',
+    'name',
+    'position',
+    'puntos',
+    'partidos_jugados',
+    'played_home',
+    'played_away',
+    'points_home',
+    'points_away',
+    'points_last_season',
+    'status',
+    'price_increment',
+    'birth_date',
+    'height',
+    'weight',
+    'price',
+    'euroleague_code',
+    'dorsal',
+    'country',
+    'profile_url',
+    'team_id',
+    'img',
+    'owner_id',
+    'owner_name',
+    'owner_color_index',
+    'owner_icon',
+    'best_real_points',
+    'worst_real_points',
+    'best_fantasy',
+    'worst_fantasy',
+    'team_name',
+    'team_img',
+    'team_code',
+  ] as const satisfies readonly PlayerProfileLegacyScalarKey[];
+  const legacyScalars = Object.fromEntries(keys.map((key) => [key, source.player[key]])) as Pick<
+    PlayerProfileApiModel,
+    PlayerProfileLegacyScalarKey
+  >;
   return {
     ...player,
-    games_played: String(player.games_played),
-    season_avg: String(player.season_avg),
-    total_points: String(player.total_points),
+    ...legacyScalars,
+    recentMatches: source.recentMatches.map((row) => {
+      const mapped = mapRecentMatch(row);
+      // Derive the allowlist from the explicit mapper, never from the database row.
+      return Object.fromEntries(
+        Object.keys(mapped).map((key) => [
+          key,
+          key === 'match_date'
+            ? row.match_date instanceof Date
+              ? row.match_date.toISOString()
+              : row.match_date
+            : row[key as keyof PlayerProfileMatchViewModel],
+        ])
+      ) as PlayerProfileApiModel['recentMatches'][number];
+    }),
+    priceHistory: source.priceHistory.map((point) => ({
+      date: point.date instanceof Date ? point.date.toISOString() : point.date,
+      price: toNumber(point.price),
+    })),
+    transfers: source.transfers.map((transfer) => ({
+      date: transfer.date instanceof Date ? transfer.date.toISOString() : transfer.date,
+      from_name: transfer.from_name,
+      to_name: transfer.to_name,
+      amount: toNullableNumber(transfer.amount),
+      from_img: transfer.from_img,
+      to_img: transfer.to_img,
+      from_color: toNullableNumber(transfer.from_color),
+      to_color: toNullableNumber(transfer.to_color),
+      from_id: transfer.from_id,
+      to_id: transfer.to_id,
+    })),
+    games_played: String(source.player.games_played),
+    season_avg: seasonAverage,
+    total_points: source.player.total_points == null ? null : String(source.player.total_points),
     advancedStats: {
       ...player.advancedStats,
-      season_avg: String(player.advancedStats.season_avg),
+      season_avg: seasonAverage,
+      best_real_points: toNullableNumber(source.player.best_real_points),
+      worst_real_points: toNullableNumber(source.player.worst_real_points),
     },
   };
 }

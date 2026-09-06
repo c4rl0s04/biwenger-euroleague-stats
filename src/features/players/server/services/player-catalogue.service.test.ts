@@ -63,4 +63,28 @@ describe('player catalogue service', () => {
     expect(listTopPlayers).toHaveBeenCalledWith(20);
     expect(listStreaks).toHaveBeenCalledWith(3);
   });
+
+  it('keeps legacy HTTP streak counts as strings while UI counts remain numbers', async () => {
+    listStreaks.mockResolvedValue({
+      hot: [
+        {
+          ...player,
+          name: null,
+          team_name: null,
+          games: '3',
+          recent_avg: 20,
+          season_avg: 10,
+          avg_diff: 10,
+          trend_pct: 100,
+        },
+      ],
+      cold: [],
+    });
+    expect((await service.getPlayerStreaksData()).hot[0].games).toBe(3);
+    expect((await service.getPlayerStreaksApiData()).hot[0]).toMatchObject({
+      games: '3',
+      name: null,
+      team_name: null,
+    });
+  });
 });

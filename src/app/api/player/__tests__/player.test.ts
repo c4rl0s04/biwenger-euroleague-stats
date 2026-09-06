@@ -8,10 +8,9 @@ vi.mock('@/features/players/server', () => ({
   getPlayerUserSeasonStatsData: vi.fn(),
   getPlayerUserRoundsData: vi.fn(),
   getPlayerUserSquadData: vi.fn(),
-  getPlayerStreaksData: vi.fn(),
-  getPlayerProfileData: vi.fn(),
+  getPlayerStreaksApiData: vi.fn(),
+  getPlayerProfileApiData: vi.fn(),
   getPlayerStatLeaders: vi.fn(),
-  toPlayerProfileApiModel: vi.fn((value) => value),
 }));
 
 vi.mock('@/lib/services', () => ({
@@ -90,7 +89,7 @@ describe('GET /api/player/stats', () => {
     expect(json.success).toBe(true);
     expect(json.data.stats).toEqual(mockStats);
     expect(response.headers.get('cache-control')).toBe(
-      'public, max-age=300, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
   });
 
@@ -184,7 +183,7 @@ describe('player and stats route contract coverage', () => {
           team_id: 2,
           team_name: 'Madrid',
           position: 'Base',
-          games: 3,
+          games: '3',
           recent_avg: 20,
           season_avg: 10,
           avg_diff: 10,
@@ -196,7 +195,7 @@ describe('player and stats route contract coverage', () => {
       ],
       cold: [],
     };
-    vi.mocked(playerServices.getPlayerStreaksData).mockResolvedValue(streaks);
+    vi.mocked(playerServices.getPlayerStreaksApiData).mockResolvedValue(streaks);
 
     const { GET } = await import('@/app/api/player/streaks/route');
     const response = await GET();
@@ -216,8 +215,8 @@ describe('player and stats route contract coverage', () => {
       priceHistory: [],
       nextMatches: [],
     };
-    vi.mocked(playerServices.getPlayerProfileData).mockResolvedValue(
-      profile as unknown as Awaited<ReturnType<typeof playerServices.getPlayerProfileData>>
+    vi.mocked(playerServices.getPlayerProfileApiData).mockResolvedValue(
+      profile as unknown as Awaited<ReturnType<typeof playerServices.getPlayerProfileApiData>>
     );
 
     const { GET } = await import('@/app/api/players/[id]/stats/route');
@@ -229,10 +228,9 @@ describe('player and stats route contract coverage', () => {
     expect(response.headers.get('cache-control')).toBe(
       'public, max-age=300, stale-while-revalidate=60'
     );
-    expect(playerServices.getPlayerProfileData).toHaveBeenCalledWith('1');
-    expect(playerServices.toPlayerProfileApiModel).toHaveBeenCalledWith(profile);
+    expect(playerServices.getPlayerProfileApiData).toHaveBeenCalledWith('1');
 
-    vi.mocked(playerServices.getPlayerProfileData).mockResolvedValue(null);
+    vi.mocked(playerServices.getPlayerProfileApiData).mockResolvedValue(null);
     const notFound = await GET(makeRequest('http://localhost/api/players/999/stats'), {
       params: Promise.resolve({ id: '999' }),
     });

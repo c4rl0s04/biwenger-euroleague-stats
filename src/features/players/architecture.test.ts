@@ -64,7 +64,9 @@ describe('players feature boundaries', () => {
 
   it('keeps the existing Player profile HTTP shape behind an explicit adapter', () => {
     const routeSource = source('../../app/api/players/[id]/stats/route.ts');
-    expect(routeSource).toContain('getPlayerProfileData(id)');
-    expect(routeSource).toContain('toPlayerProfileApiModel(stats)');
+    expect(routeSource).toContain('getPlayerProfileApiData(id)');
+    expect(source('./server/services/player-profile.service.ts')).toContain(
+      'toPlayerProfileApiModel(read.model, read.result)'
+    );
   });
 });

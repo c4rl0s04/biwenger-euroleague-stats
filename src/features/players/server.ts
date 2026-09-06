@@ -1,7 +1,5 @@
 import 'server-only';
 
-export { toPlayerProfileApiModel } from './server/mappers/player.mapper';
-
 export { default as MobilePlayerProfileScreen } from './components/mobile/MobilePlayerProfileScreen';
 export { default as MobilePlayersScreen } from './components/mobile/MobilePlayersScreen';
 export { default as PlayerProfileClient } from './components/desktop/profile/PlayerProfileClient';
@@ -19,6 +17,7 @@ export {
   getPlayerCatalogueInsightsData,
   getPlayerStatLeaders,
   getPlayerStreaksData,
+  getPlayerStreaksApiData,
   PLAYERS_ACCESS_POLICY,
   PLAYERS_HTTP_CACHE_SECONDS,
 } from './server/services/player-catalogue.service';
@@ -26,6 +25,7 @@ export {
   getPlayerPerformanceSummaryData,
   getPlayerPerformanceSummaryForProfile,
   getPlayerProfileData,
+  getPlayerProfileApiData,
 } from './server/services/player-profile.service';
 export {
   getPlayerUserRoundsData,

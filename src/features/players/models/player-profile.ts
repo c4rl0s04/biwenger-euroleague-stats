@@ -137,16 +137,75 @@ export interface PlayerProfileViewModel {
   advancedStats: PlayerAdvancedStatsViewModel;
 }
 
-export type PlayerProfileApiModel = Omit<
+type PlayerProfileApiBase = Omit<
   PlayerProfileViewModel,
   'games_played' | 'season_avg' | 'total_points' | 'advancedStats'
 > & {
   // These PostgreSQL aggregate fields have historically been JSON strings.
   games_played: string;
-  season_avg: string;
-  total_points: string;
+  season_avg: string | null;
+  total_points: string | null;
   advancedStats: Omit<PlayerAdvancedStatsViewModel, 'season_avg'> & {
-    season_avg: string;
+    season_avg: string | null;
+  };
+};
+
+// Legacy SQL projections allow nulls; these wire DTOs are not UI view models.
+export type PlayerProfileLegacyScalarKey =
+  | 'id'
+  | 'name'
+  | 'position'
+  | 'puntos'
+  | 'partidos_jugados'
+  | 'played_home'
+  | 'played_away'
+  | 'points_home'
+  | 'points_away'
+  | 'points_last_season'
+  | 'status'
+  | 'price_increment'
+  | 'birth_date'
+  | 'height'
+  | 'weight'
+  | 'price'
+  | 'euroleague_code'
+  | 'dorsal'
+  | 'country'
+  | 'profile_url'
+  | 'team_id'
+  | 'img'
+  | 'owner_id'
+  | 'owner_name'
+  | 'owner_color_index'
+  | 'owner_icon'
+  | 'best_real_points'
+  | 'worst_real_points'
+  | 'best_fantasy'
+  | 'worst_fantasy'
+  | 'team_name'
+  | 'team_img'
+  | 'team_code';
+
+export type PlayerProfileApiModel = Omit<
+  PlayerProfileApiBase,
+  PlayerProfileLegacyScalarKey | 'recentMatches' | 'advancedStats' | 'profile_url' | 'transfers'
+> & {
+  [K in PlayerProfileLegacyScalarKey]: string | number | null;
+} & {
+  recentMatches: {
+    [K in keyof PlayerProfileMatchViewModel]: PlayerProfileMatchViewModel[K] | null;
+  }[];
+  transfers: (Omit<PlayerTransferViewModel, 'from_name' | 'to_name' | 'amount'> & {
+    from_name: string | null;
+    to_name: string | null;
+    amount: number | null;
+  })[];
+  advancedStats: Omit<
+    PlayerProfileApiBase['advancedStats'],
+    'best_real_points' | 'worst_real_points'
+  > & {
+    best_real_points: number | null;
+    worst_real_points: number | null;
   };
 };
 
