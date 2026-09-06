@@ -98,6 +98,8 @@ function resolveLocalLink(sourcePath, destination) {
 const docsFiles = walkMarkdown(docsRoot);
 const checkedMarkdown = [
   join(repositoryRoot, 'README.md'),
+  join(repositoryRoot, 'AGENTS.md'),
+  join(repositoryRoot, '.github/copilot-instructions.md'),
   join(repositoryRoot, '.agents/INSTRUCTIONS.md'),
   ...docsFiles,
 ];

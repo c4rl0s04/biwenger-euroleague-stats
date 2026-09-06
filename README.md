@@ -22,7 +22,9 @@ and synchronized PostgreSQL data.
 
 ## Quick start
 
-Requirements: Node.js 20+, npm, PostgreSQL 16, and valid Biwenger credentials.
+Requirements: Node.js 24.20.0 (see `.nvmrc`), npm, PostgreSQL 16, and Biwenger credentials for real data synchronization.
+For agent work and synthetic browser tests without provider credentials, use the
+[agent workflow](docs/contributing/agent-workflow.md).
 
 ```bash
 npm ci
@@ -40,10 +42,8 @@ For complete instructions, read [local development](docs/getting-started/local-d
 ## Common checks
 
 ```bash
-npm run lint
-npm run typecheck
-npm run test:run
-SKIP_DB=true npm run build
+npm run verify
+npm run test:e2e:local # disposable authenticated browser tests
 ```
 
 ## Technology
@@ -58,7 +58,7 @@ UI remains JavaScript as part of a boundary-first migration strategy.
 Obsidian vault. It includes separate paths for product behavior, architecture, operations,
 reference material, contributors, and engineering decisions.
 
-Engineering agents should begin with [`.agents/INSTRUCTIONS.md`](.agents/INSTRUCTIONS.md), which
+Engineering agents should begin with [`AGENTS.md`](AGENTS.md), which
 points to the same canonical documentation rather than maintaining a parallel knowledge base.
 
 ## Contributing and security

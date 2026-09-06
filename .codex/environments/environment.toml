@@ -1,0 +1,21 @@
+# Shared worktree setup; select the pinned Node version before opening the project.
+version = 1
+name = "Biwenger Stats"
+
+[setup]
+script = "npm run worktree:setup"
+
+[[actions]]
+name = "Run"
+icon = "run"
+command = "npm run dev:worktree"
+
+[[actions]]
+name = "Verify"
+icon = "test"
+command = "npm run verify"
+
+[[actions]]
+name = "Browser tests"
+icon = "test"
+command = "npm run test:e2e:local"

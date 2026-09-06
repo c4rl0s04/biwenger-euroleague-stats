@@ -1,4 +1,4 @@
-import { expect, test } from 'playwright/test';
+import { expect, test } from './fixtures';
 
 test('phone home opens as the league activity cover', async ({ page }) => {
   test.skip(

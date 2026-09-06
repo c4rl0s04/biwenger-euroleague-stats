@@ -22,11 +22,11 @@
   top: 0;
   z-index: 34;
   display: flex;
-  min-height: calc(4.6rem + env(safe-area-inset-top, 0px));
+  min-height: calc(4.6rem + var(--app-safe-area-top));
   align-items: center;
   gap: 0.75rem;
   margin: 0 calc(var(--mobile-gutter) * -1);
-  padding: calc(0.65rem + env(safe-area-inset-top, 0px)) var(--mobile-gutter) 0.65rem;
+  padding: calc(0.65rem + var(--app-safe-area-top)) var(--mobile-gutter) 0.65rem;
   border-bottom: 1px solid hsl(var(--border) / 0.55);
   background: hsl(var(--background) / 0.92);
   backdrop-filter: blur(22px) saturate(145%);
@@ -692,7 +692,7 @@
 
 .mobile-full-map {
   height: calc(
-    100dvh - 9rem - var(--mobile-nav-height) - env(safe-area-inset-top, 0px) -
+    100dvh - 9rem - var(--mobile-nav-height) - var(--app-safe-area-top) -
       env(safe-area-inset-bottom, 0px)
   );
   min-height: 24rem;
@@ -874,7 +874,7 @@
 
 .mobile-app .app-route-loading {
   min-height: calc(100dvh - var(--mobile-nav-height));
-  padding: calc(1rem + env(safe-area-inset-top, 0px)) var(--mobile-gutter)
+  padding: calc(1rem + var(--app-safe-area-top)) var(--mobile-gutter)
     calc(var(--mobile-nav-height) + 1rem);
 }
 
@@ -1473,8 +1473,7 @@
 }
 
 .mobile-cheatsheet-page {
-  padding: calc(1rem + env(safe-area-inset-top, 0px)) 1rem
-    calc(1rem + env(safe-area-inset-bottom, 0px));
+  padding: calc(1rem + var(--app-safe-area-top)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 .mobile-cheatsheet-page > div > div:last-child {
@@ -3370,7 +3369,7 @@
   margin: 0 calc(var(--mobile-gutter) * -1);
 }
 .mobile-home-skeleton-header {
-  height: calc(4.6rem + env(safe-area-inset-top, 0px));
+  height: calc(4.6rem + var(--app-safe-area-top));
   border-radius: 0;
 }
 .mobile-home-skeleton-pulse {

@@ -18,11 +18,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Check skills and architecture
+        run: npm run skills:check && npm run architecture:check
 
       - name: Run linter
         run: npm run lint
@@ -34,7 +37,10 @@ jobs:
         run: npm run docs:check
 
       - name: Run tests
-        run: npm run test:run
+        run: npm run test:run -- --maxWorkers=2
+
+      - name: Check schema metadata
+        run: npm run db:audit:schema:metadata && npx --no-install drizzle-kit check
 
       - name: Build application
         run: npm run build
@@ -53,7 +59,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install dependencies
@@ -61,3 +67,26 @@ jobs:
 
       - name: Check formatting
         run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}"
+
+  browser:
+    name: Browser contracts and visual regression
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 25
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build pinned browser environment
+        run: docker build --platform linux/arm64 -f scripts/e2e/Dockerfile -t biwenger-e2e .
+      - name: Run disposable browser suite
+        run: |
+          mkdir -p test-results
+          chmod 777 test-results
+          docker run --rm --init --ipc=host --platform linux/arm64 -e CI=true \
+            -v "$PWD/test-results:/workspace/test-results" biwenger-e2e
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-results
+          path: test-results/
+          retention-days: 7

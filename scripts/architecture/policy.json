@@ -1,0 +1,18 @@
+{
+  "entrypoints": [
+    "src/app/(app)/matches/page.tsx",
+    "src/app/(app)/matches/round/[roundId]/page.tsx",
+    "src/app/(app)/team/[id]/page.tsx",
+    "src/app/(app)/team/[id]/[section]/page.tsx",
+    "src/app/api/team/[id]/route.ts",
+    "src/app/api/matches/[id]/shots/route.ts",
+    "src/app/api/matches/[id]/play-by-play/route.ts"
+  ],
+  "exceptions": [
+    {
+      "edge": "persistence-owner: src/features/matches/server/services/matches.service.ts -> src/lib/db/index.ts",
+      "reason": "Existing resolveRoundIdByPolicy adapter; Rounds is not migrated yet. No direct SQL is added here.",
+      "removeWhen": "Rounds exposes its current-round policy through a server contract."
+    }
+  ]
+}

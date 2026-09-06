@@ -1,5 +1,25 @@
 # Repository working conventions
 
+## Task routing and source of truth
+
+These rules are the repository instruction entry point. Keep detailed guidance in the
+[knowledge base](docs/README.md); compatibility agent files link here instead of duplicating rules.
+
+- Architecture or API work: read [application layers](docs/architecture/application-layers.md),
+  [migration status](docs/architecture/migration-status.md), and use the repository
+  [feature-migration skill](.agents/skills/feature-migration/SKILL.md) for a migration.
+- UI changes: read [design context](docs/product/design-system.md) and use
+  [project-ui](.agents/skills/project-ui/SKILL.md). Use a redesign skill only for intended design work.
+- Setup, skills, and verification: read [agent workflow](docs/contributing/agent-workflow.md) and
+  [testing](docs/contributing/testing.md).
+- Database or sync work: read [database safety](docs/operations/database-safety.md) and
+  [data and sync](docs/architecture/data-and-sync.md).
+
+The current task and approved scope take precedence over skill suggestions. Skills do not authorize
+redesigns, dependency changes, provider operations, or API changes outside that scope.
+Legacy global directories remain supported during migration; they are not templates for new features.
+TypeScript/TSX is preferred at new feature boundaries; retain untouched JavaScript without bulk conversion.
+
 ## Git branches and worktrees
 
 - Develop every new feature, fix, refactor, or other non-trivial change in a dedicated Git worktree.
@@ -83,3 +103,13 @@ Small read-only investigations and explanations do not require a new worktree. A
 - Run schema or migration consistency checks when the affected code reads database-backed models, even when no schema change is intended.
 - Report every validation command and its result, remaining risks, any unverified visual behavior, and whether the task worktree is clean.
 - Do not report a task as complete when required validation was skipped or failed; state the exact limitation instead.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
