@@ -3,7 +3,7 @@ import 'server-only';
 import { eq } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
-import { db } from '@/lib/db';
+import { db } from '@/lib/db/connection';
 import { matches, teams } from '@/lib/db/schema';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 

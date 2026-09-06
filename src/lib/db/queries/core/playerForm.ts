@@ -1,4 +1,4 @@
-import { pgClient } from '../../index';
+import { pgClient } from '../../connection';
 import { resolveReadSeasonId } from '../../season-context';
 
 /**

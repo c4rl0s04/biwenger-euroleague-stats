@@ -336,5 +336,33 @@ typecheck, all 784 tests (one existing skip), lint (25 existing image warnings),
 database-disabled production build, schema metadata (38 tables), Drizzle and diff
 check. The build retained expected missing-provider-environment warnings. Production
 dependency audit reported zero findings. No presentation moved; local browser
-screenshots were not rerun. Release checks are pending. No UI or Managers work is
-part of this maintenance slice.
+screenshots were not rerun. Released at `832b4c754c7f89063c5c088289ceaa239155a91b`:
+Vercel `dpl_8eHSSXgis87pPfueYmGDu6jbkfhP` READY on the matching production alias;
+CI `34065393437` passed, including browser contracts and visual regression. Public
+reads, login redirects and private session-read headers passed production smoke
+checks; scoped logs showed no error/fatal or 5xx entries or sensitive-value patterns.
+No UI or Managers work was part of that maintenance slice.
+
+## Parallel read-foundations batch
+
+The user approved parallel implementation with controlled batched integration.
+Base: `832b4c75`. Three isolated worktrees own Managers reads, base Standings reads,
+and Search reads; `refactor/read-foundations-batch` owns cross-feature review,
+architecture policy registration, this ledger and the combined release gate.
+Feature agents commit locally and do not push, merge or deploy independently.
+Focused tests run during development; full verification and deployment run on the
+combined candidate after sequential integration. Heavy builds are coordinated to
+avoid local resource contention, not skipped or weakened.
+
+Scope is deliberately bounded: Managers squad/statistics/recent rounds before
+profile composition; base Standings before performance/draft analytics; Search
+read contracts without changing shell or Hoopgrid interactions. Managers consumes
+Standings and Players through deliberate contracts. Existing manager-shaped
+`/api/player/*` URLs remain HTTP compatibility adapters and will point directly
+to Managers, avoiding a Players/Managers dependency cycle. No aliases are needed.
+
+No application redesign, security-sensitive mutations, credential behavior,
+dependencies, database schemas or production configuration are included. Preserve
+all existing cache, input quirks, field types, envelopes and error behavior.
+The batch is in progress, not yet validated or released. Manager Profile screens,
+Standings analytics and the remainder of the migration are not claimed complete.
