@@ -4,10 +4,7 @@ import {
   parseOfficialGameFilters,
   parseOptionalPositiveInteger,
 } from '../../validation/match-input';
-import {
-  getOfficialPlayByPlay,
-  getOfficialShots,
-} from '../queries/official-game.query';
+import { getOfficialPlayByPlay, getOfficialShots } from '../queries/official-game.query';
 
 export { MatchesInputError };
 
@@ -33,7 +30,9 @@ function parseRequest(request: OfficialGameRequest) {
 
 export async function getOfficialPlayByPlayData(
   request: OfficialGameRequest
-): Promise<OfficialGameServiceResult<NonNullable<Awaited<ReturnType<typeof getOfficialPlayByPlay>>>>> {
+): Promise<
+  OfficialGameServiceResult<NonNullable<Awaited<ReturnType<typeof getOfficialPlayByPlay>>>>
+> {
   const input = parseRequest(request);
   const data = await getOfficialPlayByPlay(input.matchId, input.filters);
   return { data, cacheSeconds: cacheSecondsFor(data) };

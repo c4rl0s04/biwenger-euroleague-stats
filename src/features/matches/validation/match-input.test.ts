@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  MatchesInputError,
-  parseOfficialGameFilters,
-  parseRoundId,
-} from './match-input';
+import { MatchesInputError, parseOfficialGameFilters, parseRoundId } from './match-input';
 
 describe('match input validation', () => {
   it('normalizes valid HTTP filters at the boundary', () => {

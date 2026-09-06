@@ -41,9 +41,9 @@ describe('official game service', () => {
   });
 
   it('rejects invalid boundary input before querying the database', async () => {
-    await expect(
-      getOfficialShotData({ matchId: 'invalid', filters: {} })
-    ).rejects.toBeInstanceOf(MatchesInputError);
+    await expect(getOfficialShotData({ matchId: 'invalid', filters: {} })).rejects.toBeInstanceOf(
+      MatchesInputError
+    );
     expect(queries.getOfficialShots).not.toHaveBeenCalled();
   });
 });

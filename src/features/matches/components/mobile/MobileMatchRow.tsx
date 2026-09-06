@@ -8,7 +8,7 @@ export default function MobileMatchRow({ match }: { match: MatchListItemViewMode
   const date = match.date ? new Date(match.date) : null;
   const score = finished
     ? `${home.score ?? 0} – ${away.score ?? 0}`
-    : date?.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) ?? 'VS';
+    : (date?.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) ?? 'VS');
 
   return (
     <div className="mobile-match-row">
@@ -17,7 +17,11 @@ export default function MobileMatchRow({ match }: { match: MatchListItemViewMode
       </Link>
       <div className="mobile-match-score">
         <strong>{score}</strong>
-        <span>{finished ? 'Final' : date?.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+        <span>
+          {finished
+            ? 'Final'
+            : date?.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+        </span>
       </div>
       <Link href={`/team/${away.id}`} className="mobile-match-team">
         {away.name}

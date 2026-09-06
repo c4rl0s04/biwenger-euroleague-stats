@@ -2,10 +2,7 @@ export class MatchesInputError extends Error {
   readonly code = 'INVALID_MATCH_INPUT';
 }
 
-export function parseOptionalPositiveInteger(
-  value: unknown,
-  name: string
-): number | undefined {
+export function parseOptionalPositiveInteger(value: unknown, name: string): number | undefined {
   if (value == null || value === '') return undefined;
   const parsed = typeof value === 'number' ? value : Number(value);
   if (!Number.isInteger(parsed) || parsed < 1) {

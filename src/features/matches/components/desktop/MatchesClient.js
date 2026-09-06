@@ -165,10 +165,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
               </div>
             )}
 
-            <MatchVenueMap
-              matches={matchesToDisplay}
-              selectedTeamId={selectedTeamId}
-            />
+            <MatchVenueMap matches={matchesToDisplay} selectedTeamId={selectedTeamId} />
           </Section>
 
           {matchesToDisplay.length === 0 && (
