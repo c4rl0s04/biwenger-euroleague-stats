@@ -12,7 +12,9 @@ export default function MobileHoopgridScreen() {
         title="Hoopgrid"
         description="Nueve cruces. Un jugador válido en cada celda."
       />
-      <Suspense fallback={<div className="mobile-hoopgrid-loading" aria-label="Cargando Hoopgrid" />}>
+      <Suspense
+        fallback={<div className="mobile-hoopgrid-loading" aria-label="Cargando Hoopgrid" />}
+      >
         <HoopgridClient mobile />
       </Suspense>
     </MobileScreen>

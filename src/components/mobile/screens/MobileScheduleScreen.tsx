@@ -45,9 +45,20 @@ export default function MobileScheduleScreen({
   const activeRoundId = schedule?.round?.round_id;
   return (
     <MobileScreen labelledBy="mobile-screen-title" className="mobile-has-sticky-action">
-      <MobileScreenHeader eyebrow="Tu plantilla" title="Horario" description={schedule?.round?.round_name ?? 'Selecciona jornada'} />
+      <MobileScreenHeader
+        eyebrow="Tu plantilla"
+        title="Horario"
+        description={schedule?.round?.round_name ?? 'Selecciona jornada'}
+      />
       <div className="mobile-control-offset">
-        <MobileSegmentedControl label="Seleccionar jornada" items={rounds.map((round) => ({ label: String(round.round_name).replace('Jornada ', 'J'), href: `/schedule?roundId=${round.round_id}`, active: String(round.round_id) === String(activeRoundId) }))} />
+        <MobileSegmentedControl
+          label="Seleccionar jornada"
+          items={rounds.map((round) => ({
+            label: String(round.round_name).replace('Jornada ', 'J'),
+            href: `/schedule?roundId=${round.round_id}`,
+            active: String(round.round_id) === String(activeRoundId),
+          }))}
+        />
       </div>
       <MobileSectionHeading>Cronología</MobileSectionHeading>
       <div className="mobile-schedule-timeline">
@@ -56,14 +67,26 @@ export default function MobileScheduleScreen({
             <MobileMatchRow match={toMatchListItem(match)} />
             <div className="mobile-schedule-players">
               {(match.user_players ?? []).map((player: RecordValue) => (
-                <MobileListRow key={String(player.player_id ?? player.id)} href={`/player/${player.player_id ?? player.id}`} title={player.name} subtitle={player.position ?? 'Tu jugador'} trailing={player.puntos != null ? `${player.puntos} pts` : undefined} />
+                <MobileListRow
+                  key={String(player.player_id ?? player.id)}
+                  href={`/player/${player.player_id ?? player.id}`}
+                  title={player.name}
+                  subtitle={player.position ?? 'Tu jugador'}
+                  trailing={player.puntos != null ? `${player.puntos} pts` : undefined}
+                />
               ))}
             </div>
           </section>
         ))}
       </div>
       <MobileSectionHeading>Mapa</MobileSectionHeading>
-      <MobileSectionLink href="/schedule/map" title="Mapa de la jornada" description="Sedes, trayectos y horarios" icon={MapPinned} accent="blue" />
+      <MobileSectionLink
+        href="/schedule/map"
+        title="Mapa de la jornada"
+        description="Sedes, trayectos y horarios"
+        icon={MapPinned}
+        accent="blue"
+      />
       {schedule.found && schedule.matches?.length > 0 && (
         <div className="mobile-sticky-action-bar">
           <AutoAlignButton matches={schedule.matches} userName={userName} discrete />

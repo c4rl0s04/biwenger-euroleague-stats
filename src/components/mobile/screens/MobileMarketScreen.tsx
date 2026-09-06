@@ -26,12 +26,22 @@ export default function MobileMarketScreen({
 }) {
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader eyebrow="Equipo" title="Mercado" description="Disponibles y actividad de la liga" />
+      <MobileScreenHeader
+        eyebrow="Equipo"
+        title="Mercado"
+        description="Disponibles y actividad de la liga"
+      />
 
       <MobileMetricGrid>
         <MobileMetric label="Disponibles" value={listings.length} tone="accent" />
-        <MobileMetric label="Operaciones" value={Number(kpis.total_transfers ?? 0).toLocaleString('es-ES')} />
-        <MobileMetric label="Precio medio" value={`${money.format(Number(kpis.avg_value ?? 0))}€`} />
+        <MobileMetric
+          label="Operaciones"
+          value={Number(kpis.total_transfers ?? 0).toLocaleString('es-ES')}
+        />
+        <MobileMetric
+          label="Precio medio"
+          value={`${money.format(Number(kpis.avg_value ?? 0))}€`}
+        />
         <MobileMetric label="Compradores" value={kpis.active_buyers ?? 0} tone="positive" />
       </MobileMetricGrid>
 
@@ -63,10 +73,33 @@ export default function MobileMarketScreen({
 
       <MobileSectionHeading>Análisis</MobileSectionHeading>
       <div>
-        <MobileSectionLink href="/market/transfers" title="Fichajes" description="Historial completo de operaciones" icon={ReceiptText} />
-        <MobileSectionLink href="/market/investments" title="Inversiones" description="Plusvalías, pérdidas y oportunidades" icon={CircleDollarSign} accent="green" />
-        <MobileSectionLink href="/market/bids" title="Pujas" description="Duelos, sobreprecios y competencia" icon={Gavel} accent="violet" />
-        <MobileSectionLink href="/market/trends" title="Tendencias" description="Volumen y precios a lo largo del tiempo" icon={ChartSpline} accent="blue" />
+        <MobileSectionLink
+          href="/market/transfers"
+          title="Fichajes"
+          description="Historial completo de operaciones"
+          icon={ReceiptText}
+        />
+        <MobileSectionLink
+          href="/market/investments"
+          title="Inversiones"
+          description="Plusvalías, pérdidas y oportunidades"
+          icon={CircleDollarSign}
+          accent="green"
+        />
+        <MobileSectionLink
+          href="/market/bids"
+          title="Pujas"
+          description="Duelos, sobreprecios y competencia"
+          icon={Gavel}
+          accent="violet"
+        />
+        <MobileSectionLink
+          href="/market/trends"
+          title="Tendencias"
+          description="Volumen y precios a lo largo del tiempo"
+          icon={ChartSpline}
+          accent="blue"
+        />
       </div>
     </MobileScreen>
   );

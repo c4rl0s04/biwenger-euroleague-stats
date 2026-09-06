@@ -15,7 +15,9 @@ export default function MobileOffersClient() {
     let active = true;
     apiClient
       .get('/api/users/lineup')
-      .then((response) => active && setOffers(response.success ? response.data?.offers ?? [] : []))
+      .then(
+        (response) => active && setOffers(response.success ? (response.data?.offers ?? []) : [])
+      )
       .finally(() => active && setLoading(false));
     return () => {
       active = false;

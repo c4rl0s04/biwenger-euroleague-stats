@@ -15,7 +15,10 @@ type SettingsSection = 'account' | 'biwenger' | 'appearance' | 'install';
 function Feedback({ error, success }: { error: string; success: string }) {
   if (!error && !success) return null;
   return (
-    <p className={`mobile-settings-feedback ${error ? 'is-error' : 'is-success'}`} role={error ? 'alert' : 'status'}>
+    <p
+      className={`mobile-settings-feedback ${error ? 'is-error' : 'is-success'}`}
+      role={error ? 'alert' : 'status'}
+    >
       {error || success}
     </p>
   );
@@ -33,7 +36,8 @@ function AccountSettings() {
     event.preventDefault();
     setError('');
     setSuccess('');
-    if (newPassword.length < 6) return setError('La nueva contraseña debe tener al menos 6 caracteres.');
+    if (newPassword.length < 6)
+      return setError('La nueva contraseña debe tener al menos 6 caracteres.');
     if (newPassword !== confirmPassword) return setError('Las contraseñas nuevas no coinciden.');
     setLoading(true);
     try {
@@ -49,7 +53,11 @@ function AccountSettings() {
       setConfirmPassword('');
       setSuccess('Contraseña actualizada correctamente.');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No se ha podido cambiar la contraseña.');
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : 'No se ha podido cambiar la contraseña.'
+      );
     } finally {
       setLoading(false);
     }
@@ -59,17 +67,51 @@ function AccountSettings() {
     <form onSubmit={submit} className="mobile-settings-form">
       <div className="mobile-settings-status">
         <ShieldCheck size={21} aria-hidden="true" />
-        <span><strong>Acceso protegido</strong><small>La sesión permanece cifrada y privada.</small></span>
+        <span>
+          <strong>Acceso protegido</strong>
+          <small>La sesión permanece cifrada y privada.</small>
+        </span>
       </div>
       <label htmlFor="current-password">Contraseña actual</label>
-      <input id="current-password" type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} required />
+      <input
+        id="current-password"
+        type="password"
+        autoComplete="current-password"
+        value={currentPassword}
+        onChange={(event) => setCurrentPassword(event.target.value)}
+        required
+      />
       <label htmlFor="new-password">Nueva contraseña</label>
-      <input id="new-password" type="password" autoComplete="new-password" minLength={6} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required />
+      <input
+        id="new-password"
+        type="password"
+        autoComplete="new-password"
+        minLength={6}
+        value={newPassword}
+        onChange={(event) => setNewPassword(event.target.value)}
+        required
+      />
       <label htmlFor="confirm-password">Repite la nueva contraseña</label>
-      <input id="confirm-password" type="password" autoComplete="new-password" minLength={6} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required />
+      <input
+        id="confirm-password"
+        type="password"
+        autoComplete="new-password"
+        minLength={6}
+        value={confirmPassword}
+        onChange={(event) => setConfirmPassword(event.target.value)}
+        required
+      />
       <Feedback error={error} success={success} />
-      <button type="submit" className="mobile-settings-submit" disabled={loading || !currentPassword || !newPassword || !confirmPassword}>
-        {loading ? <Loader2 className="animate-spin" aria-hidden="true" /> : <CheckCircle2 aria-hidden="true" />}
+      <button
+        type="submit"
+        className="mobile-settings-submit"
+        disabled={loading || !currentPassword || !newPassword || !confirmPassword}
+      >
+        {loading ? (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        ) : (
+          <CheckCircle2 aria-hidden="true" />
+        )}
         Actualizar contraseña
       </button>
     </form>
@@ -103,7 +145,9 @@ function BiwengerSettings({ initialLinked }: { initialLinked: boolean }) {
       setPassword('');
       setSuccess('Cuenta vinculada y lista para sincronizar.');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No se ha podido vincular la cuenta.');
+      setError(
+        requestError instanceof Error ? requestError.message : 'No se ha podido vincular la cuenta.'
+      );
     } finally {
       setLoading(false);
     }
@@ -113,15 +157,40 @@ function BiwengerSettings({ initialLinked }: { initialLinked: boolean }) {
     <form onSubmit={submit} className="mobile-settings-form">
       <div className={`mobile-settings-status ${isLinked ? 'is-linked' : ''}`}>
         <ShieldCheck size={21} aria-hidden="true" />
-        <span><strong>{isLinked ? 'Cuenta vinculada' : 'Vinculación pendiente'}</strong><small>La contraseña de Biwenger no se almacena.</small></span>
+        <span>
+          <strong>{isLinked ? 'Cuenta vinculada' : 'Vinculación pendiente'}</strong>
+          <small>La contraseña de Biwenger no se almacena.</small>
+        </span>
       </div>
       <label htmlFor="biwenger-email">Email de Biwenger</label>
-      <input id="biwenger-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+      <input
+        id="biwenger-email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        required
+      />
       <label htmlFor="biwenger-password">Contraseña de Biwenger</label>
-      <input id="biwenger-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+      <input
+        id="biwenger-password"
+        type="password"
+        autoComplete="current-password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        required
+      />
       <Feedback error={error} success={success} />
-      <button type="submit" className="mobile-settings-submit" disabled={loading || !email || !password}>
-        {loading ? <Loader2 className="animate-spin" aria-hidden="true" /> : <CheckCircle2 aria-hidden="true" />}
+      <button
+        type="submit"
+        className="mobile-settings-submit"
+        disabled={loading || !email || !password}
+      >
+        {loading ? (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        ) : (
+          <CheckCircle2 aria-hidden="true" />
+        )}
         {isLinked ? 'Renovar conexión' : 'Vincular cuenta'}
       </button>
     </form>
@@ -133,12 +202,26 @@ function AppearanceSettings() {
   return (
     <div className="mobile-settings-options">
       <div className="mobile-settings-option">
-        <span><strong>Tema oscuro</strong><small>Identidad visual principal de BiwengerStats</small></span>
+        <span>
+          <strong>Tema oscuro</strong>
+          <small>Identidad visual principal de BiwengerStats</small>
+        </span>
         <span className="mobile-settings-badge">Activo</span>
       </div>
       <div className="mobile-settings-option">
-        <span><strong>Efecto de nieve</strong><small>Preferencia visual guardada en este dispositivo</small></span>
-        <button type="button" role="switch" aria-checked={showSnow} onClick={toggleSnow} className="mobile-settings-switch"><span /></button>
+        <span>
+          <strong>Efecto de nieve</strong>
+          <small>Preferencia visual guardada en este dispositivo</small>
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={showSnow}
+          onClick={toggleSnow}
+          className="mobile-settings-switch"
+        >
+          <span />
+        </button>
       </div>
     </div>
   );
@@ -151,10 +234,22 @@ function InstallSettings() {
       <div className="mobile-settings-install-hero">
         <Smartphone size={30} aria-hidden="true" />
         <strong>{isStandalone ? 'Ya estás usando la aplicación' : 'Instala BiwengerStats'}</strong>
-        <p>{isStandalone ? 'Se ejecuta a pantalla completa y conserva tu sesión.' : `Experiencia optimizada para ${platform === 'ios' ? 'iPhone' : platform === 'android' ? 'Android' : 'tu dispositivo'}.`}</p>
+        <p>
+          {isStandalone
+            ? 'Se ejecuta a pantalla completa y conserva tu sesión.'
+            : `Experiencia optimizada para ${platform === 'ios' ? 'iPhone' : platform === 'android' ? 'Android' : 'tu dispositivo'}.`}
+        </p>
       </div>
-      {!isStandalone && canInstall && <button type="button" onClick={install} className="mobile-settings-submit"><Download aria-hidden="true" /> Instalar ahora</button>}
-      {!isStandalone && !canInstall && <Link href="/install" className="mobile-settings-submit"><Download aria-hidden="true" /> Ver instrucciones</Link>}
+      {!isStandalone && canInstall && (
+        <button type="button" onClick={install} className="mobile-settings-submit">
+          <Download aria-hidden="true" /> Instalar ahora
+        </button>
+      )}
+      {!isStandalone && !canInstall && (
+        <Link href="/install" className="mobile-settings-submit">
+          <Download aria-hidden="true" /> Ver instrucciones
+        </Link>
+      )}
     </div>
   );
 }
@@ -175,7 +270,12 @@ export default function MobileSettingsDetail({
 }) {
   const current = copy[section];
   return (
-    <MobileDetailScaffold title={current.title} context="Ajustes" backHref="/settings" description={current.description}>
+    <MobileDetailScaffold
+      title={current.title}
+      context="Ajustes"
+      backHref="/settings"
+      description={current.description}
+    >
       {section === 'account' && <AccountSettings />}
       {section === 'biwenger' && <BiwengerSettings initialLinked={biwengerLinked} />}
       {section === 'appearance' && <AppearanceSettings />}
