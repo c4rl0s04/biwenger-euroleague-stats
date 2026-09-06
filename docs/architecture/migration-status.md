@@ -232,6 +232,29 @@ Validation passed: typecheck, 86 focused tests, full suite (735 passed, one exis
 skip), lint (25 existing warnings), production build (known local environment/Node
 warnings), docs (49 notes), schema metadata (38 tables), Drizzle, production audit
 (zero findings) and diff check. The analyzer uses ES5-target-compatible collection
-iteration without changing compiler configuration. Release verification is pending.
+iteration without changing compiler configuration. Released at
+`3a4fcc9794d05036ab2f87b7ae364c770877f11c`: Vercel
+`dpl_tzn5Zo9KNtXP7wXjwWZxWK8NuAex` READY with matching production alias,
+GitHub CI `34053863757` passed, read-only smoke checks passed, and scoped logs
+had no error/fatal or 5xx entries or sampled sensitive-value patterns.
+
+## Explicit feature server guards
+
+`refactor/feature-server-guards` adds side-effect `server-only` imports to the
+six remaining unguarded query/service modules in Matches, Teams and Players.
+All ten current query/service modules are now covered by an AST guard test.
+Local unit tests mock the marker only where they import these services directly;
+application guards and the source import-graph tests are not weakened. Consumer
+inspection found no CLI imports of these internal modules. Pure mappers and types
+remain usable without privileged-module side effects. No queries, payloads,
+validation, cache policy, UI or provider behavior changed.
+
+Baseline: typecheck and 86 focused tests passed. After changes: typecheck and 97
+focused tests passed; lint retained 25 existing warnings; schema metadata (38
+tables), Drizzle and production dependency audit (zero findings) passed. A full
+suite run concurrent with lint timed out in the graph scan while 745 tests passed;
+an isolated default-worker rerun passed all 746 tests (one existing skip) without
+changing any timeout or assertion. Production build, docs (49 notes), and diff
+check passed. Release verification is pending for this slice.
 The full migration objective remains incomplete. Protected pages, credentials,
 fallback configuration, database schema and provider operations are unchanged.

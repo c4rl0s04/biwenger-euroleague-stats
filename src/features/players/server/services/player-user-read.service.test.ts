@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('server-only', () => ({}));
+
 vi.mock('@/lib/services/core/userService', () => ({
   fetchUserRecentRounds: vi.fn(),
   fetchUserSeasonStats: vi.fn(),

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('server-only', () => ({}));
+
 vi.mock('@/features/matches/server', () => ({ getSeasonScheduleData: vi.fn() }));
 vi.mock('../queries/team-profile.query', () => ({
   findTeamProfileDetails: vi.fn(),
