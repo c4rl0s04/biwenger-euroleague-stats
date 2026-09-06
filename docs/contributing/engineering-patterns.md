@@ -12,17 +12,18 @@ status: active
 
 ## Query, service, route, UI
 
-For a normal data-backed feature:
+New or migrated domains follow [the feature architecture](../architecture/application-layers.md):
 
-1. Add pure reads under `src/lib/db/queries/<domain>/` or idempotent writes under
-   `src/lib/db/mutations/`.
-2. Put orchestration and result shaping in `src/lib/services/`.
-3. Keep the route handler focused on HTTP authentication, validation, cache policy, and response.
-4. Render the behavior in the domain component and keep the page entry responsible for routing and
-   composition.
+1. Put queries/repositories, mappers, services, typed view models, and screens under their owning
+   `src/features/<feature>` boundary.
+2. Expose client-safe `public.ts` and server-only `server.ts` contracts; consume other features
+   through those contracts rather than internal files.
+3. Pages invoke services directly. Retained HTTP handlers adapt the same services while preserving
+   authentication, validation, response and cache behavior.
+4. Keep domain components separate from domain-agnostic UI primitives.
 
-Some older and specialized routes still access the data layer directly. Do not expand that
-exception without an explicit reason.
+Unmigrated global queries/services/mutations remain supported. Their paths are compatibility
+locations, not the default for new domain code. See the [migration ledger](../architecture/migration-status.md).
 
 ## Sync pipeline
 

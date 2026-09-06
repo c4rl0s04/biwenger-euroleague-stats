@@ -15,6 +15,8 @@ status: active
 Product documentation follows user domains rather than individual components. Each note connects
 behavior to its page entries, internal APIs, services, data access, and tests.
 
+- [Design context](design-system.md) — visual identity, representative screens, and interaction rules.
+
 ## Domains
 
 - [Dashboard](dashboard.md) — home and personalized analytics.

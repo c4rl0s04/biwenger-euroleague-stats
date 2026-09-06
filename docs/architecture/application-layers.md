@@ -1,6 +1,6 @@
 ---
-title: Application Layers
-description: Request flow and responsibility boundaries across UI, HTTP, services, and data access.
+title: Application layers
+description: Target feature architecture and supported legacy boundaries.
 audience:
   - contributor
   - maintainer
@@ -10,58 +10,58 @@ status: active
 
 # Application layers
 
-New data-backed features should normally follow this direction:
+New and migrated domain code belongs in `src/features/<feature>`. The current
+[domain ledger](migration-status.md) identifies integrated features, pending work, and exceptions.
+Matches and Teams are integrated on main; check the ledger and actual branch before selecting a base.
+
+## Read flow
 
 ```mermaid
-sequenceDiagram
-  participant U as User
-  participant UI as Page / Client component
-  participant API as Route handler
-  participant S as Service
-  participant Q as Query or mutation
-  participant DB as PostgreSQL
-
-  U->>UI: Interact
-  UI->>API: Internal HTTP request
-  API->>API: Authenticate and validate
-  API->>S: Call domain operation
-  S->>Q: Read or write
-  Q->>DB: SQL through shared pool
-  DB-->>Q: Rows
-  Q-->>S: Typed data
-  S-->>API: Result
-  API-->>UI: Standard response
+flowchart LR
+  Page[Server page] --> Service[Feature service]
+  Browser[Browser interaction] --> Route[Route handler]
+  Route --> Service
+  Service --> Query[Feature query or repository]
+  Query --> DB[(PostgreSQL)]
+  Service --> VM[Serializable view model]
+  VM --> Screen[Feature screen]
 ```
 
-## Boundaries
+Server Components call feature services directly. Route Handlers adapt existing HTTP contracts to
+those same services. Internal REST exists for browser or external consumers, not as a mandatory hop
+between code already running on the server.
 
-- **Pages and components** own presentation, interaction, and route-level composition. Most
-  authenticated page entries live under [`src/app/(app)`](<../../src/app/(app)>).
-- **Route handlers** own HTTP parsing, authentication, validation, response status, and cache
-  headers. They live under [`src/app/api`](../../src/app/api).
-- **Services** combine queries, apply business rules, and shape domain responses. Server-exclusive
-  services should import `server-only`.
-- **Queries** in [`src/lib/db/queries`](../../src/lib/db/queries) read data. **Mutations** in
-  [`src/lib/db/mutations`](../../src/lib/db/mutations) write it.
-- [`src/lib/db/index.ts`](../../src/lib/db/index.ts) exposes the Drizzle client and a temporary legacy
-  `pg` bridge over one shared pool.
+## Responsibilities and contracts
 
-The repository is still completing this separation. A small number of route handlers access Drizzle
-or mutations directly, particularly authentication, account, and Hoopgrid routes. Treat those as
-explicit current-state exceptions, not examples for unrelated new endpoints.
+- Pages/layouts parse framework inputs, invoke services, and compose screens.
+- Route Handlers authenticate/authorize deliberately, validate HTTP inputs, invoke services, and
+  preserve response envelopes, status codes, caching, and observable errors.
+- Feature services orchestrate domain reads, declare access and freshness policies, and return
+  explicit view models through mappers.
+- Feature queries/repositories own SQL and Drizzle; presentation code receives no raw database rows.
+- `public.ts` exposes client-safe components, models, and types. `server.ts` starts with
+  `import 'server-only'` and exposes deliberate server contracts.
+- Cross-feature consumers use `public.ts` or `server.ts`, including type imports. Shared code needs
+  demonstrated reuse and clear ownership.
+- Client Components own browser interaction and local state. Server-to-client props are serializable.
+  Desktop and mobile compositions share the domain model and preserve information parity.
 
-## Client data flow
+Use [Matches](../../src/features/matches/server.ts) and [Teams](../../src/features/teams/server.ts)
+as concrete examples, while checking their documented remaining limitations. Run `npm run architecture:check`
+for graph enforcement; its scope and explicit legacy exceptions are described in
+[agent workflow](../contributing/agent-workflow.md).
 
-Interactive JavaScript components commonly fetch internal APIs with
-[`useApiData`](../../src/lib/hooks/useApiData.js). HTTP responses normally use the helpers in
-[`response.ts`](../../src/lib/utils/response.ts) to return either `{ success: true, data }` or
-`{ success: false, error }`.
+## Legacy compatibility
 
-Some App Router pages and specialized endpoints use different shapes. Consult the
-[internal API reference](../reference/internal-api.md) and route tests before changing a contract.
+Unmigrated code continues to use [global services](../../src/lib/services),
+[queries](../../src/lib/db/queries), and [mutations](../../src/lib/db/mutations).
+Existing browser consumers may use [useApiData](../../src/lib/hooks/useApiData.js) and
+[API helpers](../../src/lib/utils/response.ts). Do not rewrite those consumers as incidental cleanup.
 
-## Server and Client Components
+URLs, query parameters, authentication, caching, response shapes, ordering, and visual behavior are
+compatibility contracts. New canonical HTTP names require an intentional contract change; a
+structural migration alone does not authorize aliases, pagination, envelope normalization, or removal.
+Consult the [internal API reference](../reference/internal-api.md) and real route tests.
 
-Page modules default to Server Components unless marked with `use client`. Interactive domain
-components commonly provide a `*Client.js` boundary. Keep secrets, direct database access, and
-provider credentials on the server side; pass only required serializable data into client code.
+Authentication, credentials, synchronization, and database infrastructure retain their existing
+ownership and safety rules. Do not create artificial feature wrappers for framework infrastructure.

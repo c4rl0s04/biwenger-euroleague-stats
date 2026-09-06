@@ -13,7 +13,8 @@ status: active
 
 ## Before changing code
 
-1. Start from an up-to-date branch or isolated worktree and inspect existing uncommitted changes.
+1. Inspect Git state and create a dedicated sibling worktree following [AGENTS.md](../../AGENTS.md).
+   Use [agent setup](agent-workflow.md) for the pinned runtime and reproducible dependency installation.
 2. Identify the product domain, architecture boundaries, API contracts, data tables, and operational
    risks affected by the change.
 3. Read nearby implementation and tests instead of relying on directory names or documentation
@@ -36,11 +37,8 @@ status: active
 Run focused tests during implementation, then the full baseline before review:
 
 ```bash
-npm run docs:check
-npm run lint
-npm run typecheck
-npm run test:run
-SKIP_DB=true npm run build
+npm run verify
+npm run test:e2e:local # for UI or browser behavior changes
 ```
 
 Run additional database or browser checks when the change affects those behaviors. Do not enable

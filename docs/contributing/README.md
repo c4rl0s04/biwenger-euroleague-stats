@@ -11,6 +11,8 @@ status: active
 
 # Contributing
 
+- [Agent workflow](agent-workflow.md) — setup, skills, architecture checks, and task acceptance.
+- [Agent setup status](agent-setup-status.md) — implementation checklist and verification evidence.
 - [Development workflow](development-workflow.md) — scope, implementation, review, and verification.
 - [Engineering patterns](engineering-patterns.md) — established application and sync patterns.
 - [Testing](testing.md) — suites, commands, safety boundaries, and coverage expectations.

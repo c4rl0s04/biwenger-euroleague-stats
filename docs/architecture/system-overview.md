@@ -27,8 +27,13 @@ flowchart LR
 
 ## Runtime responsibilities
 
+Migrated domains own their services, queries, models, and screens under
+[`src/features`](../../src/features). Global services and components remain for unmigrated code
+and shared infrastructure. Follow [application layers](application-layers.md) for new work.
+
 | Area         | Responsibility                                                  | Primary source                               |
 | ------------ | --------------------------------------------------------------- | -------------------------------------------- |
+| Features     | Domain contracts, queries, services, view models, and screens   | [`src/features`](../../src/features)         |
 | App Router   | Pages, layouts, and internal HTTP handlers                      | [`src/app`](../../src/app)                   |
 | UI           | Domain components, shared layout, and primitives                | [`src/components`](../../src/components)     |
 | Services     | Business orchestration and result shaping                       | [`src/lib/services`](../../src/lib/services) |

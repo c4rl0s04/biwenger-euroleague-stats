@@ -1,4 +1,4 @@
-import { expect, test } from 'playwright/test';
+import { expect, test } from './fixtures';
 import type { Page } from 'playwright';
 
 async function expectNoGlobalOverflow(page: Page) {
@@ -17,6 +17,8 @@ test('public PWA routes work without a session and do not overflow', async ({ pa
   await expect(page.getByRole('heading', { name: /BiwengerStats en tu móvil/i })).toBeVisible();
   await expectNoGlobalOverflow(page);
 
+  // Let SessionProvider settle before hard navigation cancels its auth requests.
+  await page.waitForLoadState('networkidle');
   await page.goto('/offline');
   await expect(page.getByRole('heading', { name: /Sin conexión/i })).toBeVisible();
   await expectNoGlobalOverflow(page);
@@ -39,6 +41,16 @@ test('login remains usable with a virtual-keyboard-sized viewport', async ({ pag
 });
 
 test('authenticated mobile shell exposes bottom navigation and More sheet', async ({ page }) => {
+  let releaseStandingsRequest = () => {};
+  const standingsRequestBlocked = new Promise<void>((resolve) => {
+    releaseStandingsRequest = resolve;
+  });
+  // Register before login so production prefetch cannot populate the route cache first.
+  await page.route('**/standings*', async (route) => {
+    await standingsRequestBlocked;
+    await route.fallback();
+  });
+
   test.skip(
     !process.env.E2E_USERNAME || !process.env.E2E_PASSWORD,
     'Set E2E_USERNAME and E2E_PASSWORD to exercise authenticated routes.'
@@ -57,7 +69,7 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
       document.documentElement.style.setProperty('--app-safe-area-top', '32px');
     });
 
-    const header = page.getByRole('banner');
+    const header = page.locator('header.mobile-native-header');
     const searchButton = page.getByRole('button', { name: 'Abrir búsqueda' });
     const profileButton = page.getByRole('button', { name: 'Abrir perfil' });
     const [headerBox, searchBox, profileBox] = await Promise.all([
@@ -73,23 +85,14 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
     const navigation = page.getByRole('navigation', { name: 'Navegación principal móvil' });
     await expect(navigation).toBeVisible();
 
-    let releaseStandingsRequest = () => {};
-    const standingsRequestBlocked = new Promise<void>((resolve) => {
-      releaseStandingsRequest = resolve;
-    });
-    await page.route('**/*', async (route) => {
-      const url = new URL(route.request().url());
-      if (url.pathname === '/standings') {
-        await standingsRequestBlocked;
-      }
-      await route.continue();
-    });
-
     const standingsLink = navigation.getByRole('link', { name: 'Clasificación' });
     const navigationPromise = standingsLink.click();
-    await expect(standingsLink).toHaveAttribute('aria-busy', 'true');
-    await expect(page.getByRole('status', { name: 'Cargando Clasificación' })).toBeVisible();
-    releaseStandingsRequest();
+    try {
+      await expect(standingsLink).toHaveAttribute('aria-busy', 'true');
+      await expect(page.getByRole('status', { name: 'Cargando Clasificación' })).toBeVisible();
+    } finally {
+      releaseStandingsRequest();
+    }
     await navigationPromise;
     await expect(page).toHaveURL(/\/standings/);
 
@@ -98,9 +101,10 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog', { name: /Más secciones/i })).toBeHidden();
   } else {
-    await expect(
-      page.getByRole('navigation', { name: 'Navegación principal móvil' })
-    ).toHaveCount(0);
+    releaseStandingsRequest();
+    await expect(page.getByRole('navigation', { name: 'Navegación principal móvil' })).toHaveCount(
+      0
+    );
   }
 
   await expectNoGlobalOverflow(page);

@@ -1,17 +1,31 @@
 import { defineConfig, devices } from 'playwright/test';
 
+if (
+  (process.env.CI || process.env.E2E_REQUIRED) &&
+  (!process.env.E2E_USERNAME || !process.env.E2E_PASSWORD)
+) {
+  throw new Error(
+    'Required browser verification needs credentials. Use npm run test:e2e:local for a disposable fixture account.'
+  );
+}
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   timeout: 60_000,
-  workers: 2,
+  expect: { timeout: 15_000 },
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
     trace: 'retain-on-failure',
+    serviceWorkers: 'block',
     screenshot: 'only-on-failure',
+    locale: 'es-ES',
+    timezoneId: 'Europe/Madrid',
+    contextOptions: { reducedMotion: 'reduce' },
   },
   projects: [
     { name: 'iphone-se', use: { ...devices['iPhone SE'] } },
@@ -27,15 +41,37 @@ export default defineConfig({
         viewport: { width: 768, height: 1024 },
       },
     },
-    { name: 'desktop-1280', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
-    { name: 'desktop-1440', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
-  ],
+    {
+      name: 'desktop-1280',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
+    },
+    {
+      name: 'desktop-1440',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+  ].map((project) => ({
+    ...project,
+    use: {
+      ...project.use,
+      ...(project.use.defaultBrowserType === 'chromium'
+        ? {
+            channel: 'chromium',
+            launchOptions: {
+              args:
+                process.platform === 'darwin'
+                  ? ['--use-angle=metal']
+                  : ['--enable-unsafe-swiftshader'],
+            },
+          }
+        : {}),
+    },
+  })),
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
         command: 'npm run dev',
         url: 'http://127.0.0.1:3000/login',
-        reuseExistingServer: true,
+        reuseExistingServer: false,
         timeout: 120_000,
       },
 });

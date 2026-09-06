@@ -1,0 +1,4 @@
+/* Live map pixels are not part of the layout contract; controls and markers remain visible. */
+.maplibregl-canvas {
+  display: none !important;
+}
