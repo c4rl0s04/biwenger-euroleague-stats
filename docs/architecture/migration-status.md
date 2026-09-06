@@ -204,6 +204,34 @@ local-environment/Node warnings. Docs check passed all 49 notes; diff check pass
 Read-only production probes established 400/404 baselines; no safely identified
 populated official match was available for a live payload comparison. Successful
 payload compatibility is covered by synthetic full-chain tests. Release verification
-is the remaining gate.
+completed at `48b0bcbb5df8b7f466361376c969463b51e9bc18`: Vercel
+`dpl_4q8NZnQwDGdCLxKt6cuP6zGJYAnH` READY on the matching production alias;
+GitHub CI `34053450150` passed. Safe HTTP checks retained login redirects,
+public read availability and private error/session-read headers. Scoped logs
+contained no error/fatal or 5xx entries and no sampled sensitive-value patterns.
+
+## Import-graph enforcement
+
+`chore/feature-graph` adds a test-only TypeScript AST analyzer. The ordinary full
+test suite now checks all feature public entrypoints and feature Client Components
+through transitive local runtime imports. It follows aliases, relative imports,
+re-exports, literal dynamic imports and CommonJS requires, distinguishing type-only
+edges. Unresolved/computed client imports fail rather than silently escaping checks.
+Tests reject foreign feature deep imports (including type-only imports), server
+module/package reachability from client-safe roots, and feature dependency cycles
+including edges mediated by legacy/shared modules. No application code is imported
+or executed by this analyzer.
+
+Scope is local source under `src`, excluding tests. External package internals are
+not traversed; framework builds remain required. Known server paths/packages are
+classified conservatively. This is not a proof about arbitrary generated code or
+third-party package behavior. Seven synthetic graph cases validate the detector,
+and the repository graph is checked separately. Baseline typecheck and 78 feature
+tests passed. No application behavior, schema, dependency or configuration changed.
+Validation passed: typecheck, 86 focused tests, full suite (735 passed, one existing
+skip), lint (25 existing warnings), production build (known local environment/Node
+warnings), docs (49 notes), schema metadata (38 tables), Drizzle, production audit
+(zero findings) and diff check. The analyzer uses ES5-target-compatible collection
+iteration without changing compiler configuration. Release verification is pending.
 The full migration objective remains incomplete. Protected pages, credentials,
 fallback configuration, database schema and provider operations are unchanged.
