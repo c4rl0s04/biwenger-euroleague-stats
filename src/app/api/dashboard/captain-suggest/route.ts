@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { fetchCaptainRecommendations } from '@/lib/services';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 import { getRequestUserId } from '@/lib/utils/api-auth';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await fetchCaptainRecommendations(userIdValidation.value, 6);
-    return successResponse(data, CACHE_DURATIONS.SHORT);
+    return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('Error fetching captain suggestions:', error);
     return errorResponse('Failed to fetch captain suggestions');

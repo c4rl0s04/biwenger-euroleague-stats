@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { fetchCaptainStats } from '@/lib/services';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 import { getRequestUserId } from '@/lib/utils/api-auth';
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     const stats = await fetchCaptainStats(userIdValidation.value);
-    return successResponse({ stats }, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: { stats } });
   } catch (error) {
     console.error('API Error:', error);
     return errorResponse('Failed to fetch captain stats');
