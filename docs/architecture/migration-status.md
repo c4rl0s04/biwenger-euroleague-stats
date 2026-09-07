@@ -734,3 +734,35 @@ projects, including all Profile reference comparisons, using a disposable synthe
 database and the final production build. The runner shut down its database normally.
 The browser-error guard, application sources, dependencies, schema and CI workflow
 remain unchanged. Remote CI and production verification follow the ordinary main push.
+
+### Browser correction release receipt
+
+The correction `713d2a3b571466337a427d50396d05614ba6d45e` and prior documentation
+receipt `175c25b9` were integrated by clean fast-forward and pushed normally to main.
+Vercel deployment `dpl_9ASk8SVahwohAoQFdjDU9KCQPGHM` is READY at that exact SHA,
+serving the production alias and
+`advanced-euroleague-biwenger-stats-p0x6vcgwi.vercel.app`.
+
+Post-deployment read-only checks passed: login/session 200; Profile and all five
+sections, Matches, Players and Team retain login redirects. Explicit manager
+statistics, rounds and squad APIs return successful 200 envelopes; anonymous rounds
+and squad retain 400 error envelopes. All five API cases preserve the exact
+`private, no-store, max-age=0, must-revalidate` header. An initial smoke assertion
+omitted the existing final directive; inspection corrected the assertion, and the
+rerun passed without changing the application. Sampled responses and logs showed no
+sensitive-value patterns; deployment-scoped error/fatal and 5xx queries returned no
+entries. These are bounded observations, not guarantees about future requests.
+
+The existing authenticated desktop session was reviewed earlier in this task against
+the identical application source: section content, contributor expansion/collapse
+and console checks passed. Native-phone production visual review and Linux Profile
+visual baselines remain explicit manual/future checks; automated Linux semantic
+coverage is retained. No application, authentication, schema, dependency, credential,
+fallback, environment or CI configuration changes were made. No new feature started.
+
+GitHub CI `34110324902` completed successfully at `713d2a3b`: Test & Build,
+Browser contracts and visual regression, and Format Check all passed. The previous
+Profile CI blocker is closed. Existing local image/provider/stream-close warnings
+and GitHub's Node 20 action deprecation notice were not suppressed or mixed into
+this scoped fix. This documentation-only receipt remains local on the task branch
+to accompany the next batch, avoiding another deployment solely to record its ID.
