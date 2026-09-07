@@ -10,6 +10,8 @@ status: active
 
 # Architecture migration status
 
+For current coverage and remaining work, see the [migration overview](migration-overview.md).
+
 ## Verified starting point — 2026-09-05
 
 - Local and fetched remote main: `a9f0dc929fd08df5a35e2a690b4859762afa7ad8`.
