@@ -13,7 +13,8 @@ status: active
 
 Read [worker protocol](worker-protocol.md), then **only the assigned batch**.
 Pilot assignment: [001 — Standings read completion](batches/001-standings.md).
-Pilot review: [CHANGES_REQUESTED and worker correction order](reviews/001-standings.md).
+Latest pilot review: [second review and checkpoint A](reviews/002-standings.md).
+Earlier evidence: [first review](reviews/001-standings.md).
 Resume the existing worker branch for corrections; do not start a new batch.
 One worker only. No background dispatch, automatic polling or automatic integration exists.
 Opening this file does not authorize starting every batch.
