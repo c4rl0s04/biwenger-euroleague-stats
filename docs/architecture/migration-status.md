@@ -28,9 +28,9 @@ For current coverage and remaining work, see the [migration overview](migration-
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |
 | Players                                                  | Integrated; manager adapter removed in the read-foundations release                |
 | Rounds                                                   | Calendar foundation implemented; historical results and analysis remain legacy     |
-| Managers                                                 | Squad/statistics/round reads released; Profile and directory remain legacy         |
-| Standings                                                | Base ranking reads released; screens, performance and draft analytics remain       |
-| Tournaments                                              | Legacy read services and components                                                |
+| Managers                                                 | Base reads released; contributors validated; Profile/directory remain legacy       |
+| Standings                                                | Base reads released; head-to-head validated; analytics/screens remain              |
+| Tournaments                                              | Core/participation reads validated; analytics/screens remain                       |
 | Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                           |
 | Schedule                                                 | Map uses Matches; squad overlay remains legacy                                     |
 | Market public reads                                      | Legacy analytics; separate from private operations                                 |
@@ -464,3 +464,62 @@ Next parallel batch: Tournament core/manager participation, Manager top contribu
 and Standings all-play-all reads. These provide the remaining data contracts for
 a subsequent Manager Profile desktop/mobile composition migration. Preserve existing
 tournament JSON/ID matching and statistical formulas; no next slice has started yet.
+
+## Manager Profile dependency batch
+
+`refactor/profile-dependencies-batch` starts from fetched production `881e4818`.
+Primary main was clean; three new sibling worktrees isolate Tournament read core,
+Manager contributors and Standings head-to-head. The prior documentation receipt
+is included unchanged. No prior mobile worktree or unrelated changes are modified.
+Baseline typecheck, architecture (718 modules, 15 protected entrypoints) and 127
+focused tests passed on pinned Node 24.20.0. Production dependency audit is clean.
+
+Managers now owns the historical contributor projection through
+`getManagerContributorsData`. Its one query retains season binding, captain doubling,
+bench/base-point and games-count rules, unlimited descending ordering, nulls and
+parseInt-or-zero conversions. The old query name and user service remain adapters
+for desktop/mobile Profile and Assistant. No dedicated HTTP endpoint is added.
+
+Standings owns `fetchAllPlayAllStats`, its sequential queries and virtual league
+calculation. The same shared in-memory key `advanced:all-play-all:<season>` and
+900-second TTL remain. Raw computed percentages (including NaN) are cached and
+sorted before allowlisting; the feature returns null for non-finite percentages,
+while the legacy server adapter restores NaN. JSON responses are unchanged. Season
+resolution errors still propagate; caught query failures still log and cache an
+empty array. Bidirectional legacy/feature cache-hit tests prevent duplicate reads.
+Only the all-play-all import changes in the advanced HTTP dispatcher; the other
+12 branches and their headers/statuses remain tested legacy behavior. The mixed
+handler is not falsely registered as fully migrated; no checker exception is added.
+
+Tournaments extraction covers the five core reads and manager participation, not
+global analytics or screen composition. Explicit row allowlists include the formerly
+undeclared `season_id` and fixture phase fields. Number/string-zero ID quirks, SQL
+substring participation matching, UNION ALL ordering, strict playoff participant
+comparison, invalid JSON errors and caught partial-statistics behavior are preserved.
+Historical JSON documents remain a deliberate compatibility projection, including
+malformed/prototype-key phase behavior; they are not claimed as a fully normalized
+presentation model. A type-only legacy detail adapter retains the old non-null-name
+typing for one existing mobile caller, while the feature model correctly allows null.
+The adapter does not coerce runtime data or change UI props.
+
+Independent source reviews found no contributor, head-to-head or Tournament
+compatibility blocker. SQL comparisons preserve all tokens; extracted templates
+are checked for trailing whitespace across the entire committed change range.
+No screens, URLs, auth, credentials, fallback, schema, dependencies or production
+configuration change. Complete combined verification and deployment are pending.
+
+Combined implementation validation passed on Node 24.20.0: `npm run verify`
+completed skills, architecture (738 modules, 15 protected entrypoints), docs (55
+notes), typecheck, full suite (988 passed, one existing skip), lint (25 existing
+image warnings), database-disabled production build, schema metadata (38 tables,
+no drift), Drizzle check and diff check. Build warnings only reported the expected
+absent provider configuration. The explicit full-range `git diff --check 881e4818`
+also passed. No application environment files were loaded or database migrations
+applied. Production dependency audit reported zero vulnerabilities.
+
+Original-to-rebased commits: contributors `7503e4a` → `07037d56`; head-to-head
+`9301573a` → `d35451ed`; Tournaments `0c2d154` / `79292c4` → `b75fc8a2` /
+`40e77f66`. All rebases and sequential fast-forwards were conflict-free. Before
+release, production all-play-all returned seven rows; canonical response hashes
+were captured without storing payloads for post-release comparison. Production
+deployment and CI/browser verification remain pending at this validation checkpoint.

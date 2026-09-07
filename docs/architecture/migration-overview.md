@@ -23,13 +23,13 @@ query adapters remain; these references are not a claim that all global code is 
 
 ## Read foundations and their remaining work
 
-| Domain      | Established boundary                                       | Still to migrate                                                    |
-| ----------- | ---------------------------------------------------------- | ------------------------------------------------------------------- |
-| Rounds      | Calendar and current/next/last-round policy                | History, results, analysis and screens                              |
-| Managers    | Season statistics, squad and recent rounds                 | Profile orchestration/screens, directory and remaining analytics    |
-| Standings   | Full/simple rankings, league overview and value ranking    | Performance/draft analytics, other advanced projections and screens |
-| Search      | Validated directory search, typed results and HTTP service | Shell/search interaction ownership during the shared UI pass        |
-| Tournaments | Read core and manager participation are the current batch  | Tournament analytics, page composition and components               |
+| Domain      | Established boundary                                           | Still to migrate                                                    |
+| ----------- | -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Rounds      | Calendar and current/next/last-round policy                    | History, results, analysis and screens                              |
+| Managers    | Season statistics, squad, recent rounds and contributors       | Profile orchestration/screens, directory and remaining analytics    |
+| Standings   | Base rankings, league overview, value and virtual head-to-head | Performance/draft analytics, other advanced projections and screens |
+| Search      | Validated directory search, typed results and HTTP service     | Shell/search interaction ownership during the shared UI pass        |
+| Tournaments | List/detail, standings, fixtures and manager participation     | Tournament analytics, page composition and components               |
 
 ## Current batch: Manager Profile dependencies
 
@@ -43,7 +43,8 @@ previous release receipt, and combines three isolated implementation branches:
 - `refactor/standings-head-to-head`: virtual all-play-all records, including the existing
   `/api/standings/advanced?type=all-play-all` dispatch branch and 15-minute season cache.
 
-This batch is in progress. It does not move Manager Profile or Tournament screens,
+The combined implementation is locally validated; release evidence is recorded in
+the ledger. It does not move Manager Profile or Tournament screens,
 rename APIs, change statistical formulas, or migrate every branch of the advanced
 Standings endpoint. Its purpose is to make the remaining Profile reads available
 through deliberate domain contracts, enabling a focused composition pass next.

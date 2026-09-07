@@ -78,8 +78,10 @@ cannot determine its target.
 
 Existing debt uses exact edge exceptions with a reason and removal condition. Unused exceptions
 fail, so resolved debt is removed. Matches now consumes the Rounds server contract.
-The one temporary Players-to-legacy-manager-service exception must disappear when Managers
-owns those read contracts. Do not add broad directory exemptions to silence failures.
+The old Players-to-legacy-manager-service exception was removed when Managers took ownership.
+The retained manager HTTP routes have exact exceptions for their unchanged authentication and
+credential infrastructure edges, pending that separate security gate. These do not permit domain
+queries outside feature ownership. Do not add broad directory exemptions to silence failures.
 
 ## Verification and handoff
 
