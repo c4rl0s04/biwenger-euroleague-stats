@@ -13,7 +13,8 @@ status: active
 
 Read [worker protocol](worker-protocol.md), then **only the assigned batch**.
 Pilot assignment: [001 — Standings read completion](batches/001-standings.md).
-Latest pilot review: [checkpoint B corrections](reviews/004-standings.md).
+Latest pilot review: [B accepted; checkpoint C assignment](reviews/005-standings.md).
+Previous correction: [checkpoint B corrections](reviews/004-standings.md).
 Previous checkpoint: [A accepted; B assignment](reviews/003-standings.md).
 Open batch findings: [second review](reviews/002-standings.md).
 Earlier evidence: [first review](reviews/001-standings.md).
