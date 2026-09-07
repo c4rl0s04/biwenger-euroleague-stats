@@ -1,6 +1,6 @@
 export interface DraftPerformanceViewModel {
   user_id: string;
-  user_name: string;
+  user_name: string | null;
   user_color_index: number;
   icon: string | null;
   actual_points: number;
@@ -68,9 +68,7 @@ export interface DraftDetailedViewModel {
   current_owner_id: string | number | null;
   current_owner: string | null;
 }
-export interface DraftAnalyticsViewModel {
-  performance: DraftPerformanceViewModel[];
-}
+export type DraftAnalyticsViewModel = DraftPerformanceViewModel[];
 export interface DraftStatsBundleViewModel {
   bestDraftPerUser: DraftPlayerViewModel[];
   retainedRanking: DraftRetainedPointsViewModel[];

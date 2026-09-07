@@ -77,7 +77,7 @@ describe('GET /api/standings/analytics', () => {
           user_id: 'manager-x',
           user_name: 'Manager X',
           user_color_index: 5,
-          icon: null,
+          icon: '',
           actual_points: 0,
           potential_points: 10,
           roi_percentage: 0,
@@ -90,7 +90,7 @@ describe('GET /api/standings/analytics', () => {
     expect(data.data).toEqual([
       {
         user_id: '007',
-        user_name: '', // The mapper coalesces null name to ''
+        user_name: null,
         user_color_index: 0,
         icon: null,
         actual_points: -5.5,
@@ -101,7 +101,7 @@ describe('GET /api/standings/analytics', () => {
         user_id: 'manager-x',
         user_name: 'Manager X',
         user_color_index: 5,
-        icon: null,
+        icon: '',
         actual_points: 0,
         potential_points: 10,
         roi_percentage: 0,

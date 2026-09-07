@@ -2,16 +2,6 @@ import 'server-only';
 import { db, pgClient } from '@/lib/db';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
-export interface InitialSquadPerformance {
-  user_id: string;
-  user_name: string;
-  user_color_index: number;
-  icon: string | null;
-  actual_points: number;
-  potential_points: number;
-  roi_percentage: number;
-}
-
 export interface InitialSquadPotential {
   user_id: string;
   user_name: string;
@@ -26,9 +16,7 @@ export interface TheoreticalBreakdown {
   user_color_index: number;
   icon: string | null;
   player_name: string;
-  player_actual_points: number;
-  potential_points: number;
-  roi_percentage: number;
+  player_total_points: number;
 }
 
 export interface BestInitialSquadPlayer {
@@ -47,9 +35,7 @@ export interface InitialSquadRetainedPoints {
   user_color_index: number;
   icon: string | null;
   players_contributed: number;
-  actual_points: number;
-  potential_points: number;
-  roi_percentage: number;
+  total_points: number;
 }
 
 export interface InitialSquadPlayerBreakdown {
@@ -84,9 +70,7 @@ export interface InitialSquadPotentialAdvanced {
   user_name: string;
   user_color_index: number;
   icon: string | null;
-  actual_points: number;
-  potential_points: number;
-  roi_percentage: number;
+  total_points: number;
   total_value: number;
 }
 
@@ -96,7 +80,7 @@ export interface InitialSquadPotentialAdvanced {
  */
 export interface InitialSquadPerformance {
   user_id: string;
-  user_name: string;
+  user_name: string | null;
   user_color_index: number;
   icon: string | null;
   actual_points: number;

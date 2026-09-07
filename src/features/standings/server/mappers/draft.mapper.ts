@@ -1,4 +1,5 @@
 import 'server-only';
+import { InitialSquadPerformance } from '../queries/draft.query';
 import {
   DraftPerformanceViewModel,
   DraftPlayerViewModel,
@@ -10,15 +11,15 @@ import {
   DraftDetailedViewModel,
 } from '../../models/draft';
 
-export function mapDraftPerformance(row: any): DraftPerformanceViewModel {
+export function mapDraftPerformance(row: InitialSquadPerformance): DraftPerformanceViewModel {
   return {
-    user_id: String(row.user_id),
-    user_name: String(row.user_name || ''),
-    user_color_index: Number(row.user_color_index || 0),
-    icon: row.icon ? String(row.icon) : null,
-    actual_points: Number(row.actual_points || 0),
-    potential_points: Number(row.potential_points || 0),
-    roi_percentage: Number(row.roi_percentage || 0),
+    user_id: row.user_id,
+    user_name: row.user_name,
+    user_color_index: row.user_color_index,
+    icon: row.icon,
+    actual_points: row.actual_points,
+    potential_points: row.potential_points,
+    roi_percentage: row.roi_percentage,
   };
 }
 export function mapDraftPlayer(row: any): DraftPlayerViewModel {

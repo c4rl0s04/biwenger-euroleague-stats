@@ -106,10 +106,10 @@ Final status: READY FOR REVIEW
 
 ### Checkpoint B
 
-- **Completion Status:** Fixed `fetchInitialSquadAnalytics` and `GET /api/standings/analytics` to return the original structure (`{ success: true, data: [...] }`). Restored the correct fields: `user_id`, `user_name`, `user_color_index`, `icon`, `actual_points`, `potential_points`, `roi_percentage` in `draft.service.ts`, `models/draft.ts`, `draft.mapper.ts`, and `draft.query.ts`. Removed the React `cache` wrapper from `fetchInitialSquadAnalytics`. Added `draft-analytics-http.contract.test.ts` focused tests matching all contract requirements.
+- **Completion Status:** Fixed `fetchInitialSquadAnalytics` and `GET /api/standings/analytics` to return the original structure (`{ success: true, data: [...] }`). Restored the correct fields: `user_id`, `user_name`, `user_color_index`, `icon`, `actual_points`, `potential_points`, `roi_percentage` in `draft.service.ts`, `models/draft.ts`, `draft.mapper.ts`, and `draft.query.ts`. Removed the React `cache` wrapper from `fetchInitialSquadAnalytics`. Added `draft-analytics-http.contract.test.ts` focused tests matching all contract requirements. Mappers no longer enforce default values like "" for null strings, accurately preserving the returned `user_name` and `icon`. Reverted unrelated query interface changes. Prohibited scratch scripts from this checkpoint were cleaned up.
 - **Validation Results:**
   - `npm run typecheck`: PASS
   - `npm run architecture:check`: PASS (792 modules, 44 protected entrypoints)
   - `npm run test:run -- src/features/standings src/app/api/standings --maxWorkers=2`: PASS (113 tests in 14 files)
-- **Commit SHA:** [to be appended]
+- **Commit SHA:** [will be replaced]
 - **Note:** CHECKPOINT B — awaiting review; full Batch 001 remains incomplete.
