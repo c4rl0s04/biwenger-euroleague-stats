@@ -1,4 +1,22 @@
-import 'server-only';
+import fs from 'fs';
+
+let content = fs.readFileSync('src/features/standings/server/queries/theoretical.query.ts', 'utf8');
+
+// The new theoretical.query.ts will just use the internal queries from advanced.query and performance.query
+let newQuery = `import 'server-only';
+import { getTheoreticalGapStats, getRivalryMatrixStats, getHeatmapStats } from './advanced.query';
+import { getLeagueComparisonStats } from './performance.query';
+
+export async function queryTheoreticalGapStats() { return getTheoreticalGapStats(); }
+export async function queryLeagueComparisonStats() { return getLeagueComparisonStats(); }
+export async function queryRivalryMatrixStats() { return getRivalryMatrixStats(); }
+export async function queryHeatmapStats() { return getHeatmapStats(); }
+`;
+
+fs.writeFileSync('src/features/standings/server/queries/theoretical.query.ts', newQuery);
+
+// Then theoretical.service.ts will do the logic
+let newService = `import 'server-only';
 import { cache } from 'react';
 import {
   mapTheoreticalGapStat,
@@ -53,3 +71,7 @@ export const fetchTheoreticalStandings = cache(async () => {
     .sort((a, b) => b.total_ideal - a.total_ideal)
     .map(mapTheoreticalStandingsStat);
 });
+`;
+
+fs.writeFileSync('src/features/standings/server/services/theoretical.service.ts', newService);
+

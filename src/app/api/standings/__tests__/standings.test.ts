@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 vi.mock('@/features/standings/server', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal<typeof import('@/features/standings/server')>();
   return {
     ...actual,
     getFullStandings: vi.fn(),

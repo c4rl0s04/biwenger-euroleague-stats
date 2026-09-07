@@ -1,12 +1,13 @@
+import 'server-only';
 import {
   getBottlerStats,
   getHeartbreakerStats,
   getNoGloryStats,
   getJinxStats,
   getEfficiencyStats,
-} from '@/lib/db';
+} from './performance.query';
 
-import { getDetailedCaptainStats } from '@/lib/db';
+import { getDetailedCaptainStats } from './advanced.query';
 
 export async function queryBottlerStats() {
   return getBottlerStats();

@@ -17,7 +17,7 @@ import {
   MobileScreenHeader,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
 type RecordValue = Record<string, any>;
 

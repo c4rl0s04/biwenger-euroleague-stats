@@ -1,4 +1,6 @@
-import 'server-only';
+import fs from 'fs';
+
+let content = `import 'server-only';
 import type {
   VolatilityStat,
   HeatCheckStat,
@@ -45,13 +47,11 @@ export const mapRollingAverageStat = (row: any): RollingAverageStat => ({
   name: String(row.name),
   icon: row.icon ? String(row.icon) : '',
   color_index: Number(row.color_index),
-  data: Array.isArray(row.data)
-    ? row.data.map((d: any) => ({
-        round: Number(d.round),
-        round_name: String(d.round_name),
-        avg: Number(d.avg),
-      }))
-    : [],
+  data: Array.isArray(row.data) ? row.data.map((d: any) => ({
+    round: Number(d.round),
+    round_name: String(d.round_name),
+    avg: Number(d.avg),
+  })) : [],
 });
 
 export const mapFloorCeilingStat = (row: any): FloorCeilingStat => ({
@@ -82,44 +82,33 @@ export const mapDominanceStat = (row: any): DominanceStat => ({
 });
 
 export const mapPositionChangeStat = (row: any): PositionChangeStat => ({
-  rounds: Array.isArray(row?.rounds)
-    ? row.rounds.map((r: any) => ({
-        id: Number(r.id),
-        name: String(r.name),
-      }))
-    : [],
-  users: Array.isArray(row?.users)
-    ? row.users.map((u: any) => ({
-        id: Number(u.id),
-        name: String(u.name),
-        icon: u.icon ? String(u.icon) : '',
-        color_index: Number(u.color_index),
-        history: Array.isArray(u.history)
-          ? u.history.map((h: any) => ({
-              position: Number(h.position),
-              change: Number(h.change),
-            }))
-          : [],
-      }))
-    : [],
+  rounds: Array.isArray(row?.rounds) ? row.rounds.map((r: any) => ({
+    id: Number(r.id),
+    name: String(r.name),
+  })) : [],
+  users: Array.isArray(row?.users) ? row.users.map((u: any) => ({
+    id: Number(u.id),
+    name: String(u.name),
+    icon: u.icon ? String(u.icon) : '',
+    color_index: Number(u.color_index),
+    history: Array.isArray(u.history) ? u.history.map((h: any) => ({
+      position: Number(h.position),
+      change: Number(h.change),
+    })) : [],
+  })) : [],
   valid: Boolean(row?.valid),
-  stats: row?.stats
-    ? {
-        biggestClimber: {
-          name: String(row.stats.biggestClimber?.name || ''),
-          change: Number(row.stats.biggestClimber?.change || 0),
-          round: String(row.stats.biggestClimber?.round || ''),
-        },
-        biggestFaller: {
-          name: String(row.stats.biggestFaller?.name || ''),
-          change: Number(row.stats.biggestFaller?.change || 0),
-          round: String(row.stats.biggestFaller?.round || ''),
-        },
-      }
-    : {
-        biggestClimber: { name: '', change: 0, round: '' },
-        biggestFaller: { name: '', change: 0, round: '' },
-      },
+  stats: row?.stats ? {
+    biggestClimber: {
+      name: String(row.stats.biggestClimber?.name || ''),
+      change: Number(row.stats.biggestClimber?.change || 0),
+      round: String(row.stats.biggestClimber?.round || ''),
+    },
+    biggestFaller: {
+      name: String(row.stats.biggestFaller?.name || ''),
+      change: Number(row.stats.biggestFaller?.change || 0),
+      round: String(row.stats.biggestFaller?.round || ''),
+    },
+  } : { biggestClimber: { name: '', change: 0, round: '' }, biggestFaller: { name: '', change: 0, round: '' } },
 });
 
 export const mapReliabilityStat = (row: any): ReliabilityStat => ({
@@ -131,3 +120,6 @@ export const mapReliabilityStat = (row: any): ReliabilityStat => ({
   rounds_above: Number(row.rounds_above),
   pct: Number(row.pct),
 });
+`;
+
+fs.writeFileSync('src/features/standings/server/mappers/performance.mapper.ts', content);

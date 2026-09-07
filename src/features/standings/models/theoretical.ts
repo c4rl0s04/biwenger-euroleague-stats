@@ -31,7 +31,7 @@ export interface RivalryMatrixStat {
   };
 }
 export interface HeatmapStat {
-  rounds: { id: number; name: string }[];
+  rounds: { id: number; name: string; shortName?: string }[];
   users: {
     id: number;
     name: string;

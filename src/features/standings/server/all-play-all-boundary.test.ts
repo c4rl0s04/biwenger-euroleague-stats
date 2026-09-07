@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db/index', () => ({ db: {}, pgClient: {} }));
-vi.mock('@/features/standings/server', () => ({
+vi.mock('@/features/standings/server/services/all-play-all.service', () => ({
   fetchAllPlayAllStats: async () => [
     {
       user_id: '1',
@@ -38,6 +38,6 @@ it('keeps typed models independent, queries guarded, and the mixed route only pa
   );
   const route = read('src/app/api/standings/advanced/route.ts');
   expect(route).toContain("from '@/features/standings/server'");
-  expect(route).toContain("from '@/lib/services'");
+  expect(route).not.toContain("from '@/lib/services'");
   expect(route).not.toMatch(/export const (dynamic|revalidate)/);
 });

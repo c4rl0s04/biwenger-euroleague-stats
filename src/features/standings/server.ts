@@ -2,7 +2,6 @@ import 'server-only';
 
 export {
   getFullStandings,
-  getSimpleStandings,
   fetchValueRanking,
   getLeagueOverview,
   STANDINGS_ACCESS_POLICY,
@@ -51,3 +50,56 @@ export {
   fetchHeatmapStats,
   fetchTheoreticalStandings,
 } from './server/services/theoretical.service';
+
+// Legacy adapters
+export {
+  getVolatilityStats,
+  getPlacementStats,
+  getLeagueComparisonStats,
+  getEfficiencyStats,
+  getStreakStats,
+  getBottlerStats,
+  getHeartbreakerStats,
+  getNoGloryStats,
+  getJinxStats,
+} from './server/queries/performance.query';
+
+export {
+  getHeatCheckStats,
+  getHunterStats,
+  getRollingAverageStats,
+  getFloorCeilingStats,
+  getReliabilityStats,
+  getPointDistributionStats,
+  getAllPlayAllStats,
+  getDominanceStats,
+  getTheoreticalGapStats,
+  getHeatmapStats,
+  getPositionChangesStats,
+  getRivalryMatrixStats,
+  getCaptainStats,
+  getDetailedCaptainStats,
+} from './server/queries/advanced.query';
+
+export {
+  getInitialSquadActualPerformance,
+  getBestInitialSquadPlayer,
+  getInitialSquadRetainedPoints,
+  getInitialSquadRetainedBreakdown,
+  getInitialSquadRegret,
+  getInitialSquadLoyalty,
+  getInitialSquadPotentialAdvanced,
+  getInitialSquadsDetailed,
+} from './server/queries/draft.query';
+
+export {
+  getExtendedStandings,
+  getRoundWinners,
+  getLeagueTotals,
+  getPointsProgression,
+  getValueRanking,
+  getWinCounts,
+  getSimpleStandings,
+  getLeaderComparison,
+  getLeagueAveragePoints,
+} from './server/queries/base.query';

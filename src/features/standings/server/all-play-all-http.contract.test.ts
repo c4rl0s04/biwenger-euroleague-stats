@@ -22,7 +22,7 @@ const legacy = vi.hoisted(() => ({
   fetchRivalryMatrixStats: vi.fn(),
 }));
 vi.mock('@/features/standings/server', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal<typeof import('@/features/standings/server')>();
   return {
     ...actual,
     ...legacy,

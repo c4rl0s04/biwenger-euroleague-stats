@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import {
   mapVolatilityStat,
   mapHeatCheckStat,
@@ -10,42 +11,42 @@ import {
   mapPositionChangeStat,
   mapReliabilityStat,
 } from '../mappers/performance.mapper';
+import { getVolatilityStats } from '../queries/performance.query';
 import {
-  queryVolatilityStats,
-  queryHeatCheckStats,
-  queryHunterStats,
-  queryRollingAverageStats,
-  queryFloorCeilingStats,
-  queryPointDistributionStats,
-  queryDominanceStats,
-  queryPositionChangesStats,
-  queryReliabilityStats,
-} from '../queries/performance.query';
+  getHeatCheckStats,
+  getHunterStats,
+  getRollingAverageStats,
+  getFloorCeilingStats,
+  getPointDistributionStats,
+  getDominanceStats,
+  getPositionChangesStats,
+  getReliabilityStats,
+} from '../queries/advanced.query';
 
-export async function fetchVolatilityStats() {
-  return (await queryVolatilityStats()).map(mapVolatilityStat);
-}
-export async function fetchHeatCheckStats() {
-  return (await queryHeatCheckStats()).map(mapHeatCheckStat);
-}
-export async function fetchHunterStats() {
-  return (await queryHunterStats()).map(mapHunterStat);
-}
-export async function fetchRollingAverageStats() {
-  return (await queryRollingAverageStats()).map(mapRollingAverageStat);
-}
-export async function fetchFloorCeilingStats() {
-  return (await queryFloorCeilingStats()).map(mapFloorCeilingStat);
-}
-export async function fetchPointDistributionStats() {
-  return (await queryPointDistributionStats()).map(mapPointDistributionStat);
-}
-export async function fetchDominanceStats() {
-  return (await queryDominanceStats()).map(mapDominanceStat);
-}
-export async function fetchPositionChangesStats() {
-  return mapPositionChangeStat(await queryPositionChangesStats());
-}
-export async function fetchReliabilityStats() {
-  return (await queryReliabilityStats()).map(mapReliabilityStat);
-}
+export const fetchVolatilityStats = cache(async () => {
+  return (await getVolatilityStats()).map(mapVolatilityStat);
+});
+export const fetchHeatCheckStats = cache(async () => {
+  return (await getHeatCheckStats()).map(mapHeatCheckStat);
+});
+export const fetchHunterStats = cache(async () => {
+  return (await getHunterStats()).map(mapHunterStat);
+});
+export const fetchRollingAverageStats = cache(async () => {
+  return (await getRollingAverageStats()).map(mapRollingAverageStat);
+});
+export const fetchFloorCeilingStats = cache(async () => {
+  return (await getFloorCeilingStats()).map(mapFloorCeilingStat);
+});
+export const fetchPointDistributionStats = cache(async () => {
+  return (await getPointDistributionStats()).map(mapPointDistributionStat);
+});
+export const fetchDominanceStats = cache(async () => {
+  return (await getDominanceStats()).map(mapDominanceStat);
+});
+export const fetchPositionChangesStats = cache(async () => {
+  return mapPositionChangeStat(await getPositionChangesStats());
+});
+export const fetchReliabilityStats = cache(async () => {
+  return (await getReliabilityStats()).map(mapReliabilityStat);
+});
