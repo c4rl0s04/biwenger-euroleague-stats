@@ -1,4 +1,4 @@
-import { fetchEfficiencyStats } from '@/lib/services';
+import { fetchEfficiencyStats } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

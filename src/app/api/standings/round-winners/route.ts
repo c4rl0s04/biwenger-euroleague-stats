@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { fetchRoundWinners } from '@/lib/services';
+import { fetchRoundWinners } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

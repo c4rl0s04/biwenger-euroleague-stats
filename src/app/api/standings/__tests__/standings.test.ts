@@ -1,64 +1,48 @@
+vi.mock('server-only', () => ({}));
+
 /**
  * Standings API Route Tests
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
-vi.mock('@/features/standings/server', async () => {
-  const legacy = await import('@/lib/services');
-  const { parseStandingsSearchParams } =
-    await import('@/features/standings/validation/standings-input');
+vi.mock('@/features/standings/server', async (importOriginal) => {
+  const actual = await importOriginal();
   return {
-    getFullStandings: legacy.getFullStandings,
-    getLeagueOverview: legacy.getLeagueOverview,
-    fetchValueRanking: legacy.fetchValueRanking,
-    parseStandingsSearchParams,
-    STANDINGS_CACHE_POLICY: {
-      fullHttpSeconds: 60,
-      overviewHttpSeconds: 900,
-      valueHttpSeconds: 900,
-    },
+    ...actual,
+    getFullStandings: vi.fn(),
+    getLeagueOverview: vi.fn(),
+    fetchValueRanking: vi.fn(),
+    fetchRoundWinners: vi.fn(),
+    fetchPointsProgression: vi.fn(),
+    fetchStreakStats: vi.fn(),
+    fetchVolatilityStats: vi.fn(),
+    fetchEfficiencyStats: vi.fn(),
+    fetchPlacementStats: vi.fn(),
+    fetchBottlerStats: vi.fn(),
+    fetchHeartbreakerStats: vi.fn(),
+    fetchNoGloryStats: vi.fn(),
+    fetchJinxStats: vi.fn(),
+    fetchDetailedCaptainStats: vi.fn(),
+    fetchHeatCheckStats: vi.fn(),
+    fetchHunterStats: vi.fn(),
+    fetchRollingAverageStats: vi.fn(),
+    fetchFloorCeilingStats: vi.fn(),
+    fetchPointDistributionStats: vi.fn(),
+    fetchDominanceStats: vi.fn(),
+    fetchPositionChangesStats: vi.fn(),
+    fetchReliabilityStats: vi.fn(),
+    fetchTheoreticalGapStats: vi.fn(),
+    fetchLeagueComparisonStats: vi.fn(),
+    fetchRivalryMatrixStats: vi.fn(),
+    fetchHeatmapStats: vi.fn(),
+    fetchInitialSquadAnalytics: vi.fn(),
+    fetchInitialSquadStats: vi.fn(),
+    fetchTheoreticalStandings: vi.fn(),
   };
 });
 
-vi.mock('@/lib/services', () => ({
-  getFullStandings: vi.fn(),
-  fetchRoundWinners: vi.fn(),
-  fetchValueRanking: vi.fn(),
-  fetchStreakStats: vi.fn(),
-  fetchVolatilityStats: vi.fn(),
-  fetchEfficiencyStats: vi.fn(),
-  fetchPlacementStats: vi.fn(),
-  fetchBottlerStats: vi.fn(),
-  fetchHeartbreakerStats: vi.fn(),
-  fetchNoGloryStats: vi.fn(),
-  fetchJinxStats: vi.fn(),
-  fetchLeagueComparisonStats: vi.fn(),
-  fetchPointsProgression: vi.fn(),
-  fetchInitialSquadStats: vi.fn(),
-  fetchInitialSquadAnalytics: vi.fn(),
-  fetchHeatCheckStats: vi.fn(),
-  fetchHunterStats: vi.fn(),
-  fetchRollingAverageStats: vi.fn(),
-  fetchFloorCeilingStats: vi.fn(),
-  fetchPointDistributionStats: vi.fn(),
-  fetchAllPlayAllStats: vi.fn(),
-  fetchDominanceStats: vi.fn(),
-  fetchTheoreticalGapStats: vi.fn(),
-  fetchHeatmapStats: vi.fn(),
-  fetchPositionChangesStats: vi.fn(),
-  fetchReliabilityStats: vi.fn(),
-  fetchRivalryMatrixStats: vi.fn(),
-  fetchDetailedCaptainStats: vi.fn(),
-  getLeagueOverview: vi.fn(),
-}));
-
-vi.mock('@/lib/services/app/standingsService', () => ({
-  fetchTheoreticalStandings: vi.fn(),
-}));
-
-import * as services from '@/lib/services';
-import { fetchTheoreticalStandings } from '@/lib/services/app/standingsService';
+import * as services from '@/features/standings/server';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
@@ -148,7 +132,17 @@ describe('GET /api/standings/round-winners', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with round winners', async () => {
-    vi.mocked(services.fetchRoundWinners).mockResolvedValue([{ user: 'Alice', wins: 5 }]);
+    vi.mocked(services.fetchRoundWinners).mockResolvedValue([
+      {
+        round_id: 1,
+        round_name: 'J1',
+        user_id: 1,
+        name: 'Alice',
+        icon: 'a.png',
+        color_index: 0,
+        points: 100,
+      },
+    ]);
 
     const { GET } = await import('@/app/api/standings/round-winners/route');
     const request = makeRequest('http://localhost/api/standings/round-winners');
@@ -323,7 +317,7 @@ describe('standings route contract coverage', () => {
 
   it('covers captains and theoretical standings route envelopes', async () => {
     vi.mocked(services.fetchDetailedCaptainStats).mockResolvedValue([{ userId: '1' }] as any);
-    vi.mocked(fetchTheoreticalStandings).mockResolvedValue([{ userId: '2' }] as any);
+    vi.mocked(services.fetchTheoreticalStandings).mockResolvedValue([{ userId: '2' }] as any);
 
     const captains = await import('@/app/api/standings/captains/route');
     const theoretical = await import('@/app/api/standings/theoretical/route');

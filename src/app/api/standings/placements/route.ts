@@ -1,4 +1,4 @@
-import { fetchPlacementStats } from '@/lib/services';
+import { fetchPlacementStats } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

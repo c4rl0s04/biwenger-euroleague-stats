@@ -1,4 +1,4 @@
-import { fetchStreakStats } from '@/lib/services';
+import { fetchStreakStats } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

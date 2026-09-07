@@ -1,5 +1,5 @@
 import { db, pgClient } from '../../index';
-import { resolveReadSeasonId } from '../../season-context';
+import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface VolatilityStat {
   user_id: number;

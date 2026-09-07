@@ -1,4 +1,4 @@
-import { fetchNoGloryStats } from '@/lib/services';
+import { fetchNoGloryStats } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

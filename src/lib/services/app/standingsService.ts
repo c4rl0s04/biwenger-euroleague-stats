@@ -1,280 +1,81 @@
 import 'server-only';
-import { getUserPerformanceHistoryService } from '../core/roundsService';
-import { getAllUsers } from '../../db';
-
-/**
- * Standings Service
- * Business logic layer for standings-related operations
- *
- * @fileoverview Aggregates and transforms standings data from multiple queries
- */
-
+import {
+  getFullStandings,
+  getLeagueOverview,
+  fetchValueRanking,
+  fetchRoundWinners,
+  fetchPointsProgression,
+  fetchStreakStats,
+  fetchPlacementStats,
+  fetchBottlerStats,
+  fetchHeartbreakerStats,
+  fetchNoGloryStats,
+  fetchJinxStats,
+  fetchEfficiencyStats,
+  fetchDetailedCaptainStats,
+  fetchVolatilityStats,
+  fetchHeatCheckStats,
+  fetchHunterStats,
+  fetchRollingAverageStats,
+  fetchFloorCeilingStats,
+  fetchPointDistributionStats,
+  fetchDominanceStats,
+  fetchPositionChangesStats,
+  fetchReliabilityStats,
+  fetchTheoreticalGapStats,
+  fetchLeagueComparisonStats,
+  fetchRivalryMatrixStats,
+  fetchHeatmapStats,
+  fetchTheoreticalStandings,
+  fetchInitialSquadAnalytics,
+  fetchInitialSquadStats,
+} from '@/features/standings/server';
 import {
   getExtendedStandings,
-  getRoundWinners,
-  getLeagueTotals,
-  getPointsProgression,
-  getValueRanking,
-  getWinCounts,
+  getSimpleStandings,
+  getLeaderComparison,
+  getLeagueAveragePoints,
 } from '../../db/queries/competition/standings';
-import {
-  getStreakStats,
-  getVolatilityStats,
-  getEfficiencyStats,
-  getPlacementStats,
-  getBottlerStats,
-  getHeartbreakerStats,
-  getNoGloryStats,
-  getJinxStats,
-  getInitialSquadActualPerformance,
-  getLeagueComparisonStats,
-  getHeatCheckStats,
-  getHunterStats,
-  getRollingAverageStats,
-  getFloorCeilingStats,
-  getPointDistributionStats,
-  getAllPlayAllStats,
-  getDominanceStats,
-  getTheoreticalGapStats,
-  getHeatmapStats,
-  getPositionChangesStats,
-  getReliabilityStats,
-  getRivalryMatrixStats,
-  getBestInitialSquadPlayer,
-  getInitialSquadRetainedPoints,
-  getInitialSquadRetainedBreakdown,
-  getInitialSquadRegret,
-  getInitialSquadLoyalty,
-  getInitialSquadPotentialAdvanced,
-  getInitialSquadsDetailed,
-  getDetailedCaptainStats,
-} from '../../db';
+import { getAllPlayAllStats } from '../../db/queries/analytics/advanced_stats';
+import { getWinCounts } from '../../db/queries/competition/standings';
+
+// Re-export standard APIs
+export {
+  getFullStandings,
+  getLeagueOverview,
+  fetchValueRanking,
+  fetchRoundWinners,
+  fetchPointsProgression,
+  fetchStreakStats,
+  fetchPlacementStats,
+  fetchBottlerStats,
+  fetchHeartbreakerStats,
+  fetchNoGloryStats,
+  fetchJinxStats,
+  fetchEfficiencyStats,
+  fetchDetailedCaptainStats,
+  fetchVolatilityStats,
+  fetchHeatCheckStats,
+  fetchHunterStats,
+  fetchRollingAverageStats,
+  fetchFloorCeilingStats,
+  fetchPointDistributionStats,
+  fetchDominanceStats,
+  fetchPositionChangesStats,
+  fetchReliabilityStats,
+  fetchTheoreticalGapStats,
+  fetchLeagueComparisonStats,
+  fetchRivalryMatrixStats,
+  fetchHeatmapStats,
+  fetchTheoreticalStandings,
+  fetchInitialSquadAnalytics,
+  fetchInitialSquadStats,
+  getAllPlayAllStats as fetchAllPlayAllStats,
+};
 
 export interface StandingsOptions {
   sortBy?: string;
   direction?: 'asc' | 'desc';
-}
-
-// ============ DIRECT WRAPPERS ============
-// These wrap query functions 1:1 for consistent service layer usage
-
-/**
- * Get full extended standings with detailed breakdown
- * @param options - Configuration options
- */
-export async function getFullStandings(options: StandingsOptions = {}) {
-  return await getExtendedStandings(options);
-}
-
-/**
- * Get overall league statistical overview
- */
-export async function getLeagueOverview() {
-  return await getLeagueTotals();
-}
-
-/**
- * Fetch users who have won the most rounds
- * @param limit
- */
-export async function fetchRoundWinners(limit: number = 15) {
-  return await getRoundWinners(limit);
-}
-
-/**
- * Fetch week-by-week points progression for graph
- * @param limit
- */
-export async function fetchPointsProgression(limit: number = 50) {
-  return await getPointsProgression(limit);
-}
-
-/**
- * Fetch ranking of teams by squad value/budget
- */
-export async function fetchValueRanking() {
-  return await getValueRanking();
-}
-
-/** Hot and Cold streaks */
-export async function fetchStreakStats() {
-  return await getStreakStats();
-}
-
-/** Volatility (Standard Deviation) stats */
-export async function fetchVolatilityStats() {
-  return await getVolatilityStats();
-}
-
-/** Efficiency ratings */
-export async function fetchEfficiencyStats() {
-  return await getEfficiencyStats();
-}
-
-/** Average placement stats */
-export async function fetchPlacementStats() {
-  return await getPlacementStats();
-}
-
-/** Users who lose big leads */
-export async function fetchBottlerStats() {
-  return await getBottlerStats();
-}
-
-/** Users who lose by small margins */
-export async function fetchHeartbreakerStats() {
-  return await getHeartbreakerStats();
-}
-
-/** High scores that didn't win rounds */
-export async function fetchNoGloryStats() {
-  return await getNoGloryStats();
-}
-
-/** Users who score low but win against low scorers */
-export async function fetchJinxStats() {
-  return await getJinxStats();
-}
-
-/** Performance of original draft squads (ROI) */
-export async function fetchInitialSquadAnalytics() {
-  return await getInitialSquadActualPerformance();
-}
-
-/** Stats A & B & Phase II: Best draft, retained points, regret, loyalty, and potential */
-export async function fetchInitialSquadStats() {
-  const [
-    bestDraftPerUser,
-    retainedRanking,
-    retainedBreakdown,
-    regretRanking,
-    loyaltyRanking,
-    potentialRanking,
-    detailedSquads,
-  ] = await Promise.all([
-    getBestInitialSquadPlayer(),
-    getInitialSquadRetainedPoints(),
-    getInitialSquadRetainedBreakdown(),
-    getInitialSquadRegret(),
-    getInitialSquadLoyalty(),
-    getInitialSquadPotentialAdvanced(),
-    getInitialSquadsDetailed(),
-  ]);
-  return {
-    bestDraftPerUser,
-    retainedRanking,
-    retainedBreakdown,
-    regretRanking,
-    loyaltyRanking,
-    potentialRanking,
-    detailedSquads: detailedSquads || [],
-  };
-}
-
-/**
- * Compare users against league averages
- */
-export async function fetchLeagueComparisonStats() {
-  return await getLeagueComparisonStats();
-}
-
-// ============ ADVANCED STATS WRAPPERS ============
-
-/** Heat Check (Overperformance) stats */
-export async function fetchHeatCheckStats() {
-  return await getHeatCheckStats();
-}
-
-/** Hunter (Chasing leader) stats */
-export async function fetchHunterStats() {
-  return await getHunterStats();
-}
-
-/** Rolling average points stats */
-export async function fetchRollingAverageStats() {
-  return await getRollingAverageStats();
-}
-
-/** Floor vs Ceiling analysis */
-export async function fetchFloorCeilingStats() {
-  return await getFloorCeilingStats();
-}
-
-/** Point distribution (Standard Deviation etc.) */
-export async function fetchPointDistributionStats() {
-  return await getPointDistributionStats();
-}
-
-/** All-Play-All league table */
-export async function fetchAllPlayAllStats() {
-  return await getAllPlayAllStats();
-}
-
-/** Dominance metrics */
-export async function fetchDominanceStats() {
-  return await getDominanceStats();
-}
-
-/** Theoretical max points analysis */
-export async function fetchTheoreticalGapStats() {
-  return await getTheoreticalGapStats();
-}
-
-/** Heatmap grid data */
-export async function fetchHeatmapStats() {
-  return await getHeatmapStats();
-}
-
-/** Position change volatility */
-export async function fetchPositionChangesStats() {
-  return await getPositionChangesStats();
-}
-
-/** Consistency ratings */
-export async function fetchReliabilityStats() {
-  return await getReliabilityStats();
-}
-
-/** Head-to-head rivalry matrix */
-export async function fetchRivalryMatrixStats() {
-  return await getRivalryMatrixStats();
-}
-
-/** Detailed captain performance stats */
-export async function fetchDetailedCaptainStats() {
-  return await getDetailedCaptainStats();
-}
-
-/**
- * Fetch theoretical standings (100% efficiency)
- * Calculates the sum of ideal points for all users across all rounds
- */
-export async function fetchTheoreticalStandings() {
-  const users = await getAllUsers();
-
-  const theoreticalData = await Promise.all(
-    users.map(async (user) => {
-      const history = await getUserPerformanceHistoryService(user.id);
-      const totalActual = history.reduce((sum, r) => sum + r.actual_points, 0);
-      const totalIdeal = history.reduce((sum, r) => sum + (r.ideal_points || 0), 0);
-      const roundsPlayed = history.length;
-
-      return {
-        user_id: user.id,
-        name: user.name,
-        icon: user.icon,
-        color_index: user.color_index,
-        total_actual: totalActual,
-        total_ideal: totalIdeal,
-        gap: totalIdeal - totalActual,
-        efficiency: totalIdeal > 0 ? (totalActual / totalIdeal) * 100 : 0,
-        rounds_played: roundsPlayed,
-      };
-    })
-  );
-
-  // Sort by total_ideal descending
-  return theoreticalData.sort((a, b) => b.total_ideal - a.total_ideal);
 }
 
 export interface StandingsPageOptions {
@@ -282,23 +83,16 @@ export interface StandingsPageOptions {
   progressionLimit?: number;
 }
 
-// ============ AGGREGATED FUNCTIONS ============
-
-/**
- * Get standings page data bundle
- * @param options - Configuration options
- * @returns Bundled standings page data
- */
 export async function getStandingsPageData(options: StandingsPageOptions = {}) {
   const { roundsLimit = 15, progressionLimit = 10 } = options;
 
   const [standings, leagueTotals, roundWinners, pointsProgression, valueRanking, winCounts] =
     await Promise.all([
       getExtendedStandings(),
-      getLeagueTotals(),
-      getRoundWinners(roundsLimit),
-      getPointsProgression(progressionLimit),
-      getValueRanking(),
+      getLeagueOverview(),
+      fetchRoundWinners(roundsLimit),
+      fetchPointsProgression(progressionLimit),
+      fetchValueRanking(),
       getWinCounts(),
     ]);
 
@@ -312,11 +106,6 @@ export async function getStandingsPageData(options: StandingsPageOptions = {}) {
   };
 }
 
-/**
- * Get user's position and gap to leader
- * @param userId - User ID to check
- * @returns Position data with gaps
- */
 export async function getUserPositionData(userId: string | number) {
   const standings = await getExtendedStandings();
   const userIndex = standings.findIndex((u: any) => String(u.user_id) === String(userId));

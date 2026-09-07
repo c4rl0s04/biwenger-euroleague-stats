@@ -1,4 +1,4 @@
-import { fetchInitialSquadAnalytics } from '@/lib/services';
+import { fetchInitialSquadAnalytics } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

@@ -1,4 +1,4 @@
-import { fetchLeagueComparisonStats } from '@/lib/services';
+import { fetchLeagueComparisonStats } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

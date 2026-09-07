@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { fetchDetailedCaptainStats } from '@/lib/services';
+import { fetchDetailedCaptainStats } from '@/features/standings/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
