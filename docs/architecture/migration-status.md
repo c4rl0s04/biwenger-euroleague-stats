@@ -419,3 +419,13 @@ and Teams regression rerun passed 63 tests. Build warnings were limited to basel
 missing provider configuration; no production environment was loaded. Production
 dependency audit reported zero findings. Presentation is unchanged; CI browser
 verification and safe production HTTP/log checks remain release gates.
+
+Release note: `d12456ea` was pushed after the full verification passed, but an
+additional committed-range whitespace check detected inherited trailing spaces
+inside extracted SQL templates. The coordinator's command sequence incorrectly
+continued after that nonzero check. A scoped follow-up removes only trailing SQL
+whitespace in four new query files; `git diff --ignore-space-at-eol --exit-code`
+confirms no other query change. The committed-range check is now explicitly part
+of the final release review. SQL templates were byte-identical at extraction;
+the follow-up changes whitespace only. Deployment/CI and smoke verification must
+target the final follow-up SHA, not the first push.

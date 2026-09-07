@@ -36,7 +36,7 @@ export async function queryFullStandings(options: StandingsOptions = {}) {
 
   const result = await db.execute(sql`
     WITH UserTotals AS (
-      SELECT 
+      SELECT
         user_id,
         SUM(points) as total_points,
         COUNT(*) as rounds_played,
@@ -49,11 +49,11 @@ export async function queryFullStandings(options: StandingsOptions = {}) {
       GROUP BY user_id
     ),
     RoundWins AS (
-      SELECT 
+      SELECT
         user_id,
         COUNT(*) as wins
       FROM (
-        SELECT 
+        SELECT
           user_id,
           points,
           RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as position
@@ -64,7 +64,7 @@ export async function queryFullStandings(options: StandingsOptions = {}) {
       WHERE position = 1
       GROUP BY user_id
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       COALESCE(us.name, u.name) as name,
       COALESCE(us.icon, u.icon) as icon,
@@ -83,8 +83,8 @@ export async function queryFullStandings(options: StandingsOptions = {}) {
     LEFT JOIN UserTotals ut ON u.id = ut.user_id
     LEFT JOIN RoundWins rw ON u.id = rw.user_id
     LEFT JOIN (
-      SELECT 
-        owner_id, 
+      SELECT
+        owner_id,
         SUM(price) as team_value,
         SUM(price_increment) as price_trend
       FROM ${playerSeasons}
@@ -103,7 +103,7 @@ export async function querySimpleStandings() {
   const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     WITH UserTotals AS (
-      SELECT 
+      SELECT
         user_id,
         SUM(points) as total_points
       FROM ${userRounds}
@@ -111,7 +111,7 @@ export async function querySimpleStandings() {
         AND participated = TRUE
       GROUP BY user_id
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       COALESCE(us.name, u.name) as name,
       COALESCE(us.icon, u.icon) as icon,
@@ -124,8 +124,8 @@ export async function querySimpleStandings() {
     JOIN ${users} u ON u.id = us.user_id
     LEFT JOIN UserTotals ut ON u.id = ut.user_id
     LEFT JOIN (
-      SELECT 
-        owner_id, 
+      SELECT
+        owner_id,
         SUM(price) as team_value,
         SUM(price_increment) as price_trend
       FROM ${playerSeasons}
@@ -143,7 +143,7 @@ export async function querySimpleStandings() {
 export async function queryValueRanking() {
   const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       u.id as user_id,
       COALESCE(us.name, u.name) as name,
       COALESCE(us.icon, u.icon) as icon,
@@ -175,7 +175,7 @@ export async function queryLeagueOverview() {
       GROUP BY round_id
       HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
     )
-    SELECT 
+    SELECT
       SUM(points)::int as total_points,
       COUNT(DISTINCT round_id)::int as total_rounds,
       (
@@ -194,7 +194,7 @@ export async function queryLeagueOverview() {
 
   const valueStats = (
     await db.execute(sql`
-    SELECT 
+    SELECT
       SUM(team_value)::bigint as total_league_value,
       MAX(team_value)::bigint as max_team_value,
       MIN(team_value)::bigint as min_team_value
@@ -217,7 +217,7 @@ export async function queryLeagueOverview() {
 
   const mostValuable = (
     await db.execute(sql`
-    SELECT 
+    SELECT
       COALESCE(us.name, u.name) as name,
       COALESCE(us.icon, u.icon) as icon,
       COALESCE(us.color_index, u.color_index, 0) as color_index,
@@ -242,7 +242,7 @@ export async function queryLeagueOverview() {
       GROUP BY round_id
       HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
     )
-    SELECT 
+    SELECT
       ur.user_id,
       COALESCE(us.name, u.name) as name,
       COALESCE(us.icon, u.icon) as icon,
@@ -271,7 +271,7 @@ export async function queryLeagueOverview() {
         HAVING COUNT(*) = COUNT(CASE WHEN status = 'finished' THEN 1 END)
       ),
       RoundWinners AS (
-        SELECT 
+        SELECT
           round_id,
           user_id,
           RANK() OVER (PARTITION BY round_id ORDER BY points DESC) as pos
@@ -288,33 +288,33 @@ export async function queryLeagueOverview() {
         FROM RoundWinners ur
         JOIN ${users} u ON ur.user_id = u.id
         JOIN ${userSeasons} us ON us.user_id = u.id AND us.season_id = ${seasonId}
-        WHERE ur.pos = 1 
+        WHERE ur.pos = 1
         AND ur.round_id = (SELECT rid FROM LatestCompletedRound)
         AND COALESCE(us.status, 'active') = 'active'
         LIMIT 1
       ),
       WinningRounds AS (
-        SELECT 
+        SELECT
           r.round_id,
-          CASE 
+          CASE
             WHEN EXISTS (
-              SELECT 1 FROM RoundWinners rw 
-              WHERE rw.round_id = r.round_id 
+              SELECT 1 FROM RoundWinners rw
+              WHERE rw.round_id = r.round_id
               AND rw.user_id = (SELECT user_id FROM TargetUser)
               AND rw.pos = 1
-            ) THEN 1 
-            ELSE 0 
+            ) THEN 1
+            ELSE 0
           END as is_win
         FROM CompletedRounds r
       ),
       StreakCalc AS (
-        SELECT 
+        SELECT
           round_id,
           is_win,
           SUM(CASE WHEN is_win = 0 THEN 1 ELSE 0 END) OVER (ORDER BY round_id DESC) as grp
         FROM WinningRounds
       )
-      SELECT 
+      SELECT
         COUNT(*)::int as streak
       FROM StreakCalc
       WHERE grp = 0 AND is_win = 1

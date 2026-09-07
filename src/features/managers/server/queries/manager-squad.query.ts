@@ -8,11 +8,11 @@ const pgClient = client as Pool;
 export async function readManagerSquad(userId: number | string) {
   const seasonId = await resolveReadSeasonId();
   const squadQuery = `
-    SELECT 
-      p.id, 
-      p.name, 
-      p.position, 
-      t.name as team, 
+    SELECT
+      p.id,
+      p.name,
+      p.position,
+      t.name as team,
       t.img as team_img,
       t.short_name as team_short_name,
       COALESCE(ps.price, p.price) AS price,

@@ -33,14 +33,14 @@ export async function readManagerSeasonStats(
 
   const statsQuery = `
     WITH UserRounds AS (
-      SELECT 
+      SELECT
         user_id,
         points,
         participated
       FROM user_rounds
       WHERE season_id = $2 AND user_id = $1 AND participated = TRUE
     )
-    SELECT 
+    SELECT
       COALESCE(SUM(points), 0) as total_points,
       COALESCE(MAX(points), 0) as best_round,
       COALESCE(MIN(points), 0) as worst_round,
@@ -54,14 +54,14 @@ export async function readManagerSeasonStats(
 
   const positionsQuery = `
     WITH RoundPositions AS (
-      SELECT 
+      SELECT
         ur.round_id,
         ur.user_id,
         RANK() OVER (PARTITION BY ur.round_id ORDER BY ur.points DESC) as position
       FROM user_rounds ur
       WHERE ur.season_id = $2 AND ur.participated = TRUE
     )
-    SELECT 
+    SELECT
       MIN(position) as best_position,
       MAX(position) as worst_position,
       ROUND(AVG(position), 1) as average_position,
@@ -98,7 +98,7 @@ export async function readManagerSeasonStats(
 
     // Get last 3 transfers
     const lastTransfersQuery = `
-      SELECT 
+      SELECT
         f.player_id,
         p.name as player_name,
         f.precio as price,

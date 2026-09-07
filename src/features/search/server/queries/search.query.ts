@@ -31,9 +31,9 @@ export async function findSearchRecords(query: string, limit: number): Promise<S
       LEFT JOIN official_player_mappings opm
         ON opm.player_id=p.id AND opm.season_id=ps.season_id
        AND opm.provider='euroleague_advanced' AND opm.status='matched'
-      WHERE p.name ILIKE $1 
+      WHERE p.name ILIKE $1
         AND ps.season_id = $2
-        AND p.name IS NOT NULL 
+        AND p.name IS NOT NULL
         AND COALESCE(opm.image_url,p.img) IS NOT NULL
         AND COALESCE(ps.team_id, p.team_id) IS NOT NULL
       ORDER BY COALESCE(ps.puntos, p.puntos) DESC
@@ -43,7 +43,7 @@ export async function findSearchRecords(query: string, limit: number): Promise<S
 
   // Search teams (distinct teams from players)
   const teamsQuery = `
-      SELECT 
+      SELECT
         t.id,
         t.name,
         COUNT(ps.player_id) as player_count
