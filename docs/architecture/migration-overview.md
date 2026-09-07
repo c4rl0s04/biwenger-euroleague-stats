@@ -43,8 +43,8 @@ previous release receipt, and combines three isolated implementation branches:
 - `refactor/standings-head-to-head`: virtual all-play-all records, including the existing
   `/api/standings/advanced?type=all-play-all` dispatch branch and 15-minute season cache.
 
-The combined implementation is locally validated; release evidence is recorded in
-the ledger. It does not move Manager Profile or Tournament screens,
+The combined implementation is released at `084bd9fe`; validation and deployment
+evidence is recorded in the ledger. It does not move Manager Profile or Tournament screens,
 rename APIs, change statistical formulas, or migrate every branch of the advanced
 Standings endpoint. Its purpose is to make the remaining Profile reads available
 through deliberate domain contracts, enabling a focused composition pass next.

@@ -28,9 +28,9 @@ For current coverage and remaining work, see the [migration overview](migration-
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |
 | Players                                                  | Integrated; manager adapter removed in the read-foundations release                |
 | Rounds                                                   | Calendar foundation implemented; historical results and analysis remain legacy     |
-| Managers                                                 | Base reads released; contributors validated; Profile/directory remain legacy       |
-| Standings                                                | Base reads released; head-to-head validated; analytics/screens remain              |
-| Tournaments                                              | Core/participation reads validated; analytics/screens remain                       |
+| Managers                                                 | Base/contributor reads released; Profile/directory remain legacy                   |
+| Standings                                                | Base/head-to-head reads released; remaining analytics/screens remain               |
+| Tournaments                                              | Core/participation reads released; analytics/screens remain                        |
 | Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                           |
 | Schedule                                                 | Map uses Matches; squad overlay remains legacy                                     |
 | Market public reads                                      | Legacy analytics; separate from private operations                                 |
@@ -523,3 +523,30 @@ Original-to-rebased commits: contributors `7503e4a` → `07037d56`; head-to-head
 release, production all-play-all returned seven rows; canonical response hashes
 were captured without storing payloads for post-release comparison. Production
 deployment and CI/browser verification remain pending at this validation checkpoint.
+
+## Manager Profile dependencies release receipt
+
+Released by clean fast-forward and ordinary main push at
+`084bd9fead90202544e8d592132b95c273ad0c2a`. Vercel deployment
+`dpl_2TkzmnuMpCsy3aaE7ttg1JPVqdmT` is READY at the same SHA and production alias
+(`advanced-euroleague-biwenger-stats-f0pv96jc9.vercel.app`). Main and all three
+implementation worktrees are clean; all feature commits are integrated.
+
+GitHub Actions run `34098109510` completed successfully: Test & Build, Format
+Check, and Browser contracts and visual regression all passed.
+
+Safe production probes preserved canonical hashes for all-play-all (seven rows),
+invalid advanced type, full standings and the manager statistics sample. Login
+and session endpoints returned 200. Manager Profile/contributors/tournaments,
+Tournament list/detail/fixtures and reference feature pages retained login
+redirects. Anonymous manager squad/round requests retained private/no-store 400
+responses. Deployment-scoped error/fatal and 5xx queries returned no entries;
+sampled responses and logs contained no sensitive-value patterns. No production
+mutations or authenticated production visual review were performed.
+
+The code batch is complete, but the overall migration is not. Next: Manager Profile
+page/service orchestration and desktop/mobile component ownership, with existing
+presentation preserved. The [overview](migration-overview.md) distinguishes the
+remaining regular domain work, temporary adapters and separate security gates.
+This documentation-only receipt will accompany the next batch rather than trigger
+an additional deployment solely to record the deployment ID.
