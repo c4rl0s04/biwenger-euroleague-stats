@@ -23,15 +23,15 @@ query adapters remain; these references are not a claim that all global code is 
 
 ## Read foundations and their remaining work
 
-| Domain      | Established boundary                                                                 | Still to migrate                                                    |
-| ----------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| Rounds      | Calendar and current/next/last-round policy                                          | History, results, analysis and screens                              |
-| Managers    | Complete Profile read flow, squad, season statistics, recent rounds and contributors | Directory and other manager analytics                               |
-| Standings   | Base rankings, league overview, value and virtual head-to-head                       | Performance/draft analytics, other advanced projections and screens |
-| Search      | Validated directory search, typed results and HTTP service                           | Shell/search interaction ownership during the shared UI pass        |
-| Tournaments | List/detail, standings, fixtures and manager participation                           | Tournament analytics, page composition and components               |
+| Domain      | Established boundary                                                                     | Still to migrate                                                            |
+| ----------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Rounds      | Calendar plus historical results, analysis, APIs and desktop/phone screens (local batch) | Separate Home/Dashboard last-round projections and legacy consumer adapters |
+| Managers    | Complete Profile read flow, squad, season statistics, recent rounds and contributors     | Directory and other manager analytics                                       |
+| Standings   | Base rankings, league overview, value and virtual head-to-head                           | Performance/draft analytics, other advanced projections and screens         |
+| Search      | Validated directory search, typed results and HTTP service                               | Shell/search interaction ownership during the shared UI pass                |
+| Tournaments | List/detail, standings, fixtures and manager participation                               | Tournament analytics, page composition and components                       |
 
-## Current milestone: Manager Profile
+## Previous deployed milestone: Manager Profile
 
 `refactor/manager-profile-completion` completes feature ownership for `/user/[id]`:
 desktop Profile, phone overview, and the five phone sections (`season`, `squad`,
@@ -53,11 +53,24 @@ imports the global service barrel. Reports distinguish **complete user-facing
 scopes**, **partial domain foundations**, and **not-yet-migrated areas**. A data-service
 extraction alone is not a completed feature.
 
+## Current batch: Rounds historical read experience
+
+`refactor/rounds-read-completion` moves `/rounds`, its four phone sections and all
+eight `/api/rounds/*` handlers into Rounds ownership. Query extraction, typed mapping,
+bounded list/results/history/formation services and desktop/phone composition belong
+to the same batch. This is the historical fantasy read experience, not private Lineup
+operations. The calendar foundation is unchanged. Local verification and release
+status are tracked in the ledger; this entry does not claim a production deployment.
+
+Legacy query/service adapters remain for other consumers. The old HeadToHeadCard is
+owned by the pending Compare experience, not an unfinished Rounds screen. Separate
+Home/Dashboard last-round projections and Predictions helpers remain outside this batch.
+
 ## Remaining regular migration work
 
 1. Migrate the manager directory and remaining manager analytics separately from the
    completed Profile read experience.
-2. Finish Rounds history/analysis, Standings performance and initial-squad/draft analytics,
+2. Finish Standings performance and initial-squad/draft analytics,
    and Tournament analytics/screens as bounded slices with formula characterization.
 3. Establish Predictions and Playoffs read ownership without merging their distinct scoring rules.
 4. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions

@@ -766,3 +766,80 @@ Profile CI blocker is closed. Existing local image/provider/stream-close warning
 and GitHub's Node 20 action deprecation notice were not suppressed or mixed into
 this scoped fix. This documentation-only receipt remains local on the task branch
 to accompany the next batch, avoiding another deployment solely to record its ID.
+
+## Rounds read completion — locally verified, not integrated
+
+`refactor/rounds-read-completion` starts from fetched clean `713d2a3b` and carries
+the unpublished Profile receipt `9d06ee0c`. The sibling worktree is
+`../biwengerstats-next-rounds-read-completion`. Baseline `npm run verify` passed:
+1,044 tests plus one existing skip, typecheck, graph (743 modules/17 entrypoints),
+lint (25 existing image warnings), production build, documentation, schema metadata
+(38 tables), Drizzle and diff checks. No application environment files were loaded.
+
+This batch targets the complete `/rounds` historical read experience and the four
+phone sections (`lineup`, `stats`, `history`, `comparison`), plus all eight existing
+`/api/rounds/*` handlers. Results, historical lineup analysis and formation statistics
+are distinct from the private Lineup feature/provider operations, which stay untouched.
+The calendar foundation remains unchanged. Unrelated last-round Home/Dashboard
+projections and Predictions calendar helpers remain explicit legacy consumers.
+
+Parallel tasks separate query/calculation extraction from services/API contracts;
+the coordinator owns screen composition, graph registration and browser evidence.
+The same SQL, season snapshots, 200ms desktop background loading, public explicit-ID
+fantasy read policy, HTTP headers, permissive input quirks and scoring rules are kept.
+The server models allowlist selected fields while preserving existing field names,
+numeric strings, nulls and partial-result behavior. No new cache is introduced.
+
+The shared active-manager directory SQL now has one narrow database infrastructure
+module and a Rounds query adapter. Importing the Managers barrel would introduce
+Rounds -> Managers -> Players -> Teams -> Matches -> Rounds; duplicating its query
+would also be wrong. Existing users.getAllUsers remains an adapter to the same SQL.
+This does not migrate manager-directory screens or unrelated analytics.
+
+Rounds owns its desktop components, phone screens and pure performance calculator.
+The historical HeadToHeadCard in the old Rounds folder is consumed only by Compare
+and remains there pending the Compare slice. The obsolete global performance hook
+has no remaining consumers and is removed. Pages stay thin and reuse feature services;
+desktop browser requests remain deliberate interactive reads, not Server Component REST.
+The two pages and eight handlers are registered with the graph checker; twelve exact
+existing page-auth infrastructure edges document the separate Accounts security gate.
+There are no new route-query exceptions or checker relaxations.
+
+Original desktop/phone browser references are captured against unchanged `9d06ee0c`
+application code in the retained browser-fix worktree. Initial test draft assumptions
+about fixture names and heading semantics were corrected from its rendered output;
+no application fix or browser guard suppression was needed. The final original
+desktop/iPhone run passed four comparisons (two repeats per viewport) without
+snapshot updates. All nine copied PNGs are byte-identical to those originals; the
+temporary baseline worktree is clean and its references retained in ignored test artifacts.
+
+Independent review compared 70 original/migrated service scenarios: serialized JSON,
+rejection type/message and ordered dependency calls matched. All 23 extracted SQL
+expressions match apart from whitespace, and the 23 moved desktop components have
+unchanged non-import emitted JavaScript. Typed allowlisting mappers preserve nulls,
+optional fields, nested ideal-lineup envelopes and numeric strings. Repeated page
+query inputs remain passed through at runtime; no new ID coercion was introduced.
+
+Post-change `npm run verify` passed: 1,151 tests and one existing skip, typecheck,
+architecture graph (764 modules/27 entrypoints), documentation, lint (the same 25
+image warnings), production build, schema metadata (38 tables, no database connection),
+Drizzle and diff checks. The added repeated-query regression also passes in the
+139-test focused Rounds/API/calculator/directory suite. React review retained existing
+loading order and interactions, with server-owned serializable screen models and no
+new client data layer.
+
+Final validation after the additional regression: full suite 1,152 passed plus one
+existing skip (169 passing files); focused suite 139 passed; typecheck and documentation
+reruns passed. The full disposable PostgreSQL/production-build browser run passed all
+81 cases across nine viewports, including the nine unchanged original Rounds images.
+The existing missing-provider notices and occasional destination-stream-close messages
+remain visible; browser/API error guards were not relaxed. A scoped formatting check
+found one new test file needing formatting; it was formatted and its rerun passed.
+
+This branch is local only: no merge, push, deployment, production database operation,
+schema, dependency, credential, fallback or environment change. The primary and original
+baseline checkouts are clean. The unpublished Profile receipt accompanies this batch.
+Linux Rounds screenshot references and authenticated real-data production visual review
+remain outstanding; Linux semantic coverage is enabled. Recommended next bounded read
+batch: Standings performance and initial-squad/draft analytics with formula tests,
+followed by its remaining screens. No other migration slice was started.

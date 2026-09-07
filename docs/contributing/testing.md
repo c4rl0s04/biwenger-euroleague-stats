@@ -113,6 +113,14 @@ The desktop overview captures the header/identity viewport; its five section ima
 cover the full domain content separately, avoiding unreliable offscreen SVG pixels
 in a full-document overview. Phone overview captures remain full-page.
 
+Rounds adds historical overview, court, history and comparison coverage, including
+all four phone section links and the three desktop lineup modes. Nine macOS images
+come from unchanged pre-migration application source at `9d06ee0c` (application
+equivalent to `713d2a3b`). Original desktop/iPhone comparisons pass twice without
+updating references. All nine viewports run semantic checks; Linux Rounds visual
+references remain pending and must not be initialized from migrated output. These
+tests use the existing synthetic league and unchanged browser/API error guards.
+
 Visual comparisons use committed snapshots for supported platforms. Intentional appearance changes
 require inspecting the output and updating baselines with `npm run test:e2e:update`; never update
 snapshots solely to hide a regression. Browser failures retain screenshots and traces in
