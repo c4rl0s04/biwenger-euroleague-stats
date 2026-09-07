@@ -93,3 +93,13 @@ Final status: READY FOR REVIEW
 
 - **Completion Status:** Fully extracted models, queries, SQL, mappers, services, architecture validation, and screens.
 - **Commit SHA:** 7e900200ee517c4069b3561f17e0b7689735f56b
+
+### Checkpoint A
+
+- **Completion Status:** Fixed UI imports for deleted components and restored original dynamic loading behavior. Removed Managers contributor exports from the Standings feature module to break the architecture cycle.
+- **Validation Results:**
+  - Typecheck: PASS
+  - Architecture (`npm run architecture:check`): PASS (792 modules, 44 protected entrypoints)
+  - Database-disabled production build (`SKIP_DB=true npm run build`): PASS
+- **Commit SHA:** 4edbfd8d06b1cc30d9c662ce7722be0a7650972b
+- **Note:** CHECKPOINT A — awaiting review; remaining second-review findings still open.
