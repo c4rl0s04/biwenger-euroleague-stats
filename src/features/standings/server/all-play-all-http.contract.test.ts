@@ -21,7 +21,13 @@ const legacy = vi.hoisted(() => ({
   fetchReliabilityStats: vi.fn(),
   fetchRivalryMatrixStats: vi.fn(),
 }));
-vi.mock('@/lib/services', () => legacy);
+vi.mock('@/features/standings/server', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    ...legacy,
+  };
+});
 vi.mock('./queries/all-play-all.query', () => query);
 import { clearCache } from '@/lib/utils/cache';
 import { GET } from '@/app/api/standings/advanced/route';

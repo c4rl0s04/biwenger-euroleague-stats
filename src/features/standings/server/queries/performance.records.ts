@@ -1,0 +1,9 @@
+export type VolatilityStatRecord = any;
+export type HeatCheckStatRecord = any;
+export type HunterStatRecord = any;
+export type RollingAverageStatRecord = any;
+export type FloorCeilingStatRecord = any;
+export type PointDistributionStatRecord = any;
+export type DominanceStatRecord = any;
+export type PositionChangeStatRecord = any;
+export type ReliabilityStatRecord = any;
