@@ -6,3 +6,4 @@ export type {
   ManagerRoundViewModel,
   ManagerTransferViewModel,
 } from './models/manager-reads';
+export type { ManagerContributorViewModel } from './models/manager-contributors';
