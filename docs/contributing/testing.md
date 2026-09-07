@@ -93,6 +93,26 @@ from the pre-migration implementation (`1a2c0c68`). Its Linux screenshot baselin
 still pending; Linux runs the semantic checks but must not initialize Profile snapshots
 from migrated output. Existing Matches and Team Linux comparisons remain enabled.
 
+Manager Profile checks desktop section redirects through the authenticated browser
+context's request client, preserving its cookies and user-agent without repeatedly
+replacing the live document. It requires an exact 307 destination or the pinned
+Next.js streamed redirect error record, rejecting unrelated errors and unsupported
+payloads. Negative checks exercise this fixture-specific assertion. Desktop UI and
+screenshots remain on the live page; phone sections still use real navigation links.
+No prefetch interception, browser-error filtering or snapshot updates are used to
+avoid WebKit document-navigation cancellation.
+
+The desktop Profile also brings its chart into view and waits for painted bars and
+the two fixture score labels: Recharts' JavaScript animation is not settled by CSS
+animation controls. Desktop captures use a resting pointer, an instant scroll reset
+and document-coordinate clips for non-chart sections rather than locator auto-scrolling.
+The SVG chart stays visible during its locator screenshot; chart tooltips
+are tested separately. References come from the original implementation in that same
+state, not an axes-only intermediate chart or accidental hover/header positioning.
+The desktop overview captures the header/identity viewport; its five section images
+cover the full domain content separately, avoiding unreliable offscreen SVG pixels
+in a full-document overview. Phone overview captures remain full-page.
+
 Visual comparisons use committed snapshots for supported platforms. Intentional appearance changes
 require inspecting the output and updating baselines with `npm run test:e2e:update`; never update
 snapshots solely to hide a regression. Browser failures retain screenshots and traces in

@@ -663,3 +663,74 @@ Manager directory and unrelated analytics
 remain separate scopes, as listed in the [overview](migration-overview.md).
 This receipt is a local documentation follow-up to accompany the next batch, avoiding
 an extra deployment solely to record the deployment ID.
+
+## Manager Profile browser verification correction
+
+The follow-up `fix/manager-profile-browser-tests` is isolated in
+`../biwengerstats-next-manager-profile-browser-fix`, based on production `aba0271e`
+and fast-forwarded through the local release receipt `175c25b9`.
+No application, authentication, schema, dependency, fixture guard or CI configuration
+changes are included. This closes verification for Profile; it starts no new feature.
+
+The unchanged test reproduced cancellation errors in two of three tablet Profile
+runs (`npm run test:e2e:local -- manager-profile.spec.ts --project=tablet-768
+--repeat-each=3`); all three missing-Profile cases passed. Repeated document replacement
+was separated from presentation checks. The same authenticated context now requests
+all five section routes without following redirects, checking exact 307 destinations
+or Next's structured streamed redirect error. The original application confirmed that
+its 200 HTML response carries a Flight redirect record without a refresh meta tag.
+An initial meta-only assertion was therefore rejected, not imposed as a new contract.
+
+The fixture-specific decoder parses JSON without executing scripts, requires exact
+redirect destinations, rejects unrelated errors and unsupported representations, and
+checks any redirect meta for contradictions. Negative browser tests cover misleading
+HTML, wrong destinations/types/statuses, unrelated errors, malformed wrappers,
+unsupported payloads and conflicting meta; split-chunk reconstruction is checked too.
+Desktop rendering and phone navigation remain unchanged. No prefetch was blocked or
+browser error filtered. The repeated original-code comparison also exposed an
+incomplete overview screenshot: it contained chart axes but no bars, whereas the
+unchanged original finished drawing its bars and failed that comparison three times.
+The test now brings the chart into view and waits for painted bars and both score
+labels before capture. The old section snapshots also encoded accidental hover and
+sticky-header positions from document replacement. Even with DOM-ready painted bars,
+the full-document overview could omit offscreen SVG pixels; the exact browser cause
+is not established. The desktop overview now captures the header/identity viewport,
+while all five dedicated section images retain full content coverage and the chart's
+painted bars. Desktop captures now reset the
+pointer and scroll instantly to the origin, then use document-coordinate clips
+for non-chart sections without locator auto-scrolling. The SVG chart is captured
+while visible in the viewport, after checking painted geometry and score labels;
+offscreen chart clips proved unreliable too. Chart tooltip interaction is explicitly tested
+separately. Affected references must be regenerated and reviewed from the unchanged
+original implementation in that same resting state, never from migrated output or
+to hide a chart regression.
+
+Final focused candidate verification passed all nine repeated tablet cases. Original
+implementation comparisons, the complete browser suite and full verification are
+recorded below when complete. Authenticated read-only production desktop review was
+possible using an existing session: all five sections rendered, contributor expansion
+and collapse worked, and no console errors were recorded. No credentials were handled
+or production mutations submitted. Native-phone production review remains manual.
+
+`npm run verify` passed twice: six packaged skills, architecture graph (743 modules,
+17 protected entrypoints), 55 documentation notes, typecheck, 1,044 unit/contract
+tests plus one existing skip, lint (zero errors; 25 existing image warnings), the
+database-disabled production build, schema metadata (38 tables; no drift), Drizzle
+check and `git diff --check`. Final capture-only refinements also passed typecheck
+and are exercised by the subsequent complete browser run. Missing-provider build
+warnings are unchanged. Earlier browser shell cases also emitted the previously
+observed stream-close warning; no filter or application workaround was added.
+
+Original-implementation verification at `1a2c0c68` passed nine repeated tablet
+and nine repeated iPhone cases. Final desktop verification passed six cases across
+two repetitions without snapshot updates. Four desktop references (overview,
+season, evolution and competitions) were captured exclusively from that unchanged
+original application and visually reviewed; the other ten Profile references are
+unchanged. The original comparison worktree was restored clean and retained.
+Independent final diff review found no actionable issues or scope expansion.
+
+Final `npm run test:e2e:local` passed all 72 cases across nine device/viewport
+projects, including all Profile reference comparisons, using a disposable synthetic
+database and the final production build. The runner shut down its database normally.
+The browser-error guard, application sources, dependencies, schema and CI workflow
+remain unchanged. Remote CI and production verification follow the ordinary main push.

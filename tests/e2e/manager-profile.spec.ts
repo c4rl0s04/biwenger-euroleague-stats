@@ -20,6 +20,111 @@ async function login(page: Page, callbackPath = managerPath) {
   await expect(page).toHaveURL(new RegExp(`${callbackPath}$`));
 }
 
+// Fixture-specific verification of Next's pinned HTML transport, not a general Flight decoder.
+function assertStreamedRedirect({ html, destination }: { html: string; destination: string }) {
+  const document = new DOMParser().parseFromString(html, 'text/html');
+  const meta = document.querySelector('meta#__next-page-redirect');
+  if (
+    meta &&
+    (meta.getAttribute('http-equiv') !== 'refresh' ||
+      meta.getAttribute('content') !== `1;url=${destination}`)
+  )
+    throw new Error('Unexpected HTML redirect');
+  const prefix = 'self.__next_f.push(';
+  let flight = '';
+  for (const script of Array.from(document.scripts)) {
+    const source = script.textContent ?? '';
+    if (!source.startsWith(prefix)) continue;
+    if (!source.endsWith(')')) throw new Error('Malformed inline Flight wrapper');
+    const chunk: unknown = JSON.parse(source.slice(prefix.length, -1));
+    if (
+      !Array.isArray(chunk) ||
+      chunk.length !== 2 ||
+      chunk[0] !== 1 ||
+      typeof chunk[1] !== 'string'
+    )
+      throw new Error('Unsupported inline Flight payload');
+    flight += chunk[1];
+  }
+  // Length-prefixed text can contain newlines that resemble records. Fail closed
+  // instead of interpreting an unsupported representation as a successful redirect.
+  if (/^[0-9a-f]+:T/m.test(flight)) throw new Error('Unsupported length-prefixed Flight text');
+  let redirects = 0;
+  for (const line of flight.split('\n')) {
+    const record = /^[0-9a-f]+:E(.+)$/.exec(line);
+    if (!record) continue;
+    const error: unknown = JSON.parse(record[1]);
+    if (
+      !error ||
+      typeof error !== 'object' ||
+      !('digest' in error) ||
+      error.digest !== `NEXT_REDIRECT;replace;${destination};307;`
+    )
+      throw new Error('Unexpected Flight error or redirect');
+    redirects++;
+  }
+  if (!redirects) throw new Error('Missing streamed redirect');
+}
+
+async function expectDesktopSectionRedirect(page: Page, section: string) {
+  // Share the browser's session and user-agent without replacing its live document.
+  // Repeated page.goto calls cancel WebKit shell prefetches, even after networkidle.
+  const response = await page.context().request.get(`${managerPath}/${section}`, {
+    maxRedirects: 0,
+  });
+  try {
+    const destination = `${managerPath}#${section}`;
+    if (response.status() === 307) {
+      expect(response.headers().location).toBe(destination);
+    } else {
+      // This route can flush its loading boundary, then deliver the redirect as
+      // a Flight error record. Parse the JSON payload without executing scripts.
+      expect(response.status()).toBe(200);
+      expect(response.headers()['content-type']).toContain('text/html');
+      await page.evaluate(assertStreamedRedirect, { html: await response.text(), destination });
+    }
+  } finally {
+    await response.dispose();
+  }
+}
+
+test('streamed Profile redirect checks reject false positives', async ({ page }) => {
+  const destination = `${managerPath}#season`;
+  const digest = `NEXT_REDIRECT;replace;${destination};307;`;
+  const record = `a:E${JSON.stringify({ digest })}\n`;
+  const script = (chunk: string) =>
+    `<script>self.__next_f.push(${JSON.stringify([1, chunk])})</script>`;
+  const check = (html: string) => page.evaluate(assertStreamedRedirect, { html, destination });
+  await check(script(record));
+  await check(script(record.slice(0, 12)) + script(record.slice(12)));
+  await expect(check(`<p>${digest}</p>`)).rejects.toThrow('Missing streamed redirect');
+  for (const incorrect of [
+    digest.replace('#season', '#squad'),
+    digest.replace('replace', 'push'),
+    digest.replace('307', '308'),
+  ])
+    await expect(check(script(`a:E${JSON.stringify({ digest: incorrect })}\n`))).rejects.toThrow(
+      'Unexpected Flight error or redirect'
+    );
+  await expect(check(script(record + 'b:E{"digest":"unexpected-error"}\n'))).rejects.toThrow(
+    'Unexpected Flight error or redirect'
+  );
+  await expect(check('<script>self.__next_f.push([3,"YQ=="])</script>')).rejects.toThrow(
+    'Unsupported inline Flight payload'
+  );
+  await expect(check('<script>self.__next_f.push([1,"broken"]</script>')).rejects.toThrow(
+    'Malformed inline Flight wrapper'
+  );
+  await expect(check(script('b:Tff,fake\n' + record))).rejects.toThrow(
+    'Unsupported length-prefixed Flight text'
+  );
+  await expect(
+    check(
+      `<meta id="__next-page-redirect" http-equiv="refresh" content="1;url=/login">${script(record)}`
+    )
+  ).rejects.toThrow('Unexpected HTML redirect');
+});
+
 async function capture(page: Page, testInfo: TestInfo, name: string, target?: Locator) {
   // Linux runs all semantic checks; Profile Linux visual baselines are still pending.
   // Never initialize those baselines from the migrated implementation.
@@ -29,13 +134,79 @@ async function capture(page: Page, testInfo: TestInfo, name: string, target?: Lo
   )
     return;
   await page.evaluate(() => document.fonts.ready);
+  if (testInfo.project.name === 'desktop-1440') {
+    if (name === 'manager-profile') {
+      await page.locator('#points-evolution').scrollIntoViewIfNeeded();
+      await expect
+        .poll(() =>
+          page
+            .locator('#points-evolution .recharts-bar-rectangle path')
+            .evaluateAll(
+              (bars) =>
+                bars.length === 2 && bars.every((bar) => bar.getBoundingClientRect().height > 100)
+            )
+        )
+        .toBe(true);
+      await expect(page.locator('#points-evolution .recharts-label-list text')).toHaveText([
+        '24',
+        '31',
+      ]);
+    }
+    // Capture a deliberate resting state, not incidental hover/scroll from login
+    // or the preceding screenshot. Locator screenshots would scroll again.
+    await page.mouse.move(0, 0);
+    await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+    await expect.poll(() => page.evaluate(() => [window.scrollX, window.scrollY])).toEqual([0, 0]);
+  }
   const options = {
     animations: 'disabled' as const,
     timeout: 60000,
     stylePath: 'tests/e2e/screenshot.css',
   };
-  if (target) await expect(target).toHaveScreenshot(`${name}.png`, options);
-  else await expect(page).toHaveScreenshot(`${name}.png`, { ...options, fullPage: true });
+  if (target && name === 'manager-evolution') {
+    // Keep the SVG in the viewport while capturing: offscreen page clips can
+    // omit filtered SVG bars even when their DOM geometry is already complete.
+    await target.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        page
+          .locator('#points-evolution .recharts-bar-rectangle path')
+          .evaluateAll(
+            (bars) =>
+              bars.length === 2 && bars.every((bar) => bar.getBoundingClientRect().height > 100)
+          )
+      )
+      .toBe(true);
+    await expect(page.locator('#points-evolution .recharts-label-list text')).toHaveText([
+      '24',
+      '31',
+    ]);
+    await page.mouse.move(0, 0);
+    await expect(target).toHaveScreenshot(`${name}.png`, options);
+  } else if (target && testInfo.project.name === 'desktop-1440') {
+    const bounds = await target.boundingBox();
+    if (!bounds || bounds.width <= 0 || bounds.height <= 0)
+      throw new Error('Missing Profile screenshot target');
+    const x = Math.floor(bounds.x);
+    const y = Math.floor(bounds.y);
+    await expect(page).toHaveScreenshot(`${name}.png`, {
+      ...options,
+      fullPage: true,
+      clip: {
+        x,
+        y,
+        width: Math.ceil(bounds.x + bounds.width) - x,
+        height: Math.ceil(bounds.y + bounds.height) - y,
+      },
+    });
+  } else if (target) await expect(target).toHaveScreenshot(`${name}.png`, options);
+  else
+    await expect(page).toHaveScreenshot(`${name}.png`, {
+      ...options,
+      // The five section captures cover content below the desktop identity area.
+      // A full-document overview can omit offscreen SVG bars despite DOM readiness.
+      fullPage: !(testInfo.project.name === 'desktop-1440' && name === 'manager-profile'),
+    });
 }
 
 test('Manager Profile preserves desktop and phone sections and interactions', async ({
@@ -69,16 +240,18 @@ test('Manager Profile preserves desktop and phone sections and interactions', as
     ).toBeVisible();
     await expect(page.locator('a[href="/tournaments/99301"]').first()).toBeVisible();
     await expect(page.locator('a[href="/tournaments/99302"]').first()).toBeVisible();
+    // Recharts animates in JavaScript; screenshot CSS animation controls cannot
+    // settle it. Its score labels appear only after the bars finish animating.
+    await expect(page.locator('#points-evolution .recharts-label-list text')).toHaveText([
+      '24',
+      '31',
+    ]);
   }
   await capture(page, testInfo, 'manager-profile');
 
   for (const section of sections) {
     if (phone) await page.locator(`a[href="${managerPath}/${section.slug}"]`).click();
-    else {
-      // Let legitimate shell prefetches finish before replacing the document in WebKit.
-      await page.waitForLoadState('networkidle');
-      await page.goto(`${managerPath}/${section.slug}`);
-    }
+    else await expectDesktopSectionRedirect(page, section.slug);
     if (phone) {
       await expect(page).toHaveURL(new RegExp(`${managerPath}/${section.slug}$`));
       await expect(
@@ -114,8 +287,8 @@ test('Manager Profile preserves desktop and phone sections and interactions', as
       await page.locator(`a[href="${managerPath}"]`).first().click();
       await expect(page).toHaveURL(new RegExp(`${managerPath}$`));
     } else {
-      // Preserve existing desktop section redirects, including their historical hash names.
-      await expect(page).toHaveURL(new RegExp(`${managerPath}#${section.slug}$`));
+      // Redirect contracts were checked above; presentation stays on the live profile.
+      await expect(page).toHaveURL(new RegExp(`${managerPath}$`));
       const target = page.locator(section.desktop);
       await expect(target).toBeVisible();
       await capture(page, testInfo, `manager-${section.slug}`, target);
@@ -123,6 +296,13 @@ test('Manager Profile preserves desktop and phone sections and interactions', as
   }
 
   if (!phone) {
+    if (testInfo.project.name.startsWith('desktop-')) {
+      await page.locator('#points-evolution .recharts-bar-rectangle path').nth(1).hover();
+      const tooltip = page.locator('#points-evolution .recharts-tooltip-wrapper');
+      await expect(tooltip).toContainText('Jornada 2');
+      await expect(tooltip).toContainText('31 pts');
+      await page.mouse.move(0, 0);
+    }
     const expand = page.getByRole('button', { name: 'Ver otros 2 jugadores' });
     await expand.click();
     await expect(
