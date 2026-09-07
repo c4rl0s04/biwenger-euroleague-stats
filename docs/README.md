@@ -23,6 +23,7 @@ editors without Obsidian plugins.
 - **Changing the system:** read the [architecture map](architecture/README.md) and
   [contributor guides](contributing/README.md).
 - **Following the migration:** consult the [architecture status ledger](architecture/migration-status.md).
+- **Implementing an assigned migration:** start at the [worker queue](migration/README.md).
 - **Running or recovering the application:** use the [operations map](operations/README.md).
 - **Looking up a contract:** use the [reference map](reference/README.md).
 - **Understanding why a choice was made:** browse the [architecture decisions](decisions/README.md).
