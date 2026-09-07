@@ -88,3 +88,8 @@ status: active
 
 All tests passed successfully, and architecture rules were strictly respected. The new Standings read experience correctly leverages bounded contexts without violating legacy constraints or introducing cross-boundary cycles. No prohibited operations, database mutations, or unrelated scope drift occurred.
 Final status: READY FOR REVIEW
+
+### Correction Implementation
+
+- **Completion Status:** Fully extracted models, queries, SQL, mappers, services, architecture validation, and screens.
+- **Commit SHA:** 7e900200ee517c4069b3561f17e0b7689735f56b

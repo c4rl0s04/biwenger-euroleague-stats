@@ -1,5 +1,5 @@
-import DesktopStandingsScreen from '@/components/standings/DesktopStandingsScreen';
-import MobileStandingsScreen from '@/components/mobile/screens/MobileStandingsScreen';
+import { DesktopStandingsScreen, MobileStandingsScreen } from '@/features/standings/public';
+
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 import { getFullStandings, getLeagueOverview } from '@/features/standings/server';
 

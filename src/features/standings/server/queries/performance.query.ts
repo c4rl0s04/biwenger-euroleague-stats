@@ -87,8 +87,6 @@ export interface JinxStat {
   jinxed_count: number;
 }
 
-export type { ManagerContributorViewModel as ContributorStat } from '@/features/managers/public';
-
 /**
  * Get volatility stats (Standard Deviation of points)
  * @returns {Promise<VolatilityStat[]>} Users sorted by consistency (lower std_dev is better)
@@ -497,12 +495,3 @@ export async function getJinxStats(): Promise<JinxStat[]> {
     jinxed_count: parseInt(row.jinxed_count) || 0,
   }));
 }
-
-/**
- * Get the players who contributed the most points to a user's total score.
- * Only counts points from rounds where the player was in the user's lineup.
- * Handles captain doubling.
- * @param userId - The ID of the user to get stats for
- * @returns {Promise<ContributorStat[]>} Top contributing players
- */
-export { getManagerContributorsData as getUserTopContributors } from '@/features/managers/server';

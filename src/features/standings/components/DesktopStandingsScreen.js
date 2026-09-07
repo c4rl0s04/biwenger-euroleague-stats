@@ -29,40 +29,40 @@ import {
   DraftFidelityCard,
   CaptainStandingsCard,
   TheoreticalStandingsCard,
-} from '@/components/standings';
+} from './';
 
-import InitialSquadRegretCard from '@/components/standings/InitialSquadRegretCard';
-import InitialSquadLoyaltyCard from '@/components/standings/InitialSquadLoyaltyCard';
-import InitialSquadPotentialCard from '@/components/standings/InitialSquadPotentialCard';
-import InitialSquadListCard from '@/components/standings/InitialSquadListCard';
+import InitialSquadRegretCard from './InitialSquadRegretCard';
+import InitialSquadLoyaltyCard from './InitialSquadLoyaltyCard';
+import InitialSquadPotentialCard from './InitialSquadPotentialCard';
+import InitialSquadListCard from './InitialSquadListCard';
 
-import RoundHeatmapCard from '@/components/standings/RoundHeatmapCard';
+import RoundHeatmapCard from './RoundHeatmapCard';
 
 // Dynamic imports for chart components - ssr: false excludes recharts from server bundle
-const PointsProgressionCard = dynamic(
-  () => import('@/components/standings/PointsProgressionCard'),
-  { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
-);
+const PointsProgressionCard = dynamic(() => import('./PointsProgressionCard'), {
+  loading: () => <CardSkeleton className="h-[550px]" />,
+  ssr: false,
+});
 
-const RoundPointsProgressionCard = dynamic(
-  () => import('@/components/standings/RoundPointsProgressionCard'),
-  { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
-);
+const RoundPointsProgressionCard = dynamic(() => import('./RoundPointsProgressionCard'), {
+  loading: () => <CardSkeleton className="h-[550px]" />,
+  ssr: false,
+});
 
-const PlacementStatsCard = dynamic(() => import('@/components/standings/PlacementStatsCard'), {
+const PlacementStatsCard = dynamic(() => import('./PlacementStatsCard'), {
   loading: () => <CardSkeleton />,
   ssr: false,
 });
 
-const LeaguePerformanceCard = dynamic(
-  () => import('@/components/standings/LeaguePerformanceCard'),
-  { loading: () => <CardSkeleton />, ssr: false }
-);
+const LeaguePerformanceCard = dynamic(() => import('./LeaguePerformanceCard'), {
+  loading: () => <CardSkeleton />,
+  ssr: false,
+});
 
-const PositionEvolutionCard = dynamic(
-  () => import('@/components/standings/PositionEvolutionCard'),
-  { loading: () => <CardSkeleton className="h-[550px]" />, ssr: false }
-);
+const PositionEvolutionCard = dynamic(() => import('./PositionEvolutionCard'), {
+  loading: () => <CardSkeleton className="h-[550px]" />,
+  ssr: false,
+});
 
 export default function ClasificacionPage() {
   return (
