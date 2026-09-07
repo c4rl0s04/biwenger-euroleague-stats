@@ -24,16 +24,16 @@ status: active
 | Domains                                                  | Status / next boundary                                                             |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |
-| Players                                                  | Integrated; manager adapter removed in the read-foundations candidate              |
+| Players                                                  | Integrated; manager adapter removed in the read-foundations release                |
 | Rounds                                                   | Calendar foundation implemented; historical results and analysis remain legacy     |
-| Managers                                                 | Squad/statistics/round reads in candidate; Profile and directory remain legacy     |
-| Standings                                                | Base ranking reads in candidate; screens, performance and draft analytics remain   |
+| Managers                                                 | Squad/statistics/round reads released; Profile and directory remain legacy         |
+| Standings                                                | Base ranking reads released; screens, performance and draft analytics remain       |
 | Tournaments                                              | Legacy read services and components                                                |
 | Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                           |
 | Schedule                                                 | Map uses Matches; squad overlay remains legacy                                     |
 | Market public reads                                      | Legacy analytics; separate from private operations                                 |
 | Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                            |
-| Home, News, Search                                       | Search read boundary in candidate; Home, News and shell composition remain         |
+| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain             |
 | Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                |
 | Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                |
 | Lineup, Market operations                                | Deferred pending provider-operation security gate                                  |
@@ -429,3 +429,36 @@ confirms no other query change. The committed-range check is now explicitly part
 of the final release review. SQL templates were byte-identical at extraction;
 the follow-up changes whitespace only. Deployment/CI and smoke verification must
 target the final follow-up SHA, not the first push.
+
+## Read-foundations release receipt
+
+Main and origin/main are `881e4818c24efafac69e0732e992464ff09ecd68` after clean
+fast-forward integration and ordinary pushes. Vercel deployment
+`dpl_GAv8GErYtAMe5wGzLVryL761US2z` is READY at the matching SHA and production alias.
+The whitespace-only follow-up passed 245 focused tests, formatting, scoped lint and
+the committed-range whitespace check. It changes no SQL tokens or bound parameters.
+
+All nine sampled canonical response hashes matched their pre-release baselines:
+three manager endpoints, full/sorted standings, overview, value ranking, and two
+Search cases. Additional populated-manager reads returned statistics, 21 squad
+players and 45 rounds with exact private/no-store headers. Login and session
+endpoints responded normally; protected routes retained login redirects. Anonymous,
+invalid and null/undefined-fallback manager requests retained private 400 responses.
+A valid Team read returned 200; not-found Team/Player/official-Match reads retained
+private 404 responses. Deployment-scoped error/fatal and 5xx log queries returned
+no entries; sampled logs and responses contained no sensitive-value patterns.
+These are bounded observations, not proof about all future requests or logs.
+
+GitHub CI `34068722840` passed on the final SHA: Test & Build, Format Check,
+and Browser contracts and visual regression all succeeded. This post-deployment
+receipt is retained as a documentation-only follow-up on the batch branch for the
+next integration; no extra production deployment is needed solely to record its ID.
+
+No authenticated production visual review was performed. No presentation moved,
+and no schema, dependency, environment, credential, fallback or provider-operation
+configuration changed. The primary and all three task worktrees are clean.
+
+Next parallel batch: Tournament core/manager participation, Manager top contributors,
+and Standings all-play-all reads. These provide the remaining data contracts for
+a subsequent Manager Profile desktop/mobile composition migration. Preserve existing
+tournament JSON/ID matching and statistical formulas; no next slice has started yet.
