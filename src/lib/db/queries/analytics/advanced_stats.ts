@@ -4,6 +4,8 @@
  */
 
 import { db, pgClient } from '../../index';
+import { fetchAllPlayAllStats } from '@/features/standings/server';
+import type { AllPlayAllEntry } from '@/features/standings/public';
 import { cached, CACHE_TTL } from '../../../utils/cache';
 import { getShortRoundName } from '../../../utils/format';
 import { resolveReadSeasonId } from '../../season-context';
@@ -70,16 +72,7 @@ export interface PointDistributionStat {
   };
 }
 
-export interface PlayAllStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
-  wins: number;
-  losses: number;
-  ties: number;
-  pct: number;
-}
+export type PlayAllStat = Omit<AllPlayAllEntry, 'pct'> & { pct: number };
 
 export interface DominanceStat {
   user_id: number;
@@ -550,88 +543,11 @@ export async function getPointDistributionStats(): Promise<PointDistributionStat
  * CACHED: This is an O(n * m²) operation, cache for 15 minutes
  */
 export async function getAllPlayAllStats(): Promise<PlayAllStat[]> {
-  const seasonId = await resolveReadSeasonId();
-  return cached(`advanced:all-play-all:${seasonId}`, CACHE_TTL.LONG, async () => {
-    try {
-      // Get all rounds
-      const rounds = (
-        await pgClient.query(
-          'SELECT DISTINCT round_id FROM user_rounds WHERE season_id = $1 AND participated = TRUE',
-          [seasonId]
-        )
-      ).rows;
-      const users = (
-        await pgClient.query(
-          `
-          SELECT
-            u.id,
-            COALESCE(us.name, u.name) as name,
-            COALESCE(us.icon, u.icon) as icon,
-            COALESCE(us.color_index, u.color_index, 0) as color_index
-          FROM user_seasons us
-          JOIN users u ON u.id = us.user_id
-          WHERE us.season_id = $1
-            AND COALESCE(us.status, 'active') = 'active'
-        `,
-          [seasonId]
-        )
-      ).rows;
-
-      const standings: Record<number, any> = {};
-      users.forEach((u: any) => {
-        standings[u.id] = {
-          user_id: u.id,
-          name: u.name,
-          icon: u.icon,
-          color_index: u.color_index,
-          wins: 0,
-          losses: 0,
-          ties: 0,
-        };
-      });
-
-      for (const round of rounds) {
-        const roundScores = (
-          await pgClient.query(
-            'SELECT user_id, points FROM user_rounds WHERE season_id = $2 AND round_id = $1 AND participated = TRUE',
-            [round.round_id, seasonId]
-          )
-        ).rows;
-
-        // Compare everyone against everyone
-        for (let i = 0; i < roundScores.length; i++) {
-          for (let j = i + 1; j < roundScores.length; j++) {
-            const u1 = roundScores[i];
-            const u2 = roundScores[j];
-
-            // Safety check: ensure both users exist in our reference list
-            if (!standings[u1.user_id] || !standings[u2.user_id]) continue;
-
-            if (u1.points > u2.points) {
-              standings[u1.user_id].wins++;
-              standings[u2.user_id].losses++;
-            } else if (u2.points > u1.points) {
-              standings[u2.user_id].wins++;
-              standings[u1.user_id].losses++;
-            } else {
-              standings[u1.user_id].ties++;
-              standings[u2.user_id].ties++;
-            }
-          }
-        }
-      }
-
-      return Object.values(standings)
-        .map((s: any) => ({
-          ...s,
-          pct: (s.wins / (s.wins + s.losses + s.ties)) * 100,
-        }))
-        .sort((a: any, b: any) => b.pct - a.pct);
-    } catch (error) {
-      console.error('Error in getAllPlayAllStats:', error);
-      return [];
-    }
-  });
+  // Preserve NaN for legacy server composition; feature/HTTP DTOs are serializable.
+  return (await fetchAllPlayAllStats()).map((row) => ({
+    ...row,
+    pct: row.pct === null ? NaN : row.pct,
+  }));
 }
 
 /**

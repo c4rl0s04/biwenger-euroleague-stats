@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { fetchAllPlayAllStats } from '@/features/standings/server';
 import {
   fetchHeatCheckStats,
   fetchHunterStats,
@@ -6,7 +7,6 @@ import {
   fetchFloorCeilingStats,
   fetchVolatilityStats,
   fetchPointDistributionStats,
-  fetchAllPlayAllStats,
   fetchDominanceStats,
   fetchTheoreticalGapStats,
   fetchHeatmapStats,
