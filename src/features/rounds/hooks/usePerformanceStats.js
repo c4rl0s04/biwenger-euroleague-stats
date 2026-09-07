@@ -6,7 +6,7 @@ export { calculateStats }; // Re-export for backward compatibility if needed loc
 
 /**
  * Hook to calculate performance statistics from history data
- * @param {Array} history Array of round performance objects
+ * @param {import('../models/round-read').UserPerformanceHistory[]} history
  */
 export function usePerformanceStats(history) {
   return useMemo(() => calculateStats(history), [history]);

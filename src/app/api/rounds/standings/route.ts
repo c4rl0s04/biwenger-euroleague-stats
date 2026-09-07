@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
-import { fetchRoundStandings } from '@/lib/services';
+import { readRoundHttpInput } from '@/features/rounds/server';
+import { fetchRoundStandings } from '@/features/rounds/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const roundId = searchParams.get('roundId');
+    const { roundId } = readRoundHttpInput(searchParams);
 
     if (!roundId) {
       return errorResponse('Missing roundId', 400);

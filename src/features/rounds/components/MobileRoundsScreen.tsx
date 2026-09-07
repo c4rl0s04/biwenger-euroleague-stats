@@ -1,6 +1,7 @@
 import { Activity, ChartNoAxesCombined, History, LayoutDashboard } from 'lucide-react';
 
-import MobileRecordList from '../MobileRecordList';
+import RoundRows from './RoundRows';
+import type { RoundOverviewViewModel } from '../models/round-screen';
 import {
   MobileMetric,
   MobileMetricGrid,
@@ -8,32 +9,14 @@ import {
   MobileScreenHeader,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
-import MobileSegmentedControl from '../MobileSegmentedControl';
+} from '@/components/mobile/MobileScreen';
+import MobileSegmentedControl from '@/components/mobile/MobileSegmentedControl';
 
-type RecordValue = Record<string, any>;
-
-export default function MobileRoundsScreen({
-  rounds,
-  activeRoundId,
-  roundData,
-  userId,
-}: {
-  rounds: RecordValue[];
-  activeRoundId: string | number;
-  roundData: RecordValue | null;
-  userId: string | number;
-}) {
-  const user = roundData?.users?.find((entry: RecordValue) => String(entry.id) === String(userId));
-  const round = rounds.find((entry) => String(entry.round_id) === String(activeRoundId));
-  const players = user?.lineup?.players ?? [];
+export default function MobileRoundsScreen({ data }: { data: RoundOverviewViewModel }) {
+  const { rounds, activeRoundId } = data;
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Análisis"
-        title="Jornadas"
-        description={round?.round_name ?? 'Jornada activa'}
-      />
+      <MobileScreenHeader eyebrow="Análisis" title="Jornadas" description={data.description} />
       <div className="mobile-control-offset">
         <MobileSegmentedControl
           label="Seleccionar jornada"
@@ -45,24 +28,13 @@ export default function MobileRoundsScreen({
         />
       </div>
       <MobileMetricGrid>
-        <MobileMetric
-          label="Tus puntos"
-          value={Number(user?.points ?? 0).toLocaleString('es-ES')}
-          tone="accent"
-        />
-        <MobileMetric
-          label="Ideal"
-          value={Number(user?.ideal_points ?? 0).toLocaleString('es-ES')}
-        />
-        <MobileMetric
-          label="Eficiencia"
-          value={`${Number(user?.coachRating?.efficiency ?? 0).toLocaleString('es-ES')}%`}
-          tone="positive"
-        />
-        <MobileMetric label="Jugadores" value={players.length} />
+        <MobileMetric label="Tus puntos" value={data.points} tone="accent" />
+        <MobileMetric label="Ideal" value={data.ideal} />
+        <MobileMetric label="Eficiencia" value={data.efficiency} tone="positive" />
+        <MobileMetric label="Jugadores" value={data.playerCount} />
       </MobileMetricGrid>
       <MobileSectionHeading>Alineación</MobileSectionHeading>
-      <MobileRecordList data={players} linkPrefix="/player" />
+      <RoundRows rows={data.rows} />
       <MobileSectionHeading>Explorar jornada</MobileSectionHeading>
       <div>
         <MobileSectionLink

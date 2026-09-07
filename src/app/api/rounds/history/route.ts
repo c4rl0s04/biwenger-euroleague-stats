@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server';
-import { getUserPerformanceHistoryService } from '@/lib/services';
+import { readRoundHttpInput } from '@/features/rounds/server';
+import { getUserPerformanceHistoryService } from '@/features/rounds/server';
 import { successResponse, errorResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const { userId } = readRoundHttpInput(searchParams);
 
     if (!userId) {
       return errorResponse('userId is required', 400);

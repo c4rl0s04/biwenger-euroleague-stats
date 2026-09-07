@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchRoundLeaderboard } from '@/lib/services';
+import { fetchRoundLeaderboard } from '@/features/rounds/server';
 import { successResponse, errorResponse } from '@/lib/utils/response';
 
 /**

@@ -39,7 +39,7 @@ import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import RecordsGrid from './stats/history/RecordsGrid';
 import LineupStatsCard from './stats/general/LineupStatsCard';
 import { Section } from '@/components/layout';
-import { usePerformanceStats } from '@/lib/hooks/usePerformanceStats';
+import { usePerformanceStats } from '../../hooks/usePerformanceStats';
 import { Activity, BarChart3, Grid, Ruler, Layout } from 'lucide-react';
 
 export default function RoundsPageClient() {

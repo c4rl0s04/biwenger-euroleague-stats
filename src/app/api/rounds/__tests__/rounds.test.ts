@@ -4,7 +4,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
-vi.mock('@/lib/services', () => ({
+vi.mock('@/features/rounds/server', async () => ({
+  readRoundHttpInput: (await import('@/features/rounds/validation/round-http-input'))
+    .readRoundHttpInput,
+  fetchLineupStats: vi.fn(),
   fetchRoundCompleteData: vi.fn(),
   fetchUserRoundDetails: vi.fn(),
   fetchRoundLeaderboard: vi.fn(),
@@ -15,12 +18,8 @@ vi.mock('@/lib/services', () => ({
   fetchUserLineup: vi.fn(),
 }));
 
-vi.mock('@/lib/services/core/roundsService', () => ({
-  fetchLineupStats: vi.fn(),
-}));
-
-import * as services from '@/lib/services';
-import { fetchLineupStats } from '@/lib/services/core/roundsService';
+import * as services from '@/features/rounds/server';
+import { fetchLineupStats } from '@/features/rounds/server';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);

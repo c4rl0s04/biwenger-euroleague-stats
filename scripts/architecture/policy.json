@@ -16,7 +16,17 @@
     "src/app/api/standings/full/route.ts",
     "src/app/api/standings/league-totals/route.ts",
     "src/app/api/standings/value-ranking/route.ts",
-    "src/app/api/search/route.ts"
+    "src/app/api/search/route.ts",
+    "src/app/(app)/rounds/page.tsx",
+    "src/app/(app)/rounds/[roundId]/[section]/page.tsx",
+    "src/app/api/rounds/all-history/route.ts",
+    "src/app/api/rounds/history/route.ts",
+    "src/app/api/rounds/leaderboard/route.ts",
+    "src/app/api/rounds/lineup-stats/route.ts",
+    "src/app/api/rounds/lineup/route.ts",
+    "src/app/api/rounds/list/route.ts",
+    "src/app/api/rounds/standings/route.ts",
+    "src/app/api/rounds/stats/route.ts"
   ],
   "exceptions": [
     {
@@ -107,6 +117,66 @@
     {
       "edge": "entrypoint-persistence: src/app/api/player/squad/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
       "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/[roundId]/[section]/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/[roundId]/[section]/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/[roundId]/[section]/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/[roundId]/[section]/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/[roundId]/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/rounds/[roundId]/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Rounds page session identity reaches frozen authentication/credential infrastructure, not Rounds statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
       "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
     }
   ]

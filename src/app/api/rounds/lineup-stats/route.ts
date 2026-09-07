@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchLineupStats } from '@/lib/services/core/roundsService';
+import { fetchLineupStats } from '@/features/rounds/server';
 
 export const dynamic = 'force-dynamic';
 

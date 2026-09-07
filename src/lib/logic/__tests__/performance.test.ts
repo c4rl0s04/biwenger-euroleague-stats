@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+// Exercise the compatibility adapter with the real pure calculator, without
+// loading unrelated React screens from the client-safe feature barrel.
+vi.mock('@/features/rounds/public', async () => import('@/features/rounds/logic/performance'));
 import { calculateStats } from '@/lib/logic/performance';
 
 const makeRound = (actual: number, ideal: number, efficiency: number) => ({

@@ -1,6 +1,7 @@
 import { db as pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
 import { getPlayerFormMap } from './playerForm';
+import { readManagerDirectory } from './manager-directory';
 
 export interface User {
   id: number;
@@ -78,23 +79,9 @@ export interface PersonalizedAlert {
  * Get all users with their basic info
  */
 export async function getAllUsers(): Promise<User[]> {
-  const seasonId = await resolveReadSeasonId();
-  const result = await (pgClient as any).query(
-    `
-    SELECT
-      u.id,
-      COALESCE(us.name, u.name) AS name,
-      COALESCE(us.icon, u.icon) AS icon,
-      COALESCE(us.color_index, u.color_index, 0) AS color_index
-    FROM user_seasons us
-    JOIN users u ON u.id = us.user_id
-    WHERE us.season_id = $1
-      AND COALESCE(us.status, 'active') = 'active'
-    ORDER BY COALESCE(us.name, u.name) ASC, u.id ASC
-  `,
-    [seasonId]
-  );
-  return result.rows as User[];
+  // Preserve the legacy declaration for unmigrated callers; runtime text IDs
+  // and nullable names/icons are not coerced. New boundaries model them exactly.
+  return (await readManagerDirectory()) as unknown as User[];
 }
 
 /**
