@@ -24,16 +24,16 @@ status: active
 | Domains                                                  | Status / next boundary                                                             |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |
-| Players                                                  | Integrated and deployed; manager adapter remains temporary                         |
+| Players                                                  | Integrated; manager adapter removed in the read-foundations candidate              |
 | Rounds                                                   | Calendar foundation implemented; historical results and analysis remain legacy     |
-| Managers                                                 | Profile, directory and squads remain legacy                                        |
-| Standings                                                | Base rankings, performance analytics and draft analytics are separate slices       |
+| Managers                                                 | Squad/statistics/round reads in candidate; Profile and directory remain legacy     |
+| Standings                                                | Base ranking reads in candidate; screens, performance and draft analytics remain   |
 | Tournaments                                              | Legacy read services and components                                                |
 | Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                           |
 | Schedule                                                 | Map uses Matches; squad overlay remains legacy                                     |
 | Market public reads                                      | Legacy analytics; separate from private operations                                 |
 | Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                            |
-| Home, News, Search                                       | Existing partial layers; migrate contracts and screens                             |
+| Home, News, Search                                       | Search read boundary in candidate; Home, News and shell composition remain         |
 | Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                |
 | Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                |
 | Lineup, Market operations                                | Deferred pending provider-operation security gate                                  |
@@ -350,6 +350,8 @@ Base: `832b4c75`. Three isolated worktrees own Managers reads, base Standings re
 and Search reads; `refactor/read-foundations-batch` owns cross-feature review,
 architecture policy registration, this ledger and the combined release gate.
 Feature agents commit locally and do not push, merge or deploy independently.
+Detailed scope notes: [Managers reads](managers-read-migration.md) and
+[Standings foundation](standings-read-foundation.md).
 Focused tests run during development; full verification and deployment run on the
 combined candidate after sequential integration. Heavy builds are coordinated to
 avoid local resource contention, not skipped or weakened.
@@ -366,3 +368,54 @@ dependencies, database schemas or production configuration are included. Preserv
 all existing cache, input quirks, field types, envelopes and error behavior.
 The batch is in progress, not yet validated or released. Manager Profile screens,
 Standings analytics and the remainder of the migration are not claimed complete.
+
+The three branches rebased conflict-free and fast-forwarded into the integration
+candidate: Standings `d83df01` → `eb12e4dc`, Managers `6fdfa8a` → `8aedb1c3`,
+Search `02fe90f` / `5971328` → `4f81d4e1` / `251175d8`.
+Preparation commit `8a027c53` changes only two database singleton imports and adds
+regression tests, avoiding cycles through legacy domain barrels. Query logic is unchanged.
+
+The candidate now registers 15 framework entrypoints (previously seven). The
+obsolete Players-to-manager-service exception is removed. Registering the three
+session-fallback manager APIs exposes existing authentication persistence paths:
+18 exact route/source/target exceptions cover only `auth.js` and the credential
+repository's Drizzle/index/schema imports. Every exception has a reason and an
+Accounts/credential security-gate removal condition. No authentication code or
+checker implementation changes. Negative tests ensure another helper, route or
+obsolete edge cannot use these allowances. This is documented infrastructure debt,
+not permission for manager queries outside their feature boundary.
+
+Managers has independent allowlisted models and owns the three retained
+`/api/player/{rounds,stats,squad}` handlers. Legacy server adapters retain Profile,
+Dashboard, Assistant and Lineup consumers. Players exposes recent scores through
+its server contract over the single existing player-form query; that legacy query
+remains until its analytics consumers migrate. Standings owns full/simple rankings,
+league overview and value ranking; its three API handlers and base page call
+services directly. Existing Standings query/service names remain adapters for
+unmigrated analytics/composition. Search owns validation, three sequential queries,
+mapping and service; its API and old query/service exports reuse one implementation.
+SearchDropdown, CommandPalette and HoopgridSearch keep their existing API calls.
+
+All legacy ID/sort/search quirks, numeric strings/nulls, ordering, response fields,
+cache TTLs and private/no-store manager responses remain intentional compatibility
+contracts. No new routes or aliases, persistent cache, screen moves or UI changes.
+Combined focused validation passed 245 tests, including the 140-case session cache
+matrix; architecture check passed 718 modules and all 15 protected entrypoints.
+Independent cross-review found no Standings/Search compatibility blocker. Complete
+verification and release results follow when available; the candidate is not yet released.
+
+Combined verification initially caught two missing documentation navigation links
+and a transitive Teams-to-Managers cycle through the legacy Team query's database
+barrel. The notes are linked above; that helper now imports the same `pgClient`
+from `connection.ts`, with a third connection-import regression case. No SQL or
+checker assertion was changed to hide the cycle. Independent cross-review confirmed
+the correction and found no Managers compatibility blocker.
+
+Final `npm run verify` passed on pinned Node 24.20.0: skills, architecture (718
+modules, 15 entrypoints), docs (54 notes), typecheck, full suite (902 passed, one
+existing skip), lint (25 existing image warnings), database-disabled production
+build, schema metadata (38 tables, no drift), Drizzle and diff check. Focused graph
+and Teams regression rerun passed 63 tests. Build warnings were limited to baseline
+missing provider configuration; no production environment was loaded. Production
+dependency audit reported zero findings. Presentation is unchanged; CI browser
+verification and safe production HTTP/log checks remain release gates.

@@ -6,13 +6,106 @@
     "src/app/(app)/team/[id]/[section]/page.tsx",
     "src/app/api/team/[id]/route.ts",
     "src/app/api/matches/[id]/shots/route.ts",
-    "src/app/api/matches/[id]/play-by-play/route.ts"
+    "src/app/api/matches/[id]/play-by-play/route.ts",
+    "src/app/api/player/rounds/route.ts",
+    "src/app/api/player/stats/route.ts",
+    "src/app/api/player/squad/route.ts",
+    "src/app/(app)/standings/page.js",
+    "src/app/api/standings/full/route.ts",
+    "src/app/api/standings/league-totals/route.ts",
+    "src/app/api/standings/value-ranking/route.ts",
+    "src/app/api/search/route.ts"
   ],
   "exceptions": [
     {
-      "edge": "legacy-service: src/features/players/server/services/player-user-read.service.ts -> src/lib/services/core/userService.ts",
-      "reason": "Temporary manager-read adapter preserves existing player rounds/stats/squad HTTP contracts, including the Lineup squad consumer, until Managers owns these reads. No new legacy dependency is allowed.",
-      "removeWhen": "Managers exposes round, season-statistics and squad read services and the Players compatibility adapter consumes that server contract."
+      "edge": "entrypoint-persistence: src/app/api/player/rounds/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/rounds/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/rounds/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/rounds/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/rounds/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/rounds/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/stats/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/stats/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/stats/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/stats/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/stats/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/stats/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/squad/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/squad/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/squad/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/squad/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/squad/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/player/squad/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
     }
   ]
 }

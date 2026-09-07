@@ -31,6 +31,44 @@ function check(files, policy = { entrypoints: [], exceptions: [] }) {
 }
 
 describe('feature import graph', () => {
+  it('does not extend a frozen authentication exception to other routes or helpers', () => {
+    const route = 'src/app/api/player/stats/route.ts';
+    const auth = 'src/auth.js';
+    const edge = `entrypoint-persistence: ${route} -> ${auth} -> drizzle-orm`;
+    const policy = {
+      entrypoints: [route],
+      exceptions: [
+        { edge, reason: 'Existing session infrastructure', removeWhen: 'Accounts gate' },
+      ],
+    };
+    const files = {
+      [route]: "import '@/auth';",
+      [auth]: "import 'drizzle-orm';",
+    };
+    expect(check(files, policy)).toEqual([]);
+    expect(check({ ...files, [auth]: 'export {};' }, policy)).toContain(`Stale exception: ${edge}`);
+    expect(
+      check(
+        {
+          ...files,
+          [route]: "import '@/auth'; import '@/lib/hidden-query';",
+          'src/lib/hidden-query.ts': "import 'drizzle-orm';",
+        },
+        policy
+      )
+    ).toContain(`entrypoint-persistence: ${route} -> src/lib/hidden-query.ts -> drizzle-orm`);
+    const other = 'src/app/api/other/route.ts';
+    expect(
+      check(
+        { ...files, [other]: "import '@/auth';" },
+        {
+          ...policy,
+          entrypoints: [route, other],
+        }
+      )
+    ).toContain(`entrypoint-persistence: ${other} -> ${auth} -> drizzle-orm`);
+  });
+
   it('keeps the manager-read exception exact and rejects it once the adapter disappears', () => {
     const adapter = 'src/features/players/server/services/player-user-read.service.ts';
     const legacy = 'src/lib/services/core/userService.ts';
