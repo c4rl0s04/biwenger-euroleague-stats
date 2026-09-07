@@ -632,3 +632,34 @@ One stream-close warning remained at existing iPhone15 shell-test teardown; no
 application workaround or log suppression was introduced. The baseline checkout
 was restored clean. The Profile implementation is locally complete and validated;
 integration, CI and production verification are the remaining release gates.
+
+## Manager Profile production release
+
+Implementation `612426cb` and browser/evidence commit `aba0271e` were integrated
+by clean fast-forward, carrying prior receipt `1a2c0c68`. Ordinary main push
+succeeded. Main and origin/main are `aba0271e374706ccf0353f1292fdfb8db8c69c64`.
+Vercel `dpl_6QGyfyBtvWXUQbgU3d65psLMNWC9` is READY at that exact SHA and the
+production alias (`advanced-euroleague-biwenger-stats-4m7tmd888.vercel.app`).
+
+Safe production verification passed: login/session 200; Profile and all five
+sections retain login redirects; Matches, Players and Team redirects remain.
+Explicit populated-manager statistics, rounds and squad reads return 200 with
+exact private/no-store headers; anonymous squad/rounds retain private 400s.
+Head-to-head still returns seven rows and matches its pre-release response hash.
+Deployment-scoped error/fatal and 5xx queries returned no entries; sampled responses
+and logs contained no sensitive-value patterns. These are bounded observations,
+not proof of all future requests. No authenticated production visual review or
+production mutation was performed.
+
+CI `34103352432` build/tests and formatting passed, but the browser job failed:
+62/63 cases passed; the tablet-768 Profile case and its retry reported cancelled
+shell RSC prefetches in the unchanged browser-error guard during desktop document
+navigation. The same failure class reproduced on the original application locally;
+the network-idle wait passed the full local suite but did not resolve CI reliably.
+No production regression has been demonstrated, and no rollback was performed.
+Release verification remains blocked until this test failure is resolved without
+weakening the error guard. No further feature or release work was started.
+Manager directory and unrelated analytics
+remain separate scopes, as listed in the [overview](migration-overview.md).
+This receipt is a local documentation follow-up to accompany the next batch, avoiding
+an extra deployment solely to record the deployment ID.
