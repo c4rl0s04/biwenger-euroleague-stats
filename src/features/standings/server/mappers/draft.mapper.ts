@@ -16,7 +16,9 @@ export function mapDraftPerformance(row: any): DraftPerformanceViewModel {
     user_name: String(row.user_name || ''),
     user_color_index: Number(row.user_color_index || 0),
     icon: row.icon ? String(row.icon) : null,
-    total_points: Number(row.total_points || row.actual_points || 0),
+    actual_points: Number(row.actual_points || 0),
+    potential_points: Number(row.potential_points || 0),
+    roi_percentage: Number(row.roi_percentage || 0),
   };
 }
 export function mapDraftPlayer(row: any): DraftPlayerViewModel {

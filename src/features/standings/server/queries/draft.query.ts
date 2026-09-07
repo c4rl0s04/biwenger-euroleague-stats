@@ -7,7 +7,9 @@ export interface InitialSquadPerformance {
   user_name: string;
   user_color_index: number;
   icon: string | null;
-  total_points: number;
+  actual_points: number;
+  potential_points: number;
+  roi_percentage: number;
 }
 
 export interface InitialSquadPotential {
@@ -24,7 +26,9 @@ export interface TheoreticalBreakdown {
   user_color_index: number;
   icon: string | null;
   player_name: string;
-  player_total_points: number;
+  player_actual_points: number;
+  potential_points: number;
+  roi_percentage: number;
 }
 
 export interface BestInitialSquadPlayer {
@@ -43,7 +47,9 @@ export interface InitialSquadRetainedPoints {
   user_color_index: number;
   icon: string | null;
   players_contributed: number;
-  total_points: number;
+  actual_points: number;
+  potential_points: number;
+  roi_percentage: number;
 }
 
 export interface InitialSquadPlayerBreakdown {
@@ -78,7 +84,9 @@ export interface InitialSquadPotentialAdvanced {
   user_name: string;
   user_color_index: number;
   icon: string | null;
-  total_points: number;
+  actual_points: number;
+  potential_points: number;
+  roi_percentage: number;
   total_value: number;
 }
 

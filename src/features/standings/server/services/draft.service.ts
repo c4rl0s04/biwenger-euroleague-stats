@@ -25,12 +25,10 @@ import {
  * Access: Public league statistics.
  * Freshness: Cached HTTP max-age=900, stale-while-revalidate=60
  */
-export const fetchInitialSquadAnalytics = cache(async () => {
+export const fetchInitialSquadAnalytics = async () => {
   const data = await getInitialSquadActualPerformance();
-  return {
-    performance: data.map(mapDraftPerformance),
-  };
-});
+  return data.map(mapDraftPerformance);
+};
 
 /**
  * Access: Public league statistics.

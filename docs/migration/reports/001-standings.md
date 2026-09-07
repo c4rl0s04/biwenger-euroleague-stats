@@ -103,3 +103,13 @@ Final status: READY FOR REVIEW
   - Database-disabled production build (`SKIP_DB=true npm run build`): PASS
 - **Commit SHA:** 4edbfd8d06b1cc30d9c662ce7722be0a7650972b
 - **Note:** CHECKPOINT A — awaiting review; remaining second-review findings still open.
+
+### Checkpoint B
+
+- **Completion Status:** Fixed `fetchInitialSquadAnalytics` and `GET /api/standings/analytics` to return the original structure (`{ success: true, data: [...] }`). Restored the correct fields: `user_id`, `user_name`, `user_color_index`, `icon`, `actual_points`, `potential_points`, `roi_percentage` in `draft.service.ts`, `models/draft.ts`, `draft.mapper.ts`, and `draft.query.ts`. Removed the React `cache` wrapper from `fetchInitialSquadAnalytics`. Added `draft-analytics-http.contract.test.ts` focused tests matching all contract requirements.
+- **Validation Results:**
+  - `npm run typecheck`: PASS
+  - `npm run architecture:check`: PASS (792 modules, 44 protected entrypoints)
+  - `npm run test:run -- src/features/standings src/app/api/standings --maxWorkers=2`: PASS (113 tests in 14 files)
+- **Commit SHA:** [to be appended]
+- **Note:** CHECKPOINT B — awaiting review; full Batch 001 remains incomplete.

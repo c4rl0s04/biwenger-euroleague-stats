@@ -3,7 +3,9 @@ export interface DraftPerformanceViewModel {
   user_name: string;
   user_color_index: number;
   icon: string | null;
-  total_points: number;
+  actual_points: number;
+  potential_points: number;
+  roi_percentage: number;
 }
 export interface DraftPlayerViewModel {
   user_id: string;
