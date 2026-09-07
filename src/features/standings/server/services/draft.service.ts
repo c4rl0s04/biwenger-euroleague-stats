@@ -19,6 +19,7 @@ import {
   getInitialSquadPotentialAdvanced,
   getInitialSquadsDetailed,
 } from '../queries/draft.query';
+import type { DraftStatsBundleViewModel } from '../../models/draft';
 
 /**
  * Access: Public league statistics.
@@ -33,7 +34,7 @@ export const fetchInitialSquadAnalytics = async () => {
  * Access: Public league statistics.
  * Freshness: Cached HTTP max-age=300, stale-while-revalidate=60
  */
-export const fetchInitialSquadStats = async () => {
+export const fetchInitialSquadStats = async (): Promise<DraftStatsBundleViewModel> => {
   const [
     bestDraftPerUser,
     retainedRanking,
@@ -59,6 +60,6 @@ export const fetchInitialSquadStats = async () => {
     regretRanking: regretRanking.map(mapDraftRegret),
     loyaltyRanking: loyaltyRanking.map(mapDraftLoyalty),
     potentialRanking: potentialRanking.map(mapDraftPotential),
-    detailedSquads: detailedSquads.map(mapDraftDetailed),
+    detailedSquads: (detailedSquads || []).map(mapDraftDetailed),
   };
 };

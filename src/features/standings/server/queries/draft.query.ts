@@ -21,17 +21,17 @@ export interface TheoreticalBreakdown {
 
 export interface BestInitialSquadPlayer {
   user_id: string;
-  user_name: string;
+  user_name: string | null;
   user_color_index: number;
   icon: string | null;
-  player_name: string;
+  player_name: string | null;
   player_id: number;
   total_fantasy_points: number;
 }
 
 export interface InitialSquadRetainedPoints {
   user_id: string;
-  user_name: string;
+  user_name: string | null;
   user_color_index: number;
   icon: string | null;
   players_contributed: number;
@@ -40,25 +40,25 @@ export interface InitialSquadRetainedPoints {
 
 export interface InitialSquadPlayerBreakdown {
   user_id: string;
-  user_name: string;
+  user_name: string | null;
   icon: string | null;
-  player_name: string;
+  player_name: string | null;
   points: number;
 }
 
 export interface InitialSquadRegret {
   user_id: string;
-  user_name: string;
+  user_name: string | null;
   user_color_index: number;
   icon: string | null;
   points_lost: number;
-  top_regret_player: string;
+  top_regret_player: string | null;
 }
 
 export interface InitialSquadLoyalty {
   user_id: string;
-  user_name: string;
-  user_color_index: number;
+  user_name: string | null;
+  user_color_index: number | null;
   icon: string | null;
   retained_count: number;
   initial_count: number;
@@ -67,8 +67,8 @@ export interface InitialSquadLoyalty {
 
 export interface InitialSquadPotentialAdvanced {
   user_id: string;
-  user_name: string;
-  user_color_index: number;
+  user_name: string | null;
+  user_color_index: number | null;
   icon: string | null;
   total_points: number;
   total_value: number;
@@ -303,15 +303,15 @@ export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]>
 }
 
 export interface InitialSquadDetailed {
-  user_id: string | number;
-  manager_name: string;
+  user_id: string;
+  manager_name: string | null;
   manager_color_index: number;
   player_id: number;
-  player_name: string;
-  player_position: string;
+  player_name: string | null;
+  player_position: string | null;
   current_points: number;
   current_price: number;
-  current_owner_id: string | number | null;
+  current_owner_id: string | null;
   current_owner: string | null;
   current_owner_color_index: number | null;
   points_contributed: number;
