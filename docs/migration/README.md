@@ -13,6 +13,8 @@ status: active
 
 Read [worker protocol](worker-protocol.md), then **only the assigned batch**.
 Pilot assignment: [001 — Standings read completion](batches/001-standings.md).
+Pilot review: [CHANGES_REQUESTED and worker correction order](reviews/001-standings.md).
+Resume the existing worker branch for corrections; do not start a new batch.
 One worker only. No background dispatch, automatic polling or automatic integration exists.
 Opening this file does not authorize starting every batch.
 
@@ -24,7 +26,7 @@ A worker result is **implemented — awaiting independent verification**, never 
 
 | ID   | Batch                                                                         | Dispatch state    | Dependency / next decision                      |
 | ---- | ----------------------------------------------------------------------------- | ----------------- | ----------------------------------------------- |
-| 001  | [Standings complete read experience](batches/001-standings.md)                | READY: pilot only | Pinned local Rounds base; see assignment        |
+| 001  | [Standings complete read experience](batches/001-standings.md)                | CHANGES_REQUESTED | Resume existing worker; see review              |
 | 002  | [Tournament analytics and screens](batches/002-tournaments.md)                | DRAFT / BLOCKED   | Pilot review; re-inventory current contracts    |
 | 003  | [Predictions read experience](batches/003-predictions.md)                     | DRAFT / BLOCKED   | Separate scoring/read-versus-write inventory    |
 | 004  | [Playoffs read experience](batches/004-playoffs.md)                           | DRAFT / BLOCKED   | Separate scoring/read-versus-write inventory    |
