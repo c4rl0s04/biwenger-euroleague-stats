@@ -1,5 +1,4 @@
 import 'server-only';
-import { cache } from 'react';
 import {
   mapDraftPerformance,
   mapDraftPlayer,
@@ -34,7 +33,7 @@ export const fetchInitialSquadAnalytics = async () => {
  * Access: Public league statistics.
  * Freshness: Cached HTTP max-age=300, stale-while-revalidate=60
  */
-export const fetchInitialSquadStats = cache(async () => {
+export const fetchInitialSquadStats = async () => {
   const [
     bestDraftPerUser,
     retainedRanking,
@@ -62,4 +61,4 @@ export const fetchInitialSquadStats = cache(async () => {
     potentialRanking: potentialRanking.map(mapDraftPotential),
     detailedSquads: detailedSquads.map(mapDraftDetailed),
   };
-});
+};

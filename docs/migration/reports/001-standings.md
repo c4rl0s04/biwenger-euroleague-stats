@@ -111,5 +111,15 @@ Final status: READY FOR REVIEW
   - `npm run typecheck`: PASS
   - `npm run architecture:check`: PASS (792 modules, 44 protected entrypoints)
   - `npm run test:run -- src/features/standings src/app/api/standings --maxWorkers=2`: PASS (113 tests in 14 files)
-- **Commit SHA:** [will be replaced]
+- **Commit SHA:** 09f42eebdf674c96997b5c250c7b9015b7eabf11
 - **Note:** CHECKPOINT B — awaiting review; full Batch 001 remains incomplete.
+
+### Checkpoint C
+
+- **Completion Status:** Removed React `cache` wrappers from all 15 assigned service exports in `performance.service.ts`, `theoretical.service.ts`, and `draft.service.ts` to restore the original async function behavior. Authored `service-cache.contract.test.ts` to assert via TypeScript AST that these 15 exports are function-like and not wrapped in React's `cache`.
+- **Validation Results:**
+  - `npm run typecheck`: PASS
+  - `npm run architecture:check`: PASS (792 modules, 44 protected entrypoints)
+  - `npm run test:run -- src/features/standings src/app/api/standings --maxWorkers=2`: PASS (116 tests in 15 files)
+- **Commit SHA:** b303f9aa950ccc73665601a12b594facb4d28dcf
+- **Note:** CHECKPOINT C — awaiting review; full batch incomplete.

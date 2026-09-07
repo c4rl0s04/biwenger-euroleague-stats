@@ -1,5 +1,4 @@
 import 'server-only';
-import { cache } from 'react';
 import {
   mapTheoreticalGapStat,
   mapLeagueComparisonStat,
@@ -16,19 +15,19 @@ import {
 import { getExtendedStandings } from '../queries/base.query';
 import { getUserPerformanceHistoryService } from '@/features/rounds/server';
 
-export const fetchTheoreticalGapStats = cache(async () => {
+export const fetchTheoreticalGapStats = async () => {
   return (await queryTheoreticalGapStats()).map(mapTheoreticalGapStat);
-});
-export const fetchLeagueComparisonStats = cache(async () => {
+};
+export const fetchLeagueComparisonStats = async () => {
   return (await queryLeagueComparisonStats()).map(mapLeagueComparisonStat);
-});
-export const fetchRivalryMatrixStats = cache(async () => {
+};
+export const fetchRivalryMatrixStats = async () => {
   return mapRivalryMatrixStat(await queryRivalryMatrixStats());
-});
-export const fetchHeatmapStats = cache(async () => {
+};
+export const fetchHeatmapStats = async () => {
   return mapHeatmapStat(await queryHeatmapStats());
-});
-export const fetchTheoreticalStandings = cache(async () => {
+};
+export const fetchTheoreticalStandings = async () => {
   const standings = await getExtendedStandings();
   const theoreticalData = await Promise.all(
     standings.map(async (user) => {
@@ -52,4 +51,4 @@ export const fetchTheoreticalStandings = cache(async () => {
   return theoreticalData
     .sort((a, b) => b.total_ideal - a.total_ideal)
     .map(mapTheoreticalStandingsStat);
-});
+};
