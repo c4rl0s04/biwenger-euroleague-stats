@@ -28,7 +28,7 @@ For current coverage and remaining work, see the [migration overview](migration-
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |
 | Players                                                  | Integrated; manager adapter removed in the read-foundations release                |
 | Rounds                                                   | Calendar foundation implemented; historical results and analysis remain legacy     |
-| Managers                                                 | Base/contributor reads released; Profile/directory remain legacy                   |
+| Managers                                                 | Profile read flow validated end-to-end; directory/other analytics remain           |
 | Standings                                                | Base/head-to-head reads released; remaining analytics/screens remain               |
 | Tournaments                                              | Core/participation reads released; analytics/screens remain                        |
 | Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                           |
@@ -550,3 +550,85 @@ presentation preserved. The [overview](migration-overview.md) distinguishes the
 remaining regular domain work, temporary adapters and separate security gates.
 This documentation-only receipt will accompany the next batch rather than trigger
 an additional deployment solely to record the deployment ID.
+
+## Manager Profile completion — in progress
+
+Branch `refactor/manager-profile-completion` starts from fetched clean main
+`084bd9fe` plus its local documentation receipt `1a2c0c68`. The main checkout and
+unrelated worktrees are preserved. Baseline typecheck, 66 focused Managers and
+Tournaments tests, and graph checks (738 modules, 15 entrypoints) passed.
+
+Scope: `/user/[id]` desktop/phone overview and `/user/[id]/[section]` for season,
+squad, evolution, contributors and competitions. Profile orchestration now uses
+the existing Managers services and deliberate Tournaments server contract. Pages
+retain framework parsing/presentation/section guards only. Profile-specific cards
+and screens move into Managers; shell-owned UserSelector stays global. Existing
+loading and parent error/auth boundaries remain unchanged.
+
+Compatibility: original ID strings remain uncoerced; mobile route matching and
+desktop hash redirects happen before reads. Main retains rendered missing-manager
+states, not new 404s. Phone overview starts two reads, desktop five; sections read
+statistics first and reuse them for season. Mobile rows explicitly preserve the
+legacy first-array/first-20 behavior (season transfers, squad risers), label/value
+precedence, links and Spanish formatting, including non-finite display text.
+No extra cache, internal REST request, database query or dependency is introduced.
+The existing League Dominance browser request retains independent loading/error
+behavior and the Standings API contract.
+
+Desktop Tournament participation has an explicit field allowlist. Malformed legacy
+phase functions/prototypes already rejected by RSC now fail before reaching presentation with
+a generic internal error; they are not coerced into a valid phase. Phone section
+projection still ignores those unused fields. Null-name and other existing invalid
+data behavior is not silently corrected during this structural move.
+
+Legacy user and Tournament adapters remain for Dashboard, Assistant, Lineup and
+other unmigrated callers; no duplicate queries are retained. Both Profile pages
+are registered in architecture policy without adding exceptions. Full validation,
+baseline browser comparison and release verification are pending; do not mark the
+Profile milestone complete yet.
+
+Independent source review found no compatibility blocker. The ten moved desktop
+JavaScript components have identical emitted runtime to their originals; typed
+JSDoc props and import paths establish ownership without visual changes. Focused
+combined tests passed (204); the full suite passed 1,043 tests with one existing
+skip. Lint retains 25 existing image warnings. Production audit reports zero
+findings; full audit reports five moderate development-tool findings in the
+unchanged lockfile (Drizzle/esbuild chain and humanfs). No dependencies changed.
+
+The unchanged original Profile at `1a2c0c68` passed desktop/iPhone semantic tests
+and 14 baseline screenshot comparisons using the same enriched synthetic fixture.
+Tests preserve real section-link navigation rather than suppressing WebKit console
+errors from aborted requests. Candidate browser comparison remains pending.
+Profile screenshots are explicitly macOS-only until original Linux baselines can
+be captured; Linux still runs all semantic checks and existing reference-feature
+visual checks. Docker was unavailable locally and no machine configuration changed.
+
+Combined `npm run verify` completed successfully on Node 24.20.0: skills, graph
+(743 modules, 17 protected entrypoints), docs (55 notes), typecheck, 1,043 tests
+plus one existing skip, lint, database-disabled production build, schema metadata
+(38 tables, no drift), Drizzle check and diff check. Build warnings only reported
+the baseline absent provider configuration. No application environment files were
+loaded and no production database was used. Full disposable browser verification
+is the remaining local release gate.
+
+Final source verification was repeated after guarding the inherited `__proto__`
+phase case: `npm run verify` passed with 1,044 tests and the same existing skip,
+lint/build warnings and schema results. The first complete candidate browser run
+passed 62/63 cases and all 14 original Profile screenshots; the tablet error guard
+caught hard-navigation cancellation. The unchanged original reproduced that failure
+three times (all completed responses 200, cancelled requests unresolved, no observed
+5xx). New tests now wait for network settling before desktop document navigation
+and log directly into the missing-profile target. No browser error guard is weakened.
+Two earlier local server stream-close messages correlated with existing shell-test
+teardown; source inspection identifies RSC cancellation, but those exact messages
+were not reproduced in three baseline shell runs. Baseline traces did show cancelled
+teardown requests and no 5xx. Keep these bounded observations distinct from production
+error checks. The final complete browser rerun remains pending.
+
+Final `npm run test:e2e:local` passed all 63 cases across nine viewports, including
+18 Profile cases and all 14 unchanged original Profile screenshots; existing
+Matches/Teams visual comparisons also passed. No browser/API error guard failed.
+One stream-close warning remained at existing iPhone15 shell-test teardown; no
+application workaround or log suppression was introduced. The baseline checkout
+was restored clean. The Profile implementation is locally complete and validated;
+integration, CI and production verification are the remaining release gates.

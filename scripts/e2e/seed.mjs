@@ -47,6 +47,36 @@ try {
   await client.query(
     "INSERT INTO player_seasons (season_id,player_id,team_id,owner_id,puntos,partidos_jugados,price,price_increment,status) VALUES ('2025-26',99101,9901,'99001',24,1,1500000,25000,'ok')"
   );
+  // Profile-only historical facts: no changes to the existing Team/Matches fixture projections.
+  await client.query(
+    "INSERT INTO user_rounds (season_id,user_id,round_id,round_name,points,participated) VALUES ('2025-26','99001',1,'Jornada 1',24,TRUE),('2025-26','99001',2,'Jornada 2',31,TRUE),('2025-26','99002',1,'Jornada 1',20,TRUE),('2025-26','99002',2,'Jornada 2',35,TRUE)"
+  );
+  for (let index = 1; index <= 12; index++) {
+    const playerId = 99200 + index;
+    await client.query(
+      "INSERT INTO players (id,name,position,img) VALUES ($1,$2,'1','/icons/icon-192.png')",
+      [playerId, `Fixture Contributor ${String(index).padStart(2, '0')}`]
+    );
+    await client.query(
+      "INSERT INTO player_round_stats (season_id,player_id,round_id,fantasy_points) VALUES ('2025-26',$1,1,$2)",
+      [playerId, 20 - index]
+    );
+    await client.query(
+      "INSERT INTO lineups (season_id,user_id,round_id,round_name,player_id,is_captain,role) VALUES ('2025-26','99001',1,'Jornada 1',$1,FALSE,'titular')",
+      [playerId]
+    );
+  }
+  await client.query(
+    "INSERT INTO tournaments (season_id,id,name,type,status,data_json,updated_at) VALUES ('2025-26',99301,'Fixture Profile League','league','active','{}',1),('2025-26',99302,'Fixture Profile Cup','playoff','finished',$1,2)",
+    [
+      JSON.stringify({
+        winner: { id: 99001, name: 'Fixture Manager', icon: '/icons/icon-192.png' },
+      }),
+    ]
+  );
+  await client.query(
+    "INSERT INTO tournament_standings (season_id,tournament_id,phase_name,group_name,user_id,position,points,won,drawn,lost,scored,against) VALUES ('2025-26',99301,'League','A','99001',1,12,4,0,0,90,70)"
+  );
   await client.query('COMMIT');
   console.log('Disposable E2E schema and synthetic league fixture ready.');
 } catch (error) {

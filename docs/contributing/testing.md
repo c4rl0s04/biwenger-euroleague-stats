@@ -87,6 +87,12 @@ during screenshots. Service workers are blocked to make request interception det
 checks verify public routes, manifest, and worker response headers, not installed offline caching.
 Local Vercel analytics script requests receive an empty script because this harness is not hosted on Vercel.
 
+Manager Profile adds synthetic contributor, season and tournament facts, with semantic
+checks across the configured viewports and 14 desktop/iPhone macOS snapshots captured
+from the pre-migration implementation (`1a2c0c68`). Its Linux screenshot baseline is
+still pending; Linux runs the semantic checks but must not initialize Profile snapshots
+from migrated output. Existing Matches and Team Linux comparisons remain enabled.
+
 Visual comparisons use committed snapshots for supported platforms. Intentional appearance changes
 require inspecting the output and updating baselines with `npm run test:e2e:update`; never update
 snapshots solely to hide a regression. Browser failures retain screenshots and traces in

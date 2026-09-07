@@ -16,43 +16,47 @@ and historical decisions live in the [migration ledger](migration-status.md).
 
 ## Established reference flows
 
-Matches, Team Profile and Players catalogue/profile have feature-owned read services,
+Matches, Team Profile, Players catalogue/profile and Manager Profile have feature-owned read services,
 models and desktop/mobile composition. Their public/server contracts, HTTP compatibility,
 server guards and transitive import graphs are tested. Some explicitly retained shared
 query adapters remain; these references are not a claim that all global code is gone.
 
 ## Read foundations and their remaining work
 
-| Domain      | Established boundary                                           | Still to migrate                                                    |
-| ----------- | -------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Rounds      | Calendar and current/next/last-round policy                    | History, results, analysis and screens                              |
-| Managers    | Season statistics, squad, recent rounds and contributors       | Profile orchestration/screens, directory and remaining analytics    |
-| Standings   | Base rankings, league overview, value and virtual head-to-head | Performance/draft analytics, other advanced projections and screens |
-| Search      | Validated directory search, typed results and HTTP service     | Shell/search interaction ownership during the shared UI pass        |
-| Tournaments | List/detail, standings, fixtures and manager participation     | Tournament analytics, page composition and components               |
+| Domain      | Established boundary                                                                 | Still to migrate                                                    |
+| ----------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| Rounds      | Calendar and current/next/last-round policy                                          | History, results, analysis and screens                              |
+| Managers    | Complete Profile read flow, squad, season statistics, recent rounds and contributors | Directory and other manager analytics                               |
+| Standings   | Base rankings, league overview, value and virtual head-to-head                       | Performance/draft analytics, other advanced projections and screens |
+| Search      | Validated directory search, typed results and HTTP service                           | Shell/search interaction ownership during the shared UI pass        |
+| Tournaments | List/detail, standings, fixtures and manager participation                           | Tournament analytics, page composition and components               |
 
-## Current batch: Manager Profile dependencies
+## Current milestone: Manager Profile
 
-`refactor/profile-dependencies-batch` starts from production `881e4818`, includes the
-previous release receipt, and combines three isolated implementation branches:
+`refactor/manager-profile-completion` completes feature ownership for `/user/[id]`:
+desktop Profile, phone overview, and the five phone sections (`season`, `squad`,
+`evolution`, `contributors`, `competitions`). Pages call Managers services directly;
+its models, mappers, orchestration, cards and screens live inside the feature.
+Tournaments and Standings retain ownership of their underlying domain information.
+Existing URLs, access, caching, ordering, empty/error behavior and visuals are preserved.
 
-- `refactor/tournament-read-core`: tournament list/details, standings, fixtures and
-  manager participation; existing tournament and Manager Profile consumers retain adapters.
-- `refactor/manager-contributors`: the lineup-derived top-contributor projection,
-  with captain/bench rules unchanged; Profile and Assistant keep their existing contract.
-- `refactor/standings-head-to-head`: virtual all-play-all records, including the existing
-  `/api/standings/advanced?type=all-play-all` dispatch branch and 15-minute season cache.
+Local validation passed: 1,044 unit/contract tests plus one existing skip, the full
+verification workflow, 63 browser cases across nine viewports, and all 14 original
+desktop/iPhone Profile screenshots. Profile Linux screenshot baselines and an
+authenticated real-production-data visual review remain manual follow-ups, not
+unfinished Profile implementation. Release evidence is recorded in the ledger.
 
-The combined implementation is released at `084bd9fe`; validation and deployment
-evidence is recorded in the ledger. It does not move Manager Profile or Tournament screens,
-rename APIs, change statistical formulas, or migrate every branch of the advanced
-Standings endpoint. Its purpose is to make the remaining Profile reads available
-through deliberate domain contracts, enabling a focused composition pass next.
+The manager directory and unrelated manager analytics are separate pending scopes;
+this milestone does not claim that every Managers-domain capability is migrated.
+Legacy user/Tournament adapters stay for other consumers, while Profile no longer
+imports the global service barrel. Reports distinguish **complete user-facing
+scopes**, **partial domain foundations**, and **not-yet-migrated areas**. A data-service
+extraction alone is not a completed feature.
 
 ## Remaining regular migration work
 
-1. Complete Manager Profile orchestration and desktop/mobile screen ownership using
-   Managers and Tournaments contracts; migrate the manager directory separately.
+1. Migrate the manager directory and remaining manager analytics separately from the
+   completed Profile read experience.
 2. Finish Rounds history/analysis, Standings performance and initial-squad/draft analytics,
    and Tournament analytics/screens as bounded slices with formula characterization.
 3. Establish Predictions and Playoffs read ownership without merging their distinct scoring rules.
