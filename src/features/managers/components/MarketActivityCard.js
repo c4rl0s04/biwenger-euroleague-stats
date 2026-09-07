@@ -11,6 +11,7 @@ import {
 import { ElegantCard, AnimatedNumber } from '@/components/ui';
 import Link from 'next/link';
 
+/** @param {{ stats: import('../models/manager-reads').ManagerSeasonStatsViewModel | null }} props */
 export default function MarketActivityCard({ stats }) {
   if (!stats) return null;
 

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { ElegantCard } from '@/components/ui';
 import { getScoreColor } from '@/lib/utils/format';
 
+/** @param {{ squad: import('../models/manager-reads').ManagerSquadViewModel | null }} props */
 export default function UserSquadAnalysisCard({ squad }) {
   if (!squad || !squad.players || squad.players.length === 0) {
     return (

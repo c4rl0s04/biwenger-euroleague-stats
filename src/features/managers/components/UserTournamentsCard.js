@@ -16,6 +16,7 @@ import {
 import { ElegantCard } from '@/components/ui';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/** @param {{ tournaments: import('@/features/tournaments/public').ManagerTournamentParticipation[] | null }} props */
 export default function UserTournamentsCard({ tournaments }) {
   if (!tournaments || tournaments.length === 0) {
     return (

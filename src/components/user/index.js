@@ -7,13 +7,3 @@
  */
 
 export { default as UserSelector } from './UserSelector';
-export { default as ManagerProfileClient } from './ManagerProfileClient';
-export { default as ManagerIdentityCard } from './ManagerIdentityCard';
-export { default as SeasonRecordsCard } from './SeasonRecordsCard';
-export { default as MarketActivityCard } from './MarketActivityCard';
-export { default as LeagueDominanceCard } from './LeagueDominanceCard';
-export { default as UserTournamentsCard } from './UserTournamentsCard';
-export { default as UserTrophyCabinetCard } from './UserTrophyCabinetCard';
-export { default as UserSquadAnalysisCard } from './UserSquadAnalysisCard';
-export { default as PointsEvolutionChart } from './PointsEvolutionChart';
-export { default as UserTopContributorsCard } from './UserTopContributorsCard';

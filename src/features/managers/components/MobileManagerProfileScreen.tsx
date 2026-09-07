@@ -7,16 +7,16 @@ import {
   MobileScreen,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type RecordValue = Record<string, any>;
+import type { ManagerSeasonStatsViewModel, ManagerSquadViewModel } from '../models/manager-reads';
 
 export default function MobileManagerProfileScreen({
   stats,
   squad,
 }: {
-  stats: RecordValue;
-  squad: RecordValue;
+  stats: ManagerSeasonStatsViewModel;
+  squad: ManagerSquadViewModel;
 }) {
   return (
     <MobileScreen labelledBy="mobile-screen-title">

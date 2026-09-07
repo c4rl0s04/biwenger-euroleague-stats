@@ -4,7 +4,9 @@ import { Swords, Trophy, Percent, TrendingUp, TrendingDown, Minus } from 'lucide
 import { ElegantCard, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
+/** @param {{ userId: string | number }} props */
 export default function LeagueDominanceCard({ userId }) {
+  /** @type {{ data?: import('@/features/standings/public').AllPlayAllEntry[], loading: boolean }} */
   const { data: allPlayAll = [], loading } = useApiData(
     '/api/standings/advanced?type=all-play-all'
   );

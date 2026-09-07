@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { ElegantCard, AnimatedNumber } from '@/components/ui';
 
+/** @param {{ stats: import('../models/manager-reads').ManagerSeasonStatsViewModel | null }} props */
 export default function SeasonRecordsCard({ stats }) {
   if (!stats) return null;
 

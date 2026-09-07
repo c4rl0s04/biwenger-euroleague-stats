@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ElegantCard } from '@/components/ui';
 
+/** @param {{ contributors: import('../models/manager-contributors').ManagerContributorViewModel[] | null }} props */
 export default function UserTopContributorsCard({ contributors }) {
   const [isExpanded, setIsExpanded] = useState(false);
 

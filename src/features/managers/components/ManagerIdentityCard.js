@@ -6,6 +6,7 @@ import { ElegantCard } from '@/components/ui';
 import Image from 'next/image';
 import { cloneElement } from 'react';
 
+/** @param {{ stats: import('../models/manager-reads').ManagerSeasonStatsViewModel | null }} props */
 export default function ManagerIdentityCard({ stats }) {
   if (!stats) return null;
 

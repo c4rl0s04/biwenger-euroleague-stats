@@ -41,6 +41,7 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
+/** @param {{ recentRounds: import('../models/manager-reads').ManagerRoundsViewModel | null }} props */
 export default function PointsEvolutionChart({ recentRounds }) {
   const data = useMemo(() => {
     if (!recentRounds || !recentRounds.rounds) return [];

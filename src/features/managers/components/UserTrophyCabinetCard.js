@@ -5,6 +5,7 @@ import { ElegantCard } from '@/components/ui';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
+/** @param {{ tournaments: import('@/features/tournaments/public').ManagerTournamentParticipation[] | null, stats?: import('../models/manager-reads').ManagerSeasonStatsViewModel }} props */
 export default function UserTrophyCabinetCard({ tournaments }) {
   // Extract Trophies only from finished tournaments
   const trophies = [];

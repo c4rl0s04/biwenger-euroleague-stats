@@ -25,6 +25,7 @@ import UserSquadAnalysisCard from './UserSquadAnalysisCard';
 import PointsEvolutionChart from './PointsEvolutionChart';
 import UserTopContributorsCard from './UserTopContributorsCard';
 
+/** @param {{ stats: import('../models/manager-reads').ManagerSeasonStatsViewModel | null, squad: import('../models/manager-reads').ManagerSquadViewModel, recentRounds: import('../models/manager-reads').ManagerRoundsViewModel, tournaments: import('@/features/tournaments/public').ManagerTournamentParticipation[], topContributors: import('../models/manager-contributors').ManagerContributorViewModel[] }} props */
 export default function ManagerProfileClient({
   stats,
   squad,
