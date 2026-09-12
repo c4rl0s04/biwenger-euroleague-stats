@@ -13,6 +13,13 @@ status: active
 
 Read [worker protocol](worker-protocol.md), then **only the assigned batch**.
 Pilot assignment: [001 — Standings read completion](batches/001-standings.md).
+Latest pilot review: [C accepted; checkpoint D assignment](reviews/006-standings.md).
+Previous checkpoint: [B accepted; checkpoint C assignment](reviews/005-standings.md).
+Previous correction: [checkpoint B corrections](reviews/004-standings.md).
+Previous checkpoint: [A accepted; B assignment](reviews/003-standings.md).
+Open batch findings: [second review](reviews/002-standings.md).
+Earlier evidence: [first review](reviews/001-standings.md).
+Resume the existing worker branch for corrections; do not start a new batch.
 One worker only. No background dispatch, automatic polling or automatic integration exists.
 Opening this file does not authorize starting every batch.
 
@@ -24,7 +31,7 @@ A worker result is **implemented — awaiting independent verification**, never 
 
 | ID   | Batch                                                                         | Dispatch state    | Dependency / next decision                      |
 | ---- | ----------------------------------------------------------------------------- | ----------------- | ----------------------------------------------- |
-| 001  | [Standings complete read experience](batches/001-standings.md)                | READY: pilot only | Pinned local Rounds base; see assignment        |
+| 001  | [Standings complete read experience](batches/001-standings.md)                | CHANGES_REQUESTED | Resume existing worker; see review              |
 | 002  | [Tournament analytics and screens](batches/002-tournaments.md)                | DRAFT / BLOCKED   | Pilot review; re-inventory current contracts    |
 | 003  | [Predictions read experience](batches/003-predictions.md)                     | DRAFT / BLOCKED   | Separate scoring/read-versus-write inventory    |
 | 004  | [Playoffs read experience](batches/004-playoffs.md)                           | DRAFT / BLOCKED   | Separate scoring/read-versus-write inventory    |
