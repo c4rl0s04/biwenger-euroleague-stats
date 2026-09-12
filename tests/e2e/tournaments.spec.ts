@@ -45,7 +45,7 @@ test('Tournament catalogue, league, cup and phone sections preserve their read e
     ['99301', 'Fixture Profile League'],
     ['99302', 'Fixture Profile Cup'],
   ]) {
-    await page.goto(`/tournaments/${id}`);
+    await page.locator(`a[href="/tournaments/${id}"]`).first().click();
     await expect(page.getByRole('heading', { name: title, exact: true }).first()).toBeVisible();
     if (phone) {
       await expect(page.locator(`a[href="/tournaments/${id}/standings"]`)).toBeVisible();
@@ -64,7 +64,8 @@ test('Tournament catalogue, league, cup and phone sections preserve their read e
           await expect(page.locator('a[href="/user/99001"]').first()).toBeVisible();
         }
         await capture(page, info, `tournament-${id}-${section}`);
-        await page.goto(`/tournaments/${id}`);
+        await page.getByRole('link', { name: `Volver a ${title}`, exact: true }).click();
+        await expect(page.getByRole('heading', { name: title, exact: true }).first()).toBeVisible();
       }
     } else {
       await expect(page.getByText('Fixture Manager', { exact: true }).first()).toBeVisible();
@@ -74,5 +75,7 @@ test('Tournament catalogue, league, cup and phone sections preserve their read e
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
     ).toBe(true);
+    await page.locator('a[href="/tournaments"]').first().click();
+    await expect(page.getByRole('heading', { name: 'Torneos', exact: true })).toBeVisible();
   }
 });
