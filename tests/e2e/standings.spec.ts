@@ -1,6 +1,23 @@
+import type { Page, TestInfo } from 'playwright/test';
 import { test, expect } from './fixtures';
 
-test('Standings overview and phone sections retain their read experience', async ({ page }) => {
+async function capture(page: Page, info: TestInfo, name: string) {
+  // References are captured from unchanged 38bf2de4 on macOS, never candidate output.
+  if (process.platform !== 'darwin' || !['iphone-13', 'desktop-1440'].includes(info.project.name))
+    return;
+  await page.evaluate(() => document.fonts.ready);
+  await page.mouse.move(0, 0);
+  await expect(page).toHaveScreenshot(name + '.png', {
+    fullPage: false,
+    animations: 'disabled',
+    timeout: 60000,
+    stylePath: 'tests/e2e/screenshot.css',
+  });
+}
+
+test('Standings overview and phone sections retain their read experience', async ({
+  page,
+}, info) => {
   test.setTimeout(180000);
   test.skip(!process.env.BIWENGER_E2E_DISPOSABLE, 'Requires the disposable synthetic league.');
   await page.goto('/login?callbackUrl=%2Fstandings');
@@ -13,6 +30,7 @@ test('Standings overview and phone sections retain their read experience', async
   const phone =
     (await page.locator('[data-presentation]').getAttribute('data-presentation')) === 'phone';
   if (phone) {
+    await capture(page, info, 'standings-overview');
     const sections = [
       ['progression', 'Evolución'],
       ['rounds', 'Jornadas'],
@@ -34,6 +52,7 @@ test('Standings overview and phone sections retain their read experience', async
       if (section === 'captains') {
         await expect(page.locator('a[href="/user/99001"]').first()).toBeVisible();
       }
+      await capture(page, info, `standings-${section}`);
       await page.getByRole('link', { name: 'Volver a Clasificación' }).click();
       await expect(page.getByRole('heading', { name: 'Clasificación', exact: true })).toBeVisible();
     }
@@ -46,5 +65,25 @@ test('Standings overview and phone sections retain their read experience', async
         .filter({ visible: true })
         .first()
     ).toBeVisible();
+    await page
+      .locator('#general-standings')
+      .evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    await capture(page, info, 'standings-ranking');
+    const progression = page.locator('#progression');
+    await progression.evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    const chart = progression.locator('.recharts-wrapper').first();
+    await expect(chart.locator('.recharts-line-curve')).toHaveCount(2);
+    await expect
+      .poll(async () =>
+        chart
+          .locator('.recharts-line-curve')
+          .evaluateAll((lines) => lines.every((line) => (line.getAttribute('d')?.length ?? 0) > 10))
+      )
+      .toBe(true);
+    await capture(page, info, 'standings-progression');
+    await progression.getByRole('button', { name: 'Fixture Manager', exact: true }).first().click();
+    await expect(chart.locator('.recharts-line-curve')).toHaveCount(1);
+    await progression.getByRole('button', { name: 'All', exact: true }).first().click();
+    await expect(chart.locator('.recharts-line-curve')).toHaveCount(2);
   }
 });
