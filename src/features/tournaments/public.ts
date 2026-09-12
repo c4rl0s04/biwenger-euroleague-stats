@@ -21,3 +21,4 @@ export {
   TournamentHistoryTable,
   RecordsSection,
 } from './components';
+export { default as DesktopTournamentsScreen } from './components/screens/DesktopTournamentsScreen';
