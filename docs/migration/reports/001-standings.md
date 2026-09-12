@@ -12,7 +12,7 @@ status: active
 ## Identity
 
 - Batch: 001-standings
-- Status: READY_FOR_REVIEW — implementation complete locally; independent release checks remain.
+- Status: VERIFIED — see [combined release receipt](rounds-standings-release.md) for the subsequent full browser review and release state.
 - Branch and absolute worktree: `refactor/standings-read-completion`, `/Users/carlosandreshuete/Documents/Projects/biwengerstats-next-standings-read-completion`
 - Exact starting SHA: 38bf2de48fc1c73165389536ef7ecbed2307ebad
 - Source commit SHAs: see coordinator completion receipt below.
@@ -218,7 +218,10 @@ WebKit request cancellation; selected the visible desktop responsive table row. 
 not weakened. A full-suite graph test exceeded its existing 5-second timeout during concurrent
 build/browser activity, then passed both in isolation and in the sequential full verification.
 
-### Remaining acceptance limits
+### Acceptance limits at implementation handoff (historical)
+
+The later [combined release receipt](rounds-standings-release.md) supersedes the local
+browser/review limits below; retain this section as the original handoff record.
 
 The Standings-only browser suite is not the entire repository browser suite. No new screenshot
 baseline was generated from the candidate. A full cross-feature browser run and unchanged-base

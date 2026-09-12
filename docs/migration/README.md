@@ -13,13 +13,14 @@ status: active
 
 Read [worker protocol](worker-protocol.md), then **only the assigned batch**.
 Pilot assignment: [001 — Standings read completion](batches/001-standings.md).
-Latest pilot review: [C accepted; checkpoint D assignment](reviews/006-standings.md).
+Historical pilot review: [C accepted; checkpoint D assignment](reviews/006-standings.md).
 Previous checkpoint: [B accepted; checkpoint C assignment](reviews/005-standings.md).
 Previous correction: [checkpoint B corrections](reviews/004-standings.md).
 Previous checkpoint: [A accepted; B assignment](reviews/003-standings.md).
-Open batch findings: [second review](reviews/002-standings.md).
+Historical batch findings: [second review](reviews/002-standings.md).
 Earlier evidence: [first review](reviews/001-standings.md).
-Resume the existing worker branch for corrections; do not start a new batch.
+Current status: implementation complete; see the [release receipt](reports/rounds-standings-release.md).
+Do not redispatch the historical checkpoint assignments or start a new batch automatically.
 One worker only. No background dispatch, automatic polling or automatic integration exists.
 Opening this file does not authorize starting every batch.
 
@@ -29,21 +30,21 @@ A worker result is **implemented — awaiting independent verification**, never 
 
 ## Queue
 
-| ID   | Batch                                                                         | Dispatch state    | Dependency / next decision                      |
-| ---- | ----------------------------------------------------------------------------- | ----------------- | ----------------------------------------------- |
-| 001  | [Standings complete read experience](batches/001-standings.md)                | CHANGES_REQUESTED | Resume existing worker; see review              |
-| 002  | [Tournament analytics and screens](batches/002-tournaments.md)                | DRAFT / BLOCKED   | Pilot review; re-inventory current contracts    |
-| 003  | [Predictions read experience](batches/003-predictions.md)                     | DRAFT / BLOCKED   | Separate scoring/read-versus-write inventory    |
-| 004  | [Playoffs read experience](batches/004-playoffs.md)                           | DRAFT / BLOCKED   | Separate scoring/read-versus-write inventory    |
-| 005  | [Manager directory and remaining analytics](batches/005-manager-directory.md) | DRAFT / BLOCKED   | Protect existing Profile and Lineup consumers   |
-| 006  | [Schedule composition](batches/006-schedule.md)                               | DRAFT / BLOCKED   | Matches/Rounds/squad contracts                  |
-| 007  | [Public Market reads](batches/007-market-reads.md)                            | DRAFT / BLOCKED   | Explicit read/private-operation boundary review |
-| 008  | [Dashboard composition](batches/008-dashboard.md)                             | DRAFT / BLOCKED   | Owning analytics contracts available            |
-| 009  | [Compare composition](batches/009-compare.md)                                 | DRAFT / BLOCKED   | Standings/Managers/Rounds contracts available   |
-| 010  | [Home and News reads](batches/010-home-news.md)                               | DRAFT / BLOCKED   | Validate ownership; split if contracts differ   |
-| 011  | [Season Review ownership](batches/011-season-review.md)                       | DRAFT / BLOCKED   | Pure engine/artifact-reader inventory           |
-| 012  | [Shell and remaining adapters](batches/012-shell.md)                          | DRAFT / BLOCKED   | Domain consumers accounted for                  |
-| Gate | [Security-sensitive deferred areas](security-gates.md)                        | NOT AUTHORIZED    | Separate explicit scope/security approval       |
+| ID   | Batch                                                                         | Dispatch state  | Dependency / next decision                      |
+| ---- | ----------------------------------------------------------------------------- | --------------- | ----------------------------------------------- |
+| 001  | [Standings complete read experience](batches/001-standings.md)                | VERIFIED        | See current release receipt                     |
+| 002  | [Tournament analytics and screens](batches/002-tournaments.md)                | DRAFT / BLOCKED | Pilot review; re-inventory current contracts    |
+| 003  | [Predictions read experience](batches/003-predictions.md)                     | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory    |
+| 004  | [Playoffs read experience](batches/004-playoffs.md)                           | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory    |
+| 005  | [Manager directory and remaining analytics](batches/005-manager-directory.md) | DRAFT / BLOCKED | Protect existing Profile and Lineup consumers   |
+| 006  | [Schedule composition](batches/006-schedule.md)                               | DRAFT / BLOCKED | Matches/Rounds/squad contracts                  |
+| 007  | [Public Market reads](batches/007-market-reads.md)                            | DRAFT / BLOCKED | Explicit read/private-operation boundary review |
+| 008  | [Dashboard composition](batches/008-dashboard.md)                             | DRAFT / BLOCKED | Owning analytics contracts available            |
+| 009  | [Compare composition](batches/009-compare.md)                                 | DRAFT / BLOCKED | Standings/Managers/Rounds contracts available   |
+| 010  | [Home and News reads](batches/010-home-news.md)                               | DRAFT / BLOCKED | Validate ownership; split if contracts differ   |
+| 011  | [Season Review ownership](batches/011-season-review.md)                       | DRAFT / BLOCKED | Pure engine/artifact-reader inventory           |
+| 012  | [Shell and remaining adapters](batches/012-shell.md)                          | DRAFT / BLOCKED | Domain consumers accounted for                  |
+| Gate | [Security-sensitive deferred areas](security-gates.md)                        | NOT AUTHORIZED  | Separate explicit scope/security approval       |
 
 Drafts are planning placeholders, **not executable specifications**. IDs are tracking identifiers,
 not promises that every batch is equally sized or that unrelated work must run sequentially.
@@ -75,11 +76,11 @@ assign a single owner or explicit per-worker changes, then review sequentially o
 A worktree is isolation, not a lock on logical contracts. Workers never resolve cross-batch conflicts,
 rebase each other, merge, force-push or change another worker's checkout.
 
-## Current Git checkpoint
+## Original Git checkpoint (historical)
 
 Application baseline: `5be73a8eb1edd18b1e7ced259488e0da51f3e3d7` on
 `refactor/rounds-read-completion`. Main was `713d2a3b` when this pack was created.
-Rounds and the preceding Profile receipt remain local/unmerged. This documentation pack
+At dispatch, Rounds and the preceding Profile receipt were local/unmerged. This documentation pack
 is stacked on that Rounds commit on `docs/migration-worker-playbook`.
 Do not mistake that local stack for production, or independently integrate its descendants.
 

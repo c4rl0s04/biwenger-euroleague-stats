@@ -128,6 +128,13 @@ snapshots solely to hide a regression. Browser failures retain screenshots and t
 
 ## Test responsibilities
 
+Standings adds nine phone references (overview plus eight sections) and desktop ranking/progression
+references captured from unchanged `38bf2de4` with the same synthetic fixture. The original passed
+a second run without snapshot updates. Candidate comparisons must use these images unchanged.
+Desktop assertions require both plotted lines and exercise manager filtering; screenshots do not
+accept an axes-only chart. Like Rounds/Profile, these new references are macOS-specific; Linux runs
+the semantic checks without creating new visual baselines from migrated output.
+
 - Route contracts: actual handlers, identity precedence, status codes, validation, envelopes,
   authorization, cache headers, and error paths with mocked data access.
 - Services/mappers: success, empty, not-found, deterministic ordering, serializable output, and errors.

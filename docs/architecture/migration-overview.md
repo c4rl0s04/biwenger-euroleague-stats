@@ -14,6 +14,17 @@ This is a scope summary, not a percentage-complete estimate. A feature directory
 not mean its screens, queries, APIs and operations are all migrated. Release evidence
 and historical decisions live in the [migration ledger](migration-status.md).
 
+## Status vocabulary
+
+- **Implemented:** code and tests committed on a feature branch.
+- **Verified:** the recorded local acceptance checks passed.
+- **Integrated:** the commits are ancestors of main.
+- **Deployed:** production serves the verified main commit.
+
+The current Rounds/Standings integration is tracked in the
+[release receipt](../migration/reports/rounds-standings-release.md).
+Implementation completion is not a claim that every broader domain or legacy consumer is migrated.
+
 ## Established reference flows
 
 Matches, Team Profile, Players catalogue/profile and Manager Profile have feature-owned read services,
@@ -23,13 +34,13 @@ query adapters remain; these references are not a claim that all global code is 
 
 ## Read foundations and their remaining work
 
-| Domain      | Established boundary                                                                     | Still to migrate                                                            |
-| ----------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Rounds      | Calendar plus historical results, analysis, APIs and desktop/phone screens (local batch) | Separate Home/Dashboard last-round projections and legacy consumer adapters |
-| Managers    | Complete Profile read flow, squad, season statistics, recent rounds and contributors     | Directory and other manager analytics                                       |
-| Standings   | Base rankings, league overview, value and virtual head-to-head                           | Performance/draft analytics, other advanced projections and screens         |
-| Search      | Validated directory search, typed results and HTTP service                               | Shell/search interaction ownership during the shared UI pass                |
-| Tournaments | List/detail, standings, fixtures and manager participation                               | Tournament analytics, page composition and components                       |
+| Domain      | Established boundary                                                                              | Still to migrate                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Rounds      | Calendar plus historical results, analysis, APIs and desktop/phone screens (completed read slice) | Separate Home/Dashboard last-round projections and legacy consumer adapters |
+| Managers    | Complete Profile read flow, squad, season statistics, recent rounds and contributors              | Directory and other manager analytics                                       |
+| Standings   | Complete rankings, progression, performance/draft analytics, APIs and screens                     | External leader-gap/league-average consumers and adapter retirement         |
+| Search      | Validated directory search, typed results and HTTP service                                        | Shell/search interaction ownership during the shared UI pass                |
+| Tournaments | List/detail, standings, fixtures and manager participation                                        | Tournament analytics, page composition and components                       |
 
 ## Previous deployed milestone: Manager Profile
 
@@ -53,7 +64,7 @@ imports the global service barrel. Reports distinguish **complete user-facing
 scopes**, **partial domain foundations**, and **not-yet-migrated areas**. A data-service
 extraction alone is not a completed feature.
 
-## Current batch: Rounds historical read experience
+## Completed implementation: Rounds and Standings read experiences
 
 `refactor/rounds-read-completion` moves `/rounds`, its four phone sections and all
 eight `/api/rounds/*` handlers into Rounds ownership. Query extraction, typed mapping,
@@ -66,12 +77,17 @@ Legacy query/service adapters remain for other consumers. The old HeadToHeadCard
 owned by the pending Compare experience, not an unfinished Rounds screen. Separate
 Home/Dashboard last-round projections and Predictions helpers remain outside this batch.
 
+Standings now owns its desktop and phone overview, eight phone sections, all 19 HTTP
+handlers and 13 advanced dispatcher variants. Its bounded services/queries/mappers preserve
+formulas, ID/null distinctions, route-specific caching and external compatibility adapters.
+The [Standings implementation report](../migration/reports/001-standings.md) records corrections;
+the release receipt distinguishes local checks from integration and deployment.
+
 ## Remaining regular migration work
 
 1. Migrate the manager directory and remaining manager analytics separately from the
    completed Profile read experience.
-2. Finish Standings performance and initial-squad/draft analytics,
-   and Tournament analytics/screens as bounded slices with formula characterization.
+2. Finish Tournament analytics/screens as the next bounded slice, reusing its migrated core.
 3. Establish Predictions and Playoffs read ownership without merging their distinct scoring rules.
 4. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.

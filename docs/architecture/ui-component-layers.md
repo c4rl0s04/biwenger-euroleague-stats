@@ -22,15 +22,15 @@ The [design context](../product/design-system.md) remains the authority for curr
 
 ## Layers, from foundations to complete screens
 
-| Layer | Responsibility | Examples and ownership |
-| --- | --- | --- |
-| Design tokens | Central visual values and semantic roles | Colors, spacing, typography, radii and shadows; build on existing global CSS tokens and Tailwind mapping |
-| UI primitives | Small domain-independent visual elements | Button, badge, input, card frame, skeleton; shared UI |
-| Reusable compositions | Repeated combinations of primitives, without domain rules | Metric tile, chart frame, empty-state panel; share only when actual reuse justifies it |
-| Feature components | Domain-specific content and interactions | StandingsTable, PlayerStatisticsCard, MatchRow; owning feature |
-| Feature sections | Group related feature components into a meaningful screen region | RankingSection, PerformanceSection; owning feature, optionally using the shared Section container |
-| Screens | Arrange imported sections and components for desktop/mobile | StandingsScreen; owning feature |
-| Pages | Adapt framework inputs and render the feature screen | Next.js page files; no embedded domain presentation implementation |
+| Layer                 | Responsibility                                                   | Examples and ownership                                                                                   |
+| --------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Design tokens         | Central visual values and semantic roles                         | Colors, spacing, typography, radii and shadows; build on existing global CSS tokens and Tailwind mapping |
+| UI primitives         | Small domain-independent visual elements                         | Button, badge, input, card frame, skeleton; shared UI                                                    |
+| Reusable compositions | Repeated combinations of primitives, without domain rules        | Metric tile, chart frame, empty-state panel; share only when actual reuse justifies it                   |
+| Feature components    | Domain-specific content and interactions                         | StandingsTable, PlayerStatisticsCard, MatchRow; owning feature                                           |
+| Feature sections      | Group related feature components into a meaningful screen region | RankingSection, PerformanceSection; owning feature, optionally using the shared Section container        |
+| Screens               | Arrange imported sections and components for desktop/mobile      | StandingsScreen; owning feature                                                                          |
+| Pages                 | Adapt framework inputs and render the feature screen             | Next.js page files; no embedded domain presentation implementation                                       |
 
 The existing shared Section or Card template is a visual container, not the implementation of
 every domain section or card. A RankingSection can live in its own file, use Section internally,

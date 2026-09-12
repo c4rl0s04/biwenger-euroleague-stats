@@ -21,15 +21,21 @@ For current coverage and remaining work, see the [migration overview](migration-
 - Slice 1: `fix/session-read-cache-policy`, based on the main SHA above.
 - These are historical starting-point SHAs; the completed cache release is recorded below.
 
+## Current Rounds/Standings release
+
+See the [integration and release receipt](../migration/reports/rounds-standings-release.md)
+for the authoritative source range, branch preservation audit, validation and release state.
+The dated entries below retain historical evidence; they are not all current blockers.
+
 ## Domain ledger
 
 | Domains                                                  | Status / next boundary                                                             |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |
 | Players                                                  | Integrated; manager adapter removed in the read-foundations release                |
-| Rounds                                                   | Calendar foundation implemented; historical results and analysis remain legacy     |
+| Rounds                                                   | Calendar and historical read experience implemented; see current release receipt   |
 | Managers                                                 | Profile read flow validated end-to-end; directory/other analytics remain           |
-| Standings                                                | Base/head-to-head reads released; remaining analytics/screens remain               |
+| Standings                                                | Complete Standings read slice implemented; see current release receipt             |
 | Tournaments                                              | Core/participation reads released; analytics/screens remain                        |
 | Predictions, Playoffs                                    | Legacy scoring/read services; preserve distinct formulas                           |
 | Schedule                                                 | Map uses Matches; squad overlay remains legacy                                     |
