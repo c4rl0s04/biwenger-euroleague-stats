@@ -77,6 +77,13 @@ try {
   await client.query(
     "INSERT INTO tournament_standings (season_id,tournament_id,phase_name,group_name,user_id,position,points,won,drawn,lost,scored,against) VALUES ('2025-26',99301,'League','A','99001',1,12,4,0,0,90,70)"
   );
+  // Tournament read fixtures: preserve existing Profile participation rows.
+  await client.query(
+    "INSERT INTO tournament_phases (id,season_id,tournament_id,name,type,order_index) VALUES (99401,'2025-26',99301,'League','league',1),(99402,'2025-26',99302,'Final','playoff',1)"
+  );
+  await client.query(
+    "INSERT INTO tournament_fixtures (id,season_id,tournament_id,phase_id,round_name,round_id,home_user_id,away_user_id,home_score,away_score,date,status) VALUES (99501,'2025-26',99301,99401,'Round 1',1,'99001','99002',90,70,1700000000,'finished'),(99502,'2025-26',99301,99401,'Round 2',2,'99002','99001',NULL,NULL,1700600000,'active'),(99503,'2025-26',99302,99402,'Final',1,'99001','99002',80,75,1700000000,'finished')"
+  );
   await client.query('COMMIT');
   console.log('Disposable E2E schema and synthetic league fixture ready.');
 } catch (error) {
