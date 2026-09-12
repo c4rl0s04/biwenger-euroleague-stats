@@ -4,6 +4,9 @@ import type { Tournament, TournamentFixture, TournamentStanding } from '../publi
 vi.mock('server-only', () => ({}));
 const reads = vi.hoisted(() => ({ all: vi.fn(), fixtures: vi.fn(), standings: vi.fn() }));
 vi.mock('./services/tournament-read.service', () => ({
+  getTournamentDetails: vi.fn(),
+  getStandings: vi.fn(),
+  getFixtures: vi.fn(),
   getAllTournaments: reads.all,
   getTournamentFixtures: reads.fixtures,
   getTournamentStandings: reads.standings,

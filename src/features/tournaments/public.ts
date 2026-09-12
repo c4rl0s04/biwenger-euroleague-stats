@@ -25,3 +25,5 @@ export { default as DesktopTournamentsScreen } from './components/screens/Deskto
 export { default as DesktopTournamentDetailScreen } from './components/screens/DesktopTournamentDetailScreen';
 export { default as MobileTournamentDetailScreen } from './components/screens/MobileTournamentDetailScreen';
 export { default as MobileTournamentsScreen } from './components/screens/MobileTournamentsScreen';
+export { default as TournamentSectionScreen } from './components/screens/TournamentSectionScreen';
+export type { TournamentSectionModel } from './models/tournament-section';
