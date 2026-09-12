@@ -57,7 +57,7 @@ export function MobileScreenHeader({
 interface MobileBackHeaderProps {
   title: string;
   backHref: string;
-  context?: string;
+  context?: string | null;
   action?: ReactNode;
 }
 

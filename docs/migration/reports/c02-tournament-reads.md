@@ -176,3 +176,25 @@ browser comparison are run for this checkpoint; full feature acceptance remains 
 Still required: typed snapshot/presentation projections, mobile section composition and contracts,
 adapter/dead-export retirement, entrypoint protection and combined acceptance. No claim of a fully
 migrated Tournament boundary is made by these composition moves.
+
+The detail/mobile composition checkpoint passed both iPhone/desktop original-snapshot comparisons
+(52.2s), including all phone sections. This precedes the section-service extraction below.
+
+## Section ownership checkpoint
+
+The section page now invokes getTournamentSection after requireMobileRoute and composes the feature's
+TournamentSectionScreen. The service preserves concurrent detail/standings/fixtures reads, original
+ID forwarding, missing-detail null output and standings versus fixture selection. The section model
+only forwards the nullable name and selected existing view-model list, not the tournament snapshot.
+
+MobileDetailScaffold/MobileBackHeader context types now admit null, matching their existing rendering
+and nullish-label handling. No JSX or runtime logic changed in these shared components. This removes
+the need for the legacy non-null name assertion at this route boundary.
+
+Nine real route/service contract tests cover routing interruption, exact inputs, selected props,
+parallelism, absent details and all read errors. Typecheck and architecture PASS (815 modules/45
+protected entrypoints). The statistics test's read-service mock was extended for newly imported
+section dependencies; statistics assertions were not weakened. Full acceptance remains pending.
+
+All three Tournament page families now compose feature screens; typed snapshot projections, obsolete
+adapter/dead-export removal, protection registration and final acceptance are still open.
