@@ -1,0 +1,4634 @@
+{
+  "baseline": "6ad78eb8",
+  "notice": "Static discovery only. Package assignments are triage, not verified ownership or call-chain/access/cache conclusions. Shared barrels overapproximate reachability; methods require AST/manual reconciliation, including re-exports. All entries await semantic tracing.",
+  "modules": [
+    {
+      "file": "src/app/(app)/assistant/[conversationId]/page.tsx",
+      "package": "C11d"
+    },
+    {
+      "file": "src/app/(app)/assistant/page.js",
+      "package": "C11d"
+    },
+    {
+      "file": "src/app/(app)/compare/[userId]/page.tsx",
+      "package": "C08"
+    },
+    {
+      "file": "src/app/(app)/compare/page.js",
+      "package": "C08"
+    },
+    {
+      "file": "src/app/(app)/dashboard/[section]/page.tsx",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/(app)/dashboard/page.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/(app)/hoopgrid/page.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/app/(app)/layout.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/app/(app)/lineup/[section]/page.tsx",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/(app)/lineup/page.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/(app)/loading.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/app/(app)/market/[section]/page.tsx",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/(app)/market/page.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/(app)/matches/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/matches/round/[roundId]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/page.js",
+      "package": "C10"
+    },
+    {
+      "file": "src/app/(app)/player/[id]/[section]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/player/[id]/page.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/players/[section]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/players/page.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/playoffs/page.js",
+      "package": "C04"
+    },
+    {
+      "file": "src/app/(app)/playoffs/predictions/[userId]/page.tsx",
+      "package": "C03"
+    },
+    {
+      "file": "src/app/(app)/predictions/[section]/page.tsx",
+      "package": "C03"
+    },
+    {
+      "file": "src/app/(app)/predictions/page.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/app/(app)/rounds/[roundId]/[section]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/rounds/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/schedule/map/page.tsx",
+      "package": "C07"
+    },
+    {
+      "file": "src/app/(app)/schedule/page.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/app/(app)/season-review/[section]/page.tsx",
+      "package": "C06"
+    },
+    {
+      "file": "src/app/(app)/season-review/actions.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/app/(app)/season-review/error.tsx",
+      "package": "C06"
+    },
+    {
+      "file": "src/app/(app)/season-review/page.tsx",
+      "package": "C06"
+    },
+    {
+      "file": "src/app/(app)/settings/[section]/page.tsx",
+      "package": "C11a"
+    },
+    {
+      "file": "src/app/(app)/settings/page.tsx",
+      "package": "C11a"
+    },
+    {
+      "file": "src/app/(app)/standings/[section]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/standings/page.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/team/[id]/[section]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/team/[id]/loading.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/team/[id]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/tournaments/[id]/[section]/page.tsx",
+      "package": "C02"
+    },
+    {
+      "file": "src/app/(app)/tournaments/[id]/page.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/app/(app)/tournaments/page.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/app/(app)/user/[id]/[section]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/user/[id]/loading.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(app)/user/[id]/page.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/(auth)/login/page.js",
+      "package": "C11a"
+    },
+    {
+      "file": "src/app/api/assistant/conversations/[id]/route.ts",
+      "package": "C11d"
+    },
+    {
+      "file": "src/app/api/assistant/conversations/route.ts",
+      "package": "C11d"
+    },
+    {
+      "file": "src/app/api/assistant/route.ts",
+      "package": "C11d"
+    },
+    {
+      "file": "src/app/api/auth/[...nextauth]/route.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/app/api/compare/data/lite/route.ts",
+      "package": "C08"
+    },
+    {
+      "file": "src/app/api/compare/data/route.ts",
+      "package": "C08"
+    },
+    {
+      "file": "src/app/api/dashboard/birthdays/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/captain-stats/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/captain-suggest/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/home-away/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/ideal-lineup/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/leader-gap/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/market-opportunities/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/mvps/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/next-round/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/recent-activity/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/rising-stars/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/top-form/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/dashboard/top-players/route.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/app/api/home/activity/route.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/app/api/hoopgrid/guess/route.ts",
+      "package": "C11c"
+    },
+    {
+      "file": "src/app/api/hoopgrid/list/route.ts",
+      "package": "C11c"
+    },
+    {
+      "file": "src/app/api/hoopgrid/today/route.ts",
+      "package": "C11c"
+    },
+    {
+      "file": "src/app/api/landing-stats/route.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/app/api/league-average/route.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/app/api/market/duels/details/route.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/api/market/offers/accept/route.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/api/market/offers/reject/route.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/api/market/remove/route.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/api/market/route.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/api/market/sell-all/route.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/api/market/sell/route.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/api/market/stats/route.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/api/market/stats/value-details/route.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/api/market/transfers/route.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/api/market/trends/route.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/app/api/matches/[id]/play-by-play/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/matches/[id]/shots/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/news/route.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/app/api/player/rounds/route.ts",
+      "package": "C01"
+    },
+    {
+      "file": "src/app/api/player/squad/route.ts",
+      "package": "C01"
+    },
+    {
+      "file": "src/app/api/player/stats/route.ts",
+      "package": "C01"
+    },
+    {
+      "file": "src/app/api/player/streaks/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/players/[id]/stats/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/rounds/all-history/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/rounds/history/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/rounds/leaderboard/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/rounds/lineup-stats/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/rounds/lineup/route.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/api/rounds/list/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/rounds/standings/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/rounds/stats/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/search/route.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/app/api/standings/advanced/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/analytics/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/bottlers/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/captains/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/efficiency/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/full/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/heartbreakers/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/initial-squad-stats/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/jinx/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/league-comparison/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/league-totals/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/no-glory/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/placements/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/points-progression/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/round-winners/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/streaks/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/theoretical/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/value-ranking/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/standings/volatility/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/stats/leaders/route.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/app/api/team/[id]/route.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/app/api/user/change-password/route.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/app/api/user/link-biwenger/route.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/app/api/users/lineup/route.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/app/api/users/route.ts",
+      "package": "C01"
+    },
+    {
+      "file": "src/app/error.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/app/hoopgrid-cheatsheet/page.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/app/install/page.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/app/layout.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/app/loading.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/app/manifest.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/app/not-found.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/app/offline/page.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/app/test-hoopgrid/page.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/auth.config.js",
+      "package": "C11a"
+    },
+    {
+      "file": "src/auth.js",
+      "package": "C11a"
+    },
+    {
+      "file": "src/components/assistant/AssistantChat.js",
+      "package": "C11d"
+    },
+    {
+      "file": "src/components/compare/ComparePageClient.js",
+      "package": "C08"
+    },
+    {
+      "file": "src/components/compare/LazyAdvancedStats.js",
+      "package": "C08"
+    },
+    {
+      "file": "src/components/dashboard/BirthdayCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/CaptainStatsCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/CaptainSuggestCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/HomeAwayCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/IdealLineupCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/KpiBentoCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/LeaderGapCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/LeagueComparisonCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/MarketActivityCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/MarketOpportunitiesCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/MySeasonCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/NextMatchesCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/NextRoundSubtitle.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/RecentActivityCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/RecentRoundsCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/RisingStarsCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/SquadValueCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/StatsLeadersCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/StreakCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/TopFormCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/TopPlayersCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/WeekMVPsCard.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/index.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/dashboard/shared/DashboardPlayerRow.js",
+      "package": "C09"
+    },
+    {
+      "file": "src/components/home/DesktopHome.jsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/home/HeroHeader.js",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/hoopgrid/GridCell.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridBoard.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridCalendar.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridCheatsheetHeader.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridClient.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridHeader.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridInstructions.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridSearch.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridShareModal.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/hoopgrid/HoopgridStats.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/index.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/AppShell.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/ClientWrapper.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/MobileNavigation.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/Navbar.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/NavigationFeedback.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/SearchDropdown.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/Section.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/SectionContext.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/SettingsDropdown.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/Sidebar.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/TopHeader.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/index.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/layout/navigation.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/lineup/LineupBench.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupBenchSection.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupClient.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupControlBar.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupCourt.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupCourtSection.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupOfferModal.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupOffersSection.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupPlayerCard.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupPlayerSwapModal.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupPutAllOnMarketModal.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupSellModal.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupSquadAnalysis.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/lineup/LineupTacticsModal.js",
+      "package": "C11b"
+    },
+    {
+      "file": "src/components/market/AnalyticsDemoShowroom.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/ExpandedPlayerModal.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/LiveMarketTable.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/MarketListingsSection.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/MarketPageClient.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/MarketPlayerCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BestFlipCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BestPercentageCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BestRevaluationCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BestSellerCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BestValueCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BestValueDetailModal.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BiddingDuelDetailsCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BiddingDuelsMatrixCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BigSpenderCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BiggestDominanceCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/BiggestStealCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/HottestRivalryCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/InfirmaryCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/InflatedPlayerCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/LongestHoldCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/LossyPlayerCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/ManagerFinancesTable.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/MarketKPIs.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/MarketPodiumCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/MarketStatCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/MarketTrendsChart.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/MissedOpportunityCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/MostOwnersCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/OverpayerManagerCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/PositionAnalysisGrid.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/ProfitablePlayerCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/QuickflipCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/RecordBidCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/RecordTransferCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/StatDetailDrawer.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/StatUIComponents.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/TheThiefCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/TheVictimCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/TopTransferredCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/WorstFlipCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/WorstRevaluationCard.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/renderers/BaseRow.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/renderers/PlayerStatRow.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/renderers/TemporalStatRow.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/renderers/TransactionStatRow.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/renderers/UserStatRow.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/renderers/registry.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/market/stats/renderers/utils.js",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/components/mobile/MobileBottomSheet.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileChartFrame.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileDetailScaffold.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileHeaderActions.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileNewsStrip.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileRecordList.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileScreenState.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/MobileSegmentedControl.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/home/ActivityTime.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/AdminBonusActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomeActivityEventCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomeActivityFilterBar.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomeFeedSection.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomeManagerAvatar.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomePreseasonState.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomePulseCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomeRankBadge.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomeSkeletons.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/HomeSummarySection.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/MatchSessionActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/MobileActivityFeed.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/MobileHomeActivityProvider.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/PredictionActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/RoundActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/RoundHighlightActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/TournamentRoundActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/TransferActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/TransferCarousel.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/home/TransferDayActivityCard.tsx",
+      "package": "C10"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileAssistantScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileCompareScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileDashboardScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileHomeScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileHoopgridScreen.tsx",
+      "package": "C11c"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileLineupClient.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileMarketScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileOffersClient.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobilePlayoffsScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobilePredictionsScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileScheduleScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileSeasonReviewDetail.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileSeasonReviewScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileSettingsDetail.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileSettingsScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileTournamentDetailScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/mobile/screens/MobileTournamentsScreen.tsx",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/playoffs/PlayoffClient.tsx",
+      "package": "C04"
+    },
+    {
+      "file": "src/components/predictions/PredictionsClient.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/PredictionsDrawer.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/BestAverageCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/BestRoundCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/BlankedCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/ClutchCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/ParticipationCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/Perfect10Card.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/PerformanceCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/PredictableTeamsCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/StatCardBase.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/VictoriasCard.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/cards/index.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/tables/HistoryTable.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/predictions/tables/PredictionsStatsTable.js",
+      "package": "C03"
+    },
+    {
+      "file": "src/components/pwa/InstallGuide.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/pwa/PwaProvider.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/rounds/stats/history/HeadToHeadCard.js",
+      "package": "C08"
+    },
+    {
+      "file": "src/components/schedule/AutoAlignActionRow.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/schedule/AutoAlignButton.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/schedule/LineupModal.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/schedule/MatchCard.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/schedule/PlayerChip.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/schedule/RoundSelector.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/schedule/RoundSummary.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/schedule/ScheduleControls.js",
+      "package": "C07"
+    },
+    {
+      "file": "src/components/season-review/SeasonReviewClient.tsx",
+      "package": "C06"
+    },
+    {
+      "file": "src/components/settings/DesktopSettingsScreen.js",
+      "package": "C11a"
+    },
+    {
+      "file": "src/components/tournaments/ActiveTournamentsSection.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/StandingsTable.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/TournamentBracket.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/TournamentCard.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/TournamentFixtures.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/TournamentRow.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/index.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/stats/HallOfFame.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/stats/RecordsSection.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/stats/TournamentHistoryTable.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/tournaments/stats/index.js",
+      "package": "C02"
+    },
+    {
+      "file": "src/components/ui/AnimatedNumber.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/BackButton.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/BaseRow.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/Card.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/CommandPalette.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/CustomSelect.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/Drawer.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/Dropdown.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/ErrorBoundary.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/FadeIn.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/LoadingSkeleton.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/NewsTicker.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/PageHeader.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/PlayerImage.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/StatsList.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/StatsTable.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/Subheading.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/ThemeBackground.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/ThemeSwitcher.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/Tooltip.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/UserAvatar.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/card-variants/ElegantCard.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/card-variants/GlassCard.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/card-variants/MeshCard.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/card-variants/NeoCard.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/card-variants/StandardCard.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/index.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/ui/map.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/components/user/UserSelector.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/components/user/index.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/contexts/CardThemeContext.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/contexts/ThemeContext.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/contexts/UserContext.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/features/managers/components/LeagueDominanceCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/ManagerIdentityCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/ManagerProfileClient.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/ManagerProfileScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/ManagerProfileSectionScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/MarketActivityCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/MobileManagerProfileScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/PointsEvolutionChart.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/SeasonRecordsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/UserSquadAnalysisCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/UserTopContributorsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/UserTournamentsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/components/UserTrophyCabinetCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/models/manager-contributors.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/models/manager-profile.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/models/manager-reads.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/public.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/mappers/manager-contributors.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/mappers/manager-profile.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/mappers/manager-read.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/queries/manager-contributors.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/queries/manager-contributors.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/queries/manager-rounds.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/queries/manager-squad.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/queries/manager-stats.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/queries/manager.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/services/manager-contributors.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/services/manager-profile.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/managers/server/services/manager-read.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/MatchRoundScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/MatchesScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/desktop/MatchCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/desktop/MatchesClient.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/desktop/RoundSelector.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/desktop/TeamSelector.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/map/MatchVenueMap.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/map/TeamMarker.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/mobile/MobileMatchRow.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/components/mobile/MobileMatchesScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/models/match.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/models/official-game.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/public.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server/mappers/match.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server/mappers/official-game.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server/queries/match-list.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server/queries/official-game.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server/queries/official-game.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server/services/matches.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/server/services/official-game.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/matches/validation/match-input.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/PlayerProfileScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/PlayersScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/PlayerFilters.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/PlayerGridItem.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/PlayerList.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/PlayerRow.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/PlayerStatsSection.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/PlayersDiscovery.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/SquadDistributionPieCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/SquadPositionBarCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/SquadSectionDrawer.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/catalogue/TeamDistributionTable.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerAdvancedStatsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerHistoryCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerIdentityCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerMarketCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerNextMatchCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerOwnershipCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerPointsGraph.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerPriceHistoryCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerProfileClient.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerSplitsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/desktop/profile/PlayerStatsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/mobile/MobilePlayerProfileScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/mobile/MobilePlayersScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/mobile/PlayerCatalogueSectionScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/components/mobile/PlayerProfileSectionScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/models/player-catalogue.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/models/player-insights.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/models/player-profile.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/public.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/server.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/server/mappers/player.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/server/queries/player-form.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/server/queries/player.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/server/services/player-catalogue.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/server/services/player-form.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/server/services/player-profile.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/players/validation/player-input.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/MobileRoundsScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/RoundRows.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/RoundSectionScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/RoundsScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/BasketballCourt.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/Bench.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/GradaList.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/PlayerCourtCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/RoundControls.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/RoundStandings.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/RoundStatsSidebar.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/RoundsPageClient.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/CoachRatingCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/GradaCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/OptimizationTips.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/RoundMVPCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/ScoreOverviewCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/StatLeaderCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/general/LineupStatsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/ConsistencyRanking.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/EfficiencyHeatmap.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/HistoryStatCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/LeagueLeaderboard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/PerfectRoundsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/PerformanceChart.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/PersonalBreakdownTable.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/components/desktop/stats/history/RecordsGrid.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/hooks/usePerformanceStats.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/logic/performance.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/models/calendar.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/models/round-query-contracts.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/models/round-read.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/models/round-screen.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/public.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/calendar-policy.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/mappers/calendar.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/mappers/round-read.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/mappers/round-screen.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/queries/calendar-season.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/queries/calendar.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/queries/directory.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/queries/round-analysis.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/round-analysis.logic.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/calendar.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/formation-usage.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/round-history.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/round-list.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/round-read-policy.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/round-read.fixtures.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/round-results.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/server/services/round-screen.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/rounds/validation/round-http-input.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/search/models/search.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/search/public.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/search/server.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/search/server/mappers/search.mapper.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/search/server/queries/search.query.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/search/server/queries/search.records.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/search/server/services/search.service.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/search/validation/search-input.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/features/standings/components/AllPlayAllCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/BestDraftPlayerCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/BottlerCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/CaptainStandingsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/DesktopStandingsScreen.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/DominanceCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/DraftFidelityCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/EfficiencyCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/FloorCeilingCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/FullStandingsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/HeartbreakersCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/HeatCheckCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/InitialSquadAnalysisCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/InitialSquadListCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/InitialSquadLoyaltyCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/InitialSquadPotentialCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/InitialSquadRegretCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/JinxCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/LeaguePerformanceCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/LeagueStatsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/MobileStandingsScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/NoGloryCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/PlacementStatsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/PointDistributionCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/PointsProgressionCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/PositionEvolutionCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/ReliabilityCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/RivalryMatrixCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/RollingAverageCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/RoundHeatmapCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/RoundPointsProgressionCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/RoundWinnersCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/StandingsSectionScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/StreaksCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/TheHunterCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/TheoreticalGapCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/TheoreticalStandingsCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/VolatilityCard.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/components/index.js",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/all-play-all.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/base-standings.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/curiosities.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/draft.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/performance.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/progression.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/screens.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/models/theoretical.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/public.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/all-play-all-calculation.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/mappers/all-play-all.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/mappers/base-standings.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/mappers/curiosities.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/mappers/draft.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/mappers/performance.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/mappers/progression.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/mappers/theoretical.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/advanced.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/all-play-all.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/all-play-all.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/base-standings.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/base-standings.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/base.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/curiosities.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/curiosities.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/draft.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/manager-directory.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/performance.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/performance.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/progression.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/progression.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/theoretical.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/queries/theoretical.records.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/all-play-all.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/base-standings.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/curiosities.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/draft.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/performance.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/progression.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/screens.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/server/services/theoretical.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/standings/validation/standings-input.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/TeamProfileScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/TeamProfileStates.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/desktop/TeamIdentityCard.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/desktop/TeamMatchesCard.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/desktop/TeamProfileClient.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/desktop/TeamRosterCard.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/mobile/MobileTeamProfileScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/components/mobile/TeamProfileSectionScreen.tsx",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/models/team-profile.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/public.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/server.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/server/mappers/team-profile.mapper.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/server/queries/team-profile.query.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/server/services/team-profile.service.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/teams/validation/team-profile-input.ts",
+      "package": "C14"
+    },
+    {
+      "file": "src/features/tournaments/models/tournaments.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/public.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/server.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/server/mappers/manager-participation.mapper.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/server/mappers/tournament.mapper.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/server/queries/tournament.query.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/server/queries/tournament.records.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/server/services/tournament-read.service.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/features/tournaments/validation/tournament-input.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/hooks/hoopgrid/useHoopgridGame.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/hooks/hoopgrid/useHoopgridShare.js",
+      "package": "C11c"
+    },
+    {
+      "file": "src/lib/api-client.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/api/biwenger-client.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/api/euroleague/client.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/api/euroleague/normalization.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/api/euroleague/runtime.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/api/euroleague/schemas.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/api/euroleague/types.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/auth/safe-callback-url.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/auth/session-safety.js",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/config.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/constants/colors.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/constants/courtPositions.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/constants/hoopgridCriteria.ts",
+      "package": "C11c"
+    },
+    {
+      "file": "src/lib/constants/teamColors.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/constants/thresholds.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/credentials/crypto.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/credentials/errors.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/credentials/keyring.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/credentials/maintenance.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/credentials/repository.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/credentials/service.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/credentials/types.ts",
+      "package": "C11a"
+    },
+    {
+      "file": "src/lib/db/client.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/connection-config.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/connection.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/index.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/market-listings.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/market.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/matches.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/official/calendar.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/official/game-data.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/official/mappings.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/official/shared.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/player-stats.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/players.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/mutations/tournaments.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/lib/db/mutations/users.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/production-readiness.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/analytics/advanced_stats.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/analytics/initial_squads.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/analytics/performance.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/analytics/records.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/analytics/season-review.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/db/queries/competition/matches.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/competition/rounds.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/competition/schedule.ts",
+      "package": "C07"
+    },
+    {
+      "file": "src/lib/db/queries/competition/standings.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/core/manager-directory.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/core/playerForm.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/core/teams.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/core/users.ts",
+      "package": "C01"
+    },
+    {
+      "file": "src/lib/db/queries/features/home-feed.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/lib/db/queries/features/home-summary.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/lib/db/queries/features/market.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/features/prediction-normalization-sql.ts",
+      "package": "C03"
+    },
+    {
+      "file": "src/lib/db/queries/features/predictions.ts",
+      "package": "C03"
+    },
+    {
+      "file": "src/lib/db/queries/features/search.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/queries/tournaments.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/lib/db/schema-audit.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/schema.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/schema_init.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/season-context.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/sql_utils.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/db/types.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/home/contracts.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/lib/home/cursor.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/lib/home/formatters.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/lib/home/tournament-winner.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/lib/home/transfer-value.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/lib/hooks/useApiData.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/hooks/useClientUser.js",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/logic/ideal-lineup.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/logic/match-scores.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/logic/performance.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/logic/standings.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/mobile/presentation-server.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/mobile/presentation.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/mobile/route-server.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/mobile/routes.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/mobile/screen-state.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/mobile/view-models/dashboard.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/lib/pwa/platform.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/pwa/service-worker-policy.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/season-review/evolution-chart.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/season-review/read-analysis.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/season-review/resilience.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/season-review/season-simulator.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/season-review/simulation-analysis.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/season-review/simulation-dataset.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/season-review/simulation-types.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/season-review/types.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/seasons.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/services/app/appShellService.ts",
+      "package": "C13"
+    },
+    {
+      "file": "src/lib/services/app/dashboardService.ts",
+      "package": "C09"
+    },
+    {
+      "file": "src/lib/services/app/homeService.ts",
+      "package": "C10"
+    },
+    {
+      "file": "src/lib/services/app/scheduleService.ts",
+      "package": "C07"
+    },
+    {
+      "file": "src/lib/services/app/standingsService.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/services/core/roundsService.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/services/core/userService.ts",
+      "package": "C01"
+    },
+    {
+      "file": "src/lib/services/features/assistantContextService.ts",
+      "package": "C11d"
+    },
+    {
+      "file": "src/lib/services/features/assistantPlayerContextService.ts",
+      "package": "C11d"
+    },
+    {
+      "file": "src/lib/services/features/assistantService.ts",
+      "package": "C11d"
+    },
+    {
+      "file": "src/lib/services/features/compareService.ts",
+      "package": "C08"
+    },
+    {
+      "file": "src/lib/services/features/hoopgridService.ts",
+      "package": "C11c"
+    },
+    {
+      "file": "src/lib/services/features/marketService.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/lib/services/features/playoffService.ts",
+      "package": "C04"
+    },
+    {
+      "file": "src/lib/services/features/predictionsService.ts",
+      "package": "C03"
+    },
+    {
+      "file": "src/lib/services/features/searchService.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/services/features/seasonResilienceService.ts",
+      "package": "C06"
+    },
+    {
+      "file": "src/lib/services/index.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/services/lineupResponse.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/lib/services/lineupService.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/lib/services/marketActionsService.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/lib/services/marketService.ts",
+      "package": "C05/C11b"
+    },
+    {
+      "file": "src/lib/services/providerMutationResult.ts",
+      "package": "C11b"
+    },
+    {
+      "file": "src/lib/services/statsService.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/lib/services/tournamentService.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/lib/sync/advisory-lock.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/audit-db.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/context.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/index.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/manager.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/pipeline.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/playoffs/sync.ts",
+      "package": "C04"
+    },
+    {
+      "file": "src/lib/sync/preflight.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/rounds.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/season-guard.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/services/biwenger/fantasy-points.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/services/biwenger/lineups.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/services/biwenger/matches.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/services/euroleague/games.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/services/euroleague/mappings.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/services/euroleague/master-data.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-board.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-catalog.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-fantasy-points.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-lineups.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-market.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-squads.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-tournaments.ts",
+      "package": "C02"
+    },
+    {
+      "file": "src/lib/sync/steps/biwenger-users.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/euroleague-games.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/euroleague-master-data.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/initial-squads.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/match-linking.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/sync/steps/user-colors.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/analytics.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/api-auth.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/cache.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/currency.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/date.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/efficiency.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/fantasy-scoring.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/format.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/index.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/lineup-logic.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/player-finance.js",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/response.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/lib/utils/validation.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/proxy.js",
+      "package": "C11a"
+    },
+    {
+      "file": "src/scripts/hoopgrid/generate-hard.ts",
+      "package": "C11c"
+    },
+    {
+      "file": "src/tests/architecture/feature-graph.ts",
+      "package": "C12"
+    },
+    {
+      "file": "src/tests/setup.ts",
+      "package": "C12"
+    }
+  ],
+  "entrypoints": [
+    {
+      "file": "src/app/(app)/assistant/[conversationId]/page.tsx",
+      "methods": [],
+      "imports": ["@/components/mobile/screens/MobileAssistantScreen", "@/lib/mobile/route-server"],
+      "computed": false,
+      "package": "C11d",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/assistant/page.js",
+      "methods": [],
+      "imports": [
+        "@/components/ui",
+        "@/components/layout",
+        "@/components/assistant/AssistantChat",
+        "@/components/mobile/screens/MobileAssistantScreen",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C11d",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/compare/[userId]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/auth",
+        "@/components/mobile/MobileDetailScaffold",
+        "@/components/mobile/MobileRecordList",
+        "@/components/mobile/MobileScreen",
+        "@/lib/mobile/route-server",
+        "@/lib/services"
+      ],
+      "computed": false,
+      "package": "C08",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/compare/page.js",
+      "methods": [],
+      "imports": [
+        "@/components/compare/ComparePageClient",
+        "@/auth",
+        "@/components/mobile/screens/MobileCompareScreen",
+        "@/lib/mobile/presentation-server",
+        "@/lib/services"
+      ],
+      "computed": false,
+      "package": "C08",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/dashboard/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/auth",
+        "@/components/mobile/MobileDetailScaffold",
+        "@/components/mobile/MobileScreen",
+        "@/lib/mobile/route-server",
+        "@/lib/services"
+      ],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/dashboard/page.js",
+      "methods": [],
+      "imports": [
+        "next/dynamic",
+        "@/components/ui",
+        "@/components/layout",
+        "@/components/dashboard",
+        "@/lib/services",
+        "@/auth",
+        "@/components/mobile/screens/MobileDashboardScreen",
+        "@/lib/mobile/presentation-server",
+        "@/lib/mobile/view-models/dashboard",
+        "@/lib/services",
+        "@/lib/services/app/dashboardService",
+        "@/components/dashboard/TopFormCard",
+        "@/components/dashboard/CaptainSuggestCard",
+        "@/components/dashboard/MarketOpportunitiesCard",
+        "@/components/dashboard/TopPlayersCard",
+        "@/components/dashboard/MarketActivityCard",
+        "@/components/dashboard/RisingStarsCard",
+        "@/components/dashboard/BirthdayCard",
+        "@/components/dashboard/NextRoundSubtitle",
+        "@/components/dashboard/WeekMVPsCard",
+        "@/components/dashboard/StatsLeadersCard",
+        "@/components/dashboard/StreakCard",
+        "@/components/dashboard/IdealLineupCard",
+        "@/components/dashboard/NextMatchesCard"
+      ],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/hoopgrid/page.js",
+      "methods": [],
+      "imports": [
+        "@/components/hoopgrid/HoopgridClient",
+        "@/components/mobile/screens/MobileHoopgridScreen",
+        "@/components/ui",
+        "@/lib/mobile/presentation-server",
+        "react"
+      ],
+      "computed": false,
+      "package": "C11c",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/layout.js",
+      "methods": [],
+      "imports": [
+        "@/components/layout/ClientWrapper",
+        "@/components/layout/AppShell",
+        "@/components/layout/SectionContext",
+        "@/lib/mobile/presentation-server",
+        "@/lib/services/app/appShellService"
+      ],
+      "computed": false,
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/lineup/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/auth",
+        "@/components/mobile/MobileDetailScaffold",
+        "@/components/mobile/screens/MobileOffersClient",
+        "@/components/mobile/MobileRecordList",
+        "@/components/mobile/MobileScreen",
+        "@/lib/mobile/route-server",
+        "@/lib/services"
+      ],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/lineup/page.js",
+      "methods": [],
+      "imports": [
+        "@/components/ui",
+        "@/auth",
+        "next/navigation",
+        "@/components/lineup/LineupClient",
+        "@/components/mobile/screens/MobileLineupClient",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/loading.js",
+      "methods": [],
+      "imports": [],
+      "computed": false,
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/market/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/components/mobile/MobileDetailScaffold",
+        "@/components/mobile/MobileRecordList",
+        "@/components/mobile/MobileScreen",
+        "@/lib/mobile/route-server",
+        "@/lib/services"
+      ],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/market/page.js",
+      "methods": [],
+      "imports": [
+        "@/components/market/MarketPageClient",
+        "@/components/ui",
+        "@/components/mobile/screens/MobileMarketScreen",
+        "@/lib/mobile/presentation-server",
+        "@/lib/services"
+      ],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/matches/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/matches/public",
+        "@/features/matches/server",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/matches/round/[roundId]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/matches/public",
+        "@/features/matches/server",
+        "@/lib/mobile/route-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/page.js",
+      "methods": [],
+      "imports": [
+        "@/components/home/DesktopHome",
+        "@/components/mobile/screens/MobileHomeScreen",
+        "@/lib/mobile/presentation-server",
+        "@/auth",
+        "next/navigation",
+        "@/lib/home/contracts"
+      ],
+      "computed": false,
+      "package": "C10",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/player/[id]/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/players/server",
+        "@/features/players/public",
+        "@/lib/mobile/route-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/player/[id]/page.js",
+      "methods": [],
+      "imports": [
+        "@/features/players/server",
+        "@/features/players/public",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/players/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/players/server",
+        "@/features/players/public",
+        "@/lib/mobile/route-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/players/page.js",
+      "methods": [],
+      "imports": [
+        "@/features/players/server",
+        "@/features/players/public",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/playoffs/page.js",
+      "methods": [],
+      "imports": [
+        "@/lib/services/features/playoffService",
+        "@/components/playoffs/PlayoffClient",
+        "@/components/ui",
+        "@/components/mobile/screens/MobilePlayoffsScreen",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C04",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/playoffs/predictions/[userId]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/components/mobile/MobileDetailScaffold",
+        "@/components/mobile/MobileRecordList",
+        "@/components/mobile/MobileScreen",
+        "@/lib/mobile/route-server",
+        "@/lib/services/features/playoffService"
+      ],
+      "computed": false,
+      "package": "C03",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/predictions/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/components/mobile/MobileDetailScaffold",
+        "@/components/mobile/MobileRecordList",
+        "@/components/mobile/MobileScreen",
+        "@/lib/mobile/route-server",
+        "@/lib/services/features/predictionsService"
+      ],
+      "computed": false,
+      "package": "C03",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/predictions/page.js",
+      "methods": [],
+      "imports": [
+        "@/lib/services/features/predictionsService",
+        "@/components/predictions/PredictionsClient",
+        "@/components/ui",
+        "@/components/mobile/screens/MobilePredictionsScreen",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C03",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/rounds/[roundId]/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/auth",
+        "@/lib/mobile/route-server",
+        "@/features/rounds/public",
+        "@/features/rounds/server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/rounds/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/auth",
+        "@/lib/mobile/presentation-server",
+        "@/features/rounds/public",
+        "@/features/rounds/server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/schedule/map/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/components/mobile/MobileDetailScaffold",
+        "@/features/matches/public",
+        "@/features/matches/server",
+        "@/lib/mobile/route-server"
+      ],
+      "computed": false,
+      "package": "C07",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/schedule/page.js",
+      "methods": [],
+      "imports": [
+        "@/lib/services",
+        "@/auth",
+        "lucide-react",
+        "@/components/schedule/ScheduleControls",
+        "@/components/schedule/MatchCard",
+        "@/components/schedule/RoundSummary",
+        "@/components/schedule/AutoAlignButton",
+        "@/components/layout",
+        "@/components/ui",
+        "@/components/mobile/screens/MobileScheduleScreen",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C07",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/season-review/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/components/mobile/screens/MobileSeasonReviewDetail",
+        "@/lib/mobile/route-server",
+        "@/lib/season-review/read-analysis"
+      ],
+      "computed": false,
+      "package": "C06",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/season-review/actions.ts",
+      "methods": [],
+      "imports": ["@/auth", "@/lib/services"],
+      "computed": false,
+      "package": "C06",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/season-review/error.tsx",
+      "methods": [],
+      "imports": [],
+      "computed": false,
+      "package": "C06",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/season-review/page.tsx",
+      "methods": [],
+      "imports": [
+        "next",
+        "next/navigation",
+        "@/auth",
+        "@/components/ui",
+        "@/components/season-review/SeasonReviewClient",
+        "@/components/mobile/screens/MobileSeasonReviewScreen",
+        "@/lib/mobile/presentation-server",
+        "@/lib/season-review/read-analysis"
+      ],
+      "computed": false,
+      "package": "C06",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/settings/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/auth",
+        "@/components/mobile/screens/MobileSettingsDetail",
+        "@/lib/mobile/route-server"
+      ],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/settings/page.tsx",
+      "methods": [],
+      "imports": [
+        "next/navigation",
+        "@/auth",
+        "@/components/settings/DesktopSettingsScreen",
+        "@/components/mobile/screens/MobileSettingsScreen",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/standings/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/lib/mobile/route-server",
+        "@/features/standings/server",
+        "@/features/standings/public"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/standings/page.js",
+      "methods": [],
+      "imports": [
+        "@/features/standings/public",
+        "@/lib/mobile/presentation-server",
+        "@/features/standings/server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/team/[id]/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/teams/public",
+        "@/features/teams/server",
+        "@/lib/mobile/route-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/team/[id]/loading.tsx",
+      "methods": [],
+      "imports": ["@/features/teams/public"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/team/[id]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/teams/public",
+        "@/features/teams/server",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/tournaments/[id]/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/components/mobile/MobileDetailScaffold",
+        "@/components/mobile/MobileRecordList",
+        "@/components/mobile/MobileScreen",
+        "@/lib/mobile/route-server",
+        "@/lib/services/tournamentService"
+      ],
+      "computed": false,
+      "package": "C02",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/tournaments/[id]/page.js",
+      "methods": [],
+      "imports": [
+        "next/link",
+        "next/navigation",
+        "@/components/ui",
+        "@/components/layout",
+        "@/lib/services/tournamentService",
+        "@/components/tournaments",
+        "lucide-react",
+        "@/components/ui/card-variants/ElegantCard",
+        "@/lib/db",
+        "@/components/mobile/screens/MobileTournamentDetailScreen",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C02",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/tournaments/page.js",
+      "methods": [],
+      "imports": [
+        "@/components/layout",
+        "@/components/ui",
+        "@/lib/services/tournamentService",
+        "@/lib/services/statsService",
+        "@/components/tournaments",
+        "@/components/mobile/screens/MobileTournamentsScreen",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C02",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/user/[id]/[section]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/managers/public",
+        "@/features/managers/server",
+        "@/lib/mobile/route-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/user/[id]/loading.js",
+      "methods": [],
+      "imports": [],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(app)/user/[id]/page.tsx",
+      "methods": [],
+      "imports": [
+        "@/features/managers/public",
+        "@/features/managers/server",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/(auth)/login/page.js",
+      "methods": [],
+      "imports": [
+        "react",
+        "next-auth/react",
+        "next/navigation",
+        "lucide-react",
+        "next/image",
+        "@/lib/auth/safe-callback-url"
+      ],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/assistant/conversations/[id]/route.ts",
+      "methods": ["GET", "DELETE"],
+      "imports": [
+        "zod",
+        "@/auth",
+        "@/lib/services/features/assistantService",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C11d",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/assistant/conversations/route.ts",
+      "methods": ["GET", "POST"],
+      "imports": [
+        "zod",
+        "@/auth",
+        "@/lib/services/features/assistantService",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C11d",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/assistant/route.ts",
+      "methods": ["POST"],
+      "imports": [
+        "openai",
+        "zod",
+        "@/auth",
+        "@/lib/services/features/assistantService",
+        "@/lib/services/features/assistantContextService",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C11d",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/auth/[...nextauth]/route.ts",
+      "methods": [],
+      "imports": ["@/auth"],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/compare/data/lite/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/lib/utils/response", "@/lib/services"],
+      "computed": false,
+      "package": "C08",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/compare/data/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/lib/utils/response", "@/lib/services"],
+      "computed": false,
+      "package": "C08",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/birthdays/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/captain-stats/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/captain-suggest/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/home-away/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/ideal-lineup/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/leader-gap/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/market-opportunities/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/mvps/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/next-round/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/recent-activity/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/services",
+        "@/lib/utils/response",
+        "@/lib/utils/validation"
+      ],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/rising-stars/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/top-form/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/dashboard/top-players/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C09",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/home/activity/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/auth",
+        "@/lib/home/contracts",
+        "@/lib/services/app/homeService"
+      ],
+      "computed": false,
+      "package": "C10",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/hoopgrid/guess/route.ts",
+      "methods": ["POST"],
+      "imports": ["@/lib/services/features/hoopgridService", "@/auth", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C11c",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/hoopgrid/list/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/db",
+        "@/lib/db/schema",
+        "drizzle-orm",
+        "@/lib/services/features/hoopgridService"
+      ],
+      "computed": false,
+      "package": "C11c",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/hoopgrid/today/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/services/features/hoopgridService",
+        "@/lib/db",
+        "@/lib/db/schema",
+        "drizzle-orm",
+        "@/auth",
+        "next/headers"
+      ],
+      "computed": false,
+      "package": "C11c",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/landing-stats/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C10",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/league-average/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C10",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/duels/details/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/services",
+        "@/lib/utils/response",
+        "@/lib/utils/validation"
+      ],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/offers/accept/route.ts",
+      "methods": ["POST"],
+      "imports": ["@/auth", "@/lib/services/marketActionsService", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/offers/reject/route.ts",
+      "methods": ["POST"],
+      "imports": ["@/auth", "@/lib/services/marketActionsService", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/remove/route.ts",
+      "methods": ["DELETE"],
+      "imports": ["@/auth", "@/lib/services/marketActionsService", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/services",
+        "@/lib/utils/validation",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/sell-all/route.ts",
+      "methods": ["POST"],
+      "imports": [
+        "next/server",
+        "@/auth",
+        "@/lib/services/marketActionsService",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/sell/route.ts",
+      "methods": ["POST"],
+      "imports": [
+        "next/server",
+        "@/auth",
+        "@/lib/services/marketActionsService",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/stats/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/stats/value-details/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/services",
+        "@/lib/utils/response",
+        "@/lib/utils/validation"
+      ],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/transfers/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/services",
+        "@/lib/utils/response",
+        "@/lib/utils/validation"
+      ],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/market/trends/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/lib/services",
+        "@/lib/utils/response",
+        "@/lib/utils/validation"
+      ],
+      "computed": false,
+      "package": "C05/C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/matches/[id]/play-by-play/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/matches/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/matches/[id]/shots/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/matches/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/news/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C10",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/player/rounds/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/features/managers/server",
+        "@/lib/utils/response",
+        "@/lib/utils/api-auth"
+      ],
+      "computed": false,
+      "package": "C01",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/player/squad/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/features/managers/server",
+        "@/lib/utils/response",
+        "@/lib/utils/api-auth"
+      ],
+      "computed": false,
+      "package": "C01",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/player/stats/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/features/managers/server",
+        "@/lib/utils/response",
+        "@/lib/utils/api-auth"
+      ],
+      "computed": false,
+      "package": "C01",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/player/streaks/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/players/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/players/[id]/stats/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/players/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/all-history/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/rounds/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/history/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/features/rounds/server",
+        "@/features/rounds/server",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/leaderboard/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/rounds/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/lineup-stats/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/rounds/server"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/lineup/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/features/rounds/server",
+        "@/features/rounds/server",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/list/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/rounds/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/standings/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/features/rounds/server",
+        "@/features/rounds/server",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/rounds/stats/route.ts",
+      "methods": ["GET"],
+      "imports": [
+        "next/server",
+        "@/features/rounds/server",
+        "@/features/rounds/server",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/search/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/search/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/advanced/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/standings/server", "@/features/standings/server"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/analytics/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/bottlers/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/captains/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/efficiency/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/full/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/heartbreakers/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/initial-squad-stats/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/jinx/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/league-comparison/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/league-totals/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/no-glory/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/placements/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/points-progression/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/round-winners/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/streaks/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/theoretical/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/value-ranking/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/standings/volatility/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/features/standings/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/stats/leaders/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/players/server"],
+      "computed": false,
+      "package": "C10",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/team/[id]/route.ts",
+      "methods": ["GET"],
+      "imports": ["next/server", "@/features/teams/server", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C14",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/user/change-password/route.ts",
+      "methods": ["POST"],
+      "imports": [
+        "@/auth",
+        "@/lib/db/queries/core/users",
+        "@/lib/db/mutations/users",
+        "@/lib/db",
+        "bcryptjs",
+        "@/lib/utils/response"
+      ],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/user/link-biwenger/route.ts",
+      "methods": ["POST"],
+      "imports": [
+        "@/auth",
+        "@/lib/db",
+        "@/lib/db/schema",
+        "drizzle-orm",
+        "@/lib/utils/response",
+        "@/lib/credentials/service"
+      ],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/users/lineup/route.ts",
+      "methods": ["POST", "GET"],
+      "imports": ["next/server", "@/auth", "@/lib/services/lineupService", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C11b",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/api/users/route.ts",
+      "methods": ["GET"],
+      "imports": ["@/lib/services", "@/lib/utils/response"],
+      "computed": false,
+      "package": "C01",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/hoopgrid-cheatsheet/page.js",
+      "methods": [],
+      "imports": [
+        "@/lib/db",
+        "@/lib/db/schema",
+        "drizzle-orm",
+        "next/image",
+        "@/lib/services/features/hoopgridService",
+        "@/components/hoopgrid/HoopgridCheatsheetHeader",
+        "@/lib/mobile/presentation-server"
+      ],
+      "computed": false,
+      "package": "C11c",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/install/page.js",
+      "methods": [],
+      "imports": ["@/components/pwa/InstallGuide"],
+      "computed": false,
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/manifest.ts",
+      "methods": [],
+      "imports": ["next"],
+      "computed": false,
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/offline/page.js",
+      "methods": [],
+      "imports": ["next/image", "next/link", "lucide-react"],
+      "computed": false,
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/test-hoopgrid/page.js",
+      "methods": [],
+      "imports": ["@/lib/constants/hoopgridCriteria"],
+      "computed": false,
+      "package": "C11c",
+      "review": "pending"
+    },
+    {
+      "file": "src/auth.config.js",
+      "methods": [],
+      "imports": ["@/lib/auth/session-safety"],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/auth.js",
+      "methods": [],
+      "imports": [
+        "next-auth",
+        "next-auth/providers/credentials",
+        "@/lib/db",
+        "@/lib/db/schema",
+        "drizzle-orm",
+        "bcryptjs",
+        "./auth.config",
+        "@/lib/auth/session-safety",
+        "@/lib/credentials/service"
+      ],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    },
+    {
+      "file": "src/proxy.js",
+      "methods": [],
+      "imports": ["next-auth", "./auth.config"],
+      "computed": false,
+      "package": "C11a",
+      "review": "pending"
+    }
+  ]
+}
