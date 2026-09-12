@@ -90,12 +90,6 @@ export {
   fetchUserTopContributors,
 } from './core/userService';
 
-// Tournament Service
-export * from './tournamentService';
-
-// Stats Service
-export * from './statsService';
-
 // Rounds Service
 export {
   fetchRoundsList,

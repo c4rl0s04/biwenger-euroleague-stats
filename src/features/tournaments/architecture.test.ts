@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 const read = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf8');
@@ -23,7 +23,7 @@ it('keeps tournament server markers, client-safe models and persistence ownershi
   );
 });
 
-it('keeps global statistics in a typed feature calculation with a legacy alias only', () => {
+it('keeps global statistics in a typed feature calculation without obsolete service adapters', () => {
   const service = read('src/features/tournaments/server/services/tournament-statistics.service.ts');
   const mapper = read('src/features/tournaments/server/mappers/tournament-statistics.mapper.ts');
   const models = read('src/features/tournaments/models/tournament-statistics.ts');
@@ -32,9 +32,11 @@ it('keeps global statistics in a typed feature calculation with a legacy alias o
   }
   expect(mapper).not.toMatch(/\bawait\b|\bfetch\s*\(|\bquery\s*\(/);
   expect(service).toContain("serverCache: 'none;");
-  const legacy = read('src/lib/services/statsService.ts');
-  expect(legacy).toContain(
-    "export { getGlobalTournamentStats } from '@/features/tournaments/server'"
-  );
-  expect(legacy).not.toMatch(/\bfunction\b|Promise\.all|\.query\(/);
+  for (const path of [
+    'src/lib/services/statsService.ts',
+    'src/lib/services/tournamentService.ts',
+    'src/features/tournaments/components/TournamentCard.js',
+  ]) {
+    expect(existsSync(resolve(process.cwd(), path))).toBe(false);
+  }
 });

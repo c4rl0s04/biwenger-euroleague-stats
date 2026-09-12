@@ -11,7 +11,7 @@ vi.mock('./services/tournament-read.service', () => ({
   getTournamentFixtures: reads.fixtures,
   getTournamentStandings: reads.standings,
 }));
-import { getGlobalTournamentStats } from '@/lib/services/statsService';
+import { getGlobalTournamentStats } from '../server';
 
 function tournament(id: number, overrides: Partial<Tournament> = {}): Tournament {
   return {
