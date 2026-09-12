@@ -93,10 +93,12 @@ PASS; typecheck PASS. Full npm run verify PASS: 1,305 tests, one existing skip; 
 image warnings; production build, 38-table metadata audit, Drizzle and diff checks PASS. No schema,
 dependency, authentication, HTTP handler policy or UI changes were made in this checkpoint.
 
-Original baseline browser suite completed: 90 PASS (10.1 minutes). Candidate browser validation is
-running separately; baseline success is not candidate evidence. C01 remains IN PROGRESS until acceptance
-and adapter bookkeeping are reconciled. No push or deployment is authorized by this checkpoint.
+Original baseline browser suite completed: 90 PASS (10.1 minutes). The separate candidate browser run
+for the c9d6a816 application checkpoint completed: 90 PASS (9.1 minutes), all nine viewports. Existing
+mobile-shell stream-close teardown messages appeared without a failed test. The disposable server and
+database stopped normally. This run does not validate subsequent Tournament source edits.
+C01 remains IN PROGRESS until adapter bookkeeping is reconciled. No push or deployment is authorized.
 
-Next: finish candidate browser verification and C01 acceptance, then trace C02 Tournament consumers.
+Next: reconcile C01 retained-adapter bookkeeping while completing C02 Tournament consumers.
 Stop for an unexpected contract/security decision or new graph cycle. Preserve temporary adapters
 until the named downstream owners have migrated; document each one through campaign closure.

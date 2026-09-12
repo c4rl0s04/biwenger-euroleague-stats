@@ -20,8 +20,8 @@ Campaign base carries planning commit `6ad78eb8`; no unrelated branch was incorp
 **C00 and C01 IN PROGRESS. No package is newly VERIFIED.** The Manager directory checkpoint
 is implemented; see [C01 evidence and remaining scope](reports/c01-manager-reads.md).
 The full goal remains all C00–C15 packages, not merely the first migration.
-The [C02 Tournament baseline](reports/c02-tournament-reads.md) records source contracts and
-characterization tests; Tournament application code is not yet migrated.
+The [C02 Tournament receipt](reports/c02-tournament-reads.md) records source contracts,
+characterization tests and statistics extraction; presentation and full acceptance remain pending.
 Sensitive policy changes and production release remain explicit gates in the plan.
 
 ## Inventory discovery
@@ -72,7 +72,8 @@ Remaining C00 work:
 - Updated documentation checks passed; disposable browser baseline completed: 90 PASS (10.1 minutes).
 - C01 directory, performance and preparation implementation passed full verify: 1,305 tests,
   one existing skip; graph 806 modules/45 protected entrypoints; unchanged lint/build warnings.
-  Candidate browser verification remains pending; see the C01 receipt for scope and retained adapters.
+  Candidate browser verification for c9d6a816 PASS: 90 tests (9.1 minutes), all nine viewports.
+  See the C01 receipt for scope, existing teardown messages and retained adapters.
 - No environment files copied, production operations, secrets, provider calls, push or deployment.
 - Existing PWA/Season Review/sync branches and both pre-existing stashes remain untouched.
   Their detailed ancestry/content classification remains part of C00/C14; no blanket merge/deletion.
