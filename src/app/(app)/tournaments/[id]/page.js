@@ -6,7 +6,7 @@ import { getTournamentDetails, getStandings, getFixtures } from '@/lib/services/
 import { StandingsTable, TournamentFixtures, TournamentBracket } from '@/components/tournaments';
 import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { resolveRoundIdByPolicy } from '@/lib/db';
+import { getTournamentInitialRoundId } from '@/features/tournaments/server';
 import MobileTournamentDetailScreen from '@/components/mobile/screens/MobileTournamentDetailScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
@@ -35,15 +35,7 @@ export default async function TournamentDetailsPage({ params }) {
     );
   }
 
-  // Determine initial round to show
-  let initialRoundId = null;
-  if (isActive) {
-    initialRoundId = await resolveRoundIdByPolicy('active_or_next');
-  } else if (fixtures && fixtures.length > 0) {
-    // For finished tournaments, find the last round in the fixtures
-    const sortedFixtures = [...fixtures].sort((a, b) => (b.round_id || 0) - (a.round_id || 0));
-    initialRoundId = sortedFixtures[0]?.round_id;
-  }
+  const initialRoundId = await getTournamentInitialRoundId(tournament, fixtures);
 
   return (
     <div className="min-h-screen pb-20">

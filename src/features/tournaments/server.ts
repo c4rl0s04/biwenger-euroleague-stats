@@ -1,5 +1,7 @@
 import 'server-only';
 
+export { getTournamentInitialRoundId } from './server/services/tournament-round.service';
+
 export {
   getGlobalTournamentStats,
   TOURNAMENT_STATISTICS_POLICY,

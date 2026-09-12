@@ -103,3 +103,22 @@ Test/fixture typecheck and targeted ESLint PASS. Original reference capture was 
 npm run test:e2e:local -- tournaments.spec.ts --project=iphone-13 --project=desktop-1440 --update-snapshots.
 Capture and repeat-without-update results are pending. Do not copy or bless incomplete reference
 artifacts or move screens before inspecting the results. Linux visual evidence remains part of C14.
+
+Original capture result: desktop PASS; phone reached all screenshots but failed the existing browser
+error guard with Auth.js/prefetch load cancellation during full document navigation. References are
+not accepted yet. The test now uses real catalogue/section/back links instead of repeated page.goto;
+guards and application source remain unchanged in the baseline checkout. A repeat without snapshot
+updates is running. If it fails, inspect the actual error rather than blessing the initial images.
+
+## Round policy checkpoint
+
+Tournament detail no longer imports the database barrel. Its new Tournament round service consumes
+Rounds/server and preserves active_or_next versus finished maximum-ID selection. The call remains
+after the phone early return; no query/cache policy or JSX changed. Four tests cover repeated active
+reads, null resolution, nonmutating finished ordering, null/zero ties, empty lists and errors.
+Tournament focused suite PASS: 42 tests. Architecture PASS: 810 modules/45 protected entrypoints;
+typecheck and diff checks PASS. Full acceptance after this checkpoint remains pending.
+
+The preceding statistics checkpoint a2cb65ec passed full npm run verify: 1,316 tests plus one existing
+skip, typecheck, architecture, documentation, lint (25 existing warnings), production build,
+38-table metadata audit and Drizzle consistency. That result predates the round-policy change.
