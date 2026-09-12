@@ -12,3 +12,12 @@ export type {
   GlobalTournamentStatistics,
   TournamentStatisticsManager,
 } from './models/tournament-statistics';
+export {
+  ActiveTournamentsSection,
+  StandingsTable,
+  TournamentFixtures,
+  TournamentBracket,
+  HallOfFame,
+  TournamentHistoryTable,
+  RecordsSection,
+} from './components';

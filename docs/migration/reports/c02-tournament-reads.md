@@ -122,3 +122,22 @@ typecheck and diff checks PASS. Full acceptance after this checkpoint remains pe
 The preceding statistics checkpoint a2cb65ec passed full npm run verify: 1,316 tests plus one existing
 skip, typecheck, architecture, documentation, lint (25 existing warnings), production build,
 38-table metadata audit and Drizzle consistency. That result predates the round-policy change.
+
+## Original references accepted and component ownership checkpoint
+
+The original repeat without snapshot updates passed both iPhone 13 and desktop 1440 tests (44.5s).
+Reference commit afb26b3b on chore/tournament-visual-baseline contains only the test, synthetic fixture
+additions and 12 macOS screenshots. Application source remains at 11c78c0e. The campaign copies those
+images unchanged; no candidate-generated baseline is used. Desktop cup and phone league captures
+were visually inspected for populated content. The original navigation failure was resolved using
+app links, without weakening error guards or changing application behavior.
+
+Eleven files under components/tournaments were relocated to features/tournaments/components.
+A binary content comparison against the pre-move commit passed for every relocated source file.
+The two page imports now consume public.ts. No component markup, interaction or calculation changed.
+Architecture (810 modules/45 entries), typecheck and diff checks passed. Candidate focused browser
+comparison is running without update flags; its outcome and full final acceptance remain pending.
+
+Remaining C02 work is explicit: desktop/mobile screen composition, typed presentation snapshot
+projections, section/page contracts, adapter retirement and entrypoint registration. Moving components
+alone does not complete this package. No deployment, production data or configuration changes occurred.
