@@ -12,14 +12,18 @@ status: active
 ## Identity
 
 - Batch: 001-standings
-- Status: IMPLEMENTING
+- Status: READY_FOR_REVIEW — implementation complete locally; independent release checks remain.
 - Branch and absolute worktree: `refactor/standings-read-completion`, `/Users/carlosandreshuete/Documents/Projects/biwengerstats-next-standings-read-completion`
 - Exact starting SHA: 38bf2de48fc1c73165389536ef7ecbed2307ebad
-- Source commit SHAs: (will record at the end)
+- Source commit SHAs: see coordinator completion receipt below.
 - Instruction-pack branch/commit: `docs/migration-worker-playbook`
-- Working tree clean: No (in progress)
+- Working tree: source committed; this receipt is committed separately, with final cleanliness checked at handoff.
 
 ## Inventory before edits
+
+The original worker notes below are historical, not a final acceptance record.
+Their early completeness claims were superseded by checkpoints A–D and the coordinator's
+remaining contract, ownership, screen and verification corrections.
 
 ### Pages (UI)
 
@@ -121,5 +125,103 @@ Final status: READY FOR REVIEW
   - `npm run typecheck`: PASS
   - `npm run architecture:check`: PASS (792 modules, 44 protected entrypoints)
   - `npm run test:run -- src/features/standings src/app/api/standings --maxWorkers=2`: PASS (116 tests in 15 files)
-- **Commit SHA:** b303f9aa950ccc73665601a12b594facb4d28dcf
+- **Commit SHA:** fb26a5ade52d4f54574877bbe30576a8e22000ea
 - **Note:** CHECKPOINT C — awaiting review; full batch incomplete.
+
+## Coordinator completion receipt
+
+The user explicitly reassigned implementation to the coordinator after the worker stopped.
+This receipt supersedes the historical completion claims above. No other batch was started.
+
+Source commits added by the coordinator:
+
+- `84618c56` — initial-squad bundle contract corrections (checkpoint D).
+- `0ce50029f29c8449a0b9da8c7125bf65bc45057c` — remaining typed read, mapper, service, page and browser contracts.
+- `8ff145d8` — remove completed worker migration scripts.
+
+The receipt itself is a separate documentation commit, not a self-referential source SHA.
+
+### Completed scope and corrections
+
+- Both Standings pages, all eight phone sections, and all 19 existing HTTP handlers now
+  consume the feature boundary. The advanced dispatcher retains all 13 variants.
+- Read flow: framework adapter → bounded service → server-only query → explicit allowlisting
+  mapper → typed model. Desktop retains its existing browser/API loading; phone pages call
+  screen services directly. No internal REST endpoint was added.
+- Models, queries, mappers and services are separated into progression, curiosities,
+  performance, theoretical, draft, and screen-composition subareas. The existing base and
+  all-play-all contracts remain authoritative. `public.ts` is client-safe; `server.ts` is guarded.
+- Checkpoint D (`84618c56`) restores the seven-part initial-squad bundle, nullable values,
+  text IDs, `current_owner_color_index`, `points_contributed`, and the original detailed-squad
+  fallback. Added real handler/service/mapper tests and strengthened the no-new-cache guard.
+- Remaining mapper corrections preserve text IDs, null/empty distinctions, nested round labels,
+  distribution bins, matrix entries and legacy non-finite values. They do not coerce missing
+  values into invented defaults or pass arbitrary database columns into presentation.
+- Restored the legacy progression service default of 50; its HTTP adapter still explicitly uses 10. Winner/progression parsing preserves zero, negative, malformed, empty and repeated inputs.
+- Theoretical standings uses a feature-owned adapter over the unchanged shared active-manager
+  directory and the deliberate Rounds server contract. Its history aggregation, ordering and
+  tie behavior remain unchanged. No Managers dependency cycle or duplicated Rounds SQL.
+- Standings queries use the database connection module rather than the legacy export barrel.
+  Removed internal self-barrel imports; both architecture checks now resolve the graph.
+- Screen services retain parallel reads, even secondary reads whose arrays are not rendered,
+  preserving failures as well as first-array selection, 20-row limit, Spanish formatting and
+  captain links. Section guards still execute before reads. Desktop dynamic-loading options,
+  existing loading/error/empty states and responsive compositions remain intact.
+- Legacy service/query adapters remain for current external consumers. The contributor adapter
+  continues to belong to Managers. Leader-comparison and league-average helpers remain outside
+  this UI slice; worker-added Dashboard/Compare type changes were reverted to the batch base.
+- Removed the unused draft records alias and 18 worker-generated migration scripts from `scratch`.
+  These scripts are recoverable from Git; pre-existing scratch files were preserved.
+
+### Compatibility and review evidence
+
+- Source-to-source runtime comparison found 40 extracted query function bodies equivalent to
+  the recorded base after stripping TypeScript and formatting; all seven draft query bodies
+  were separately compared. SQL parameters, formulas, ordering and existing cache bodies remain.
+- Compared 35 desktop component runtime bodies after import removal; the desktop screen was
+  separately inspected for import/formatting-only differences and preserved dynamic options.
+- Public fantasy statistics remain independent of session identity. No authentication,
+  authorization, credentials, schema, dependencies, environment configuration or provider behavior
+  was changed. HTTP headers/envelopes remain route-specific; advanced retains bare error envelopes,
+  captains retains nested `stats`, and caught query errors retain their existing behavior.
+- No React cache layer was added. Existing season-bound 900-second query caches and all-play-all
+  caching remain unchanged. Tests exercise cache hits, expiry, season separation and failures.
+- New tests cover real HTTP-to-query chains, nested mapper allowlists, null/text-ID contracts,
+  query-bound limit quirks, bundle failures, theoretical aggregation, screen orchestration and
+  page branch/guard behavior. Browser tests use only the disposable synthetic league.
+
+### Executed validation
+
+| Command                                                                           | Final result                                                      |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `npm run verify`                                                                  | PASS, sequential aggregate; all commands below passed             |
+| `npm run skills:check`                                                            | PASS, 6 repository skills                                         |
+| `npm run architecture:check`                                                      | PASS, 794 modules / 44 protected entrypoints; no new exceptions   |
+| `npm run docs:check`                                                              | PASS, 74 notes; rerun after receipt edits                         |
+| `npm run typecheck`                                                               | PASS                                                              |
+| `npm run test:run -- src/features/standings src/app/api/standings --maxWorkers=2` | PASS, 218 tests / 23 files                                        |
+| `npm run test:run -- --maxWorkers=2`                                              | PASS, 1,277 tests / 179 files; one pre-existing skipped test/file |
+| `npm run lint`                                                                    | PASS, 0 errors / 25 existing image warnings                       |
+| `SKIP_DB=true npm run build`                                                      | PASS through `verify`; all Standings routes registered            |
+| `npm run db:audit:schema:metadata`                                                | PASS, 38 tables match snapshot; no database connection            |
+| `npx --no-install drizzle-kit check`                                              | PASS                                                              |
+| `npm run test:e2e:local -- standings.spec.ts`                                     | PASS, all 9 configured phone/tablet/desktop viewports             |
+| `git diff --check` and `git diff --check 38bf2de4..HEAD`                          | PASS                                                              |
+
+Browser verification used an isolated local synthetic PostgreSQL database, cleaned up by the runner.
+No real provider actions or production database operations occurred. Existing missing-provider-variable
+build warnings are expected in this secret-free environment; no secrets were supplied to silence them.
+
+Intermediate failures were investigated rather than suppressed: repaired an invalid `NaN` test
+assertion with `Object.is`; replaced browser forced reloads with real section/back links to avoid
+WebKit request cancellation; selected the visible desktop responsive table row. Error guards were
+not weakened. A full-suite graph test exceeded its existing 5-second timeout during concurrent
+build/browser activity, then passed both in isolation and in the sequential full verification.
+
+### Remaining acceptance limits
+
+The Standings-only browser suite is not the entire repository browser suite. No new screenshot
+baseline was generated from the candidate. A full cross-feature browser run and unchanged-base
+desktop/phone screenshot comparison remain independent-review/release checks. Local browser
+checks do not substitute for authenticated production visual review. No integration or release
+is authorized by this receipt.

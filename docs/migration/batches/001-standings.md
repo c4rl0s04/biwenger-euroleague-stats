@@ -9,7 +9,8 @@ status: active
 
 # Batch 001 — Standings read completion
 
-**Dispatch: READY, one worker only.** Read [worker protocol](../worker-protocol.md).
+**Dispatch: IMPLEMENTED locally; awaiting independent review.** See the [completion receipt](../reports/001-standings.md).
+The following is the original single-worker assignment. Read [worker protocol](../worker-protocol.md).
 This assignment authorizes local implementation, not integration or release.
 Do not start another batch or spawn additional workers.
 
@@ -77,7 +78,7 @@ An unexpected handler or ownership ambiguity requires a report, not automatic sc
   [advanced queries](../../../src/lib/db/queries/analytics/advanced_stats.ts), and
   [initial-squad queries](../../../src/lib/db/queries/analytics/initial_squads.ts).
 - [Desktop components](../../../src/components/standings),
-  [phone overview](../../../src/components/mobile/screens/MobileStandingsScreen.tsx),
+  [phone overview (now feature-owned)](../../../src/features/standings/components/MobileStandingsScreen.tsx),
   [mobile route registry](../../../src/lib/mobile/routes.ts) and
   [legacy row renderer](../../../src/components/mobile/MobileRecordList.tsx).
 - [HTTP handlers and existing tests](../../../src/app/api/standings).
