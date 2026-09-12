@@ -86,3 +86,20 @@ Snapshot winner typing is still an internal compatibility assertion over heterog
 Complete its presentation projection/validation with the screen migration; do not claim all public
 snapshot boundaries are closed yet. Fixture record projections reuse the existing allowlisted feature
 models. Required full acceptance and original Tournament visual references remain pending.
+
+## Original browser reference preparation
+
+Reference branch/worktree: chore/tournament-visual-baseline in
+../biwengerstats-next-tournament-visual-baseline, pinned to 11c78c0e (pre-extraction application).
+Only the new Tournament browser test and synthetic fixture additions are applied there. Its isolated
+dependency setup passed without lockfile changes. The campaign carries the same test and fixture edits.
+
+The new test covers catalogue, league, finished cup and all three phone sections. Synthetic league
+fixtures include a completed and pending game; the cup has a completed final. Existing Profile
+participation rows are unchanged. One exact synthetic CDN icon path is served from the local icon;
+browser exception and failed-API guards remain unchanged. No production data or provider request is used.
+
+Test/fixture typecheck and targeted ESLint PASS. Original reference capture was launched with
+npm run test:e2e:local -- tournaments.spec.ts --project=iphone-13 --project=desktop-1440 --update-snapshots.
+Capture and repeat-without-update results are pending. Do not copy or bless incomplete reference
+artifacts or move screens before inspecting the results. Linux visual evidence remains part of C14.
