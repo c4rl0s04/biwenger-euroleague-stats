@@ -158,3 +158,21 @@ The shared Section component had incorrect JSDoc treating its props object as a 
 annotation was corrected so the typed screen can consume it without an unsafe local cast; emitted
 JavaScript is identical. No shared component behavior changed. Browser/full acceptance of this latest
 checkpoint remains pending, along with the previously listed mobile/detail/model work.
+
+## Detail and mobile composition checkpoint
+
+Both mobile screens now live under features/tournaments/components/screens and use public.ts exports.
+Only their shared-component import paths changed; their loose tournament types remain an explicit
+projection task, not completed work. The desktop detail JSX moved to DesktopTournamentDetailScreen;
+its typed TSX page calls feature services directly, preserving force-dynamic, ID forwarding, read order,
+notFound and the phone early return. No legacy service wrapper remains in that detail page.
+
+Nine real detail-page contract tests cover desktop/phone props, all read failures, missing tournaments,
+read staging and exact ID forwarding. Combined Tournament suite PASS: 57 tests; typecheck PASS.
+Initial JSX test-loader React errors were resolved by making the thin page TSX, not by altering
+application runtime or global test configuration. Architecture/diff checks and original-snapshot
+browser comparison are run for this checkpoint; full feature acceptance remains pending.
+
+Still required: typed snapshot/presentation projections, mobile section composition and contracts,
+adapter/dead-export retirement, entrypoint protection and combined acceptance. No claim of a fully
+migrated Tournament boundary is made by these composition moves.

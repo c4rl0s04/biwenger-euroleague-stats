@@ -22,3 +22,6 @@ export {
   RecordsSection,
 } from './components';
 export { default as DesktopTournamentsScreen } from './components/screens/DesktopTournamentsScreen';
+export { default as DesktopTournamentDetailScreen } from './components/screens/DesktopTournamentDetailScreen';
+export { default as MobileTournamentDetailScreen } from './components/screens/MobileTournamentDetailScreen';
+export { default as MobileTournamentsScreen } from './components/screens/MobileTournamentsScreen';
