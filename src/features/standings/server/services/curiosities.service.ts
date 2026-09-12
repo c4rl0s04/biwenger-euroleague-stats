@@ -1,4 +1,9 @@
 import 'server-only';
+
+/** Access: public league statistics, no session identity. Freshness: no service cache;
+ * existing query caches and each HTTP adapter's headers remain authoritative.
+ * These queries are uncached; errors retain the existing query/route behavior.
+ */
 import {
   mapBottlerStat,
   mapHeartbreakerStat,

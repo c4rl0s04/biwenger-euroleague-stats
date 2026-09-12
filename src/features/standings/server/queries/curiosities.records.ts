@@ -1,6 +1,9 @@
-export type BottlerStatRecord = any;
-export type HeartbreakerStatRecord = any;
-export type NoGloryStatRecord = any;
-export type JinxStatRecord = any;
-export type EfficiencyStatRecord = any;
-export type DetailedCaptainStatRecord = any;
+// Explicit serializable projection contracts; no untyped database records cross this boundary.
+export type {
+  BottlerStat as BottlerStatRecord,
+  HeartbreakerStat as HeartbreakerStatRecord,
+  NoGloryStat as NoGloryStatRecord,
+  JinxStat as JinxStatRecord,
+  EfficiencyStat as EfficiencyStatRecord,
+  DetailedCaptainStat as DetailedCaptainStatRecord,
+} from '../../models/curiosities';

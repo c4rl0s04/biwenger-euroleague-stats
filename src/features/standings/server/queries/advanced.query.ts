@@ -4,18 +4,18 @@ import 'server-only';
  * Complex analytics for the standings page
  */
 
-import { db, pgClient } from '@/lib/db';
-import { fetchAllPlayAllStats } from '@/features/standings/server';
-import type { AllPlayAllEntry } from '@/features/standings/public';
+import { db, pgClient } from '@/lib/db/connection';
+import { fetchAllPlayAllStats } from '../services/all-play-all.service';
+import type { AllPlayAllEntry } from '../../models/all-play-all';
 import { cached, CACHE_TTL } from '@/lib/utils/cache';
 import { getShortRoundName } from '@/lib/utils/format';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface HeatCheckStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   last5_avg: number;
   season_avg: number;
   diff: number;
@@ -23,51 +23,52 @@ export interface HeatCheckStat {
 }
 
 export interface HunterStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   recent_points: number;
   gained: number;
 }
 
 export interface RollingAverageStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   data: {
     round: number;
-    round_name: string;
+    round_name: string | null;
+    short_name: string;
     avg: number;
   }[];
 }
 
 export interface FloorCeilingStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   floor: number;
   ceiling: number;
   avg: number;
 }
 
 export interface ReliabilityStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   total_rounds: number;
   rounds_above: number;
   pct: number;
 }
 
 export interface PointDistributionStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   distribution: {
     [range: string]: number; // '90-135' | '136-170' | ...
   };
@@ -76,19 +77,19 @@ export interface PointDistributionStat {
 export type PlayAllStat = Omit<AllPlayAllEntry, 'pct'> & { pct: number };
 
 export interface DominanceStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   wins: number;
   avg_margin: number;
 }
 
 export interface TheoreticalGapStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   current_points: number;
   perfectTotal: number;
   gap: number;
@@ -96,51 +97,51 @@ export interface TheoreticalGapStat {
 }
 
 export interface HeatmapStat {
-  rounds: { id: number; name: string }[];
+  rounds: { id: number; name: string | null; shortName: string }[];
   users: {
-    id: number;
-    name: string;
-    icon: string;
-    color_index: number;
+    id: string;
+    name: string | null;
+    icon: string | null;
+    color_index: number | null;
     scores: (number | null)[];
   }[];
 }
 
 export interface PositionChangeStat {
-  rounds: { id: number; name: string }[];
+  rounds: { id: number; name: string | null; shortName: string }[];
   users: {
-    id: number;
-    name: string;
-    icon: string;
-    color_index: number;
-    history: { position: number; change: number }[];
+    id: string;
+    name: string | null;
+    icon: string | null;
+    color_index: number | null;
+    history: { position: number | undefined; change: number }[];
   }[];
   valid: boolean;
   stats: {
-    biggestClimber: { name: string; change: number; round: string };
-    biggestFaller: { name: string; change: number; round: string };
+    biggestClimber: { name: string | null; change: number; round: string };
+    biggestFaller: { name: string | null; change: number; round: string };
   };
 }
 
 export interface RivalryMatrixStat {
   users: {
-    id: number;
-    name: string;
-    icon: string;
-    color_index: number;
+    id: string;
+    name: string | null;
+    icon: string | null;
+    color_index: number | null;
   }[];
   matrix: {
-    [userId: number]: {
-      [opponentId: number]: { wins: number; losses: number; ties: number };
+    [userId: string]: {
+      [opponentId: string]: { wins: number; losses: number; ties: number };
     };
   };
 }
 
 export interface CaptainStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   total_captains: number;
   raw_captain_points: number;
   total_bonus: number;
@@ -150,9 +151,9 @@ export interface CaptainStat {
 
 export interface DetailedCaptainStat {
   user_id: string;
-  user_name: string;
-  user_icon: string;
-  color_index: number;
+  user_name: string | null;
+  user_icon: string | null;
+  color_index: number | null;
   total_rounds: number;
   total_captain_points: number;
   avg_captain_points: number;
@@ -160,8 +161,8 @@ export interface DetailedCaptainStat {
   unique_captains: number;
   best_points: number;
   worst_points: number;
-  most_used_captain: string;
-  most_used_captain_id: number;
+  most_used_captain: string | null;
+  most_used_captain_id: number | null;
 }
 
 /**

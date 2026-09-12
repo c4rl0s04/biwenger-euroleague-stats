@@ -1,4 +1,9 @@
 import 'server-only';
+
+/** Access: public league statistics, no session identity. Freshness: no service cache;
+ * existing query caches and each HTTP adapter's headers remain authoritative.
+ * Position evolution retains its season-scoped 900-second query cache.
+ */
 import {
   mapVolatilityStat,
   mapHeatCheckStat,

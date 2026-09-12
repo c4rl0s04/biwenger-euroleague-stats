@@ -1,5 +1,5 @@
 import 'server-only';
-import { db, pgClient } from '@/lib/db';
+import { db, pgClient } from '@/lib/db/connection';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface InitialSquadPotential {
@@ -96,10 +96,10 @@ export async function getInitialSquadActualPerformance(): Promise<InitialSquadPe
   const seasonId = await resolveReadSeasonId();
   const query = `
     WITH actual AS (
-      SELECT 
+      SELECT
         isq.user_id,
         SUM(
-          CASE 
+          CASE
             WHEN l.role = 'titular' THEN prs.fantasy_points * 1.0
             WHEN l.role = '6th_man' THEN prs.fantasy_points * 0.75
             WHEN l.role = 'suplente' THEN prs.fantasy_points * 0.5
@@ -113,7 +113,7 @@ export async function getInitialSquadActualPerformance(): Promise<InitialSquadPe
       GROUP BY isq.user_id
     ),
     potential AS (
-      SELECT 
+      SELECT
         isq.user_id,
         SUM(prs.fantasy_points) as potential_points
       FROM initial_squads isq
@@ -121,17 +121,17 @@ export async function getInitialSquadActualPerformance(): Promise<InitialSquadPe
       WHERE isq.season_id = $1
       GROUP BY isq.user_id
     )
-    SELECT 
+    SELECT
       u.id as user_id,
       COALESCE(us.name, u.name) as user_name,
       COALESCE(us.color_index, u.color_index, 0) as user_color_index,
       COALESCE(us.icon, u.icon) as icon,
       COALESCE(a.actual_points, 0) as actual_points,
       COALESCE(p.potential_points, 0) as potential_points,
-      CASE 
-        WHEN COALESCE(p.potential_points, 0) > 0 
+      CASE
+        WHEN COALESCE(p.potential_points, 0) > 0
         THEN ROUND((COALESCE(a.actual_points, 0) * 100.0 / p.potential_points), 1)
-        ELSE 0 
+        ELSE 0
       END as roi_percentage
     FROM users u
     JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
@@ -256,7 +256,7 @@ export async function getInitialSquadRetainedBreakdown(): Promise<InitialSquadPl
 export async function getInitialSquadTheoreticalPotential(): Promise<InitialSquadPotential[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       u.id as user_id,
       COALESCE(us.name, u.name) as user_name,
       COALESCE(us.color_index, u.color_index, 0) as user_color_index,
@@ -282,7 +282,7 @@ export async function getInitialSquadTheoreticalPotential(): Promise<InitialSqua
 export async function getTheoreticalBreakdown(): Promise<TheoreticalBreakdown[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
       COALESCE(us.name, u.name) as user_name,
       COALESCE(us.color_index, u.color_index, 0) as user_color_index,
       p.name as player_name,
@@ -337,25 +337,25 @@ export async function getInitialSquadRegret(): Promise<InitialSquadRegret[]> {
       JOIN user_seasons us ON us.user_id = u.id AND us.season_id = isq.season_id
       JOIN players p ON p.id = isq.player_id
       JOIN player_round_stats prs ON prs.player_id = isq.player_id AND prs.season_id = isq.season_id
-      LEFT JOIN lineups l ON l.player_id = isq.player_id 
-                         AND l.user_id = isq.user_id 
+      LEFT JOIN lineups l ON l.player_id = isq.player_id
+                         AND l.user_id = isq.user_id
                          AND l.round_id = prs.round_id
                          AND l.season_id = isq.season_id
       WHERE isq.season_id = $1 AND l.id IS NULL
     ),
     aggregated AS (
-      SELECT 
+      SELECT
         user_id,
         user_name,
         user_color_index,
         icon,
         SUM(fantasy_points) as points_lost,
         (
-          SELECT player_name 
-          FROM regret_points rp2 
-          WHERE rp2.user_id = regret_points.user_id 
-          GROUP BY player_name 
-          ORDER BY SUM(fantasy_points) DESC 
+          SELECT player_name
+          FROM regret_points rp2
+          WHERE rp2.user_id = regret_points.user_id
+          GROUP BY player_name
+          ORDER BY SUM(fantasy_points) DESC
           LIMIT 1
         ) as top_regret_player
       FROM regret_points
@@ -435,7 +435,7 @@ export async function getInitialSquadPotentialAdvanced(): Promise<InitialSquadPo
 export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
-    SELECT 
+    SELECT
         u.id as user_id,
         COALESCE(us.name, u.name) as manager_name,
         COALESCE(us.color_index, u.color_index, 0) as manager_color_index,
@@ -448,7 +448,7 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
         (SELECT COALESCE(us2.name, u2.name) FROM users u2 LEFT JOIN user_seasons us2 ON us2.user_id = u2.id AND us2.season_id = isq.season_id WHERE u2.id = ps.owner_id) as current_owner,
         (SELECT COALESCE(us2.color_index, u2.color_index, 0) FROM users u2 LEFT JOIN user_seasons us2 ON us2.user_id = u2.id AND us2.season_id = isq.season_id WHERE u2.id = ps.owner_id) as current_owner_color_index,
         (SELECT COALESCE(SUM(prs.fantasy_points), 0)
-         FROM lineups l 
+         FROM lineups l
          JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
          WHERE l.season_id = isq.season_id AND l.user_id = isq.user_id AND l.player_id = isq.player_id
         ) as points_contributed
@@ -459,12 +459,12 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = isq.season_id
     WHERE isq.season_id = $1
     ORDER BY COALESCE(us.name, u.name),
-             CASE p.position 
-               WHEN 'G' THEN 1 
-               WHEN 'F' THEN 2 
-               WHEN 'C' THEN 3 
-               ELSE 4 
-             END, 
+             CASE p.position
+               WHEN 'G' THEN 1
+               WHEN 'F' THEN 2
+               WHEN 'C' THEN 3
+               ELSE 4
+             END,
              COALESCE(ps.price, p.price) DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({

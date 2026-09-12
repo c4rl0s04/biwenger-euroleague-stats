@@ -1,60 +1,60 @@
 import 'server-only';
-import { db, pgClient } from '@/lib/db';
+import { db, pgClient } from '@/lib/db/connection';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface VolatilityStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   avg_points: number;
   std_dev: number;
 }
 
 export interface PlacementStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   top_3_count: number;
   bottom_3_count: number;
   total_rounds: number;
 }
 
 export interface LeagueComparisonStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   above_avg_count: number;
   below_avg_count: number;
   avg_diff: number;
 }
 
 export interface EfficiencyStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   total_points: number;
   team_value: number;
   points_per_million: number;
 }
 
 export interface StreakStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   longest_streak: number;
   current_streak: number;
 }
 
 export interface BottlerStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   wins: number;
   seconds: number;
   thirds: number;
@@ -62,28 +62,28 @@ export interface BottlerStat {
 }
 
 export interface HeartbreakerStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   count: number;
   total_diff: number;
 }
 
 export interface NoGloryStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   total_points_no_glory: number;
   rounds_count: number;
 }
 
 export interface JinxStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   jinxed_count: number;
 }
 

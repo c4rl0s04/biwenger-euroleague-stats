@@ -1,4 +1,9 @@
 import 'server-only';
+
+/** Access: public league statistics, no session identity. Freshness: no service cache;
+ * existing query caches and each HTTP adapter's headers remain authoritative.
+ * Heatmap/rivalry retain season-scoped 900-second query caches; other reads are uncached.
+ */
 import {
   mapTheoreticalGapStat,
   mapLeagueComparisonStat,
@@ -12,7 +17,7 @@ import {
   queryRivalryMatrixStats,
   queryHeatmapStats,
 } from '../queries/theoretical.query';
-import { getExtendedStandings } from '../queries/base.query';
+import { queryStandingsManagers } from '../queries/manager-directory.query';
 import { getUserPerformanceHistoryService } from '@/features/rounds/server';
 
 export const fetchTheoreticalGapStats = async () => {
@@ -28,15 +33,15 @@ export const fetchHeatmapStats = async () => {
   return mapHeatmapStat(await queryHeatmapStats());
 };
 export const fetchTheoreticalStandings = async () => {
-  const standings = await getExtendedStandings();
+  const standings = await queryStandingsManagers();
   const theoreticalData = await Promise.all(
     standings.map(async (user) => {
-      const history = await getUserPerformanceHistoryService(user.user_id);
+      const history = await getUserPerformanceHistoryService(user.id);
       const totalActual = history.reduce((sum, r) => sum + r.actual_points, 0);
       const totalIdeal = history.reduce((sum, r) => sum + (r.ideal_points || 0), 0);
       const roundsPlayed = history.length;
       return {
-        user_id: user.user_id,
+        user_id: user.id,
         name: user.name,
         icon: user.icon,
         color_index: user.color_index,

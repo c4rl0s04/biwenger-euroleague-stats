@@ -1,50 +1,50 @@
 export interface TheoreticalGapStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   current_points: number;
   perfectTotal: number;
   gap: number;
   pct: number;
 }
 export interface LeagueComparisonStat {
-  user_id: number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   above_avg_count: number;
   below_avg_count: number;
   avg_diff: number;
 }
 export interface RivalryMatrixStat {
   users: {
-    id: number;
-    name: string;
-    icon: string;
-    color_index: number;
+    id: string;
+    name: string | null;
+    icon: string | null;
+    color_index: number | null;
   }[];
   matrix: {
-    [userId: number]: {
-      [opponentId: number]: { wins: number; losses: number; ties: number };
+    [userId: string]: {
+      [opponentId: string]: { wins: number; losses: number; ties: number };
     };
   };
 }
 export interface HeatmapStat {
-  rounds: { id: number; name: string; shortName?: string }[];
+  rounds: { id: number; name: string | null; shortName: string }[];
   users: {
-    id: number;
-    name: string;
-    icon: string;
-    color_index: number;
+    id: string;
+    name: string | null;
+    icon: string | null;
+    color_index: number | null;
     scores: (number | null)[];
   }[];
 }
 export interface TheoreticalStandingsStat {
-  user_id: string | number;
-  name: string;
-  icon: string;
-  color_index: number;
+  user_id: string;
+  name: string | null;
+  icon: string | null;
+  color_index: number | null;
   total_actual: number;
   total_ideal: number;
   gap: number;

@@ -19,18 +19,14 @@ import {
   MobileSectionLink,
 } from '@/components/mobile/MobileScreen';
 
-type RecordValue = Record<string, any>;
+import type { StandingsOverviewModel } from '../models/screens';
 
 const compactMoney = new Intl.NumberFormat('es-ES', {
   notation: 'compact',
   maximumFractionDigits: 1,
 });
 
-export default function MobileStandingsScreen({
-  data,
-}: {
-  data: { standings: RecordValue[]; leagueTotals: RecordValue };
-}) {
+export default function MobileStandingsScreen({ data }: { data: StandingsOverviewModel }) {
   const leader = data.standings[0];
   const last = data.standings[data.standings.length - 1];
   const gap = Number(leader?.total_points ?? 0) - Number(last?.total_points ?? 0);

@@ -1,9 +1,12 @@
-export type VolatilityStatRecord = any;
-export type HeatCheckStatRecord = any;
-export type HunterStatRecord = any;
-export type RollingAverageStatRecord = any;
-export type FloorCeilingStatRecord = any;
-export type PointDistributionStatRecord = any;
-export type DominanceStatRecord = any;
-export type PositionChangeStatRecord = any;
-export type ReliabilityStatRecord = any;
+// Explicit serializable projection contracts; no untyped database records cross this boundary.
+export type {
+  VolatilityStat as VolatilityStatRecord,
+  HeatCheckStat as HeatCheckStatRecord,
+  HunterStat as HunterStatRecord,
+  RollingAverageStat as RollingAverageStatRecord,
+  FloorCeilingStat as FloorCeilingStatRecord,
+  PointDistributionStat as PointDistributionStatRecord,
+  DominanceStat as DominanceStatRecord,
+  PositionChangeStat as PositionChangeStatRecord,
+  ReliabilityStat as ReliabilityStatRecord,
+} from '../../models/performance';

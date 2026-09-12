@@ -11,123 +11,108 @@ import type {
   ReliabilityStat,
 } from '../../models/performance';
 
-export const mapVolatilityStat = (row: any): VolatilityStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  avg_points: Number(row.avg_points),
-  std_dev: Number(row.std_dev),
+export const mapVolatilityStat = (row: VolatilityStat): VolatilityStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  avg_points: row.avg_points,
+  std_dev: row.std_dev,
 });
 
-export const mapHeatCheckStat = (row: any): HeatCheckStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  last5_avg: Number(row.last5_avg),
-  season_avg: Number(row.season_avg),
-  diff: Number(row.diff),
-  status: row.status as 'fire' | 'ice' | 'neutral',
+export const mapHeatCheckStat = (row: HeatCheckStat): HeatCheckStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  last5_avg: row.last5_avg,
+  season_avg: row.season_avg,
+  diff: row.diff,
+  status: row.status,
 });
 
-export const mapHunterStat = (row: any): HunterStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  recent_points: Number(row.recent_points),
-  gained: Number(row.gained),
+export const mapHunterStat = (row: HunterStat): HunterStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  recent_points: row.recent_points,
+  gained: row.gained,
 });
 
-export const mapRollingAverageStat = (row: any): RollingAverageStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  data: Array.isArray(row.data)
-    ? row.data.map((d: any) => ({
-        round: Number(d.round),
-        round_name: String(d.round_name),
-        avg: Number(d.avg),
-      }))
-    : [],
+export const mapFloorCeilingStat = (row: FloorCeilingStat): FloorCeilingStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  floor: row.floor,
+  ceiling: row.ceiling,
+  avg: row.avg,
 });
 
-export const mapFloorCeilingStat = (row: any): FloorCeilingStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  floor: Number(row.floor),
-  ceiling: Number(row.ceiling),
-  avg: Number(row.avg),
+export const mapDominanceStat = (row: DominanceStat): DominanceStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  wins: row.wins,
+  avg_margin: row.avg_margin,
 });
 
-export const mapPointDistributionStat = (row: any): PointDistributionStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  distribution: row.distribution || {},
+export const mapReliabilityStat = (row: ReliabilityStat): ReliabilityStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  total_rounds: row.total_rounds,
+  rounds_above: row.rounds_above,
+  pct: row.pct,
 });
 
-export const mapDominanceStat = (row: any): DominanceStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  wins: Number(row.wins),
-  avg_margin: Number(row.avg_margin),
+export const mapRollingAverageStat = (row: RollingAverageStat): RollingAverageStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  data: row.data.map((d) => ({
+    round: d.round,
+    round_name: d.round_name,
+    short_name: d.short_name,
+    avg: d.avg,
+  })),
 });
-
-export const mapPositionChangeStat = (row: any): PositionChangeStat => ({
-  rounds: Array.isArray(row?.rounds)
-    ? row.rounds.map((r: any) => ({
-        id: Number(r.id),
-        name: String(r.name),
-      }))
-    : [],
-  users: Array.isArray(row?.users)
-    ? row.users.map((u: any) => ({
-        id: Number(u.id),
-        name: String(u.name),
-        icon: u.icon ? String(u.icon) : '',
-        color_index: Number(u.color_index),
-        history: Array.isArray(u.history)
-          ? u.history.map((h: any) => ({
-              position: Number(h.position),
-              change: Number(h.change),
-            }))
-          : [],
-      }))
-    : [],
-  valid: Boolean(row?.valid),
-  stats: row?.stats
-    ? {
-        biggestClimber: {
-          name: String(row.stats.biggestClimber?.name || ''),
-          change: Number(row.stats.biggestClimber?.change || 0),
-          round: String(row.stats.biggestClimber?.round || ''),
-        },
-        biggestFaller: {
-          name: String(row.stats.biggestFaller?.name || ''),
-          change: Number(row.stats.biggestFaller?.change || 0),
-          round: String(row.stats.biggestFaller?.round || ''),
-        },
-      }
-    : {
-        biggestClimber: { name: '', change: 0, round: '' },
-        biggestFaller: { name: '', change: 0, round: '' },
-      },
+export const mapPointDistributionStat = (row: PointDistributionStat): PointDistributionStat => ({
+  user_id: row.user_id,
+  name: row.name,
+  icon: row.icon,
+  color_index: row.color_index,
+  distribution: {
+    '90-135': row.distribution['90-135'],
+    '136-170': row.distribution['136-170'],
+    '171-205': row.distribution['171-205'],
+    '206+': row.distribution['206+'],
+  },
 });
-
-export const mapReliabilityStat = (row: any): ReliabilityStat => ({
-  user_id: Number(row.user_id),
-  name: String(row.name),
-  icon: row.icon ? String(row.icon) : '',
-  color_index: Number(row.color_index),
-  total_rounds: Number(row.total_rounds),
-  rounds_above: Number(row.rounds_above),
-  pct: Number(row.pct),
+export const mapPositionChangeStat = (row: PositionChangeStat): PositionChangeStat => ({
+  rounds: row.rounds.map((r) => ({ id: r.id, name: r.name, shortName: r.shortName })),
+  users: row.users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    icon: u.icon,
+    color_index: u.color_index,
+    history: u.history.map((h) => ({ position: h.position, change: h.change })),
+  })),
+  valid: row.valid,
+  stats: {
+    biggestClimber: {
+      name: row.stats.biggestClimber.name,
+      change: row.stats.biggestClimber.change,
+      round: row.stats.biggestClimber.round,
+    },
+    biggestFaller: {
+      name: row.stats.biggestFaller.name,
+      change: row.stats.biggestFaller.change,
+      round: row.stats.biggestFaller.round,
+    },
+  },
 });

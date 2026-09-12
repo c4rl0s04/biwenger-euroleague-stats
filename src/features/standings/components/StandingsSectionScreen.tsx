@@ -1,6 +1,7 @@
 import React from 'react';
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
-import MobileRecordList from '@/components/mobile/MobileRecordList';
+import type { StandingsSectionModel } from '../models/screens';
+import { MobileListRow } from '@/components/mobile/MobileScreen';
 import { MobileSectionHeading } from '@/components/mobile/MobileScreen';
 
 export const descriptions: Record<string, string> = {
@@ -22,7 +23,7 @@ export default function StandingsSectionScreen({
 }: {
   section: string;
   title: string;
-  data: unknown;
+  data: StandingsSectionModel;
 }) {
   return (
     <MobileDetailScaffold
@@ -32,7 +33,21 @@ export default function StandingsSectionScreen({
       description={descriptions[section]}
     >
       <MobileSectionHeading>Datos destacados</MobileSectionHeading>
-      <MobileRecordList data={data} linkPrefix={section === 'captains' ? '/user' : undefined} />
+      {data.rows.length === 0 ? (
+        <p className="mobile-record-empty">No hay datos disponibles para esta vista.</p>
+      ) : (
+        <div>
+          {data.rows.map((row, index) => (
+            <MobileListRow
+              key={row.key}
+              href={row.href ?? undefined}
+              leading={<span className="mobile-record-index">{index + 1}</span>}
+              title={row.title}
+              trailing={row.value ?? undefined}
+            />
+          ))}
+        </div>
+      )}
     </MobileDetailScaffold>
   );
 }

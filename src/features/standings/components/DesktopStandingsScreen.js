@@ -29,7 +29,7 @@ import {
   DraftFidelityCard,
   CaptainStandingsCard,
   TheoreticalStandingsCard,
-} from './';
+} from './index';
 
 import InitialSquadRegretCard from './InitialSquadRegretCard';
 import InitialSquadLoyaltyCard from './InitialSquadLoyaltyCard';

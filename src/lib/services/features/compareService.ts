@@ -196,7 +196,7 @@ export async function getCompareData(): Promise<CompareDataResponse> {
 
   // Fetch full history for each user in parallel using the expert service
   const allUsersHistory = await Promise.all(
-    usersResult.rows.map(async (user: any) => {
+    usersResult.rows.map(async (user) => {
       const [history, captain, homeAway, squad] = await Promise.all([
         getUserPerformanceHistoryService(user.id),
         fetchCaptainStats(user.id),
@@ -290,7 +290,7 @@ export async function getCompareDataLite(): Promise<CompareDataLiteResponse> {
 
   // Fetch full history for each user in parallel using the expert service
   const allUsersHistory = await Promise.all(
-    usersResult.rows.map(async (user: any) => {
+    usersResult.rows.map(async (user) => {
       const [history, captain, homeAway, squad] = await Promise.all([
         getUserPerformanceHistoryService(user.id),
         fetchCaptainStats(user.id),

@@ -100,6 +100,6 @@ export {
   getValueRanking,
   getWinCounts,
   getSimpleStandings,
-  getLeaderComparison,
-  getLeagueAveragePoints,
 } from './server/queries/base.query';
+
+export { getStandingsOverview, getStandingsSection } from './server/services/screens.service';

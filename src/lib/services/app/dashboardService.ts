@@ -130,7 +130,7 @@ export async function getNextRoundData(userId: string | number | null = null) {
  */
 export async function fetchLandingStats() {
   const standings = await getStandings();
-  const userCount = (standings as any)?.length || 0;
+  const userCount = standings?.length || 0;
 
   const { currentRound } = await getCurrentRoundState();
   let roundNumber = 0;

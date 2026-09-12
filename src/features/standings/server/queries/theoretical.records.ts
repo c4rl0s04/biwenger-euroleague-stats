@@ -1,5 +1,8 @@
-export type TheoreticalGapStatRecord = any;
-export type LeagueComparisonStatRecord = any;
-export type RivalryMatrixStatRecord = any;
-export type HeatmapStatRecord = any;
-export type TheoreticalStandingsStatRecord = any;
+// Explicit serializable projection contracts; no untyped database records cross this boundary.
+export type {
+  TheoreticalGapStat as TheoreticalGapStatRecord,
+  LeagueComparisonStat as LeagueComparisonStatRecord,
+  RivalryMatrixStat as RivalryMatrixStatRecord,
+  HeatmapStat as HeatmapStatRecord,
+  TheoreticalStandingsStat as TheoreticalStandingsStatRecord,
+} from '../../models/theoretical';

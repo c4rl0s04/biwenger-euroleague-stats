@@ -14,3 +14,5 @@ export { default as MobileStandingsScreen } from './components/MobileStandingsSc
 // Export everything from the old index.js
 export * from './components/index';
 export { default as StandingsSectionScreen } from './components/StandingsSectionScreen';
+
+export type { StandingsOverviewModel, StandingsSectionModel } from './models/screens';

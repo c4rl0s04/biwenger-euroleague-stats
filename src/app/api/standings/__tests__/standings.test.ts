@@ -136,7 +136,7 @@ describe('GET /api/standings/round-winners', () => {
       {
         round_id: 1,
         round_name: 'J1',
-        user_id: 1,
+        user_id: '1',
         name: 'Alice',
         icon: 'a.png',
         color_index: 0,
