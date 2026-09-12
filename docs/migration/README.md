@@ -11,6 +11,11 @@ status: active
 
 ## Start here
 
+For the complete remaining campaign, read the [completion plan](completion-plan.md).
+It includes ordinary reads, security-gated flows, infrastructure, UI layering and final release
+criteria. It is a planning document, not automatic dispatch permission; the pilot instructions
+and draft assignments below remain historical or blocked until explicitly activated.
+
 Read [worker protocol](worker-protocol.md), then **only the assigned batch**.
 Pilot assignment: [001 — Standings read completion](batches/001-standings.md).
 Historical pilot review: [C accepted; checkpoint D assignment](reviews/006-standings.md).

@@ -10,6 +10,7 @@ status: active
 
 # Architecture
 
+- [Complete migration plan](../migration/completion-plan.md) — all remaining packages and the final closure criteria.
 - [System overview](system-overview.md) — runtime responsibilities and repository map.
 - [Application layers](application-layers.md) — browser-to-database request flow and boundaries.
 - [UI component layering target](ui-component-layers.md) — agreed post-domain-migration UI composition and reuse direction.
