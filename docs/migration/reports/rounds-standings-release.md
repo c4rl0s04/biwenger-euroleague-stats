@@ -88,10 +88,11 @@ were found. The prior deployment's sampled error/fatal log counts were empty.
   [Deployment](https://advanced-euroleague-biwenger-stats-qaw73js4o.vercel.app) was assigned the
   [production alias](https://advanced-euroleague-biwenger-stats.vercel.app).
 - Fifteen post-release read-only probes returned the expected status codes, redirects and cache
-  headers. Seven of eight JSON byte hashes matched the pre-release sample; draft statistics
-  differed at the byte level, so this is not a claim of complete live-payload equality. Its HTTP
-  contract tests passed; the handler only changes its service import. The old deployment URL
-  is protected, preventing an anonymous contemporaneous payload comparison.
+  headers. Seven of eight JSON byte hashes matched directly. Draft statistics differed only
+  because the mapper places `player_position` before `current_points`/`current_price` instead
+  of after them. Reordering that object's keys to the original SQL projection order reproduced
+  the exact baseline SHA-256 `738b6b992642af2702b429cfd0668c33dd0a96765bee182c9521c355169682e5`.
+  No values, array order or field types were changed in this comparison.
 - The first sequential probe attempt timed out; a bounded concurrent retry completed all probes.
   No 5xx response was observed. Sampled JSON and up to 100 runtime log entries contained no
   JWT/bearer/database-URL value patterns. Deployment-scoped error/fatal and 5xx log queries
