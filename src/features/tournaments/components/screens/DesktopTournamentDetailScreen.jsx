@@ -1,46 +1,21 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { PageHeader, BackButton } from '@/components/ui';
 import { Section } from '@/components/layout';
-import { getTournamentDetails, getStandings, getFixtures } from '@/lib/services/tournamentService';
-import {
-  StandingsTable,
-  TournamentFixtures,
-  TournamentBracket,
-} from '@/features/tournaments/public';
+import { StandingsTable, TournamentFixtures, TournamentBracket } from '../index';
 import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { getTournamentInitialRoundId } from '@/features/tournaments/server';
-import MobileTournamentDetailScreen from '@/components/mobile/screens/MobileTournamentDetailScreen';
-import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
-export const dynamic = 'force-dynamic';
-
-export default async function TournamentDetailsPage({ params }) {
-  const { id } = await params;
-  const [tournament, phone] = await Promise.all([getTournamentDetails(id), isPhonePresentation()]);
-
-  if (!tournament) {
-    notFound();
-  }
-
-  const [standings, fixtures] = await Promise.all([getStandings(id), getFixtures(id)]);
-
+/**
+ * @param {{tournament: import('../../models/tournaments').Tournament, standings: import('../../models/tournaments').TournamentStanding[], fixtures: import('../../models/tournaments').TournamentFixture[], initialRoundId: number | null | undefined}} props
+ */
+export default function DesktopTournamentDetailScreen({
+  tournament,
+  standings,
+  fixtures,
+  initialRoundId,
+}) {
   const isActive = tournament.status === 'active';
   const data = tournament.data || {};
-
-  if (phone) {
-    return (
-      <MobileTournamentDetailScreen
-        tournament={tournament}
-        standings={standings}
-        fixtures={fixtures}
-      />
-    );
-  }
-
-  const initialRoundId = await getTournamentInitialRoundId(tournament, fixtures);
-
   return (
     <div className="min-h-screen pb-20">
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-10 relative z-20">

@@ -7,7 +7,7 @@ import {
   MobileScreen,
   MobileScreenHeader,
   MobileSectionHeading,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
 type Tournament = Record<string, any>;
 

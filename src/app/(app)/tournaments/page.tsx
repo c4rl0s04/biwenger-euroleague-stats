@@ -1,6 +1,5 @@
 import { getAllTournaments, getGlobalTournamentStats } from '@/features/tournaments/server';
-import { DesktopTournamentsScreen } from '@/features/tournaments/public';
-import MobileTournamentsScreen from '@/components/mobile/screens/MobileTournamentsScreen';
+import { DesktopTournamentsScreen, MobileTournamentsScreen } from '@/features/tournaments/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export default async function TournamentsPage() {

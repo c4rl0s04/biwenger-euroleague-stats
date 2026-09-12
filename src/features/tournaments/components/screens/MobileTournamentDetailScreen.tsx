@@ -1,6 +1,6 @@
 import { Brackets, ListChecks, Trophy } from 'lucide-react';
 
-import MobileRecordList from '../MobileRecordList';
+import MobileRecordList from '@/components/mobile/MobileRecordList';
 import {
   MobileBackHeader,
   MobileMetric,
@@ -8,7 +8,7 @@ import {
   MobileScreen,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
 type RecordValue = Record<string, any>;
 

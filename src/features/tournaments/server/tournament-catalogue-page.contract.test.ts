@@ -11,9 +11,9 @@ vi.mock('@/features/tournaments/server', () => ({
   getAllTournaments: deps.list,
   getGlobalTournamentStats: deps.statistics,
 }));
-vi.mock('@/features/tournaments/public', () => ({ DesktopTournamentsScreen: deps.desktopScreen }));
-vi.mock('@/components/mobile/screens/MobileTournamentsScreen', () => ({
-  default: deps.mobileScreen,
+vi.mock('@/features/tournaments/public', () => ({
+  DesktopTournamentsScreen: deps.desktopScreen,
+  MobileTournamentsScreen: deps.mobileScreen,
 }));
 vi.mock('@/lib/mobile/presentation-server', () => ({ isPhonePresentation: deps.phone }));
 import Page from '@/app/(app)/tournaments/page';
