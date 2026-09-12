@@ -8,10 +8,7 @@ import { FadeIn } from '@/components/ui';
  * Section component with split-color title and background support
  * Title format: "MI TEMPORADA" -> "MI" in white, "TEMPORADA" in gradient
  *
- * @param {string} title - Section title (first word white, rest gradient)
- * @param {ReactNode} children - Section content
- * @param {number} delay - Animation delay in ms
- * @param {string} background - CSS class for background (e.g., 'section-base', 'section-raised')
+ * @param {{title?: string, id?: string, subtitle?: import('react').ReactNode, children?: import('react').ReactNode, delay?: number, background?: string, className?: string}} props
  */
 export default function Section({
   title,

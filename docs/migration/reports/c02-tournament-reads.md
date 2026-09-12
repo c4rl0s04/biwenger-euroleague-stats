@@ -141,3 +141,20 @@ comparison is running without update flags; its outcome and full final acceptanc
 Remaining C02 work is explicit: desktop/mobile screen composition, typed presentation snapshot
 projections, section/page contracts, adapter retirement and entrypoint registration. Moving components
 alone does not complete this package. No deployment, production data or configuration changes occurred.
+
+Candidate component-move comparison completed: both original iPhone/desktop tests PASS (43.4s),
+with unchanged snapshots and error guards. This verifies the component move/round-policy checkpoint,
+not later screen extraction.
+
+## Desktop catalogue composition checkpoint
+
+The catalogue page is now a thin TSX adapter calling Tournament server services directly. Its desktop
+JSX moved into DesktopTournamentsScreen with typed props; phone composition remains pending. Six page
+contract tests exercise real page branching, concurrent list/presentation reads, desktop-only statistics,
+prop forwarding and all read failure paths. Tournament suite PASS: 48 tests; typecheck and architecture
+PASS (811 modules/45 entries). An AST comparison proves the desktop JSX is unchanged.
+
+The shared Section component had incorrect JSDoc treating its props object as a string. Only that
+annotation was corrected so the typed screen can consume it without an unsafe local cast; emitted
+JavaScript is identical. No shared component behavior changed. Browser/full acceptance of this latest
+checkpoint remains pending, along with the previously listed mobile/detail/model work.
