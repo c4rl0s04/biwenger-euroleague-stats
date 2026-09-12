@@ -7,6 +7,7 @@ it('keeps tournament server markers, client-safe models and persistence ownershi
     'server.ts',
     'server/queries/tournament.query.ts',
     'server/services/tournament-read.service.ts',
+    'server/services/tournament-statistics.service.ts',
   ])
     expect(read(`src/features/tournaments/${path}`)).toMatch(/^import 'server-only';/);
   expect(read('src/features/tournaments/public.ts')).not.toMatch(/server|queries/);
@@ -20,4 +21,20 @@ it('keeps tournament server markers, client-safe models and persistence ownershi
   expect(read('src/features/tournaments/server/queries/tournament.query.ts')).not.toContain(
     "@/lib/db'"
   );
+});
+
+it('keeps global statistics in a typed feature calculation with a legacy alias only', () => {
+  const service = read('src/features/tournaments/server/services/tournament-statistics.service.ts');
+  const mapper = read('src/features/tournaments/server/mappers/tournament-statistics.mapper.ts');
+  const models = read('src/features/tournaments/models/tournament-statistics.ts');
+  for (const source of [service, mapper, models]) {
+    expect(source).not.toMatch(/\bany\b|@\/lib\/db|@\/lib\/services/);
+  }
+  expect(mapper).not.toMatch(/\bawait\b|\bfetch\s*\(|\bquery\s*\(/);
+  expect(service).toContain("serverCache: 'none;");
+  const legacy = read('src/lib/services/statsService.ts');
+  expect(legacy).toContain(
+    "export { getGlobalTournamentStats } from '@/features/tournaments/server'"
+  );
+  expect(legacy).not.toMatch(/\bfunction\b|Promise\.all|\.query\(/);
 });

@@ -1,6 +1,11 @@
 import 'server-only';
 
 export {
+  getGlobalTournamentStats,
+  TOURNAMENT_STATISTICS_POLICY,
+} from './server/services/tournament-statistics.service';
+
+export {
   getTournaments,
   getTournamentById,
   getTournamentStandings,

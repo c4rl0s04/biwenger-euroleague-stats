@@ -10,7 +10,7 @@ status: active
 # C02 Tournament read migration
 
 Source baseline: `c9d6a816`, campaign branch `refactor/architecture-completion`.
-**IN PROGRESS: characterization only; Tournament application code has not moved.**
+**IN PROGRESS: statistics extraction implemented; presentation migration and full acceptance pending.**
 
 ## Actual flow and compatibility
 
@@ -66,3 +66,23 @@ Next: capture Tournament screen/route baselines, move typed statistics orchestra
 introduce presentation projections, migrate screens/pages and round policy, register entrypoints,
 remove confirmed obsolete adapters, then full acceptance. No UI, scoring, API, auth, schema or provider
 behavior change is authorized as incidental cleanup. This package is not VERIFIED.
+
+## Statistics extraction checkpoint
+
+The global calculation now lives in tournament-statistics.mapper.ts, with explicit statistics models
+and tournament-statistics.service.ts orchestrating the existing read services. The old statsService
+is a compatibility export only. Its former DB imports already delegated to those same feature reads;
+no SQL, season resolution, parallelism or caching changed. Screens remain untouched.
+
+The original calculation tests now exercise the legacy alias through the feature service and mapper;
+only their data-read mock location changed. Tournament/Managers focused run: 151 tests PASS; added
+statistics architecture assertions separately PASS (2 tests). Typecheck PASS, architecture PASS
+(809 modules, 45 protected entrypoints). A temporary read-only differential harness compared serialized
+results for 100 deterministic synthetic fixture sets against c9d6a816: all matched, including null
+scores/counters/manager IDs, byes, chronological ordering and streaks. This is additional bounded
+evidence, not a replacement for final UI or full verification.
+
+Snapshot winner typing is still an internal compatibility assertion over heterogeneous persisted JSON.
+Complete its presentation projection/validation with the screen migration; do not claim all public
+snapshot boundaries are closed yet. Fixture record projections reuse the existing allowlisted feature
+models. Required full acceptance and original Tournament visual references remain pending.

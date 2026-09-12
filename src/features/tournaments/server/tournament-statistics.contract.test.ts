@@ -3,8 +3,8 @@ import type { Tournament, TournamentFixture, TournamentStanding } from '../publi
 
 vi.mock('server-only', () => ({}));
 const reads = vi.hoisted(() => ({ all: vi.fn(), fixtures: vi.fn(), standings: vi.fn() }));
-vi.mock('@/lib/services/tournamentService', () => ({ getAllTournaments: reads.all }));
-vi.mock('@/lib/db', () => ({
+vi.mock('./services/tournament-read.service', () => ({
+  getAllTournaments: reads.all,
   getTournamentFixtures: reads.fixtures,
   getTournamentStandings: reads.standings,
 }));
