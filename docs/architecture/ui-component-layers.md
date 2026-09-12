@@ -22,19 +22,25 @@ The [design context](../product/design-system.md) remains the authority for curr
 
 ## Layers, from foundations to complete screens
 
-| Layer                 | Responsibility                                                   | Examples and ownership                                                                                   |
-| --------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Design tokens         | Central visual values and semantic roles                         | Colors, spacing, typography, radii and shadows; build on existing global CSS tokens and Tailwind mapping |
-| UI primitives         | Small domain-independent visual elements                         | Button, badge, input, card frame, skeleton; shared UI                                                    |
-| Reusable compositions | Repeated combinations of primitives, without domain rules        | Metric tile, chart frame, empty-state panel; share only when actual reuse justifies it                   |
-| Feature components    | Domain-specific content and interactions                         | StandingsTable, PlayerStatisticsCard, MatchRow; owning feature                                           |
-| Feature sections      | Group related feature components into a meaningful screen region | RankingSection, PerformanceSection; owning feature, optionally using the shared Section container        |
-| Screens               | Arrange imported sections and components for desktop/mobile      | StandingsScreen; owning feature                                                                          |
-| Pages                 | Adapt framework inputs and render the feature screen             | Next.js page files; no embedded domain presentation implementation                                       |
+| Layer | Responsibility | Examples and ownership |
+| --- | --- | --- |
+| Base tokens | Raw design values | Color palettes, spacing scales, font sizes, radii and shadows |
+| Semantic tokens | Assign visual meaning to base values | Background, surface, muted text, border, accent; build on existing global CSS tokens and Tailwind mapping |
+| UI primitives | Small domain-independent visual elements | Button, badge, input, card frame, skeleton; shared UI |
+| Reusable controls and compositions | Combine primitives without domain rules | SearchableSelect, metric display, card header, chart frame, empty-state panel; share when actual reuse justifies it |
+| Reusable domain components | Domain-specific presentation and interactions usable in several cards or features | ManagerSelector, PlayerSelector, MatchRow, StandingsTable; owning domain feature |
+| Feature cards and panels | Assemble controls and data displays for a particular use case | ManagerPerformanceCard, PlayerStatisticsCard; owning feature |
+| Feature sections | Group related feature components into a meaningful screen region | RankingSection, PerformanceSection; owning feature, optionally using the shared Section container |
+| Screens | Arrange imported sections and components for desktop/mobile | StandingsScreen; owning feature |
+| Pages | Adapt framework inputs and render the feature screen | Next.js page files; no embedded domain presentation implementation |
 
 The existing shared Section or Card template is a visual container, not the implementation of
 every domain section or card. A RankingSection can live in its own file, use Section internally,
 and compose StandingsTable and other relevant feature components.
+
+These are logical responsibilities, not a requirement for one folder, stylesheet or wrapper per
+layer. Base and semantic tokens may coexist in the existing stylesheet. A component can use the
+layers it needs directly; do not add intermediate components merely to complete the hierarchy.
 
 ## Composition rules
 
@@ -82,10 +88,67 @@ they look similar. Prefer explicit variants and composition to a universal compo
 unrelated switches. Domain-specific components stay feature-owned even when another feature consumes
 them through a deliberate public contract. Avoid speculative abstractions and one-file-per-HTML-tag rules.
 
+## Reusable controls inside different cards
+
+Reuse applies to the elements inside cards, not only their outer containers. Two cards displaying
+different statistics may share a manager selector, avatar/name display, metric label or filter control.
+Do not duplicate their selection, search, keyboard or focus behavior inside each card.
+
+Distinguish composition (which component renders which) from ownership (which module maintains it).
+A component's separate file does not automatically make it globally owned. Reuse across several pages
+is not evidence that a component is domain-independent; feature folders represent domains, not pages.
+
+Illustrative target ownership, to be confirmed against existing components during the future inventory:
+
+```text
+src/components/ui/
+  SearchableSelect.tsx             generic options, search and selection behavior
+
+src/features/managers/
+  components/ManagerSelector.tsx   manager names, avatars and domain colors
+  public.ts                       deliberate client-safe export
+
+src/features/standings/
+  components/ManagerPerformanceCard.tsx
+
+src/features/compare/
+  components/ManagerComparisonCard.tsx
+```
+
+Both cards can import ManagerSelector from `@/features/managers/public`, provided those dependencies
+are acyclic. ManagerSelector uses the shared SearchableSelect internally; it does not become a global
+UI primitive because several features use it. Shared UI must not import Managers or another feature.
+The same ownership rule applies to PlayerSelector and other domain-specific controls.
+
+An illustrative controlled component contract:
+
+```tsx
+import { ManagerSelector } from '@/features/managers/public';
+
+<ManagerSelector
+  options={managers}
+  value={selectedManagerId}
+  onChange={setSelectedManagerId}
+/>
+```
+
+Options are typed, client-safe manager projections, not database/account records. The parent obtains
+data through the appropriate service or existing browser-read contract and owns what a selection
+means for its card. The selector owns selection presentation and interaction, not card-specific
+statistics, data fetching or persistence. Browser callbacks must be defined within the client subtree,
+not passed as ordinary functions from a Server Component.
+
+Before adding a cross-feature import, check the dependency graph. If it would introduce a cycle,
+consider whether the consuming feature only needs SearchableSelect with prepared options, or whether
+screen-level composition can supply the domain control. Introduce a new shared abstraction only when
+reuse and ownership justify it; do not move domain code into a global folder or weaken boundary checks
+merely to bypass a cycle.
+
 ## Future migration sequence and acceptance
 
-1. Inventory repeated inline UI, current primitives/templates and large screen files after the
-   domain migration. Establish original desktop/mobile behavior and visual references.
+1. Inventory repeated inline UI, current primitives/templates, controls inside different cards and
+   large screen files after the domain migration. Classify generic versus domain-owned reuse and
+   check cross-feature dependencies. Establish original desktop/mobile behavior and visual references.
 2. Reconcile token use and identify demonstrated shared visual patterns without changing appearance.
 3. Extract feature components and meaningful sections, then simplify screens and pages to composition.
 4. Verify typed data boundaries, loading/empty/error states, interactions, accessibility, responsive
