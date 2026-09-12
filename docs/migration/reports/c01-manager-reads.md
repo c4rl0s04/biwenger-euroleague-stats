@@ -73,6 +73,30 @@ database type import; it now imports through the feature query contract. No chec
 Architecture check PASS: 798 modules, 45 protected entrypoints. Typecheck PASS.
 Full candidate acceptance remains pending before verification is claimed.
 
-Next: migrate captain/home-away/alert reads and resolve form ownership; then full C01 acceptance.
+## Performance and preparation checkpoint
+
+Captain, home-away, captain recommendations and personalized alerts now use Managers-owned queries,
+explicit mappers and services. Legacy exports alias those services for unchanged Dashboard/Home callers.
+SQL fingerprint tests preserve all nine statements, parameter order and season selection. Tests preserve
+aggregate null/missing behavior, ranking ties, labels, limits, error propagation and absence of memoization.
+The additive Players form service exposes an allowlisted form projection; its existing score-only
+contract remains unchanged. The legacy form query remains one shared implementation pending C14 closure.
+
+Unused getSquadStats/getUserSquad implementations were removed after source/script/test consumer checks;
+Compare's independently used private function remains untouched. getUserWithPassword is unchanged.
+The remaining analytics/records helper is consumed by dashboardService and combines highest round,
+highest transfer and largest price gain: C09 owns composition, with Rounds/Market projections to be
+resolved in C05/C09. It is not an unassigned Managers query.
+
+Focused validation: 266 tests across 19 files PASS; architecture 806 modules/45 protected entrypoints
+PASS; typecheck PASS. Full npm run verify PASS: 1,305 tests, one existing skip; lint retains 25 existing
+image warnings; production build, 38-table metadata audit, Drizzle and diff checks PASS. No schema,
+dependency, authentication, HTTP handler policy or UI changes were made in this checkpoint.
+
+Original baseline browser suite completed: 90 PASS (10.1 minutes). Candidate browser validation is
+running separately; baseline success is not candidate evidence. C01 remains IN PROGRESS until acceptance
+and adapter bookkeeping are reconciled. No push or deployment is authorized by this checkpoint.
+
+Next: finish candidate browser verification and C01 acceptance, then trace C02 Tournament consumers.
 Stop for an unexpected contract/security decision or new graph cycle. Preserve temporary adapters
 until the named downstream owners have migrated; document each one through campaign closure.

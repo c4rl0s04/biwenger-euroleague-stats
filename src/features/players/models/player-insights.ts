@@ -1,3 +1,10 @@
+export interface PlayerFormStatsViewModel {
+  playerId: number;
+  recentScores: string;
+  averageRecentPoints: number;
+  formScore: number;
+}
+
 export interface PlayerTopPerformerViewModel {
   id: number;
   name: string;

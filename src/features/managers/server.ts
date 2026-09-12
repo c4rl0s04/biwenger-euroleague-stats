@@ -1,5 +1,15 @@
 import 'server-only';
 export {
+  getManagerCaptainRecommendations,
+  getManagerPersonalizedAlerts,
+  MANAGER_PREPARATION_POLICY,
+} from './server/services/manager-preparation.service';
+export {
+  getManagerCaptainStats,
+  getManagerHomeAwayStats,
+  MANAGER_PERFORMANCE_POLICY,
+} from './server/services/manager-performance.service';
+export {
   getManagerDirectory,
   MANAGER_DIRECTORY_POLICY,
 } from './server/services/manager-directory.service';

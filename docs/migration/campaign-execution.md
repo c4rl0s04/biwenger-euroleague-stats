@@ -67,7 +67,10 @@ Remaining C00 work:
   Missing-provider build warnings are unchanged. No application environment files were present.
 - Built app-paths manifest reconciliation: 125 entries, zero missing inventory routes after
   explicitly accounting for generated internal boundaries and manifest.webmanifest.
-- Updated documentation checks passed; the full disposable browser baseline is the next gate.
+- Updated documentation checks passed; disposable browser baseline completed: 90 PASS (10.1 minutes).
+- C01 directory, performance and preparation implementation passed full verify: 1,305 tests,
+  one existing skip; graph 806 modules/45 protected entrypoints; unchanged lint/build warnings.
+  Candidate browser verification remains pending; see the C01 receipt for scope and retained adapters.
 - No environment files copied, production operations, secrets, provider calls, push or deployment.
 - Existing PWA/Season Review/sync branches and both pre-existing stashes remain untouched.
   Their detailed ancestry/content classification remains part of C00/C14; no blanket merge/deletion.

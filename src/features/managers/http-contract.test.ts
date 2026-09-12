@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 vi.mock('server-only', () => ({}));
 vi.mock('@/features/players/server', () => ({
+  getPlayerFormStats: vi.fn(async () => []),
   getPlayerRecentScores: vi.fn(async () => [{ playerId: 1, recentScores: '4,X' }]),
 }));
 vi.mock('@/features/standings/server', () => ({

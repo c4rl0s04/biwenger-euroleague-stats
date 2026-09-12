@@ -1,3 +1,4 @@
+export type { ManagerCaptainStats, ManagerHomeAwayStats } from './models/manager-performance';
 export type { ManagerDirectoryViewModel } from './models/manager-directory';
 export type {
   ManagerSeasonStatsViewModel,
@@ -17,3 +18,7 @@ export type {
 } from './models/manager-profile';
 export { default as ManagerProfileScreen } from './components/ManagerProfileScreen';
 export { default as ManagerProfileSectionScreen } from './components/ManagerProfileSectionScreen';
+export type {
+  ManagerCaptainRecommendation,
+  ManagerPersonalizedAlert,
+} from './models/manager-preparation';

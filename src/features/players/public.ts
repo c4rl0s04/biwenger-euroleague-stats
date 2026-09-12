@@ -29,3 +29,4 @@ export type {
   PlayerStatLeaderViewModel,
   PlayerTopPerformerViewModel,
 } from './models/player-insights';
+export type { PlayerFormStatsViewModel } from './models/player-insights';
