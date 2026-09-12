@@ -20,6 +20,8 @@ Campaign base carries planning commit `6ad78eb8`; no unrelated branch was incorp
 **C00 and C01 IN PROGRESS. No package is newly VERIFIED.** The Manager directory checkpoint
 is implemented; see [C01 evidence and remaining scope](reports/c01-manager-reads.md).
 The full goal remains all C00–C15 packages, not merely the first migration.
+The [C02 Tournament baseline](reports/c02-tournament-reads.md) records source contracts and
+characterization tests; Tournament application code is not yet migrated.
 Sensitive policy changes and production release remain explicit gates in the plan.
 
 ## Inventory discovery
