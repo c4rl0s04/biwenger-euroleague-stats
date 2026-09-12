@@ -9,17 +9,18 @@ status: draft
 
 # Manager directory and remaining analytics
 
-**DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
-Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
+**ACTIVE in the single-agent completion campaign.** The source-backed
+[C01 assignment and execution receipt](../reports/c01-manager-reads.md) records the pinned base,
+write set, contracts, validation and remaining work. This is not a parallel dispatch.
 
 - Intended scope: Complete manager directory/remaining read analytics without remigrating the verified Profile.
 - Required discovery: Inventory actual callers of directory, captain and home/away reads, session-ID fallback and private cache policies. Preserve Lineup squad contracts.
 - Dependency review: Existing Managers/Players/Standings contracts; never introduce a Standings-to-Managers cycle.
 
-Before promotion, the coordinator must inspect the current code, fill every field in the
+The original placeholder required the coordinator to inspect the current code, fill every field in the
 [assignment template](../assignment-template.md), pin an exact base, identify all routes/consumers,
-reserve shared files and obtain the user's next-batch/parallel approval. No worker should infer
-missing scope, create a worktree, run production checks or implement this placeholder.
+reserve shared files and obtain scope approval. The user subsequently approved campaign implementation;
+its receipt now governs execution. No worker should infer permission for parallel or production work.
 
 Validation follows the [worker protocol](../worker-protocol.md) and independent
 [review checklist](../reviewer-checklist.md) once a runnable assignment is approved.

@@ -1,5 +1,9 @@
 import 'server-only';
 export {
+  getManagerDirectory,
+  MANAGER_DIRECTORY_POLICY,
+} from './server/services/manager-directory.service';
+export {
   getManagerProfile,
   getManagerProfileSection,
   MANAGER_PROFILE_POLICY,

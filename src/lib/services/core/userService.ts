@@ -6,7 +6,6 @@ import 'server-only';
  */
 
 import {
-  getAllUsers,
   getUserSeasonStats,
   getUserSquadDetails,
   getUserRecentRounds,
@@ -17,9 +16,8 @@ import {
  * Fetch all users participating in the league
  * @returns List of users
  */
-export async function fetchAllUsers() {
-  return await getAllUsers();
-}
+// Compatibility name for Schedule until its composition migration.
+export { getManagerDirectory as fetchAllUsers } from '@/features/managers/server';
 
 export async function fetchUserSeasonStats(userId: string | number) {
   return await getUserSeasonStats(userId);

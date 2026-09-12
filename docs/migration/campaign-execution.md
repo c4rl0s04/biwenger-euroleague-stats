@@ -17,7 +17,8 @@ Worktree: `../biwengerstats-next-architecture-completion`.
 Fetched main/origin/main: `354f66e1585cb59a15efe96f094defdba6ad1e65`.
 Campaign base carries planning commit `6ad78eb8`; no unrelated branch was incorporated.
 
-**C00 IN PROGRESS. No package is newly VERIFIED.** No application code has changed.
+**C00 and C01 IN PROGRESS. No package is newly VERIFIED.** The Manager directory checkpoint
+is implemented; see [C01 evidence and remaining scope](reports/c01-manager-reads.md).
 The full goal remains all C00–C15 packages, not merely the first migration.
 Sensitive policy changes and production release remain explicit gates in the plan.
 

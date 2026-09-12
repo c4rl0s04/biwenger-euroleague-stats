@@ -38,21 +38,21 @@ A worker result is **implemented — awaiting independent verification**, never 
 
 ## Queue
 
-| ID   | Batch                                                                         | Dispatch state  | Dependency / next decision                      |
-| ---- | ----------------------------------------------------------------------------- | --------------- | ----------------------------------------------- |
-| 001  | [Standings complete read experience](batches/001-standings.md)                | VERIFIED        | See current release receipt                     |
-| 002  | [Tournament analytics and screens](batches/002-tournaments.md)                | DRAFT / BLOCKED | Pilot review; re-inventory current contracts    |
-| 003  | [Predictions read experience](batches/003-predictions.md)                     | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory    |
-| 004  | [Playoffs read experience](batches/004-playoffs.md)                           | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory    |
-| 005  | [Manager directory and remaining analytics](batches/005-manager-directory.md) | DRAFT / BLOCKED | Protect existing Profile and Lineup consumers   |
-| 006  | [Schedule composition](batches/006-schedule.md)                               | DRAFT / BLOCKED | Matches/Rounds/squad contracts                  |
-| 007  | [Public Market reads](batches/007-market-reads.md)                            | DRAFT / BLOCKED | Explicit read/private-operation boundary review |
-| 008  | [Dashboard composition](batches/008-dashboard.md)                             | DRAFT / BLOCKED | Owning analytics contracts available            |
-| 009  | [Compare composition](batches/009-compare.md)                                 | DRAFT / BLOCKED | Standings/Managers/Rounds contracts available   |
-| 010  | [Home and News reads](batches/010-home-news.md)                               | DRAFT / BLOCKED | Validate ownership; split if contracts differ   |
-| 011  | [Season Review ownership](batches/011-season-review.md)                       | DRAFT / BLOCKED | Pure engine/artifact-reader inventory           |
-| 012  | [Shell and remaining adapters](batches/012-shell.md)                          | DRAFT / BLOCKED | Domain consumers accounted for                  |
-| Gate | [Security-sensitive deferred areas](security-gates.md)                        | NOT AUTHORIZED  | Separate explicit scope/security approval       |
+| ID   | Batch                                                                         | Dispatch state  | Dependency / next decision                         |
+| ---- | ----------------------------------------------------------------------------- | --------------- | -------------------------------------------------- |
+| 001  | [Standings complete read experience](batches/001-standings.md)                | VERIFIED        | See current release receipt                        |
+| 002  | [Tournament analytics and screens](batches/002-tournaments.md)                | DRAFT / BLOCKED | Pilot review; re-inventory current contracts       |
+| 003  | [Predictions read experience](batches/003-predictions.md)                     | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory       |
+| 004  | [Playoffs read experience](batches/004-playoffs.md)                           | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory       |
+| 005  | [Manager directory and remaining analytics](batches/005-manager-directory.md) | IN PROGRESS     | Single-agent C01; directory checkpoint implemented |
+| 006  | [Schedule composition](batches/006-schedule.md)                               | DRAFT / BLOCKED | Matches/Rounds/squad contracts                     |
+| 007  | [Public Market reads](batches/007-market-reads.md)                            | DRAFT / BLOCKED | Explicit read/private-operation boundary review    |
+| 008  | [Dashboard composition](batches/008-dashboard.md)                             | DRAFT / BLOCKED | Owning analytics contracts available               |
+| 009  | [Compare composition](batches/009-compare.md)                                 | DRAFT / BLOCKED | Standings/Managers/Rounds contracts available      |
+| 010  | [Home and News reads](batches/010-home-news.md)                               | DRAFT / BLOCKED | Validate ownership; split if contracts differ      |
+| 011  | [Season Review ownership](batches/011-season-review.md)                       | DRAFT / BLOCKED | Pure engine/artifact-reader inventory              |
+| 012  | [Shell and remaining adapters](batches/012-shell.md)                          | DRAFT / BLOCKED | Domain consumers accounted for                     |
+| Gate | [Security-sensitive deferred areas](security-gates.md)                        | NOT AUTHORIZED  | Separate explicit scope/security approval          |
 
 Drafts are planning placeholders, **not executable specifications**. IDs are tracking identifiers,
 not promises that every batch is equally sized or that unrelated work must run sequentially.

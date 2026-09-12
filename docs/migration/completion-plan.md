@@ -103,7 +103,12 @@ Do not repeatedly build after documentation-only edits; run documentation checks
 
 ## Stage 0 — Establish a closed inventory and baseline
 
-**Package C00. Required before any new feature code.**
+**Package C00. Discovery and baseline are required before feature edits.**
+During execution, detailed semantic tracing is completed for each package before its edits;
+the global inventory remains open until every package and C14 close it. This sequencing avoids
+repeating full-repository tracing before unrelated slices; it removes no inventory or final acceptance
+requirement. A compiled baseline browser run may finish while source-only work proceeds, provided its
+build, fixtures and browser tests remain unchanged and no competing build overwrites it.
 
 Create an execution inventory under docs/migration with one row per entrypoint, plus ownership groups
 for every runtime module. Include route methods, Server Actions, layouts, proxy/auth adapters, API routes,

@@ -1,3 +1,4 @@
+export type { ManagerDirectoryViewModel } from './models/manager-directory';
 export type {
   ManagerSeasonStatsViewModel,
   ManagerSquadViewModel,

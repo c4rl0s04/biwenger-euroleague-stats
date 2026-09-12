@@ -1,5 +1,6 @@
 {
   "entrypoints": [
+    "src/app/api/users/route.ts",
     "src/app/(app)/user/[id]/page.tsx",
     "src/app/(app)/user/[id]/[section]/page.tsx",
     "src/app/(app)/matches/page.tsx",

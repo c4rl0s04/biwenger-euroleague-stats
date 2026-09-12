@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 
-vi.mock('@/lib/services', () => ({
-  fetchAllUsers: vi.fn(),
+vi.mock('@/features/managers/server', () => ({
+  getManagerDirectory: vi.fn(),
 }));
 
 vi.mock('@/lib/services/lineupService', () => ({
@@ -54,7 +54,7 @@ vi.mock('bcryptjs', () => ({
   },
 }));
 
-import * as services from '@/lib/services';
+import * as services from '@/features/managers/server';
 import { lineupService } from '@/lib/services/lineupService';
 import { getUserWithPassword } from '@/lib/db/queries/core/users';
 import { prepareUserMutations } from '@/lib/db/mutations/users';
@@ -88,7 +88,7 @@ describe('user and lineup route contracts', () => {
   });
 
   it('covers GET /api/users success and error envelopes', async () => {
-    vi.mocked(services.fetchAllUsers).mockResolvedValue([{ id: '1', name: 'User' }] as any);
+    vi.mocked(services.getManagerDirectory).mockResolvedValue([{ id: '1', name: 'User' }] as any);
 
     const { GET } = await import('@/app/api/users/route');
     const response = await GET();
@@ -97,7 +97,7 @@ describe('user and lineup route contracts', () => {
     expect(response.status).toBe(200);
     expect(json).toEqual({ success: true, data: [{ id: '1', name: 'User' }] });
 
-    vi.mocked(services.fetchAllUsers).mockRejectedValue(new Error('fail'));
+    vi.mocked(services.getManagerDirectory).mockRejectedValue(new Error('fail'));
     const errorResponse = await GET();
     expect(errorResponse.status).toBe(500);
     expect((await errorResponse.json()).success).toBe(false);
