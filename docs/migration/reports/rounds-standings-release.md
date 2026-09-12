@@ -11,8 +11,10 @@ status: active
 
 ## State
 
-User-authorized integration and main push. Local release validation VERIFIED; push and
-automatic deployment are the next gate, recorded below after verification.
+Application release INTEGRATED, PUSHED and DEPLOYED at `416ab25477bd12c5a948ede23ad168de1c76a3e2`.
+Local acceptance passed. Remote build/test and formatting passed; browser CI was still running
+when this receipt was written. The documentation-only follow-up preserves concurrent UI-plan
+clarifications and records production verification; its final SHA is reported in the task handoff.
 Primary main started at `713d2a3b`. Integration worktree:
 `../biwengerstats-next-rounds-standings-integration`, branch `chore/rounds-standings-integration`.
 
@@ -30,6 +32,9 @@ Primary main started at `713d2a3b`. Integration worktree:
   and old sync ancestry are outside this read-domain release; no deletion is authorized.
 - No new feature, UI redesign, dependency/schema change, production database operation,
   credential/fallback change or environment configuration is part of this integration.
+- Preserved concurrent UI-plan clarification commits `643cee26` and `567c289c` through
+  documentation merges. Their only conflicts were formatting: formatting the incoming document
+  produced the same SHA-256 as our version. No content or application behavior was discarded.
 
 ## Review
 
@@ -75,11 +80,33 @@ login. Public Standings/Rounds reads returned 200, invalid advanced type retaine
 squad retained private/no-store 400. No sampled JSON credential/JWT/bearer/database-URL patterns
 were found. The prior deployment's sampled error/fatal log counts were empty.
 
+## Production verification
+
+- Primary main fast-forwarded to the verified integration branch; normal push advanced
+  `origin/main` from `713d2a3b` to `416ab254`. No force-push or rewritten history.
+- Vercel deployment `dpl_BJh3Ur7sP3ZL6ppPo5BMhWE3gpG3` reached READY with that exact SHA.
+  [Deployment](https://advanced-euroleague-biwenger-stats-qaw73js4o.vercel.app) was assigned the
+  [production alias](https://advanced-euroleague-biwenger-stats.vercel.app).
+- Fifteen post-release read-only probes returned the expected status codes, redirects and cache
+  headers. Seven of eight JSON byte hashes matched the pre-release sample; draft statistics
+  differed at the byte level, so this is not a claim of complete live-payload equality. Its HTTP
+  contract tests passed; the handler only changes its service import. The old deployment URL
+  is protected, preventing an anonymous contemporaneous payload comparison.
+- The first sequential probe attempt timed out; a bounded concurrent retry completed all probes.
+  No 5xx response was observed. Sampled JSON and up to 100 runtime log entries contained no
+  JWT/bearer/database-URL value patterns. Deployment-scoped error/fatal and 5xx log queries
+  returned no entries in the first-hour window. These are bounded checks, not an all-time guarantee.
+- The existing authenticated browser session loaded Standings and Rounds with real data and all
+  expected section headings. Rounds rendering was inspected; no sampled browser console errors.
+  No credentials were requested, inspected or persisted and no production mutations were submitted.
+- CI run [34722100309](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/34722100309)
+  passed Format Check and Test & Build; browser job completion remained pending at receipt time.
+
 ## Remaining scope
 
 Next regular batch: Tournament analytics and screens, using existing core contracts, only after
 this release is accepted and a pinned assignment is approved. Manager directory/other analytics,
 Predictions, Playoffs, Schedule, public Market reads, Dashboard, Compare, Home/News, Season Review
 and shell/adapters remain separate scopes. Private operations and credentials retain their
-security gates. Linux Standings/Rounds/Profile visual reference capture and authenticated
-real-production visual review remain manual follow-ups; Linux semantic tests stay enabled.
+security gates. Linux Standings/Rounds/Profile visual reference capture and exhaustive physical-phone
+production visual review remain manual follow-ups; Linux semantic tests stay enabled.
