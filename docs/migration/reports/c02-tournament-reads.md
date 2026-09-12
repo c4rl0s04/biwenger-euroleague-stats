@@ -198,3 +198,20 @@ section dependencies; statistics assertions were not weakened. Full acceptance r
 
 All three Tournament page families now compose feature screens; typed snapshot projections, obsolete
 adapter/dead-export removal, protection registration and final acceptance are still open.
+
+## Obsolete adapters and route protection
+
+Source/script/test searches found no runtime consumers of tournamentService.ts, statsService.ts or
+TournamentCard after page migration. Both service wrappers and their global-barrel exports were
+removed, along with the unused card and its component-barrel export. Manager Profile already consumes
+fetchUserTournaments from the feature server contract; unrelated similarly named provider/Compare
+functions were not changed. Removed files remain recoverable in Git history.
+
+Existing tests now invoke the feature contract directly, preserving all data/coercion/error assertions.
+Only obsolete wrapper identity assertions were retired; query-adapter identity tests remain while
+those adapters exist. Architecture tests assert the deleted files remain absent.
+
+Focused Tournament/Managers suite PASS: 179 tests; typecheck and diff checks PASS. All three Tournament
+routes are registered without exceptions: architecture PASS (812 modules, 48 protected entrypoints).
+The already-running broader verify is not final acceptance for this evolving checkpoint; repeat full
+verification after the remaining typed projections/query-adapter cleanup. No release is authorized.

@@ -1,5 +1,8 @@
 {
   "entrypoints": [
+    "src/app/(app)/tournaments/page.tsx",
+    "src/app/(app)/tournaments/[id]/page.tsx",
+    "src/app/(app)/tournaments/[id]/[section]/page.tsx",
     "src/app/(app)/user/[id]/page.tsx",
     "src/app/(app)/user/[id]/[section]/page.tsx",
     "src/app/(app)/matches/page.tsx",

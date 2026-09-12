@@ -5,7 +5,6 @@ vi.mock('@/lib/db/client', () => ({ pgClient: { query: mocks.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 
 import * as legacyQueries from '@/lib/db/queries/tournaments';
-import * as legacyService from '@/lib/services/tournamentService';
 import * as tournaments from '../server';
 
 beforeEach(() => {
@@ -14,8 +13,8 @@ beforeEach(() => {
   mocks.season.mockReset().mockResolvedValue('2026-27');
 });
 
-describe('Tournaments full service/query legacy contract', () => {
-  it('keeps every old name as an adapter to one implementation', () => {
+describe('Tournaments full service/query compatibility contract', () => {
+  it('keeps remaining legacy query adapters on one implementation', () => {
     for (const name of [
       'getTournaments',
       'getTournamentById',
@@ -24,19 +23,12 @@ describe('Tournaments full service/query legacy contract', () => {
       'getUserTournaments',
     ] as const)
       expect(legacyQueries[name]).toBe(tournaments[name]);
-    for (const name of [
-      'getAllTournaments',
-      'getStandings',
-      'getFixtures',
-      'fetchUserTournaments',
-    ] as const)
-      expect(legacyService[name]).toBe(tournaments[name]);
   });
-  it('keeps runtime null names through the historical screen typing adapter', async () => {
+  it('keeps runtime null names through the feature contract', async () => {
     mocks.query.mockResolvedValueOnce({
       rows: [{ id: 1, name: null, type: null, status: null, data_json: null }],
     });
-    expect(await legacyService.getTournamentDetails('1')).toEqual({
+    expect(await tournaments.getTournamentDetails('1')).toEqual({
       id: 1,
       name: null,
       type: null,
@@ -52,7 +44,7 @@ describe('Tournaments full service/query legacy contract', () => {
       { id: 3, name: null, type: null, status: null, data_json: null },
     ];
     mocks.query.mockResolvedValueOnce({ rows });
-    const data = await legacyService.getAllTournaments();
+    const data = await tournaments.getAllTournaments();
     expect(data.all.map((t) => t.id)).toEqual([2, 1, 3]);
     expect(data.active.map((t) => t.id)).toEqual([1]);
     expect(data.finished.map((t) => t.id)).toEqual([2, 3]);
@@ -65,15 +57,15 @@ describe('Tournaments full service/query legacy contract', () => {
   });
   it('returns null for missing detail and preserves Number coercion without new strict ID validation', async () => {
     for (const id of ['7', '7abc', '', ' ', '0x10', '1e2', 0]) {
-      expect(await legacyService.getTournamentDetails(id)).toBeNull();
+      expect(await tournaments.getTournamentDetails(id)).toBeNull();
       expect(mocks.query.mock.lastCall?.[1]).toEqual([Number(id), '2026-27']);
-      await legacyService.getStandings(id);
+      await tournaments.getStandings(id);
       expect(mocks.query.mock.lastCall?.[1]).toEqual([Number(id), '2026-27']);
     }
   });
   it('preserves fixture truthiness and all-tournament reads', async () => {
     for (const id of [null, 0, '0', '', '7abc', '07']) {
-      expect(await legacyService.getFixtures(id)).toEqual([]);
+      expect(await tournaments.getFixtures(id)).toEqual([]);
       expect(mocks.query.mock.lastCall?.[1]).toEqual([id ? Number(id) : null, '2026-27']);
       expect(mocks.query.mock.lastCall?.[0]).toContain('ORDER BY tf.date ASC');
       expect(mocks.query.mock.lastCall?.[0]).toContain(
@@ -101,7 +93,7 @@ describe('Tournaments full service/query legacy contract', () => {
       group_name: null,
     };
     mocks.query.mockResolvedValueOnce({ rows: [row, row] });
-    const results = await legacyService.fetchUserTournaments('07');
+    const results = await tournaments.fetchUserTournaments('07');
     expect(results).toHaveLength(2);
     expect(results[0]).toMatchObject({ position: null, points: 0, won: 2, drawn: 0, lost: 0 });
     expect(results[0]).not.toHaveProperty('data_json');
@@ -156,7 +148,7 @@ describe('Tournaments full service/query legacy contract', () => {
         },
       ],
     });
-    expect(await legacyService.fetchUserTournaments(7)).toMatchObject([
+    expect(await tournaments.fetchUserTournaments(7)).toMatchObject([
       { won: 0, drawn: 0, lost: 0, phase_name: 'Desconocida' },
     ]);
     expect(log).toHaveBeenCalledOnce();
