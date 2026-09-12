@@ -230,3 +230,16 @@ Presentation projections must be separate from that internal historical contract
 blanket object validation into getTournamentDetails/getAllTournaments to make screen types compile.
 The next implementation should allowlist consumed fields and preserve unused/absent field semantics;
 it must not merely assert the entire snapshot is a typed screen model.
+
+## Playoff rule projection
+
+The detail page obtains an allowlisted TournamentPlayoffRules model from the feature service; the
+bracket receives two booleans instead of reading config.playoff itself. Only literal true enables
+either rule, including either historical spelling. Scalars/arrays/null and unknown fields remain
+accepted internally and are not forwarded through this projection. The phone path still skips it.
+
+Nineteen mapper cases cover historical roots, both spellings, nonboolean flags, OR precedence and
+field exclusion. Tournament suite PASS: 91 tests; typecheck, architecture (814 modules/48 protected
+entrypoints) and diff checks PASS. No cast of the full snapshot or new input rejection was introduced.
+Winner/current-phase/round-fallback projections remain open, and the bracket still receives the old
+tournament model for its remaining fallback lookup. Final browser/full acceptance remains pending.

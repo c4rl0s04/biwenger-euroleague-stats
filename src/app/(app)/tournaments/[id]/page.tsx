@@ -4,6 +4,7 @@ import {
   getStandings,
   getFixtures,
   getTournamentInitialRoundId,
+  getTournamentPlayoffRules,
 } from '@/features/tournaments/server';
 import {
   DesktopTournamentDetailScreen,
@@ -38,6 +39,7 @@ export default async function TournamentDetailsPage({
       standings={standings}
       fixtures={fixtures}
       initialRoundId={initialRoundId}
+      playoffRules={getTournamentPlayoffRules(tournament.data)}
     />
   );
 }

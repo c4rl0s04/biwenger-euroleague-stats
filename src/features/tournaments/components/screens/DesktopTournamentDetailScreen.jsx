@@ -6,13 +6,14 @@ import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 /**
- * @param {{tournament: import('../../models/tournaments').Tournament, standings: import('../../models/tournaments').TournamentStanding[], fixtures: import('../../models/tournaments').TournamentFixture[], initialRoundId: number | null | undefined}} props
+ * @param {{tournament: import('../../models/tournaments').Tournament, standings: import('../../models/tournaments').TournamentStanding[], fixtures: import('../../models/tournaments').TournamentFixture[], initialRoundId: number | null | undefined, playoffRules: import('../../models/tournament-playoff-rules').TournamentPlayoffRules}} props
  */
 export default function DesktopTournamentDetailScreen({
   tournament,
   standings,
   fixtures,
   initialRoundId,
+  playoffRules,
 }) {
   const isActive = tournament.status === 'active';
   const data = tournament.data || {};
@@ -90,7 +91,11 @@ export default function DesktopTournamentDetailScreen({
         </Section>
       ) : (
         <Section title="Cuadro" delay={100} background="section-base">
-          <TournamentBracket tournament={tournament} fixtures={fixtures} />
+          <TournamentBracket
+            tournament={tournament}
+            fixtures={fixtures}
+            playoffRules={playoffRules}
+          />
         </Section>
       )}
 

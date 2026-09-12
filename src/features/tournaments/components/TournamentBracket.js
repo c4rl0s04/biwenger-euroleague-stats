@@ -294,11 +294,8 @@ function getCleanRoundName(phaseType, phaseName, roundIndex, totalRounds) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function TournamentBracket({ tournament, fixtures }) {
-  const playoffConfig = tournament?.data?.config?.playoff || {};
-  const isTwoLegged = playoffConfig.twoLegged === true || playoffConfig.twolegged === true;
-  const isTwoLeggedFinal =
-    playoffConfig.twoLeggedFinal === true || playoffConfig.twoleggedfinal === true;
+export default function TournamentBracket({ tournament, fixtures, playoffRules }) {
+  const { twoLegged: isTwoLegged, twoLeggedFinal: isTwoLeggedFinal } = playoffRules;
 
   const rounds = useMemo(() => {
     if (!fixtures?.length) return [];

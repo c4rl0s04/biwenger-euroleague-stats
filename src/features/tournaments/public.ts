@@ -27,3 +27,4 @@ export { default as MobileTournamentDetailScreen } from './components/screens/Mo
 export { default as MobileTournamentsScreen } from './components/screens/MobileTournamentsScreen';
 export { default as TournamentSectionScreen } from './components/screens/TournamentSectionScreen';
 export type { TournamentSectionModel } from './models/tournament-section';
+export type { TournamentPlayoffRules } from './models/tournament-playoff-rules';
