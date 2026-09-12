@@ -14,6 +14,18 @@ beforeEach(() => {
 });
 
 describe('Tournaments full service/query compatibility contract', () => {
+  it.each([null, false, 0, 'historical', [], { unrelated: ['kept internally'] }])(
+    'preserves heterogeneous stored JSON in the internal read contract: %j',
+    async (snapshot) => {
+      const data_json = JSON.stringify(snapshot);
+      mocks.query.mockResolvedValueOnce({
+        rows: [{ id: 1, name: 'Historical', type: 'league', status: 'finished', data_json }],
+      });
+      const result = await tournaments.getTournamentDetails('1');
+      expect(result?.data).toEqual(snapshot);
+      expect(result?.data_json).toBe(data_json);
+    }
+  );
   it('keeps remaining legacy query adapters on one implementation', () => {
     for (const name of [
       'getTournaments',

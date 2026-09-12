@@ -215,3 +215,18 @@ Focused Tournament/Managers suite PASS: 179 tests; typecheck and diff checks PAS
 routes are registered without exceptions: architecture PASS (812 modules, 48 protected entrypoints).
 The already-running broader verify is not final acceptance for this evolving checkpoint; repeat full
 verification after the remaining typed projections/query-adapter cleanup. No release is authorized.
+
+## Snapshot projection compatibility checkpoint
+
+The broader verify completed successfully (1,346 tests, one existing skip; production build and
+38-table metadata/Drizzle checks PASS). Cleanup edits overlapped its execution, so it is diagnostic
+evidence rather than immutable-candidate acceptance. The final exact candidate still needs verification.
+
+Screen snapshot consumers are limited to winner identity/name/icon, currentPhase, playoff leg flags
+(both camel-case and lower-case spellings), and round-name/type fallbacks for bracket grouping.
+The internal read contract deliberately accepts scalar, array and object JSON; six additional
+characterization cases pin null, false, zero, string, array and unrelated-object preservation.
+Presentation projections must be separate from that internal historical contract. Do not introduce
+blanket object validation into getTournamentDetails/getAllTournaments to make screen types compile.
+The next implementation should allowlist consumed fields and preserve unused/absent field semantics;
+it must not merely assert the entire snapshot is a typed screen model.
