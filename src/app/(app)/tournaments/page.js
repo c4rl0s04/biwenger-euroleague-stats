@@ -7,7 +7,7 @@ import {
   HallOfFame,
   TournamentHistoryTable,
   RecordsSection,
-} from '@/components/tournaments';
+} from '@/features/tournaments/public';
 import MobileTournamentsScreen from '@/components/mobile/screens/MobileTournamentsScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 

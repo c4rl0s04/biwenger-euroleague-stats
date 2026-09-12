@@ -3,7 +3,11 @@ import { notFound } from 'next/navigation';
 import { PageHeader, BackButton } from '@/components/ui';
 import { Section } from '@/components/layout';
 import { getTournamentDetails, getStandings, getFixtures } from '@/lib/services/tournamentService';
-import { StandingsTable, TournamentFixtures, TournamentBracket } from '@/components/tournaments';
+import {
+  StandingsTable,
+  TournamentFixtures,
+  TournamentBracket,
+} from '@/features/tournaments/public';
 import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getTournamentInitialRoundId } from '@/features/tournaments/server';
