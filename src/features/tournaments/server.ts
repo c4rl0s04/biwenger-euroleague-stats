@@ -1,5 +1,7 @@
 import 'server-only';
 
+export { getTournamentPlayoffRules } from './server/services/tournament-read.service';
+
 export { getTournamentSection } from './server/services/tournament-section.service';
 
 export { getTournamentInitialRoundId } from './server/services/tournament-round.service';

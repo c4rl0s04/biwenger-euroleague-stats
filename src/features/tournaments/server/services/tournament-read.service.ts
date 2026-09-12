@@ -1,5 +1,12 @@
 import 'server-only';
 
+import { mapTournamentPlayoffRules } from '../mappers/tournament-playoff-rules.mapper';
+import type { TournamentJson } from '../../models/tournaments';
+
+export function getTournamentPlayoffRules(snapshot: TournamentJson) {
+  return mapTournamentPlayoffRules(snapshot);
+}
+
 import { tournamentId, fixtureTournamentId } from '../../validation/tournament-input';
 import {
   mapTournament,
