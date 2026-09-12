@@ -24,9 +24,13 @@ Sensitive policy changes and production release remain explicit gates in the pla
 ## Inventory discovery
 
 [Source inventory](campaign-inventory.json) records 794 non-test source modules and
-132 discovered framework/auth entrypoints, with direct imports and preliminary package
+136 discovered framework/auth entrypoints (including root boundaries), with direct imports and preliminary package
 assignments. It uses the repository's existing TypeScript-resolved architecture graph.
 Assignment is a triage queue, not evidence of correct ownership or a completed security review.
+
+AST export discovery additionally records 82 explicit HTTP method exports (including Auth.js aliases),
+route cache declarations, 57 ancillary script/worker/configuration/style files and 47 package commands.
+These inventories are coverage evidence, not semantic acceptance or permission to execute commands.
 
 Remaining C00 work:
 
@@ -56,7 +60,13 @@ Remaining C00 work:
 
 - Worktree setup PASS: Node 24.20.0, 688 packages; no lockfile edits.
 - Existing esbuild-kit deprecation and install-script approval notices retained unchanged.
-- Baseline `npm run verify`: running; record final output before acceptance.
+- Baseline `npm run verify`: PASS. Skills (6), graph (794 modules/44 protected entrypoints),
+  typecheck, 1,277 tests plus one existing skip, lint (0 errors/25 existing image warnings),
+  SKIP_DB production build, 38-table metadata audit, Drizzle check and diff check passed.
+  Missing-provider build warnings are unchanged. No application environment files were present.
+- Built app-paths manifest reconciliation: 125 entries, zero missing inventory routes after
+  explicitly accounting for generated internal boundaries and manifest.webmanifest.
+- Updated documentation checks passed; the full disposable browser baseline is the next gate.
 - No environment files copied, production operations, secrets, provider calls, push or deployment.
 - Existing PWA/Season Review/sync branches and both pre-existing stashes remain untouched.
   Their detailed ancestry/content classification remains part of C00/C14; no blanket merge/deletion.

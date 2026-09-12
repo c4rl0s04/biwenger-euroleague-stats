@@ -3181,12 +3181,63 @@
   ],
   "entrypoints": [
     {
+      "file": "src/app/layout.js",
+      "methods": [],
+      "imports": [
+        "next/font/google",
+        "./globals.css",
+        "./mobile-native.css",
+        "@vercel/analytics/next",
+        "@/contexts/ThemeContext",
+        "@/contexts/CardThemeContext",
+        "@/components/pwa/PwaProvider",
+        "next-auth/react"
+      ],
+      "computed": false,
+      "package": "C13",
+      "review": "pending",
+      "exports": [],
+      "cacheDeclarations": []
+    },
+    {
+      "file": "src/app/error.js",
+      "methods": [],
+      "imports": ["react", "lucide-react"],
+      "computed": false,
+      "package": "C12",
+      "review": "pending",
+      "exports": [],
+      "cacheDeclarations": []
+    },
+    {
+      "file": "src/app/loading.js",
+      "methods": [],
+      "imports": [],
+      "computed": false,
+      "package": "C12",
+      "review": "pending",
+      "exports": [],
+      "cacheDeclarations": []
+    },
+    {
+      "file": "src/app/not-found.js",
+      "methods": [],
+      "imports": ["next/link", "lucide-react"],
+      "computed": false,
+      "package": "C12",
+      "review": "pending",
+      "exports": [],
+      "cacheDeclarations": []
+    },
+    {
       "file": "src/app/(app)/assistant/[conversationId]/page.tsx",
       "methods": [],
       "imports": ["@/components/mobile/screens/MobileAssistantScreen", "@/lib/mobile/route-server"],
       "computed": false,
       "package": "C11d",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["AssistantConversationPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/assistant/page.js",
@@ -3200,7 +3251,9 @@
       ],
       "computed": false,
       "package": "C11d",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "AssistantPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/compare/[userId]/page.tsx",
@@ -3215,7 +3268,9 @@
       ],
       "computed": false,
       "package": "C08",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["CompareOpponentPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/compare/page.js",
@@ -3229,7 +3284,9 @@
       ],
       "computed": false,
       "package": "C08",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "ComparePage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/dashboard/[section]/page.tsx",
@@ -3243,7 +3300,9 @@
       ],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["DashboardSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/dashboard/page.js",
@@ -3276,7 +3335,9 @@
       ],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "Dashboard"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/(app)/hoopgrid/page.js",
@@ -3290,7 +3351,9 @@
       ],
       "computed": false,
       "package": "C11c",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "HoopgridPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/layout.js",
@@ -3304,7 +3367,9 @@
       ],
       "computed": false,
       "package": "C13",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["AppLayout"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/lineup/[section]/page.tsx",
@@ -3320,7 +3385,9 @@
       ],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["LineupSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/lineup/page.js",
@@ -3335,7 +3402,9 @@
       ],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "LineupPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/loading.js",
@@ -3343,7 +3412,9 @@
       "imports": [],
       "computed": false,
       "package": "C12",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["AppLoading"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/market/[section]/page.tsx",
@@ -3357,7 +3428,9 @@
       ],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["MarketSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/market/page.js",
@@ -3371,7 +3444,9 @@
       ],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["MarketPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/matches/page.tsx",
@@ -3383,7 +3458,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["revalidate", "MatchesPage"],
+      "cacheDeclarations": ["export const revalidate = 300;"]
     },
     {
       "file": "src/app/(app)/matches/round/[roundId]/page.tsx",
@@ -3395,7 +3472,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["MatchRoundPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/page.js",
@@ -3410,7 +3489,9 @@
       ],
       "computed": false,
       "package": "C10",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["Home"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/player/[id]/[section]/page.tsx",
@@ -3422,7 +3503,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["PlayerSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/player/[id]/page.js",
@@ -3434,7 +3517,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "PlayerPage"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/(app)/players/[section]/page.tsx",
@@ -3446,7 +3531,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["PlayersSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/players/page.js",
@@ -3458,7 +3545,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "PlayersPage"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/(app)/playoffs/page.js",
@@ -3472,7 +3561,9 @@
       ],
       "computed": false,
       "package": "C04",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "revalidate", "PlayoffPage"],
+      "cacheDeclarations": ["export const revalidate = 600;"]
     },
     {
       "file": "src/app/(app)/playoffs/predictions/[userId]/page.tsx",
@@ -3486,7 +3577,9 @@
       ],
       "computed": false,
       "package": "C03",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["PlayoffPredictionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/predictions/[section]/page.tsx",
@@ -3500,7 +3593,9 @@
       ],
       "computed": false,
       "package": "C03",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["PredictionsSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/predictions/page.js",
@@ -3514,7 +3609,9 @@
       ],
       "computed": false,
       "package": "C03",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "revalidate", "PredictionsPage"],
+      "cacheDeclarations": ["export const revalidate = 300;"]
     },
     {
       "file": "src/app/(app)/rounds/[roundId]/[section]/page.tsx",
@@ -3527,7 +3624,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["RoundSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/rounds/page.tsx",
@@ -3540,7 +3639,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["RoundsPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/schedule/map/page.tsx",
@@ -3553,7 +3654,9 @@
       ],
       "computed": false,
       "package": "C07",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["ScheduleMapPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/schedule/page.js",
@@ -3573,7 +3676,9 @@
       ],
       "computed": false,
       "package": "C07",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["SchedulePage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/season-review/[section]/page.tsx",
@@ -3585,7 +3690,9 @@
       ],
       "computed": false,
       "package": "C06",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["SeasonReviewSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/season-review/actions.ts",
@@ -3593,7 +3700,9 @@
       "imports": ["@/auth", "@/lib/services"],
       "computed": false,
       "package": "C06",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["runSeasonReviewScenario"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/season-review/error.tsx",
@@ -3601,7 +3710,9 @@
       "imports": [],
       "computed": false,
       "package": "C06",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["SeasonReviewError"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/season-review/page.tsx",
@@ -3618,7 +3729,9 @@
       ],
       "computed": false,
       "package": "C06",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "SeasonReviewPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/settings/[section]/page.tsx",
@@ -3630,7 +3743,9 @@
       ],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["SettingsSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/settings/page.tsx",
@@ -3644,7 +3759,9 @@
       ],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["SettingsPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/standings/[section]/page.tsx",
@@ -3656,7 +3773,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["StandingsSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/standings/page.js",
@@ -3668,7 +3787,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "StandingsPage"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/(app)/team/[id]/[section]/page.tsx",
@@ -3680,7 +3801,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["TeamSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/team/[id]/loading.tsx",
@@ -3688,7 +3811,9 @@
       "imports": ["@/features/teams/public"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": [],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/team/[id]/page.tsx",
@@ -3700,7 +3825,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "TeamPage"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/(app)/tournaments/[id]/[section]/page.tsx",
@@ -3714,7 +3841,9 @@
       ],
       "computed": false,
       "package": "C02",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["TournamentSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/tournaments/[id]/page.js",
@@ -3734,7 +3863,9 @@
       ],
       "computed": false,
       "package": "C02",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "TournamentDetailsPage"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/(app)/tournaments/page.js",
@@ -3750,7 +3881,9 @@
       ],
       "computed": false,
       "package": "C02",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["TournamentsPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/user/[id]/[section]/page.tsx",
@@ -3762,7 +3895,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["ManagerSectionPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/user/[id]/loading.js",
@@ -3770,7 +3905,9 @@
       "imports": [],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["Loading"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/(app)/user/[id]/page.tsx",
@@ -3782,7 +3919,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "ManagerPage"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/(auth)/login/page.js",
@@ -3797,7 +3936,9 @@
       ],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["LoginPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/assistant/conversations/[id]/route.ts",
@@ -3810,7 +3951,9 @@
       ],
       "computed": false,
       "package": "C11d",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET", "DELETE"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/assistant/conversations/route.ts",
@@ -3823,7 +3966,9 @@
       ],
       "computed": false,
       "package": "C11d",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET", "POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/assistant/route.ts",
@@ -3838,15 +3983,19 @@
       ],
       "computed": false,
       "package": "C11d",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/auth/[...nextauth]/route.ts",
-      "methods": [],
+      "methods": ["GET", "POST"],
       "imports": ["@/auth"],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET", "POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/compare/data/lite/route.ts",
@@ -3854,7 +4003,9 @@
       "imports": ["next/server", "@/lib/utils/response", "@/lib/services"],
       "computed": false,
       "package": "C08",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/compare/data/route.ts",
@@ -3862,7 +4013,9 @@
       "imports": ["next/server", "@/lib/utils/response", "@/lib/services"],
       "computed": false,
       "package": "C08",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/birthdays/route.ts",
@@ -3870,7 +4023,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/captain-stats/route.ts",
@@ -3878,7 +4033,9 @@
       "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/dashboard/captain-suggest/route.ts",
@@ -3886,7 +4043,9 @@
       "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/home-away/route.ts",
@@ -3894,7 +4053,9 @@
       "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/dashboard/ideal-lineup/route.ts",
@@ -3902,7 +4063,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/leader-gap/route.ts",
@@ -3910,7 +4073,9 @@
       "imports": ["next/server", "@/lib/services", "@/lib/utils/response", "@/lib/utils/api-auth"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/dashboard/market-opportunities/route.ts",
@@ -3918,7 +4083,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/mvps/route.ts",
@@ -3926,7 +4093,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/next-round/route.ts",
@@ -3934,7 +4103,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/recent-activity/route.ts",
@@ -3947,7 +4118,9 @@
       ],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/rising-stars/route.ts",
@@ -3955,7 +4128,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/top-form/route.ts",
@@ -3963,7 +4138,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/dashboard/top-players/route.ts",
@@ -3971,7 +4148,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C09",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/home/activity/route.ts",
@@ -3984,7 +4163,9 @@
       ],
       "computed": false,
       "package": "C10",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/hoopgrid/guess/route.ts",
@@ -3992,7 +4173,9 @@
       "imports": ["@/lib/services/features/hoopgridService", "@/auth", "@/lib/utils/response"],
       "computed": false,
       "package": "C11c",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/hoopgrid/list/route.ts",
@@ -4006,7 +4189,9 @@
       ],
       "computed": false,
       "package": "C11c",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/hoopgrid/today/route.ts",
@@ -4022,7 +4207,9 @@
       ],
       "computed": false,
       "package": "C11c",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/landing-stats/route.ts",
@@ -4030,7 +4217,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C10",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/league-average/route.ts",
@@ -4038,7 +4227,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C10",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/market/duels/details/route.ts",
@@ -4051,7 +4242,9 @@
       ],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/market/offers/accept/route.ts",
@@ -4059,7 +4252,9 @@
       "imports": ["@/auth", "@/lib/services/marketActionsService", "@/lib/utils/response"],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/market/offers/reject/route.ts",
@@ -4067,7 +4262,9 @@
       "imports": ["@/auth", "@/lib/services/marketActionsService", "@/lib/utils/response"],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/market/remove/route.ts",
@@ -4075,7 +4272,9 @@
       "imports": ["@/auth", "@/lib/services/marketActionsService", "@/lib/utils/response"],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["DELETE"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/market/route.ts",
@@ -4088,7 +4287,9 @@
       ],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/market/sell-all/route.ts",
@@ -4101,7 +4302,9 @@
       ],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/market/sell/route.ts",
@@ -4114,7 +4317,9 @@
       ],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/market/stats/route.ts",
@@ -4122,7 +4327,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/market/stats/value-details/route.ts",
@@ -4135,7 +4342,9 @@
       ],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/market/transfers/route.ts",
@@ -4148,7 +4357,9 @@
       ],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/market/trends/route.ts",
@@ -4161,7 +4372,9 @@
       ],
       "computed": false,
       "package": "C05/C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/matches/[id]/play-by-play/route.ts",
@@ -4169,7 +4382,9 @@
       "imports": ["next/server", "@/features/matches/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/matches/[id]/shots/route.ts",
@@ -4177,7 +4392,9 @@
       "imports": ["next/server", "@/features/matches/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/news/route.ts",
@@ -4185,7 +4402,9 @@
       "imports": ["next/server", "@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C10",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/player/rounds/route.ts",
@@ -4198,7 +4417,9 @@
       ],
       "computed": false,
       "package": "C01",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/player/squad/route.ts",
@@ -4211,7 +4432,9 @@
       ],
       "computed": false,
       "package": "C01",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/player/stats/route.ts",
@@ -4224,7 +4447,9 @@
       ],
       "computed": false,
       "package": "C01",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/player/streaks/route.ts",
@@ -4232,7 +4457,9 @@
       "imports": ["@/features/players/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/players/[id]/stats/route.ts",
@@ -4240,7 +4467,9 @@
       "imports": ["next/server", "@/features/players/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/rounds/all-history/route.ts",
@@ -4248,7 +4477,9 @@
       "imports": ["next/server", "@/features/rounds/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/rounds/history/route.ts",
@@ -4261,7 +4492,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/rounds/leaderboard/route.ts",
@@ -4269,7 +4502,9 @@
       "imports": ["next/server", "@/features/rounds/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/rounds/lineup-stats/route.ts",
@@ -4277,7 +4512,9 @@
       "imports": ["next/server", "@/features/rounds/server"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/rounds/lineup/route.ts",
@@ -4290,7 +4527,9 @@
       ],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/rounds/list/route.ts",
@@ -4298,7 +4537,9 @@
       "imports": ["@/features/rounds/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/rounds/standings/route.ts",
@@ -4311,7 +4552,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/rounds/stats/route.ts",
@@ -4324,7 +4567,9 @@
       ],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/search/route.ts",
@@ -4332,7 +4577,9 @@
       "imports": ["next/server", "@/features/search/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C13",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/standings/advanced/route.ts",
@@ -4340,7 +4587,9 @@
       "imports": ["next/server", "@/features/standings/server", "@/features/standings/server"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/standings/analytics/route.ts",
@@ -4348,7 +4597,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/bottlers/route.ts",
@@ -4356,7 +4607,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/captains/route.ts",
@@ -4364,7 +4617,9 @@
       "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/standings/efficiency/route.ts",
@@ -4372,7 +4627,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/full/route.ts",
@@ -4380,7 +4637,9 @@
       "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/heartbreakers/route.ts",
@@ -4388,7 +4647,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/initial-squad-stats/route.ts",
@@ -4396,7 +4657,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/jinx/route.ts",
@@ -4404,7 +4667,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/league-comparison/route.ts",
@@ -4412,7 +4677,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/league-totals/route.ts",
@@ -4420,7 +4687,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/no-glory/route.ts",
@@ -4428,7 +4697,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/placements/route.ts",
@@ -4436,7 +4707,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/points-progression/route.ts",
@@ -4444,7 +4717,9 @@
       "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/round-winners/route.ts",
@@ -4452,7 +4727,9 @@
       "imports": ["next/server", "@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/streaks/route.ts",
@@ -4460,7 +4737,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/theoretical/route.ts",
@@ -4468,7 +4747,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/value-ranking/route.ts",
@@ -4476,7 +4757,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/standings/volatility/route.ts",
@@ -4484,7 +4767,9 @@
       "imports": ["@/features/standings/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/stats/leaders/route.ts",
@@ -4492,7 +4777,9 @@
       "imports": ["next/server", "@/features/players/server"],
       "computed": false,
       "package": "C10",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/team/[id]/route.ts",
@@ -4500,7 +4787,9 @@
       "imports": ["next/server", "@/features/teams/server", "@/lib/utils/response"],
       "computed": false,
       "package": "C14",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/api/user/change-password/route.ts",
@@ -4515,7 +4804,9 @@
       ],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/user/link-biwenger/route.ts",
@@ -4530,7 +4821,9 @@
       ],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/users/lineup/route.ts",
@@ -4538,7 +4831,9 @@
       "imports": ["next/server", "@/auth", "@/lib/services/lineupService", "@/lib/utils/response"],
       "computed": false,
       "package": "C11b",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["POST", "GET"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/api/users/route.ts",
@@ -4546,7 +4841,9 @@
       "imports": ["@/lib/services", "@/lib/utils/response"],
       "computed": false,
       "package": "C01",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["dynamic", "GET"],
+      "cacheDeclarations": ["export const dynamic = 'force-dynamic';"]
     },
     {
       "file": "src/app/hoopgrid-cheatsheet/page.js",
@@ -4562,7 +4859,9 @@
       ],
       "computed": false,
       "package": "C11c",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["HoopgridCheatsheetPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/install/page.js",
@@ -4570,7 +4869,9 @@
       "imports": ["@/components/pwa/InstallGuide"],
       "computed": false,
       "package": "C12",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "InstallPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/manifest.ts",
@@ -4578,7 +4879,9 @@
       "imports": ["next"],
       "computed": false,
       "package": "C12",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["manifest"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/offline/page.js",
@@ -4586,7 +4889,9 @@
       "imports": ["next/image", "next/link", "lucide-react"],
       "computed": false,
       "package": "C12",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["metadata", "OfflinePage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/app/test-hoopgrid/page.js",
@@ -4594,7 +4899,9 @@
       "imports": ["@/lib/constants/hoopgridCriteria"],
       "computed": false,
       "package": "C11c",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["TestHoopgridPage"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/auth.config.js",
@@ -4602,7 +4909,9 @@
       "imports": ["@/lib/auth/session-safety"],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["isPublicPath"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/auth.js",
@@ -4620,7 +4929,9 @@
       ],
       "computed": false,
       "package": "C11a",
-      "review": "pending"
+      "review": "pending",
+      "exports": ["handlers", "signIn", "signOut", "auth"],
+      "cacheDeclarations": []
     },
     {
       "file": "src/proxy.js",
@@ -4628,7 +4939,345 @@
       "imports": ["next-auth", "./auth.config"],
       "computed": false,
       "package": "C11a",
+      "review": "pending",
+      "exports": ["config"],
+      "cacheDeclarations": []
+    }
+  ],
+  "ancillary": [
+    {
+      "file": ".github/workflows/ci.yml",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": ".github/workflows/season-simulations.yml",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": ".github/workflows/sync-live.yml",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": ".github/workflows/sync.yml",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "next.config.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "package.json",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "public/assets/playoffs/predictions/all-stars.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/assets/playoffs/predictions/ask72.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/assets/playoffs/predictions/cactus-team.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/assets/playoffs/predictions/june.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/assets/playoffs/predictions/nonameyet.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/assets/playoffs/predictions/real-madrid-basket.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/brand-logo.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/favicon.ico",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/favicon.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/icons/apple-touch-icon.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/icons/icon-192.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/icons/icon-512.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/icons/icon-maskable-512.png",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "public/sw.js",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/analysis/calibrate-season-analysis.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/analysis/merge-season-analysis.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/analysis/merge-season-simulations.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/analysis/run-season-analysis.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/analysis/run-season-simulations.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/architecture/check.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/architecture/policy.json",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/auth/init-passwords.js",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/audit-schema.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/audit-seasons.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/biwenger-credential-maintenance.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/check-docs.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/check-skills.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/db-check.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/debug-playoffs.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/fingerprint-season.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/official-mappings.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/production-readiness.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/recalculate-hoopgrid-counts.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/repair-player-prices-from-history.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/season-lifecycle.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/seed-team-locations.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/sync-preflight.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/verify-db-connection.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/verify-drizzle.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/verify-official-integration.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/verify.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/dev/worktree.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/e2e/Dockerfile",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/e2e/Dockerfile.dockerignore",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/e2e/run.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/e2e/safety.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/e2e/seed.mjs",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/repair-market-values.ts",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "scripts/setup.js",
+      "package": "C12",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/globals.css",
+      "package": "C13",
+      "review": "pending"
+    },
+    {
+      "file": "src/app/mobile-native.css",
+      "package": "C13",
       "review": "pending"
     }
+  ],
+  "packageScripts": [
+    "dev",
+    "build",
+    "start",
+    "lint",
+    "typecheck",
+    "docs:check",
+    "format",
+    "setup",
+    "sync",
+    "sync:bootstrap",
+    "sync:live",
+    "sync:preflight",
+    "sync:official:mappings",
+    "sync:playoffs",
+    "test",
+    "test:run",
+    "test:e2e",
+    "test:official-integration",
+    "db:audit:schema",
+    "db:audit:schema:metadata",
+    "db:season:audit",
+    "db:season:fingerprint",
+    "db:season:freeze",
+    "db:season:create-next",
+    "db:production:check",
+    "db:production:apply",
+    "db:repair:player-prices",
+    "credentials:status",
+    "credentials:migrate",
+    "credentials:rotate",
+    "db:check",
+    "db:verify",
+    "db:verify:drizzle",
+    "analyze",
+    "simulation:run",
+    "simulation:merge",
+    "simulation:analysis:run",
+    "simulation:analysis:merge",
+    "simulation:analysis:calibrate",
+    "prepare",
+    "worktree:setup",
+    "dev:worktree",
+    "architecture:check",
+    "skills:check",
+    "verify",
+    "test:e2e:local",
+    "test:e2e:update"
   ]
 }
