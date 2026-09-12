@@ -10,6 +10,9 @@ status: active
 
 # Product design context
 
+The [UI component layering target](../architecture/ui-component-layers.md) records the agreed
+future consolidation pass after domain migration; it does not describe completed UI migration.
+
 Biwenger Stats is a Spanish-language EuroLeague fantasy analytics application. Its core work is
 scanning results, comparing players and teams, following league activity, and managing fantasy decisions.
 Data legibility and consistent navigation take precedence over decorative novelty.

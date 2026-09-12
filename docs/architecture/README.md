@@ -12,6 +12,7 @@ status: active
 
 - [System overview](system-overview.md) — runtime responsibilities and repository map.
 - [Application layers](application-layers.md) — browser-to-database request flow and boundaries.
+- [UI component layering target](ui-component-layers.md) — agreed post-domain-migration UI composition and reuse direction.
 - [Data and sync](data-and-sync.md) — local-first data ingestion and write safety.
 - [Authentication and security](authentication-and-security.md) — page protection, credentials, and
   API responsibilities.
