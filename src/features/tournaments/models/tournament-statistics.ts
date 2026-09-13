@@ -1,4 +1,5 @@
 import type { TournamentFixture } from './tournaments';
+import type { TournamentDisplayText } from './tournament-detail';
 
 export interface TournamentStatisticsManager {
   id: string | number | null;
@@ -6,7 +7,9 @@ export interface TournamentStatisticsManager {
   icon: string | null | undefined;
   colorIndex: number | null;
 }
-export interface HallOfFameEntry extends TournamentStatisticsManager {
+export interface HallOfFameEntry extends Omit<TournamentStatisticsManager, 'name'> {
+  href: string;
+  name: TournamentDisplayText | undefined;
   titles: number;
   tournaments: (string | null)[];
 }

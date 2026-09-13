@@ -39,7 +39,7 @@ export function HallOfFame({ winners }) {
             <div className="flex flex-col items-center justify-center gap-5 py-3">
               {/* Avatar - Unified Size */}
               <Link
-                href={`/user/${winner.id || winner.name}`}
+                href={winner.href}
                 className={cn(
                   'relative w-24 h-24 rounded-full overflow-hidden shrink-0 transition-all duration-500 hover:shadow-2xl active:scale-95 group/avatar border-2',
                   isFirst
@@ -66,10 +66,7 @@ export function HallOfFame({ winners }) {
 
               {/* Info - Unified Typography */}
               <div className="text-center">
-                <Link
-                  href={`/user/${winner.id || winner.name}`}
-                  className="group/name inline-block"
-                >
+                <Link href={winner.href} className="group/name inline-block">
                   <h3
                     className={cn(
                       'font-black font-display tracking-tight text-2xl mb-1 transition-colors',

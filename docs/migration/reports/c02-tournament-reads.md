@@ -358,3 +358,26 @@ Validation on unchanged application source:
 
 C02 is still open: statistics snapshot typing and final export/contract reconciliation remain.
 No push, deployment, production operation, schema/configuration change or visual redesign occurred.
+
+## Statistics winner contract and export audit
+
+Removed the unchecked WinnerSnapshot assertion. Hall of Fame now reads each consumed field explicitly,
+normalizes non-string/number identities to their existing grouping key, and carries an explicit href
+so unusual truthy IDs (including empty arrays) retain their original link. Renderable name arrays/scalars
+remain supported; icon and palette values retain existing display behavior. Duplicate winner details
+are not inspected after the first occurrence, and standings colors still override snapshot colors.
+The finished-only legacy top-level winner fallback remains explicitly typed without a cast.
+
+Tests cover identity/link coercion, falsy IDs, numeric palette coercion, duplicate-field skipping,
+renderable names, omitted fields and previously failing consumed values. Focused Tournament suite:
+222 tests PASS; typecheck, architecture (820 modules/48 protected entrypoints) and diff checks PASS.
+The HallOfFame href is an internal presentation field, not a new HTTP response field.
+
+Removed the unused getTournamentPlayoffRules service wrapper after consumer search; the bracket service
+uses the mapper directly. Removed internal Tournament, TournamentJson and ManagerTournamentRead exports
+from public.ts; consumers use their explicit presentation/participation contracts instead.
+
+Closure audit still requires consolidating page-level read/projection orchestration into screen-model
+services: catalogue/detail pages currently see internal read snapshots before calling projections.
+Then reconcile the C02 inventory/receipt and rerun final full/browser checks. Do not mark C02 complete
+based solely on the earlier bracket validation.
