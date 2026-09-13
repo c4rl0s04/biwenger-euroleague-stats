@@ -35,6 +35,7 @@ it('keeps global statistics in a typed feature calculation without obsolete serv
   for (const path of [
     'src/lib/services/statsService.ts',
     'src/lib/services/tournamentService.ts',
+    'src/lib/db/queries/tournaments.ts',
     'src/features/tournaments/components/TournamentCard.js',
   ]) {
     expect(existsSync(resolve(process.cwd(), path))).toBe(false);

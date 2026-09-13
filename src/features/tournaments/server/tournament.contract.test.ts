@@ -4,7 +4,6 @@ vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db/client', () => ({ pgClient: { query: mocks.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 
-import * as legacyQueries from '@/lib/db/queries/tournaments';
 import * as tournaments from '../server';
 
 beforeEach(() => {
@@ -26,16 +25,6 @@ describe('Tournaments full service/query compatibility contract', () => {
       expect(result?.data_json).toBe(data_json);
     }
   );
-  it('keeps remaining legacy query adapters on one implementation', () => {
-    for (const name of [
-      'getTournaments',
-      'getTournamentById',
-      'getTournamentStandings',
-      'getTournamentFixtures',
-      'getUserTournaments',
-    ] as const)
-      expect(legacyQueries[name]).toBe(tournaments[name]);
-  });
   it('keeps runtime null names through the feature contract', async () => {
     mocks.query.mockResolvedValueOnce({
       rows: [{ id: 1, name: null, type: null, status: null, data_json: null }],
@@ -84,7 +73,7 @@ describe('Tournaments full service/query compatibility contract', () => {
         '($1::int IS NULL OR tf.tournament_id = $1)'
       );
     }
-    await legacyQueries.getTournamentStandings(null);
+    await tournaments.getTournamentStandings(null);
     expect(mocks.query.mock.lastCall?.[1]).toEqual([null, '2026-27']);
     expect(mocks.query.mock.lastCall?.[0]).toContain('ts.*');
     expect(mocks.query.mock.lastCall?.[0]).toContain('ORDER BY ts.position ASC');
@@ -125,22 +114,22 @@ describe('Tournaments full service/query compatibility contract', () => {
     '%s resolves season on every call, does not cache and propagates errors',
     async (name) => {
       const failure = new Error('synthetic database failure');
-      await legacyQueries[name](7);
+      await tournaments[name](7);
       mocks.query.mockRejectedValueOnce(failure);
-      await expect(legacyQueries[name](7)).rejects.toBe(failure);
+      await expect(tournaments[name](7)).rejects.toBe(failure);
       expect(mocks.season).toHaveBeenCalledTimes(2);
       expect(mocks.season).toHaveBeenCalledWith();
       expect(mocks.query).toHaveBeenCalledTimes(2);
       mocks.season.mockRejectedValueOnce(failure);
-      await expect(legacyQueries[name](7)).rejects.toBe(failure);
+      await expect(tournaments[name](7)).rejects.toBe(failure);
       expect(mocks.query).toHaveBeenCalledTimes(2);
     }
   );
   it('preserves the different malformed-JSON outcomes for detail/list and participation', async () => {
     const row = { id: 1, name: 'Cup', type: 'playoff', status: 'active', data_json: '{' };
     mocks.query.mockResolvedValue({ rows: [row] });
-    await expect(legacyQueries.getTournaments()).rejects.toBeInstanceOf(SyntaxError);
-    await expect(legacyQueries.getTournamentById(1)).rejects.toBeInstanceOf(SyntaxError);
+    await expect(tournaments.getTournaments()).rejects.toBeInstanceOf(SyntaxError);
+    await expect(tournaments.getTournamentById(1)).rejects.toBeInstanceOf(SyntaxError);
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     mocks.query.mockResolvedValueOnce({
       rows: [

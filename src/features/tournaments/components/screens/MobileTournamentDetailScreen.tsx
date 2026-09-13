@@ -1,4 +1,5 @@
 import { Brackets, ListChecks, Trophy } from 'lucide-react';
+import type { TournamentStanding, TournamentFixture } from '../../models/tournaments';
 
 import MobileRecordList from '@/components/mobile/MobileRecordList';
 import {
@@ -18,8 +19,8 @@ export default function MobileTournamentDetailScreen({
   fixtures,
 }: {
   tournament: RecordValue;
-  standings: RecordValue[];
-  fixtures: RecordValue[];
+  standings: TournamentStanding[];
+  fixtures: TournamentFixture[];
 }) {
   const winner = tournament.data?.winner;
   return (
