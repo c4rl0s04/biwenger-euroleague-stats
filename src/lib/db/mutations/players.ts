@@ -80,11 +80,11 @@ export function preparePlayerMutations(
     upsertPlayer: async (params: UpsertPlayerParams) => {
       await db.query(
         `
-        INSERT INTO players (id, name, position, img)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO players (id, name, img)
+        VALUES ($1, $2, $3)
         ON CONFLICT(id) DO NOTHING
       `,
-        [params.id, params.name, params.position, params.img]
+        [params.id, params.name, params.img]
       );
 
       await db.query(

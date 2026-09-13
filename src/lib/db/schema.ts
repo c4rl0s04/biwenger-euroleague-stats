@@ -50,17 +50,13 @@ export const userBiwengerCredentials = pgTable(
   })
 );
 
-// 1b. Teams Table
+// 1b. Teams Table (Global team entity directory)
 export const teams = pgTable('teams', {
   id: integer('id').primaryKey(),
   name: text('name'),
   shortName: text('short_name'),
   code: text('code'),
   img: text('img'),
-  city: text('city'),
-  arenaName: text('arena_name'),
-  latitude: doublePrecision('latitude'),
-  longitude: doublePrecision('longitude'),
 });
 
 // 1c. Seasons Table
@@ -118,31 +114,14 @@ export const teamSeasons = pgTable(
 );
 
 // 2. Players Table (Global player entity directory)
-// NOTE: Seasonal columns (puntos, partidos_jugados, played_home/away, points_home/away,
-// points_last_season, owner_id, status, price_increment, price, team_id, position, dorsal)
-// are deprecated in favor of player_seasons and preserved temporarily for query transition.
 export const players = pgTable('players', {
   id: integer('id').primaryKey(),
   name: text('name'),
-  position: text('position'), // Deprecated: use player_seasons.position
-  puntos: integer('puntos'), // Deprecated: use player_seasons.puntos
-  partidosJugados: integer('partidos_jugados'), // Deprecated: use player_seasons.partidos_jugados
-  playedHome: integer('played_home'), // Deprecated: use player_seasons.played_home
-  playedAway: integer('played_away'), // Deprecated: use player_seasons.played_away
-  pointsHome: integer('points_home'), // Deprecated: use player_seasons.points_home
-  pointsAway: integer('points_away'), // Deprecated: use player_seasons.points_away
-  pointsLastSeason: integer('points_last_season'), // Deprecated: use player_seasons.points_last_season
-  ownerId: text('owner_id'), // Deprecated: use player_seasons.owner_id
-  status: text('status'), // Deprecated: use player_seasons.status
-  priceIncrement: integer('price_increment'), // Deprecated: use player_seasons.price_increment
   birthDate: text('birth_date'),
   height: integer('height'),
   weight: integer('weight'),
-  price: integer('price'), // Deprecated: use player_seasons.price
   euroleagueCode: text('euroleague_code'),
-  dorsal: text('dorsal'), // Deprecated: use player_seasons.dorsal
   country: text('country'),
-  teamId: integer('team_id'), // Deprecated: use player_seasons.team_id
   img: text('img'),
 });
 

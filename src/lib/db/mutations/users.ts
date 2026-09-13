@@ -105,9 +105,6 @@ export function prepareUserMutations(
 
   return {
     resetAllOwners: async () => {
-      if (seasonId === DEFAULT_SEASON_ID) {
-        await db.query('UPDATE players SET owner_id = NULL');
-      }
       await db.query(
         'UPDATE player_seasons SET owner_id = NULL, updated_at = NOW() WHERE season_id = $1',
         [seasonId]
@@ -126,9 +123,6 @@ export function prepareUserMutations(
     },
 
     resetUserSquad: async (userId: string) => {
-      if (seasonId === DEFAULT_SEASON_ID) {
-        await db.query('UPDATE players SET owner_id = NULL WHERE owner_id = $1', [userId]);
-      }
       await db.query(
         'UPDATE player_seasons SET owner_id = NULL, updated_at = NOW() WHERE season_id = $1 AND owner_id = $2',
         [seasonId, userId]
@@ -182,12 +176,6 @@ export function prepareUserMutations(
     },
 
     updatePlayerOwner: async (params: UpdatePlayerOwnerParams) => {
-      if (seasonId === DEFAULT_SEASON_ID) {
-        await db.query('UPDATE players SET owner_id = $1 WHERE id = $2', [
-          params.owner_id,
-          params.player_id,
-        ]);
-      }
       await db.query(
         `
         INSERT INTO player_seasons (season_id, player_id, owner_id, updated_at)

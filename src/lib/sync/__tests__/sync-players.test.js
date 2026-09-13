@@ -100,11 +100,10 @@ describe('syncPlayers', () => {
     // Verify DB query was called
     expect(db.query).toHaveBeenCalled();
 
-    // New-season sync only updates global identity fields in players.
+    // New-season sync only updates global identity fields in players (id, name, img).
     expect(db.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO players'), [
       101,
       'Campazzo',
-      'Base',
       null,
     ]);
 

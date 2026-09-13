@@ -15,10 +15,6 @@ async function clearLocalPlayerOwner(playerId: number) {
     .update(playerSeasons)
     .set({ ownerId: null, updatedAt: new Date() })
     .where(and(eq(playerSeasons.seasonId, seasonId), eq(playerSeasons.playerId, playerId)));
-
-  if (seasonId === DEFAULT_SEASON_ID) {
-    await db.update(players).set({ ownerId: null }).where(eq(players.id, playerId));
-  }
 }
 
 /**

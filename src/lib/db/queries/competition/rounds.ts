@@ -286,7 +286,7 @@ export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
       player_id: playerRoundStats.playerId,
       name: players.name,
       team: teams.name,
-      position: players.position,
+      position: playerSeasons.position,
       points: playerRoundStats.fantasyPoints,
       owner_name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
       owner_color_index: sql<number>`COALESCE(${userSeasons.colorIndex}, ${users.colorIndex}, 0)`,
@@ -297,7 +297,7 @@ export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
       playerSeasons,
       and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
     )
-    .leftJoin(teams, eq(sql`COALESCE(${playerSeasons.teamId}, ${players.teamId})`, teams.id))
+    .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
     .leftJoin(users, eq(playerSeasons.ownerId, users.id))
     .leftJoin(
       userSeasons,
@@ -334,8 +334,8 @@ export async function getLastRoundStats(): Promise<any[]> {
       player_id: playerRoundStats.playerId,
       name: players.name,
       team: teams.name,
-      position: players.position,
-      price: sql<number>`COALESCE(${playerSeasons.price}, ${players.price})`,
+      position: playerSeasons.position,
+      price: playerSeasons.price,
       points: playerRoundStats.fantasyPoints,
       owner_name: users.name,
       round_name: sql<string>`(SELECT round_name FROM matches WHERE season_id = ${seasonId} AND round_id = ${playerRoundStats.roundId} LIMIT 1)`,
@@ -346,7 +346,7 @@ export async function getLastRoundStats(): Promise<any[]> {
       playerSeasons,
       and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
     )
-    .leftJoin(teams, eq(sql`COALESCE(${playerSeasons.teamId}, ${players.teamId})`, teams.id))
+    .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
     .leftJoin(users, eq(playerSeasons.ownerId, users.id))
     .where(
       and(eq(playerRoundStats.roundId, lastRoundId as any), eq(playerRoundStats.seasonId, seasonId))
