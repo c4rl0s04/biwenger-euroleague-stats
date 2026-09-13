@@ -47,6 +47,20 @@ Do not confuse Team playoff probabilities with the separate Playoffs prediction 
 
 ## Frozen scope and next work
 
+## Original-contract checkpoint
+
+Application baseline is `23b6af65`. Added characterization tests execute all six real read
+handlers with mocked service outputs, preserving permissive parseInt behavior, missing detail ID
+default zero, the unused market limit, trimmed filters, public success TTLs, private error headers
+and rejection before reads. The basic aggregate service tests pin its envelope, per-service defaults,
+uncached repeated calls and propagated failures. Fixtures are synthetic, not production samples.
+
+Focused Market/API plus basic service suite: 36 tests PASS across four files. Typecheck PASS.
+An initial service-test run lacked the standard server-only test mock; adding that test-only mock
+resolved the import failure without changing application code. These checks characterize the current
+implementation; they do not establish query safety, complete data-model coverage or C05 acceptance.
+The analytics enrichment service, query/helper closure and original browser references remain next.
+
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
 Next: complete method/export/caller inventory, exact cache and serialization contracts, original
