@@ -29,6 +29,11 @@ The dated entries below retain historical evidence; they are not all current blo
 
 ## Domain ledger
 
+Local campaign update: C02 Tournament reads (all catalogue/detail/section screens and analytics)
+are implemented and locally verified at e14fe39a, not integrated or deployed. The
+[C02 receipt](../migration/reports/c02-tournament-reads.md) supersedes older Tournament pending-work
+descriptions for the campaign branch. Predictions is the next implementation package.
+
 | Domains                                                  | Status / next boundary                                                             |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified |

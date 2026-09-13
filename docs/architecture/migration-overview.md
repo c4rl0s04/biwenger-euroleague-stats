@@ -34,6 +34,12 @@ query adapters remain; these references are not a claim that all global code is 
 
 ## Read foundations and their remaining work
 
+Unpublished campaign update: Tournament catalogue/detail/sections, analytics and screens are now
+implemented and locally verified at e14fe39a on refactor/architecture-completion. See the
+[C02 receipt](../migration/reports/c02-tournament-reads.md) for exact evidence and remaining
+campaign-wide visual/release gates. The table below describes the previously integrated baseline;
+it must not be read as saying the unpublished Tournament implementation is missing.
+
 | Domain      | Established boundary                                                                              | Still to migrate                                                            |
 | ----------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | Rounds      | Calendar plus historical results, analysis, APIs and desktop/phone screens (completed read slice) | Separate Home/Dashboard last-round projections and legacy consumer adapters |
@@ -87,7 +93,7 @@ the release receipt distinguishes local checks from integration and deployment.
 
 1. Migrate the manager directory and remaining manager analytics separately from the
    completed Profile read experience.
-2. Finish Tournament analytics/screens as the next bounded slice, reusing its migrated core.
+2. Integrate the locally verified Tournament read slice only at the authorized release gate.
 3. Establish Predictions and Playoffs read ownership without merging their distinct scoring rules.
 4. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
