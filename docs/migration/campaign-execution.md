@@ -25,6 +25,11 @@ complete Tournament read implementation and local acceptance at e14fe39a. It is 
 Predictions (C03) is next. Campaign-wide Linux/full-viewport acceptance remains C14.
 Sensitive policy changes and production release remain explicit gates in the plan.
 
+C03 is now in source-contract/baseline work; see the
+[Predictions receipt](reports/c03-prediction-reads.md). Eight characterization tests pin the
+existing formulas and ID quirks before implementation. Compare/Home consumers and sync-write
+ownership have been identified; no Predictions application code has changed yet.
+
 ## Inventory discovery
 
 [Source inventory](campaign-inventory.json) records 794 non-test source modules and
