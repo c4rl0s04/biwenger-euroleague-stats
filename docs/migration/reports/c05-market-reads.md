@@ -12,8 +12,8 @@ status: active
 IN PROGRESS. Checkpoints A–M are locally committed through `78b77ea1`: all six scoped read APIs,
 statistical queries/services/models, overview composition, non-bids phone projections, duel
 presentation and the drawer boundary are feature-owned. Checkpoint N below is locally verified
-for typed metric renderers and expanded drawer browser coverage. Listing expansion,
-populated rolling charts, remaining presentation contracts, bids approval/ownership and broader
+for typed metric renderers and expanded drawer browser coverage. Checkpoint O verifies listing
+expansion. Populated rolling charts, remaining presentation contracts, bids approval/ownership and broader
 visual closure remain open. Legacy Dashboard/Assistant adapters retire with their consumers.
 The initial inventory and dated checkpoints below are historical evidence, not current status.
 
@@ -283,6 +283,30 @@ and diff checks are required for this test/evidence commit; no new runtime imple
 is claimed and the prior G full-suite result remains the last full application acceptance.
 
 ## Still required for C05
+
+### Listing interaction checkpoint O (after `cf9db91b`)
+
+Locally accepted for listing expansion coverage. No application source changes. The populated desktop scenario
+now opens “Analizar Fichaje,” waits for the real card flip and loaded Players statistics,
+opens “Ver Análisis Completo,” checks the profile link and body scroll lock, closes the
+modal and returns the card to its front. It uses the existing `/api/players/99311/stats`
+read flow against synthetic data, not response interception or provider actions.
+
+Two new original screenshots are retained at `a4d105cf`, with application source unchanged
+from `9a2abc1c`. The capture run completed interactions and failed only for the two missing
+references it created. Both subsequent original desktop repeats passed without updating
+images. The quick-stat card and full modal images were visually inspected; ten earlier
+populated references remain unchanged. Candidate desktop/phone comparison passes both cases;
+the same known bids server TypeError remains logged, with no suppression. Original command:
+`npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts --project=desktop-1440 --repeat-each=2`.
+Candidate command uses `--project=iphone-13 --project=desktop-1440` without snapshot updates.
+All disposable databases shut down normally. `npm run verify` passes: skills, graph (921/60),
+docs (89 notes), typecheck, 1,974 unit tests plus one existing skip, lint (24 existing image
+warnings), production build, offline schema metadata (38 tables), Drizzle and diff checks.
+Missing-provider build notices are unchanged. Twelve populated images and the test match
+the original checkout byte-for-byte. No screenshot tolerance or error guard changed.
+Listing/modal types, populated rolling charts,
+broader viewport/Linux coverage and the separately gated bids behavior remain unfinished.
 
 ### Metric renderer checkpoint N (after `78b77ea1`)
 
@@ -612,7 +636,7 @@ remaining adapter/shared-helper closure are still required for complete C05 acce
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
-Next: finish listing expansion, populated
+Next: finish listing/modal presentation contracts and populated
 rolling-chart coverage and remaining presentation contracts. Overview and section entrypoints
 are already registered; bids remains an explicit unresolved behavior/ownership decision.
 Retire compatibility wrappers only after their final consumers move;

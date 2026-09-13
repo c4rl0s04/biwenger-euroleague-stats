@@ -58,6 +58,14 @@ desktop/phone verification remain pending; private operations stay frozen under 
 
 ## Inventory discovery
 
+Checkpoint O adds verified listing flip/full-analysis/close/return coverage, with no application
+source changes. Two new references from unchanged original application `a4d105cf` pass two
+original desktop repeats; candidate desktop/iPhone passes against all twelve populated images.
+Full verify passes 1,974 tests plus one existing skip, graph 921/60, typecheck, lint (24 existing
+warnings), build and offline schema/Drizzle checks. The known bids server error remains recorded.
+Listing/modal presentation types and populated rolling-chart coverage are next; this browser
+checkpoint does not complete C05 or the full campaign.
+
 Checkpoint N follows committed M (`78b77ea1`) and is locally verified for Market's metric
 renderer contracts. Four rows, all twenty metric definitions and identity resolution are
 typed without changing emitted runtime behavior; the shared BaseRow remains one unchanged

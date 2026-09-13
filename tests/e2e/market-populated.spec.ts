@@ -88,6 +88,42 @@ test('populated Market preserves listings, history and ranking interaction', asy
       listings.getByRole('heading', { name: 'Fixture Market Wing', exact: true })
     ).toBeVisible();
 
+    const listingCard = listings
+      .getByRole('heading', { name: 'Fixture Market Wing', exact: true })
+      .first()
+      .locator('xpath=ancestor::div[contains(@class, "perspective-")][1]');
+    await listingCard
+      .getByRole('button', { name: 'Analizar Fichaje', exact: true })
+      .first()
+      .click();
+    const back = listingCard.locator('.backface-hidden').nth(1);
+    await expect(
+      back.getByRole('button', { name: 'Ver Análisis Completo', exact: true })
+    ).toBeVisible();
+    await expect(listingCard.locator('.preserve-3d')).toHaveCSS('transform', /^matrix3d\(-1,/);
+    await page.mouse.move(0, 0);
+    await listingCard.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' })
+    );
+    await capture('market-populated-listing-analysis', listingCard);
+    await back.getByRole('button', { name: 'Ver Análisis Completo', exact: true }).click();
+    const analysis = page.locator('div.fixed.inset-0.z-\\[100\\]');
+    await expect(
+      analysis.getByRole('heading', { name: 'Fixture Market Wing', exact: true })
+    ).toBeVisible();
+    await expect(analysis.getByRole('heading', { name: 'Fiabilidad Biwenger' })).toBeVisible();
+    await expect(
+      analysis.getByRole('link', { name: 'Ver Informe Completo en BiwengerStats' })
+    ).toHaveAttribute('href', '/player/99311');
+    await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+    await expect(analysis.locator(':scope > div')).toHaveCSS('transform', 'none');
+    await capture('market-populated-listing-full-analysis', analysis.locator(':scope > div'));
+    await analysis.locator('button').first().click();
+    await expect(analysis).toHaveCount(0);
+    await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+    await back.locator('button').first().click();
+    await expect(listingCard.locator('.preserve-3d')).toHaveCSS('transform', 'none');
+
     // The label shares its span with tooltip content, so its full text is not an exact match.
     await page.getByText('Récord Histórico').first().click({ timeout: 15000 });
     const drawer = page.locator('div[class~="z-[201]"]');
