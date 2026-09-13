@@ -281,6 +281,50 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Shared form checkpoint J (after `efcb5eef`)
+
+Locally accepted. `features/player-form` owns the single finished-team-match
+form query, explicit row/model, DNP calculation/allowlisting mapper and server-only service.
+This leaf is shared by Teams and Players; Market keeps consuming the existing Players
+service contract. Importing the whole Players feature from Teams would introduce the
+existing reverse Profile dependency as a cycle. No domain exception or duplicate query is
+introduced. The Map is a server-side lookup only; existing screen services still expose
+their unchanged plain serializable projections.
+
+The three catalogue/top-player/form-ranking enrichment routines and Team roster enrichment
+now belong to their feature service layers. Queries accept explicit seasons and return
+metadata rows; services preserve the original independent form-season resolution, query
+order, parallel reads, double ranking candidate limit and numeric/null conversions.
+Season-resolution infrastructure is exposed by query adapters, not imported by services.
+The legacy form file, its database-barrel export and the obsolete Players form query adapter
+are removed. No remaining runtime caller uses those paths. Two obsolete Market test mocks
+are removed; actual Players contract mocks remain unchanged.
+
+Before extraction, 50 focused tests passed including eight new original-form cases. A
+read-only executable comparison against `efcb5eef` passed 36 combinations of empty/populated
+form/metadata, comparing exact outputs AND ordered SQL strings, parameters and season calls.
+The first graph check rejected three direct service imports of season infrastructure; these
+were corrected through owned query exports, not policy changes. The graph then passed
+(913 modules/59 entrypoints). Final focused validation passes 325 tests across Players,
+Teams, Market, the new shared form boundary and read-foundation contracts. A separate
+AST comparison confirms all five extracted SQL template strings exactly match `efcb5eef`.
+Full `npm run verify` passes: 1,894 tests plus one existing skip, typecheck, graph,
+lint (24 existing image warnings), database-disabled build, 38-table schema metadata,
+Drizzle and diff checks. Missing-provider build notices remain unchanged. Documentation
+links and formatting pass after recording the shared ownership decision.
+Focused command: `npm run test:run -- src/features/player-form src/features/players
+src/features/teams src/features/market src/lib/db/queries/features/market
+src/tests/architecture/read-foundations.test.ts --maxWorkers=2`.
+Browser acceptance passes four cases with `npm run test:e2e:local --
+tests/e2e/feature-screens.spec.ts tests/e2e/market.spec.ts --project=iphone-13
+--project=desktop-1440` and two cases with `npm run test:e2e:local -- --fixture=market
+tests/e2e/market-populated.spec.ts --project=iphone-13 --project=desktop-1440`.
+All existing Team/Matches/Market references remain unchanged; no page/component source
+changed. Both disposable databases shut down normally. The existing bids TypeError remains
+visible in Market runs, not suppressed or claimed fixed. Full-viewports/Linux and remaining
+Market interactions/sections are still required; this closes shared form ownership only.
+No UI, external contract, formula, auth, private operation, schema or dependency changed.
+
 ### Populated browser checkpoint I (after `b8fea457`)
 
 The disposable browser runner now accepts a fixed `--fixture=market` scenario. Default
@@ -383,6 +427,6 @@ original-reference browser comparisons. The overview is registered; register the
 entrypoint after reconciling its loading/error/section behavior and approved bids decision.
 Retire compatibility wrappers only after their final consumers move;
 Dashboard and Assistant callers remain assigned to their later packages. Team competition metrics
-have owned contracts and Market uses the deliberate Players form service. Shared form still has
-non-Market callers: close that ownership without duplicate SQL or a Teams-to-Players barrel cycle.
+have owned contracts and Market uses the deliberate Players form service. Shared form ownership
+is closed by checkpoint J's leaf contract, without duplicate SQL or a Teams-to-Players cycle.
 Neither this data checkpoint nor passing unit/build checks alone completes Market visual acceptance.

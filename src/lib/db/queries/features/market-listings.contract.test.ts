@@ -20,7 +20,6 @@ vi.mock('@/features/teams/server', () => ({
   getAllTeamsPlayoffProbabilities: dependencies.probabilities,
   getAllTeamMatchesCount: dependencies.counts,
 }));
-vi.mock('../core/playerForm', () => ({ getPlayerFormMap: dependencies.form }));
 vi.mock('@/features/players/server', () => ({
   getPlayerFormStats: async (...args: number[]) => {
     const map = await dependencies.form(...args);

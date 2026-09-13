@@ -1,5 +1,5 @@
 import 'server-only';
-import { readPlayerForm } from '../queries/player-form.query';
+import { getPlayerFormMap as readPlayerForm } from '@/features/player-form/server';
 import type { PlayerFormStatsViewModel } from '../../models/player-insights';
 
 /** Caller selects the existing form window; no extra cache or normalization. */

@@ -39,6 +39,21 @@ superseded by the approved completion campaign, not by authorization for private
 
 ## Remaining C05 execution
 
+### Checkpoint J — Shared Player form ownership
+
+Predecessor `efcb5eef`. Establish a leaf `features/player-form` boundary for the existing
+finished-team-match form projection used by Teams, Players and indirectly Market. This
+is demonstrated shared read ownership, not a new page or API. A Teams import of the full
+Players barrel would create Teams → Players → Teams; do not add an exception or duplicate SQL.
+Own the query, typed row/model, DNP mapper and uncached season-aware service in that leaf.
+Move roster/catalogue enrichment orchestration above their respective queries. Retain
+Players' existing public service contracts and all current view models, limits, ordering,
+independent season resolutions and parallel/sequential read behavior. Remove the legacy
+form implementation and obsolete Players query adapter after all consumer checks.
+Validate original/new outputs and exact SQL/call order, mapper/service/error contracts,
+cross-feature consumers, graph, full verification and affected browser regressions.
+No section/UI, credentials, schema, provider, HTTP or cache-policy change is included.
+
 ### Checkpoint I — Populated Market browser evidence
 
 Predecessor `b8fea457`. Add an explicit `--fixture=market` scenario to the existing

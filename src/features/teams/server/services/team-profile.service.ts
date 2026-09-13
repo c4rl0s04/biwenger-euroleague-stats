@@ -12,7 +12,8 @@ import {
   mapTeamProfileMatches,
   mapTeamRoster,
 } from '../mappers/team-profile.mapper';
-import { listTeamRoster, type TeamRosterRow } from '../queries/team-profile.query';
+import type { TeamRosterRow } from '../queries/team-profile.query';
+import { listTeamRoster } from './team-roster.service';
 import { findTeamProfileDetails } from './team-profile-details.service';
 import type { TeamProfileDetailsFacts } from '../records/team-profile-facts';
 

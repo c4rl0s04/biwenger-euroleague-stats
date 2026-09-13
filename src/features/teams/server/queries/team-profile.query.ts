@@ -1,7 +1,6 @@
 import 'server-only';
 
 import { db as pgClient } from '@/lib/db/client';
-import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface TeamProfileDetailsRow {
@@ -128,8 +127,10 @@ export async function readTeamProfileDetailsRow(
     | undefined;
 }
 
-export async function listTeamRoster(teamId: number): Promise<TeamRosterRow[]> {
-  const seasonId = await resolveReadSeasonId();
+export async function readTeamRosterRows(
+  teamId: number,
+  seasonId: string
+): Promise<TeamRosterRow[]> {
   const query = `
     SELECT
       p.id, p.name, COALESCE(opm.image_url,p.img) AS img, p.position,
@@ -151,16 +152,5 @@ export async function listTeamRoster(teamId: number): Promise<TeamRosterRow[]> {
     WHERE COALESCE(ps.team_id, p.team_id) = $1
     ORDER BY COALESCE(ps.puntos, p.puntos) DESC
   `;
-
-  const [rows, formMap] = await Promise.all([
-    pgClient
-      .query(query, [teamId, seasonId])
-      .then((result: { rows: unknown[] }) => result.rows as TeamRosterRow[]),
-    getPlayerFormMap(),
-  ]);
-
-  return rows.map((row: TeamRosterRow) => ({
-    ...row,
-    recent_scores: formMap.get(Number(row.id))?.recent_scores ?? null,
-  }));
+  return (await pgClient.query(query, [teamId, seasonId])).rows as TeamRosterRow[];
 }

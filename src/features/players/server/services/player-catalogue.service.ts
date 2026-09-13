@@ -17,14 +17,16 @@ import {
   mapPlayerTopPerformers,
 } from '../mappers/player.mapper';
 import {
-  getAllPlayers,
   getPlayerStreaks,
   getPlayersBirthday,
   getRisingStars,
   getStatLeaders,
+} from '../queries/player.query';
+import {
+  getAllPlayers,
   getTopPlayers,
   getTopPlayersByForm,
-} from '../queries/player.query';
+} from './player-catalogue-facts.service';
 
 export const PLAYERS_HTTP_CACHE_SECONDS = 300;
 export const PLAYERS_ACCESS_POLICY = Object.freeze({

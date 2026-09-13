@@ -65,3 +65,17 @@ Consult the [internal API reference](../reference/internal-api.md) and real rout
 
 Authentication, credentials, synchronization, and database infrastructure retain their existing
 ownership and safety rules. Do not create artificial feature wrappers for framework infrastructure.
+
+## Shared Player form projection
+
+The [Player form server contract](../../src/features/player-form/server.ts) owns the single
+finished-team-match/DNP projection shared by Teams and Players. It is a leaf read domain,
+not a new product page: it imports no other feature. Keeping it separate avoids the
+Teams → Players → Teams cycle caused by Player Profile's Team dependency, without
+duplicating SQL or placing scoring logic in generic infrastructure.
+
+Teams roster and Players catalogue services join its normalized server-side lookup with
+their own metadata queries, then use their existing screen mappers. Market retains the
+deliberate Players form service contract. The lookup is not passed as raw database data
+to pages; public screen/API projections remain unchanged. No new cache, HTTP endpoint,
+window validation, score formula or season-selection rule is introduced.

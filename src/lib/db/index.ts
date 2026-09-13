@@ -4,7 +4,6 @@ export { db, pgClient } from './connection';
 
 export * from './queries/core/users';
 
-export * from './queries/core/playerForm';
 export * from './queries/core/teams'; // Assuming teams.js exists
 
 export * from './queries/competition/rounds';

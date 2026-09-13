@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 const fake = vi.hoisted(() => ({ read: vi.fn() }));
-vi.mock('../queries/player-form.query', () => ({ readPlayerForm: fake.read }));
+vi.mock('@/features/player-form/server', () => ({ getPlayerFormMap: fake.read }));
 import { getPlayerFormStats, getPlayerRecentScores } from './player-form.service';
 beforeEach(() => {
   vi.clearAllMocks();

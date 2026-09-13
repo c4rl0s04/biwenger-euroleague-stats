@@ -3,7 +3,7 @@ import 'server-only';
 import { CONFIG } from '@/lib/config';
 import { db as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
-import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
+export { resolveReadSeasonId as resolvePlayerCatalogueSeason } from '@/lib/db/season-context';
 
 export interface CorePlayer {
   id: number | string;
@@ -257,8 +257,7 @@ export async function getPlayerMatchesPlayed(playerId: number | string): Promise
 /**
  * Get top performing players
  */
-export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
-  const seasonId = await resolveReadSeasonId();
+export async function readTopPlayerRows(limit: number, seasonId: string): Promise<CorePlayer[]> {
   const query = `
     SELECT 
       p.id, p.name, COALESCE(opm.image_url,p.img) AS img, t.id as team_id, t.name as team_name,
@@ -281,40 +280,16 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
     ORDER BY COALESCE(ps.puntos, p.puntos) DESC
     LIMIT $1
   `;
-
-  const [rows, formMap] = await Promise.all([
-    pgClient.query(query, [limit, seasonId]).then((result) => result.rows as CorePlayer[]),
-    getPlayerFormMap(),
-  ]);
-
-  return rows.map((row) => ({
-    ...row,
-    average: parseFloat(String(row.average)) || 0,
-    recent_scores: formMap.get(Number(row.id))?.recent_scores ?? null,
-  }));
+  return (await pgClient.query(query, [limit, seasonId])).rows as CorePlayer[];
 }
 
 /**
  * Get top players by recent form (last N rounds)
  */
-export async function getTopPlayersByForm(
-  limit: number = 5,
-  rounds: number = 3
-): Promise<PlayerRecentForm[]> {
-  const seasonId = await resolveReadSeasonId();
-  // 1. Get the form map for everyone with the specified round window
-  const formMap = await getPlayerFormMap(rounds);
-
-  // 2. Identify the top players by form from the map
-  const topFormEntries = Array.from(formMap.values())
-    .sort((a, b) => b.avg_form_score - a.avg_form_score)
-    .slice(0, limit * 2); // Fetch extra for safety
-
-  if (topFormEntries.length === 0) return [];
-
-  const playerIds = topFormEntries.map((e) => e.player_id);
-
-  // 3. Fetch metadata for these specific players
+export async function readTopFormPlayerRows(
+  playerIds: number[],
+  seasonId: string
+): Promise<Array<CorePlayer & { total_points: number | string; games_played: number | string }>> {
   const query = `
     SELECT 
       p.id,
@@ -348,26 +323,9 @@ export async function getTopPlayersByForm(
     ) pa ON p.id = pa.player_id
     WHERE p.id = ANY($1)
   `;
-
-  const rows = (await pgClient.query(query, [playerIds, seasonId])).rows as Array<
+  return (await pgClient.query(query, [playerIds, seasonId])).rows as Array<
     CorePlayer & { total_points: number | string; games_played: number | string }
   >;
-
-  // 4. Merge metadata with form data and sort final list
-  return rows
-    .map((row) => {
-      const form = formMap.get(Number(row.id));
-      return {
-        ...row,
-        id: Number(row.id),
-        total_points: parseInt(String(row.total_points)) || 0,
-        games_played: parseInt(String(row.games_played)) || 0,
-        avg_points: form?.avg_form_score || 0,
-        recent_scores: form?.recent_scores || '',
-      };
-    })
-    .sort((a, b) => b.avg_points - a.avg_points)
-    .slice(0, limit);
 }
 
 /**
@@ -677,8 +635,16 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
 /**
  * Get all players with basic stats for the players list
  */
-export async function getAllPlayers(): Promise<CorePlayer[]> {
-  const seasonId = await resolveReadSeasonId();
+export async function readAllPlayerRows(seasonId: string): Promise<
+  Array<
+    CorePlayer & {
+      played: number | string;
+      total_points: number | string;
+      best_score: number | string;
+      worst_score: number | string;
+    }
+  >
+> {
   const query = `
      WITH PlayerAggregates AS (
        SELECT 
@@ -731,33 +697,14 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
      LEFT JOIN PlayerAggregates pa ON p.id = pa.player_id
      ORDER BY COALESCE(pa.total_points, 0) DESC
   `;
-
-  const [rows, formMap] = await Promise.all([
-    pgClient.query(query, [seasonId]).then(
-      (result) =>
-        result.rows as Array<
-          CorePlayer & {
-            played: number | string;
-            total_points: number | string;
-            best_score: number | string;
-            worst_score: number | string;
-          }
-        >
-    ),
-    getPlayerFormMap(),
-  ]);
-
-  return rows.map((player) => ({
-    ...player,
-    total_points: parseFloat(String(player.total_points)) || 0,
-    played: parseInt(String(player.played)) || 0,
-    average: parseFloat(String(player.average)) || 0,
-    best_score: parseFloat(String(player.best_score)) || 0,
-    worst_score: parseFloat(String(player.worst_score)) || 0,
-    price: parseInt(String(player.price)) || 0,
-    recent_scores: formMap.get(Number(player.id))?.recent_scores ?? null,
-    avg_form_score: formMap.get(Number(player.id))?.avg_form_score ?? 0,
-  }));
+  return (await pgClient.query(query, [seasonId])).rows as Array<
+    CorePlayer & {
+      played: number | string;
+      total_points: number | string;
+      best_score: number | string;
+      worst_score: number | string;
+    }
+  >;
 }
 
 /**

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 vi.mock('@/features/matches/server', () => ({ getSeasonScheduleData: vi.fn() }));
-vi.mock('../queries/team-profile.query', () => ({
+vi.mock('./team-roster.service', () => ({
   listTeamRoster: vi.fn(),
 }));
 vi.mock('./team-profile-details.service', () => ({ findTeamProfileDetails: vi.fn() }));

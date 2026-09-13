@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 vi.mock('../queries/player.query', () => ({
-  getAllPlayers: vi.fn(),
   getPlayerStreaks: vi.fn(),
   getPlayersBirthday: vi.fn(),
   getRisingStars: vi.fn(),
   getStatLeaders: vi.fn(),
+}));
+vi.mock('./player-catalogue-facts.service', () => ({
+  getAllPlayers: vi.fn(),
   getTopPlayers: vi.fn(),
   getTopPlayersByForm: vi.fn(),
 }));

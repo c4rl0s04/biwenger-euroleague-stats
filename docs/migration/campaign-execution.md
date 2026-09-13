@@ -79,6 +79,16 @@ This accepts the bounded fixture/browser checkpoint only. Other drawers, listing
 expansion, duel interaction, rolling charts, sections and shared-form ownership remain
 open; the pre-existing bids failure remains visible, not suppressed. See the C05 receipt.
 
+Checkpoint J closes shared Player-form ownership locally. A leaf `features/player-form`
+owns the single form query/calculation; Teams and Players consume its deliberate server
+contract without a reverse feature cycle. Roster/catalogue enrichment moves from queries
+to services, and the legacy form implementation/Players query adapter are removed. Original
+output/SQL/call-order comparison passes 36 cases; all five SQL templates also match exactly.
+Focused tests pass 325 cases; full verification passes 1,894 plus one existing skip,
+with unchanged lint/build warnings and schema metadata. Four default Team/Matches/Market
+and two populated Market browser cases pass with unchanged references. No page/component
+source changed. The existing bids failure and remaining Market scope are still open.
+
 C05 screen baseline now pins five empty-state desktop/phone references against unchanged
 screen source at `91a3ea7f`. Two real-page characterization tests and a fresh two-project
 non-updating browser comparison pass. The receipt records the pre-existing phone bids

@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
-vi.mock('../queries/player-form.query', () => ({ readPlayerForm: vi.fn() }));
-import { readPlayerForm } from '../queries/player-form.query';
+vi.mock('@/features/player-form/server', () => ({ getPlayerFormMap: vi.fn() }));
+import { getPlayerFormMap as readPlayerForm } from '@/features/player-form/server';
 import { getPlayerRecentScores } from './player-form.service';
 it('exposes only serializable recent-score fields for the requested window', async () => {
   vi.mocked(readPlayerForm).mockResolvedValue(

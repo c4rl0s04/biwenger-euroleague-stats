@@ -9,7 +9,6 @@ const fake = vi.hoisted(() => ({ query: vi.fn(), form: vi.fn(), season: vi.fn() 
 vi.mock('../../index', () => ({ db: {}, pgClient: { query: fake.query } }));
 vi.mock('@/lib/db/client', () => ({ db: { query: fake.query } }));
 vi.mock('../../season-context', () => ({ resolveReadSeasonId: fake.season }));
-vi.mock('../core/playerForm', () => ({ getPlayerFormMap: fake.form }));
 vi.mock('@/features/players/server', () => ({
   getPlayerFormStats: async (...args: number[]) => {
     const map = await fake.form(...args);
