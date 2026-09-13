@@ -60,6 +60,33 @@ it('owns catalogue orchestration with deliberate cross-feature contracts and all
   expect(read('src/lib/db/queries/features/market.ts')).not.toContain('getPlayerFormMap');
 });
 
+it('owns every remaining analytics query, projection and stats HTTP boundary', () => {
+  expect(read('src/lib/db/queries/features/market.ts')).not.toMatch(
+    /SELECT|pgClient|resolveReadSeasonId|export async function/
+  );
+  expect(read('src/lib/services/marketService.ts')).not.toMatch(
+    /\bany\b|Promise.all|from ['"].*db/
+  );
+  const service = feature('server/services/market-analytics.service.ts');
+  expect(service).toContain("from '@/features/managers/server'");
+  expect(service).not.toMatch(/@\/lib\/(db|services)|\bany\b/);
+  for (const group of ['summary', 'auctions', 'investments', 'activity-extra', 'overview']) {
+    expect(feature(`models/market-${group}.ts`)).not.toMatch(/\bany\b|\bDate\b|drizzle|queries/);
+    expect(feature(`server/queries/market-${group}.query.ts`)).toMatch(/^import 'server-only';/);
+    expect(feature(`server/mappers/market-${group}.mapper.ts`)).not.toMatch(/\.\.\.row|\bany\b/);
+    expect(feature(`server/services/market-${group}.service.ts`)).not.toMatch(
+      /@\/lib\/(db|services)|\bany\b/
+    );
+  }
+  const path = 'src/app/api/market/stats/route.ts';
+  expect(read(path)).toContain('@/features/market/server');
+  const policy = JSON.parse(read('scripts/architecture/policy.json'));
+  expect(policy.entrypoints).toContain(path);
+  expect(policy.exceptions.some((entry: { edge: string }) => entry.edge.includes(path))).toBe(
+    false
+  );
+});
+
 it('owns basic activity orchestration and registers its HTTP boundary', () => {
   expect(feature('models/market-activity.ts')).not.toMatch(/\bany\b|\bDate\b|drizzle|ReturnType/);
   expect(feature('server/services/market-activity.service.ts')).toMatch(/^import 'server-only';/);

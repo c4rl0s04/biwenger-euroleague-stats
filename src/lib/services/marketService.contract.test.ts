@@ -42,6 +42,54 @@ const queries = vi.hoisted(() =>
   )
 );
 vi.mock('../db', () => queries);
+vi.mock('@/features/market/server/services/market-summary.service', () => ({
+  getTopTransferredPlayer: queries.getTopTransferredPlayer,
+  getRecordTransfer: queries.getRecordTransfer,
+  getBigSpender: queries.getBigSpender,
+  getBestSeller: queries.getBestSeller,
+  getMostOwnersPlayer: queries.getMostOwnersPlayer,
+  getManagerMarketStats: queries.getManagerMarketStats,
+}));
+vi.mock('@/features/market/server/services/market-auctions.service', () => ({
+  getRecordBid: queries.getRecordBid,
+  getTheThief: queries.getTheThief,
+  getBiggestSteal: queries.getBiggestSteal,
+  getTheVictim: queries.getTheVictim,
+  getOverpayerManager: queries.getOverpayerManager,
+  getInflatedPlayer: queries.getInflatedPlayer,
+}));
+vi.mock('@/features/market/server/services/market-investments.service', () => ({
+  getBestRevaluation: queries.getBestRevaluation,
+  getBestValuePlayer: queries.getBestValuePlayer,
+  getInfirmaryPlayers: queries.getInfirmaryPlayers,
+  getBestSingleFlip: queries.getBestSingleFlip,
+  getWorstSingleFlip: queries.getWorstSingleFlip,
+  getBestPercentageGain: queries.getBestPercentageGain,
+  getMissedOpportunity: queries.getMissedOpportunity,
+  getTopTrader: queries.getTopTrader,
+  getProfitablePlayer: queries.getProfitablePlayer,
+  getLossyPlayer: queries.getLossyPlayer,
+  getQuickestFlip: queries.getQuickestFlip,
+  getLongestProfitableHold: queries.getLongestProfitableHold,
+  getWorstRevaluation: queries.getWorstRevaluation,
+}));
+vi.mock('@/features/market/server/services/market-overview.service', () => ({
+  getMarketOverviewKPIs: queries.getMarketOverviewKPIs,
+  getPositionAnalysis: queries.getPositionAnalysis,
+  getBiddingDuelsStats: queries.getBiddingDuelsStats,
+}));
+vi.mock('@/features/market/server/services/market-trends.service', () => ({
+  getMarketTrendsAnalysis: queries.getMarketTrendsAnalysis,
+}));
+vi.mock('@/features/market/server/services/market-catalogue.service', () => ({
+  getCurrentMarketListings: queries.getCurrentMarketListings,
+}));
+vi.mock('@/features/market/server/services/market-transfers.service', () => ({
+  getLiveMarketTransfers: queries.getLiveMarketTransfers,
+  getBestValueDetails: queries.getBestValueDetails,
+  getBiddingDuelDetails: queries.getBiddingDuelDetails,
+}));
+vi.mock('@/features/managers/server', () => ({ getManagerDirectory: queries.getAllUsers }));
 
 import {
   fetchMarketStats,

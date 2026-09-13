@@ -214,12 +214,51 @@ metadata audit, Drizzle consistency and diff check. Missing-provider build notic
 No browser run is claimed for this data-only checkpoint; original/candidate Market screen
 verification remains required before accepting C05 as a complete feature.
 
+## Checkpoint G — Remaining analytics, activity and aggregate HTTP flow
+
+Predecessor: `feeca992`. All remaining Market statistical SQL now lives in owned query layers:
+summary rankings/manager finances, auction outcomes, investment histories, recent activity/price
+changes and overview/duel facts. Thirty read functions were migrated, comprising 31 unchanged
+SQL templates. Explicit records and allowlisting mappers replace raw-row spreading; public models
+include real nullable/text-ID/team-label/transfer metadata previously omitted by legacy declarations.
+The distinct bounded services feed one typed aggregate composition, not a giant query service.
+
+The aggregate reuses Managers/server directory data and preserves first exact-name matching
+(including null), buyer aliases, unmatched rows and winner-then-runner color overwriting. All
+31 aggregate keys and original constituent defaults/order remain. GET `/api/market/stats` uses
+the owned service with unchanged force-dynamic, 300/stale-60 public success and private generic
+failure behavior. All six scoped Market read APIs now use feature services. The global Market
+query file contains forwarding exports only; the legacy Market analytics service keeps just
+forwarding wrappers needed by current pages and other consumers.
+
+Preserved read quirks include Record Bid's warning/empty query-error fallback but propagated
+season errors; KPI missing-row failure; integer truncation versus fractional metrics; null/NaN
+JSON behavior; active-directory ordering; duel symmetry, unknown participant filtering, tied
+leaders and ranking rules; unused price-change hours argument; query/output limits and season
+scoping. No cache, validation, authentication, provider, schema, dependency or UI policy changed.
+The security-guided output review keeps display/statistical data only and tests extra-field
+exclusion with synthetic canaries. No production database/provider operations were performed.
+
+Baseline: 27 frozen synthetic query-output fixtures executed against original functions, then
+four original overview/duel scenarios before their extraction. Candidate tests add empty/error,
+season, field-exclusion and real aggregate-to-HTTP checks. Focused PASS: 247 tests; typecheck and
+graph PASS (904 modules/58 protected entrypoints), with no added exceptions. All 31 SQL templates
+match the predecessor byte-for-byte. The first full run found three obsolete partial Player mocks
+in legacy Market tests; isolating their unused Managers contract fixes all 16 affected cases
+without changing runtime code. Full `npm run verify` rerun PASS: skills/docs/architecture,
+typecheck, 1,850 tests plus the existing skip, lint (zero errors/24 unchanged image warnings),
+database-disabled production build, 38-table metadata audit, Drizzle consistency and diff check.
+Missing-provider build notices remain unchanged. No browser or visual acceptance is claimed;
+the screen checkpoint must compare original and candidate desktop/mobile output.
+
 ## Still required for C05
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
-Next: complete method/export/caller inventory, exact cache and serialization contracts, original
-query characterization tests, then bounded query/model/service and screen ownership. Team probability
-and counts now have owned contracts; their legacy forwarding exports remain for consumer closure.
-Player form already has a deliberate Players service;
-do not add a second form query or introduce a Teams-to-Players barrel cycle while closing adapters.
+Next: finish Market desktop/mobile page and component ownership, screen composition contracts,
+and original-reference browser comparisons. Register both page entrypoints and reconcile their
+loading/error/section behavior. Retire compatibility wrappers only after their final consumers move;
+Dashboard and Assistant callers remain assigned to their later packages. Team competition metrics
+have owned contracts and Market uses the deliberate Players form service. Shared form still has
+non-Market callers: close that ownership without duplicate SQL or a Teams-to-Players barrel cycle.
+Neither this data checkpoint nor passing unit/build checks alone completes Market visual acceptance.

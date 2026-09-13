@@ -1,5 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
+vi.mock('@/features/managers/server', () => ({
+  getManagerDirectory: vi.fn(() => {
+    throw new Error('This isolated Market read must not request the manager directory');
+  }),
+}));
 const fake = vi.hoisted(() => ({ query: vi.fn(), form: vi.fn(), season: vi.fn() }));
 vi.mock('../../index', () => ({ db: {}, pgClient: { query: fake.query } }));
 vi.mock('@/lib/db/client', () => ({ db: { query: fake.query } }));

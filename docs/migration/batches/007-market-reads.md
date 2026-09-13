@@ -146,5 +146,22 @@ do not introduce a Teams-to-Players barrel cycle or duplicate its SQL. Character
 opportunities before extraction and retain listing baselines. Verify SQL, projection safety,
 ordering, service failures, cross-feature graph, full checks and document remaining screen work.
 
+### Checkpoint G — Remaining Market analytics and activity
+
+Predecessor: `feeca992`. The coordinator owns the remaining statistical SELECTs, explicit
+record/model projections, bounded summary/auction/investment/activity services, duel calculation,
+aggregate composition and GET `/api/market/stats`. Preserve all SQL, independent season reads,
+numeric/nullable fields, sorting/ties, name-based directory enrichment, and Record Bid's existing
+warning/empty fallback. The aggregate must reuse Managers directory through its server contract.
+No provider commands, auth, schema, dependency or UI changes. No cache policy change.
+
+These call chains read fantasy transfer/bid/player/team facts and manager display identities;
+they do not resolve sessions or read account credentials. Keep the existing public HTTP response
+and private generic errors, with explicit allowlists preventing extra record fields from leaking.
+Pin original query-output fixtures before moving code. Check every selected field, including
+fichajes wildcard columns, against the schema; do not trust incomplete legacy interfaces.
+Run focused/golden/service/HTTP/boundary tests, SQL comparison and full acceptance. Market
+screens and cross-campaign adapter cleanup remain separate outstanding work.
+
 Final acceptance follows the [completion plan](../completion-plan.md), [worker protocol](../worker-protocol.md)
 and [review checklist](../reviewer-checklist.md). Record logical commit SHAs and all validation results.

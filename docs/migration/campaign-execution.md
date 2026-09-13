@@ -37,9 +37,9 @@ Typed read/screen services, a deliberate Teams label contract, both pages and or
 browser comparisons are verified. Full verification passed 1554 tests plus one skip.
 C05 public Market analytics is in progress, excluding private provider actions. Its
 [receipt](reports/c05-market-reads.md) records recommendation extraction at `deda942d`, the
-trends boundary at `e3dad14b`, and subsequent transfer/detail/basic-summary boundaries. Five scoped
-read APIs now use feature services; the large stats aggregate, recent activity/opportunities,
-cross-feature helper closure and screens remain. Do not treat these checkpoints as complete Market acceptance.
+trends boundary at `e3dad14b`, and subsequent transfer/detail/basic-summary boundaries. Those
+checkpoints moved five scoped read APIs; the later checkpoint G below closes the sixth.
+Do not treat data checkpoints as complete Market screen acceptance.
 Checkpoint E closes Team competition helper ownership and moves Team Profile detail orchestration
 above queries. Its focused 197-test suite and full verification (1,742 tests plus one skip) pass;
 SQL and original probability comparisons are unchanged. Player form and remaining Market consumers
@@ -47,9 +47,14 @@ still need closure. See the C05 receipt before continuing.
 Checkpoint F owns Market listing/opportunity queries, models, mappers and services. Market now
 consumes Players form through its deliberate server contract, not the global query. Legacy
 forwarders preserve aggregate/Dashboard/Assistant callers. Focused checks pass 199 tests; full
-verification passes 1,751 tests plus one skip, with unchanged lint/build warnings. Remaining C05
-work is recent activity/price changes, the large analytics aggregate and screens. Shared Player
+verification passes 1,751 tests plus one skip, with unchanged lint/build warnings. Shared Player
 form still has non-Market callers and remains explicitly pending ownership closure.
+Checkpoint G migrates the remaining 30 Market statistical read functions (31 unchanged SQL
+templates), typed aggregate and GET `/api/market/stats`. Global Market query implementations are
+gone; all six scoped read APIs use owned services, including a deliberate Managers directory
+contract. Focused validation passes 247 tests and full unit validation passes 1,850 plus one
+skip; full build/schema acceptance passes with unchanged lint/build warnings. Market pages/components and original-reference
+desktop/phone verification remain pending; private operations stay frozen under C11.
 
 ## Inventory discovery
 
