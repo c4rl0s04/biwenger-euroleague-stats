@@ -57,6 +57,17 @@ test('Predictions preserves populated rankings and phone sections', async ({ pag
         await page.getByRole('link', { name: 'Volver a Porras', exact: true }).click();
       }
     } else {
+      for (const [index, title] of [
+        [0, 'Ranking Clutch'],
+        [1, 'Ranking de Victorias'],
+      ] as const) {
+        await page.getByText('Ver ranking', { exact: true }).nth(index).click();
+        const drawer = page.getByRole('dialog', { name: title });
+        await expect(drawer).toBeVisible();
+        await expect(drawer.getByText('Fixture Manager', { exact: true })).toBeVisible();
+        await drawer.getByRole('button', { name: `Cerrar ${title}`, exact: true }).click();
+        await expect(drawer).not.toBeVisible();
+      }
       await expect(page.getByRole('heading', { name: 'Clasificación Detallada' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Historial Completo' })).toBeVisible();
       await expect(page.getByText('Fixture Madrid', { exact: true }).first()).toBeVisible();
