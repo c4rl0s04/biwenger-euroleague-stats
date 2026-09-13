@@ -307,3 +307,21 @@ MobileBackHeader's title annotation now admits the existing runtime null name; n
 Page tests preserve phone-only projection and the unchanged desktop read path.
 Typecheck, architecture (817 modules, 48 entrypoints), focused tests and diff checks pass.
 Full/browser evidence above covers the preceding commit, not this new checkpoint. C02 remains open.
+
+## Desktop catalogue projection
+
+Desktop catalogue items now expose id/name/type/status, the existing status label and a winner
+display projection (name and resolved icon URL). Neither DesktopTournamentsScreen nor TournamentRow
+receives the stored snapshot. The list service projection runs after the existing statistics read;
+phone requests still skip both desktop operations. Active rows ignore winner fields, while finished
+rows ignore currentPhase. This preserves conditional access to malformed unused fields.
+
+Both phone and desktop mappers share feature-private JSON property/text helpers. No global utility
+or foreign-feature dependency was introduced. Truthy non-string icons and non-renderable text objects
+remain errors, while existing falsy values, array text, URL casing, ordering and duplicate rows remain
+compatible. Query/season/cache behavior and JSX styling are unchanged.
+
+Validation: typecheck PASS; architecture PASS (818 modules, 48 protected entrypoints);
+Tournament suite PASS (163 tests, 12 files); diff check PASS. Architecture guards additionally reject
+raw snapshot access in the migrated catalogue screen/row. Full/browser acceptance must be repeated
+after the remaining desktop-detail winner and bracket snapshot work is implemented.

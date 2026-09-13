@@ -1,5 +1,7 @@
 import 'server-only';
 
+export { getDesktopTournamentCataloguePresentation } from './server/services/tournament-read.service';
+
 export { getTournamentPhoneDetailPresentation } from './server/services/tournament-read.service';
 
 export { getTournamentCataloguePresentation } from './server/services/tournament-read.service';

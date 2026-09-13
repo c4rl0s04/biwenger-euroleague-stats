@@ -2,13 +2,11 @@ import Link from 'next/link';
 import { Trophy, Users, ArrowRight } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
+/** @param {{ tournament: import('../models/tournament-catalogue').DesktopTournamentCatalogueItem }} props */
 export default function TournamentRow({ tournament }) {
   const isActive = tournament.status === 'active';
-  const data = tournament.data || {};
-
-  // If active, try to show the current round/phase
-  const statusLabel =
-    isActive && data.currentPhase ? data.currentPhase : isActive ? 'En Curso' : 'Finalizado';
+  const winner = tournament.winner;
+  const statusLabel = tournament.statusLabel;
 
   return (
     <Link href={`/tournaments/${tournament.id}`} className="block group/item">
@@ -62,27 +60,23 @@ export default function TournamentRow({ tournament }) {
 
           {/* Right Side: Winner or Action */}
           <div className="flex items-center gap-4 shrink-0">
-            {!isActive && data.winner ? (
+            {!isActive && winner ? (
               <div className="hidden sm:flex items-center gap-4">
                 <div className="flex flex-col items-end mr-1">
                   <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500/90 mb-0.5">
                     Ganador
                   </span>
                   <span className="text-base font-black font-display tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 max-w-[150px] truncate leading-none">
-                    {data.winner.name}
+                    {winner.name}
                   </span>
                 </div>
                 <div className="relative group/winner">
                   <div className="absolute -inset-2 bg-amber-500/20 rounded-full blur-md opacity-0 group-hover/winner:opacity-100 transition-opacity duration-500" />
                   <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-amber-500/50 shadow-lg shadow-amber-900/20 group-hover/winner:border-amber-400 transition-colors">
-                    {data.winner.icon ? (
+                    {winner.iconUrl ? (
                       <img
-                        src={
-                          data.winner.icon.startsWith('http')
-                            ? data.winner.icon
-                            : `https://cdn.biwenger.com/${data.winner.icon}`
-                        }
-                        alt={data.winner.name}
+                        src={winner.iconUrl}
+                        alt={winner.name}
                         className="w-full h-full object-cover"
                       />
                     ) : (

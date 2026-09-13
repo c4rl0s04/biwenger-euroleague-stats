@@ -1,5 +1,7 @@
 import 'server-only';
 
+export { mapDesktopTournamentCatalogue as getDesktopTournamentCataloguePresentation } from '../mappers/tournament-catalogue.mapper';
+
 export { mapTournamentPhoneDetail as getTournamentPhoneDetailPresentation } from '../mappers/tournament-detail.mapper';
 
 export { mapTournamentCatalogue as getTournamentCataloguePresentation } from '../mappers/tournament-catalogue.mapper';

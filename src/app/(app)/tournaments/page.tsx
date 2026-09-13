@@ -2,6 +2,7 @@ import {
   getAllTournaments,
   getGlobalTournamentStats,
   getTournamentCataloguePresentation,
+  getDesktopTournamentCataloguePresentation,
 } from '@/features/tournaments/server';
 import { DesktopTournamentsScreen, MobileTournamentsScreen } from '@/features/tournaments/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
@@ -12,5 +13,10 @@ export default async function TournamentsPage() {
   if (phone)
     return <MobileTournamentsScreen {...getTournamentCataloguePresentation(tournamentsData)} />;
   const statistics = await getGlobalTournamentStats();
-  return <DesktopTournamentsScreen active={active} finished={finished} statistics={statistics} />;
+  return (
+    <DesktopTournamentsScreen
+      {...getDesktopTournamentCataloguePresentation({ active, finished })}
+      statistics={statistics}
+    />
+  );
 }

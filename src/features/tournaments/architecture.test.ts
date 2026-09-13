@@ -2,12 +2,19 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 const read = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf8');
-it('keeps phone tournament screens free of snapshot and loose-record props', () => {
-  for (const name of ['MobileTournamentsScreen', 'MobileTournamentDetailScreen']) {
+it('keeps migrated tournament screens free of snapshot and loose-record props', () => {
+  for (const name of [
+    'MobileTournamentsScreen',
+    'MobileTournamentDetailScreen',
+    'DesktopTournamentsScreen',
+  ]) {
     const source = read(`src/features/tournaments/components/screens/${name}.tsx`);
     expect(source).not.toMatch(/\bany\b|\bRecord\s*</);
     expect(source).not.toMatch(/tournament\.data\b|data_json/);
   }
+  expect(read('src/features/tournaments/components/TournamentRow.js')).not.toMatch(
+    /tournament\.data\b|data_json/
+  );
 });
 it('keeps tournament server markers, client-safe models and persistence ownership explicit', () => {
   for (const path of [
