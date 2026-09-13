@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const deps = vi.hoisted(() => ({
   rules: vi.fn(),
+  presentation: vi.fn(),
   detail: vi.fn(),
   standings: vi.fn(),
   fixtures: vi.fn(),
@@ -12,6 +13,7 @@ const deps = vi.hoisted(() => ({
 }));
 vi.mock('@/features/tournaments/server', () => ({
   getTournamentPlayoffRules: deps.rules,
+  getTournamentPhoneDetailPresentation: deps.presentation,
   getTournamentDetails: deps.detail,
   getStandings: deps.standings,
   getFixtures: deps.fixtures,
@@ -36,6 +38,7 @@ beforeEach(() => {
   deps.fixtures.mockResolvedValue(fixtures);
   deps.round.mockResolvedValue(2);
   deps.rules.mockReturnValue({ twoLegged: false, twoLeggedFinal: false });
+  deps.presentation.mockImplementation((value) => value);
   deps.phone.mockResolvedValue(false);
   deps.missing.mockImplementation(() => {
     throw new Error('fixture notFound');
@@ -56,6 +59,7 @@ describe('Tournament detail page contract', () => {
       playoffRules: { twoLegged: false, twoLeggedFinal: false },
     });
     expect(deps.round).toHaveBeenCalledWith(tournament, fixtures);
+    expect(deps.presentation).not.toHaveBeenCalled();
   });
   it('does not resolve a round for phone presentation', async () => {
     deps.phone.mockResolvedValue(true);
@@ -64,6 +68,7 @@ describe('Tournament detail page contract', () => {
     expect(screen.props).toEqual({ tournament, standings, fixtures });
     expect(deps.round).not.toHaveBeenCalled();
     expect(deps.rules).not.toHaveBeenCalled();
+    expect(deps.presentation).toHaveBeenCalledWith(tournament);
   });
   it('preserves notFound before child reads for an absent tournament', async () => {
     deps.detail.mockResolvedValue(null);

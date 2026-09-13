@@ -293,3 +293,17 @@ This supersedes the earlier overlapping-source diagnostic verification for the i
 not the C02 completion status. Desktop/detail winner models, bracket phase/scoring projection and
 remaining snapshot typing still require implementation and another final acceptance run.
 No production operations, push, configuration changes or snapshot updates were performed.
+
+## Phone detail projection
+
+The phone detail service projection now allowlists id/name/type/status and a winner display model.
+The screen no longer accepts Record<string, any> or the stored snapshot. Unused icon, rounds and
+configuration fields are not inspected. A zero winner still renders zero through the historical
+short-circuit expression. Scalar/array name rendering is retained; ordinary object children that
+already failed React rendering stay on the error path. Missing name values project to null, which
+renders identically. Render-based tests compare these cases against React's former expression.
+
+MobileBackHeader's title annotation now admits the existing runtime null name; no JSX changed there.
+Page tests preserve phone-only projection and the unchanged desktop read path.
+Typecheck, architecture (817 modules, 48 entrypoints), focused tests and diff checks pass.
+Full/browser evidence above covers the preceding commit, not this new checkpoint. C02 remains open.
