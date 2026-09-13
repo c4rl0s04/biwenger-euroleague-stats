@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   pgTable,
   serial,
@@ -10,6 +11,7 @@ import {
   date,
   foreignKey,
   index,
+  uniqueIndex,
   unique,
   jsonb,
 } from 'drizzle-orm/pg-core';
@@ -68,6 +70,8 @@ export const seasons = pgTable(
     id: text('id').primaryKey(),
     name: text('name').notNull(),
     status: text('status').notNull(),
+    isSyncEnabled: boolean('is_sync_enabled').default(true).notNull(),
+    euroleagueCode: text('euroleague_code'),
     startsAt: date('starts_at'),
     endsAt: date('ends_at'),
     frozenAt: timestamp('frozen_at'),
@@ -78,32 +82,67 @@ export const seasons = pgTable(
   },
   (t) => ({
     statusIdx: index('idx_seasons_status').on(t.status),
+    uniqueActiveSeason: uniqueIndex('unique_active_season')
+      .on(t.status)
+      .where(sql`status = 'active'`),
   })
 );
 
-// 2. Players Table
+// 1d. Season-specific team state.
+export const teamSeasons = pgTable(
+  'team_seasons',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    name: text('name'),
+    shortName: text('short_name'),
+    img: text('img'),
+    city: text('city'),
+    arenaName: text('arena_name'),
+    latitude: doublePrecision('latitude'),
+    longitude: doublePrecision('longitude'),
+    snapshotSource: text('snapshot_source').notNull().default('sync'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    teamSeasonUnique: unique('unique_team_season').on(t.seasonId, t.teamId),
+    seasonTeamIdx: index('idx_team_seasons_season_team').on(t.seasonId, t.teamId),
+  })
+);
+
+// 2. Players Table (Global player entity directory)
+// NOTE: Seasonal columns (puntos, partidos_jugados, played_home/away, points_home/away,
+// points_last_season, owner_id, status, price_increment, price, team_id, position, dorsal)
+// are deprecated in favor of player_seasons and preserved temporarily for query transition.
 export const players = pgTable('players', {
   id: integer('id').primaryKey(),
   name: text('name'),
-  position: text('position'), // '1', '2', etc stored as text? Schema says TEXT.
-  puntos: integer('puntos'),
-  partidosJugados: integer('partidos_jugados'),
-  playedHome: integer('played_home'),
-  playedAway: integer('played_away'),
-  pointsHome: integer('points_home'),
-  pointsAway: integer('points_away'),
-  pointsLastSeason: integer('points_last_season'),
-  ownerId: text('owner_id'), // Referenced as TEXT in schema
-  status: text('status'),
-  priceIncrement: integer('price_increment'),
+  position: text('position'), // Deprecated: use player_seasons.position
+  puntos: integer('puntos'), // Deprecated: use player_seasons.puntos
+  partidosJugados: integer('partidos_jugados'), // Deprecated: use player_seasons.partidos_jugados
+  playedHome: integer('played_home'), // Deprecated: use player_seasons.played_home
+  playedAway: integer('played_away'), // Deprecated: use player_seasons.played_away
+  pointsHome: integer('points_home'), // Deprecated: use player_seasons.points_home
+  pointsAway: integer('points_away'), // Deprecated: use player_seasons.points_away
+  pointsLastSeason: integer('points_last_season'), // Deprecated: use player_seasons.points_last_season
+  ownerId: text('owner_id'), // Deprecated: use player_seasons.owner_id
+  status: text('status'), // Deprecated: use player_seasons.status
+  priceIncrement: integer('price_increment'), // Deprecated: use player_seasons.price_increment
   birthDate: text('birth_date'),
   height: integer('height'),
   weight: integer('weight'),
-  price: integer('price'),
+  price: integer('price'), // Deprecated: use player_seasons.price
   euroleagueCode: text('euroleague_code'),
-  dorsal: text('dorsal'),
+  dorsal: text('dorsal'), // Deprecated: use player_seasons.dorsal
   country: text('country'),
-  teamId: integer('team_id'),
+  teamId: integer('team_id'), // Deprecated: use player_seasons.team_id
   img: text('img'),
 });
 
@@ -121,6 +160,8 @@ export const playerSeasons = pgTable(
       .references(() => players.id),
     teamId: integer('team_id'),
     ownerId: text('owner_id'),
+    position: text('position'),
+    dorsal: text('dorsal'),
     puntos: integer('puntos'),
     partidosJugados: integer('partidos_jugados'),
     playedHome: integer('played_home'),
@@ -131,6 +172,7 @@ export const playerSeasons = pgTable(
     status: text('status'),
     priceIncrement: integer('price_increment'),
     price: integer('price'),
+    rosterSnapshotSource: text('roster_snapshot_source'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -269,6 +311,12 @@ export const matches = pgTable(
     homeOt: integer('home_ot'),
     awayOt: integer('away_ot'),
     officialGameCode: integer('official_game_code'),
+    homeCoach: text('home_coach'),
+    awayCoach: text('away_coach'),
+    referee1: text('referee_1'),
+    referee2: text('referee_2'),
+    referee3: text('referee_3'),
+    payloadChecksum: text('payload_checksum'),
   },
   (t) => ({
     unq_match: unique('unique_match').on(t.seasonId, t.roundId, t.homeId, t.awayId),
@@ -290,6 +338,8 @@ export const playerRoundStats = pgTable(
     roundId: integer('round_id'),
     fantasyPoints: integer('fantasy_points'),
     minutes: integer('minutes'),
+    minutesSeconds: integer('minutes_seconds'),
+    dorsal: text('dorsal'),
     points: integer('points'),
     twoPointsMade: integer('two_points_made'),
     twoPointsAttempted: integer('two_points_attempted'),
@@ -310,6 +360,7 @@ export const playerRoundStats = pgTable(
     blocksAgainst: integer('blocks_against'),
     plusMinus: integer('plus_minus'),
     gamesStarted: integer('games_started'),
+    rawPayload: jsonb('raw_payload'),
   },
   (t) => ({
     unq_player_round_stat: unique('unique_player_round_stat').on(t.seasonId, t.playerId, t.roundId),
@@ -480,113 +531,8 @@ export const officialPlayerMappings = pgTable(
   })
 );
 
-// 14c. Canonical official game data for the configured season.
-export const officialGames = pgTable(
-  'official_games',
-  {
-    id: serial('id').primaryKey(),
-    seasonId: text('season_id')
-      .notNull()
-      .references(() => seasons.id),
-    provider: text('provider').notNull().default('euroleague_advanced'),
-    gameCode: integer('game_code').notNull(),
-    gameId: text('game_id').notNull(),
-    roundNumber: integer('round_number'),
-    roundCode: text('round_code'),
-    phase: text('phase'),
-    homeTeamCode: text('home_team_code').notNull(),
-    awayTeamCode: text('away_team_code').notNull(),
-    scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
-    isDateConfirmed: boolean('is_date_confirmed').default(false),
-    isTimeConfirmed: boolean('is_time_confirmed').default(false),
-    isPlayed: boolean('is_played').default(false),
-    isLive: boolean('is_live').default(false),
-    status: text('status').notNull().default('scheduled'),
-    homeScore: integer('home_score'),
-    awayScore: integer('away_score'),
-    homeScoreRegtime: integer('home_score_regtime'),
-    awayScoreRegtime: integer('away_score_regtime'),
-    homeQ1: integer('home_q1'),
-    awayQ1: integer('away_q1'),
-    homeQ2: integer('home_q2'),
-    awayQ2: integer('away_q2'),
-    homeQ3: integer('home_q3'),
-    awayQ3: integer('away_q3'),
-    homeQ4: integer('home_q4'),
-    awayQ4: integer('away_q4'),
-    homeOt: integer('home_ot'),
-    awayOt: integer('away_ot'),
-    arenaCode: text('arena_code'),
-    arenaName: text('arena_name'),
-    arenaCapacity: integer('arena_capacity'),
-    homeCoach: text('home_coach'),
-    awayCoach: text('away_coach'),
-    referee1: text('referee_1'),
-    referee2: text('referee_2'),
-    referee3: text('referee_3'),
-    payloadChecksum: text('payload_checksum'),
-    rawSchedule: jsonb('raw_schedule'),
-    rawReport: jsonb('raw_report'),
-    rawMetadata: jsonb('raw_metadata'),
-    finalizedAt: timestamp('finalized_at', { withTimezone: true }),
-    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
-  },
-  (t) => ({
-    seasonGameUnique: unique('unique_official_game').on(t.seasonId, t.provider, t.gameCode),
-    seasonGameIdUnique: unique('unique_official_game_id').on(t.seasonId, t.provider, t.gameId),
-    seasonScheduleIdx: index('idx_official_games_season_schedule').on(t.seasonId, t.scheduledAt),
-  })
-);
-
-export const officialPlayerGameStats = pgTable(
-  'official_player_game_stats',
-  {
-    id: serial('id').primaryKey(),
-    seasonId: text('season_id')
-      .notNull()
-      .references(() => seasons.id),
-    gameCode: integer('game_code').notNull(),
-    providerPlayerCode: text('provider_player_code').notNull(),
-    providerName: text('provider_name').notNull(),
-    teamCode: text('team_code').notNull(),
-    isHome: boolean('is_home'),
-    isStarter: boolean('is_starter'),
-    isPlaying: boolean('is_playing'),
-    dorsal: text('dorsal'),
-    minutes: text('minutes'),
-    minutesSeconds: integer('minutes_seconds'),
-    points: integer('points'),
-    twoPointsMade: integer('two_points_made'),
-    twoPointsAttempted: integer('two_points_attempted'),
-    threePointsMade: integer('three_points_made'),
-    threePointsAttempted: integer('three_points_attempted'),
-    freeThrowsMade: integer('free_throws_made'),
-    freeThrowsAttempted: integer('free_throws_attempted'),
-    offensiveRebounds: integer('offensive_rebounds'),
-    defensiveRebounds: integer('defensive_rebounds'),
-    totalRebounds: integer('total_rebounds'),
-    assists: integer('assists'),
-    steals: integer('steals'),
-    turnovers: integer('turnovers'),
-    blocks: integer('blocks'),
-    blocksAgainst: integer('blocks_against'),
-    foulsCommitted: integer('fouls_committed'),
-    foulsReceived: integer('fouls_received'),
-    valuation: integer('valuation'),
-    plusMinus: integer('plus_minus'),
-    rawPayload: jsonb('raw_payload'),
-    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
-  },
-  (t) => ({
-    seasonPlayerGameUnique: unique('unique_official_player_game_stat').on(
-      t.seasonId,
-      t.gameCode,
-      t.providerPlayerCode
-    ),
-    seasonGameIdx: index('idx_official_player_game_stats_game').on(t.seasonId, t.gameCode),
-  })
-);
-
+// 14c. Event-level official EuroLeague data (play-by-play, shot charts, standings).
+// NOTE: Game-level scores and boxscores are consolidated directly into matches and player_round_stats.
 export const officialPlayByPlay = pgTable(
   'official_play_by_play',
   {

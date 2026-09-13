@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Search, Bell } from 'lucide-react';
 import { UserSelector } from '@/components/user';
+import SeasonSelector from './SeasonSelector';
 import { useState } from 'react';
 import SearchDropdown from './SearchDropdown';
 import SettingsDropdown from './SettingsDropdown';
@@ -84,6 +85,9 @@ export default function TopHeader() {
           <div className="hidden lg:flex">
             <SettingsDropdown />
           </div>
+
+          {/* Season Selector */}
+          <SeasonSelector />
 
           {/* Divider */}
           <div className="hidden lg:block w-px h-6 bg-border/50" />

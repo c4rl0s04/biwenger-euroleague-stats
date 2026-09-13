@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Download, LoaderCircle, MoreHorizontal, Settings, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import SearchDropdown from './SearchDropdown';
+import SeasonSelector from './SeasonSelector';
 import { MOBILE_PRIMARY_ITEMS, NAV_ITEMS, isNavigationItemActive } from './navigation';
 import { NavigationLink, useNavigationFeedback } from './NavigationFeedback';
 
@@ -100,7 +101,13 @@ function MoreSheet({ isOpen, onClose }) {
           </button>
         </header>
 
-        <div className="px-5 pb-4">
+        <div className="px-5 pb-4 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Temporada
+            </span>
+            <SeasonSelector />
+          </div>
           <SearchDropdown onClose={onClose} />
         </div>
 
