@@ -273,3 +273,23 @@ Mapper tests cover field exclusion, JSON serialization, historical roots, unused
 order, duplicates, empty lists and legacy conversion errors. Page contracts verify projection on the
 phone path only and preserve the desktop statistics read. Desktop catalogue/detail snapshot
 projections and final full/browser acceptance remain open.
+
+## Pinned accumulated checkpoint verification
+
+Application source was held unchanged at fdf7ea345ba26213a66243e018d5ddb3c96ee7ef throughout:
+
+- npm run verify: PASS. Skills, documentation (86 notes), architecture (815 modules,
+  48 protected entrypoints), typecheck, full tests (1388 passed, one existing skip), lint,
+  database-disabled production build, schema metadata (38 tables without drift),
+  Drizzle consistency and diff checks all passed.
+- Lint: 24 existing image warnings, zero errors. Build: expected absent provider configuration
+  warnings; no new warning category observed.
+- npm run test:e2e:local -- tests/e2e/tournaments.spec.ts --project=iphone-13
+  --project=desktop-1440: PASS, two tests in 47.8 seconds. Original macOS screenshots remained
+  unchanged. Catalogue, league, cup and phone section navigation passed with existing error guards.
+  The disposable synthetic database and local application shut down successfully.
+
+This supersedes the earlier overlapping-source diagnostic verification for the implemented range,
+not the C02 completion status. Desktop/detail winner models, bracket phase/scoring projection and
+remaining snapshot typing still require implementation and another final acceptance run.
+No production operations, push, configuration changes or snapshot updates were performed.
