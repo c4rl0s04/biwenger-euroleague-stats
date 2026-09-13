@@ -463,7 +463,7 @@ All remaining packages are PLANNED, not dispatched by creating this document.
 - [ ] C01 Manager directory/analytics.
 - [x] C02 Tournament complete read experience (local acceptance: e14fe39a; release remains C15).
 - [x] C03 Predictions reads (locally verified; release remains C15).
-- [ ] C04 Playoffs reads.
+- [x] C04 Playoffs reads (locally verified; release remains C15).
 - [ ] C05 Public Market reads.
 - [ ] C06 Season Review.
 - [ ] C07 Schedule.

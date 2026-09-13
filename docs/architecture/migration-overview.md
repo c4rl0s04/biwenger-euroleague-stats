@@ -94,7 +94,8 @@ the release receipt distinguishes local checks from integration and deployment.
 1. Migrate the manager directory and remaining manager analytics separately from the
    completed Profile read experience.
 2. Integrate the locally verified Tournament read slice only at the authorized release gate.
-3. Establish Predictions and Playoffs read ownership without merging their distinct scoring rules.
+3. Integrate the locally verified Predictions and Playoffs read slices at the authorized release
+   gate; their distinct scoring rules remain separate. See the campaign receipts for local evidence.
 4. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
 5. Move Season Review's pure engine/artifact readers into an explicit feature boundary.

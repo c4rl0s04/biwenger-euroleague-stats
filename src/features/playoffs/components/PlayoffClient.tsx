@@ -37,24 +37,8 @@ import { getColorForUser } from '@/lib/constants/colors';
 import { clsx } from 'clsx';
 import Link from 'next/link';
 
-interface LeaderboardRow {
-  userId: string;
-  userName: string;
-  userIcon: string;
-  colorIndex: number;
-  points: number;
-  correctCount: number;
-  totalCount: number;
-  accuracy: number;
-  imageUrl?: string;
-  predictions: any[];
-}
-
-interface Team {
-  id: number;
-  name: string;
-  image: string;
-}
+import type { PlayoffLeaderboardRow as LeaderboardRow } from '../models/playoffs';
+import type { TeamName as Team } from '@/features/teams/public';
 
 export default function PlayoffClient({
   leaderboard,
@@ -353,16 +337,16 @@ export default function PlayoffClient({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedUser.predictions
-                        .sort((a: any, b: any) => {
+                        .sort((a, b) => {
                           const priority: Record<string, number> = {
                             'play-in': 1,
                             quarter: 2,
                             semi: 3,
                             final: 4,
                           };
-                          return (priority[a.stage] || 99) - (priority[b.stage] || 99);
+                          return (priority[a.stage!] || 99) - (priority[b.stage!] || 99);
                         })
-                        .map((pred: any, i: number) => (
+                        .map((pred, i) => (
                           <div
                             key={i}
                             className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50"

@@ -7,9 +7,9 @@ import {
   MobileScreen,
   MobileScreenHeader,
   MobileSectionHeading,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type Leader = Record<string, any>;
+import type { PlayoffLeaderboardRow as Leader } from '../models/playoffs';
 
 export default function MobilePlayoffsScreen({ leaderboard }: { leaderboard: Leader[] }) {
   const leader = leaderboard[0];

@@ -9,7 +9,8 @@ status: active
 
 # C04 Playoffs read migration
 
-Baseline: 3c0517e2 on refactor/architecture-completion. IN PROGRESS; characterization only.
+Baseline: 3c0517e2 on refactor/architecture-completion. IMPLEMENTED AND LOCALLY VERIFIED.
+Unmerged and undeployed; campaign-wide viewport/Linux closure remains C14. Historical checkpoints follow.
 Previous complete source verification: 1531 passing tests, one skip; Predictions browser acceptance
 passed desktop/iPhone with unchanged references. Do not repeat that entire baseline before each edit.
 
@@ -82,3 +83,49 @@ restricted to nullable name and ID consumed by Playoffs. The old getPlayoffResul
 remaining consumers and is removed; the remaining legacy service is only a temporary re-export adapter.
 Typecheck, architecture (842 modules/50 entrypoints), and 23 focused Teams/Playoffs tests passed.
 Presentation, populated original browser references and full acceptance still remain.
+
+## Screen-service preparation
+
+Typed overview/detail services preserve concurrent phone detection and leaderboard reads, no team
+lookup on phone, exact textual identity and null missing-user output. Detail projections retain
+MobileRecordList's first-20 generic labels and stored points. Typecheck and five feature-local tests
+passed; these services are not yet wired into the pages.
+
+Original-reference worktree: chore/playoffs-visual-baseline at 49bd8334. Its new disposable browser
+test covers overview, phone detail and desktop image/no-image states with test-scoped rows.
+The first capture exposed an incorrect test back-link label (the actual context is Fixture Manager).
+That assertion was corrected without application changes. The interrupted runner left its disposable
+cluster running; that exact loopback fixture was stopped with pg_ctl. No production database was touched.
+The corrected original-reference run is in progress; screenshots are not yet accepted references.
+
+## Screen migration and browser evidence
+
+Both pages now call feature screen services and compose public feature components. The overview is
+TSX; its 600-second declaration remains. Detail guards still run before reads and missing users still
+render null. Mobile overview and prediction rows use explicit models rather than Record<string, any>.
+The desktop component uses typed leaderboard/prediction and Teams name models; its emitted JavaScript
+is identical to original 49bd8334. Existing local generic UI casts are retained pending the C13 controls
+typing pass; they do not define the feature data contract. No CSS or interaction implementation changed.
+
+Removed the obsolete global service and desktop/phone component paths after consumer searches.
+Characterization tests moved into the feature; both pages are registered in architecture enforcement.
+Typecheck and architecture passed (844 modules, 52 entrypoints); all fifteen focused feature tests pass,
+including page guards, exact IDs, null missing states, model projection and service read order.
+
+Corrected original capture passed (31.7s); repeat without snapshot updates passed (38.4s).
+Original references are retained at fc053343 on the baseline branch. The migrated desktop/iPhone run
+passed (31.7s), preserving all five original screenshots, phone detail and desktop image/no-image
+interactions. The desktop media reference was visually inspected. Browser error guards stayed unchanged
+and each completed runner stopped its disposable database. Full source verification is next.
+Campaign-wide Linux/full viewport and release gates remain C14/C15, not implied by this focused run.
+
+## Local acceptance
+
+npm run verify passed: skills, architecture (844 modules/52 entrypoints), docs, typecheck,
+1554 tests plus one existing skip, lint (zero errors/24 existing image warnings), database-disabled
+production build, schema metadata (38 tables/no drift), Drizzle consistency and git diff --check.
+Expected absent-provider build notices remain unchanged. Combined with the original/candidate browser
+comparisons above, this accepts C04 locally; it does not close campaign-wide C14/C15 requirements.
+The legacy service and presentation paths are removed, and their tests retained inside the feature.
+No provider writes, production data, authentication, schema, secrets or dependency changes were made.
+Next regular slice: C05 public Market analytics, separate from private Market actions.

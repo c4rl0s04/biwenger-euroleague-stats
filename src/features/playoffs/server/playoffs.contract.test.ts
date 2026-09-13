@@ -18,8 +18,8 @@ vi.mock('@/lib/db/connection', () => ({
   },
 }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
-import { getPlayoffLeaderboard, SCORING_RULES } from './playoffService';
-import { users, playoffPredictions, playoffResults, userPlayoffMedia } from '../../db/schema';
+import { getPlayoffLeaderboard, SCORING_RULES } from '../server';
+import { users, playoffPredictions, playoffResults, userPlayoffMedia } from '@/lib/db/schema';
 
 beforeEach(() => {
   mocks.rows = [];
