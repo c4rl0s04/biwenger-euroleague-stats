@@ -17,11 +17,12 @@ Worktree: `../biwengerstats-next-architecture-completion`.
 Fetched main/origin/main: `354f66e1585cb59a15efe96f094defdba6ad1e65`.
 Campaign base carries planning commit `6ad78eb8`; no unrelated branch was incorporated.
 
-**C00 and C01 IN PROGRESS. No package is newly VERIFIED.** The Manager directory checkpoint
+**C00 and C01 IN PROGRESS; C02 IMPLEMENTED AND LOCALLY VERIFIED.** The Manager directory checkpoint
 is implemented; see [C01 evidence and remaining scope](reports/c01-manager-reads.md).
 The full goal remains all C00–C15 packages, not merely the first migration.
 The [C02 Tournament receipt](reports/c02-tournament-reads.md) records source contracts,
-characterization tests and statistics extraction; presentation and full acceptance remain pending.
+complete Tournament read implementation and local acceptance at e14fe39a. It is unmerged/undeployed;
+Predictions (C03) is next. Campaign-wide Linux/full-viewport acceptance remains C14.
 Sensitive policy changes and production release remain explicit gates in the plan.
 
 ## Inventory discovery
@@ -43,7 +44,6 @@ Remaining C00 work:
 - Extend coverage to scripts/jobs, public workers/assets and non-JavaScript runtime/configuration files.
 - Associate existing tests with actual contracts; missing tests remain explicit.
 - Review mixed-package assignments and remaining infrastructure candidates; none is exempt by default.
-- Complete baseline full verify and disposable browser suite before feature edits.
 - Reconcile old status headings through current-release links without deleting historical evidence.
 
 ## Initial source findings

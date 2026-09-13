@@ -461,7 +461,7 @@ All remaining packages are PLANNED, not dispatched by creating this document.
 
 - [ ] C00 Closed inventory and baseline.
 - [ ] C01 Manager directory/analytics.
-- [ ] C02 Tournament complete read experience.
+- [x] C02 Tournament complete read experience (local acceptance: e14fe39a; release remains C15).
 - [ ] C03 Predictions reads.
 - [ ] C04 Playoffs reads.
 - [ ] C05 Public Market reads.

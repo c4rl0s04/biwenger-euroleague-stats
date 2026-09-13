@@ -10,9 +10,43 @@ status: active
 # C02 Tournament read migration
 
 Source baseline: `c9d6a816`, campaign branch `refactor/architecture-completion`.
-**IN PROGRESS: statistics extraction implemented; presentation migration and full acceptance pending.**
+**IMPLEMENTED AND LOCALLY VERIFIED at e14fe39aa3e8a572da93f35462d911f631d3ff97.**
+Unmerged and undeployed. Earlier checkpoint sections below are historical, not current blockers.
 
-## Actual flow and compatibility
+## Accepted read-slice scope
+
+All three route families now use feature screen-model services: /tournaments, /tournaments/[id],
+and /tournaments/[id]/[section] (standings, bracket, results). Pages receive finished typed
+presentation models rather than internal snapshots. Services preserve parallel read ordering,
+phone early returns, null/not-found differences, permissive IDs, independent season resolution,
+existing authentication boundaries and no-server-cache behavior. No HTTP endpoint was added.
+
+Query ownership, mapper/statistics/bracket calculations, screen orchestration, models and desktop/phone
+components belong to features/tournaments. Manager Profile participation remains on its deliberate
+server/public contract. The active-round policy uses Rounds/server; there are no foreign deep imports.
+The obsolete global services, query adapter and unused card are removed with consumer checks.
+Sync writes remain C12 infrastructure, not an unfinished Tournament read implementation.
+
+Final validation on unchanged application source:
+
+- Focused Tournament suite: 226 tests PASS across 16 files.
+- npm run verify: PASS (skills, architecture: 822 modules/48 protected entrypoints, docs,
+  typecheck, 1507 full-suite tests plus one existing skip, lint, production build,
+  schema metadata/Drizzle checks and diff check).
+- Lint: zero errors, 24 existing image warnings. Expected missing-provider build warnings only.
+- npm run test:e2e:local -- tests/e2e/tournaments.spec.ts --project=iphone-13
+  --project=desktop-1440: two tests PASS in 49.7 seconds, original screenshots unchanged.
+  Catalogue, league, cup and all phone sections are covered. Disposable database/app shutdown passed.
+
+The first focused run exposed a stale statistics test mock after expanding the server barrel.
+Its import now targets the statistics service under test; the final runs above passed. No production
+workaround, weakened assertion or error filter was introduced.
+
+Remaining campaign work is explicit: C14 covers inventory refresh, the full viewport suite and
+original Linux visual references; C15 covers authorized integration/deployment and production review.
+These are not claimed complete by this local C02 acceptance. Next implementation package: C03 Predictions.
+
+## Original flow and compatibility (historical baseline)
 
 | Entry                       | Existing behavior                                                                                            | Required ownership                                            |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
