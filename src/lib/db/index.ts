@@ -2,7 +2,6 @@ export { db, pgClient } from './connection';
 
 // --- Exports from legacy index.js (Restored for backward compatibility) ---
 
-export * from './queries/tournaments';
 export * from './queries/core/users';
 
 export * from './queries/core/playerForm';

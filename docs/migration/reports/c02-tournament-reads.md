@@ -243,3 +243,18 @@ field exclusion. Tournament suite PASS: 91 tests; typecheck, architecture (814 m
 entrypoints) and diff checks PASS. No cast of the full snapshot or new input rejection was introduced.
 Winner/current-phase/round-fallback projections remain open, and the bracket still receives the old
 tournament model for its remaining fallback lookup. Final browser/full acceptance remains pending.
+
+## Retired query adapter
+
+Removed the unused legacy tournament query module and its global database-barrel re-export.
+Repository-wide symbol and import searches found no runtime callers outside the owning feature.
+Contract tests now invoke the same feature services directly; only the obsolete adapter-identity
+assertion was removed. Season resolution, null/all-tournament reads, malformed JSON, ordering and
+error propagation assertions remain. Architecture tests prevent the deleted module returning.
+Mobile detail fixture/standing props now use the existing explicit feature models; JSX is unchanged.
+
+Validation: typecheck PASS; architecture PASS (813 modules, 48 protected entrypoints);
+focused Tournament tests PASS (90 tests, 9 files); diff check PASS.
+This is an implementation checkpoint, not full acceptance. Snapshot presentation projections,
+browser comparison and final full verification remain open. The original campaign inventory retains
+the deleted path as baseline evidence and must be reconciled during closure.
