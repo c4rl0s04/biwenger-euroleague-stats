@@ -1,4 +1,7 @@
 import { fetchRoundGames } from '../../../api/biwenger-client';
+import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
+import type { OfficialScheduleGame } from '../../../api/euroleague/types';
+import { CONFIG } from '../../../config';
 import { prepareMatchMutations } from '../../../db/mutations/matches';
 import { SyncManager } from '../../manager';
 
@@ -54,35 +57,68 @@ function closestOfficialGame(
 }
 
 /**
- * Biwenger supplies fantasy round/team identities only. Every sporting field written to
- * matches comes from official_games.
+ * Biwenger supplies fantasy round/team identities. Official schedules and game codes
+ * are resolved from EuroLeague provider / context and persisted directly into matches.
  */
 export async function run(manager: SyncManager, round: any, _playersList: any = {}) {
   const db = manager.context.db as any;
-  const seasonId = manager.context.seasonId;
+  const seasonId = manager.context.season?.seasonId || manager.context.seasonId;
+  if (!seasonId) throw new Error('The writable season was not resolved.');
   const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id;
   const mutations = prepareMatchMutations(db, { seasonId });
 
   let gamesData: any;
   let mappingResult: any;
-  let officialResult: any;
+  let officialGames: OfficialMatchRow[] = [];
   try {
-    [gamesData, mappingResult, officialResult] = await Promise.all([
+    const getSchedulePromise = (async (): Promise<OfficialScheduleGame[]> => {
+      if (manager.context.officialSchedule && manager.context.officialSchedule.length > 0) {
+        return manager.context.officialSchedule;
+      }
+      if (manager.context.euroleague && typeof manager.context.euroleague.getSchedule === 'function') {
+        const seasonCode =
+          manager.context.season?.euroleagueCode || CONFIG.EUROLEAGUE.SEASON_CODE || 'E2026';
+        const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
+        const schedule = await manager.context.euroleague.getSchedule(seasonYear);
+        manager.context.officialSchedule = schedule;
+        return schedule;
+      }
+      return [];
+    })();
+
+    const [gamesRes, mapRes, scheduleRes] = await Promise.all([
       fetchRoundGames(round.id),
       db.query(
         `SELECT team_id,provider_team_code FROM official_team_mappings
        WHERE season_id=$1 AND provider='euroleague_advanced'`,
         [seasonId]
       ),
-      db.query(
-        `SELECT game_code,round_number,scheduled_at,status,home_team_code,away_team_code,
-              home_score,away_score,home_score_regtime,away_score_regtime,
-              home_q1,away_q1,home_q2,away_q2,home_q3,away_q3,home_q4,away_q4,home_ot,away_ot
-       FROM official_games
-       WHERE season_id=$1 AND provider='euroleague_advanced'`,
-        [seasonId]
-      ),
+      getSchedulePromise,
     ]);
+    gamesData = gamesRes;
+    mappingResult = mapRes;
+    officialGames = scheduleRes.map((game: OfficialScheduleGame) => ({
+      game_code: game.gameCode,
+      round_number: game.roundNumber,
+      scheduled_at: game.scheduledAt,
+      status: game.isPlayed ? 'finished' : 'scheduled',
+      home_team_code: game.homeTeamCode,
+      away_team_code: game.awayTeamCode,
+      home_score: null,
+      away_score: null,
+      home_score_regtime: null,
+      away_score_regtime: null,
+      home_q1: null,
+      away_q1: null,
+      home_q2: null,
+      away_q2: null,
+      home_q3: null,
+      away_q3: null,
+      home_q4: null,
+      away_q4: null,
+      home_ot: null,
+      away_ot: null,
+    }));
   } catch (error: any) {
     throw new Error('Could not load fantasy and official match inputs.', { cause: error });
   }
@@ -91,7 +127,6 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
   const codeByTeam = new Map<number, string>(
     mappingResult.rows.map((row: any) => [row.team_id, row.provider_team_code])
   );
-  const officialGames = officialResult.rows as OfficialMatchRow[];
   let synced = 0;
   let unresolved = 0;
 

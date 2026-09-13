@@ -11,6 +11,7 @@ import { jsonPayload, type Queryable } from './shared';
 
 export interface OfficialGameDataInput {
   gameCode: number;
+  roundId?: number;
   report: OfficialGameReport | null;
   metadata: OfficialGameMetadata | null;
   boxscore: OfficialPlayerBoxScore[];
@@ -39,26 +40,25 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
     const awayRegtime = awayQuarters.slice(0, 4).reduce((sum, value) => sum + value, 0) || null;
 
     await client.query(
-      `UPDATE official_games SET
-         round_number=COALESCE($3,round_number), phase=COALESCE($4,phase),
-         scheduled_at=COALESCE($5,scheduled_at), is_played=$6, is_live=$7, status=$8,
-         home_score=$9, away_score=$10, home_score_regtime=$11, away_score_regtime=$12,
-         home_q1=$13, away_q1=$14, home_q2=$15, away_q2=$16,
-         home_q3=$17, away_q3=$18, home_q4=$19, away_q4=$20,
-         home_ot=$21, away_ot=$22, arena_name=COALESCE($23,arena_name),
-         arena_capacity=COALESCE($24,arena_capacity), home_coach=$25, away_coach=$26,
-         referee_1=$27, referee_2=$28, referee_3=$29,
-         payload_checksum=$30, raw_report=$31::jsonb, raw_metadata=$32::jsonb,
-         synced_at=NOW()
-       WHERE season_id=$1 AND provider='euroleague_advanced' AND game_code=$2`,
+      `UPDATE matches SET
+         status = $3,
+         home_score = $4,
+         away_score = $5,
+         home_score_regtime = $6,
+         away_score_regtime = $7,
+         home_q1 = $8, away_q1 = $9,
+         home_q2 = $10, away_q2 = $11,
+         home_q3 = $12, away_q3 = $13,
+         home_q4 = $14, away_q4 = $15,
+         home_ot = $16, away_ot = $17,
+         home_coach = $18, away_coach = $19,
+         referee_1 = $20, referee_2 = $21, referee_3 = $22,
+         payload_checksum = $23,
+         date = COALESCE($24, date)
+       WHERE season_id = $1 AND official_game_code = $2`,
       [
         seasonId,
         gameCode,
-        report?.roundNumber ?? null,
-        report?.phase ?? null,
-        report?.scheduledAt ?? null,
-        played,
-        isLive,
         status,
         homeScore,
         awayScore,
@@ -74,93 +74,16 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
         awayQuarters[3] ?? null,
         metadata?.homeOvertime ?? null,
         metadata?.awayOvertime ?? null,
-        metadata?.arenaName ?? null,
-        metadata?.arenaCapacity ?? null,
         metadata?.homeCoach ?? null,
         metadata?.awayCoach ?? null,
         metadata?.referees[0] ?? null,
         metadata?.referees[1] ?? null,
         metadata?.referees[2] ?? null,
         checksum,
-        jsonPayload(report?.raw),
-        jsonPayload(metadata?.raw),
+        report?.scheduledAt ?? null,
       ]
-    );
-
-    await client.query(
-      `UPDATE matches m SET
-         date=og.scheduled_at, status=og.status,
-         home_score=og.home_score, away_score=og.away_score,
-         home_score_regtime=og.home_score_regtime, away_score_regtime=og.away_score_regtime,
-         home_q1=og.home_q1, away_q1=og.away_q1, home_q2=og.home_q2, away_q2=og.away_q2,
-         home_q3=og.home_q3, away_q3=og.away_q3, home_q4=og.home_q4, away_q4=og.away_q4,
-         home_ot=og.home_ot, away_ot=og.away_ot
-       FROM official_games og
-       WHERE m.season_id=$1 AND m.official_game_code=$2
-         AND og.season_id=m.season_id AND og.game_code=m.official_game_code
-         AND og.provider='euroleague_advanced'`,
-      [seasonId, gameCode]
     );
     return status;
-  };
-
-  const upsertPlayerStat = async (stat: OfficialPlayerBoxScore, client: Queryable) => {
-    await client.query(
-      `INSERT INTO official_player_game_stats (
-         season_id,game_code,provider_player_code,provider_name,team_code,is_home,is_starter,
-         is_playing,dorsal,minutes,minutes_seconds,points,two_points_made,two_points_attempted,
-         three_points_made,three_points_attempted,free_throws_made,free_throws_attempted,
-         offensive_rebounds,defensive_rebounds,total_rebounds,assists,steals,turnovers,blocks,
-         blocks_against,fouls_committed,fouls_received,valuation,plus_minus,raw_payload,synced_at
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
-         $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31::jsonb,NOW())
-       ON CONFLICT (season_id,game_code,provider_player_code) DO UPDATE SET
-         provider_name=EXCLUDED.provider_name,team_code=EXCLUDED.team_code,is_home=EXCLUDED.is_home,
-         is_starter=EXCLUDED.is_starter,is_playing=EXCLUDED.is_playing,dorsal=EXCLUDED.dorsal,
-         minutes=EXCLUDED.minutes,minutes_seconds=EXCLUDED.minutes_seconds,points=EXCLUDED.points,
-         two_points_made=EXCLUDED.two_points_made,two_points_attempted=EXCLUDED.two_points_attempted,
-         three_points_made=EXCLUDED.three_points_made,three_points_attempted=EXCLUDED.three_points_attempted,
-         free_throws_made=EXCLUDED.free_throws_made,free_throws_attempted=EXCLUDED.free_throws_attempted,
-         offensive_rebounds=EXCLUDED.offensive_rebounds,defensive_rebounds=EXCLUDED.defensive_rebounds,
-         total_rebounds=EXCLUDED.total_rebounds,assists=EXCLUDED.assists,steals=EXCLUDED.steals,
-         turnovers=EXCLUDED.turnovers,blocks=EXCLUDED.blocks,blocks_against=EXCLUDED.blocks_against,
-         fouls_committed=EXCLUDED.fouls_committed,fouls_received=EXCLUDED.fouls_received,
-         valuation=EXCLUDED.valuation,plus_minus=EXCLUDED.plus_minus,raw_payload=EXCLUDED.raw_payload,
-         synced_at=NOW()`,
-      [
-        seasonId,
-        stat.gameCode,
-        stat.playerCode,
-        stat.playerName,
-        stat.teamCode,
-        stat.isHome,
-        stat.isStarter,
-        stat.isPlaying,
-        stat.dorsal,
-        stat.minutes,
-        stat.minutesSeconds,
-        stat.points,
-        stat.twoPointsMade,
-        stat.twoPointsAttempted,
-        stat.threePointsMade,
-        stat.threePointsAttempted,
-        stat.freeThrowsMade,
-        stat.freeThrowsAttempted,
-        stat.offensiveRebounds,
-        stat.defensiveRebounds,
-        stat.totalRebounds,
-        stat.assists,
-        stat.steals,
-        stat.turnovers,
-        stat.blocks,
-        stat.blocksAgainst,
-        stat.foulsCommitted,
-        stat.foulsReceived,
-        stat.valuation,
-        stat.plusMinus,
-        jsonPayload(stat.raw),
-      ]
-    );
   };
 
   const upsertPlay = async (event: OfficialPlayByPlayEvent, client: Queryable) => {
@@ -256,10 +179,6 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
       );
       if (input.finalized) {
         await target.query(
-          'DELETE FROM official_player_game_stats WHERE season_id=$1 AND game_code=$2',
-          [seasonId, input.gameCode]
-        );
-        await target.query(
           'DELETE FROM official_play_by_play WHERE season_id=$1 AND game_code=$2',
           [seasonId, input.gameCode]
         );
@@ -268,16 +187,108 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
           input.gameCode,
         ]);
       }
-      for (const row of input.boxscore) await upsertPlayerStat(row, target);
+
+      // Upsert player sporting boxscore rows directly into player_round_stats
+      if (input.boxscore.length > 0) {
+        let roundId = input.roundId;
+        if (!roundId) {
+          const matchRes = await target.query(
+            'SELECT round_id FROM matches WHERE season_id=$1 AND official_game_code=$2',
+            [seasonId, input.gameCode]
+          );
+          roundId = matchRes.rows[0]?.round_id;
+        }
+
+        if (roundId) {
+          const mapRes = await target.query(
+            `SELECT provider_player_code, player_id FROM official_player_mappings
+             WHERE season_id=$1 AND provider='euroleague_advanced' AND status='matched' AND player_id IS NOT NULL`,
+            [seasonId]
+          );
+          const playerMap = new Map<string, number>(
+            mapRes.rows.map((row: any) => [row.provider_player_code, row.player_id])
+          );
+
+          for (const stat of input.boxscore) {
+            const playerId = playerMap.get(stat.playerCode);
+            if (!playerId) continue;
+
+            await target.query(
+              `INSERT INTO player_round_stats (
+                 season_id, player_id, round_id,
+                 minutes, minutes_seconds, dorsal, points,
+                 two_points_made, two_points_attempted,
+                 three_points_made, three_points_attempted,
+                 free_throws_made, free_throws_attempted,
+                 rebounds, offensive_rebounds, defensive_rebounds,
+                 assists, steals, blocks, blocks_against,
+                 turnovers, fouls_committed, fouls_received,
+                 valuation, plus_minus, games_started, raw_payload
+               ) VALUES (
+                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+                 $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27::jsonb
+               )
+               ON CONFLICT (season_id, player_id, round_id) DO UPDATE SET
+                 minutes = EXCLUDED.minutes,
+                 minutes_seconds = EXCLUDED.minutes_seconds,
+                 dorsal = COALESCE(EXCLUDED.dorsal, player_round_stats.dorsal),
+                 points = EXCLUDED.points,
+                 two_points_made = EXCLUDED.two_points_made,
+                 two_points_attempted = EXCLUDED.two_points_attempted,
+                 three_points_made = EXCLUDED.three_points_made,
+                 three_points_attempted = EXCLUDED.three_points_attempted,
+                 free_throws_made = EXCLUDED.free_throws_made,
+                 free_throws_attempted = EXCLUDED.free_throws_attempted,
+                 rebounds = EXCLUDED.rebounds,
+                 offensive_rebounds = EXCLUDED.offensive_rebounds,
+                 defensive_rebounds = EXCLUDED.defensive_rebounds,
+                 assists = EXCLUDED.assists,
+                 steals = EXCLUDED.steals,
+                 blocks = EXCLUDED.blocks,
+                 blocks_against = EXCLUDED.blocks_against,
+                 turnovers = EXCLUDED.turnovers,
+                 fouls_committed = EXCLUDED.fouls_committed,
+                 fouls_received = EXCLUDED.fouls_received,
+                 valuation = EXCLUDED.valuation,
+                 plus_minus = EXCLUDED.plus_minus,
+                 games_started = EXCLUDED.games_started,
+                 raw_payload = EXCLUDED.raw_payload`,
+              [
+                seasonId,
+                playerId,
+                roundId,
+                stat.minutes ? Math.round(stat.minutesSeconds / 60) : null,
+                stat.minutesSeconds,
+                stat.dorsal,
+                stat.points,
+                stat.twoPointsMade,
+                stat.twoPointsAttempted,
+                stat.threePointsMade,
+                stat.threePointsAttempted,
+                stat.freeThrowsMade,
+                stat.freeThrowsAttempted,
+                stat.totalRebounds,
+                stat.offensiveRebounds,
+                stat.defensiveRebounds,
+                stat.assists,
+                stat.steals,
+                stat.blocks,
+                stat.blocksAgainst,
+                stat.turnovers,
+                stat.foulsCommitted,
+                stat.foulsReceived,
+                stat.valuation,
+                stat.plusMinus,
+                stat.isStarter ? 1 : 0,
+                jsonPayload(stat.raw),
+              ]
+            );
+          }
+        }
+      }
+
       for (const row of input.playByPlay) await upsertPlay(row, target);
       for (const row of input.shots) await upsertShot(row, target);
-      if (input.finalized) {
-        await target.query(
-          `UPDATE official_games SET finalized_at=COALESCE(finalized_at,NOW())
-           WHERE season_id=$1 AND provider='euroleague_advanced' AND game_code=$2`,
-          [seasonId, input.gameCode]
-        );
-      }
       if (client) await client.query('COMMIT');
       return status;
     } catch (error) {
@@ -288,58 +299,28 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
     }
   };
 
-  const materializeRoundStats = async (roundId: number) => {
-    await db.query(
-      `INSERT INTO player_round_stats (
-         season_id,player_id,round_id,minutes,points,two_points_made,two_points_attempted,
-         three_points_made,three_points_attempted,free_throws_made,free_throws_attempted,
-         rebounds,offensive_rebounds,defensive_rebounds,assists,steals,blocks,blocks_against,
-         turnovers,fouls_committed,fouls_received,valuation,plus_minus,games_started
-       )
-       SELECT s.season_id,pm.player_id,m.round_id,
-         ROUND(SUM(s.minutes_seconds)/60.0)::int,SUM(s.points),SUM(s.two_points_made),
-         SUM(s.two_points_attempted),SUM(s.three_points_made),SUM(s.three_points_attempted),
-         SUM(s.free_throws_made),SUM(s.free_throws_attempted),SUM(s.total_rebounds),
-         SUM(s.offensive_rebounds),SUM(s.defensive_rebounds),SUM(s.assists),SUM(s.steals),
-         SUM(s.blocks),SUM(s.blocks_against),SUM(s.turnovers),SUM(s.fouls_committed),
-         SUM(s.fouls_received),SUM(s.valuation),SUM(s.plus_minus),
-         SUM(CASE WHEN s.is_starter THEN 1 ELSE 0 END)
-       FROM official_player_game_stats s
-       JOIN matches m ON m.season_id=s.season_id AND m.official_game_code=s.game_code
-       JOIN official_player_mappings pm
-         ON pm.season_id=s.season_id AND pm.provider_player_code=s.provider_player_code
-        AND pm.provider='euroleague_advanced' AND pm.status='matched' AND pm.player_id IS NOT NULL
-       WHERE s.season_id=$1 AND m.round_id=$2
-       GROUP BY s.season_id,pm.player_id,m.round_id
-       ON CONFLICT (season_id,player_id,round_id) DO UPDATE SET
-         minutes=EXCLUDED.minutes,points=EXCLUDED.points,
-         two_points_made=EXCLUDED.two_points_made,two_points_attempted=EXCLUDED.two_points_attempted,
-         three_points_made=EXCLUDED.three_points_made,three_points_attempted=EXCLUDED.three_points_attempted,
-         free_throws_made=EXCLUDED.free_throws_made,free_throws_attempted=EXCLUDED.free_throws_attempted,
-         rebounds=EXCLUDED.rebounds,offensive_rebounds=EXCLUDED.offensive_rebounds,
-         defensive_rebounds=EXCLUDED.defensive_rebounds,assists=EXCLUDED.assists,
-         steals=EXCLUDED.steals,blocks=EXCLUDED.blocks,blocks_against=EXCLUDED.blocks_against,
-         turnovers=EXCLUDED.turnovers,fouls_committed=EXCLUDED.fouls_committed,
-         fouls_received=EXCLUDED.fouls_received,valuation=EXCLUDED.valuation,
-         plus_minus=EXCLUDED.plus_minus,games_started=EXCLUDED.games_started`,
-      [seasonId, roundId]
-    );
+  const materializeRoundStats = async (_roundId: number) => {
+    // Round stats are now populated directly during persistGameData
   };
 
   const getSyncCandidates = async (forceGame?: number) =>
     (
       await db.query(
-        `SELECT og.game_code,og.scheduled_at,og.status,og.finalized_at,og.payload_checksum,
-                m.round_id,m.round_name
-         FROM official_games og
-         JOIN matches m ON m.season_id=og.season_id AND m.official_game_code=og.game_code
-         WHERE og.season_id=$1 AND og.provider='euroleague_advanced'
-           AND ($2::int IS NOT NULL AND og.game_code=$2 OR $2::int IS NULL AND (
-             og.scheduled_at BETWEEN NOW()-INTERVAL '48 hours' AND NOW()+INTERVAL '1 hour'
-             OR og.status='live'
-             OR og.finalized_at IS NULL AND og.scheduled_at < NOW()
+        `SELECT m.official_game_code AS game_code,
+                m.date AS scheduled_at,
+                m.status,
+                m.payload_checksum,
+                m.round_id,
+                m.round_name
+         FROM matches m
+         WHERE m.season_id = $1
+           AND m.official_game_code IS NOT NULL
+           AND ($2::int IS NOT NULL AND m.official_game_code = $2 OR $2::int IS NULL AND (
+             m.date BETWEEN NOW() - INTERVAL '48 hours' AND NOW() + INTERVAL '1 hour'
+             OR m.status = 'live'
+             OR m.payload_checksum IS NULL AND m.date < NOW()
            ))
-         ORDER BY og.scheduled_at`,
+         ORDER BY m.date`,
         [seasonId, forceGame ?? null]
       )
     ).rows as {
@@ -355,11 +336,9 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
   const getGameByMatchId = async (matchId: number) =>
     (
       await db.query(
-        `SELECT m.id,m.official_game_code,m.status,m.date,og.finalized_at
+        `SELECT m.id, m.official_game_code, m.status, m.date
          FROM matches m
-         LEFT JOIN official_games og
-           ON og.season_id=m.season_id AND og.game_code=m.official_game_code
-         WHERE m.id=$1 AND m.season_id=$2`,
+         WHERE m.id = $1 AND m.season_id = $2`,
         [matchId, seasonId]
       )
     ).rows[0] as

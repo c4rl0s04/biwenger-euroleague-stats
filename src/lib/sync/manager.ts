@@ -43,6 +43,7 @@ export class SyncManager {
   readonly useAdvisoryLock: boolean;
   readonly lockKey: number;
   readonly forceGame?: number;
+  readonly targetSeasonId?: string;
   hasErrors = false;
   lockUnavailable = false;
   private roundIds = new Map<string, number>();
@@ -53,12 +54,14 @@ export class SyncManager {
       useAdvisoryLock?: boolean;
       lockKey?: number;
       forceGame?: number;
+      seasonId?: string;
     } = {}
   ) {
     this.mode = options.mode ?? 'routine';
     this.useAdvisoryLock = options.useAdvisoryLock ?? true;
     this.lockKey = options.lockKey ?? 823744;
     this.forceGame = options.forceGame;
+    this.targetSeasonId = options.seasonId;
     this.context = { db: null, euroleague: getEuroleagueClient() };
   }
 
@@ -118,9 +121,12 @@ export class SyncManager {
       if (allowBootstrap) await ensureSchema(db as any);
       await validateSchemaReady(db as any);
 
-      const season = await assertSyncSeasonWritable(db as any);
+      const season = await assertSyncSeasonWritable(db as any, this.targetSeasonId);
+      this.context.season = season;
       this.context.seasonId = season.seasonId;
-      this.log(`🗓️ Writable season: ${season.seasonId} (${season.status}).`);
+      this.log(
+        `🗓️ Writable season: ${season.seasonId} (${season.status}) [euroleague: ${season.euroleagueCode}].`
+      );
 
       for (const step of this.steps) {
         const startedAt = Date.now();

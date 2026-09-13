@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useEffect, useState } from 'react';
-import Marquee from 'react-fast-marquee';
+import FastMarquee from 'react-fast-marquee';
 import {
   Sparkles,
   ArrowUpRight,
@@ -12,6 +12,8 @@ import {
   Calendar,
   CheckSquare,
 } from 'lucide-react';
+
+const Marquee = FastMarquee?.default || FastMarquee;
 
 export default function NewsTicker() {
   /*

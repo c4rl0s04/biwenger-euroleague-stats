@@ -85,6 +85,20 @@
       "when": 1788338331482,
       "tag": "0011_lock_down_biwenger_credentials",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789331532169,
+      "tag": "0012_consolidated_season_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789335054544,
+      "tag": "0013_season_lifecycle_and_constraints",
+      "breakpoints": true
     }
   ]
 }

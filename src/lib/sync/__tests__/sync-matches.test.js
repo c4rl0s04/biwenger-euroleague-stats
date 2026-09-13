@@ -67,7 +67,20 @@ describe('syncMatches', () => {
   });
 
   const manager = () => ({
-    context: { db, seasonId: '2026-27' },
+    context: {
+      db,
+      seasonId: '2026-27',
+      officialSchedule: [
+        {
+          gameCode: 1,
+          roundNumber: 1,
+          scheduledAt: new Date('2026-09-30T18:30:00Z'),
+          isPlayed: false,
+          homeTeamCode: 'MAD',
+          awayTeamCode: 'BAR',
+        },
+      ],
+    },
     resolveRoundId: (round) => round.dbId || round.id,
     log: vi.fn(),
   });

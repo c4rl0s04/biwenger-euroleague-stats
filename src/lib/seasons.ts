@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { CONFIG } from './config';
-import { db } from './db';
+import { db } from './db/connection';
 import { seasons } from './db/schema';
 
 export type SeasonStatus = 'active' | 'frozen' | 'archived';
@@ -9,6 +9,10 @@ export interface SeasonRecord {
   id: string;
   name: string;
   status: SeasonStatus;
+  isSyncEnabled: boolean;
+  euroleagueCode: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
   frozenAt: Date | null;
 }
 
@@ -33,6 +37,10 @@ export async function getSeasonById(seasonId: string): Promise<SeasonRecord | nu
       id: true,
       name: true,
       status: true,
+      isSyncEnabled: true,
+      euroleagueCode: true,
+      startsAt: true,
+      endsAt: true,
       frozenAt: true,
     },
   });
@@ -41,10 +49,19 @@ export async function getSeasonById(seasonId: string): Promise<SeasonRecord | nu
   return row as SeasonRecord;
 }
 
-export async function getActiveSeasonId(): Promise<string> {
+export async function getActiveSeason(): Promise<SeasonRecord> {
   const activeSeasons = await db.query.seasons.findMany({
     where: eq(seasons.status, 'active'),
-    columns: { id: true },
+    columns: {
+      id: true,
+      name: true,
+      status: true,
+      isSyncEnabled: true,
+      euroleagueCode: true,
+      startsAt: true,
+      endsAt: true,
+      frozenAt: true,
+    },
   });
 
   if (activeSeasons.length !== 1) {
@@ -54,7 +71,30 @@ export async function getActiveSeasonId(): Promise<string> {
     );
   }
 
-  return activeSeasons[0].id;
+  return activeSeasons[0] as SeasonRecord;
+}
+
+export async function getActiveSeasonId(): Promise<string> {
+  const active = await getActiveSeason();
+  return active.id;
+}
+
+export async function listAvailableSeasons(): Promise<SeasonRecord[]> {
+  const rows = await db.query.seasons.findMany({
+    orderBy: [desc(seasons.startsAt), desc(seasons.id)],
+    columns: {
+      id: true,
+      name: true,
+      status: true,
+      isSyncEnabled: true,
+      euroleagueCode: true,
+      startsAt: true,
+      endsAt: true,
+      frozenAt: true,
+    },
+  });
+
+  return rows as SeasonRecord[];
 }
 
 export async function assertWritableSeason(seasonId: string): Promise<SeasonRecord> {

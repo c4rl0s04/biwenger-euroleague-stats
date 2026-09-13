@@ -13,9 +13,9 @@ export async function runGame(
   _roundName: string,
   options: { force?: boolean; existingChecksum?: string | null } = {}
 ) {
-  const seasonCode = CONFIG.EUROLEAGUE.SEASON_CODE;
+  const seasonCode = manager.context.season?.euroleagueCode || CONFIG.EUROLEAGUE.SEASON_CODE;
   if (!seasonCode) throw new Error('EUROLEAGUE_SEASON_CODE is required.');
-  const seasonId = manager.context.seasonId;
+  const seasonId = manager.context.season?.seasonId || manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
   const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
   const provider = manager.context.euroleague;
@@ -46,6 +46,7 @@ export async function runGame(
   }
   await gameMutations.persistGameData({
     gameCode,
+    roundId,
     report,
     metadata,
     boxscore,

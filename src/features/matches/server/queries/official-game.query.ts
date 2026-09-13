@@ -22,10 +22,9 @@ export interface OfficialGameFilters {
 async function resolveGame(matchId: number, seasonId: string) {
   return (
     await (db as Pool).query<ResolvedGameRow>(
-      `SELECT m.id,m.status,m.date,m.official_game_code,og.finalized_at
+      `SELECT m.id, m.status, m.date, m.official_game_code,
+              CASE WHEN m.status = 'finished' THEN m.date ELSE NULL END AS finalized_at
        FROM matches m
-       LEFT JOIN official_games og
-         ON og.season_id=m.season_id AND og.game_code=m.official_game_code
        WHERE m.id=$1 AND m.season_id=$2`,
       [matchId, seasonId]
     )
