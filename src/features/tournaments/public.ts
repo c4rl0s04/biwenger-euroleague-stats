@@ -28,6 +28,8 @@ export { default as MobileTournamentsScreen } from './components/screens/MobileT
 export { default as TournamentSectionScreen } from './components/screens/TournamentSectionScreen';
 export type { TournamentSectionModel } from './models/tournament-section';
 export type { TournamentPlayoffRules } from './models/tournament-playoff-rules';
+export type { TournamentBracketRound, TournamentBracketMatch } from './models/tournament-bracket';
+export type { TournamentDesktopDetail } from './models/tournament-detail';
 export type {
   DesktopTournamentCatalogue,
   DesktopTournamentCatalogueItem,

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const deps = vi.hoisted(() => ({
-  rules: vi.fn(),
+  bracket: vi.fn(),
+  desktopPresentation: vi.fn(),
   presentation: vi.fn(),
   detail: vi.fn(),
   standings: vi.fn(),
@@ -12,7 +13,8 @@ const deps = vi.hoisted(() => ({
   missing: vi.fn(),
 }));
 vi.mock('@/features/tournaments/server', () => ({
-  getTournamentPlayoffRules: deps.rules,
+  getTournamentBracketPresentation: deps.bracket,
+  getTournamentDesktopDetailPresentation: deps.desktopPresentation,
   getTournamentPhoneDetailPresentation: deps.presentation,
   getTournamentDetails: deps.detail,
   getStandings: deps.standings,
@@ -37,7 +39,8 @@ beforeEach(() => {
   deps.standings.mockResolvedValue(standings);
   deps.fixtures.mockResolvedValue(fixtures);
   deps.round.mockResolvedValue(2);
-  deps.rules.mockReturnValue({ twoLegged: false, twoLeggedFinal: false });
+  deps.bracket.mockReturnValue([]);
+  deps.desktopPresentation.mockImplementation((value) => value);
   deps.presentation.mockImplementation((value) => value);
   deps.phone.mockResolvedValue(false);
   deps.missing.mockImplementation(() => {
@@ -56,10 +59,12 @@ describe('Tournament detail page contract', () => {
       standings,
       fixtures,
       initialRoundId: 2,
-      playoffRules: { twoLegged: false, twoLeggedFinal: false },
+      bracketRounds: [],
     });
     expect(deps.round).toHaveBeenCalledWith(tournament, fixtures);
     expect(deps.presentation).not.toHaveBeenCalled();
+    expect(deps.desktopPresentation).toHaveBeenCalledWith(tournament);
+    expect(deps.bracket).toHaveBeenCalledWith(tournament, fixtures);
   });
   it('does not resolve a round for phone presentation', async () => {
     deps.phone.mockResolvedValue(true);
@@ -67,7 +72,8 @@ describe('Tournament detail page contract', () => {
     expect(screen.type).toBe(deps.mobile);
     expect(screen.props).toEqual({ tournament, standings, fixtures });
     expect(deps.round).not.toHaveBeenCalled();
-    expect(deps.rules).not.toHaveBeenCalled();
+    expect(deps.bracket).not.toHaveBeenCalled();
+    expect(deps.desktopPresentation).not.toHaveBeenCalled();
     expect(deps.presentation).toHaveBeenCalledWith(tournament);
   });
   it('preserves notFound before child reads for an absent tournament', async () => {

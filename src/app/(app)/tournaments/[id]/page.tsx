@@ -4,7 +4,8 @@ import {
   getStandings,
   getFixtures,
   getTournamentInitialRoundId,
-  getTournamentPlayoffRules,
+  getTournamentBracketPresentation,
+  getTournamentDesktopDetailPresentation,
   getTournamentPhoneDetailPresentation,
 } from '@/features/tournaments/server';
 import {
@@ -36,11 +37,11 @@ export default async function TournamentDetailsPage({
   const initialRoundId = await getTournamentInitialRoundId(tournament, fixtures);
   return (
     <DesktopTournamentDetailScreen
-      tournament={tournament}
+      tournament={getTournamentDesktopDetailPresentation(tournament)}
       standings={standings}
       fixtures={fixtures}
       initialRoundId={initialRoundId}
-      playoffRules={getTournamentPlayoffRules(tournament.data)}
+      bracketRounds={getTournamentBracketPresentation(tournament, fixtures)}
     />
   );
 }
