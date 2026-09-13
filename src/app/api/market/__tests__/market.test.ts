@@ -20,6 +20,11 @@ vi.mock('@/lib/services', () => ({
 import * as services from '@/lib/services';
 
 vi.mock('@/features/market/server', async () => ({
+  getMarketPageData: (await import('@/lib/services')).getMarketPageData,
+  getLiveMarketTransfers: (await import('@/lib/services')).fetchLiveMarketTransfers,
+  getBestValueDetails: (await import('@/lib/services')).fetchBestValueDetails,
+  getBiddingDuelDetails: (await import('@/lib/services')).fetchBiddingDuelDetails,
+  ...(await import('@/features/market/validation/market-transfers')),
   getMarketTrendsAnalysis: (await import('@/lib/services')).fetchMarketTrendsAnalysis,
   ...(await import('@/features/market/validation/market-trends')),
 }));

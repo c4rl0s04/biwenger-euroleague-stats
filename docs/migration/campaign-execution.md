@@ -36,9 +36,10 @@ C04 Playoffs is also locally accepted; see its [receipt](reports/c04-playoff-rea
 Typed read/screen services, a deliberate Teams label contract, both pages and original-reference
 browser comparisons are verified. Full verification passed 1554 tests plus one skip.
 C05 public Market analytics is in progress, excluding private provider actions. Its
-[receipt](reports/c05-market-reads.md) records recommendation extraction at `deda942d` and the
-subsequent trends query/service/API boundary. Remaining analytics, cross-feature helper closure and
-screens are not yet migrated; do not treat these checkpoints as complete Market acceptance.
+[receipt](reports/c05-market-reads.md) records recommendation extraction at `deda942d`, the
+trends boundary at `e3dad14b`, and subsequent transfer/detail/basic-summary boundaries. Five scoped
+read APIs now use feature services; the large stats aggregate, recent activity/opportunities,
+cross-feature helper closure and screens remain. Do not treat these checkpoints as complete Market acceptance.
 
 ## Inventory discovery
 

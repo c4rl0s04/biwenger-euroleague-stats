@@ -26,3 +26,45 @@ it('keeps the trend handler on the owned service and registers transitive graph 
     policy.exceptions.some((entry: { edge: string }) => entry.edge.includes('api/market/trends'))
   ).toBe(false);
 });
+
+it('keeps transfer/detail services and models off legacy database-shaped boundaries', () => {
+  expect(feature('models/market-transfers.ts')).not.toMatch(/\bany\b|\bDate\b|drizzle|ReturnType/);
+  expect(feature('server/services/market-transfers.service.ts')).toMatch(/^import 'server-only';/);
+  expect(feature('server/services/market-transfers.service.ts')).not.toMatch(
+    /@\/lib\/(db|services)|drizzle/
+  );
+  expect(feature('server/queries/market-transfers.query.ts')).toMatch(/^import 'server-only';/);
+  expect(feature('server/mappers/market-transfers.mapper.ts')).not.toMatch(/\.\.\.row|@\/lib\/db/);
+  const policy = JSON.parse(read('scripts/architecture/policy.json'));
+  for (const suffix of ['transfers', 'stats/value-details', 'duels/details']) {
+    const path = `src/app/api/market/${suffix}/route.ts`;
+    expect(read(path)).toContain('@/features/market/server');
+    expect(read(path)).not.toMatch(/@\/lib\/(db|services)|queries/);
+    expect(policy.entrypoints).toContain(path);
+    expect(policy.exceptions.some((entry: { edge: string }) => entry.edge.includes(path))).toBe(
+      false
+    );
+  }
+});
+
+it('owns basic activity orchestration and registers its HTTP boundary', () => {
+  expect(feature('models/market-activity.ts')).not.toMatch(/\bany\b|\bDate\b|drizzle|ReturnType/);
+  expect(feature('server/services/market-activity.service.ts')).toMatch(/^import 'server-only';/);
+  expect(feature('server/services/market-activity.service.ts')).not.toMatch(
+    /@\/lib\/(db|services)|drizzle/
+  );
+  expect(feature('server/queries/market-activity.query.ts')).toMatch(/^import 'server-only';/);
+  expect(read('src/app/api/market/route.ts')).toContain('@/features/market/server');
+  expect(read('src/app/api/market/route.ts')).not.toMatch(/@\/lib\/(db|services)|queries/);
+  expect(read('src/lib/services/features/marketService.ts')).toContain(
+    "export { getMarketPageData } from '@/features/market/server'"
+  );
+  expect(read('src/lib/services/features/marketService.ts')).not.toContain('Promise.all');
+  const policy = JSON.parse(read('scripts/architecture/policy.json'));
+  expect(policy.entrypoints).toContain('src/app/api/market/route.ts');
+  expect(
+    policy.exceptions.some((entry: { edge: string }) =>
+      entry.edge.includes('src/app/api/market/route.ts')
+    )
+  ).toBe(false);
+});

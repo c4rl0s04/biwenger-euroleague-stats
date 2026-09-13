@@ -39,6 +39,48 @@ superseded by the approved completion campaign, not by authorization for private
 
 ## Remaining C05 execution
 
+### Checkpoint D — basic Market summary (combined acceptance with C)
+
+Original base remains `e3dad14b`; C is implemented and awaiting the combined acceptance run.
+Allowed additional edits: `getAllTransfers`, `getMarketTrends`, `getMarketKPIs` and corresponding
+types in the legacy query module, the global basic `getMarketPageData` orchestration (replace with
+a feature re-export), GET `/api/market`, its tests, new Market activity boundary files and policy/docs.
+No changes to current-listing queries, opportunity/form helpers, other features or screens.
+
+The basic summary is three parallel configured-season reads. All transfers preserves nullable
+transfer facts and default limit 100/offset zero. Daily trends uses fecha (not the separate richer
+timestamp-based analysis), first 30 dates ascending, integer counts and float averages. KPIs preserve
+their zero fallbacks. The route's limit defaults to 50 and is validated but deliberately unused;
+do not add pagination behavior. Public max-age 300/stale 60 and private errors remain unchanged.
+Original basic query tests pass before extraction. Move the two aggregate orchestration tests to
+the owned service suite with real query/mapping coverage; retain wrapper tests for surviving adapters.
+Final C/D acceptance is one full verification run, not a claim that Market is complete.
+
+### Checkpoint C — transfer history and detail APIs
+
+Base `e3dad14b`; same campaign branch/worktree and single coordinator. Allowed edits are the
+three transfer/detail query functions and their obsolete types in the legacy Market query module;
+new Market query/record/model/mapper/service/validation contracts; GET `/api/market/transfers`,
+`/api/market/stats/value-details` and `/api/market/duels/details`; their tests, policy registration
+and campaign documentation. Keep the global service wrappers as forwarding compatibility adapters
+until the remaining Market consumers move. No UI or private operation changes.
+
+Each reviewed call chain reaches only the configured-season resolver and PostgreSQL SELECTs over
+historical transfers/bids, players/season facts, manager display identities, matches and teams.
+No session fallback, provider call, command or credential record participates. HTTP numeric inputs
+are validated; buyer/seller patterns remain bound SQL values (including existing wildcard semantics).
+Threat cases: injected filter text must remain a parameter; extra record fields must not escape
+the mapper; cookies must not affect these public historical projections. Preserve pagination limits
+rather than adding throttling or changing access policy in a structural refactor.
+
+Preserve the 10-row HTTP/20-row internal defaults, all/Todos filter sentinels, trim behavior,
+missing-ID default zero, prefix parsing, duel-ID truncation, snake_case/null fields, date JSON,
+ordering, count failures, exact status/envelopes, force-dynamic detail declarations and 60/300-second
+success caches. Original query characterization passes six cases before edits. Add complete mapper,
+service, validation, real-handler and graph tests; compare SQL templates and bound arguments against
+the original. Stop for any required external contract/security change. Final full verification is
+required; these three reads do not finish the remaining Market analytics/screens.
+
 ### Checkpoint B — trends read boundary
 
 Pinned predecessor: `deda942d`. The same coordinator owns this sequential checkpoint.

@@ -54,11 +54,7 @@ export interface RecentTransfer extends Transfer {
   player_team: string | null;
 }
 
-export interface MarketTrend {
-  date: string;
-  count: number;
-  avg_value: number;
-}
+export type { MarketActivityTrend as MarketTrend } from '@/features/market/public';
 
 export interface MarketOpportunity {
   player_id: number;
@@ -85,14 +81,7 @@ export interface PriceChange {
   player_team: string | null;
 }
 
-export interface MarketKPIs {
-  total_transfers: number;
-  avg_value: number;
-  max_value: number;
-  min_value: number;
-  active_buyers: number;
-  active_sellers: number;
-}
+export type { MarketActivityKPIs as MarketKPIs } from '@/features/market/public';
 
 export interface MarketOverviewKPIs {
   totalVolume: number;
@@ -160,18 +149,7 @@ export interface PositionAnalysis {
   }[];
 }
 
-export interface PaginatedTransfers {
-  transfers: (Transfer & {
-    player_name: string;
-    player_position: string;
-    player_img: string;
-    player_team: string | null;
-    bids_count: number;
-  })[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
+export type { MarketTransferPage as PaginatedTransfers } from '@/features/market/public';
 
 export interface ManagerMarketStats {
   user_name: string;
@@ -218,13 +196,7 @@ export interface BestValuePlayer {
   player_team: string | null;
 }
 
-export interface BestValueDetail {
-  round_name: string;
-  date: string;
-  points: number;
-  opponent: string;
-  team_id: number;
-}
+export type { MarketValueDetail as BestValueDetail } from '@/features/market/public';
 
 export interface TheThief {
   name: string;
@@ -334,24 +306,7 @@ export interface BiddingDuelsStats {
   biggestDominance: BidDuelSummary | null;
 }
 
-export interface BidDuelDetail {
-  transfer_id: number;
-  transfer_date: string | null;
-  player_id: number;
-  player_name: string;
-  player_img: string | null;
-  winner_id: number;
-  winner_name: string;
-  winner_icon: string | null;
-  winner_color_index: number | null;
-  runner_id: number;
-  runner_name: string;
-  runner_icon: string | null;
-  runner_color_index: number | null;
-  winning_bid: number;
-  second_bid: number;
-  margin: number;
-}
+export type { MarketDuelDetail as BidDuelDetail } from '@/features/market/public';
 
 export interface SingleFlip {
   user_id: number;
@@ -453,24 +408,7 @@ export interface Devaluation {
  * @param {number} offset - Offset for pagination
  * @returns {Promise<Transfer[]>} List of transfers
  */
-export async function getAllTransfers(limit = 100, offset = 0): Promise<Transfer[]> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT
-      id,
-      fecha,
-      player_id,
-      precio,
-      vendedor,
-      comprador
-    FROM fichajes
-    WHERE season_id = $3
-    ORDER BY timestamp DESC
-    LIMIT $1 OFFSET $2
-  `;
-
-  return (await pgClient.query(query, [limit, offset, seasonId])).rows;
-}
+export { getAllTransfers } from '@/features/market/server';
 
 /**
  * Get recent market activity
@@ -504,25 +442,7 @@ export async function getRecentTransfers(limit = 5): Promise<RecentTransfer[]> {
  * LEGACY VERSION - Returns count, avg_value
  * @returns {Promise<MarketTrend[]>} Daily market stats
  */
-export async function getMarketTrends(): Promise<MarketTrend[]> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT
-      TO_CHAR(fecha::timestamp, 'YYYY-MM-DD') as date,
-      COUNT(*) as count,
-      ROUND(AVG(precio), 0) as avg_value
-    FROM fichajes
-    WHERE season_id = $1
-    GROUP BY date
-    ORDER BY date ASC
-    LIMIT 30
-  `;
-  return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
-    ...row,
-    count: parseInt(row.count) || 0,
-    avg_value: parseFloat(row.avg_value) || 0,
-  }));
-}
+export { getMarketTrends } from '@/features/market/server';
 
 /**
  * Get market opportunities (undervalued players with good form)
@@ -612,31 +532,7 @@ export async function getSignificantPriceChanges(
  * LEGACY VERSION - Returns distinct buyer/seller counts
  * @returns {Promise<MarketKPIs>} Market statistics
  */
-export async function getMarketKPIs(): Promise<MarketKPIs> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT
-      COUNT(*) as total_transfers,
-      ROUND(AVG(precio), 2) as avg_value,
-      MAX(precio) as max_value,
-      MIN(precio) as min_value,
-      COUNT(DISTINCT comprador) as active_buyers,
-      COUNT(DISTINCT vendedor) as active_sellers
-    FROM fichajes
-    WHERE season_id = $1
-  `;
-
-  const kpis = (await pgClient.query(query, [seasonId])).rows[0];
-  return {
-    ...kpis,
-    total_transfers: parseInt(kpis?.total_transfers) || 0,
-    avg_value: parseFloat(kpis?.avg_value) || 0,
-    active_buyers: parseInt(kpis?.active_buyers) || 0,
-    active_sellers: parseInt(kpis?.active_sellers) || 0,
-    max_value: parseInt(kpis?.max_value) || 0,
-    min_value: parseInt(kpis?.min_value) || 0,
-  };
-}
+export { getMarketKPIs } from '@/features/market/server';
 
 // ==========================================
 // NEW QUERIES (For Market Page V2)
@@ -878,103 +774,10 @@ export async function getPositionAnalysis(): Promise<PositionAnalysis> {
   };
 }
 
-interface LiveMarketTransfersParams {
-  page?: number;
-  limit?: number;
-  buyer?: string;
-  seller?: string;
-}
-
 /**
  * Get Live Market Transfers with Pagination and Filters
  */
-export async function getLiveMarketTransfers({
-  page = 1,
-  limit = 20,
-  buyer = 'all',
-  seller = 'all',
-}: LiveMarketTransfersParams): Promise<PaginatedTransfers> {
-  const seasonId = await resolveReadSeasonId();
-  const offset = (page - 1) * limit;
-
-  let whereClause = 'WHERE f.season_id = $1 AND f.precio > 0';
-  const params: any[] = [seasonId];
-  let paramIndex = 2;
-
-  if (buyer && buyer !== 'all' && buyer !== 'Todos') {
-    whereClause += ` AND f.comprador ILIKE '%' || $${paramIndex} || '%'`;
-    params.push(buyer);
-    paramIndex++;
-  }
-
-  if (seller && seller !== 'all' && seller !== 'Todos') {
-    whereClause += ` AND f.vendedor ILIKE '%' || $${paramIndex} || '%'`;
-    params.push(seller);
-    paramIndex++;
-  }
-
-  // Row Query
-  const query = `
-    SELECT
-      f.id,
-      f.fecha,
-      f.precio,
-      f.vendedor,
-      f.comprador,
-      v.id as vendedor_id,
-      v.icon as vendedor_icon,
-      v.color_index as vendedor_color_index,
-      c.id as comprador_id,
-      c.icon as comprador_icon,
-      c.color_index as comprador_color_index,
-      f.player_id,
-      p.name as player_name,
-      p.position as player_position,
-      p.img as player_img,
-      t.code as player_team,
-      (SELECT COUNT(*) + 1 FROM transfer_bids tb WHERE tb.transfer_id = f.id) as bids_count
-    FROM fichajes f
-    LEFT JOIN players p ON f.player_id = p.id
-    LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
-    LEFT JOIN user_seasons vs ON vs.name = f.vendedor AND vs.season_id = f.season_id
-    LEFT JOIN users v ON COALESCE(vs.user_id, '') = v.id
-    LEFT JOIN user_seasons cs ON cs.name = f.comprador AND cs.season_id = f.season_id
-    LEFT JOIN users c ON COALESCE(cs.user_id, '') = c.id
-    ${whereClause}
-    ORDER BY f.timestamp DESC
-    LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
-  `;
-
-  // Count Query
-  const countQuery = `
-    SELECT COUNT(*) as total
-    FROM fichajes f
-    ${whereClause}
-  `;
-
-  // Add limit and offset
-  params.push(limit, offset);
-
-  const [rowsResult, countResult] = await Promise.all([
-    pgClient.query(query, params),
-    pgClient.query(countQuery, params.slice(0, paramIndex - 1)),
-  ]);
-
-  return {
-    transfers: rowsResult.rows.map((r: any) => ({
-      ...r,
-      player_id: r.player_id,
-      precio: parseInt(r.precio),
-      bids_count: parseInt(r.bids_count),
-      vendedor_id: r.vendedor_id || null,
-      comprador_id: r.comprador_id || null,
-    })),
-    total: parseInt(countResult.rows[0].total),
-    page,
-    totalPages: Math.ceil(parseInt(countResult.rows[0].total) / limit),
-  };
-}
+export { getLiveMarketTransfers } from '@/features/market/server';
 
 /**
  * Get Manager Finances (Purchases/Sales Balance)
@@ -1226,75 +1029,7 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
 /**
  * Get breakdown of points for a specific transfer ownership window
  */
-export async function getBestValueDetails(transferId: number): Promise<BestValueDetail[]> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    WITH purchase AS (
-      SELECT
-        f.id as transfer_id,
-        f.player_id,
-        f.comprador,
-        f.season_id,
-        f.timestamp as start_time,
-        f.precio
-      FROM fichajes f
-      WHERE f.season_id = $2 AND f.id = $1
-    ),
-    sale AS (
-      SELECT
-        s.timestamp as end_time
-      FROM fichajes s, purchase p
-      WHERE s.season_id = p.season_id
-        AND s.player_id = p.player_id
-        AND s.vendedor = p.comprador
-        AND s.timestamp > p.start_time
-      ORDER BY s.timestamp ASC
-      LIMIT 1
-    ),
-    RoundStarts AS (
-      SELECT round_id, MIN(date) as start_date
-      FROM matches
-      WHERE season_id = $2
-      GROUP BY round_id
-    )
-    SELECT
-      m.round_name,
-      m.date,
-      COALESCE(prs.fantasy_points, 0) as points,
-      (
-         CASE
-          WHEN m.home_id = COALESCE(ps.team_id, pl.team_id) THEN t_away.name
-          ELSE t_home.name
-         END
-      ) as opponent,
-      COALESCE(ps.team_id, pl.team_id) as team_id
-    FROM player_round_stats prs
-    JOIN purchase p ON prs.player_id = p.player_id
-    JOIN players pl ON p.player_id = pl.id
-    LEFT JOIN player_seasons ps ON ps.player_id = pl.id AND ps.season_id = p.season_id
-    JOIN matches m ON m.season_id = p.season_id
-      AND m.round_id = prs.round_id
-      AND (m.home_id = COALESCE(ps.team_id, pl.team_id) OR m.away_id = COALESCE(ps.team_id, pl.team_id))
-    JOIN RoundStarts rs ON rs.round_id = prs.round_id
-    LEFT JOIN teams t_home ON m.home_id = t_home.id
-    LEFT JOIN teams t_away ON m.away_id = t_away.id
-    LEFT JOIN sale s ON true
-    WHERE
-      -- Ownership must start BEFORE round lock
-      prs.season_id = p.season_id
-      AND to_timestamp(p.start_time) < rs.start_date
-      -- Must still own player when round starts
-      AND (
-         s.end_time IS NULL OR to_timestamp(s.end_time) > rs.start_date
-      )
-    ORDER BY m.date ASC
-  `;
-  const result = await pgClient.query(query, [transferId, seasonId]);
-  return result.rows.map((row: any) => ({
-    ...row,
-    points: parseInt(row.points),
-  }));
-}
+export { getBestValueDetails } from '@/features/market/server';
 
 /**
  * Get La Enfermería Players (Expensive players with most missed matches)
@@ -1832,83 +1567,7 @@ export async function getBiddingDuelsStats(): Promise<BiddingDuelsStats> {
   };
 }
 
-export async function getBiddingDuelDetails(
-  userId: number,
-  opponentId: number
-): Promise<BidDuelDetail[]> {
-  const seasonId = await resolveReadSeasonId();
-  const normalizedUserId = Math.trunc(userId);
-  const normalizedOpponentId = Math.trunc(opponentId);
-
-  const query = `
-    SELECT
-      f.id as transfer_id,
-      f.fecha as transfer_date,
-      p.id as player_id,
-      p.name as player_name,
-      p.img as player_img,
-      winner.id as winner_id,
-      COALESCE(winner_season.name, winner.name) as winner_name,
-      COALESCE(winner_season.icon, winner.icon) as winner_icon,
-      COALESCE(winner_season.color_index, winner.color_index, 0) as winner_color_index,
-      runner.id as runner_id,
-      COALESCE(runner_season.name, runner.name) as runner_name,
-      COALESCE(runner_season.icon, runner.icon) as runner_icon,
-      COALESCE(runner_season.color_index, runner.color_index, 0) as runner_color_index,
-      f.precio as winning_bid,
-      second_bid.amount as second_bid,
-      (f.precio - second_bid.amount) as margin
-    FROM fichajes f
-    JOIN user_seasons winner_season ON winner_season.name = f.comprador AND winner_season.season_id = f.season_id
-    JOIN users winner ON winner.id = winner_season.user_id
-    JOIN LATERAL (
-      SELECT tb.bidder_name, tb.amount
-      FROM transfer_bids tb
-      WHERE tb.season_id = f.season_id
-        AND tb.transfer_id = f.id
-        AND tb.bidder_name != f.comprador
-        AND tb.amount < f.precio
-      ORDER BY tb.amount DESC
-      LIMIT 1
-    ) second_bid ON true
-    JOIN user_seasons runner_season ON runner_season.name = second_bid.bidder_name AND runner_season.season_id = f.season_id
-    JOIN users runner ON runner.id = runner_season.user_id
-    JOIN players p ON p.id = f.player_id
-    WHERE f.season_id = $1
-      AND f.comprador != 'Mercado'
-      AND (
-        (winner.id = $2 AND runner.id = $3)
-        OR
-        (winner.id = $3 AND runner.id = $2)
-      )
-    ORDER BY f.timestamp DESC NULLS LAST, f.id DESC
-  `;
-
-  const result = await pgClient.query(query, [
-    seasonId,
-    String(normalizedUserId),
-    String(normalizedOpponentId),
-  ]);
-
-  return result.rows.map((row: any) => ({
-    transfer_id: parseInt(row.transfer_id),
-    transfer_date: row.transfer_date ?? null,
-    player_id: parseInt(row.player_id),
-    player_name: row.player_name,
-    player_img: row.player_img ?? null,
-    winner_id: parseInt(row.winner_id),
-    winner_name: row.winner_name,
-    winner_icon: row.winner_icon ?? null,
-    winner_color_index: row.winner_color_index !== null ? parseInt(row.winner_color_index) : null,
-    runner_id: parseInt(row.runner_id),
-    runner_name: row.runner_name,
-    runner_icon: row.runner_icon ?? null,
-    runner_color_index: row.runner_color_index !== null ? parseInt(row.runner_color_index) : null,
-    winning_bid: parseInt(row.winning_bid),
-    second_bid: parseInt(row.second_bid),
-    margin: parseInt(row.margin),
-  }));
-}
+export { getBiddingDuelDetails } from '@/features/market/server';
 
 /**
  * Get Best Single Flip (Buy Low, Sell High)

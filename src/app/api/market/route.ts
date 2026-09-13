@@ -4,7 +4,7 @@
  */
 
 import { NextRequest } from 'next/server';
-import { getMarketPageData } from '@/lib/services';
+import { getMarketPageData } from '@/features/market/server';
 import { validateNumber } from '@/lib/utils/validation';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 

@@ -9,9 +9,10 @@ status: active
 
 # C05 Market read migration
 
-IN PROGRESS. Recommendation scoring and the trends query/service/API are now feature-owned;
-other Market queries, services and screens remain legacy. This receipt is not evidence that the
-complete Market call graph is reviewed.
+IN PROGRESS. Recommendation scoring plus five scoped read APIs are now feature-owned: trends,
+transfer history, value details, duel details and the basic summary. The large stats aggregate,
+its remaining queries/helper dependencies, recent activity/opportunities and screens remain legacy.
+This receipt is not evidence that the complete Market call graph is reviewed.
 
 ## Initial entrypoint inventory
 
@@ -116,7 +117,46 @@ lint (zero errors, 24 existing image warnings), production build with SKIP_DB, s
 Documentation checks passed after updating this receipt. No UI was moved and no browser run is claimed;
 the original/candidate visual comparison remains part of the later screen migration.
 
-## Remaining scope
+## Transfer/detail and summary reads — checkpoints C/D
+
+Source baseline `e3dad14b`; both checkpoints share one acceptance run. GET `/api/market/transfers`,
+`/api/market/stats/value-details`, `/api/market/duels/details` and `/api/market` now call Market services.
+Six original query implementations were replaced with compatibility re-exports to those services;
+the global basic getMarketPageData aggregator was also replaced, so there is one implementation.
+Existing global wrappers remain for unmigrated consumers; their retirement stays in C05/C14.
+
+New bounded subareas:
+
+- Transfer reads: explicit records, serializable models, field-allowlisting mappers, services and
+  edge validators for paginated history, ownership-window point details and historical bidding duels.
+- Basic activity: queries/mappers/services for all transfers, fecha-based daily trends and KPIs,
+  plus the original three-read parallel summary. This remains distinct from timestamp trend analysis.
+
+Compatibility preserved: text transfer-manager IDs versus numeric duel IDs; nullable joined fields;
+date JSON serialization; numeric truncation/fallbacks; missing detail IDs defaulting to zero; first
+query values and numeric prefixes; page/limit defaults and bounds; all/Todos filter sentinels;
+existing SQL wildcard semantics; the summary's validated but unused limit; row ordering, count-error
+propagation, response envelopes/statuses, detail force-dynamic declarations and 60/300-second caches.
+No request/persistent server cache was added. All nine SQL/filter templates from the six functions
+are byte-identical to the baseline; injected filter text stays in bound parameters.
+
+Security-guided review covered the explicit public read boundary, not frozen provider commands.
+The paths use only configured-season historical fantasy/statistical SELECTs and display identities.
+They do not resolve viewer sessions or select account/credential records. Synthetic tests cover
+cookie-invariance, input rejection before reads, bound filter values, excluded extra fields and
+generic private errors. Existing logging behavior was not expanded or suppressed.
+
+Before edits, eight original query scenarios passed. The two original aggregate orchestration tests
+were moved from the obsolete global implementation to the feature's real query/mapper/service suite;
+legacy wrapper tests remain. Focused combined suite PASS: 170 tests across 12 files. Typecheck and
+architecture PASS (863 modules/57 protected entrypoints); four handlers added with no exceptions.
+Final `npm run verify` PASS: skills/docs/architecture, typecheck, 1,712 tests plus the existing skip,
+lint (zero errors, 24 existing image warnings), SKIP_DB production build, 38-table schema metadata
+and Drizzle consistency, and diff check. Missing-provider build notices remain unchanged.
+No browser run is claimed: no screen source moved, and original/candidate visual verification remains
+required in the screen checkpoint. No auth/provider/schema/dependency/configuration or release changes.
+
+## Still required for C05
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.

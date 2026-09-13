@@ -10,6 +10,11 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock('@/lib/services', () => mocks);
 vi.mock('@/features/market/server', async () => ({
+  getMarketPageData: mocks.getMarketPageData,
+  getLiveMarketTransfers: mocks.fetchLiveMarketTransfers,
+  getBestValueDetails: mocks.fetchBestValueDetails,
+  getBiddingDuelDetails: mocks.fetchBiddingDuelDetails,
+  ...(await import('@/features/market/validation/market-transfers')),
   getMarketTrendsAnalysis: mocks.fetchMarketTrendsAnalysis,
   ...(await import('@/features/market/validation/market-trends')),
 }));

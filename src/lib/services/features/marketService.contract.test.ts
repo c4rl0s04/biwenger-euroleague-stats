@@ -10,6 +10,7 @@ const queries = vi.hoisted(() => ({
   getMarketOpportunities: vi.fn(),
 }));
 vi.mock('../../db', () => queries);
+vi.mock('@/features/market/server', () => ({ getMarketPageData: vi.fn() }));
 
 import {
   fetchMarketKPIs,
@@ -17,7 +18,6 @@ import {
   fetchMarketTrends,
   fetchRecentTransfers,
   fetchMarketOpportunities,
-  getMarketPageData,
   getMarketActivity,
 } from './marketService';
 
@@ -25,18 +25,7 @@ beforeEach(() => {
   vi.resetAllMocks();
 });
 
-it('preserves the page envelope, query defaults and nullable/string results', async () => {
-  const kpis = { total_transfers: '2', total_volume: null };
-  const transfers = [{ id: '007', precio: '100', vendedor: null }];
-  const trends = [{ date: '2026-01-01', volume: '100' }];
-  queries.getMarketKPIs.mockResolvedValue(kpis);
-  queries.getAllTransfers.mockResolvedValue(transfers);
-  queries.getMarketTrends.mockResolvedValue(trends);
-  expect(await getMarketPageData()).toEqual({ kpis, transfers, trends });
-  for (const query of [queries.getMarketKPIs, queries.getAllTransfers, queries.getMarketTrends]) {
-    expect(query).toHaveBeenCalledExactlyOnceWith();
-  }
-});
+// Aggregate envelope/default/failure coverage moved to the owned Market activity service suite.
 
 it('retains service-specific recent-transfer and opportunity defaults', async () => {
   queries.getRecentTransfers.mockResolvedValue([]);
@@ -62,12 +51,4 @@ it('does not cache repeated reads or replace query failures with empty results',
     await expect(service()).rejects.toThrow('fixture failure');
     expect(query).toHaveBeenCalledTimes(2);
   }
-});
-
-it('rejects the aggregate if one constituent fails', async () => {
-  queries.getMarketKPIs.mockResolvedValue({});
-  queries.getAllTransfers.mockRejectedValue(new Error('fixture transfer failure'));
-  queries.getMarketTrends.mockResolvedValue([]);
-  await expect(getMarketPageData()).rejects.toThrow('fixture transfer failure');
-  expect(queries.getMarketTrends).toHaveBeenCalledExactlyOnceWith();
 });

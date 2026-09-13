@@ -1,5 +1,9 @@
 {
   "entrypoints": [
+    "src/app/api/market/route.ts",
+    "src/app/api/market/transfers/route.ts",
+    "src/app/api/market/stats/value-details/route.ts",
+    "src/app/api/market/duels/details/route.ts",
     "src/app/api/market/trends/route.ts",
     "src/app/(app)/playoffs/page.tsx",
     "src/app/(app)/playoffs/predictions/[userId]/page.tsx",
