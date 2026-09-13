@@ -9,8 +9,9 @@ status: active
 
 # C05 Market read migration
 
-IN PROGRESS. The recommendation calculation is now feature-owned; broader Market queries, services
-and screens remain legacy. This receipt is not evidence that the complete Market call graph is reviewed.
+IN PROGRESS. Recommendation scoring and the trends query/service/API are now feature-owned;
+other Market queries, services and screens remain legacy. This receipt is not evidence that the
+complete Market call graph is reviewed.
 
 ## Initial entrypoint inventory
 
@@ -84,7 +85,38 @@ Drizzle check and diff check. Existing image warnings remain; no UI modules or r
 The five analytics tests were added afterward: final typecheck, scoped ESLint and full unit rerun
 passed with 1,641 tests plus one existing skip. Browser references remain required before moving screens.
 
-## Frozen scope and next work
+## Trends read boundary — checkpoint B
+
+Predecessor `deda942d` owns the accepted scoring extraction. The existing GET `/api/market/trends`
+now calls the Market service and edge validator directly. Typed query records are mapped to an
+explicit nested allowlist with established snake_case fields, nullable player names/prices and
+integer truncation. Null aggregates retain their existing JSON null behavior (NaN before JSON),
+not invented zero values. SQL, season resolution and chronological/transfer ordering are unchanged;
+the extracted SQL template is byte-identical to the predecessor.
+
+The former query function is a temporary re-export, not a second implementation. Existing global
+service callers (Market overview/section and Assistant) therefore use the same feature service.
+Internal 14-day reads remain supported; only the HTTP selector limits windows to 7/30/90/180/365.
+Its numeric-prefix parsing, default, errors, public max-age 60/stale 60 and private error headers
+are unchanged. No new Next dynamic/revalidation export or server cache was added.
+
+The reviewed trend path has no session/cookie resolver, provider call or mutation: it reads configured
+season-scoped transfer/player statistics. Its inputs are days and the application season, not viewer
+identity. This supports preserving its public policy; it is not a blanket security conclusion for
+all Market responses. New tests run the real handler/service/mapper against a mocked database,
+including ignored identity query/cookie inputs, empty/error behavior and boundary validation.
+
+Focused suite PASS: 127 tests across nine files. Full unit phase PASS: 1,665 plus one existing skip.
+One old route test initially mocked only the global service, causing a refused localhost connection;
+the mock now targets the new feature contract and the suite passes. No database was connected or
+mutated. Architecture PASS: 852 modules/53 protected entrypoints, including trends with no exception.
+Final `npm run verify` PASS: skills, graph, docs, typecheck, all 1,665 tests (one existing skip),
+lint (zero errors, 24 existing image warnings), production build with SKIP_DB, source/schema metadata
+(38 tables, no drift), Drizzle consistency and diff checks. Missing-provider build notices are unchanged.
+Documentation checks passed after updating this receipt. No UI was moved and no browser run is claimed;
+the original/candidate visual comparison remains part of the later screen migration.
+
+## Remaining scope
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.

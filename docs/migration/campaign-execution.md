@@ -35,8 +35,10 @@ viewport/Linux closure and C15 remains the release gate.
 C04 Playoffs is also locally accepted; see its [receipt](reports/c04-playoff-reads.md).
 Typed read/screen services, a deliberate Teams label contract, both pages and original-reference
 browser comparisons are verified. Full verification passed 1554 tests plus one skip.
-C05 public Market analytics is next, excluding private provider actions. Its
-[preliminary inventory](reports/c05-market-reads.md) records discovery, not implementation.
+C05 public Market analytics is in progress, excluding private provider actions. Its
+[receipt](reports/c05-market-reads.md) records recommendation extraction at `deda942d` and the
+subsequent trends query/service/API boundary. Remaining analytics, cross-feature helper closure and
+screens are not yet migrated; do not treat these checkpoints as complete Market acceptance.
 
 ## Inventory discovery
 

@@ -1,5 +1,6 @@
 {
   "entrypoints": [
+    "src/app/api/market/trends/route.ts",
     "src/app/(app)/playoffs/page.tsx",
     "src/app/(app)/playoffs/predictions/[userId]/page.tsx",
     "src/app/(app)/predictions/page.tsx",

@@ -39,6 +39,27 @@ superseded by the approved completion campaign, not by authorization for private
 
 ## Remaining C05 execution
 
+### Checkpoint B — trends read boundary
+
+Pinned predecessor: `deda942d`. The same coordinator owns this sequential checkpoint.
+Allowed edits: the Market trend query/function and model in the legacy Market module, new Market
+models/query/mapper/service/validation/server contract files, GET `/api/market/trends`, its tests,
+architecture entrypoint registration and this receipt/assignment. Keep the existing global service
+wrapper for the 30-day Market aggregate/section and 14-day Assistant callers; it must forward to
+the new single implementation. Do not edit Assistant or UI code.
+
+The complete trend call chain is the handler or numeric internal caller, global wrapper where
+retained, `getMarketTrendsAnalysis`, season resolver and one SELECT over fichajes/players. It uses
+no session, cookie, provider call or write. Selected facts are date, aggregate prices/counts and
+player name/transfer price; preserve nulls and integer truncation. Keep the original SQL and ordering.
+HTTP parsing retains default 30, parseInt quirks and allowed 7/30/90/180/365; internal 14 remains valid.
+Public success max-age 60/stale 60 and private error headers remain unchanged; no server cache added.
+
+Before extraction, a six-case original listing/trend suite passes, including a 14-day nullable-data
+projection. Add mapper, service, validation and real-handler contract tests, client/server boundary
+assertions and SQL argument evidence. Run focused tests, typecheck, architecture and full acceptance.
+Stop if an external contract/policy change is needed; completing trends alone does not complete C05.
+
 Complete the [receipt's route/helper inventory](../reports/c05-market-reads.md) for `/market`, its
 transfers/trends/bids/investments sections and the six existing read APIs before changing those flows.
 Own queries, allowlisting mappers, typed models, bounded services and screens; reuse Teams/Players

@@ -148,13 +148,7 @@ export interface RecordBid {
   player_team: string | null;
 }
 
-export interface MarketAnalysisDay {
-  date: string;
-  volume: number;
-  avg_price: number;
-  ops_count: number;
-  transfers: { player_name: string; price: number }[];
-}
+export type { MarketTrendDay as MarketAnalysisDay } from '@/features/market/public';
 
 export interface PositionAnalysis {
   mostSigned: { position: string; count: number } | null;
@@ -841,33 +835,7 @@ export async function getRecordBid(): Promise<RecordBid[]> {
  * Series: Volume, Avg Price
  * NEW VERSION used in Market Page Charts
  */
-export async function getMarketTrendsAnalysis(days = 30): Promise<MarketAnalysisDay[]> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT
-      TO_CHAR(to_timestamp(f.timestamp), 'YYYY-MM-DD') as date,
-      SUM(f.precio) as volume,
-      AVG(f.precio) as avg_price,
-      COUNT(*) as ops_count,
-      json_agg(json_build_object(
-        'player_name', p.name,
-        'price', f.precio
-      ) ORDER BY f.precio DESC) as transfers
-    FROM fichajes f
-    JOIN players p ON f.player_id = p.id
-    WHERE f.season_id = $1 AND f.timestamp >= extract(epoch from (now() - interval '${days} days'))
-    GROUP BY date
-    ORDER BY date ASC
-  `;
-  const result = await pgClient.query(query, [seasonId]);
-  return result.rows.map((r: any) => ({
-    date: r.date,
-    volume: parseInt(r.volume),
-    avg_price: parseInt(r.avg_price),
-    ops_count: parseInt(r.ops_count),
-    transfers: r.transfers || [],
-  }));
-}
+export { getMarketTrendsAnalysis } from '@/features/market/server';
 
 /**
  * Get Position Analysis

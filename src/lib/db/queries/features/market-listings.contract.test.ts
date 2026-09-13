@@ -9,6 +9,7 @@ const dependencies = vi.hoisted(() => ({
   form: vi.fn(),
 }));
 vi.mock('../../index', () => ({ pgClient: { query: dependencies.query }, db: {} }));
+vi.mock('@/lib/db/client', () => ({ db: { query: dependencies.query } }));
 vi.mock('../../season-context', () => ({ resolveReadSeasonId: dependencies.season }));
 vi.mock('../core/teams', () => ({
   getAllTeamsPlayoffProbabilities: dependencies.probabilities,
@@ -16,7 +17,7 @@ vi.mock('../core/teams', () => ({
 }));
 vi.mock('../core/playerForm', () => ({ getPlayerFormMap: dependencies.form }));
 
-import { getCurrentMarketListings } from './market';
+import { getCurrentMarketListings, getMarketTrendsAnalysis } from './market';
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -41,6 +42,39 @@ const strongPlayer = {
   real_price: '900000',
   seller_id: null,
 };
+
+it('preserves internal 14-day trend reads, numeric truncation and nullable transfer facts', async () => {
+  dependencies.query.mockResolvedValue({
+    rows: [
+      {
+        date: '2026-01-02',
+        volume: '10.99',
+        avg_price: '3.75',
+        ops_count: '2',
+        transfers: [
+          { player_name: null, price: null },
+          { player_name: 'Fixture Player', price: 10 },
+        ],
+      },
+    ],
+  });
+  expect(await getMarketTrendsAnalysis(14)).toEqual([
+    {
+      date: '2026-01-02',
+      volume: 10,
+      avg_price: 3,
+      ops_count: 2,
+      transfers: [
+        { player_name: null, price: null },
+        { player_name: 'Fixture Player', price: 10 },
+      ],
+    },
+  ]);
+  expect(dependencies.query).toHaveBeenCalledExactlyOnceWith(
+    expect.stringContaining("interval '14 days'"),
+    ['fixture-season']
+  );
+});
 
 it('preserves strong-player recommendation, raw compatibility fields and form enrichment', async () => {
   dependencies.form.mockResolvedValue(

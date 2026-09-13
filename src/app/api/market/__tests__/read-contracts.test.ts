@@ -9,6 +9,10 @@ const mocks = vi.hoisted(() => ({
   fetchBiddingDuelDetails: vi.fn(),
 }));
 vi.mock('@/lib/services', () => mocks);
+vi.mock('@/features/market/server', async () => ({
+  getMarketTrendsAnalysis: mocks.fetchMarketTrendsAnalysis,
+  ...(await import('@/features/market/validation/market-trends')),
+}));
 import { GET as market } from '../route';
 import { GET as stats } from '../stats/route';
 import { GET as value } from '../stats/value-details/route';
