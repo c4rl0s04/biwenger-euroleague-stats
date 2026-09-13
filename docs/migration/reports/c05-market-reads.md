@@ -281,6 +281,50 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Phone read projection checkpoint L (after `be0c2e5b`)
+
+Locally accepted for non-bids row projection. Transfers, trends and investments now call a feature-owned
+section service and receive explicit row models. The mapper preserves the old generic list's
+20-row cap, ordering, label/null precedence, value formatting and transfer links. Trends keeps
+its existing ordinal-only display; exposing additional trend fields is not part of this move.
+The service retains no cache, no identity lookup, default transfer query arguments, 30-day
+trend selection and the same complete analytics read for investments. No query changes.
+
+The page still calls `requireMobileRoute` before any read, preserving unknown-route handling
+and desktop redirects. Its bids path is explicitly retained with the existing non-iterable
+duel-object failure and loose legacy contract pending the separate behavior decision. No unsafe
+iterable cast, fabricated empty result or error suppression makes that path appear migrated.
+All section reads now reach the feature server contract; the page is registered in graph
+enforcement without an exception. The global list remains for other features and legacy bids.
+
+Tests compare actual legacy/new row HTML, limits, links, nulls and serialization; service tests
+cover dependency selection, arguments, ordering, failures and repeated uncached reads. Page
+tests retain the bids TypeError and guard-before-read behavior and add typed-model forwarding.
+Full verification and unchanged original browser comparisons are recorded below.
+
+Focused Market/API/page tests pass 196 cases. The first full run passed 1,920 tests and
+failed only the actual-source graph test's 5-second timeout (one existing skip). The same
+graph test run alone passed all eight cases in 3.38 seconds. A fresh full `npm run verify`
+then passed 1,921 tests plus one existing skip, typecheck, graph (918 modules/60 protected
+entrypoints), skills/docs, lint (24 existing image warnings), production build, offline
+38-table metadata/Drizzle checks and diff check. No timeout, assertion or policy was relaxed.
+This supports load-sensitive timing, not a proven underlying cause or a checker fix.
+Browser acceptance passed with no reference changes:
+
+- `npm run test:e2e:local -- tests/e2e/market.spec.ts --project=iphone-13 --project=desktop-1440`:
+  two passed, all five original empty-state images unchanged.
+- `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts
+--project=iphone-13 --project=desktop-1440`: two passed, all seven original populated
+  images unchanged, including transfers/investments and desktop transfer/duel interactions.
+
+Both runners shut down their disposable databases normally. The pre-existing bids TypeError
+remains in both server logs; no clean-all-Market-logs claim is made. Existing source comparisons
+cover the ordinal-only populated trend output; rolling chart/browser data and all-viewports/Linux
+closure remain outstanding. Scoped formatting and diff checks pass. React/UI review keeps a
+stateless row component, existing semantics/classes and no new fetching/cache layer.
+Remaining C05 work includes bids approval/ownership, full section screen composition, drawer
+contracts/categories, listing expansion, rolling charts and final visual/adapter closure.
+
 ### Duel presentation checkpoint K (after `7cfad1e0`)
 
 Locally accepted. `MarketDuelSelection` connects the parent selection state, typed matrix and

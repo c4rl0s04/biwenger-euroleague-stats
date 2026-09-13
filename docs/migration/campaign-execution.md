@@ -89,6 +89,16 @@ with unchanged lint/build warnings and schema metadata. Four default Team/Matche
 and two populated Market browser cases pass with unchanged references. No page/component
 source changed. The existing bids failure and remaining Market scope are still open.
 
+Checkpoint L follows committed K (`be0c2e5b`). Non-bids phone transfers/trends/investments
+now use a typed row projection and feature service; the section route no longer imports
+the legacy service barrel and is graph-protected without a new exception. The known bids
+failure remains isolated and uncorrected, so this is not full section/C05 closure. Focused
+tests pass 196 cases; full verify passes 1,921 plus one existing skip, graph 918/60,
+typecheck, lint (24 existing warnings), build and offline schema/Drizzle checks. One earlier
+graph timeout passed in isolation and did not recur in the full rerun; no guard was relaxed.
+Default and populated desktop/phone browser comparisons pass four cases with all twelve
+original images unchanged. Broader viewports/Linux and the remaining Market tasks stay open.
+
 Checkpoint K types the existing duel selection/matrix/detail presentation without changing
 their emitted runtime logic. Nine render contracts and 174 focused Market/API cases pass.
 Original baseline `df01154f` preserves the duel detail reference and click/keyboard/reverse

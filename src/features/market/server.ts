@@ -1,5 +1,9 @@
 import 'server-only';
 export {
+  getMobileMarketSection,
+  MARKET_SECTION_POLICY,
+} from './server/services/market-section.service';
+export {
   getMobileMarketOverview,
   MARKET_SCREEN_POLICY,
 } from './server/services/market-screen.service';

@@ -5,6 +5,21 @@ import { expect, it } from 'vitest';
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 const feature = (path: string) => read(`src/features/market/${path}`);
 
+it('owns non-bids phone projections and enforces the section route without a new exception', () => {
+  const path = 'src/app/(app)/market/[section]/page.tsx';
+  expect(read(path)).not.toMatch(/@\/lib\/(db|services)/);
+  expect(feature('models/market-section.ts')).not.toMatch(/\bany\b|\bDate\b|drizzle|ReturnType/);
+  expect(feature('components/MarketSectionRows.tsx')).not.toMatch(
+    /MobileRecordList|@\/lib\/(db|services)/
+  );
+  expect(feature('server/services/market-section.service.ts')).toMatch(/^import 'server-only';/);
+  const policy = JSON.parse(read('scripts/architecture/policy.json'));
+  expect(policy.entrypoints).toContain(path);
+  expect(policy.exceptions.some((entry: { edge: string }) => entry.edge.includes(path))).toBe(
+    false
+  );
+});
+
 it('keeps the public contract and trend models independent from server and database code', () => {
   expect(feature('public.ts')).not.toMatch(/server|queries|drizzle/);
   expect(feature('models/market-trends.ts')).not.toMatch(/\bany\b|\bDate\b|drizzle|ReturnType/);
