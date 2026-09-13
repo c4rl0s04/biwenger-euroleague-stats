@@ -251,6 +251,34 @@ database-disabled production build, 38-table metadata audit, Drizzle consistency
 Missing-provider build notices remain unchanged. No browser or visual acceptance is claimed;
 the screen checkpoint must compare original and candidate desktop/mobile output.
 
+## Screen baseline checkpoint — source `91a3ea7f`
+
+Market page and component sources are identical to main `354f66e1` (an empty scoped
+Git diff confirms this). Before moving presentation, five macOS empty-state references
+cover desktop overview and phone overview/transfers/trends/investments. These do not
+cover populated listings, analytics drawers, all viewports or Linux, and are not C05
+acceptance. No application source or synthetic database fixture changed in this checkpoint.
+
+Two real-page characterization tests pass: the mobile guard precedes reads, and bids
+throws TypeError when the real `BiddingDuelsStats` object is spread as an iterable.
+This is pre-existing in unchanged main screen source. Its behavior correction needs
+explicit approval; do not silently flatten or omit duel data during migration. The
+browser runner also observes this server failure during automatic phone-link prefetch;
+its browser/API guard does not detect every RSC-prefetch server failure. A green
+empty-state browser test therefore does not establish clean application logs.
+
+Typecheck and the two focused section tests pass. References were captured against the
+unchanged screen source; the initial desktop test selector matched both navigation and
+heading and was corrected to select the heading, without an application change.
+Fresh non-updating comparison PASS: `npm run test:e2e:local -- tests/e2e/market.spec.ts
+--project=iphone-13 --project=desktop-1440` (two tests, five unchanged screenshots).
+The disposable production build passed and the runner stopped its database normally.
+Missing-provider notices remain; this run also logged two destination-stream-close errors.
+No guard was suppressed and no clean-log claim is made. Populated-data, drawer, bids,
+Linux and full-viewport acceptance remain outstanding. Formatting, documentation-link
+and diff checks are required for this test/evidence commit; no new runtime implementation
+is claimed and the prior G full-suite result remains the last full application acceptance.
+
 ## Still required for C05
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations

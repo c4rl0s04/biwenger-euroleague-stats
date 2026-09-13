@@ -58,6 +58,13 @@ desktop/phone verification remain pending; private operations stay frozen under 
 
 ## Inventory discovery
 
+C05 screen baseline now pins five empty-state desktop/phone references against unchanged
+screen source at `91a3ea7f`. Two real-page characterization tests and a fresh two-project
+non-updating browser comparison pass. The receipt records the pre-existing phone bids
+failure and stream-close logs; neither is suppressed or treated as full screen acceptance.
+Populated data/drawers and actual screen migration remain next, with a separate approval
+required for the bids behavior correction. No private operation or production change occurred.
+
 [Source inventory](campaign-inventory.json) records 794 non-test source modules and
 136 discovered framework/auth entrypoints (including root boundaries), with direct imports and preliminary package
 assignments. It uses the repository's existing TypeScript-resolved architecture graph.
