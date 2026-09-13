@@ -9,8 +9,8 @@ status: active
 
 # C05 Market read migration
 
-PRELIMINARY INVENTORY ONLY. No Market application edits yet. Final source baseline must be pinned
-after C04 acceptance; this receipt is not evidence that the complete Market call graph is reviewed.
+IN PROGRESS. The recommendation calculation is now feature-owned; broader Market queries, services
+and screens remain legacy. This receipt is not evidence that the complete Market call graph is reviewed.
 
 ## Initial entrypoint inventory
 
@@ -45,8 +45,6 @@ Team game counts and Player form helpers before its SQL and scoring projection. 
 Teams/Players contracts, preserving these helper semantics and query order rather than copying queries.
 Do not confuse Team playoff probabilities with the separate Playoffs prediction competition.
 
-## Frozen scope and next work
-
 ## Original-contract checkpoint
 
 Application baseline is `23b6af65`. Added characterization tests execute all six real read
@@ -59,9 +57,38 @@ Focused Market/API plus basic service suite: 36 tests PASS across four files. Ty
 An initial service-test run lacked the standard server-only test mock; adding that test-only mock
 resolved the import failure without changing application code. These checks characterize the current
 implementation; they do not establish query safety, complete data-model coverage or C05 acceptance.
-The analytics enrichment service, query/helper closure and original browser references remain next.
+The analytics service now additionally has five original-contract tests: all 31 aggregate keys and
+constituent defaults, first exact-name match (including null), text manager IDs, unmatched records,
+buyer aliases, two-step bidder enrichment, propagated failures and narrow-loader argument forwarding.
+The second bidder currently overwrites the shared user_color_index field; this quirk is pinned rather
+than silently corrected. All five tests pass against the unchanged global analytics service.
+
+## Recommendation extraction — checkpoint A
+
+The eight-factor listing recommendation now belongs to `src/features/market/lib`, with explicit
+input/output types and a client-safe public contract. The legacy query delegates to that calculation;
+its SQL, form enrichment, helper invocation order and final score/trend/price sorting are unchanged.
+The pure output allowlists its calculated fields; full listing/model allowlisting is still pending.
+
+Before extraction, five listing-query characterization scenarios were established (four before the
+move, plus stable ordering after). The complete focused suite passed 100 tests across six files.
+Forty-seven frozen original-score cases and ten clamp/label boundary examples exercise the extracted
+formula, including exact label/color/dot/icon output. Numeric strings, nulls, truthy fallbacks and NaN
+price behavior are preserved. These are not route-validation policy changes.
+
+Additional read-only source comparison confirmed all 44 template literals remain byte-identical to
+`ecb06da3`; 12,000 deterministic original/candidate formula comparisons matched every output field.
+Full `npm run verify` passed: skills, graph (846 modules/52 protected entrypoints), docs, typecheck,
+1,636 tests plus one existing skip, lint, database-disabled production build, 38-table schema metadata,
+Drizzle check and diff check. Existing image warnings remain; no UI modules or route contracts changed.
+The five analytics tests were added afterward: final typecheck, scoped ESLint and full unit rerun
+passed with 1,641 tests plus one existing skip. Browser references remain required before moving screens.
+
+## Frozen scope and next work
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
 Next: complete method/export/caller inventory, exact cache and serialization contracts, original
-service/HTTP characterization tests, then bounded query/model/service and screen ownership.
+query characterization tests, then bounded query/model/service and screen ownership. Team probability
+and counts still live in legacy Team queries. Player form already has a deliberate Players service;
+do not add a second form query or introduce a Teams-to-Players barrel cycle while closing adapters.
