@@ -12,14 +12,17 @@ const deps = vi.hoisted(() => ({
   mobile: vi.fn(),
   missing: vi.fn(),
 }));
-vi.mock('@/features/tournaments/server', () => ({
+vi.mock('server-only', () => ({}));
+vi.mock('@/features/tournaments/server', () => import('./services/tournament-screen.service'));
+vi.mock('./services/tournament-round.service', () => ({ getTournamentInitialRoundId: deps.round }));
+vi.mock('./services/tournament-read.service', async () => ({
+  ...(await vi.importActual('./services/tournament-read.service')),
   getTournamentBracketPresentation: deps.bracket,
   getTournamentDesktopDetailPresentation: deps.desktopPresentation,
   getTournamentPhoneDetailPresentation: deps.presentation,
   getTournamentDetails: deps.detail,
   getStandings: deps.standings,
   getFixtures: deps.fixtures,
-  getTournamentInitialRoundId: deps.round,
 }));
 vi.mock('@/features/tournaments/public', () => ({
   DesktopTournamentDetailScreen: deps.desktop,

@@ -1,4 +1,8 @@
 export type {
+  TournamentCatalogueScreenModel,
+  TournamentDetailScreenModel,
+} from './models/tournament-screen';
+export type {
   TournamentStanding,
   TournamentFixture,
   ManagerTournamentParticipation,

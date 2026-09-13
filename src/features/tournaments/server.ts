@@ -1,5 +1,11 @@
 import 'server-only';
 
+export {
+  getTournamentCatalogueScreen,
+  getTournamentDetailScreen,
+  TOURNAMENT_SCREEN_POLICY,
+} from './server/services/tournament-screen.service';
+
 export { getTournamentDesktopDetailPresentation } from './server/services/tournament-read.service';
 
 export { getTournamentBracketPresentation } from './server/services/tournament-read.service';

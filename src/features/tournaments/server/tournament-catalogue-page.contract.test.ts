@@ -9,9 +9,14 @@ const deps = vi.hoisted(() => ({
   presentation: vi.fn(),
   desktopPresentation: vi.fn(),
 }));
-vi.mock('@/features/tournaments/server', () => ({
-  getAllTournaments: deps.list,
+vi.mock('server-only', () => ({}));
+vi.mock('@/features/tournaments/server', () => import('./services/tournament-screen.service'));
+vi.mock('./services/tournament-statistics.service', () => ({
   getGlobalTournamentStats: deps.statistics,
+}));
+vi.mock('./services/tournament-read.service', async () => ({
+  ...(await vi.importActual('./services/tournament-read.service')),
+  getAllTournaments: deps.list,
   getTournamentCataloguePresentation: deps.presentation,
   getDesktopTournamentCataloguePresentation: deps.desktopPresentation,
 }));

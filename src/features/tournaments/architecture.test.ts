@@ -2,6 +2,21 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 const read = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf8');
+it('keeps catalogue/detail pages on complete screen-model service contracts', () => {
+  for (const [path, service] of [
+    ['src/app/(app)/tournaments/page.tsx', 'getTournamentCatalogueScreen'],
+    ['src/app/(app)/tournaments/[id]/page.tsx', 'getTournamentDetailScreen'],
+  ]) {
+    const page = read(path);
+    expect(page).toContain(service);
+    expect(page).not.toMatch(
+      /getAllTournaments|getTournamentDetails|getStandings|getFixtures|Presentation\(|\.data\b|Promise\.all/
+    );
+  }
+  expect(read('src/features/tournaments/server/services/tournament-screen.service.ts')).toMatch(
+    /^import 'server-only';/
+  );
+});
 it('keeps bracket scoring and snapshot interpretation out of client presentation', () => {
   const bracket = read('src/features/tournaments/components/TournamentBracket.js');
   expect(bracket).not.toMatch(/tournament\??\.|phaseMap|processedIds|home_score|away_score/);
