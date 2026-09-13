@@ -4,8 +4,11 @@ const dependencies = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
 vi.mock('../../index', () => ({ pgClient: { query: dependencies.query }, db: {} }));
 vi.mock('@/lib/db/client', () => ({ db: { query: dependencies.query } }));
 vi.mock('../../season-context', () => ({ resolveReadSeasonId: dependencies.season }));
-vi.mock('../core/teams', () => ({}));
-vi.mock('../core/playerForm', () => ({}));
+vi.mock('@/features/players/server', () => ({
+  getPlayerFormStats: vi.fn(() => {
+    throw new Error('Transfer reads must not request Player form');
+  }),
+}));
 import {
   getLiveMarketTransfers,
   getBestValueDetails,

@@ -16,6 +16,23 @@ vi.mock('@/features/teams/server', () => ({
   getAllTeamMatchesCount: dependencies.counts,
 }));
 vi.mock('../core/playerForm', () => ({ getPlayerFormMap: dependencies.form }));
+vi.mock('@/features/players/server', () => ({
+  getPlayerFormStats: async (...args: number[]) => {
+    const map = await dependencies.form(...args);
+    return Array.from(
+      map.entries(),
+      ([playerId, row]: [
+        number,
+        { recent_scores: string; avg_recent_points: number; avg_form_score: number },
+      ]) => ({
+        playerId,
+        recentScores: row.recent_scores,
+        averageRecentPoints: row.avg_recent_points,
+        formScore: row.avg_form_score,
+      })
+    );
+  },
+}));
 
 import { getCurrentMarketListings, getMarketTrendsAnalysis } from './market';
 

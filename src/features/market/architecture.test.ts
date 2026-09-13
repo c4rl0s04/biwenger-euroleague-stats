@@ -47,6 +47,19 @@ it('keeps transfer/detail services and models off legacy database-shaped boundar
   }
 });
 
+it('owns catalogue orchestration with deliberate cross-feature contracts and allowlisted models', () => {
+  const service = feature('server/services/market-catalogue.service.ts');
+  expect(service).toContain("from '@/features/players/server'");
+  expect(service).toContain("from '@/features/teams/server'");
+  expect(service).not.toMatch(/@\/lib\/(db|services)|playerForm|\bany\b/);
+  const query = feature('server/queries/market-catalogue.query.ts');
+  expect(query).toMatch(/^import 'server-only';/);
+  expect(query).not.toMatch(/features\/players|features\/teams|services\//);
+  expect(feature('models/market-catalogue.ts')).not.toMatch(/\bany\b|\bDate\b|drizzle|queries/);
+  expect(feature('server/mappers/market-catalogue.mapper.ts')).not.toContain('...row');
+  expect(read('src/lib/db/queries/features/market.ts')).not.toContain('getPlayerFormMap');
+});
+
 it('owns basic activity orchestration and registers its HTTP boundary', () => {
   expect(feature('models/market-activity.ts')).not.toMatch(/\bany\b|\bDate\b|drizzle|ReturnType/);
   expect(feature('server/services/market-activity.service.ts')).toMatch(/^import 'server-only';/);

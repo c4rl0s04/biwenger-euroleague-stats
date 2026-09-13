@@ -133,5 +133,18 @@ Private offers/accept/reject/remove/sell/sell-all, linking, credentials and prov
 frozen. A URL name is not evidence that a response is public. Finish transitive output/access review
 before affirming existing public caching is safe. No production operations, push or deployment.
 
+### Checkpoint F — Market listings and opportunities
+
+Pinned predecessor: `51f84bf6`. Extract the two existing listing/opportunity SELECTs, typed
+records, allowlisting mappers and bounded Market services. Services reuse Players/server form
+and Teams/server competition contracts. Preserve three-round opportunity and five-round listing
+windows, independent season reads, helper-before-listing query ordering, limits, ranking, nulls,
+snake_case fields and existing errors/cache behavior. Keep legacy forwarding exports for the
+Market aggregate, Dashboard and Assistant; do not change those features or provider commands.
+The shared Player form implementation remains single-owned pending its other consumer closure;
+do not introduce a Teams-to-Players barrel cycle or duplicate its SQL. Characterize original
+opportunities before extraction and retain listing baselines. Verify SQL, projection safety,
+ordering, service failures, cross-feature graph, full checks and document remaining screen work.
+
 Final acceptance follows the [completion plan](../completion-plan.md), [worker protocol](../worker-protocol.md)
 and [review checklist](../reviewer-checklist.md). Record logical commit SHAs and all validation results.

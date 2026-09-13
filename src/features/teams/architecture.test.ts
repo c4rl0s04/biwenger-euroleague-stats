@@ -12,9 +12,9 @@ describe('teams feature boundaries', () => {
       expect(query).not.toContain('/services/');
       expect(query).not.toContain('core/teams');
     }
-    const marketQuery = source('../../lib/db/queries/features/market.ts');
-    expect(marketQuery).toContain("from '@/features/teams/server'");
-    expect(marketQuery).not.toContain('core/teams');
+    const marketService = source('../market/server/services/market-catalogue.service.ts');
+    expect(marketService).toContain("from '@/features/teams/server'");
+    expect(marketService).not.toContain('core/teams');
     expect(source('./public.ts')).not.toContain('team-profile-facts');
   });
 

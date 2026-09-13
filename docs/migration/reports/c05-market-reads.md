@@ -181,6 +181,39 @@ remain unchanged. This accepts checkpoint E only, not the incomplete Market feat
 No browser comparison is claimed because no presentation source changed. Market screen and
 campaign-wide visual acceptance remain outstanding.
 
+## Checkpoint F — Listing and opportunity services
+
+Predecessor: `51f84bf6`. Current listings and available-player opportunities now use owned
+Market queries, explicit records, allowlisting mappers and bounded catalogue services. The
+legacy functions/types forward to the feature; Market aggregate, Dashboard and Assistant
+wrappers retain their names/defaults. Market no longer imports the global Player form helper.
+Its service uses Players/server and Teams/server, without a cross-feature internal import or
+new cycle. The underlying shared Player form implementation still has Team and Player callers;
+its remaining ownership closure is not claimed complete by this checkpoint.
+
+Preserved: opportunity SQL limit 100/default output 3 and caller-provided slicing, three-round
+penalized form versus listing five-round played-game average, stable recommendation/value/trend
+ordering, independent season resolutions, helper-before-listing SELECT order, nullable joined
+facts, numeric compatibility fields and existing no-cache/error behavior. Listing match dates
+become ISO strings at the mapper boundary with unchanged JSON values. No extra SQL columns can
+escape via row spreading. No handler, screen, authentication or private operation was changed.
+
+Before extraction, the six listing/trend and two opportunity characterization cases passed.
+The new baseline test initially needed the normal server-only test mock; no application defect
+or database access was involved. After extraction, focused Teams/Players/Market validation passes
+199 tests in 26 files and typecheck passes. Both catalogue SQL templates match the predecessor;
+500 opportunity and 500 listing JSON comparisons match the original implementation. Tests cover
+allowlisting, serializable dates, domain contract inputs, missing form, limits, ordering and
+season/helper/query failures. Graph passes at 875 modules/57 entrypoints with no new exceptions.
+The first full run exposed an obsolete empty Player-form mock in the transfer compatibility
+suite. It now stubs the deliberate Players contract and throws if transfer reads accidentally
+request form; all eight transfer cases pass. The rerun passes 1,751 unit tests plus one existing
+skip. Full `npm run verify` PASS: skills/docs/architecture, typecheck, full unit suite, lint
+(zero errors/24 unchanged image warnings), database-disabled production build, 38-table schema
+metadata audit, Drizzle consistency and diff check. Missing-provider build notices are unchanged.
+No browser run is claimed for this data-only checkpoint; original/candidate Market screen
+verification remains required before accepting C05 as a complete feature.
+
 ## Still required for C05
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations

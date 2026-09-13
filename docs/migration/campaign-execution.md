@@ -44,6 +44,12 @@ Checkpoint E closes Team competition helper ownership and moves Team Profile det
 above queries. Its focused 197-test suite and full verification (1,742 tests plus one skip) pass;
 SQL and original probability comparisons are unchanged. Player form and remaining Market consumers
 still need closure. See the C05 receipt before continuing.
+Checkpoint F owns Market listing/opportunity queries, models, mappers and services. Market now
+consumes Players form through its deliberate server contract, not the global query. Legacy
+forwarders preserve aggregate/Dashboard/Assistant callers. Focused checks pass 199 tests; full
+verification passes 1,751 tests plus one skip, with unchanged lint/build warnings. Remaining C05
+work is recent activity/price changes, the large analytics aggregate and screens. Shared Player
+form still has non-Market callers and remains explicitly pending ownership closure.
 
 ## Inventory discovery
 

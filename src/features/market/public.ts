@@ -1,4 +1,5 @@
 export { scoreMarketListing } from './lib/market-recommendation';
+export type { CurrentMarketListing, MarketOpportunity } from './models/market-catalogue';
 export type { MarketTrendDay } from './models/market-trends';
 export type {
   MarketActivityTransfer,

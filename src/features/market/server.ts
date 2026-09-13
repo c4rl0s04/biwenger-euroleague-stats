@@ -1,5 +1,10 @@
 import 'server-only';
 export {
+  getCurrentMarketListings,
+  getMarketOpportunities,
+  MARKET_CATALOGUE_POLICY,
+} from './server/services/market-catalogue.service';
+export {
   getAllTransfers,
   getMarketTrends,
   getMarketKPIs,

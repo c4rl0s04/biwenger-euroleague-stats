@@ -1,39 +1,11 @@
-import { scoreMarketListing } from '@/features/market/public';
-import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '@/features/teams/server';
 import { db, pgClient } from '../../index';
-import { getPlayerFormMap } from '../core/playerForm';
 import { resolveReadSeasonId } from '../../season-context';
 
 // ==========================================
 // INTERFACES
 // ==========================================
 
-export interface CurrentMarketListing {
-  player_id: number;
-  name: string;
-  img: string;
-  position: string;
-  team_id: number | null;
-  team: string | null;
-  team_img: string | null;
-  price: number;
-  real_price: number;
-  price_trend: number;
-  avg_recent_points: number;
-  recent_scores: string;
-  value_score: number;
-  total_points: number;
-  season_avg: number;
-  seller_id: string | null;
-  seller_name: string | null;
-  seller_icon: string | null;
-  seller_color: number | null;
-  next_opponent_id: number | null;
-  next_opponent_name: string | null;
-  next_opponent_img: string | null;
-  next_match_date: string | null;
-  player_team: string | null;
-}
+export type { CurrentMarketListing } from '@/features/market/public';
 
 export interface Transfer {
   id: number;
@@ -56,19 +28,7 @@ export interface RecentTransfer extends Transfer {
 
 export type { MarketActivityTrend as MarketTrend } from '@/features/market/public';
 
-export interface MarketOpportunity {
-  player_id: number;
-  name: string;
-  position: string;
-  team_id: number | null;
-  team: string | null;
-  price: number;
-  price_trend: number;
-  avg_recent_points: number;
-  recent_scores: string;
-  value_score: number;
-  player_team: string | null;
-}
+export type { MarketOpportunity } from '@/features/market/public';
 
 export interface PriceChange {
   player_id: number;
@@ -449,51 +409,7 @@ export { getMarketTrends } from '@/features/market/server';
  * @param {number} limit - Number of opportunities to return
  * @returns {Promise<MarketOpportunity[]>} List of recommended buys
  */
-export async function getMarketOpportunities(limit = 3): Promise<MarketOpportunity[]> {
-  const seasonId = await resolveReadSeasonId();
-  // 1. Fetch available players basic info
-  // Fetch more than 'limit' to ensure we can rank them correctly by value_score
-  const query = `
-    SELECT
-      p.id as player_id,
-      p.name,
-      p.position,
-      t.id as team_id,
-      t.name as team,
-      COALESCE(ps.price, p.price) as price,
-      COALESCE(ps.price_increment, p.price_increment, 0) as price_trend
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
-    WHERE ps.season_id = $1
-      AND ps.owner_id IS NULL
-      AND COALESCE(ps.price, p.price) > 0
-    ORDER BY COALESCE(ps.price_increment, p.price_increment, 0) DESC
-    LIMIT 100
-  `;
-
-  const [rows, formMap] = await Promise.all([
-    pgClient.query(query, [seasonId]).then((r) => r.rows),
-    getPlayerFormMap(3),
-  ]);
-
-  // 2. Merge with form data and rank by value_score
-  return rows
-    .map((row: any) => {
-      const form = formMap.get(Number(row.player_id));
-      const avg = form?.avg_form_score || 0;
-      return {
-        ...row,
-        avg_recent_points: avg,
-        recent_scores: form?.recent_scores || '',
-        // Value score based on form performance per millon
-        value_score:
-          avg > 0 ? parseFloat(((avg * 1000000) / Math.max(Number(row.price), 1)).toFixed(2)) : 0,
-      };
-    })
-    .sort((a, b) => b.value_score - a.value_score || b.price_trend - a.price_trend)
-    .slice(0, limit);
-}
+export { getMarketOpportunities } from '@/features/market/server';
 
 /**
  * Get significant price changes in the last period
@@ -2159,115 +2075,4 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
  * Enriches them with recent form, full season stats, seller info, and next opponent info.
  * @returns {Promise<CurrentMarketListing[]>}
  */
-export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    WITH PlayerTotals AS (
-      SELECT
-        player_id,
-        (SELECT COUNT(*) FROM player_round_stats WHERE season_id = $1 AND player_id = prs.player_id) as games_played,
-        ROUND(AVG(fantasy_points), 1) as season_avg,
-        SUM(fantasy_points) as total_points,
-        MIN(fantasy_points) as min_points,
-        MAX(fantasy_points) as max_points
-      FROM player_round_stats prs
-      WHERE season_id = $1
-      GROUP BY player_id
-    ),
-    TeamNextMatch AS (
-      SELECT
-        team_id,
-        opponent_id,
-        opponent_name,
-        opponent_img,
-        date
-      FROM (
-        SELECT
-          t.id as team_id,
-          CASE WHEN m.home_id = t.id THEN m.away_id ELSE m.home_id END as opponent_id,
-          CASE WHEN m.home_id = t.id THEN ta.name ELSE th.name END as opponent_name,
-          CASE WHEN m.home_id = t.id THEN ta.img ELSE th.img END as opponent_img,
-          m.date,
-          ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY m.date ASC) as rn
-        FROM teams t
-        JOIN matches m ON m.home_id = t.id OR m.away_id = t.id
-        LEFT JOIN teams th ON m.home_id = th.id
-        LEFT JOIN teams ta ON m.away_id = ta.id
-        WHERE m.season_id = $1 AND m.date > NOW()
-      ) sub
-      WHERE rn = 1
-    )
-    SELECT
-      ml.player_id,
-      p.name,
-      p.img,
-      p.position,
-      t.id as team_id,
-      t.name as team,
-      t.img as team_img,
-      ml.price,
-      COALESCE(ps.price, p.price) as real_price,
-      COALESCE(ps.price_increment, p.price_increment, 0) as price_trend,
-      COALESCE(pt.total_points, 0) as total_points,
-      COALESCE(pt.season_avg, 0) as season_avg,
-      pt.min_points,
-      pt.max_points,
-      pt.games_played,
-      ml.seller_id,
-      u.name as seller_name,
-      u.icon as seller_icon,
-      u.color_index as seller_color,
-      t.code as player_team,
-      -- Next opponent logic
-      tnm.opponent_id as next_opponent_id,
-      tnm.opponent_name as next_opponent_name,
-      tnm.opponent_img as next_opponent_img,
-      tnm.date as next_match_date
-    FROM market_listings ml
-    JOIN players p ON ml.player_id = p.id
-    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = ml.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
-    LEFT JOIN users u ON ml.seller_id::text = u.id::text
-    LEFT JOIN PlayerTotals pt ON p.id = pt.player_id
-    LEFT JOIN TeamNextMatch tnm ON tnm.team_id = COALESCE(ps.team_id, p.team_id)
-    WHERE ml.season_id = $1
-      AND ml.listed_at = (SELECT MAX(listed_at) FROM market_listings WHERE season_id = $1)
-    ORDER BY pt.season_avg DESC NULLS LAST, ml.price DESC
-  `;
-
-  const [teamPlayoffProbs, teamMatchCounts, formMap] = await Promise.all([
-    getAllTeamsPlayoffProbabilities(),
-    getAllTeamMatchesCount(),
-    getPlayerFormMap(),
-  ]);
-
-  const rows = (await pgClient.query(query, [seasonId])).rows.map((row: any) => {
-    const form = formMap.get(Number(row.player_id));
-    return {
-      ...row,
-      recent_scores: form?.recent_scores ?? null,
-      avg_recent_points: form?.avg_recent_points ?? 0,
-      // value_score computed here using season total points vs current price
-      value_score: row.total_points
-        ? parseFloat(
-            ((Number(row.total_points) * 1_000_000) / Math.max(Number(row.price), 1)).toFixed(2)
-          )
-        : 0,
-    };
-  });
-
-  const mappedRows = rows.map((row) => ({
-    ...row,
-    ...scoreMarketListing(row, teamMatchCounts, teamPlayoffProbs),
-  }));
-  // Sort by the new advanced algorithm score descending, then by price trend, then by price
-  return mappedRows.sort((a, b) => {
-    if (b.recommendation_score !== a.recommendation_score) {
-      return b.recommendation_score - a.recommendation_score;
-    }
-    if (b.price_trend !== a.price_trend) {
-      return b.price_trend - a.price_trend;
-    }
-    return b.price - a.price;
-  });
-}
+export { getCurrentMarketListings } from '@/features/market/server';
