@@ -8,7 +8,8 @@ import type {
   TeamProfileViewModel,
   TeamRosterPlayerViewModel,
 } from '../../models/team-profile';
-import type { TeamProfileDetailsQueryResult, TeamRosterRow } from '../queries/team-profile.query';
+import type { TeamRosterRow } from '../queries/team-profile.query';
+import type { TeamProfileDetailsFacts } from '../records/team-profile-facts';
 
 function toNumber(value: number | string | null | undefined): number {
   const parsed = Number(value);
@@ -16,7 +17,7 @@ function toNumber(value: number | string | null | undefined): number {
 }
 
 export function mapTeamProfileDetails(
-  result: TeamProfileDetailsQueryResult
+  result: TeamProfileDetailsFacts
 ): Omit<TeamProfileViewModel, 'roster' | 'upcomingMatches' | 'recentMatches'> {
   const { row } = result;
   return {

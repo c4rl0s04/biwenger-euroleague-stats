@@ -40,6 +40,10 @@ C05 public Market analytics is in progress, excluding private provider actions. 
 trends boundary at `e3dad14b`, and subsequent transfer/detail/basic-summary boundaries. Five scoped
 read APIs now use feature services; the large stats aggregate, recent activity/opportunities,
 cross-feature helper closure and screens remain. Do not treat these checkpoints as complete Market acceptance.
+Checkpoint E closes Team competition helper ownership and moves Team Profile detail orchestration
+above queries. Its focused 197-test suite and full verification (1,742 tests plus one skip) pass;
+SQL and original probability comparisons are unchanged. Player form and remaining Market consumers
+still need closure. See the C05 receipt before continuing.
 
 ## Inventory discovery
 

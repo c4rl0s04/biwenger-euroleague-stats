@@ -6,6 +6,18 @@ function source(relativePath: string) {
 }
 
 describe('teams feature boundaries', () => {
+  it('keeps competition orchestration above queries and Market behind the Team contract', () => {
+    for (const file of ['team-profile.query.ts', 'team-competition.query.ts']) {
+      const query = source(`./server/queries/${file}`);
+      expect(query).not.toContain('/services/');
+      expect(query).not.toContain('core/teams');
+    }
+    const marketQuery = source('../../lib/db/queries/features/market.ts');
+    expect(marketQuery).toContain("from '@/features/teams/server'");
+    expect(marketQuery).not.toContain('core/teams');
+    expect(source('./public.ts')).not.toContain('team-profile-facts');
+  });
+
   it('keeps the public barrel client-safe and marks the server barrel explicitly', () => {
     const publicSource = source('./public.ts');
     const serverSource = source('./server.ts');

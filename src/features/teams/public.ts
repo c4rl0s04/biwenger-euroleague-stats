@@ -15,3 +15,4 @@ export type {
   TeamRosterPlayerViewModel,
 } from './models/team-profile';
 export type { TeamName } from './models/team-name';
+export type { TeamMatchCounts, TeamQualificationProbabilities } from './models/team-competition';

@@ -156,11 +156,37 @@ and Drizzle consistency, and diff check. Missing-provider build notices remain u
 No browser run is claimed: no screen source moved, and original/candidate visual verification remains
 required in the screen checkpoint. No auth/provider/schema/dependency/configuration or release changes.
 
+## Checkpoint E — Team competition ownership
+
+Predecessor: `d67f2e7b`. Team match counts and qualification probabilities now have
+Team-owned records, SELECT queries, a pure mapper and services exposed through Teams/server.
+Market consumes that deliberate contract; the old Team query exports only forward these four
+helpers. Team Profile detail orchestration moved above its query layer so queries do not call
+services. Internal assembled records stay server-side and the existing profile mapper still
+produces the public view model. No new cache, identity policy or UI behavior is introduced.
+
+Original helper and profile orchestration characterization passed before extraction. The
+expanded Teams/Players/Market focused suite passes 197 tests in 25 files; typecheck passes.
+All five competition and three profile SQL templates match the predecessor exactly. A read-only
+deterministic comparison of the original function and extracted mapper passes 500 generated
+standings/form/opponent cases. Added formula tests cover thresholds, absent form/tenth place,
+duplicate opponents, numeric counts and clamping. Graph passes at 870 modules/57 entrypoints.
+The initial placement of internal facts under server/models was correctly rejected by the
+presentation rule; they now live under server/records, with no policy exception or weakening.
+
+Full `npm run verify` PASS: skills, docs, architecture, typecheck, 1,742 unit tests plus
+one existing skip, lint (zero errors/24 unchanged image warnings), database-disabled production
+build, 38-table metadata audit, Drizzle consistency and diff check. Missing-provider build notices
+remain unchanged. This accepts checkpoint E only, not the incomplete Market feature.
+No browser comparison is claimed because no presentation source changed. Market screen and
+campaign-wide visual acceptance remain outstanding.
+
 ## Still required for C05
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
 Next: complete method/export/caller inventory, exact cache and serialization contracts, original
 query characterization tests, then bounded query/model/service and screen ownership. Team probability
-and counts still live in legacy Team queries. Player form already has a deliberate Players service;
+and counts now have owned contracts; their legacy forwarding exports remain for consumer closure.
+Player form already has a deliberate Players service;
 do not add a second form query or introduce a Teams-to-Players barrel cycle while closing adapters.

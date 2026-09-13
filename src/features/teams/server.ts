@@ -1,4 +1,10 @@
 import 'server-only';
+export {
+  getTeamMatchesCount,
+  getAllTeamMatchesCount,
+  getAllTeamsPlayoffProbabilities,
+  getTeamPlayoffProbability,
+} from './server/services/team-competition.service';
 export { getTeamNames } from './server/services/team-names.service';
 
 export { toTeamProfileApiModel } from './server/mappers/team-profile.mapper';

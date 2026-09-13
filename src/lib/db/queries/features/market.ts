@@ -1,5 +1,5 @@
 import { scoreMarketListing } from '@/features/market/public';
-import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '../core/teams';
+import { getAllTeamsPlayoffProbabilities, getAllTeamMatchesCount } from '@/features/teams/server';
 import { db, pgClient } from '../../index';
 import { getPlayerFormMap } from '../core/playerForm';
 import { resolveReadSeasonId } from '../../season-context';

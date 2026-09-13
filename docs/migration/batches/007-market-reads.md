@@ -39,6 +39,26 @@ superseded by the approved completion campaign, not by authorization for private
 
 ## Remaining C05 execution
 
+### Checkpoint E — Team recommendation dependencies
+
+Base `d67f2e7b`; coordinator only in the existing campaign worktree. Own the four legacy Team
+match-count/probability helpers in Teams query/mapper/service layers and expose a deliberate server
+contract for Market. Move Team Profile detail orchestration out of its query module into a service
+so this closure does not introduce query-to-service dependencies. Keep original detail/roster models,
+cache policy, strict route IDs and all SQL/read order unchanged. The unused legacy getTeamById is
+outside this checkpoint; do not delete unrelated helpers without the final consumer audit.
+
+Allowed files: core/teams helper implementations, Teams competition/detail query/record/mapper/service
+files and related internal imports/tests, Teams server/public contracts, the Market helper import and
+its test mock, and campaign docs. No Team or Market UI, schema, credential or provider changes.
+
+Five original competition tests and two complete Profile fact-assembly tests pass before edits.
+Preserve Number-based helper coercion independently from strict Team route validation; neutral/zero
+fallbacks; three sequential same-season probability reads; separate home/away ranking windows;
+missing tenth-place behavior, form adjustment, distinct ranked-opponent averaging and 1–99 clamping.
+Run focused Teams/Market/cross-feature tests plus full acceptance. A feature-folder move alone is not
+acceptance; old implementations must delegate to the single owned service rather than duplicate it.
+
 ### Checkpoint D — basic Market summary (combined acceptance with C)
 
 Original base remains `e3dad14b`; C is implemented and awaiting the combined acceptance run.

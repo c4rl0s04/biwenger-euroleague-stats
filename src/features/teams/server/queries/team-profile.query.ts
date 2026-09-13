@@ -2,7 +2,6 @@ import 'server-only';
 
 import { db as pgClient } from '@/lib/db/client';
 import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
-import { getTeamMatchesCount, getTeamPlayoffProbability } from '@/lib/db/queries/core/teams';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface TeamProfileDetailsRow {
@@ -17,13 +16,6 @@ export interface TeamProfileDetailsRow {
   roster_size: number | string | null;
   wins: number | string | null;
   losses: number | string | null;
-}
-
-export interface TeamProfileDetailsQueryResult {
-  row: TeamProfileDetailsRow;
-  matchesPlayed: number;
-  playoffProbability: number;
-  rank: number | string | null;
 }
 
 export interface TeamRosterRow {
@@ -42,7 +34,7 @@ export interface TeamRosterRow {
   recent_scores: string | null;
 }
 
-async function listRegularSeasonStandings(seasonId: string) {
+export async function listRegularSeasonStandings(seasonId: string) {
   const query = `
     WITH TeamStats AS (
       SELECT
@@ -83,10 +75,11 @@ async function listRegularSeasonStandings(seasonId: string) {
   }>;
 }
 
-export async function findTeamProfileDetails(
-  teamId: number
-): Promise<TeamProfileDetailsQueryResult | null> {
-  const seasonId = await resolveReadSeasonId();
+export const resolveTeamProfileSeason = resolveReadSeasonId;
+export async function readTeamProfileDetailsRow(
+  teamId: number,
+  seasonId: string
+): Promise<TeamProfileDetailsRow | undefined> {
   const query = `
     WITH TeamMatchStats AS (
       SELECT
@@ -130,24 +123,9 @@ export async function findTeamProfileDetails(
     WHERE t.id = $1
     GROUP BY t.id, t.name, t.short_name, t.img, otm.crest_url, tms.wins, tms.losses
   `;
-
-  const [detailsResult, matchesPlayed, playoffProbability, standings] = await Promise.all([
-    pgClient.query(query, [teamId, seasonId]),
-    getTeamMatchesCount(teamId),
-    getTeamPlayoffProbability(teamId),
-    listRegularSeasonStandings(seasonId),
-  ]);
-  const row = detailsResult.rows[0] as TeamProfileDetailsRow | undefined;
-  if (!row) return null;
-
-  return {
-    row,
-    matchesPlayed,
-    playoffProbability,
-    rank:
-      standings.find((entry: { team_id: number | string }) => Number(entry.team_id) === teamId)
-        ?.rank ?? 0,
-  };
+  return (await pgClient.query(query, [teamId, seasonId])).rows[0] as
+    | TeamProfileDetailsRow
+    | undefined;
 }
 
 export async function listTeamRoster(teamId: number): Promise<TeamRosterRow[]> {

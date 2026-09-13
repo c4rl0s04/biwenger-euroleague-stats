@@ -12,12 +12,9 @@ import {
   mapTeamProfileMatches,
   mapTeamRoster,
 } from '../mappers/team-profile.mapper';
-import {
-  findTeamProfileDetails,
-  listTeamRoster,
-  type TeamProfileDetailsQueryResult,
-  type TeamRosterRow,
-} from '../queries/team-profile.query';
+import { listTeamRoster, type TeamRosterRow } from '../queries/team-profile.query';
+import { findTeamProfileDetails } from './team-profile-details.service';
+import type { TeamProfileDetailsFacts } from '../records/team-profile-facts';
 
 export const TEAM_PROFILE_HTTP_CACHE_SECONDS = 300;
 export const TEAM_PROFILE_ACCESS_POLICY = Object.freeze({
@@ -26,7 +23,7 @@ export const TEAM_PROFILE_ACCESS_POLICY = Object.freeze({
 } as const);
 
 export interface TeamProfileServiceDependencies {
-  findDetails(teamId: number): Promise<TeamProfileDetailsQueryResult | null>;
+  findDetails(teamId: number): Promise<TeamProfileDetailsFacts | null>;
   listRoster(teamId: number): Promise<TeamRosterRow[]>;
   getSeasonSchedule(): Promise<MatchScheduleViewModel[]>;
   now(): Date;

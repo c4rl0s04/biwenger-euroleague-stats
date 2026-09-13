@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import type { MatchesScreenViewModel, MatchScheduleViewModel } from '@/features/matches/public';
 
-import type { TeamProfileDetailsQueryResult, TeamRosterRow } from '../queries/team-profile.query';
+import type { TeamRosterRow } from '../queries/team-profile.query';
+import type { TeamProfileDetailsFacts } from '../records/team-profile-facts';
 import {
   mapTeamProfileDetails,
   mapTeamProfileMatches,
@@ -27,7 +28,7 @@ const details = {
   matchesPlayed: 4,
   playoffProbability: 84,
   rank: '2',
-} satisfies TeamProfileDetailsQueryResult;
+} satisfies TeamProfileDetailsFacts;
 
 const roster = [
   {

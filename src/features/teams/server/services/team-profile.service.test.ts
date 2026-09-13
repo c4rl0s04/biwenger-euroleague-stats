@@ -4,9 +4,9 @@ vi.mock('server-only', () => ({}));
 
 vi.mock('@/features/matches/server', () => ({ getSeasonScheduleData: vi.fn() }));
 vi.mock('../queries/team-profile.query', () => ({
-  findTeamProfileDetails: vi.fn(),
   listTeamRoster: vi.fn(),
 }));
+vi.mock('./team-profile-details.service', () => ({ findTeamProfileDetails: vi.fn() }));
 
 import type { MatchScheduleViewModel } from '@/features/matches/public';
 

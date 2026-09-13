@@ -11,7 +11,7 @@ const dependencies = vi.hoisted(() => ({
 vi.mock('../../index', () => ({ pgClient: { query: dependencies.query }, db: {} }));
 vi.mock('@/lib/db/client', () => ({ db: { query: dependencies.query } }));
 vi.mock('../../season-context', () => ({ resolveReadSeasonId: dependencies.season }));
-vi.mock('../core/teams', () => ({
+vi.mock('@/features/teams/server', () => ({
   getAllTeamsPlayoffProbabilities: dependencies.probabilities,
   getAllTeamMatchesCount: dependencies.counts,
 }));
