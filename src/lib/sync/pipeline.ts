@@ -46,7 +46,6 @@ export const PIPELINE: readonly SyncStepDefinition[] = [
     title: 'Official calendar, standings and season mappings',
     source: 'euroleague',
     writes: [
-      'official_games',
       'official_team_standings',
       'official_team_mappings',
       'official_player_mappings',
@@ -78,12 +77,10 @@ export const PIPELINE: readonly SyncStepDefinition[] = [
     title: 'Official scores, boxscores, play-by-play and shots',
     source: 'euroleague',
     writes: [
-      'official_games',
-      'official_player_game_stats',
-      'official_play_by_play',
-      'official_shots',
       'matches',
       'player_round_stats:sporting',
+      'official_play_by_play',
+      'official_shots',
     ],
     modes: ['routine', 'bootstrap', 'live'],
     dependencies: ['match-linking'],

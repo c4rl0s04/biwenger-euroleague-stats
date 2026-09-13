@@ -57,6 +57,33 @@ describe('sync season guard', () => {
       seasonId: '2026-27',
       status: 'active',
       sourceLeagueId: '456',
+      euroleagueCode: 'E2026',
+    });
+  });
+
+  it('dynamically resolves active season when explicit season id is omitted', async () => {
+    delete process.env.SEASON_ID;
+    const db = {
+      query: vi.fn(async () => ({
+        rows: [
+          {
+            id: '2026-27',
+            status: 'active',
+            is_sync_enabled: true,
+            source_league_id: '456',
+            euroleague_code: 'E2026',
+          },
+        ],
+      })),
+    };
+
+    await expect(
+      assertSyncSeasonWritable(db as any, { skipEnvValidation: true })
+    ).resolves.toEqual({
+      seasonId: '2026-27',
+      status: 'active',
+      sourceLeagueId: '456',
+      euroleagueCode: 'E2026',
     });
   });
 

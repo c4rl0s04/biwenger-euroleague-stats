@@ -36,7 +36,15 @@ const stat = {
 
 function database() {
   const client = {
-    query: vi.fn(async (_sql: string, _params?: any[]) => ({ rows: [], rowCount: 1 })),
+    query: vi.fn(async (sql: string, _params?: any[]) => {
+      if (sql.includes('SELECT round_id FROM matches')) {
+        return { rows: [{ round_id: 10 }], rowCount: 1 };
+      }
+      if (sql.includes('SELECT provider_player_code, player_id FROM official_player_mappings')) {
+        return { rows: [{ provider_player_code: 'P014102', player_id: 101 }], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 1 };
+    }),
     release: vi.fn(),
   };
   const db = {
@@ -52,6 +60,7 @@ describe('official game reconciliation', () => {
     const mutations = prepareOfficialGameMutations(db as any, '2026-27');
     await mutations.persistGameData({
       gameCode: 1,
+      roundId: 10,
       report: null,
       metadata: null,
       boxscore: [stat],
@@ -62,7 +71,9 @@ describe('official game reconciliation', () => {
     });
     const sql = client.query.mock.calls.map(([statement]) => statement).join('\n');
     expect(sql).not.toContain('DELETE FROM official_');
-    expect(sql).toContain('ON CONFLICT (season_id,game_code,provider_player_code)');
+    expect(sql).toContain('UPDATE matches SET');
+    expect(sql).toContain('INSERT INTO player_round_stats');
+    expect(sql).toContain('ON CONFLICT (season_id, player_id, round_id)');
     expect(client.query).toHaveBeenCalledWith('COMMIT');
   });
 
@@ -71,6 +82,7 @@ describe('official game reconciliation', () => {
     const mutations = prepareOfficialGameMutations(db as any, '2026-27');
     await mutations.persistGameData({
       gameCode: 1,
+      roundId: 10,
       report: null,
       metadata: null,
       boxscore: [stat],
@@ -80,20 +92,37 @@ describe('official game reconciliation', () => {
       finalized: true,
     });
     const sql = client.query.mock.calls.map(([statement]) => statement).join('\n');
-    expect(sql).toContain('DELETE FROM official_player_game_stats');
     expect(sql).toContain('DELETE FROM official_play_by_play');
     expect(sql).toContain('DELETE FROM official_shots');
-    expect(sql).toContain('finalized_at=COALESCE');
+    expect(sql).not.toContain('DELETE FROM official_player_game_stats');
+    expect(sql).toContain('UPDATE matches SET');
     expect(client.query.mock.calls[0][0]).toBe('BEGIN');
     expect(client.query).toHaveBeenCalledWith('COMMIT');
   });
 
-  it('materializes sporting fields without overwriting Biwenger fantasy points', async () => {
-    const { db } = database();
+  it('upserts sporting fields into player_round_stats without overwriting Biwenger fantasy points', async () => {
+    const { db, client } = database();
     const mutations = prepareOfficialGameMutations(db as any, '2026-27');
-    await mutations.materializeRoundStats(10);
-    const sql = db.query.mock.calls[0][0];
-    expect(sql).not.toContain('fantasy_points');
-    expect(db.query.mock.calls[0][1]).toEqual(['2026-27', 10]);
+    await mutations.persistGameData({
+      gameCode: 1,
+      roundId: 10,
+      report: null,
+      metadata: null,
+      boxscore: [stat],
+      playByPlay: [],
+      shots: [],
+      checksum: 'final',
+      finalized: true,
+    });
+    const playerRoundStatCall = client.query.mock.calls.find(([sql]) =>
+      sql.includes('INSERT INTO player_round_stats')
+    );
+    expect(playerRoundStatCall).toBeDefined();
+    const [sql, params] = playerRoundStatCall!;
+    // Fantasy points is preserved and not updated by the sporting boxscore upsert
+    expect(sql).not.toContain('fantasy_points = EXCLUDED');
+    expect(params![0]).toBe('2026-27');
+    expect(params![1]).toBe(101); // player_id mapped from P014102
+    expect(params![2]).toBe(10);  // round_id
   });
 });

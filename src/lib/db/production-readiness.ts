@@ -4,10 +4,8 @@ import { readMigrationFiles } from 'drizzle-orm/migrator';
 import type { Pool, PoolClient } from 'pg';
 
 export const OFFICIAL_TABLES = [
-  'official_games',
   'official_team_mappings',
   'official_player_mappings',
-  'official_player_game_stats',
   'official_play_by_play',
   'official_shots',
   'official_team_standings',

@@ -6,48 +6,19 @@ export function prepareOfficialCalendarMutations(db: DbClient, seasonId: string)
   return {
     upsertScheduleGame: async (game: OfficialScheduleGame, client: Queryable = db) => {
       await client.query(
-        `INSERT INTO official_games (
-           season_id, provider, game_code, game_id, round_number, round_code, phase,
-           home_team_code, away_team_code, scheduled_at, is_date_confirmed,
-           is_time_confirmed, is_played, status, arena_code, arena_name, arena_capacity,
-           raw_schedule, synced_at
-         ) VALUES (
-           $1, 'euroleague_advanced', $2, $3, $4, $5, $6, $7, $8, $9,
-           $10, $11, $12, $13, $14, $15, $16, $17::jsonb, NOW()
-         )
-         ON CONFLICT (season_id, provider, game_code) DO UPDATE SET
-           game_id=EXCLUDED.game_id, round_number=EXCLUDED.round_number,
-           round_code=EXCLUDED.round_code, phase=EXCLUDED.phase,
-           home_team_code=EXCLUDED.home_team_code, away_team_code=EXCLUDED.away_team_code,
-           scheduled_at=EXCLUDED.scheduled_at, is_date_confirmed=EXCLUDED.is_date_confirmed,
-           is_time_confirmed=EXCLUDED.is_time_confirmed, is_played=EXCLUDED.is_played,
-           status=CASE
-             WHEN official_games.status IN ('live','finished') THEN official_games.status
-             WHEN EXCLUDED.is_played THEN 'finished'
+        `UPDATE matches SET
+           date = COALESCE($3, matches.date),
+           status = CASE
+             WHEN matches.status IN ('live', 'finished') THEN matches.status
+             WHEN $4 THEN 'finished'
              ELSE 'scheduled'
-           END,
-           arena_code=EXCLUDED.arena_code,
-           arena_name=COALESCE(EXCLUDED.arena_name,official_games.arena_name),
-           arena_capacity=COALESCE(EXCLUDED.arena_capacity,official_games.arena_capacity),
-           raw_schedule=EXCLUDED.raw_schedule, synced_at=NOW()`,
+           END
+         WHERE season_id = $1 AND official_game_code = $2`,
         [
           seasonId,
           game.gameCode,
-          game.gameId,
-          game.roundNumber,
-          game.roundCode,
-          game.phase,
-          game.homeTeamCode,
-          game.awayTeamCode,
           game.scheduledAt,
-          game.isDateConfirmed,
-          game.isTimeConfirmed,
           game.isPlayed,
-          game.isPlayed ? 'finished' : 'scheduled',
-          game.arenaCode,
-          game.arenaName,
-          game.arenaCapacity,
-          jsonPayload(game.raw),
         ]
       );
     },

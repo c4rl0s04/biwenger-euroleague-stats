@@ -7,9 +7,9 @@ import { validateAdvancedProviderSnapshot } from '../../preflight';
 import { reconcilePlayerMappings, reconcileTeamMappings } from './mappings';
 
 export async function syncOfficialMasterData(manager: SyncManager) {
-  const seasonCode = CONFIG.EUROLEAGUE.SEASON_CODE;
+  const seasonCode = manager.context.season?.euroleagueCode || CONFIG.EUROLEAGUE.SEASON_CODE;
   if (!seasonCode) throw new Error('EUROLEAGUE_SEASON_CODE is required.');
-  const seasonId = manager.context.seasonId;
+  const seasonId = manager.context.season?.seasonId || manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
   const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
   const provider = manager.context.euroleague;
@@ -21,6 +21,7 @@ export async function syncOfficialMasterData(manager: SyncManager) {
     provider.getPlayerProfiles(seasonYear),
   ]);
   if (schedule.length === 0) throw new Error(`Official schedule for ${seasonYear} is empty.`);
+  manager.context.officialSchedule = schedule;
   const standingsRound = Math.max(
     1,
     ...schedule
