@@ -1,25 +1,28 @@
 ---
 title: Batch 004 — Playoffs read experience
-description: Blocked planning placeholder requiring a source-backed assignment before execution.
+description: Sequential campaign assignment for the existing Playoffs read domain.
 audience:
   - agent
   - maintainer
-status: draft
+status: active
 ---
 
 # Playoffs read experience
 
-**DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
-Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
+**ACTIVE — C04 sequential campaign assignment, not a parallel worker dispatch.**
+The approved [completion plan](../completion-plan.md) supersedes the historical pilot restriction.
+Base: 3c0517e2; branch refactor/architecture-completion in the sibling architecture-completion worktree.
+Source inventory, contracts, frozen writes and acceptance are in the [C04 receipt](../reports/c04-playoff-reads.md).
+Reserved writes: features/playoffs, its two pages, existing Playoffs desktop/phone components,
+playoffService and tests, a narrow Teams catalogue contract if required, architecture policy,
+scoped browser fixtures/references and campaign documentation. No other domain implementation.
 
 - Intended scope: Move the existing Playoffs read experience and its distinct scoring rules.
 - Required discovery: Inspect actual brackets, prediction-view routes, historical snapshots and mutation boundaries. Do not unify formulas with Predictions by appearance.
 - Dependency review: Matches/Rounds and relevant manager contracts; coordinate shared-file ownership with Predictions.
 
-Before promotion, the coordinator must inspect the current code, fill every field in the
-[assignment template](../assignment-template.md), pin an exact base, identify all routes/consumers,
-reserve shared files and obtain the user's next-batch/parallel approval. No worker should infer
-missing scope, create a worktree, run production checks or implement this placeholder.
+Execute locally and sequentially under the campaign authorization. No push, merge or deployment.
+Stop for a newly discovered behavioral/security decision; preserve writes and production configuration.
 
 Validation follows the [worker protocol](../worker-protocol.md) and independent
 [review checklist](../reviewer-checklist.md) once a runnable assignment is approved.
