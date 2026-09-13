@@ -1,13 +1,5 @@
 import { notFound } from 'next/navigation';
-import {
-  getTournamentDetails,
-  getStandings,
-  getFixtures,
-  getTournamentInitialRoundId,
-  getTournamentBracketPresentation,
-  getTournamentDesktopDetailPresentation,
-  getTournamentPhoneDetailPresentation,
-} from '@/features/tournaments/server';
+import { getTournamentDetailScreen } from '@/features/tournaments/server';
 import {
   DesktopTournamentDetailScreen,
   MobileTournamentDetailScreen,
@@ -22,26 +14,11 @@ export default async function TournamentDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [tournament, phone] = await Promise.all([getTournamentDetails(id), isPhonePresentation()]);
-  if (!tournament) notFound();
-  const [standings, fixtures] = await Promise.all([getStandings(id), getFixtures(id)]);
-  if (phone) {
-    return (
-      <MobileTournamentDetailScreen
-        tournament={getTournamentPhoneDetailPresentation(tournament)}
-        standings={standings}
-        fixtures={fixtures}
-      />
-    );
-  }
-  const initialRoundId = await getTournamentInitialRoundId(tournament, fixtures);
-  return (
-    <DesktopTournamentDetailScreen
-      tournament={getTournamentDesktopDetailPresentation(tournament)}
-      standings={standings}
-      fixtures={fixtures}
-      initialRoundId={initialRoundId}
-      bracketRounds={getTournamentBracketPresentation(tournament, fixtures)}
-    />
+  const model = await getTournamentDetailScreen(id, isPhonePresentation);
+  if (!model) notFound();
+  return model.screen === 'phone' ? (
+    <MobileTournamentDetailScreen {...model.props} />
+  ) : (
+    <DesktopTournamentDetailScreen {...model.props} />
   );
 }
