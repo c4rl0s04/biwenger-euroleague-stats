@@ -64,6 +64,20 @@ To exercise an independently configured local app, `npm run test:e2e` accepts `P
 `E2E_USERNAME`, and `E2E_PASSWORD`. Authenticated cases skip without credentials only in this optional
 manual mode. CI and the disposable runner require credentials and fail if they are missing.
 
+Market populated-state verification uses a separate, explicitly selected synthetic fixture:
+
+```bash
+npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts --project=iphone-13 --project=desktop-1440
+```
+
+Only `default` and `market` selectors are accepted. The runner retains the same fresh-loopback
+database safety checks and cleanup. The default fixture remains unchanged; populated Market
+checks skip outside their dedicated scenario, so the standard browser run alone is not evidence
+for them. Run both scenarios for Market acceptance. Campaign C14 must include this dedicated
+run in final verification/CI coverage. Static historical facts cover listings and investments;
+they intentionally do not fabricate a moving rolling-trends date. Original Market references
+come from the retained pre-screen-migration checkout, never from migrated output.
+
 CI uses [the pinned Linux browser container](../../scripts/e2e/Dockerfile), including Node 24.20.0,
 PostgreSQL 16, and Playwright 1.58.2. Reproduce the same Linux/arm64 environment locally with Docker:
 

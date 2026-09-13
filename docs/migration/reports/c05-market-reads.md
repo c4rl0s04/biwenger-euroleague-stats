@@ -281,6 +281,50 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Populated browser checkpoint I (after `b8fea457`)
+
+The disposable browser runner now accepts a fixed `--fixture=market` scenario. Default
+fixtures are unchanged. Unknown/ambiguous selectors are rejected; no arbitrary seed path
+or external environment is accepted. The extra static facts run inside the existing
+fresh-loopback database transaction and cleanup. They add three listings, five historical
+transfers (including a profitable sale and a loss), four losing bids and season facts.
+Application code, schema, credentials and provider operations are unchanged.
+
+The dedicated browser test uses the real aggregate HTTP service and browser UI. It covers
+three listing models, five ranked transfers, nonempty profit/loss rankings, two duel users,
+phone overview/activity/transfers/investments, desktop name filtering, and opening/closing
+the transfer-ranking drawer with Escape. Other drawer categories, listing expansion,
+duel selection/details and rolling-trends charts remain outstanding, not implied covered.
+Historical fixed dates intentionally leave the rolling trend window separate.
+
+Original references are captured only in the retained original-application worktree.
+Initial test corrections: record-transfer ranking includes Mercado purchases (five rows,
+not two); the card title shares a span with tooltip text and needs a non-exact locator.
+Phone activity uses content-visibility:auto, so its original capture is made while centered
+in the viewport, clear of the fixed dock, rather than accepting blank offscreen rows.
+No CSS, accessibility behavior, error guard or application failure was suppressed.
+
+Original reference commit `c9f609d5` retains unchanged application source from `ba37d245`
+(the pre-overview implementation). Six original images were visually inspected; all six,
+plus the six fixture/test files, are byte-identical in the campaign checkout. Both original
+and candidate passed four non-updating cases with `npm run test:e2e:local -- --fixture=market
+tests/e2e/market-populated.spec.ts --project=iphone-13 --project=desktop-1440 --repeat-each=2`.
+The existing bids TypeError appeared in both server logs; no claim of clean Market logs or
+bids acceptance is made. Both disposable databases shut down normally.
+
+The scenario/safety unit suite passes 15 tests. Full `npm run verify` passes: graph
+907 modules/59 protected entrypoints, typecheck, 1,872 tests plus one existing skip,
+lint (24 existing image warnings), production build, 38-table metadata audit, Drizzle
+consistency and diff checks. Missing-provider build notices remain unchanged.
+Default-fixture regression passes both cases with `npm run test:e2e:local --
+tests/e2e/market.spec.ts --project=iphone-13 --project=desktop-1440`; all five empty-state
+references are unchanged. The known bids error remains in this run too, with normal
+disposable database shutdown. Documentation checks pass all 89 notes; scoped formatting
+and `git diff --check` pass. Checkpoint I is accepted only for this bounded fixture/browser
+coverage, not complete Market migration or all-log acceptance.
+Dedicated scenario execution is required in
+addition to the default browser run; C14 must wire it into final verification/CI coverage.
+
 ### Overview ownership checkpoint H (after `3e4b43a3`)
 
 The `/market` overview is now a thin typed adapter. Phone composition calls

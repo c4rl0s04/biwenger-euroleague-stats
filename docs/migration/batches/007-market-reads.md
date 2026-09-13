@@ -39,6 +39,19 @@ superseded by the approved completion campaign, not by authorization for private
 
 ## Remaining C05 execution
 
+### Checkpoint I — Populated Market browser evidence
+
+Predecessor `b8fea457`. Add an explicit `--fixture=market` scenario to the existing
+guarded disposable runner, leaving default fixtures and application code unchanged.
+Repository-owned synthetic listings, profitable/loss-making transfers and rival bids
+exercise real queries/services, phone summaries/sections and desktop filtering/rankings.
+Capture originals only in the retained `chore/market-visual-baseline` checkout, then
+compare the candidate without updating references. Preserve browser error guards.
+Validate scenario parsing/unsafe selector rejection, typecheck, both fixture paths and
+browser behavior. Historical fixed dates deliberately leave rolling trends separate.
+Remaining drawer categories/player expansion/duel and temporal-chart coverage must stay
+explicit until actually exercised; this does not approve a bids behavior correction.
+
 ### Checkpoint H — Overview screen ownership
 
 Predecessor `3e4b43a3`. Move Market desktop components unchanged into the feature and

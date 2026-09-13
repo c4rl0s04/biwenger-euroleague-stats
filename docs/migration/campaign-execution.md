@@ -69,6 +69,16 @@ test evidence are retained on `chore/market-visual-baseline` at `ba37d245`.
 The existing bids server failure remains visible and needs the separate approved behavior
 decision. Sections, populated/drawer coverage and remaining Market closure are not done.
 
+Checkpoint I adds an opt-in populated Market fixture without changing the default seed
+or application code. Original references are preserved at `c9f609d5`; four original and
+four candidate desktop/phone repeats pass against six byte-identical images. Coverage
+includes listings/filtering, recent activity, investment/transfer sections and the transfer
+ranking drawer. Full source verification passes 1,872 tests plus one existing skip with
+unchanged warnings. Both default-fixture cases also pass with five unchanged references.
+This accepts the bounded fixture/browser checkpoint only. Other drawers, listing
+expansion, duel interaction, rolling charts, sections and shared-form ownership remain
+open; the pre-existing bids failure remains visible, not suppressed. See the C05 receipt.
+
 C05 screen baseline now pins five empty-state desktop/phone references against unchanged
 screen source at `91a3ea7f`. Two real-page characterization tests and a fresh two-project
 non-updating browser comparison pass. The receipt records the pre-existing phone bids
