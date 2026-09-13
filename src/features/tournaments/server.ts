@@ -1,5 +1,7 @@
 import 'server-only';
 
+export { getTournamentPhoneDetailPresentation } from './server/services/tournament-read.service';
+
 export { getTournamentCataloguePresentation } from './server/services/tournament-read.service';
 
 export { getTournamentPlayoffRules } from './server/services/tournament-read.service';

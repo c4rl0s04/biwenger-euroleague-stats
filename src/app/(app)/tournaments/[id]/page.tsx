@@ -5,6 +5,7 @@ import {
   getFixtures,
   getTournamentInitialRoundId,
   getTournamentPlayoffRules,
+  getTournamentPhoneDetailPresentation,
 } from '@/features/tournaments/server';
 import {
   DesktopTournamentDetailScreen,
@@ -26,7 +27,7 @@ export default async function TournamentDetailsPage({
   if (phone) {
     return (
       <MobileTournamentDetailScreen
-        tournament={tournament}
+        tournament={getTournamentPhoneDetailPresentation(tournament)}
         standings={standings}
         fixtures={fixtures}
       />

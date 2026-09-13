@@ -1,5 +1,7 @@
 import 'server-only';
 
+export { mapTournamentPhoneDetail as getTournamentPhoneDetailPresentation } from '../mappers/tournament-detail.mapper';
+
 export { mapTournamentCatalogue as getTournamentCataloguePresentation } from '../mappers/tournament-catalogue.mapper';
 
 import { mapTournamentPlayoffRules } from '../mappers/tournament-playoff-rules.mapper';

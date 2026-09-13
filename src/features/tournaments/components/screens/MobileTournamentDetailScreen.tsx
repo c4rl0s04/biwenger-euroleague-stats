@@ -11,18 +11,18 @@ import {
   MobileSectionLink,
 } from '@/components/mobile/MobileScreen';
 
-type RecordValue = Record<string, any>;
+import type { TournamentPhoneDetail } from '../../models/tournament-detail';
 
 export default function MobileTournamentDetailScreen({
   tournament,
   standings,
   fixtures,
 }: {
-  tournament: RecordValue;
+  tournament: TournamentPhoneDetail;
   standings: TournamentStanding[];
   fixtures: TournamentFixture[];
 }) {
-  const winner = tournament.data?.winner;
+  const winner = tournament.winner;
   return (
     <MobileScreen labelledBy="mobile-screen-title">
       <MobileBackHeader title={tournament.name} context="Torneo" backHref="/tournaments" />
