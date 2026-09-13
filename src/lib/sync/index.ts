@@ -8,12 +8,14 @@ interface SyncCliOptions {
   mode: 'routine' | 'bootstrap' | 'live';
   step?: string;
   forceGame?: number;
+  season?: string;
 }
 
 export function parseSyncArgs(args: string[]): SyncCliOptions {
   let mode: SyncCliOptions['mode'] = 'routine';
   let step: string | undefined;
   let forceGame: number | undefined;
+  let season: string | undefined;
 
   for (const argument of args) {
     if (argument.startsWith('--mode=')) {
@@ -29,6 +31,11 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
       if (!step) throw new Error('--step requires a descriptive step id.');
       continue;
     }
+    if (argument.startsWith('--season=')) {
+      season = argument.slice('--season='.length);
+      if (!season) throw new Error('--season requires a season id (e.g. 2026-27).');
+      continue;
+    }
     if (argument.startsWith('--force-game=')) {
       forceGame = Number(argument.slice('--force-game='.length));
       if (!Number.isInteger(forceGame) || forceGame <= 0) {
@@ -42,7 +49,7 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
   if (forceGame !== undefined && step !== 'euroleague-games') {
     throw new Error('--force-game requires --step=euroleague-games.');
   }
-  return { mode, step, forceGame };
+  return { mode, step, forceGame, season };
 }
 
 export async function syncData(args = process.argv.slice(2)): Promise<number> {
@@ -57,7 +64,11 @@ export async function syncData(args = process.argv.slice(2)): Promise<number> {
     throw new Error('BIWENGER_TOKEN is required.');
   }
 
-  const manager = new SyncManager({ mode: options.mode, forceGame: options.forceGame });
+  const manager = new SyncManager({
+    mode: options.mode,
+    forceGame: options.forceGame,
+    seasonId: options.season,
+  });
   for (const step of selectPipeline(options.mode, options.step)) manager.addStep(step);
   await manager.run();
   return manager.hasErrors ? 1 : 0;
