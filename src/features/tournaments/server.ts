@@ -10,8 +10,6 @@ export { getTournamentPhoneDetailPresentation } from './server/services/tourname
 
 export { getTournamentCataloguePresentation } from './server/services/tournament-read.service';
 
-export { getTournamentPlayoffRules } from './server/services/tournament-read.service';
-
 export { getTournamentSection } from './server/services/tournament-section.service';
 
 export { getTournamentInitialRoundId } from './server/services/tournament-round.service';

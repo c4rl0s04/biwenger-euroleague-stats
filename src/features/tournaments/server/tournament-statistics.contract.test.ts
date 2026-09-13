@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Tournament, TournamentFixture, TournamentStanding } from '../public';
+import type { Tournament, TournamentFixture, TournamentStanding } from '../models/tournaments';
 
 vi.mock('server-only', () => ({}));
 const reads = vi.hoisted(() => ({ all: vi.fn(), fixtures: vi.fn(), standings: vi.fn() }));
@@ -113,6 +113,7 @@ describe('global Tournament statistics pre-migration contract', () => {
       {
         id: '01',
         name: 'First name',
+        href: '/user/01',
         icon: 'first',
         colorIndex: 0,
         titles: 2,
@@ -121,6 +122,7 @@ describe('global Tournament statistics pre-migration contract', () => {
       {
         id: '02',
         name: 'Second',
+        href: '/user/02',
         icon: undefined,
         colorIndex: 4,
         titles: 1,

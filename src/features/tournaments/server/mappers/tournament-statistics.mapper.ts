@@ -1,4 +1,10 @@
-import type { Tournament, TournamentFixture, TournamentStanding } from '../../models/tournaments';
+import type {
+  Tournament,
+  TournamentFixture,
+  TournamentStanding,
+  TournamentJson,
+} from '../../models/tournaments';
+import { snapshotProperty, tournamentDisplayText } from './tournament-display';
 import type {
   HallOfFameEntry,
   GlobalUserStats,
@@ -6,20 +12,24 @@ import type {
   TournamentStatisticsManager,
 } from '../../models/tournament-statistics';
 
-// Existing persisted snapshots are heterogeneous. This local shape documents the
-// fields read by the original calculation without coercing or tightening them.
-// Presentation snapshot validation/allowlisting is completed with the screen migration.
-interface WinnerSnapshot {
-  id?: string | number;
-  name?: string | null;
-  icon?: string | null;
-  colorIndex?: number | null;
-  color_index?: number | null;
+function snapshotWinner(t: Tournament & { winner?: TournamentJson }): TournamentJson {
+  return (
+    snapshotProperty(t.data, 'winner') || (t.status === 'finished' && t.winner ? t.winner : null)
+  );
 }
-function snapshotWinner(t: Tournament): WinnerSnapshot | null | undefined {
-  const data = t.data as { winner?: WinnerSnapshot } | null;
-  const legacy = t as Tournament & { winner?: WinnerSnapshot };
-  return data?.winner || (t.status === 'finished' && legacy.winner ? legacy.winner : null);
+
+function winnerIcon(value: TournamentJson | undefined): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (!value) return null;
+  if (typeof value !== 'string') throw new TypeError('Tournament winner icon is not a string');
+  return value;
+}
+
+function winnerColor(value: TournamentJson): number {
+  // Match the numeric coercion used by the existing palette modulo operation.
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw new TypeError('Tournament winner color is not finite');
+  return number;
 }
 
 export function mapGlobalTournamentStatistics(
@@ -41,21 +51,29 @@ export function mapGlobalTournamentStatistics(
   allTournaments.forEach((t) => {
     // Check both potential winner locations
     const winner = snapshotWinner(t);
+    const rawId = snapshotProperty(winner, 'id');
 
-    if (winner && winner.id) {
-      if (!hallOfFame[winner.id]) {
-        hallOfFame[winner.id] = {
-          id: winner.id,
-          name: winner.name,
-          icon: winner.icon,
+    if (winner && rawId) {
+      const id = typeof rawId === 'string' || typeof rawId === 'number' ? rawId : String(rawId);
+      if (!hallOfFame[id]) {
+        const name = snapshotProperty(winner, 'name');
+        hallOfFame[id] = {
+          id,
+          href: `/user/${rawId}`,
+          name: name === undefined ? undefined : tournamentDisplayText(name),
+          icon: winnerIcon(snapshotProperty(winner, 'icon')),
           // Use map color if available, otherwise snapshot, fallback to 0
-          colorIndex: managerColorMap[winner.id] ?? (winner.colorIndex || winner.color_index || 0),
+          colorIndex:
+            managerColorMap[id] ??
+            winnerColor(
+              snapshotProperty(winner, 'colorIndex') || snapshotProperty(winner, 'color_index') || 0
+            ),
           titles: 0,
           tournaments: [],
         };
       }
-      hallOfFame[winner.id].titles += 1;
-      hallOfFame[winner.id].tournaments.push(t.name);
+      hallOfFame[id].titles += 1;
+      hallOfFame[id].tournaments.push(t.name);
     }
   });
 
