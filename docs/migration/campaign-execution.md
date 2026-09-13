@@ -17,20 +17,26 @@ Worktree: `../biwengerstats-next-architecture-completion`.
 Fetched main/origin/main: `354f66e1585cb59a15efe96f094defdba6ad1e65`.
 Campaign base carries planning commit `6ad78eb8`; no unrelated branch was incorporated.
 
-**C00 and C01 IN PROGRESS; C02 IMPLEMENTED AND LOCALLY VERIFIED.** The Manager directory checkpoint
+**C00 and C01 IN PROGRESS; C02–C04 IMPLEMENTED AND LOCALLY VERIFIED.** The Manager directory checkpoint
 is implemented; see [C01 evidence and remaining scope](reports/c01-manager-reads.md).
 The full goal remains all C00–C15 packages, not merely the first migration.
 The [C02 Tournament receipt](reports/c02-tournament-reads.md) records source contracts,
 complete Tournament read implementation and local acceptance at e14fe39a. It is unmerged/undeployed;
-Predictions (C03) is next. Campaign-wide Linux/full-viewport acceptance remains C14.
+Campaign-wide Linux/full-viewport acceptance remains C14.
 Sensitive policy changes and production release remain explicit gates in the plan.
 
 C03 backend and screen ownership are implemented; see the
 [Predictions receipt](reports/c03-prediction-reads.md). Queries, mappers, calculations and orchestration
 now belong to Predictions, with deliberate Compare/Home contracts. Original desktop/phone references
 and final candidate comparison passed, including both ranking drawers. Full source verification passed;
-C03 is locally accepted, unmerged and undeployed. C04 Playoffs is next; C14 retains campaign-wide
+C03 is locally accepted, unmerged and undeployed. C14 retains campaign-wide
 viewport/Linux closure and C15 remains the release gate.
+
+C04 Playoffs is also locally accepted; see its [receipt](reports/c04-playoff-reads.md).
+Typed read/screen services, a deliberate Teams label contract, both pages and original-reference
+browser comparisons are verified. Full verification passed 1554 tests plus one skip.
+C05 public Market analytics is next, excluding private provider actions. Its
+[preliminary inventory](reports/c05-market-reads.md) records discovery, not implementation.
 
 ## Inventory discovery
 
