@@ -6,20 +6,33 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { AnimatePresence, LayoutGroup } from 'framer-motion';
 import ExpandedPlayerModal from './ExpandedPlayerModal';
-export default function MarketListingsSection({ listings = [] }) {
+import type { CurrentMarketListing } from '../models/market-catalogue';
+
+type ListingSortKey =
+  | 'recommendation_score'
+  | 'value_score'
+  | 'total_points'
+  | 'price'
+  | 'price_trend'
+  | 'avg_recent_points';
+export default function MarketListingsSection({
+  listings = [],
+}: {
+  listings?: CurrentMarketListing[];
+}) {
   const [filterOwner, setFilterOwner] = useState('all'); // 'all', 'free', 'owned'
   const [filterPosition, setFilterPosition] = useState('all');
   const [filterTeam, setFilterTeam] = useState('all');
   const [maxPrice, setMaxPrice] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('value_score');
+  const [sortBy, setSortBy] = useState<ListingSortKey>('value_score');
   const [sortDirection, setSortDirection] = useState('desc'); // Add sortDirection state
-  const [expandedPlayerId, setExpandedPlayerId] = useState(null);
-  const [selectedPlayer, setSelectedPlayer] = useState(null); // For Level 2 Expansion
+  const [expandedPlayerId, setExpandedPlayerId] = useState<number | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<CurrentMarketListing | null>(null); // For Level 2 Expansion
 
   // Extract unique teams and positions
   const availableTeams = useMemo(() => {
-    const teams = new Set();
+    const teams = new Set<string>();
     listings.forEach((p) => {
       if (p.team) teams.add(p.team);
     });
@@ -27,7 +40,7 @@ export default function MarketListingsSection({ listings = [] }) {
   }, [listings]);
 
   const availablePositions = useMemo(() => {
-    const pos = new Set();
+    const pos = new Set<string>();
     listings.forEach((p) => {
       if (p.position) pos.add(p.position);
     });
@@ -53,8 +66,8 @@ export default function MarketListingsSection({ listings = [] }) {
       // Price
       if (maxPrice && player.price > parseInt(maxPrice)) return false;
 
-      // Search Name
-      if (searchQuery && !player.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+      // Preserve the existing null-name failure when searching; this is not a validation change.
+      if (searchQuery && !player.name!.toLowerCase().includes(searchQuery.trim().toLowerCase()))
         return false;
 
       return true;

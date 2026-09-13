@@ -7,12 +7,48 @@ import { motion } from 'framer-motion';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/utils/format';
 import { getColorForUser } from '@/lib/constants/colors';
+import type { CSSProperties, ReactNode } from 'react';
+import type {
+  MarketListingPresentation,
+  UseMarketPlayerDetails,
+} from '../models/market-listing-presentation';
 
-function getPurchaseHeuristic(player) {
+interface PurchaseHeuristic {
+  label: string;
+  score?: number;
+  color: string;
+  accent: string;
+  dot: string;
+  icon: ReactNode;
+}
+interface PositionStyle {
+  text: string;
+  bg: string;
+  initial: string;
+}
+interface MarketPlayerCardProps {
+  player: MarketListingPresentation;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onExpandLevel2?: () => void;
+}
+interface CardFrontProps {
+  player: MarketListingPresentation;
+  heuristic: PurchaseHeuristic;
+  posStyle: PositionStyle;
+  onToggleExpand: () => void;
+  isSpacer?: boolean;
+}
+interface CardBackProps extends MarketPlayerCardProps {
+  heuristic: PurchaseHeuristic;
+  isSpacer?: boolean;
+}
+
+function getPurchaseHeuristic(player: MarketListingPresentation): PurchaseHeuristic {
   // Use the advanced 0-100 algorithm recommendation from backend if available
   if (player.recommendation_label) {
     const icons = { TrendingUp, TrendingDown, Star, Activity };
-    const IconCmp = icons[player.recommendation_icon] || Activity;
+    const IconCmp = icons[player.recommendation_icon as keyof typeof icons] || Activity;
 
     // Extract base color name (e.g. 'fuchsia', 'emerald', 'amber', 'orange', 'rose')
     const colorMatch = player.recommendation_color?.match(/(?:bg|text|border)-([a-z]+)-/);
@@ -31,7 +67,7 @@ function getPurchaseHeuristic(player) {
       label: player.recommendation_label,
       score: player.recommendation_score,
       color: player.recommendation_color,
-      accent: accentMap[baseColor] || 'via-gray-500/60',
+      accent: accentMap[baseColor as keyof typeof accentMap] || 'via-gray-500/60',
       dot: player.recommendation_dot,
       icon: <IconCmp size={11} className="mr-1" />,
     };
@@ -66,7 +102,7 @@ function getPurchaseHeuristic(player) {
   }
 }
 
-function getTeamColorByName(teamName) {
+function getTeamColorByName(teamName: string | null) {
   if (!teamName) return '#ffffff';
   const name = teamName.toLowerCase();
   if (name.includes('madrid')) return '#FEBE10';
@@ -90,14 +126,14 @@ function getTeamColorByName(teamName) {
   return '#ffffff';
 }
 
-const positionColors = {
+const positionColors: Record<string, PositionStyle> = {
   Base: { text: 'text-sky-400', bg: 'bg-sky-400/10 border-sky-400/30', initial: 'B' },
   Alero: { text: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/30', initial: 'A' },
   Pívot: { text: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/30', initial: 'P' },
   Pivot: { text: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/30', initial: 'P' },
 };
 
-function ScoreBar({ score }) {
+function ScoreBar({ score }: { score: number | null | 'X' }) {
   if (score === null || score === 'X') {
     return (
       <div className="flex-1 h-8 bg-rose-600/40 border border-rose-500/50 rounded flex items-center justify-center">
@@ -121,9 +157,14 @@ function ScoreBar({ score }) {
 }
 
 // ── ROOT ──────────────────────────────────────────────────────────────────────
-export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, onExpandLevel2 }) {
+export default function MarketPlayerCard({
+  player,
+  isExpanded,
+  onToggleExpand,
+  onExpandLevel2,
+}: MarketPlayerCardProps) {
   const heuristic = getPurchaseHeuristic(player);
-  const posStyle = positionColors[player.position] || {
+  const posStyle = positionColors[player.position!] || {
     text: 'text-white/60',
     bg: 'bg-white/5 border-white/10',
     initial: '?',
@@ -178,7 +219,13 @@ export default function MarketPlayerCard({ player, isExpanded, onToggleExpand, o
 }
 
 // ── FRONT ─────────────────────────────────────────────────────────────────────
-function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = false }) {
+function CardFront({
+  player,
+  heuristic,
+  posStyle,
+  onToggleExpand,
+  isSpacer = false,
+}: CardFrontProps) {
   const recentScores = player.recent_scores
     ? player.recent_scores
         .split(',')
@@ -213,7 +260,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
             {player.img ? (
               <Image
                 src={player.img}
-                alt={player.name}
+                alt={player.name!}
                 fill
                 className="object-cover object-top scale-[1.8] origin-top translate-y-[10%]"
                 sizes="56px"
@@ -225,8 +272,8 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
           <div className="flex-1 min-w-0">
             <h3
               className="text-[22px] font-display font-bold text-white leading-none truncate tracking-wide uppercase mt-0.5 transition-all duration-300 origin-left group-hover/link:scale-[1.03] group-hover/link:text-[var(--team-color)] inline-block max-w-full drop-shadow-md"
-              title={player.name}
-              style={{ '--team-color': getTeamColorByName(player.team) }}
+              title={player.name!}
+              style={{ '--team-color': getTeamColorByName(player.team) } as CSSProperties}
             >
               {player.name}
             </h3>
@@ -336,7 +383,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
               </span>
               <Image
                 src={player.seller_icon}
-                alt={player.seller_name}
+                alt={player.seller_name!}
                 width={14}
                 height={14}
                 className="rounded-full"
@@ -372,11 +419,10 @@ function CardBack({
   onToggleExpand,
   onExpandLevel2,
   isSpacer = false,
-}) {
-  const { data: detailsData, loading: detailsLoading } = useApiData(
-    () => `/api/players/${player.player_id}/stats`,
-    { skip: !isExpanded || isSpacer }
-  );
+}: CardBackProps) {
+  const { data: detailsData, loading: detailsLoading } = (
+    useApiData as unknown as UseMarketPlayerDetails
+  )(() => `/api/players/${player.player_id}/stats`, { skip: !isExpanded || isSpacer });
   const details = detailsData;
 
   const priceTrendPositive = player.price_trend > 0;
@@ -428,7 +474,7 @@ function CardBack({
                 <Calendar size={12} className="text-amber-400" /> Próx. Partido
               </span>
               <span className="text-[10px] bg-white/6 border border-white/8 px-2 py-0.5 rounded-lg text-white/80 font-medium font-sans">
-                {new Date(player.next_match_date).toLocaleDateString('es-ES', {
+                {new Date(player.next_match_date!).toLocaleDateString('es-ES', {
                   weekday: 'short',
                   day: 'numeric',
                   month: 'short',

@@ -284,6 +284,42 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Listing presentation checkpoint P (after `5b1281ed`)
+
+Locally accepted for listing presentation contracts. Listing composition, the front/back card and full analysis
+modal are now TSX with explicit listing/selection/renderer contracts. The detail reads use
+the existing Players public `PlayerProfileApiModel` through a type-only view of the same
+browser hook. No new endpoint, request, transformation, cache or query is introduced.
+Known optional owner/average presentation fallbacks are enumerated locally; they are not
+added to the listing API. Nullable JSX/date/arithmetic assertions erase at runtime and
+preserve existing behavior, including the null-name search failure rather than adding a
+silent input correction. All three emitted runtime ASTs match `5b1281ed` exactly after
+type/comment erasure and redundant-parenthesis normalization.
+
+Twenty-two new focused contracts exercise filters, all six sort keys, stable ties,
+nonmutating sorting, selected-player callbacks, skip flags, loading/empty states, heuristic
+fallbacks and modal role thresholds. A boundary test pins the deliberate Players type
+contract. Shared visual wrappers/motion and the browser hook are mocked in those unit
+tests. No database,
+authentication, credential, provider, dependency, schema or production change is included.
+
+Focused Market/API/page validation passes 272 tests in 21 files. Full `npm run verify`
+passes 1,997 tests plus one existing skip, graph (922 modules/60 protected entrypoints),
+typecheck, skills/docs, production build, offline 38-table metadata audit, Drizzle and
+diff checks. Lint initially reported one newly obsolete suppression after the TSX move;
+removing only that comment leaves the 24 existing image warnings. Scoped formatting passes.
+React/UI review preserves hook order, skip conditions, effect dependencies, markup and all
+existing fallbacks; no performance redesign or cache change is introduced.
+
+Both browser commands pass iPhone 13 and desktop 1440 (four cases), without any test or
+snapshot edits: `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts
+--project=iphone-13 --project=desktop-1440` and `npm run test:e2e:local --
+tests/e2e/market.spec.ts --project=iphone-13 --project=desktop-1440`. Twelve populated and
+five empty-state original references remain unchanged. Both databases shut down normally;
+the known bids TypeError remains visible, not fixed or suppressed. Remaining C05 work is
+the desktop aggregate/chart presentation boundary, populated rolling-chart coverage,
+broader viewport/Linux closure and the separately gated bids behavior/ownership decision.
+
 ### Listing interaction checkpoint O (after `cf9db91b`)
 
 Locally accepted for listing expansion coverage. No application source changes. The populated desktop scenario
@@ -636,8 +672,8 @@ remaining adapter/shared-helper closure are still required for complete C05 acce
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
-Next: finish listing/modal presentation contracts and populated
-rolling-chart coverage and remaining presentation contracts. Overview and section entrypoints
+Next: finish desktop aggregate/chart presentation contracts and populated
+rolling-chart coverage. Overview and section entrypoints
 are already registered; bids remains an explicit unresolved behavior/ownership decision.
 Retire compatibility wrappers only after their final consumers move;
 Dashboard and Assistant callers remain assigned to their later packages. Team competition metrics

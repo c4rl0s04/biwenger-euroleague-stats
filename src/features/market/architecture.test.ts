@@ -5,6 +5,24 @@ import { expect, it } from 'vitest';
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 const feature = (path: string) => read(`src/features/market/${path}`);
 
+it('owns typed listing composition and consumes the deliberate Players HTTP model', () => {
+  expect(feature('models/market-listing-presentation.ts')).toContain(
+    "from '@/features/players/public'"
+  );
+  expect(feature('models/market-listing-presentation.ts')).not.toMatch(
+    /\bany\b|drizzle|queries|ReturnType/
+  );
+  expect(feature('components/MarketListingsSection.tsx')).toContain(
+    'listings?: CurrentMarketListing[]'
+  );
+  for (const name of ['MarketPlayerCard', 'ExpandedPlayerModal']) {
+    const source = feature(`components/${name}.tsx`);
+    expect(source).toContain('UseMarketPlayerDetails');
+    expect(source).toContain('MarketListingPresentation');
+    expect(source).not.toContain('@/features/players/server');
+  }
+});
+
 it('keeps metric renderer inputs explicit and the shared visual facade implementation-free', () => {
   expect(feature('models/market-metric.ts')).not.toMatch(/\bany\b|drizzle|queries|ReturnType/);
   for (const name of ['PlayerStatRow', 'UserStatRow', 'TransactionStatRow', 'TemporalStatRow']) {

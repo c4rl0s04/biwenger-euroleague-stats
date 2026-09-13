@@ -19,12 +19,22 @@ import {
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getTeamColor } from '@/lib/constants/teamColors';
 import { calculateTargetPrice } from '@/lib/utils/player-finance';
+import type {
+  MarketListingPresentation,
+  UseMarketPlayerDetails,
+} from '../models/market-listing-presentation';
+import type { PlayerProfileApiModel } from '@/features/players/public';
 
-export default function ExpandedPlayerModal({ player, onClose }) {
+export default function ExpandedPlayerModal({
+  player,
+  onClose,
+}: {
+  player: MarketListingPresentation | null;
+  onClose: () => void;
+}) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line
     setMounted(true);
   }, []);
 
@@ -35,10 +45,9 @@ export default function ExpandedPlayerModal({ player, onClose }) {
     };
   }, [player]);
 
-  const { data: details, loading: detailsLoading } = useApiData(
-    () => `/api/players/${player?.player_id}/stats`,
-    { skip: !player }
-  );
+  const { data: details, loading: detailsLoading } = (
+    useApiData as unknown as UseMarketPlayerDetails
+  )(() => `/api/players/${player?.player_id}/stats`, { skip: !player });
 
   const teamColor = getTeamColor(player?.team);
 
@@ -66,15 +75,15 @@ export default function ExpandedPlayerModal({ player, onClose }) {
   const floor = scores.length ? Math.min(...scores) : '-';
 
   // Compute Shooting %
-  const adv = details?.advancedStats || {};
+  const adv: Partial<PlayerProfileApiModel['advancedStats']> = details?.advancedStats || {};
   const t2pct = adv.two_points_attempted
-    ? Math.round((adv.two_points_made / adv.two_points_attempted) * 100)
+    ? Math.round((adv.two_points_made! / adv.two_points_attempted) * 100)
     : 0;
   const t3pct = adv.three_points_attempted
-    ? Math.round((adv.three_points_made / adv.three_points_attempted) * 100)
+    ? Math.round((adv.three_points_made! / adv.three_points_attempted) * 100)
     : 0;
   const ftpct = adv.free_throws_attempted
-    ? Math.round((adv.free_throws_made / adv.free_throws_attempted) * 100)
+    ? Math.round((adv.free_throws_made! / adv.free_throws_attempted) * 100)
     : 0;
 
   // Compute Team Form
@@ -84,8 +93,8 @@ export default function ExpandedPlayerModal({ player, onClose }) {
     .reverse();
   const formArray = teamFormMatches.map((m) => {
     const isHome = m.home_id === player.team_id;
-    if (isHome) return m.home_score > m.away_score ? 'V' : 'D';
-    else return m.away_score > m.home_score ? 'V' : 'D';
+    if (isHome) return m.home_score! > m.away_score! ? 'V' : 'D';
+    else return m.away_score! > m.home_score! ? 'V' : 'D';
   });
 
   // Next Matches Setup
@@ -134,7 +143,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
             {player.img ? (
               <Image
                 src={player.img}
-                alt={player.name}
+                alt={player.name!}
                 fill
                 className="object-cover object-top scale-110"
               />
@@ -159,7 +168,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                   {player.team_img && (
                     <Image
                       src={player.team_img}
-                      alt={player.team}
+                      alt={player.team!}
                       width={22}
                       height={22}
                       className="object-contain opacity-90"
@@ -434,7 +443,7 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                           </div>
                         );
 
-                      const matchDate = new Date(match.date || match.match_date);
+                      const matchDate = new Date((match.date || match.match_date)!);
                       const isHome = match.home_id === player.team_id;
                       const oppId = isHome ? match.away_id : match.home_id;
                       const oppName = isHome ? match.away_team : match.home_team;

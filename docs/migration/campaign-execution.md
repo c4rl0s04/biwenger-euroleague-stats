@@ -58,6 +58,16 @@ desktop/phone verification remain pending; private operations stay frozen under 
 
 ## Inventory discovery
 
+Checkpoint P types listing composition, front/back card and full-analysis modal together,
+reusing the Players public API model without changing requests or runtime behavior.
+Twenty-two render/interaction unit cases plus one boundary assertion accompany the move;
+all three emitted runtime ASTs match `5b1281ed`. Focused tests pass 272 cases; full verify
+passes 1,997 plus one existing skip, graph 922/60, build and offline schema/Drizzle checks.
+One obsolete lint-suppression comment is removed; full lint returns to 24 existing warnings.
+Populated and empty desktop/iPhone comparisons pass four cases with seventeen unchanged
+original references. Desktop aggregate/chart typing, populated rolling-chart coverage,
+broader viewports/Linux and the unapproved bids correction remain open. C05 is incomplete.
+
 Checkpoint O adds verified listing flip/full-analysis/close/return coverage, with no application
 source changes. Two new references from unchanged original application `a4d105cf` pass two
 original desktop repeats; candidate desktop/iPhone passes against all twelve populated images.
