@@ -79,6 +79,7 @@ export default function MarketPageClient() {
   });
 
   const { data: statsData, loading } = useApiData('/api/market/stats');
+  /** @type {Partial<import('../models/market-analytics').MarketAnalytics>} */
   const marketStats = statsData || {};
 
   if (loading) {

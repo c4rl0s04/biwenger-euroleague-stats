@@ -5,6 +5,7 @@ import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerName, ManagerPill } from './StatUIComponents';
 
+/** @param {{ data?: import('../../models/market-analytics').MarketAnalytics['mostOwners'], onViewAll?: () => void }} props */
 export default function MostOwnersCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 

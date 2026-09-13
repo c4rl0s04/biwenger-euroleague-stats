@@ -41,10 +41,15 @@ test('Market original overview and working phone sections preserve empty-fixture
       ['trends', 'Tendencias'],
       ['investments', 'Inversiones'],
     ]) {
-      await page.goto(`/market/${section}`);
+      // Exercise the actual app navigation without replacing a document with active prefetches.
+      await page.locator(`a.mobile-section-link[href="/market/${section}"]`).click();
+      await expect(page).toHaveURL(new RegExp(`/market/${section}$`));
       await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
       await expect(page.getByText('No hay datos disponibles para esta vista.')).toBeVisible();
       await capture(`market-empty-${section}`);
+      await page.getByRole('link', { name: 'Volver a Mercado', exact: true }).click();
+      await expect(page).toHaveURL(/\/market$/);
+      await expect(page.getByRole('heading', { name: 'Mercado', exact: true })).toBeVisible();
     }
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(

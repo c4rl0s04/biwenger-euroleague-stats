@@ -39,6 +39,19 @@ superseded by the approved completion campaign, not by authorization for private
 
 ## Remaining C05 execution
 
+### Checkpoint H — Overview screen ownership
+
+Predecessor `3e4b43a3`. Move Market desktop components unchanged into the feature and
+the phone overview into a typed screen. Move its three-read orchestration into an owned
+service, preserving parallel listing/KPI/recent-transfer reads and the explicit limit four.
+Keep desktop browser fetching/loading behavior and all card interactions unchanged.
+Register the overview page and test its phone/desktop service boundary. Scope includes
+these components, models/services/tests, public/server exports and the overview adapter.
+The section route remains unchanged pending a separate bids behavior decision; its
+temporary legacy imports remain tracked rather than weakened through graph exceptions.
+Original empty-state references are committed. Populated-screen/drawer original-reference
+and cross-platform coverage remain required before accepting the complete feature.
+
 ### Checkpoint E — Team recommendation dependencies
 
 Base `d67f2e7b`; coordinator only in the existing campaign worktree. Own the four legacy Team

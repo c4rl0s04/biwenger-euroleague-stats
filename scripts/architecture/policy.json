@@ -1,5 +1,6 @@
 {
   "entrypoints": [
+    "src/app/(app)/market/page.tsx",
     "src/app/api/market/stats/route.ts",
     "src/app/api/market/route.ts",
     "src/app/api/market/transfers/route.ts",

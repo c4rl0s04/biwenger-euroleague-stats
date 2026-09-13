@@ -7,6 +7,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
+/** @param {{ data?: import('../../models/market-analytics').MarketAnalytics['recordTransfer'], onViewAll?: () => void }} props */
 export default function RecordTransferCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 

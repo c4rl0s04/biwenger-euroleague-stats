@@ -58,6 +58,17 @@ desktop/phone verification remain pending; private operations stay frozen under 
 
 ## Inventory discovery
 
+Checkpoint H moves the `/market` overview and 49 desktop modules into Market ownership,
+with a typed phone model/service and unchanged browser-loaded desktop analytics. Full
+verification passes (1,864 tests plus one skip; graph 907 modules/59 entrypoints), with
+unchanged lint/build warnings and schema metadata. An original-code browser repetition
+reproduced the phone prefetch-cancellation test failure. Following actual section/back
+links instead of replacing documents passes three original and six candidate repeats,
+with five unchanged screenshots and no guard suppression. Original baseline source and
+test evidence are retained on `chore/market-visual-baseline` at `ba37d245`.
+The existing bids server failure remains visible and needs the separate approved behavior
+decision. Sections, populated/drawer coverage and remaining Market closure are not done.
+
 C05 screen baseline now pins five empty-state desktop/phone references against unchanged
 screen source at `91a3ea7f`. Two real-page characterization tests and a fresh two-project
 non-updating browser comparison pass. The receipt records the pre-existing phone bids

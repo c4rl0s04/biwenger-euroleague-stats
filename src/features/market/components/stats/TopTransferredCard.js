@@ -6,6 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup } from './StatUIComponents';
 
+/** @param {{ data?: import('../../models/market-analytics').MarketAnalytics['topPlayer'], onViewAll?: () => void }} props */
 export default function TopTransferredCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 

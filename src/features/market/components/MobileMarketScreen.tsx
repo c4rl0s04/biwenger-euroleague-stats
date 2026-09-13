@@ -1,4 +1,5 @@
-import { ChartSpline, CircleDollarSign, Gavel, ReceiptText, ShoppingBasket } from 'lucide-react';
+import { ChartSpline, CircleDollarSign, Gavel, ReceiptText } from 'lucide-react';
+import type { MobileMarketOverview } from '../models/market-screen';
 
 import {
   MobileListRow,
@@ -8,10 +9,7 @@ import {
   MobileScreenHeader,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
-
-type MarketListing = Record<string, any>;
-type MarketKpis = Record<string, any>;
+} from '@/components/mobile/MobileScreen';
 
 const money = new Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 });
 
@@ -19,11 +17,7 @@ export default function MobileMarketScreen({
   listings,
   kpis,
   recentTransfers,
-}: {
-  listings: MarketListing[];
-  kpis: MarketKpis;
-  recentTransfers: MarketListing[];
-}) {
+}: MobileMarketOverview) {
   return (
     <MobileScreen labelledBy="mobile-screen-title">
       <MobileScreenHeader
@@ -64,9 +58,9 @@ export default function MobileMarketScreen({
         {recentTransfers.slice(0, 4).map((transfer, index) => (
           <MobileListRow
             key={String(transfer.id ?? index)}
-            title={transfer.player_name ?? transfer.name ?? 'Movimiento'}
+            title={transfer.player_name ?? 'Movimiento'}
             subtitle={`${transfer.vendedor ?? 'Mercado'} → ${transfer.comprador ?? 'Mercado'}`}
-            trailing={`${money.format(Number(transfer.precio ?? transfer.price ?? 0))}€`}
+            trailing={`${money.format(Number(transfer.precio ?? 0))}€`}
           />
         ))}
       </div>

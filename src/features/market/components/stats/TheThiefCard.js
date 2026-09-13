@@ -6,6 +6,7 @@ import { TooltipHeader } from '@/components/ui/Tooltip';
 import { formatEuro } from '@/lib/utils/currency';
 import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
+/** @param {{ data?: import('../../models/market-analytics').MarketAnalytics['theThief'], onViewAll?: () => void }} props */
 export default function TheThiefCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 

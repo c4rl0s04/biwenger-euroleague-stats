@@ -281,11 +281,63 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Overview ownership checkpoint H (after `3e4b43a3`)
+
+The `/market` overview is now a thin typed adapter. Phone composition calls
+`getMobileMarketOverview` directly; the service starts the same listing, basic KPI and
+four-transfer reads in parallel, with independent season resolution and no new cache or
+identity lookup. Desktop retains its browser `/api/market/stats` loading/skeleton and
+interactive requests rather than adding an SSR aggregate read. Existing app protection
+and all HTTP contracts remain untouched.
+
+All 49 desktop Market modules moved to feature components with identical emitted
+JavaScript. Existing card data props receive JSDoc contracts from the typed analytics
+model where directly connected to the aggregate. The phone overview now accepts
+`MobileMarketOverview`, not `Record<string, any>`. Its dead `transfer.name`/`transfer.price`
+fallbacks were removed: the existing allowlisting RecentTransfer mapper never returns
+those keys. The actual null-name/price fallbacks, ordering, row limits, formatting and
+links remain. A 1,000-case original/current element-tree comparison matches using
+service-owned fields; three populated/empty render tests cover those semantics.
+
+The overview entrypoint is registered without a new graph exception. Public exports
+contain screens/models and server exports contain the orchestration. Eight additional
+service/page cases cover parallel calls, exact limits, failure propagation, no caching,
+desktop no-read and phone model forwarding. The pre-existing bids section is unchanged
+and remains outside this overview checkpoint pending its explicit behavior decision.
+
+Full `npm run verify` PASS: skills/docs, graph (907 modules/59 protected entrypoints),
+typecheck, 1,864 tests plus one existing skip, lint (zero errors/24 existing image warnings),
+database-disabled production build, metadata audit (38 tables, no drift), Drizzle and
+diff check. Missing-provider build notices remain unchanged. Scoped source formatting
+also passes. Candidate `npm run test:e2e:local -- tests/e2e/market.spec.ts
+--project=iphone-13 --project=desktop-1440` matched the five original screenshots:
+desktop passed, but phone failed the unchanged browser-error guard on Dashboard and
+Standings RSC prefetch access-control/cancellation messages. The known bids TypeError
+also appeared in server logs. That first run is not clean browser acceptance. An isolated
+original checkout at `3e4b43a3` reproduced the same error class in one of three phone runs
+(Home/Schedule/Dashboard prefetch messages). The test now follows real section/back links
+instead of replacing the document with `page.goto` between sections. No app fix, prefetch
+interception, error filtering or reference-image update was introduced. The unchanged
+original then passed all three repeats. Baseline test commit `ba37d245` on
+`chore/market-visual-baseline` preserves that evidence with original application source.
+The candidate then passed all six repeats (three iPhone 13 and three desktop 1440)
+with `npm run test:e2e:local -- tests/e2e/market.spec.ts --project=iphone-13
+--project=desktop-1440 --repeat-each=3`. All five reference images are unchanged;
+the existing bids TypeError remains visible in server logs, as on the original.
+This supports the document-replacement/prefetch explanation for the test failure,
+not a claim that all possible browser cancellations or Market errors are fixed.
+Both disposable runners stopped their databases normally. The React/UI review retained
+parallel fetching, existing client state and markup; no cache, redesign or hook change
+was introduced in application code. This accepts overview ownership only, not full C05.
+Populated-browser/drawer, section migration, full-viewports/Linux and
+remaining adapter/shared-helper closure are still required for complete C05 acceptance.
+
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
-Next: finish Market desktop/mobile page and component ownership, screen composition contracts,
-and original-reference browser comparisons. Register both page entrypoints and reconcile their
-loading/error/section behavior. Retire compatibility wrappers only after their final consumers move;
+Next: finish Market section ownership, remaining presentation contracts and populated/drawer
+original-reference browser comparisons. The overview is registered; register the section
+entrypoint after reconciling its loading/error/section behavior and approved bids decision.
+Retire compatibility wrappers only after their final consumers move;
 Dashboard and Assistant callers remain assigned to their later packages. Team competition metrics
 have owned contracts and Market uses the deliberate Players form service. Shared form still has
 non-Market callers: close that ownership without duplicate SQL or a Teams-to-Players barrel cycle.

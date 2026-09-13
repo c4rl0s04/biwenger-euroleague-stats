@@ -6,6 +6,7 @@ import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerName, ManagerPill } from './StatUIComponents';
 
+/** @param {{ data?: import('../../models/market-analytics').MarketAnalytics['inflatedPlayer'], onViewAll?: () => void }} props */
 export default function InflatedPlayerCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 

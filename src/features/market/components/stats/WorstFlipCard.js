@@ -1,36 +1,34 @@
 'use client';
 
-import { Rocket } from 'lucide-react';
-import { formatEuro } from '@/lib/utils/currency';
+import { TrendingDown } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
-import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
+import { formatEuro } from '@/lib/utils/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
+import { HeroStatGroup, ManagerPill, ManagerName } from './StatUIComponents';
 
-export default function BestFlipCard({ data, onViewAll }) {
+/** @param {{ data?: import('../../models/market-analytics').MarketAnalytics['worstFlip'], onViewAll?: () => void }} props */
+export default function WorstFlipCard({ data, onViewAll }) {
   if (!data || !Array.isArray(data) || data.length === 0) return null;
 
   return (
     <MarketPodiumCard
       onViewAll={onViewAll}
       data={data}
-      title="El Pelotazo"
-      icon={Rocket}
-      color="emerald"
+      title="El Fiasco"
+      icon={TrendingDown}
+      color="red"
       info={
         <>
-          <TooltipHeader>El Pelotazo</TooltipHeader>
+          <TooltipHeader>El Fiasco</TooltipHeader>
           <p>
-            Muestra las operaciones de compraventa que han generado el mayor beneficio neto absoluto
-            (Precio de Venta - Precio de Compra). Es el ranking de los mejores flips de la temporada
-            en términos de dinero real.
+            Muestra las operaciones de compraventa que han generado la mayor pérdida neta absoluta.
+            Es el ranking de los peores movimientos de mercado de la temporada.
           </p>
         </>
       }
-      winnerLabel="EL PELOTAZO"
+      winnerLabel="EL FIASCO"
       renderHeroValue={(item) => (
-        <span className="text-3xl font-black text-emerald-400">
-          +{formatEuro(item.profit, true)}€
-        </span>
+        <span className="text-3xl font-black text-rose-400">-{formatEuro(item.profit, true)}€</span>
       )}
       renderHeroStats={(item) => (
         <HeroStatGroup
@@ -42,15 +40,11 @@ export default function BestFlipCard({ data, onViewAll }) {
       )}
       renderHeroMeta={(item) => <ManagerPill user={item} />}
       renderRunnerUpValue={(item) => (
-        <span className="text-sm font-black text-emerald-400">
-          +{formatEuro(item.profit, true)}€
-        </span>
+        <span className="text-sm font-black text-rose-400">-{formatEuro(item.profit, true)}€</span>
       )}
       renderRunnerUpMeta={(item) => <ManagerName user={item} className="text-xs" />}
       renderListItemValue={(item) => (
-        <span className="text-xs font-bold text-emerald-400/80">
-          +{formatEuro(item.profit, true)}€
-        </span>
+        <span className="text-xs font-bold text-rose-400">-{formatEuro(item.profit, true)}€</span>
       )}
       renderListItemMeta={(item) => <ManagerName user={item} className="text-[10px] ml-2" />}
     />
