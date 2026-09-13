@@ -8,3 +8,16 @@ export interface TournamentPhoneDetail {
   status: string | null;
   winner: null | false | 0 | '' | { name: TournamentDisplayText };
 }
+
+export interface TournamentDesktopDetail extends Omit<TournamentPhoneDetail, 'winner'> {
+  winner:
+    | null
+    | false
+    | 0
+    | ''
+    | {
+        name: TournamentDisplayText;
+        iconUrl: string | null;
+        href: string;
+      };
+}

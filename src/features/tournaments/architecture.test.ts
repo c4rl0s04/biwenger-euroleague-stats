@@ -2,6 +2,16 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 const read = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf8');
+it('keeps bracket scoring and snapshot interpretation out of client presentation', () => {
+  const bracket = read('src/features/tournaments/components/TournamentBracket.js');
+  expect(bracket).not.toMatch(/tournament\??\.|phaseMap|processedIds|home_score|away_score/);
+  expect(bracket).toContain('TournamentBracketRound[]');
+  const desktop = read(
+    'src/features/tournaments/components/screens/DesktopTournamentDetailScreen.jsx'
+  );
+  expect(desktop).not.toMatch(/tournament\.data\b|data_json/);
+  expect(desktop).toContain('TournamentDesktopDetail');
+});
 it('keeps migrated tournament screens free of snapshot and loose-record props', () => {
   for (const name of [
     'MobileTournamentsScreen',

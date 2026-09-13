@@ -6,17 +6,17 @@ import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 /**
- * @param {{tournament: import('../../models/tournaments').Tournament, standings: import('../../models/tournaments').TournamentStanding[], fixtures: import('../../models/tournaments').TournamentFixture[], initialRoundId: number | null | undefined, playoffRules: import('../../models/tournament-playoff-rules').TournamentPlayoffRules}} props
+ * @param {{tournament: import('../../models/tournament-detail').TournamentDesktopDetail, standings: import('../../models/tournaments').TournamentStanding[], fixtures: import('../../models/tournaments').TournamentFixture[], initialRoundId: number | null | undefined, bracketRounds: import('../../models/tournament-bracket').TournamentBracketRound[]}} props
  */
 export default function DesktopTournamentDetailScreen({
   tournament,
   standings,
   fixtures,
   initialRoundId,
-  playoffRules,
+  bracketRounds,
 }) {
   const isActive = tournament.status === 'active';
-  const data = tournament.data || {};
+  const winner = tournament.winner;
   return (
     <div className="min-h-screen pb-20">
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-10 relative z-20">
@@ -36,24 +36,20 @@ export default function DesktopTournamentDetailScreen({
       />
 
       {/* Winner Banner (if finished) */}
-      {!isActive && data.winner && (
+      {!isActive && winner && (
         <Section title="Ganador del Torneo" background="section-raised" delay={0}>
           <ElegantCard hideHeader color="amber" bgColor="amber" className="w-full" padding="p-6">
             <div className="flex items-center gap-8 py-2">
               <Link
-                href={`/user/${data.winner.id || data.winner.name}`}
+                href={winner.href}
                 className="relative group/winner block transition-transform duration-500 hover:scale-105 active:scale-95"
               >
                 <div className="absolute -inset-2 bg-amber-500/20 rounded-full blur-xl opacity-0 group-hover/winner:opacity-100 transition-opacity duration-700" />
                 <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-                  {data.winner.icon ? (
+                  {winner.iconUrl ? (
                     <img
-                      src={
-                        data.winner.icon.startsWith('http')
-                          ? data.winner.icon
-                          : `https://cdn.biwenger.com/${data.winner.icon}`
-                      }
-                      alt={data.winner.name}
+                      src={winner.iconUrl}
+                      alt={winner.name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -70,9 +66,9 @@ export default function DesktopTournamentDetailScreen({
                     Campeón
                   </span>
                 </div>
-                <Link href={`/user/${data.winner.id || data.winner.name}`}>
+                <Link href={winner.href}>
                   <h3 className="text-4xl font-black font-display text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 uppercase italic tracking-tighter leading-none mb-1 hover:brightness-110 transition-all">
-                    {data.winner.name}
+                    {winner.name}
                   </h3>
                 </Link>
                 <p className="text-xl font-bold text-amber-500/80 font-display uppercase tracking-widest">
@@ -91,11 +87,7 @@ export default function DesktopTournamentDetailScreen({
         </Section>
       ) : (
         <Section title="Cuadro" delay={100} background="section-base">
-          <TournamentBracket
-            tournament={tournament}
-            fixtures={fixtures}
-            playoffRules={playoffRules}
-          />
+          <TournamentBracket rounds={bracketRounds} />
         </Section>
       )}
 

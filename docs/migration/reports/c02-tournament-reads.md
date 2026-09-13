@@ -325,3 +325,36 @@ Validation: typecheck PASS; architecture PASS (818 modules, 48 protected entrypo
 Tournament suite PASS (163 tests, 12 files); diff check PASS. Architecture guards additionally reject
 raw snapshot access in the migrated catalogue screen/row. Full/browser acceptance must be repeated
 after the remaining desktop-detail winner and bracket snapshot work is implemented.
+
+## Desktop detail and bracket projection
+
+Desktop detail now receives a typed winner/name/status projection; it no longer reads snapshot JSON.
+Winner links preserve the original id-or-name interpolation, icon prefix handling and falsy banner
+behavior. Active tournaments do not inspect unused winner fields.
+
+Bracket phase lookup, grouping, two-leg aggregation, byes, tie winners, null arithmetic and match
+ordering now run in a pure typed server mapper. The client receives only round labels and allowlisted
+match display fields; it retains layout, connectors and animation. League/phone paths skip the
+bracket calculation. The original query mapper never projected order_index, so that always-zero
+sort term is removed; lexical ID ordering remains. No snapshot, raw fixture spread or internal
+phase fixture collection crosses the bracket client boundary.
+
+A frozen test-only calculation from 8062ccdd is the compatibility oracle: 100 deterministic fixture
+sets across four leg-rule combinations (400 comparisons), plus explicit fallback/error cases,
+preserve existing results. Additional tests cover desktop winner links, display values, ignored
+malformed fields, serialization and page call boundaries. Architecture guards prohibit snapshot
+interpretation/scoring in the bracket client and snapshot props in desktop detail.
+
+Validation on unchanged application source:
+
+- Typecheck, architecture (820 modules/48 protected entrypoints) and focused Tournament tests:
+  PASS (199 tests in 14 files).
+- npm run verify: PASS, including 1479 full-suite tests plus one existing skip, skills, docs,
+  lint (24 existing image warnings), production build, schema metadata (38 tables/no drift),
+  Drizzle consistency and diff check. Expected missing-provider configuration warnings remain.
+- npm run test:e2e:local -- tests/e2e/tournaments.spec.ts --project=iphone-13
+  --project=desktop-1440: PASS, two tests in 49.7 seconds, original screenshots unchanged.
+  Disposable database/application shutdown completed.
+
+C02 is still open: statistics snapshot typing and final export/contract reconciliation remain.
+No push, deployment, production operation, schema/configuration change or visual redesign occurred.
