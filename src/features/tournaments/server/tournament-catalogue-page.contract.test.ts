@@ -6,10 +6,12 @@ const deps = vi.hoisted(() => ({
   phone: vi.fn(),
   desktopScreen: vi.fn(),
   mobileScreen: vi.fn(),
+  presentation: vi.fn(),
 }));
 vi.mock('@/features/tournaments/server', () => ({
   getAllTournaments: deps.list,
   getGlobalTournamentStats: deps.statistics,
+  getTournamentCataloguePresentation: deps.presentation,
 }));
 vi.mock('@/features/tournaments/public', () => ({
   DesktopTournamentsScreen: deps.desktopScreen,
@@ -28,10 +30,11 @@ beforeEach(() => {
     records: {},
   });
   deps.phone.mockResolvedValue(false);
+  deps.presentation.mockImplementation(({ active, finished }) => ({ active, finished }));
 });
 
 describe('Tournament catalogue page read contract', () => {
-  it('passes phone lists unchanged and does not read desktop statistics', async () => {
+  it('projects phone lists and does not read desktop statistics', async () => {
     const active = [{ id: 1 }];
     const finished = [{ id: 2 }];
     deps.list.mockResolvedValue({ active, finished, all: [...active, ...finished] });
@@ -39,6 +42,11 @@ describe('Tournament catalogue page read contract', () => {
     const element = await Page();
     expect(element.type).toBe(deps.mobileScreen);
     expect(element.props).toEqual({ active, finished });
+    expect(deps.presentation).toHaveBeenCalledWith({
+      active,
+      finished,
+      all: [...active, ...finished],
+    });
     expect(deps.statistics).not.toHaveBeenCalled();
   });
   it('passes desktop statistics without introducing extra reads', async () => {
@@ -50,6 +58,7 @@ describe('Tournament catalogue page read contract', () => {
     expect(deps.list).toHaveBeenCalledOnce();
     expect(deps.phone).toHaveBeenCalledOnce();
     expect(deps.statistics).toHaveBeenCalledOnce();
+    expect(deps.presentation).not.toHaveBeenCalled();
   });
   it('starts list and presentation together, then waits for both before statistics', async () => {
     let release!: (value: boolean) => void;
