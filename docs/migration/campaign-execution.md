@@ -25,10 +25,10 @@ complete Tournament read implementation and local acceptance at e14fe39a. It is 
 Predictions (C03) is next. Campaign-wide Linux/full-viewport acceptance remains C14.
 Sensitive policy changes and production release remain explicit gates in the plan.
 
-C03 is now in source-contract/baseline work; see the
-[Predictions receipt](reports/c03-prediction-reads.md). Eight characterization tests pin the
-existing formulas and ID quirks before implementation. Compare/Home consumers and sync-write
-ownership have been identified; no Predictions application code has changed yet.
+C03 backend ownership is implemented; see the
+[Predictions receipt](reports/c03-prediction-reads.md). Queries, mappers, calculations and orchestration
+now belong to Predictions, with deliberate Compare/Home contracts. Screen composition and populated
+original browser references remain pending; C03 is not yet accepted.
 
 ## Inventory discovery
 

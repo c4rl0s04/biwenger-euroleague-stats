@@ -9,7 +9,8 @@ status: active
 
 # C03 Predictions read migration
 
-Baseline: 661f545d on refactor/architecture-completion. IN PROGRESS; no application migration yet.
+Baseline: 661f545d on refactor/architecture-completion. IN PROGRESS; backend ownership migrated,
+screen composition and original browser references still pending. Historical checkpoints follow.
 The preceding full campaign verification passed 1507 tests plus one skip and Tournament browser checks.
 
 ## Routes and consumers
@@ -26,7 +27,7 @@ The preceding full campaign verification passed 1507 tests plus one skip and Tou
   do not duplicate the SQL or deep-import the new feature's query internals.
 - Playoffs predictions are a different C04 domain and scoring implementation.
 
-## Current data flow
+## Original data flow
 
 Pages -> predictionsService -> global DB barrel -> getPorrasStats in predictions query module.
 That module mixes public interfaces, two SQL reads, orchestration and pure calculations.
@@ -90,3 +91,28 @@ architecture (826 modules/48 protected entrypoints) and diff checks PASS.
 This is an implementation checkpoint, not feature acceptance. Next: dedicated query/record mapper
 ownership, the shared Home normalization contract and Compare adapter, then original UI fixtures,
 screen/services migration and full acceptance.
+
+## Query, mapper and orchestration checkpoint
+
+The feature now owns both server-only SQL reads, explicit database record contracts, allowlisted
+mappers and getPorrasStats orchestration. Pages still use the legacy predictionsService adapter;
+its removal belongs to the forthcoming screen migration. Compare consumes the deliberate server
+contract; Home consumes its exported normalization SQL contract (season bound at $1).
+The old Predictions query, normalization module and DB barrel export are removed after consumer
+searches. Their characterization tests moved into the feature rather than being deleted.
+
+Both query template expressions and the entire normalization module were compared against
+cc65f916 and are unchanged. Each query still resolves its season independently; no cache was added.
+Nullable names/icons reflect the existing schema. Tests preserve the original nullable-history-name
+failure and leading-zero ID behavior rather than silently correcting external behavior.
+
+Verification: typecheck and architecture checks passed (829 modules/48 protected entrypoints).
+Full unit suite passed 1521 tests plus one skip; two additional contract cases subsequently passed
+in the focused 14-test Predictions suite. Lint passed with the existing 24 image warnings.
+Schema metadata passed with 38 tables and no drift; Drizzle consistency passed without a database
+connection. A fresh SKIP_DB=true production build passed after the earlier process handle expired;
+only the expected missing-provider configuration notices appeared.
+No UI, schema, provider, authentication, dependency or production configuration changes are included.
+
+This is not complete C03 acceptance. Next: populated original browser fixtures/references, typed
+screen composition, direct page-to-feature services, adapter removal and complete verification.

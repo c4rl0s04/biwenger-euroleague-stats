@@ -1,102 +1,10 @@
-import {
-  getAchievements,
-  getParticipation,
-  getPerformanceData,
-  getTableStats,
-  getClutchStats,
-  getVictorias,
-  getBestRoundStat,
-  getHistoryPivot,
-} from '@/features/predictions/server';
-export {
-  getAchievements,
-  getParticipation,
-  getPerformanceData,
-  getTableStats,
-  getClutchStats,
-  getVictorias,
-  getBestRoundStat,
-  getHistoryPivot,
-} from '@/features/predictions/server';
-import type {
-  NormalizedPrediction,
-  PredictableTeam,
-  PorrasStats,
-} from '@/features/predictions/public';
-export type {
-  Achievement,
-  ParticipationStat,
-  PorraResult,
-  TableStat,
-  ClutchStat,
-  VictoryStat,
-  PredictableTeam,
-  BestRoundStat,
-  HistoryUser,
-  HistoryPivotRow,
-  NormalizedPrediction,
-  HistoryPivot,
-  PorrasStats,
-} from '@/features/predictions/public';
-import { db, pgClient } from '../../index';
-import { resolveReadSeasonId } from '../../season-context';
+import 'server-only';
+import { pgClient } from '@/lib/db/connection';
+import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { PREDICTION_NORMALIZATION_CTES } from './prediction-normalization-sql';
+import type { NormalizedPredictionRecord, PredictableTeamRecord } from './prediction.records';
 
-// ==========================================
-// INTERFACES
-// ==========================================
-
-// ==========================================
-// MAIN FUNCTION
-// ==========================================
-
-/**
- * Fetches all statistics needed for the predictions dashboard.
- * Optimizes performance by using parallel queries where possible.
- */
-export async function getPorrasStats(): Promise<PorrasStats> {
-  // 1. Fetch normalized data once
-  const normalizedData = await getNormalizedPredictions();
-
-  // 2. Parallelize processing of normalized data
-  const [achievements, participation, tableStats, performance, history] = await Promise.all([
-    getAchievements(normalizedData),
-    getParticipation(normalizedData),
-    getTableStats(normalizedData),
-    getPerformanceData(normalizedData),
-    getHistoryPivot(normalizedData),
-  ]);
-
-  const clutch = await getClutchStats(normalizedData);
-  const victories = await getVictorias(normalizedData);
-  const predictable = await getPredictableTeams(); // Match-based, keep separate query
-  const bestRound = await getBestRoundStat(normalizedData);
-
-  return {
-    achievements,
-    participation,
-    table_stats: tableStats,
-    performance,
-    history,
-    clutch_stats: clutch,
-    porra_stats: {
-      victorias: victories,
-      predictable_teams: predictable,
-      promedios: tableStats,
-      mejor_jornada: bestRound,
-    },
-  };
-}
-
-// ==========================================
-// HELPER FUNCTIONS
-// ==========================================
-
-/**
- * The CORE function for all prediction statistics.
- * Normalizes all partitioned rounds and merges prediction strings correctly.
- */
-export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]> {
+export async function readNormalizedPredictions(): Promise<NormalizedPredictionRecord[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     WITH ${PREDICTION_NORMALIZATION_CTES}
@@ -106,18 +14,10 @@ export async function getNormalizedPredictions(): Promise<NormalizedPrediction[]
     FROM conceptual_totals
     ORDER BY base_round_id ASC, total_aciertos DESC
   `;
-
   const res = await pgClient.query(query, [seasonId]);
-  return res.rows.map((row: any) => ({
-    ...row,
-    aciertos: parseInt(row.total_aciertos),
-    total_matches: parseInt(row.total_matches),
-    user_matches: parseInt(row.user_matches),
-    is_partial: row.is_partial === true,
-  }));
+  return res.rows;
 }
-
-export async function getPredictableTeams(): Promise<PredictableTeam[]> {
+export async function readPredictableTeams(): Promise<PredictableTeamRecord[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     WITH MatchOutcomes AS (
@@ -200,16 +100,6 @@ export async function getPredictableTeams(): Promise<PredictableTeam[]> {
     HAVING SUM(ts.total_predictions) > 0
     ORDER BY percentage DESC
   `;
-
   const res = await pgClient.query(query, [seasonId]);
-  return res.rows.map((row: any) => ({
-    ...row,
-    total: parseInt(row.total),
-    correct: parseInt(row.correct),
-    predicted_wins: parseInt(row.predicted_wins),
-    predicted_losses: parseInt(row.predicted_losses),
-    correct_wins: parseInt(row.correct_wins),
-    correct_losses: parseInt(row.correct_losses),
-    percentage: parseFloat(row.percentage),
-  }));
+  return res.rows;
 }

@@ -5,7 +5,7 @@ import 'server-only';
  * Business logic layer for predictions-related operations
  */
 
-import { getPorrasStats } from '../../db';
+import { getPorrasStats } from '@/features/predictions/server';
 
 /**
  * Fetch all statistics for the Predictions (Porras) page.

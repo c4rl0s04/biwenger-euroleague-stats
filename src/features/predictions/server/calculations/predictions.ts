@@ -120,7 +120,7 @@ export async function getClutchStats(data: NormalizedPrediction[]): Promise<Clut
 
   const userAgg = new Map<
     string,
-    { usuario: string; user_id: string; icon: string; color: number; totals: number[] }
+    { usuario: string | null; user_id: string; icon: string; color: number; totals: number[] }
   >();
 
   data
@@ -204,7 +204,7 @@ export async function getHistoryPivot(data: NormalizedPrediction[]): Promise<His
       const entry = data.find((d) => d.user_id === id)!;
       return { id: parseInt(id), name: entry.usuario, color_index: entry.color_index };
     })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => a.name!.localeCompare(b.name!));
 
   const rounds = Array.from(new Set(data.map((d) => d.jornada)))
     .map((name) => {
@@ -222,7 +222,7 @@ export async function getHistoryPivot(data: NormalizedPrediction[]): Promise<His
 
     users.forEach((user) => {
       const match = data.find((d) => d.jornada === round.name && d.user_id === String(user.id));
-      row.scores[user.name] = match
+      row.scores[String(user.name)] = match
         ? { score: match.aciertos, is_partial: match.is_partial }
         : { score: null, is_partial: false };
     });

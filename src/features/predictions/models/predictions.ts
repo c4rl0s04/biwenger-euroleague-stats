@@ -1,10 +1,10 @@
 export interface Achievement {
   aciertos: number;
   jornada: string;
-  usuario: string;
+  usuario: string | null;
   user_id: number;
   color_index: number;
-  user_icon?: string;
+  user_icon?: string | null;
 }
 
 export interface ParticipationStat {
@@ -14,18 +14,18 @@ export interface ParticipationStat {
 
 export interface PorraResult {
   jornada: string;
-  usuario: string;
+  usuario: string | null;
   aciertos: number;
   user_id: number;
   color_index: number;
-  user_icon?: string;
+  user_icon?: string | null;
   is_partial: boolean;
 }
 
 export interface TableStat {
   user_id: number;
-  usuario: string;
-  user_icon?: string;
+  usuario: string | null;
+  user_icon?: string | null;
   color_index: number;
   jornadas_jugadas: number;
   total_aciertos: number;
@@ -37,25 +37,25 @@ export interface TableStat {
 }
 
 export interface ClutchStat {
-  usuario: string;
+  usuario: string | null;
   user_id: number;
   color_index: number;
-  user_icon?: string;
+  user_icon?: string | null;
   avg_last_3: number;
 }
 
 export interface VictoryStat {
-  usuario: string;
+  usuario: string | null;
   user_id: number;
   color_index: number;
-  user_icon?: string;
+  user_icon?: string | null;
   victorias: number;
 }
 
 export interface PredictableTeam {
   id: number;
-  name: string;
-  img: string;
+  name: string | null;
+  img: string | null;
   total: number;
   correct: number;
   predicted_wins: number;
@@ -66,17 +66,17 @@ export interface PredictableTeam {
 }
 
 export interface BestRoundStat {
-  usuario: string;
+  usuario: string | null;
   user_id: number;
   color_index: number;
-  user_icon?: string;
+  user_icon?: string | null;
   aciertos: number;
   jornada: string;
 }
 
 export interface HistoryUser {
   id: number;
-  name: string;
+  name: string | null;
   color_index: number;
 }
 
@@ -88,8 +88,8 @@ export interface HistoryPivotRow {
 
 export interface NormalizedPrediction {
   user_id: string;
-  usuario: string;
-  user_icon?: string;
+  usuario: string | null;
+  user_icon?: string | null;
   color_index: number;
   jornada: string;
   base_round_id: number;

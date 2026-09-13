@@ -1,8 +1,9 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 const mocks = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
-vi.mock('../../index', () => ({ db: {}, pgClient: { query: mocks.query } }));
-vi.mock('../../season-context', () => ({ resolveReadSeasonId: mocks.season }));
+vi.mock('@/lib/db/connection', () => ({ pgClient: { query: mocks.query } }));
+vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
+import type { NormalizedPrediction } from '../public';
 import {
   getPorrasStats,
   getAchievements,
@@ -13,8 +14,7 @@ import {
   getVictorias,
   getBestRoundStat,
   getHistoryPivot,
-  type NormalizedPrediction,
-} from './predictions';
+} from '../server';
 
 const entry = (patch: Partial<NormalizedPrediction> = {}): NormalizedPrediction => ({
   user_id: '1',
@@ -143,4 +143,74 @@ it('propagates query and season failures without a fallback result', async () =>
   await expect(getPorrasStats()).rejects.toBe(failure);
   mocks.season.mockRejectedValueOnce(failure);
   await expect(getPorrasStats()).rejects.toBe(failure);
+});
+
+it('maps populated query rows before returning statistics and excludes unselected fields', async () => {
+  mocks.query
+    .mockResolvedValueOnce({
+      rows: [
+        {
+          user_id: '1',
+          usuario: 'Ana',
+          user_icon: null,
+          color_index: 0,
+          jornada: 'Jornada 1',
+          base_round_id: 1,
+          total_aciertos: '8',
+          result: '1-2',
+          is_partial: false,
+          total_matches: '2',
+          user_matches: '2',
+          unused: 'query-only-marker',
+        },
+      ],
+    })
+    .mockResolvedValueOnce({
+      rows: [
+        {
+          id: 7,
+          name: null,
+          img: null,
+          total: '2',
+          correct: '1',
+          predicted_wins: '1',
+          predicted_losses: '1',
+          correct_wins: '1',
+          correct_losses: '0',
+          percentage: '50.0',
+          unused: 'query-only-marker',
+        },
+      ],
+    });
+  const stats = await getPorrasStats();
+  expect(stats.table_stats[0]).toMatchObject({
+    user_id: 1,
+    usuario: 'Ana',
+    user_icon: null,
+    promedio: 8,
+  });
+  expect(stats.porra_stats.predictable_teams[0]).toEqual({
+    id: 7,
+    name: null,
+    img: null,
+    total: 2,
+    correct: 1,
+    predicted_wins: 1,
+    predicted_losses: 1,
+    correct_wins: 1,
+    correct_losses: 0,
+    percentage: 50,
+  });
+  expect(JSON.stringify(stats)).not.toContain('query-only-marker');
+  expect(JSON.parse(JSON.stringify(stats))).toEqual(stats);
+});
+
+it('preserves nullable history names and the original null-receiver sort failure', async () => {
+  expect((await getHistoryPivot([entry({ usuario: null })])).jornadas[0].scores.null).toEqual({
+    score: 8,
+    is_partial: false,
+  });
+  await expect(
+    getHistoryPivot([entry(), entry({ user_id: '2', usuario: null })])
+  ).rejects.toBeInstanceOf(TypeError);
 });

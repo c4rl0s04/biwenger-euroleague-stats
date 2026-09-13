@@ -1,4 +1,5 @@
 import 'server-only';
+import { getPorrasStats } from '@/features/predictions/server';
 
 /**
  * Compare Service
@@ -9,7 +10,6 @@ import { db } from '../../db/client';
 import { resolveReadSeasonId } from '../../db/season-context';
 import {
   getExtendedStandings as getStandings,
-  getPorrasStats,
   getManagerMarketStats,
   getBestSeller,
   getBiddingDuelsStats,

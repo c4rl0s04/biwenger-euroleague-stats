@@ -20,4 +20,3 @@ export * from './queries/analytics/season-review';
 
 export * from './queries/features/market';
 export * from './queries/features/search';
-export * from './queries/features/predictions';
