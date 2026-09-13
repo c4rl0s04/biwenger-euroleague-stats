@@ -258,3 +258,18 @@ focused Tournament tests PASS (90 tests, 9 files); diff check PASS.
 This is an implementation checkpoint, not full acceptance. Snapshot presentation projections,
 browser comparison and final full verification remain open. The original campaign inventory retains
 the deleted path as baseline evidence and must be reconciled during closure.
+
+## Phone catalogue projection
+
+The phone catalogue now receives explicit id/name/type/winnerLabel items, not the complete stored
+snapshot or an any-based model. The server contract exposes a pure allowlisting projection of the
+already retrieved lists, so query ordering/counts, season resolution and cache behavior are unchanged.
+Active rows never inspect winner names. Finished rows preserve the original truthiness and template
+interpolation (including arrays, scalar values and ordinary objects); unused icon/round/config fields
+are ignored. A consumed object with an invalid toString retains its previous TypeError rather than
+being silently repaired. No new validation policy was introduced.
+
+Mapper tests cover field exclusion, JSON serialization, historical roots, unused malformed fields,
+order, duplicates, empty lists and legacy conversion errors. Page contracts verify projection on the
+phone path only and preserve the desktop statistics read. Desktop catalogue/detail snapshot
+projections and final full/browser acceptance remain open.

@@ -1,5 +1,7 @@
 import 'server-only';
 
+export { mapTournamentCatalogue as getTournamentCataloguePresentation } from '../mappers/tournament-catalogue.mapper';
+
 import { mapTournamentPlayoffRules } from '../mappers/tournament-playoff-rules.mapper';
 import type { TournamentJson } from '../../models/tournaments';
 
