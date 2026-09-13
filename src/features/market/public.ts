@@ -1,5 +1,6 @@
 export { scoreMarketListing } from './lib/market-recommendation';
 export { default as MarketSectionRows } from './components/MarketSectionRows';
+export { default as MarketSectionScreen } from './components/MarketSectionScreen';
 export type { MarketSectionRow, MarketSectionModel } from './models/market-section';
 export { default as DesktopMarketScreen } from './components/DesktopMarketScreen';
 export { default as MobileMarketScreen } from './components/MobileMarketScreen';

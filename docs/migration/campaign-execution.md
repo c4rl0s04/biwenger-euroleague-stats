@@ -89,6 +89,15 @@ with unchanged lint/build warnings and schema metadata. Four default Team/Matche
 and two populated Market browser cases pass with unchanged references. No page/component
 source changed. The existing bids failure and remaining Market scope are still open.
 
+Checkpoint M follows committed L (`876a05fa`). The Market drawer boundary now has typed
+category-specific client-local configuration and TSX props, with unchanged emitted runtime
+AST for the drawer/parent. Phone section scaffold/descriptions move into the feature and
+preserve original markup. Ten drawer contracts, five scaffold comparisons and an ownership
+assertion accompany this work. Full verify passes 1,937 tests plus one existing skip,
+graph 920/60, typecheck, lint (24 existing warnings), build and offline schema/Drizzle checks.
+Default/populated desktop/phone browser runs pass four cases with twelve unchanged originals.
+Renderer/metric internals, further interactions, broader visual closure and bids remain open.
+
 Checkpoint L follows committed K (`be0c2e5b`). Non-bids phone transfers/trends/investments
 now use a typed row projection and feature service; the section route no longer imports
 the legacy service barrel and is graph-protected without a new exception. The known bids

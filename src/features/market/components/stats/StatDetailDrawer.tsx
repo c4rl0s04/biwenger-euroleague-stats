@@ -17,8 +17,13 @@ import UserStatRow from './renderers/UserStatRow';
 import TransactionStatRow from './renderers/TransactionStatRow';
 import TemporalStatRow from './renderers/TemporalStatRow';
 import { getMetricConfig } from './renderers/registry';
+import type {
+  MarketDrawerProps,
+  MarketDrawerFieldView,
+  MarketDrawerRowProps,
+} from '../../models/market-drawer';
 
-function getInitials(name) {
+function getInitials(name: string | null) {
   if (!name) return '??';
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
@@ -41,8 +46,8 @@ export default function StatDetailDrawer({
   allUsers = [],
   showFilters = true,
   showSummary = true,
-}) {
-  const [selectedManagerId, setSelectedManagerId] = React.useState(null);
+}: MarketDrawerProps) {
+  const [selectedManagerId, setSelectedManagerId] = React.useState<string | null>(null);
   const [prevOpen, setPrevOpen] = React.useState(isOpen);
 
   // Reset filter when opening (Render-time state update pattern)
@@ -54,7 +59,7 @@ export default function StatDetailDrawer({
   }
   // Handle Escape key and body scroll
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) onClose();
     };
 
@@ -153,7 +158,10 @@ export default function StatDetailDrawer({
   const filteredData = React.useMemo(() => {
     if (!data) return [];
     return data
-      .map((item, originalIndex) => ({ ...item, globalIndex: originalIndex }))
+      .map((item: MarketDrawerFieldView, originalIndex) => ({
+        ...item,
+        globalIndex: originalIndex,
+      }))
       .filter((item) => {
         if (!selectedManagerId) return true;
 
@@ -190,7 +198,7 @@ export default function StatDetailDrawer({
       const val =
         typeof config.summary.key === 'function'
           ? config.summary.key(item)
-          : item[config.summary.key];
+          : item[config.summary.key as keyof MarketDrawerFieldView];
       return acc + (Number(val) || 0);
     }, 0);
 
@@ -286,13 +294,13 @@ export default function StatDetailDrawer({
                                 ? `${uColor.border.replace('border-', 'border-opacity-100 border-')} shadow-[0_0_15px_rgba(0,0,0,0.4)] scale-110 z-10 opacity-100`
                                 : `opacity-30 hover:opacity-100 border-white/5 hover:border-white/20 bg-zinc-900/20`
                             }`}
-                            title={user.name}
+                            title={user.name!}
                           >
                             {/* Manager Avatar Image */}
                             {user.icon ? (
                               <img
                                 src={user.icon}
-                                alt={user.name}
+                                alt={user.name!}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -416,7 +424,7 @@ export default function StatDetailDrawer({
   );
 }
 
-function StatItemRow({ item, localIdx, globalIdx, statType }) {
+function StatItemRow({ item, localIdx, globalIdx, statType }: MarketDrawerRowProps) {
   // Strategy: Determine which specialized row to render based on data presence
 
   // 1. Transactional / Transfer specific

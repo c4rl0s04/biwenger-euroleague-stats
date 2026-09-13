@@ -68,17 +68,19 @@ export default function MarketPageClient() {
   const [selectedDuel, setSelectedDuel] = useState(
     /** @type {import('../models/market-duel-selection').MarketDuelSelection | null} */ (null)
   );
-  const [drawerData, setDrawerData] = useState({
-    isOpen: false,
-    title: '',
-    subtitle: '',
-    data: [],
-    icon: Trophy,
-    statType: 'player',
-    color: 'blue',
-    showFilters: true,
-    showSummary: true,
-  });
+  const [drawerData, setDrawerData] = useState(
+    /** @type {import('../models/market-drawer').MarketDrawerState} */ ({
+      isOpen: false,
+      title: '',
+      subtitle: '',
+      data: [],
+      icon: Trophy,
+      statType: 'player',
+      color: 'blue',
+      showFilters: true,
+      showSummary: true,
+    })
+  );
 
   const { data: statsData, loading } = useApiData('/api/market/stats');
   /** @type {Partial<import('../models/market-analytics').MarketAnalytics>} */
@@ -130,6 +132,7 @@ export default function MarketPageClient() {
     });
   };
 
+  /** @param {import('../models/market-drawer').MarketDrawerConfig} config */
   const handleOpenDrawer = (config) => {
     setDrawerData({
       ...config,

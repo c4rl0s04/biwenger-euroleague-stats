@@ -281,6 +281,48 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Drawer boundary and section composition checkpoint M (after `876a05fa`)
+
+Locally accepted for drawer boundary and section composition. The drawer boundary now uses category-specific Player,
+Manager, Transaction and Temporal row unions from the existing explicit analytics models.
+Client-local state includes the icon component and is not represented as a serializable
+server response. The renderer's internal optional field view derives only from those known
+models; it is not an unbounded dictionary or a new database projection. Existing profit/trade
+dispatch remains supported through the existing topTrader model, despite no current opener.
+
+`StatDetailDrawer` becomes TSX; parent state and opener receive the same typed contract.
+Emitted runtime ASTs for both components match `876a05fa` after erasing types/comments and
+ignoring formatting, redundant parentheses and punctuation-only differences. All filter
+precedence, strict IDs/name fallbacks, global ranking indices, summary rules, state/effects,
+portal and motion behavior remain unchanged. Ten render contracts exercise the drawer with
+controlled state and mocked row/metric rendering; they do not claim full renderer/browser
+coverage. Negative compile-time assignments reject mismatched row categories.
+
+The phone scaffold/descriptions now belong to `MarketSectionScreen`; the page only composes
+the screen with its typed rows or explicitly pending legacy bids content. Five original/new
+render comparisons preserve descriptions, headings, back links and content, including the
+existing no-description fallback. Guard/error and bids behavior are unchanged.
+
+Focused tests pass 211 cases. Full `npm run verify`, including the additional ownership
+assertion, passes 1,937 tests plus one existing skip, graph (920 modules/60 protected
+entrypoints), typecheck, skills/docs, lint (24 existing image warnings), production build,
+offline 38-table metadata audit, Drizzle and diff checks. Missing-provider notices are unchanged.
+No graph timeout occurred in this full run. The following browser commands both pass two
+cases, with all five empty-state and seven populated original images unchanged:
+
+- `npm run test:e2e:local -- tests/e2e/market.spec.ts --project=iphone-13 --project=desktop-1440`
+- `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts
+--project=iphone-13 --project=desktop-1440`
+
+The populated run retains listing-name filtering, transfer-drawer opening/Escape dismissal and duel
+click/keyboard/reverse-selection checks. Both disposable databases shut down normally.
+The existing phone bids TypeError remains visible in both logs; it is neither fixed nor
+suppressed. A type-only model formatting issue was corrected and its check then passed;
+scoped formatting, documentation and diff checks pass. React/UI review retains the original
+hooks, state reset, scroll lock, keyboard handlers, motion and markup without new caching.
+Remaining C05 work includes renderer/metric internals, additional drawer/listing/rolling-chart
+browser coverage, all-viewports/Linux closure and the unapproved bids behavior/ownership decision.
+
 ### Phone read projection checkpoint L (after `be0c2e5b`)
 
 Locally accepted for non-bids row projection. Transfers, trends and investments now call a feature-owned

@@ -11,7 +11,10 @@ vi.mock('@/features/market/server', () => ({
   fetchMarketStats: fake.stats,
   getMobileMarketSection: fake.section,
 }));
-vi.mock('@/features/market/public', () => ({ MarketSectionRows: () => null }));
+vi.mock('@/features/market/public', () => ({
+  MarketSectionRows: () => null,
+  MarketSectionScreen: () => null,
+}));
 vi.mock('@/components/mobile/MobileDetailScaffold', () => ({ default: () => null }));
 vi.mock('@/components/mobile/MobileRecordList', () => ({ default: () => null }));
 vi.mock('@/components/mobile/MobileScreen', () => ({ MobileSectionHeading: () => null }));
@@ -59,8 +62,8 @@ it.each(['transfers', 'trends', 'investments'])(
     expect(fake.section).toHaveBeenCalledExactlyOnceWith(section);
     expect(fake.stats).not.toHaveBeenCalled();
     expect(result.props.title).toBe('Fixture section');
-    expect(result.props.backHref).toBe('/market');
-    expect(result.props.children[1].props).toEqual({ rows: [] });
+    expect(result.props.section).toBe(section);
+    expect(result.props.children.props).toEqual({ rows: [] });
   }
 );
 
