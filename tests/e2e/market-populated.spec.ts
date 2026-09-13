@@ -1,0 +1,104 @@
+import { test, expect } from './fixtures';
+import type { Locator, Page } from 'playwright/test';
+
+test('populated Market preserves listings, history and ranking interaction', async ({
+  page,
+}, info) => {
+  test.setTimeout(180000);
+  test.skip(process.env.E2E_FIXTURE_SCENARIO !== 'market', 'Run with --fixture=market.');
+  await page.goto('/login?callbackUrl=%2Fmarket');
+  await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
+  await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page).toHaveURL(/\/market$/);
+  const phone =
+    (await page.locator('[data-presentation]').getAttribute('data-presentation')) === 'phone';
+  await expect(page.getByRole('heading', { name: 'Mercado', exact: true }).first()).toBeVisible();
+
+  // These are real application reads against the dedicated synthetic PostgreSQL fixture.
+  const response = await page.request.get('/api/market/stats');
+  expect(response.status()).toBe(200);
+  const stats = (await response.json()).data;
+  expect(stats.currentMarketListings).toHaveLength(3);
+  // The existing ranking includes purchases from Mercado as well as manager-to-manager sales.
+  expect(stats.recordTransfer).toHaveLength(5);
+  expect(stats.bestFlip.length).toBeGreaterThan(0);
+  expect(stats.worstFlip.length).toBeGreaterThan(0);
+  expect(stats.biddingDuels.users).toHaveLength(2);
+
+  const capture = async (name: string, target: Locator | Page = page) => {
+    // Originals must be captured in the retained pre-screen-migration checkout, never
+    // initialized from the migrated output. Linux references remain a C14 requirement.
+    if (process.platform !== 'darwin' || !['iphone-13', 'desktop-1440'].includes(info.project.name))
+      return;
+    await page.evaluate(() => document.fonts.ready);
+    await page.mouse.move(0, 0);
+    await expect(target).toHaveScreenshot(`${name}.png`, {
+      animations: 'disabled',
+      timeout: 60000,
+      stylePath: 'tests/e2e/screenshot.css',
+    });
+  };
+
+  if (phone) {
+    for (const id of [99101, 99311, 99313]) {
+      await expect(page.locator(`a.mobile-list-row[href="/player/${id}"]`).first()).toBeVisible();
+    }
+    await capture('market-populated-phone-overview');
+    // Offscreen rows use content-visibility:auto. Capture them in the actual viewport,
+    // not as blank offscreen placeholders in a full-document image.
+    const activity = page
+      .locator('.mobile-section-heading')
+      .filter({ hasText: 'Actividad reciente' })
+      .locator('xpath=following-sibling::div[1]');
+    // Center the block clear of the fixed phone navigation; bottom-edge scrolling would
+    // leave its fourth row covered by the dock in the reference image.
+    await activity.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' })
+    );
+    await expect(activity.getByText('Fixture Market Wing', { exact: true })).toHaveCount(2);
+    await capture('market-populated-phone-activity', activity);
+    for (const [section, title] of [
+      ['transfers', 'Fichajes'],
+      ['investments', 'Inversiones'],
+    ]) {
+      await page.locator(`a.mobile-section-link[href="/market/${section}"]`).click();
+      await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+      await expect(page.locator('.mobile-record-index').first()).toBeVisible();
+      await expect(page.getByText('No hay datos disponibles para esta vista.')).toHaveCount(0);
+      await capture(`market-populated-phone-${section}`);
+      await page.getByRole('link', { name: 'Volver a Mercado', exact: true }).click();
+      await expect(page).toHaveURL(/\/market$/);
+    }
+  } else {
+    const listings = page.locator('#jugadores-en-el-mercado');
+    await expect(
+      listings.getByRole('heading', { name: 'Fixture Market Wing', exact: true })
+    ).toBeVisible();
+    await capture('market-populated-listings', listings);
+    await listings.getByPlaceholder('Nombre...').fill('Market Free');
+    await expect(
+      listings.getByRole('heading', { name: 'Fixture Market Free', exact: true })
+    ).toBeVisible();
+    await expect(
+      listings.getByRole('heading', { name: 'Fixture Market Wing', exact: true })
+    ).toHaveCount(0);
+    await listings.getByPlaceholder('Nombre...').fill('');
+    await expect(
+      listings.getByRole('heading', { name: 'Fixture Market Wing', exact: true })
+    ).toBeVisible();
+
+    // The label shares its span with tooltip content, so its full text is not an exact match.
+    await page.getByText('Récord Histórico').first().click({ timeout: 15000 });
+    const drawer = page.locator('div[class~="z-[201]"]');
+    await expect(
+      drawer.getByRole('heading', { name: 'Récord de Traspasos', exact: true })
+    ).toBeVisible();
+    await expect(drawer.getByText('Fixture Market Wing', { exact: true })).toHaveCount(2);
+    await expect(drawer.getByText('Fixture Market Wing', { exact: true }).first()).toBeVisible();
+    await capture('market-populated-transfer-ranking', drawer);
+    await page.keyboard.press('Escape');
+    await expect(drawer).toHaveCount(0);
+    await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+  }
+});
