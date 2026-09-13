@@ -281,6 +281,57 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Duel presentation checkpoint K (after `7cfad1e0`)
+
+Locally accepted. `MarketDuelSelection` connects the parent selection state, typed matrix and
+typed detail card. The two components become TSX, with a local type-only adapter describing
+the existing fetch hook's nullable key and optional options correctly; the shared hook
+and actual browser cache behavior are untouched. Three emitted JavaScript ASTs match
+their original components after type/comment erasure and redundant-parenthesis/formatting
+normalization. No rendered markup, handler or runtime helper changes are intended.
+
+Nine focused render cases cover absent selection, directional URLs/symmetric cache key,
+loading/error/empty states, details, keyboard-accessible matrix labels and unchanged
+null-name sorting failure. The original `.js` JSX files cannot be imported by the current
+Vitest parser; the tests run against TSX with shared visual primitives mocked, while real
+browser comparisons use the original application. Focused Market/API tests pass 174 cases;
+typecheck and architecture pass (914 modules/59 protected entrypoints).
+
+The original browser test now exercises click selection, clear, Enter/Space toggling,
+reverse selection and four real detail rows. The first new screenshot capture writes a
+reference and exits failed for the missing snapshot. Its two non-updating repeats then
+failed on a small text rasterization difference; that initial run was not acceptance.
+Pixel-alignment did not change the two failures, and that probe was removed. Moving the
+resting pointer before scrolling details into view resolved the mismatch. The original
+capture command with update mode passed without rewriting the new image (its original
+creation timestamp remained unchanged); two subsequent non-updating original repeats
+passed, including click/clear, Enter/Space and reverse-pair interaction. This supports an
+accidental hover/resting-state capture issue, not an application rendering change.
+No screenshot tolerance, error guard, application CSS or behavior is relaxed.
+
+Candidate populated comparison passes both iPhone 13 and desktop 1440 using the exact
+original test and seven reference images. The existing phone bids TypeError remains in
+server logs; neither this checkpoint nor those browser passes claim it is fixed. The
+React review retains hook order, functional selection updates, keyboard handlers and
+client-safe imports; no new rendering or fetching behavior is added.
+The first full verification run failed only the existing five-second graph-test timeout
+while browser builds were running (1,902 tests passed, one failed, one skipped). An
+isolated full rerun was required; no test timeout, assertion or graph policy is changed.
+The previous isolated process handle was unavailable when work resumed; its final exit
+could not be recovered. A fresh isolated `npm run verify` completed successfully before
+checkpoint acceptance: 1,903 tests passed and one existing skip, typecheck, graph (914
+modules/59 protected entrypoints), skills, 89 documentation notes, lint (zero errors and
+24 existing image warnings), production build, 38-table offline schema metadata audit,
+Drizzle check and diff check all passed. Existing missing-provider build notices remain.
+The timeout did not recur; resource contention is a plausible explanation, not proven causality.
+
+Original browser evidence is retained at `df01154f`: `npm run test:e2e:local --
+--fixture=market tests/e2e/market-populated.spec.ts --project=desktop-1440 --repeat-each=2`
+passed both repetitions. The candidate command with `--project=iphone-13
+--project=desktop-1440` passed both cases. All seven images and the browser test were
+rechecked byte-for-byte against that original checkout when closing this checkpoint.
+These checks accept duel presentation only; the remaining C05 scope below stays open.
+
 ### Shared form checkpoint J (after `efcb5eef`)
 
 Locally accepted. `features/player-form` owns the single finished-team-match

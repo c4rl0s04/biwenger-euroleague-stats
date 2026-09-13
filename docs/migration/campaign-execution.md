@@ -89,6 +89,18 @@ with unchanged lint/build warnings and schema metadata. Four default Team/Matche
 and two populated Market browser cases pass with unchanged references. No page/component
 source changed. The existing bids failure and remaining Market scope are still open.
 
+Checkpoint K types the existing duel selection/matrix/detail presentation without changing
+their emitted runtime logic. Nine render contracts and 174 focused Market/API cases pass.
+Original baseline `df01154f` preserves the duel detail reference and click/keyboard/reverse
+selection checks; two non-updating original repeats and both candidate desktop/phone cases
+pass. Moving the pointer before scrolling avoids an accidental hover capture difference;
+the original image and all prior references remain unchanged. A fresh isolated full
+verification passed: 1,903 tests plus one existing skip, graph 914/59, typecheck, lint
+(24 existing warnings), build, offline schema/Drizzle and diff checks. The earlier graph
+timeout did not recur. Checkpoint K is locally accepted for duel presentation only.
+Other drawer categories, listing expansion, rolling charts, phone sections and broader
+presentation/full-viewport closure remain open; the bids correction is still unapproved.
+
 C05 screen baseline now pins five empty-state desktop/phone references against unchanged
 screen source at `91a3ea7f`. Two real-page characterization tests and a fresh two-project
 non-updating browser comparison pass. The receipt records the pre-existing phone bids

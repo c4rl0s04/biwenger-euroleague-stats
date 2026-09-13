@@ -4,8 +4,16 @@ import React, { useState } from 'react';
 import { Swords, Sparkles } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { getColorForUser } from '@/lib/constants/colors';
+import type { BiddingDuelsStats, BidDuelRecord } from '../../models/market-overview';
+import type { MarketDuelSelection } from '../../models/market-duel-selection';
 
-function getCellColor(record) {
+interface BiddingDuelsMatrixProps {
+  data?: BiddingDuelsStats | null;
+  onSelectDuel?: (selection: MarketDuelSelection) => void;
+  selectedDuel?: MarketDuelSelection | null;
+}
+
+function getCellColor(record: BidDuelRecord | undefined) {
   if (!record || record.duels === 0) return 'bg-transparent border-transparent text-zinc-700';
   if (record.wins > record.losses)
     return 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40';
@@ -15,12 +23,17 @@ function getCellColor(record) {
 
 import { formatEuro } from '@/lib/utils/currency';
 
-export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDuel }) {
-  const [hoveredCell, setHoveredCell] = useState(null);
+export default function BiddingDuelsMatrixCard({
+  data,
+  onSelectDuel,
+  selectedDuel,
+}: BiddingDuelsMatrixProps) {
+  const [hoveredCell, setHoveredCell] = useState<string | null>(null);
 
   if (!data?.users?.length) return null;
 
-  const users = [...data.users].sort((a, b) => a.name.localeCompare(b.name));
+  // Preserve the existing null-name failure; this migration does not add fallback ordering.
+  const users = [...data.users].sort((a, b) => a.name!.localeCompare(b.name!));
   const matrix = data.matrix || {};
   const competitiveMargins = Object.values(matrix)
     .flatMap((opponents) => Object.values(opponents || {}))
@@ -28,7 +41,7 @@ export default function BiddingDuelsMatrixCard({ data, onSelectDuel, selectedDue
     .map((record) => record.avg_margin);
   const lowestAvgMargin = competitiveMargins.length > 0 ? Math.min(...competitiveMargins) : null;
 
-  const isMostCompetitiveCell = (record) => {
+  const isMostCompetitiveCell = (record: BidDuelRecord | undefined) => {
     if (!record || record.duels < 2 || lowestAvgMargin === null) return false;
     return Math.abs(record.avg_margin - lowestAvgMargin) < 0.01;
   };

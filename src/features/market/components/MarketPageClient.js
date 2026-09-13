@@ -65,7 +65,9 @@ import {
 } from 'lucide-react';
 
 export default function MarketPageClient() {
-  const [selectedDuel, setSelectedDuel] = useState(null);
+  const [selectedDuel, setSelectedDuel] = useState(
+    /** @type {import('../models/market-duel-selection').MarketDuelSelection | null} */ (null)
+  );
   const [drawerData, setDrawerData] = useState({
     isOpen: false,
     title: '',
@@ -114,6 +116,7 @@ export default function MarketPageClient() {
     );
   }
 
+  /** @param {import('../models/market-duel-selection').MarketDuelSelection} duelSelection */
   const handleSelectDuel = (duelSelection) => {
     setSelectedDuel((currentSelection) => {
       if (

@@ -6,10 +6,24 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/constants/colors';
+import type { MarketDuelSelection } from '../../models/market-duel-selection';
+import type { MarketDuelDetail } from '../../models/market-transfers';
+
+interface BiddingDuelDetailsProps {
+  selectedDuel: MarketDuelSelection | null;
+  onClear: () => void;
+}
+
+// The legacy hook supports null cache keys at runtime; its JSDoc only declares string.
+// Keep that existing contract without changing the shared hook or its caching behavior.
+type UseDuelDetailsData = (
+  endpoint: () => string | null,
+  options: { dependencies: (number | undefined)[]; skip: boolean; cacheKey: string | null }
+) => { data?: MarketDuelDetail[]; loading: boolean; error: string | null };
 
 import { formatEuro } from '@/lib/utils/currency';
 
-function formatDate(value) {
+function formatDate(value: string | null) {
   if (!value) return 'Fecha no disponible';
 
   const parsedDate = new Date(value);
@@ -30,12 +44,12 @@ function formatDate(value) {
   return value;
 }
 
-function buildPairKey(selectedDuel) {
+function buildPairKey(selectedDuel: MarketDuelSelection | null) {
   if (!selectedDuel?.user?.id || !selectedDuel?.opponent?.id) return null;
   return [selectedDuel.user.id, selectedDuel.opponent.id].sort((a, b) => a - b).join('-');
 }
 
-export default function BiddingDuelDetailsCard({ selectedDuel, onClear }) {
+export default function BiddingDuelDetailsCard({ selectedDuel, onClear }: BiddingDuelDetailsProps) {
   const pairKey = buildPairKey(selectedDuel);
   const userId = selectedDuel?.user?.id;
   const opponentId = selectedDuel?.opponent?.id;
@@ -44,7 +58,7 @@ export default function BiddingDuelDetailsCard({ selectedDuel, onClear }) {
     data: duelDetails = [],
     loading,
     error,
-  } = useApiData(
+  } = (useApiData as unknown as UseDuelDetailsData)(
     () =>
       selectedDuel ? `/api/market/duels/details?userId=${userId}&opponentId=${opponentId}` : null,
     {

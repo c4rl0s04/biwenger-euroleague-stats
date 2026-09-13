@@ -100,5 +100,36 @@ test('populated Market preserves listings, history and ranking interaction', asy
     await page.keyboard.press('Escape');
     await expect(drawer).toHaveCount(0);
     await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+
+    const duelCell = page.getByRole('button', {
+      name: /^Fixture Manager contra Fixture Rival,/,
+    });
+    await duelCell.click();
+    await expect(duelCell).toHaveAttribute('aria-pressed', 'true');
+    const detail = page
+      .getByRole('button', { name: 'Cerrar detalle', exact: true })
+      .locator('xpath=ancestor::div[contains(@class, "animate-in")][1]');
+    await expect(detail.locator('a[href^="/players/"]')).toHaveCount(4);
+    await expect(detail.locator('a[href="/players/99101"]')).toBeVisible();
+    // Move the resting pointer before scrolling new content underneath it.
+    await page.mouse.move(0, 0);
+    await detail.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' })
+    );
+    await capture('market-populated-duel-details', detail);
+    await page.getByRole('button', { name: 'Cerrar detalle', exact: true }).click();
+    await expect(duelCell).toHaveAttribute('aria-pressed', 'false');
+    await duelCell.focus();
+    await duelCell.press('Enter');
+    await expect(duelCell).toHaveAttribute('aria-pressed', 'true');
+    await duelCell.press('Space');
+    await expect(duelCell).toHaveAttribute('aria-pressed', 'false');
+    const reverseCell = page.getByRole('button', {
+      name: /^Fixture Rival contra Fixture Manager,/,
+    });
+    await reverseCell.click();
+    await expect(reverseCell).toHaveAttribute('aria-pressed', 'true');
+    await expect(detail.locator('a[href^="/players/"]')).toHaveCount(4);
+    await page.getByRole('button', { name: 'Cerrar detalle', exact: true }).click();
   }
 });

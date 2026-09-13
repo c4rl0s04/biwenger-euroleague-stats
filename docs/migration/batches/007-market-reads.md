@@ -39,6 +39,17 @@ superseded by the approved completion campaign, not by authorization for private
 
 ## Remaining C05 execution
 
+### Checkpoint K — Duel presentation contract
+
+Predecessor `7cfad1e0`. Type the existing matrix selection, matrix props and detail API
+data in the two owned duel components, preserving runtime markup, click/keyboard toggles,
+directional URL, symmetric pair cache key, default TTL and loading/error/empty states.
+Keep the shared fetch hook unchanged; use a local typed adapter for its actual nullable
+cache-key contract. Preserve existing null-name sorting failure and plural player links;
+this does not approve the unrelated phone bids fix or other behavior changes.
+Pin render contracts and original desktop duel interactions/details, then compare the
+candidate using unchanged original references. Complete full verification before acceptance.
+
 ### Checkpoint J — Shared Player form ownership
 
 Predecessor `efcb5eef`. Establish a leaf `features/player-form` boundary for the existing
