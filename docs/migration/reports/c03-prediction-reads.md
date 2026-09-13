@@ -73,3 +73,20 @@ props are not acceptable final boundaries.
 Capture populated original Predictions browser references before moving UI: existing browser fixtures
 have no porras seed or Predictions-specific screenshots. Then run focused/cross-feature tests,
 architecture/type checks and full/browser acceptance. Do not mark this slice verified prematurely.
+
+## Models and calculation ownership checkpoint
+
+Created features/predictions public models and server-only entrypoint, with the eight existing
+calculation functions under server/calculations. The legacy query module imports/re-exports those
+contracts temporarily; the two SQL reads and getPorrasStats orchestration remain there for the next
+step. No screen, database record mapping, SQL, identity handling or scoring rule changed.
+
+A TypeScript AST comparison against cc65f916 confirms all eleven function bodies are identical:
+eight relocated calculations plus the retained orchestrator and two query functions. The baseline
+tests now use the normal test-only server-only mock; production retains the real guard.
+Focused validation: nine tests PASS (eight behavior tests plus the new boundary test), typecheck,
+architecture (826 modules/48 protected entrypoints) and diff checks PASS.
+
+This is an implementation checkpoint, not feature acceptance. Next: dedicated query/record mapper
+ownership, the shared Home normalization contract and Compare adapter, then original UI fixtures,
+screen/services migration and full acceptance.
