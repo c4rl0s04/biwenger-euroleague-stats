@@ -88,17 +88,17 @@ export async function fetchUserPlayers(userId: number) {
     .select({
       id: players.id,
       name: players.name,
-      team_id: sql<number>`COALESCE(${playerSeasons.teamId}, ${players.teamId})`,
+      team_id: playerSeasons.teamId,
       team_name: teams.shortName,
       team_code: sql<string>`COALESCE((SELECT provider_team_code FROM official_team_mappings WHERE season_id=${seasonId} AND team_id=${teams.id} AND provider='euroleague_advanced'), ${teams.code})`,
-      position: players.position,
-      price: sql<number>`COALESCE(${playerSeasons.price}, ${players.price})`,
+      position: playerSeasons.position,
+      price: playerSeasons.price,
       img: sql<string>`COALESCE((SELECT image_url FROM official_player_mappings WHERE season_id=${seasonId} AND player_id=${players.id} AND provider='euroleague_advanced' AND status='matched'), ${players.img})`,
-      puntos: sql<number>`COALESCE(${playerSeasons.puntos}, ${players.puntos})`,
+      puntos: playerSeasons.puntos,
     })
     .from(playerSeasons)
     .innerJoin(players, eq(playerSeasons.playerId, players.id))
-    .leftJoin(teams, eq(sql`COALESCE(${playerSeasons.teamId}, ${players.teamId})`, teams.id))
+    .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
     .where(and(eq(playerSeasons.seasonId, seasonId), eq(playerSeasons.ownerId, userId.toString())));
 
   return rows;

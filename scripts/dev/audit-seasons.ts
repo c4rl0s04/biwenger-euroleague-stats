@@ -136,14 +136,13 @@ async function main() {
     const ownership = await pool.query(
       `
       SELECT
-        COUNT(*) FILTER (WHERE owner_id IS NOT NULL)::int AS legacy_owned,
-        (SELECT COUNT(*)::int FROM player_seasons WHERE season_id = $1 AND owner_id IS NOT NULL) AS season_owned
-      FROM players
+        COUNT(*)::int AS season_owned
+      FROM player_seasons
+      WHERE season_id = $1 AND owner_id IS NOT NULL
     `,
       [seasonId]
     );
     console.log('\nOwnership');
-    console.log(`  players.owner_id owned: ${ownership.rows[0].legacy_owned}`);
     console.log(`  player_seasons owned: ${ownership.rows[0].season_owned}`);
 
     const priceMismatch = await pool.query(
@@ -155,15 +154,15 @@ async function main() {
         ORDER BY player_id, date DESC, id DESC
       )
       SELECT COUNT(*)::int AS count
-      FROM players p
-      JOIN latest l ON l.player_id = p.id
-      WHERE p.price IS DISTINCT FROM l.price
+      FROM player_seasons ps
+      JOIN latest l ON l.player_id = ps.player_id
+      WHERE ps.season_id = $1 AND ps.price IS DISTINCT FROM l.price
     `,
       [seasonId]
     );
     console.log('\nPrice cache');
     console.log(
-      `  mismatches between players.price and latest market_values: ${priceMismatch.rows[0].count}`
+      `  mismatches between player_seasons.price and latest market_values: ${priceMismatch.rows[0].count}`
     );
 
     const missingColumns = await pool.query(

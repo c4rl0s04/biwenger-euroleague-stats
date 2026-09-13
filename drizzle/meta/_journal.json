@@ -99,6 +99,13 @@
       "when": 1789335054544,
       "tag": "0013_season_lifecycle_and_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789342135139,
+      "tag": "0014_drop_deprecated_seasonal_columns",
+      "breakpoints": true
     }
   ]
 }
