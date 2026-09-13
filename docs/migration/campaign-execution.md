@@ -58,6 +58,18 @@ desktop/phone verification remain pending; private operations stay frozen under 
 
 ## Inventory discovery
 
+Checkpoint N follows committed M (`78b77ea1`) and is locally verified for Market's metric
+renderer contracts. Four rows, all twenty metric definitions and identity resolution are
+typed without changing emitted runtime behavior; the shared BaseRow remains one unchanged
+implementation. Focused checks pass 249 tests; full verify passes 1,974 plus one existing
+skip, graph 921/60, lint (24 existing warnings), build and offline schema/Drizzle checks.
+Original reference `9a2abc1c` adds three drawer images and manager-filter interaction;
+two original repeats and four candidate populated/empty desktop/phone cases pass against
+fifteen unchanged-original images. Locator corrections target existing card headers rather
+than hidden tooltip copies; no error guard, tolerance or application behavior was changed.
+Listing expansion, rolling charts, remaining presentation, broader viewports/Linux and
+the separately unapproved bids behavior/ownership decision remain open. C05 is not complete.
+
 Checkpoint H moves the `/market` overview and 49 desktop modules into Market ownership,
 with a typed phone model/service and unchanged browser-loaded desktop analytics. Full
 verification passes (1,864 tests plus one skip; graph 907 modules/59 entrypoints), with

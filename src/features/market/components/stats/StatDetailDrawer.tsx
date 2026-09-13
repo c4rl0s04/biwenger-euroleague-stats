@@ -196,9 +196,9 @@ export default function StatDetailDrawer({
 
     const total = filteredData.reduce((acc, item) => {
       const val =
-        typeof config.summary.key === 'function'
-          ? config.summary.key(item)
-          : item[config.summary.key as keyof MarketDrawerFieldView];
+        typeof config.summary!.key === 'function'
+          ? config.summary!.key(item)
+          : item[config.summary!.key as keyof MarketDrawerFieldView];
       return acc + (Number(val) || 0);
     }, 0);
 

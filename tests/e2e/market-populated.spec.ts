@@ -97,9 +97,42 @@ test('populated Market preserves listings, history and ranking interaction', asy
     await expect(drawer.getByText('Fixture Market Wing', { exact: true })).toHaveCount(2);
     await expect(drawer.getByText('Fixture Market Wing', { exact: true }).first()).toBeVisible();
     await capture('market-populated-transfer-ranking', drawer);
+    const transferRows = await drawer.locator('h4').count();
+    await drawer.getByTitle('Fixture Rival', { exact: true }).click();
+    await expect.poll(() => drawer.locator('h4').count()).toBeLessThan(transferRows);
+    expect(await drawer.locator('h4').count()).toBeGreaterThan(0);
+    await drawer.getByTitle('Todos los Managers', { exact: true }).click();
+    await expect(drawer.locator('h4')).toHaveCount(transferRows);
     await page.keyboard.press('Escape');
     await expect(drawer).toHaveCount(0);
     await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+
+    for (const [trigger, title, category, count] of [
+      ['El Jeque', 'Los Grandes Gastadores', 'user', stats.bigSpender.length],
+      ['El Pelotazo', 'El Pelotazo', 'temporal', stats.bestFlip.length],
+      ['El más fichado', 'El Más Deseado', 'player', stats.topPlayer.length],
+    ] as const) {
+      expect(count).toBeGreaterThan(0);
+      // Header text also occurs in a nested hidden tooltip; target the card header itself.
+      await page
+        .locator('.stat-card > div > div > span')
+        .filter({ hasText: trigger })
+        .first()
+        .click({ timeout: 15000 });
+      await expect(drawer.getByRole('heading', { name: title, exact: true })).toBeVisible();
+      await expect(drawer.locator('h4')).toHaveCount(count);
+      // Framer's JavaScript entry motion must finish before taking an original reference.
+      await page.mouse.move(0, 0);
+      await expect(drawer).toHaveCSS('transform', 'none');
+      for (const row of await drawer.locator('.custom-scrollbar > div').all()) {
+        await expect(row).toHaveCSS('opacity', '1');
+        await expect(row).toHaveCSS('transform', 'none');
+      }
+      await capture(`market-populated-${category}-ranking`, drawer);
+      await page.keyboard.press('Escape');
+      await expect(drawer).toHaveCount(0);
+      await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+    }
 
     const duelCell = page.getByRole('button', {
       name: /^Fixture Manager contra Fixture Rival,/,

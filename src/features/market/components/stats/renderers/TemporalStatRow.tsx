@@ -5,14 +5,20 @@ import BaseRow from './BaseRow';
 import { resolveIdentity } from './utils';
 import { formatEuro } from '@/lib/utils/currency';
 import { getMetricConfig } from './registry';
+import type { MarketMetricRowProps } from '../../../models/market-metric';
 
-export default function TransactionStatRow({ item, localIdx, globalIdx, statType }) {
+export default function TemporalStatRow({
+  item,
+  localIdx,
+  globalIdx,
+  statType,
+}: MarketMetricRowProps) {
   const rank = globalIdx + 1;
   const isTop3 = rank <= 3;
   const identity = resolveIdentity(item, statType);
 
   // Resolve metric configuration from registry
-  const config = getMetricConfig(item, 'TRANSACTION');
+  const config = getMetricConfig(item, 'TEMPORAL');
 
   if (!config) {
     return (
@@ -21,17 +27,15 @@ export default function TransactionStatRow({ item, localIdx, globalIdx, statType
         rank={rank}
         isTop3={isTop3}
         {...identity}
-        valueLabel="Precio Traspaso"
-        valueText={`${formatEuro(item.precio || item.price || 0)}€`}
-        valueSub={item.player_team || item.team || ''}
+        valueLabel="Valor"
+        valueText="-"
       />
     );
   }
 
-  const label = typeof config.label === 'function' ? config.label(item) : config.label;
-  const value = typeof config.value === 'function' ? config.value(item) : config.value;
+  const valueLabel = typeof config.label === 'function' ? config.label(item) : config.label;
+  const valueText = typeof config.value === 'function' ? config.value(item) : config.value;
   const sub = typeof config.sub === 'function' ? config.sub(item) : config.sub;
-  const info = typeof config.info === 'function' ? config.info(item) : config.info;
 
   return (
     <BaseRow
@@ -39,11 +43,9 @@ export default function TransactionStatRow({ item, localIdx, globalIdx, statType
       rank={rank}
       isTop3={isTop3}
       {...identity}
-      valueLabel={label}
-      valueText={value}
+      valueLabel={valueLabel}
+      valueText={valueText}
       valueSub={sub}
-    >
-      {info}
-    </BaseRow>
+    />
   );
 }

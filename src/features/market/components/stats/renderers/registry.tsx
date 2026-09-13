@@ -5,19 +5,26 @@ import Link from 'next/link';
 import { formatEuro, formatProfit } from '@/lib/utils/currency';
 import { Timer, Hourglass, ArrowRight } from 'lucide-react';
 import { getColorForUser } from '@/lib/constants/colors';
+import type {
+  MarketMetricFields,
+  MarketMetricDefinition,
+  MarketMetricCategory,
+} from '../../../models/market-metric';
 
 /**
  * Registry of Market Metrics
  * Each entry defines how to identify a metric and how to render its values.
+ * Type-only assertions retain the original callback arithmetic and missing-value
+ * behavior; they do not add defaults or alter the presence-based matching rules.
  */
 
-const formatTime = (hours) => {
+const formatTime = (hours: number) => {
   if (hours < 1) return `${Math.round(hours * 60)}m`;
   if (hours < 24) return `${hours.toFixed(1)}h`;
   return `${(hours / 24).toFixed(1)}d`;
 };
 
-export const METRIC_REGISTRY = {
+export const METRIC_REGISTRY: Record<MarketMetricCategory, MarketMetricDefinition[]> = {
   // --- PLAYER METRICS ---
   PLAYER: [
     {
@@ -51,7 +58,7 @@ export const METRIC_REGISTRY = {
       value: (item) => `${item.missed_rounds}`,
       sub: (item) => {
         const rate = item.available_rounds
-          ? Math.round((item.played_rounds / item.available_rounds) * 100)
+          ? Math.round((item.played_rounds! / item.available_rounds) * 100)
           : 0;
         return `Asistencia: ${rate}% (${item.played_rounds}/${item.available_rounds})`;
       },
@@ -70,20 +77,20 @@ export const METRIC_REGISTRY = {
       label: (item) =>
         item.percentage_gain !== undefined
           ? 'Rentabilidad'
-          : (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+          : (item.revaluation !== undefined ? item.revaluation : item.devaluation)! >= 0
             ? 'Revalorización'
             : 'Depreciación',
       value: (item) => {
         if (item.percentage_gain !== undefined) return `+${item.percentage_gain.toFixed(0)}%`;
         const change = item.revaluation !== undefined ? item.revaluation : item.devaluation;
-        return `${formatEuro(Math.abs(change))}€`;
+        return `${formatEuro(Math.abs(change!))}€`;
       },
       sub: (item) =>
         `C: ${formatEuro(item.purchase_price || 0)}€ · A: ${formatEuro(item.current_price || item.price || 0)}€`,
       summary: {
         key: (item) => (item.revaluation !== undefined ? item.revaluation : item.devaluation),
         label: (item) =>
-          (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+          (item.revaluation !== undefined ? item.revaluation : item.devaluation)! >= 0
             ? 'Revalorización Total'
             : 'Depreciación Total',
         type: 'currency',
@@ -106,7 +113,7 @@ export const METRIC_REGISTRY = {
       id: 'points_million',
       match: (item) => item.points_per_million !== undefined,
       label: 'Puntos / Millón',
-      value: (item) => item.points_per_million.toFixed(2),
+      value: (item) => item.points_per_million!.toFixed(2),
       sub: (item) => `${item.total_points} puntos totales`,
     },
   ],
@@ -339,7 +346,7 @@ export const METRIC_REGISTRY = {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-orange-400 font-bold">
             <Timer className="w-3.5 h-3.5" />
-            {formatTime(item.hours_held)} de posesión
+            {formatTime(item.hours_held!)} de posesión
           </div>
           <div className="flex items-center gap-2 opacity-70 text-[10px]">
             C: {formatEuro(item.purchase_price || 0)}€ · V: {formatEuro(item.sale_price || 0)}€
@@ -361,7 +368,7 @@ export const METRIC_REGISTRY = {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-teal-400 font-bold">
             <Hourglass className="w-3.5 h-3.5" />
-            {Math.floor(item.days_held)} días en plantilla
+            {Math.floor(item.days_held!)} días en plantilla
           </div>
           <div className="flex items-center gap-2 opacity-70 text-[10px]">
             C: {formatEuro(item.purchase_price || 0)}€ · V: {formatEuro(item.sale_price || 0)}€
@@ -383,20 +390,20 @@ export const METRIC_REGISTRY = {
       label: (item) =>
         item.percentage_gain !== undefined
           ? 'Rentabilidad'
-          : (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+          : (item.revaluation !== undefined ? item.revaluation : item.devaluation)! >= 0
             ? 'Revalorización'
             : 'Depreciación',
       value: (item) => {
         if (item.percentage_gain !== undefined) return `+${item.percentage_gain.toFixed(0)}%`;
         const change = item.revaluation !== undefined ? item.revaluation : item.devaluation;
-        return `${formatEuro(Math.abs(change))}€`;
+        return `${formatEuro(Math.abs(change!))}€`;
       },
       sub: (item) =>
         `C: ${formatEuro(item.purchase_price || 0)}€ · A: ${formatEuro(item.current_price || item.price || 0)}€`,
       summary: {
         key: (item) => (item.revaluation !== undefined ? item.revaluation : item.devaluation),
         label: (item) =>
-          (item.revaluation !== undefined ? item.revaluation : item.devaluation) >= 0
+          (item.revaluation !== undefined ? item.revaluation : item.devaluation)! >= 0
             ? 'Revalorización Total'
             : 'Depreciación Total',
         type: 'currency',
@@ -419,19 +426,20 @@ export const METRIC_REGISTRY = {
       id: 'generic_flip',
       match: (item) => item.purchase_price !== undefined && item.sale_price !== undefined,
       label: (item) => {
-        const p = item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price;
+        const p = item.profit !== undefined ? item.profit : item.sale_price! - item.purchase_price!;
         return p >= 0 ? 'Beneficio' : 'Pérdida';
       },
       value: (item) => {
-        const p = item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price;
+        const p = item.profit !== undefined ? item.profit : item.sale_price! - item.purchase_price!;
         return `${formatEuro(Math.abs(p))}€`;
       },
       sub: (item) => `C: ${formatEuro(item.purchase_price)}€ · V: ${formatEuro(item.sale_price)}€`,
       summary: {
         key: (item) =>
-          item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price,
+          item.profit !== undefined ? item.profit : item.sale_price! - item.purchase_price!,
         label: (item) => {
-          const p = item.profit !== undefined ? item.profit : item.sale_price - item.purchase_price;
+          const p =
+            item.profit !== undefined ? item.profit : item.sale_price! - item.purchase_price!;
           return p >= 0 ? 'Beneficio Total' : 'Pérdida Total';
         },
         type: 'currency',
@@ -443,7 +451,10 @@ export const METRIC_REGISTRY = {
 /**
  * Helper to get the correct config for an item based on a category
  */
-export function getMetricConfig(item, category) {
-  const metrics = METRIC_REGISTRY[category] || [];
+export function getMetricConfig(
+  item: MarketMetricFields,
+  category: string
+): MarketMetricDefinition | null {
+  const metrics = METRIC_REGISTRY[category as MarketMetricCategory] || [];
   return metrics.find((m) => m.match(item)) || null;
 }

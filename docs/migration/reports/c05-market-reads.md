@@ -9,10 +9,13 @@ status: active
 
 # C05 Market read migration
 
-IN PROGRESS. Recommendation scoring plus five scoped read APIs are now feature-owned: trends,
-transfer history, value details, duel details and the basic summary. The large stats aggregate,
-its remaining queries/helper dependencies, recent activity/opportunities and screens remain legacy.
-This receipt is not evidence that the complete Market call graph is reviewed.
+IN PROGRESS. Checkpoints A–M are locally committed through `78b77ea1`: all six scoped read APIs,
+statistical queries/services/models, overview composition, non-bids phone projections, duel
+presentation and the drawer boundary are feature-owned. Checkpoint N below is locally verified
+for typed metric renderers and expanded drawer browser coverage. Listing expansion,
+populated rolling charts, remaining presentation contracts, bids approval/ownership and broader
+visual closure remain open. Legacy Dashboard/Assistant adapters retire with their consumers.
+The initial inventory and dated checkpoints below are historical evidence, not current status.
 
 ## Initial entrypoint inventory
 
@@ -280,6 +283,56 @@ and diff checks are required for this test/evidence commit; no new runtime imple
 is claimed and the prior G full-suite result remains the last full application acceptance.
 
 ## Still required for C05
+
+### Metric renderer checkpoint N (after `78b77ea1`)
+
+Locally accepted for metric renderer contracts and drawer interaction coverage. All four metric rows, the 20-entry registry and identity
+helper now have explicit TypeScript contracts. The known alias fields are enumerated rather
+than accepted through an unbounded record. Current category-specific service models remain
+the drawer inputs; aliases are internal compatibility behavior, not new response fields.
+Registry callback/summary contracts retain presence matching, first-match order, labels,
+formulae and missing-value behavior. Type-only assertions add no runtime defaults or checks.
+
+The shared visual BaseRow also serves Predictions. It remains unchanged for C13; Market's
+typed facade exports that exact same component without a wrapper or duplicated markup.
+Seven emitted runtime ASTs (four rows, registry, identity helper and drawer) match `78b77ea1`
+after type/comment erasure and formatting/parenthesis normalization. Thirty-six focused
+tests cover every registered metric, real callback/row rendering with only the shared
+visual component mocked, time formatting, zero fallbacks, identity/color precedence,
+existing plural links and percentage-only summary behavior. The facade identity is tested.
+
+No database, service, API, cache, authentication, credential or provider changes. Recovered
+`npm run verify` process 55806 completed successfully: 1,974 tests plus one existing skip,
+graph 921 modules/60 protected entrypoints, skills/docs, typecheck, lint (24 existing image
+warnings), production build, offline 38-table metadata audit, Drizzle and diff checks pass.
+The expanded browser test subsequently passes typecheck and scoped formatting. A fresh
+seven-module emitted-runtime AST comparison also passes. The first original desktop run passed transfer-manager filtering but
+timed out clicking the hidden tooltip copy of “El Jeque.” The test now selects visible
+text and uses the actual player card label “El más fichado” (the drawer title remains
+“El Más Deseado”). Both original and candidate tests receive the same locator correction;
+no application behavior, error guard or screenshot tolerance changes. Original application
+source still matches `df01154f` exactly. Filtering visible text alone also failed because
+Playwright selected the nested tooltip; targeting the existing card-header span resolved
+the locator without forcing clicks. The next run completed all interactions and wrote
+only three missing original images (expected missing-snapshot exit). Both subsequent
+non-updating original desktop repeats passed. References and the test are committed at
+`9a2abc1c`; all seven prior images remain unchanged. Candidate populated and empty-state
+comparisons pass on iPhone 13 and desktop 1440 (four cases). The browser test and ten
+populated images match the original checkout byte-for-byte; five empty images are unchanged.
+The following commands supply browser evidence:
+
+- Original: `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts --project=desktop-1440 --repeat-each=2` — two passes.
+- Candidate: `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts --project=iphone-13 --project=desktop-1440` — two passes.
+- Candidate: `npm run test:e2e:local -- tests/e2e/market.spec.ts --project=iphone-13 --project=desktop-1440` — two passes.
+
+All disposable databases shut down normally. The known phone bids TypeError remains visible
+in both candidate runs, not suppressed or claimed fixed. React/UI review preserves component
+identity, hooks, markup, callbacks and client-only boundaries; it introduces no cache or
+performance redesign. Focused Market/API/page validation passed 249 tests in 19 files;
+source formatting, documentation links and diff whitespace checks also pass.
+
+Listing expansion, rolling charts, broader viewport/Linux closure
+and the separately unapproved bids correction remain C05 work.
 
 ### Drawer boundary and section composition checkpoint M (after `876a05fa`)
 
@@ -559,9 +612,9 @@ remaining adapter/shared-helper closure are still required for complete C05 acce
 
 Private offers/accept/reject/remove/sell/sell-all, provider adapters, credentials and sync mutations
 remain C11/C12. No production actions, policy changes, schema/dependency work or deployment is authorized.
-Next: finish Market section ownership, remaining presentation contracts and populated/drawer
-original-reference browser comparisons. The overview is registered; register the section
-entrypoint after reconciling its loading/error/section behavior and approved bids decision.
+Next: finish listing expansion, populated
+rolling-chart coverage and remaining presentation contracts. Overview and section entrypoints
+are already registered; bids remains an explicit unresolved behavior/ownership decision.
 Retire compatibility wrappers only after their final consumers move;
 Dashboard and Assistant callers remain assigned to their later packages. Team competition metrics
 have owned contracts and Market uses the deliberate Players form service. Shared form ownership

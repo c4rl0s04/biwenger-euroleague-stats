@@ -5,6 +5,19 @@ import { expect, it } from 'vitest';
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 const feature = (path: string) => read(`src/features/market/${path}`);
 
+it('keeps metric renderer inputs explicit and the shared visual facade implementation-free', () => {
+  expect(feature('models/market-metric.ts')).not.toMatch(/\bany\b|drizzle|queries|ReturnType/);
+  for (const name of ['PlayerStatRow', 'UserStatRow', 'TransactionStatRow', 'TemporalStatRow']) {
+    expect(feature(`components/stats/renderers/${name}.tsx`)).toContain('MarketMetricRowProps');
+  }
+  expect(feature('components/stats/renderers/registry.tsx')).toContain('MarketMetricDefinition');
+  expect(feature('components/stats/renderers/utils.ts')).toContain('MarketRowIdentity');
+  expect(feature('components/stats/renderers/BaseRow.ts')).toContain(
+    'ComponentType<MarketBaseRowProps>'
+  );
+  expect(feature('components/stats/renderers/BaseRow.ts')).not.toContain('function');
+});
+
 it('owns the section composition and typed client-local drawer boundary', () => {
   expect(read('src/app/(app)/market/[section]/page.tsx')).not.toContain('MobileDetailScaffold');
   expect(feature('components/MarketSectionScreen.tsx')).toContain('MobileDetailScaffold');

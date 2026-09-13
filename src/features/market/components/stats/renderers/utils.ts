@@ -1,9 +1,14 @@
 import { getColorForUser } from '@/lib/constants/colors';
+import type { MarketMetricFields, MarketRowIdentity } from '../../../models/market-metric';
+import type { MarketDrawerType } from '../../../models/market-drawer';
 
 /**
  * Resolves naming, images, and brand colors for different market entities.
  */
-export function resolveIdentity(item, statType) {
+export function resolveIdentity(
+  item: MarketMetricFields,
+  statType: MarketDrawerType
+): MarketRowIdentity {
   const isUser = statType === 'user' || (!item.player_id && (item.id || item.user_id));
 
   // Context-aware image resolution
@@ -27,9 +32,9 @@ export function resolveIdentity(item, statType) {
     : { text: 'text-white' };
 
   // Case-specific Manager Identity Resolution
-  let managerId = null;
-  let managerName = null;
-  let managerColorIndex = null;
+  let managerId: string | number | null | undefined = null;
+  let managerName: string | null | undefined = null;
+  let managerColorIndex: number | null | undefined = null;
 
   if (statType === 'user') {
     managerId = item.user_id || item.id;

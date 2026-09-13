@@ -5,30 +5,39 @@ import BaseRow from './BaseRow';
 import { resolveIdentity } from './utils';
 import { formatEuro } from '@/lib/utils/currency';
 import { getMetricConfig } from './registry';
+import type { MarketMetricRowProps } from '../../../models/market-metric';
 
-export default function UserStatRow({ item, localIdx, globalIdx, statType }) {
+export default function PlayerStatRow({
+  item,
+  localIdx,
+  globalIdx,
+  statType,
+}: MarketMetricRowProps) {
   const rank = globalIdx + 1;
   const isTop3 = rank <= 3;
   const identity = resolveIdentity(item, statType);
 
   // Resolve metric configuration from registry
-  const config = getMetricConfig(item, 'USER');
+  const config = getMetricConfig(item, 'PLAYER');
 
   if (!config) {
+    // Fallback for unexpected data
     return (
       <BaseRow
         idx={localIdx}
         rank={rank}
         isTop3={isTop3}
         {...identity}
-        valueLabel="Total"
-        valueText="-"
+        valueLabel="Valor"
+        valueText={`${formatEuro(item.price || item.current_price || 0)}€`}
+        valueSub={item.player_team || item.team || item.team_name || ''}
       />
     );
   }
 
-  const valueLabel = typeof config.label === 'function' ? config.label(item) : config.label;
-  const valueText = typeof config.value === 'function' ? config.value(item) : config.value;
+  // Execute configuration
+  const label = typeof config.label === 'function' ? config.label(item) : config.label;
+  const value = typeof config.value === 'function' ? config.value(item) : config.value;
   const sub = typeof config.sub === 'function' ? config.sub(item) : config.sub;
 
   return (
@@ -37,8 +46,8 @@ export default function UserStatRow({ item, localIdx, globalIdx, statType }) {
       rank={rank}
       isTop3={isTop3}
       {...identity}
-      valueLabel={valueLabel}
-      valueText={valueText}
+      valueLabel={label}
+      valueText={value}
       valueSub={sub}
     />
   );

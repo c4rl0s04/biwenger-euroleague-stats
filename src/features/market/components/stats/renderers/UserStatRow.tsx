@@ -5,14 +5,15 @@ import BaseRow from './BaseRow';
 import { resolveIdentity } from './utils';
 import { formatEuro } from '@/lib/utils/currency';
 import { getMetricConfig } from './registry';
+import type { MarketMetricRowProps } from '../../../models/market-metric';
 
-export default function TemporalStatRow({ item, localIdx, globalIdx, statType }) {
+export default function UserStatRow({ item, localIdx, globalIdx, statType }: MarketMetricRowProps) {
   const rank = globalIdx + 1;
   const isTop3 = rank <= 3;
   const identity = resolveIdentity(item, statType);
 
   // Resolve metric configuration from registry
-  const config = getMetricConfig(item, 'TEMPORAL');
+  const config = getMetricConfig(item, 'USER');
 
   if (!config) {
     return (
@@ -21,7 +22,7 @@ export default function TemporalStatRow({ item, localIdx, globalIdx, statType })
         rank={rank}
         isTop3={isTop3}
         {...identity}
-        valueLabel="Valor"
+        valueLabel="Total"
         valueText="-"
       />
     );
