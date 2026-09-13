@@ -26,3 +26,18 @@ it('centralizes persistence and prevents the obsolete query adapters returning',
   for (const file of ['predictions.ts', 'prediction-normalization-sql.ts'])
     expect(existsSync(resolve(process.cwd(), 'src/lib/db/queries/features', file))).toBe(false);
 });
+
+it('keeps both pages on the feature contracts and removes legacy presentation entrypoints', () => {
+  for (const page of ['page.tsx', '[section]/page.tsx']) {
+    const source = readFileSync(resolve(process.cwd(), 'src/app/(app)/predictions', page), 'utf8');
+    expect(source).toContain('@/features/predictions/server');
+    expect(source).toContain('@/features/predictions/public');
+    expect(source).not.toMatch(/@\/lib\/(db|services)|Record<string, any>|components\/predictions/);
+  }
+  for (const path of [
+    'src/components/predictions/PredictionsClient.js',
+    'src/components/mobile/screens/MobilePredictionsScreen.tsx',
+    'src/lib/services/features/predictionsService.ts',
+  ])
+    expect(existsSync(resolve(process.cwd(), path))).toBe(false);
+});

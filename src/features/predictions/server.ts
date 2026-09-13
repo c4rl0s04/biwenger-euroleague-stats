@@ -1,4 +1,5 @@
 import 'server-only';
+export { getPredictionSection } from './server/services/prediction-screen.service';
 
 export {
   getPorrasStats,
