@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   season: vi.fn(),
 }));
 vi.mock('server-only', () => ({}));
-vi.mock('../../db', () => ({
+vi.mock('@/lib/db/connection', () => ({
   db: {
     select: () => ({
       from: (table: unknown) => {
@@ -17,7 +17,7 @@ vi.mock('../../db', () => ({
     }),
   },
 }));
-vi.mock('../../db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
+vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 import { getPlayoffLeaderboard, SCORING_RULES } from './playoffService';
 import { users, playoffPredictions, playoffResults, userPlayoffMedia } from '../../db/schema';
 

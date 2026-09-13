@@ -14,3 +14,4 @@ export type {
   TeamProfileViewModel,
   TeamRosterPlayerViewModel,
 } from './models/team-profile';
+export type { TeamName } from './models/team-name';

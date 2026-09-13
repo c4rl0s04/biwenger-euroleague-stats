@@ -63,3 +63,22 @@ and remove obsolete service/component paths only after consumer verification.
 Capture populated original desktop/phone fixtures before presentation changes. Add mapper/service/page
 and boundary tests; run full verification and original-reference browser comparisons before acceptance.
 The campaign-wide Linux/full viewport and release gates remain C14/C15, not implicitly complete here.
+
+## Backend ownership checkpoint
+
+features/playoffs now owns the four-read query, scoring/projection mapper, typed database facts,
+explicit serializable leaderboard/prediction models and uncached service. The legacy service delegates
+leaderboard reads; its team/results helpers remain temporarily until their final consumer audit.
+The same five original-service tests pass through the new boundary. Nullable SQL names are modeled
+honestly; the existing detail-page context uses an erased non-null assertion to preserve runtime output.
+Prediction rows are allowlisted and their unused createdAt timestamp is serialized to ISO; UI consumers
+do not read that field. No score, ID coercion, query order, season scope or cache policy was changed.
+Typecheck passed after extraction. Final mapper/boundary tests, Teams catalogue ownership, original
+screen fixtures, presentation migration and full acceptance remain outstanding. This is not C04 acceptance.
+
+The mapper now has explicit allowlisting/ISO timestamp regression coverage. Teams owns the narrow
+getTeamNames contract: unchanged unfiltered table query, no new ordering/cache/season policy, output
+restricted to nullable name and ID consumed by Playoffs. The old getPlayoffResults export had no
+remaining consumers and is removed; the remaining legacy service is only a temporary re-export adapter.
+Typecheck, architecture (842 modules/50 entrypoints), and 23 focused Teams/Playoffs tests passed.
+Presentation, populated original browser references and full acceptance still remain.

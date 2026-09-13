@@ -1,4 +1,5 @@
 import 'server-only';
+export { getTeamNames } from './server/services/team-names.service';
 
 export { toTeamProfileApiModel } from './server/mappers/team-profile.mapper';
 export {

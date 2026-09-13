@@ -20,7 +20,7 @@ export default async function PlayoffPredictionPage({ params }: PageProps) {
   return (
     <MobileDetailScaffold
       title={route.definition.title}
-      context={user.userName}
+      context={user.userName!}
       backHref="/playoffs"
     >
       <MobileMetricGrid>
