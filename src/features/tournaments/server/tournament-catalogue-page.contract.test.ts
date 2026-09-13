@@ -7,11 +7,13 @@ const deps = vi.hoisted(() => ({
   desktopScreen: vi.fn(),
   mobileScreen: vi.fn(),
   presentation: vi.fn(),
+  desktopPresentation: vi.fn(),
 }));
 vi.mock('@/features/tournaments/server', () => ({
   getAllTournaments: deps.list,
   getGlobalTournamentStats: deps.statistics,
   getTournamentCataloguePresentation: deps.presentation,
+  getDesktopTournamentCataloguePresentation: deps.desktopPresentation,
 }));
 vi.mock('@/features/tournaments/public', () => ({
   DesktopTournamentsScreen: deps.desktopScreen,
@@ -31,6 +33,7 @@ beforeEach(() => {
   });
   deps.phone.mockResolvedValue(false);
   deps.presentation.mockImplementation(({ active, finished }) => ({ active, finished }));
+  deps.desktopPresentation.mockImplementation(({ active, finished }) => ({ active, finished }));
 });
 
 describe('Tournament catalogue page read contract', () => {
@@ -48,6 +51,7 @@ describe('Tournament catalogue page read contract', () => {
       all: [...active, ...finished],
     });
     expect(deps.statistics).not.toHaveBeenCalled();
+    expect(deps.desktopPresentation).not.toHaveBeenCalled();
   });
   it('passes desktop statistics without introducing extra reads', async () => {
     const statistics = { hallOfFame: [], globalStats: [], leagueStats: [], records: {} };
@@ -59,6 +63,7 @@ describe('Tournament catalogue page read contract', () => {
     expect(deps.phone).toHaveBeenCalledOnce();
     expect(deps.statistics).toHaveBeenCalledOnce();
     expect(deps.presentation).not.toHaveBeenCalled();
+    expect(deps.desktopPresentation).toHaveBeenCalledWith({ active: [], finished: [] });
   });
   it('starts list and presentation together, then waits for both before statistics', async () => {
     let release!: (value: boolean) => void;

@@ -6,12 +6,12 @@ import {
   TournamentHistoryTable,
   RecordsSection,
 } from '../index';
-import type { Tournament } from '../../models/tournaments';
+import type { DesktopTournamentCatalogueItem } from '../../models/tournament-catalogue';
 import type { GlobalTournamentStatistics } from '../../models/tournament-statistics';
 
 interface DesktopTournamentsScreenProps {
-  active: Tournament[];
-  finished: Tournament[];
+  active: DesktopTournamentCatalogueItem[];
+  finished: DesktopTournamentCatalogueItem[];
   statistics: GlobalTournamentStatistics;
 }
 
