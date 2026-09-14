@@ -1,34 +1,54 @@
-import { fetchRoundsLeague, fetchPlayerDetails } from '../../../api/biwenger-client';
-import { prepareUserMutations } from '../../../db/mutations/users';
-import { preparePlayerMutations } from '../../../db/mutations/players';
+import {
+  fetchPlayerDetails as defaultFetchPlayerDetails,
+  fetchRoundsLeague as defaultFetchRoundsLeague,
+} from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
-import { SyncManager } from '../../manager';
+import { preparePlayerMutations, type PlayerMutations } from '../../../db/mutations/players';
+import { prepareUserMutations, type UserMutations } from '../../../db/mutations/users';
+import type { SyncManager } from '../../manager';
+
+export interface LineupsDependencies {
+  fetchRoundsLeague?: (roundId: number) => Promise<any>;
+  fetchPlayerDetails?: (playerId: number) => Promise<any>;
+  prepareUserMutations?: (db: unknown, options: { seasonId?: string }) => UserMutations;
+  preparePlayerMutations?: (db: unknown, options: { seasonId?: string }) => PlayerMutations;
+}
 
 /**
  * Syncs lineups for finished rounds.
  * @param manager
  * @param round - Round object
  * @param playersListInput - Map of player IDs to player objects
+ * @param dependencies - Injected dependencies for isolated testing
  * @returns Object with success boolean and inserted count
  */
-export async function run(manager: SyncManager, round: any, playersListInput?: any) {
+export async function syncBiwengerLineups(
+  manager: SyncManager,
+  round: any,
+  playersListInput?: any,
+  dependencies: LineupsDependencies = {}
+) {
   const db = manager.context.db;
   const playersList = playersListInput || manager.context.biwenger?.players || {};
 
   const roundId = round.id;
-  const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id; // Use mapped ID for DB if present
+  const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id;
   const roundName = round.name;
   const status = round.status;
   let insertedCount = 0;
 
+  const fetchRounds = dependencies.fetchRoundsLeague || defaultFetchRoundsLeague;
+  const fetchDetails = dependencies.fetchPlayerDetails || defaultFetchPlayerDetails;
+  const userMutationsFactory = dependencies.prepareUserMutations || prepareUserMutations;
+  const playerMutationsFactory = dependencies.preparePlayerMutations || preparePlayerMutations;
+
   if (status === 'finished' || status === 'active') {
     manager.log('Fetching lineups/standings...');
 
-    // Fetch round details to get standings
     let standings: any = null;
     try {
-      const roundData = await fetchRoundsLeague(roundId);
-      if (roundData.data) {
+      const roundData = await fetchRounds(roundId);
+      if (roundData?.data) {
         if (roundData.data.round && roundData.data.round.standings) {
           standings = roundData.data.round.standings;
         } else if (roundData.data.league && roundData.data.league.standings) {
@@ -40,22 +60,19 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
     }
 
     if (standings) {
-      // Initialize Mutations
-      const mutations = prepareUserMutations(db as any, { seasonId: manager.context.seasonId });
-      const playerMutations = preparePlayerMutations(db as any, {
+      const mutations = userMutationsFactory(db as any, { seasonId: manager.context.seasonId });
+      const playerMutations = playerMutationsFactory(db as any, {
         seasonId: manager.context.seasonId,
       });
       const positions: any = CONFIG.POSITIONS;
 
       for (const user of standings) {
-        // Insert user info
         await mutations.upsertUser({
           id: user.id.toString(),
           name: user.name,
-          icon: null, // We don't have icon here usually
+          icon: null,
         });
 
-        // Insert User Round Score (only for FINISHED rounds to avoid 0-point entries)
         if (user.lineup && status === 'finished') {
           try {
             const participated = user.lineup.count ? 1 : 0;
@@ -73,9 +90,7 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
           }
         }
 
-        // Insert Lineup (ALWAYS)
         if (user.lineup && user.lineup.players) {
-          // Clear previous lineup to avoid duplicates/ghosts on re-sync
           if (mutations.deleteUserLineup) {
             await mutations.deleteUserLineup({
               user_id: user.id.toString(),
@@ -85,11 +100,8 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
 
           const captainId = user.lineup.captain ? user.lineup.captain.id : null;
 
-          // Sequential loop for async
           for (let index = 0; index < user.lineup.players.length; index++) {
             const playerId = user.lineup.players[index];
-
-            // Skip empty slots in lineup (null or undefined)
             if (!playerId) continue;
 
             try {
@@ -97,12 +109,11 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
               if (index < 5) role = 'titular';
               else if (index === 5) role = '6th_man';
 
-              // Handle missing players (e.g. left the league, DNP, etc)
               if (!playersList[playerId]) {
                 manager.log(`      🛠️  Repairing missing player ${playerId}...`);
                 try {
-                  const details = await fetchPlayerDetails(playerId);
-                  if (details.data) {
+                  const details = await fetchDetails(playerId);
+                  if (details?.data) {
                     const d = details.data;
                     await playerMutations.upsertPlayer({
                       id: playerId,
@@ -121,7 +132,6 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
                       price: d.price || 0,
                       img: d.img || `https://cdn.biwenger.com/players/euroleague/${playerId}.png`,
                     });
-                    // Add to list to avoid re-fetching in this run
                     playersList[playerId] = { id: playerId, name: d.name };
                   }
                 } catch (repairError: any) {
@@ -130,9 +140,6 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
                   });
                 }
               }
-
-              // Proceed even if not in list (table has no FK constraint on player_id based on schema.js check)
-              // But if we want names in UI, we needed the fetch above.
 
               await mutations.upsertLineup({
                 user_id: user.id.toString(),
@@ -157,3 +164,6 @@ export async function run(manager: SyncManager, round: any, playersListInput?: a
 
   return { insertedCount };
 }
+
+/** Compatibility export */
+export const run = syncBiwengerLineups;
