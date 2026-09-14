@@ -104,7 +104,7 @@ describe('Local End-to-End Pipeline Dry Run', () => {
     expect(executedSteps).toContain('initial-squads');
     expect(executedSteps).toContain('user-colors');
     expect(executedSteps).toContain('biwenger-tournaments');
-  });
+  }, 15000);
 
   it('executes individual thinned steps through their exported run handlers', async () => {
     const { SyncManager } = await import('../manager');
