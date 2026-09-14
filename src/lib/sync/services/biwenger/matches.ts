@@ -2,11 +2,14 @@ import { fetchRoundGames } from '../../../api/biwenger-client';
 import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
 import type { OfficialScheduleGame } from '../../../api/euroleague/types';
 import { CONFIG } from '../../../config';
-import { prepareMatchMutations } from '../../../db/mutations/matches';
-import { SyncManager } from '../../manager';
-import { getOfficialTeamMappings } from '../../repositories/sync-queries';
+import { prepareMatchMutations, type MatchMutations } from '../../../db/mutations/matches';
+import type { SyncManager } from '../../manager';
+import {
+  getOfficialTeamMappings as defaultGetOfficialTeamMappings,
+  type OfficialTeamMappingRecord,
+} from '../../repositories/sync-queries';
 
-interface OfficialMatchRow {
+export interface OfficialMatchRow {
   game_code: number;
   round_number: number | null;
   scheduled_at: Date | null;
@@ -29,12 +32,19 @@ interface OfficialMatchRow {
   away_ot: number | null;
 }
 
-function roundNumber(name: string): number | null {
+export interface MatchesDependencies {
+  fetchRoundGames?: (roundId: number) => Promise<any>;
+  getOfficialTeamMappings?: (seasonId: string, db?: any) => Promise<OfficialTeamMappingRecord[]>;
+  prepareMutations?: (db: unknown, options: { seasonId: string }) => MatchMutations;
+  getSchedule?: (seasonYear: number) => Promise<OfficialScheduleGame[]>;
+}
+
+export function roundNumber(name: string): number | null {
   const match = /(?:Jornada|Round)\s+(\d+)/i.exec(name);
   return match ? Number(match[1]) : null;
 }
 
-function closestOfficialGame(
+export function closestOfficialGame(
   candidates: OfficialMatchRow[],
   expectedRound: number | null,
   biwengerDate: number | null
@@ -61,12 +71,22 @@ function closestOfficialGame(
  * Biwenger supplies fantasy round/team identities. Official schedules and game codes
  * are resolved from EuroLeague provider / context and persisted directly into matches.
  */
-export async function run(manager: SyncManager, round: any, _playersList: any = {}) {
+export async function syncBiwengerMatches(
+  manager: SyncManager,
+  round: any,
+  _playersList: any = {},
+  dependencies: MatchesDependencies = {}
+) {
   const db = manager.context.db as any;
   const seasonId = manager.context.season?.seasonId || manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
   const dbRoundId = manager.resolveRoundId ? manager.resolveRoundId(round) : round.dbId || round.id;
-  const mutations = prepareMatchMutations(db, { seasonId });
+
+  const mutationsFactory = dependencies.prepareMutations || prepareMatchMutations;
+  const mutations = mutationsFactory(db, { seasonId });
+
+  const fetchGames = dependencies.fetchRoundGames || fetchRoundGames;
+  const getMappings = dependencies.getOfficialTeamMappings || defaultGetOfficialTeamMappings;
 
   let gamesData: any;
   let mappingResult: any;
@@ -76,12 +96,24 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
       if (manager.context.officialSchedule && manager.context.officialSchedule.length > 0) {
         return manager.context.officialSchedule;
       }
+      if (dependencies.getSchedule) {
+        const seasonCode =
+          manager.context.season?.euroleagueCode ||
+          CONFIG.EUROLEAGUE.SEASON_CODE ||
+          `E${seasonId.slice(0, 4)}`;
+        const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
+        const schedule = await dependencies.getSchedule(seasonYear);
+        manager.context.officialSchedule = schedule;
+        return schedule;
+      }
       if (
         manager.context.euroleague &&
         typeof manager.context.euroleague.getSchedule === 'function'
       ) {
         const seasonCode =
-          manager.context.season?.euroleagueCode || CONFIG.EUROLEAGUE.SEASON_CODE || 'E2026';
+          manager.context.season?.euroleagueCode ||
+          CONFIG.EUROLEAGUE.SEASON_CODE ||
+          `E${seasonId.slice(0, 4)}`;
         const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
         const schedule = await manager.context.euroleague.getSchedule(seasonYear);
         manager.context.officialSchedule = schedule;
@@ -91,8 +123,8 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
     })();
 
     const [gamesRes, mappings, scheduleRes] = await Promise.all([
-      fetchRoundGames(round.id),
-      getOfficialTeamMappings(seasonId, db),
+      fetchGames(round.id),
+      getMappings(seasonId, db),
       getSchedulePromise,
     ]);
     gamesData = gamesRes;
@@ -189,3 +221,6 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
   }
   return { synced, games: games.length };
 }
+
+/** Compatibility export */
+export const run = syncBiwengerMatches;
