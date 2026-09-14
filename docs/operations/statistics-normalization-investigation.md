@@ -1,3 +1,13 @@
+---
+title: Statistics Normalization Investigation
+description: Investigation and proposed contract for provider-independent sporting and fantasy statistics.
+audience:
+  - maintainer
+  - contributor
+  - agent
+status: active
+---
+
 # Provider-independent statistics: investigation and proposed contract
 
 Status: proposed, not implemented. Date: 2026-09-13. Source code inspected on main at 354f66e1; data inspected in the isolated season_audit copy. No live provider requests, production changes or application edits.
@@ -21,26 +31,26 @@ One domain read contract per granularity, independent of season/provider. Provid
 
 Names below describe the canonical contract; existing HTTP names must be preserved through adapters or deliberately changed with approval.
 
-| Canonical round field | Existing historical field | New box-score input | Rule |
-| --- | --- | --- | --- |
-| fantasy_points | fantasy_points | Separate Biwenger score ingestion | Never derive from basketball points or PIR. |
-| minutes_seconds | minutes (integer) | Minutes -> minutesSeconds | Legacy minutes * 60 is minute-resolution, not recovered exact duration. Keep precision/provenance. |
-| points | points | Points | Nullable basketball points. |
-| two_points_made / attempted | same | FieldGoalsMade2 / FieldGoalsAttempted2 | Nullable counts. |
-| three_points_made / attempted | same | FieldGoalsMade3 / FieldGoalsAttempted3 | Nullable counts. |
-| free_throws_made / attempted | same | FreeThrowsMade / FreeThrowsAttempted | Nullable counts. |
-| rebounds | rebounds | TotalRebounds | Do not substitute a partial component sum. |
-| offensive_rebounds / defensive_rebounds | same, all null | OffensiveRebounds / DefensiveRebounds | Historical unavailable. |
-| assists | assists | Assistances | Nullable count. |
-| steals | steals | Steals | Nullable count. |
-| blocks | blocks | BlocksFavour | Blocks made, not blocks received. |
-| blocks_against | same, all null | BlocksAgainst | Historical unavailable. |
-| turnovers | turnovers | Turnovers | Nullable count. |
-| fouls_committed | fouls_committed | FoulsCommited | Nullable count; retain provider spelling only in adapter. |
-| fouls_received | same, all null | FoulsReceived | Historical unavailable. |
-| valuation | valuation | Valuation | Sporting valuation/PIR; verify provider formula equivalence before calling cross-source values identical. |
-| plus_minus | same, all null | Plusminus | Signed value; historical unavailable. |
-| games_started | same, all null | IsStarter | Count known starts across games; unknown flag is not false. |
+| Canonical round field                   | Existing historical field | New box-score input                    | Rule                                                                                                      |
+| --------------------------------------- | ------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| fantasy_points                          | fantasy_points            | Separate Biwenger score ingestion      | Never derive from basketball points or PIR.                                                               |
+| minutes_seconds                         | minutes (integer)         | Minutes -> minutesSeconds              | Legacy minutes \* 60 is minute-resolution, not recovered exact duration. Keep precision/provenance.       |
+| points                                  | points                    | Points                                 | Nullable basketball points.                                                                               |
+| two_points_made / attempted             | same                      | FieldGoalsMade2 / FieldGoalsAttempted2 | Nullable counts.                                                                                          |
+| three_points_made / attempted           | same                      | FieldGoalsMade3 / FieldGoalsAttempted3 | Nullable counts.                                                                                          |
+| free_throws_made / attempted            | same                      | FreeThrowsMade / FreeThrowsAttempted   | Nullable counts.                                                                                          |
+| rebounds                                | rebounds                  | TotalRebounds                          | Do not substitute a partial component sum.                                                                |
+| offensive_rebounds / defensive_rebounds | same, all null            | OffensiveRebounds / DefensiveRebounds  | Historical unavailable.                                                                                   |
+| assists                                 | assists                   | Assistances                            | Nullable count.                                                                                           |
+| steals                                  | steals                    | Steals                                 | Nullable count.                                                                                           |
+| blocks                                  | blocks                    | BlocksFavour                           | Blocks made, not blocks received.                                                                         |
+| blocks_against                          | same, all null            | BlocksAgainst                          | Historical unavailable.                                                                                   |
+| turnovers                               | turnovers                 | Turnovers                              | Nullable count.                                                                                           |
+| fouls_committed                         | fouls_committed           | FoulsCommited                          | Nullable count; retain provider spelling only in adapter.                                                 |
+| fouls_received                          | same, all null            | FoulsReceived                          | Historical unavailable.                                                                                   |
+| valuation                               | valuation                 | Valuation                              | Sporting valuation/PIR; verify provider formula equivalence before calling cross-source values identical. |
+| plus_minus                              | same, all null            | Plusminus                              | Signed value; historical unavailable.                                                                     |
+| games_started                           | same, all null            | IsStarter                              | Count known starts across games; unknown flag is not false.                                               |
 
 Identity, fantasy seasonal state and source mappings retain the responsibilities in season-data-audit.md and the agreed table design. This investigation does not authorize deleting legacy mappings or statistical summaries.
 

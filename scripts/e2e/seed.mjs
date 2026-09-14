@@ -42,10 +42,10 @@ try {
     "INSERT INTO matches (season_id,id,round_id,round_name,home_id,away_id,home_score,away_score,date,status) VALUES ('2025-26',99001,1,'Jornada 1',9901,9902,84,79,'2025-10-01T18:00:00Z','finished')"
   );
   await client.query(
-    "INSERT INTO players (id,name,position,img) VALUES (99101,'Fixture Guard','1','/icons/icon-192.png')"
+    "INSERT INTO players (id,name,img) VALUES (99101,'Fixture Guard','/icons/icon-192.png')"
   );
   await client.query(
-    "INSERT INTO player_seasons (season_id,player_id,team_id,owner_id,puntos,partidos_jugados,price,price_increment,status) VALUES ('2025-26',99101,9901,'99001',24,1,1500000,25000,'ok')"
+    "INSERT INTO player_seasons (season_id,player_id,team_id,owner_id,position,puntos,partidos_jugados,price,price_increment,status) VALUES ('2025-26',99101,9901,'99001','1',24,1,1500000,25000,'ok')"
   );
   // Profile-only historical facts: no changes to the existing Team/Matches fixture projections.
   await client.query(
@@ -54,7 +54,7 @@ try {
   for (let index = 1; index <= 12; index++) {
     const playerId = 99200 + index;
     await client.query(
-      "INSERT INTO players (id,name,position,img) VALUES ($1,$2,'1','/icons/icon-192.png')",
+      "INSERT INTO players (id,name,img) VALUES ($1,$2,'/icons/icon-192.png')",
       [playerId, `Fixture Contributor ${String(index).padStart(2, '0')}`]
     );
     await client.query(

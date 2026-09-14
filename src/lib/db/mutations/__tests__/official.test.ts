@@ -123,6 +123,6 @@ describe('official game reconciliation', () => {
     expect(sql).not.toContain('fantasy_points = EXCLUDED');
     expect(params![0]).toBe('2026-27');
     expect(params![1]).toBe(101); // player_id mapped from P014102
-    expect(params![2]).toBe(10);  // round_id
+    expect(params![2]).toBe(10); // round_id
   });
 });

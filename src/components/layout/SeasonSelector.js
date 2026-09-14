@@ -47,7 +47,10 @@ export default function SeasonSelector({ className = '' }) {
               Histórico
             </span>
           ) : (
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Temporada activa" />
+            <span
+              className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
+              title="Temporada activa"
+            />
           )}
         </div>
 

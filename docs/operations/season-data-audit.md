@@ -1,3 +1,14 @@
+---
+title: Season Data Audit
+description: Findings and coverage audit from read-only inspection of the isolated historical season snapshot.
+audience:
+  - operator
+  - maintainer
+  - contributor
+  - agent
+status: active
+---
+
 # Historical season data audit
 
 Date: 2026-09-13. Read-only inspection of the isolated `season_audit` database described in `season-data-copy-receipt.md`. Findings concern the copied snapshot, not a continuously verified production state. No data corrections or schema migrations have been applied.

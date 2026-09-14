@@ -19,6 +19,11 @@ status: active
 - [Season lifecycle](season-lifecycle.md) — freeze a completed season and activate the next one.
 - [Season simulations](season-simulations.md) — calculate and publish complete-season Monte Carlo
   results.
+- [Season data audit](season-data-audit.md) — findings from the isolated season snapshot audit.
+- [Season data copy receipt](season-data-copy-receipt.md) — preparation receipt for the isolated season
+  copy.
+- [Statistics normalization investigation](statistics-normalization-investigation.md) —
+  provider-independent statistics investigation and proposed contract.
 - [Troubleshooting](troubleshooting.md) — diagnose common application, database, and sync failures.
 
 Operational notes contain commands that can mutate databases or external Biwenger state. Confirm the

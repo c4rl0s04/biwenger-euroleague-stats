@@ -4,12 +4,7 @@ import { createContext, useContext } from 'react';
 
 const SeasonContext = createContext(null);
 
-export function SeasonProvider({
-  children,
-  seasons = [],
-  currentSeasonId,
-  activeSeasonId,
-}) {
+export function SeasonProvider({ children, seasons = [], currentSeasonId, activeSeasonId }) {
   const isCustomSeason = Boolean(
     currentSeasonId && activeSeasonId && currentSeasonId !== activeSeasonId
   );

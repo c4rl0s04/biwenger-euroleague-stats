@@ -1,3 +1,14 @@
+---
+title: Season Data Copy Receipt
+description: Preparation receipt and execution record for the historical season data copy.
+audience:
+  - operator
+  - maintainer
+  - contributor
+  - agent
+status: active
+---
+
 # Season data copy — preparation receipt
 
 Date: 2026-09-13. Application base: `354f66e1`.

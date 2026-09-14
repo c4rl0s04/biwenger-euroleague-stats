@@ -14,12 +14,7 @@ export function prepareOfficialCalendarMutations(db: DbClient, seasonId: string)
              ELSE 'scheduled'
            END
          WHERE season_id = $1 AND official_game_code = $2`,
-        [
-          seasonId,
-          game.gameCode,
-          game.scheduledAt,
-          game.isPlayed,
-        ]
+        [seasonId, game.gameCode, game.scheduledAt, game.isPlayed]
       );
     },
 
