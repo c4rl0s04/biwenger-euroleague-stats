@@ -32,12 +32,13 @@ describe('syncPlayers', () => {
 
     db = {
       query: vi.fn(async (sql, params) => {
+        const queryText = (typeof sql === 'string' ? sql : sql?.text || '').toLowerCase();
         // Mock existing players query
-        if (sql === 'SELECT id FROM players') {
+        if (queryText.includes('players') && !queryText.includes('player_seasons')) {
           return { rows: [] };
         }
         // Mock last price date check
-        if (sql.includes('SELECT date FROM market_values')) {
+        if (queryText.includes('market_values')) {
           return { rows: [], rowCount: 0 };
         }
         return { rows: [], rowCount: 1 };
@@ -138,14 +139,19 @@ describe('syncPlayers', () => {
     };
 
     db.query.mockImplementation(async (sql, params) => {
-      if (sql.includes('FROM player_seasons')) {
-        expect(params).toEqual(['2026-27']);
+      const queryText = (typeof sql === 'string' ? sql : sql?.text || '').toLowerCase();
+      const queryParams = params || sql?.values;
+      if (
+        queryText.includes('from "player_seasons"') ||
+        queryText.includes('from player_seasons')
+      ) {
+        expect(queryParams).toEqual(['2026-27']);
         return {
-          rows: [{ id: 101, puntos: 7, points_home: 4, points_away: 3 }],
+          rows: [{ id: 101, player_id: 101, puntos: 7, points_home: 4, points_away: 3 }],
           rowCount: 1,
         };
       }
-      if (sql === 'SELECT id FROM players') {
+      if (queryText.includes('players')) {
         return { rows: [{ id: 101 }], rowCount: 1 };
       }
       return { rows: [], rowCount: 1 };

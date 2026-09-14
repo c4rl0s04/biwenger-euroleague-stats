@@ -4,6 +4,7 @@ import type { OfficialScheduleGame } from '../../../api/euroleague/types';
 import { CONFIG } from '../../../config';
 import { prepareMatchMutations } from '../../../db/mutations/matches';
 import { SyncManager } from '../../manager';
+import { getOfficialTeamMappings } from '../../repositories/sync-queries';
 
 interface OfficialMatchRow {
   game_code: number;
@@ -75,7 +76,10 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
       if (manager.context.officialSchedule && manager.context.officialSchedule.length > 0) {
         return manager.context.officialSchedule;
       }
-      if (manager.context.euroleague && typeof manager.context.euroleague.getSchedule === 'function') {
+      if (
+        manager.context.euroleague &&
+        typeof manager.context.euroleague.getSchedule === 'function'
+      ) {
         const seasonCode =
           manager.context.season?.euroleagueCode || CONFIG.EUROLEAGUE.SEASON_CODE || 'E2026';
         const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
@@ -86,17 +90,13 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
       return [];
     })();
 
-    const [gamesRes, mapRes, scheduleRes] = await Promise.all([
+    const [gamesRes, mappings, scheduleRes] = await Promise.all([
       fetchRoundGames(round.id),
-      db.query(
-        `SELECT team_id,provider_team_code FROM official_team_mappings
-       WHERE season_id=$1 AND provider='euroleague_advanced'`,
-        [seasonId]
-      ),
+      getOfficialTeamMappings(seasonId, db),
       getSchedulePromise,
     ]);
     gamesData = gamesRes;
-    mappingResult = mapRes;
+    mappingResult = mappings;
     officialGames = scheduleRes.map((game: OfficialScheduleGame) => ({
       game_code: game.gameCode,
       round_number: game.roundNumber,
@@ -125,7 +125,10 @@ export async function run(manager: SyncManager, round: any, _playersList: any = 
 
   const games = gamesData?.data?.games || gamesData?.games || [];
   const codeByTeam = new Map<number, string>(
-    mappingResult.rows.map((row: any) => [row.team_id, row.provider_team_code])
+    mappingResult.map((row: any) => [
+      row.teamId ?? row.team_id,
+      row.providerTeamCode ?? row.provider_team_code,
+    ])
   );
   let synced = 0;
   let unresolved = 0;

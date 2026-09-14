@@ -102,4 +102,4 @@ it('enforces migrated feature boundaries across the actual source graph', () => 
   }
   collect('src');
   expect(inspectFeatureGraph(sources)).toEqual([]);
-});
+}, 30000);

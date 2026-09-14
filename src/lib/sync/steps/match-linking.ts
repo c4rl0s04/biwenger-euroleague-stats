@@ -1,11 +1,13 @@
 import * as syncMatches from '../services/biwenger/matches';
 import { SyncManager } from '../manager';
+import { getRoundScheduleState } from '../repositories/sync-queries';
 import { relevantRounds } from '../rounds';
 
 /** Links Biwenger round/team identities to the authoritative official calendar. */
 export async function run(manager: SyncManager) {
   manager.log('\n📅 Linking fantasy matches to the official calendar...');
   const seasonId = manager.context.seasonId;
+  if (!seasonId) throw new Error('The writable season was not resolved.');
   const snapshot = await manager.getBiwengerCompetition();
   const rounds = relevantRounds(snapshot.rounds);
   let processedRounds = 0;
@@ -17,26 +19,13 @@ export async function run(manager: SyncManager) {
 
       // Check local DB for this round's matches
       try {
-        // Find schedule info for this round in DB
-        const res = await (manager.context.db as any).query(
-          `SELECT 
-                    MAX(date) as last_match_date, 
-                    MIN(date) as first_match_date,
-                    BOOL_AND(status = 'finished') as all_finished,
-                    COUNT(*) as match_count
-                 FROM matches 
-                 WHERE season_id = $2 AND round_id = $1`,
-          [roundId, seasonId]
-        );
-
-        const row = res.rows[0];
-        if (row && row.match_count > 0) {
+        const row = await getRoundScheduleState(seasonId, roundId, false, manager.context.db);
+        if (row && row.matchCount > 0) {
           const now = new Date();
-
-          const lastMatchTime = row.last_match_date ? new Date(row.last_match_date).getTime() : 0;
+          const lastMatchTime = row.lastMatchDate ? row.lastMatchDate.getTime() : 0;
           const isRecent = now.getTime() - lastMatchTime < 24 * 60 * 60 * 1000;
 
-          if (row.all_finished && !isRecent) {
+          if (row.allFinished && !isRecent) {
             continue;
           }
         }

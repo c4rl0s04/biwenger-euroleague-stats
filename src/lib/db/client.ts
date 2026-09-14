@@ -7,7 +7,7 @@ import { CONFIG } from '../config.js';
 import { buildPoolConfig } from './connection-config';
 
 // Skip database connection in CI/build environment
-const skipDb = CONFIG.DB.SKIP;
+const skipDb = Boolean(CONFIG?.DB?.SKIP);
 
 // Use a union type to allow for the mock DB object
 let db:

@@ -26,14 +26,15 @@ describe('syncBoard', () => {
 
     db = {
       query: vi.fn(async (sql) => {
-        if (sql.includes('FROM user_seasons us')) {
+        const queryText = typeof sql === 'string' ? sql : sql?.text || '';
+        if (queryText.toLowerCase().includes('user_seasons')) {
           return {
             rows: [{ name: 'June' }, { name: 'All Stars' }],
             rowCount: 2,
           };
         }
 
-        if (sql.includes('INSERT INTO fichajes')) {
+        if (queryText.includes('INSERT INTO fichajes')) {
           return { rows: [{ id: 1 }], rowCount: 1 };
         }
 
@@ -105,7 +106,9 @@ describe('syncBoard', () => {
 
     await run(manager(), { fetch: fetchBoard });
 
-    const insertCalls = db.query.mock.calls.filter(([sql]) => sql.includes('INSERT INTO fichajes'));
+    const insertCalls = db.query.mock.calls.filter(([sql]) =>
+      (typeof sql === 'string' ? sql : sql?.text || '').includes('INSERT INTO fichajes')
+    );
     expect(insertCalls).toHaveLength(0);
   });
 
@@ -133,6 +136,10 @@ describe('syncBoard', () => {
       expect.stringContaining('INSERT INTO porras'),
       expect.arrayContaining(['2026-27', '10', 7, '80-75'])
     );
-    expect(db.query.mock.calls.map(([sql]) => sql).join('\n')).not.toContain('owner_id');
+    expect(
+      db.query.mock.calls
+        .map(([sql]) => (typeof sql === 'string' ? sql : sql?.text || ''))
+        .join('\n')
+    ).not.toContain('owner_id');
   });
 });

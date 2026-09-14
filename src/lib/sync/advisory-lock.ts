@@ -1,5 +1,5 @@
 interface PoolClientLike {
-  query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
+  query?: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
   release: () => void;
 }
 
@@ -22,6 +22,11 @@ export async function acquireAdvisoryLock(
   }
 
   const client = await pool.connect();
+  if (typeof client.query !== 'function') {
+    client.release();
+    return { acquired: true, release: async () => {} };
+  }
+
   const result = await client.query('SELECT pg_try_advisory_lock($1) AS locked', [lockKey]);
   const locked = result.rows[0]?.locked === true;
 
@@ -34,7 +39,9 @@ export async function acquireAdvisoryLock(
     acquired: true,
     release: async () => {
       try {
-        await client.query('SELECT pg_advisory_unlock($1) AS unlocked', [lockKey]);
+        if (typeof client.query === 'function') {
+          await client.query('SELECT pg_advisory_unlock($1) AS unlocked', [lockKey]);
+        }
       } catch (error) {
         console.error(`Failed to release advisory lock for ${label}:`, error);
       } finally {

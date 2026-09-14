@@ -26,7 +26,7 @@ describe('sync season guard', () => {
   it('requires complete canonical season configuration', async () => {
     const db = { query: vi.fn() };
 
-    await expect(assertSyncSeasonWritable(db as any)).rejects.toMatchObject({
+    await expect(assertSyncSeasonWritable(db)).rejects.toMatchObject({
       code: 'INVALID_SEASON_CONFIG',
     });
     expect(db.query).not.toHaveBeenCalled();
@@ -40,7 +40,7 @@ describe('sync season guard', () => {
       })),
     };
 
-    await expect(assertSyncSeasonWritable(db as any)).rejects.toMatchObject({
+    await expect(assertSyncSeasonWritable(db)).rejects.toMatchObject({
       code: 'SYNC_SEASON_NOT_WRITABLE',
     });
   });
@@ -53,7 +53,7 @@ describe('sync season guard', () => {
       })),
     };
 
-    await expect(assertSyncSeasonWritable(db as any)).resolves.toEqual({
+    await expect(assertSyncSeasonWritable(db)).resolves.toEqual({
       seasonId: '2026-27',
       status: 'active',
       sourceLeagueId: '456',
@@ -77,9 +77,7 @@ describe('sync season guard', () => {
       })),
     };
 
-    await expect(
-      assertSyncSeasonWritable(db as any, { skipEnvValidation: true })
-    ).resolves.toEqual({
+    await expect(assertSyncSeasonWritable(db, { skipEnvValidation: true })).resolves.toEqual({
       seasonId: '2026-27',
       status: 'active',
       sourceLeagueId: '456',
@@ -95,7 +93,7 @@ describe('sync season guard', () => {
       })),
     };
 
-    await expect(assertSyncSeasonWritable(db as any)).rejects.toMatchObject({
+    await expect(assertSyncSeasonWritable(db)).rejects.toMatchObject({
       code: 'SEASON_SOURCE_LEAGUE_MISMATCH',
     });
   });
@@ -109,7 +107,7 @@ describe('sync season guard', () => {
       })),
     };
 
-    await expect(assertSyncSeasonWritable(db as any)).rejects.toMatchObject({
+    await expect(assertSyncSeasonWritable(db)).rejects.toMatchObject({
       code: 'SEASON_AWARE_READS_NOT_CONFIRMED',
     });
   });

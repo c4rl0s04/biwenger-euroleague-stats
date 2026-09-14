@@ -2,6 +2,7 @@ import { biwengerFetch } from '../../api/biwenger-client';
 import { CONFIG } from '../../config';
 import { prepareMarketMutations } from '../../db/mutations/market';
 import { SyncManager } from '../manager';
+import { getSeasonActiveUserNames } from '../repositories/sync-queries';
 
 interface BoardDependencies {
   fetch: typeof biwengerFetch;
@@ -27,21 +28,7 @@ export async function run(manager: SyncManager, dependencies = defaultDependenci
 
   // Initialize Mutations
   const mutations = prepareMarketMutations(db as any, { seasonId });
-  const usersResult = await (db as any).query(
-    `
-    SELECT COALESCE(us.name, u.name) as name
-    FROM user_seasons us
-    JOIN users u ON u.id = us.user_id
-    WHERE us.season_id = $1
-      AND COALESCE(us.status, 'active') = 'active'
-      AND COALESCE(us.name, u.name) IS NOT NULL
-      AND TRIM(COALESCE(us.name, u.name)) != ''
-  `,
-    [seasonId]
-  );
-  const validUserNames = new Set(
-    usersResult.rows.map((row: any) => row.name).filter((name: string | null) => Boolean(name))
-  );
+  const validUserNames = await getSeasonActiveUserNames(seasonId, db);
 
   manager.log('Fetching full board history...');
   let offset = 0;

@@ -4,6 +4,10 @@ import { CONFIG } from '../../config';
 import { preparePlayerMutations } from '../../db/mutations/players';
 import { SyncManager } from '../manager';
 import { validateBiwengerRoundSeason } from '../preflight';
+import {
+  getExistingPlayerIdentities,
+  getExistingPlayerSeasonMap,
+} from '../repositories/sync-queries';
 import { relevantRounds } from '../rounds';
 
 const SLEEP_MS = 600;
@@ -66,18 +70,8 @@ export async function run(manager: SyncManager) {
   const positions: any = CONFIG.POSITIONS;
   const teams = snapshot.teams;
 
-  const resExistingSeason = await (db as any).query(
-    `
-    SELECT player_id AS id, puntos, points_home, points_away
-    FROM player_seasons
-    WHERE season_id = $1
-  `,
-    [seasonId]
-  );
-  const existingSeasonPlayerMap = new Map(resExistingSeason.rows.map((p: any) => [p.id, p]));
-
-  const resExistingPlayers = await (db as any).query('SELECT id FROM players');
-  const existingPlayerIds = new Set(resExistingPlayers.rows.map((p: any) => p.id));
+  const existingSeasonPlayerMap = await getExistingPlayerSeasonMap(seasonId, db);
+  const existingPlayerIds = await getExistingPlayerIdentities(db);
   manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing player identities in DB.`);
   manager.log(
     `   ℹ️ Found ${existingSeasonPlayerMap.size} existing player season rows for ${seasonId}.`
@@ -106,14 +100,16 @@ export async function run(manager: SyncManager) {
     let finalPointsAway = player.pointsAway || 0;
 
     if (existing) {
-      if (finalPoints === 0 && (existing as any).puntos > 0) {
-        finalPoints = (existing as any).puntos;
+      if (finalPoints === 0 && existing.puntos > 0) {
+        finalPoints = existing.puntos;
       }
-      if (finalPointsHome === 0 && (existing as any).points_home > 0) {
-        finalPointsHome = (existing as any).points_home;
+      const homePts = existing.pointsHome ?? (existing as any).points_home ?? 0;
+      if (finalPointsHome === 0 && homePts > 0) {
+        finalPointsHome = homePts;
       }
-      if (finalPointsAway === 0 && (existing as any).points_away > 0) {
-        finalPointsAway = (existing as any).points_away;
+      const awayPts = existing.pointsAway ?? (existing as any).points_away ?? 0;
+      if (finalPointsAway === 0 && awayPts > 0) {
+        finalPointsAway = awayPts;
       }
     }
 

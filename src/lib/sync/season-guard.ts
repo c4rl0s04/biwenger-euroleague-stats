@@ -1,6 +1,12 @@
 import type { Pool } from 'pg';
 import { getSeasonConfig, validateSeasonConfig } from '../config';
 
+export interface QueryableDb {
+  query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount?: number }>;
+}
+
+export type DbClient = Pool | QueryableDb;
+
 export interface SyncSeasonContext {
   seasonId: string;
   status: string;
@@ -30,7 +36,7 @@ export interface AssertSyncSeasonOptions {
 }
 
 export async function assertSyncSeasonWritable(
-  db: Pool,
+  db: DbClient,
   options?: string | AssertSyncSeasonOptions
 ): Promise<SyncSeasonContext> {
   const opts: AssertSyncSeasonOptions =
@@ -58,9 +64,10 @@ export async function assertSyncSeasonWritable(
   }
 
   let season: SeasonRow | undefined;
+  const client: QueryableDb = db;
 
   if (targetId) {
-    const result = await db.query<SeasonRow>(
+    const result = await client.query(
       'SELECT id, status, is_sync_enabled, source_league_id, euroleague_code FROM seasons WHERE id = $1',
       [targetId]
     );
@@ -72,7 +79,7 @@ export async function assertSyncSeasonWritable(
       );
     }
   } else {
-    const result = await db.query<SeasonRow>(
+    const result = await client.query(
       "SELECT id, status, is_sync_enabled, source_league_id, euroleague_code FROM seasons WHERE status = 'active' LIMIT 1"
     );
     season = result.rows[0];
@@ -123,8 +130,7 @@ export async function assertSyncSeasonWritable(
     );
   }
 
-  const euroleagueCode =
-    season.euroleague_code || configuredSeason.EUROLEAGUE_CODE || 'E2026';
+  const euroleagueCode = season.euroleague_code || configuredSeason.EUROLEAGUE_CODE || 'E2026';
 
   return {
     seasonId: season.id,

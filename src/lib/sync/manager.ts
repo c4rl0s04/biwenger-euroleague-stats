@@ -107,7 +107,7 @@ export class SyncManager {
     this.context.db = db;
 
     if (this.useAdvisoryLock) {
-      advisoryLock = await acquireAdvisoryLock(db as any, this.lockKey, this.mode);
+      advisoryLock = await acquireAdvisoryLock(db, this.lockKey, this.mode);
       if (!advisoryLock.acquired) {
         this.lockUnavailable = true;
         this.log('⏭️ Another synchronization is already running. Skipping this run.');
@@ -118,10 +118,10 @@ export class SyncManager {
     try {
       const allowBootstrap =
         process.env.NODE_ENV !== 'production' || process.env.ALLOW_SCHEMA_BOOTSTRAP === 'true';
-      if (allowBootstrap) await ensureSchema(db as any);
-      await validateSchemaReady(db as any);
+      if (allowBootstrap) await ensureSchema(db);
+      await validateSchemaReady(db);
 
-      const season = await assertSyncSeasonWritable(db as any, this.targetSeasonId);
+      const season = await assertSyncSeasonWritable(db, this.targetSeasonId);
       this.context.season = season;
       this.context.seasonId = season.seasonId;
       this.log(
