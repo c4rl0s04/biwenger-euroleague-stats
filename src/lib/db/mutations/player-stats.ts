@@ -1,5 +1,7 @@
 import type { DbClient } from './matches';
 
+export type PlayerStatMutations = ReturnType<typeof preparePlayerStatMutations>;
+
 export function preparePlayerStatMutations(db: DbClient, seasonId: string) {
   return {
     updateFantasyPoints: async (input: {
