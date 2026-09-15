@@ -15,19 +15,19 @@ export type DbClient =
 export interface UpsertPlayerParams {
   id: number;
   name: string;
-  team_id: number;
-  position: string;
-  puntos: number;
-  partidos_jugados: number;
-  played_home: number;
-  played_away: number;
-  points_home: number;
-  points_away: number;
-  points_last_season: number;
-  status: string;
-  price_increment: number;
-  price: number;
-  img: string;
+  team_id?: number | null;
+  position?: string | null;
+  puntos?: number | null;
+  partidos_jugados?: number | null;
+  played_home?: number | null;
+  played_away?: number | null;
+  points_home?: number | null;
+  points_away?: number | null;
+  points_last_season?: number | null;
+  status?: string | null;
+  price_increment?: number | null;
+  price?: number | null;
+  img?: string | null;
 }
 
 export interface UpdatePlayerDetailsParams {

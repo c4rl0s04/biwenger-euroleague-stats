@@ -132,11 +132,14 @@ export function minutesToSeconds(value: string | null): number | null {
   return parseMinutes(value).seconds;
 }
 
-function quarters(row: EuroleagueRow, team: 'A' | 'B'): number[] {
-  const cumulative = [1, 2, 3, 4].map(
-    (quarter) => asNumber(row[`ScoreQuarter${quarter}${team}`]) ?? 0
-  );
-  return cumulative.map((score, index) => score - (index === 0 ? 0 : cumulative[index - 1]));
+function quarters(row: EuroleagueRow, team: 'A' | 'B'): (number | null)[] {
+  const cumulative = [1, 2, 3, 4].map((quarter) => asNumber(row[`ScoreQuarter${quarter}${team}`]));
+  return cumulative.map((score, index) => {
+    if (score == null) return null;
+    const prev = index === 0 ? 0 : cumulative[index - 1];
+    if (prev == null) return null;
+    return score - prev;
+  });
 }
 
 export function checksumPayload(value: unknown): string {
@@ -351,8 +354,8 @@ export class EuroleagueClient {
       awayScore: asNumber(row.ScoreB),
       homeQuarterScores: quarters(row, 'A'),
       awayQuarterScores: quarters(row, 'B'),
-      homeOvertime: asNumber(row.ScoreExtraTimeA) ?? 0,
-      awayOvertime: asNumber(row.ScoreExtraTimeB) ?? 0,
+      homeOvertime: asNumber(row.ScoreExtraTimeA),
+      awayOvertime: asNumber(row.ScoreExtraTimeB),
       arenaName: asString(row.Stadium),
       arenaCapacity: asNumber(row.Capacity),
       homeCoach: asString(row.CoachA),

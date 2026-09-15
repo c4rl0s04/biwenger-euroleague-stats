@@ -295,6 +295,9 @@ export const matches = pgTable(
     referee1: text('referee_1'),
     referee2: text('referee_2'),
     referee3: text('referee_3'),
+    arenaCode: text('arena_code'),
+    arenaName: text('arena_name'),
+    arenaCapacity: integer('arena_capacity'),
     payloadChecksum: text('payload_checksum'),
   },
   (t) => ({
@@ -339,6 +342,8 @@ export const playerRoundStats = pgTable(
     blocksAgainst: integer('blocks_against'),
     plusMinus: integer('plus_minus'),
     gamesStarted: integer('games_started'),
+    isDnp: boolean('is_dnp'),
+    officialGameCode: integer('official_game_code'),
     rawPayload: jsonb('raw_payload'),
   },
   (t) => ({

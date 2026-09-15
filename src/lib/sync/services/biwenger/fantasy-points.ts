@@ -38,7 +38,7 @@ export async function syncFantasyPoints(
         await mutations.updateFantasyPoints({
           playerId,
           roundId: round.dbId,
-          fantasyPoints: report.points || 0,
+          fantasyPoints: report.points != null ? Number(report.points) : null,
         });
         updated++;
       }

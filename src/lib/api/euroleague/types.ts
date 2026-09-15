@@ -64,10 +64,10 @@ export interface EuroleagueGameMetadata {
   isLive: boolean;
   homeScore: number | null;
   awayScore: number | null;
-  homeQuarterScores: number[];
-  awayQuarterScores: number[];
-  homeOvertime: number;
-  awayOvertime: number;
+  homeQuarterScores: (number | null)[];
+  awayQuarterScores: (number | null)[];
+  homeOvertime: number | null;
+  awayOvertime: number | null;
   arenaName: string | null;
   arenaCapacity: number | null;
   homeCoach: string | null;

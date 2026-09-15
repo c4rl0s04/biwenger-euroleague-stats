@@ -229,6 +229,7 @@ function mapRecentMatch(row: PlayerMatchRow): PlayerProfileMatchViewModel {
     free_throws_attempted: toNullableNumber(row.free_throws_attempted),
     fouls_committed: toNullableNumber(row.fouls_committed),
     valuation: toNullableNumber(row.valuation),
+    is_dnp: row.is_dnp ?? null,
   };
 }
 
@@ -239,25 +240,30 @@ function buildAdvancedStats(
   worstRealPoints: number
 ): PlayerAdvancedStatsViewModel {
   const totals = matches.reduce(
-    (stats, match) => ({
-      ...stats,
-      two_points_made: stats.two_points_made + (match.two_points_made ?? 0),
-      two_points_attempted: stats.two_points_attempted + (match.two_points_attempted ?? 0),
-      three_points_made: stats.three_points_made + (match.three_points_made ?? 0),
-      three_points_attempted: stats.three_points_attempted + (match.three_points_attempted ?? 0),
-      free_throws_made: stats.free_throws_made + (match.free_throws_made ?? 0),
-      free_throws_attempted: stats.free_throws_attempted + (match.free_throws_attempted ?? 0),
-      blocks: stats.blocks + (match.blocks ?? 0),
-      turnovers: stats.turnovers + (match.turnovers ?? 0),
-      fouls: stats.fouls + (match.fouls_committed ?? 0),
-      rebounds: stats.rebounds + (match.rebounds ?? 0),
-      assists: stats.assists + (match.assists ?? 0),
-      steals: stats.steals + (match.steals ?? 0),
-      minutes_played: stats.minutes_played + (match.minutes_played ?? 0),
-      points_scored: stats.points_scored + (match.points_scored ?? 0),
-      valuation: stats.valuation + (match.valuation ?? 0),
-      games_played: stats.games_played + (match.minutes_played && match.minutes_played > 0 ? 1 : 0),
-    }),
+    (stats, match) => {
+      const isPlayed =
+        match.is_dnp === false ||
+        (match.is_dnp == null && match.minutes_played != null && match.minutes_played > 0);
+      return {
+        ...stats,
+        two_points_made: stats.two_points_made + (match.two_points_made ?? 0),
+        two_points_attempted: stats.two_points_attempted + (match.two_points_attempted ?? 0),
+        three_points_made: stats.three_points_made + (match.three_points_made ?? 0),
+        three_points_attempted: stats.three_points_attempted + (match.three_points_attempted ?? 0),
+        free_throws_made: stats.free_throws_made + (match.free_throws_made ?? 0),
+        free_throws_attempted: stats.free_throws_attempted + (match.free_throws_attempted ?? 0),
+        blocks: stats.blocks + (match.blocks ?? 0),
+        turnovers: stats.turnovers + (match.turnovers ?? 0),
+        fouls: stats.fouls + (match.fouls_committed ?? 0),
+        rebounds: stats.rebounds + (match.rebounds ?? 0),
+        assists: stats.assists + (match.assists ?? 0),
+        steals: stats.steals + (match.steals ?? 0),
+        minutes_played: stats.minutes_played + (match.minutes_played ?? 0),
+        points_scored: stats.points_scored + (match.points_scored ?? 0),
+        valuation: stats.valuation + (match.valuation ?? 0),
+        games_played: stats.games_played + (isPlayed ? 1 : 0),
+      };
+    },
     {
       two_points_made: 0,
       two_points_attempted: 0,
@@ -277,14 +283,14 @@ function buildAdvancedStats(
       games_played: 0,
     }
   );
-  const games = Math.max(totals.games_played, 1);
+  const games = totals.games_played;
   return {
     ...totals,
     season_avg: seasonAverage,
     best_real_points: bestRealPoints,
     worst_real_points: worstRealPoints,
-    avg_real_points: Number((totals.points_scored / games).toFixed(1)),
-    avg_pir: Number((totals.valuation / games).toFixed(1)),
+    avg_real_points: games > 0 ? Number((totals.points_scored / games).toFixed(1)) : 0,
+    avg_pir: games > 0 ? Number((totals.valuation / games).toFixed(1)) : 0,
     ast_to_ratio:
       totals.turnovers > 0
         ? Number((totals.assists / totals.turnovers).toFixed(2))

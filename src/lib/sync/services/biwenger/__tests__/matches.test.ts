@@ -47,6 +47,9 @@ describe('Biwenger Matches Service', () => {
         away_q4: null,
         home_ot: null,
         away_ot: null,
+        arena_code: null,
+        arena_name: null,
+        arena_capacity: null,
       };
 
       const candidateRound2: OfficialMatchRow = {
@@ -81,6 +84,9 @@ describe('Biwenger Matches Service', () => {
         away_q4: null,
         home_ot: null,
         away_ot: null,
+        arena_code: null,
+        arena_name: null,
+        arena_capacity: null,
       };
 
       const candidateB: OfficialMatchRow = {
@@ -115,7 +121,7 @@ describe('Biwenger Matches Service', () => {
       };
 
       const manager: any = {
-        context: { db: {}, seasonId: '2025-26' },
+        context: { db: {}, seasonId: '2025-26', season: { euroleagueCode: 'E2025' } },
         log: vi.fn(),
         resolveRoundId: vi.fn((r) => r.id),
       };
@@ -182,7 +188,7 @@ describe('Biwenger Matches Service', () => {
       };
 
       const manager: any = {
-        context: { db: {}, seasonId: '2025-26' },
+        context: { db: {}, seasonId: '2025-26', season: { euroleagueCode: 'E2025' } },
         log: vi.fn(),
         resolveRoundId: vi.fn((r) => r.id),
       };
@@ -228,7 +234,7 @@ describe('Biwenger Matches Service', () => {
       };
 
       const manager: any = {
-        context: { db: {}, seasonId: '2025-26' },
+        context: { db: {}, seasonId: '2025-26', season: { euroleagueCode: 'E2025' } },
         log: vi.fn(),
         resolveRoundId: vi.fn((r) => r.id),
       };

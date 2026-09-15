@@ -4,6 +4,7 @@ import { preparePlayerMutations } from '../../src/lib/db/mutations/players';
 import { prepareMatchMutations } from '../../src/lib/db/mutations/matches';
 import { prepareOfficialGameMutations } from '../../src/lib/db/mutations/official/game-data';
 import { assertSyncSeasonWritable } from '../../src/lib/sync/season-guard';
+import { validateSchemaReady } from '../../src/lib/db/schema_init';
 
 const connectionString = process.env.E2E_DATABASE_URL || process.env.DATABASE_URL;
 if (!connectionString) {
@@ -18,6 +19,14 @@ const pool = new pg.Pool({ connectionString });
 console.log('🧪 Starting real PostgreSQL multi-season data integrity verification...');
 
 try {
+  // 0. Schema readiness validation (read-only audit)
+  console.log('   Running validateSchemaReady...');
+  const schemaValidation = await validateSchemaReady(pool);
+  if (!schemaValidation.ready) {
+    throw new Error('validateSchemaReady failed during E2E integrity test.');
+  }
+  console.log('   ✅ validateSchemaReady passed.');
+
   // 1. Verify dropped columns no longer exist on players and teams
   console.log('   Checking absence of dropped seasonal columns on players and teams...');
   const playerCols = await pool.query(
@@ -41,7 +50,28 @@ try {
       `Table teams still has dropped columns: ${teamCols.rows.map((r) => r.column_name).join(', ')}`
     );
   }
-  console.log('   ✅ Dropped columns confirmed absent on players and teams.');
+
+  // Verify migration 0015 columns exist
+  const matchVenues = await pool.query(
+    `SELECT column_name FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'matches'
+       AND column_name IN ('arena_code', 'arena_name', 'arena_capacity')`
+  );
+  if (matchVenues.rows.length !== 3) {
+    throw new Error(`Expected 3 venue columns in matches, found ${matchVenues.rows.length}`);
+  }
+
+  const prs0015Cols = await pool.query(
+    `SELECT column_name FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'player_round_stats'
+       AND column_name IN ('is_dnp', 'official_game_code')`
+  );
+  if (prs0015Cols.rows.length !== 2) {
+    throw new Error(
+      `Expected is_dnp and official_game_code in player_round_stats, found ${prs0015Cols.rows.length}`
+    );
+  }
+  console.log('   ✅ Dropped columns absent and migration 0015 columns present.');
 
   // 2. Multi-season isolation: same player can have different state in two seasons
   console.log('   Verifying multi-season player state isolation...');
@@ -501,6 +531,132 @@ try {
     );
   }
   console.log('   ✅ Mapping resolution retry with unchanged checksum verified.');
+
+  // 12. hasUnpersistedMappedPlayers detects players with fantasy row but no official game stats
+  console.log(
+    '   Verifying hasUnpersistedMappedPlayers with pre-existing fantasy rows and DNP persistence...'
+  );
+  // Insert player 99103
+  await pool.query(
+    `INSERT INTO players (id, name, img) VALUES (99103, 'Pre-fantasy Player', '/icons/icon-192.png')
+     ON CONFLICT (id) DO NOTHING`
+  );
+  await pool.query(
+    `INSERT INTO official_player_mappings (season_id, provider, provider_player_code, provider_name, match_method, player_id, status)
+     VALUES ('2025-26', 'euroleague_advanced', 'P99103', 'Pre-fantasy Player', 'exact_name', 99103, 'matched')
+     ON CONFLICT (season_id, provider, provider_player_code) DO UPDATE SET player_id = 99103, status = 'matched'`
+  );
+  // Simulate fantasy sync running FIRST: creates row with fantasy_points, but official_game_code IS NULL
+  await pool.query(
+    `INSERT INTO player_round_stats (season_id, player_id, round_id, fantasy_points)
+     VALUES ('2025-26', 99103, 1, 15)
+     ON CONFLICT (season_id, player_id, round_id) DO UPDATE SET fantasy_points = 15, official_game_code = NULL`
+  );
+
+  // Even though a row exists in player_round_stats, official_game_code is NULL, so hasUnpersistedMappedPlayers MUST return TRUE!
+  const hasUnpersistedWithFantasyOnly = await officialMutations25.hasUnpersistedMappedPlayers(1, [
+    'P99103',
+  ]);
+  if (!hasUnpersistedWithFantasyOnly) {
+    throw new Error(
+      'Expected hasUnpersistedMappedPlayers to be true when player only has fantasy points without official game code.'
+    );
+  }
+
+  // Ensure match 99001 is linked to official_game_code = 99001
+  await pool.query(
+    `UPDATE matches SET official_game_code = 99001 WHERE id = 99001 AND season_id = '2025-26'`
+  );
+
+  // Now persist game data with boxscore for P99103 as DNP = true, along with venue info in metadata
+  await officialMutations25.persistGameData({
+    gameCode: 99001,
+    roundId: 1,
+    report: null,
+    metadata: {
+      arenaName: 'WiZink Center',
+      arenaCapacity: 15000,
+      referees: [],
+    } as any,
+    boxscore: [
+      {
+        gameCode: 99001,
+        playerCode: 'P99103',
+        playerName: 'Pre-fantasy Player',
+        teamCode: 'FMA',
+        isHome: true,
+        isStarter: false,
+        isPlaying: false,
+        dorsal: '99',
+        minutes: null,
+        minutesSeconds: null,
+        isDnp: true,
+        points: null,
+        twoPointsMade: null,
+        twoPointsAttempted: null,
+        threePointsMade: null,
+        threePointsAttempted: null,
+        freeThrowsMade: null,
+        freeThrowsAttempted: null,
+        offensiveRebounds: null,
+        defensiveRebounds: null,
+        totalRebounds: null,
+        assists: null,
+        steals: null,
+        turnovers: null,
+        blocks: null,
+        blocksAgainst: null,
+        foulsCommitted: null,
+        foulsReceived: null,
+        valuation: null,
+        plusMinus: null,
+        raw: {},
+      },
+    ],
+    playByPlay: [],
+    shots: [],
+    checksum: 'chk_dnp_venue_test',
+    finalized: true,
+  });
+
+  // Verify player_round_stats has official_game_code set, is_dnp = true, and fantasy_points = 15 preserved!
+  const checkPostDnp = await pool.query(
+    `SELECT fantasy_points, is_dnp, official_game_code FROM player_round_stats
+     WHERE season_id = '2025-26' AND player_id = 99103 AND round_id = 1`
+  );
+  const rowPostDnp = checkPostDnp.rows[0];
+  if (
+    !rowPostDnp ||
+    rowPostDnp.fantasy_points !== 15 ||
+    rowPostDnp.is_dnp !== true ||
+    rowPostDnp.official_game_code !== 99001
+  ) {
+    throw new Error(
+      `Expected is_dnp=true, official_game_code=99001, fantasy_points=15, got ${JSON.stringify(rowPostDnp)}`
+    );
+  }
+
+  // hasUnpersistedMappedPlayers must now return FALSE!
+  const hasUnpersistedPostDnp = await officialMutations25.hasUnpersistedMappedPlayers(1, [
+    'P99103',
+  ]);
+  if (hasUnpersistedPostDnp) {
+    throw new Error(
+      'Expected hasUnpersistedMappedPlayers to be false after official DNP boxscore is persisted.'
+    );
+  }
+
+  // Verify match venue info was persisted into matches
+  const matchVenueCheck = await pool.query(
+    `SELECT arena_name, arena_capacity FROM matches WHERE id = 99001 AND season_id = '2025-26'`
+  );
+  const rowVenue = matchVenueCheck.rows[0];
+  if (!rowVenue || rowVenue.arena_name !== 'WiZink Center' || rowVenue.arena_capacity !== 15000) {
+    throw new Error(`Expected arena info in matches, got: ${JSON.stringify(rowVenue)}`);
+  }
+  console.log(
+    '   ✅ hasUnpersistedMappedPlayers with pre-existing fantasy rows and venue persistence verified.'
+  );
 
   console.log('🎉 All PostgreSQL multi-season data integrity checks PASSED!');
 } finally {

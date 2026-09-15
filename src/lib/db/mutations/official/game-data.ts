@@ -36,8 +36,16 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
     const status = isLive ? 'live' : played ? 'finished' : 'scheduled';
     const homeScore = metadata?.homeScore ?? report?.homeScore ?? null;
     const awayScore = metadata?.awayScore ?? report?.awayScore ?? null;
-    const homeRegtime = homeQuarters.slice(0, 4).reduce((sum, value) => sum + value, 0) || null;
-    const awayRegtime = awayQuarters.slice(0, 4).reduce((sum, value) => sum + value, 0) || null;
+    const homeQuartersSlice = homeQuarters.slice(0, 4);
+    const awayQuartersSlice = awayQuarters.slice(0, 4);
+    const homeHasAll4 = homeQuartersSlice.length === 4 && homeQuartersSlice.every((v) => v != null);
+    const awayHasAll4 = awayQuartersSlice.length === 4 && awayQuartersSlice.every((v) => v != null);
+    const homeRegtime = homeHasAll4
+      ? homeQuartersSlice.reduce((sum, value) => (sum ?? 0) + (value ?? 0), 0)
+      : null;
+    const awayRegtime = awayHasAll4
+      ? awayQuartersSlice.reduce((sum, value) => (sum ?? 0) + (value ?? 0), 0)
+      : null;
 
     await client.query(
       `UPDATE matches SET
@@ -54,7 +62,9 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
          home_coach = $18, away_coach = $19,
          referee_1 = $20, referee_2 = $21, referee_3 = $22,
          payload_checksum = $23,
-         date = COALESCE($24, date)
+         date = COALESCE($24, date),
+         arena_name = COALESCE($25, matches.arena_name),
+         arena_capacity = COALESCE($26, matches.arena_capacity)
        WHERE season_id = $1 AND official_game_code = $2`,
       [
         seasonId,
@@ -76,11 +86,13 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
         metadata?.awayOvertime ?? null,
         metadata?.homeCoach ?? null,
         metadata?.awayCoach ?? null,
-        metadata?.referees[0] ?? null,
-        metadata?.referees[1] ?? null,
-        metadata?.referees[2] ?? null,
+        metadata?.referees?.[0] ?? null,
+        metadata?.referees?.[1] ?? null,
+        metadata?.referees?.[2] ?? null,
         checksum,
         report?.scheduledAt ?? null,
+        metadata?.arenaName ?? null,
+        metadata?.arenaCapacity ?? null,
       ]
     );
     return status;
@@ -223,10 +235,10 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
                  rebounds, offensive_rebounds, defensive_rebounds,
                  assists, steals, blocks, blocks_against,
                  turnovers, fouls_committed, fouls_received,
-                 valuation, plus_minus, games_started, raw_payload
+                 valuation, plus_minus, games_started, is_dnp, official_game_code, raw_payload
                ) VALUES (
                  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-                 $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27::jsonb
+                 $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29::jsonb
                )
                ON CONFLICT (season_id, player_id, round_id) DO UPDATE SET
                  minutes = EXCLUDED.minutes,
@@ -252,6 +264,8 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
                  valuation = EXCLUDED.valuation,
                  plus_minus = EXCLUDED.plus_minus,
                  games_started = EXCLUDED.games_started,
+                 is_dnp = EXCLUDED.is_dnp,
+                 official_game_code = COALESCE(EXCLUDED.official_game_code, player_round_stats.official_game_code),
                  raw_payload = EXCLUDED.raw_payload`,
               [
                 seasonId,
@@ -280,6 +294,8 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
                 stat.valuation,
                 stat.plusMinus,
                 stat.isStarter == null ? null : stat.isStarter ? 1 : 0,
+                stat.isDnp != null ? stat.isDnp : null,
+                input.gameCode,
                 jsonPayload(stat.raw),
               ]
             );
@@ -368,7 +384,7 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
          AND m.status = 'matched'
          AND m.player_id IS NOT NULL
          AND m.provider_player_code = ANY($3)
-         AND prs.id IS NULL
+         AND (prs.id IS NULL OR prs.official_game_code IS NULL)
        LIMIT 1`,
       [seasonId, roundId, playerCodes]
     );

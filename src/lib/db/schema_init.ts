@@ -44,7 +44,7 @@ export async function validateSchemaReady(db: DbClient) {
     `
     SELECT table_name
     FROM information_schema.tables
-    WHERE table_schema = "public"
+    WHERE table_schema = 'public'
       AND table_name = ANY($1::text[])
   `,
     [REQUIRED_SEASON_TABLES]
@@ -62,8 +62,8 @@ export async function validateSchemaReady(db: DbClient) {
     `
     SELECT table_name
     FROM information_schema.columns
-    WHERE table_schema = "public"
-      AND column_name = "season_id"
+    WHERE table_schema = 'public'
+      AND column_name = 'season_id'
       AND table_name = ANY($1::text[])
   `,
     [REQUIRED_SEASON_SCOPED_TABLES]
@@ -80,22 +80,71 @@ export async function validateSchemaReady(db: DbClient) {
     `
     SELECT 1
     FROM information_schema.columns
-    WHERE table_schema = "public"
-      AND table_name = "seasons"
-      AND column_name = "source_league_id"
+    WHERE table_schema = 'public'
+      AND table_name = 'seasons'
+      AND column_name = 'source_league_id'
   `
   );
   if (leagueBinding.rows.length !== 1) {
     throw new Error('Database schema is not season-ready; seasons.source_league_id is missing.');
   }
 
-  const officialColumns = await db.query(
-    `SELECT table_name,column_name FROM information_schema.columns
-     WHERE table_schema='public' AND (
-       (table_name='matches' AND column_name='official_game_code') OR
-       (table_name='player_round_stats' AND column_name = ANY($1::text[]))
+  const droppedColumns = await db.query(
+    `SELECT table_name, column_name FROM information_schema.columns
+     WHERE table_schema = 'public' AND (
+       (table_name = 'players' AND column_name = ANY($1::text[])) OR
+       (table_name = 'teams' AND column_name = ANY($2::text[]))
      )`,
     [
+      [
+        'position',
+        'puntos',
+        'partidos_jugados',
+        'played_home',
+        'played_away',
+        'points_home',
+        'points_away',
+        'points_last_season',
+        'owner_id',
+        'status',
+        'price_increment',
+        'price',
+        'dorsal',
+        'team_id',
+      ],
+      ['city', 'arena_name', 'latitude', 'longitude'],
+    ]
+  );
+  if (droppedColumns.rows.length > 0) {
+    const list = droppedColumns.rows.map((r: any) => `${r.table_name}.${r.column_name}`).join(', ');
+    throw new Error(
+      `Database schema has deprecated seasonal columns on global tables: ${list}. Apply migration 0014.`
+    );
+  }
+
+  const requiredOfficialColumns = [
+    { table: 'matches', column: 'official_game_code' },
+    { table: 'matches', column: 'arena_code' },
+    { table: 'matches', column: 'arena_name' },
+    { table: 'matches', column: 'arena_capacity' },
+    { table: 'player_round_stats', column: 'offensive_rebounds' },
+    { table: 'player_round_stats', column: 'defensive_rebounds' },
+    { table: 'player_round_stats', column: 'fouls_received' },
+    { table: 'player_round_stats', column: 'blocks_against' },
+    { table: 'player_round_stats', column: 'plus_minus' },
+    { table: 'player_round_stats', column: 'games_started' },
+    { table: 'player_round_stats', column: 'is_dnp' },
+    { table: 'player_round_stats', column: 'official_game_code' },
+  ];
+
+  const officialColumns = await db.query(
+    `SELECT table_name, column_name FROM information_schema.columns
+     WHERE table_schema = 'public' AND (
+       (table_name = 'matches' AND column_name = ANY($1::text[])) OR
+       (table_name = 'player_round_stats' AND column_name = ANY($2::text[]))
+     )`,
+    [
+      ['official_game_code', 'arena_code', 'arena_name', 'arena_capacity'],
       [
         'offensive_rebounds',
         'defensive_rebounds',
@@ -103,20 +152,23 @@ export async function validateSchemaReady(db: DbClient) {
         'blocks_against',
         'plus_minus',
         'games_started',
+        'is_dnp',
+        'official_game_code',
       ],
     ]
   );
-  if (officialColumns.rows.length !== 7) {
+  const foundOfficial = new Set(
+    officialColumns.rows.map((r: any) => `${r.table_name}.${r.column_name}`)
+  );
+  const missingOfficial = requiredOfficialColumns.filter(
+    (col) => !foundOfficial.has(`${col.table}.${col.column}`)
+  );
+
+  if (missingOfficial.length > 0) {
     throw new Error(
-      'Database schema is missing Euroleague Advanced API columns. Apply migrations 0007 and 0012.'
+      `Database schema is missing EuroLeague/provenance columns: ${missingOfficial.map((c) => `${c.table}.${c.column}`).join(', ')}. Apply migrations 0007, 0012, and 0015.`
     );
   }
-}
 
-/**
- * @deprecated Schema authority belongs strictly to Drizzle migrations (`drizzle/*.sql`).
- * Sync pipeline only validates readiness via `validateSchemaReady()`.
- */
-export async function ensureSchema(_db: DbClient): Promise<void> {
-  // No-op: Drizzle migrations are the sole schema authority.
+  return { ready: true };
 }

@@ -18,7 +18,7 @@ export async function runGame(
     mappingMutations?: ReturnType<typeof prepareOfficialMappingMutations>;
   } = {}
 ) {
-  const seasonCode = manager.context.season?.euroleagueCode || CONFIG.EUROLEAGUE.SEASON_CODE;
+  const seasonCode = manager.context.season?.euroleagueCode;
   if (!seasonCode) throw new Error('EUROLEAGUE_SEASON_CODE is required.');
   const seasonId = manager.context.season?.seasonId || manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');

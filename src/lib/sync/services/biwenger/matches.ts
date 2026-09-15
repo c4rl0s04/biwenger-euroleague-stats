@@ -30,6 +30,9 @@ export interface OfficialMatchRow {
   away_q4: number | null;
   home_ot: number | null;
   away_ot: number | null;
+  arena_code: string | null;
+  arena_name: string | null;
+  arena_capacity: number | null;
 }
 
 export interface MatchesDependencies {
@@ -97,10 +100,10 @@ export async function syncBiwengerMatches(
         return manager.context.officialSchedule;
       }
       if (dependencies.getSchedule) {
-        const seasonCode =
-          manager.context.season?.euroleagueCode ||
-          CONFIG.EUROLEAGUE.SEASON_CODE ||
-          `E${seasonId.slice(0, 4)}`;
+        const seasonCode = manager.context.season?.euroleagueCode;
+        if (!seasonCode) {
+          throw new Error(`Season ${seasonId} has no official EuroLeague code binding.`);
+        }
         const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
         const schedule = await dependencies.getSchedule(seasonYear);
         manager.context.officialSchedule = schedule;
@@ -110,10 +113,10 @@ export async function syncBiwengerMatches(
         manager.context.euroleague &&
         typeof manager.context.euroleague.getSchedule === 'function'
       ) {
-        const seasonCode =
-          manager.context.season?.euroleagueCode ||
-          CONFIG.EUROLEAGUE.SEASON_CODE ||
-          `E${seasonId.slice(0, 4)}`;
+        const seasonCode = manager.context.season?.euroleagueCode;
+        if (!seasonCode) {
+          throw new Error(`Season ${seasonId} has no official EuroLeague code binding.`);
+        }
         const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
         const schedule = await manager.context.euroleague.getSchedule(seasonYear);
         manager.context.officialSchedule = schedule;
@@ -150,6 +153,9 @@ export async function syncBiwengerMatches(
       away_q4: null,
       home_ot: null,
       away_ot: null,
+      arena_code: game.arenaCode,
+      arena_name: game.arenaName,
+      arena_capacity: game.arenaCapacity,
     }));
   } catch (error: any) {
     throw new Error('Could not load fantasy and official match inputs.', { cause: error });
@@ -233,6 +239,9 @@ export async function syncBiwengerMatches(
       home_ot: official.home_ot,
       away_ot: official.away_ot,
       official_game_code: official.game_code,
+      arena_code: official.arena_code,
+      arena_name: official.arena_name,
+      arena_capacity: official.arena_capacity,
     });
     synced++;
   }

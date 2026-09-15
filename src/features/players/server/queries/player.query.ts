@@ -128,6 +128,7 @@ export interface PlayerMatchRow {
   free_throws_attempted: number | string | null;
   fouls_committed: number | string | null;
   valuation: number | string | null;
+  is_dnp?: boolean | null;
 }
 
 export interface PlayerDetailsQueryResult {
@@ -247,7 +248,7 @@ export async function getPlayerMatchesPlayed(playerId: number | string): Promise
   const query = `
     SELECT COUNT(DISTINCT round_id) as count
     FROM player_round_stats
-    WHERE season_id = $2 AND player_id = $1 AND minutes > 0
+    WHERE season_id = $2 AND player_id = $1 AND (is_dnp IS FALSE OR (is_dnp IS NULL AND minutes > 0))
   `;
 
   const res = await pgClient.query(query, [numericPlayerId, seasonId]);
@@ -409,11 +410,11 @@ export async function getPlayerDetails(
       COALESCE(us.name, u.name) as owner_name,
       COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
       COALESCE(us.icon, u.icon) as owner_icon,
-      (SELECT COUNT(*) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as games_played,
+      (SELECT COUNT(*) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id AND (is_dnp IS FALSE OR (is_dnp IS NULL AND minutes > 0))) as games_played,
       (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as season_avg,
       (SELECT SUM(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as total_points,
-      (SELECT MAX(points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as best_real_points,
-      (SELECT MIN(points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as worst_real_points,
+      (SELECT MAX(points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id AND (is_dnp IS FALSE OR (is_dnp IS NULL AND minutes > 0))) as best_real_points,
+      (SELECT MIN(points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id AND (is_dnp IS FALSE OR (is_dnp IS NULL AND minutes > 0))) as worst_real_points,
       (SELECT MAX(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as best_fantasy,
       (SELECT MIN(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as worst_fantasy,
       t.id as team_id,
@@ -467,7 +468,8 @@ export async function getPlayerDetails(
       prs.free_throws_made,
       prs.free_throws_attempted,
       prs.fouls_committed,
-      prs.valuation
+      prs.valuation,
+      prs.is_dnp
     FROM matches m
     JOIN players p ON p.id = $1
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2

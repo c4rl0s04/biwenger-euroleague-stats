@@ -12,9 +12,20 @@ export function prepareOfficialCalendarMutations(db: DbClient, seasonId: string)
              WHEN matches.status IN ('live', 'finished') THEN matches.status
              WHEN $4 THEN 'finished'
              ELSE 'scheduled'
-           END
+           END,
+           arena_code = COALESCE($5, matches.arena_code),
+           arena_name = COALESCE($6, matches.arena_name),
+           arena_capacity = COALESCE($7, matches.arena_capacity)
          WHERE season_id = $1 AND official_game_code = $2`,
-        [seasonId, game.gameCode, game.scheduledAt, game.isPlayed]
+        [
+          seasonId,
+          game.gameCode,
+          game.scheduledAt,
+          game.isPlayed,
+          game.arenaCode ?? null,
+          game.arenaName ?? null,
+          game.arenaCapacity ?? null,
+        ]
       );
     },
 

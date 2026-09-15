@@ -56,6 +56,64 @@ export const parsePriceDate = (dateInt: number | string): string => {
   return `${year}-${month}-${day}`;
 };
 
+export interface CanonicalBiwengerPlayerSnapshot {
+  id: number;
+  name: string;
+  teamId: number | null;
+  position: string | null;
+  points: number | null;
+  pointsHome: number | null;
+  pointsAway: number | null;
+  playedHome: number | null;
+  playedAway: number | null;
+  gamesPlayed: number | null;
+  pointsLastSeason: number | null;
+  status: string | null;
+  priceIncrement: number | null;
+  price: number | null;
+  img: string | null;
+}
+
+export function normalizeBiwengerPlayer(
+  rawId: string | number,
+  raw: any,
+  positions: Record<string | number, string> = {}
+): CanonicalBiwengerPlayerSnapshot {
+  const parseNum = (val: unknown): number | null => {
+    if (val === null || val === undefined || val === '') return null;
+    const n = Number(val);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const id = typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10);
+  const playedHome = parseNum(raw.playedHome);
+  const playedAway = parseNum(raw.playedAway);
+  let gamesPlayed: number | null = null;
+  if (playedHome != null || playedAway != null) {
+    gamesPlayed = (playedHome ?? 0) + (playedAway ?? 0);
+  }
+
+  const rawPos = raw.position != null ? positions[raw.position] : null;
+
+  return {
+    id,
+    name: String(raw.name || ''),
+    teamId: parseNum(raw.teamID ?? raw.team_id),
+    position: rawPos || 'Unknown',
+    points: parseNum(raw.points),
+    pointsHome: parseNum(raw.pointsHome),
+    pointsAway: parseNum(raw.pointsAway),
+    playedHome,
+    playedAway,
+    gamesPlayed,
+    pointsLastSeason: parseNum(raw.pointsLastSeason),
+    status: raw.status != null ? String(raw.status) : 'ok',
+    priceIncrement: parseNum(raw.priceIncrement),
+    price: parseNum(raw.price),
+    img: raw.img ? String(raw.img) : null,
+  };
+}
+
 export interface BiwengerCatalogSyncResult {
   summary: string;
   counts: {
@@ -120,39 +178,37 @@ export async function syncBiwengerCatalog(
   const warnings: string[] = [];
 
   for (const [id, player] of Object.entries(playersList) as any[]) {
-    const playerId = parseInt(id, 10);
-    const existing = existingSeasonPlayerMap.get(playerId);
-
-    const finalPoints = player.points ?? 0;
-    const finalPointsHome = player.pointsHome ?? 0;
-    const finalPointsAway = player.pointsAway ?? 0;
+    const snapshot = normalizeBiwengerPlayer(id, player, positions);
+    const playerId = snapshot.id;
 
     await mutations.upsertPlayer({
       id: playerId,
-      name: player.name,
-      team_id: player.teamID ?? null,
-      position: positions[player.position] || 'Unknown',
-      puntos: finalPoints,
-      partidos_jugados: (player.playedHome || 0) + (player.playedAway || 0),
-      played_home: player.playedHome || 0,
-      played_away: player.playedAway || 0,
-      points_home: finalPointsHome,
-      points_away: finalPointsAway,
-      points_last_season: player.pointsLastSeason || 0,
-      status: player.status || 'ok',
-      price_increment: player.priceIncrement || 0,
-      price: player.price || 0,
-      img: player.img ?? null,
+      name: snapshot.name,
+      team_id: snapshot.teamId,
+      position: snapshot.position,
+      puntos: snapshot.points,
+      partidos_jugados: snapshot.gamesPlayed,
+      played_home: snapshot.playedHome,
+      played_away: snapshot.playedAway,
+      points_home: snapshot.pointsHome,
+      points_away: snapshot.pointsAway,
+      points_last_season: snapshot.pointsLastSeason,
+      status: snapshot.status,
+      price_increment: snapshot.priceIncrement,
+      price: snapshot.price,
+      img: snapshot.img,
     });
 
-    const todayInt = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    const priceDate = parsePriceDate(todayInt);
+    if (snapshot.price != null) {
+      const todayInt = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+      const priceDate = parsePriceDate(todayInt);
 
-    await mutations.insertMarketValue({
-      player_id: playerId,
-      price: player.price || 0,
-      date: priceDate,
-    });
+      await mutations.insertMarketValue({
+        player_id: playerId,
+        price: snapshot.price,
+        date: priceDate,
+      });
+    }
 
     const isNewPlayer = !existingPlayerIds.has(playerId);
 

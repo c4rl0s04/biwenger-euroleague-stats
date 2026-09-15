@@ -7,7 +7,7 @@ export function preparePlayerStatMutations(db: DbClient, seasonId: string) {
     updateFantasyPoints: async (input: {
       playerId: number;
       roundId: number;
-      fantasyPoints: number;
+      fantasyPoints: number | null;
     }) => {
       await db.query(
         `INSERT INTO player_round_stats (season_id, player_id, round_id, fantasy_points)

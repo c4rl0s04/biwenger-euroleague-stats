@@ -62,15 +62,14 @@ production database; the reconciliation records the verified historical migratio
 
 - Do not drop, truncate, rename, or rewrite production tables without a tested restore plan.
 - Prefer additive migrations and provide rollback steps for destructive changes.
-- Treat `ensureSchema()` as transitional local/bootstrap behavior, not a substitute for reviewed
-  production migrations.
+- Drizzle migrations are the sole authority for database schema; runtime DDL and runtime schema alterations have been eliminated in favor of committed, audited migrations and `npm run db:schema:validate`.
 - Optional database tests must use a disposable local database unless `ALLOW_REMOTE_TEST_DB=true` is
   deliberately set.
 - Never commit dumps, credentials, or production row samples.
 
 ## Player price cache repair
 
-`market_values` is durable price history; `players.price` is a latest-value cache. Inspect drift
+`market_values` is durable price history; `player_seasons.price` is a latest-value cache. Inspect drift
 without changing data:
 
 ```bash

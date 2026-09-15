@@ -34,6 +34,9 @@ export interface UpsertMatchParams {
   home_ot: number | null;
   away_ot: number | null;
   official_game_code?: number | null;
+  arena_code?: string | null;
+  arena_name?: string | null;
+  arena_capacity?: number | null;
 }
 
 export interface UpdateMatchScoreParams {
@@ -104,12 +107,13 @@ export function prepareMatchMutations(
           season_id, round_id, round_name, home_id, away_id, date, status,
           home_score, away_score, home_score_regtime, away_score_regtime,
           home_q1, away_q1, home_q2, away_q2, home_q3, away_q3, home_q4, away_q4,
-          home_ot, away_ot, official_game_code
+          home_ot, away_ot, official_game_code, arena_code, arena_name, arena_capacity
         )
         VALUES (
           $1, $2, $3, $4, $5, $6, $7,
           $8, $9, $10, $11,
-          $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+          $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22,
+          $23, $24, $25
         )
         ON CONFLICT(season_id, round_id, home_id, away_id) DO UPDATE SET
           round_name=excluded.round_name,
@@ -129,7 +133,10 @@ export function prepareMatchMutations(
           home_ot=COALESCE(excluded.home_ot,matches.home_ot),
           away_ot=COALESCE(excluded.away_ot,matches.away_ot),
           date=COALESCE(excluded.date,matches.date),
-          official_game_code=COALESCE(excluded.official_game_code,matches.official_game_code)
+          official_game_code=COALESCE(excluded.official_game_code,matches.official_game_code),
+          arena_code=COALESCE(excluded.arena_code,matches.arena_code),
+          arena_name=COALESCE(excluded.arena_name,matches.arena_name),
+          arena_capacity=COALESCE(excluded.arena_capacity,matches.arena_capacity)
       `;
       const values = [
         seasonId,
@@ -154,6 +161,9 @@ export function prepareMatchMutations(
         params.home_ot,
         params.away_ot,
         params.official_game_code ?? null,
+        params.arena_code ?? null,
+        params.arena_name ?? null,
+        params.arena_capacity ?? null,
       ];
       await db.query(sql, values);
     },

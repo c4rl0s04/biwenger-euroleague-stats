@@ -371,4 +371,55 @@ describe('player mappers', () => {
       ].sort()
     );
   });
+
+  it('correctly ignores DNP matches when computing games played and averages in advanced stats', () => {
+    const source = {
+      ...details,
+      recentMatches: [
+        {
+          ...details.recentMatches[0],
+          round_id: '1',
+          is_dnp: true,
+          minutes_played: '0',
+          points_scored: '0',
+          valuation: '0',
+        },
+        {
+          ...details.recentMatches[0],
+          round_id: '2',
+          is_dnp: false,
+          minutes_played: '25',
+          points_scored: '20',
+          valuation: '18',
+        },
+      ],
+    };
+    const model = mapPlayerProfile(source, metrics, upcoming);
+    expect(model.advancedStats.games_played).toBe(1);
+    expect(model.advancedStats.avg_real_points).toBe(20);
+    expect(model.advancedStats.avg_pir).toBe(18);
+    expect(model.recentMatches[0].is_dnp).toBe(true);
+    expect(model.recentMatches[1].is_dnp).toBe(false);
+  });
+
+  it('safely handles 0 games played without NaN or division by zero in advanced stats', () => {
+    const source = {
+      ...details,
+      recentMatches: [
+        {
+          ...details.recentMatches[0],
+          round_id: '1',
+          is_dnp: true,
+          minutes_played: '0',
+          points_scored: '0',
+          valuation: '0',
+        },
+      ],
+    };
+    const model = mapPlayerProfile(source, metrics, upcoming);
+    expect(model.advancedStats.games_played).toBe(0);
+    expect(model.advancedStats.avg_real_points).toBe(0);
+    expect(model.advancedStats.avg_pir).toBe(0);
+    expect(model.advancedStats.pts_per_40).toBe(0);
+  });
 });

@@ -130,9 +130,7 @@ export async function assertSyncSeasonWritable(
     );
   }
 
-  const euroleagueCode =
-    season.euroleague_code ||
-    (season.id === configuredSeason.ID ? configuredSeason.EUROLEAGUE_CODE : null);
+  const euroleagueCode = season.euroleague_code;
 
   if (!euroleagueCode) {
     throw new SyncSeasonGuardError(

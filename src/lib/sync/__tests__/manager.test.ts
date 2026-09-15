@@ -9,7 +9,6 @@ const { mockDb } = vi.hoisted(() => ({
 
 vi.mock('../../db/client', () => ({ db: mockDb }));
 vi.mock('../../db/schema_init', () => ({
-  ensureSchema: vi.fn(async () => {}),
   validateSchemaReady: vi.fn(async () => {}),
 }));
 vi.mock('../../utils/cache', () => ({ clearCache: vi.fn() }));
@@ -100,7 +99,6 @@ describe('SyncManager', () => {
     await manager.run();
 
     expect(schema.validateSchemaReady).toHaveBeenCalledOnce();
-    expect(schema.ensureSchema).not.toHaveBeenCalled();
     vi.unstubAllEnvs();
   });
 });

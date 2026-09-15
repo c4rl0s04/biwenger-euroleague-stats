@@ -26,6 +26,7 @@ export interface PlayerProfileMatchViewModel {
   free_throws_attempted: number | null;
   fouls_committed: number | null;
   valuation: number | null;
+  is_dnp?: boolean | null;
 }
 
 export interface PlayerPriceHistoryPointViewModel {

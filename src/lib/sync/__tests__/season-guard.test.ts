@@ -49,7 +49,9 @@ describe('sync season guard', () => {
     configureSeason();
     const db = {
       query: vi.fn(async () => ({
-        rows: [{ id: '2026-27', status: 'active', source_league_id: '456' }],
+        rows: [
+          { id: '2026-27', status: 'active', source_league_id: '456', euroleague_code: 'E2026' },
+        ],
       })),
     };
 
@@ -103,7 +105,9 @@ describe('sync season guard', () => {
     configureSeason();
     const db = {
       query: vi.fn(async () => ({
-        rows: [{ id: '2026-27', status: 'active', source_league_id: '456' }],
+        rows: [
+          { id: '2026-27', status: 'active', source_league_id: '456', euroleague_code: 'E2026' },
+        ],
       })),
     };
 
