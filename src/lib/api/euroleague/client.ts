@@ -94,13 +94,13 @@ function parseProviderUtc(value: unknown): Date | null {
 export interface ParsedMinutes {
   raw: string | null;
   seconds: number | null;
-  isDnp: boolean;
+  isDnp: boolean | null;
 }
 
 export function parseMinutes(value: unknown): ParsedMinutes {
   const text = asString(value)?.trim();
   if (!text) {
-    return { raw: null, seconds: null, isDnp: false };
+    return { raw: null, seconds: null, isDnp: null };
   }
   const upper = text.toUpperCase();
   if (upper === 'DNP' || upper === 'DNE' || upper === 'CDNP') {

@@ -7,6 +7,7 @@ import type {
 
 import type { PlayerDetailsQueryResult } from '../queries/player.query';
 import {
+  buildAdvancedStats,
   mapPlayerBirthdays,
   mapPlayerCatalogue,
   mapPlayerPerformanceSummary,
@@ -402,7 +403,7 @@ describe('player mappers', () => {
     expect(model.recentMatches[1].is_dnp).toBe(false);
   });
 
-  it('safely handles 0 games played without NaN or division by zero in advanced stats', () => {
+  it('safely handles 0 games played by returning null for averages and rates without fabricating 0', () => {
     const source = {
       ...details,
       recentMatches: [
@@ -418,8 +419,87 @@ describe('player mappers', () => {
     };
     const model = mapPlayerProfile(source, metrics, upcoming);
     expect(model.advancedStats.games_played).toBe(0);
-    expect(model.advancedStats.avg_real_points).toBe(0);
-    expect(model.advancedStats.avg_pir).toBe(0);
-    expect(model.advancedStats.pts_per_40).toBe(0);
+    expect(model.advancedStats.avg_real_points).toBeNull();
+    expect(model.advancedStats.avg_pir).toBeNull();
+    expect(model.advancedStats.pts_per_40).toBeNull();
+    expect(model.advancedStats.season_avg).toBeNull();
+  });
+
+  describe('buildAdvancedStats coverage and null propagation', () => {
+    const baseMatch = {
+      round_id: 1,
+      round_name: 'Round 1',
+      match_date: '2025-10-10',
+      home_team: 'Home',
+      home_img: '/h.png',
+      away_team: 'Away',
+      away_img: '/a.png',
+      home_id: 1,
+      away_id: 2,
+      home_score: 80,
+      away_score: 75,
+      fantasy_points: 15,
+      minutes_played: 20,
+      points_scored: 10,
+      rebounds: 5,
+      assists: 4,
+      steals: 2,
+      blocks: 1,
+      turnovers: 2,
+      two_points_made: 3,
+      two_points_attempted: 5,
+      three_points_made: 1,
+      three_points_attempted: 3,
+      free_throws_made: 1,
+      free_throws_attempted: 2,
+      fouls_committed: 2,
+      valuation: 12,
+      is_dnp: false,
+    };
+
+    it('computes complete stats accurately when all metrics are present', () => {
+      const match2 = {
+        ...baseMatch,
+        round_id: 2,
+        points_scored: 20,
+        assists: 6,
+        turnovers: 1,
+        valuation: 18,
+      };
+      const stats = buildAdvancedStats([baseMatch, match2], 15, 20, 10);
+      expect(stats.games_played).toBe(2);
+      expect(stats.points_scored).toBe(30);
+      expect(stats.avg_real_points).toBe(15);
+      expect(stats.assists).toBe(10);
+      expect(stats.turnovers).toBe(3);
+      expect(stats.ast_to_ratio).toBe(3.33); // 10 / 3
+      expect(stats.avg_pir).toBe(15);
+      expect(stats.best_real_points).toBe(20);
+      expect(stats.worst_real_points).toBe(10);
+    });
+
+    it('propagates null when a sporting metric has incomplete coverage across played matches', () => {
+      const matchWithMissingAssists = { ...baseMatch, round_id: 2, assists: null, turnovers: 2 };
+      const stats = buildAdvancedStats([baseMatch, matchWithMissingAssists], 15, 10, 10);
+      expect(stats.games_played).toBe(2);
+      expect(stats.assists).toBeNull();
+      expect(stats.ast_to_ratio).toBeNull();
+      // Other complete metrics remain computed
+      expect(stats.turnovers).toBe(4);
+      expect(stats.points_scored).toBe(20);
+    });
+
+    it('returns null for ast_to_ratio when turnovers is 0 rather than dividing by zero', () => {
+      const matchNoTurnovers = { ...baseMatch, turnovers: 0 };
+      const stats = buildAdvancedStats([matchNoTurnovers], 10, 10, 10);
+      expect(stats.turnovers).toBe(0);
+      expect(stats.ast_to_ratio).toBeNull();
+    });
+
+    it('returns null for pts_per_40 when minutes_played is 0 or null', () => {
+      const matchZeroMin = { ...baseMatch, minutes_played: 0, points_scored: 0 };
+      const stats = buildAdvancedStats([matchZeroMin], 0, 0, 0);
+      expect(stats.pts_per_40).toBeNull();
+    });
   });
 });

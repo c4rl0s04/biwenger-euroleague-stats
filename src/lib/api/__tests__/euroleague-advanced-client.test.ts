@@ -103,11 +103,11 @@ describe('EuroleagueClient contracts', () => {
       expect(parseMinutes('CDNP')).toEqual({ raw: 'CDNP', seconds: null, isDnp: true });
     });
 
-    it('returns nulls for absent or empty minutes without marking DNP', () => {
-      expect(parseMinutes(null)).toEqual({ raw: null, seconds: null, isDnp: false });
-      expect(parseMinutes(undefined)).toEqual({ raw: null, seconds: null, isDnp: false });
-      expect(parseMinutes('')).toEqual({ raw: null, seconds: null, isDnp: false });
-      expect(parseMinutes('   ')).toEqual({ raw: null, seconds: null, isDnp: false });
+    it('returns nulls for absent or empty minutes with isDnp as null', () => {
+      expect(parseMinutes(null)).toEqual({ raw: null, seconds: null, isDnp: null });
+      expect(parseMinutes(undefined)).toEqual({ raw: null, seconds: null, isDnp: null });
+      expect(parseMinutes('')).toEqual({ raw: null, seconds: null, isDnp: null });
+      expect(parseMinutes('   ')).toEqual({ raw: null, seconds: null, isDnp: null });
     });
 
     it('throws error for malformed minutes strings', () => {

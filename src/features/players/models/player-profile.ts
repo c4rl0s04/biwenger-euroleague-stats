@@ -65,29 +65,29 @@ export interface PlayerUpcomingMatchViewModel {
 }
 
 export interface PlayerAdvancedStatsViewModel {
-  two_points_made: number;
-  two_points_attempted: number;
-  three_points_made: number;
-  three_points_attempted: number;
-  free_throws_made: number;
-  free_throws_attempted: number;
-  blocks: number;
-  turnovers: number;
-  fouls: number;
-  rebounds: number;
-  assists: number;
-  steals: number;
-  minutes_played: number;
-  points_scored: number;
-  valuation: number;
+  two_points_made: number | null;
+  two_points_attempted: number | null;
+  three_points_made: number | null;
+  three_points_attempted: number | null;
+  free_throws_made: number | null;
+  free_throws_attempted: number | null;
+  blocks: number | null;
+  turnovers: number | null;
+  fouls: number | null;
+  rebounds: number | null;
+  assists: number | null;
+  steals: number | null;
+  minutes_played: number | null;
+  points_scored: number | null;
+  valuation: number | null;
   games_played: number;
-  season_avg: number;
-  best_real_points: number;
-  worst_real_points: number;
-  avg_real_points: number;
-  avg_pir: number;
-  ast_to_ratio: number;
-  pts_per_40: number;
+  season_avg: number | null;
+  best_real_points: number | null;
+  worst_real_points: number | null;
+  avg_real_points: number | null;
+  avg_pir: number | null;
+  ast_to_ratio: number | null;
+  pts_per_40: number | null;
 }
 
 export interface PlayerProfileViewModel {

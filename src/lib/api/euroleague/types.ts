@@ -87,7 +87,7 @@ export interface EuroleaguePlayerBoxScore {
   dorsal: string | null;
   minutes: string | null;
   minutesSeconds: number | null;
-  isDnp: boolean;
+  isDnp: boolean | null;
   points: number | null;
   twoPointsMade: number | null;
   twoPointsAttempted: number | null;

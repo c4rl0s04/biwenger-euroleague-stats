@@ -67,15 +67,24 @@ export default function ExpandedPlayerModal({ player, onClose }) {
 
   // Compute Shooting %
   const adv = details?.advancedStats || {};
-  const t2pct = adv.two_points_attempted
-    ? Math.round((adv.two_points_made / adv.two_points_attempted) * 100)
-    : 0;
-  const t3pct = adv.three_points_attempted
-    ? Math.round((adv.three_points_made / adv.three_points_attempted) * 100)
-    : 0;
-  const ftpct = adv.free_throws_attempted
-    ? Math.round((adv.free_throws_made / adv.free_throws_attempted) * 100)
-    : 0;
+  const t2pct =
+    adv.two_points_made != null && adv.two_points_attempted != null
+      ? adv.two_points_attempted > 0
+        ? Math.round((adv.two_points_made / adv.two_points_attempted) * 100)
+        : 0
+      : null;
+  const t3pct =
+    adv.three_points_made != null && adv.three_points_attempted != null
+      ? adv.three_points_attempted > 0
+        ? Math.round((adv.three_points_made / adv.three_points_attempted) * 100)
+        : 0
+      : null;
+  const ftpct =
+    adv.free_throws_made != null && adv.free_throws_attempted != null
+      ? adv.free_throws_attempted > 0
+        ? Math.round((adv.free_throws_made / adv.free_throws_attempted) * 100)
+        : 0
+      : null;
 
   // Compute Team Form
   const teamFormMatches = (details?.recentMatches || [])
@@ -372,11 +381,11 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-sky-400/80 rounded-full"
-                          style={{ width: `${t2pct}%` }}
+                          style={{ width: `${t2pct != null ? t2pct : 0}%` }}
                         ></div>
                       </div>
                       <span className="text-xl font-medium text-white w-12 text-right tabular-nums tracking-tight">
-                        {t2pct}%
+                        {t2pct != null ? `${t2pct}%` : '—'}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -386,11 +395,11 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-indigo-400/80 rounded-full"
-                          style={{ width: `${t3pct}%` }}
+                          style={{ width: `${t3pct != null ? t3pct : 0}%` }}
                         ></div>
                       </div>
                       <span className="text-xl font-medium text-white w-12 text-right tabular-nums tracking-tight">
-                        {t3pct}%
+                        {t3pct != null ? `${t3pct}%` : '—'}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -400,11 +409,11 @@ export default function ExpandedPlayerModal({ player, onClose }) {
                       <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-400/80 rounded-full"
-                          style={{ width: `${ftpct}%` }}
+                          style={{ width: `${ftpct != null ? ftpct : 0}%` }}
                         ></div>
                       </div>
                       <span className="text-xl font-medium text-white w-12 text-right tabular-nums tracking-tight">
-                        {ftpct}%
+                        {ftpct != null ? `${ftpct}%` : '—'}
                       </span>
                     </div>
                   </div>

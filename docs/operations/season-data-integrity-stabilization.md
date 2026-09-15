@@ -99,20 +99,27 @@ The multi-season model separates global identities (`players`, `teams`, `users`)
 When upgrading existing environments to schema migrations 0014 and 0015:
 
 ```text
-[Existing DB: 0001 - 0013]
+[Starting State: 0013 Baseline Database]
          │
          ▼
-[Verify Pre-Drop Data Integrity: player_seasons & team_seasons backfilled]
+[Step 1: Pre-Migration Backup (pg_dump)]
          │
          ▼
-[Apply Migration 0014: drop deprecated seasonal columns from players & teams]
+[Step 2: Canonical Backfill (if needed): npm run db:season:backfill-2025]
          │
          ▼
-[Apply Migration 0015: add DNP, official game provenance & match venues]
+[Step 3: Pre-0014 Hard Safety Check: npm run db:pre0014:check]
          │
          ▼
-[Validate Schema Readiness: npm run db:schema:validate]
+[Step 4: Apply Migrations 0014 & 0015: npm run db:migrate]
+         │
+         ▼
+[Step 5: Validate Schema Readiness: npm run db:schema:validate]
 ```
+
+### Starting State Precondition
+
+The database must be migrated through `0013_careful_doctor_strange.sql`. All seasonal tables (`player_seasons`, `team_seasons`, `user_seasons`) exist, and deprecated seasonal columns (`players.puntos`, `teams.city`, etc.) are still present.
 
 ### Step 1: Pre-Migration Backup
 
@@ -122,33 +129,31 @@ Before running schema migrations:
 pg_dump -Fc --no-acl --no-owner "$DATABASE_URL" > "backup_pre_0014_$(date +%Y%m%d_%H%M%S).dump"
 ```
 
-### Step 2: Apply Migrations Through 0013
+### Step 2: Canonical Data Backfill
 
-Ensure schema lifecycle and seasonal tables are present:
+If unmigrated records exist or seasonal tables are empty, execute the canonical, idempotent backfill procedure:
 
 ```bash
-npm run db:migrate
+npm run db:season:backfill-2025
 ```
 
-### Step 3: Verify Data Backfill Completeness
+This populates all 14 seasonal player fields into `player_seasons` and all 4 seasonal team fields into `team_seasons`. It is safe to run multiple times (idempotent: $A = B$).
 
-Execute this verification query before dropping columns:
+### Step 3: Verify Pre-0014 Safety Check
 
-```sql
--- Ensure all players have current season player_seasons entries
-SELECT count(*) AS unmigrated_players
-FROM players p
-LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = (SELECT id FROM seasons WHERE status = 'active' LIMIT 1)
-WHERE ps.player_id IS NULL;
+Execute the automated hard safety check before dropping columns:
 
--- Ensure all teams have current season team_seasons entries
-SELECT count(*) AS unmigrated_teams
-FROM teams t
-LEFT JOIN team_seasons ts ON ts.team_id = t.id AND ts.season_id = (SELECT id FROM seasons WHERE status = 'active' LIMIT 1)
-WHERE ts.team_id IS NULL;
+```bash
+npm run db:pre0014:check
 ```
 
-Both counts must be `0` before proceeding to Step 4.
+This CLI verifies that:
+
+1. Every player in `players` has a matching record in `player_seasons` for the active season.
+2. Every team in `teams` has a matching record in `team_seasons` for the active season.
+3. No data discrepancies exist between source and seasonal destination records.
+
+The command returns exit code `0` when safe to proceed, or exits non-zero with error details.
 
 ### Step 4: Apply Migrations 0014 and 0015
 
@@ -160,7 +165,7 @@ npm run db:migrate
 
 This applies:
 
-- `drizzle/0014_drop_deprecated_seasonal_columns.sql`: drops deprecated columns (`position`, `puntos`, `partidos_jugados`, `price`, `team_id`, `status`, `price_increment`, `played_home`, `played_away`, `points_home`, `points_away`, `points_last_season`, `owner_id`, `dorsal` on `players`; `city`, `arena_name`, `latitude`, `longitude` on `teams`).
+- `drizzle/0014_drop_deprecated_seasonal_columns.sql`: drops all 18 deprecated columns (`position`, `puntos`, `partidos_jugados`, `price`, `team_id`, `status`, `price_increment`, `played_home`, `played_away`, `points_home`, `points_away`, `points_last_season`, `owner_id`, `dorsal` on `players`; `city`, `arena_name`, `latitude`, `longitude` on `teams`).
 - `drizzle/0015_dnp_provenance_and_match_venues.sql`: adds `arena_code`, `arena_name`, `arena_capacity` to `matches`, and `is_dnp`, `official_game_code` to `player_round_stats`.
 
 ### Step 5: Verify Schema Readiness
@@ -177,7 +182,7 @@ npm run db:schema:validate
 
 ### 4.1 Automated Upgrade Rehearsal
 
-The migration sequence from baseline through 0013, the population of deprecated seasonal columns, the data backfill into `player_seasons` and `team_seasons`, and the destructive column drop in 0014 and additions in 0015 are verified end-to-end via:
+The migration sequence from baseline through 0013, the population of all 18 deprecated seasonal columns with distinct non-default values, the canonical data backfill into `player_seasons` and `team_seasons`, the verification of backfill idempotency ($A = B$), the destructive column drop in 0014, additions in 0015, and tri-state DNP semantics are verified end-to-end via:
 
 ```bash
 npm run test:e2e:local
@@ -185,11 +190,13 @@ npm run test:e2e:local
 
 This automated rehearsal (`scripts/e2e/season-upgrade-integrity.ts`) runs against real disposable PostgreSQL and proves that:
 
-1. Deprecated columns exist and hold data at 0013.
-2. Backfilled data in `player_seasons` and `team_seasons` is completely preserved.
-3. Migration 0014 drops all 18 deprecated columns cleanly without foreign key or dependency errors.
-4. Migration 0015 adds venue and DNP columns cleanly.
-5. `validateSchemaReady` passes on the upgraded schema.
+1. All 18 deprecated columns exist and hold data at 0013.
+2. The canonical backfill procedure copies all 18 columns accurately to destination tables.
+3. Repeated execution of the canonical backfill is strictly idempotent ($A = B$, unchanged row counts).
+4. Migration 0014 drops all 18 deprecated columns cleanly without foreign key or dependency errors.
+5. All 18 backfilled values survive intact post-drop.
+6. Migration 0015 adds venue and DNP columns cleanly.
+7. `validateSchemaReady` passes on the upgraded schema.
 
 ### 4.2 2025-26 Live Production Status
 

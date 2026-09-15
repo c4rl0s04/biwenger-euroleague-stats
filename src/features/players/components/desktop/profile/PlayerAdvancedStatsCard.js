@@ -27,15 +27,17 @@ const ShootingBar = ({ label, pct, made, att, colorClass, barColorClass }) => (
       </span>
       <div className="flex items-center gap-2">
         <span className="text-[10px] text-white/80">
-          {made}/{att}
+          {made != null && att != null ? `${made}/${att}` : '—'}
         </span>
-        <span className={`text-base font-black ${colorClass}`}>{pct}%</span>
+        <span className={`text-base font-black ${colorClass}`}>
+          {pct != null ? `${pct}%` : '—'}
+        </span>
       </div>
     </div>
     <div className="h-1.5 bg-black/40 rounded-full overflow-hidden shadow-inner border border-white/5">
       <div
         className={`h-full rounded-full transition-all duration-1000 ${barColorClass}`}
-        style={{ width: `${pct}%` }}
+        style={{ width: `${pct != null ? pct : 0}%` }}
       />
     </div>
   </div>
@@ -58,11 +60,13 @@ const StatBox = ({
     </div>
     <div className="flex items-end justify-between mt-auto">
       <div className="flex flex-col">
-        <span className="text-2xl font-black text-white leading-none">{total}</span>
+        <span className="text-2xl font-black text-white leading-none">
+          {total != null ? total : '—'}
+        </span>
         <span className="text-[9px] text-white/80 uppercase tracking-widest mt-1">{subLabel}</span>
       </div>
       <div className="flex flex-col text-right">
-        <span className="text-lg font-bold text-white leading-none">{avg}</span>
+        <span className="text-lg font-bold text-white leading-none">{avg != null ? avg : '—'}</span>
         <span className="text-[9px] text-white/80 uppercase tracking-widest mt-1">{avgLabel}</span>
       </div>
     </div>
@@ -73,23 +77,28 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
   if (!advancedStats) return null;
   const s = advancedStats;
 
-  // Games played check to prevent division by zero
-  const gp = Math.max(s.games_played || 1, 1);
-
   // Calculate percentages safely
-  const calcPct = (made, att) => (att > 0 ? Math.round((made / att) * 100) : 0);
+  const calcPct = (made, att) => {
+    if (made == null || att == null) return null;
+    return att > 0 ? Math.round((made / att) * 100) : 0;
+  };
 
   const pct2 = calcPct(s.two_points_made, s.two_points_attempted);
   const pct3 = calcPct(s.three_points_made, s.three_points_attempted);
   const pctFT = calcPct(s.free_throws_made, s.free_throws_attempted);
 
   // Averages
-  const avgReb = (s.rebounds / gp).toFixed(1);
-  const avgAst = (s.assists / gp).toFixed(1);
-  const avgStl = (s.steals / gp).toFixed(1);
-  const avgBlk = (s.blocks / gp).toFixed(1);
-  const avgTO = (s.turnovers / gp).toFixed(1);
-  const avgMin = (s.minutes_played / gp).toFixed(1);
+  const formatAvg = (val) => {
+    if (val == null || !s.games_played) return '—';
+    return (val / s.games_played).toFixed(1);
+  };
+
+  const avgReb = formatAvg(s.rebounds);
+  const avgAst = formatAvg(s.assists);
+  const avgStl = formatAvg(s.steals);
+  const avgBlk = formatAvg(s.blocks);
+  const avgTO = formatAvg(s.turnovers);
+  const avgMin = formatAvg(s.minutes_played);
 
   return (
     <ElegantCard
@@ -109,7 +118,7 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
                 Media Puntos
               </span>
               <span className="text-2xl font-black text-white tracking-tighter">
-                {s.avg_real_points || '0.0'}
+                {s.avg_real_points != null ? s.avg_real_points : '—'}
               </span>
             </div>
 
@@ -118,7 +127,9 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
               <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400 mb-1">
                 Máximo Puntos
               </span>
-              <span className="text-2xl font-black text-white">{s.best_real_points || 0}</span>
+              <span className="text-2xl font-black text-white">
+                {s.best_real_points != null ? s.best_real_points : '—'}
+              </span>
             </div>
 
             {/* MIN */}
@@ -126,7 +137,9 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
               <span className="text-[9px] font-black uppercase tracking-widest text-rose-400 mb-1">
                 Mínimo Puntos
               </span>
-              <span className="text-2xl font-black text-white">{s.worst_real_points || 0}</span>
+              <span className="text-2xl font-black text-white">
+                {s.worst_real_points != null ? s.worst_real_points : '—'}
+              </span>
             </div>
           </div>
 
@@ -244,7 +257,7 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
               <div className="flex items-end justify-between mt-auto">
                 <div className="flex flex-col">
                   <span className="text-2xl font-black text-white leading-none">
-                    {s.minutes_played}
+                    {s.minutes_played != null ? s.minutes_played : '—'}
                   </span>
                   <span className="text-[9px] text-teal-200 uppercase tracking-widest mt-1">
                     Total
@@ -267,9 +280,7 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
                 <span className="text-[10px] text-white/40 font-black tracking-widest uppercase mb-1">
                   Partidos Jugados
                 </span>
-                <span className="text-xl font-black text-white">
-                  {s.games_played} / {gp}
-                </span>
+                <span className="text-xl font-black text-white">{s.games_played ?? 0}</span>
               </div>
               <Target className="w-5 h-5 text-white/10 group-hover:text-indigo-400/40 transition-colors" />
             </div>
@@ -279,7 +290,9 @@ export default function PlayerAdvancedStatsCard({ advancedStats, className = '' 
                 <span className="text-[10px] text-white/40 font-black tracking-widest uppercase mb-1">
                   Faltas Cometidas
                 </span>
-                <span className="text-xl font-black text-white">{s.fouls}</span>
+                <span className="text-xl font-black text-white">
+                  {s.fouls != null ? s.fouls : '—'}
+                </span>
               </div>
               <AlertCircle className="w-5 h-5 text-white/10 group-hover:text-orange-400/40 transition-colors" />
             </div>

@@ -23,6 +23,8 @@
     "test:e2e": "playwright test",
     "db:migrate": "tsx -r dotenv/config scripts/dev/migrate.ts",
     "db:schema:validate": "tsx -r dotenv/config scripts/dev/validate-schema.ts",
+    "db:pre0014:check": "tsx -r dotenv/config scripts/dev/pre0014-season-check.ts",
+    "db:season:backfill-2025": "tsx -r dotenv/config scripts/season-model/backfill-2025-26.ts",
     "db:studio": "drizzle-kit studio",
     "db:audit:schema": "tsx -r dotenv/config scripts/dev/audit-schema.ts",
     "db:audit:schema:metadata": "tsx -r dotenv/config scripts/dev/audit-schema.ts --metadata-only",

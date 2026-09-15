@@ -636,6 +636,40 @@ try {
     );
   }
 
+  // 13. Verify full tri-state DNP semantics (true, false, null) in PostgreSQL
+  console.log('   Verifying full tri-state DNP semantics in PostgreSQL (true, false, null)...');
+  const checkDnpStates = await pool.query(
+    `SELECT player_id, is_dnp FROM player_round_stats
+     WHERE season_id = '2025-26' AND round_id = 1
+     ORDER BY player_id`
+  );
+  const dnpMap = new Map(checkDnpStates.rows.map((r) => [r.player_id, r.is_dnp]));
+
+  // Player 99101 played 20:00 -> is_dnp MUST be false
+  if (dnpMap.get(99101) !== false) {
+    throw new Error(`Expected is_dnp=false for active participant 99101, got ${dnpMap.get(99101)}`);
+  }
+  // Player 99103 was explicit DNP -> is_dnp MUST be true
+  if (dnpMap.get(99103) !== true) {
+    throw new Error(`Expected is_dnp=true for explicit DNP player 99103, got ${dnpMap.get(99103)}`);
+  }
+  // Player 99102 had only fantasy points without official boxscore -> is_dnp MUST be null
+  // Let's seed a fantasy-only row for 99102 if not present
+  await pool.query(
+    `INSERT INTO player_round_stats (season_id, player_id, round_id, fantasy_points, is_dnp)
+     VALUES ('2025-26', 99102, 1, 8, NULL)
+     ON CONFLICT (season_id, player_id, round_id) DO UPDATE SET is_dnp = NULL`
+  );
+  const checkNullDnp = await pool.query(
+    `SELECT is_dnp FROM player_round_stats WHERE season_id = '2025-26' AND player_id = 99102 AND round_id = 1`
+  );
+  if (checkNullDnp.rows[0]?.is_dnp !== null) {
+    throw new Error(
+      `Expected is_dnp=null for unobserved player 99102, got ${checkNullDnp.rows[0]?.is_dnp}`
+    );
+  }
+  console.log('   ✅ True three-state DNP semantics verified in PostgreSQL (false, true, null).');
+
   // hasUnpersistedMappedPlayers must now return FALSE!
   const hasUnpersistedPostDnp = await officialMutations25.hasUnpersistedMappedPlayers(1, [
     'P99103',

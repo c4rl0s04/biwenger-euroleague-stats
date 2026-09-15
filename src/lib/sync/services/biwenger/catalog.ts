@@ -86,6 +86,17 @@ export function normalizeBiwengerPlayer(
   };
 
   const id = typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10);
+  if (!id || !Number.isFinite(id) || id <= 0) {
+    throw new Error(`Invalid player id: ${JSON.stringify(rawId)}`);
+  }
+  if (!raw || typeof raw !== 'object') {
+    throw new Error(`Invalid player raw payload for player ${id}`);
+  }
+  const name = typeof raw.name === 'string' ? raw.name.trim() : '';
+  if (!name) {
+    throw new Error(`Missing required player name for player ${id}`);
+  }
+
   const playedHome = parseNum(raw.playedHome);
   const playedAway = parseNum(raw.playedAway);
   let gamesPlayed: number | null = null;
@@ -97,9 +108,9 @@ export function normalizeBiwengerPlayer(
 
   return {
     id,
-    name: String(raw.name || ''),
+    name,
     teamId: parseNum(raw.teamID ?? raw.team_id),
-    position: rawPos || 'Unknown',
+    position: rawPos != null && rawPos.trim() !== '' ? rawPos.trim() : null,
     points: parseNum(raw.points),
     pointsHome: parseNum(raw.pointsHome),
     pointsAway: parseNum(raw.pointsAway),
@@ -107,7 +118,8 @@ export function normalizeBiwengerPlayer(
     playedAway,
     gamesPlayed,
     pointsLastSeason: parseNum(raw.pointsLastSeason),
-    status: raw.status != null ? String(raw.status) : 'ok',
+    status:
+      raw.status != null && String(raw.status).trim() !== '' ? String(raw.status).trim() : null,
     priceIncrement: parseNum(raw.priceIncrement),
     price: parseNum(raw.price),
     img: raw.img ? String(raw.img) : null,

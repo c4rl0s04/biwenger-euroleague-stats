@@ -233,72 +233,93 @@ function mapRecentMatch(row: PlayerMatchRow): PlayerProfileMatchViewModel {
   };
 }
 
-function buildAdvancedStats(
-  matches: PlayerProfileMatchViewModel[],
-  seasonAverage: number,
-  bestRealPoints: number,
-  worstRealPoints: number
-): PlayerAdvancedStatsViewModel {
-  const totals = matches.reduce(
-    (stats, match) => {
-      const isPlayed =
-        match.is_dnp === false ||
-        (match.is_dnp == null && match.minutes_played != null && match.minutes_played > 0);
-      return {
-        ...stats,
-        two_points_made: stats.two_points_made + (match.two_points_made ?? 0),
-        two_points_attempted: stats.two_points_attempted + (match.two_points_attempted ?? 0),
-        three_points_made: stats.three_points_made + (match.three_points_made ?? 0),
-        three_points_attempted: stats.three_points_attempted + (match.three_points_attempted ?? 0),
-        free_throws_made: stats.free_throws_made + (match.free_throws_made ?? 0),
-        free_throws_attempted: stats.free_throws_attempted + (match.free_throws_attempted ?? 0),
-        blocks: stats.blocks + (match.blocks ?? 0),
-        turnovers: stats.turnovers + (match.turnovers ?? 0),
-        fouls: stats.fouls + (match.fouls_committed ?? 0),
-        rebounds: stats.rebounds + (match.rebounds ?? 0),
-        assists: stats.assists + (match.assists ?? 0),
-        steals: stats.steals + (match.steals ?? 0),
-        minutes_played: stats.minutes_played + (match.minutes_played ?? 0),
-        points_scored: stats.points_scored + (match.points_scored ?? 0),
-        valuation: stats.valuation + (match.valuation ?? 0),
-        games_played: stats.games_played + (isPlayed ? 1 : 0),
-      };
-    },
-    {
-      two_points_made: 0,
-      two_points_attempted: 0,
-      three_points_made: 0,
-      three_points_attempted: 0,
-      free_throws_made: 0,
-      free_throws_attempted: 0,
-      blocks: 0,
-      turnovers: 0,
-      fouls: 0,
-      rebounds: 0,
-      assists: 0,
-      steals: 0,
-      minutes_played: 0,
-      points_scored: 0,
-      valuation: 0,
-      games_played: 0,
+function sumMetric(
+  playedMatches: PlayerProfileMatchViewModel[],
+  accessor: (m: PlayerProfileMatchViewModel) => number | null | undefined
+): number | null {
+  if (playedMatches.length === 0) return null;
+  let total = 0;
+  for (const match of playedMatches) {
+    const val = accessor(match);
+    if (val == null || !Number.isFinite(val)) {
+      return null;
     }
+    total += val;
+  }
+  return total;
+}
+
+export function buildAdvancedStats(
+  matches: PlayerProfileMatchViewModel[],
+  seasonAverage: number | null,
+  bestRealPoints: number | null,
+  worstRealPoints: number | null
+): PlayerAdvancedStatsViewModel {
+  const playedMatches = matches.filter(
+    (match) =>
+      match.is_dnp === false ||
+      (match.is_dnp == null && match.minutes_played != null && match.minutes_played > 0)
   );
-  const games = totals.games_played;
+  const gamesPlayed = playedMatches.length;
+
+  const twoPointsMade = sumMetric(playedMatches, (m) => m.two_points_made);
+  const twoPointsAttempted = sumMetric(playedMatches, (m) => m.two_points_attempted);
+  const threePointsMade = sumMetric(playedMatches, (m) => m.three_points_made);
+  const threePointsAttempted = sumMetric(playedMatches, (m) => m.three_points_attempted);
+  const freeThrowsMade = sumMetric(playedMatches, (m) => m.free_throws_made);
+  const freeThrowsAttempted = sumMetric(playedMatches, (m) => m.free_throws_attempted);
+  const blocks = sumMetric(playedMatches, (m) => m.blocks);
+  const turnovers = sumMetric(playedMatches, (m) => m.turnovers);
+  const fouls = sumMetric(playedMatches, (m) => m.fouls_committed);
+  const rebounds = sumMetric(playedMatches, (m) => m.rebounds);
+  const assists = sumMetric(playedMatches, (m) => m.assists);
+  const steals = sumMetric(playedMatches, (m) => m.steals);
+  const minutesPlayed = sumMetric(playedMatches, (m) => m.minutes_played);
+  const pointsScored = sumMetric(playedMatches, (m) => m.points_scored);
+  const valuation = sumMetric(playedMatches, (m) => m.valuation);
+
+  const avgRealPoints =
+    gamesPlayed > 0 && pointsScored != null
+      ? Number((pointsScored / gamesPlayed).toFixed(1))
+      : null;
+
+  const avgPir =
+    gamesPlayed > 0 && valuation != null ? Number((valuation / gamesPlayed).toFixed(1)) : null;
+
+  const astToRatio =
+    assists != null && turnovers != null && turnovers > 0
+      ? Number((assists / turnovers).toFixed(2))
+      : null;
+
+  const ptsPer40 =
+    pointsScored != null && minutesPlayed != null && minutesPlayed > 0
+      ? Number(((pointsScored / minutesPlayed) * 40).toFixed(1))
+      : null;
+
   return {
-    ...totals,
-    season_avg: seasonAverage,
-    best_real_points: bestRealPoints,
-    worst_real_points: worstRealPoints,
-    avg_real_points: games > 0 ? Number((totals.points_scored / games).toFixed(1)) : 0,
-    avg_pir: games > 0 ? Number((totals.valuation / games).toFixed(1)) : 0,
-    ast_to_ratio:
-      totals.turnovers > 0
-        ? Number((totals.assists / totals.turnovers).toFixed(2))
-        : totals.assists,
-    pts_per_40:
-      totals.minutes_played > 0
-        ? Number(((totals.points_scored / totals.minutes_played) * 40).toFixed(1))
-        : 0,
+    two_points_made: twoPointsMade,
+    two_points_attempted: twoPointsAttempted,
+    three_points_made: threePointsMade,
+    three_points_attempted: threePointsAttempted,
+    free_throws_made: freeThrowsMade,
+    free_throws_attempted: freeThrowsAttempted,
+    blocks,
+    turnovers,
+    fouls,
+    rebounds,
+    assists,
+    steals,
+    minutes_played: minutesPlayed,
+    points_scored: pointsScored,
+    valuation,
+    games_played: gamesPlayed,
+    season_avg: gamesPlayed > 0 && seasonAverage != null ? seasonAverage : null,
+    best_real_points: gamesPlayed > 0 && bestRealPoints != null ? bestRealPoints : null,
+    worst_real_points: gamesPlayed > 0 && worstRealPoints != null ? worstRealPoints : null,
+    avg_real_points: avgRealPoints,
+    avg_pir: avgPir,
+    ast_to_ratio: astToRatio,
+    pts_per_40: ptsPer40,
   };
 }
 

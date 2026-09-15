@@ -83,10 +83,10 @@ Proposed services: getPlayerRoundStats({playerId, seasonId}), getPlayerGameStats
 
 - Nullable provider DTO metrics; validated minutes parsing; preserve absent fields through adapters and writes.
 - Exact seconds retained in canonical duration storage; mark legacy resolution without asserting rounding direction.
-- Coverage-aware aggregators, including incomplete mappings and multiple games per round.
+- Coverage-aware aggregators and direct round writes into `player_round_stats` without an intermediate player-game table, enforcing the one-match-per-team-per-round invariant.
 - Null-preserving query/mapping/model contracts and explicit display handling. This is a deliberate behavior correction, not a structural-only refactor.
 - No global seasonal fallback and no silent GREATEST-based replacement of authoritative corrections.
-- Tests: observed zero vs missing vs invalid; DNP vs missing; signed metrics; exact and legacy duration; multiple games; partial fields; missing mapping; late provider correction; 2025-26 unavailable advanced stats; two-season cache isolation; unchanged authorization.
+- Tests: observed zero vs missing vs invalid; DNP vs missing; signed metrics; exact and legacy duration; one match per round invariant; partial fields; missing mapping; late provider correction; 2025-26 unavailable advanced stats; two-season cache isolation; unchanged authorization.
 
 ## Outstanding investigation
 
