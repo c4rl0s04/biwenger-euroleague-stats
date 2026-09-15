@@ -4,18 +4,7 @@ import { CredentialError, credentialErrorCode, type CredentialErrorCode } from '
 import { decryptCredential, encryptCredential } from './crypto';
 import type { CredentialEnvelope, CredentialKeyring, StoredCredential } from './types';
 
-export interface LegacyCredentialCandidate {
-  userId: string;
-  plaintext: string;
-}
-
 export interface CredentialMaintenanceRepository {
-  listLegacy(afterUserId: string | undefined, limit: number): Promise<LegacyCredentialCandidate[]>;
-  findEncrypted(userId: string): Promise<StoredCredential | null>;
-  storeMigrated(
-    userId: string,
-    envelope: CredentialEnvelope
-  ): Promise<'created' | 'already_exists'>;
   listForRotation(
     activeKeyId: string,
     afterUserId: string | undefined,
@@ -25,15 +14,6 @@ export interface CredentialMaintenanceRepository {
 }
 
 type MaintenanceFailureCategory = CredentialErrorCode | 'unexpected_error';
-
-export interface MigrationResult {
-  scanned: number;
-  migrated: number;
-  wouldMigrate: number;
-  alreadyVerified: number;
-  failed: number;
-  failures: Partial<Record<MaintenanceFailureCategory, number>>;
-}
 
 export interface RotationResult {
   scanned: number;
@@ -74,69 +54,6 @@ function verifyMatches(
   if (decryptCredential(envelope, userId, keyring) !== expected) {
     throw new CredentialError('credential_integrity_failure');
   }
-}
-
-export async function migrateLegacyCredentials({
-  repository,
-  keyring,
-  dryRun,
-  batchSize = 100,
-}: MaintenanceOptions): Promise<MigrationResult> {
-  assertBatchSize(batchSize);
-  const result: MigrationResult = {
-    scanned: 0,
-    migrated: 0,
-    wouldMigrate: 0,
-    alreadyVerified: 0,
-    failed: 0,
-    failures: {},
-  };
-  let afterUserId: string | undefined;
-
-  while (true) {
-    const batch = await repository.listLegacy(afterUserId, batchSize);
-    if (batch.length === 0) break;
-
-    for (const candidate of batch) {
-      result.scanned += 1;
-      afterUserId = candidate.userId;
-
-      try {
-        const current = await repository.findEncrypted(candidate.userId);
-        if (current) {
-          verifyMatches(current, candidate.userId, candidate.plaintext, keyring);
-          result.alreadyVerified += 1;
-          continue;
-        }
-
-        const envelope = encryptCredential(candidate.plaintext, candidate.userId, keyring);
-        verifyMatches(envelope, candidate.userId, candidate.plaintext, keyring);
-
-        if (dryRun) {
-          result.wouldMigrate += 1;
-          continue;
-        }
-
-        const outcome = await repository.storeMigrated(candidate.userId, envelope);
-        if (outcome === 'created') {
-          result.migrated += 1;
-          continue;
-        }
-
-        const concurrentlyStored = await repository.findEncrypted(candidate.userId);
-        if (!concurrentlyStored) throw new CredentialError('credential_storage_failure');
-        verifyMatches(concurrentlyStored, candidate.userId, candidate.plaintext, keyring);
-        result.alreadyVerified += 1;
-      } catch (error) {
-        result.failed += 1;
-        recordFailure(result.failures, error);
-      }
-    }
-
-    if (batch.length < batchSize) break;
-  }
-
-  return result;
 }
 
 export async function rotateCredentials({

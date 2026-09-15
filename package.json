@@ -34,7 +34,6 @@
     "db:production:apply": "tsx scripts/db/production-readiness.ts apply",
     "db:repair:player-prices": "tsx -r dotenv/config scripts/db/repair-player-prices.ts",
     "credentials:status": "NODE_OPTIONS=--conditions=react-server tsx scripts/dev/biwenger-credential-maintenance.ts status",
-    "credentials:migrate": "NODE_OPTIONS=--conditions=react-server tsx scripts/dev/biwenger-credential-maintenance.ts migrate",
     "credentials:rotate": "NODE_OPTIONS=--conditions=react-server tsx scripts/dev/biwenger-credential-maintenance.ts rotate",
     "analyze": "ANALYZE=true next build --webpack",
     "simulation:run": "NODE_OPTIONS=--conditions=react-server tsx -r dotenv/config scripts/analysis/run-season-simulations.ts",

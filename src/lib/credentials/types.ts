@@ -23,8 +23,6 @@ export interface CredentialKeyring {
 export interface CredentialRecordRepository {
   hasEncrypted(userId: string): Promise<boolean>;
   findEncrypted(userId: string): Promise<StoredCredential | null>;
-  findLegacyPlaintext(userId: string): Promise<string | null>;
-  hasLegacyPlaintext(userId: string): Promise<boolean>;
   replaceCredential(userId: string, envelope: CredentialEnvelope, email?: string): Promise<void>;
   deleteCredential(userId: string): Promise<void>;
 }

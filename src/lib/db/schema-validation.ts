@@ -6,7 +6,13 @@ export type DbClient =
       query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
     };
 
-const REQUIRED_GLOBAL_TABLES = ['users', 'teams', 'players', 'seasons'];
+const REQUIRED_GLOBAL_TABLES = [
+  'users',
+  'teams',
+  'players',
+  'seasons',
+  'user_biwenger_credentials',
+];
 
 const REQUIRED_SEASON_SCOPED_TABLES = [
   'team_seasons',
@@ -93,7 +99,8 @@ export async function validateSchemaReady(db: DbClient) {
     `SELECT table_name, column_name FROM information_schema.columns
      WHERE table_schema = 'public' AND (
        (table_name = 'players' AND column_name = ANY($1::text[])) OR
-       (table_name = 'teams' AND column_name = ANY($2::text[]))
+       (table_name = 'teams' AND column_name = ANY($2::text[])) OR
+       (table_name = 'users' AND column_name = ANY($3::text[]))
      )`,
     [
       [
@@ -113,12 +120,13 @@ export async function validateSchemaReady(db: DbClient) {
         'team_id',
       ],
       ['city', 'arena_name', 'latitude', 'longitude'],
+      ['biwenger_token'],
     ]
   );
   if (droppedColumns.rows.length > 0) {
     const list = droppedColumns.rows.map((r: any) => `${r.table_name}.${r.column_name}`).join(', ');
     throw new Error(
-      `Database schema has deprecated seasonal columns on global tables: ${list}. Apply migration 0014.`
+      `Database schema has deprecated columns on global tables: ${list}. Apply migrations 0014 and 0016.`
     );
   }
 

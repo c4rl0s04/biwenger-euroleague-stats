@@ -9,7 +9,6 @@ import type { CredentialKeyring, CredentialLogger, CredentialRecordRepository } 
 export interface CredentialServiceOptions {
   repository: CredentialRecordRepository;
   getKeyring: () => CredentialKeyring;
-  allowLegacyPlaintextFallback?: boolean;
   logger?: CredentialLogger;
 }
 
@@ -20,17 +19,11 @@ export interface StoreCredentialInput {
 }
 
 export function createBiwengerCredentialService(options: CredentialServiceOptions) {
-  const {
-    repository,
-    getKeyring,
-    allowLegacyPlaintextFallback = false,
-    logger = console,
-  } = options;
+  const { repository, getKeyring } = options;
 
   return {
     async hasCredential(userId: string): Promise<boolean> {
-      if (await repository.hasEncrypted(userId)) return true;
-      return allowLegacyPlaintextFallback && (await repository.hasLegacyPlaintext(userId));
+      return repository.hasEncrypted(userId);
     },
 
     async storeCredential({ userId, credential, email }: StoreCredentialInput): Promise<void> {
@@ -46,24 +39,13 @@ export function createBiwengerCredentialService(options: CredentialServiceOption
 
     async withCredential<T>(
       userId: string,
-      operation: string,
+      _operation: string,
       runWithCredential: (credential: string) => Promise<T>
     ): Promise<T> {
       const encrypted = await repository.findEncrypted(userId);
       if (encrypted) {
         const credential = decryptCredential(encrypted, userId, getKeyring());
         return runWithCredential(credential);
-      }
-
-      if (allowLegacyPlaintextFallback) {
-        const legacyCredential = await repository.findLegacyPlaintext(userId);
-        if (legacyCredential) {
-          logger.warn('Temporary plaintext credential fallback used', {
-            category: 'legacy_credential_fallback',
-            operation,
-          });
-          return runWithCredential(legacyCredential);
-        }
       }
 
       throw new CredentialError('missing_credential');
@@ -78,5 +60,4 @@ export function createBiwengerCredentialService(options: CredentialServiceOption
 export const biwengerCredentials = createBiwengerCredentialService({
   repository: new DrizzleCredentialRepository(),
   getKeyring: getEnvironmentCredentialKeyring,
-  allowLegacyPlaintextFallback: process.env.BIWENGER_CREDENTIAL_PLAINTEXT_FALLBACK === 'true',
 });

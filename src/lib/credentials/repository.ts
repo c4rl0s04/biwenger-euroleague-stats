@@ -1,9 +1,10 @@
 import 'server-only';
 
-import { and, count, eq, isNotNull, ne, sql } from 'drizzle-orm';
+import { and, count, eq, ne, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { userBiwengerCredentials, users } from '@/lib/db/schema';
 import type { CredentialEnvelope, CredentialRecordRepository, StoredCredential } from './types';
+import type { CredentialMaintenanceRepository } from './maintenance';
 
 function toStoredCredential(row: typeof userBiwengerCredentials.$inferSelect): StoredCredential {
   return {
@@ -34,22 +35,6 @@ export class DrizzleCredentialRepository implements CredentialRecordRepository {
     return row ? toStoredCredential(row) : null;
   }
 
-  async findLegacyPlaintext(userId: string): Promise<string | null> {
-    const row = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: { biwengerToken: true },
-    });
-    return row?.biwengerToken ?? null;
-  }
-
-  async hasLegacyPlaintext(userId: string): Promise<boolean> {
-    const row = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: { biwengerToken: true },
-    });
-    return Boolean(row?.biwengerToken);
-  }
-
   async replaceCredential(
     userId: string,
     envelope: CredentialEnvelope,
@@ -64,54 +49,15 @@ export class DrizzleCredentialRepository implements CredentialRecordRepository {
           set: { ...envelope, updatedAt: new Date() },
         });
 
-      await tx
-        .update(users)
-        .set({ biwengerToken: null, ...(email !== undefined ? { email } : {}) })
-        .where(eq(users.id, userId));
+      if (email !== undefined) {
+        await tx.update(users).set({ email }).where(eq(users.id, userId));
+      }
     });
   }
 
   async deleteCredential(userId: string): Promise<void> {
-    await db.transaction(async (tx) => {
-      await tx.delete(userBiwengerCredentials).where(eq(userBiwengerCredentials.userId, userId));
-      await tx.update(users).set({ biwengerToken: null }).where(eq(users.id, userId));
-    });
+    await db.delete(userBiwengerCredentials).where(eq(userBiwengerCredentials.userId, userId));
   }
-}
-
-import type { CredentialMaintenanceRepository, LegacyCredentialCandidate } from './maintenance';
-
-export async function listLegacyCredentialCandidates(
-  afterUserId: string | undefined,
-  limit: number
-): Promise<LegacyCredentialCandidate[]> {
-  const rows = await db
-    .select({ userId: users.id, plaintext: users.biwengerToken })
-    .from(users)
-    .where(
-      and(
-        isNotNull(users.biwengerToken),
-        afterUserId ? sql`${users.id} > ${afterUserId}` : sql`true`
-      )
-    )
-    .orderBy(users.id)
-    .limit(limit);
-
-  return rows.flatMap((row) =>
-    row.plaintext ? [{ userId: row.userId, plaintext: row.plaintext }] : []
-  );
-}
-
-export async function storeMigratedCredential(
-  userId: string,
-  envelope: CredentialEnvelope
-): Promise<'created' | 'already_exists'> {
-  const inserted = await db
-    .insert(userBiwengerCredentials)
-    .values({ userId, ...envelope })
-    .onConflictDoNothing({ target: userBiwengerCredentials.userId })
-    .returning({ userId: userBiwengerCredentials.userId });
-  return inserted.length === 1 ? 'created' : 'already_exists';
 }
 
 export async function listCredentialsForRotation(
@@ -155,20 +101,15 @@ export async function storeRotatedCredential(
 }
 
 export const databaseCredentialMaintenanceRepository: CredentialMaintenanceRepository = {
-  listLegacy: listLegacyCredentialCandidates,
-  findEncrypted: (userId) => new DrizzleCredentialRepository().findEncrypted(userId),
-  storeMigrated: storeMigratedCredential,
   listForRotation: listCredentialsForRotation,
   storeRotated: storeRotatedCredential,
 };
 
 export async function getCredentialStorageStatus(): Promise<{
-  legacyPlaintextRecords: number;
   encryptedRecords: number;
   keyUsage: Array<{ keyId: string; records: number }>;
 }> {
-  const [legacyResult, encryptedResult, keyUsage] = await Promise.all([
-    db.select({ records: count() }).from(users).where(isNotNull(users.biwengerToken)),
+  const [encryptedResult, keyUsage] = await Promise.all([
     db.select({ records: count() }).from(userBiwengerCredentials),
     db
       .select({ keyId: userBiwengerCredentials.keyId, records: count() })
@@ -178,7 +119,6 @@ export async function getCredentialStorageStatus(): Promise<{
   ]);
 
   return {
-    legacyPlaintextRecords: legacyResult[0]?.records ?? 0,
     encryptedRecords: encryptedResult[0]?.records ?? 0,
     keyUsage,
   };

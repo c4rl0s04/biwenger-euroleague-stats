@@ -75,6 +75,7 @@ async function main() {
       'team_seasons',
       'matches',
       'player_round_stats',
+      'user_biwenger_credentials',
     ];
     const modernRes = await disposable.pool.query(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ANY($1::text[])",
@@ -86,10 +87,10 @@ async function main() {
       throw new Error(`Missing modern season tables: ${missingTables.join(', ')}`);
     }
     console.log(
-      '   ✅ Modern season-model tables present (seasons, player_seasons, team_seasons, matches, player_round_stats).'
+      '   ✅ Modern tables present (seasons, player_seasons, team_seasons, matches, player_round_stats, user_biwenger_credentials).'
     );
 
-    // c) Legacy pre-0014 columns are absent
+    // c) Legacy pre-0014 columns and pre-0016 biwenger_token are absent
     const deprecatedPlayerCols = [
       'position',
       'puntos',
@@ -107,14 +108,16 @@ async function main() {
       'team_id',
     ];
     const deprecatedTeamCols = ['city', 'arena_name', 'latitude', 'longitude'];
+    const deprecatedUserCols = ['biwenger_token'];
 
     const deprecatedRes = await disposable.pool.query(
       `SELECT table_name, column_name FROM information_schema.columns
        WHERE table_schema = 'public' AND (
          (table_name = 'players' AND column_name = ANY($1::text[])) OR
-         (table_name = 'teams' AND column_name = ANY($2::text[]))
+         (table_name = 'teams' AND column_name = ANY($2::text[])) OR
+         (table_name = 'users' AND column_name = ANY($3::text[]))
        )`,
-      [deprecatedPlayerCols, deprecatedTeamCols]
+      [deprecatedPlayerCols, deprecatedTeamCols, deprecatedUserCols]
     );
     if (deprecatedRes.rows.length > 0) {
       const list = deprecatedRes.rows
@@ -123,7 +126,7 @@ async function main() {
       throw new Error(`Deprecated columns still present on global tables: ${list}`);
     }
     console.log(
-      '   ✅ All 18 deprecated pre-0014 columns on players and teams are confirmed absent.'
+      '   ✅ All deprecated columns on players, teams, and users (including users.biwenger_token) are confirmed absent.'
     );
 
     // d) Post-0015 venue and DNP provenance columns exist

@@ -13,8 +13,8 @@ status: active
 Personal manager credentials use AES-256-GCM with a fresh 96-bit IV. Authenticated data binds each
 record to its user, purpose, envelope version, and key ID, so copying a record to another user or
 changing its metadata fails integrity verification. The separate `user_biwenger_credentials` table
-stores only versioned ciphertext metadata. `users.biwenger_token` remains temporarily for migration
-and rollback; normal application writes never add plaintext to it.
+is the sole canonical store for personal manager credentials and stores only versioned ciphertext metadata.
+The legacy `users.biwenger_token` column and plaintext fallback have been completely removed.
 
 `BIWENGER_TOKEN` is different: it is the existing global credential for trusted background
 ingestion. Do not put it in the personal credential keyring or migrate it into the manager table.
@@ -70,23 +70,20 @@ Use separate verification gates. Do not run these steps from an untrusted workst
 9. Investigate failed categories. Invalid provider credentials may still encrypt correctly; provider
    rejection is handled by asking that user to reconnect. Corrupt envelopes or unavailable keys
    require restoring the correct key configuration or re-linking, never plaintext logging.
-10. Keep the fallback through an observation and rollback window. Monitor categorical credential
-    failures, legacy-fallback warnings, link failures, and provider rejection rates.
-11. Disable `BIWENGER_CREDENTIAL_PLAINTEXT_FALLBACK` only after full encrypted coverage, zero recent
-    fallback usage, all application instances on the encrypted version, and a tested rollback plan.
-12. In a separately approved cleanup, clear verified plaintext values. After another backup and
-    observation window, remove `users.biwenger_token` in a later schema migration. Neither cleanup
-    happens in the encryption stage.
+10. Encrypted coverage is complete and all legacy credentials have been migrated.
+11. Plaintext fallback has been disabled and removed.
+12. Migration 0016 dropped `users.biwenger_token`. All personal credentials exclusively reside
+    in `user_biwenger_credentials`.
 
 ## Linking, relinking, and unlinking
 
 The link route validates credentials with Biwenger before the database transaction. A successful
 link or relink encrypts with the active key, verifies a local round trip, atomically upserts the
-encrypted record, updates email, and clears that user's legacy value. Provider validation failure
+encrypted record, and updates email. Provider validation failure
 leaves the previous record unchanged. The browser receives only linked state.
 
-The server boundary also provides unlink deletion. It atomically deletes the encrypted row and
-clears legacy plaintext, after which linked-state checks return false. There is currently no
+The server boundary also provides unlink deletion. It deletes the encrypted row,
+after which linked-state checks return false. There is currently no
 concrete unlink HTTP consumer, so no new credential endpoint was added. A future authenticated
 unlink flow must call this boundary with the session actor and refresh the safe session state.
 

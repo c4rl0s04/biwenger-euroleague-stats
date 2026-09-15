@@ -26,8 +26,8 @@ function parseBatchSize(args: string[]): number {
 async function main() {
   const args = process.argv.slice(2);
   const operation = args[0];
-  if (operation !== 'migrate' && operation !== 'rotate' && operation !== 'status') {
-    throw new Error('Usage: biwenger-credential-maintenance.ts <status|migrate|rotate> [--apply]');
+  if (operation !== 'rotate' && operation !== 'status') {
+    throw new Error('Usage: biwenger-credential-maintenance.ts <status|rotate> [--apply]');
   }
 
   const apply = args.includes('--apply');
@@ -61,10 +61,7 @@ async function main() {
     dryRun: !apply,
     batchSize: parseBatchSize(args),
   };
-  const result =
-    operation === 'migrate'
-      ? await maintenanceModule.migrateLegacyCredentials(options)
-      : await maintenanceModule.rotateCredentials(options);
+  const result = await maintenanceModule.rotateCredentials(options);
 
   console.log(`Credential ${operation} ${apply ? 'apply' : 'dry-run'} result:`, result);
   if (!apply) console.log('No credential records were changed. Add --apply to write changes.');

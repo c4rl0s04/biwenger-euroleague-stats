@@ -418,7 +418,9 @@ export async function getPersonalizedAlerts(
 /**
  * Get a user by ID including their hashed password
  */
-export async function getUserWithPassword(userId: string) {
-  const result = await pgClient.query('SELECT * FROM users WHERE id = $1', [userId]);
+export async function getUserWithPassword(
+  userId: string
+): Promise<{ id: string; password: string | null } | undefined> {
+  const result = await pgClient.query('SELECT id, password FROM users WHERE id = $1', [userId]);
   return result.rows[0];
 }

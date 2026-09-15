@@ -26,11 +26,10 @@ export const users = pgTable('users', {
   password: text('password'),
   icon: text('icon'),
   colorIndex: integer('color_index').default(0),
-  biwengerToken: text('biwenger_token'),
 });
 
-// Server-only encrypted Biwenger credentials. The legacy users.biwenger_token
-// column remains temporarily for staged migration and rollback compatibility.
+// Server-only encrypted Biwenger credentials. This is the sole canonical store
+// for personal Biwenger credentials.
 export const userBiwengerCredentials = pgTable(
   'user_biwenger_credentials',
   {

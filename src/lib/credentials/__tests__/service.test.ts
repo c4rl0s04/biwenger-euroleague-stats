@@ -13,7 +13,6 @@ import type {
 
 class MemoryRepository implements CredentialRecordRepository {
   encrypted = new Map<string, StoredCredential>();
-  legacy = new Map<string, string>();
   emails = new Map<string, string>();
   failNextReplace = false;
 
@@ -23,24 +22,16 @@ class MemoryRepository implements CredentialRecordRepository {
   async findEncrypted(userId: string) {
     return this.encrypted.get(userId) ?? null;
   }
-  async findLegacyPlaintext(userId: string) {
-    return this.legacy.get(userId) ?? null;
-  }
-  async hasLegacyPlaintext(userId: string) {
-    return this.legacy.has(userId);
-  }
   async replaceCredential(userId: string, envelope: CredentialEnvelope, email?: string) {
     if (this.failNextReplace) {
       this.failNextReplace = false;
       throw new Error('synthetic storage failure');
     }
     this.encrypted.set(userId, { userId, ...envelope });
-    this.legacy.delete(userId);
     if (email) this.emails.set(userId, email);
   }
   async deleteCredential(userId: string) {
     this.encrypted.delete(userId);
-    this.legacy.delete(userId);
   }
 }
 
@@ -56,11 +47,10 @@ describe('server-only Biwenger credential boundary', () => {
     repository = new MemoryRepository();
   });
 
-  function create(options: { fallback?: boolean; warn?: CredentialLogger['warn'] } = {}) {
+  function create(options: { warn?: CredentialLogger['warn'] } = {}) {
     return createBiwengerCredentialService({
       repository,
       getKeyring: () => testKeyring,
-      allowLegacyPlaintextFallback: options.fallback,
       logger: { warn: options.warn ?? vi.fn() },
     });
   }
@@ -73,7 +63,6 @@ describe('server-only Biwenger credential boundary', () => {
     const stored = repository.encrypted.get('actor');
     expect(stored).toBeDefined();
     expect(JSON.stringify(stored)).not.toContain(credential);
-    expect(repository.legacy.has('actor')).toBe(false);
     expect(await service.hasCredential('actor')).toBe(true);
     expect(await service.withCredential('actor', 'test.use', async (value) => value)).toBe(
       credential
@@ -98,10 +87,9 @@ describe('server-only Biwenger credential boundary', () => {
     );
   });
 
-  it('unlinks encrypted and legacy access', async () => {
-    const service = create({ fallback: true });
+  it('unlinks credential access', async () => {
+    const service = create();
     await service.storeCredential({ userId: 'actor', credential: 'synthetic-token' });
-    repository.legacy.set('actor', 'legacy-synthetic-token');
 
     await service.deleteCredential('actor');
     expect(await service.hasCredential('actor')).toBe(false);
@@ -110,22 +98,12 @@ describe('server-only Biwenger credential boundary', () => {
     ).rejects.toMatchObject({ code: 'missing_credential' });
   });
 
-  it('uses explicit legacy fallback observably without logging credential material', async () => {
-    const warn = vi.fn();
-    const service = create({ fallback: true, warn });
-    repository.legacy.set('actor', 'legacy-canary-token');
-
-    expect(await service.withCredential('actor', 'test.fallback', async (value) => value)).toBe(
-      'legacy-canary-token'
-    );
-    expect(JSON.stringify(warn.mock.calls)).not.toContain('legacy-canary-token');
-    expect(warn).toHaveBeenCalledWith(
-      'Temporary plaintext credential fallback used',
-      expect.objectContaining({
-        category: 'legacy_credential_fallback',
-        operation: 'test.fallback',
-      })
-    );
+  it('throws missing_credential when credential does not exist', async () => {
+    const service = create();
+    expect(await service.hasCredential('missing-user')).toBe(false);
+    await expect(
+      service.withCredential('missing-user', 'test.missing', async (value) => value)
+    ).rejects.toMatchObject({ code: 'missing_credential' });
   });
 
   it('never allows one user to retrieve another user credential', async () => {

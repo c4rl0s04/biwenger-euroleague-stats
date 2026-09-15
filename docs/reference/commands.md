@@ -60,23 +60,22 @@ integration. Database-backed tests require the explicit safety configuration des
 
 ## Database and seasons
 
-| Command                            | Behavior                                                                                            |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `npm run db:migrate`               | Run pending Drizzle migrations in journal order.                                                    |
-| `npm run db:validate`              | Verify runtime database readiness against schema expectations (read-only).                          |
-| `npm run db:check`                 | Consolidate connection test, Drizzle ORM query, schema readiness, and table row counts.             |
-| `npm run db:audit:schema`          | Compare runtime database state with schema expectations.                                            |
-| `npm run db:audit:schema:metadata` | Compare source schema with committed metadata without a DB connection.                              |
-| `npm run db:production:check`      | Audit production migration, constraint, index, FK, RLS, and grant readiness.                        |
-| `npm run db:production:apply`      | Apply the guarded additive repair after backup confirmation.                                        |
-| `npm run db:season:audit`          | Read-only multi-season integrity audit.                                                             |
-| `npm run db:season:fingerprint`    | Emit deterministic row counts and hashes for a season (defaults to 2025-26).                        |
-| `npm run db:season:freeze`         | Freeze a season after explicit backup confirmation.                                                 |
-| `npm run db:season:create-next`    | Create the next season after explicit backup confirmation.                                          |
-| `npm run db:repair:player-prices`  | Dry-run price-cache drift; add `-- --apply` only through the safety runbook.                        |
-| `npm run credentials:status`       | Report safe plaintext/encrypted counts and encrypted key-ID usage.                                  |
-| `npm run credentials:migrate`      | Dry-run legacy manager-credential encryption; add `-- --apply` only through the credential runbook. |
-| `npm run credentials:rotate`       | Dry-run re-encryption to the active key; add `-- --apply` only through the credential runbook.      |
+| Command                            | Behavior                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run db:migrate`               | Run pending Drizzle migrations in journal order.                                               |
+| `npm run db:validate`              | Verify runtime database readiness against schema expectations (read-only).                     |
+| `npm run db:check`                 | Consolidate connection test, Drizzle ORM query, schema readiness, and table row counts.        |
+| `npm run db:audit:schema`          | Compare runtime database state with schema expectations.                                       |
+| `npm run db:audit:schema:metadata` | Compare source schema with committed metadata without a DB connection.                         |
+| `npm run db:production:check`      | Audit production migration, constraint, index, FK, RLS, and grant readiness.                   |
+| `npm run db:production:apply`      | Apply the guarded additive repair after backup confirmation.                                   |
+| `npm run db:season:audit`          | Read-only multi-season integrity audit.                                                        |
+| `npm run db:season:fingerprint`    | Emit deterministic row counts and hashes for a season (defaults to 2025-26).                   |
+| `npm run db:season:freeze`         | Freeze a season after explicit backup confirmation.                                            |
+| `npm run db:season:create-next`    | Create the next season after explicit backup confirmation.                                     |
+| `npm run db:repair:player-prices`  | Dry-run price-cache drift; add `-- --apply` only through the safety runbook.                   |
+| `npm run credentials:status`       | Report safe encrypted counts and encrypted key-ID usage.                                       |
+| `npm run credentials:rotate`       | Dry-run re-encryption to the active key; add `-- --apply` only through the credential runbook. |
 
 Database commands can target remote state through environment configuration. Follow
 [database safety](../operations/database-safety.md) and [season lifecycle](../operations/season-lifecycle.md).
