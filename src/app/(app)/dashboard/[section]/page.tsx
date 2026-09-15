@@ -120,7 +120,9 @@ export default async function DashboardSectionPage({ params }: PageProps) {
             title={playerName(player)}
             subtitle={player.team ?? player.form_label}
             trailing={
-              player.avg_recent_points ? Number(player.avg_recent_points).toFixed(1) : undefined
+              player.avg_recent_points != null
+                ? Number(player.avg_recent_points).toFixed(1)
+                : undefined
             }
           />
         ))}

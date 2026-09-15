@@ -263,6 +263,39 @@ describe('player mappers', () => {
       ])[0]
     ).toMatchObject({ games_played: 3, avg_points: 10 });
     expect(
+      mapPlayerRecentFormRows([
+        {
+          ...row,
+          games_played: 0,
+          avg_points: null,
+          total_points: 0,
+          recent_scores: '?,?,?',
+        },
+      ])[0].avg_points
+    ).toBeNull();
+    expect(
+      mapPlayerRecentFormRows([
+        {
+          ...row,
+          games_played: 2,
+          avg_points: 0,
+          total_points: 0,
+          recent_scores: '0,0',
+        },
+      ])[0].avg_points
+    ).toBe(0);
+    expect(
+      mapPlayerRecentFormRows([
+        {
+          ...row,
+          games_played: 2,
+          avg_points: '0',
+          total_points: 0,
+          recent_scores: '0,0',
+        },
+      ])[0].avg_points
+    ).toBe(0);
+    expect(
       mapPlayerRisingStars([
         { ...row, recent_avg: '14', earlier_avg: '8', improvement: '6', improvement_pct: '75' },
       ])[0]

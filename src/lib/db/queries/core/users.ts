@@ -302,10 +302,11 @@ export async function getCaptainRecommendations(
   return squadRows
     .map((row: any) => {
       const form = formMap.get(Number(row.player_id));
-      const avg = form?.avg_form_score || 0;
+      const avg = form?.avg_form_score ?? null;
 
       let formLabel = 'Forma baja';
-      if (avg >= 25) formLabel = 'Excelente forma';
+      if (avg == null) formLabel = 'Sin datos';
+      else if (avg >= 25) formLabel = 'Excelente forma';
       else if (avg >= 18) formLabel = 'Buena forma';
       else if (avg >= 12) formLabel = 'Forma regular';
 
@@ -318,10 +319,12 @@ export async function getCaptainRecommendations(
       } as CaptainRecommendation;
     })
     .filter((p: CaptainRecommendation) => p.avg_recent_points != null && p.avg_recent_points > 0)
-    .sort(
-      (a: CaptainRecommendation, b: CaptainRecommendation) =>
-        (b.avg_recent_points ?? 0) - (a.avg_recent_points ?? 0)
-    )
+    .sort((a: CaptainRecommendation, b: CaptainRecommendation) => {
+      if (a.avg_recent_points == null && b.avg_recent_points == null) return 0;
+      if (a.avg_recent_points == null) return 1;
+      if (b.avg_recent_points == null) return -1;
+      return b.avg_recent_points - a.avg_recent_points;
+    })
     .slice(0, limit);
 }
 

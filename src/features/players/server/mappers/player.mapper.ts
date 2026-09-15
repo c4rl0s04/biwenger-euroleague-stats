@@ -123,7 +123,7 @@ export function mapPlayerRecentFormRows(rows: PlayerRecentForm[]): PlayerRecentF
     owner_color_index: toNumber(row.owner_color_index),
     total_points: toNumber(row.total_points),
     games_played: toNumber(row.games_played),
-    avg_points: toNumber(row.avg_points),
+    avg_points: toNullableNumber(row.avg_points),
     recent_scores: row.recent_scores || '',
   }));
 }

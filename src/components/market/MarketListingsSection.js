@@ -62,8 +62,14 @@ export default function MarketListingsSection({ listings = [] }) {
 
     // Apply Sorting
     return list.sort((a, b) => {
-      const valA = a[sortBy] ?? 0;
-      const valB = b[sortBy] ?? 0;
+      const valA = a[sortBy];
+      const valB = b[sortBy];
+
+      const aMissing = valA == null;
+      const bMissing = valB == null;
+      if (aMissing && bMissing) return 0;
+      if (aMissing) return 1;
+      if (bMissing) return -1;
 
       if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
       if (valA > valB) return sortDirection === 'asc' ? 1 : -1;

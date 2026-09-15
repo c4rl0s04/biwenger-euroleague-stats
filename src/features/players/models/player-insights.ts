@@ -29,7 +29,7 @@ export interface PlayerRecentFormViewModel {
   owner_color_index: number;
   total_points: number;
   games_played: number;
-  avg_points: number;
+  avg_points: number | null;
   recent_scores: string;
 }
 

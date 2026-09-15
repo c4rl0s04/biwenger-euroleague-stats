@@ -73,7 +73,7 @@ export default function TopFormCard() {
               Media
             </span>
             <span className="text-emerald-400 font-bold text-base tabular-nums leading-none">
-              {Number(player.avg_points).toFixed(1)}
+              {player.avg_points != null ? Number(player.avg_points).toFixed(1) : '—'}
             </span>
           </div>
         )}

@@ -33,14 +33,14 @@ export interface CorePlayer {
 
 export interface PlayerRecentForm extends CorePlayer {
   games_played: number | string;
-  avg_points: number | string;
+  avg_points: number | string | null;
   total_points: number | string;
   recent_scores: string;
-  season_avg?: number | string;
-  avg_diff?: number | string;
-  trend_pct?: number | string;
+  season_avg?: number | string | null;
+  avg_diff?: number | string | null;
+  trend_pct?: number | string | null;
   games?: number | string; // Alias for games_played in some queries
-  recent_avg?: number | string; // Alias for avg_points in some queries
+  recent_avg?: number | string | null; // Alias for avg_points in some queries
 }
 
 export interface RisingStar extends CorePlayer {
@@ -308,7 +308,12 @@ export async function getTopPlayersByForm(
 
   // 2. Identify the top players by form from the map
   const topFormEntries = Array.from(formMap.values())
-    .sort((a, b) => (b.avg_form_score ?? -1) - (a.avg_form_score ?? -1))
+    .sort((a, b) => {
+      if (a.avg_form_score == null && b.avg_form_score == null) return 0;
+      if (a.avg_form_score == null) return 1;
+      if (b.avg_form_score == null) return -1;
+      return b.avg_form_score - a.avg_form_score;
+    })
     .slice(0, limit * 2); // Fetch extra for safety
 
   if (topFormEntries.length === 0) return [];
@@ -363,11 +368,16 @@ export async function getTopPlayersByForm(
         id: Number(row.id),
         total_points: parseInt(String(row.total_points)) || 0,
         games_played: parseInt(String(row.games_played)) || 0,
-        avg_points: form?.avg_form_score || 0,
+        avg_points: form?.avg_form_score ?? null,
         recent_scores: form?.recent_scores || '',
       };
     })
-    .sort((a, b) => b.avg_points - a.avg_points)
+    .sort((a, b) => {
+      if (a.avg_points == null && b.avg_points == null) return 0;
+      if (a.avg_points == null) return 1;
+      if (b.avg_points == null) return -1;
+      return Number(b.avg_points) - Number(a.avg_points);
+    })
     .slice(0, limit);
 }
 

@@ -109,6 +109,12 @@ export default function PlayersDiscovery({ initialPlayers = [] }) {
       if (sortConfig.key === 'name') {
         aVal = aVal?.toLowerCase() || '';
         bVal = bVal?.toLowerCase() || '';
+      } else {
+        const aMissing = aVal == null;
+        const bMissing = bVal == null;
+        if (aMissing && bMissing) return 0;
+        if (aMissing) return 1;
+        if (bMissing) return -1;
       }
 
       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;

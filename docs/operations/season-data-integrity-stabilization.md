@@ -119,7 +119,7 @@ When upgrading existing environments to schema migrations 0014 and 0015:
 
 ### Starting State Precondition
 
-The database must be migrated through `0013_careful_doctor_strange.sql`. All seasonal tables (`player_seasons`, `team_seasons`, `user_seasons`) exist, and deprecated seasonal columns (`players.puntos`, `teams.city`, etc.) are still present.
+The database must be migrated through `0013_season_lifecycle_and_constraints.sql`. All seasonal tables (`player_seasons`, `team_seasons`, `user_seasons`) exist, and deprecated seasonal columns (`players.puntos`, `teams.city`, etc.) are still present.
 
 ### Step 1: Pre-Migration Backup
 
