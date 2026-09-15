@@ -17,8 +17,24 @@ describe('getScoreColor', () => {
     expect(getScoreColor(4)).toContain('orange');
   });
 
-  it('returns slate class for score == 0', () => {
-    expect(getScoreColor(0)).toContain('slate');
+  it('returns slate-700 class for score == 0', () => {
+    expect(getScoreColor(0)).toContain('slate-700');
+  });
+
+  it('returns rose class for DNP score "X"', () => {
+    expect(getScoreColor('X')).toContain('rose');
+  });
+
+  it('returns neutral slate-800 class for unavailable score "?" without red styling', () => {
+    const color = getScoreColor('?');
+    expect(color).toContain('slate-800');
+    expect(color).not.toContain('red');
+    expect(color).not.toContain('rose');
+  });
+
+  it('returns neutral slate-800 class for null and undefined', () => {
+    expect(getScoreColor(null)).toContain('slate-800');
+    expect(getScoreColor(undefined)).toContain('slate-800');
   });
 
   it('returns red class for score >= -10 and < 0', () => {

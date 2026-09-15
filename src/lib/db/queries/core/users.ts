@@ -313,7 +313,12 @@ export async function getCaptainRecommendations(
       return {
         ...row,
         avg_recent_points: avg,
-        recent_games: form ? form.recent_scores.split(',').filter((s) => s !== 'X').length : 0,
+        recent_games: form
+          ? form.recent_scores
+              .split(',')
+              .map((s) => s.trim())
+              .filter((s) => s !== 'X' && s !== '?' && s !== '').length
+          : 0,
         recent_scores: form?.recent_scores || '',
         form_label: formLabel,
       } as CaptainRecommendation;

@@ -98,24 +98,43 @@ const positionColors = {
 };
 
 function ScoreBar({ score }) {
-  if (score === null || score === 'X') {
+  if (score === 'X') {
     return (
-      <div className="flex-1 h-8 bg-rose-600/40 border border-rose-500/50 rounded flex items-center justify-center">
+      <div
+        title="No jugó"
+        className="flex-1 h-8 bg-rose-600/40 border border-rose-500/50 rounded flex items-center justify-center"
+      >
         <span className="text-xs font-bold text-rose-100">X</span>
       </div>
     );
   }
+  if (score === '?' || score === null || score === undefined) {
+    return (
+      <div
+        title="Sin datos"
+        className="flex-1 h-8 bg-slate-800/40 border border-slate-700/40 rounded flex items-center justify-center"
+      >
+        <span className="text-xs font-bold text-slate-400">?</span>
+      </div>
+    );
+  }
+  const num = typeof score === 'number' ? score : Number(score);
   const color =
-    score < 0
+    num < 0
       ? 'bg-rose-700    text-white border-rose-600/50'
-      : score < 6
-        ? 'bg-amber-700   text-white border-amber-600/50'
-        : score < 10
-          ? 'bg-emerald-700 text-white border-emerald-600/50'
-          : 'bg-sky-700     text-white border-sky-600/50';
+      : num === 0
+        ? 'bg-slate-700/50 text-slate-300 border-slate-600/40'
+        : num < 6
+          ? 'bg-amber-700   text-white border-amber-600/50'
+          : num < 10
+            ? 'bg-emerald-700 text-white border-emerald-600/50'
+            : 'bg-sky-700     text-white border-sky-600/50';
   return (
-    <div className={`flex-1 h-8 rounded flex items-center justify-center border ${color}`}>
-      <span className="text-xs font-bold font-mono">{score}</span>
+    <div
+      title={`${num} pts`}
+      className={`flex-1 h-8 rounded flex items-center justify-center border ${color}`}
+    >
+      <span className="text-xs font-bold font-mono">{num}</span>
     </div>
   );
 }
@@ -182,12 +201,18 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
   const recentScores = player.recent_scores
     ? player.recent_scores
         .split(',')
-        .filter((s) => s.trim() !== '')
-        .map((s) => (s === 'X' ? null : parseInt(s, 10)))
+        .map((s) => s.trim())
+        .filter((s) => s !== '')
+        .map((s) => {
+          if (s === 'X' || s === 'x') return 'X';
+          if (s === '?') return '?';
+          const parsed = parseInt(s, 10);
+          return Number.isNaN(parsed) ? '?' : parsed;
+        })
     : [];
   const displayScores = Array(5)
     .fill(null)
-    .map((_, i) => recentScores[i] ?? null);
+    .map((_, i) => recentScores[i] ?? '?');
 
   const sellerUserColor =
     player.seller_id != null

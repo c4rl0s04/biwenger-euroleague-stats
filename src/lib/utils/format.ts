@@ -1,9 +1,11 @@
 /**
  * Get color class for a score
  */
-export function getScoreColor(score: number | string): string {
+export function getScoreColor(score: number | string | null | undefined): string {
   if (score === 'X') return 'bg-rose-600/40 text-rose-100 border-rose-500/50';
+  if (score === '?' || score == null) return 'bg-slate-800/40 text-slate-400 border-slate-700/40';
   const s = Number(score);
+  if (!Number.isFinite(s)) return 'bg-slate-800/40 text-slate-400 border-slate-700/40';
   if (s >= 15) return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
   if (s >= 10) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
   if (s >= 5) return 'bg-green-500/20 text-green-300 border-green-500/30';

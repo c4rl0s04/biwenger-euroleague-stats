@@ -302,7 +302,7 @@ function parseRecentScores(value: unknown): number[] {
   return value
     .split(',')
     .map((score) => score.trim())
-    .filter((score) => score !== '' && score.toUpperCase() !== 'X')
+    .filter((score) => score !== '' && score.toUpperCase() !== 'X' && score !== '?')
     .map(Number)
     .filter(Number.isFinite);
 }

@@ -53,6 +53,30 @@ describe('getCaptainRecommendations null form semantics', () => {
     expect(recommendations).toHaveLength(1);
     expect(recommendations[0].player_id).toBe(1);
     expect(recommendations[0].avg_recent_points).toBe(21);
+    expect(recommendations[0].recent_games).toBe(2);
     expect(recommendations[0].form_label).toBe('Buena forma');
+  });
+
+  it('correctly counts only played games, excluding both DNP ("X") and unknown ("?")', async () => {
+    const formMap = new Map([
+      [
+        1,
+        { player_id: 1, recent_scores: '15,?,X,20,?', avg_recent_points: 17.5, avg_form_score: 7 },
+      ],
+    ]);
+
+    vi.mocked(getPlayerFormMap).mockResolvedValue(formMap);
+
+    const squadRows = [
+      { player_id: 1, name: 'Mixed Player', position: 'Base', team_id: 10, team: 'Team A' },
+    ];
+
+    vi.mocked(pgClient.query).mockResolvedValue({ rows: squadRows } as any);
+
+    const recommendations = await getCaptainRecommendations(1, 5);
+
+    expect(recommendations).toHaveLength(1);
+    // 15 and 20 are played games; ?, X, ? are not played
+    expect(recommendations[0].recent_games).toBe(2);
   });
 });
