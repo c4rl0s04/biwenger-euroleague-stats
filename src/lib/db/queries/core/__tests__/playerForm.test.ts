@@ -30,14 +30,16 @@ describe('computePlayerFormScores', () => {
   it('handles player with only DNPs', () => {
     const result = computePlayerFormScores('X,X,X');
     expect(result.scores).toEqual(['X', 'X', 'X']);
-    expect(result.avg_recent_points).toBe(0);
+    // Played games count is 0, so average over played games is null
+    expect(result.avg_recent_points).toBeNull();
+    // Known games count is 3 (DNP penalized as 0) -> 0 / 3 = 0
     expect(result.avg_form_score).toBe(0);
   });
 
-  it('handles empty or all unknown matches gracefully', () => {
+  it('returns null for all-unknown recent form (?,?,?) rather than zero', () => {
     const result = computePlayerFormScores('?,?,?');
     expect(result.scores).toEqual(['?', '?', '?']);
-    expect(result.avg_recent_points).toBe(0);
-    expect(result.avg_form_score).toBe(0);
+    expect(result.avg_recent_points).toBeNull();
+    expect(result.avg_form_score).toBeNull();
   });
 });

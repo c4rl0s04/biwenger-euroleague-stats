@@ -194,5 +194,63 @@ describe('Biwenger Catalog Service', () => {
       expect(() => normalizeBiwengerPlayer(100, null)).toThrow('Invalid player raw payload');
       expect(() => normalizeBiwengerPlayer(100, undefined)).toThrow('Invalid player raw payload');
     });
+
+    it('rejects malformed numeric values with validation error instead of treating as null', () => {
+      const baseRaw = { name: 'Valid Player' };
+
+      // Malformed points
+      expect(() => normalizeBiwengerPlayer(101, { ...baseRaw, points: 'foo' })).toThrow(
+        'Malformed numeric value for points on player 101: "foo"'
+      );
+
+      // Malformed price
+      expect(() => normalizeBiwengerPlayer(101, { ...baseRaw, price: 'not-a-price' })).toThrow(
+        'Malformed numeric value for price on player 101: "not-a-price"'
+      );
+
+      // Malformed playedHome
+      expect(() => normalizeBiwengerPlayer(101, { ...baseRaw, playedHome: 'abc' })).toThrow(
+        'Malformed numeric value for playedHome on player 101: "abc"'
+      );
+
+      // Malformed teamID
+      expect(() => normalizeBiwengerPlayer(101, { ...baseRaw, teamID: 'invalid_team' })).toThrow(
+        'Malformed numeric value for teamID on player 101: "invalid_team"'
+      );
+
+      // Malformed priceIncrement
+      expect(() => normalizeBiwengerPlayer(101, { ...baseRaw, priceIncrement: 'hundred' })).toThrow(
+        'Malformed numeric value for priceIncrement on player 101: "hundred"'
+      );
+
+      // Non-finite number
+      expect(() => normalizeBiwengerPlayer(101, { ...baseRaw, price: NaN })).toThrow(
+        'Malformed numeric value for price on player 101'
+      );
+
+      // Boolean instead of number
+      expect(() => normalizeBiwengerPlayer(101, { ...baseRaw, points: true })).toThrow(
+        'Malformed numeric value for points on player 101: true'
+      );
+    });
+
+    it('parses valid numeric strings and distinguishes empty strings from malformed', () => {
+      const snapshot = normalizeBiwengerPlayer(101, {
+        name: 'Valid Player',
+        points: '15',
+        price: '5000000',
+        playedHome: '0',
+        playedAway: '',
+        pointsHome: '   ',
+        priceIncrement: null,
+      });
+
+      expect(snapshot.points).toBe(15);
+      expect(snapshot.price).toBe(5000000);
+      expect(snapshot.playedHome).toBe(0);
+      expect(snapshot.playedAway).toBeNull();
+      expect(snapshot.pointsHome).toBeNull();
+      expect(snapshot.priceIncrement).toBeNull();
+    });
   });
 });

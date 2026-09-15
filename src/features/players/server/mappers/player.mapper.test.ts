@@ -213,7 +213,7 @@ describe('player mappers', () => {
         total_points: 20,
       },
     ]);
-    expect(catalogue[0]).toMatchObject({ id: 7, total_points: 20, avg_form_score: 0 });
+    expect(catalogue[0]).toMatchObject({ id: 7, total_points: 20, avg_form_score: null });
 
     const streaks = mapPlayerStreaks({
       hot: [
@@ -500,6 +500,67 @@ describe('player mappers', () => {
       const matchZeroMin = { ...baseMatch, minutes_played: 0, points_scored: 0 };
       const stats = buildAdvancedStats([matchZeroMin], 0, 0, 0);
       expect(stats.pts_per_40).toBeNull();
+    });
+
+    it('invalidates sporting aggregates when participation is unknown in any match', () => {
+      // Round 1: known participant, assists = 5
+      const round1 = {
+        ...baseMatch,
+        round_id: 1,
+        is_dnp: false,
+        assists: 5,
+        turnovers: 2,
+        points_scored: 10,
+        minutes_played: 20,
+      };
+      // Round 2: unknown participation (is_dnp = null, minutes = null, assists = null)
+      const round2 = {
+        ...baseMatch,
+        round_id: 2,
+        is_dnp: null,
+        minutes_played: null,
+        assists: null,
+        turnovers: null,
+        points_scored: null,
+      };
+
+      const stats = buildAdvancedStats([round1, round2], 10, 10, 10);
+      // Must NOT return assists = 5 as though coverage were complete!
+      expect(stats.assists).toBeNull();
+      expect(stats.points_scored).toBeNull();
+      expect(stats.turnovers).toBeNull();
+      expect(stats.minutes_played).toBeNull();
+      expect(stats.avg_real_points).toBeNull();
+      expect(stats.ast_to_ratio).toBeNull();
+      expect(stats.pts_per_40).toBeNull();
+    });
+
+    it('allows complete stats when match is a known DNP (contributes 0 production and no appearance)', () => {
+      const round1 = {
+        ...baseMatch,
+        round_id: 1,
+        is_dnp: false,
+        assists: 5,
+        turnovers: 2,
+        points_scored: 10,
+        minutes_played: 20,
+      };
+      // Round 2: known DNP
+      const round2 = {
+        ...baseMatch,
+        round_id: 2,
+        is_dnp: true,
+        minutes_played: 0,
+        assists: null,
+        points_scored: null,
+      };
+
+      const stats = buildAdvancedStats([round1, round2], 10, 10, 10);
+      expect(stats.games_played).toBe(1);
+      expect(stats.assists).toBe(5);
+      expect(stats.turnovers).toBe(2);
+      expect(stats.points_scored).toBe(10);
+      expect(stats.avg_real_points).toBe(10);
     });
   });
 });

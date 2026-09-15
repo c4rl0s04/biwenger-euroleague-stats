@@ -21,7 +21,7 @@ export interface PlayerCatalogueItemViewModel {
   best_score: number;
   worst_score: number;
   recent_scores: string | null;
-  avg_form_score: number;
+  avg_form_score: number | null;
   avg_points?: undefined;
   season_avg?: undefined;
   status: string | null;

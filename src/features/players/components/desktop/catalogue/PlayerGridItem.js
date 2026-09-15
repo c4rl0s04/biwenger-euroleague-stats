@@ -190,7 +190,9 @@ export default function PlayerGridItem({ player, sortConfig }) {
                   : sortConfig?.key === 'worst_score'
                     ? player.worst_score
                     : sortConfig?.key === 'avg_form_score'
-                      ? player.avg_form_score
+                      ? player.avg_form_score != null
+                        ? player.avg_form_score
+                        : '—'
                       : player.average || '0.0'}
               </span>
             </div>

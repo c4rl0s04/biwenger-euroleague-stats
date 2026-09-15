@@ -80,7 +80,7 @@ export function mapPlayerCatalogueItem(row: CorePlayer): PlayerCatalogueItemView
     best_score: toNumber(extended.best_score ?? row.best_score),
     worst_score: toNumber(extended.worst_score ?? row.worst_score),
     recent_scores: row.recent_scores || null,
-    avg_form_score: toNumber(extended.avg_form_score),
+    avg_form_score: toNullableNumber(extended.avg_form_score),
     status: row.status || null,
   };
 }
@@ -233,18 +233,41 @@ function mapRecentMatch(row: PlayerMatchRow): PlayerProfileMatchViewModel {
   };
 }
 
+function isKnownDnp(match: PlayerProfileMatchViewModel): boolean {
+  return match.is_dnp === true;
+}
+
+function isKnownParticipant(match: PlayerProfileMatchViewModel): boolean {
+  return (
+    match.is_dnp === false ||
+    (match.is_dnp == null && match.minutes_played != null && match.minutes_played > 0)
+  );
+}
+
 function sumMetric(
-  playedMatches: PlayerProfileMatchViewModel[],
+  matches: PlayerProfileMatchViewModel[],
   accessor: (m: PlayerProfileMatchViewModel) => number | null | undefined
 ): number | null {
-  if (playedMatches.length === 0) return null;
+  const hasKnownParticipant = matches.some(isKnownParticipant);
+  if (!hasKnownParticipant) return null;
+
   let total = 0;
-  for (const match of playedMatches) {
-    const val = accessor(match);
-    if (val == null || !Number.isFinite(val)) {
-      return null;
+  for (const match of matches) {
+    // Known DNP contributes 0 production and no appearance
+    if (isKnownDnp(match)) {
+      continue;
     }
-    total += val;
+    // Known participant: metric must be observed for aggregate completeness
+    if (isKnownParticipant(match)) {
+      const val = accessor(match);
+      if (val == null || !Number.isFinite(val)) {
+        return null;
+      }
+      total += val;
+      continue;
+    }
+    // Unknown participation: affected sporting aggregates become null
+    return null;
   }
   return total;
 }
@@ -255,28 +278,24 @@ export function buildAdvancedStats(
   bestRealPoints: number | null,
   worstRealPoints: number | null
 ): PlayerAdvancedStatsViewModel {
-  const playedMatches = matches.filter(
-    (match) =>
-      match.is_dnp === false ||
-      (match.is_dnp == null && match.minutes_played != null && match.minutes_played > 0)
-  );
+  const playedMatches = matches.filter(isKnownParticipant);
   const gamesPlayed = playedMatches.length;
 
-  const twoPointsMade = sumMetric(playedMatches, (m) => m.two_points_made);
-  const twoPointsAttempted = sumMetric(playedMatches, (m) => m.two_points_attempted);
-  const threePointsMade = sumMetric(playedMatches, (m) => m.three_points_made);
-  const threePointsAttempted = sumMetric(playedMatches, (m) => m.three_points_attempted);
-  const freeThrowsMade = sumMetric(playedMatches, (m) => m.free_throws_made);
-  const freeThrowsAttempted = sumMetric(playedMatches, (m) => m.free_throws_attempted);
-  const blocks = sumMetric(playedMatches, (m) => m.blocks);
-  const turnovers = sumMetric(playedMatches, (m) => m.turnovers);
-  const fouls = sumMetric(playedMatches, (m) => m.fouls_committed);
-  const rebounds = sumMetric(playedMatches, (m) => m.rebounds);
-  const assists = sumMetric(playedMatches, (m) => m.assists);
-  const steals = sumMetric(playedMatches, (m) => m.steals);
-  const minutesPlayed = sumMetric(playedMatches, (m) => m.minutes_played);
-  const pointsScored = sumMetric(playedMatches, (m) => m.points_scored);
-  const valuation = sumMetric(playedMatches, (m) => m.valuation);
+  const twoPointsMade = sumMetric(matches, (m) => m.two_points_made);
+  const twoPointsAttempted = sumMetric(matches, (m) => m.two_points_attempted);
+  const threePointsMade = sumMetric(matches, (m) => m.three_points_made);
+  const threePointsAttempted = sumMetric(matches, (m) => m.three_points_attempted);
+  const freeThrowsMade = sumMetric(matches, (m) => m.free_throws_made);
+  const freeThrowsAttempted = sumMetric(matches, (m) => m.free_throws_attempted);
+  const blocks = sumMetric(matches, (m) => m.blocks);
+  const turnovers = sumMetric(matches, (m) => m.turnovers);
+  const fouls = sumMetric(matches, (m) => m.fouls_committed);
+  const rebounds = sumMetric(matches, (m) => m.rebounds);
+  const assists = sumMetric(matches, (m) => m.assists);
+  const steals = sumMetric(matches, (m) => m.steals);
+  const minutesPlayed = sumMetric(matches, (m) => m.minutes_played);
+  const pointsScored = sumMetric(matches, (m) => m.points_scored);
+  const valuation = sumMetric(matches, (m) => m.valuation);
 
   const avgRealPoints =
     gamesPlayed > 0 && pointsScored != null

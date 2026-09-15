@@ -145,15 +145,20 @@ Execute the automated hard safety check before dropping columns:
 
 ```bash
 npm run db:pre0014:check
+# Or explicitly targeting the historical cutover season:
+npm run db:pre0014:check -- --season=2025-26
 ```
 
-This CLI verifies that:
+This CLI explicitly targets historical season `2025-26` (not inferred dynamically from `status = 'active'`) and verifies that:
 
-1. Every player in `players` has a matching record in `player_seasons` for the active season.
-2. Every team in `teams` has a matching record in `team_seasons` for the active season.
-3. No data discrepancies exist between source and seasonal destination records.
+1. Target season `2025-26` exists in the `seasons` table.
+2. Every player in `players` has a matching record in `player_seasons` for `2025-26`.
+3. Every team in `teams` has a matching record in `team_seasons` for `2025-26`.
+4. All 18 migrated columns match exactly between source and seasonal destination records (using `IS DISTINCT FROM`):
+   - **14 player columns**: `position`, `puntos`, `partidos_jugados`, `played_home`, `played_away`, `points_home`, `points_away`, `points_last_season`, `owner_id`, `status`, `price_increment`, `price`, `dorsal`, `team_id`
+   - **4 team columns**: `city`, `arena_name`, `latitude`, `longitude`
 
-The command returns exit code `0` when safe to proceed, or exits non-zero with error details.
+The command returns exit code `0` when safe to proceed, or exits non-zero if ANY value differs.
 
 ### Step 4: Apply Migrations 0014 and 0015
 

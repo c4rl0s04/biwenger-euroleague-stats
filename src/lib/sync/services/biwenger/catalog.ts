@@ -74,17 +74,43 @@ export interface CanonicalBiwengerPlayerSnapshot {
   img: string | null;
 }
 
+export function parseBiwengerNumeric(
+  val: unknown,
+  fieldName: string,
+  playerId: number | string
+): number | null {
+  if (val === null || val === undefined) {
+    return null;
+  }
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (trimmed === '') {
+      return null;
+    }
+    const n = Number(trimmed);
+    if (!Number.isFinite(n)) {
+      throw new Error(
+        `Malformed numeric value for ${fieldName} on player ${playerId}: ${JSON.stringify(val)}`
+      );
+    }
+    return n;
+  }
+  if (typeof val === 'number') {
+    if (!Number.isFinite(val)) {
+      throw new Error(`Malformed numeric value for ${fieldName} on player ${playerId}: ${val}`);
+    }
+    return val;
+  }
+  throw new Error(
+    `Malformed numeric value for ${fieldName} on player ${playerId}: ${JSON.stringify(val)}`
+  );
+}
+
 export function normalizeBiwengerPlayer(
   rawId: string | number,
   raw: any,
   positions: Record<string | number, string> = {}
 ): CanonicalBiwengerPlayerSnapshot {
-  const parseNum = (val: unknown): number | null => {
-    if (val === null || val === undefined || val === '') return null;
-    const n = Number(val);
-    return Number.isFinite(n) ? n : null;
-  };
-
   const id = typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10);
   if (!id || !Number.isFinite(id) || id <= 0) {
     throw new Error(`Invalid player id: ${JSON.stringify(rawId)}`);
@@ -97,8 +123,8 @@ export function normalizeBiwengerPlayer(
     throw new Error(`Missing required player name for player ${id}`);
   }
 
-  const playedHome = parseNum(raw.playedHome);
-  const playedAway = parseNum(raw.playedAway);
+  const playedHome = parseBiwengerNumeric(raw.playedHome, 'playedHome', id);
+  const playedAway = parseBiwengerNumeric(raw.playedAway, 'playedAway', id);
   let gamesPlayed: number | null = null;
   if (playedHome != null || playedAway != null) {
     gamesPlayed = (playedHome ?? 0) + (playedAway ?? 0);
@@ -109,19 +135,19 @@ export function normalizeBiwengerPlayer(
   return {
     id,
     name,
-    teamId: parseNum(raw.teamID ?? raw.team_id),
+    teamId: parseBiwengerNumeric(raw.teamID ?? raw.team_id, 'teamID', id),
     position: rawPos != null && rawPos.trim() !== '' ? rawPos.trim() : null,
-    points: parseNum(raw.points),
-    pointsHome: parseNum(raw.pointsHome),
-    pointsAway: parseNum(raw.pointsAway),
+    points: parseBiwengerNumeric(raw.points, 'points', id),
+    pointsHome: parseBiwengerNumeric(raw.pointsHome, 'pointsHome', id),
+    pointsAway: parseBiwengerNumeric(raw.pointsAway, 'pointsAway', id),
     playedHome,
     playedAway,
     gamesPlayed,
-    pointsLastSeason: parseNum(raw.pointsLastSeason),
+    pointsLastSeason: parseBiwengerNumeric(raw.pointsLastSeason, 'pointsLastSeason', id),
     status:
       raw.status != null && String(raw.status).trim() !== '' ? String(raw.status).trim() : null,
-    priceIncrement: parseNum(raw.priceIncrement),
-    price: parseNum(raw.price),
+    priceIncrement: parseBiwengerNumeric(raw.priceIncrement, 'priceIncrement', id),
+    price: parseBiwengerNumeric(raw.price, 'price', id),
     img: raw.img ? String(raw.img) : null,
   };
 }

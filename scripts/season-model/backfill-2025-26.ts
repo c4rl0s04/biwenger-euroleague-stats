@@ -10,6 +10,25 @@ export interface ClientLike {
   query: (text: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number | null }>;
 }
 
+export const ALL_14_DROPPED_PLAYER_COLUMNS = [
+  'position',
+  'puntos',
+  'partidos_jugados',
+  'played_home',
+  'played_away',
+  'points_home',
+  'points_away',
+  'points_last_season',
+  'owner_id',
+  'status',
+  'price_increment',
+  'price',
+  'dorsal',
+  'team_id',
+] as const;
+
+export const ALL_4_DROPPED_TEAM_COLUMNS = ['city', 'arena_name', 'latitude', 'longitude'] as const;
+
 /**
  * Reusable, canonical, idempotent backfill procedure for the 2025-26 season baseline.
  * Copies all 14 legacy seasonal player attributes from `players` into `player_seasons`,

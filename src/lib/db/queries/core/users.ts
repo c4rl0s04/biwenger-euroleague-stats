@@ -62,7 +62,7 @@ export interface CaptainRecommendation {
   position: string;
   team_id: number;
   team: string;
-  avg_recent_points: number;
+  avg_recent_points: number | null;
   recent_games: number;
   recent_scores: string;
   form_label: string;
@@ -317,10 +317,10 @@ export async function getCaptainRecommendations(
         form_label: formLabel,
       } as CaptainRecommendation;
     })
-    .filter((p: CaptainRecommendation) => p.avg_recent_points > 0)
+    .filter((p: CaptainRecommendation) => p.avg_recent_points != null && p.avg_recent_points > 0)
     .sort(
       (a: CaptainRecommendation, b: CaptainRecommendation) =>
-        b.avg_recent_points - a.avg_recent_points
+        (b.avg_recent_points ?? 0) - (a.avg_recent_points ?? 0)
     )
     .slice(0, limit);
 }

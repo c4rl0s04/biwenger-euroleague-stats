@@ -71,7 +71,7 @@ export default function CaptainSuggestCard() {
               Media
             </span>
             <span className="text-yellow-400 font-bold text-base tabular-nums leading-none">
-              {Number(player.avg_recent_points).toFixed(1)}
+              {player.avg_recent_points != null ? Number(player.avg_recent_points).toFixed(1) : '—'}
             </span>
           </div>
         )}

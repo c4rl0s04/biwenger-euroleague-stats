@@ -308,7 +308,7 @@ export async function getTopPlayersByForm(
 
   // 2. Identify the top players by form from the map
   const topFormEntries = Array.from(formMap.values())
-    .sort((a, b) => b.avg_form_score - a.avg_form_score)
+    .sort((a, b) => (b.avg_form_score ?? -1) - (a.avg_form_score ?? -1))
     .slice(0, limit * 2); // Fetch extra for safety
 
   if (topFormEntries.length === 0) return [];
@@ -772,7 +772,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
     worst_score: parseFloat(String(player.worst_score)) || 0,
     price: parseInt(String(player.price)) || 0,
     recent_scores: formMap.get(Number(player.id))?.recent_scores ?? null,
-    avg_form_score: formMap.get(Number(player.id))?.avg_form_score ?? 0,
+    avg_form_score: formMap.get(Number(player.id))?.avg_form_score ?? null,
   }));
 }
 

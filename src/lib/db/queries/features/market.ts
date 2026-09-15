@@ -18,7 +18,7 @@ export interface CurrentMarketListing {
   price: number;
   real_price: number;
   price_trend: number;
-  avg_recent_points: number;
+  avg_recent_points: number | null;
   recent_scores: string;
   value_score: number;
   total_points: number;
@@ -67,7 +67,7 @@ export interface MarketOpportunity {
   team: string | null;
   price: number;
   price_trend: number;
-  avg_recent_points: number;
+  avg_recent_points: number | null;
   recent_scores: string;
   value_score: number;
   player_team: string | null;
@@ -567,14 +567,16 @@ export async function getMarketOpportunities(limit = 3): Promise<MarketOpportuni
   return rows
     .map((row: any) => {
       const form = formMap.get(Number(row.player_id));
-      const avg = form?.avg_form_score || 0;
+      const avg = form?.avg_form_score ?? null;
       return {
         ...row,
         avg_recent_points: avg,
         recent_scores: form?.recent_scores || '',
         // Value score based on form performance per millon
         value_score:
-          avg > 0 ? parseFloat(((avg * 1000000) / Math.max(Number(row.price), 1)).toFixed(2)) : 0,
+          avg != null && avg > 0
+            ? parseFloat(((avg * 1000000) / Math.max(Number(row.price), 1)).toFixed(2))
+            : 0,
       };
     })
     .sort((a, b) => b.value_score - a.value_score || b.price_trend - a.price_trend)
@@ -2623,7 +2625,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     return {
       ...row,
       recent_scores: form?.recent_scores ?? null,
-      avg_recent_points: form?.avg_recent_points ?? 0,
+      avg_recent_points: form?.avg_recent_points ?? null,
       // value_score computed here using season total points vs current price
       value_score: row.total_points
         ? parseFloat(
@@ -2640,7 +2642,8 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     const games_played = parseInt(row.games_played) || 0;
     const team_games_played = teamMatchCounts[parseInt(row.team_id)] || 1;
     const season_avg = parseFloat(row.season_avg) || 0;
-    const avg_recent_points = parseFloat(row.avg_recent_points) || 0;
+    const avg_recent_points =
+      row.avg_recent_points != null ? parseFloat(row.avg_recent_points) : null;
     const value_score = parseFloat(row.value_score) || 0;
     const price_trend = parseInt(row.price_trend) || 0;
     const team_prob = teamPlayoffProbs[parseInt(row.team_id)] || 50;
@@ -2681,14 +2684,18 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
 
     // - Momento de Forma (15%)
     let formScore = 7.5; // neutral
-    const formDiff = avg_recent_points - season_avg;
-    if (games_played < 3) formScore = 5;
-    else if (avg_recent_points >= 18 || formDiff >= 6) formScore = 15;
-    else if (avg_recent_points >= 14 || formDiff >= 3) formScore = 12;
-    else if (formDiff >= 0) formScore = 9;
-    else if (formDiff > -3) formScore = 6;
-    else if (formDiff > -6) formScore = 3;
-    else formScore = 0;
+    if (avg_recent_points != null) {
+      const formDiff = avg_recent_points - season_avg;
+      if (games_played < 3) formScore = 5;
+      else if (avg_recent_points >= 18 || formDiff >= 6) formScore = 15;
+      else if (avg_recent_points >= 14 || formDiff >= 3) formScore = 12;
+      else if (formDiff >= 0) formScore = 9;
+      else if (formDiff > -3) formScore = 6;
+      else if (formDiff > -6) formScore = 3;
+      else formScore = 0;
+    } else if (games_played < 3) {
+      formScore = 5;
+    }
     totalScore += formScore;
 
     // - Contexto Equipo (10%), implicitly includes playoff prob and calendar

@@ -3,7 +3,12 @@ import path from 'node:path';
 import pg from 'pg';
 import { assertFixtureTarget } from './safety.mjs';
 import { validateSchemaReady } from '../../src/lib/db/schema_init';
-import { runCanonicalBackfill } from '../season-model/backfill-2025-26';
+import {
+  ALL_14_DROPPED_PLAYER_COLUMNS,
+  ALL_4_DROPPED_TEAM_COLUMNS,
+  runCanonicalBackfill,
+} from '../season-model/backfill-2025-26';
+import { checkPre0014Safety } from '../dev/pre0014-season-check';
 
 const connectionString = process.env.E2E_DATABASE_URL || process.env.DATABASE_URL;
 if (!connectionString) {
@@ -14,25 +19,6 @@ assertFixtureTarget(connectionString, process.env);
 const pool = new pg.Pool({ connectionString });
 
 console.log('🧪 Starting populated pre-0014 database upgrade rehearsal...');
-
-const ALL_14_DROPPED_PLAYER_COLUMNS = [
-  'position',
-  'puntos',
-  'partidos_jugados',
-  'played_home',
-  'played_away',
-  'points_home',
-  'points_away',
-  'points_last_season',
-  'owner_id',
-  'status',
-  'price_increment',
-  'price',
-  'dorsal',
-  'team_id',
-];
-
-const ALL_4_DROPPED_TEAM_COLUMNS = ['city', 'arena_name', 'latitude', 'longitude'];
 
 try {
   // 1. Role setup for disposable PostgreSQL
@@ -193,6 +179,60 @@ try {
   }
   console.log('   ✅ Canonical backfill proven strictly idempotent (A = B).');
 
+  // 7b. Verify pre-0014 safety checker catches mismatches across the 18 columns
+  console.log('   Testing pre-0014 safety checker against canonical state...');
+  const safetyInitial = await checkPre0014Safety(pool, '2025-26');
+  if (!safetyInitial.safe || safetyInitial.dataMismatches > 0) {
+    throw new Error(`Expected pre-0014 check to pass initially: ${JSON.stringify(safetyInitial)}`);
+  }
+
+  // Provoke deliberate mismatch on player_seasons.dorsal
+  console.log('   Testing pre-0014 safety checker rejects mismatch on dorsal...');
+  await pool.query(
+    "UPDATE player_seasons SET dorsal = '99' WHERE player_id = 88101 AND season_id = '2025-26'"
+  );
+  const safetyDorsal = await checkPre0014Safety(pool, '2025-26');
+  if (safetyDorsal.safe || safetyDorsal.playerMismatches !== 1) {
+    throw new Error('Expected safety check to reject dorsal mismatch');
+  }
+  await pool.query(
+    "UPDATE player_seasons SET dorsal = '23' WHERE player_id = 88101 AND season_id = '2025-26'"
+  );
+
+  // Provoke deliberate mismatch on player_seasons.price
+  console.log('   Testing pre-0014 safety checker rejects mismatch on price...');
+  await pool.query(
+    "UPDATE player_seasons SET price = 999999 WHERE player_id = 88101 AND season_id = '2025-26'"
+  );
+  const safetyPrice = await checkPre0014Safety(pool, '2025-26');
+  if (safetyPrice.safe || safetyPrice.playerMismatches !== 1) {
+    throw new Error('Expected safety check to reject price mismatch');
+  }
+  await pool.query(
+    "UPDATE player_seasons SET price = 3450000 WHERE player_id = 88101 AND season_id = '2025-26'"
+  );
+
+  // Provoke deliberate mismatch on team_seasons.latitude
+  console.log('   Testing pre-0014 safety checker rejects mismatch on latitude...');
+  await pool.query(
+    "UPDATE team_seasons SET latitude = 50.123 WHERE team_id = 8801 AND season_id = '2025-26'"
+  );
+  const safetyLat = await checkPre0014Safety(pool, '2025-26');
+  if (safetyLat.safe || safetyLat.teamMismatches !== 1) {
+    throw new Error('Expected safety check to reject latitude mismatch');
+  }
+  await pool.query(
+    "UPDATE team_seasons SET latitude = 40.4241 WHERE team_id = 8801 AND season_id = '2025-26'"
+  );
+
+  const safetyReverted = await checkPre0014Safety(pool, '2025-26');
+  if (!safetyReverted.safe) {
+    throw new Error('Expected safety check to pass after reverting mismatches');
+  }
+  console.log(
+    '   ✅ pre-0014 safety check verified: strictly rejects any of the 18 column mismatches.'
+  );
+
   // 8. Apply migrations 0014 (dropping deprecated columns) and 0015
   console.log('   Applying migration 0014 (dropping deprecated columns) and 0015...');
   for (const entry of journal.entries) {
@@ -205,6 +245,14 @@ try {
     }
   }
   console.log('   ✅ Migration 0014 and 0015 applied successfully.');
+
+  const safetyPost0014 = await checkPre0014Safety(pool, '2025-26');
+  if (!safetyPost0014.safe || !safetyPost0014.alreadyMigrated) {
+    throw new Error('Expected safety check post-0014 to report alreadyMigrated = true');
+  }
+  console.log(
+    '   ✅ pre-0014 safety check correctly identifies post-0014 state as alreadyMigrated.'
+  );
 
   // 9. Verify all 18 deprecated columns are completely gone from source tables
   console.log('   Verifying absence of all 18 deprecated columns on players and teams...');

@@ -16,8 +16,8 @@ import { resolveReadSeasonId } from '../../season-context';
 export interface PlayerFormEntry {
   player_id: number;
   recent_scores: string;
-  avg_recent_points: number; // Average only over rounds played
-  avg_form_score: number; // Average over known team rounds in window (DNPs = 0, '?' excluded)
+  avg_recent_points: number | null; // Average only over rounds played
+  avg_form_score: number | null; // Average over known team rounds in window (DNPs = 0, '?' excluded)
 }
 
 /**
@@ -25,8 +25,8 @@ export interface PlayerFormEntry {
  */
 export function computePlayerFormScores(recentScoresStr: string): {
   scores: string[];
-  avg_recent_points: number;
-  avg_form_score: number;
+  avg_recent_points: number | null;
+  avg_form_score: number | null;
 } {
   const rawScores = (recentScoresStr ?? '')
     .split(',')
@@ -39,14 +39,14 @@ export function computePlayerFormScores(recentScoresStr: string): {
     return sum + (Number.isFinite(n) ? n : 0);
   }, 0);
 
-  const avgFormScore = knownGames.length > 0 ? totalPoints / knownGames.length : 0;
+  const avgFormScore = knownGames.length > 0 ? totalPoints / knownGames.length : null;
   const playedGames = knownGames.filter((s) => s !== 'X');
-  const avgRecentPoints = playedGames.length > 0 ? totalPoints / playedGames.length : 0;
+  const avgRecentPoints = playedGames.length > 0 ? totalPoints / playedGames.length : null;
 
   return {
     scores: rawScores,
-    avg_recent_points: parseFloat(avgRecentPoints.toFixed(2)),
-    avg_form_score: parseFloat(avgFormScore.toFixed(2)),
+    avg_recent_points: avgRecentPoints != null ? parseFloat(avgRecentPoints.toFixed(2)) : null,
+    avg_form_score: avgFormScore != null ? parseFloat(avgFormScore.toFixed(2)) : null,
   };
 }
 

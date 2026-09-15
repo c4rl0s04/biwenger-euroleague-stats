@@ -300,7 +300,7 @@ function CardFront({ player, heuristic, posStyle, onToggleExpand, isSpacer = fal
             <span className="text-[11px] text-white/50 uppercase tracking-wider font-bold font-sans flex items-center">
               Media:
               <span className="text-emerald-400 font-display text-[15px] leading-none ml-1.5 mr-0.5 translate-y-[1px]">
-                {player.avg_recent_points?.toFixed(1) || '0.0'}
+                {player.avg_recent_points != null ? player.avg_recent_points.toFixed(1) : '—'}
               </span>
               <span className="text-[9px]">pts</span>
             </span>

@@ -60,11 +60,15 @@ export default function MarketOpportunitiesCard() {
               Reciente
             </span>
             <span className="text-green-400 font-bold text-base tabular-nums leading-none">
-              <AnimatedNumber
-                value={parseFloat(player.avg_recent_points)}
-                decimals={1}
-                duration={0.8}
-              />
+              {player.avg_recent_points != null ? (
+                <AnimatedNumber
+                  value={parseFloat(player.avg_recent_points)}
+                  decimals={1}
+                  duration={0.8}
+                />
+              ) : (
+                '—'
+              )}
             </span>
           </div>
         )}
