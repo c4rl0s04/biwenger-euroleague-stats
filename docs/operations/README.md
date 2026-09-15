@@ -22,6 +22,8 @@ status: active
 - [Season data audit](season-data-audit.md) — findings from the isolated season snapshot audit.
 - [Season data copy receipt](season-data-copy-receipt.md) — preparation receipt for the isolated season
   copy.
+- [Season data integrity stabilization](season-data-integrity-stabilization.md) — multi-season database
+  stabilization, architectural audit, and safe migration runbook.
 - [Statistics normalization investigation](statistics-normalization-investigation.md) —
   provider-independent statistics investigation and proposed contract.
 - [Troubleshooting](troubleshooting.md) — diagnose common application, database, and sync failures.
