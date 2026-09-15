@@ -39,6 +39,9 @@ try {
     "INSERT INTO teams (id,name,short_name,code,img) VALUES (9901,'Fixture Madrid','Madrid','FMA','/icons/icon-192.png'),(9902,'Fixture Athens','Athens','FAT','/icons/icon-192.png')"
   );
   await client.query(
+    "INSERT INTO team_seasons (season_id,team_id,city,arena_name) VALUES ('2025-26',9901,'Madrid','WiZink Center'),('2025-26',9902,'Athens','OAKA')"
+  );
+  await client.query(
     "INSERT INTO matches (season_id,id,round_id,round_name,home_id,away_id,home_score,away_score,date,status) VALUES ('2025-26',99001,1,'Jornada 1',9901,9902,84,79,'2025-10-01T18:00:00Z','finished')"
   );
   await client.query(
@@ -56,6 +59,10 @@ try {
     await client.query(
       "INSERT INTO players (id,name,img) VALUES ($1,$2,'/icons/icon-192.png')",
       [playerId, `Fixture Contributor ${String(index).padStart(2, '0')}`]
+    );
+    await client.query(
+      "INSERT INTO player_seasons (season_id,player_id,team_id,owner_id,position,status) VALUES ('2025-26',$1,NULL,NULL,'1','ok')",
+      [playerId]
     );
     await client.query(
       "INSERT INTO player_round_stats (season_id,player_id,round_id,fantasy_points) VALUES ('2025-26',$1,1,$2)",

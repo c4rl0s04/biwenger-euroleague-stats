@@ -144,11 +144,22 @@ try {
     connectionString: `postgresql://fixture@127.0.0.1:${dbPort}/postgres`,
   });
   await admin.connect();
+  const integrityDatabase = `${database}_integrity`;
   try {
     await admin.query(`CREATE DATABASE "${database}"`);
+    await admin.query(`CREATE DATABASE "${integrityDatabase}"`);
   } finally {
     await admin.end();
   }
+  const integrityConnectionString = `postgresql://fixture@127.0.0.1:${dbPort}/${integrityDatabase}`;
+  await run(['scripts/e2e/seed.mjs'], {
+    E2E_DATABASE_URL: integrityConnectionString,
+    DATABASE_URL: integrityConnectionString,
+  });
+  await run(['node_modules/tsx/dist/cli.mjs', 'scripts/e2e/season-integrity.ts'], {
+    E2E_DATABASE_URL: integrityConnectionString,
+    DATABASE_URL: integrityConnectionString,
+  });
   await run(['scripts/e2e/seed.mjs']);
   await run(['node_modules/next/dist/bin/next', 'build'], { SKIP_DB: 'true' });
   cpSync(path.join(root, 'public'), path.join(root, '.next/standalone/public'), {
