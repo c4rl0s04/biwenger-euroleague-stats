@@ -145,19 +145,12 @@ try {
   });
   await admin.connect();
   const integrityDatabase = `${database}_integrity`;
-  const upgradeDatabase = `${database}_upgrade`;
   try {
     await admin.query(`CREATE DATABASE "${database}"`);
     await admin.query(`CREATE DATABASE "${integrityDatabase}"`);
-    await admin.query(`CREATE DATABASE "${upgradeDatabase}"`);
   } finally {
     await admin.end();
   }
-  const upgradeConnectionString = `postgresql://fixture@127.0.0.1:${dbPort}/${upgradeDatabase}`;
-  await run(['node_modules/tsx/dist/cli.mjs', 'scripts/e2e/season-upgrade-integrity.ts'], {
-    E2E_DATABASE_URL: upgradeConnectionString,
-    DATABASE_URL: upgradeConnectionString,
-  });
   const integrityConnectionString = `postgresql://fixture@127.0.0.1:${dbPort}/${integrityDatabase}`;
   await run(['scripts/e2e/seed.mjs'], {
     E2E_DATABASE_URL: integrityConnectionString,

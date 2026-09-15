@@ -1,16 +1,21 @@
 /**
- * Database access layer using pg (PostgreSQL)
+ * Canonical database access layer.
+ *
+ * Contract:
+ * - pool = raw pg.Pool (or mock pool when CONFIG.DB.SKIP is set)
+ * - db   = Drizzle database instance wrapping pool with schema
  */
 import pg, { Pool, PoolConfig } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 
 import { CONFIG } from '../config.js';
 import { buildPoolConfig } from './connection-config';
+import * as schema from './schema';
 
 // Skip database connection in CI/build environment
 const skipDb = Boolean(CONFIG?.DB?.SKIP);
 
-// Use a union type to allow for the mock DB object
-let db:
+export type PgPool =
   | Pool
   | {
       query: () => Promise<{ rows: any[]; rowCount: number }>;
@@ -18,9 +23,11 @@ let db:
       end: () => Promise<void>;
     };
 
+let rawPool: PgPool;
+
 if (skipDb) {
   // Create a mock database object for builds without a real database
-  db = {
+  rawPool = {
     query: async () => ({ rows: [], rowCount: 0 }),
     connect: async () => ({ release: () => {} }),
     end: async () => {},
@@ -31,7 +38,7 @@ if (skipDb) {
   const connectionString = process.env.DATABASE_URL;
   const poolConfig: PoolConfig = buildPoolConfig(process.env);
 
-  const pool = new pg.Pool({
+  const realPool = new pg.Pool({
     ...poolConfig,
     max: 10,
     idleTimeoutMillis: 30000,
@@ -40,12 +47,13 @@ if (skipDb) {
   console.log(`🔌 Database connecting to: ${connectionString ? 'DATABASE_URL' : poolConfig.host}`);
 
   // Test connection
-  pool.on('error', (err: Error) => {
+  realPool.on('error', (err: Error) => {
     console.error('Unexpected error on idle client', err);
     process.exit(-1);
   });
 
-  db = pool;
+  rawPool = realPool;
 }
 
-export { db };
+export const pool: PgPool = rawPool;
+export const db = drizzle(rawPool as any, { schema });

@@ -14,6 +14,24 @@ status: active
 Production fantasy data is non-reconstructable. Schema work starts with audit and backup, not
 mutation.
 
+## Standard workflow and diagnostics
+
+For routine database operations:
+
+```bash
+# 1. Apply committed migrations
+npm run db:migrate
+
+# 2. Validate runtime readiness against schema expectations (read-only)
+npm run db:validate
+
+# 3. Comprehensive diagnostics (connection, Drizzle ORM, readiness, row counts)
+npm run db:check
+
+# 4. Prove fresh database construction from zero (isolated disposable DB)
+npm run test:db:local
+```
+
 ## Before a migration-affecting pull request
 
 Resolve the exact target database, then create and retain:
@@ -62,7 +80,7 @@ production database; the reconciliation records the verified historical migratio
 
 - Do not drop, truncate, rename, or rewrite production tables without a tested restore plan.
 - Prefer additive migrations and provide rollback steps for destructive changes.
-- Drizzle migrations are the sole authority for database schema; runtime DDL and runtime schema alterations have been eliminated in favor of committed, audited migrations and `npm run db:schema:validate`.
+- Drizzle migrations are the sole authority for database schema; runtime DDL and runtime schema alterations have been eliminated in favor of committed, audited migrations and `npm run db:validate`.
 - Optional database tests must use a disposable local database unless `ALLOW_REMOTE_TEST_DB=true` is
   deliberately set.
 - Never commit dumps, credentials, or production row samples.

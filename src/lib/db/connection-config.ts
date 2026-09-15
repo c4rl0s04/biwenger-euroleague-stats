@@ -1,14 +1,19 @@
 import type { PoolConfig } from 'pg';
 
-type DatabaseEnvironment = Record<string, string | undefined>;
+export type DatabaseEnvironment = Record<string, string | undefined>;
 
-function isLocalHost(host: string | undefined): boolean {
+export function isLocalHost(host: string | undefined): boolean {
   if (!host) return true;
   const normalized = host.toLowerCase().replace(/^\[|\]$/g, '');
-  return normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '::1';
+  return (
+    normalized === 'localhost' ||
+    normalized === '127.0.0.1' ||
+    normalized === '::1' ||
+    normalized === 'postgres'
+  );
 }
 
-function connectionHost(connectionString: string): string | undefined {
+export function connectionHost(connectionString: string): string | undefined {
   try {
     return new URL(connectionString).hostname;
   } catch {
@@ -16,8 +21,17 @@ function connectionHost(connectionString: string): string | undefined {
   }
 }
 
+export function isLocalDatabaseTarget(env: DatabaseEnvironment = process.env): boolean {
+  const connectionString = env.DATABASE_URL || env.POSTGRES_URL;
+  if (connectionString) {
+    const host = connectionHost(connectionString);
+    return isLocalHost(host);
+  }
+  return isLocalHost(env.POSTGRES_HOST);
+}
+
 export function buildPoolConfig(env: DatabaseEnvironment): PoolConfig {
-  const connectionString = env.DATABASE_URL;
+  const connectionString = env.DATABASE_URL || env.POSTGRES_URL;
   if (connectionString) {
     const host = connectionHost(connectionString);
     return {

@@ -1,6 +1,5 @@
 import 'server-only';
-import type { Pool } from 'pg';
-import { db as client } from '@/lib/db/client';
+import { pool as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import type {
   ManagerIdentityRecord,
@@ -10,7 +9,6 @@ import type {
   ManagerTransferRecord,
   ManagerSeasonRecords,
 } from './manager.records';
-const pgClient = client as Pool;
 
 export async function readManagerSeasonStats(
   userId: number | string

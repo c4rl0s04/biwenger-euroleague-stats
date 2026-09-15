@@ -1,7 +1,6 @@
 import 'server-only';
 
-import type { Pool } from 'pg';
-import { db } from '@/lib/db/client';
+import { pool } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import type { OfficialGameRow, OfficialPlayRow, OfficialShotRow } from './official-game.records';
 
@@ -21,7 +20,7 @@ export interface OfficialGameFilters {
 
 async function resolveGame(matchId: number, seasonId: string) {
   return (
-    await (db as Pool).query<ResolvedGameRow>(
+    await pool.query<ResolvedGameRow>(
       `SELECT m.id, m.status, m.date, m.official_game_code,
               CASE WHEN m.status = 'finished' THEN m.date ELSE NULL END AS finalized_at
        FROM matches m
@@ -59,7 +58,7 @@ export async function getOfficialPlayByPlay(
   const values: unknown[] = [seasonId, game.official_game_code];
   const where = filtersSql(filters, values);
   const items = (
-    await (db as Pool).query<OfficialPlayRow>(
+    await pool.query<OfficialPlayRow>(
       `SELECT d.sequence,d.provider_play_number,d.period,d.minute,d.marker_time,d.play_type,
               d.team_code,d.provider_player_code,pm.player_id,d.player_name,d.team_name,d.dorsal,
               d.home_score,d.away_score,d.comment,d.play_info
@@ -107,7 +106,7 @@ export async function getOfficialShots(
   }
   const where = clauses.length ? ` AND ${clauses.join(' AND ')}` : '';
   const items = (
-    await (db as Pool).query<OfficialShotRow>(
+    await pool.query<OfficialShotRow>(
       `SELECT d.annotation_number,d.team_code,d.provider_player_code,pm.player_id,d.player_name,
               d.action_id,d.action,d.points,d.coordinate_x,d.coordinate_y,d.zone,
               d.is_fastbreak,d.is_second_chance,d.is_points_off_turnover,d.minute,

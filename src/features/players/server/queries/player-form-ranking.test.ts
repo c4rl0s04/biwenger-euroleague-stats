@@ -2,11 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-vi.mock('@/lib/db/client', () => ({
-  db: {
-    query: vi.fn(),
-  },
-}));
+vi.mock('@/lib/db/client', () => {
+  const queryFn = vi.fn();
+  return {
+    pool: { query: queryFn },
+    db: { query: queryFn },
+  };
+});
 
 vi.mock('@/lib/db/season-context', () => ({
   resolveReadSeasonId: vi.fn(),
@@ -16,7 +18,7 @@ vi.mock('@/lib/db/queries/core/playerForm', () => ({
   getPlayerFormMap: vi.fn(),
 }));
 
-import { db as pgClient } from '@/lib/db/client';
+import { pool as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
 import { getTopPlayersByForm } from './player.query';

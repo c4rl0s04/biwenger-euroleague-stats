@@ -49,9 +49,8 @@ do not prevent the rest of the application from starting.
 ## Verify
 
 ```bash
-npm run db:verify
-npm run db:verify:drizzle
+npm run db:check
 ```
 
-These commands confirm connectivity and the Drizzle client. They do not replace the schema and
+This command confirms connectivity, the Drizzle client, schema readiness, and table row counts. It does not replace the schema and
 season audits required before sensitive database work.

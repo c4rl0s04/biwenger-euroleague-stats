@@ -1,4 +1,4 @@
-import { db as pgClient } from '../../client';
+import { pool as pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
 import { getPlayerFormMap } from './playerForm';
 import { readManagerDirectory } from './manager-directory';

@@ -35,9 +35,25 @@ writes `.env`. To configure manually instead, copy `.env.example` to `.env` and 
 Never commit `.env`. Both `.env` and `.env.local` are intended for local secrets and are ignored by
 Git.
 
+## Database setup
+
+With `DATABASE_URL` configured:
+
+```bash
+npm run db:migrate
+npm run db:validate
+npm run db:check
+```
+
+To prove an empty database can be migrated to the current schema from zero:
+
+```bash
+npm run test:db:local
+```
+
 ## Start the application
 
-With an accessible PostgreSQL database:
+With a migrated and validated PostgreSQL database:
 
 ```bash
 npm run dev

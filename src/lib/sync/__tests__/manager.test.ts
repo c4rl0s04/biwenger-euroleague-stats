@@ -7,8 +7,8 @@ const { mockDb } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('../../db/client', () => ({ db: mockDb }));
-vi.mock('../../db/schema_init', () => ({
+vi.mock('../../db/client', () => ({ pool: mockDb, db: mockDb }));
+vi.mock('../../db/schema-validation', () => ({
   validateSchemaReady: vi.fn(async () => {}),
 }));
 vi.mock('../../utils/cache', () => ({ clearCache: vi.fn() }));
@@ -92,7 +92,7 @@ describe('SyncManager', () => {
 
   it('uses read-only schema validation in production', async () => {
     vi.stubEnv('NODE_ENV', 'production');
-    const schema = await import('../../db/schema_init');
+    const schema = await import('../../db/schema-validation');
     const { SyncManager } = await import('../manager');
     const manager = new SyncManager({ useAdvisoryLock: false });
 

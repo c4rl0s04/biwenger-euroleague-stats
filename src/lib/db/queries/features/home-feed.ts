@@ -3,7 +3,7 @@ import 'server-only';
 import type { HomeFeedCursor } from '@/lib/home/cursor';
 import type { HomeActivityFilter } from '@/lib/home/contracts';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
-import { db as pgClient } from '@/lib/db/client';
+import { pool as pgClient } from '@/lib/db/client';
 import { PREDICTION_NORMALIZATION_CTES } from './prediction-normalization-sql';
 
 export type HomeActivityRowType =

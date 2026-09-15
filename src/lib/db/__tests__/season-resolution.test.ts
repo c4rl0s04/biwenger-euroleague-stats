@@ -13,6 +13,9 @@ vi.mock('next/headers', () => ({
 }));
 
 vi.mock('../client', () => ({
+  pool: {
+    query: mocks.pgQuery,
+  },
   db: {
     query: mocks.pgQuery,
   },

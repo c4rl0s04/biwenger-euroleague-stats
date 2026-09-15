@@ -1,4 +1,4 @@
-import { db as defaultDb } from '../client';
+import { pool as defaultDb } from '../client';
 import { CONFIG } from '../../config';
 
 // ==========================================

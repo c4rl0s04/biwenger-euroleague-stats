@@ -21,9 +21,8 @@ schema ready for the current code, and a writable season bound to the configured
 3. Verify connectivity and schema readiness:
 
    ```bash
-   npm run db:verify
-   npm run db:verify:drizzle
    npm run db:check
+   npm run db:validate
    ```
 
 4. For production or remote targets, confirm backups and follow [database safety](database-safety.md).
@@ -43,14 +42,13 @@ accidentally enabling sync for a frozen season.
 | `npm run sync:playoffs`                                     | Apply custom playoff metadata and results from checked-in JSON. |
 | `npm run sync -- --step=match-linking`                      | Run one descriptive step for diagnosis or recovery.             |
 | `npm run sync -- --step=euroleague-games --force-game=CODE` | Reconcile one old finalized official game.                      |
-| `npm run sync:official:mappings -- report`                  | Print the reproducible season mapping report.                   |
 
 The declarative pipeline is:
 
 | Order | Step ID                   | Source              | Main storage owned                                                     | Modes              |
 | ----: | ------------------------- | ------------------- | ---------------------------------------------------------------------- | ------------------ |
 |     1 | `biwenger-catalog`        | Biwenger            | `players`, `teams`, `player_seasons`, `market_values`                  | routine, bootstrap |
-|     2 | `euroleague-master-data`  | EuroLeague          | `official_games`, standings, team/player mappings                      | routine, bootstrap |
+|     2 | `euroleague-master-data`  | EuroLeague          | `matches`, standings, team/player mappings                             | routine, bootstrap |
 |     3 | `match-linking`           | Biwenger + database | `matches` links and official sporting fields                           | routine, bootstrap |
 |     4 | `biwenger-users`          | Biwenger            | `users`, `user_seasons`                                                | routine, bootstrap |
 |     5 | `euroleague-games`        | EuroLeague          | game state, boxscores, events, shots, sporting round statistics        | all                |

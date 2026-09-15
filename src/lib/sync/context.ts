@@ -1,6 +1,6 @@
 import type { EuroleagueClient } from '../api/euroleague/client';
 import type { OfficialScheduleGame } from '../api/euroleague/types';
-import type { db } from '../db/client';
+import type { pool } from '../db/client';
 import type { BiwengerRound } from './rounds';
 import type { SyncSeasonContext } from './season-guard';
 
@@ -12,7 +12,7 @@ export interface BiwengerCompetitionSnapshot {
 }
 
 export interface SyncExecutionContext {
-  db: typeof db | null;
+  db: typeof pool | null;
   seasonId?: string;
   season?: SyncSeasonContext;
   euroleague: EuroleagueClient;

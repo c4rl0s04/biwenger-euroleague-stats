@@ -6,7 +6,7 @@ const { query, resolveReadSeasonId } = vi.hoisted(() => ({
 }));
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/db/client', () => ({ db: { query } }));
+vi.mock('@/lib/db/client', () => ({ pool: { query }, db: { query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId }));
 
 import { queryHomeActivityRows, queryHomeRoundHighlightPlayers } from './home-feed';

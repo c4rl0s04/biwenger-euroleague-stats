@@ -1,17 +1,18 @@
-export { db, pgClient } from './connection';
+// Canonical connection exports from client.ts
+export { db, pool, pool as pgClient } from './client';
 
-// --- Exports from legacy index.js (Restored for backward compatibility) ---
+// --- Domain query exports remain for backward compatibility until feature architecture migration is completed ---
 
 export * from './queries/tournaments';
 export * from './queries/core/users';
 
 export * from './queries/core/playerForm';
-export * from './queries/core/teams'; // Assuming teams.js exists
+export * from './queries/core/teams';
 
 export * from './queries/competition/rounds';
 export * from './queries/competition/matches';
 export * from './queries/competition/schedule';
-export * from './queries/competition/standings'; // This will resolve to standings.ts (the managed one)
+export * from './queries/competition/standings';
 
 export * from './queries/analytics/performance';
 export * from './queries/analytics/advanced_stats';

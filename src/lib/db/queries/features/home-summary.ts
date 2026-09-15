@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { db as pgClient } from '@/lib/db/client';
+import { pool as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface HomeSeasonMetadata {

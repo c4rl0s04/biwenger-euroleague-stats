@@ -5,7 +5,7 @@ import 'server-only';
  * Business logic layer for comparison-related operations
  */
 
-import { db } from '../../db/client';
+import { pool } from '../../db/client';
 import { resolveReadSeasonId } from '../../db/season-context';
 import {
   getExtendedStandings as getStandings,
@@ -70,7 +70,7 @@ async function getUserSquad(userId: number): Promise<UserSquadMember[]> {
     ORDER BY points DESC
   `;
 
-  const rows = (await db.query(query, [userId, seasonId])).rows;
+  const rows = (await pool.query(query, [userId, seasonId])).rows;
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
@@ -170,7 +170,7 @@ export async function getCompareData(): Promise<CompareDataResponse> {
     biddingDuelsStats,
     theThiefStats,
   ] = await Promise.all([
-    db.query(usersQuery, [seasonId]),
+    pool.query(usersQuery, [seasonId]),
     getStandings(),
     getPorrasStats(),
     fetchStreakStats(),
@@ -283,7 +283,7 @@ export async function getCompareDataLite(): Promise<CompareDataLiteResponse> {
   `;
 
   const [usersResult, standingsData, porrasData] = await Promise.all([
-    db.query(usersQuery, [seasonId]),
+    pool.query(usersQuery, [seasonId]),
     getStandings(),
     getPorrasStats(),
   ]);

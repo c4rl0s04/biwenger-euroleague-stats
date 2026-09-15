@@ -17,11 +17,9 @@ call OpenAI after building context from local data.
 
 ## Database access
 
-[`src/lib/db/client.ts`](../../src/lib/db/client.ts) owns a shared `pg` pool. The pool is wrapped by
-Drizzle in [`src/lib/db/index.ts`](../../src/lib/db/index.ts), which also exposes a legacy raw-client
-bridge while migration is in progress. [`schema.ts`](../../src/lib/db/schema.ts) is the application
-schema source; [`schema_init.ts`](../../src/lib/db/schema_init.ts) remains a transitional bootstrap
-and readiness layer.
+[`src/lib/db/client.ts`](../../src/lib/db/client.ts) owns the shared `pg` pool and canonical Drizzle instance.
+[`schema.ts`](../../src/lib/db/schema.ts) is the application schema source;
+[`schema-validation.ts`](../../src/lib/db/schema-validation.ts) provides read-only schema readiness validation.
 
 Data is grouped around:
 

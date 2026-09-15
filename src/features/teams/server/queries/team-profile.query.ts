@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { db as pgClient } from '@/lib/db/client';
+import { pool as pgClient } from '@/lib/db/client';
 import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
 import { getTeamMatchesCount, getTeamPlayoffProbability } from '@/lib/db/queries/core/teams';
 import { resolveReadSeasonId } from '@/lib/db/season-context';

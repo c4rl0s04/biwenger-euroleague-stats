@@ -4,7 +4,7 @@ import { preparePlayerMutations } from '../../src/lib/db/mutations/players';
 import { prepareMatchMutations } from '../../src/lib/db/mutations/matches';
 import { prepareOfficialGameMutations } from '../../src/lib/db/mutations/official/game-data';
 import { assertSyncSeasonWritable } from '../../src/lib/sync/season-guard';
-import { validateSchemaReady } from '../../src/lib/db/schema_init';
+import { validateSchemaReady } from '../../src/lib/db/schema-validation';
 
 const connectionString = process.env.E2E_DATABASE_URL || process.env.DATABASE_URL;
 if (!connectionString) {

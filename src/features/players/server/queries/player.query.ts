@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { CONFIG } from '@/lib/config';
-import { db as pgClient } from '@/lib/db/client';
+import { pool as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
 

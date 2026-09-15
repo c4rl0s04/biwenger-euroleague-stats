@@ -1,4 +1,4 @@
-import { db as pgClient } from './client';
+import { pool as pgClient } from './client';
 import { CONFIG } from '../config';
 import { cookies } from 'next/headers';
 import { getActiveSeasonId } from '../seasons';

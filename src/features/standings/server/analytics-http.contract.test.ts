@@ -22,7 +22,7 @@ vi.mock('@/lib/db/connection', () => ({
   pgClient: { query: mocks.query },
   db: { execute: mocks.execute },
 }));
-vi.mock('@/lib/db/client', () => ({ db: { query: mocks.query } }));
+vi.mock('@/lib/db/client', () => ({ pool: { query: mocks.query }, db: { query: mocks.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 vi.mock('@/features/rounds/server', () => ({ getUserPerformanceHistoryService: async () => [] }));
 beforeEach(() => {

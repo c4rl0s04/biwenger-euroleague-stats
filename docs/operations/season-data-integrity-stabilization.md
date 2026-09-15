@@ -18,14 +18,14 @@ This document records the architectural hardening and data integrity stabilizati
 The multi-season model separates global identities (`players`, `teams`, `users`) from season-specific facts and performance (`player_seasons`, `team_seasons`, `user_seasons`, `player_round_stats`, `matches`). Migration `0014_drop_deprecated_seasonal_columns.sql` removed historical duplicate columns from global `players` and `teams`, and Migration `0015_dnp_provenance_and_match_venues.sql` added DNP participation tracking, official game provenance, and match venue support. This stabilization ensures that:
 
 1. **Drizzle migrations** remain the sole authority for database schema (no runtime DDL / `ensureSchema()` bootstrapping).
-2. **Dedicated migration & validation tooling** (`npm run db:migrate` and `npm run db:schema:validate`) allows operators to inspect and execute migrations safely.
+2. **Dedicated migration & validation tooling** (`npm run db:migrate` and `npm run db:validate`) allows operators to inspect and execute migrations safely.
 3. **Zero stale column references** exist across all queries, services, and mappers, protected by a continuous AST architectural guard.
 4. **Biwenger catalog & mutations** maintain authoritative current-season player updates, allowing downward score corrections, transfers, and valid zero-point values without artificial `GREATEST(...)` clamps.
 5. **Official EuroLeague provider sync** preserves nullable sporting metrics, distinguishing between 0, valid absence (`null`), and non-participation (DNP).
 6. **Round integrity invariant** enforces at most one match per team per fantasy round.
 7. **Player mapping resolution** automatically re-triggers ingestion on unchanged payload checksums when unpersisted mapped player stats are detected, even when fantasy points already exist.
 8. **Fail-closed season guard** prevents syncing when official EuroLeague provider bindings are missing, eliminating hardcoded fallbacks.
-9. **Automated upgrade rehearsal** (`scripts/e2e/season-upgrade-integrity.ts`) proves that pre-0014 databases with populated legacy columns upgrade cleanly to 0014 and 0015 with zero data loss.
+9. **Multi-season integrity validation** (`scripts/e2e/season-integrity.ts`) verifies that post-0015 multi-season databases maintain cross-season isolation, data integrity, and strict absence of deprecated seasonal columns.
 
 ---
 
@@ -35,11 +35,11 @@ The multi-season model separates global identities (`players`, `teams`, `users`)
 
 - **Problem**: Runtime `ensureSchema()` calls attempted ad-hoc `CREATE TABLE IF NOT EXISTS` and `ALTER TABLE` statements during sync operations, conflicting with Drizzle migrations. In addition, catalog queries in `validateSchemaReady()` quoted `"public"` as an identifier rather than a literal string (`'public'`), causing silent check mismatches.
 - **Fix**:
-  - Removed deprecated `ensureSchema()` from `src/lib/db/schema_init.ts` and eliminated all call sites from runtime code and test mocks.
+  - Removed deprecated `ensureSchema()`, eliminating all DDL from runtime code, and renamed to `src/lib/db/schema-validation.ts`.
   - Fixed schema name quoting (`'public'`) in `validateSchemaReady()`.
   - Added read-only verification in `validateSchemaReady()` for the absence of all 18 dropped seasonal columns and the presence of required EuroLeague columns (`is_dnp`, `official_game_code`, `arena_code`, `arena_name`, `arena_capacity`).
-  - Implemented `npm run db:migrate` (`scripts/dev/migrate.ts`) to run committed Drizzle migrations safely in journal order within transactions.
-  - Implemented `npm run db:schema:validate` (`scripts/dev/validate-schema.ts`) to run read-only preflight verification before sync or application start.
+  - Implemented `npm run db:migrate` (`scripts/db/migrate.ts`) to run committed Drizzle migrations safely in journal order within transactions.
+  - Implemented `npm run db:validate` (`scripts/db/validate.ts`) to run read-only preflight verification before sync or application start.
 
 ### 2.2 Complete Elimination of Dropped Seasonal Columns & AST Guard
 
@@ -94,120 +94,62 @@ The multi-season model separates global identities (`players`, `teams`, `users`)
 
 ---
 
-## 3. Safe Upgrade Runbook for Existing Databases
+## 3. Database Support Model & Operational Lifecycle
 
-When upgrading existing environments to schema migrations 0014 and 0015:
+### 3.1 Supported Environments
+
+- **Existing Databases**: Must be on the current migration history (post-0015). Upgrading a populated database whose migration state is older than `0014` is **no longer supported** (all historical pre-0014 backfill and temporary check tooling has been decommissioned).
+- **Fresh Databases**: Fully supported. A clean database executes migrations `0000` through `0015` in sequential order via `npm run db:migrate`.
+
+### 3.2 Routine Migration & Verification Procedure
+
+For applying pending schema updates and verifying database readiness:
 
 ```text
-[Starting State: 0013 Baseline Database]
+[Step 1: Apply Pending Migrations: npm run db:migrate]
          │
          ▼
-[Step 1: Pre-Migration Backup (pg_dump)]
+[Step 2: Validate Schema Readiness: npm run db:validate]
          │
          ▼
-[Step 2: Canonical Backfill (if needed): npm run db:season:backfill-2025]
-         │
-         ▼
-[Step 3: Pre-0014 Hard Safety Check: npm run db:pre0014:check]
-         │
-         ▼
-[Step 4: Apply Migrations 0014 & 0015: npm run db:migrate]
-         │
-         ▼
-[Step 5: Validate Schema Readiness: npm run db:schema:validate]
+[Step 3: Check Diagnostic Status: npm run db:check]
 ```
 
-### Starting State Precondition
+1. **Apply Migrations**:
 
-The database must be migrated through `0013_season_lifecycle_and_constraints.sql`. All seasonal tables (`player_seasons`, `team_seasons`, `user_seasons`) exist, and deprecated seasonal columns (`players.puntos`, `teams.city`, etc.) are still present.
+   ```bash
+   npm run db:migrate
+   ```
 
-### Step 1: Pre-Migration Backup
+   Applies any pending Drizzle migrations in journal order within transactions.
 
-Before running schema migrations:
+2. **Verify Schema Readiness**:
 
-```bash
-pg_dump -Fc --no-acl --no-owner "$DATABASE_URL" > "backup_pre_0014_$(date +%Y%m%d_%H%M%S).dump"
-```
+   ```bash
+   npm run db:validate
+   ```
 
-### Step 2: Canonical Data Backfill
+   Runs standalone read-only schema preflight, confirming all required tables, seasonal isolation structures, and EuroLeague sporting columns (`is_dnp`, `official_game_code`, `arena_code`, `arena_name`, `arena_capacity`) are intact.
 
-If unmigrated records exist or seasonal tables are empty, execute the canonical, idempotent backfill procedure:
-
-```bash
-npm run db:season:backfill-2025
-```
-
-This populates all 14 seasonal player fields into `player_seasons` and all 4 seasonal team fields into `team_seasons`. It is safe to run multiple times (idempotent: $A = B$).
-
-### Step 3: Verify Pre-0014 Safety Check
-
-Execute the automated hard safety check before dropping columns:
-
-```bash
-npm run db:pre0014:check
-# Or explicitly targeting the historical cutover season:
-npm run db:pre0014:check -- --season=2025-26
-```
-
-This CLI explicitly targets historical season `2025-26` (not inferred dynamically from `status = 'active'`) and verifies that:
-
-1. Target season `2025-26` exists in the `seasons` table.
-2. Every player in `players` has a matching record in `player_seasons` for `2025-26`.
-3. Every team in `teams` has a matching record in `team_seasons` for `2025-26`.
-4. All 18 migrated columns match exactly between source and seasonal destination records (using `IS DISTINCT FROM`):
-   - **14 player columns**: `position`, `puntos`, `partidos_jugados`, `played_home`, `played_away`, `points_home`, `points_away`, `points_last_season`, `owner_id`, `status`, `price_increment`, `price`, `dorsal`, `team_id`
-   - **4 team columns**: `city`, `arena_name`, `latitude`, `longitude`
-
-The command returns exit code `0` when safe to proceed, or exits non-zero if ANY value differs.
-
-### Step 4: Apply Migrations 0014 and 0015
-
-Run the migration runner:
-
-```bash
-npm run db:migrate
-```
-
-This applies:
-
-- `drizzle/0014_drop_deprecated_seasonal_columns.sql`: drops all 18 deprecated columns (`position`, `puntos`, `partidos_jugados`, `price`, `team_id`, `status`, `price_increment`, `played_home`, `played_away`, `points_home`, `points_away`, `points_last_season`, `owner_id`, `dorsal` on `players`; `city`, `arena_name`, `latitude`, `longitude` on `teams`).
-- `drizzle/0015_dnp_provenance_and_match_venues.sql`: adds `arena_code`, `arena_name`, `arena_capacity` to `matches`, and `is_dnp`, `official_game_code` to `player_round_stats`.
-
-### Step 5: Verify Schema Readiness
-
-Run the standalone schema validation preflight:
-
-```bash
-npm run db:schema:validate
-```
+3. **Check Diagnostic Status**:
+   ```bash
+   npm run db:check
+   ```
+   Performs connection, ORM, schema readiness, and table count diagnostic verification.
 
 ---
 
-## 4. Production Cutover & Upgrade Rehearsal Status
+## 4. Production Cutover & Schema Parity Status
 
-### 4.1 Automated Upgrade Rehearsal
-
-The migration sequence from baseline through 0013, the population of all 18 deprecated seasonal columns with distinct non-default values, the canonical data backfill into `player_seasons` and `team_seasons`, the verification of backfill idempotency ($A = B$), the destructive column drop in 0014, additions in 0015, and tri-state DNP semantics are verified end-to-end via:
-
-```bash
-npm run test:e2e:local
-```
-
-This automated rehearsal (`scripts/e2e/season-upgrade-integrity.ts`) runs against real disposable PostgreSQL and proves that:
-
-1. All 18 deprecated columns exist and hold data at 0013.
-2. The canonical backfill procedure copies all 18 columns accurately to destination tables.
-3. Repeated execution of the canonical backfill is strictly idempotent ($A = B$, unchanged row counts).
-4. Migration 0014 drops all 18 deprecated columns cleanly without foreign key or dependency errors.
-5. All 18 backfilled values survive intact post-drop.
-6. Migration 0015 adds venue and DNP columns cleanly.
-7. `validateSchemaReady` passes on the upgraded schema.
-
-### 4.2 2025-26 Live Production Status
-
-- **Codebase & Architecture**: Genuinely merge-ready. Zero stale column reads, sole DDL authority established, AST guards active, and all unit/integration tests passing.
-- **Local Rehearsal**: Fully verified with real PostgreSQL.
-- **Live Production Database**: The actual live production database will execute migrations 0014 and 0015 during deployment. Verification on live production requires production database credentials and maintenance window authorization, following the runbook in Section 3.
+- **Live Production Database**: The live Supabase production database has completed all migrations through `0015_dnp_provenance_and_match_venues.sql`.
+  - All 366 current players have a matching `2025-26` `player_seasons` record.
+  - All 20 current teams have a matching `2025-26` `team_seasons` record.
+  - Zero players or teams are missing their seasonal snapshot.
+  - All 18 deprecated columns on `players` and `teams` are absent.
+  - Abandoned staging tables (`official_games`, `official_player_game_stats`) do not exist.
+  - Migration journals (`drizzle.__drizzle_migrations` and `supabase_migrations.schema_migrations`) are 100% reconciled.
+- **Codebase & Architecture**: Zero stale column reads, sole DDL authority established, continuous AST guards active, and all unit/integration tests passing.
+- **Multi-Season Integrity**: Verified through `scripts/e2e/season-integrity.ts`.
 
 ---
 
@@ -215,13 +157,13 @@ This automated rehearsal (`scripts/e2e/season-upgrade-integrity.ts`) runs agains
 
 All modifications are verified through the repository's verification pipeline:
 
-| Gate                    | Command                            | Scope / Coverage                                                                     | Result |
-| :---------------------- | :--------------------------------- | :----------------------------------------------------------------------------------- | :----- |
-| **Typecheck**           | `npm run typecheck`                | Full repository TypeScript compilation                                               | Passed |
-| **Unit & Architecture** | `npm test`                         | Full test suite (including AST seasonal column reads guard and mapper unit tests)    | Passed |
-| **Linter**              | `npm run lint`                     | ESLint rules across all files                                                        | Passed |
-| **Production Build**    | `npm run build`                    | Next.js production bundle compilation                                                | Passed |
-| **Drizzle Checks**      | `npx drizzle-kit check`            | Drizzle migration journal and schema sync (0000 - 0015)                              | Passed |
-| **Schema Audit**        | `npm run db:audit:schema:metadata` | Schema metadata audit across 37 tables                                               | Passed |
-| **Git Diff Check**      | `git diff --check`                 | Trailing whitespace and merge artifacts check                                        | Clean  |
-| **E2E & PostgreSQL**    | `npm run test:e2e:local`           | Real isolated PostgreSQL: upgrade rehearsal + 12 DB integrity checks + Playwright UI | Passed |
+| Gate                    | Command                            | Scope / Coverage                                                                  | Result |
+| :---------------------- | :--------------------------------- | :-------------------------------------------------------------------------------- | :----- |
+| **Typecheck**           | `npm run typecheck`                | Full repository TypeScript compilation                                            | Passed |
+| **Unit & Architecture** | `npm test`                         | Full test suite (including AST seasonal column reads guard and mapper unit tests) | Passed |
+| **Linter**              | `npm run lint`                     | ESLint rules across all files                                                     | Passed |
+| **Production Build**    | `npm run build`                    | Next.js production bundle compilation                                             | Passed |
+| **Drizzle Checks**      | `npx drizzle-kit check`            | Drizzle migration journal and schema sync (0000 - 0015)                           | Passed |
+| **Schema Audit**        | `npm run db:audit:schema:metadata` | Schema metadata audit across 37 tables                                            | Passed |
+| **Git Diff Check**      | `git diff --check`                 | Trailing whitespace and merge artifacts check                                     | Clean  |
+| **E2E & PostgreSQL**    | `npm run test:e2e:local`           | Real isolated PostgreSQL: 12 DB multi-season integrity checks + Playwright UI     | Passed |

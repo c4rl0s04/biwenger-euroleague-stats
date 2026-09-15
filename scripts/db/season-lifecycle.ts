@@ -1,15 +1,12 @@
 import * as dotenv from 'dotenv';
 import pg from 'pg';
 import { getSeasonConfig, validateSeasonConfig } from '../../src/lib/config';
+import { createCliPool } from '../../src/lib/db/cli';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
 
 const SYNC_LOCK_KEYS = [823744, 823745];
-
-function connectionStringFromEnv(): string | undefined {
-  return process.env.DATABASE_URL || process.env.POSTGRES_URL;
-}
 
 function requireBackupConfirmation() {
   if (process.env.BACKUP_CONFIRMED !== 'true') {
@@ -68,51 +65,73 @@ async function freezeSeason(pool: pg.Pool) {
 async function createNextSeason(pool: pg.Pool) {
   const configuredSeason = validateSeasonConfig({ requireToken: false });
   const seasonId = configuredSeason.ID;
-  const seasonName = configuredSeason.NAME;
   requireBackupConfirmation();
   await assertNoSyncRunning(pool);
 
   await pool.query('BEGIN');
   try {
     const active = await pool.query<{ id: string }>(
-      "SELECT id FROM seasons WHERE status = 'active' FOR UPDATE"
+      "SELECT id FROM seasons WHERE status = 'active'"
     );
-
-    if (active.rows.length > 0) {
+    if (active.rowCount && active.rows.some((row) => row.id !== seasonId)) {
       throw new Error(
-        `Cannot create ${seasonId}; active season already exists: ${active.rows.map((r) => r.id).join(', ')}`
+        `Another season is already active: ${active.rows.map((row) => row.id).join(', ')}. Freeze it before creating a new active season.`
       );
     }
 
-    const existing = await pool.query<{ id: string; status: string }>(
-      'SELECT id, status FROM seasons WHERE id = $1 FOR UPDATE',
-      [seasonId]
-    );
-    if (existing.rows.length > 0) {
-      throw new Error(
-        `Cannot create ${seasonId}; that season already exists with status ${existing.rows[0].status}. Existing seasons are never reactivated by create-next.`
-      );
-    }
-
-    await pool.query(
+    const inserted = await pool.query(
       `
-      INSERT INTO seasons (id, name, status, starts_at, ends_at, source_league_id, notes)
-      VALUES ($1, $2, 'active', $3, $4, $5, $6)
+      INSERT INTO seasons (
+        id,
+        name,
+        status,
+        is_sync_enabled,
+        euroleague_code,
+        starts_at,
+        ends_at,
+        source_league_id,
+        notes,
+        created_at,
+        updated_at
+      )
+      VALUES (
+        $1,
+        $2,
+        'active',
+        true,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT (id) DO UPDATE
+      SET name = EXCLUDED.name,
+          status = 'active',
+          is_sync_enabled = true,
+          euroleague_code = EXCLUDED.euroleague_code,
+          starts_at = EXCLUDED.starts_at,
+          ends_at = EXCLUDED.ends_at,
+          source_league_id = EXCLUDED.source_league_id,
+          notes = EXCLUDED.notes,
+          updated_at = NOW()
+      RETURNING id, name, status, source_league_id
     `,
       [
         seasonId,
-        seasonName,
+        configuredSeason.NAME,
+        configuredSeason.EUROLEAGUE_CODE,
         configuredSeason.START_DATE,
-        process.env.SEASON_END_DATE || null,
-        configuredSeason.BIWENGER_LEAGUE_ID,
-        process.env.SEASON_NOTES || null,
+        configuredSeason.END_DATE || null,
+        configuredSeason.LEAGUE_ID,
+        'Provisioned via db:season:create-next',
       ]
     );
 
     await pool.query('COMMIT');
-    console.log(
-      `Season ${seasonId} is now active for Biwenger league ${configuredSeason.BIWENGER_LEAGUE_ID}.`
-    );
+    console.log(`Season ${seasonId} ready:`, inserted.rows[0]);
   } catch (error) {
     await pool.query('ROLLBACK');
     throw error;
@@ -121,22 +140,11 @@ async function createNextSeason(pool: pg.Pool) {
 
 async function main() {
   const command = process.argv[2];
-  const connectionString = connectionStringFromEnv();
-  const pool = connectionString
-    ? new pg.Pool({
-        connectionString,
-        ssl:
-          connectionString.includes('localhost') || connectionString.includes('127.0.0.1')
-            ? false
-            : { rejectUnauthorized: false },
-      })
-    : new pg.Pool({
-        user: process.env.POSTGRES_USER,
-        password: process.env.POSTGRES_PASSWORD,
-        host: process.env.POSTGRES_HOST,
-        port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT, 10) : 5432,
-        database: process.env.POSTGRES_DB,
-      });
+  if (!['freeze', 'create-next'].includes(command)) {
+    throw new Error('Usage: tsx scripts/db/season-lifecycle.ts <freeze|create-next>');
+  }
+
+  const pool = createCliPool();
 
   try {
     if (command === 'freeze') {
@@ -148,8 +156,6 @@ async function main() {
       await createNextSeason(pool);
       return;
     }
-
-    throw new Error('Usage: tsx scripts/dev/season-lifecycle.ts <freeze|create-next>');
   } finally {
     await pool.end();
   }

@@ -9,8 +9,8 @@ const { mockDb } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('../../db/client', () => ({ db: mockDb }));
-vi.mock('../../db/schema_init', () => ({
+vi.mock('../../db/client', () => ({ pool: mockDb, db: mockDb }));
+vi.mock('../../db/schema-validation', () => ({
   validateSchemaReady: vi.fn(async () => {}),
 }));
 vi.mock('../../utils/cache', () => ({ clearCache: vi.fn() }));

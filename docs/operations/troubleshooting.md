@@ -19,7 +19,7 @@ database or bypass a guard merely to make a symptom disappear.
 
 1. Confirm Node.js 20+, `npm ci`, and required environment values.
 2. Run `npm run typecheck` to separate compile-time problems from runtime configuration.
-3. Run `npm run db:verify` if the error references PostgreSQL.
+3. Run `npm run db:check` if the error references PostgreSQL.
 4. With `SKIP_DB=true`, use `npm run build` to determine whether the application can compile without
    a live database.
 
@@ -34,7 +34,7 @@ database or bypass a guard merely to make a symptom disappear.
 
 - Determine whether `DATABASE_URL` is overriding individual `POSTGRES_*` values.
 - Inside Docker, use the container-visible host rather than assuming `localhost` reaches PostgreSQL.
-- Run `npm run db:verify` and `npm run db:verify:drizzle`.
+- Run `npm run db:check`.
 - Do not delete a Docker volume to fix roles or schema until it is confirmed disposable.
 
 ## Sync does not run

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 const fake = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
-vi.mock('@/lib/db/client', () => ({ db: { query: fake.query } }));
+vi.mock('@/lib/db/client', () => ({ pool: { query: fake.query }, db: { query: fake.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: fake.season }));
 import { readManagerSeasonStats } from './manager-stats.query';
 import { readManagerSquad, readManagerPoints } from './manager-squad.query';

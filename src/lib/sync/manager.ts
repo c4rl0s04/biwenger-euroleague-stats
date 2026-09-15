@@ -1,6 +1,6 @@
 import { getEuroleagueClient } from '../api/euroleague/runtime';
-import { db } from '../db/client';
-import { validateSchemaReady } from '../db/schema_init';
+import { pool } from '../db/client';
+import { validateSchemaReady } from '../db/schema-validation';
 import { clearCache } from '../utils/cache';
 import { acquireAdvisoryLock, type AdvisoryLock } from './advisory-lock';
 import {
@@ -104,10 +104,10 @@ export class SyncManager {
   async run(): Promise<void> {
     this.log(`🚀 Starting ${this.mode} data sync...`);
     let advisoryLock: AdvisoryLock | null = null;
-    this.context.db = db;
+    this.context.db = pool;
 
     if (this.useAdvisoryLock) {
-      advisoryLock = await acquireAdvisoryLock(db, this.lockKey, this.mode);
+      advisoryLock = await acquireAdvisoryLock(pool, this.lockKey, this.mode);
       if (!advisoryLock.acquired) {
         this.lockUnavailable = true;
         this.log('⏭️ Another synchronization is already running. Skipping this run.');
@@ -116,9 +116,9 @@ export class SyncManager {
     }
 
     try {
-      await validateSchemaReady(db);
+      await validateSchemaReady(pool);
 
-      const season = await assertSyncSeasonWritable(db, this.targetSeasonId);
+      const season = await assertSyncSeasonWritable(pool, this.targetSeasonId);
       this.context.season = season;
       this.context.seasonId = season.seasonId;
       this.log(
