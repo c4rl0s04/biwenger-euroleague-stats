@@ -11,20 +11,20 @@ export async function readManagerSquad(userId: number | string) {
     SELECT
       p.id,
       p.name,
-      p.position,
+      ps.position,
       t.name as team,
       t.img as team_img,
       t.short_name as team_short_name,
-      COALESCE(ps.price, p.price) AS price,
-      COALESCE(ps.price_increment, p.price_increment) AS price_increment,
-      COALESCE(ps.puntos, p.puntos) as points,
-      ROUND(CAST(COALESCE(ps.puntos, p.puntos) AS NUMERIC) / NULLIF(COALESCE(ps.partidos_jugados, p.partidos_jugados), 0), 1) as average,
+      ps.price AS price,
+      ps.price_increment AS price_increment,
+      ps.puntos as points,
+      ROUND(CAST(ps.puntos AS NUMERIC) / NULLIF(ps.partidos_jugados, 0), 1) as average,
       p.img
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE ps.season_id = $1 AND ps.owner_id = $2
-    ORDER BY COALESCE(ps.puntos, p.puntos) DESC
+    ORDER BY ps.puntos DESC NULLS LAST
   `;
 
   const squadRes = await pgClient.query<ManagerSquadRecord>(squadQuery, [seasonId, userId]);

@@ -412,8 +412,8 @@ export async function getInitialSquadPotentialAdvanced(): Promise<InitialSquadPo
       u.name as user_name,
       u.color_index as user_color_index,
       u.icon as icon,
-      SUM(COALESCE(ps.puntos, p.puntos)) as total_points,
-      SUM(COALESCE(ps.price, p.price)) as total_value
+      SUM(ps.puntos) as total_points,
+      SUM(ps.price) as total_value
     FROM initial_squads isq
     JOIN users u ON u.id = isq.user_id
     JOIN players p ON p.id = isq.player_id
@@ -441,9 +441,9 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
         COALESCE(us.color_index, u.color_index, 0) as manager_color_index,
         p.id as player_id,
         p.name as player_name,
-        COALESCE(ps.puntos, p.puntos) as current_points,
-        COALESCE(ps.price, p.price) as current_price,
-        p.position as player_position,
+        ps.puntos as current_points,
+        ps.price as current_price,
+        ps.position as player_position,
         ps.owner_id as current_owner_id,
         (SELECT COALESCE(us2.name, u2.name) FROM users u2 LEFT JOIN user_seasons us2 ON us2.user_id = u2.id AND us2.season_id = isq.season_id WHERE u2.id = ps.owner_id) as current_owner,
         (SELECT COALESCE(us2.color_index, u2.color_index, 0) FROM users u2 LEFT JOIN user_seasons us2 ON us2.user_id = u2.id AND us2.season_id = isq.season_id WHERE u2.id = ps.owner_id) as current_owner_color_index,
@@ -459,13 +459,13 @@ export async function getInitialSquadsDetailed(): Promise<InitialSquadDetailed[]
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = isq.season_id
     WHERE isq.season_id = $1
     ORDER BY COALESCE(us.name, u.name),
-             CASE p.position
+             CASE ps.position
                WHEN 'G' THEN 1
                WHEN 'F' THEN 2
                WHEN 'C' THEN 3
                ELSE 4
              END,
-             COALESCE(ps.price, p.price) DESC
+             ps.price DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
     ...row,

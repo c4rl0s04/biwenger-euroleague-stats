@@ -42,7 +42,7 @@ describe('Manager SQL contracts', () => {
       .mockResolvedValueOnce({ rows: [{ total_points: '0' }] });
     const result = await readManagerSquad('7');
     expect(result).toEqual({ seasonId: '2026-27', rows: [{ id: 1, average: '3.5' }] });
-    expect(fake.query.mock.calls[0][0]).toContain('ORDER BY COALESCE(ps.puntos, p.puntos) DESC');
+    expect(fake.query.mock.calls[0][0]).toContain('ORDER BY ps.puntos DESC NULLS LAST');
     expect(fake.query.mock.calls[0][1]).toEqual(['2026-27', '7']);
     expect(await readManagerPoints('7', result.seasonId)).toBe('0');
     expect(fake.season).toHaveBeenCalledTimes(1);

@@ -93,7 +93,7 @@ export async function getSquadStats(): Promise<SquadStats[]> {
     SELECT 
       ps.owner_id as user_id,
       COUNT(p.id) as squad_size,
-      SUM(COALESCE(ps.price, p.price, 0)) as total_value,
+      SUM(COALESCE(ps.price, 0)) as total_value,
       ur.total_points
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
@@ -125,17 +125,17 @@ export async function getUserSquad(userId: number | string): Promise<UserSquadPl
     SELECT 
       p.id,
       p.name,
-      p.position,
+      ps.position,
       t.name as team,
-      COALESCE(ps.price, p.price) AS price,
-      COALESCE(ps.puntos, p.puntos) as points,
-      ROUND(CAST(COALESCE(ps.puntos, p.puntos) AS NUMERIC) / NULLIF(COALESCE(ps.partidos_jugados, p.partidos_jugados), 0), 1) as average,
-      COALESCE(ps.status, p.status) AS status
+      ps.price AS price,
+      ps.puntos as points,
+      ROUND(CAST(ps.puntos AS NUMERIC) / NULLIF(ps.partidos_jugados, 0), 1) as average,
+      ps.status AS status
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE ps.season_id = $1 AND ps.owner_id = $2
-    ORDER BY COALESCE(ps.puntos, p.puntos) DESC
+    ORDER BY ps.puntos DESC NULLS LAST
   `;
 
   return (await (pgClient as any).query(query, [seasonId, userId])).rows.map((row: any) => ({
@@ -284,12 +284,12 @@ export async function getCaptainRecommendations(
     SELECT 
       p.id as player_id,
       p.name,
-      p.position,
-      COALESCE(ps.team_id, p.team_id) as team_id,
+      ps.position,
+      ps.team_id as team_id,
       t.name as team
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE ps.season_id = $1 AND ps.owner_id = $2
   `;
 
@@ -338,10 +338,10 @@ export async function getPersonalizedAlerts(
   const priceGainsQuery = `
     SELECT 
       p.name,
-      COALESCE(ps.price_increment, p.price_increment) AS price_increment
+      ps.price_increment AS price_increment
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND COALESCE(ps.price_increment, p.price_increment) > 500000
+    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND ps.price_increment > 500000
     ORDER BY price_increment DESC
     LIMIT 2
   `;
@@ -358,10 +358,10 @@ export async function getPersonalizedAlerts(
   const priceLossesQuery = `
     SELECT 
       p.name,
-      COALESCE(ps.price_increment, p.price_increment) AS price_increment
+      ps.price_increment AS price_increment
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND COALESCE(ps.price_increment, p.price_increment) < -500000
+    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND ps.price_increment < -500000
     ORDER BY price_increment ASC
     LIMIT 2
   `;

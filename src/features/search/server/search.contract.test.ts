@@ -98,8 +98,8 @@ describe('real Search HTTP/service/query contract', () => {
     expect(calls[0][0]).toContain('AND ps.season_id = $2');
     expect(calls[0][0]).toContain("opm.provider='euroleague_advanced' AND opm.status='matched'");
     expect(calls[0][0]).toContain('AND COALESCE(opm.image_url,p.img) IS NOT NULL');
-    expect(calls[0][0]).toContain('AND COALESCE(ps.team_id, p.team_id) IS NOT NULL');
-    expect(calls[0][0]).toContain('ORDER BY COALESCE(ps.puntos, p.puntos) DESC');
+    expect(calls[0][0]).toContain('AND ps.team_id IS NOT NULL');
+    expect(calls[0][0]).toContain('ORDER BY ps.puntos DESC NULLS LAST');
     expect(calls[1][0]).toContain(
       'LEFT JOIN player_seasons ps ON ps.team_id = t.id AND ps.season_id = $2'
     );

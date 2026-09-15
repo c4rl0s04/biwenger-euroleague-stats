@@ -1,6 +1,6 @@
 import { getEuroleagueClient } from '../api/euroleague/runtime';
 import { db } from '../db/client';
-import { ensureSchema, validateSchemaReady } from '../db/schema_init';
+import { validateSchemaReady } from '../db/schema_init';
 import { clearCache } from '../utils/cache';
 import { acquireAdvisoryLock, type AdvisoryLock } from './advisory-lock';
 import {
@@ -116,9 +116,6 @@ export class SyncManager {
     }
 
     try {
-      const allowBootstrap =
-        process.env.NODE_ENV !== 'production' || process.env.ALLOW_SCHEMA_BOOTSTRAP === 'true';
-      if (allowBootstrap) await ensureSchema(db);
       await validateSchemaReady(db);
 
       const season = await assertSyncSeasonWritable(db, this.targetSeasonId);

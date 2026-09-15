@@ -22,6 +22,13 @@ vi.mock('../../seasons', () => ({
   getActiveSeasonId: mocks.getActiveSeasonId,
 }));
 
+vi.mock('../../config', () => ({
+  CONFIG: {
+    DB: { SKIP: false },
+    SEASON: { ID: '2025-26' },
+  },
+}));
+
 import { resolveReadSeasonId } from '../season-context';
 
 describe('resolveReadSeasonId', () => {

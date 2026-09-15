@@ -119,9 +119,9 @@ export async function getSeasonReviewRawData(): Promise<SeasonReviewRawData> {
     ),
     pgClient.query(
       `SELECT prs.round_id, prs.player_id, COALESCE(prs.fantasy_points, 0) AS fantasy_points,
-              p.position
+              ps.position
        FROM player_round_stats prs
-       LEFT JOIN players p ON p.id = prs.player_id
+       LEFT JOIN player_seasons ps ON ps.player_id = prs.player_id AND ps.season_id = prs.season_id
        WHERE prs.season_id = $1
        ORDER BY prs.round_id, prs.fantasy_points DESC NULLS LAST, prs.player_id`,
       [seasonId]

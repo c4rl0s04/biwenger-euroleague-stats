@@ -55,18 +55,18 @@ async function getUserSquad(userId: number): Promise<UserSquadMember[]> {
     SELECT 
       p.id,
       p.name,
-      p.position,
+      ps.position,
       t.name as team,
-      COALESCE(ps.price, p.price) AS price,
+      ps.price AS price,
       COALESCE(SUM(prs.fantasy_points), 0) as points,
       ROUND(AVG(COALESCE(prs.fantasy_points, 0)), 1) as average,
-      COALESCE(ps.status, p.status) AS status
+      ps.status AS status
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND prs.season_id = ps.season_id
     WHERE ps.season_id = $2 AND ps.owner_id = $1
-    GROUP BY p.id, p.name, p.position, t.name, ps.price, p.price, ps.status, p.status
+    GROUP BY p.id, p.name, ps.position, t.name, ps.price, ps.status
     ORDER BY points DESC
   `;
 

@@ -21,13 +21,13 @@ export async function findSearchRecords(query: string, limit: number): Promise<S
         p.id,
         p.name,
         COALESCE(opm.image_url,p.img) AS img,
-        p.position,
+        ps.position,
         t.name as team,
-        COALESCE(ps.price, p.price) as price,
-        COALESCE(ps.puntos, p.puntos) as points
+        ps.price as price,
+        ps.puntos as points
       FROM players p
       JOIN player_seasons ps ON ps.player_id = p.id
-      LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+      LEFT JOIN teams t ON ps.team_id = t.id
       LEFT JOIN official_player_mappings opm
         ON opm.player_id=p.id AND opm.season_id=ps.season_id
        AND opm.provider='euroleague_advanced' AND opm.status='matched'
@@ -35,8 +35,8 @@ export async function findSearchRecords(query: string, limit: number): Promise<S
         AND ps.season_id = $2
         AND p.name IS NOT NULL
         AND COALESCE(opm.image_url,p.img) IS NOT NULL
-        AND COALESCE(ps.team_id, p.team_id) IS NOT NULL
-      ORDER BY COALESCE(ps.puntos, p.puntos) DESC
+        AND ps.team_id IS NOT NULL
+      ORDER BY ps.puntos DESC NULLS LAST
       LIMIT $3
   `;
   const playersRes = await pgClient.query(playersQuery, [searchTerm, seasonId, limit]);

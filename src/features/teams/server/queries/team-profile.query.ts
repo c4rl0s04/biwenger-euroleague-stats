@@ -116,7 +116,7 @@ export async function findTeamProfileDetails(
       COALESCE(SUM(prs.fantasy_points), 0) as total_fantasy_points,
       COALESCE(SUM(prs.points), 0) as total_real_points,
       COALESCE(ROUND(AVG(prs.valuation), 1), 0) as avg_pir,
-      COALESCE(SUM(COALESCE(ps.price, p.price)), 0) as total_value,
+      COALESCE(SUM(ps.price), 0) as total_value,
       (SELECT COUNT(*) FROM player_seasons WHERE season_id = $2 AND team_id = t.id) as roster_size,
       COALESCE(tms.wins, 0) as wins,
       COALESCE(tms.losses, 0) as losses
@@ -154,11 +154,11 @@ export async function listTeamRoster(teamId: number): Promise<TeamRosterRow[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      p.id, p.name, COALESCE(opm.image_url,p.img) AS img, p.position,
-      COALESCE(ps.price, p.price) as price,
-      COALESCE(ps.price_increment, p.price_increment) as price_increment,
-      COALESCE(ps.puntos, p.puntos) as points,
-      ROUND(CAST(COALESCE(ps.puntos, p.puntos) AS NUMERIC) / NULLIF(COALESCE(ps.partidos_jugados, p.partidos_jugados), 0), 1) as average,
+      p.id, p.name, COALESCE(opm.image_url,p.img) AS img, ps.position,
+      ps.price as price,
+      ps.price_increment as price_increment,
+      ps.puntos as points,
+      ROUND(CAST(ps.puntos AS NUMERIC) / NULLIF(ps.partidos_jugados, 0), 1) as average,
       ps.owner_id,
       COALESCE(us.name, u.name) as owner_name,
       COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
@@ -170,8 +170,8 @@ export async function listTeamRoster(teamId: number): Promise<TeamRosterRow[]> {
      AND opm.provider='euroleague_advanced' AND opm.status='matched'
     LEFT JOIN users u ON ps.owner_id = u.id
     LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
-    WHERE COALESCE(ps.team_id, p.team_id) = $1
-    ORDER BY COALESCE(ps.puntos, p.puntos) DESC
+    WHERE ps.team_id = $1
+    ORDER BY ps.puntos DESC NULLS LAST
   `;
 
   const [rows, formMap] = await Promise.all([

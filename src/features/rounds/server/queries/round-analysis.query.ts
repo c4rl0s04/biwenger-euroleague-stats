@@ -58,7 +58,7 @@ export async function getUserLineup(userId: string, roundId: string | number): P
     SELECT
       l.player_id,
       COALESCE(p.name, 'Unknown Player') as name,
-      COALESCE(p.position, 'Bench') as position,
+      COALESCE(ps.position, 'Bench') as position,
       p.img,
       COALESCE(t.name, 'Unknown Team') as team,
       t.short_name as team_short,
@@ -71,19 +71,19 @@ export async function getUserLineup(userId: string, roundId: string | number): P
       COALESCE(prs.rebounds, 0) as stats_rebounds,
       COALESCE(prs.assists, 0) as stats_assists,
       prs.minutes,
-      COALESCE(ps.status, p.status) as current_status,
+      ps.status as current_status,
       p.id as player_exists
     FROM lineups l
     LEFT JOIN players p ON l.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = l.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
     WHERE l.season_id = $3 AND l.user_id = $1 AND l.round_id = $2
     ORDER BY
       CASE
-        WHEN p.position = 'Base' THEN 1
-        WHEN p.position = 'Alero' THEN 2
-        WHEN p.position = 'Pivot' THEN 3
+        WHEN ps.position = 'Base' THEN 1
+        WHEN ps.position = 'Alero' THEN 2
+        WHEN ps.position = 'Pivot' THEN 3
         ELSE 4
       END
   `;
@@ -279,12 +279,12 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 1. Round MVP (Fantasy Points Leader)
   const mvpQuery = `
     SELECT
-      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      p.id, p.name, p.img, ps.position, t.short_name as team_name,
       prs.fantasy_points as points, prs.valuation
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.fantasy_points DESC NULLS LAST
     LIMIT 1
@@ -293,12 +293,12 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 2. Top Scorer (Real Points Leader)
   const topScorerQuery = `
     SELECT
-      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      p.id, p.name, p.img, ps.position, t.short_name as team_name,
       prs.points as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.points DESC NULLS LAST
     LIMIT 1
@@ -307,12 +307,12 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 3. Top Rebounder
   const topRebounderQuery = `
     SELECT
-      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      p.id, p.name, p.img, ps.position, t.short_name as team_name,
       prs.rebounds as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.rebounds DESC NULLS LAST
     LIMIT 1
@@ -321,12 +321,12 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 4. Top Assister
   const topAssisterQuery = `
     SELECT
-      p.id, p.name, p.img, p.position, t.short_name as team_name,
+      p.id, p.name, p.img, ps.position, t.short_name as team_name,
       prs.assists as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.assists DESC NULLS LAST
     LIMIT 1
@@ -378,13 +378,13 @@ export async function getIdealLineup(roundId: string | number): Promise<IdealLin
   // Fetch top 50 to ensure we have enough for valid formations
   const query = `
     SELECT
-      p.id as player_id, p.name, p.position, p.img, COALESCE(ps.team_id, p.team_id) as team_id,
+      p.id as player_id, p.name, ps.position, p.img, ps.team_id as team_id,
       t.short_name as team_short, t.img as team_img,
       prs.fantasy_points as points, prs.valuation
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.fantasy_points DESC
     LIMIT 50
@@ -507,7 +507,7 @@ export async function getPlayersLeftOut(
     SELECT
       prs.player_id,
       p.name,
-      p.position,
+      ps.position,
       p.img,
       t.short_name as team_short,
       t.img as team_img,
@@ -515,7 +515,7 @@ export async function getPlayersLeftOut(
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE prs.season_id = $3 AND prs.round_id = $1 AND prs.player_id = ANY($2)
     ORDER BY prs.fantasy_points DESC
   `;
@@ -540,7 +540,7 @@ export async function getUserOptimization(
     SELECT
       p.id as player_id,
       p.name,
-      p.position,
+      ps.position,
       p.img,
       t.short_name as team_short,
       t.img as team_img,
@@ -549,7 +549,7 @@ export async function getUserOptimization(
     FROM players p
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $3
     LEFT JOIN player_round_stats prs ON prs.player_id = p.id AND prs.season_id = $3 AND prs.round_id = $1
-    LEFT JOIN teams t ON COALESCE(ps.team_id, p.team_id) = t.id
+    LEFT JOIN teams t ON ps.team_id = t.id
     WHERE p.id = ANY($2)
     ORDER BY COALESCE(prs.fantasy_points, 0) DESC
   `;
@@ -626,17 +626,17 @@ export async function getLineupUsageStats(): Promise<LineupUsageResult> {
       SELECT
         l.round_id,
         l.user_id,
-        SUM(CASE WHEN p.position = 'Base' THEN 1 ELSE 0 END)::int as base_count,
-        SUM(CASE WHEN p.position = 'Alero' THEN 1 ELSE 0 END)::int as alero_count,
-        SUM(CASE WHEN p.position = 'Pivot' THEN 1 ELSE 0 END)::int as pivot_count,
+        SUM(CASE WHEN ps.position = 'Base' THEN 1 ELSE 0 END)::int as base_count,
+        SUM(CASE WHEN ps.position = 'Alero' THEN 1 ELSE 0 END)::int as alero_count,
+        SUM(CASE WHEN ps.position = 'Pivot' THEN 1 ELSE 0 END)::int as pivot_count,
         COUNT(*)::int as starters_count,
-        SUM(CASE WHEN p.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END)::int as known_pos_count
+        SUM(CASE WHEN ps.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END)::int as known_pos_count
       FROM lineups l
-      LEFT JOIN players p ON l.player_id = p.id
+      LEFT JOIN player_seasons ps ON ps.player_id = l.player_id AND ps.season_id = l.season_id
       WHERE l.season_id = $1 AND l.role = 'titular'
       GROUP BY l.round_id, l.user_id
       HAVING COUNT(*) = 5
-         AND SUM(CASE WHEN p.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END) = 5
+         AND SUM(CASE WHEN ps.position IN ('Base', 'Alero', 'Pivot') THEN 1 ELSE 0 END) = 5
     )
     SELECT
       l.user_id,

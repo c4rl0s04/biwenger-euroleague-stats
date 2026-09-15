@@ -156,7 +156,7 @@ export async function queryHomeActivityRows({
         ) AT TIME ZONE 'Europe/Madrid')::date AS local_date,
         f.player_id,
         COALESCE(p.name, 'Jugador') AS player_name,
-        p.position,
+        ps.position,
         p.img AS player_image,
         t.code AS team_code,
         seller.user_id AS seller_id,
@@ -174,7 +174,7 @@ export async function queryHomeActivityRows({
       LEFT JOIN players p ON p.id = f.player_id
       LEFT JOIN player_seasons ps
         ON ps.season_id = f.season_id AND ps.player_id = f.player_id
-      LEFT JOIN teams t ON t.id = COALESCE(ps.team_id, p.team_id)
+      LEFT JOIN teams t ON t.id = ps.team_id
       LEFT JOIN user_seasons seller
         ON seller.season_id = f.season_id AND lower(seller.name) = lower(f.vendedor)
       LEFT JOIN user_seasons buyer
@@ -536,7 +536,7 @@ export async function queryHomeRoundHighlightPlayers(
         prs.round_id,
         p.id AS player_id,
         p.name,
-        p.position,
+        ps.position,
         p.img,
         t.short_name AS team_short,
         prs.fantasy_points AS points,
@@ -545,7 +545,7 @@ export async function queryHomeRoundHighlightPlayers(
       JOIN players p ON p.id = prs.player_id
       LEFT JOIN player_seasons ps
         ON ps.season_id = prs.season_id AND ps.player_id = prs.player_id
-      LEFT JOIN teams t ON t.id = COALESCE(ps.team_id, p.team_id)
+      LEFT JOIN teams t ON t.id = ps.team_id
       WHERE prs.season_id = $1 AND prs.round_id = ANY($2::int[])
       ORDER BY prs.round_id, prs.fantasy_points DESC NULLS LAST, p.id
     `,

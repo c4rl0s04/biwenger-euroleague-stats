@@ -86,7 +86,7 @@ describe('Rounds read query compatibility', () => {
     expect(result.summary).toEqual({ total_points: 30, round_rank: 2, participated: true });
     for (const call of mocks.query.mock.calls)
       expect(call[1]).toEqual(['007', '8abc', 'fixture-season']);
-    expect(mocks.query.mock.calls[0][0]).toContain("WHEN p.position = 'Base' THEN 1");
+    expect(mocks.query.mock.calls[0][0]).toContain("WHEN ps.position = 'Base' THEN 1");
     expect(mocks.query.mock.calls[1][0]).toContain('ur2.points > ur.points');
   });
 

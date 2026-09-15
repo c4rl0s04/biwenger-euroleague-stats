@@ -49,7 +49,7 @@ export async function getPlayerFormMap(limit: number = 5): Promise<Map<number, P
       AVG(prs.fantasy_points) AS avg_recent_points
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
-    JOIN RecentMatchInfo rmi ON COALESCE(ps.team_id, p.team_id) = rmi.team_id
+    JOIN RecentMatchInfo rmi ON ps.team_id = rmi.team_id
     LEFT JOIN player_round_stats prs ON p.id = prs.player_id AND rmi.round_id = prs.round_id AND prs.season_id = $2
     WHERE rmi.team_rn <= $1
     GROUP BY p.id
