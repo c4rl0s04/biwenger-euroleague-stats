@@ -12,6 +12,7 @@ const stat = {
   dorsal: '5',
   minutes: '10:00',
   minutesSeconds: 600,
+  isDnp: false,
   points: 2,
   twoPointsMade: 1,
   twoPointsAttempted: 1,
@@ -38,17 +39,20 @@ function database() {
   const client = {
     query: vi.fn(async (sql: string, _params?: any[]) => {
       if (sql.includes('SELECT round_id FROM matches')) {
-        return { rows: [{ round_id: 10 }], rowCount: 1 };
+        return { rows: [{ round_id: 10 }] as any[], rowCount: 1 };
       }
       if (sql.includes('SELECT provider_player_code, player_id FROM official_player_mappings')) {
-        return { rows: [{ provider_player_code: 'P014102', player_id: 101 }], rowCount: 1 };
+        return {
+          rows: [{ provider_player_code: 'P014102', player_id: 101 }] as any[],
+          rowCount: 1,
+        };
       }
-      return { rows: [], rowCount: 1 };
+      return { rows: [] as any[], rowCount: 1 };
     }),
     release: vi.fn(),
   };
   const db = {
-    query: vi.fn(async (_sql: string, _params?: any[]) => ({ rows: [], rowCount: 1 })),
+    query: vi.fn(async (_sql: string, _params?: any[]) => ({ rows: [] as any[], rowCount: 1 })),
     connect: vi.fn(async () => client),
   };
   return { db, client };
@@ -124,5 +128,22 @@ describe('official game reconciliation', () => {
     expect(params![0]).toBe('2026-27');
     expect(params![1]).toBe(101); // player_id mapped from P014102
     expect(params![2]).toBe(10); // round_id
+  });
+
+  it('detects unpersisted mapped players for a round', async () => {
+    const { db } = database();
+    db.query = vi.fn(async (sql: string) => {
+      if (sql.includes('FROM official_player_mappings')) {
+        return { rows: [{ '?column?': 1 }], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    });
+    const mutations = prepareOfficialGameMutations(db as any, '2026-27');
+    const result = await mutations.hasUnpersistedMappedPlayers(10, ['P014102']);
+    expect(result).toBe(true);
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('FROM official_player_mappings'),
+      ['2026-27', 10, ['P014102']]
+    );
   });
 });

@@ -84,6 +84,21 @@ export function prepareMatchMutations(
     },
 
     upsertMatch: async (params: UpsertMatchParams) => {
+      // Validate one-game-per-team-per-round invariant:
+      // A team cannot play in another match in the same round for this season
+      const conflictRes = await db.query(
+        `SELECT id FROM matches
+         WHERE season_id = $1 AND round_id = $2
+           AND (home_id IN ($3, $4) OR away_id IN ($3, $4))
+           AND NOT (home_id = $3 AND away_id = $4)`,
+        [seasonId, params.round_id, params.home_id, params.away_id]
+      );
+      if (conflictRes.rows && conflictRes.rows.length > 0) {
+        throw new Error(
+          `Invariant violation: Team ${params.home_id} or ${params.away_id} already has a match in round ${params.round_id} for season ${seasonId}.`
+        );
+      }
+
       const sql = `
         INSERT INTO matches (
           season_id, round_id, round_name, home_id, away_id, date, status,

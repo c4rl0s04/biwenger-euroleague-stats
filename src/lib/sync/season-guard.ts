@@ -130,7 +130,16 @@ export async function assertSyncSeasonWritable(
     );
   }
 
-  const euroleagueCode = season.euroleague_code || configuredSeason.EUROLEAGUE_CODE || 'E2026';
+  const euroleagueCode =
+    season.euroleague_code ||
+    (season.id === configuredSeason.ID ? configuredSeason.EUROLEAGUE_CODE : null);
+
+  if (!euroleagueCode) {
+    throw new SyncSeasonGuardError(
+      'SEASON_EUROLEAGUE_CODE_MISSING',
+      `Season ${season.id} has no euroleague_code; refusing to sync without an official provider binding.`
+    );
+  }
 
   return {
     seasonId: season.id,

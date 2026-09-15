@@ -1,7 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
-import { EuroleagueApiError, EuroleagueClient } from '../euroleague/client';
+import {
+  EuroleagueApiError,
+  EuroleagueClient,
+  parseMinutes,
+  parseProviderNumber,
+} from '../euroleague/client';
 
 const fixture = (name: string) =>
   JSON.parse(
@@ -83,5 +88,78 @@ describe('EuroleagueClient contracts', () => {
       fetchImpl: vi.fn(async () => response([{ game: 1 }])) as unknown as typeof fetch,
     });
     await expect(malformed.getSchedule(2026)).rejects.toMatchObject({ name: 'ZodError' });
+  });
+
+  describe('parseMinutes', () => {
+    it('parses valid MM:SS duration into seconds', () => {
+      expect(parseMinutes('12:34')).toEqual({ raw: '12:34', seconds: 754, isDnp: false });
+      expect(parseMinutes('00:00')).toEqual({ raw: '00:00', seconds: 0, isDnp: false });
+      expect(parseMinutes('05:20')).toEqual({ raw: '05:20', seconds: 320, isDnp: false });
+    });
+
+    it('distinguishes DNP as non-participation without inferring 0 seconds', () => {
+      expect(parseMinutes('DNP')).toEqual({ raw: 'DNP', seconds: null, isDnp: true });
+      expect(parseMinutes('DNE')).toEqual({ raw: 'DNE', seconds: null, isDnp: true });
+      expect(parseMinutes('CDNP')).toEqual({ raw: 'CDNP', seconds: null, isDnp: true });
+    });
+
+    it('returns nulls for absent or empty minutes without marking DNP', () => {
+      expect(parseMinutes(null)).toEqual({ raw: null, seconds: null, isDnp: false });
+      expect(parseMinutes(undefined)).toEqual({ raw: null, seconds: null, isDnp: false });
+      expect(parseMinutes('')).toEqual({ raw: null, seconds: null, isDnp: false });
+      expect(parseMinutes('   ')).toEqual({ raw: null, seconds: null, isDnp: false });
+    });
+
+    it('throws error for malformed minutes strings', () => {
+      expect(() => parseMinutes('invalid')).toThrow('Invalid minutes format');
+      expect(() => parseMinutes('12:65')).toThrow('Invalid minutes format');
+      expect(() => parseMinutes('12')).toThrow('Invalid minutes format');
+    });
+  });
+
+  describe('parseProviderNumber', () => {
+    it('preserves real zero as 0', () => {
+      expect(parseProviderNumber(0, 'Points')).toBe(0);
+      expect(parseProviderNumber('0', 'Points')).toBe(0);
+    });
+
+    it('returns null for absent, undefined, or empty values', () => {
+      expect(parseProviderNumber(null, 'Points')).toBeNull();
+      expect(parseProviderNumber(undefined, 'Points')).toBeNull();
+      expect(parseProviderNumber('', 'Points')).toBeNull();
+    });
+
+    it('throws error for malformed non-numeric values', () => {
+      expect(() => parseProviderNumber('abc', 'Points')).toThrow(
+        'Invalid numeric value for Points'
+      );
+    });
+  });
+
+  describe('getPlayerBoxScore missing value preservation', () => {
+    it('preserves null when sporting metrics are absent rather than coercing to 0', async () => {
+      const boxscoreRow = {
+        Player_ID: '14102',
+        Player: 'JONES, KAI',
+        Team: 'MAD',
+        Minutes: 'DNP',
+        Points: 0,
+        FieldGoalsMade2: null,
+        Assistances: undefined,
+      };
+      const provider = new EuroleagueClient({
+        fetchImpl: vi.fn(async () => response([boxscoreRow])) as unknown as typeof fetch,
+      });
+
+      const result = await provider.getPlayerBoxScore(2026, 1);
+      expect(result).toHaveLength(1);
+      const player = result[0];
+      expect(player.minutes).toBe('DNP');
+      expect(player.minutesSeconds).toBeNull();
+      expect(player.isDnp).toBe(true);
+      expect(player.points).toBe(0); // Real 0 preserved
+      expect(player.twoPointsMade).toBeNull(); // Missing preserved as null
+      expect(player.assists).toBeNull(); // Missing preserved as null
+    });
   });
 });

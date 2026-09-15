@@ -111,4 +111,25 @@ describe('sync season guard', () => {
       code: 'SEASON_AWARE_READS_NOT_CONFIRMED',
     });
   });
+
+  it('fails closed when a future season has no EuroLeague provider code', async () => {
+    delete process.env.SEASON_ID;
+    const db = {
+      query: vi.fn(async () => ({
+        rows: [
+          {
+            id: '2027-28',
+            status: 'active',
+            source_league_id: '456',
+            is_sync_enabled: true,
+            // euroleague_code is intentionally omitted/null
+          },
+        ],
+      })),
+    };
+
+    await expect(assertSyncSeasonWritable(db, { skipEnvValidation: true })).rejects.toMatchObject({
+      code: 'SEASON_EUROLEAGUE_CODE_MISSING',
+    });
+  });
 });

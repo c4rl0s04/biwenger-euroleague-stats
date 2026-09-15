@@ -115,7 +115,7 @@ describe('syncPlayers', () => {
     );
   });
 
-  it('uses season-specific existing stats instead of global player stats', async () => {
+  it('treats incoming 0 points as authoritative rather than falling back to previous stats', async () => {
     const mockCompetition = {
       data: {
         rounds: [{ id: 1, name: 'Jornada 1' }],
@@ -166,7 +166,7 @@ describe('syncPlayers', () => {
     );
 
     expect(playerSeasonUpsert?.[1]).toEqual(
-      expect.arrayContaining(['2026-27', 101, 5, 7, 0, 0, 0, 4, 3])
+      expect.arrayContaining(['2026-27', 101, 5, 0, 0, 0, 0, 0, 0])
     );
     expect(client.fetchPlayerDetails).not.toHaveBeenCalled();
   });

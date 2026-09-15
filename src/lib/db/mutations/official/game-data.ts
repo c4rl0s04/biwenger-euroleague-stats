@@ -257,7 +257,7 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
                 seasonId,
                 playerId,
                 roundId,
-                stat.minutes ? Math.round(stat.minutesSeconds / 60) : null,
+                stat.minutesSeconds != null ? Math.round(stat.minutesSeconds / 60) : null,
                 stat.minutesSeconds,
                 stat.dorsal,
                 stat.points,
@@ -279,7 +279,7 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
                 stat.foulsReceived,
                 stat.valuation,
                 stat.plusMinus,
-                stat.isStarter ? 1 : 0,
+                stat.isStarter == null ? null : stat.isStarter ? 1 : 0,
                 jsonPayload(stat.raw),
               ]
             );
@@ -351,11 +351,36 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
         }
       | undefined;
 
+  const hasUnpersistedMappedPlayers = async (
+    roundId: number,
+    playerCodes: string[]
+  ): Promise<boolean> => {
+    if (playerCodes.length === 0) return false;
+    const res = await db.query(
+      `SELECT 1
+       FROM official_player_mappings m
+       LEFT JOIN player_round_stats prs
+         ON prs.season_id = m.season_id
+        AND prs.player_id = m.player_id
+        AND prs.round_id = $2
+       WHERE m.season_id = $1
+         AND m.provider = 'euroleague_advanced'
+         AND m.status = 'matched'
+         AND m.player_id IS NOT NULL
+         AND m.provider_player_code = ANY($3)
+         AND prs.id IS NULL
+       LIMIT 1`,
+      [seasonId, roundId, playerCodes]
+    );
+    return res.rows.length > 0;
+  };
+
   return {
     updateGame,
     persistGameData,
     materializeRoundStats,
     getSyncCandidates,
     getGameByMatchId,
+    hasUnpersistedMappedPlayers,
   };
 }

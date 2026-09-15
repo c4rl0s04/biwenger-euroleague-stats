@@ -213,22 +213,22 @@ function mapRecentMatch(row: PlayerMatchRow): PlayerProfileMatchViewModel {
     away_id: toNumber(row.away_id),
     home_score: toNullableNumber(row.home_score),
     away_score: toNullableNumber(row.away_score),
-    fantasy_points: toNumber(row.fantasy_points),
-    minutes_played: toNumber(row.minutes_played),
-    points_scored: toNumber(row.points_scored),
-    rebounds: toNumber(row.rebounds),
-    assists: toNumber(row.assists),
-    steals: toNumber(row.steals),
-    blocks: toNumber(row.blocks),
-    turnovers: toNumber(row.turnovers),
-    two_points_made: toNumber(row.two_points_made),
-    two_points_attempted: toNumber(row.two_points_attempted),
-    three_points_made: toNumber(row.three_points_made),
-    three_points_attempted: toNumber(row.three_points_attempted),
-    free_throws_made: toNumber(row.free_throws_made),
-    free_throws_attempted: toNumber(row.free_throws_attempted),
-    fouls_committed: toNumber(row.fouls_committed),
-    valuation: toNumber(row.valuation),
+    fantasy_points: toNullableNumber(row.fantasy_points),
+    minutes_played: toNullableNumber(row.minutes_played),
+    points_scored: toNullableNumber(row.points_scored),
+    rebounds: toNullableNumber(row.rebounds),
+    assists: toNullableNumber(row.assists),
+    steals: toNullableNumber(row.steals),
+    blocks: toNullableNumber(row.blocks),
+    turnovers: toNullableNumber(row.turnovers),
+    two_points_made: toNullableNumber(row.two_points_made),
+    two_points_attempted: toNullableNumber(row.two_points_attempted),
+    three_points_made: toNullableNumber(row.three_points_made),
+    three_points_attempted: toNullableNumber(row.three_points_attempted),
+    free_throws_made: toNullableNumber(row.free_throws_made),
+    free_throws_attempted: toNullableNumber(row.free_throws_attempted),
+    fouls_committed: toNullableNumber(row.fouls_committed),
+    valuation: toNullableNumber(row.valuation),
   };
 }
 
@@ -241,22 +241,22 @@ function buildAdvancedStats(
   const totals = matches.reduce(
     (stats, match) => ({
       ...stats,
-      two_points_made: stats.two_points_made + match.two_points_made,
-      two_points_attempted: stats.two_points_attempted + match.two_points_attempted,
-      three_points_made: stats.three_points_made + match.three_points_made,
-      three_points_attempted: stats.three_points_attempted + match.three_points_attempted,
-      free_throws_made: stats.free_throws_made + match.free_throws_made,
-      free_throws_attempted: stats.free_throws_attempted + match.free_throws_attempted,
-      blocks: stats.blocks + match.blocks,
-      turnovers: stats.turnovers + match.turnovers,
-      fouls: stats.fouls + match.fouls_committed,
-      rebounds: stats.rebounds + match.rebounds,
-      assists: stats.assists + match.assists,
-      steals: stats.steals + match.steals,
-      minutes_played: stats.minutes_played + match.minutes_played,
-      points_scored: stats.points_scored + match.points_scored,
-      valuation: stats.valuation + match.valuation,
-      games_played: stats.games_played + (match.minutes_played ? 1 : 0),
+      two_points_made: stats.two_points_made + (match.two_points_made ?? 0),
+      two_points_attempted: stats.two_points_attempted + (match.two_points_attempted ?? 0),
+      three_points_made: stats.three_points_made + (match.three_points_made ?? 0),
+      three_points_attempted: stats.three_points_attempted + (match.three_points_attempted ?? 0),
+      free_throws_made: stats.free_throws_made + (match.free_throws_made ?? 0),
+      free_throws_attempted: stats.free_throws_attempted + (match.free_throws_attempted ?? 0),
+      blocks: stats.blocks + (match.blocks ?? 0),
+      turnovers: stats.turnovers + (match.turnovers ?? 0),
+      fouls: stats.fouls + (match.fouls_committed ?? 0),
+      rebounds: stats.rebounds + (match.rebounds ?? 0),
+      assists: stats.assists + (match.assists ?? 0),
+      steals: stats.steals + (match.steals ?? 0),
+      minutes_played: stats.minutes_played + (match.minutes_played ?? 0),
+      points_scored: stats.points_scored + (match.points_scored ?? 0),
+      valuation: stats.valuation + (match.valuation ?? 0),
+      games_played: stats.games_played + (match.minutes_played && match.minutes_played > 0 ? 1 : 0),
     }),
     {
       two_points_made: 0,
@@ -399,7 +399,8 @@ export function mapPlayerPerformanceSummary(
   const recentGames = player.recentMatches.slice(0, 5);
   const recentAverage =
     recentGames.length > 0
-      ? recentGames.reduce((sum, match) => sum + match.fantasy_points, 0) / recentGames.length
+      ? recentGames.reduce((sum, match) => sum + (match.fantasy_points ?? 0), 0) /
+        recentGames.length
       : 0;
   const formStatus =
     recentAverage >= 20

@@ -98,15 +98,15 @@ export function preparePlayerMutations(
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
         ON CONFLICT(season_id, player_id) DO UPDATE SET
-          team_id = COALESCE(player_seasons.team_id, excluded.team_id),
+          team_id = excluded.team_id,
           position = excluded.position,
-          puntos = GREATEST(player_seasons.puntos, excluded.puntos),
-          partidos_jugados = GREATEST(player_seasons.partidos_jugados, excluded.partidos_jugados),
-          played_home = GREATEST(player_seasons.played_home, excluded.played_home),
-          played_away = GREATEST(player_seasons.played_away, excluded.played_away),
-          points_home = GREATEST(player_seasons.points_home, excluded.points_home),
-          points_away = GREATEST(player_seasons.points_away, excluded.points_away),
-          points_last_season = GREATEST(player_seasons.points_last_season, excluded.points_last_season),
+          puntos = excluded.puntos,
+          partidos_jugados = excluded.partidos_jugados,
+          played_home = excluded.played_home,
+          played_away = excluded.played_away,
+          points_home = excluded.points_home,
+          points_away = excluded.points_away,
+          points_last_season = excluded.points_last_season,
           status = excluded.status,
           price_increment = excluded.price_increment,
           price = excluded.price,

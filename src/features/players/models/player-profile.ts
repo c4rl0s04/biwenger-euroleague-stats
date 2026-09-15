@@ -10,22 +10,22 @@ export interface PlayerProfileMatchViewModel {
   away_id: number;
   home_score: number | null;
   away_score: number | null;
-  fantasy_points: number;
-  minutes_played: number;
-  points_scored: number;
-  rebounds: number;
-  assists: number;
-  steals: number;
-  blocks: number;
-  turnovers: number;
-  two_points_made: number;
-  two_points_attempted: number;
-  three_points_made: number;
-  three_points_attempted: number;
-  free_throws_made: number;
-  free_throws_attempted: number;
-  fouls_committed: number;
-  valuation: number;
+  fantasy_points: number | null;
+  minutes_played: number | null;
+  points_scored: number | null;
+  rebounds: number | null;
+  assists: number | null;
+  steals: number | null;
+  blocks: number | null;
+  turnovers: number | null;
+  two_points_made: number | null;
+  two_points_attempted: number | null;
+  three_points_made: number | null;
+  three_points_attempted: number | null;
+  free_throws_made: number | null;
+  free_throws_attempted: number | null;
+  fouls_committed: number | null;
+  valuation: number | null;
 }
 
 export interface PlayerPriceHistoryPointViewModel {

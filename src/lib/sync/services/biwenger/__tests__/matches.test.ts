@@ -221,5 +221,49 @@ describe('Biwenger Matches Service', () => {
         )
       ).rejects.toThrow('1 Biwenger matches could not be linked to official games.');
     });
+
+    it('rejects when a team appears in multiple matches within the same round', async () => {
+      const mockMutations: any = {
+        upsertMatch: vi.fn(),
+      };
+
+      const manager: any = {
+        context: { db: {}, seasonId: '2025-26' },
+        log: vi.fn(),
+        resolveRoundId: vi.fn((r) => r.id),
+      };
+
+      // Team 1 appears in both Match 1 (home) and Match 2 (away) in Round 1
+      const mockFetchRoundGames = vi.fn().mockResolvedValue({
+        data: {
+          games: [
+            { id: 1001, home: { id: 1 }, away: { id: 2 } },
+            { id: 1002, home: { id: 3 }, away: { id: 1 } },
+          ],
+        },
+      });
+
+      const mockGetOfficialTeamMappings = vi.fn().mockResolvedValue([
+        { teamId: 1, providerTeamCode: 'MAD' },
+        { teamId: 2, providerTeamCode: 'BAR' },
+        { teamId: 3, providerTeamCode: 'OLY' },
+      ]);
+
+      await expect(
+        syncBiwengerMatches(
+          manager,
+          { id: 1, name: 'Jornada 1' },
+          {},
+          {
+            fetchRoundGames: mockFetchRoundGames,
+            getOfficialTeamMappings: mockGetOfficialTeamMappings,
+            getSchedule: vi.fn().mockResolvedValue([]),
+            prepareMutations: () => mockMutations,
+          }
+        )
+      ).rejects.toThrow(
+        /Invariant violation: Team 1 appears in multiple matches for round Jornada 1/
+      );
+    });
   });
 });

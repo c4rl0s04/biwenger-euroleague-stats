@@ -123,23 +123,9 @@ export async function syncBiwengerCatalog(
     const playerId = parseInt(id, 10);
     const existing = existingSeasonPlayerMap.get(playerId);
 
-    let finalPoints = player.points || 0;
-    let finalPointsHome = player.pointsHome || 0;
-    let finalPointsAway = player.pointsAway || 0;
-
-    if (existing) {
-      if (finalPoints === 0 && existing.puntos > 0) {
-        finalPoints = existing.puntos;
-      }
-      const homePts = existing.pointsHome ?? (existing as any).points_home ?? 0;
-      if (finalPointsHome === 0 && homePts > 0) {
-        finalPointsHome = homePts;
-      }
-      const awayPts = existing.pointsAway ?? (existing as any).points_away ?? 0;
-      if (finalPointsAway === 0 && awayPts > 0) {
-        finalPointsAway = awayPts;
-      }
-    }
+    const finalPoints = player.points ?? 0;
+    const finalPointsHome = player.pointsHome ?? 0;
+    const finalPointsAway = player.pointsAway ?? 0;
 
     await mutations.upsertPlayer({
       id: playerId,

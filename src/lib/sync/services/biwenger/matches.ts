@@ -156,6 +156,30 @@ export async function syncBiwengerMatches(
   }
 
   const games = gamesData?.data?.games || gamesData?.games || [];
+
+  // Enforce invariant: Within one season and one fantasy round, a team appears in at most one official game.
+  const seenTeamIds = new Set<number>();
+  for (const game of games) {
+    const homeId = game.home?.id;
+    const awayId = game.away?.id;
+    if (homeId != null) {
+      if (seenTeamIds.has(homeId)) {
+        throw new Error(
+          `Invariant violation: Team ${homeId} appears in multiple matches for round ${round.name || dbRoundId}.`
+        );
+      }
+      seenTeamIds.add(homeId);
+    }
+    if (awayId != null) {
+      if (seenTeamIds.has(awayId)) {
+        throw new Error(
+          `Invariant violation: Team ${awayId} appears in multiple matches for round ${round.name || dbRoundId}.`
+        );
+      }
+      seenTeamIds.add(awayId);
+    }
+  }
+
   const codeByTeam = new Map<number, string>(
     mappingResult.map((row: any) => [
       row.teamId ?? row.team_id,

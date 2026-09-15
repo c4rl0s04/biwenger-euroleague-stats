@@ -11,7 +11,12 @@ export async function runGame(
   gameCode: number,
   roundId: number,
   _roundName: string,
-  options: { force?: boolean; existingChecksum?: string | null } = {}
+  options: {
+    force?: boolean;
+    existingChecksum?: string | null;
+    gameMutations?: ReturnType<typeof prepareOfficialGameMutations>;
+    mappingMutations?: ReturnType<typeof prepareOfficialMappingMutations>;
+  } = {}
 ) {
   const seasonCode = manager.context.season?.euroleagueCode || CONFIG.EUROLEAGUE.SEASON_CODE;
   if (!seasonCode) throw new Error('EUROLEAGUE_SEASON_CODE is required.');
@@ -19,8 +24,11 @@ export async function runGame(
   if (!seasonId) throw new Error('The writable season was not resolved.');
   const seasonYear = euroleagueSeasonYear(seasonCode, seasonId);
   const provider = manager.context.euroleague;
-  const gameMutations = prepareOfficialGameMutations(manager.context.db as any, seasonId);
-  const mappingMutations = prepareOfficialMappingMutations(manager.context.db as any, seasonId);
+  const gameMutations =
+    options.gameMutations || prepareOfficialGameMutations(manager.context.db as any, seasonId);
+  const mappingMutations =
+    options.mappingMutations ||
+    prepareOfficialMappingMutations(manager.context.db as any, seasonId);
 
   manager.log(`📊 Syncing official game ${gameCode}...`);
   const [report, metadata, boxscore, playByPlay, shots] = await Promise.all([
@@ -41,8 +49,17 @@ export async function runGame(
   const finalized = Boolean(report?.isPlayed && !metadata?.isLive && boxscore.length > 0);
   const checksum = checksumPayload({ report, metadata, boxscore, playByPlay, shots });
   if (finalized && !options.force && options.existingChecksum === checksum) {
-    manager.log(`   ✅ Game ${gameCode}: final checksum unchanged.`);
-    return { status: 'unchanged' as const, finalized: true, checksum };
+    const hasUnpersisted = await gameMutations.hasUnpersistedMappedPlayers(
+      roundId,
+      boxscore.map((p) => p.playerCode)
+    );
+    if (!hasUnpersisted) {
+      manager.log(`   ✅ Game ${gameCode}: final checksum unchanged.`);
+      return { status: 'unchanged' as const, finalized: true, checksum };
+    }
+    manager.log(
+      `   🔄 Game ${gameCode}: final checksum matches but newly mapped player stats require persistence.`
+    );
   }
   await gameMutations.persistGameData({
     gameCode,
