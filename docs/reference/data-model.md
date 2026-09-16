@@ -29,29 +29,30 @@ flowchart LR
   Teams[(teams)] --> TeamSeason
 ```
 
-| Tables                                               | Responsibility                                                                 |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `seasons`                                            | Lifecycle state and provider binding for one fantasy season.                   |
-| `users`, `teams`, `players`                          | Durable cross-season identities synchronized from providers.                  |
-| `user_seasons`                                       | Season-specific manager identity/state; keyed by `(season_id, user_id)`.       |
-| `team_seasons`, `player_seasons`                     | Season-specific team/player attributes, relationships, and current state.      |
-| `player_mappings`                                    | Historical global EuroLeague links retained as a read-only mapping fallback.   |
-| `official_team_mappings`, `official_player_mappings` | Season-scoped official identity links, mapping provenance, and review state.    |
+- `seasons` — lifecycle state and provider binding for one fantasy season.
+- `users`, `teams`, `players` — durable cross-season identities synchronized from providers.
+- `user_seasons` — season-specific manager identity/state, keyed by `(season_id, user_id)`.
+- `team_seasons`, `player_seasons` — season-specific team/player attributes, relationships, and
+  current state.
+- `player_mappings` — historical global EuroLeague links retained as a read-only mapping fallback.
+- `official_team_mappings`, `official_player_mappings` — season-scoped official identity links,
+  mapping provenance, and review state.
 
 Season-varying attributes must not be reintroduced on the global identity tables. The architectural
 rationale is recorded in [ADR-0005](../decisions/0005-season-scoped-domain-model.md).
 
 ## Competition and performance
 
-| Tables                                    | Responsibility                                                                    |
-| ----------------------------------------- | --------------------------------------------------------------------------------- |
-| `matches`                                 | Canonical per-season game schedule, participants, status, result, venue, and official-game link. |
-| `user_rounds`                             | Manager points and placement by round and season.                                 |
-| `lineups`                                 | Historical selected players, roles, and fantasy results.                          |
-| `player_round_stats`                      | Season/round player performance, participation provenance, and fantasy/official metrics. |
-| `official_play_by_play`, `official_shots` | Granular official event and shot data keyed to the persisted game.                |
-| `official_team_standings`                 | Official team standings snapshots by season/round.                                |
-| `initial_squads`                          | Starting squad snapshots used by draft and historical analytics.                  |
+- `matches` — canonical per-season game schedule, participants, status, result, venue, and
+  official-game link.
+- `user_rounds` — manager points and placement by round and season.
+- `lineups` — historical selected players, roles, and fantasy results.
+- `player_round_stats` — season/round player performance, participation provenance, and
+  fantasy/official metrics.
+- `official_play_by_play`, `official_shots` — granular official event and shot data keyed to the
+  persisted game.
+- `official_team_standings` — official team standings snapshots by season/round.
+- `initial_squads` — starting squad snapshots used by draft and historical analytics.
 
 Game-level official staging tables are not part of the current schema. Official schedule/game state
 is consolidated into `matches`, and materialized player performance is consolidated into
@@ -59,34 +60,28 @@ is consolidated into `matches`, and materialized player performance is consolida
 
 ## Market and finance
 
-| Tables            | Responsibility                                                                  |
-| ----------------- | ------------------------------------------------------------------------------- |
-| `fichajes`        | Completed transfer history.                                                     |
-| `transfer_bids`   | Auction bid history.                                                            |
-| `market_values`   | Durable player price history.                                                   |
-| `market_listings` | Current/listing snapshots captured by the rollover-aware sync step.              |
-| `finances`        | Manager financial events.                                                       |
+- `fichajes` — completed transfer history.
+- `transfer_bids` — auction bid history.
+- `market_values` — durable player price history.
+- `market_listings` — current/listing snapshots captured by the rollover-aware sync step.
+- `finances` — manager financial events.
 
 `player_seasons.price` is the current season price cache, not the price-history source. See
 [database safety](../operations/database-safety.md) for auditing and repair.
 
 ## Tournaments and predictions
 
-| Tables                                                         | Responsibility                                 |
-| -------------------------------------------------------------- | ---------------------------------------------- |
-| `tournaments`, `tournament_phases`                             | Competition identity and phase structure.      |
-| `tournament_fixtures`, `tournament_standings`                  | Tournament fixtures and rankings.              |
-| `porras`                                                       | Synchronized Biwenger prediction-pool records. |
-| `playoff_predictions`, `playoff_results`, `user_playoff_media` | Custom playoff feature state.                  |
+- `tournaments`, `tournament_phases` — competition identity and phase structure.
+- `tournament_fixtures`, `tournament_standings` — tournament fixtures and rankings.
+- `porras` — synchronized Biwenger prediction-pool records.
+- `playoff_predictions`, `playoff_results`, `user_playoff_media` — custom playoff feature state.
 
 ## Interactive features, credentials, and metadata
 
-| Tables                                          | Responsibility                                                    |
-| ----------------------------------------------- | ----------------------------------------------------------------- |
-| `hoopgrid_challenges`, `hoopgrid_guesses`       | Daily grid definition, guesses, and rarity source data.           |
-| `assistant_conversations`, `assistant_messages` | User-owned assistant history.                                     |
-| `user_biwenger_credentials`                     | Encrypted personal Biwenger credential envelopes and key metadata. |
-| `sync_meta`                                     | Synchronization metadata used by ingestion tooling.               |
+- `hoopgrid_challenges`, `hoopgrid_guesses` — daily grid definition, guesses, and rarity source data.
+- `assistant_conversations`, `assistant_messages` — user-owned assistant history.
+- `user_biwenger_credentials` — encrypted personal Biwenger credential envelopes and key metadata.
+- `sync_meta` — synchronization metadata used by ingestion tooling.
 
 ## Write ownership
 
