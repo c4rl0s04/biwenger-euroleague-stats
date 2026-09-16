@@ -78,4 +78,28 @@ describe('production season readiness', () => {
       );
     }
   });
+
+  it('keeps migration 0018 additive, enables RLS across all public tables, and revokes anon/authenticated access', () => {
+    const sql = fs.readFileSync(
+      path.join(process.cwd(), 'drizzle', '0018_lock_down_supabase_data_access.sql'),
+      'utf8'
+    );
+
+    expect(sql).not.toMatch(/\bDROP\s+(TABLE|COLUMN)\b/i);
+    expect(sql).toContain('REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM PUBLIC');
+    expect(sql).toContain('REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC');
+    expect(sql).toContain('REVOKE ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public FROM PUBLIC');
+    expect(sql).toContain(
+      'REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM anon, authenticated'
+    );
+    expect(sql).toContain(
+      'REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated'
+    );
+    expect(sql).toContain(
+      'REVOKE ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public FROM anon, authenticated'
+    );
+    expect(sql).toContain(
+      'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated'
+    );
+  });
 });

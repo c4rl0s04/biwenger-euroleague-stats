@@ -271,6 +271,69 @@ async function main() {
       `   ✅ All ${expectedFkConstraints.length} composite foreign keys referencing user_seasons(season_id, user_id) confirmed present.`
     );
 
+    // g) Supabase data access lockdown: RLS enabled on all public tables, zero grants to anon/authenticated
+    const rlsRes = await disposable.pool.query(
+      `SELECT c.relname as table_name, c.relrowsecurity as rls_enabled
+       FROM pg_class c
+       JOIN pg_namespace n ON n.oid = c.relnamespace
+       WHERE n.nspname = 'public' AND c.relkind = 'r'
+       ORDER BY c.relname`
+    );
+    const tablesWithoutRls = rlsRes.rows
+      .filter((r: any) => !r.rls_enabled)
+      .map((r: any) => r.table_name);
+    if (tablesWithoutRls.length > 0) {
+      throw new Error(
+        `Tables in schema public without RLS enabled: ${tablesWithoutRls.join(', ')}`
+      );
+    }
+    console.log(
+      `   ✅ All ${rlsRes.rows.length} public tables have Row Level Security enabled (relrowsecurity = true).`
+    );
+
+    const unsafeGrantsRes = await disposable.pool.query(
+      `SELECT table_name, grantee, privilege_type
+       FROM information_schema.role_table_grants
+       WHERE table_schema = 'public'
+         AND grantee IN ('anon', 'authenticated')`
+    );
+    if (unsafeGrantsRes.rows.length > 0) {
+      const list = unsafeGrantsRes.rows
+        .map((r: any) => `${r.table_name}.${r.grantee}.${r.privilege_type}`)
+        .join(', ');
+      throw new Error(`Unsafe table grants found for anon/authenticated: ${list}`);
+    }
+    console.log(
+      '   ✅ Zero table grants for anon/authenticated roles confirmed across all public tables.'
+    );
+
+    const unsafeSeqGrantsRes = await disposable.pool.query(
+      `SELECT sequence_info.relname AS sequence_name,
+              role_info.rolname AS grantee,
+              privilege_info.privilege_type
+       FROM pg_class sequence_info
+       JOIN pg_namespace namespace_info ON namespace_info.oid=sequence_info.relnamespace
+       CROSS JOIN pg_roles role_info
+       CROSS JOIN (VALUES ('USAGE'), ('SELECT'), ('UPDATE')) AS privilege_info(privilege_type)
+       WHERE namespace_info.nspname='public'
+         AND sequence_info.relkind='S'
+         AND role_info.rolname IN ('anon','authenticated')
+         AND has_sequence_privilege(
+           role_info.rolname,
+           sequence_info.oid,
+           privilege_info.privilege_type
+         )`
+    );
+    if (unsafeSeqGrantsRes.rows.length > 0) {
+      const list = unsafeSeqGrantsRes.rows
+        .map((r: any) => `${r.sequence_name}.${r.grantee}.${r.privilege_type}`)
+        .join(', ');
+      throw new Error(`Unsafe sequence grants found for anon/authenticated: ${list}`);
+    }
+    console.log(
+      '   ✅ Zero sequence grants for anon/authenticated roles confirmed across all public sequences.'
+    );
+
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`\n🎉 Fresh database lifecycle test PASSED in ${duration}s!`);
   } finally {

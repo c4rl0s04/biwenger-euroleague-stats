@@ -392,16 +392,19 @@ export async function inspectProductionReadiness(
     else if (databaseHash !== migration.hash) snapshot.migrationHashMismatches.push(tag);
   }
 
+  const allExpectedTableNames = Object.keys(expectedTables).map((table) =>
+    table.replace(/^public\./, '')
+  );
   const rlsRows = await db.query<{ table_name: string; enabled: boolean }>(
     `
     SELECT relname AS table_name, relrowsecurity AS enabled
     FROM pg_class
     WHERE relnamespace='public'::regnamespace AND relname=ANY($1::text[])
   `,
-    [OFFICIAL_TABLES]
+    [allExpectedTableNames]
   );
   const rlsByTable = new Map(rlsRows.rows.map((row) => [row.table_name, row.enabled]));
-  snapshot.tablesWithoutRls = OFFICIAL_TABLES.filter((table) => !rlsByTable.get(table));
+  snapshot.tablesWithoutRls = allExpectedTableNames.filter((table) => !rlsByTable.get(table));
 
   const grants = await db.query<{ table_name: string; grantee: string; privilege_type: string }>(
     `
@@ -411,7 +414,7 @@ export async function inspectProductionReadiness(
       AND table_name=ANY($1::text[])
       AND grantee IN ('anon','authenticated')
   `,
-    [OFFICIAL_TABLES]
+    [allExpectedTableNames]
   );
   snapshot.unsafeRoleGrants = grants.rows.map(
     (row) => `${row.table_name}.${row.grantee}.${row.privilege_type}`
@@ -431,15 +434,13 @@ export async function inspectProductionReadiness(
       CROSS JOIN (VALUES ('USAGE'), ('SELECT'), ('UPDATE')) AS privilege_info(privilege_type)
       WHERE namespace_info.nspname='public'
         AND sequence_info.relkind='S'
-        AND sequence_info.relname=ANY($1::text[])
         AND role_info.rolname IN ('anon','authenticated')
         AND has_sequence_privilege(
           role_info.rolname,
           sequence_info.oid,
           privilege_info.privilege_type
         )
-    `,
-    [OFFICIAL_SEQUENCES]
+    `
   );
   snapshot.unsafeRoleGrants.push(
     ...sequenceGrants.rows.map(

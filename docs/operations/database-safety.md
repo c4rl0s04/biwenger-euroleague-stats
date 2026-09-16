@@ -103,6 +103,23 @@ ALLOW_REMOTE_PRICE_REPAIR=true npm run db:repair:player-prices -- --apply
 The repair only updates `players.price` from the latest applicable `market_values` row. It does not
 delete or rewrite the history table. Review its dry-run output and target before applying it.
 
+## Supabase Data API and access controls
+
+All application data reads and writes execute server-side via direct PostgreSQL connection pooler
+sessions as the database owner (`postgres`), never through client-side Supabase PostgREST endpoints.
+
+To protect sensitive user data (passwords, tokens, fantasy transactions, rosters) from exposure over
+the public PostgREST API:
+
+1. **Row Level Security (RLS)** is enabled on 100% of public tables (`0018_lock_down_supabase_data_access.sql`).
+   Without permissive policies, PostgreSQL enforces default-deny for all non-owner roles.
+2. **Role Privileges**: All privileges (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) on all tables, sequences,
+   and routines in schema `public` are revoked from `anon`, `authenticated`, and `PUBLIC`.
+3. **Default Privileges**: Default privileges for future tables, sequences, and routines are revoked from
+   `anon` and `authenticated` in schema `public`.
+4. **Verification**: `npm run test:db:local` and `npm run db:production:check` assert that zero public
+   tables lack RLS and that no unsafe grants exist for `anon` or `authenticated`.
+
 ## Recovery expectation
 
 Every destructive proposal must state the restore artifact, restoration command, expected downtime,
