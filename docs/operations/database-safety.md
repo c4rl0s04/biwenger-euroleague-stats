@@ -107,18 +107,25 @@ delete or rewrite the history table. Review its dry-run output and target before
 
 All application data reads and writes execute server-side via direct PostgreSQL connection pooler
 sessions as the database owner (`postgres`), never through client-side Supabase PostgREST endpoints.
+The Supabase Data API has not been disabled at the external project settings level; rather, data access
+is locked down at the PostgreSQL database authorization level:
 
-To protect sensitive user data (passwords, tokens, fantasy transactions, rosters) from exposure over
-the public PostgREST API:
-
-1. **Row Level Security (RLS)** is enabled on 100% of public tables (`0018_lock_down_supabase_data_access.sql`).
-   Without permissive policies, PostgreSQL enforces default-deny for all non-owner roles.
-2. **Role Privileges**: All privileges (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) on all tables, sequences,
-   and routines in schema `public` are revoked from `anon`, `authenticated`, and `PUBLIC`.
-3. **Default Privileges**: Default privileges for future tables, sequences, and routines are revoked from
-   `anon` and `authenticated` in schema `public`.
-4. **Verification**: `npm run test:db:local` and `npm run db:production:check` assert that zero public
-   tables lack RLS and that no unsafe grants exist for `anon` or `authenticated`.
+1. **Row Level Security (RLS)** is enabled on 100% of application tables (`0018_lock_down_supabase_data_access.sql`).
+   Without permissive policies, PostgreSQL enforces default-deny for non-owner roles.
+2. **Role Privileges on Application Objects**: All privileges (`SELECT`, `INSERT`, `UPDATE`, `DELETE`,
+   `TRUNCATE`, `REFERENCES`, `TRIGGER`) on the 37 application tables and all privileges (`USAGE`, `SELECT`,
+   `UPDATE`) on their 25 associated sequences are revoked from `PUBLIC`, `anon`, `authenticated`, and
+   `service_role`. Crucially, `service_role` has `BYPASSRLS=true` in Supabase, so RLS alone does not
+   restrict it; revoking table and sequence privileges enforces Discretionary Access Control (DAC) denial.
+3. **Preservation of Extension Routines**: The 118 existing routines in schema `public` belong entirely
+   to database extensions (`pgcrypto`, `vector`, etc.) and are preserved untouched.
+4. **Default Privileges**: Default privileges for future tables, sequences, and routines created by
+   `postgres` (or the database owner) in schema `public` are revoked from `anon`, `authenticated`, and
+   `service_role`. In addition, default `EXECUTE` on future routines is revoked from `PUBLIC`.
+5. **Verification**: `npm run test:db:local`, `npm run db:production:check`, and
+   `src/tests/db/supabase-data-access-hardening.test.ts` verify that zero application tables lack RLS,
+   zero unsafe grants exist for `anon`, `authenticated`, or `service_role`, and zero unsafe default
+   privileges exist in the database.
 
 ## Recovery expectation
 

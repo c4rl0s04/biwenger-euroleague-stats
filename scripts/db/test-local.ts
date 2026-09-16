@@ -295,16 +295,16 @@ async function main() {
       `SELECT table_name, grantee, privilege_type
        FROM information_schema.role_table_grants
        WHERE table_schema = 'public'
-         AND grantee IN ('anon', 'authenticated')`
+         AND grantee IN ('anon', 'authenticated', 'service_role')`
     );
     if (unsafeGrantsRes.rows.length > 0) {
       const list = unsafeGrantsRes.rows
         .map((r: any) => `${r.table_name}.${r.grantee}.${r.privilege_type}`)
         .join(', ');
-      throw new Error(`Unsafe table grants found for anon/authenticated: ${list}`);
+      throw new Error(`Unsafe table grants found for anon/authenticated/service_role: ${list}`);
     }
     console.log(
-      '   ✅ Zero table grants for anon/authenticated roles confirmed across all public tables.'
+      '   ✅ Zero table grants for anon/authenticated/service_role roles confirmed across all public tables.'
     );
 
     const unsafeSeqGrantsRes = await disposable.pool.query(
@@ -317,7 +317,7 @@ async function main() {
        CROSS JOIN (VALUES ('USAGE'), ('SELECT'), ('UPDATE')) AS privilege_info(privilege_type)
        WHERE namespace_info.nspname='public'
          AND sequence_info.relkind='S'
-         AND role_info.rolname IN ('anon','authenticated')
+         AND role_info.rolname IN ('anon','authenticated','service_role')
          AND has_sequence_privilege(
            role_info.rolname,
            sequence_info.oid,
@@ -328,10 +328,37 @@ async function main() {
       const list = unsafeSeqGrantsRes.rows
         .map((r: any) => `${r.sequence_name}.${r.grantee}.${r.privilege_type}`)
         .join(', ');
-      throw new Error(`Unsafe sequence grants found for anon/authenticated: ${list}`);
+      throw new Error(`Unsafe sequence grants found for anon/authenticated/service_role: ${list}`);
     }
     console.log(
-      '   ✅ Zero sequence grants for anon/authenticated roles confirmed across all public sequences.'
+      '   ✅ Zero sequence grants for anon/authenticated/service_role roles confirmed across all public sequences.'
+    );
+
+    const unsafeDefaultPrivsRes = await disposable.pool.query(
+      `SELECT
+        target_role.rolname AS defaclrole,
+        COALESCE(a.defaclnamespace::regnamespace::text, 'global') AS defaclnamespace,
+        a.defaclobjtype,
+        COALESCE(r.rolname, 'PUBLIC') AS grantee,
+        x.privilege_type
+      FROM pg_default_acl a
+      CROSS JOIN LATERAL aclexplode(a.defaclacl) x
+      LEFT JOIN pg_roles r ON r.oid = x.grantee
+      JOIN pg_roles target_role ON target_role.oid = a.defaclrole
+      WHERE target_role.rolname IN ('postgres', current_user)
+        AND (
+          r.rolname IN ('anon', 'authenticated', 'service_role')
+          OR (x.grantee = 0 AND a.defaclobjtype = 'f')
+        )`
+    );
+    if (unsafeDefaultPrivsRes.rows.length > 0) {
+      const list = unsafeDefaultPrivsRes.rows
+        .map((r: any) => `${r.defaclrole}.${r.defaclnamespace}.${r.grantee}.${r.privilege_type}`)
+        .join(', ');
+      throw new Error(`Unsafe default privileges found: ${list}`);
+    }
+    console.log(
+      '   ✅ Zero unsafe default privileges for API roles or PUBLIC functions confirmed.'
     );
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);

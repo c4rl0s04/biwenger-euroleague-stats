@@ -79,27 +79,24 @@ describe('production season readiness', () => {
     }
   });
 
-  it('keeps migration 0018 additive, enables RLS across all public tables, and revokes anon/authenticated access', () => {
+  it('keeps migration 0018 additive, enables RLS across all public tables, and revokes API role access', () => {
     const sql = fs.readFileSync(
       path.join(process.cwd(), 'drizzle', '0018_lock_down_supabase_data_access.sql'),
       'utf8'
     );
 
     expect(sql).not.toMatch(/\bDROP\s+(TABLE|COLUMN)\b/i);
-    expect(sql).toContain('REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM PUBLIC');
-    expect(sql).toContain('REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC');
-    expect(sql).toContain('REVOKE ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public FROM PUBLIC');
+    expect(sql).toContain('ALTER TABLE "users" ENABLE ROW LEVEL SECURITY');
+    expect(sql).toContain('REVOKE ALL PRIVILEGES ON TABLE');
+    expect(sql).toContain('"users"');
+    expect(sql).toContain('REVOKE ALL PRIVILEGES ON SEQUENCE');
+    expect(sql).toContain('"fichajes_id_seq"');
+    expect(sql).not.toContain('REVOKE ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public');
     expect(sql).toContain(
-      'REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM anon, authenticated'
+      'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE EXECUTE ON ROUTINES FROM PUBLIC'
     );
-    expect(sql).toContain(
-      'REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated'
-    );
-    expect(sql).toContain(
-      'REVOKE ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public FROM anon, authenticated'
-    );
-    expect(sql).toContain(
-      'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated'
-    );
+    expect(sql).toContain("'anon'");
+    expect(sql).toContain("'authenticated'");
+    expect(sql).toContain("'service_role'");
   });
 });

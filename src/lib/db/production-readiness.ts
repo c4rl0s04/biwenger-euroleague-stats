@@ -412,7 +412,7 @@ export async function inspectProductionReadiness(
     FROM information_schema.role_table_grants
     WHERE table_schema='public'
       AND table_name=ANY($1::text[])
-      AND grantee IN ('anon','authenticated')
+      AND grantee IN ('anon','authenticated','service_role')
   `,
     [allExpectedTableNames]
   );
@@ -434,7 +434,7 @@ export async function inspectProductionReadiness(
       CROSS JOIN (VALUES ('USAGE'), ('SELECT'), ('UPDATE')) AS privilege_info(privilege_type)
       WHERE namespace_info.nspname='public'
         AND sequence_info.relkind='S'
-        AND role_info.rolname IN ('anon','authenticated')
+        AND role_info.rolname IN ('anon','authenticated','service_role')
         AND has_sequence_privilege(
           role_info.rolname,
           sequence_info.oid,
@@ -445,6 +445,36 @@ export async function inspectProductionReadiness(
   snapshot.unsafeRoleGrants.push(
     ...sequenceGrants.rows.map(
       (row) => `sequence.${row.sequence_name}.${row.grantee}.${row.privilege_type}`
+    )
+  );
+
+  const defaultPrivileges = await db.query<{
+    defaclrole: string;
+    defaclnamespace: string;
+    defaclobjtype: string;
+    grantee: string;
+    privilege_type: string;
+  }>(`
+    SELECT
+      target_role.rolname AS defaclrole,
+      COALESCE(a.defaclnamespace::regnamespace::text, 'global') AS defaclnamespace,
+      a.defaclobjtype,
+      COALESCE(r.rolname, 'PUBLIC') AS grantee,
+      x.privilege_type
+    FROM pg_default_acl a
+    CROSS JOIN LATERAL aclexplode(a.defaclacl) x
+    LEFT JOIN pg_roles r ON r.oid = x.grantee
+    JOIN pg_roles target_role ON target_role.oid = a.defaclrole
+    WHERE target_role.rolname IN ('postgres', current_user)
+      AND (
+        r.rolname IN ('anon', 'authenticated', 'service_role')
+        OR (x.grantee = 0 AND a.defaclobjtype = 'f')
+      )
+  `);
+  snapshot.unsafeRoleGrants.push(
+    ...defaultPrivileges.rows.map(
+      (row) =>
+        `default_privilege.${row.defaclrole}.${row.defaclnamespace}.${row.defaclobjtype}.${row.grantee}.${row.privilege_type}`
     )
   );
 
