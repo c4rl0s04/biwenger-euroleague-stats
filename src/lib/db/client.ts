@@ -56,4 +56,5 @@ if (skipDb) {
 }
 
 export const pool: PgPool = rawPool;
+export const pgClient: PgPool = rawPool;
 export const db = drizzle(rawPool as any, { schema });

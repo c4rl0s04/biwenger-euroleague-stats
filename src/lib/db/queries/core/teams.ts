@@ -1,4 +1,4 @@
-import { pgClient } from '../../connection';
+import { pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
 
 export interface Team {

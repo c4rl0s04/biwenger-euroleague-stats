@@ -1,6 +1,6 @@
 import { desc, eq } from 'drizzle-orm';
 import { CONFIG } from './config';
-import { db } from './db/connection';
+import { db } from './db/client';
 import { seasons } from './db/schema';
 
 export type SeasonStatus = 'active' | 'frozen' | 'archived';

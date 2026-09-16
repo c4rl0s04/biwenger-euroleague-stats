@@ -18,11 +18,11 @@ import { GET as route9 } from '@/app/api/standings/captains/route';
 import { GET as route10 } from '@/app/api/standings/theoretical/route';
 vi.mock('server-only', () => ({}));
 const mocks = vi.hoisted(() => ({ query: vi.fn(), execute: vi.fn(), season: vi.fn() }));
-vi.mock('@/lib/db/connection', () => ({
+vi.mock('@/lib/db/client', () => ({
   pgClient: { query: mocks.query },
-  db: { execute: mocks.execute },
+  pool: { query: mocks.query },
+  db: { execute: mocks.execute, query: mocks.query },
 }));
-vi.mock('@/lib/db/client', () => ({ pool: { query: mocks.query }, db: { query: mocks.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 vi.mock('@/features/rounds/server', () => ({ getUserPerformanceHistoryService: async () => [] }));
 beforeEach(() => {

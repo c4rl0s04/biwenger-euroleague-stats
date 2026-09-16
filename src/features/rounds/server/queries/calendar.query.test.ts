@@ -8,7 +8,7 @@ const chain = vi.hoisted(() => ({
   where: vi.fn(),
   orderBy: vi.fn(),
 }));
-vi.mock('@/lib/db/connection', () => ({ db: chain }));
+vi.mock('@/lib/db/client', () => ({ db: chain }));
 import { listCalendarRows } from './calendar.query';
 
 it('selects only the five chronology fields with season filtering and stable date/id ordering', async () => {

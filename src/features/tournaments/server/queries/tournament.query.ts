@@ -1,5 +1,5 @@
 import 'server-only';
-import { pgClient } from '@/lib/db/connection';
+import { pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import type {
   TournamentRecord,

@@ -1,5 +1,5 @@
 import 'server-only';
-import { db, pgClient } from '@/lib/db/connection';
+import { db, pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface InitialSquadPotential {

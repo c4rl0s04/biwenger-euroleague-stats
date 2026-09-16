@@ -8,7 +8,7 @@ import {
 import type { StandingsOptions } from '../../models/base-standings';
 
 // Temporary adapters for unmigrated composition and analytics consumers.
-import { db } from '@/lib/db/connection';
+import { db } from '@/lib/db/client';
 import { userRounds, userSeasons } from '@/lib/db/schema';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { sql } from 'drizzle-orm';

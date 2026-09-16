@@ -1,6 +1,6 @@
 import 'server-only';
 import { and, count, desc, eq, sql } from 'drizzle-orm';
-import { db } from '@/lib/db/connection';
+import { db } from '@/lib/db/client';
 import { userRounds } from '@/lib/db/schema';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 

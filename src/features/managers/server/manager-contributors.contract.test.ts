@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 vi.mock('server-only', () => ({}));
 const fake = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
-vi.mock('@/lib/db/connection', () => ({ pgClient: { query: fake.query } }));
+vi.mock('@/lib/db/client', () => ({ pgClient: { query: fake.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: fake.season }));
 vi.mock('@/features/managers/server', async () => {
   return await import('./services/manager-contributors.service');

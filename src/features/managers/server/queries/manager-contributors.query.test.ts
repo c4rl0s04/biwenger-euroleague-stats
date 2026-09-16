@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 const fake = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
-vi.mock('@/lib/db/connection', () => ({ pgClient: { query: fake.query } }));
+vi.mock('@/lib/db/client', () => ({ pgClient: { query: fake.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: fake.season }));
 import { readManagerContributors } from './manager-contributors.query';
 

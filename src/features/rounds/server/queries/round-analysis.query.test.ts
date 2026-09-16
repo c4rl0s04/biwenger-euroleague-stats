@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   groupBy: vi.fn(),
   orderBy: vi.fn(),
 }));
-vi.mock('@/lib/db/connection', () => ({ pgClient: { query: mocks.query }, db: mocks }));
+vi.mock('@/lib/db/client', () => ({ pgClient: { query: mocks.query }, db: mocks }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 import {
   getAllRounds,

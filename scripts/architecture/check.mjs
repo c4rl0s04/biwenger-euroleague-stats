@@ -15,7 +15,7 @@ const isServer = (file) =>
   /^src\/auth\./.test(file);
 const isTest = (file) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(file) || file.includes('/__tests__/');
 const externalServer = (name) =>
-  /^(server-only|node:|pg$|postgres$|drizzle-orm(?:\/|$)|next\/(headers|server)$|fs(?:\/|$)|path$|crypto$)/.test(
+  /^(server-only|node:|pg$|drizzle-orm(?:\/|$)|next\/(headers|server)$|fs(?:\/|$)|path$|crypto$)/.test(
     name
   );
 

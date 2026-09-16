@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { asc, eq } from 'drizzle-orm';
-import { db } from '@/lib/db/connection';
+import { db } from '@/lib/db/client';
 import { matches } from '@/lib/db/schema';
 
 export interface CalendarRow {

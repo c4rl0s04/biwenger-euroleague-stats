@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 const mocks = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
-vi.mock('@/lib/db/connection', () => ({ pgClient: { query: mocks.query } }));
+vi.mock('@/lib/db/client', () => ({ pgClient: { query: mocks.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 import {
   resolveAllPlayAllSeason,

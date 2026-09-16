@@ -5,16 +5,16 @@ import * as path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 dotenv.config();
 
-import { hoopgridChallenges } from '../../lib/db/schema';
+import { hoopgridChallenges } from '../../src/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 /**
  * Script to generate a series of high-difficulty Hoopgrid challenges.
- * Usage: npx tsx src/scripts/hoopgrid/generate-hard.ts [count] [minDifficulty]
+ * Usage: npx tsx scripts/hoopgrid/generate-hard.ts [count] [minDifficulty]
  */
 async function main() {
-  const { db } = await import('../../lib/db');
-  const { hoopgridService } = await import('../../lib/services/features/hoopgridService');
+  const { db } = await import('../../src/lib/db/client');
+  const { hoopgridService } = await import('../../src/lib/services/features/hoopgridService');
 
   const args = process.argv.slice(2);
   const count = parseInt(args[0]) || 5;

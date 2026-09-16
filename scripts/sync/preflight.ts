@@ -1,27 +1,13 @@
 import * as dotenv from 'dotenv';
 import pg from 'pg';
 
+import { buildPoolConfig } from '../../src/lib/db/connection-config.js';
+
 dotenv.config({ path: '.env.local' });
 dotenv.config();
 
 function createPool() {
-  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
-
-  if (connectionString) {
-    const local = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
-    return new pg.Pool({
-      connectionString,
-      ssl: local ? false : { rejectUnauthorized: false },
-    });
-  }
-
-  return new pg.Pool({
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    host: process.env.POSTGRES_HOST,
-    port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT, 10) : 5432,
-    database: process.env.POSTGRES_DB,
-  });
+  return new pg.Pool(buildPoolConfig(process.env));
 }
 
 async function main() {
@@ -68,8 +54,7 @@ async function main() {
       validateProviderSnapshot,
       validateAdvancedProviderSnapshot,
       validateBiwengerRoundSeason,
-    } =
-      await import('../../src/lib/sync/preflight.js');
+    } = await import('../../src/lib/sync/preflight.js');
     const { parseBiwengerCompetition } = await import('../../src/lib/sync/context.js');
     const { relevantRounds } = await import('../../src/lib/sync/rounds.js');
 

@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/db/connection', () => ({
+vi.mock('@/lib/db/client', () => ({
   db: {},
   pgClient: {
     query: mocks.query,

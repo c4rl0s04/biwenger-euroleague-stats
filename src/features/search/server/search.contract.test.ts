@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 
 const mocks = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/db/connection', () => ({ pgClient: { query: mocks.query } }));
+vi.mock('@/lib/db/client', () => ({ pgClient: { query: mocks.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 
 import { GET } from '@/app/api/search/route';

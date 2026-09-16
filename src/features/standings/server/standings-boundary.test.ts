@@ -28,7 +28,7 @@ it('retains one implementation behind the legacy query adapter without a barrel 
     "from '@/features/standings/server'"
   );
   expect(read('src/features/standings/server/queries/base-standings.query.ts')).toContain(
-    "from '@/lib/db/connection'"
+    "from '@/lib/db/client'"
   );
   expect(read('src/features/standings/server/queries/base-standings.query.ts')).not.toMatch(
     /from ['"]@\/lib\/db['"]/

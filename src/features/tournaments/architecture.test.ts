@@ -15,7 +15,7 @@ it('keeps tournament server markers, client-safe models and persistence ownershi
     '@/lib/db'
   );
   expect(read('src/features/tournaments/server/queries/tournament.query.ts')).toContain(
-    '@/lib/db/connection'
+    '@/lib/db/client'
   );
   expect(read('src/features/tournaments/server/queries/tournament.query.ts')).not.toContain(
     "@/lib/db'"

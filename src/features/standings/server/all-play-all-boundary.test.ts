@@ -34,7 +34,7 @@ it('keeps typed models independent, queries guarded, and the mixed route only pa
     )
   ).toBe(true);
   expect(read('src/features/standings/server/queries/all-play-all.query.ts')).toContain(
-    "from '@/lib/db/connection'"
+    "from '@/lib/db/client'"
   );
   const route = read('src/app/api/standings/advanced/route.ts');
   expect(route).toContain("from '@/features/standings/server'");

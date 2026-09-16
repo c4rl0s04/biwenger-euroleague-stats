@@ -5,7 +5,7 @@ vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: async () => 1 }));
 
 const mockQuery = vi.fn();
-vi.mock('@/lib/db/connection', () => ({
+vi.mock('@/lib/db/client', () => ({
   pgClient: {
     query: (...args: unknown[]) => mockQuery(...args),
   },

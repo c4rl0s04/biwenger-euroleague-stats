@@ -2,7 +2,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { PgDialect } from 'drizzle-orm/pg-core';
 vi.mock('server-only', () => ({}));
 const mocks = vi.hoisted(() => ({ execute: vi.fn(), season: vi.fn() }));
-vi.mock('@/lib/db/connection', () => ({ db: { execute: mocks.execute } }));
+vi.mock('@/lib/db/client', () => ({ db: { execute: mocks.execute } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 import {
   queryFullStandings,

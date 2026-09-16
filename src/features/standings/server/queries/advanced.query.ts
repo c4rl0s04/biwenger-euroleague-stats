@@ -4,7 +4,7 @@ import 'server-only';
  * Complex analytics for the standings page
  */
 
-import { db, pgClient } from '@/lib/db/connection';
+import { db, pgClient } from '@/lib/db/client';
 import { fetchAllPlayAllStats } from '../services/all-play-all.service';
 import type { AllPlayAllEntry } from '../../models/all-play-all';
 import { cached, CACHE_TTL } from '@/lib/utils/cache';

@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { db as defaultDb } from '../../db/connection';
+import { db as defaultDb } from '../../db/client';
 import * as schema from '../../db/schema';
 import {
   lineups,
