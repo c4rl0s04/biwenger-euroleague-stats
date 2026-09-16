@@ -100,8 +100,8 @@ To apply the repair, first create and verify a fresh backup, then run:
 ALLOW_REMOTE_PRICE_REPAIR=true npm run db:repair:player-prices -- --apply
 ```
 
-The repair only updates `players.price` from the latest applicable `market_values` row. It does not
-delete or rewrite the history table. Review its dry-run output and target before applying it.
+The repair only updates `player_seasons.price` from the latest applicable `market_values` row. It
+does not delete or rewrite the history table. Review its dry-run output and target before applying it.
 
 ## Supabase Data API and access controls
 

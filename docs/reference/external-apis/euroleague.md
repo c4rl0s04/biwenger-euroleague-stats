@@ -39,21 +39,32 @@ The provider year is derived from `EUROLEAGUE_SEASON_CODE=E2026` and must match
 
 ## Persistence and matching
 
-`official_games` is the canonical calendar. Granular boxscores, play-by-play, shots, and standings
-are stored in their corresponding `official_*` tables with season IDs and raw JSON payloads.
-Round-level player totals are materialized locally; provider leader/all-time endpoints are neither
-called nor persisted.
+`matches` is the canonical persisted game record. Schedule and game metadata update its official
+game code, timing, status, scores, venue, officials, finalization, and related sporting fields.
+Player boxscore data is materialized into `player_round_stats`, where official metrics and
+participation provenance remain separate from Biwenger-owned fantasy fields.
+
+Granular datasets keep focused storage:
+
+- `official_play_by_play` stores official event history.
+- `official_shots` stores shot-level data.
+- `official_team_standings` stores official team standings snapshots.
+- `official_team_mappings` and `official_player_mappings` own season-scoped provider identity links
+  and review state.
+
+The former game and player-game staging tables were retired during the consolidated season-model
+migration and are not part of the current schema.
 
 Team mappings first reuse an existing exact legacy code, then require an exact normalized name.
 Player mappings first reuse an exact legacy player code, then require exact normalized name inside
 the mapped official team. Fuzzy results are report-only suggestions. Unresolved players remain in
-official storage with `review_required` and do not enter `player_round_stats`.
+mapping review state and do not enter `player_round_stats`.
 
 ## Live and final behavior
 
 At most two games are processed concurrently. Live events and shots are upserted without deleting
-temporarily absent rows. A finished game is replaced transactionally and receives a checksum and
-`finalized_at`. Routine sync rechecks finals for 48 hours, replacing only a changed checksum; older
-games require `--force-game=<code>`.
+temporarily absent rows. Finished game data is applied transactionally and tracked with a payload
+checksum/finalization state so routine sync can recheck recent finals and replace changed official
+data. Older games require the explicit force-game path.
 
 The API's current individual/non-commercial terms must be reviewed before any commercial use.

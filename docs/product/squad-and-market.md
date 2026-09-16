@@ -40,7 +40,7 @@ Market actions call the Biwenger API and can change external league state; they 
 authenticated user's provider token and validate ownership and inputs. Read-side market analytics
 depend on the synchronization history and can lag provider state between jobs.
 
-`market_values` is durable price history. `players.price` is the latest-price cache used by many
-queries and can be audited or repaired from history through the
+`market_values` is durable price history. `player_seasons.price` is the current-season price cache
+used by many queries and can be audited or repaired from history through the
 [database safety runbook](../operations/database-safety.md). Ownership updates must handle sales,
 eliminations, purchases, and current-squad snapshots without erasing historical facts.
