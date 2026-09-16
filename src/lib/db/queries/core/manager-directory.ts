@@ -18,15 +18,14 @@ export async function readManagerDirectory(): Promise<ManagerDirectoryRow[]> {
   const result = await pgClient.query(
     `
     SELECT
-      u.id,
-      COALESCE(us.name, u.name) AS name,
-      COALESCE(us.icon, u.icon) AS icon,
-      COALESCE(us.color_index, u.color_index, 0) AS color_index
+      us.user_id AS id,
+      us.name,
+      us.icon,
+      us.color_index
     FROM user_seasons us
-    JOIN users u ON u.id = us.user_id
     WHERE us.season_id = $1
-      AND COALESCE(us.status, 'active') = 'active'
-    ORDER BY COALESCE(us.name, u.name) ASC, u.id ASC
+      AND us.status = 'active'
+    ORDER BY us.name ASC, us.user_id ASC
   `,
     [seasonId]
   );

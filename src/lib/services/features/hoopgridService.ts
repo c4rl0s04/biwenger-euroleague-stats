@@ -8,7 +8,6 @@ import {
   initialSquads,
   fichajes,
   teams,
-  users,
   userSeasons,
 } from '@/lib/db/schema';
 import { eq, and, avg, count, sql, sum, max } from 'drizzle-orm';
@@ -222,13 +221,9 @@ export class HoopgridService {
 
         // Check transfers (might use Name)
         const [user] = await db
-          .select({ name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})` })
-          .from(users)
-          .innerJoin(
-            userSeasons,
-            and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
-          )
-          .where(eq(users.id, userId));
+          .select({ name: userSeasons.name })
+          .from(userSeasons)
+          .where(and(eq(userSeasons.userId, userId), eq(userSeasons.seasonId, seasonId)));
         const name = user?.name;
 
         const [transfer] = await db
@@ -443,14 +438,11 @@ export class HoopgridService {
         .where(and(eq(fichajes.seasonId, seasonId), eq(fichajes.playerId, playerId))),
       db
         .select({
-          id: users.id,
-          name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
+          id: userSeasons.userId,
+          name: userSeasons.name,
         })
-        .from(users)
-        .innerJoin(
-          userSeasons,
-          and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
-        ),
+        .from(userSeasons)
+        .where(eq(userSeasons.seasonId, seasonId)),
     ]);
 
     const userMap = new Map(allUsers.map((u) => [u.id, u.name]));
@@ -633,14 +625,11 @@ export class HoopgridService {
 
     const allUsersList = await db
       .select({
-        id: users.id,
-        name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
+        id: userSeasons.userId,
+        name: userSeasons.name,
       })
-      .from(users)
-      .innerJoin(
-        userSeasons,
-        and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
-      );
+      .from(userSeasons)
+      .where(eq(userSeasons.seasonId, seasonId));
     const seasonTeams = await db
       .select({ id: teams.id, label: teams.name })
       .from(teams)

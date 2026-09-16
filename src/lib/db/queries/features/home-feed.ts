@@ -90,9 +90,9 @@ export async function queryHomeActivityRows({
         ur.round_id,
         COALESCE(ur.round_name, 'Jornada ' || ur.round_id::text) AS round_name,
         ur.user_id,
-        COALESCE(us.name, u.name, 'Manager') AS user_name,
-        COALESCE(us.icon, u.icon) AS user_icon,
-        COALESCE(us.color_index, u.color_index, 0) AS color_index,
+        COALESCE(us.name, 'Manager') AS user_name,
+        us.icon AS user_icon,
+        COALESCE(us.color_index, 0) AS color_index,
         COALESCE(ur.points, 0)::int AS points,
         RANK() OVER (
           PARTITION BY ur.round_id
@@ -101,7 +101,6 @@ export async function queryHomeActivityRows({
       FROM user_rounds ur
       LEFT JOIN user_seasons us
         ON us.season_id = ur.season_id AND us.user_id = ur.user_id
-      LEFT JOIN users u ON u.id = ur.user_id
       WHERE ur.season_id = $1 AND COALESCE(ur.participated, TRUE) = TRUE
     ),
     round_events AS (
@@ -160,13 +159,13 @@ export async function queryHomeActivityRows({
         p.img AS player_image,
         t.code AS team_code,
         seller.user_id AS seller_id,
-        COALESCE(seller.name, seller_user.name, NULLIF(f.vendedor, ''), 'Mercado') AS seller_name,
-        COALESCE(seller.icon, seller_user.icon) AS seller_icon,
-        COALESCE(seller.color_index, seller_user.color_index, 0) AS seller_color_index,
+        COALESCE(seller.name, NULLIF(f.vendedor, ''), 'Mercado') AS seller_name,
+        seller.icon AS seller_icon,
+        COALESCE(seller.color_index, 0) AS seller_color_index,
         buyer.user_id AS buyer_id,
-        COALESCE(buyer.name, buyer_user.name, NULLIF(f.comprador, ''), 'Mercado') AS buyer_name,
-        COALESCE(buyer.icon, buyer_user.icon) AS buyer_icon,
-        COALESCE(buyer.color_index, buyer_user.color_index, 0) AS buyer_color_index,
+        COALESCE(buyer.name, NULLIF(f.comprador, ''), 'Mercado') AS buyer_name,
+        buyer.icon AS buyer_icon,
+        COALESCE(buyer.color_index, 0) AS buyer_color_index,
         COALESCE(f.precio, 0) AS amount,
         historical_value.price AS market_value,
         historical_value.date AS market_value_at
@@ -179,8 +178,6 @@ export async function queryHomeActivityRows({
         ON seller.season_id = f.season_id AND lower(seller.name) = lower(f.vendedor)
       LEFT JOIN user_seasons buyer
         ON buyer.season_id = f.season_id AND lower(buyer.name) = lower(f.comprador)
-      LEFT JOIN users seller_user ON seller_user.id = seller.user_id
-      LEFT JOIN users buyer_user ON buyer_user.id = buyer.user_id
       LEFT JOIN LATERAL (
         SELECT mv.price, mv.date
         FROM market_values mv
@@ -241,16 +238,15 @@ export async function queryHomeActivityRows({
         NULLIF(date, '')::timestamptz AS occurred_at,
         jsonb_build_object(
           'recipientId', df.user_id,
-          'recipientName', COALESCE(us.name, u.name, 'Manager'),
-          'icon', COALESCE(us.icon, u.icon),
-          'colorIndex', COALESCE(us.color_index, u.color_index, 0),
+          'recipientName', COALESCE(us.name, 'Manager'),
+          'icon', us.icon,
+          'colorIndex', COALESCE(us.color_index, 0),
           'amount', COALESCE(df.amount, 0),
           'description', COALESCE(NULLIF(df.description, ''), 'Prima administrativa')
         ) AS payload
       FROM deduplicated_finances df
       LEFT JOIN user_seasons us
         ON us.season_id = $1 AND us.user_id = df.user_id
-      LEFT JOIN users u ON u.id = df.user_id
       WHERE df.type <> 'round_bonus' OR df.round_id IS NULL
     ),
     match_session_events AS (
@@ -298,12 +294,11 @@ export async function queryHomeActivityRows({
     active_prediction_managers AS (
       SELECT
         us.user_id,
-        COALESCE(us.name, u.name, 'Manager') AS user_name,
-        COALESCE(us.icon, u.icon) AS user_icon,
-        COALESCE(us.color_index, u.color_index, 0)::int AS color_index
+        us.name AS user_name,
+        us.icon AS user_icon,
+        us.color_index::int AS color_index
       FROM user_seasons us
-      LEFT JOIN users u ON u.id = us.user_id
-      WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
+      WHERE us.season_id = $1 AND us.status <> 'inactive'
     ),
     complete_prediction_rankings AS (
       SELECT
@@ -428,14 +423,14 @@ export async function queryHomeActivityRows({
         COALESCE(tf.round_name, 'Jornada ' || tf.round_id::text) AS round_name,
         tf.id AS fixture_id,
         tf.home_user_id,
-        COALESCE(home_season.name, home_user.name, 'Manager') AS home_name,
-        COALESCE(home_season.icon, home_user.icon) AS home_icon,
-        COALESCE(home_season.color_index, home_user.color_index, 0)::int AS home_color_index,
+        COALESCE(home_season.name, 'Manager') AS home_name,
+        home_season.icon AS home_icon,
+        COALESCE(home_season.color_index, 0)::int AS home_color_index,
         tf.home_score,
         tf.away_user_id,
-        COALESCE(away_season.name, away_user.name, 'Manager') AS away_name,
-        COALESCE(away_season.icon, away_user.icon) AS away_icon,
-        COALESCE(away_season.color_index, away_user.color_index, 0)::int AS away_color_index,
+        COALESCE(away_season.name, 'Manager') AS away_name,
+        away_season.icon AS away_icon,
+        COALESCE(away_season.color_index, 0)::int AS away_color_index,
         tf.away_score,
         round_state.occurred_at,
         terminal_round.round_id = tf.round_id AS is_final_round
@@ -447,10 +442,8 @@ export async function queryHomeActivityRows({
       LEFT JOIN terminal_tournament_rounds terminal_round
         ON terminal_round.season_id = tf.season_id
         AND terminal_round.tournament_id = tf.tournament_id
-      LEFT JOIN users home_user ON home_user.id = tf.home_user_id
       LEFT JOIN user_seasons home_season
         ON home_season.season_id = tf.season_id AND home_season.user_id = tf.home_user_id
-      LEFT JOIN users away_user ON away_user.id = tf.away_user_id
       LEFT JOIN user_seasons away_season
         ON away_season.season_id = tf.season_id AND away_season.user_id = tf.away_user_id
       WHERE tf.season_id = $1

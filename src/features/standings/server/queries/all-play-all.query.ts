@@ -24,14 +24,13 @@ export async function listAllPlayAllUsers(seasonId: string): Promise<AllPlayAllU
     await pgClient.query<AllPlayAllUserRecord>(
       `
           SELECT
-            u.id,
-            COALESCE(us.name, u.name) as name,
-            COALESCE(us.icon, u.icon) as icon,
-            COALESCE(us.color_index, u.color_index, 0) as color_index
+            us.user_id as id,
+            us.name as name,
+            us.icon as icon,
+            us.color_index as color_index
           FROM user_seasons us
-          JOIN users u ON u.id = us.user_id
           WHERE us.season_id = $1
-            AND COALESCE(us.status, 'active') = 'active'
+            AND us.status = 'active'
         `,
       [seasonId]
     )

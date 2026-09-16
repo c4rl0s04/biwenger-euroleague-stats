@@ -10,6 +10,7 @@ import {
   bigint,
   date,
   foreignKey,
+  primaryKey,
   index,
   uniqueIndex,
   unique,
@@ -24,8 +25,6 @@ export const users = pgTable('users', {
   name: text('name'),
   email: text('email').unique(),
   password: text('password'),
-  icon: text('icon'),
-  colorIndex: integer('color_index').default(0),
 });
 
 // Server-only encrypted Biwenger credentials. This is the sole canonical store
@@ -158,6 +157,11 @@ export const playerSeasons = pgTable(
     playerSeasonUnique: unique('unique_player_season').on(t.seasonId, t.playerId),
     seasonOwnerIdx: index('idx_player_seasons_season_owner').on(t.seasonId, t.ownerId),
     seasonTeamIdx: index('idx_player_seasons_season_team').on(t.seasonId, t.teamId),
+    ownerSeasonFk: foreignKey({
+      columns: [t.seasonId, t.ownerId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'player_seasons_season_owner_fk',
+    }),
   })
 );
 
@@ -165,7 +169,6 @@ export const playerSeasons = pgTable(
 export const userSeasons = pgTable(
   'user_seasons',
   {
-    id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
       .default(DEFAULT_SEASON_ID)
@@ -173,16 +176,15 @@ export const userSeasons = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id),
-    name: text('name'),
+    name: text('name').notNull(),
     icon: text('icon'),
-    colorIndex: integer('color_index').default(0),
-    status: text('status').default('active'),
+    colorIndex: integer('color_index').notNull().default(0),
+    status: text('status').notNull().default('active'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (t) => ({
-    userSeasonUnique: unique('unique_user_season').on(t.seasonId, t.userId),
-    seasonUserIdx: index('idx_user_seasons_season_user').on(t.seasonId, t.userId),
+    pk: primaryKey({ columns: [t.seasonId, t.userId], name: 'user_seasons_pkey' }),
   })
 );
 
@@ -205,6 +207,11 @@ export const userRounds = pgTable(
   (t) => ({
     unq_user_round: unique('unique_user_round').on(t.seasonId, t.userId, t.roundId),
     seasonRoundIdx: index('idx_user_rounds_season_round').on(t.seasonId, t.roundId),
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'user_rounds_season_user_fk',
+    }),
   })
 );
 
@@ -256,6 +263,11 @@ export const lineups = pgTable(
   (t) => ({
     unq_lineup: unique('unique_lineup').on(t.seasonId, t.userId, t.roundId, t.playerId),
     seasonRoundIdx: index('idx_lineups_season_round').on(t.seasonId, t.roundId),
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'lineups_season_user_fk',
+    }),
   })
 );
 
@@ -368,6 +380,11 @@ export const porras = pgTable(
   },
   (t) => ({
     unq_porra: unique('unique_porra').on(t.seasonId, t.userId, t.roundId),
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'porras_season_user_fk',
+    }),
   })
 );
 
@@ -391,17 +408,27 @@ export const marketValues = pgTable(
 );
 
 // 10. Transfer Bids Table
-export const transferBids = pgTable('transfer_bids', {
-  id: serial('id').primaryKey(),
-  seasonId: text('season_id')
-    .notNull()
-    .default(DEFAULT_SEASON_ID)
-    .references(() => seasons.id),
-  transferId: integer('transfer_id').references(() => fichajes.id),
-  bidderId: text('bidder_id'),
-  bidderName: text('bidder_name'),
-  amount: integer('amount'),
-});
+export const transferBids = pgTable(
+  'transfer_bids',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    transferId: integer('transfer_id').references(() => fichajes.id),
+    bidderId: text('bidder_id'),
+    bidderName: text('bidder_name'),
+    amount: integer('amount'),
+  },
+  (t) => ({
+    bidderSeasonFk: foreignKey({
+      columns: [t.seasonId, t.bidderId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'transfer_bids_season_bidder_fk',
+    }),
+  })
+);
 
 // 11. Initial Squads Table
 export const initialSquads = pgTable(
@@ -418,23 +445,38 @@ export const initialSquads = pgTable(
   },
   (t) => ({
     unq_initial_squad: unique('unique_initial_squad').on(t.seasonId, t.userId, t.playerId),
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'initial_squads_season_user_fk',
+    }),
   })
 );
 
 // 12. Finances Table
-export const finances = pgTable('finances', {
-  id: serial('id').primaryKey(),
-  seasonId: text('season_id')
-    .notNull()
-    .default(DEFAULT_SEASON_ID)
-    .references(() => seasons.id),
-  userId: text('user_id'),
-  roundId: integer('round_id'),
-  date: text('date'),
-  type: text('type'),
-  amount: integer('amount'),
-  description: text('description'),
-});
+export const finances = pgTable(
+  'finances',
+  {
+    id: serial('id').primaryKey(),
+    seasonId: text('season_id')
+      .notNull()
+      .default(DEFAULT_SEASON_ID)
+      .references(() => seasons.id),
+    userId: text('user_id'),
+    roundId: integer('round_id'),
+    date: text('date'),
+    type: text('type'),
+    amount: integer('amount'),
+    description: text('description'),
+  },
+  (t) => ({
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'finances_season_user_fk',
+    }),
+  })
+);
 
 // 13. Player Mappings Table
 export const playerMappings = pgTable('player_mappings', {
@@ -692,6 +734,16 @@ export const tournamentFixtures = pgTable(
       foreignColumns: [tournaments.seasonId, tournaments.id],
       name: 'tournament_fixtures_season_tournament_fk',
     }),
+    homeUserSeasonFk: foreignKey({
+      columns: [t.seasonId, t.homeUserId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'tournament_fixtures_season_home_user_fk',
+    }),
+    awayUserSeasonFk: foreignKey({
+      columns: [t.seasonId, t.awayUserId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'tournament_fixtures_season_away_user_fk',
+    }),
     unq_tournament_fixture: unique('unique_tournament_fixture').on(
       t.seasonId,
       t.tournamentId,
@@ -727,6 +779,11 @@ export const tournamentStandings = pgTable(
       foreignColumns: [tournaments.seasonId, tournaments.id],
       name: 'tournament_standings_season_tournament_fk',
     }),
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'tournament_standings_season_user_fk',
+    }),
     unq_tournament_standing: unique('unique_tournament_standing').on(
       t.seasonId,
       t.tournamentId,
@@ -754,6 +811,11 @@ export const marketListings = pgTable(
     sellerId: text('seller_id'),
   },
   (t) => ({
+    sellerSeasonFk: foreignKey({
+      columns: [t.seasonId, t.sellerId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'market_listings_season_seller_fk',
+    }),
     unq_market_listing: unique('unique_market_listing').on(t.seasonId, t.playerId, t.listedAt),
   })
 );
@@ -796,7 +858,7 @@ export const playoffPredictions = pgTable(
       .notNull()
       .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
-    userId: text('user_id').references(() => users.id),
+    userId: text('user_id'),
     stage: text('stage'), // 'play-in', 'quarter', 'semi', 'final'
     matchId: text('match_id'), // 'PI-1', 'QF-1', etc.
     predictedWinnerId: integer('predicted_winner_id').references(() => teams.id),
@@ -806,6 +868,11 @@ export const playoffPredictions = pgTable(
     createdAt: timestamp('created_at').defaultNow(),
   },
   (t) => ({
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'playoff_predictions_season_user_fk',
+    }),
     unq_prediction: unique('unique_playoff_prediction').on(
       t.seasonId,
       t.userId,
@@ -845,11 +912,16 @@ export const userPlayoffMedia = pgTable(
       .notNull()
       .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
-    userId: text('user_id').references(() => users.id),
+    userId: text('user_id'),
     predictionImageUrl: text('prediction_image_url'),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
   (t) => ({
+    userSeasonFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'user_playoff_media_season_user_fk',
+    }),
     unq_user_playoff_media: unique('unique_user_playoff_media').on(t.seasonId, t.userId),
   })
 );

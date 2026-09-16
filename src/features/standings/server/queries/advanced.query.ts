@@ -198,16 +198,17 @@ export async function getHeatCheckStats(): Promise<HeatCheckStat[]> {
         GROUP BY user_id
       )
       SELECT
-        u.id as user_id,
-        u.name,
-        u.icon,
-        u.color_index,
+        us.user_id,
+        us.name,
+        us.icon,
+        us.color_index,
         COALESCE(r.recent_avg, 0) as last5_avg,
         COALESCE(s.season_avg, 0) as season_avg,
         (COALESCE(r.recent_avg, 0) - COALESCE(s.season_avg, 0)) as diff
-      FROM users u
-      JOIN SeasonStats s ON u.id = s.user_id
-      LEFT JOIN RecentStats r ON u.id = r.user_id
+      FROM user_seasons us
+      JOIN SeasonStats s ON us.user_id = s.user_id
+      LEFT JOIN RecentStats r ON us.user_id = r.user_id
+      WHERE us.season_id = $1
       ORDER BY diff DESC
     `;
 
@@ -261,15 +262,15 @@ export async function getHunterStats(): Promise<HunterStat[]> {
 
     const sql = `
       SELECT
-        u.id as user_id,
-        u.name,
-        u.icon,
-        u.color_index,
+        us.user_id,
+        us.name,
+        us.icon,
+        us.color_index,
         SUM(ur.points) as recent_points
-      FROM users u
-      JOIN user_rounds ur ON u.id = ur.user_id
+      FROM user_seasons us
+      JOIN user_rounds ur ON us.user_id = ur.user_id AND us.season_id = ur.season_id
       WHERE ur.season_id = $2 AND ur.round_id >= $1
-      GROUP BY u.id
+      GROUP BY us.user_id, us.name, us.icon, us.color_index
     `;
 
     const recentPoints = (await pgClient.query(sql, [minRoundId, seasonId])).rows.map((p: any) => ({
@@ -308,10 +309,10 @@ export async function getRollingAverageStats(): Promise<RollingAverageStat[]> {
     const users = (
       await pgClient.query(
         `
-        SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
-        FROM users u
-        JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-        WHERE COALESCE(us.status, 'active') <> 'inactive'
+        SELECT us.user_id as id, us.name as name, us.icon as icon, us.color_index as color_index
+        FROM user_seasons us
+        WHERE us.season_id = $1
+          AND us.status <> 'inactive'
       `,
         [seasonId]
       )
@@ -377,18 +378,17 @@ export async function getFloorCeilingStats(): Promise<FloorCeilingStat[]> {
     const seasonId = await resolveReadSeasonId();
     const sql = `
       SELECT
-        u.id as user_id,
-        COALESCE(us.name, u.name) as name,
-        COALESCE(us.icon, u.icon) as icon,
-        COALESCE(us.color_index, u.color_index, 0) as color_index,
+        us.user_id as user_id,
+        us.name as name,
+        us.icon as icon,
+        us.color_index as color_index,
         MIN(ur.points) as floor,
         MAX(ur.points) as ceiling,
         CAST(AVG(ur.points) as INTEGER) as avg
-      FROM users u
-      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-      JOIN user_rounds ur ON u.id = ur.user_id
-      WHERE ur.season_id = $1 AND ur.participated = TRUE
-      GROUP BY u.id, us.name, us.icon, us.color_index
+      FROM user_seasons us
+      JOIN user_rounds ur ON us.user_id = ur.user_id AND us.season_id = ur.season_id
+      WHERE us.season_id = $1 AND ur.participated = TRUE AND us.status <> 'inactive'
+      GROUP BY us.user_id, us.name, us.icon, us.color_index
       ORDER BY ceiling DESC
     `;
 
@@ -431,16 +431,15 @@ export async function getReliabilityStats(): Promise<ReliabilityStat[]> {
       await pgClient.query(
         `
       SELECT
-        u.id as user_id,
-        COALESCE(us.name, u.name) as name,
-        COALESCE(us.icon, u.icon) as icon,
-        COALESCE(us.color_index, u.color_index, 0) as color_index,
+        us.user_id as user_id,
+        us.name as name,
+        us.icon as icon,
+        us.color_index as color_index,
         ur.round_id,
         ur.points
-      FROM users u
-      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-      JOIN user_rounds ur ON u.id = ur.user_id
-      WHERE ur.season_id = $1 AND ur.participated = TRUE
+      FROM user_seasons us
+      JOIN user_rounds ur ON us.user_id = ur.user_id AND us.season_id = ur.season_id
+      WHERE us.season_id = $1 AND ur.participated = TRUE AND us.status <> 'inactive'
     `,
         [seasonId]
       )
@@ -488,10 +487,10 @@ export async function getPointDistributionStats(): Promise<PointDistributionStat
     const users = (
       await pgClient.query(
         `
-        SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
-        FROM users u
-        JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-        WHERE COALESCE(us.status, 'active') <> 'inactive'
+        SELECT us.user_id as id, us.name as name, us.icon as icon, us.color_index as color_index
+        FROM user_seasons us
+        WHERE us.season_id = $1
+          AND us.status <> 'inactive'
       `,
         [seasonId]
       )
@@ -572,17 +571,16 @@ export async function getDominanceStats(): Promise<DominanceStat[]> {
         WHERE season_id = $1 AND participated = TRUE
       )
       SELECT
-        u.id as user_id,
-        COALESCE(us.name, u.name) as name,
-        COALESCE(us.icon, u.icon) as icon,
-        COALESCE(us.color_index, u.color_index, 0) as color_index,
+        us.user_id as user_id,
+        us.name as name,
+        us.icon as icon,
+        us.color_index as color_index,
         COUNT(CASE WHEN rs.rnk = 1 THEN 1 END)::int as wins,
         COALESCE(AVG(CASE WHEN rs.rnk = 1 THEN rs.points - COALESCE(rs.next_points, rs.points) END), 0)::float as avg_margin
-      FROM users u
-      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-      LEFT JOIN RoundStats rs ON u.id = rs.user_id
-      WHERE COALESCE(us.status, 'active') <> 'inactive'
-      GROUP BY u.id, u.name, u.icon, u.color_index, us.name, us.icon, us.color_index
+      FROM user_seasons us
+      LEFT JOIN RoundStats rs ON us.user_id = rs.user_id
+      WHERE us.season_id = $1 AND us.status <> 'inactive'
+      GROUP BY us.user_id, us.name, us.icon, us.color_index
       ORDER BY wins DESC, avg_margin DESC
     `,
         [seasonId]
@@ -630,16 +628,15 @@ export async function getTheoreticalGapStats(): Promise<TheoreticalGapStat[]> {
       await pgClient.query(
         `
       SELECT
-        u.id as user_id,
-        COALESCE(us.name, u.name) as name,
-        COALESCE(us.icon, u.icon) as icon,
-        COALESCE(us.color_index, u.color_index, 0) as color_index,
+        us.user_id as user_id,
+        us.name as name,
+        us.icon as icon,
+        us.color_index as color_index,
         SUM(ur.points) as current_points
       FROM user_rounds ur
-      JOIN users u ON ur.user_id = u.id
-      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ur.season_id
-      WHERE ur.season_id = $1 AND participated = TRUE
-      GROUP BY u.id, us.name, us.icon, us.color_index
+      JOIN user_seasons us ON us.user_id = ur.user_id AND us.season_id = ur.season_id
+      WHERE ur.season_id = $1 AND participated = TRUE AND us.status <> 'inactive'
+      GROUP BY us.user_id, us.name, us.icon, us.color_index
     `,
         [seasonId]
       )
@@ -683,10 +680,10 @@ export async function getHeatmapStats(): Promise<HeatmapStat> {
       const users = (
         await pgClient.query(
           `
-          SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
-          FROM users u
-          JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-          WHERE COALESCE(us.status, 'active') <> 'inactive'
+          SELECT us.user_id as id, us.name as name, us.icon as icon, us.color_index as color_index
+          FROM user_seasons us
+          WHERE us.season_id = $1
+            AND us.status <> 'inactive'
         `,
           [seasonId]
         )
@@ -751,10 +748,10 @@ export async function getPositionChangesStats(): Promise<PositionChangeStat> {
       const users = (
         await pgClient.query(
           `
-          SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
-          FROM users u
-          JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-          WHERE COALESCE(us.status, 'active') <> 'inactive'
+          SELECT us.user_id as id, us.name as name, us.icon as icon, us.color_index as color_index
+          FROM user_seasons us
+          WHERE us.season_id = $1
+            AND us.status <> 'inactive'
         `,
           [seasonId]
         )
@@ -890,10 +887,10 @@ export async function getRivalryMatrixStats(): Promise<RivalryMatrixStat> {
       const users = (
         await pgClient.query(
           `
-          SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
-          FROM users u
-          JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-          WHERE COALESCE(us.status, 'active') <> 'inactive'
+          SELECT us.user_id as id, us.name as name, us.icon as icon, us.color_index as color_index
+          FROM user_seasons us
+          WHERE us.season_id = $1
+            AND us.status <> 'inactive'
         `,
           [seasonId]
         )
@@ -974,9 +971,9 @@ export async function getCaptainStats(): Promise<CaptainStat[]> {
     const sql = `
       SELECT
         l.user_id,
-        COALESCE(us.name, u.name) as name,
-        COALESCE(us.icon, u.icon) as icon,
-        COALESCE(us.color_index, u.color_index, 0) as color_index,
+        us.name as name,
+        us.icon as icon,
+        us.color_index as color_index,
         COUNT(*) as total_captains,
         SUM(prs.points) as raw_captain_points,
         SUM(CASE
@@ -985,11 +982,10 @@ export async function getCaptainStats(): Promise<CaptainStat[]> {
         END) as weighted_points,
         AVG(prs.points) as avg_captain_points
       FROM lineups l
-      JOIN users u ON l.user_id = u.id
-      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = l.season_id
+      JOIN user_seasons us ON us.user_id = l.user_id AND us.season_id = l.season_id
       JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
       WHERE l.season_id = $1 AND l.is_captain = TRUE
-      GROUP BY l.user_id, u.name, u.icon, u.color_index, us.name, us.icon, us.color_index
+      GROUP BY l.user_id, us.name, us.icon, us.color_index
       ORDER BY raw_captain_points DESC
     `;
 
@@ -1063,10 +1059,10 @@ export async function getDetailedCaptainStats(): Promise<DetailedCaptainStat[]> 
           GROUP BY cs.user_id
       )
       SELECT
-          u.id as user_id,
-          COALESCE(us.name, u.name) as user_name,
-          COALESCE(us.icon, u.icon) as user_icon,
-          COALESCE(us.color_index, u.color_index, 0) as color_index,
+          us.user_id as user_id,
+          us.name as user_name,
+          us.icon as user_icon,
+          us.color_index as color_index,
           COALESCE(ucs.total_rounds, 0) as total_rounds,
           COALESCE(ucs.total_captain_points, 0) as total_captain_points,
           COALESCE(ucs.avg_captain_points, 0) as avg_captain_points,
@@ -1076,11 +1072,10 @@ export async function getDetailedCaptainStats(): Promise<DetailedCaptainStat[]> 
           COALESCE(ucs.worst_captain_points, 0) as worst_points,
           cu.player_name as most_used_captain,
           cu.player_id as most_used_captain_id
-      FROM users u
-      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $1
-      LEFT JOIN UserCapiStats ucs ON u.id = ucs.user_id
-      LEFT JOIN CaptainUsage cu ON u.id = cu.user_id AND cu.usage_rank = 1
-      WHERE COALESCE(us.status, 'active') <> 'inactive'
+      FROM user_seasons us
+      LEFT JOIN UserCapiStats ucs ON us.user_id = ucs.user_id
+      LEFT JOIN CaptainUsage cu ON us.user_id = cu.user_id AND cu.usage_rank = 1
+      WHERE us.season_id = $1 AND us.status <> 'inactive'
       ORDER BY total_captain_points DESC
     `;
 

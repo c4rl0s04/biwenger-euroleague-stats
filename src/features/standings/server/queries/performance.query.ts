@@ -105,14 +105,15 @@ export async function getVolatilityStats(): Promise<VolatilityStat[]> {
       GROUP BY user_id
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       ROUND(s.avg_points, 1) as avg_points,
       ROUND(s.std_dev, 2) as std_dev
-    FROM users u
-    JOIN Stats s ON u.id = s.user_id
+    FROM user_seasons us
+    JOIN Stats s ON us.user_id = s.user_id
+    WHERE us.season_id = $1
     ORDER BY s.std_dev ASC
   `;
   // Note: Postgres `STDDEV` returns numeric/float, `ROUND` works fine.
@@ -140,16 +141,17 @@ export async function getPlacementStats(): Promise<PlacementStat[]> {
       WHERE season_id = $1 AND participated = TRUE
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       SUM(CASE WHEN r.position <= 3 THEN 1 ELSE 0 END) as top_3_count,
       SUM(CASE WHEN r.position >= (r.total_participants - 2) THEN 1 ELSE 0 END) as bottom_3_count,
       COUNT(r.round_id) as total_rounds
-    FROM users u
-    JOIN RoundRanks r ON u.id = r.user_id
-    GROUP BY u.id
+    FROM user_seasons us
+    JOIN RoundRanks r ON us.user_id = r.user_id
+    WHERE us.season_id = $1
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     ORDER BY top_3_count DESC, bottom_3_count ASC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
@@ -176,18 +178,18 @@ export async function getLeagueComparisonStats(): Promise<LeagueComparisonStat[]
       GROUP BY round_id
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       SUM(CASE WHEN ur.points > ra.league_avg THEN 1 ELSE 0 END) as above_avg_count,
       SUM(CASE WHEN ur.points < ra.league_avg THEN 1 ELSE 0 END) as below_avg_count,
       ROUND(AVG(ur.points - ra.league_avg), 1) as avg_diff
-    FROM users u
-    JOIN user_rounds ur ON u.id = ur.user_id
+    FROM user_seasons us
+    JOIN user_rounds ur ON us.user_id = ur.user_id AND us.season_id = ur.season_id
     JOIN RoundAverages ra ON ur.round_id = ra.round_id
-    WHERE ur.season_id = $1 AND ur.participated = TRUE
-    GROUP BY u.id
+    WHERE ur.season_id = $1 AND ur.participated = TRUE AND us.season_id = $1
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     ORDER BY above_avg_count DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
@@ -219,18 +221,18 @@ export async function getEfficiencyStats(): Promise<EfficiencyStat[]> {
       GROUP BY owner_id
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       up.total_points,
       COALESCE(uv.team_value, 0) as team_value,
       -- Calculate Points per 1M value
       ROUND(CAST(up.total_points AS NUMERIC) / NULLIF((CAST(uv.team_value AS NUMERIC) / 1000000), 0), 2) as points_per_million
-    FROM users u
-    JOIN UserPoints up ON u.id = up.user_id
-    LEFT JOIN UserValue uv ON u.id = uv.owner_id
-    WHERE uv.team_value > 0
+    FROM user_seasons us
+    JOIN UserPoints up ON us.user_id = up.user_id
+    LEFT JOIN UserValue uv ON us.user_id = uv.owner_id
+    WHERE us.season_id = $1 AND uv.team_value > 0
     ORDER BY points_per_million DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
@@ -294,16 +296,17 @@ export async function getStreakStats(): Promise<StreakStat[]> {
        GROUP BY ur.user_id
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       COALESCE(MAX(gs.streak_length), 0) as longest_streak,
       COALESCE(csc.current_streak, 0) as current_streak
-    FROM users u
-    LEFT JOIN GroupedStreaks gs ON u.id = gs.user_id
-    LEFT JOIN CurrentStreakCalc csc ON u.id = csc.user_id
-    GROUP BY u.id, u.name, u.icon, u.color_index, csc.current_streak
+    FROM user_seasons us
+    LEFT JOIN GroupedStreaks gs ON us.user_id = gs.user_id
+    LEFT JOIN CurrentStreakCalc csc ON us.user_id = csc.user_id
+    WHERE us.season_id = $1
+    GROUP BY us.user_id, us.name, us.icon, us.color_index, csc.current_streak
     ORDER BY longest_streak DESC, current_streak DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
@@ -330,10 +333,10 @@ export async function getBottlerStats(): Promise<BottlerStat[]> {
       WHERE season_id = $1 AND participated = TRUE
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) as wins,
       SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) as seconds,
       SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) as thirds,
@@ -341,9 +344,10 @@ export async function getBottlerStats(): Promise<BottlerStat[]> {
        SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) * 1) -
        (SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) * 2)
        as bottler_score
-    FROM users u
-    JOIN RoundRanks r ON u.id = r.user_id
-    GROUP BY u.id
+    FROM user_seasons us
+    JOIN RoundRanks r ON us.user_id = r.user_id
+    WHERE us.season_id = $1
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     HAVING (SUM(CASE WHEN position = 2 THEN 1 ELSE 0 END) > 0 OR SUM(CASE WHEN position = 3 THEN 1 ELSE 0 END) > 0)
     ORDER BY bottler_score DESC
   `;
@@ -382,16 +386,17 @@ export async function getHeartbreakerStats(): Promise<HeartbreakerStat[]> {
       WHERE position = 2
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       COUNT(he.round_id) as count,
       COALESCE(SUM(he.diff), 0) as total_diff
-    FROM users u
-    LEFT JOIN HeartbreakEvents he ON u.id = he.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = u.id AND ur.participated = TRUE) -- Only active users
-    GROUP BY u.id
+    FROM user_seasons us
+    LEFT JOIN HeartbreakEvents he ON us.user_id = he.user_id
+    WHERE us.season_id = $1
+      AND EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = us.user_id AND ur.participated = TRUE) -- Only active users
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     ORDER BY (CASE WHEN COALESCE(SUM(he.diff), 0) = 0 THEN 1 ELSE 0 END) ASC, total_diff ASC
   `;
   return (await pgClient.query(refinedQuery, [seasonId])).rows.map((row: any) => ({
@@ -425,16 +430,17 @@ export async function getNoGloryStats(): Promise<NoGloryStat[]> {
       WHERE position > 1
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       COALESCE(SUM(nge.points), 0) as total_points_no_glory,
       COUNT(nge.points) as rounds_count
-    FROM users u
-    LEFT JOIN NoGloryEvents nge ON u.id = nge.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = u.id AND ur.participated = TRUE)
-    GROUP BY u.id
+    FROM user_seasons us
+    LEFT JOIN NoGloryEvents nge ON us.user_id = nge.user_id
+    WHERE us.season_id = $1
+      AND EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = us.user_id AND ur.participated = TRUE)
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     ORDER BY total_points_no_glory DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({
@@ -479,15 +485,16 @@ export async function getJinxStats(): Promise<JinxStat[]> {
         AND urr.position > (rs.participant_count / 2)
     )
     SELECT
-      u.id as user_id,
-      u.name,
-      u.icon,
-      u.color_index,
+      us.user_id as user_id,
+      us.name,
+      us.icon,
+      us.color_index,
       COUNT(je.round_id) as jinxed_count
-    FROM users u
-    LEFT JOIN JinxEvents je ON u.id = je.user_id
-    WHERE EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = u.id AND ur.participated = TRUE)
-    GROUP BY u.id
+    FROM user_seasons us
+    LEFT JOIN JinxEvents je ON us.user_id = je.user_id
+    WHERE us.season_id = $1
+      AND EXISTS (SELECT 1 FROM user_rounds ur WHERE ur.season_id = $1 AND ur.user_id = us.user_id AND ur.participated = TRUE)
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     ORDER BY jinxed_count DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows.map((row: any) => ({

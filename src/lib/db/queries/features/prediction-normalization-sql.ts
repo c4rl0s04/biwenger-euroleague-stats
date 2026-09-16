@@ -86,9 +86,9 @@ export const PREDICTION_NORMALIZATION_CTES = `
   conceptual_totals AS (
     SELECT
       md.user_id,
-      COALESCE(us.name, u.name) AS usuario,
-      COALESCE(us.icon, u.icon) AS user_icon,
-      COALESCE(us.color_index, u.color_index, 0) AS color_index,
+      us.name AS usuario,
+      us.icon AS user_icon,
+      us.color_index AS color_index,
       md.base_round AS jornada,
       md.base_round_id,
       SUM(md.is_correct) AS total_aciertos,
@@ -96,15 +96,14 @@ export const PREDICTION_NORMALIZATION_CTES = `
       COUNT(md.global_pos) AS user_matches,
       (SELECT COUNT(*) FROM match_sequences ms2 WHERE ms2.base_round = md.base_round) AS total_matches
     FROM matched_data md
-    JOIN users u ON md.user_id = u.id
-    LEFT JOIN user_seasons us
-      ON us.user_id = u.id
+    JOIN user_seasons us
+      ON us.user_id = md.user_id
       AND us.season_id = $1
     GROUP BY
       md.user_id,
-      COALESCE(us.name, u.name),
-      COALESCE(us.icon, u.icon),
-      COALESCE(us.color_index, u.color_index, 0),
+      us.name,
+      us.icon,
+      us.color_index,
       md.base_round,
       md.base_round_id
   )

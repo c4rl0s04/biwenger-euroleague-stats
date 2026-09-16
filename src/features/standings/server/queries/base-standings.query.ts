@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { db } from '@/lib/db/connection';
-import { matches, playerSeasons, userRounds, users, userSeasons } from '@/lib/db/schema';
+import { matches, playerSeasons, userRounds, userSeasons } from '@/lib/db/schema';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { sql } from 'drizzle-orm';
 import type { StandingsOptions } from '../../models/base-standings';
@@ -65,10 +65,10 @@ export async function queryFullStandings(options: StandingsOptions = {}) {
       GROUP BY user_id
     )
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as name,
-      COALESCE(us.icon, u.icon) as icon,
-      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      us.user_id as user_id,
+      us.name as name,
+      us.icon as icon,
+      us.color_index as color_index,
       COALESCE(ut.total_points, 0)::int as total_points,
       COALESCE(ut.rounds_played, 0)::int as rounds_played,
       COALESCE(ut.avg_points, 0)::float as avg_points,
@@ -79,9 +79,8 @@ export async function queryFullStandings(options: StandingsOptions = {}) {
       COALESCE(sq.price_trend, 0)::int as price_trend,
       RANK() OVER (ORDER BY COALESCE(ut.total_points, 0) DESC)::int as position
     FROM ${userSeasons} us
-    JOIN ${users} u ON u.id = us.user_id
-    LEFT JOIN UserTotals ut ON u.id = ut.user_id
-    LEFT JOIN RoundWins rw ON u.id = rw.user_id
+    LEFT JOIN UserTotals ut ON us.user_id = ut.user_id
+    LEFT JOIN RoundWins rw ON us.user_id = rw.user_id
     LEFT JOIN (
       SELECT
         owner_id,
@@ -90,7 +89,7 @@ export async function queryFullStandings(options: StandingsOptions = {}) {
       FROM ${playerSeasons}
       WHERE season_id = ${seasonId} AND owner_id IS NOT NULL
       GROUP BY owner_id
-    ) sq ON u.id = sq.owner_id
+    ) sq ON us.user_id = sq.owner_id
     WHERE us.season_id = ${seasonId}
       AND COALESCE(us.status, 'active') = 'active'
     ORDER BY ${orderBy} ${sortDir} NULLS LAST
@@ -112,17 +111,16 @@ export async function querySimpleStandings() {
       GROUP BY user_id
     )
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as name,
-      COALESCE(us.icon, u.icon) as icon,
-      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      us.user_id as user_id,
+      us.name as name,
+      us.icon as icon,
+      us.color_index as color_index,
       COALESCE(ut.total_points, 0)::int as total_points,
       COALESCE(sq.team_value, 0)::bigint as team_value,
       COALESCE(sq.price_trend, 0)::int as price_trend,
       RANK() OVER (ORDER BY COALESCE(ut.total_points, 0) DESC)::int as position
     FROM ${userSeasons} us
-    JOIN ${users} u ON u.id = us.user_id
-    LEFT JOIN UserTotals ut ON u.id = ut.user_id
+    LEFT JOIN UserTotals ut ON us.user_id = ut.user_id
     LEFT JOIN (
       SELECT
         owner_id,
@@ -131,7 +129,7 @@ export async function querySimpleStandings() {
       FROM ${playerSeasons}
       WHERE season_id = ${seasonId} AND owner_id IS NOT NULL
       GROUP BY owner_id
-    ) sq ON u.id = sq.owner_id
+    ) sq ON us.user_id = sq.owner_id
     WHERE us.season_id = ${seasonId}
       AND COALESCE(us.status, 'active') = 'active'
     ORDER BY position ASC
@@ -144,20 +142,19 @@ export async function queryValueRanking() {
   const seasonId = await resolveReadSeasonId();
   const result = await db.execute(sql`
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as name,
-      COALESCE(us.icon, u.icon) as icon,
-      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      us.user_id as user_id,
+      us.name as name,
+      us.icon as icon,
+      us.color_index as color_index,
       COALESCE(SUM(ps.price), 0)::bigint as team_value,
       COALESCE(SUM(ps.price_increment), 0)::int as price_trend,
       COUNT(ps.player_id)::int as squad_size,
       RANK() OVER (ORDER BY COALESCE(SUM(ps.price), 0) DESC)::int as value_position
     FROM ${userSeasons} us
-    JOIN ${users} u ON u.id = us.user_id
-    LEFT JOIN ${playerSeasons} ps ON u.id = ps.owner_id AND ps.season_id = us.season_id
+    LEFT JOIN ${playerSeasons} ps ON us.user_id = ps.owner_id AND ps.season_id = us.season_id
     WHERE us.season_id = ${seasonId}
       AND COALESCE(us.status, 'active') = 'active'
-    GROUP BY u.id, us.name, us.icon, us.color_index
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     ORDER BY team_value DESC
   `);
 
@@ -218,16 +215,15 @@ export async function queryLeagueOverview() {
   const mostValuable = (
     await db.execute(sql`
     SELECT
-      COALESCE(us.name, u.name) as name,
-      COALESCE(us.icon, u.icon) as icon,
-      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      us.name as name,
+      us.icon as icon,
+      us.color_index as color_index,
       SUM(ps.price)::bigint as team_value
     FROM ${userSeasons} us
-    JOIN ${users} u ON u.id = us.user_id
-    JOIN ${playerSeasons} ps ON u.id = ps.owner_id AND ps.season_id = us.season_id
+    JOIN ${playerSeasons} ps ON us.user_id = ps.owner_id AND ps.season_id = us.season_id
     WHERE us.season_id = ${seasonId}
       AND COALESCE(us.status, 'active') = 'active'
-    GROUP BY u.id, us.name, us.icon, us.color_index
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
     ORDER BY team_value DESC
     LIMIT 1
   `)
@@ -244,14 +240,13 @@ export async function queryLeagueOverview() {
     )
     SELECT
       ur.user_id,
-      COALESCE(us.name, u.name) as name,
-      COALESCE(us.icon, u.icon) as icon,
-      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      us.name as name,
+      us.icon as icon,
+      us.color_index as color_index,
       ur.round_name,
       ur.points
     FROM ${userRounds} ur
-    JOIN ${users} u ON ur.user_id = u.id
-    JOIN ${userSeasons} us ON us.user_id = u.id AND us.season_id = ur.season_id
+    JOIN ${userSeasons} us ON us.user_id = ur.user_id AND us.season_id = ur.season_id
     WHERE ur.round_id IN (SELECT round_id FROM CompletedRounds)
     AND ur.season_id = ${seasonId}
     AND COALESCE(us.status, 'active') = 'active'
@@ -284,10 +279,9 @@ export async function queryLeagueOverview() {
         SELECT MAX(round_id) as rid FROM CompletedRounds
       ),
       TargetUser AS (
-        SELECT ur.user_id, COALESCE(us.name, u.name) as name
+        SELECT ur.user_id, us.name as name
         FROM RoundWinners ur
-        JOIN ${users} u ON ur.user_id = u.id
-        JOIN ${userSeasons} us ON us.user_id = u.id AND us.season_id = ${seasonId}
+        JOIN ${userSeasons} us ON us.user_id = ur.user_id AND us.season_id = ${seasonId}
         WHERE ur.pos = 1
         AND ur.round_id = (SELECT rid FROM LatestCompletedRound)
         AND COALESCE(us.status, 'active') = 'active'

@@ -81,6 +81,11 @@ try {
      VALUES ('2026-27', 'EuroLeague Fantasy 2026-27', 'active', true, 'E2026', '456')
      ON CONFLICT (id) DO UPDATE SET status = 'active', is_sync_enabled = true, euroleague_code = 'E2026'`
   );
+  await pool.query(
+    `INSERT INTO user_seasons (season_id, user_id, name, color_index, status)
+     VALUES ('2026-27', '99001', 'Fixture Manager', 0, 'active')
+     ON CONFLICT (season_id, user_id) DO NOTHING`
+  );
 
   // Player 99101 already seeded in 2025-26 with team 9901, price 1500000, puntos 24
   // Insert player 99101 in 2026-27 with team 9902, price 2500000, puntos 30

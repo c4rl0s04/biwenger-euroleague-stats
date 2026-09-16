@@ -87,12 +87,11 @@ export async function getSeasonReviewRawData(): Promise<SeasonReviewRawData> {
     counts,
   ] = await Promise.all([
     pgClient.query(
-      `SELECT us.user_id AS id, COALESCE(us.name, u.name) AS name,
-              COALESCE(us.color_index, u.color_index, 0) AS color_index
+      `SELECT us.user_id AS id, us.name AS name,
+              us.color_index AS color_index
        FROM user_seasons us
-       JOIN users u ON u.id = us.user_id
-       WHERE us.season_id = $1 AND COALESCE(us.status, 'active') = 'active'
-       ORDER BY COALESCE(us.name, u.name)`,
+       WHERE us.season_id = $1 AND us.status = 'active'
+       ORDER BY us.name`,
       [seasonId]
     ),
     pgClient.query(

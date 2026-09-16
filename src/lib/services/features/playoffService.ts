@@ -4,11 +4,10 @@ import {
   playoffPredictions,
   playoffResults,
   userPlayoffMedia,
-  users,
   teams,
   userSeasons,
 } from '../../db/schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, ne, sql } from 'drizzle-orm';
 import { resolveReadSeasonId } from '../../db/season-context';
 
 /**
@@ -27,17 +26,13 @@ export async function getPlayoffLeaderboard() {
   const seasonId = await resolveReadSeasonId();
   const allUsers = await db
     .select({
-      id: users.id,
-      name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
-      icon: sql<string | null>`COALESCE(${userSeasons.icon}, ${users.icon})`,
-      colorIndex: sql<number>`COALESCE(${userSeasons.colorIndex}, ${users.colorIndex}, 0)`,
+      id: userSeasons.userId,
+      name: userSeasons.name,
+      icon: userSeasons.icon,
+      colorIndex: userSeasons.colorIndex,
     })
-    .from(users)
-    .innerJoin(
-      userSeasons,
-      and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
-    )
-    .where(sql`COALESCE(${userSeasons.status}, 'active') <> 'inactive'`);
+    .from(userSeasons)
+    .where(and(eq(userSeasons.seasonId, seasonId), ne(userSeasons.status, 'inactive')));
   const predictions = await db
     .select()
     .from(playoffPredictions)

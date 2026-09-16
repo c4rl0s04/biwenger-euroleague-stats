@@ -104,8 +104,8 @@ describe('real Search HTTP/service/query contract', () => {
       'LEFT JOIN player_seasons ps ON ps.team_id = t.id AND ps.season_id = $2'
     );
     expect(calls[1][0]).toContain('ORDER BY player_count DESC');
-    expect(calls[2][0]).toContain("AND COALESCE(us.status, 'active') = 'active'");
-    expect(calls[2][0]).toContain('ORDER BY COALESCE(us.name, u.name)');
+    expect(calls[2][0]).toContain("AND us.status = 'active'");
+    expect(calls[2][0]).toContain('ORDER BY us.name');
     for (const [sql] of calls) expect(sql).toContain('LIMIT $3');
   });
 

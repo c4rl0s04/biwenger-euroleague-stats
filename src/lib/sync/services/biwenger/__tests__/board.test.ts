@@ -15,9 +15,7 @@ describe('Biwenger Board Service', () => {
     const mockDb = {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
-          innerJoin: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([{ name: 'June', status: 'active' }]),
-          }),
+          where: vi.fn().mockResolvedValue([{ name: 'June', status: 'active' }]),
         }),
       }),
       query: vi.fn().mockResolvedValue({ rows: [{ id: 1 }], rowCount: 1 }),

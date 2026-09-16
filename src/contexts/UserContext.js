@@ -21,10 +21,14 @@ export function UserProvider({ children, users }) {
   // Sync with Auth.js session
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
+      const activeUserSeason = Array.isArray(users)
+        ? users.find((u) => (u.user_id ?? u.id) === session.user.id)
+        : null;
+
       const userData = {
         id: session.user.id,
-        name: session.user.name,
-        icon: session.user.image,
+        name: activeUserSeason?.name ?? session.user.name,
+        icon: activeUserSeason?.icon ?? null,
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentUser(userData);
@@ -37,7 +41,7 @@ export function UserProvider({ children, users }) {
       localStorage.removeItem('selectedUser');
       document.cookie = 'NEXT_USER_ID=; path=/; max-age=0; SameSite=Lax';
     }
-  }, [session, status]);
+  }, [session, status, users]);
 
   const [isLoading] = useState(false);
 
@@ -46,16 +50,16 @@ export function UserProvider({ children, users }) {
     if (status === 'authenticated') return;
 
     if (!users || !Array.isArray(users)) return;
-    const user = users.find((u) => u.user_id === userId);
+    const user = users.find((u) => (u.user_id ?? u.id) === userId);
     if (user) {
       const userData = {
-        id: user.user_id,
+        id: user.user_id ?? user.id,
         name: user.name,
         icon: user.icon,
       };
       setCurrentUser(userData);
       localStorage.setItem('selectedUser', JSON.stringify(userData));
-      document.cookie = `NEXT_USER_ID=${user.user_id}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `NEXT_USER_ID=${user.user_id ?? user.id}; path=/; max-age=31536000; SameSite=Lax`;
       window.location.reload();
     }
   };

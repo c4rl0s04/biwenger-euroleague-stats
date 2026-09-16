@@ -1,6 +1,5 @@
 import { Pool } from 'pg';
 import { CONFIG } from '../../config';
-import { DEFAULT_SEASON_ID } from '../schema';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -133,15 +132,14 @@ export function prepareUserMutations(
       const res = await db.query(
         `
         SELECT
-          u.id,
-          COALESCE(us.name, u.name) AS name,
-          COALESCE(us.icon, u.icon) AS icon,
-          COALESCE(us.color_index, u.color_index, 0) AS color_index
+          us.user_id AS id,
+          us.name,
+          us.icon,
+          us.color_index
         FROM user_seasons us
-        JOIN users u ON u.id = us.user_id
         WHERE us.season_id = $1
           AND COALESCE(us.status, 'active') = 'active'
-        ORDER BY COALESCE(us.name, u.name), u.id
+        ORDER BY us.name, us.user_id
       `,
         [seasonId]
       );
@@ -189,13 +187,16 @@ export function prepareUserMutations(
     },
 
     updateUserColor: async (colorIndex: number, userId: string) => {
-      if (seasonId === DEFAULT_SEASON_ID) {
-        await db.query('UPDATE users SET color_index = $1 WHERE id = $2', [colorIndex, userId]);
-      }
       await db.query(
         `
-        INSERT INTO user_seasons (season_id, user_id, color_index, updated_at)
-        VALUES ($1, $2, $3, NOW())
+        INSERT INTO user_seasons (season_id, user_id, name, color_index, updated_at)
+        VALUES (
+          $1,
+          $2,
+          COALESCE((SELECT name FROM users WHERE id = $2), 'Manager ' || $2),
+          $3,
+          NOW()
+        )
         ON CONFLICT(season_id, user_id) DO UPDATE SET
           color_index = excluded.color_index,
           updated_at = NOW()
@@ -206,10 +207,10 @@ export function prepareUserMutations(
 
     upsertUser: async (params: UpsertUserParams) => {
       const sql = `
-        INSERT INTO users (id, name, icon) VALUES ($1, $2, $3)
-        ON CONFLICT(id) DO UPDATE SET name=excluded.name, icon=COALESCE(excluded.icon, users.icon)
+        INSERT INTO users (id, name) VALUES ($1, $2)
+        ON CONFLICT(id) DO UPDATE SET name = excluded.name
       `;
-      await db.query(sql, [params.id, params.name, params.icon]);
+      await db.query(sql, [params.id, params.name]);
       await db.query(
         `
         INSERT INTO user_seasons (season_id, user_id, name, icon, status, updated_at)

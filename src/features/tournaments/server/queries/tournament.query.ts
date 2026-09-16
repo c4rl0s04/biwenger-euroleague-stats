@@ -59,13 +59,12 @@ export async function readTournamentStandings(
     `
         SELECT
             ts.*,
-            COALESCE(us.name, u.name) as user_name,
-            COALESCE(us.icon, u.icon) as user_icon,
-            COALESCE(us.color_index, u.color_index, 0) as user_color
+            us.name as user_name,
+            us.icon as user_icon,
+            COALESCE(us.color_index, 0) as user_color
         FROM tournament_standings ts
         JOIN tournaments t ON t.id = ts.tournament_id AND t.season_id = ts.season_id
-        LEFT JOIN users u ON ts.user_id = u.id
-        LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ts.season_id
+        LEFT JOIN user_seasons us ON us.user_id = ts.user_id AND us.season_id = ts.season_id
         WHERE ts.season_id = $2 AND ($1::int IS NULL OR ts.tournament_id = $1)
         ORDER BY ts.position ASC
     `,
@@ -96,19 +95,17 @@ export async function readTournamentFixtures(
       tf.status,
       tp.name as phase_name,
       tp.type as phase_type,
-      COALESCE(ush.name, uh.name) as home_user_name,
-      COALESCE(ush.icon, uh.icon) as home_user_icon,
-      COALESCE(ush.color_index, uh.color_index, 0) as home_user_color,
-      COALESCE(usa.name, ua.name) as away_user_name,
-      COALESCE(usa.icon, ua.icon) as away_user_icon,
-      COALESCE(usa.color_index, ua.color_index, 0) as away_user_color
+      ush.name as home_user_name,
+      ush.icon as home_user_icon,
+      COALESCE(ush.color_index, 0) as home_user_color,
+      usa.name as away_user_name,
+      usa.icon as away_user_icon,
+      COALESCE(usa.color_index, 0) as away_user_color
     FROM tournament_fixtures tf
     JOIN tournaments t ON t.id = tf.tournament_id AND t.season_id = tf.season_id
     LEFT JOIN tournament_phases tp ON tf.phase_id = tp.id AND tp.season_id = tf.season_id
-    LEFT JOIN users uh ON tf.home_user_id = uh.id
-    LEFT JOIN users ua ON tf.away_user_id = ua.id
-    LEFT JOIN user_seasons ush ON ush.user_id = uh.id AND ush.season_id = tf.season_id
-    LEFT JOIN user_seasons usa ON usa.user_id = ua.id AND usa.season_id = tf.season_id
+    LEFT JOIN user_seasons ush ON ush.user_id = tf.home_user_id AND ush.season_id = tf.season_id
+    LEFT JOIN user_seasons usa ON usa.user_id = tf.away_user_id AND usa.season_id = tf.season_id
     WHERE tf.season_id = $2 AND ($1::int IS NULL OR tf.tournament_id = $1)
     ORDER BY tf.date ASC
     `,

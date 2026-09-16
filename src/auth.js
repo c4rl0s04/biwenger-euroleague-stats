@@ -33,7 +33,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: true,
             email: true,
             password: true,
-            icon: true,
           },
         });
 
@@ -62,7 +61,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           name: user.name,
           email: user.email,
-          image: user.icon,
+          image: null,
           biwengerLinked: await biwengerCredentials.hasCredential(user.id),
         };
       },

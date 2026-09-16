@@ -56,11 +56,13 @@ export const DROPPED_PLAYER_COLUMNS = [
 ];
 
 export const DROPPED_TEAM_COLUMNS = ['city', 'arena_name', 'latitude', 'longitude'];
+export const DROPPED_USER_COLUMNS = ['icon', 'color_index'];
 
 function extractTableAliases(sqlText: string, tableName: string): Set<string> {
   const aliases = new Set<string>([tableName]);
   if (tableName === 'players') aliases.add('p');
   if (tableName === 'teams') aliases.add('t');
+  if (tableName === 'users') aliases.add('u');
   const regex = new RegExp(`\\b${tableName}\\s+(?:AS\\s+)?([a-zA-Z0-9_]+)\\b`, 'gi');
   let match: RegExpExecArray | null;
   while ((match = regex.exec(sqlText)) !== null) {
@@ -88,8 +90,9 @@ function extractTableAliases(sqlText: string, tableName: string): Set<string> {
 export function findSeasonalColumnViolationsInSql(sqlText: string): string[] {
   const hasPlayers = /\bplayers\b/i.test(sqlText);
   const hasTeams = /\bteams\b/i.test(sqlText);
+  const hasUsers = /\busers\b/i.test(sqlText);
 
-  if (!hasPlayers && !hasTeams) {
+  if (!hasPlayers && !hasTeams && !hasUsers) {
     return [];
   }
 
@@ -117,7 +120,18 @@ export function findSeasonalColumnViolationsInSql(sqlText: string): string[] {
     }
   }
 
-  // 3. Explicit check for un-aliased or direct table.column references
+  // 3. Check users table aliases and dropped columns
+  const userAliases = extractTableAliases(sqlText, 'users');
+  const userColsPattern = DROPPED_USER_COLUMNS.join('|');
+  for (const alias of Array.from(userAliases)) {
+    const pattern = new RegExp(`\\b${alias}\\.(?:${userColsPattern})\\b`, 'gi');
+    const matches = sqlText.match(pattern);
+    if (matches) {
+      violations.push(...matches);
+    }
+  }
+
+  // 4. Explicit check for un-aliased or direct table.column references
   for (const col of DROPPED_PLAYER_COLUMNS) {
     const directPattern = new RegExp(`\\bplayers\\.${col}\\b`, 'gi');
     const matches = sqlText.match(directPattern);
@@ -134,12 +148,24 @@ export function findSeasonalColumnViolationsInSql(sqlText: string): string[] {
     }
   }
 
-  // 4. Scoped check for COALESCE references using dropped columns
-  const coalescePattern = /COALESCE\s*\([^)]*\b(?:p|t)\.([a-zA-Z0-9_]+)\b[^)]*\)/gi;
+  for (const col of DROPPED_USER_COLUMNS) {
+    const directPattern = new RegExp(`\\busers\\.${col}\\b`, 'gi');
+    const matches = sqlText.match(directPattern);
+    if (matches) {
+      violations.push(...matches);
+    }
+  }
+
+  // 5. Scoped check for COALESCE references using dropped columns
+  const coalescePattern = /COALESCE\s*\([^)]*\b(?:p|t|u)\.([a-zA-Z0-9_]+)\b[^)]*\)/gi;
   let coalesceMatch: RegExpExecArray | null;
   while ((coalesceMatch = coalescePattern.exec(sqlText)) !== null) {
     const colName = coalesceMatch[1].toLowerCase();
-    if (DROPPED_PLAYER_COLUMNS.includes(colName) || DROPPED_TEAM_COLUMNS.includes(colName)) {
+    if (
+      DROPPED_PLAYER_COLUMNS.includes(colName) ||
+      DROPPED_TEAM_COLUMNS.includes(colName) ||
+      DROPPED_USER_COLUMNS.includes(colName)
+    ) {
       violations.push(coalesceMatch[0]);
     }
   }
@@ -154,7 +180,11 @@ describe('seasonal-column-reads architectural guard', () => {
 
     for (const file of files) {
       const sourceText = readFileSync(file, 'utf8');
-      if (!sourceText.includes('players') && !sourceText.includes('teams')) {
+      if (
+        !sourceText.includes('players') &&
+        !sourceText.includes('teams') &&
+        !sourceText.includes('users')
+      ) {
         continue;
       }
       const sourceFile = ts.createSourceFile(file, sourceText, ts.ScriptTarget.Latest, true);
@@ -209,11 +239,24 @@ describe('seasonal-column-reads architectural guard', () => {
       expect(findSeasonalColumnViolationsInSql(sql2)).toEqual(['teams.city', 'teams.latitude']);
     });
 
-    it('catches COALESCE fallbacks to global player/team tables', () => {
+    it('catches arbitrary alias reads on dropped user columns', () => {
+      const sql1 = 'SELECT u.icon, u.color_index FROM users u';
+      expect(findSeasonalColumnViolationsInSql(sql1)).toEqual(['u.icon', 'u.color_index']);
+
+      const sql2 = 'SELECT users.icon, users.color_index FROM users';
+      expect(findSeasonalColumnViolationsInSql(sql2)).toEqual(['users.icon', 'users.color_index']);
+    });
+
+    it('catches COALESCE fallbacks to global player/team/user tables', () => {
       const sql =
         'SELECT COALESCE(ps.team_id, p.team_id) FROM players p JOIN player_seasons ps ON ps.player_id = p.id';
       const violations = findSeasonalColumnViolationsInSql(sql);
       expect(violations.length).toBeGreaterThan(0);
+
+      const sqlUser =
+        'SELECT COALESCE(us.icon, u.icon), COALESCE(us.color_index, u.color_index) FROM users u JOIN user_seasons us ON us.user_id = u.id';
+      const userViolations = findSeasonalColumnViolationsInSql(sqlUser);
+      expect(userViolations.length).toBeGreaterThan(0);
     });
 
     it('permits valid reads from seasonal tables with legitimate joins', () => {

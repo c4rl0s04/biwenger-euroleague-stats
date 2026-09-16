@@ -120,13 +120,13 @@ export async function validateSchemaReady(db: DbClient) {
         'team_id',
       ],
       ['city', 'arena_name', 'latitude', 'longitude'],
-      ['biwenger_token'],
+      ['biwenger_token', 'icon', 'color_index'],
     ]
   );
   if (droppedColumns.rows.length > 0) {
     const list = droppedColumns.rows.map((r: any) => `${r.table_name}.${r.column_name}`).join(', ');
     throw new Error(
-      `Database schema has deprecated columns on global tables: ${list}. Apply migrations 0014 and 0016.`
+      `Database schema has deprecated columns on global tables: ${list}. Apply migrations 0014, 0016, and 0017.`
     );
   }
 

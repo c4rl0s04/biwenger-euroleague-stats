@@ -160,16 +160,15 @@ export async function listTeamRoster(teamId: number): Promise<TeamRosterRow[]> {
       ps.puntos as points,
       ROUND(CAST(ps.puntos AS NUMERIC) / NULLIF(ps.partidos_jugados, 0), 1) as average,
       ps.owner_id,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
-      COALESCE(us.icon, u.icon) as owner_icon
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index,
+      us.icon as owner_icon
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN official_player_mappings opm
       ON opm.player_id=p.id AND opm.season_id=ps.season_id
      AND opm.provider='euroleague_advanced' AND opm.status='matched'
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
     WHERE ps.team_id = $1
     ORDER BY ps.puntos DESC NULLS LAST
   `;

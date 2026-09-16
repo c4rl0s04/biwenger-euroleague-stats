@@ -29,11 +29,11 @@ try {
   }
   const passwordHash = await bcrypt.hash('fixture-only-password', 10);
   await client.query(
-    "INSERT INTO users (id,name,email,password,color_index) VALUES ('99001','Fixture Manager','fixture@example.invalid',$1,0),('99002','Fixture Rival','rival@example.invalid',$1,1)",
+    "INSERT INTO users (id,name,email,password) VALUES ('99001','Fixture Manager','fixture@example.invalid',$1),('99002','Fixture Rival','rival@example.invalid',$1)",
     [passwordHash]
   );
   await client.query(
-    "INSERT INTO user_seasons (season_id,user_id) VALUES ('2025-26','99001'),('2025-26','99002')"
+    "INSERT INTO user_seasons (season_id,user_id,name,icon,color_index,status) VALUES ('2025-26','99001','Fixture Manager',NULL,0,'active'),('2025-26','99002','Fixture Rival',NULL,0,'active')"
   );
   await client.query(
     "INSERT INTO teams (id,name,short_name,code,img) VALUES (9901,'Fixture Madrid','Madrid','FMA','/icons/icon-192.png'),(9902,'Fixture Athens','Athens','FAT','/icons/icon-192.png')"

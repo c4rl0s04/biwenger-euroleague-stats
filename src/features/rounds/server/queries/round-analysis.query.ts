@@ -185,26 +185,25 @@ export async function getOfficialStandings(roundId: string | number): Promise<Ro
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id,
-      COALESCE(us.name, u.name) as name,
-      COALESCE(us.icon, u.icon) as icon,
-      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      us.user_id as id,
+      us.name,
+      us.icon,
+      us.color_index,
       COALESCE(ur.points, 0) as round_points,
       COALESCE(
         (SELECT SUM(ur2.points)
          FROM user_rounds ur2
          WHERE ur2.season_id = $2
-           AND ur2.user_id = u.id
+           AND ur2.user_id = us.user_id
            AND ur2.round_id <= $1
            AND ur2.participated = true),
         0
       ) as total_points,
       ur.participated
-    FROM users u
-    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
-    LEFT JOIN user_rounds ur ON u.id = ur.user_id AND ur.season_id = $2 AND ur.round_id = $1
-    WHERE COALESCE(us.status, 'active') <> 'inactive'
-    ORDER BY round_points DESC, COALESCE(us.name, u.name) ASC
+    FROM user_seasons us
+    LEFT JOIN user_rounds ur ON us.user_id = ur.user_id AND ur.season_id = $2 AND ur.round_id = $1
+    WHERE us.season_id = $2 AND us.status <> 'inactive'
+    ORDER BY round_points DESC, us.name ASC
   `;
   return ((await pgClient.query(query, [roundId, seasonId])).rows as StandingRow[]).map((row) => ({
     ...row,
@@ -224,10 +223,10 @@ export async function getLivingStandings(roundId: string | number): Promise<Roun
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id,
-      COALESCE(us.name, u.name) as name,
-      COALESCE(us.icon, u.icon) as icon,
-      COALESCE(us.color_index, u.color_index, 0) as color_index,
+      us.user_id as id,
+      us.name,
+      us.icon,
+      us.color_index,
       COALESCE(
         SUM(
           COALESCE(prs.fantasy_points, 0) *
@@ -243,19 +242,18 @@ export async function getLivingStandings(roundId: string | number): Promise<Roun
         (SELECT SUM(ur2.points)
          FROM user_rounds ur2
          WHERE ur2.season_id = $2
-           AND ur2.user_id = u.id
+           AND ur2.user_id = us.user_id
            AND ur2.round_id < $1
            AND ur2.participated = true),
         0
       ) as past_total,
       MAX(CASE WHEN l.player_id IS NOT NULL THEN 1 ELSE 0 END) as participated
-    FROM users u
-    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
-    LEFT JOIN lineups l ON u.id = l.user_id AND l.season_id = $2 AND l.round_id = $1
+    FROM user_seasons us
+    LEFT JOIN lineups l ON us.user_id = l.user_id AND l.season_id = $2 AND l.round_id = $1
     LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND prs.season_id = $2 AND prs.round_id = $1
-    WHERE COALESCE(us.status, 'active') <> 'inactive'
-    GROUP BY u.id, us.name, us.icon, us.color_index
-    ORDER BY round_points DESC, COALESCE(us.name, u.name) ASC
+    WHERE us.season_id = $2 AND us.status <> 'inactive'
+    GROUP BY us.user_id, us.name, us.icon, us.color_index
+    ORDER BY round_points DESC, us.name ASC
   `;
 
   return ((await pgClient.query(query, [roundId, seasonId])).rows as StandingRow[]).map((row) => {
@@ -341,10 +339,9 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
 
   // 6. Highest Score (Round Winner)
   const winnerQuery = `
-    SELECT COALESCE(us.name, u.name) as name, ur.points, COALESCE(us.icon, u.icon) as icon
+    SELECT us.name, ur.points, us.icon
     FROM user_rounds ur
-    JOIN users u ON ur.user_id = u.id
-    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ur.season_id
+    JOIN user_seasons us ON us.user_id = ur.user_id AND us.season_id = ur.season_id
     WHERE ur.season_id = $2 AND ur.round_id = $1 AND ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1
@@ -410,10 +407,9 @@ async function getHistoricSquad(userId: string, roundId: string | number): Promi
     // 1. Get User Name (fichajes table stores names, not IDs)
     const userRes = await pgClient.query(
       `
-      SELECT COALESCE(us.name, u.name) as name
-      FROM users u
-      JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
-      WHERE u.id = $1
+      SELECT us.name
+      FROM user_seasons us
+      WHERE us.user_id = $1 AND us.season_id = $2
     `,
       [userId, seasonId]
     );

@@ -18,12 +18,11 @@ export async function readManagerSeasonStats(
   const userRes = await pgClient.query(
     `
     SELECT
-      COALESCE(us.name, u.name) AS name,
-      COALESCE(us.icon, u.icon) AS icon,
-      COALESCE(us.color_index, u.color_index, 0) AS color_index
-    FROM users u
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = $2
-    WHERE u.id = $1
+      us.name AS name,
+      us.icon AS icon,
+      us.color_index AS color_index
+    FROM user_seasons us
+    WHERE us.user_id = $1 AND us.season_id = $2
   `,
     [userId, seasonId]
   );

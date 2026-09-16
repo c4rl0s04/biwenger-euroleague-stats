@@ -139,11 +139,10 @@ export interface CompareDataLiteResponse {
 export async function getCompareData(): Promise<CompareDataResponse> {
   const seasonId = await resolveReadSeasonId();
   const usersQuery = `
-    SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+    SELECT us.user_id as id, us.name, us.icon, us.color_index
     FROM user_seasons us
-    JOIN users u ON u.id = us.user_id
-    WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
-    ORDER BY COALESCE(us.name, u.name) ASC
+    WHERE us.season_id = $1 AND us.status <> 'inactive'
+    ORDER BY us.name ASC
   `;
 
   const [
@@ -196,7 +195,7 @@ export async function getCompareData(): Promise<CompareDataResponse> {
 
   // Fetch full history for each user in parallel using the expert service
   const allUsersHistory = await Promise.all(
-    usersResult.rows.map(async (user) => {
+    usersResult.rows.map(async (user: any) => {
       const [history, captain, homeAway, squad] = await Promise.all([
         getUserPerformanceHistoryService(user.id),
         fetchCaptainStats(user.id),
@@ -275,11 +274,10 @@ export async function getCompareData(): Promise<CompareDataResponse> {
 export async function getCompareDataLite(): Promise<CompareDataLiteResponse> {
   const seasonId = await resolveReadSeasonId();
   const usersQuery = `
-    SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+    SELECT us.user_id as id, us.name, us.icon, us.color_index
     FROM user_seasons us
-    JOIN users u ON u.id = us.user_id
-    WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
-    ORDER BY COALESCE(us.name, u.name) ASC
+    WHERE us.season_id = $1 AND us.status <> 'inactive'
+    ORDER BY us.name ASC
   `;
 
   const [usersResult, standingsData, porrasData] = await Promise.all([

@@ -180,21 +180,21 @@ async function listPlayerTransfers(playerId: number): Promise<PlayerTransferRow[
       u2.icon as to_img,
       u1.color_index as from_color,
       u2.color_index as to_color,
-      u1.id as from_id,
-      u2.id as to_id
+      u1.user_id as from_id,
+      u2.user_id as to_id
     FROM fichajes f
-    LEFT JOIN users u1 ON f.vendedor = u1.name
-    LEFT JOIN users u2 ON f.comprador = u2.name
+    LEFT JOIN user_seasons u1 ON f.vendedor = u1.name AND u1.season_id = f.season_id
+    LEFT JOIN user_seasons u2 ON f.comprador = u2.name AND u2.season_id = f.season_id
     WHERE f.season_id = $2 AND f.player_id = $1
     ORDER BY f.timestamp DESC
   `;
   const transfers = (await pgClient.query(query, [playerId, seasonId])).rows as PlayerTransferRow[];
   const initialOwnerQuery = `
     SELECT
-      u.id as user_id, u.name as owner_name, u.color_index as owner_color_index,
-      u.icon as owner_img
+      us.user_id as user_id, us.name as owner_name, us.color_index as owner_color_index,
+      us.icon as owner_img
     FROM initial_squads s
-    JOIN users u ON s.user_id = u.id
+    JOIN user_seasons us ON s.user_id = us.user_id AND s.season_id = us.season_id
     WHERE s.season_id = $2 AND s.player_id = $1
   `;
   const initialOwner = (await pgClient.query(initialOwnerQuery, [playerId, seasonId])).rows[0] as
@@ -267,8 +267,8 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
       ps.puntos as points,
       ROUND(CAST(ps.puntos AS NUMERIC) / NULLIF(ps.partidos_jugados, 0), 1) as average,
       ps.owner_id,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN teams t ON ps.team_id = t.id
@@ -277,8 +277,7 @@ export async function getTopPlayers(limit: number = 6): Promise<CorePlayer[]> {
      AND opm.provider='euroleague_advanced' AND opm.status='matched'
     LEFT JOIN official_team_mappings otm
       ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
     ORDER BY ps.puntos DESC NULLS LAST
     LIMIT $1
   `;
@@ -332,8 +331,8 @@ export async function getTopPlayersByForm(
       COALESCE(otm.provider_team_code,t.code) as team_code,
       COALESCE(otm.crest_url,t.img) as team_img,
       ps.owner_id,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index,
       COALESCE(pa.total_points, 0) as total_points,
       COALESCE(pa.played_count, 0) as games_played
     FROM players p
@@ -344,8 +343,7 @@ export async function getTopPlayersByForm(
      AND opm.provider='euroleague_advanced' AND opm.status='matched'
     LEFT JOIN official_team_mappings otm
       ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
     LEFT JOIN (
       SELECT player_id, SUM(fantasy_points) as total_points, COUNT(*) as played_count
       FROM player_round_stats
@@ -417,9 +415,9 @@ export async function getPlayerDetails(
       ps.points_away,
       ps.points_last_season,
       ps.owner_id,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
-      COALESCE(us.icon, u.icon) as owner_icon,
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index,
+      us.icon as owner_icon,
       (SELECT COUNT(*) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id AND (is_dnp IS FALSE OR (is_dnp IS NULL AND minutes > 0))) as games_played,
       (SELECT ROUND(AVG(fantasy_points), 1) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as season_avg,
       (SELECT SUM(fantasy_points) FROM player_round_stats WHERE season_id = $2 AND player_id = p.id) as total_points,
@@ -439,8 +437,7 @@ export async function getPlayerDetails(
      AND opm.provider='euroleague_advanced' AND opm.status='matched'
     LEFT JOIN official_team_mappings otm
       ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
     WHERE p.id = $1
   `;
 
@@ -529,13 +526,12 @@ export async function getPlayersBirthday(): Promise<PlayerBirthdayRow[]> {
         t.code as team_code,
       ps.position,
       p.birth_date,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index
     FROM players p
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
     LEFT JOIN teams t ON ps.team_id = t.id
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
     WHERE p.birth_date IS NOT NULL
       AND TO_CHAR(CAST(p.birth_date AS DATE), 'MM-DD') = TO_CHAR(NOW(), 'MM-DD')
     ORDER BY p.name
@@ -570,17 +566,16 @@ export async function getPlayerStreaks(
         COUNT(*) as games,
         AVG(prs.fantasy_points) as recent_avg,
         ps.owner_id,
-        COALESCE(us.name, u.name) as owner_name,
-        COALESCE(us.color_index, u.color_index, 0) as owner_color_index
+        us.name as owner_name,
+        COALESCE(us.color_index, 0) as owner_color_index
       FROM player_round_stats prs
       JOIN players p ON prs.player_id = p.id
       JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
       LEFT JOIN teams t ON ps.team_id = t.id
-      LEFT JOIN users u ON ps.owner_id = u.id
-      LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+      LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
       WHERE prs.round_id IN (SELECT round_id FROM RecentRounds)
       AND prs.season_id = $2
-      GROUP BY prs.player_id, p.name, t.id, t.name, ps.position, ps.owner_id, us.name, u.name, us.color_index, u.color_index
+      GROUP BY prs.player_id, p.name, t.id, t.name, ps.position, ps.owner_id, us.name, us.color_index
       HAVING COUNT(*) >= $1
     ),
     SeasonAvg AS (
@@ -676,15 +671,14 @@ export async function getRisingStars(limit: number = 5): Promise<RisingStar[]> {
       COALESCE(ep.earlier_avg, 0) as earlier_avg,
       ROUND(rp.recent_avg - COALESCE(ep.earlier_avg, 0), 1) as improvement,
       ROUND((rp.recent_avg - COALESCE(ep.earlier_avg, 0)) / NULLIF(ep.earlier_avg, 0) * 100, 1) as improvement_pct,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index
     FROM RecentPerformance rp
     JOIN players p ON rp.player_id = p.id
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $2
     LEFT JOIN teams t ON ps.team_id = t.id
     LEFT JOIN EarlierPerformance ep ON rp.player_id = ep.player_id
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
     WHERE rp.recent_avg > COALESCE(ep.earlier_avg, 0)
       AND (rp.recent_avg - COALESCE(ep.earlier_avg, 0)) >= 3
     ORDER BY improvement DESC
@@ -732,9 +726,9 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
        COALESCE(otm.crest_url,t.img) as team_img,
 
        ps.owner_id,
-       COALESCE(us.name, u.name) as owner_name,
-       COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
-       COALESCE(us.icon, u.icon) as owner_icon,
+       us.name as owner_name,
+       COALESCE(us.color_index, 0) as owner_color_index,
+       us.icon as owner_icon,
        
        -- Use aggregated stats from player_round_stats as requested
        COALESCE(pa.total_points, 0) as total_points,
@@ -752,8 +746,7 @@ export async function getAllPlayers(): Promise<CorePlayer[]> {
       AND opm.provider='euroleague_advanced' AND opm.status='matched'
      LEFT JOIN official_team_mappings otm
        ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
-     LEFT JOIN users u ON ps.owner_id = u.id
-     LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+     LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
      LEFT JOIN PlayerAggregates pa ON p.id = pa.player_id
      ORDER BY COALESCE(pa.total_points, 0) DESC
   `;
@@ -810,8 +803,8 @@ export async function getStatLeaders(type: string = 'points'): Promise<PlayerSta
       t.name as team_name,
         t.code as team_code,
       ps.owner_id,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index,
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index,
       SUM(prs.${column}) as value,
       COUNT(prs.id) as games_played,
       ROUND(AVG(prs.${column}), 1) as avg_value
@@ -819,10 +812,9 @@ export async function getStatLeaders(type: string = 'points'): Promise<PlayerSta
     JOIN players p ON prs.player_id = p.id
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ps.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = ps.season_id
     WHERE prs.season_id = $1
-    GROUP BY p.id, p.name, t.id, t.name, ps.owner_id, us.name, u.name, us.color_index, u.color_index
+    GROUP BY p.id, p.name, t.id, t.name, ps.owner_id, us.name, us.color_index
     HAVING SUM(prs.${column}) > 0
     ORDER BY value DESC
     LIMIT 5

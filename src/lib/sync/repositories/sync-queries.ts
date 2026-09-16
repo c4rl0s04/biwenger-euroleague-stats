@@ -9,7 +9,6 @@ import {
   playerSeasons,
   players,
   userSeasons,
-  users,
 } from '../../db/schema';
 import type { BiwengerRound } from '../rounds';
 
@@ -185,23 +184,21 @@ export async function getSeasonActiveUserNames(
   const db = resolveDrizzle(client);
   const rows = await db
     .select({
-      name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`.as('name'),
-      status: sql<string>`COALESCE(${userSeasons.status}, 'active')`.as('status'),
+      name: userSeasons.name,
+      status: userSeasons.status,
     })
     .from(userSeasons)
-    .innerJoin(users, eq(users.id, userSeasons.userId))
     .where(
       and(
         eq(userSeasons.seasonId, seasonId),
-        sql`COALESCE(${userSeasons.status}, 'active') = 'active'`,
-        sql`COALESCE(${userSeasons.name}, ${users.name}) IS NOT NULL`,
-        sql`TRIM(COALESCE(${userSeasons.name}, ${users.name})) != ''`
+        eq(userSeasons.status, 'active'),
+        ne(sql`TRIM(${userSeasons.name})`, '')
       )
     );
 
   const names = new Set<string>();
   for (const r of rows) {
-    const name = r.name ?? (r as any).coalesce;
+    const name = r.name;
     if (name) names.add(name);
   }
   return names;

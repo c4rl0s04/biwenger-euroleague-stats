@@ -489,15 +489,15 @@ export async function getRecentTransfers(limit = 5): Promise<RecentTransfer[]> {
       f.*,
       p.name as player_name,
       ps.position,
-      seller.id as vendedor_id,
+      seller.user_id as vendedor_id,
       seller.color_index as vendedor_color_index,
-      buyer.id as comprador_id,
+      buyer.user_id as comprador_id,
       buyer.color_index as comprador_color_index
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = f.player_id AND ps.season_id = f.season_id
-    LEFT JOIN users seller ON f.vendedor = seller.name
-    LEFT JOIN users buyer ON f.comprador = buyer.name
+    LEFT JOIN user_seasons seller ON f.vendedor = seller.name AND seller.season_id = f.season_id
+    LEFT JOIN user_seasons buyer ON f.comprador = buyer.name AND buyer.season_id = f.season_id
     WHERE f.season_id = $2
     ORDER BY f.timestamp DESC
     LIMIT $1
@@ -697,16 +697,15 @@ export async function getTopTransferredPlayer(): Promise<TopTransferredPlayer[]>
       COUNT(*) as transfer_count,
       AVG(f.precio) as avg_price,
       ps.owner_id,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = f.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = f.season_id
     WHERE f.season_id = $1 AND f.precio > 0
-    GROUP BY f.player_id, p.name, p.img, t.code, ps.owner_id, us.name, u.name, us.color_index, u.color_index
+    GROUP BY f.player_id, p.name, p.img, t.code, ps.owner_id, us.name, us.color_index
     ORDER BY transfer_count DESC
 
   `;
@@ -728,28 +727,31 @@ export async function getRecordTransfer(): Promise<EnrichedTransfer[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      f.*,
+      f.id,
+      f.player_id,
+      f.precio,
+      f.fecha,
+      f.comprador,
+      f.vendedor,
       p.name as player_name,
       p.img as player_img,
       t.code as player_team,
       t.name as team_name,
       t.img as team_logo,
-      ub.id as buyer_id,
-      ub.name as buyer_name,
-      ub.icon as buyer_icon,
-      ub.color_index as buyer_color,
-      us.id as seller_id,
-      us.name as seller_name,
-      us.icon as seller_icon,
-      us.color_index as seller_color
+      usb.user_id as buyer_id,
+      usb.name as buyer_name,
+      usb.icon as buyer_icon,
+      usb.color_index as buyer_color,
+      uss.user_id as seller_id,
+      uss.name as seller_name,
+      uss.icon as seller_icon,
+      uss.color_index as seller_color
     FROM fichajes f
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
     LEFT JOIN user_seasons usb ON f.comprador = usb.name AND usb.season_id = f.season_id
-    LEFT JOIN users ub ON COALESCE(usb.user_id, '') = ub.id
     LEFT JOIN user_seasons uss ON f.vendedor = uss.name AND uss.season_id = f.season_id
-    LEFT JOIN users us ON COALESCE(uss.user_id, '') = us.id
     WHERE f.season_id = $1
     ORDER BY f.precio DESC
 
@@ -771,15 +773,14 @@ export async function getBigSpender(): Promise<BigSpender[]> {
   const query = `
     SELECT
       f.comprador as name,
-      COALESCE(us.user_id, u.id) as user_id,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      COALESCE(us.color_index, 0) as user_color_index,
       SUM(f.precio) as total_spent,
       COUNT(*) as purchases_count
     FROM fichajes f
     LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
-    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id OR f.comprador = u.name
     WHERE f.season_id = $1 AND f.comprador != 'Mercado'
-    GROUP BY f.comprador, us.user_id, u.id, us.color_index, u.color_index
+    GROUP BY f.comprador, us.user_id, us.color_index
     ORDER BY total_spent DESC
 
   `;
@@ -805,8 +806,8 @@ export async function getRecordBid(): Promise<RecordBid[]> {
       f.player_id,
       f.precio,
       f.comprador,
-      u.id as buyer_id,
-      u.color_index as buyer_color_index,
+      us.user_id as buyer_id,
+      COALESCE(us.color_index, 0) as buyer_color_index,
       p.name as player_name,
       p.img as player_img,
       tm.code as player_team,
@@ -815,12 +816,11 @@ export async function getRecordBid(): Promise<RecordBid[]> {
     FROM transfer_bids t
     JOIN fichajes f ON t.transfer_id = f.id AND t.season_id = f.season_id
     LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
-    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     LEFT JOIN players p ON f.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
     LEFT JOIN teams tm ON ps.team_id = tm.id
     WHERE f.season_id = $1 AND f.comprador != 'Mercado'
-    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, u.id, us.color_index, u.color_index, p.name, p.img, tm.code, tm.name, tm.img
+    GROUP BY t.transfer_id, f.player_id, f.precio, f.comprador, us.user_id, us.color_index, p.name, p.img, tm.code, tm.name, tm.img
     HAVING COUNT(*) >= 1 -- At least one loser exists, so at least 2 total bidders
     ORDER BY bid_count DESC
 
@@ -956,12 +956,12 @@ export async function getLiveMarketTransfers({
       f.precio,
       f.vendedor,
       f.comprador,
-      v.id as vendedor_id,
-      v.icon as vendedor_icon,
-      v.color_index as vendedor_color_index,
-      c.id as comprador_id,
-      c.icon as comprador_icon,
-      c.color_index as comprador_color_index,
+      vs.user_id as vendedor_id,
+      vs.icon as vendedor_icon,
+      vs.color_index as vendedor_color_index,
+      cs.user_id as comprador_id,
+      cs.icon as comprador_icon,
+      cs.color_index as comprador_color_index,
       f.player_id,
       p.name as player_name,
       ps.position as player_position,
@@ -973,9 +973,7 @@ export async function getLiveMarketTransfers({
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
     LEFT JOIN user_seasons vs ON vs.name = f.vendedor AND vs.season_id = f.season_id
-    LEFT JOIN users v ON COALESCE(vs.user_id, '') = v.id
     LEFT JOIN user_seasons cs ON cs.name = f.comprador AND cs.season_id = f.season_id
-    LEFT JOIN users c ON COALESCE(cs.user_id, '') = c.id
     ${whereClause}
     ORDER BY f.timestamp DESC
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -1018,10 +1016,9 @@ export async function getManagerMarketStats(): Promise<ManagerMarketStats[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     WITH managers AS (
-      SELECT COALESCE(us.name, u.name) as user_name, u.id, u.icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+      SELECT us.name as user_name, us.user_id as id, us.icon, us.color_index as color_index
       FROM user_seasons us
-      JOIN users u ON u.id = us.user_id
-      WHERE us.season_id = $1 AND COALESCE(us.name, u.name) IS NOT NULL
+      WHERE us.season_id = $1
     ),
     purchases AS (
       SELECT f.comprador as user_name, COUNT(*) as count, SUM(f.precio) as total
@@ -1077,14 +1074,13 @@ export async function getBestSeller(): Promise<BestSeller[]> {
   const query = `
     SELECT
       s.vendedor as name,
-      u.id as user_id,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      COALESCE(us.color_index, 0) as user_color_index,
       SUM(s.precio - p.precio) as net_profit,
       SUM(s.precio) as total_sales,
       COUNT(*) as sales_count
     FROM fichajes s
     LEFT JOIN user_seasons us ON us.name = s.vendedor AND us.season_id = s.season_id
-    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     CROSS JOIN LATERAL (
         SELECT precio
         FROM fichajes p
@@ -1096,7 +1092,7 @@ export async function getBestSeller(): Promise<BestSeller[]> {
         LIMIT 1
     ) p
     WHERE s.season_id = $1 AND s.vendedor != 'Mercado' -- Only check user sales
-    GROUP BY s.vendedor, u.id, us.color_index, u.color_index
+    GROUP BY s.vendedor, us.user_id, us.color_index
     ORDER BY net_profit DESC
 
   `;
@@ -1125,21 +1121,21 @@ export async function getBestRevaluation(): Promise<BestRevaluation[]> {
       t.code as player_team,
       t.name as team_name,
       t.img as team_logo,
-      u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
       ps.price as current_price,
       f.precio as purchase_price,
       (ps.price - f.precio) as revaluation
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
+    JOIN user_seasons us ON ps.owner_id = us.user_id AND us.season_id = ps.season_id
     JOIN fichajes f ON p.id = f.player_id AND f.season_id = ps.season_id AND ps.owner_id IS NOT NULL
     LEFT JOIN teams t ON ps.team_id = t.id
-    JOIN users u ON ps.owner_id = u.id
     -- Find the *last* purchase for this player by the CURRENT owner
     WHERE f.id = (
       SELECT id FROM fichajes
-      WHERE season_id = ps.season_id AND player_id = p.id AND comprador = u.name
+      WHERE season_id = ps.season_id AND player_id = p.id AND comprador = us.name
       ORDER BY timestamp DESC LIMIT 1
     )
     AND ps.season_id = $1
@@ -1181,9 +1177,9 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
       t.name as team_name,
       t.img as team_logo,
 
-      curr_owner.id as user_id,
-      curr_owner.name as user_name,
-      curr_owner.color_index as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
 
       f.precio as purchase_price,
       to_timestamp(f.timestamp) as signed_at,
@@ -1219,7 +1215,6 @@ export async function getBestValuePlayer(): Promise<BestValuePlayer[]> {
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
     JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
-    JOIN users curr_owner ON curr_owner.id = us.user_id
 
     LEFT JOIN LATERAL (
         SELECT timestamp
@@ -1353,21 +1348,21 @@ export async function getInfirmaryPlayers(): Promise<InfirmaryPlayer[]> {
         p.img as player_img,
         ps.team_id as team_id,
         t.code as player_team,
-        u.id as user_id,
-        u.name as user_name,
-        u.color_index as user_color_index,
+        us.user_id as user_id,
+        us.name as user_name,
+        us.color_index as user_color_index,
         f.precio as purchase_price,
         to_timestamp(f.timestamp) as signed_at
       FROM player_seasons ps
       JOIN players p ON ps.player_id = p.id
-      JOIN users u ON ps.owner_id = u.id
+      JOIN user_seasons us ON ps.owner_id = us.user_id AND us.season_id = ps.season_id
       LEFT JOIN teams t ON ps.team_id = t.id
       JOIN LATERAL (
         SELECT precio, timestamp
         FROM fichajes f2
         WHERE f2.season_id = ps.season_id
           AND f2.player_id = p.id
-          AND f2.comprador = u.name
+          AND f2.comprador = us.name
         ORDER BY timestamp DESC
         LIMIT 1
       ) f ON true
@@ -1409,13 +1404,14 @@ export async function getInfirmaryPlayers(): Promise<InfirmaryPlayer[]> {
       COALESCE(pr.played_rounds, 0) as played_rounds,
       (COALESCE(tr.total_team_rounds, 0) - COALESCE(pr.played_rounds, 0)) as missed_rounds
     FROM TargetPlayers tp
-    LEFT JOIN TeamRounds tr ON tp.player_id = tr.player_id
-    LEFT JOIN PlayedRounds pr ON tp.player_id = pr.player_id
-    WHERE COALESCE(tr.total_team_rounds, 0) >= 3
-    ORDER BY missed_rounds DESC, available_rounds ASC;
+    LEFT JOIN TeamRounds tr ON tr.player_id = tp.player_id
+    LEFT JOIN PlayedRounds pr ON pr.player_id = tp.player_id
+    ORDER BY missed_rounds DESC, tp.purchase_price DESC
+
   `;
 
   const result = await pgClient.query(query, [seasonId]);
+  if (!result.rows.length) return [];
   return result.rows.map((row: any) => ({
     ...row,
     purchase_price: parseInt(row.purchase_price),
@@ -1435,17 +1431,16 @@ export async function getTheThief(): Promise<TheThief[]> {
   const query = `
     SELECT
       f.comprador as name,
-      u.id as user_id,
-      u.color_index as user_color_index,
+      us.user_id as user_id,
+      COALESCE(us.color_index, 0) as user_color_index,
       COUNT(DISTINCT f.id) as stolen_count
     FROM fichajes f
     JOIN transfer_bids tb ON f.id = tb.transfer_id AND tb.season_id = f.season_id
     LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
-    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     WHERE f.season_id = $1
       AND f.comprador != 'Mercado'
       AND tb.bidder_name != f.comprador -- Bid was from someone else
-    GROUP BY f.comprador, u.id, us.color_index, u.color_index
+    GROUP BY f.comprador, us.user_id, us.color_index
     ORDER BY stolen_count DESC
 
   `;
@@ -1473,8 +1468,8 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
       f.id as transfer_id,
       f.precio as winning_price,
       f.comprador as winner,
-      u.id as winner_id,
-      u.color_index as winner_color_index,
+      us.user_id as winner_id,
+      COALESCE(us.color_index, 0) as winner_color_index,
       f.player_id,
       p.name as player_name,
       p.img as player_img,
@@ -1487,20 +1482,12 @@ export async function getBiggestSteal(): Promise<BiggestSteal[]> {
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
     LEFT JOIN teams t ON ps.team_id = t.id
     LEFT JOIN user_seasons us ON us.name = f.comprador AND us.season_id = $1
-    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     CROSS JOIN LATERAL (
         SELECT amount, bidder_name, bidder_id, bidder_color_index
         FROM (
-            -- We look for the highest LOSING bid.
-            -- If multiple people bid the same as the winner, we count that as a steal with 0 diff.
-            -- One of the bids for this transfer_id in transfer_bids MUST be the winning f.precio.
-            -- So we look for bids where id != (the row that matched f.precio)
-            -- or more simply: bids that are ONE of the multiple bids.
-
-            SELECT tb.amount, tb.bidder_name, u2.id as bidder_id, u2.color_index as bidder_color_index
+            SELECT tb.amount, tb.bidder_name, us2.user_id as bidder_id, COALESCE(us2.color_index, 0) as bidder_color_index
             FROM transfer_bids tb
             LEFT JOIN user_seasons us2 ON us2.name = tb.bidder_name AND us2.season_id = tb.season_id
-            LEFT JOIN users u2 ON COALESCE(us2.user_id, '') = u2.id
             WHERE tb.season_id = $1
               AND tb.transfer_id = f.id
               AND tb.bidder_name != f.comprador -- The winner isn't a losing bid
@@ -1530,17 +1517,16 @@ export async function getTheVictim(): Promise<TheVictim[]> {
   const query = `
     SELECT
         tb.bidder_name as name,
-        u.id as user_id,
-        u.color_index as user_color_index,
+        us.user_id as user_id,
+        COALESCE(us.color_index, 0) as user_color_index,
         COUNT(*) as failed_bids_count
     FROM transfer_bids tb
     JOIN fichajes f ON tb.transfer_id = f.id AND tb.season_id = f.season_id
     LEFT JOIN user_seasons us ON us.name = tb.bidder_name AND us.season_id = tb.season_id
-    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     WHERE tb.season_id = $1
       AND tb.bidder_name != f.comprador -- The bidder was NOT the winner
       AND tb.bidder_name != 'Mercado' -- Exclude system
-    GROUP BY tb.bidder_name, u.id, us.color_index, u.color_index
+    GROUP BY tb.bidder_name, us.user_id, us.color_index
     ORDER BY failed_bids_count DESC
 
   `;
@@ -1582,16 +1568,15 @@ export async function getOverpayerManager(): Promise<OverpayerManager[]> {
     )
     SELECT
       cw.name,
-      u.id as user_id,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      COALESCE(us.color_index, 0) as user_color_index,
       COUNT(*) as contested_wins,
       SUM(cw.overpay) as total_overpay,
       AVG(cw.overpay) as avg_overpay
     FROM CompetitiveWins cw
     LEFT JOIN user_seasons us ON us.name = cw.name AND us.season_id = $1
-    LEFT JOIN users u ON COALESCE(us.user_id, '') = u.id
     WHERE cw.overpay > 0
-    GROUP BY cw.name, u.id, us.color_index, u.color_index
+    GROUP BY cw.name, us.user_id, us.color_index
     ORDER BY total_overpay DESC, avg_overpay DESC
 
   `;
@@ -1650,14 +1635,13 @@ export async function getInflatedPlayer(): Promise<InflatedPlayer[]> {
       t.inflation,
       t.purchase_price,
       t.market_price,
-      u.id as buyer_id,
-      u.name as buyer_name,
-      u.color_index as buyer_color,
+      us.user_id as buyer_id,
+      us.name as buyer_name,
+      us.color_index as buyer_color,
       t.transfer_id
     FROM TransferWithMarketValue t
     JOIN fichajes f ON t.transfer_id = f.id AND f.season_id = $1
     JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
-    JOIN users u ON u.id = us.user_id
     ORDER BY t.inflation DESC
     LIMIT 100;
 
@@ -1683,29 +1667,27 @@ export async function getBiddingDuelsStats(): Promise<BiddingDuelsStats> {
   const [usersResult, duelsResult] = await Promise.all([
     pgClient.query(
       `
-      SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index
+      SELECT us.user_id as id, us.name, us.icon, us.color_index
       FROM user_seasons us
-      JOIN users u ON u.id = us.user_id
-      WHERE us.season_id = $1 AND COALESCE(us.status, 'active') <> 'inactive'
-      ORDER BY COALESCE(us.name, u.name) ASC
+      WHERE us.season_id = $1 AND us.status <> 'inactive'
+      ORDER BY us.name ASC
     `,
       [seasonId]
     ),
     pgClient.query(
       `
       SELECT
-        winner.id as winner_id,
-        COALESCE(winner_season.name, winner.name) as winner_name,
-        COALESCE(winner_season.icon, winner.icon) as winner_icon,
-        COALESCE(winner_season.color_index, winner.color_index, 0) as winner_color_index,
-        runner.id as runner_id,
-        COALESCE(runner_season.name, runner.name) as runner_name,
-        COALESCE(runner_season.icon, runner.icon) as runner_icon,
-        COALESCE(runner_season.color_index, runner.color_index, 0) as runner_color_index,
+        winner_season.user_id as winner_id,
+        winner_season.name as winner_name,
+        winner_season.icon as winner_icon,
+        winner_season.color_index as winner_color_index,
+        runner_season.user_id as runner_id,
+        runner_season.name as runner_name,
+        runner_season.icon as runner_icon,
+        runner_season.color_index as runner_color_index,
         (f.precio - second_bid.amount) as margin
       FROM fichajes f
       JOIN user_seasons winner_season ON winner_season.name = f.comprador AND winner_season.season_id = f.season_id
-      JOIN users winner ON winner.id = winner_season.user_id
       JOIN LATERAL (
         SELECT tb.bidder_name, tb.amount
         FROM transfer_bids tb
@@ -1717,7 +1699,6 @@ export async function getBiddingDuelsStats(): Promise<BiddingDuelsStats> {
         LIMIT 1
       ) second_bid ON true
       JOIN user_seasons runner_season ON runner_season.name = second_bid.bidder_name AND runner_season.season_id = f.season_id
-      JOIN users runner ON runner.id = runner_season.user_id
       WHERE f.season_id = $1 AND f.comprador != 'Mercado'
     `,
       [seasonId]
@@ -1885,20 +1866,19 @@ export async function getBiddingDuelDetails(
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
-      winner.id as winner_id,
-      COALESCE(winner_season.name, winner.name) as winner_name,
-      COALESCE(winner_season.icon, winner.icon) as winner_icon,
-      COALESCE(winner_season.color_index, winner.color_index, 0) as winner_color_index,
-      runner.id as runner_id,
-      COALESCE(runner_season.name, runner.name) as runner_name,
-      COALESCE(runner_season.icon, runner.icon) as runner_icon,
-      COALESCE(runner_season.color_index, runner.color_index, 0) as runner_color_index,
+      winner_season.user_id as winner_id,
+      winner_season.name as winner_name,
+      winner_season.icon as winner_icon,
+      winner_season.color_index as winner_color_index,
+      runner_season.user_id as runner_id,
+      runner_season.name as runner_name,
+      runner_season.icon as runner_icon,
+      runner_season.color_index as runner_color_index,
       f.precio as winning_bid,
       second_bid.amount as second_bid,
       (f.precio - second_bid.amount) as margin
     FROM fichajes f
     JOIN user_seasons winner_season ON winner_season.name = f.comprador AND winner_season.season_id = f.season_id
-    JOIN users winner ON winner.id = winner_season.user_id
     JOIN LATERAL (
       SELECT tb.bidder_name, tb.amount
       FROM transfer_bids tb
@@ -1910,14 +1890,13 @@ export async function getBiddingDuelDetails(
       LIMIT 1
     ) second_bid ON true
     JOIN user_seasons runner_season ON runner_season.name = second_bid.bidder_name AND runner_season.season_id = f.season_id
-    JOIN users runner ON runner.id = runner_season.user_id
     JOIN players p ON p.id = f.player_id
     WHERE f.season_id = $1
       AND f.comprador != 'Mercado'
       AND (
-        (winner.id = $2 AND runner.id = $3)
+        (winner_season.user_id = $2 AND runner_season.user_id = $3)
         OR
-        (winner.id = $3 AND runner.id = $2)
+        (winner_season.user_id = $3 AND runner_season.user_id = $2)
       )
     ORDER BY f.timestamp DESC NULLS LAST, f.id DESC
   `;
@@ -1957,9 +1936,9 @@ export async function getBestSingleFlip(): Promise<SingleFlip[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as user_name,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
 
       p.id as player_id,
       p.name as player_name,
@@ -1971,7 +1950,6 @@ export async function getBestSingleFlip(): Promise<SingleFlip[]> {
 
     FROM fichajes purchase
     JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
-    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
 
     -- Join with the sale
@@ -2011,9 +1989,9 @@ export async function getWorstSingleFlip(): Promise<SingleFlip[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as user_name,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
 
       p.id as player_id,
       p.name as player_name,
@@ -2025,7 +2003,6 @@ export async function getWorstSingleFlip(): Promise<SingleFlip[]> {
 
     FROM fichajes purchase
     JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
-    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
 
     -- Join with the sale
@@ -2066,9 +2043,9 @@ export async function getBestPercentageGain(): Promise<PercentageGain[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as user_name,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
 
       p.id as player_id,
       p.name as player_name,
@@ -2080,7 +2057,6 @@ export async function getBestPercentageGain(): Promise<PercentageGain[]> {
 
     FROM fichajes f
     JOIN user_seasons us ON us.name = f.comprador AND us.season_id = f.season_id
-    JOIN users u ON u.id = us.user_id
     JOIN players p ON f.player_id = p.id
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
 
@@ -2130,16 +2106,15 @@ export async function getMostOwnersPlayer(): Promise<MostOwnersPlayer[]> {
       t.img as team_logo,
       COUNT(DISTINCT f.comprador) as distinct_owners_count,
       ps.owner_id,
-      COALESCE(us.name, u.name) as owner_name,
-      COALESCE(us.color_index, u.color_index, 0) as owner_color_index
+      us.name as owner_name,
+      COALESCE(us.color_index, 0) as owner_color_index
     FROM fichajes f
     JOIN players p ON f.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = f.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
-    LEFT JOIN users u ON ps.owner_id = u.id
-    LEFT JOIN user_seasons us ON us.user_id = u.id AND us.season_id = f.season_id
+    LEFT JOIN user_seasons us ON us.user_id = ps.owner_id AND us.season_id = f.season_id
     WHERE f.season_id = $1 AND f.comprador != 'Mercado'
-    GROUP BY p.id, p.name, p.img, t.code, t.name, t.img, ps.owner_id, us.name, u.name, us.color_index, u.color_index
+    GROUP BY p.id, p.name, p.img, t.code, t.name, t.img, ps.owner_id, us.name, us.color_index
     HAVING COUNT(DISTINCT f.comprador) > 1
     ORDER BY distinct_owners_count DESC
 
@@ -2182,9 +2157,9 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
       ORDER BY comprador, player_id, timestamp DESC
     )
     SELECT
-      u.id as user_id,
-      u.name as user_name,
-      u.color_index as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
 
       p.id as player_id,
       p.name as player_name,
@@ -2193,19 +2168,19 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
 
       ls.sale_price,
       CASE
-        WHEN ps.owner_id = u.id THEN lp.purchase_price
+        WHEN ps.owner_id = us.user_id THEN lp.purchase_price
         ELSE ps.price
       END as current_price,
 
-      (ps.owner_id = u.id) as is_repurchase,
+      (ps.owner_id = us.user_id) as is_repurchase,
 
       CASE
-        WHEN ps.owner_id = u.id THEN (lp.purchase_price - ls.sale_price)
+        WHEN ps.owner_id = us.user_id THEN (lp.purchase_price - ls.sale_price)
         ELSE (ps.price - ls.sale_price)
       END as missed_profit
 
     FROM LatestSales ls
-    JOIN users u ON ls.user_name = u.name
+    JOIN user_seasons us ON ls.user_name = us.name AND us.season_id = $1
     JOIN players p ON ls.player_id = p.id
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $1
     LEFT JOIN teams t ON ps.team_id = t.id
@@ -2215,10 +2190,10 @@ export async function getMissedOpportunity(): Promise<MissedOpportunity[]> {
 
     WHERE
       -- Case 1: Not owned and market price rose since sale
-      (ps.owner_id != u.id AND ps.price > ls.sale_price)
+      (ps.owner_id != us.user_id AND ps.price > ls.sale_price)
       OR
       -- Case 2: Currently owned and repurchase price was higher than sale price
-      (ps.owner_id = u.id AND lp.purchase_price > ls.sale_price)
+      (ps.owner_id = us.user_id AND lp.purchase_price > ls.sale_price)
 
     ORDER BY missed_profit DESC
   `;
@@ -2242,15 +2217,14 @@ export async function getTopTrader(): Promise<TopTrader[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as user_name,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
       COUNT(*) as trade_count,
       SUM(sale.precio - purchase.precio) as total_profit
 
     FROM fichajes purchase
     JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
-    JOIN users u ON u.id = us.user_id
 
     -- Join with the subsequent sale
     JOIN LATERAL (
@@ -2265,7 +2239,7 @@ export async function getTopTrader(): Promise<TopTrader[]> {
     ) sale ON true
 
     WHERE purchase.season_id = $1 AND purchase.comprador != 'Mercado'
-    GROUP BY u.id, u.name, u.color_index, us.name, us.color_index
+    GROUP BY us.user_id, us.name, us.color_index
     ORDER BY trade_count DESC
 
   `;
@@ -2381,9 +2355,9 @@ export async function getQuickestFlip(): Promise<QuickFlip[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as user_name,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
 
       p.id as player_id,
       p.name as player_name,
@@ -2396,7 +2370,6 @@ export async function getQuickestFlip(): Promise<QuickFlip[]> {
 
     FROM fichajes purchase
     JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
-    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
 
     JOIN LATERAL (
@@ -2436,9 +2409,9 @@ export async function getLongestProfitableHold(): Promise<LongHold[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as user_name,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
 
       p.id as player_id,
       p.name as player_name,
@@ -2451,7 +2424,6 @@ export async function getLongestProfitableHold(): Promise<LongHold[]> {
 
     FROM fichajes purchase
     JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
-    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
 
     JOIN LATERAL (
@@ -2491,9 +2463,9 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
   const seasonId = await resolveReadSeasonId();
   const query = `
     SELECT
-      u.id as user_id,
-      COALESCE(us.name, u.name) as user_name,
-      COALESCE(us.color_index, u.color_index, 0) as user_color_index,
+      us.user_id as user_id,
+      us.name as user_name,
+      us.color_index as user_color_index,
       p.id as player_id,
       p.name as player_name,
       p.img as player_img,
@@ -2505,7 +2477,6 @@ export async function getWorstRevaluation(): Promise<Devaluation[]> {
       (ps.price - purchase.precio) as devaluation
     FROM fichajes purchase
     JOIN user_seasons us ON us.name = purchase.comprador AND us.season_id = purchase.season_id
-    JOIN users u ON u.id = us.user_id
     JOIN players p ON purchase.player_id = p.id
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = purchase.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
@@ -2593,9 +2564,9 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
       pt.max_points,
       pt.games_played,
       ml.seller_id,
-      u.name as seller_name,
-      u.icon as seller_icon,
-      u.color_index as seller_color,
+      us.name as seller_name,
+      us.icon as seller_icon,
+      us.color_index as seller_color,
       t.code as player_team,
       -- Next opponent logic
       tnm.opponent_id as next_opponent_id,
@@ -2606,7 +2577,7 @@ export async function getCurrentMarketListings(): Promise<CurrentMarketListing[]
     JOIN players p ON ml.player_id = p.id
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = ml.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
-    LEFT JOIN users u ON ml.seller_id::text = u.id::text
+    LEFT JOIN user_seasons us ON ml.seller_id = us.user_id AND ml.season_id = us.season_id
     LEFT JOIN PlayerTotals pt ON p.id = pt.player_id
     LEFT JOIN TeamNextMatch tnm ON tnm.team_id = ps.team_id
     WHERE ml.season_id = $1

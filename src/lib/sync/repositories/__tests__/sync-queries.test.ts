@@ -84,14 +84,12 @@ describe('sync-queries repository', () => {
       const mockDb = {
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
-            innerJoin: vi.fn().mockReturnValue({
-              where: vi.fn().mockResolvedValue([
-                { name: 'Alice', status: 'active' },
-                { name: 'Bob', status: 'active' },
-                { name: '', status: 'active' },
-                { name: null, status: 'active' },
-              ]),
-            }),
+            where: vi.fn().mockResolvedValue([
+              { name: 'Alice', status: 'active' },
+              { name: 'Bob', status: 'active' },
+              { name: '', status: 'active' },
+              { name: null, status: 'active' },
+            ]),
           }),
         }),
       };

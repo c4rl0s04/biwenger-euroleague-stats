@@ -59,15 +59,14 @@ export async function findSearchRecords(query: string, limit: number): Promise<S
   // Search users by name
   const usersQuery = `
       SELECT
-        u.id,
-        COALESCE(us.name, u.name) as name,
-        COALESCE(us.icon, u.icon) as icon
+        us.user_id as id,
+        us.name,
+        us.icon
       FROM user_seasons us
-      JOIN users u ON u.id = us.user_id
-      WHERE COALESCE(us.name, u.name) ILIKE $1
+      WHERE us.name ILIKE $1
         AND us.season_id = $2
-        AND COALESCE(us.status, 'active') = 'active'
-      ORDER BY COALESCE(us.name, u.name)
+        AND us.status = 'active'
+      ORDER BY us.name
       LIMIT $3
   `;
   const usersRes = await pgClient.query(usersQuery, [searchTerm, seasonId, limit]);

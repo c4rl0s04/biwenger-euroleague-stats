@@ -108,7 +108,7 @@ async function main() {
       'team_id',
     ];
     const deprecatedTeamCols = ['city', 'arena_name', 'latitude', 'longitude'];
-    const deprecatedUserCols = ['biwenger_token'];
+    const deprecatedUserCols = ['biwenger_token', 'icon', 'color_index'];
 
     const deprecatedRes = await disposable.pool.query(
       `SELECT table_name, column_name FROM information_schema.columns
@@ -126,7 +126,7 @@ async function main() {
       throw new Error(`Deprecated columns still present on global tables: ${list}`);
     }
     console.log(
-      '   ✅ All deprecated columns on players, teams, and users (including users.biwenger_token) are confirmed absent.'
+      '   ✅ All deprecated columns on players, teams, and users (including users.biwenger_token, users.icon, users.color_index) are confirmed absent.'
     );
 
     // d) Post-0015 venue and DNP provenance columns exist
@@ -170,6 +170,105 @@ async function main() {
     }
     console.log(
       '   ✅ Abandoned official staging tables confirmed absent (official_games, official_player_game_stats).'
+    );
+
+    // f) User seasons normalization: composite PK (season_id, user_id), no id column, no unique_user_season constraint
+    const userSeasonsPkRes = await disposable.pool.query(
+      `SELECT pg_get_constraintdef(c.oid) as def
+       FROM pg_constraint c
+       WHERE c.contype = 'p' AND c.conrelid = 'user_seasons'::regclass`
+    );
+    if (
+      userSeasonsPkRes.rows.length !== 1 ||
+      !userSeasonsPkRes.rows[0].def.includes('(season_id, user_id)')
+    ) {
+      throw new Error(
+        `Expected user_seasons composite primary key (season_id, user_id), got: ${userSeasonsPkRes.rows[0]?.def}`
+      );
+    }
+
+    const userSeasonsIdColRes = await disposable.pool.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = 'user_seasons' AND column_name = 'id'`
+    );
+    if (userSeasonsIdColRes.rowCount !== 0) {
+      throw new Error('user_seasons.id column still exists; expected dropped surrogate ID.');
+    }
+
+    const redundantConstraintRes = await disposable.pool.query(
+      `SELECT conname FROM pg_constraint
+       WHERE conname = 'unique_user_season' AND conrelid = 'user_seasons'::regclass`
+    );
+    if (redundantConstraintRes.rowCount !== 0) {
+      throw new Error('unique_user_season constraint still exists on user_seasons.');
+    }
+    console.log(
+      '   ✅ user_seasons composite PK (season_id, user_id) verified; surrogate id and redundant unique constraint confirmed absent.'
+    );
+
+    // g) user_seasons column constraints (name NOT NULL, color_index NOT NULL DEFAULT 0, status NOT NULL DEFAULT 'active')
+    const userSeasonsColsRes = await disposable.pool.query(
+      `SELECT column_name, is_nullable, column_default
+       FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = 'user_seasons' AND column_name = ANY(ARRAY['name', 'color_index', 'status'])`
+    );
+    const colMap = new Map(userSeasonsColsRes.rows.map((r: any) => [r.column_name, r]));
+    const nameCol = colMap.get('name');
+    const colorCol = colMap.get('color_index');
+    const statusCol = colMap.get('status');
+    if (!nameCol || nameCol.is_nullable !== 'NO') {
+      throw new Error(
+        `user_seasons.name must be NOT NULL, got is_nullable=${nameCol?.is_nullable}`
+      );
+    }
+    if (!colorCol || colorCol.is_nullable !== 'NO' || !colorCol.column_default?.includes('0')) {
+      throw new Error(
+        `user_seasons.color_index must be NOT NULL DEFAULT 0, got is_nullable=${colorCol?.is_nullable}, default=${colorCol?.column_default}`
+      );
+    }
+    if (
+      !statusCol ||
+      statusCol.is_nullable !== 'NO' ||
+      !statusCol.column_default?.includes('active')
+    ) {
+      throw new Error(
+        `user_seasons.status must be NOT NULL DEFAULT 'active', got is_nullable=${statusCol?.is_nullable}, default=${statusCol?.column_default}`
+      );
+    }
+    console.log(
+      "   ✅ user_seasons column constraints verified (name NOT NULL, color_index NOT NULL DEFAULT 0, status NOT NULL DEFAULT 'active')."
+    );
+
+    // h) Composite foreign keys referencing user_seasons(season_id, user_id)
+    const expectedFkConstraints = [
+      'finances_season_user_fk',
+      'initial_squads_season_user_fk',
+      'lineups_season_user_fk',
+      'market_listings_season_seller_fk',
+      'player_seasons_season_owner_fk',
+      'playoff_predictions_season_user_fk',
+      'porras_season_user_fk',
+      'tournament_fixtures_season_home_user_fk',
+      'tournament_fixtures_season_away_user_fk',
+      'tournament_standings_season_user_fk',
+      'transfer_bids_season_bidder_fk',
+      'user_playoff_media_season_user_fk',
+      'user_rounds_season_user_fk',
+    ];
+    const fkRes = await disposable.pool.query(
+      `SELECT conname, pg_get_constraintdef(c.oid) as def
+       FROM pg_constraint c
+       WHERE c.contype = 'f' AND c.confrelid = 'user_seasons'::regclass`
+    );
+    const existingFks = new Set(fkRes.rows.map((r: any) => r.conname));
+    const missingFks = expectedFkConstraints.filter((fk) => !existingFks.has(fk));
+    if (missingFks.length > 0) {
+      throw new Error(
+        `Missing composite foreign keys referencing user_seasons: ${missingFks.join(', ')}`
+      );
+    }
+    console.log(
+      `   ✅ All ${expectedFkConstraints.length} composite foreign keys referencing user_seasons(season_id, user_id) confirmed present.`
     );
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);

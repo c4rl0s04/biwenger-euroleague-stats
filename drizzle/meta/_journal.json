@@ -120,6 +120,13 @@
       "when": 1789516485013,
       "tag": "0016_drop_legacy_biwenger_token",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789553633709,
+      "tag": "0017_normalize_user_season_membership",
+      "breakpoints": true
     }
   ]
 }

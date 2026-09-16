@@ -63,6 +63,11 @@ function readSourceUniqueConstraints(tableExport: unknown): Set<string> {
     const values = Array.isArray(config) ? config : Object.values(config ?? {});
 
     for (const item of values) {
+      if (
+        (item as { constructor?: { name?: string } })?.constructor?.name === 'PrimaryKeyBuilder'
+      ) {
+        continue;
+      }
       const name = (item as { name?: string }).name;
       if (name) constraints.add(name);
     }

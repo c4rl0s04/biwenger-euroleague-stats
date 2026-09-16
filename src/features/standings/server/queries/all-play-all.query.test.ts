@@ -39,7 +39,7 @@ it('preserves active participants, display fallback and absence of additional or
   await listAllPlayAllUsers('synthetic');
   const [sql, params] = mocks.query.mock.calls[0];
   expect(sql.replace(/\s+/g, ' ').trim()).toBe(
-    "SELECT u.id, COALESCE(us.name, u.name) as name, COALESCE(us.icon, u.icon) as icon, COALESCE(us.color_index, u.color_index, 0) as color_index FROM user_seasons us JOIN users u ON u.id = us.user_id WHERE us.season_id = $1 AND COALESCE(us.status, 'active') = 'active'"
+    "SELECT us.user_id as id, us.name as name, us.icon as icon, us.color_index as color_index FROM user_seasons us WHERE us.season_id = $1 AND us.status = 'active'"
   );
   expect(params).toEqual(['synthetic']);
 });

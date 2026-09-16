@@ -13,13 +13,10 @@ describe('single shared fantasy manager directory query', () => {
     const rows = [{ id: '007', name: null, icon: null, color_index: 0 }];
     mocks.query.mockResolvedValue({ rows });
     expect(await readManagerDirectory()).toBe(rows);
-    expect(mocks.query).toHaveBeenCalledWith(
-      expect.stringContaining("COALESCE(us.status, 'active') = 'active'"),
-      ['fixture-season']
-    );
-    expect(mocks.query.mock.calls[0][0]).toContain(
-      'ORDER BY COALESCE(us.name, u.name) ASC, u.id ASC'
-    );
+    expect(mocks.query).toHaveBeenCalledWith(expect.stringContaining("us.status = 'active'"), [
+      'fixture-season',
+    ]);
+    expect(mocks.query.mock.calls[0][0]).toContain('ORDER BY us.name ASC, us.user_id ASC');
     expect(mocks.query.mock.calls[0][0]).not.toMatch(/password|token|credential|SELECT\s+\*/i);
     await readManagerDirectory();
     expect(mocks.season).toHaveBeenCalledTimes(2);

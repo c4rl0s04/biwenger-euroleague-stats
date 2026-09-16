@@ -21,12 +21,11 @@ export async function getRecentRecords(): Promise<RecordItem[]> {
   const highestRoundQuery = `
     SELECT 
       ur.user_id,
-      COALESCE(us.name, u.name) as user_name,
+      us.name as user_name,
       ur.round_name,
       ur.points
     FROM user_rounds ur
-    JOIN users u ON ur.user_id = u.id
-    JOIN user_seasons us ON us.user_id = u.id AND us.season_id = ur.season_id
+    JOIN user_seasons us ON us.user_id = ur.user_id AND us.season_id = ur.season_id
     WHERE ur.season_id = $1 AND ur.participated = TRUE
     ORDER BY ur.points DESC
     LIMIT 1

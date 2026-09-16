@@ -9,7 +9,6 @@ import {
 import {
   matches,
   porras,
-  users,
   userRounds,
   playerRoundStats,
   lineups,
@@ -68,11 +67,14 @@ export async function getAllPorrasRounds(): Promise<PorrasRound[]> {
   const result = await db
     .select({
       jornada: porras.roundName, // mapped from legacy naming
-      usuario: users.name,
+      usuario: userSeasons.name,
       aciertos: porras.aciertos,
     })
     .from(porras)
-    .leftJoin(users, eq(porras.userId, users.id))
+    .leftJoin(
+      userSeasons,
+      and(eq(porras.userId, userSeasons.userId), eq(porras.seasonId, userSeasons.seasonId))
+    )
     .where(eq(porras.seasonId, seasonId))
     .orderBy(desc(porras.roundId), desc(porras.aciertos));
 
@@ -233,16 +235,15 @@ export async function getLastRoundWinner(): Promise<any> {
   const result = await db
     .select({
       user_id: userRounds.userId,
-      name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
-      icon: sql<string>`COALESCE(${userSeasons.icon}, ${users.icon})`,
+      name: userSeasons.name,
+      icon: userSeasons.icon,
       points: userRounds.points,
       round_name: userRounds.roundName,
     })
     .from(userRounds)
-    .innerJoin(users, eq(userRounds.userId, users.id))
     .innerJoin(
       userSeasons,
-      and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+      and(eq(userRounds.userId, userSeasons.userId), eq(userRounds.seasonId, userSeasons.seasonId))
     )
     .where(
       and(
@@ -288,8 +289,8 @@ export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
       team: teams.name,
       position: playerSeasons.position,
       points: playerRoundStats.fantasyPoints,
-      owner_name: sql<string>`COALESCE(${userSeasons.name}, ${users.name})`,
-      owner_color_index: sql<number>`COALESCE(${userSeasons.colorIndex}, ${users.colorIndex}, 0)`,
+      owner_name: userSeasons.name,
+      owner_color_index: userSeasons.colorIndex,
     })
     .from(playerRoundStats)
     .innerJoin(players, eq(playerRoundStats.playerId, players.id))
@@ -298,10 +299,12 @@ export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
       and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
     )
     .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
-    .leftJoin(users, eq(playerSeasons.ownerId, users.id))
     .leftJoin(
       userSeasons,
-      and(eq(userSeasons.userId, users.id), eq(userSeasons.seasonId, seasonId))
+      and(
+        eq(playerSeasons.ownerId, userSeasons.userId),
+        eq(playerSeasons.seasonId, userSeasons.seasonId)
+      )
     )
     .where(
       and(eq(playerRoundStats.roundId, lastRoundId as any), eq(playerRoundStats.seasonId, seasonId))
@@ -337,7 +340,7 @@ export async function getLastRoundStats(): Promise<any[]> {
       position: playerSeasons.position,
       price: playerSeasons.price,
       points: playerRoundStats.fantasyPoints,
-      owner_name: users.name,
+      owner_name: userSeasons.name,
       round_name: sql<string>`(SELECT round_name FROM matches WHERE season_id = ${seasonId} AND round_id = ${playerRoundStats.roundId} LIMIT 1)`,
     })
     .from(playerRoundStats)
@@ -347,7 +350,13 @@ export async function getLastRoundStats(): Promise<any[]> {
       and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
     )
     .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
-    .leftJoin(users, eq(playerSeasons.ownerId, users.id))
+    .leftJoin(
+      userSeasons,
+      and(
+        eq(playerSeasons.ownerId, userSeasons.userId),
+        eq(playerSeasons.seasonId, userSeasons.seasonId)
+      )
+    )
     .where(
       and(eq(playerRoundStats.roundId, lastRoundId as any), eq(playerRoundStats.seasonId, seasonId))
     )
