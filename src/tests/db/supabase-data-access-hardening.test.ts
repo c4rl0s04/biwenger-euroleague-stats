@@ -260,5 +260,42 @@ describe('supabase data access hardening (0018_lock_down_supabase_data_access)',
         await disposable.cleanup();
       }
     }, 30000);
+
+    it('ignores legitimate Supabase default ACLs in non-public schemas like storage', async () => {
+      const disposable = await startDisposablePostgres();
+      try {
+        await runMigrations(disposable.pool);
+
+        // Create non-public schema 'storage' and Supabase roles
+        await disposable.pool.query(`
+            CREATE SCHEMA IF NOT EXISTS storage;
+            DO $$
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+                CREATE ROLE anon NOLOGIN;
+              END IF;
+              IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+                CREATE ROLE authenticated NOLOGIN;
+              END IF;
+              IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+                CREATE ROLE service_role NOLOGIN;
+              END IF;
+            END $$;
+          `);
+
+        // Seed legitimate Supabase storage default privileges
+        await disposable.pool.query(`
+            ALTER DEFAULT PRIVILEGES IN SCHEMA storage GRANT ALL ON TABLES TO anon, authenticated, service_role;
+            ALTER DEFAULT PRIVILEGES IN SCHEMA storage GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
+            ALTER DEFAULT PRIVILEGES IN SCHEMA storage GRANT ALL ON ROUTINES TO anon, authenticated, service_role;
+          `);
+
+        // inspectProductionReadiness must ignore storage defaults and report 0 unsafeRoleGrants
+        const readiness = await inspectProductionReadiness(disposable.pool);
+        expect(readiness.unsafeRoleGrants).toHaveLength(0);
+      } finally {
+        await disposable.cleanup();
+      }
+    }, 30000);
   });
 });

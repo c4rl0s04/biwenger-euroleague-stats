@@ -467,7 +467,7 @@ export async function inspectProductionReadiness(
     JOIN pg_roles target_role ON target_role.oid = a.defaclrole
     WHERE target_role.rolname IN ('postgres', current_user)
       AND (
-        r.rolname IN ('anon', 'authenticated', 'service_role')
+        (a.defaclnamespace = 'public'::regnamespace AND r.rolname IN ('anon', 'authenticated', 'service_role'))
         OR (x.grantee = 0 AND a.defaclobjtype = 'f')
       )
   `);
