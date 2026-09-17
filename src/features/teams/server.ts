@@ -10,3 +10,11 @@ export {
   TEAM_PROFILE_HTTP_CACHE_SECONDS,
 } from './server/services/team-profile.service';
 export { parseTeamProfileSection } from './validation/team-profile-input';
+export {
+  getTeamMatchesCount,
+  getAllTeamMatchesCount,
+  getAllTeamsPlayoffProbabilities,
+  getTeamPlayoffProbability,
+  TEAM_COMPETITION_READ_POLICY,
+} from './server/services/team-competition.service';
+export type { TeamMatchCounts, TeamQualificationProbabilities } from './models/team-competition';
