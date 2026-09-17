@@ -34,30 +34,30 @@ are implemented, verified and integrated via PR #35. The
 [C02 receipt](../migration/reports/c02-tournament-reads.md) records contracts and verification evidence.
 
 Predictions read migration: C03 Predictions reads (overview, sections, calculations and queries)
-are implemented, verified and isolated on branch `integration/predictions-migration`. The
+are implemented and verified on branch `integration/predictions-migration`; integration is tracked in PR #36. The
 [C03 receipt](../migration/reports/c03-prediction-reads.md) records contracts and verification evidence.
 
-| Domains                                                  | Status / next boundary                                                                               |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified                   |
-| Players                                                  | Integrated; manager adapter removed in the read-foundations release                                  |
-| Rounds                                                   | Calendar and historical read experience implemented; see current release receipt                     |
-| Managers                                                 | Profile read flow validated end-to-end; directory/other analytics remain                             |
-| Standings                                                | Complete Standings read slice implemented; see current release receipt                               |
-| Tournaments                                              | Complete read experience integrated; catalogue, details, bracket and analytics feature-owned         |
-| Predictions                                              | Complete read experience integrated; overview, sections, pure calculations and feature-owned queries |
-| Playoffs                                                 | Legacy scoring/read services; distinct formulas preserved                                            |
-| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                                       |
-| Market public reads                                      | Legacy analytics; separate from private operations                                                   |
-| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                              |
-| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                               |
-| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                  |
-| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                  |
-| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                    |
-| Accounts, Settings                                       | Deferred pending credential observation gate                                                         |
-| Assistant                                                | Deferred pending privacy/provider review                                                             |
-| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                 |
-| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                       |
+| Domains                                                  | Status / next boundary                                                                                       |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified                           |
+| Players                                                  | Integrated; manager adapter removed in the read-foundations release                                          |
+| Rounds                                                   | Calendar and historical read experience implemented; see current release receipt                             |
+| Managers                                                 | Profile read flow validated end-to-end; directory/other analytics remain                                     |
+| Standings                                                | Complete Standings read slice implemented; see current release receipt                                       |
+| Tournaments                                              | Complete read experience integrated; catalogue, details, bracket and analytics feature-owned                 |
+| Predictions                                              | Complete read experience implemented and verified; integration tracked in PR #36                             |
+| Playoffs                                                 | Legacy scoring/read services; distinct formulas preserved                                                    |
+| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                                               |
+| Market public reads                                      | Legacy analytics; separate from private operations                                                           |
+| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                                      |
+| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                                       |
+| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                          |
+| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                          |
+| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                            |
+| Accounts, Settings                                       | Deferred pending credential observation gate                                                                 |
+| Assistant                                                | Deferred pending privacy/provider review                                                                     |
+| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                         |
+| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                               |
 
 ## HTTP contracts and compatibility
 
@@ -476,8 +476,8 @@ and no schema, dependency, environment, credential, fallback or provider-operati
 configuration changed. The primary and all three task worktrees are clean.
 
 Next parallel batch: Tournament core/manager participation, Manager top contributors,
-and Standings all-play-all reads. These provide the remaining data contracts for
-a subsequent Manager Profile desktop/mobile composition migration. Preserve existing
+and Standings all-play-all reads. These provide the remaining data contracts for a
+subsequent Manager Profile desktop/mobile composition migration. Preserve existing
 tournament JSON/ID matching and statistical formulas; no next slice has started yet.
 
 ## Manager Profile dependency batch
