@@ -74,3 +74,10 @@ export interface PlayerStatLeaderViewModel {
   games_played: string;
   avg_value: number;
 }
+
+export interface PlayerFormStatsViewModel {
+  playerId: number;
+  recentScores: string;
+  averageRecentPoints: number | null;
+  formScore: number | null;
+}
