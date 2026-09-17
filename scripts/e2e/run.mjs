@@ -5,6 +5,9 @@ import { createServer } from 'node:net';
 import path from 'node:path';
 import pg from 'pg';
 import { assertFixtureTarget } from './safety.mjs';
+import { parseFixtureArgs } from './fixture-scenarios.mjs';
+
+const { fixture, playwrightArgs } = parseFixtureArgs(process.argv.slice(2));
 
 const root = path.resolve(import.meta.dirname, '../..');
 const envFiles = readdirSync(root).filter(
@@ -54,6 +57,7 @@ const database = `biwenger_e2e_${process.pid}`;
 const connectionString = `postgresql://fixture@127.0.0.1:${dbPort}/${database}`;
 Object.assign(env, {
   BIWENGER_E2E_DISPOSABLE: 'true',
+  E2E_FIXTURE_SCENARIO: fixture,
   E2E_DATABASE_URL: connectionString,
   DATABASE_URL: connectionString,
   AUTH_SECRET: 'biwenger-disposable-fixture-auth-secret-only',
@@ -155,6 +159,7 @@ try {
   await run(['scripts/e2e/seed.mjs'], {
     E2E_DATABASE_URL: integrityConnectionString,
     DATABASE_URL: integrityConnectionString,
+    E2E_FIXTURE_SCENARIO: 'default',
   });
   await run(['node_modules/tsx/dist/cli.mjs', 'scripts/e2e/season-integrity.ts'], {
     E2E_DATABASE_URL: integrityConnectionString,
@@ -193,7 +198,7 @@ try {
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   if (!ready) throw new Error('Fixture app did not become ready');
-  await run(['node_modules/playwright/cli.js', 'test', ...process.argv.slice(2)]);
+  await run(['node_modules/playwright/cli.js', 'test', ...playwrightArgs]);
 } finally {
   await cleanup();
 }
