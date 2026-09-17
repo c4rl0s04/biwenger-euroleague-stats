@@ -9,6 +9,10 @@ status: active
 
 # Complete architecture migration plan
 
+For a short explanation and the latest inspected execution checkpoint, read the
+[completion guide](completion-guide.md). This document defines the full scope; its original
+planning checklist below is not a live claim that subsequent implementation has not happened.
+
 ## Purpose and authorization
 
 Finish the existing architecture migration without redesigning the product. This is a planning
@@ -401,6 +405,10 @@ no duplicated domain interaction implementation remains without a justified dist
   Close all additional visual-reference gaps discovered during the campaign.
 - Run full validation below on the exact integrated candidate. Recheck API method/route manifests,
   all phone sections, desktop redirects, empty/error/missing inputs and cross-user cache behavior.
+- Include every opt-in fixture scenario in the acceptance matrix and CI; a passing default run
+  must not silently skip populated coverage. In particular, reconcile the pending Market fixture
+  work and cover populated listings, transfer drawers, duel selection/details, rolling charts and
+  phone sections, alongside empty states. Record scenario, viewport, original reference SHA and result.
 - Reconcile overview, ledger, API/product references, architecture docs, old queue, assignments and
   receipts. Historical notes remain historical with prominent links to final state.
 - Audit all Git worktrees, branch tips, stashes and untracked files again. No migration work may exist
@@ -452,7 +460,33 @@ regressions, suppress security findings, or silently skip failures.
 
 ## Progress checklist
 
-All remaining packages are PLANNED, not dispatched by creating this document.
+### Resume order at the latest inspection
+
+1. Read the completion guide and current campaign receipts. Preserve the uncommitted Market Q
+   checkpoint at campaign HEAD `1e889c8e`; verify and finish it rather than restarting Market.
+2. Close the remaining C05 presentation/interactions and record the separate phone-bids decision.
+   An unapproved behavioral fix must not block independent authorized read work or disappear from
+   the final acceptance list.
+3. Complete C06, then dependency-ready C07–C10. Retire C01/upstream adapters when their last real
+   consumers migrate. Reconcile C00 call-chain ownership as each package is touched.
+4. Obtain bounded approval for C11 and complete all sensitive subpackages. Meanwhile, independently
+   safe C12 inventory work may proceed; do not use it to bypass sensitive implementation approval.
+5. Complete C12 infrastructure/cache ownership and C13 component/shell ownership, including the
+   remaining consumers of features already migrated on main.
+6. Execute C14 against the entire candidate, not just newly moved folders. Every unresolved item
+   needs a named owner/package and must close before implementation is declared complete.
+7. Only with separate release approval, perform C15 and reconcile the final main/deployment receipt.
+
+For each remaining item, the execution ledger must record: exact scope, dependencies, status
+(`pending`, `implemented`, `verified`, `released`), commit, verification evidence and any approval
+needed. A green package with a remaining adapter is not global closure: link that adapter to the
+downstream package that removes it. Re-discovery at C14 is mandatory because a static plan cannot
+guarantee that no hidden consumer will be found during implementation.
+
+This is the original scope checklist, not current execution status. Consult the completion
+guide and campaign execution receipts before working: C02–C04 already have locally verified
+implementations and C05 has committed data checkpoints. Do not redo accepted work. Creating
+or updating this planning document does not dispatch implementation or authorize release.
 
 - [ ] C00 Closed inventory and baseline.
 - [ ] C01 Manager directory/analytics.
