@@ -71,9 +71,14 @@ describe('SyncManager', () => {
     expect(lockClient.release).toHaveBeenCalledOnce();
   });
 
-  it('logs the declared source, writes and result counts', async () => {
+  it('logs the declared source, writes and result counts to diagnostic logs and reporter', async () => {
+    const terminalLines: string[] = [];
+    const writer = {
+      log: (line: string) => terminalLines.push(line),
+      error: (line: string) => terminalLines.push(line),
+    };
     const { SyncManager } = await import('../manager');
-    const manager = new SyncManager({ useAdvisoryLock: false });
+    const manager = new SyncManager({ useAdvisoryLock: false, writer });
     manager.addStep({
       ...definition(
         'visible-step',
@@ -88,6 +93,13 @@ describe('SyncManager', () => {
     const output = manager.logs.map((entry) => entry.message).join('\n');
     expect(output).toContain('Source: euroleague; writes: official_games');
     expect(output).toContain('Counts: {"rows":2}');
+
+    const terminalOutput = terminalLines.join('\n');
+    expect(terminalOutput).toContain('Source     EuroLeague');
+    expect(terminalOutput).toContain('Writes     official_games');
+    expect(terminalOutput).toContain('  Rows       2');
+    expect(terminalOutput).toContain('stored');
+    expect(terminalOutput).toContain('SYNC COMPLETE');
   });
 
   it('uses read-only schema validation in production', async () => {

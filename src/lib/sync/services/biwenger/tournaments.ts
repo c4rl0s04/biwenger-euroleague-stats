@@ -46,7 +46,7 @@ export async function syncBiwengerTournaments(
   manager: SyncManager,
   dependencies: TournamentsDependencies = {}
 ) {
-  manager.log('🏆 Starting Tournament Sync...');
+  manager.log('Starting tournament sync');
   const seasonId = manager.context.seasonId;
   if (!seasonId) {
     throw new Error('Canonical sync season was not resolved before tournament ingestion.');
@@ -59,7 +59,7 @@ export async function syncBiwengerTournaments(
   const leagueId = Number(dependencies.leagueId || CONFIG.API.LEAGUE_ID);
 
   // 1. Discovery: Scan FULL SEASON to find all tournaments (Active & Finished)
-  manager.log('   > Discovering tournaments from Full Season Schedule...');
+  manager.log('Discovering tournaments from full season schedule');
   const tournamentIds = new Set<number>();
 
   const snapshot = await manager.getBiwengerCompetition();
@@ -68,7 +68,7 @@ export async function syncBiwengerTournaments(
   if (allRounds.length === 0) {
     throw new Error('Biwenger competition contains no rounds for tournament discovery.');
   }
-  manager.log(`   > Scanning ${allRounds.length} rounds for tournament fixtures...`);
+  manager.log(`Scanning ${allRounds.length} rounds for tournament fixtures`);
 
   for (const round of allRounds) {
     const roundDetail = await getRoundDetail(round.id);
@@ -79,7 +79,7 @@ export async function syncBiwengerTournaments(
           if (!tournamentIds.has(tId)) {
             tournamentIds.add(tId);
             manager.log(
-              `   > 🎯 Discovered "${fixture.tournament.name}" (ID: ${tId}) in Round ${round.name}`
+              `Discovered "${fixture.tournament.name}" (ID: ${tId}) in Round ${round.name}`
             );
           }
         }
@@ -88,7 +88,7 @@ export async function syncBiwengerTournaments(
   }
 
   if (tournamentIds.size === 0) {
-    manager.log('   > No tournaments found in any round.');
+    manager.log('No tournaments found in any round');
     return {
       summary: 'No Biwenger tournaments were present in the season.',
       counts: { tournaments: 0 },
@@ -96,13 +96,13 @@ export async function syncBiwengerTournaments(
   }
 
   manager.log(
-    `   > Found ${tournamentIds.size} tournament(s): [${Array.from(tournamentIds).join(', ')}]`
+    `Found ${tournamentIds.size} tournament(s): [${Array.from(tournamentIds).join(', ')}]`
   );
 
   // 2. Deep Sync: Process each tournament
   let synchronized = 0;
   for (const tId of Array.from(tournamentIds)) {
-    manager.log(`   > Syncing Tournament ID: ${tId}...`);
+    manager.log(`Syncing tournament ID: ${tId}`);
     try {
       const tData = await getTournament(Number(tId));
       const data = tData.data;
@@ -237,10 +237,10 @@ export async function syncBiwengerTournaments(
             }
           }
         }
-        manager.log('     ✅ Synced Standings');
+        manager.log('Synced standings');
       }
 
-      manager.log(`     ✅ Synced ${data.name}`);
+      manager.log(`Synced ${data.name}`);
       synchronized++;
     } catch (e: any) {
       throw new Error(`Failed to synchronize tournament ${tId}.`, { cause: e });

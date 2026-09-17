@@ -30,7 +30,7 @@ export async function runGame(
     options.mappingMutations ||
     prepareOfficialMappingMutations(manager.context.db as any, seasonId);
 
-  manager.log(`📊 Syncing official game ${gameCode}...`);
+  manager.log(`Syncing official game ${gameCode}`);
   const [report, metadata, boxscore, playByPlay, shots] = await Promise.all([
     provider.getGameReport(seasonYear, gameCode),
     provider.getGameMetadata(seasonYear, gameCode),
@@ -41,7 +41,7 @@ export async function runGame(
 
   // A future game can validly return 404/empty data. Keep its schedule row untouched.
   if (!report && !metadata && boxscore.length === 0) {
-    manager.log(`   ⏭️ Game ${gameCode}: official details not available yet.`);
+    manager.log(`Game ${gameCode}: official details not available yet`);
     return { status: 'not_available_yet' as const };
   }
 
@@ -54,11 +54,11 @@ export async function runGame(
       boxscore.map((p) => p.playerCode)
     );
     if (!hasUnpersisted) {
-      manager.log(`   ✅ Game ${gameCode}: final checksum unchanged.`);
+      manager.log(`Game ${gameCode}: final checksum unchanged`);
       return { status: 'unchanged' as const, finalized: true, checksum };
     }
     manager.log(
-      `   🔄 Game ${gameCode}: final checksum matches but newly mapped player stats require persistence.`
+      `Game ${gameCode}: final checksum matches but newly mapped player stats require persistence`
     );
   }
   await gameMutations.persistGameData({
@@ -75,7 +75,7 @@ export async function runGame(
   await gameMutations.materializeRoundStats(roundId);
 
   manager.log(
-    `   ✅ Game ${gameCode}: ${boxscore.length} boxscore rows, ${playByPlay.length} plays, ${shots.length} shots, ${mapping.issues.length} pending mappings.`
+    `Game ${gameCode}: ${boxscore.length} boxscore rows, ${playByPlay.length} plays, ${shots.length} shots, ${mapping.issues.length} pending mappings`
   );
   return {
     status: 'updated' as const,

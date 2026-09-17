@@ -79,14 +79,14 @@ export async function syncOfficialMasterData(manager: SyncManager) {
   const mappingIssues = [...teamResult.issues, ...playerResult.issues];
 
   manager.log(
-    `   ✅ Official master data: ${schedule.length} games, ${teamResult.mapped}/${teamSource.size} teams, ${playerResult.mapped}/${profiles.length} player profiles mapped, ${pendingPlayers} persisted player reviews.`
+    `Official master data: ${schedule.length} games, ${teamResult.mapped}/${teamSource.size} teams, ${playerResult.mapped}/${profiles.length} player profiles mapped, ${pendingPlayers} persisted player reviews`
   );
   for (const issue of mappingIssues) {
     const suggestion = issue.suggestion
       ? `; suggestion only: ${issue.suggestion.name} (${issue.suggestion.score.toFixed(2)})`
       : '';
     manager.log(
-      `   ⚠️ ${issue.kind} review required: ${issue.providerName} (${issue.providerCode})${suggestion}`
+      `${issue.kind} review required: ${issue.providerName} (${issue.providerCode})${suggestion}`
     );
   }
 

@@ -25,7 +25,7 @@ export async function syncBiwengerSquads(
 ): Promise<BiwengerSquadsSyncResult> {
   const db = manager.context.db;
   const seasonId = manager.context.seasonId;
-  manager.log('\n📥 Syncing Squads (Ownership)...');
+  manager.log('Syncing squads and ownership');
 
   const mutations = prepareUserMutations(db as any, { seasonId });
 
@@ -37,7 +37,7 @@ export async function syncBiwengerSquads(
   const users = usersRes.all();
 
   if (users.length === 0) {
-    manager.log('No users found in DB. Skipping squad sync.');
+    manager.log('No users found in database; skipping squad sync');
     return {
       summary: 'No users found; ownership was not changed.',
       counts: { users: 0, playersOwned: 0 },

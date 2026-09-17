@@ -20,7 +20,7 @@ export async function syncBiwengerUsers(
     throw new Error('Canonical sync season was not resolved before user ingestion.');
   }
 
-  manager.log('\n📥 Fetching Standings...');
+  manager.log('Fetching standings');
   const getLeague = dependencies.fetchLeague || fetchLeague;
   const mutationsFactory = dependencies.prepareMutations || prepareUserMutations;
 

@@ -18,7 +18,7 @@ export async function syncUserColors(
     throw new Error('Canonical sync season was not resolved before user color assignment.');
   }
 
-  manager.log('\n🎨 Syncing User Colors...');
+  manager.log('Syncing user colors');
   const mutationsFactory = dependencies.prepareMutations || prepareUserMutations;
 
   try {

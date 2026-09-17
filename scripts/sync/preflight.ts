@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import pg from 'pg';
 
 import { buildPoolConfig } from '../../src/lib/db/connection-config.js';
+import { DIVIDER, formatMetrics } from '../../src/lib/sync/reporter.js';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -35,14 +36,21 @@ async function main() {
       [season.ID]
     );
 
-    console.log(`Season: ${season.ID} (${writable.status})`);
-    console.log(`Biwenger league: ${writable.sourceLeagueId}`);
-    console.log(`EuroLeague code: ${season.EUROLEAGUE_CODE}`);
-    console.log(`League start: ${season.START_DATE}`);
-    console.log(`Existing season rows: ${JSON.stringify(counts.rows[0])}`);
+    console.log('Sync Preflight');
+    console.log(DIVIDER);
+    console.log(`Season              ${season.ID} (${writable.status})`);
+    console.log(`Biwenger league     ${writable.sourceLeagueId}`);
+    console.log(`EuroLeague code     ${season.EUROLEAGUE_CODE}`);
+    console.log(`League start        ${season.START_DATE}`);
+
+    console.log('\nExisting season rows:');
+    for (const line of formatMetrics(counts.rows[0])) {
+      console.log(line);
+    }
 
     if (skipProviderProbes) {
-      console.log('Provider probes skipped; configuration and database binding are valid.');
+      console.log('\nProvider probes     skipped');
+      console.log('Configuration and database binding are valid.');
       return;
     }
 
@@ -107,19 +115,35 @@ async function main() {
     );
     const accountId = account?.data?.id ?? account?.id ?? 'available';
 
-    console.log(`Biwenger account probe: ${accountId}`);
-    console.log(`Provider snapshot: ${JSON.stringify(providerCounts)}`);
-    console.log(`Biwenger season readiness: ${JSON.stringify(biwengerReadiness)}`);
-    console.log(`Official snapshot: ${JSON.stringify(officialCounts)}`);
-    console.log(`Mapping coverage: ${JSON.stringify(mappingCoverage.rows[0])}`);
+    console.log(`\nBiwenger account probe: ${accountId}`);
 
-    console.log('Sync preflight passed. No database rows were modified.');
+    console.log('\nProvider snapshot:');
+    for (const line of formatMetrics(providerCounts)) {
+      console.log(line);
+    }
+
+    console.log('\nBiwenger season readiness:');
+    for (const line of formatMetrics(biwengerReadiness)) {
+      console.log(line);
+    }
+
+    console.log('\nOfficial snapshot:');
+    for (const line of formatMetrics(officialCounts)) {
+      console.log(line);
+    }
+
+    console.log('\nMapping coverage:');
+    for (const line of formatMetrics(mappingCoverage.rows[0])) {
+      console.log(line);
+    }
+
+    console.log('\n✓ Sync preflight passed. No database rows were modified.');
   } finally {
     await pool.end();
   }
 }
 
 main().catch((error) => {
-  console.error('Sync preflight failed:', error instanceof Error ? error.message : error);
+  console.error('\n✗ Sync preflight failed:', error instanceof Error ? error.message : error);
   process.exit(1);
 });

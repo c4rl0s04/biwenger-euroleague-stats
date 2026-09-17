@@ -67,7 +67,7 @@ export async function syncInitialSquads(
   manager: SyncManager,
   dependencies: BacktrackerDependencies = {}
 ) {
-  manager.log('\n🕰️  Inferring initial squads from ownership history...');
+  manager.log('Inferring initial squads from ownership history');
   const seasonId = manager.context.seasonId;
   if (!seasonId) {
     throw new Error('Canonical sync season was not resolved before initial squads inference.');
@@ -79,7 +79,7 @@ export async function syncInitialSquads(
 
   // 0. Clear existing initial squad data
   await mutations.clearInitialSquads();
-  manager.log('   🧹 Cleared previous initial squads data.');
+  manager.log('Cleared previous initial squads data');
 
   // 1. Load season users and their current squads
   const usersRes = await mutations.getAllUsers();
@@ -93,11 +93,11 @@ export async function syncInitialSquads(
     currentSquads.set(String(user.id), currentIds);
     userNameToId.set(user.name, String(user.id));
   }
-  manager.log(`   📊 Loaded current squads and name mappings for ${users.length} users.`);
+  manager.log(`Loaded current squads and name mappings for ${users.length} users`);
 
   // 2. Load complete transfer history (newest first)
   const transfers = (await mutations.getTransfersForBacktracking()) as TransferHistoryItem[];
-  manager.log(`   📜 Processing ${transfers.length} transfers backwards...`);
+  manager.log(`Processing ${transfers.length} transfers backwards`);
 
   // 3. Backtracking simulation
   const initialSquads = simulateBacktracking(currentSquads, userNameToId, transfers);
@@ -109,7 +109,7 @@ export async function syncInitialSquads(
   for (const user of users) {
     const initialSet = initialSquads.get(String(user.id));
     if (!initialSet) continue;
-    manager.log(`      -> User ${user.name}: Start State has ${initialSet.size} players.`);
+    manager.log(`User ${user.name}: start state has ${initialSet.size} players`);
 
     for (const playerId of Array.from(initialSet)) {
       const priceParams = await mutations.getInitialPrice(playerId, seasonStartDate);

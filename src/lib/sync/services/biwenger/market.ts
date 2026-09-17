@@ -31,7 +31,7 @@ export async function syncBiwengerMarket(
   overrides?: Partial<BiwengerMarketDependencies>
 ): Promise<BiwengerMarketSyncResult> {
   const deps = { ...defaultDependencies, ...overrides };
-  manager.log('🛒 Syncing Market Listings...');
+  manager.log('Syncing market listings');
 
   const db = manager.context.db;
   const mutations = prepareMarketListingMutations(db as any, {
@@ -39,13 +39,13 @@ export async function syncBiwengerMarket(
   });
 
   const marketDate = resolveMarketDate();
-  manager.log(`   > Fetching active market listings for market day ${marketDate}...`);
+  manager.log(`Fetching active market listings for market day ${marketDate}`);
   const response = await deps.fetchMarketListings();
 
   const items: any[] = response?.data?.sales ?? [];
 
   if (!Array.isArray(items) || items.length === 0) {
-    manager.log('   > No players currently listed on the market.');
+    manager.log('No players currently listed on the market');
     await mutations.deleteStaleMarketListings(marketDate, []);
     return {
       summary: 'Biwenger market snapshot synchronized.',
@@ -53,7 +53,7 @@ export async function syncBiwengerMarket(
     };
   }
 
-  manager.log(`   > Found ${items.length} player(s) on the market. Upserting...`);
+  manager.log(`Found ${items.length} player(s) on the market`);
 
   let upserted = 0;
   let skipped = 0;
@@ -91,12 +91,10 @@ export async function syncBiwengerMarket(
         typeof l.player_id === 'number' && !isNaN(l.player_id)
     );
 
-  manager.log(`   > Cleaning up any stale listings for today...`);
+  manager.log('Cleaning up stale listings for today');
   await mutations.deleteStaleMarketListings(marketDate, activeListings);
 
-  manager.log(
-    `✅ Market listings synced: ${upserted} upserted, ${skipped} skipped. Stale listings removed.`
-  );
+  manager.log(`Market listings synced: ${upserted} upserted, ${skipped} skipped`);
   return {
     summary: 'Biwenger market snapshot synchronized.',
     counts: { listings: upserted, skipped },

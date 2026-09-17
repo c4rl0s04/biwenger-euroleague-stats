@@ -18,7 +18,7 @@ async function mapWithConcurrency<T>(
 }
 
 export async function run(manager: SyncManager) {
-  manager.log('\n📊 Synchronizing official EuroLeague game data...');
+  manager.log('Synchronizing official EuroLeague game data');
   const db = manager.context.db as any;
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
@@ -48,7 +48,7 @@ export async function run(manager: SyncManager) {
     ? Math.round((Date.now() - Date.parse(metrics.lastSuccessfulAt)) / 1000)
     : null;
   manager.log(
-    `   📡 Official provider metrics: ${JSON.stringify({ ...metrics, lastSuccessfulAgeSeconds })}`
+    `Official provider metrics: ${JSON.stringify({ ...metrics, lastSuccessfulAgeSeconds })}`
   );
 
   return {

@@ -43,7 +43,7 @@ export async function syncBiwengerLineups(
   const playerMutationsFactory = dependencies.preparePlayerMutations || preparePlayerMutations;
 
   if (status === 'finished' || status === 'active') {
-    manager.log('Fetching lineups/standings...');
+    manager.log('Fetching lineups/standings');
 
     let standings: any = null;
     try {
@@ -110,7 +110,7 @@ export async function syncBiwengerLineups(
               else if (index === 5) role = '6th_man';
 
               if (!playersList[playerId]) {
-                manager.log(`      🛠️  Repairing missing player ${playerId}...`);
+                manager.log(`Repairing missing player ${playerId}`);
                 try {
                   const details = await fetchDetails(playerId);
                   if (details?.data) {
@@ -156,7 +156,7 @@ export async function syncBiwengerLineups(
           }
         }
       }
-      manager.log(`   -> Synced standings/lineups for ${standings.length} users.`);
+      manager.log(`Synced standings/lineups for ${standings.length} users`);
     }
   } else {
     manager.log('Skipping lineups (round not finished/active).');

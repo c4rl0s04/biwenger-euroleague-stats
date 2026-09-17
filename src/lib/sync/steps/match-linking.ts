@@ -5,7 +5,7 @@ import { relevantRounds } from '../rounds';
 
 /** Links Biwenger round/team identities to the authoritative official calendar. */
 export async function run(manager: SyncManager) {
-  manager.log('\n📅 Linking fantasy matches to the official calendar...');
+  manager.log('Linking fantasy matches to official calendar');
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
   const snapshot = await manager.getBiwengerCompetition();
@@ -30,11 +30,11 @@ export async function run(manager: SyncManager) {
           }
         }
       } catch (err: any) {
-        manager.log(`   ⚠️ Could not optimize round ${roundId}: ${err.message}`);
+        manager.log(`Could not optimize round ${roundId}: ${err.message}`);
       }
     }
 
-    manager.log(`\n🔹 Linking ${roundToSync.name}...`);
+    manager.log(`Linking ${roundToSync.name}`);
 
     const result = await syncMatches.run(manager, roundToSync, snapshot.players);
     linkedMatches += result.synced;

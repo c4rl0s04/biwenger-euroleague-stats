@@ -15,6 +15,7 @@ import {
   type BiwengerRound,
 } from './rounds';
 import { assertSyncSeasonWritable } from './season-guard';
+import { SyncReporter, type ReporterWriter } from './reporter';
 
 export type SyncMode = 'routine' | 'bootstrap' | 'live';
 export type SyncSource = 'biwenger' | 'euroleague' | 'database' | 'biwenger+database';
@@ -44,6 +45,7 @@ export class SyncManager {
   readonly lockKey: number;
   readonly forceGame?: number;
   readonly targetSeasonId?: string;
+  readonly reporter: SyncReporter;
   hasErrors = false;
   lockUnavailable = false;
   private roundIds = new Map<string, number>();
@@ -55,6 +57,8 @@ export class SyncManager {
       lockKey?: number;
       forceGame?: number;
       seasonId?: string;
+      reporter?: SyncReporter;
+      writer?: ReporterWriter;
     } = {}
   ) {
     this.mode = options.mode ?? 'routine';
@@ -63,6 +67,7 @@ export class SyncManager {
     this.forceGame = options.forceGame;
     this.targetSeasonId = options.seasonId;
     this.context = { db: null, euroleague: getEuroleagueClient() };
+    this.reporter = options.reporter ?? new SyncReporter({ writer: options.writer });
   }
 
   addStep(step: SyncStepDefinition): void {
@@ -91,18 +96,23 @@ export class SyncManager {
   }
 
   log(message: string): void {
-    console.log(message);
     this.logs.push({ type: 'info', message, timestamp: new Date() });
+    this.reporter.stepDetail(message);
   }
 
   error(message: string, error?: unknown): void {
-    console.error(message, error);
     this.logs.push({ type: 'error', message, error, timestamp: new Date() });
     this.hasErrors = true;
   }
 
   async run(): Promise<void> {
-    this.log(`🚀 Starting ${this.mode} data sync...`);
+    const startedAt = Date.now();
+    this.reporter.runStarted({ mode: this.mode, totalSteps: this.steps.length });
+    this.logs.push({
+      type: 'info',
+      message: `Starting ${this.mode} data sync...`,
+      timestamp: new Date(),
+    });
     let advisoryLock: AdvisoryLock | null = null;
     this.context.db = pool;
 
@@ -110,10 +120,19 @@ export class SyncManager {
       advisoryLock = await acquireAdvisoryLock(pool, this.lockKey, this.mode);
       if (!advisoryLock.acquired) {
         this.lockUnavailable = true;
-        this.log('⏭️ Another synchronization is already running. Skipping this run.');
+        this.reporter.runSkipped({ reason: 'Another synchronization is already running' });
+        this.logs.push({
+          type: 'info',
+          message: 'Another synchronization is already running. Skipping this run.',
+          timestamp: new Date(),
+        });
         return;
       }
     }
+
+    let completedStepsCount = 0;
+    let failedStep: SyncStepDefinition | null = null;
+    let totalWarningsCount = 0;
 
     try {
       await validateSchemaReady(pool);
@@ -121,35 +140,110 @@ export class SyncManager {
       const season = await assertSyncSeasonWritable(pool, this.targetSeasonId);
       this.context.season = season;
       this.context.seasonId = season.seasonId;
-      this.log(
-        `🗓️ Writable season: ${season.seasonId} (${season.status}) [euroleague: ${season.euroleagueCode}].`
-      );
+      this.reporter.seasonResolved({
+        seasonId: season.seasonId,
+        status: season.status,
+        euroleagueCode: season.euroleagueCode,
+      });
+      this.logs.push({
+        type: 'info',
+        message: `Writable season: ${season.seasonId} (${season.status}) [euroleague: ${season.euroleagueCode}].`,
+        timestamp: new Date(),
+      });
 
-      for (const step of this.steps) {
-        const startedAt = Date.now();
-        this.log(`\n▶️ ${step.id}: ${step.title}`);
-        this.log(`   Source: ${step.source}; writes: ${step.writes.join(', ') || 'none'}`);
+      for (let i = 0; i < this.steps.length; i++) {
+        const step = this.steps[i];
+        const stepStartedAt = Date.now();
+        this.reporter.stepStarted({
+          index: i + 1,
+          total: this.steps.length,
+          step,
+        });
+        this.logs.push({
+          type: 'info',
+          message: `${step.id}: ${step.title}`,
+          timestamp: new Date(),
+        });
+        this.logs.push({
+          type: 'info',
+          message: `Source: ${step.source}; writes: ${step.writes.join(', ') || 'none'}`,
+          timestamp: new Date(),
+        });
+
         try {
           const result = await step.run(this);
-          const durationMs = Date.now() - startedAt;
-          if (result?.summary) this.log(`   ${result.summary}`);
-          if (result?.counts) this.log(`   Counts: ${JSON.stringify(result.counts)}`);
-          for (const warning of result?.warnings || []) this.log(`   ⚠️ ${warning}`);
-          this.log(`✅ ${step.id} completed in ${durationMs}ms.`);
+          const durationMs = Date.now() - stepStartedAt;
+          if (result?.summary) {
+            this.logs.push({ type: 'info', message: result.summary, timestamp: new Date() });
+          }
+          if (result?.counts) {
+            this.logs.push({
+              type: 'info',
+              message: `Counts: ${JSON.stringify(result.counts)}`,
+              timestamp: new Date(),
+            });
+          }
+          const warnings = result?.warnings || [];
+          totalWarningsCount += warnings.length;
+          for (const warning of warnings) {
+            this.logs.push({ type: 'info', message: `Warning: ${warning}`, timestamp: new Date() });
+          }
+          this.reporter.stepCompleted({ step, durationMs, result });
+          this.logs.push({
+            type: 'info',
+            message: `${step.id} completed in ${durationMs}ms.`,
+            timestamp: new Date(),
+          });
+          completedStepsCount++;
         } catch (error) {
-          this.error(`❌ ${step.id} failed.`, error);
+          const durationMs = Date.now() - stepStartedAt;
+          failedStep = step;
+          this.error(`${step.id} failed.`, error);
+          this.reporter.stepFailed({ step, durationMs, error });
           break;
         }
       }
     } catch (error) {
-      this.error('❌ Synchronization preconditions failed.', error);
+      this.error('Synchronization preconditions failed.', error);
+      this.reporter.preconditionsFailed({ error });
     } finally {
       if (!this.hasErrors) clearCache();
       if (advisoryLock?.acquired) await advisoryLock.release();
       if (this.context.db && typeof this.context.db.end === 'function') {
         await this.context.db.end();
       }
-      this.log(`\n🏁 Sync finished ${this.hasErrors ? 'with errors' : 'successfully'}.`);
+
+      const totalDurationMs = Date.now() - startedAt;
+      if (this.hasErrors) {
+        this.reporter.runFailed({
+          completedSteps: completedStepsCount,
+          failedStepId: failedStep ? failedStep.id : 'preconditions',
+          remainingSteps: failedStep
+            ? this.steps.length - completedStepsCount - 1
+            : this.steps.length,
+          warningsCount: totalWarningsCount,
+          durationMs: totalDurationMs,
+        });
+        this.logs.push({
+          type: 'info',
+          message: 'Sync finished with errors.',
+          timestamp: new Date(),
+        });
+      } else {
+        this.reporter.runCompleted({
+          mode: this.mode,
+          totalSteps: this.steps.length,
+          succeededSteps: completedStepsCount,
+          warningsCount: totalWarningsCount,
+          durationMs: totalDurationMs,
+          seasonId: this.context.seasonId,
+        });
+        this.logs.push({
+          type: 'info',
+          message: 'Sync finished successfully.',
+          timestamp: new Date(),
+        });
+      }
     }
   }
 }

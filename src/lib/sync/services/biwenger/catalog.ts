@@ -172,7 +172,7 @@ export async function syncBiwengerCatalog(
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('Canonical sync season was not resolved before catalogue import.');
 
-  manager.log('\n📥 Fetching Players Database...');
+  manager.log('Fetching players database');
   const competition = await deps.fetchAllPlayers();
   const snapshot = manager.setBiwengerCompetition(competition);
   const playersList = snapshot.players;
@@ -183,7 +183,7 @@ export async function syncBiwengerCatalog(
   const firstRoundGames = firstRoundResponse?.data?.games || firstRoundResponse?.games || [];
   const readiness = validateBiwengerRoundSeason({ seasonId, games: firstRoundGames });
   manager.log(
-    `   ✅ Biwenger season readiness: ${readiness.datedGames}/${readiness.games} first-round games belong to ${readiness.seasonYear}.`
+    `Biwenger season readiness: ${readiness.datedGames}/${readiness.games} first-round games belong to ${readiness.seasonYear}`
   );
 
   manager.log(
@@ -196,12 +196,10 @@ export async function syncBiwengerCatalog(
 
   const existingSeasonPlayerMap = await getExistingPlayerSeasonMap(seasonId, db);
   const existingPlayerIds = await getExistingPlayerIdentities(db);
-  manager.log(`   ℹ️ Found ${existingPlayerIds.size} existing player identities in DB.`);
-  manager.log(
-    `   ℹ️ Found ${existingSeasonPlayerMap.size} existing player season rows for ${seasonId}.`
-  );
+  manager.log(`Found ${existingPlayerIds.size} existing player identities in DB`);
+  manager.log(`Found ${existingSeasonPlayerMap.size} existing player season rows for ${seasonId}`);
 
-  manager.log('Syncing Teams...');
+  manager.log('Syncing teams');
   for (const [teamId, teamData] of Object.entries(teams) as any[]) {
     await mutations.upsertTeam({
       id: parseInt(teamId, 10),
@@ -290,10 +288,8 @@ export async function syncBiwengerCatalog(
     }
   }
 
-  manager.log(`   ✨ New Players Detected: ${newPlayersCount} (Fetched full details)`);
-  manager.log(
-    `   ⏩ Existing Players: ${skippedDetailsCount} (Skipped details fetch, updated price)`
-  );
+  manager.log(`New players detected: ${newPlayersCount} (fetched full details)`);
+  manager.log(`Existing players: ${skippedDetailsCount} (skipped details fetch, updated price)`);
 
   return {
     summary: 'Biwenger player and team catalogue synchronized.',

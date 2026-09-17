@@ -195,12 +195,10 @@ export async function syncBiwengerBoard(
   const playersList = snapshot.players;
   const teams = snapshot.teams;
 
-  manager.log('\n📥 Fetching Full Board History...');
-
   const mutations = prepareMarketMutations(db as any, { seasonId });
   const validUserNames = await getSeasonActiveUserNames(seasonId, db);
 
-  manager.log('Fetching full board history...');
+  manager.log('Fetching full board history');
   let offset = 0;
   const limit = 50;
   let moreTransfers = true;
@@ -230,7 +228,7 @@ export async function syncBiwengerBoard(
   };
 
   while (moreTransfers) {
-    manager.log(`Fetching batch (offset: ${offset})...`);
+    manager.log(`Fetching batch (offset: ${offset})`);
     const response = await dependencies.fetch(
       CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(leagueId, offset, limit),
       { skipVersionCheck: true }
@@ -293,7 +291,7 @@ export async function syncBiwengerBoard(
     }
 
     if (reachedCutoff && manager.mode === 'routine') {
-      manager.log('   🛑 Reached the routine seven-day cutoff. Stopping history fetch.');
+      manager.log('Reached routine 7-day cutoff; stopping history fetch');
       moreTransfers = false;
     } else if (items.length < limit) {
       moreTransfers = false;
@@ -304,13 +302,13 @@ export async function syncBiwengerBoard(
 
   if (transfersWithMissingPlayer > 0) {
     manager.log(
-      `   ⚠️ Inserted ${transfersWithMissingPlayer} transfers with players missing from playersList.`
+      `Inserted ${transfersWithMissingPlayer} transfers with players missing from playersList`
     );
   }
 
   if (skippedInvalidActorTransfers > 0) {
     manager.log(
-      `   🧹 Skipped ${skippedInvalidActorTransfers} transfers involving actors outside users/market.`
+      `Skipped ${skippedInvalidActorTransfers} transfers involving actors outside users/market`
     );
   }
 
