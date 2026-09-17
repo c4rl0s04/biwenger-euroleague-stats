@@ -43,19 +43,7 @@ export async function fetchMarketOpportunities(limit: number = 6) {
  * Get full market data for market page
  * @returns Complete market data
  */
-export async function getMarketPageData() {
-  const [kpis, transfers, trends] = await Promise.all([
-    getMarketKPIs(),
-    getAllTransfers(),
-    getMarketTrends(),
-  ]);
-
-  return {
-    kpis,
-    transfers,
-    trends,
-  };
-}
+export { getMarketPageData } from '@/features/market/server';
 
 export interface MarketActivityOptions {
   limit?: number;
