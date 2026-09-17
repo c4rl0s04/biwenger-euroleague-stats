@@ -64,7 +64,19 @@ async function freezeSeason(pool: pg.Pool) {
 
 async function createNextSeason(pool: pg.Pool) {
   const configuredSeason = validateSeasonConfig({ requireToken: false });
-  const seasonId = configuredSeason.ID;
+  const seasonId =
+    process.env.NEXT_SEASON_ID?.trim() || process.env.SEASON_ID?.trim() || configuredSeason.ID;
+  const seasonName =
+    process.env.NEXT_SEASON_NAME?.trim() ||
+    process.env.SEASON_NAME?.trim() ||
+    configuredSeason.NAME;
+  const euroleagueCode =
+    process.env.EUROLEAGUE_SEASON_CODE?.trim() || configuredSeason.EUROLEAGUE_CODE;
+  const startDate = process.env.LEAGUE_START_DATE?.trim() || configuredSeason.START_DATE;
+  const endDate = process.env.SEASON_END_DATE?.trim() || null;
+  const sourceLeagueId =
+    process.env.BIWENGER_LEAGUE_ID?.trim() || configuredSeason.BIWENGER_LEAGUE_ID;
+
   requireBackupConfirmation();
   await assertNoSyncRunning(pool);
 
@@ -121,11 +133,11 @@ async function createNextSeason(pool: pg.Pool) {
     `,
       [
         seasonId,
-        configuredSeason.NAME,
-        configuredSeason.EUROLEAGUE_CODE,
-        configuredSeason.START_DATE,
-        configuredSeason.END_DATE || null,
-        configuredSeason.LEAGUE_ID,
+        seasonName,
+        euroleagueCode,
+        startDate,
+        endDate,
+        sourceLeagueId,
         'Provisioned via db:season:create-next',
       ]
     );

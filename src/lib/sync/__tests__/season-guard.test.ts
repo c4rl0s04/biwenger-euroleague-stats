@@ -3,12 +3,9 @@ import { assertSyncSeasonWritable } from '../season-guard';
 
 describe('sync season guard', () => {
   function configureSeason() {
-    process.env.SEASON_ID = '2026-27';
     process.env.BIWENGER_TOKEN = 'token';
-    process.env.BIWENGER_LEAGUE_ID = '456';
     process.env.BIWENGER_USER_ID = '789';
-    process.env.EUROLEAGUE_SEASON_CODE = 'E2026';
-    process.env.LEAGUE_START_DATE = '2026-09-01';
+    process.env.DATABASE_URL = 'postgres://localhost:5432/biwengerstats';
   }
 
   afterEach(() => {
@@ -18,12 +15,13 @@ describe('sync season guard', () => {
     delete process.env.BIWENGER_USER_ID;
     delete process.env.EUROLEAGUE_SEASON_CODE;
     delete process.env.LEAGUE_START_DATE;
+    delete process.env.DATABASE_URL;
     delete process.env.SEASON_AWARE_READS_CONFIRMED;
     delete process.env.ALLOW_SYNC_ON_FROZEN_SEASON;
     vi.unstubAllEnvs();
   });
 
-  it('requires complete canonical season configuration', async () => {
+  it('requires complete credentials and database configuration', async () => {
     const db = { query: vi.fn() };
 
     await expect(assertSyncSeasonWritable(db)).rejects.toMatchObject({
@@ -45,7 +43,7 @@ describe('sync season guard', () => {
     });
   });
 
-  it('allows exactly the configured active season', async () => {
+  it('allows active season resolved from database without SEASON_ID in env', async () => {
     configureSeason();
     const db = {
       query: vi.fn(async () => ({
@@ -64,7 +62,7 @@ describe('sync season guard', () => {
   });
 
   it('dynamically resolves active season when explicit season id is omitted', async () => {
-    delete process.env.SEASON_ID;
+    configureSeason();
     const db = {
       query: vi.fn(async () => ({
         rows: [
@@ -79,7 +77,7 @@ describe('sync season guard', () => {
       })),
     };
 
-    await expect(assertSyncSeasonWritable(db, { skipEnvValidation: true })).resolves.toEqual({
+    await expect(assertSyncSeasonWritable(db)).resolves.toEqual({
       seasonId: '2026-27',
       status: 'active',
       sourceLeagueId: '456',
@@ -89,9 +87,10 @@ describe('sync season guard', () => {
 
   it('rejects a configured league that does not match the season binding', async () => {
     configureSeason();
+    process.env.BIWENGER_LEAGUE_ID = '999';
     const db = {
       query: vi.fn(async () => ({
-        rows: [{ id: '2026-27', status: 'active', source_league_id: 'old-league' }],
+        rows: [{ id: '2026-27', status: 'active', source_league_id: '456' }],
       })),
     };
 
@@ -117,7 +116,7 @@ describe('sync season guard', () => {
   });
 
   it('fails closed when a future season has no EuroLeague provider code', async () => {
-    delete process.env.SEASON_ID;
+    configureSeason();
     const db = {
       query: vi.fn(async () => ({
         rows: [
@@ -132,7 +131,7 @@ describe('sync season guard', () => {
       })),
     };
 
-    await expect(assertSyncSeasonWritable(db, { skipEnvValidation: true })).rejects.toMatchObject({
+    await expect(assertSyncSeasonWritable(db)).rejects.toMatchObject({
       code: 'SEASON_EUROLEAGUE_CODE_MISSING',
     });
   });

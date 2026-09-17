@@ -23,18 +23,44 @@ describe('canonical season configuration', () => {
     });
   });
 
-  it('rejects incomplete configuration before a mutating sync', () => {
-    expect(() => validateSeasonConfig({}, { SEASON_ID: '2026-27' })).toThrow(
-      /BIWENGER_LEAGUE_ID is required/
-    );
-  });
-
-  it('rejects stale or malformed season codes and dates', () => {
+  it('requires credentials and database configuration', () => {
+    expect(() => validateSeasonConfig({}, {})).toThrow(/BIWENGER_TOKEN is required/);
     expect(() =>
       validateSeasonConfig(
         {},
-        { ...validEnv, EUROLEAGUE_SEASON_CODE: '2025', LEAGUE_START_DATE: 'September' }
+        { BIWENGER_TOKEN: 'token', DATABASE_URL: 'postgres://localhost:5432/db' }
       )
-    ).toThrow(/EUROLEAGUE_SEASON_CODE must use EYYYY format/);
+    ).toThrow(/BIWENGER_USER_ID is required/);
+    expect(() =>
+      validateSeasonConfig({}, { BIWENGER_TOKEN: 'token', BIWENGER_USER_ID: '123' })
+    ).toThrow(/DATABASE_URL is required/);
+  });
+
+  it('succeeds with credentials and database without requiring season in env', () => {
+    const credentialsEnv = {
+      BIWENGER_TOKEN: 'token',
+      BIWENGER_USER_ID: '456',
+      DATABASE_URL: 'postgres://localhost:5432/db',
+    };
+    expect(() => validateSeasonConfig({}, credentialsEnv)).not.toThrow();
+  });
+
+  it('rejects stale or malformed optional season codes and dates if provided', () => {
+    const baseEnv = {
+      BIWENGER_TOKEN: 'token',
+      BIWENGER_USER_ID: '456',
+      DATABASE_URL: 'postgres://localhost:5432/db',
+    };
+    expect(() => validateSeasonConfig({}, { ...baseEnv, EUROLEAGUE_SEASON_CODE: '2025' })).toThrow(
+      /EUROLEAGUE_SEASON_CODE must use EYYYY format/
+    );
+
+    expect(() => validateSeasonConfig({}, { ...baseEnv, SEASON_ID: '2026-2027' })).toThrow(
+      /SEASON_ID must use YYYY-YY format/
+    );
+
+    expect(() => validateSeasonConfig({}, { ...baseEnv, LEAGUE_START_DATE: 'September' })).toThrow(
+      /LEAGUE_START_DATE must use YYYY-MM-DD format/
+    );
   });
 });

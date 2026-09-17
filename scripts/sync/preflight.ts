@@ -33,19 +33,26 @@ async function main() {
         (SELECT COUNT(*) FROM market_values WHERE season_id = $1)::text AS market_values,
         (SELECT COUNT(*) FROM player_seasons WHERE season_id = $1 AND owner_id IS NOT NULL)::text AS ownerships
     `,
-      [season.ID]
+      [writable.seasonId]
     );
 
     console.log('Sync Preflight');
     console.log(DIVIDER);
-    console.log(`Season              ${season.ID} (${writable.status})`);
+    console.log(`Season              ${writable.seasonId} (${writable.status})`);
     console.log(`Biwenger league     ${writable.sourceLeagueId}`);
-    console.log(`EuroLeague code     ${season.EUROLEAGUE_CODE}`);
-    console.log(`League start        ${season.START_DATE}`);
+    console.log(`EuroLeague code     ${writable.euroleagueCode}`);
+    if (season.START_DATE) {
+      console.log(`League start        ${season.START_DATE}`);
+    }
 
     console.log('\nExisting season rows:');
     for (const line of formatMetrics(counts.rows[0])) {
       console.log(line);
+    }
+
+    const { CONFIG } = await import('../../src/lib/config.js');
+    if (!CONFIG.API.LEAGUE_ID && writable.sourceLeagueId) {
+      CONFIG.API.LEAGUE_ID = writable.sourceLeagueId;
     }
 
     if (skipProviderProbes) {

@@ -150,6 +150,12 @@ export class SyncManager {
       const season = await assertSyncSeasonWritable(pool, this.targetSeasonId);
       this.context.season = season;
       this.context.seasonId = season.seasonId;
+
+      const { CONFIG } = await import('../config');
+      if (!CONFIG.API.LEAGUE_ID && season.sourceLeagueId) {
+        CONFIG.API.LEAGUE_ID = season.sourceLeagueId;
+      }
+
       this.reporter.seasonResolved({
         seasonId: season.seasonId,
         status: season.status,

@@ -37,56 +37,86 @@ export class SeasonConfigError extends Error {
 export function validateSeasonConfig(options = {}, env = process.env) {
   const {
     requireBiwenger = true,
-    requireEuroleague = true,
-    requireStartDate = true,
     requireToken = true,
+    requireDatabase = true,
+    requireSeason = false,
+    requireEuroleague = false,
+    requireStartDate = false,
   } = options;
   const season = getSeasonConfig(env);
   const errors = [];
 
-  if (!env.SEASON_ID?.trim()) errors.push('SEASON_ID is required');
-  if (!/^\d{4}-\d{2}$/.test(season.ID)) errors.push('SEASON_ID must use YYYY-YY format');
-  if (/^\d{4}-\d{2}$/.test(season.ID)) {
-    const startYear = Number(season.ID.slice(0, 4));
-    const expectedEnd = String(startYear + 1).slice(-2);
-    if (season.ID.slice(-2) !== expectedEnd) {
-      errors.push(`SEASON_ID must end in ${expectedEnd} for start year ${startYear}`);
-    }
+  if (requireToken && !env.BIWENGER_TOKEN?.trim()) {
+    errors.push('BIWENGER_TOKEN is required');
   }
 
   if (requireBiwenger) {
-    if (!season.BIWENGER_LEAGUE_ID) errors.push('BIWENGER_LEAGUE_ID is required');
-    if (!season.BIWENGER_USER_ID) errors.push('BIWENGER_USER_ID is required');
+    if (!season.BIWENGER_USER_ID) {
+      errors.push('BIWENGER_USER_ID is required');
+    } else if (!/^\d+$/.test(season.BIWENGER_USER_ID)) {
+      errors.push('BIWENGER_USER_ID must be numeric');
+    }
     if (season.BIWENGER_LEAGUE_ID && !/^\d+$/.test(season.BIWENGER_LEAGUE_ID)) {
       errors.push('BIWENGER_LEAGUE_ID must be numeric');
     }
-    if (season.BIWENGER_USER_ID && !/^\d+$/.test(season.BIWENGER_USER_ID)) {
-      errors.push('BIWENGER_USER_ID must be numeric');
+  }
+
+  const isDbSkipped = env.SKIP_DB === 'true' || Boolean(CONFIG?.DB?.SKIP);
+  const hasDbConfig =
+    isDbSkipped ||
+    Boolean(env.DATABASE_URL?.trim()) ||
+    Boolean(env.POSTGRES_URL?.trim()) ||
+    Boolean(env.POSTGRES_HOST?.trim());
+
+  if (requireDatabase && !hasDbConfig) {
+    errors.push('DATABASE_URL is required');
+  }
+
+  if (requireSeason && !env.SEASON_ID?.trim()) {
+    errors.push('SEASON_ID is required');
+  }
+
+  if (env.SEASON_ID?.trim()) {
+    if (!/^\d{4}-\d{2}$/.test(season.ID)) {
+      errors.push('SEASON_ID must use YYYY-YY format');
+    } else {
+      const startYear = Number(season.ID.slice(0, 4));
+      const expectedEnd = String(startYear + 1).slice(-2);
+      if (season.ID.slice(-2) !== expectedEnd) {
+        errors.push(`SEASON_ID must end in ${expectedEnd} for start year ${startYear}`);
+      }
     }
   }
 
-  if (requireToken && !env.BIWENGER_TOKEN?.trim()) errors.push('BIWENGER_TOKEN is required');
-
-  if (requireEuroleague && !/^E\d{4}$/.test(season.EUROLEAGUE_CODE || '')) {
-    errors.push('EUROLEAGUE_SEASON_CODE must use EYYYY format');
+  if (requireEuroleague && !env.EUROLEAGUE_SEASON_CODE?.trim()) {
+    errors.push('EUROLEAGUE_SEASON_CODE is required');
   }
 
-  const seasonStartYear = season.ID.slice(0, 4);
-  if (
-    requireEuroleague &&
-    /^E\d{4}$/.test(season.EUROLEAGUE_CODE || '') &&
-    season.EUROLEAGUE_CODE !== `E${seasonStartYear}`
-  ) {
-    errors.push('EUROLEAGUE_SEASON_CODE must match the SEASON_ID start year');
+  if (season.EUROLEAGUE_CODE) {
+    if (!/^E\d{4}$/.test(season.EUROLEAGUE_CODE)) {
+      errors.push('EUROLEAGUE_SEASON_CODE must use EYYYY format');
+    } else if (env.SEASON_ID?.trim()) {
+      const seasonStartYear = season.ID.slice(0, 4);
+      if (season.EUROLEAGUE_CODE !== `E${seasonStartYear}`) {
+        errors.push('EUROLEAGUE_SEASON_CODE must match the SEASON_ID start year');
+      }
+    }
   }
 
-  if (requireStartDate) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(season.START_DATE || '')) {
+  if (requireStartDate && !env.LEAGUE_START_DATE?.trim()) {
+    errors.push('LEAGUE_START_DATE is required');
+  }
+
+  if (season.START_DATE) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(season.START_DATE)) {
       errors.push('LEAGUE_START_DATE must use YYYY-MM-DD format');
     } else if (Number.isNaN(Date.parse(`${season.START_DATE}T00:00:00Z`))) {
       errors.push('LEAGUE_START_DATE must be a valid date');
-    } else if (!season.START_DATE.startsWith(`${seasonStartYear}-`)) {
-      errors.push('LEAGUE_START_DATE must fall in the SEASON_ID start year');
+    } else if (env.SEASON_ID?.trim()) {
+      const seasonStartYear = season.ID.slice(0, 4);
+      if (!season.START_DATE.startsWith(`${seasonStartYear}-`)) {
+        errors.push('LEAGUE_START_DATE must fall in the SEASON_ID start year');
+      }
     }
   }
 
@@ -198,7 +228,5 @@ export const CONFIG = {
 // Validate required config in Server Environment
 if (typeof window === 'undefined') {
   if (!CONFIG.API.TOKEN) console.warn('⚠️ BIWENGER_TOKEN is missing in environment variables');
-  if (!CONFIG.API.LEAGUE_ID)
-    console.warn('⚠️ BIWENGER_LEAGUE_ID is missing in environment variables');
   if (!CONFIG.API.USER_ID) console.warn('⚠️ BIWENGER_USER_ID is missing in environment variables');
 }
