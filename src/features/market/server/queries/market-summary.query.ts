@@ -65,7 +65,7 @@ export async function readRecordTransfer(): Promise<EnrichedTransferRecord[]> {
     LEFT JOIN user_seasons usb ON f.comprador = usb.name AND usb.season_id = f.season_id
     LEFT JOIN user_seasons uss ON f.vendedor = uss.name AND uss.season_id = f.season_id
     WHERE f.season_id = $1
-    ORDER BY f.precio DESC, f.timestamp DESC NULLS LAST, f.id DESC
+    ORDER BY f.precio DESC
   `;
   return (await pgClient.query(query, [seasonId])).rows;
 }

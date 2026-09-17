@@ -2,3 +2,8 @@
 .maplibregl-canvas {
   display: none !important;
 }
+
+/* Rolling calendar dates shift daily; chart curves, grids and axes remain asserted. */
+.recharts-xAxis text {
+  visibility: hidden !important;
+}

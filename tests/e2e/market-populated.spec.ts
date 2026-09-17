@@ -21,7 +21,7 @@ test('populated Market preserves listings, history and ranking interaction', asy
   const stats = (await response.json()).data;
   expect(stats.currentMarketListings).toHaveLength(3);
   // The existing ranking includes purchases from Mercado as well as manager-to-manager sales.
-  expect(stats.recordTransfer).toHaveLength(5);
+  expect(stats.recordTransfer).toHaveLength(8);
   expect(stats.bestFlip.length).toBeGreaterThan(0);
   expect(stats.worstFlip.length).toBeGreaterThan(0);
   expect(stats.biddingDuels.users).toHaveLength(2);
@@ -130,7 +130,7 @@ test('populated Market preserves listings, history and ranking interaction', asy
     await expect(
       drawer.getByRole('heading', { name: 'Récord de Traspasos', exact: true })
     ).toBeVisible();
-    await expect(drawer.getByText('Fixture Market Wing', { exact: true })).toHaveCount(2);
+    await expect(drawer.getByText('Fixture Market Wing', { exact: true })).toHaveCount(4);
     await expect(drawer.getByText('Fixture Market Wing', { exact: true }).first()).toBeVisible();
     await capture('market-populated-transfer-ranking', drawer);
     const transferRows = await drawer.locator('h4').count();
@@ -200,5 +200,43 @@ test('populated Market preserves listings, history and ranking interaction', asy
     await expect(reverseCell).toHaveAttribute('aria-pressed', 'true');
     await expect(detail.locator('a[href^="/players/"]')).toHaveCount(4);
     await page.getByRole('button', { name: 'Cerrar detalle', exact: true }).click();
+
+    // 5. Populated trends chart verification on desktop
+    const trendsSection = page.locator('#tendencias-y-analisis');
+    await expect(trendsSection).toBeVisible();
+    await trendsSection.evaluate((el) =>
+      el.scrollIntoView({ block: 'center', behavior: 'instant' })
+    );
+
+    // Default period is 1M (30 days)
+    const trends30Response = await page.request.get('/api/market/trends?days=30');
+    expect(trends30Response.status()).toBe(200);
+    const trends30Data = (await trends30Response.json()).data;
+    expect(trends30Data.length).toBeGreaterThan(0);
+
+    await expect(trendsSection.getByText('No hay datos para este periodo.')).toHaveCount(0);
+    await expect(trendsSection.getByText('0.9M €')).toBeVisible();
+
+    // Switch period to 3M (90 days) and observe real API response
+    const responsePromise90 = page.waitForResponse(
+      (res) => res.url().includes('/api/market/trends?days=90') && res.status() === 200
+    );
+    await trendsSection.getByRole('button', { name: '3M', exact: true }).click();
+    const response90 = await responsePromise90;
+    expect(response90.status()).toBe(200);
+    const response90Json = await response90.json();
+    expect(response90Json.data.length).toBeGreaterThan(0);
+    await expect(trendsSection.getByText('1.5M €')).toBeVisible();
+
+    // Hover over chart surface to assert tooltip renders known fixture content
+    const chartCard = trendsSection.locator('.stat-card').filter({ hasText: 'Volumen de Mercado' });
+    const chartArea = chartCard.locator('.recharts-responsive-container');
+    await expect(chartArea).toBeVisible();
+    await chartCard.locator('.recharts-surface').hover({ position: { x: 150, y: 100 } });
+    await expect(trendsSection.getByText(/Fixture Market (Wing|Center)/)).toBeVisible();
+
+    // Reset pointer and capture stable populated chart reference
+    await page.mouse.move(0, 0);
+    await capture('market-populated-trends-chart', chartCard);
   }
 });
