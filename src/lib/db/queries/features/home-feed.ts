@@ -4,7 +4,7 @@ import type { HomeFeedCursor } from '@/lib/home/cursor';
 import type { HomeActivityFilter } from '@/lib/home/contracts';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { pool as pgClient } from '@/lib/db/client';
-import { PREDICTION_NORMALIZATION_CTES } from './prediction-normalization-sql';
+import { PREDICTION_NORMALIZATION_CTES } from '@/features/predictions/server';
 
 export type HomeActivityRowType =
   | 'transfer_day'
