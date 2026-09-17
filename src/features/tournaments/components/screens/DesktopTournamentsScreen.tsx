@@ -1,26 +1,26 @@
 import { Section } from '@/components/layout';
 import { PageHeader } from '@/components/ui';
-import { getAllTournaments } from '@/lib/services/tournamentService';
-import { getGlobalTournamentStats } from '@/lib/services/statsService';
 import {
   ActiveTournamentsSection,
   HallOfFame,
   TournamentHistoryTable,
   RecordsSection,
-} from '@/components/tournaments';
-import MobileTournamentsScreen from '@/components/mobile/screens/MobileTournamentsScreen';
-import { isPhonePresentation } from '@/lib/mobile/presentation-server';
+} from '../index';
+import type { DesktopTournamentCatalogueItem } from '../../models/tournament-catalogue';
+import type { GlobalTournamentStatistics } from '../../models/tournament-statistics';
 
-export default async function TournamentsPage() {
-  const [tournamentsData, phone] = await Promise.all([getAllTournaments(), isPhonePresentation()]);
-  const { active, finished } = tournamentsData;
+interface DesktopTournamentsScreenProps {
+  active: DesktopTournamentCatalogueItem[];
+  finished: DesktopTournamentCatalogueItem[];
+  statistics: GlobalTournamentStatistics;
+}
 
-  if (phone) {
-    return <MobileTournamentsScreen active={active} finished={finished} />;
-  }
-
-  const { hallOfFame, globalStats, leagueStats, records } = await getGlobalTournamentStats();
-
+export default function DesktopTournamentsScreen({
+  active,
+  finished,
+  statistics,
+}: DesktopTournamentsScreenProps) {
+  const { hallOfFame, globalStats, records } = statistics;
   return (
     <div>
       {/* Header Section */}

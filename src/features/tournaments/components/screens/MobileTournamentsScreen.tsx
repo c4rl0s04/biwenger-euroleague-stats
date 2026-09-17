@@ -7,17 +7,11 @@ import {
   MobileScreen,
   MobileScreenHeader,
   MobileSectionHeading,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type Tournament = Record<string, any>;
+import type { TournamentCatalogue } from '../../models/tournament-catalogue';
 
-export default function MobileTournamentsScreen({
-  active,
-  finished,
-}: {
-  active: Tournament[];
-  finished: Tournament[];
-}) {
+export default function MobileTournamentsScreen({ active, finished }: TournamentCatalogue) {
   return (
     <MobileScreen labelledBy="mobile-screen-title">
       <MobileScreenHeader
@@ -52,11 +46,7 @@ export default function MobileTournamentsScreen({
             href={`/tournaments/${tournament.id}`}
             leading={<Medal size={20} aria-hidden="true" />}
             title={tournament.name}
-            subtitle={
-              tournament.data?.winner?.name
-                ? `Campeón: ${tournament.data.winner.name}`
-                : 'Finalizado'
-            }
+            subtitle={tournament.winnerLabel}
           />
         ))}
       </div>

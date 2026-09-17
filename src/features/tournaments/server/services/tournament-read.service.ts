@@ -1,5 +1,31 @@
 import 'server-only';
 
+export { mapTournamentDesktopDetail as getTournamentDesktopDetailPresentation } from '../mappers/tournament-detail.mapper';
+
+import { mapTournamentBracket } from '../mappers/tournament-bracket.mapper';
+import type { Tournament, TournamentFixture } from '../../models/tournaments';
+
+export function getTournamentBracketPresentation(
+  tournament: Tournament,
+  fixtures: TournamentFixture[]
+) {
+  // League and phone screens never ran the bracket calculation.
+  if (tournament.type === 'league') return [];
+  return mapTournamentBracket(
+    tournament.data,
+    fixtures,
+    mapTournamentPlayoffRules(tournament.data)
+  );
+}
+
+export { mapDesktopTournamentCatalogue as getDesktopTournamentCataloguePresentation } from '../mappers/tournament-catalogue.mapper';
+
+export { mapTournamentPhoneDetail as getTournamentPhoneDetailPresentation } from '../mappers/tournament-detail.mapper';
+
+export { mapTournamentCatalogue as getTournamentCataloguePresentation } from '../mappers/tournament-catalogue.mapper';
+
+import { mapTournamentPlayoffRules } from '../mappers/tournament-playoff-rules.mapper';
+
 import { tournamentId, fixtureTournamentId } from '../../validation/tournament-input';
 import {
   mapTournament,

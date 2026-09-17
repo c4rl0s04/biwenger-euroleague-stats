@@ -3,7 +3,6 @@ export { db, pool, pool as pgClient } from './client';
 
 // --- Domain query exports remain for backward compatibility until feature architecture migration is completed ---
 
-export * from './queries/tournaments';
 export * from './queries/core/users';
 
 export * from './queries/core/playerForm';

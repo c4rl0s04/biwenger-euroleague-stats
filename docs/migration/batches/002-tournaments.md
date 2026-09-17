@@ -1,16 +1,17 @@
 ---
 title: Batch 002 — Tournament analytics and screens
-description: Blocked planning placeholder requiring a source-backed assignment before execution.
+description: Historical worker placeholder superseded by the completed coordinator-led C02 read slice.
 audience:
   - agent
   - maintainer
-status: draft
+status: active
 ---
 
 # Tournament analytics and screens
 
-**DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
-Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
+**INTEGRATED — do not dispatch a duplicate migration.** The Tournaments read slice is completed
+and integrated via PR #35. See the [C02 implementation and acceptance receipt](../reports/c02-tournament-reads.md).
+The following notes preserve the original worker-planning context.
 
 - Intended scope: Finish the existing Tournament list/detail/phone composition and remaining read analytics; reuse already migrated core/participation services.
 - Required discovery: Inspect actual tournament routes, legacy analytics, JSON phase compatibility and external Manager Profile consumers. Do not rewrite historical phase semantics.

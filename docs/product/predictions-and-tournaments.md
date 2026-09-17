@@ -24,10 +24,13 @@ status: active
 
 - Pages: [`predictions`](<../../src/app/(app)/predictions>), [`playoffs`](<../../src/app/(app)/playoffs>),
   and [`tournaments`](<../../src/app/(app)/tournaments>).
-- UI: corresponding folders under [`src/components`](../../src/components).
-- Services: `predictionsService`, `playoffService`, `tournamentService`, and `statsService` under
-  [`src/lib/services`](../../src/lib/services).
-- Data: feature queries and tournament queries/mutations under [`src/lib/db`](../../src/lib/db).
+- Tournament reads and UI: [`Tournament feature`](../../src/features/tournaments), with thin page
+  adapters. Snapshot projection and final acceptance progress is recorded in the
+  [C02 receipt](../migration/reports/c02-tournament-reads.md).
+- Predictions/Playoffs UI remains under [`src/components`](../../src/components); their legacy
+  services remain under [`src/lib/services`](../../src/lib/services).
+- Data: Tournament-owned read queries; remaining legacy queries and mutations under
+  [`src/lib/db`](../../src/lib/db).
 - Sync: `biwenger-board` and `biwenger-tournaments`, plus the separate playoff command and
   [`playoff-data.json`](../../src/lib/sync/playoffs/playoff-data.json).
 

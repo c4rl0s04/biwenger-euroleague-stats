@@ -1,5 +1,6 @@
 import TournamentRow from './TournamentRow';
 
+/** @param {{ tournaments: import('../models/tournament-catalogue').DesktopTournamentCatalogueItem[] }} props */
 export default function ActiveTournamentsSection({ tournaments }) {
   if (!tournaments || tournaments.length === 0) {
     return (

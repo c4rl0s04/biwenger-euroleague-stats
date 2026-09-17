@@ -1,6 +1,7 @@
 import { Brackets, ListChecks, Trophy } from 'lucide-react';
+import type { TournamentStanding, TournamentFixture } from '../../models/tournaments';
 
-import MobileRecordList from '../MobileRecordList';
+import MobileRecordList from '@/components/mobile/MobileRecordList';
 import {
   MobileBackHeader,
   MobileMetric,
@@ -8,20 +9,20 @@ import {
   MobileScreen,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type RecordValue = Record<string, any>;
+import type { TournamentPhoneDetail } from '../../models/tournament-detail';
 
 export default function MobileTournamentDetailScreen({
   tournament,
   standings,
   fixtures,
 }: {
-  tournament: RecordValue;
-  standings: RecordValue[];
-  fixtures: RecordValue[];
+  tournament: TournamentPhoneDetail;
+  standings: TournamentStanding[];
+  fixtures: TournamentFixture[];
 }) {
-  const winner = tournament.data?.winner;
+  const winner = tournament.winner;
   return (
     <MobileScreen labelledBy="mobile-screen-title">
       <MobileBackHeader title={tournament.name} context="Torneo" backHref="/tournaments" />

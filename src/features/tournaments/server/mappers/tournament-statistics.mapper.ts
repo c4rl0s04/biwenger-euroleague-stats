@@ -1,79 +1,79 @@
-import 'server-only';
+import type {
+  Tournament,
+  TournamentFixture,
+  TournamentStanding,
+  TournamentJson,
+} from '../../models/tournaments';
+import { snapshotProperty, tournamentDisplayText } from './tournament-display';
+import type {
+  HallOfFameEntry,
+  GlobalUserStats,
+  GlobalTournamentStatistics,
+  TournamentStatisticsManager,
+} from '../../models/tournament-statistics';
 
-import { getAllTournaments } from './tournamentService';
-import { getTournamentFixtures, getTournamentStandings } from '../db';
-
-export interface HallOfFameEntry {
-  id: number;
-  name: string;
-  icon: string;
-  colorIndex: number;
-  titles: number;
-  tournaments: string[];
+function snapshotWinner(t: Tournament & { winner?: TournamentJson }): TournamentJson {
+  return (
+    snapshotProperty(t.data, 'winner') || (t.status === 'finished' && t.winner ? t.winner : null)
+  );
 }
 
-export interface GlobalUserStats {
-  id: number;
-  name: string;
-  icon: string;
-  colorIndex: number;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  gf: number;
-  ga: number;
-  points: number;
-  form: string[];
-  currentStreak: number;
-  longestStreak: number;
-  signedStreak: number;
-  scored?: number; // Used in league stats
-  against?: number; // Used in league stats
+function winnerIcon(value: TournamentJson | undefined): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (!value) return null;
+  if (typeof value !== 'string') throw new TypeError('Tournament winner icon is not a string');
+  return value;
 }
 
-/**
- * Calculates global statistics for the tournaments page.
- * Aggregates data from all tournaments, fixtures, and standings.
- */
-export async function getGlobalTournamentStats() {
-  const [tournamentsData, fixtures, standings] = await Promise.all([
-    getAllTournaments(),
-    getTournamentFixtures(null),
-    getTournamentStandings(null),
-  ]);
+function winnerColor(value: TournamentJson): number {
+  // Match the numeric coercion used by the existing palette modulo operation.
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw new TypeError('Tournament winner color is not finite');
+  return number;
+}
 
-  const { all: allTournaments } = tournamentsData;
-
+export function mapGlobalTournamentStatistics(
+  allTournaments: Tournament[],
+  fixtures: TournamentFixture[],
+  standings: TournamentStanding[]
+): GlobalTournamentStatistics {
   // 1. Hall of Fame (Most Titles)
-  const hallOfFame: Record<number, HallOfFameEntry> = {};
+  const hallOfFame: Record<string, HallOfFameEntry> = {};
 
   // Build a map of user colors from the latest standings data (which joins with users table)
   const managerColorMap: Record<string, number> = {};
-  standings.forEach((s: any) => {
+  standings.forEach((s) => {
     if (s.user_id && s.user_color !== null && s.user_color !== undefined) {
       managerColorMap[s.user_id] = s.user_color;
     }
   });
 
-  allTournaments.forEach((t: any) => {
+  allTournaments.forEach((t) => {
     // Check both potential winner locations
-    const winner = t.data?.winner || (t.status === 'finished' && t.winner ? t.winner : null);
+    const winner = snapshotWinner(t);
+    const rawId = snapshotProperty(winner, 'id');
 
-    if (winner && winner.id) {
-      if (!hallOfFame[winner.id]) {
-        hallOfFame[winner.id] = {
-          id: winner.id,
-          name: winner.name,
-          icon: winner.icon,
+    if (winner && rawId) {
+      const id = typeof rawId === 'string' || typeof rawId === 'number' ? rawId : String(rawId);
+      if (!hallOfFame[id]) {
+        const name = snapshotProperty(winner, 'name');
+        hallOfFame[id] = {
+          id,
+          href: `/user/${rawId}`,
+          name: name === undefined ? undefined : tournamentDisplayText(name),
+          icon: winnerIcon(snapshotProperty(winner, 'icon')),
           // Use map color if available, otherwise snapshot, fallback to 0
-          colorIndex: managerColorMap[winner.id] ?? (winner.colorIndex || winner.color_index || 0),
+          colorIndex:
+            managerColorMap[id] ??
+            winnerColor(
+              snapshotProperty(winner, 'colorIndex') || snapshotProperty(winner, 'color_index') || 0
+            ),
           titles: 0,
           tournaments: [],
         };
       }
-      hallOfFame[winner.id].titles += 1;
-      hallOfFame[winner.id].tournaments.push(t.name);
+      hallOfFame[id].titles += 1;
+      hallOfFame[id].tournaments.push(t.name);
     }
   });
 
@@ -81,15 +81,20 @@ export async function getGlobalTournamentStats() {
   const hallOfFameList = Object.values(hallOfFame).sort((a, b) => b.titles - a.titles);
 
   // 2. Global Record (W-D-L from ALL fixtures) & Records
-  const userMap: Record<number, GlobalUserStats> = {};
+  const userMap: Record<string, GlobalUserStats> = {};
 
   // Records Containers
-  let biggestWin = { diff: 0, match: null as any };
-  let highestScoring = { total: 0, match: null as any };
-  const longestStreakGlobal = { count: 0, user: null as any };
+  let biggestWin = { diff: 0, match: null as TournamentFixture | null };
+  let highestScoring = { total: 0, match: null as TournamentFixture | null };
+  const longestStreakGlobal = { count: 0, user: null as TournamentStatisticsManager | null };
 
   // Helper to init user stats
-  const initUser = (id: number, name: string, icon: string, colorIndex: number) => {
+  const initUser = (
+    id: string,
+    name: string | null,
+    icon: string | null,
+    colorIndex: number | null
+  ) => {
     if (!userMap[id]) {
       userMap[id] = {
         id,
@@ -113,10 +118,10 @@ export async function getGlobalTournamentStats() {
 
   // Sort fixtures chronologically (ASC) for streak calculation
   const sortedFixtures = [...fixtures].sort(
-    (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    (a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime()
   );
 
-  sortedFixtures.forEach((f: any) => {
+  sortedFixtures.forEach((f) => {
     // Basic check for finished or scored matches
     if (f.status !== 'finished' && f.home_score === null && f.away_score === null) return;
 
@@ -147,8 +152,8 @@ export async function getGlobalTournamentStats() {
       stats.ga += awayScore;
 
       if (homeScore > awayScore) {
-        stats.won++;
-        stats.points += 3;
+        stats.won!++;
+        stats.points! += 3;
         stats.form.push('W');
         stats.currentStreak++;
         stats.signedStreak = stats.signedStreak > 0 ? stats.signedStreak + 1 : 1;
@@ -156,13 +161,13 @@ export async function getGlobalTournamentStats() {
           stats.longestStreak = stats.currentStreak;
         }
       } else if (homeScore === awayScore) {
-        stats.drawn++;
-        stats.points += 1;
+        stats.drawn!++;
+        stats.points! += 1;
         stats.form.push('D');
         stats.currentStreak = 0;
         stats.signedStreak = 0;
       } else {
-        stats.lost++;
+        stats.lost!++;
         stats.form.push('L');
         stats.currentStreak = 0;
         stats.signedStreak = stats.signedStreak < 0 ? stats.signedStreak - 1 : -1;
@@ -178,8 +183,8 @@ export async function getGlobalTournamentStats() {
       stats.ga += homeScore;
 
       if (awayScore > homeScore) {
-        stats.won++;
-        stats.points += 3;
+        stats.won!++;
+        stats.points! += 3;
         stats.form.push('W');
         stats.currentStreak++;
         stats.signedStreak = stats.signedStreak > 0 ? stats.signedStreak + 1 : 1;
@@ -187,13 +192,13 @@ export async function getGlobalTournamentStats() {
           stats.longestStreak = stats.currentStreak;
         }
       } else if (awayScore === homeScore) {
-        stats.drawn++;
-        stats.points += 1;
+        stats.drawn!++;
+        stats.points! += 1;
         stats.form.push('D');
         stats.currentStreak = 0;
         stats.signedStreak = 0;
       } else {
-        stats.lost++;
+        stats.lost!++;
         stats.form.push('L');
         stats.currentStreak = 0;
         stats.signedStreak = stats.signedStreak < 0 ? stats.signedStreak - 1 : -1;
@@ -235,7 +240,7 @@ export async function getGlobalTournamentStats() {
           diff: biggestWin.diff,
           match: biggestWin.match,
           winner:
-            biggestWin.match.home_score > biggestWin.match.away_score
+            biggestWin.match.home_score! > biggestWin.match.away_score!
               ? {
                   id: biggestWin.match.home_user_id,
                   name: biggestWin.match.home_user_name,
@@ -249,7 +254,7 @@ export async function getGlobalTournamentStats() {
                   colorIndex: biggestWin.match.away_user_color,
                 },
           loser:
-            biggestWin.match.home_score > biggestWin.match.away_score
+            biggestWin.match.home_score! > biggestWin.match.away_score!
               ? {
                   id: biggestWin.match.away_user_id,
                   name: biggestWin.match.away_user_name,
@@ -262,7 +267,7 @@ export async function getGlobalTournamentStats() {
                   icon: biggestWin.match.home_user_icon,
                   colorIndex: biggestWin.match.home_user_color,
                 },
-          score: `${Math.max(biggestWin.match.home_score, biggestWin.match.away_score)} - ${Math.min(biggestWin.match.home_score, biggestWin.match.away_score)}`,
+          score: `${Math.max(biggestWin.match.home_score!, biggestWin.match.away_score!)} - ${Math.min(biggestWin.match.home_score!, biggestWin.match.away_score!)}`,
         }
       : null,
     highestScoring: highestScoring.match
@@ -291,18 +296,16 @@ export async function getGlobalTournamentStats() {
 
   // 3. League Classification (Only League Tournaments)
   // We can trust our "type" field now!
-  const leagueTournaments = allTournaments
-    .filter((t: any) => t.type === 'league')
-    .map((t: any) => t.id);
+  const leagueTournaments = allTournaments.filter((t) => t.type === 'league').map((t) => t.id);
   const leagueIds = new Set(leagueTournaments);
 
-  const leagueStatsMap: Record<number, GlobalUserStats> = {};
+  const leagueStatsMap: Record<string, GlobalUserStats> = {};
 
-  standings.forEach((s: any) => {
-    if (!leagueIds.has(s.tournament_id)) return;
+  standings.forEach((s) => {
+    if (!leagueIds.has(s.tournament_id!)) return;
 
-    if (!leagueStatsMap[s.user_id]) {
-      leagueStatsMap[s.user_id] = {
+    if (!leagueStatsMap[s.user_id!]) {
+      leagueStatsMap[s.user_id!] = {
         id: s.user_id,
         name: s.user_name,
         icon: s.user_icon,
@@ -323,17 +326,17 @@ export async function getGlobalTournamentStats() {
       };
     }
 
-    const st = leagueStatsMap[s.user_id];
-    st.points += s.points;
-    st.won += s.won;
-    st.drawn += s.drawn;
-    st.lost += s.lost;
-    st.played += s.won + s.drawn + s.lost;
-    st.scored = (st.scored || 0) + s.scored;
-    st.against = (st.against || 0) + s.against;
+    const st = leagueStatsMap[s.user_id!];
+    st.points += s.points!;
+    st.won += s.won!;
+    st.drawn += s.drawn!;
+    st.lost += s.lost!;
+    st.played += s.won! + s.drawn! + s.lost!;
+    st.scored = (st.scored || 0) + s.scored!;
+    st.against = (st.against || 0) + s.against!;
   });
 
-  const leagueStatsList = Object.values(leagueStatsMap).sort((a: any, b: any) => {
+  const leagueStatsList = Object.values(leagueStatsMap).sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     const gdA = (a.scored || 0) - (a.against || 0);
     const gdB = (b.scored || 0) - (b.against || 0);

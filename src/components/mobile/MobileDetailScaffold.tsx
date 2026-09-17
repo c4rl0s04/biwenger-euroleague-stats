@@ -4,7 +4,7 @@ import { MobileBackHeader, MobileScreen } from './MobileScreen';
 
 interface MobileDetailScaffoldProps {
   title: string;
-  context: string;
+  context: string | null;
   backHref: string;
   description?: string;
   action?: ReactNode;
