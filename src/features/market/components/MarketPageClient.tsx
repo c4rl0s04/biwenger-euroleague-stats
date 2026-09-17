@@ -64,12 +64,25 @@ import {
   Gem,
 } from 'lucide-react';
 
+import type { MarketDuelSelection } from '../models/market-duel-selection';
+import type { MarketDrawerState, MarketDrawerConfig } from '../models/market-drawer';
+import type { MarketAnalytics } from '../models/market-analytics';
+import type { ComponentType } from 'react';
+import type { MarketDrawerProps } from '../models/market-drawer';
+type UseMarketAnalytics = (endpoint: string) => { data?: MarketAnalytics | null; loading: boolean };
+// Preserve existing runtime calls to shared/legacy components without changing their behavior.
+const LegacySubheading = Subheading as unknown as ComponentType<{
+  title: string;
+  subtitle: string;
+}>;
+const LegacyLiveMarketTable = LiveMarketTable as ComponentType<{ initialData?: never }>;
+
 export default function MarketPageClient() {
-  const [selectedDuel, setSelectedDuel] = useState(
-    /** @type {import('../models/market-duel-selection').MarketDuelSelection | null} */ (null)
+  const [selectedDuel, setSelectedDuel] = useState<MarketDuelSelection | null>(
+    /** @type {import('../models/market-duel-selection').MarketDuelSelection | null} */ null
   );
-  const [drawerData, setDrawerData] = useState(
-    /** @type {import('../models/market-drawer').MarketDrawerState} */ ({
+  const [drawerData, setDrawerData] = useState<MarketDrawerState>(
+    /** @type {import('../models/market-drawer').MarketDrawerState} */ {
       isOpen: false,
       title: '',
       subtitle: '',
@@ -79,12 +92,14 @@ export default function MarketPageClient() {
       color: 'blue',
       showFilters: true,
       showSummary: true,
-    })
+    }
   );
 
-  const { data: statsData, loading } = useApiData('/api/market/stats');
+  const { data: statsData, loading } = (useApiData as unknown as UseMarketAnalytics)(
+    '/api/market/stats'
+  );
   /** @type {Partial<import('../models/market-analytics').MarketAnalytics>} */
-  const marketStats = statsData || {};
+  const marketStats: Partial<MarketAnalytics> = statsData || {};
 
   if (loading) {
     return (
@@ -119,7 +134,7 @@ export default function MarketPageClient() {
   }
 
   /** @param {import('../models/market-duel-selection').MarketDuelSelection} duelSelection */
-  const handleSelectDuel = (duelSelection) => {
+  const handleSelectDuel = (duelSelection: MarketDuelSelection) => {
     setSelectedDuel((currentSelection) => {
       if (
         currentSelection?.user?.id === duelSelection.user.id &&
@@ -133,7 +148,7 @@ export default function MarketPageClient() {
   };
 
   /** @param {import('../models/market-drawer').MarketDrawerConfig} config */
-  const handleOpenDrawer = (config) => {
+  const handleOpenDrawer = (config: MarketDrawerConfig) => {
     setDrawerData({
       ...config,
       isOpen: true,
@@ -205,7 +220,7 @@ export default function MarketPageClient() {
       <Section title="Inversiones y Plusvalías" delay={150} background="section-base">
         {/* Sub-section: Ganancias */}
         <div className="mb-8">
-          <Subheading title="Ganancias" subtitle="Las mejores operaciones y plusvalías" />
+          <LegacySubheading title="Ganancias" subtitle="Las mejores operaciones y plusvalías" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             <BestFlipCard
               data={marketStats.bestFlip}
@@ -266,7 +281,10 @@ export default function MarketPageClient() {
 
         {/* Sub-section: Pérdidas */}
         <div className="mb-8">
-          <Subheading title="Pérdidas" subtitle="Las peores operaciones y oportunidades perdidas" />
+          <LegacySubheading
+            title="Pérdidas"
+            subtitle="Las peores operaciones y oportunidades perdidas"
+          />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
             <WorstFlipCard
               data={marketStats.worstFlip}
@@ -312,7 +330,7 @@ export default function MarketPageClient() {
 
         {/* Sub-section: Tiempos */}
         <div>
-          <Subheading title="Tiempos" subtitle="Velocidad y paciencia en las operaciones" />
+          <LegacySubheading title="Tiempos" subtitle="Velocidad y paciencia en las operaciones" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <QuickflipCard
               data={marketStats.quickestFlip}
@@ -348,7 +366,7 @@ export default function MarketPageClient() {
       <Section title="Pujas y Pulso del Mercado" delay={200} background="section-raised">
         <div className="space-y-8">
           <div>
-            <Subheading
+            <LegacySubheading
               title="Managers en la Subasta"
               subtitle="Quién roba más operaciones disputadas, quién pierde más finales y quién termina pagando de más por ganar"
             />
@@ -421,7 +439,7 @@ export default function MarketPageClient() {
           </div>
 
           <div>
-            <Subheading
+            <LegacySubheading
               title="Jugadores Bajo el Martillo"
               subtitle="Los nombres que concentran pujas, rotación, sobreprecio, robos ajustados y también grandes decepciones"
             />
@@ -520,7 +538,7 @@ export default function MarketPageClient() {
       {/* 3. Charts Section */}
       <Section title="Tendencias y Análisis" delay={200} background="section-base">
         <div className="space-y-6">
-          <MarketTrendsChart trends={marketStats.trends} />
+          <MarketTrendsChart {...({ trends: marketStats.trends } as object)} />
           <PositionAnalysisGrid positionStats={marketStats.positionStats} />
         </div>
       </Section>
@@ -531,23 +549,25 @@ export default function MarketPageClient() {
           {/* Finanzas Managers arriba */}
           <ManagerFinancesTable data={marketStats.managerStats} />
           {/* Mercado en Vivo debajo */}
-          <LiveMarketTable />
+          <LegacyLiveMarketTable />
         </div>
       </Section>
 
       {/* Global Ranking Sidebar */}
       <StatDetailDrawer
-        isOpen={drawerData.isOpen}
-        onClose={handleCloseDrawer}
-        title={drawerData.title}
-        subtitle={drawerData.subtitle}
-        data={drawerData.data}
-        icon={drawerData.icon}
-        statType={drawerData.statType}
-        color={drawerData.color}
-        allUsers={marketStats.allUsers}
-        showFilters={drawerData.showFilters}
-        showSummary={drawerData.showSummary}
+        {...({
+          isOpen: drawerData.isOpen,
+          onClose: handleCloseDrawer,
+          title: drawerData.title,
+          subtitle: drawerData.subtitle,
+          data: drawerData.data,
+          icon: drawerData.icon,
+          statType: drawerData.statType,
+          color: drawerData.color,
+          allUsers: marketStats.allUsers,
+          showFilters: drawerData.showFilters,
+          showSummary: drawerData.showSummary,
+        } as MarketDrawerProps)}
       />
     </div>
   );

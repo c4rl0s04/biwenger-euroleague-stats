@@ -284,6 +284,38 @@ is claimed and the prior G full-suite result remains the last full application a
 
 ## Still required for C05
 
+### Desktop aggregate and chart checkpoint Q (after `1e889c8e`)
+
+Implemented, acceptance pending. The desktop aggregate client and trends chart now use
+the existing explicit Market analytics/day models, typed state and type-only browser-hook
+contracts. The five trend URLs, dependencies, session-storage keys, default TTL, array
+transform, ordering, totals and tooltip formatting remain unchanged. The chart continues
+to fetch its own data and ignore the parent's supplied trend prop, as before.
+
+Local identity aliases describe Subheading's runtime title/subtitle support omitted from
+its JSDoc and LiveMarketTable's omitted-initialData fallback. They do not wrap, modify or
+duplicate either component. The drawer's explicit prop values/order are preserved in a
+typed object spread, retaining the state discriminant without loosening the public drawer
+contract. Emitted AST comparison against `1e889c8e` passes after erasing types/comments,
+resolving those two direct identity aliases and expanding static object-literal props.
+
+Eight chart tests cover period/cache contracts, transform identity, dates, total volume,
+price thresholds and loading/empty tooltip behavior. Four parent tests execute real
+orchestration with mocked leaves and cover loading, undefined-data fallback, exact DTO
+forwarding, legacy component calls and drawer open/close state. The test harness uses
+beforeAll and Array.from to respect the repository's TypeScript target. These tests do
+not establish populated Recharts/browser visual coverage; that remains explicitly pending.
+No service/query, API, credential, provider, schema or dependency changes are included.
+
+Resumed validation: full `npm run verify` PASS (2,010 tests plus one existing skip,
+922 modules/60 protected entrypoints, 89 documentation notes, typecheck, production
+build, 38-table offline metadata audit and Drizzle check). The first run stopped on
+a missing display name in the new test-only leaf mock; a named mock function corrected
+it without suppressing lint. The complete rerun has zero lint errors and the same 24
+image warnings; missing-provider build notices remain unchanged. Scoped formatting and
+diff checks pass. Desktop/iPhone browser comparisons are still pending; this is not
+checkpoint acceptance or full C05 completion.
+
 ### Listing presentation checkpoint P (after `5b1281ed`)
 
 Locally accepted for listing presentation contracts. Listing composition, the front/back card and full analysis

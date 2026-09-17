@@ -13,6 +13,18 @@ import { TrendingUp } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { useApiData } from '@/lib/hooks/useApiData';
+import type { ReactNode } from 'react';
+import type { MarketTrendDay } from '../../models/market-trends';
+
+type ChartDay = MarketTrendDay & { shortDate: string };
+type UseMarketTrends = (
+  endpoint: () => string,
+  options: {
+    dependencies: number[];
+    cacheKey: string;
+    transform: (result: unknown) => MarketTrendDay[];
+  }
+) => { data?: MarketTrendDay[]; loading: boolean };
 
 const TIME_PERIODS = [
   { label: '1W', days: 7 },
@@ -22,14 +34,22 @@ const TIME_PERIODS = [
   { label: '1Y', days: 365 },
 ];
 
-function CustomTooltip({ active, payload, label }) {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { payload: ChartDay }[];
+  label?: ReactNode;
+}) {
   if (!active || !payload || !payload.length) return null;
   const dayData = payload[0].payload; // Access the full data object for this day
   const transfers = dayData.transfers || [];
 
-  const formatPrice = (val) => {
-    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
-    if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+  const formatPrice = (val: number | null) => {
+    if (val! >= 1000000) return (val! / 1000000).toFixed(1) + 'M';
+    if (val! >= 1000) return (val! / 1000).toFixed(0) + 'k';
     return val;
   };
 
@@ -62,11 +82,14 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function MarketTrendsChart() {
   const [period, setPeriod] = useState(TIME_PERIODS[1]); // Default 1M
-  const { data = [], loading } = useApiData(() => `/api/market/trends?days=${period.days}`, {
-    dependencies: [period.days],
-    cacheKey: `market-trends-${period.days}`,
-    transform: (result) => (Array.isArray(result) ? result : []),
-  });
+  const { data = [], loading } = (useApiData as unknown as UseMarketTrends)(
+    () => `/api/market/trends?days=${period.days}`,
+    {
+      dependencies: [period.days],
+      cacheKey: `market-trends-${period.days}`,
+      transform: (result) => (Array.isArray(result) ? result : []),
+    }
+  );
 
   const formattedData = useMemo(() => {
     if (!data || !data.length) return [];

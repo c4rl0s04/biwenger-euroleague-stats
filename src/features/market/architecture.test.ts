@@ -5,6 +5,16 @@ import { expect, it } from 'vitest';
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 const feature = (path: string) => read(`src/features/market/${path}`);
 
+it('types aggregate and chart reads without adding server imports or cache changes', () => {
+  const parent = feature('components/MarketPageClient.tsx');
+  expect(parent).toContain('Partial<MarketAnalytics>');
+  expect(parent).toContain('useState<MarketDrawerState>');
+  const chart = feature('components/stats/MarketTrendsChart.tsx');
+  expect(chart).toContain("from '../../models/market-trends'");
+  expect(chart).toContain('cacheKey: `market-trends-${period.days}`');
+  expect(parent + chart).not.toContain('/server');
+});
+
 it('owns typed listing composition and consumes the deliberate Players HTTP model', () => {
   expect(feature('models/market-listing-presentation.ts')).toContain(
     "from '@/features/players/public'"
@@ -43,7 +53,7 @@ it('owns the section composition and typed client-local drawer boundary', () => 
   expect(model).not.toMatch(/\bany\b|drizzle|queries|ReturnType/);
   expect(model).toContain('MarketDrawerRowsByType');
   expect(feature('components/stats/StatDetailDrawer.tsx')).toContain('}: MarketDrawerProps)');
-  expect(feature('components/MarketPageClient.js')).toContain('MarketDrawerConfig');
+  expect(feature('components/MarketPageClient.tsx')).toContain('MarketDrawerConfig');
 });
 
 it('owns non-bids phone projections and enforces the section route without a new exception', () => {
