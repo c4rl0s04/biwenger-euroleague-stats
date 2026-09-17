@@ -100,6 +100,26 @@ Existing code references: [legacy queries](../../src/lib/db/queries),
 [domain features](../../src/features). Some old modules are thin compatibility exports;
 others still own substantial logic. File counts alone would overstate remaining duplication.
 
+## Adjacent database and security foundation
+
+The feature migration is progressing alongside a separate platform-hardening track. These changes
+support the target architecture but are not counted as feature-domain completion:
+
+- Season-varying player, team, and manager attributes now live in `player_seasons`, `team_seasons`,
+  and `user_seasons` rather than falling back to deprecated columns on global identity tables.
+- `user_seasons` uses `(season_id, user_id)` as its identity, and season-dependent references use
+  composite foreign keys where the relationship requires season isolation.
+- Official game and player-game staging tables were retired; official game state is consolidated
+  into `matches` and materialized player performance into `player_round_stats`.
+- Personal Biwenger credentials now use `user_biwenger_credentials` as the sole canonical store;
+  the legacy plaintext column and fallback were removed.
+- Application tables are protected from public Supabase Data API roles through RLS plus explicit
+  privilege and default-privilege revocation, while normal application access remains server-side.
+
+See the [data and sync architecture](data-and-sync.md),
+[data model reference](../reference/data-model.md), and
+[authentication and security](authentication-and-security.md) for the current contracts.
+
 ## Separate security gates
 
 - Hoopgrid: challenge creation in GET and mixed read/write/private-response behavior.
@@ -107,9 +127,11 @@ others still own substantial logic. File counts alone would overstate remaining 
 - Accounts and Settings: authentication, linking and credential observation gate.
 - Assistant: privacy/provider review before structural migration of its orchestration.
 
-Credential encryption and plaintext fallback, authentication/session behavior, database
-schema/RLS, production secrets and provider mutations are unchanged by these read batches.
-Static PWA pages and framework/authentication protocol adapters do not need artificial features.
+Authentication/session behavior, credential encryption and rotation, database authorization,
+production secrets, and provider mutations remain outside ordinary read-migration batches. The
+plaintext personal-credential fallback no longer exists; changes to the current encrypted credential
+boundary require their own explicit security scope. Static PWA pages and framework/authentication
+protocol adapters do not need artificial features.
 
 ## Completion standard
 

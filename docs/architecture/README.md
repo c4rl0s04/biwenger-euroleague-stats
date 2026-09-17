@@ -10,13 +10,13 @@ status: active
 
 # Architecture
 
-- [System overview](system-overview.md) — runtime responsibilities and repository map.
+- [System overview](system-overview.md) — system context, runtime responsibilities, and repository map.
 - [Application layers](application-layers.md) — browser-to-database request flow and boundaries.
 - [UI component layering target](ui-component-layers.md) — agreed post-domain-migration UI composition and reuse direction.
-- [Data and sync](data-and-sync.md) — local-first data ingestion and write safety.
-- [Authentication and security](authentication-and-security.md) — page protection, credentials, and
-  API responsibilities.
+- [Data and sync](data-and-sync.md) — local-first data ingestion, persistence ownership, and write safety.
+- [Authentication and security](authentication-and-security.md) — page protection, credentials, database access, and API responsibilities.
+- [Migration overview](migration-overview.md) — current feature coverage, remaining work, and migration milestones.
 
 Consequential choices are recorded separately in the [decision log](../decisions/README.md).
-Operational commands belong in [operations](../operations/README.md), while exact configuration and
-API contracts belong in [reference](../reference/README.md).
+Operational commands belong in [operations](../operations/README.md), while exact configuration,
+API contracts, and table ownership belong in [reference](../reference/README.md).

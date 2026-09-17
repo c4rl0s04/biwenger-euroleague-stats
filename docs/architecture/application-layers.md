@@ -11,8 +11,13 @@ status: active
 # Application layers
 
 New and migrated domain code belongs in `src/features/<feature>`. The current
-[domain ledger](migration-status.md) identifies integrated features, pending work, and exceptions.
-Matches and Teams are integrated on main; check the ledger and actual branch before selecting a base.
+[migration overview](migration-overview.md) summarizes feature coverage, while the
+[domain ledger](migration-status.md) records detailed integration and release evidence.
+
+Multiple read domains now have feature-owned boundaries on main, including Matches, Teams, Players,
+Managers, Rounds, Standings, Search, and Tournaments at different levels of completion. A feature
+directory alone does not imply that every screen, API, query, mutation, or legacy consumer for that
+domain has migrated; use the overview and ledger as the source of truth.
 
 ## Read flow
 
@@ -46,15 +51,18 @@ between code already running on the server.
 - Client Components own browser interaction and local state. Server-to-client props are serializable.
   Desktop and mobile compositions share the domain model and preserve information parity.
 
-Use [Matches](../../src/features/matches/server.ts) and [Teams](../../src/features/teams/server.ts)
-as concrete examples, while checking their documented remaining limitations. Run `npm run architecture:check`
+Use the integrated Matches, Teams, Players, Managers, Rounds, and Standings boundaries as concrete
+examples while checking their documented remaining limitations. Run `npm run architecture:check`
 for graph enforcement; its scope and explicit legacy exceptions are described in
 [agent workflow](../contributing/agent-workflow.md).
 
 ## Legacy compatibility
 
-Unmigrated code continues to use [global services](../../src/lib/services),
-[queries](../../src/lib/db/queries), and [mutations](../../src/lib/db/mutations).
+Unmigrated consumers continue to use [global services](../../src/lib/services),
+[queries](../../src/lib/db/queries), and shared [mutations](../../src/lib/db/mutations). Some old
+modules are thin compatibility adapters for migrated domains; others still own substantial logic.
+Do not infer ownership or deletion readiness from file location alone.
+
 Existing browser consumers may use [useApiData](../../src/lib/hooks/useApiData.js) and
 [API helpers](../../src/lib/utils/response.ts). Do not rewrite those consumers as incidental cleanup.
 
@@ -64,4 +72,5 @@ structural migration alone does not authorize aliases, pagination, envelope norm
 Consult the [internal API reference](../reference/internal-api.md) and real route tests.
 
 Authentication, credentials, synchronization, and database infrastructure retain their existing
-ownership and safety rules. Do not create artificial feature wrappers for framework infrastructure.
+ownership and safety rules. Do not create artificial feature wrappers for framework or cross-domain
+infrastructure.

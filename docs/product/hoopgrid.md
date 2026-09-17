@@ -30,8 +30,6 @@ cell. Correct-guess frequency across users contributes to rarity scoring.
 - Criteria: [`hoopgridCriteria.ts`](../../src/lib/constants/hoopgridCriteria.ts).
 - HTTP: `/api/hoopgrid/today`, `/api/hoopgrid/guess`, and `/api/hoopgrid/list`.
 - Data: challenges and guesses in [`schema.ts`](../../src/lib/db/schema.ts).
-- Support scripts: [`src/scripts/hoopgrid`](../../src/scripts/hoopgrid) and the recount utility under
-  [`scripts/dev`](../../scripts/dev).
 
 ## Lifecycle
 

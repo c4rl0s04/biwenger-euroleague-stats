@@ -6,8 +6,10 @@ These rules are the repository instruction entry point. Keep detailed guidance i
 [knowledge base](docs/README.md); compatibility agent files link here instead of duplicating rules.
 
 - Architecture or API work: read [application layers](docs/architecture/application-layers.md),
-  [migration status](docs/architecture/migration-status.md), and use the repository
-  [feature-migration skill](.agents/skills/feature-migration/SKILL.md) for a migration.
+  [migration overview](docs/architecture/migration-overview.md), and consult the
+  [migration status ledger](docs/architecture/migration-status.md) when detailed release evidence is
+  needed. Use the repository [feature-migration skill](.agents/skills/feature-migration/SKILL.md) for
+  a migration.
 - UI changes: read [design context](docs/product/design-system.md) and use
   [project-ui](.agents/skills/project-ui/SKILL.md). Use a redesign skill only for intended design work.
 - Setup, skills, and verification: read [agent workflow](docs/contributing/agent-workflow.md) and
@@ -82,7 +84,7 @@ Small read-only investigations and explanations do not require a new worktree. A
 
 - Never expose credentials, provider tokens, encryption material, or sensitive session data through responses, serialized props, client components, logs, errors, fixtures, or snapshots.
 - Do not log secrets or complete third-party payloads. Log only the minimum identifiers and metadata needed for diagnosis.
-- Architectural read-flow refactors do not authorize changes to authentication, sessions, credential encryption, keyrings, plaintext fallback behavior, provider mutations, or authorization policy.
+- Architectural read-flow refactors do not authorize changes to authentication, sessions, credential encryption, keyrings, credential storage or rotation behavior, provider mutations, or authorization policy.
 - Do not perform real provider mutations, production database operations, secret rotation, deployment configuration changes, or environment-variable changes unless the user explicitly authorizes them.
 - Do not modify database schemas or create or apply migrations unless schema work is explicitly in scope. When authorized, keep schema changes and data migrations reviewable and independently verifiable.
 

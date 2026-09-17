@@ -19,10 +19,13 @@ editors without Obsidian plugins.
 ## Choose your path
 
 - **New to the repository:** start with the [getting-started map](getting-started/README.md).
+- **Understanding the system quickly:** read the [system overview](architecture/system-overview.md).
 - **Exploring the product:** use the [product map](product/README.md).
 - **Changing the system:** read the [architecture map](architecture/README.md) and
   [contributor guides](contributing/README.md).
-- **Following the migration:** consult the [architecture status ledger](architecture/migration-status.md).
+- **Following the migration:** use the [migration overview](architecture/migration-overview.md) for
+  current scope and the [migration status ledger](architecture/migration-status.md) for detailed
+  implementation and release evidence.
 - **Implementing an assigned migration:** start at the [worker queue](migration/README.md).
 - **Running or recovering the application:** use the [operations map](operations/README.md).
 - **Looking up a contract:** use the [reference map](reference/README.md).
