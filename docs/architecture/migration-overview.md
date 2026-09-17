@@ -93,7 +93,7 @@ the release receipt distinguishes local checks from integration and deployment.
 1. Migrate the manager directory and remaining manager analytics separately from the
    completed Profile read experience.
 2. Tournaments read slice integrated via PR #35.
-3. Predictions read slice implemented and verified on `integration/predictions-migration`; awaiting integration.
+3. Predictions read slice implemented and verified on `integration/predictions-migration`; integration tracked in PR #36.
 4. Establish Playoffs read ownership preserving distinct scoring rules.
 5. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
