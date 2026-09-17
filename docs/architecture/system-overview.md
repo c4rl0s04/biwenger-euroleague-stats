@@ -107,7 +107,7 @@ runbooks rather than in this architecture note.
 
 The exact versions are owned by `package.json` and the lockfile. At a high level the application
 uses Next.js 16, React 19, PostgreSQL, Drizzle ORM, Auth.js v5, Tailwind CSS v4, Framer Motion,
-Recharts/Chart.js, Zod, Vitest, and Playwright.
+Recharts, Zod, Vitest, and Playwright.
 
 ## Continue reading
 
