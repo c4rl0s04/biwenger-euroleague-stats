@@ -1,7 +1,6 @@
-import { getPlayoffLeaderboard, getTeams } from '@/lib/services/features/playoffService';
-import PlayoffClient from '@/components/playoffs/PlayoffClient';
+import { getPlayoffOverview } from '@/features/playoffs/server';
+import { PlayoffClient, MobilePlayoffsScreen } from '@/features/playoffs/public';
 import { PageHeader } from '@/components/ui';
-import MobilePlayoffsScreen from '@/components/mobile/screens/MobilePlayoffsScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const metadata = {
@@ -13,11 +12,12 @@ export const metadata = {
 export const revalidate = 600;
 
 export default async function PlayoffPage() {
-  const [leaderboard, phone] = await Promise.all([getPlayoffLeaderboard(), isPhonePresentation()]);
+  const model = await getPlayoffOverview(isPhonePresentation());
 
-  if (phone) return <MobilePlayoffsScreen leaderboard={leaderboard} />;
+  if (model.presentation === 'phone')
+    return <MobilePlayoffsScreen leaderboard={model.leaderboard} />;
 
-  const teams = await getTeams();
+  const { leaderboard, teams } = model;
 
   return (
     <div className="min-h-screen bg-background">
