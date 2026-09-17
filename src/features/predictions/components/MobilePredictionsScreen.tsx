@@ -8,11 +8,11 @@ import {
   MobileScreenHeader,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type Stats = Record<string, any>;
+import type { PorrasStats } from '../models/predictions';
 
-export default function MobilePredictionsScreen({ stats }: { stats: Stats }) {
+export default function MobilePredictionsScreen({ stats }: { stats: PorrasStats }) {
   const ranking = stats.table_stats ?? [];
   const leader = ranking[0];
   const victories = stats.porra_stats?.victorias?.[0];
@@ -40,7 +40,7 @@ export default function MobilePredictionsScreen({ stats }: { stats: Stats }) {
       </MobileMetricGrid>
       <MobileSectionHeading>Clasificación</MobileSectionHeading>
       <div>
-        {ranking.slice(0, 7).map((row: Stats, index: number) => (
+        {ranking.slice(0, 7).map((row, index) => (
           <MobileListRow
             key={String(row.user_id)}
             href={`/user/${row.user_id}`}
