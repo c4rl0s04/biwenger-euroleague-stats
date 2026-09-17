@@ -61,7 +61,10 @@ export function validateSeasonConfig(options = {}, env = process.env) {
     }
   }
 
-  const isDbSkipped = env.SKIP_DB === 'true' || Boolean(CONFIG?.DB?.SKIP);
+  const isDbSkipped =
+    env === process.env
+      ? env.SKIP_DB === 'true' || Boolean(CONFIG?.DB?.SKIP)
+      : env.SKIP_DB === 'true';
   const hasDbConfig =
     isDbSkipped ||
     Boolean(env.DATABASE_URL?.trim()) ||
