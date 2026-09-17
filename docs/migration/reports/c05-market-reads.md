@@ -12,7 +12,7 @@ status: active
 Baseline: `3c2a3ac8ce403b6a3d93b8256b9806931c4969d9` on `main` (PR #37 merge).
 Worktree: `/Users/carlosandreshuete/Documents/Projects/biwengerstats-next-market-reads`
 Branch: `integration/market-reads-migration`
-Status: IMPLEMENTED AND LOCALLY VERIFIED.
+Status: IMPLEMENTED AND LOCALLY VERIFIED / AWAITING INDEPENDENT REVIEW.
 
 ## Executive summary
 
@@ -31,15 +31,15 @@ The C05 Public Market Reads migration establishes complete feature ownership for
   - Desktop: Renders `DesktopMarketScreen`, composing Listings, Transactions, Duels, Trends, Investment Rankings, and KPIs.
   - Mobile: Renders `MobileMarketScreen`, orchestrating tabbed sections.
 - `/market/[section]`:
-  - Mobile sections: `overview`, `transfers`, `bids`, `trends`, `investments`, `activity`.
-  - Bounded route handling and validation via `MARKET_SECTION_ORDER`.
+  - Mobile sections: `transfers`, `investments`, `bids`, `trends`.
+  - Bounded route handling and validation via registered mobile routes in `src/lib/mobile/routes.ts`.
 - API Route Handlers:
-  - `GET /api/market`: returns live market listings (cache policy: `public, max-age=60, s-maxage=120, stale-while-revalidate=300`).
-  - `GET /api/market/stats`: returns full market analytics payload (cache policy: `public, max-age=300, s-maxage=600, stale-while-revalidate=1800`).
-  - `GET /api/market/stats/value-details`: returns transfer value round progression.
-  - `GET /api/market/transfers`: paginated historical transfers list with buyer/seller filtering.
-  - `GET /api/market/trends`: rolling window market valuation and transaction volume trends.
-  - `GET /api/market/duels/details`: head-to-head bidding duel history between two managers.
+  - `GET /api/market`: returns `getMarketPageData()` containing `{ kpis, transfers, trends }` with a validated-but-unused `limit` query parameter (default 50, min 1, max 500, preserving existing contract). Cache headers: `public, max-age=300, stale-while-revalidate=60` (`CACHE_DURATIONS.MEDIUM`); errors: `private, no-store, max-age=0, must-revalidate`.
+  - `GET /api/market/stats`: returns full market analytics payload (`currentMarketListings`, `recordTransfer`, `biddingDuels`, `bestFlip`, `worstFlip`, etc.). Cache headers: `public, max-age=300, stale-while-revalidate=60`.
+  - `GET /api/market/stats/value-details`: returns transfer value round progression. Cache headers: `public, max-age=300, stale-while-revalidate=60`.
+  - `GET /api/market/transfers`: paginated historical transfers list with buyer/seller filtering. Cache headers: `public, max-age=60, stale-while-revalidate=60` (`CACHE_DURATIONS.SHORT`).
+  - `GET /api/market/trends`: rolling window market valuation and transaction volume trends. Cache headers: `public, max-age=60, stale-while-revalidate=60` (`CACHE_DURATIONS.SHORT`).
+  - `GET /api/market/duels/details`: head-to-head bidding duel history between two managers. Cache headers: `public, max-age=300, stale-while-revalidate=60`.
 
 ## Schema reconciliation against authoritative multi-season main
 
@@ -57,16 +57,17 @@ During the recovery from historical branches (`refactor/architecture-completion`
   - `market-transfers.query.ts`
   - `market-auctions.query.ts`
   - `market-trends.query.ts`
-- Manager directory lookups were decoupled into `market-manager.query.ts` querying `user_seasons` directly for the active season to avoid circular feature dependencies.
-- Secondary sort keys (`ORDER BY f.precio DESC, f.timestamp DESC NULLS LAST, f.id DESC`) were added to `readRecordTransfer` for deterministic ordering under tie prices matching historical visual baseline snapshots.
+- Manager directory lookups use the neutral shared query `readManagerDirectory()` from `@/lib/db/queries/core/manager-directory` (wrapped in `readMarketManagerDirectory()`) to map to domain view models without circular feature dependencies.
+- Production sort semantics in `readRecordTransfer` strictly preserve `origin/main` (`ORDER BY f.precio DESC`). Deterministic ordering across tests is guaranteed by distinct price fixtures in the synthetic test suite rather than modifying production SQL queries.
 
 ## Frozen boundaries and backward compatibility
 
-- **Private Operations**: `src/lib/services/marketActionsService.ts` and mutation API routes (`/api/market/offers/accept`, `/api/market/offers/reject`, `/api/market/sell`, `/api/market/sell-all`, `/api/market/remove`) were NOT moved or modified.
+- **Private Operations**: `src/lib/services/marketActionsService.ts` and mutation API routes (`/api/market/offers/accept`, `/api/market/offers/reject`, `/api/market/sell`, `/api/market/sell-all`, `/api/market/remove`) were NOT moved or modified, remaining byte-identical to `origin/main`.
 - **Cross-Domain Consumers**:
   - Dashboard: `/dashboard` and `src/lib/services/app/dashboardService.ts` consume `getMarketKPIs`, `getMarketOpportunities`, and `getRecentMarketActivity`. Compatibility adapters forward these to `src/features/market/server`.
   - Assistant: `assistantContextService.ts` consumes `getMarketTrends` and `getRecentMarketActivity` via legacy query adapters.
   - Teams: Cross-boundary team competition lookups were cleanly encapsulated in `src/features/teams` server services.
+- **Config**: `src/lib/config.js` has zero diff against `origin/main`.
 
 ## Verification and test evidence
 
@@ -78,4 +79,5 @@ During the recovery from historical branches (`refactor/architecture-completion`
 - **E2E Visual & Interaction Tests**:
   - `npm run test:e2e:local -- tests/e2e/market.spec.ts --project=iphone-13 --project=desktop-1440`: Passed (2/2 tests passed, 0 snapshot diffs).
   - `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts --project=iphone-13 --project=desktop-1440`: Passed (2/2 tests passed, 0 snapshot diffs).
+  - Populated browser suite covers `MarketTrendsChart` on desktop (verifying `/api/market/trends?days=30` and `0.9M €`, switching to `3M` and verifying `/api/market/trends?days=90` network response and `1.5M €`, hovering to verify tooltip details, and capturing `market-populated-trends-chart` reference snapshot).
   - Verified preservation of runtime TypeError in `/market/bids` on iPhone 13 (`TypeError: (a.biddingDuels ?? []) is not iterable`).

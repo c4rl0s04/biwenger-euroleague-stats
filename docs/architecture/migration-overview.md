@@ -95,7 +95,7 @@ the release receipt distinguishes local checks from integration and deployment.
 2. Tournaments read slice integrated via PR #35.
 3. Predictions read slice integrated via PR #36.
 4. Playoffs read slice integrated via PR #37.
-5. Market public reads slice implemented and verified on branch `integration/market-reads-migration`.
+5. Market public reads slice implemented and locally verified on branch `integration/market-reads-migration` (awaiting independent review).
 6. Migrate Schedule, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
 7. Move Season Review's pure engine/artifact readers into an explicit feature boundary.
