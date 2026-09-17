@@ -10,8 +10,8 @@ status: active
 # C02 Tournament read migration
 
 Source baseline: `c9d6a816`, campaign branch `refactor/architecture-completion`.
-**IMPLEMENTED AND LOCALLY VERIFIED at e14fe39aa3e8a572da93f35462d911f631d3ff97.**
-Unmerged and undeployed. Earlier checkpoint sections below are historical, not current blockers.
+**IMPLEMENTED AND VERIFIED at e14fe39aa3e8a572da93f35462d911f631d3ff97.**
+Integrated on main via PR #35 (`integration/tournaments-migration`). Earlier checkpoint sections below are historical evidence, not current blockers.
 
 ## Accepted read-slice scope
 

@@ -9,10 +9,9 @@ status: active
 
 # Tournament analytics and screens
 
-**SUPERSEDED — do not dispatch a duplicate migration.** The coordinator completed this read slice
-under the approved completion campaign at e14fe39a on refactor/architecture-completion.
-See the [C02 implementation and local acceptance receipt](../reports/c02-tournament-reads.md).
-It remains unmerged and undeployed. The following notes preserve the original worker-planning context.
+**INTEGRATED — do not dispatch a duplicate migration.** The Tournaments read slice is completed
+and integrated via PR #35. See the [C02 implementation and acceptance receipt](../reports/c02-tournament-reads.md).
+The following notes preserve the original worker-planning context.
 
 - Intended scope: Finish the existing Tournament list/detail/phone composition and remaining read analytics; reuse already migrated core/participation services.
 - Required discovery: Inspect actual tournament routes, legacy analytics, JSON phase compatibility and external Manager Profile consumers. Do not rewrite historical phase semantics.
