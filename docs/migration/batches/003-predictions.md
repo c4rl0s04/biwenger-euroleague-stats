@@ -1,16 +1,17 @@
 ---
 title: Batch 003 — Predictions read experience
-description: Blocked planning placeholder requiring a source-backed assignment before execution.
+description: Historical worker placeholder superseded by the completed C03 read slice.
 audience:
   - agent
   - maintainer
-status: draft
+status: active
 ---
 
 # Predictions read experience
 
-**DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
-Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
+**IMPLEMENTED — do not dispatch a duplicate migration.** The Predictions read slice is completed
+and verified on integration/predictions-migration. See the [C03 implementation and acceptance receipt](../reports/c03-prediction-reads.md).
+The following notes preserve the original worker-planning context.
 
 - Intended scope: Move existing prediction read composition and scoring ownership into a bounded feature.
 - Required discovery: Inventory all page/section/API consumers and distinguish pure reads from submissions or provider actions. Keep prediction-specific rules separate from Playoffs.
