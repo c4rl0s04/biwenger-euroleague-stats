@@ -25,6 +25,8 @@ behavior to its page entries, internal APIs, services, data access, and tests.
   and comparisons.
 - [Squad and market](squad-and-market.md) — lineup management, listings, offers, and finance.
 - [Predictions and tournaments](predictions-and-tournaments.md) — predictions, playoffs, and cups.
+- [Season predictions design](season-predictions-plan.md) — proposed new season time capsule;
+  questions, data contracts and future UI, not an implemented page.
 - [Assistant](assistant.md) — conversational analytics over local league context.
 - [Hoopgrid](hoopgrid.md) — daily trivia, rarity, and internal inspection views.
 - [Accounts and settings](accounts-and-settings.md) — login, manager profiles, and preferences.
