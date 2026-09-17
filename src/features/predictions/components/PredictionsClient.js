@@ -17,6 +17,7 @@ import { PredictionsStatsTable } from './tables/PredictionsStatsTable';
 import { HistoryTable } from './tables/HistoryTable';
 import PredictionsDrawer from './PredictionsDrawer';
 
+/** @param {{ stats: import('../models/predictions').PorrasStats }} props */
 export default function PredictionsClient({ stats }) {
   const [drawerType, setDrawerType] = useState(null); // 'clutch' | 'victorias' | null
   const isDrawerOpen = drawerType !== null;

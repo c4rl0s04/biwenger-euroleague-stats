@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Shared SQL normalization for regular and postponed prediction rounds.
  *

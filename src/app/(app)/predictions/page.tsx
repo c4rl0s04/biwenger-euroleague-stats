@@ -1,7 +1,6 @@
-import { fetchPredictionsStats } from '@/lib/services/features/predictionsService';
-import PredictionsClient from '@/components/predictions/PredictionsClient';
+import { getPorrasStats } from '@/features/predictions/server';
+import { PredictionsClient, MobilePredictionsScreen } from '@/features/predictions/public';
 import { PageHeader } from '@/components/ui';
-import MobilePredictionsScreen from '@/components/mobile/screens/MobilePredictionsScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const metadata = {
@@ -13,7 +12,7 @@ export const metadata = {
 export const revalidate = 300;
 
 export default async function PredictionsPage() {
-  const [stats, phone] = await Promise.all([fetchPredictionsStats(), isPhonePresentation()]);
+  const [stats, phone] = await Promise.all([getPorrasStats(), isPhonePresentation()]);
 
   if (phone) return <MobilePredictionsScreen stats={stats} />;
 

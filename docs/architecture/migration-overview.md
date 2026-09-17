@@ -45,6 +45,7 @@ fully migrated into `src/features/tournaments` and integrated on main via PR #35
 | Standings   | Complete rankings, progression, performance/draft analytics, APIs and screens                     | External leader-gap/league-average consumers and adapter retirement         |
 | Search      | Validated directory search, typed results and HTTP service                                        | Shell/search interaction ownership during the shared UI pass                |
 | Tournaments | Complete read experience (catalogue, detail, sections, bracket and analytics)                     | External Profile consumer compatibility maintained                          |
+| Predictions | Complete read experience (overview, evolution, ranking, teams, history)                           | Prediction ingestion and sync actions reserved for separate scope           |
 
 ## Previous deployed milestone: Manager Profile
 
@@ -92,11 +93,12 @@ the release receipt distinguishes local checks from integration and deployment.
 1. Migrate the manager directory and remaining manager analytics separately from the
    completed Profile read experience.
 2. Tournaments read slice integrated via PR #35.
-3. Establish Predictions and Playoffs read ownership without merging their distinct scoring rules.
-4. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
+3. Predictions read slice implemented and verified on `integration/predictions-migration`; integration tracked in PR #36.
+4. Establish Playoffs read ownership preserving distinct scoring rules.
+5. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
-5. Move Season Review's pure engine/artifact readers into an explicit feature boundary.
-6. Finish application-shell/shared-UI ownership and remove obsolete global adapters only
+6. Move Season Review's pure engine/artifact readers into an explicit feature boundary.
+7. Finish application-shell/shared-UI ownership and remove obsolete global adapters only
    after checking all consumers. Evaluate canonical API names without deleting legacy URLs.
 
 Existing code references: [legacy queries](../../src/lib/db/queries),
