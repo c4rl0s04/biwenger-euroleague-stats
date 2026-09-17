@@ -39,7 +39,7 @@ The C05 Public Market Reads migration establishes complete feature ownership for
   - `GET /api/market/stats/value-details`: returns transfer value round progression. Cache headers: `public, max-age=300, stale-while-revalidate=60`.
   - `GET /api/market/transfers`: paginated historical transfers list with buyer/seller filtering. Cache headers: `public, max-age=60, stale-while-revalidate=60` (`CACHE_DURATIONS.SHORT`).
   - `GET /api/market/trends`: rolling window market valuation and transaction volume trends. Cache headers: `public, max-age=60, stale-while-revalidate=60` (`CACHE_DURATIONS.SHORT`).
-  - `GET /api/market/duels/details`: head-to-head bidding duel history between two managers. Cache headers: `public, max-age=300, stale-while-revalidate=60`.
+  - `GET /api/market/duels/details`: head-to-head bidding duel history between two managers. Cache headers: `public, max-age=60, stale-while-revalidate=60` (`CACHE_DURATIONS.SHORT`).
 
 ## Schema reconciliation against authoritative multi-season main
 
