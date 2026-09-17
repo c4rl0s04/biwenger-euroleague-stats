@@ -180,6 +180,22 @@ describe('SyncReporter Output Scenarios', () => {
     expect(logs).toContain('  · Fetching standings');
   });
 
+  it('renders intermediate step warning messages with exclamation prefix', () => {
+    const { writer, logs } = createMockWriter();
+    const reporter = new SyncReporter({ writer });
+
+    reporter.stepWarning('Inserted 3 transfers with players missing from playersList');
+    expect(logs).toContain('  ! Inserted 3 transfers with players missing from playersList');
+  });
+
+  it('strips leading warning emojis and spaces in step warning', () => {
+    const { writer, logs } = createMockWriter();
+    const reporter = new SyncReporter({ writer });
+
+    reporter.stepWarning('   ⚠️ Review required: Team MAD');
+    expect(logs).toContain('  ! Review required: Team MAD');
+  });
+
   it('renders step completion with counts, summary, warnings, and duration', () => {
     const { writer, logs } = createMockWriter();
     const reporter = new SyncReporter({ writer });

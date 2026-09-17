@@ -48,6 +48,8 @@ export class SyncManager {
   readonly reporter: SyncReporter;
   hasErrors = false;
   lockUnavailable = false;
+  warningsCount = 0;
+  private currentStepWarnings: string[] = [];
   private roundIds = new Map<string, number>();
 
   constructor(
@@ -100,6 +102,13 @@ export class SyncManager {
     this.reporter.stepDetail(message);
   }
 
+  warn(message: string): void {
+    this.logs.push({ type: 'warning', message, timestamp: new Date() });
+    this.currentStepWarnings.push(message);
+    this.warningsCount++;
+    this.reporter.stepWarning(message);
+  }
+
   error(message: string, error?: unknown): void {
     this.logs.push({ type: 'error', message, error, timestamp: new Date() });
     this.hasErrors = true;
@@ -132,7 +141,8 @@ export class SyncManager {
 
     let completedStepsCount = 0;
     let failedStep: SyncStepDefinition | null = null;
-    let totalWarningsCount = 0;
+    this.warningsCount = 0;
+    this.currentStepWarnings = [];
 
     try {
       await validateSchemaReady(pool);
@@ -154,6 +164,7 @@ export class SyncManager {
       for (let i = 0; i < this.steps.length; i++) {
         const step = this.steps[i];
         const stepStartedAt = Date.now();
+        this.currentStepWarnings = [];
         this.reporter.stepStarted({
           index: i + 1,
           total: this.steps.length,
@@ -183,12 +194,30 @@ export class SyncManager {
               timestamp: new Date(),
             });
           }
-          const warnings = result?.warnings || [];
-          totalWarningsCount += warnings.length;
-          for (const warning of warnings) {
-            this.logs.push({ type: 'info', message: `Warning: ${warning}`, timestamp: new Date() });
+
+          const stepEmittedWarnings = [...this.currentStepWarnings];
+          const unrenderedWarnings: string[] = [];
+          const remainingEmitted = [...stepEmittedWarnings];
+
+          for (const warning of result?.warnings || []) {
+            const matchIdx = remainingEmitted.indexOf(warning);
+            if (matchIdx !== -1) {
+              remainingEmitted.splice(matchIdx, 1);
+            } else {
+              unrenderedWarnings.push(warning);
+              this.warningsCount++;
+              this.logs.push({
+                type: 'info',
+                message: `Warning: ${warning}`,
+                timestamp: new Date(),
+              });
+            }
           }
-          this.reporter.stepCompleted({ step, durationMs, result });
+
+          const stepResultForReporter = result
+            ? { ...result, warnings: unrenderedWarnings }
+            : result;
+          this.reporter.stepCompleted({ step, durationMs, result: stepResultForReporter });
           this.logs.push({
             type: 'info',
             message: `${step.id} completed in ${durationMs}ms.`,
@@ -221,7 +250,7 @@ export class SyncManager {
           remainingSteps: failedStep
             ? this.steps.length - completedStepsCount - 1
             : this.steps.length,
-          warningsCount: totalWarningsCount,
+          warningsCount: this.warningsCount,
           durationMs: totalDurationMs,
         });
         this.logs.push({
@@ -234,7 +263,7 @@ export class SyncManager {
           mode: this.mode,
           totalSteps: this.steps.length,
           succeededSteps: completedStepsCount,
-          warningsCount: totalWarningsCount,
+          warningsCount: this.warningsCount,
           durationMs: totalDurationMs,
           seasonId: this.context.seasonId,
         });

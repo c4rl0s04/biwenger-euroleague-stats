@@ -30,7 +30,10 @@ export async function run(manager: SyncManager) {
           }
         }
       } catch (err: any) {
-        manager.log(`Could not optimize round ${roundId}: ${err.message}`);
+        (manager.warn || manager.log).call(
+          manager,
+          `Could not optimize round ${roundId}: ${err.message}`
+        );
       }
     }
 

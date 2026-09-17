@@ -301,13 +301,15 @@ export async function syncBiwengerBoard(
   }
 
   if (transfersWithMissingPlayer > 0) {
-    manager.log(
+    (manager.warn || manager.log).call(
+      manager,
       `Inserted ${transfersWithMissingPlayer} transfers with players missing from playersList`
     );
   }
 
   if (skippedInvalidActorTransfers > 0) {
-    manager.log(
+    (manager.warn || manager.log).call(
+      manager,
       `Skipped ${skippedInvalidActorTransfers} transfers involving actors outside users/market`
     );
   }

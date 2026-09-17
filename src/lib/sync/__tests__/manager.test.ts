@@ -113,4 +113,112 @@ describe('SyncManager', () => {
     expect(schema.validateSchemaReady).toHaveBeenCalledOnce();
     vi.unstubAllEnvs();
   });
+
+  describe('warnings reporting', () => {
+    it('renders manager.warn() as a warning, stores in logs, increments count, and remains non-fatal', async () => {
+      const terminalLines: string[] = [];
+      const writer = {
+        log: (line: string) => terminalLines.push(line),
+        error: (line: string) => terminalLines.push(line),
+      };
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ useAdvisoryLock: false, writer });
+
+      const step1 = vi.fn(async (m: any) => {
+        m.warn('Inserted 2 transfers with missing players');
+        return { summary: 'step 1 done' };
+      });
+      const step2 = vi.fn(async () => ({ summary: 'step 2 done' }));
+
+      manager.addStep(definition('step-1', step1));
+      manager.addStep(definition('step-2', step2));
+
+      await manager.run();
+
+      // Non-fatal: both steps ran
+      expect(step1).toHaveBeenCalledOnce();
+      expect(step2).toHaveBeenCalledOnce();
+      expect(manager.hasErrors).toBe(false);
+
+      // Preserved in logs with type: warning
+      const warnLogs = manager.logs.filter((l) => l.type === 'warning');
+      expect(warnLogs).toHaveLength(1);
+      expect(warnLogs[0].message).toBe('Inserted 2 transfers with missing players');
+
+      // Rendered in terminal output
+      const terminalOutput = terminalLines.join('\n');
+      expect(terminalOutput).toContain('  ! Inserted 2 transfers with missing players');
+
+      // Final summary reflects warning count
+      expect(manager.warningsCount).toBe(1);
+      expect(terminalOutput).toContain('Warnings    1');
+    });
+
+    it('counts existing result.warnings and renders them in step completion', async () => {
+      const terminalLines: string[] = [];
+      const writer = {
+        log: (line: string) => terminalLines.push(line),
+        error: (line: string) => terminalLines.push(line),
+      };
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ useAdvisoryLock: false, writer });
+
+      manager.addStep(
+        definition(
+          'catalog-step',
+          vi.fn(async () => ({
+            summary: 'catalog done',
+            warnings: ['Optional details unavailable for player John Doe'],
+          }))
+        )
+      );
+
+      await manager.run();
+
+      expect(manager.hasErrors).toBe(false);
+      expect(manager.warningsCount).toBe(1);
+
+      const terminalOutput = terminalLines.join('\n');
+      expect(terminalOutput).toContain('Warnings');
+      expect(terminalOutput).toContain('  ! Optional details unavailable for player John Doe');
+      expect(terminalOutput).toContain('Warnings    1');
+    });
+
+    it('does not double-count when a warning is both emitted via manager.warn() and returned in result.warnings', async () => {
+      const terminalLines: string[] = [];
+      const writer = {
+        log: (line: string) => terminalLines.push(line),
+        error: (line: string) => terminalLines.push(line),
+      };
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ useAdvisoryLock: false, writer });
+
+      manager.addStep(
+        definition(
+          'dual-warn-step',
+          vi.fn(async (m: any) => {
+            m.warn('Player review required: John Doe (JDOE)');
+            return {
+              summary: 'done',
+              warnings: ['Player review required: John Doe (JDOE)', 'Additional separate warning'],
+            };
+          })
+        )
+      );
+
+      await manager.run();
+
+      expect(manager.hasErrors).toBe(false);
+      // Exactly 2 warnings: the emitted one + the additional separate one (not 3)
+      expect(manager.warningsCount).toBe(2);
+
+      const terminalOutput = terminalLines.join('\n');
+      expect(terminalOutput).toContain('Warnings    2');
+
+      // The emitted warning should appear once as immediate warning `  ! Player review required...`
+      // and not duplicated in the Warnings section
+      const countEmitted = (terminalOutput.match(/Player review required: John Doe/g) || []).length;
+      expect(countEmitted).toBe(1);
+    });
+  });
 });

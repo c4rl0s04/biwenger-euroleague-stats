@@ -85,7 +85,8 @@ export async function syncOfficialMasterData(manager: SyncManager) {
     const suggestion = issue.suggestion
       ? `; suggestion only: ${issue.suggestion.name} (${issue.suggestion.score.toFixed(2)})`
       : '';
-    manager.log(
+    (manager.warn || manager.log).call(
+      manager,
       `${issue.kind} review required: ${issue.providerName} (${issue.providerCode})${suggestion}`
     );
   }

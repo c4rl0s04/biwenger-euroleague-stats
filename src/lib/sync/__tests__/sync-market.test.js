@@ -53,6 +53,7 @@ describe('syncBoard', () => {
     })),
     resolveRoundId: (round) => round.id,
     log: vi.fn(),
+    warn: vi.fn(),
   });
 
   it('inserts transfers even when the player is missing from playersList', async () => {
@@ -75,12 +76,16 @@ describe('syncBoard', () => {
       })
       .mockResolvedValueOnce({ data: [] });
 
-    const result = await run(manager(), { fetch: fetchBoard });
+    const mgr = manager();
+    const result = await run(mgr, { fetch: fetchBoard });
 
     expect(result.counts.transfers).toBe(1);
     expect(db.query).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO fichajes'),
       expect.arrayContaining([1759685765, 'June', 'Mercado', 24806, 1872600])
+    );
+    expect(mgr.warn).toHaveBeenCalledWith(
+      'Inserted 1 transfers with players missing from playersList'
     );
   });
 
@@ -104,7 +109,8 @@ describe('syncBoard', () => {
       })
       .mockResolvedValueOnce({ data: [] });
 
-    await run(manager(), { fetch: fetchBoard });
+    const mgr = manager();
+    await run(mgr, { fetch: fetchBoard });
 
     const insertCalls = db.query.mock.calls.filter(([sql]) =>
       (typeof sql === 'string' ? sql : sql?.text || '').includes('INSERT INTO fichajes')

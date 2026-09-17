@@ -211,8 +211,9 @@ export async function syncBiwengerMatches(
 
     if (!homeId || !awayId || !official) {
       unresolved++;
-      manager.log(
-        `      ⚠️ Official game not linked for Biwenger game ${game.id} (${homeCode || homeId} vs ${awayCode || awayId}).`
+      (manager.warn || manager.log).call(
+        manager,
+        `Official game not linked for Biwenger game ${game.id} (${homeCode || homeId} vs ${awayCode || awayId})`
       );
       continue;
     }
@@ -246,9 +247,7 @@ export async function syncBiwengerMatches(
     synced++;
   }
 
-  manager.log(
-    `   ✅ Linked ${synced} fantasy matches to official games (${unresolved} unresolved).`
-  );
+  manager.log(`Linked ${synced} fantasy matches to official games (${unresolved} unresolved)`);
   if (unresolved > 0) {
     throw new Error(`${unresolved} Biwenger matches could not be linked to official games.`);
   }

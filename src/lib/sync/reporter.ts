@@ -182,6 +182,13 @@ export class SyncReporter {
     }
   }
 
+  stepWarning(message: string): void {
+    const clean = cleanDetailMessage(message);
+    if (clean) {
+      this.writer.log(`  ! ${clean}`);
+    }
+  }
+
   stepCompleted(params: {
     step: SyncStepDefinition;
     durationMs: number;
