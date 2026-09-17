@@ -35,7 +35,7 @@ A worker result is **implemented — awaiting independent verification**, never 
 | 001  | [Standings complete read experience](batches/001-standings.md)                | VERIFIED        | See current release receipt                     |
 | 002  | [Tournament analytics and screens](batches/002-tournaments.md)                | DRAFT / BLOCKED | Pilot review; re-inventory current contracts    |
 | 003  | [Predictions read experience](batches/003-predictions.md)                     | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory    |
-| 004  | [Playoffs read experience](batches/004-playoffs.md)                           | DRAFT / BLOCKED | Separate scoring/read-versus-write inventory    |
+| 004  | [Playoffs read experience](batches/004-playoffs.md)                           | VERIFIED        | Implemented and verified on integration branch  |
 | 005  | [Manager directory and remaining analytics](batches/005-manager-directory.md) | DRAFT / BLOCKED | Protect existing Profile and Lineup consumers   |
 | 006  | [Schedule composition](batches/006-schedule.md)                               | DRAFT / BLOCKED | Matches/Rounds/squad contracts                  |
 | 007  | [Public Market reads](batches/007-market-reads.md)                            | DRAFT / BLOCKED | Explicit read/private-operation boundary review |

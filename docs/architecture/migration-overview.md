@@ -94,7 +94,7 @@ the release receipt distinguishes local checks from integration and deployment.
    completed Profile read experience.
 2. Tournaments read slice integrated via PR #35.
 3. Predictions read slice implemented and verified on `integration/predictions-migration`; integration tracked in PR #36.
-4. Establish Playoffs read ownership preserving distinct scoring rules.
+4. Playoffs read slice implemented and verified on branch `integration/playoffs-migration`; distinct scoring rules preserved.
 5. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
 6. Move Season Review's pure engine/artifact readers into an explicit feature boundary.

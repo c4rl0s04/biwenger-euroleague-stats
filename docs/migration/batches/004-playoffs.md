@@ -1,16 +1,17 @@
 ---
 title: Batch 004 — Playoffs read experience
-description: Blocked planning placeholder requiring a source-backed assignment before execution.
+description: Historical worker placeholder superseded by the completed C04 read slice.
 audience:
   - agent
   - maintainer
-status: draft
+status: active
 ---
 
 # Playoffs read experience
 
-**DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
-Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
+**IMPLEMENTED — do not dispatch a duplicate migration.** The Playoffs read slice is completed
+and verified on `integration/playoffs-migration`. See the [C04 implementation and acceptance receipt](../reports/c04-playoff-reads.md).
+The following notes preserve the original worker-planning context.
 
 - Intended scope: Move the existing Playoffs read experience and its distinct scoring rules.
 - Required discovery: Inspect actual brackets, prediction-view routes, historical snapshots and mutation boundaries. Do not unify formulas with Predictions by appearance.
