@@ -46,7 +46,7 @@ Market public reads migration: C05 Market public reads (catalogue listings, tran
 are integrated via PR #38. The
 [C05 receipt](../migration/reports/c05-market-reads.md) records contracts and verification evidence.
 
-Managers remaining reads migration: C06 Managers remaining reads (directory, captain stats, home/away performance, captain recommendations, and personalized alerts)
+Managers remaining reads migration: C06 Managers remaining reads (directory, captain stats, home/away performance, captain recommendations, and personalized alerts: manager-specific price-gain, price-loss and recent high-performance alerts)
 are implemented and verified on branch `integration/managers-remaining-reads-migration` (awaiting independent review before merge). The
 [C06 receipt](../migration/reports/c06-manager-remaining-reads.md) records contracts and verification evidence.
 

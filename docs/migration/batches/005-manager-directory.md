@@ -32,6 +32,7 @@ Establish complete feature ownership for all remaining Managers-domain public an
 3. **Manager Preparation Reads**:
    - Services: `getManagerCaptainRecommendations(userId, limit = 3)`, `getManagerPersonalizedAlerts(userId, limit = 5)`.
    - Dependencies: Consumes `getPlayerFormStats(3)` from `@/features/players/server`.
+   - Personalized Alerts: Manager-specific price-gain, price-loss and recent high-performance alerts.
    - Queries: `readCaptainCandidates(userId, seasonId)`, `readManagerAlertsRaw(userId, seasonId)` in `src/features/managers/server/queries/manager-preparation.query.ts`.
    - Route Handler: `GET /api/dashboard/captain-suggest` rewired to `getManagerCaptainRecommendations(userId, 6)` with `private, no-store, max-age=0, must-revalidate`.
    - Forwarders & Consumers: `src/lib/services/app/dashboardService.ts` (`fetchCaptainRecommendations`, `getNextRoundData`, `getUserDashboardData`, `getRecentActivityData`), `src/lib/services/app/homeService.ts` (`getHomeSummary`), and `src/lib/db/queries/core/users.ts` (`getCaptainRecommendations`, `getPersonalizedAlerts`).
