@@ -166,6 +166,123 @@ Next.js pages
 
 Not every feature needs every layer.
 
+The foundation feeds two major UI consumers in parallel:
+
+```text
+                 Design tokens
+                      ↓
+                UI foundation
+               ↙             ↘
+      Application shell     Feature UI
+               \             /
+                \           /
+                  Next.js pages
+```
+
+The application shell is part of the UI migration. It is not a feature domain, but it owns the
+persistent product frame in which feature screens are rendered.
+
+## Application shell architecture
+
+The complete UI migration includes the persistent application shell as a first-class scope.
+
+The shell owns global presentation and navigation that is visible across many or all routes. It must
+consume the same design tokens and shared primitives as feature UI, but it is allowed to know about
+application-level navigation and route structure.
+
+### Shell responsibilities
+
+The target shell includes:
+
+- application background and ambient decoration;
+- main content frame and page-width constraints;
+- desktop sidebar/navigation;
+- top application header;
+- global search entry point;
+- season selector;
+- account/settings actions;
+- optional global news/ticker surface;
+- footer;
+- phone bottom navigation;
+- global mobile menu / more sheet;
+- route-level loading/progress presentation;
+- PWA safe-area handling;
+- persistent spacing/clearance around fixed navigation.
+
+These responsibilities are global UI. They should not be reimplemented by individual features.
+
+### Shell versus feature ownership
+
+The shell owns **where** a global capability appears. The relevant feature owns **what the capability
+means and where its data comes from**.
+
+Examples:
+
+```text
+Search feature
+    ↓ client-safe search contract
+AppHeader / global search composition
+
+News feature
+    ↓ news projection
+AppHeader or shell NewsTicker
+
+Season infrastructure
+    ↓ available seasons / selected season
+Shell SeasonSelector
+```
+
+The shell must not absorb domain queries or domain business rules merely because it renders their
+entry points.
+
+### Shell target direction
+
+Directional structure:
+
+```text
+src/components/
+  ui/
+    primitives/
+    controls/
+    compositions/
+
+  shell/
+    AppShell.tsx
+    AppBackground.tsx
+    AppHeader.tsx
+    Sidebar.tsx
+    Footer.tsx
+    MobileNavigation.tsx
+    GlobalSearch.tsx
+    SeasonSelector.tsx
+    NewsStrip.tsx
+```
+
+This is not a mandate to create every file immediately. Existing shell components should be migrated
+incrementally after their dependencies and route contracts are understood.
+
+The current `src/components/layout` and `src/components/mobile` code are audit inputs, not automatic
+target ownership. Some current mobile primitives may become shared responsive UI; some navigation
+components will remain shell-specific.
+
+### Shell migration order
+
+The shell should be migrated after the shared foundation is stable enough to support it and after the
+relevant domain contracts used by global search/news/navigation are clear.
+
+A likely sequence is:
+
+1. app background and content frame;
+2. shared shell actions and navigation item primitives;
+3. desktop sidebar and header;
+4. phone bottom navigation and mobile menu;
+5. global search/season/account integrations;
+6. footer and global news/ticker surfaces;
+7. legacy shell cleanup and visual-regression verification.
+
+This shell migration is part of the complete UI migration, even though it is not required before the
+Season Predictions pilot.
+
 ## Design tokens
 
 ### Existing token authority
@@ -539,10 +656,135 @@ All new motion must continue respecting `prefers-reduced-motion`.
 
 ### General rule
 
-A shared primitive should normally be responsive through its own layout contract.
+Responsive behavior is not a separate layer in the hierarchy. It is a decision made at the lowest
+layer where desktop and phone behavior actually diverge.
 
-Create separate desktop/mobile feature components only when the information architecture or interaction
-model genuinely differs.
+Default rule:
+
+> keep one component while the responsibility, information hierarchy and interaction model remain the
+> same; split desktop and phone components only when those responsibilities materially diverge.
+
+This means most low-level UI stays shared:
+
+```text
+tokens                 shared
+primitives             shared
+Button                 shared
+Badge                  shared
+Avatar                 shared
+Surface                shared
+Card                   shared
+EntityIdentity         usually shared
+SearchableSelect       shared behavior, adaptive presentation allowed
+```
+
+A primitive can change padding, typography, stacking or dimensions at breakpoints without becoming a
+different mobile component.
+
+### Where desktop/mobile differentiation normally begins
+
+The split usually becomes meaningful at the **composition, feature component, section or screen**
+levels.
+
+#### Same component, responsive layout
+
+Use one component when only layout changes:
+
+```text
+MetricCard
+desktop → horizontal supporting metrics
+phone   → stacked supporting metrics
+```
+
+```text
+PlayerIdentity
+desktop → larger avatar + metadata inline
+phone   → smaller avatar + metadata stacked
+```
+
+The responsibility and content remain the same, so the component remains shared.
+
+#### Shared behavior, different presentation shell
+
+Interactive controls may keep one logical contract while adapting their container:
+
+```text
+SearchableSelect
+desktop → Popover
+phone   → Bottom Sheet / Dialog
+```
+
+Search, selection, active option and keyboard semantics stay shared. Only the presentation mechanism
+changes.
+
+This can be implemented internally through an adaptive wrapper or through two private renderers behind
+one public contract. Do not force consumers to know about desktop versus phone unless the feature truly
+needs that distinction.
+
+#### Separate feature components
+
+Create separate desktop/phone components when information architecture or interaction changes enough
+that a single component becomes conditional and difficult to understand.
+
+Example:
+
+```text
+Standings
+desktop → dense comparative table with many simultaneous columns
+phone   → focused manager list with expandable/detail navigation
+```
+
+Possible ownership:
+
+```text
+StandingsScreen
+├── DesktopStandingsView
+└── MobileStandingsView
+```
+
+Both consume the same feature view model. They do not duplicate queries or business calculations.
+
+#### Separate screens
+
+Use separate screens only for a substantial route-level presentation difference, such as when desktop
+and phone compose different sections or navigation patterns.
+
+The split should therefore happen as late/high in the hierarchy as necessary, not as early as possible.
+
+### Decision test
+
+Before creating `MobileX` and `DesktopX`, ask:
+
+1. Is the data/view model the same?
+2. Is the semantic responsibility the same?
+3. Is the information priority the same?
+4. Is the interaction model the same?
+5. Can normal responsive CSS solve the difference cleanly?
+
+If the answer is yes to the first four and responsive CSS is clean, keep one component.
+
+If information priority or interaction changes materially, split at that composition/feature/screen
+boundary while keeping lower-level primitives shared.
+
+### Naming
+
+Do not prefix every responsive component with `Mobile` or `Desktop`.
+
+Prefer neutral names for shared components:
+
+```text
+Card
+EntityIdentity
+PlayerSelector
+PredictionCard
+```
+
+Use explicit responsive names only when two real implementations exist:
+
+```text
+DesktopStandingsView
+MobileStandingsView
+```
 
 ### Tables
 
@@ -638,6 +880,14 @@ src/components/ui/
     ChartFrame.tsx
     DataList.tsx
     DataTable.tsx
+
+src/components/shell/
+  AppShell.tsx
+  AppBackground.tsx
+  AppHeader.tsx
+  Sidebar.tsx
+  Footer.tsx
+  MobileNavigation.tsx
 
 src/features/players/components/
   PlayerIdentity.tsx
@@ -832,8 +1082,11 @@ The first foundation does not attempt to define or implement:
 - toast/notification infrastructure unless the first feature requires it;
 - drag-and-drop;
 - a Storybook/design-system site;
-- global legacy-component replacement;
+- immediate global legacy-component replacement in the v1 pilot;
 - a new brand direction.
+
+The **complete UI migration**, however, does include the application shell and eventual retirement or
+migration of legacy shared/mobile UI once the new foundation has been validated.
 
 ## Open decisions
 
