@@ -14,3 +14,7 @@ export {
   getManagerRoundsData,
   MANAGERS_READ_POLICY,
 } from './server/services/manager-read.service';
+export {
+  getManagerDirectory,
+  MANAGER_DIRECTORY_POLICY,
+} from './server/services/manager-directory.service';

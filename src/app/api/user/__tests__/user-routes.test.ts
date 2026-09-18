@@ -2,6 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 
+vi.mock('server-only', () => ({}));
+
+const managerMocks = vi.hoisted(() => ({
+  getManagerDirectory: vi.fn(),
+}));
+
+vi.mock('@/features/managers/server', () => ({
+  getManagerDirectory: managerMocks.getManagerDirectory,
+}));
+
 vi.mock('@/lib/services', () => ({
   fetchAllUsers: vi.fn(),
 }));
@@ -88,7 +98,7 @@ describe('user and lineup route contracts', () => {
   });
 
   it('covers GET /api/users success and error envelopes', async () => {
-    vi.mocked(services.fetchAllUsers).mockResolvedValue([{ id: '1', name: 'User' }] as any);
+    managerMocks.getManagerDirectory.mockResolvedValue([{ id: '1', name: 'User' }] as any);
 
     const { GET } = await import('@/app/api/users/route');
     const response = await GET();
@@ -97,7 +107,7 @@ describe('user and lineup route contracts', () => {
     expect(response.status).toBe(200);
     expect(json).toEqual({ success: true, data: [{ id: '1', name: 'User' }] });
 
-    vi.mocked(services.fetchAllUsers).mockRejectedValue(new Error('fail'));
+    managerMocks.getManagerDirectory.mockRejectedValue(new Error('fail'));
     const errorResponse = await GET();
     expect(errorResponse.status).toBe(500);
     expect((await errorResponse.json()).success).toBe(false);

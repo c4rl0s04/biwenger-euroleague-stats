@@ -1,11 +1,11 @@
-import { fetchAllUsers } from '@/lib/services';
+import { getManagerDirectory } from '@/features/managers/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const users = await fetchAllUsers();
+    const users = await getManagerDirectory();
     return successResponse(users, CACHE_DURATIONS.LONG);
   } catch (error) {
     console.error('Error fetching users:', error);

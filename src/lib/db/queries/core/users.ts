@@ -1,7 +1,7 @@
 import { pool as pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
 import { getPlayerFormMap } from './playerForm';
-import { readManagerDirectory } from './manager-directory';
+import { getManagerDirectory } from '@/features/managers/server';
 
 export interface User {
   id: number;
@@ -81,7 +81,7 @@ export interface PersonalizedAlert {
 export async function getAllUsers(): Promise<User[]> {
   // Preserve the legacy declaration for unmigrated callers; runtime text IDs
   // and nullable names/icons are not coerced. New boundaries model them exactly.
-  return (await readManagerDirectory()) as unknown as User[];
+  return (await getManagerDirectory()) as unknown as User[];
 }
 
 /**
