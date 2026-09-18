@@ -353,11 +353,11 @@ Examples:
 
 ```css
 :root {
-  --palette-obsidian-950: 240 5% 2%;
-  --palette-obsidian-900: 240 4% 7%;
-  --palette-neutral-50: 0 0% 98%;
-  --palette-orange-500: 19 99% 49%;
-  --palette-red-500: 0 84% 60%;
+  --color-obsidian-950: 240 5% 2%;
+  --color-obsidian-900: 240 4% 7%;
+  --color-neutral-50: 0 0% 98%;
+  --color-orange-500: 19 99% 49%;
+  --color-red-500: 0 84% 60%;
 
   --radius-card: 1rem;
 }
@@ -369,11 +369,11 @@ Examples:
 
 ```css
 :root {
-  --surface-app: var(--palette-obsidian-950);
-  --surface-card: var(--palette-obsidian-900);
-  --content-primary: var(--palette-neutral-50);
-  --action-primary: var(--palette-orange-500);
-  --status-danger: var(--palette-red-500);
+  --surface-app: var(--color-obsidian-950);
+  --surface-card: var(--color-obsidian-900);
+  --content-primary: var(--color-neutral-50);
+  --action-primary: var(--color-orange-500);
+  --status-danger: var(--color-red-500);
 }
 ```
 
@@ -458,9 +458,9 @@ Example:
 
 ```css
 :root {
-  --surface-app: var(--palette-obsidian-950);
-  --surface-card: var(--palette-obsidian-900);
-  --action-primary: var(--palette-orange-500);
+  --surface-app: var(--color-obsidian-950);
+  --surface-card: var(--color-obsidian-900);
+  --action-primary: var(--color-orange-500);
 
   /* Legacy compatibility bridge */
   --background: var(--surface-app);
