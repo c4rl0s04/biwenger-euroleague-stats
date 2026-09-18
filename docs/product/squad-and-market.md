@@ -26,10 +26,12 @@ rejecting offers.
 
 - Pages: [`lineup`](<../../src/app/(app)/lineup>) and [`market`](<../../src/app/(app)/market>).
 - UI: [`src/components/lineup`](../../src/components/lineup) and
-  [`src/components/market`](../../src/components/market).
-- Services: [`lineupService.ts`](../../src/lib/services/lineupService.ts), market read services, and
+  [`src/features/market/components`](../../src/features/market/components).
+- Services: [`lineupService.ts`](../../src/lib/services/lineupService.ts), market read services under
+  [`src/features/market/server`](../../src/features/market/server), and
   [`marketActionsService.ts`](../../src/lib/services/marketActionsService.ts).
-- Data: market queries, current ownership, lineups, transfers, bids, listings, and market-value
+- Data: market queries under [`src/features/market/server/queries`](../../src/features/market/server/queries),
+  current ownership, lineups, transfers, bids, listings, and market-value
   history under [`src/lib/db`](../../src/lib/db).
 - HTTP: `/api/market/*`, `/api/users/lineup`, and player squad endpoints.
 - Tests: market route/action suites plus sync-market and lineup-related tests.

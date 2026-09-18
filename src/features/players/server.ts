@@ -1,5 +1,5 @@
 import 'server-only';
-export { getPlayerRecentScores } from './server/services/player-form.service';
+export { getPlayerRecentScores, getPlayerFormStats } from './server/services/player-form.service';
 
 export {
   getDashboardPlayerBirthdays,
@@ -48,4 +48,5 @@ export type {
   PlayerRisingStarViewModel,
   PlayerStatLeaderViewModel,
   PlayerTopPerformerViewModel,
+  PlayerFormStatsViewModel,
 } from './models/player-insights';

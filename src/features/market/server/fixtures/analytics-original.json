@@ -1,0 +1,1463 @@
+[
+  {
+    "name": "getTopTransferredPlayer",
+    "rows": [
+      {
+        "player_id": 7,
+        "name": "Fixture name",
+        "img": "Fixture img",
+        "player_team": "Fixture player_team",
+        "transfer_count": "12.75",
+        "avg_price": "12.75",
+        "owner_id": "7",
+        "owner_name": "Fixture owner_name",
+        "owner_color_index": 7
+      },
+      {
+        "player_id": null,
+        "name": null,
+        "img": null,
+        "player_team": null,
+        "transfer_count": null,
+        "avg_price": null,
+        "owner_id": null,
+        "owner_name": null,
+        "owner_color_index": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "name": "Fixture name",
+        "img": "Fixture img",
+        "player_team": "Fixture player_team",
+        "transfer_count": 12,
+        "avg_price": 12,
+        "owner_id": "7",
+        "owner_name": "Fixture owner_name",
+        "owner_color_index": 7
+      },
+      {
+        "player_id": null,
+        "name": null,
+        "img": null,
+        "player_team": null,
+        "transfer_count": null,
+        "avg_price": null,
+        "owner_id": null,
+        "owner_name": null,
+        "owner_color_index": null
+      }
+    ]
+  },
+  {
+    "name": "getRecordTransfer",
+    "rows": [
+      {
+        "id": 7,
+        "season_id": "7",
+        "timestamp": "1700000000",
+        "fecha": "Fixture fecha",
+        "player_id": 7,
+        "precio": "12.75",
+        "vendedor": "Fixture vendedor",
+        "comprador": "Fixture comprador",
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "buyer_id": "7",
+        "buyer_name": "Fixture buyer_name",
+        "buyer_icon": "Fixture buyer_icon",
+        "buyer_color": 7,
+        "seller_id": "7",
+        "seller_name": "Fixture seller_name",
+        "seller_icon": "Fixture seller_icon",
+        "seller_color": 7
+      },
+      {
+        "id": null,
+        "season_id": null,
+        "timestamp": null,
+        "fecha": null,
+        "player_id": null,
+        "precio": null,
+        "vendedor": null,
+        "comprador": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "buyer_id": null,
+        "buyer_name": null,
+        "buyer_icon": null,
+        "buyer_color": null,
+        "seller_id": null,
+        "seller_name": null,
+        "seller_icon": null,
+        "seller_color": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "id": 7,
+        "season_id": "7",
+        "timestamp": "1700000000",
+        "fecha": "Fixture fecha",
+        "player_id": 7,
+        "precio": 12,
+        "vendedor": "Fixture vendedor",
+        "comprador": "Fixture comprador",
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "buyer_id": "7",
+        "buyer_name": "Fixture buyer_name",
+        "buyer_icon": "Fixture buyer_icon",
+        "buyer_color": 7,
+        "seller_id": "7",
+        "seller_name": "Fixture seller_name",
+        "seller_icon": "Fixture seller_icon",
+        "seller_color": 7
+      },
+      {
+        "id": null,
+        "season_id": null,
+        "timestamp": null,
+        "fecha": null,
+        "player_id": null,
+        "precio": null,
+        "vendedor": null,
+        "comprador": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "buyer_id": null,
+        "buyer_name": null,
+        "buyer_icon": null,
+        "buyer_color": null,
+        "seller_id": null,
+        "seller_name": null,
+        "seller_icon": null,
+        "seller_color": null
+      }
+    ]
+  },
+  {
+    "name": "getBigSpender",
+    "rows": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "total_spent": "12.75",
+        "purchases_count": "12.75"
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "total_spent": null,
+        "purchases_count": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "total_spent": 12,
+        "purchases_count": 12
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "total_spent": null,
+        "purchases_count": null
+      }
+    ]
+  },
+  {
+    "name": "getRecordBid",
+    "rows": [
+      {
+        "transfer_id": 7,
+        "bid_count": "12.75",
+        "player_id": 7,
+        "precio": 7,
+        "comprador": "Fixture comprador",
+        "buyer_id": "7",
+        "buyer_color_index": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo"
+      },
+      {
+        "transfer_id": null,
+        "bid_count": null,
+        "player_id": null,
+        "precio": null,
+        "comprador": null,
+        "buyer_id": null,
+        "buyer_color_index": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "transfer_id": 7,
+        "bid_count": 13,
+        "player_id": 7,
+        "precio": 7,
+        "comprador": "Fixture comprador",
+        "buyer_id": "7",
+        "buyer_color_index": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo"
+      },
+      {
+        "transfer_id": null,
+        "bid_count": null,
+        "player_id": null,
+        "precio": null,
+        "comprador": null,
+        "buyer_id": null,
+        "buyer_color_index": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null
+      }
+    ]
+  },
+  {
+    "name": "getBestSeller",
+    "rows": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "net_profit": "12.75",
+        "total_sales": "12.75",
+        "sales_count": "12.75"
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "net_profit": null,
+        "total_sales": null,
+        "sales_count": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "net_profit": 12,
+        "total_sales": 12,
+        "sales_count": 12
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "net_profit": null,
+        "total_sales": null,
+        "sales_count": null
+      }
+    ]
+  },
+  {
+    "name": "getBestRevaluation",
+    "rows": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "current_price": "12.75",
+        "purchase_price": "12.75",
+        "revaluation": "12.75"
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "current_price": null,
+        "purchase_price": null,
+        "revaluation": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "current_price": 12,
+        "purchase_price": 12,
+        "revaluation": 12
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "current_price": null,
+        "purchase_price": null,
+        "revaluation": null
+      }
+    ]
+  },
+  {
+    "name": "getBestValuePlayer",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "transfer_id": 7,
+        "purchase_price": "12.75",
+        "total_points": "12.75",
+        "points_per_million": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "transfer_id": null,
+        "purchase_price": null,
+        "total_points": null,
+        "points_per_million": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "transfer_id": 7,
+        "purchase_price": 12,
+        "total_points": 12,
+        "points_per_million": 12.75
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "transfer_id": null,
+        "purchase_price": null,
+        "total_points": null,
+        "points_per_million": null
+      }
+    ]
+  },
+  {
+    "name": "getInfirmaryPlayers",
+    "rows": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "purchase_price": "12.75",
+        "available_rounds": "12.75",
+        "played_rounds": "12.75",
+        "missed_rounds": "12.75"
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "purchase_price": null,
+        "available_rounds": null,
+        "played_rounds": null,
+        "missed_rounds": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "purchase_price": 12,
+        "available_rounds": 12,
+        "played_rounds": 12,
+        "missed_rounds": 12
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "purchase_price": null,
+        "available_rounds": null,
+        "played_rounds": null,
+        "missed_rounds": null
+      }
+    ]
+  },
+  {
+    "name": "getTheThief",
+    "rows": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "stolen_count": "12.75"
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "stolen_count": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "stolen_count": 12
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "stolen_count": null
+      }
+    ]
+  },
+  {
+    "name": "getBiggestSteal",
+    "rows": [
+      {
+        "transfer_id": 7,
+        "winning_price": "12.75",
+        "winner": "Fixture winner",
+        "winner_id": "7",
+        "winner_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "second_highest_bid": "12.75",
+        "second_bidder_name": "Fixture second_bidder_name",
+        "price_diff": "12.75"
+      },
+      {
+        "transfer_id": null,
+        "winning_price": null,
+        "winner": null,
+        "winner_id": null,
+        "winner_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "second_highest_bid": null,
+        "second_bidder_name": null,
+        "price_diff": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "transfer_id": 7,
+        "winning_price": 12,
+        "winner": "Fixture winner",
+        "winner_id": "7",
+        "winner_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "second_highest_bid": 12,
+        "second_bidder_name": "Fixture second_bidder_name",
+        "price_diff": 12
+      },
+      {
+        "transfer_id": null,
+        "winning_price": null,
+        "winner": null,
+        "winner_id": null,
+        "winner_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "second_highest_bid": null,
+        "second_bidder_name": null,
+        "price_diff": null
+      }
+    ]
+  },
+  {
+    "name": "getTheVictim",
+    "rows": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "failed_bids_count": "12.75"
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "failed_bids_count": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "failed_bids_count": 12
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "failed_bids_count": null
+      }
+    ]
+  },
+  {
+    "name": "getOverpayerManager",
+    "rows": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "contested_wins": "12.75",
+        "total_overpay": "12.75",
+        "avg_overpay": "12.75"
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "contested_wins": null,
+        "total_overpay": null,
+        "avg_overpay": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "name": "Fixture name",
+        "user_id": "7",
+        "user_color_index": 7,
+        "contested_wins": 12,
+        "total_overpay": 12,
+        "avg_overpay": 12.75
+      },
+      {
+        "name": null,
+        "user_id": null,
+        "user_color_index": null,
+        "contested_wins": null,
+        "total_overpay": null,
+        "avg_overpay": null
+      }
+    ]
+  },
+  {
+    "name": "getInflatedPlayer",
+    "rows": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "inflation": "12.75",
+        "purchase_price": "12.75",
+        "market_price": "12.75",
+        "buyer_id": "7",
+        "buyer_name": "Fixture buyer_name",
+        "buyer_color": 7,
+        "transfer_id": 7
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "inflation": null,
+        "purchase_price": null,
+        "market_price": null,
+        "buyer_id": null,
+        "buyer_name": null,
+        "buyer_color": null,
+        "transfer_id": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "inflation": 12,
+        "purchase_price": 12,
+        "market_price": 12,
+        "buyer_id": "7",
+        "buyer_name": "Fixture buyer_name",
+        "buyer_color": 7,
+        "transfer_id": 7
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "inflation": null,
+        "purchase_price": null,
+        "market_price": null,
+        "buyer_id": null,
+        "buyer_name": null,
+        "buyer_color": null,
+        "transfer_id": null
+      }
+    ]
+  },
+  {
+    "name": "getBestSingleFlip",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": "12.75",
+        "sale_price": "12.75",
+        "profit": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": 12,
+        "sale_price": 12,
+        "profit": 12
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null
+      }
+    ]
+  },
+  {
+    "name": "getWorstSingleFlip",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": "12.75",
+        "sale_price": "12.75",
+        "profit": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": 12,
+        "sale_price": 12,
+        "profit": 12
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null
+      }
+    ]
+  },
+  {
+    "name": "getBestPercentageGain",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "current_price": "12.75",
+        "purchase_price": "12.75",
+        "percentage_gain": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "current_price": null,
+        "purchase_price": null,
+        "percentage_gain": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "current_price": 12,
+        "purchase_price": 12,
+        "percentage_gain": 12.75
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "current_price": null,
+        "purchase_price": null,
+        "percentage_gain": null
+      }
+    ]
+  },
+  {
+    "name": "getMostOwnersPlayer",
+    "rows": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "distinct_owners_count": "12.75",
+        "owner_id": "7",
+        "owner_name": "Fixture owner_name",
+        "owner_color_index": 7
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "distinct_owners_count": null,
+        "owner_id": null,
+        "owner_name": null,
+        "owner_color_index": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "distinct_owners_count": 12,
+        "owner_id": "7",
+        "owner_name": "Fixture owner_name",
+        "owner_color_index": 7
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "distinct_owners_count": null,
+        "owner_id": null,
+        "owner_name": null,
+        "owner_color_index": null
+      }
+    ]
+  },
+  {
+    "name": "getMissedOpportunity",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "sale_price": "12.75",
+        "current_price": "12.75",
+        "is_repurchase": true,
+        "missed_profit": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "sale_price": null,
+        "current_price": null,
+        "is_repurchase": null,
+        "missed_profit": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "sale_price": 12,
+        "current_price": 12,
+        "is_repurchase": true,
+        "missed_profit": 12
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "sale_price": null,
+        "current_price": null,
+        "is_repurchase": false,
+        "missed_profit": null
+      }
+    ]
+  },
+  {
+    "name": "getTopTrader",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "trade_count": "12.75",
+        "total_profit": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "trade_count": null,
+        "total_profit": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "trade_count": 12,
+        "total_profit": 12
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "trade_count": null,
+        "total_profit": null
+      }
+    ]
+  },
+  {
+    "name": "getProfitablePlayer",
+    "rows": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "trade_count": "12.75",
+        "total_profit": "12.75"
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "trade_count": null,
+        "total_profit": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "trade_count": 12,
+        "total_profit": 12
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "trade_count": null,
+        "total_profit": null
+      }
+    ]
+  },
+  {
+    "name": "getLossyPlayer",
+    "rows": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "trade_count": "12.75",
+        "total_loss": "12.75"
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "trade_count": null,
+        "total_loss": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "trade_count": 12,
+        "total_loss": 12
+      },
+      {
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "trade_count": null,
+        "total_loss": null
+      }
+    ]
+  },
+  {
+    "name": "getQuickestFlip",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": "12.75",
+        "sale_price": "12.75",
+        "profit": "12.75",
+        "hours_held": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null,
+        "hours_held": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": 12,
+        "sale_price": 12,
+        "profit": 12,
+        "hours_held": 12.75
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null,
+        "hours_held": null
+      }
+    ]
+  },
+  {
+    "name": "getLongestProfitableHold",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": "12.75",
+        "sale_price": "12.75",
+        "profit": "12.75",
+        "days_held": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null,
+        "days_held": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "purchase_price": 12,
+        "sale_price": 12,
+        "profit": 12,
+        "days_held": 12.75
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "purchase_price": null,
+        "sale_price": null,
+        "profit": null,
+        "days_held": null
+      }
+    ]
+  },
+  {
+    "name": "getWorstRevaluation",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "current_price": "12.75",
+        "purchase_price": "12.75",
+        "devaluation": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "current_price": null,
+        "purchase_price": null,
+        "devaluation": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_name": "Fixture user_name",
+        "user_color_index": 7,
+        "player_id": 7,
+        "player_name": "Fixture player_name",
+        "player_img": "Fixture player_img",
+        "player_team": "Fixture player_team",
+        "team_name": "Fixture team_name",
+        "team_logo": "Fixture team_logo",
+        "current_price": 12,
+        "purchase_price": 12,
+        "devaluation": 12
+      },
+      {
+        "user_id": null,
+        "user_name": null,
+        "user_color_index": null,
+        "player_id": null,
+        "player_name": null,
+        "player_img": null,
+        "player_team": null,
+        "team_name": null,
+        "team_logo": null,
+        "current_price": null,
+        "purchase_price": null,
+        "devaluation": null
+      }
+    ]
+  },
+  {
+    "name": "getRecentTransfers",
+    "rows": [
+      {
+        "id": 7,
+        "season_id": "7",
+        "timestamp": "1700000000",
+        "fecha": "Fixture fecha",
+        "player_id": 7,
+        "precio": 7,
+        "vendedor": "Fixture vendedor",
+        "comprador": "Fixture comprador",
+        "player_name": "Fixture player_name",
+        "position": "Fixture position",
+        "vendedor_id": "7",
+        "vendedor_color_index": 7,
+        "comprador_id": "7",
+        "comprador_color_index": 7
+      },
+      {
+        "id": null,
+        "season_id": null,
+        "timestamp": null,
+        "fecha": null,
+        "player_id": null,
+        "precio": null,
+        "vendedor": null,
+        "comprador": null,
+        "player_name": null,
+        "position": null,
+        "vendedor_id": null,
+        "vendedor_color_index": null,
+        "comprador_id": null,
+        "comprador_color_index": null
+      }
+    ],
+    "args": [5],
+    "queryArgs": [5, "fixture-season"],
+    "expected": [
+      {
+        "id": 7,
+        "season_id": "7",
+        "timestamp": "1700000000",
+        "fecha": "Fixture fecha",
+        "player_id": 7,
+        "precio": 7,
+        "vendedor": "Fixture vendedor",
+        "comprador": "Fixture comprador",
+        "player_name": "Fixture player_name",
+        "position": "Fixture position",
+        "vendedor_id": "7",
+        "vendedor_color_index": 7,
+        "comprador_id": "7",
+        "comprador_color_index": 7
+      },
+      {
+        "id": null,
+        "season_id": null,
+        "timestamp": null,
+        "fecha": null,
+        "player_id": null,
+        "precio": null,
+        "vendedor": null,
+        "comprador": null,
+        "player_name": null,
+        "position": null,
+        "vendedor_id": null,
+        "vendedor_color_index": null,
+        "comprador_id": null,
+        "comprador_color_index": null
+      }
+    ]
+  },
+  {
+    "name": "getSignificantPriceChanges",
+    "rows": [
+      {
+        "player_id": 7,
+        "name": "Fixture name",
+        "position": "Fixture position",
+        "team": "Fixture team",
+        "price": 7,
+        "price_increment": 7,
+        "owner_id": "7"
+      },
+      {
+        "player_id": null,
+        "name": null,
+        "position": null,
+        "team": null,
+        "price": null,
+        "price_increment": null,
+        "owner_id": null
+      }
+    ],
+    "args": [24, 500000],
+    "queryArgs": [500000, "fixture-season"],
+    "expected": [
+      {
+        "player_id": 7,
+        "name": "Fixture name",
+        "position": "Fixture position",
+        "team": "Fixture team",
+        "price": 7,
+        "price_increment": 7,
+        "owner_id": "7"
+      },
+      {
+        "player_id": null,
+        "name": null,
+        "position": null,
+        "team": null,
+        "price": null,
+        "price_increment": null,
+        "owner_id": null
+      }
+    ]
+  },
+  {
+    "name": "getManagerMarketStats",
+    "rows": [
+      {
+        "user_id": "7",
+        "user_icon": "Fixture user_icon",
+        "color_index": 7,
+        "user_name": "Fixture user_name",
+        "purchases_count": "12.75",
+        "purchases_total": "12.75",
+        "sales_count": "12.75",
+        "sales_total": "12.75"
+      },
+      {
+        "user_id": null,
+        "user_icon": null,
+        "color_index": null,
+        "user_name": null,
+        "purchases_count": null,
+        "purchases_total": null,
+        "sales_count": null,
+        "sales_total": null
+      }
+    ],
+    "args": [],
+    "queryArgs": ["fixture-season"],
+    "expected": [
+      {
+        "user_id": "7",
+        "user_icon": "Fixture user_icon",
+        "color_index": 7,
+        "user_name": "Fixture user_name",
+        "purchases_count": 12,
+        "purchases_total": 12,
+        "sales_count": 12,
+        "sales_total": 12,
+        "balance": 0
+      },
+      {
+        "user_id": null,
+        "user_icon": null,
+        "color_index": null,
+        "user_name": null,
+        "purchases_count": null,
+        "purchases_total": null,
+        "sales_count": null,
+        "sales_total": null,
+        "balance": null
+      }
+    ]
+  }
+]

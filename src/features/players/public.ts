@@ -28,4 +28,5 @@ export type {
   PlayerRisingStarViewModel,
   PlayerStatLeaderViewModel,
   PlayerTopPerformerViewModel,
+  PlayerFormStatsViewModel,
 } from './models/player-insights';

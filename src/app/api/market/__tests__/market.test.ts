@@ -19,6 +19,17 @@ vi.mock('@/lib/services', () => ({
 
 import * as services from '@/lib/services';
 
+vi.mock('@/features/market/server', async () => ({
+  fetchMarketStats: (await import('@/lib/services')).fetchMarketStats,
+  getMarketPageData: (await import('@/lib/services')).getMarketPageData,
+  getLiveMarketTransfers: (await import('@/lib/services')).fetchLiveMarketTransfers,
+  getBestValueDetails: (await import('@/lib/services')).fetchBestValueDetails,
+  getBiddingDuelDetails: (await import('@/lib/services')).fetchBiddingDuelDetails,
+  ...(await import('@/features/market/validation/market-transfers')),
+  getMarketTrendsAnalysis: (await import('@/lib/services')).fetchMarketTrendsAnalysis,
+  ...(await import('@/features/market/validation/market-trends')),
+}));
+
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));

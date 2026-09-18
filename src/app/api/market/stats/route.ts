@@ -1,4 +1,4 @@
-import { fetchMarketStats } from '@/lib/services';
+import { fetchMarketStats } from '@/features/market/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

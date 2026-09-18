@@ -42,6 +42,10 @@ Playoffs read migration: C04 Playoffs reads (leaderboard, predictions, detail an
 are implemented and verified on branch `integration/playoffs-migration`. The
 [C04 receipt](../migration/reports/c04-playoff-reads.md) records contracts and verification evidence.
 
+Market public reads migration: C05 Market public reads (catalogue listings, transfers, duels, stats, analytics, sections, queries, mappers and services)
+are implemented and verified on branch `integration/market-reads-migration` (awaiting independent review before merge). The
+[C05 receipt](../migration/reports/c05-market-reads.md) records contracts and verification evidence.
+
 | Domains                                                  | Status / next boundary                                                                           |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified               |
@@ -53,7 +57,7 @@ are implemented and verified on branch `integration/playoffs-migration`. The
 | Predictions                                              | Complete read experience implemented and verified; integration tracked in PR #36                 |
 | Playoffs                                                 | Complete read experience implemented and verified; leaderboard, detail and scoring feature-owned |
 | Schedule                                                 | Map uses Matches; squad overlay remains legacy                                                   |
-| Market public reads                                      | Legacy analytics; separate from private operations                                               |
+| Market public reads                                      | Complete public read experience implemented and verified on branch; awaiting independent review  |
 | Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                          |
 | Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                           |
 | Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                              |

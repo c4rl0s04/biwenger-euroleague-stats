@@ -3,6 +3,7 @@ import path from 'node:path';
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
 import { assertFixtureTarget } from './safety.mjs';
+import { marketFixtureStatements } from './market-fixture.mjs';
 
 const connectionString = process.env.E2E_DATABASE_URL;
 assertFixtureTarget(connectionString, process.env);
@@ -91,6 +92,11 @@ try {
   await client.query(
     "INSERT INTO tournament_fixtures (id,season_id,tournament_id,phase_id,round_name,round_id,home_user_id,away_user_id,home_score,away_score,date,status) VALUES (99501,'2025-26',99301,99401,'Round 1',1,'99001','99002',90,70,1700000000,'finished'),(99502,'2025-26',99301,99401,'Round 2',2,'99002','99001',NULL,NULL,1700600000,'active'),(99503,'2025-26',99302,99402,'Final',1,'99001','99002',80,75,1700000000,'finished')"
   );
+  if (process.env.E2E_FIXTURE_SCENARIO === 'market') {
+    for (const [sql] of marketFixtureStatements) await client.query(sql);
+  } else if (process.env.E2E_FIXTURE_SCENARIO && process.env.E2E_FIXTURE_SCENARIO !== 'default') {
+    throw new Error('Unknown disposable fixture.');
+  }
   await client.query('COMMIT');
   console.log('Disposable E2E schema and synthetic league fixture ready.');
 } catch (error) {

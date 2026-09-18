@@ -93,12 +93,13 @@ the release receipt distinguishes local checks from integration and deployment.
 1. Migrate the manager directory and remaining manager analytics separately from the
    completed Profile read experience.
 2. Tournaments read slice integrated via PR #35.
-3. Predictions read slice implemented and verified on `integration/predictions-migration`; integration tracked in PR #36.
-4. Playoffs read slice implemented and verified on branch `integration/playoffs-migration`; distinct scoring rules preserved.
-5. Migrate Schedule, public Market reads, Dashboard, Compare, Home and News compositions
+3. Predictions read slice integrated via PR #36.
+4. Playoffs read slice integrated via PR #37.
+5. Market public reads slice implemented and locally verified on branch `integration/market-reads-migration` (awaiting independent review).
+6. Migrate Schedule, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
-6. Move Season Review's pure engine/artifact readers into an explicit feature boundary.
-7. Finish application-shell/shared-UI ownership and remove obsolete global adapters only
+7. Move Season Review's pure engine/artifact readers into an explicit feature boundary.
+8. Finish application-shell/shared-UI ownership and remove obsolete global adapters only
    after checking all consumers. Evaluate canonical API names without deleting legacy URLs.
 
 Existing code references: [legacy queries](../../src/lib/db/queries),

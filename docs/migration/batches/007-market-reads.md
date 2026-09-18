@@ -1,16 +1,18 @@
 ---
 title: Batch 007 — Public Market reads
-description: Blocked planning placeholder requiring a source-backed assignment before execution.
+description: Historical worker placeholder superseded by the completed C05 read slice.
 audience:
   - agent
   - maintainer
-status: draft
+status: active
 ---
 
 # Public Market reads
 
-**DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
-Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
+**IMPLEMENTED AND LOCALLY VERIFIED / AWAITING INDEPENDENT REVIEW — do not dispatch a duplicate migration.**
+The Market public read slice is implemented and verified on branch `integration/market-reads-migration`,
+awaiting independent review before merge to main. See the [C05 implementation and acceptance receipt](../reports/c05-market-reads.md).
+The following notes preserve the original worker-planning context.
 
 - Intended scope: Establish ownership only for demonstrably public Market statistical reads.
 - Required discovery: Trace identity and provider calls before scoping. Freeze private operations, link state, credentials and transaction actions; report inseparable mixed flows.

@@ -2,3 +2,8 @@
 .maplibregl-canvas {
   display: none !important;
 }
+
+/* Market rolling calendar dates shift daily; keep this stabilization scoped to Market only. */
+#tendencias-y-analisis .recharts-xAxis text {
+  visibility: hidden !important;
+}
