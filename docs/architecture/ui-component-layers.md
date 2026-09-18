@@ -19,6 +19,7 @@ This note does not authorize starting that pass, redesigning screens or changing
 
 The [application layers](application-layers.md) govern data ownership and feature boundaries.
 The [design context](../product/design-system.md) remains the authority for current styling.
+The [UI foundation v1](ui-foundation-v1.md) turns this target into the initial implementation direction for new UI work without authorizing a global legacy-UI migration.
 
 ## Layers, from foundations to complete screens
 
