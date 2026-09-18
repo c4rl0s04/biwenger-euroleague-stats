@@ -8,7 +8,7 @@ import {
 } from '@/lib/db/queries/features/home-feed';
 import { queryHomeSeasonMetadata } from '@/lib/db/queries/features/home-summary';
 import { getCurrentRoundState } from '@/lib/db/queries/competition/rounds';
-import { getPersonalizedAlerts } from '@/lib/db/queries/core/users';
+import { getManagerPersonalizedAlerts } from '@/features/managers/server';
 import { decodeHomeFeedCursor, encodeHomeFeedCursor } from '@/lib/home/cursor';
 import {
   HOME_FEED_PAGE_SIZE,
@@ -360,7 +360,7 @@ export async function getHomeSummary(userId: string): Promise<HomeSummary> {
     queryHomeSeasonMetadata(),
     getAppStandings(),
     getCurrentRoundState(),
-    getPersonalizedAlerts(userId, 3).catch(() => []),
+    getManagerPersonalizedAlerts(userId, 3).catch(() => []),
   ]);
 
   const user = standings.find((item) => String(item.user_id) === String(userId));

@@ -6,11 +6,29 @@ describe('Manager read ownership', () => {
     expect(source('./public.ts')).not.toMatch(/server|queries|lib\/db/);
     expect(source('./server.ts').startsWith("import 'server-only';")).toBe(true);
     expect(source('./models/manager-reads.ts')).not.toMatch(/\bany\b|lib\/db|queries/);
+    expect(source('./models/manager-directory.ts')).not.toMatch(/\bany\b|lib\/db|queries/);
+    expect(source('./models/manager-performance.ts')).not.toMatch(/\bany\b|lib\/db|queries/);
+    expect(source('./models/manager-preparation.ts')).not.toMatch(/\bany\b|lib\/db|queries/);
   });
   it.each(['rounds', 'stats', 'squad'])(
     'routes legacy %s HTTP calls to Managers without changing identity policy',
     (route) => {
       const file = source('../../app/api/player/' + route + '/route.ts');
+      expect(file).toContain('@/features/managers/server');
+      expect(file).toContain('getRequestUserId(request)');
+      expect(file).toContain('privateJsonResponse(');
+    }
+  );
+  it('routes GET /api/users to Managers with public caching', () => {
+    const file = source('../../app/api/users/route.ts');
+    expect(file).toContain('@/features/managers/server');
+    expect(file).toContain('successResponse(');
+    expect(file).toContain('CACHE_DURATIONS.LONG');
+  });
+  it.each(['captain-stats', 'home-away', 'captain-suggest'])(
+    'routes dashboard %s HTTP calls to Managers preserving identity and private caching',
+    (route) => {
+      const file = source('../../app/api/dashboard/' + route + '/route.ts');
       expect(file).toContain('@/features/managers/server');
       expect(file).toContain('getRequestUserId(request)');
       expect(file).toContain('privateJsonResponse(');

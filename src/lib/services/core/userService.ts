@@ -5,8 +5,8 @@ import 'server-only';
  * Handles business logic related to users/participants
  */
 
+import { getManagerDirectory } from '@/features/managers/server';
 import {
-  getAllUsers,
   getUserSeasonStats,
   getUserSquadDetails,
   getUserRecentRounds,
@@ -18,7 +18,7 @@ import {
  * @returns List of users
  */
 export async function fetchAllUsers() {
-  return await getAllUsers();
+  return await getManagerDirectory();
 }
 
 export async function fetchUserSeasonStats(userId: string | number) {

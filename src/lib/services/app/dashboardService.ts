@@ -8,12 +8,8 @@ import 'server-only';
  */
 
 import {
-  getCaptainRecommendations,
   getMarketOpportunities,
   getUserSeasonStats,
-  getUserCaptainStats,
-  getUserHomeAwayStats,
-  getPersonalizedAlerts,
   getUserSquadDetails,
   getLeagueAveragePoints,
   getLastRoundMVPs,
@@ -32,6 +28,12 @@ import {
   resolveRoundIdByPolicy,
 } from '../../db';
 import {
+  getManagerCaptainStats,
+  getManagerHomeAwayStats,
+  getManagerCaptainRecommendations,
+  getManagerPersonalizedAlerts,
+} from '@/features/managers/server';
+import {
   getDashboardPlayerBirthdays,
   getDashboardRisingStars,
   getDashboardTopPlayers,
@@ -43,11 +45,11 @@ import { CONFIG } from '../../config';
 // These wrap query functions 1:1 for consistent service layer usage
 
 export async function fetchCaptainStats(userId: string | number) {
-  return await getUserCaptainStats(userId);
+  return await getManagerCaptainStats(userId);
 }
 
 export async function fetchHomeAwayStats(userId: string | number) {
-  return await getUserHomeAwayStats(userId);
+  return await getManagerHomeAwayStats(userId);
 }
 
 export async function fetchLeagueAveragePoints() {
@@ -83,7 +85,7 @@ export async function fetchTopPlayersByForm(limit: number = 5, rounds: number = 
 }
 
 export async function fetchCaptainRecommendations(userId: string | number, limit: number = 6) {
-  return await getCaptainRecommendations(userId, limit);
+  return await getManagerCaptainRecommendations(userId, limit);
 }
 
 export async function fetchMarketOpportunities(limit: number = 6) {
@@ -110,7 +112,7 @@ export async function getNextRoundData(userId: string | number | null = null) {
     await Promise.all([
       getCurrentRoundState(),
       getDashboardTopPlayersByForm(6, 3),
-      userId ? getCaptainRecommendations(userId, 6) : [],
+      userId ? getManagerCaptainRecommendations(userId, 6) : [],
       getMarketOpportunities(6),
       targetId ? getRoundDetails(targetId) : null,
     ]);
@@ -258,9 +260,9 @@ export async function getUserDashboardData(userId: string | number) {
   const [seasonStats, captainStats, homeAwayStats, alerts, squadDetails, leaderGap] =
     await Promise.all([
       getUserSeasonStats(userId),
-      getUserCaptainStats(userId),
-      getUserHomeAwayStats(userId),
-      getPersonalizedAlerts(userId, 5),
+      getManagerCaptainStats(userId),
+      getManagerHomeAwayStats(userId),
+      getManagerPersonalizedAlerts(userId, 5),
       getUserSquadDetails(userId),
       getLeaderComparison(String(userId)),
     ]);
@@ -318,7 +320,7 @@ export async function getRecentActivityData(userId: string | number | null = nul
     getRecentTransfers(8),
     getSignificantPriceChanges(24, 500000),
     getRecentRecords(),
-    userId ? getPersonalizedAlerts(userId, 5) : [],
+    userId ? getManagerPersonalizedAlerts(userId, 5) : [],
   ]);
 
   return {

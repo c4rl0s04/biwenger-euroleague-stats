@@ -1,7 +1,12 @@
 import { pool as pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
-import { getPlayerFormMap } from './playerForm';
-import { readManagerDirectory } from './manager-directory';
+import {
+  getManagerDirectory,
+  getManagerCaptainStats,
+  getManagerHomeAwayStats,
+  getManagerCaptainRecommendations,
+  getManagerPersonalizedAlerts,
+} from '@/features/managers/server';
 
 export interface User {
   id: number;
@@ -81,7 +86,7 @@ export interface PersonalizedAlert {
 export async function getAllUsers(): Promise<User[]> {
   // Preserve the legacy declaration for unmigrated callers; runtime text IDs
   // and nullable names/icons are not coerced. New boundaries model them exactly.
-  return (await readManagerDirectory()) as unknown as User[];
+  return (await getManagerDirectory()) as unknown as User[];
 }
 
 /**
@@ -160,115 +165,14 @@ export { getManagerSquadData as getUserSquadDetails } from '@/features/managers/
  * Get user's captain statistics
  */
 export async function getUserCaptainStats(userId: number | string): Promise<CaptainStats> {
-  const seasonId = await resolveReadSeasonId();
-  const overallQuery = `
-    SELECT 
-      COUNT(DISTINCT l.round_id) as total_rounds,
-      SUM(COALESCE(prs.fantasy_points, 0)) as extra_points,
-      AVG(COALESCE(prs.fantasy_points, 0)) as avg_points
-    FROM lineups l
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-  `;
-  const overallRes = await (pgClient as any).query(overallQuery, [userId, seasonId]);
-  const overall = overallRes.rows[0];
-
-  const mostUsedQuery = `
-    SELECT 
-      p.id as player_id,
-      p.name,
-      COUNT(DISTINCT l.round_id) as times_captain,
-      AVG(COALESCE(prs.fantasy_points, 0)) as avg_as_captain,
-      SUM(COALESCE(prs.fantasy_points, 0)) as total_as_captain
-    FROM lineups l
-    JOIN players p ON l.player_id = p.id
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-    GROUP BY l.player_id, p.id, p.name
-    ORDER BY times_captain DESC, avg_as_captain DESC
-  `;
-  const mostUsedRes = await (pgClient as any).query(mostUsedQuery, [userId, seasonId]);
-  const mostUsed = mostUsedRes.rows;
-
-  const bestQuery = `
-    SELECT 
-      p.name,
-      COALESCE(prs.fantasy_points, 0) as points
-    FROM lineups l
-    JOIN players p ON l.player_id = p.id
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-    ORDER BY points DESC
-    LIMIT 1
-  `;
-  const bestRes = await (pgClient as any).query(bestQuery, [userId, seasonId]);
-  const best = bestRes.rows[0];
-
-  const worstQuery = `
-    SELECT 
-      p.name,
-      COALESCE(prs.fantasy_points, 0) as points
-    FROM lineups l
-    JOIN players p ON l.player_id = p.id
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-    ORDER BY points ASC
-    LIMIT 1
-  `;
-  const worstRes = await (pgClient as any).query(worstQuery, [userId, seasonId]);
-  const worst = worstRes.rows[0];
-
-  return {
-    total_rounds: overall ? parseInt(overall.total_rounds) : 0,
-    extra_points: overall ? parseInt(overall.extra_points) : 0,
-    avg_points: overall ? parseFloat(overall.avg_points) : 0,
-    most_used: mostUsed.map((m: any) => ({
-      ...m,
-      avg_as_captain: parseFloat(m.avg_as_captain) || 0,
-      times_captain: parseInt(m.times_captain) || 0,
-      total_as_captain: parseInt(m.total_as_captain) || 0,
-    })),
-    best_round: best
-      ? { name: best.name, points: parseInt(best.points) || 0 }
-      : { name: '', points: 0 },
-    worst_round: worst
-      ? { name: worst.name, points: parseInt(worst.points) || 0 }
-      : { name: '', points: 0 },
-  };
+  return (await getManagerCaptainStats(userId)) as unknown as CaptainStats;
 }
 
 /**
  * Get user's home/away performance
  */
 export async function getUserHomeAwayStats(userId: number | string): Promise<HomeAwayStats> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT 
-      SUM(points_home) as total_home,
-      SUM(points_away) as total_away,
-      SUM(played_home) as games_home,
-      SUM(played_away) as games_away
-    FROM player_seasons
-    WHERE season_id = $1 AND owner_id = $2
-  `;
-
-  const statsRes = await (pgClient as any).query(query, [seasonId, userId]);
-  const stats = statsRes.rows[0];
-
-  // Safely parse
-  const totalHome = parseInt(stats.total_home) || 0;
-  const totalAway = parseInt(stats.total_away) || 0;
-  const gamesHome = parseInt(stats.games_home) || 0;
-  const gamesAway = parseInt(stats.games_away) || 0;
-
-  return {
-    total_home: totalHome,
-    total_away: totalAway,
-    avg_home: gamesHome > 0 ? Math.round(totalHome / gamesHome) : 0,
-    avg_away: gamesAway > 0 ? Math.round(totalAway / gamesAway) : 0,
-    difference_pct:
-      totalHome > 0 && totalAway > 0 ? Math.round(((totalHome - totalAway) / totalAway) * 100) : 0,
-  };
+  return (await getManagerHomeAwayStats(userId)) as unknown as HomeAwayStats;
 }
 
 /**
@@ -278,59 +182,10 @@ export async function getCaptainRecommendations(
   userId: number | string,
   limit: number = 3
 ): Promise<CaptainRecommendation[]> {
-  const seasonId = await resolveReadSeasonId();
-  // 1. Fetch user squad basic info
-  const squadQuery = `
-    SELECT 
-      p.id as player_id,
-      p.name,
-      ps.position,
-      ps.team_id as team_id,
-      t.name as team
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON ps.team_id = t.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2
-  `;
-
-  const [squadRows, formMap] = await Promise.all([
-    (pgClient as any).query(squadQuery, [seasonId, userId]).then((r: any) => r.rows),
-    getPlayerFormMap(3), // Match the original "last 3 rounds" window
-  ]);
-
-  // 2. Merge with form data and provide recommendations
-  return squadRows
-    .map((row: any) => {
-      const form = formMap.get(Number(row.player_id));
-      const avg = form?.avg_form_score ?? null;
-
-      let formLabel = 'Forma baja';
-      if (avg == null) formLabel = 'Sin datos';
-      else if (avg >= 25) formLabel = 'Excelente forma';
-      else if (avg >= 18) formLabel = 'Buena forma';
-      else if (avg >= 12) formLabel = 'Forma regular';
-
-      return {
-        ...row,
-        avg_recent_points: avg,
-        recent_games: form
-          ? form.recent_scores
-              .split(',')
-              .map((s) => s.trim())
-              .filter((s) => s !== 'X' && s !== '?' && s !== '').length
-          : 0,
-        recent_scores: form?.recent_scores || '',
-        form_label: formLabel,
-      } as CaptainRecommendation;
-    })
-    .filter((p: CaptainRecommendation) => p.avg_recent_points != null && p.avg_recent_points > 0)
-    .sort((a: CaptainRecommendation, b: CaptainRecommendation) => {
-      if (a.avg_recent_points == null && b.avg_recent_points == null) return 0;
-      if (a.avg_recent_points == null) return 1;
-      if (b.avg_recent_points == null) return -1;
-      return b.avg_recent_points - a.avg_recent_points;
-    })
-    .slice(0, limit);
+  return (await getManagerCaptainRecommendations(
+    userId,
+    limit
+  )) as unknown as CaptainRecommendation[];
 }
 
 /**
@@ -340,79 +195,7 @@ export async function getPersonalizedAlerts(
   userId: number | string,
   limit: number = 5
 ): Promise<PersonalizedAlert[]> {
-  const seasonId = await resolveReadSeasonId();
-  const alerts: PersonalizedAlert[] = [];
-
-  const priceGainsQuery = `
-    SELECT 
-      p.name,
-      ps.price_increment AS price_increment
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND ps.price_increment > 500000
-    ORDER BY price_increment DESC
-    LIMIT 2
-  `;
-  const priceGains = (await (pgClient as any).query(priceGainsQuery, [seasonId, userId])).rows;
-  priceGains.forEach((player: any) => {
-    alerts.push({
-      type: 'price_gain',
-      icon: '📈',
-      message: `Tu jugador ${player.name} ha ganado ${(parseInt(player.price_increment) / 1000000).toFixed(2)}M€`,
-      severity: 'success',
-    });
-  });
-
-  const priceLossesQuery = `
-    SELECT 
-      p.name,
-      ps.price_increment AS price_increment
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND ps.price_increment < -500000
-    ORDER BY price_increment ASC
-    LIMIT 2
-  `;
-  const priceLosses = (await (pgClient as any).query(priceLossesQuery, [seasonId, userId])).rows;
-  priceLosses.forEach((player: any) => {
-    alerts.push({
-      type: 'price_loss',
-      icon: '📉',
-      message: `Tu jugador ${player.name} ha perdido ${Math.abs(parseInt(player.price_increment) / 1000000).toFixed(2)}M€`,
-      severity: 'warning',
-    });
-  });
-
-  const recentGoodFormQuery = `
-    WITH LastRound AS (
-      SELECT MAX(round_id) as max_round
-      FROM player_round_stats
-      WHERE season_id = $1
-    )
-    SELECT 
-      p.name,
-      prs.fantasy_points
-    FROM player_round_stats prs
-    JOIN players p ON prs.player_id = p.id
-    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    WHERE prs.season_id = $1
-      AND ps.owner_id = $2
-      AND prs.round_id = (SELECT max_round FROM LastRound)
-      AND prs.fantasy_points >= 25
-    ORDER BY prs.fantasy_points DESC
-    LIMIT 1
-  `;
-  const goodForm = (await (pgClient as any).query(recentGoodFormQuery, [seasonId, userId])).rows[0];
-  if (goodForm) {
-    alerts.push({
-      type: 'good_performance',
-      icon: '⭐',
-      message: `¡${goodForm.name} brilló con ${goodForm.fantasy_points} puntos!`,
-      severity: 'info',
-    });
-  }
-
-  return alerts.slice(0, limit);
+  return (await getManagerPersonalizedAlerts(userId, limit)) as unknown as PersonalizedAlert[];
 }
 
 /**

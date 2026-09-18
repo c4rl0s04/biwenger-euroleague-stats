@@ -7,14 +7,14 @@ const {
   queryHomeRoundHighlightPlayers,
   queryHomeSeasonMetadata,
   getCurrentRoundState,
-  getPersonalizedAlerts,
+  getManagerPersonalizedAlerts,
   getAppStandings,
 } = vi.hoisted(() => ({
   queryHomeActivityRows: vi.fn(),
   queryHomeRoundHighlightPlayers: vi.fn(),
   queryHomeSeasonMetadata: vi.fn(),
   getCurrentRoundState: vi.fn(),
-  getPersonalizedAlerts: vi.fn(),
+  getManagerPersonalizedAlerts: vi.fn(),
   getAppStandings: vi.fn(),
 }));
 
@@ -25,7 +25,7 @@ vi.mock('@/lib/db/queries/features/home-feed', () => ({
 }));
 vi.mock('@/lib/db/queries/features/home-summary', () => ({ queryHomeSeasonMetadata }));
 vi.mock('@/lib/db/queries/competition/rounds', () => ({ getCurrentRoundState }));
-vi.mock('@/lib/db/queries/core/users', () => ({ getPersonalizedAlerts }));
+vi.mock('@/features/managers/server', () => ({ getManagerPersonalizedAlerts }));
 vi.mock('./appShellService', () => ({ getAppStandings }));
 
 import { getHomeFeedPage, getHomeSummary } from './homeService';
@@ -435,7 +435,7 @@ describe('mobile home feed service', () => {
       },
     ]);
     getCurrentRoundState.mockResolvedValue({ currentRound: null, nextRound: null });
-    getPersonalizedAlerts.mockResolvedValue([]);
+    getManagerPersonalizedAlerts.mockResolvedValue([]);
 
     const summary = await getHomeSummary('7');
 
@@ -474,7 +474,7 @@ describe('mobile home feed service', () => {
       },
       nextRound: null,
     });
-    getPersonalizedAlerts.mockResolvedValue([
+    getManagerPersonalizedAlerts.mockResolvedValue([
       { type: 'price_gain', message: 'Subida de valor', severity: 'success' },
     ]);
 

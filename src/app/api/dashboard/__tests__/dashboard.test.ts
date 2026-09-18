@@ -5,6 +5,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+vi.mock('server-only', () => ({}));
+
+const managerMocks = vi.hoisted(() => ({
+  getManagerCaptainStats: vi.fn(),
+  getManagerHomeAwayStats: vi.fn(),
+  getManagerCaptainRecommendations: vi.fn(),
+}));
+
+vi.mock('@/features/managers/server', () => ({
+  getManagerCaptainStats: managerMocks.getManagerCaptainStats,
+  getManagerHomeAwayStats: managerMocks.getManagerHomeAwayStats,
+  getManagerCaptainRecommendations: managerMocks.getManagerCaptainRecommendations,
+}));
+
 // --- Mock all services ---
 vi.mock('@/lib/services', () => ({
   fetchPlayerBirthdays: vi.fn(),
@@ -136,7 +150,7 @@ describe('dashboard route contract coverage', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('covers captain-stats success and missing userId error envelope', async () => {
-    vi.mocked(services.fetchCaptainStats).mockResolvedValue({ total: 1 } as any);
+    managerMocks.getManagerCaptainStats.mockResolvedValue({ total: 1 } as any);
 
     const { GET } = await import('@/app/api/dashboard/captain-stats/route');
     const okResponse = await GET(
@@ -153,7 +167,7 @@ describe('dashboard route contract coverage', () => {
   });
 
   it('covers captain-suggest success envelope', async () => {
-    vi.mocked(services.fetchCaptainRecommendations).mockResolvedValue([{ id: 1 }] as any);
+    managerMocks.getManagerCaptainRecommendations.mockResolvedValue([{ id: 1 }] as any);
 
     const { GET } = await import('@/app/api/dashboard/captain-suggest/route');
     const response = await GET(
@@ -167,7 +181,7 @@ describe('dashboard route contract coverage', () => {
   });
 
   it('covers home-away and leader-gap user-scoped routes', async () => {
-    vi.mocked(services.fetchHomeAwayStats).mockResolvedValue({ home: 1 } as any);
+    managerMocks.getManagerHomeAwayStats.mockResolvedValue({ home: 1 } as any);
     vi.mocked(services.fetchLeaderComparison).mockResolvedValue({ gap: 10 } as any);
 
     const homeAway = await import('@/app/api/dashboard/home-away/route');
