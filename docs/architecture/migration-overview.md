@@ -41,7 +41,7 @@ fully migrated into `src/features/tournaments` and integrated on main via PR #35
 | Domain      | Established boundary                                                                              | Still to migrate                                                            |
 | ----------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | Rounds      | Calendar plus historical results, analysis, APIs and desktop/phone screens (completed read slice) | Separate Home/Dashboard last-round projections and legacy consumer adapters |
-| Managers    | Complete Profile read flow, squad, season statistics, recent rounds and contributors              | Directory and other manager analytics                                       |
+| Managers    | Complete Profile, Directory, Captain Stats, Home/Away, Captain Recommendations and Alerts         | Lineup squad mutations, private operations (reserved for security gate)     |
 | Standings   | Complete rankings, progression, performance/draft analytics, APIs and screens                     | External leader-gap/league-average consumers and adapter retirement         |
 | Search      | Validated directory search, typed results and HTTP service                                        | Shell/search interaction ownership during the shared UI pass                |
 | Tournaments | Complete read experience (catalogue, detail, sections, bracket and analytics)                     | External Profile consumer compatibility maintained                          |
@@ -90,12 +90,12 @@ the release receipt distinguishes local checks from integration and deployment.
 
 ## Remaining regular migration work
 
-1. Migrate the manager directory and remaining manager analytics separately from the
-   completed Profile read experience.
+1. Managers remaining reads slice (directory, captain stats, home/away, recommendations and alerts)
+   implemented and verified on branch `integration/managers-remaining-reads-migration` (awaiting review).
 2. Tournaments read slice integrated via PR #35.
 3. Predictions read slice integrated via PR #36.
 4. Playoffs read slice integrated via PR #37.
-5. Market public reads slice implemented and locally verified on branch `integration/market-reads-migration` (awaiting independent review).
+5. Market public reads slice integrated via PR #38.
 6. Migrate Schedule, Dashboard, Compare, Home and News compositions
    after their owning read services are ready.
 7. Move Season Review's pure engine/artifact readers into an explicit feature boundary.
