@@ -167,7 +167,7 @@ describe('dashboard route contract coverage', () => {
   });
 
   it('covers captain-suggest success envelope', async () => {
-    vi.mocked(services.fetchCaptainRecommendations).mockResolvedValue([{ id: 1 }] as any);
+    managerMocks.getManagerCaptainRecommendations.mockResolvedValue([{ id: 1 }] as any);
 
     const { GET } = await import('@/app/api/dashboard/captain-suggest/route');
     const response = await GET(

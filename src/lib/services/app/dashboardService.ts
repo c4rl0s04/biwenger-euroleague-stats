@@ -8,10 +8,8 @@ import 'server-only';
  */
 
 import {
-  getCaptainRecommendations,
   getMarketOpportunities,
   getUserSeasonStats,
-  getPersonalizedAlerts,
   getUserSquadDetails,
   getLeagueAveragePoints,
   getLastRoundMVPs,
@@ -29,7 +27,12 @@ import {
   getRoundDetails,
   resolveRoundIdByPolicy,
 } from '../../db';
-import { getManagerCaptainStats, getManagerHomeAwayStats } from '@/features/managers/server';
+import {
+  getManagerCaptainStats,
+  getManagerHomeAwayStats,
+  getManagerCaptainRecommendations,
+  getManagerPersonalizedAlerts,
+} from '@/features/managers/server';
 import {
   getDashboardPlayerBirthdays,
   getDashboardRisingStars,
@@ -82,7 +85,7 @@ export async function fetchTopPlayersByForm(limit: number = 5, rounds: number = 
 }
 
 export async function fetchCaptainRecommendations(userId: string | number, limit: number = 6) {
-  return await getCaptainRecommendations(userId, limit);
+  return await getManagerCaptainRecommendations(userId, limit);
 }
 
 export async function fetchMarketOpportunities(limit: number = 6) {
@@ -109,7 +112,7 @@ export async function getNextRoundData(userId: string | number | null = null) {
     await Promise.all([
       getCurrentRoundState(),
       getDashboardTopPlayersByForm(6, 3),
-      userId ? getCaptainRecommendations(userId, 6) : [],
+      userId ? getManagerCaptainRecommendations(userId, 6) : [],
       getMarketOpportunities(6),
       targetId ? getRoundDetails(targetId) : null,
     ]);
@@ -259,7 +262,7 @@ export async function getUserDashboardData(userId: string | number) {
       getUserSeasonStats(userId),
       getManagerCaptainStats(userId),
       getManagerHomeAwayStats(userId),
-      getPersonalizedAlerts(userId, 5),
+      getManagerPersonalizedAlerts(userId, 5),
       getUserSquadDetails(userId),
       getLeaderComparison(String(userId)),
     ]);
@@ -317,7 +320,7 @@ export async function getRecentActivityData(userId: string | number | null = nul
     getRecentTransfers(8),
     getSignificantPriceChanges(24, 500000),
     getRecentRecords(),
-    userId ? getPersonalizedAlerts(userId, 5) : [],
+    userId ? getManagerPersonalizedAlerts(userId, 5) : [],
   ]);
 
   return {

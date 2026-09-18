@@ -1,10 +1,11 @@
 import { pool as pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
-import { getPlayerFormMap } from './playerForm';
 import {
   getManagerDirectory,
   getManagerCaptainStats,
   getManagerHomeAwayStats,
+  getManagerCaptainRecommendations,
+  getManagerPersonalizedAlerts,
 } from '@/features/managers/server';
 
 export interface User {
@@ -181,59 +182,10 @@ export async function getCaptainRecommendations(
   userId: number | string,
   limit: number = 3
 ): Promise<CaptainRecommendation[]> {
-  const seasonId = await resolveReadSeasonId();
-  // 1. Fetch user squad basic info
-  const squadQuery = `
-    SELECT 
-      p.id as player_id,
-      p.name,
-      ps.position,
-      ps.team_id as team_id,
-      t.name as team
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    LEFT JOIN teams t ON ps.team_id = t.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2
-  `;
-
-  const [squadRows, formMap] = await Promise.all([
-    (pgClient as any).query(squadQuery, [seasonId, userId]).then((r: any) => r.rows),
-    getPlayerFormMap(3), // Match the original "last 3 rounds" window
-  ]);
-
-  // 2. Merge with form data and provide recommendations
-  return squadRows
-    .map((row: any) => {
-      const form = formMap.get(Number(row.player_id));
-      const avg = form?.avg_form_score ?? null;
-
-      let formLabel = 'Forma baja';
-      if (avg == null) formLabel = 'Sin datos';
-      else if (avg >= 25) formLabel = 'Excelente forma';
-      else if (avg >= 18) formLabel = 'Buena forma';
-      else if (avg >= 12) formLabel = 'Forma regular';
-
-      return {
-        ...row,
-        avg_recent_points: avg,
-        recent_games: form
-          ? form.recent_scores
-              .split(',')
-              .map((s) => s.trim())
-              .filter((s) => s !== 'X' && s !== '?' && s !== '').length
-          : 0,
-        recent_scores: form?.recent_scores || '',
-        form_label: formLabel,
-      } as CaptainRecommendation;
-    })
-    .filter((p: CaptainRecommendation) => p.avg_recent_points != null && p.avg_recent_points > 0)
-    .sort((a: CaptainRecommendation, b: CaptainRecommendation) => {
-      if (a.avg_recent_points == null && b.avg_recent_points == null) return 0;
-      if (a.avg_recent_points == null) return 1;
-      if (b.avg_recent_points == null) return -1;
-      return b.avg_recent_points - a.avg_recent_points;
-    })
-    .slice(0, limit);
+  return (await getManagerCaptainRecommendations(
+    userId,
+    limit
+  )) as unknown as CaptainRecommendation[];
 }
 
 /**
@@ -243,79 +195,7 @@ export async function getPersonalizedAlerts(
   userId: number | string,
   limit: number = 5
 ): Promise<PersonalizedAlert[]> {
-  const seasonId = await resolveReadSeasonId();
-  const alerts: PersonalizedAlert[] = [];
-
-  const priceGainsQuery = `
-    SELECT 
-      p.name,
-      ps.price_increment AS price_increment
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND ps.price_increment > 500000
-    ORDER BY price_increment DESC
-    LIMIT 2
-  `;
-  const priceGains = (await (pgClient as any).query(priceGainsQuery, [seasonId, userId])).rows;
-  priceGains.forEach((player: any) => {
-    alerts.push({
-      type: 'price_gain',
-      icon: '📈',
-      message: `Tu jugador ${player.name} ha ganado ${(parseInt(player.price_increment) / 1000000).toFixed(2)}M€`,
-      severity: 'success',
-    });
-  });
-
-  const priceLossesQuery = `
-    SELECT 
-      p.name,
-      ps.price_increment AS price_increment
-    FROM player_seasons ps
-    JOIN players p ON ps.player_id = p.id
-    WHERE ps.season_id = $1 AND ps.owner_id = $2 AND ps.price_increment < -500000
-    ORDER BY price_increment ASC
-    LIMIT 2
-  `;
-  const priceLosses = (await (pgClient as any).query(priceLossesQuery, [seasonId, userId])).rows;
-  priceLosses.forEach((player: any) => {
-    alerts.push({
-      type: 'price_loss',
-      icon: '📉',
-      message: `Tu jugador ${player.name} ha perdido ${Math.abs(parseInt(player.price_increment) / 1000000).toFixed(2)}M€`,
-      severity: 'warning',
-    });
-  });
-
-  const recentGoodFormQuery = `
-    WITH LastRound AS (
-      SELECT MAX(round_id) as max_round
-      FROM player_round_stats
-      WHERE season_id = $1
-    )
-    SELECT 
-      p.name,
-      prs.fantasy_points
-    FROM player_round_stats prs
-    JOIN players p ON prs.player_id = p.id
-    JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
-    WHERE prs.season_id = $1
-      AND ps.owner_id = $2
-      AND prs.round_id = (SELECT max_round FROM LastRound)
-      AND prs.fantasy_points >= 25
-    ORDER BY prs.fantasy_points DESC
-    LIMIT 1
-  `;
-  const goodForm = (await (pgClient as any).query(recentGoodFormQuery, [seasonId, userId])).rows[0];
-  if (goodForm) {
-    alerts.push({
-      type: 'good_performance',
-      icon: '⭐',
-      message: `¡${goodForm.name} brilló con ${goodForm.fantasy_points} puntos!`,
-      severity: 'info',
-    });
-  }
-
-  return alerts.slice(0, limit);
+  return (await getManagerPersonalizedAlerts(userId, limit)) as unknown as PersonalizedAlert[];
 }
 
 /**

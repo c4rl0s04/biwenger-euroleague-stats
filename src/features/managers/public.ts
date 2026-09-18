@@ -10,6 +10,12 @@ export type { ManagerContributorViewModel } from './models/manager-contributors'
 export type { ManagerDirectoryViewModel } from './models/manager-directory';
 export type { ManagerCaptainStats, ManagerHomeAwayStats } from './models/manager-performance';
 export type {
+  ManagerCaptainRecommendation,
+  ManagerPersonalizedAlert,
+  ManagerAlertType,
+  ManagerAlertSeverity,
+} from './models/manager-preparation';
+export type {
   ManagerProfileResult,
   ManagerProfileDesktop,
   ManagerProfileOverview,

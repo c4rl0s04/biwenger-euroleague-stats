@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { fetchCaptainRecommendations } from '@/lib/services';
+import { getManagerCaptainRecommendations } from '@/features/managers/server';
 import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 import { getRequestUserId } from '@/lib/utils/api-auth';
 
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return errorResponse(userIdValidation.error, 400);
     }
 
-    const data = await fetchCaptainRecommendations(userIdValidation.value, 6);
+    const data = await getManagerCaptainRecommendations(userIdValidation.value, 6);
     return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('Error fetching captain suggestions:', error);

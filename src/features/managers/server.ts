@@ -23,3 +23,8 @@ export {
   getManagerHomeAwayStats,
   MANAGER_PERFORMANCE_POLICY,
 } from './server/services/manager-performance.service';
+export {
+  getManagerCaptainRecommendations,
+  getManagerPersonalizedAlerts,
+  MANAGER_PREPARATION_POLICY,
+} from './server/services/manager-preparation.service';
