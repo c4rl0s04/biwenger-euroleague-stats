@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+@import '../styles/tokens/base-tokens.css';
+@import '../styles/tokens/semantic-tokens.css';
+
 /* ========================================
    BIWENGER STATS - Premium Sports Analytics
    Primary: #fa5001 (Sports Orange)
@@ -7,61 +10,7 @@
    ======================================== */
 
 :root {
-  /* Midnight Obsidian - Pure Black/Slate base */
-  --background: 240 5% 2%;
-  --foreground: 0 0% 98%;
-
-  --card: 240 4% 7%;
-  --card-foreground: 0 0% 98%;
-
-  --popover: 240 4% 9%;
-  --popover-foreground: 0 0% 98%;
-
   --manager-card-bg: linear-gradient(165deg, hsla(240, 4%, 10%, 1), hsla(240, 5%, 2%, 1));
-
-  /* Sports orange primary - #fa5001 */
-  --primary: 19 99% 49%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 240 4% 12%;
-  --secondary-foreground: 0 0% 95%;
-
-  --muted: 240 4% 15%;
-  --muted-foreground: 240 5% 65%;
-
-  --accent: 19 99% 45%;
-  --accent-foreground: 0 0% 100%;
-
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-
-  --border: 240 5% 15%;
-  --input: 240 5% 15%;
-  --ring: 19 99% 49%;
-  --radius: 1rem;
-
-  /* Premium Glow & Glass Tokens */
-  --glow-primary: 0 0 40px hsla(19, 99%, 49%, 0.3);
-  --glow-subtle: 0 0 80px hsla(19, 99%, 49%, 0.08);
-  --glass-border: hsla(0, 0%, 100%, 0.06);
-  --glass-surface: hsla(240, 6%, 7%, 0.7);
-
-  --gradient-card: linear-gradient(165deg, hsla(240, 4%, 10%, 1), hsla(240, 5%, 2%, 1));
-  --gradient-accent: linear-gradient(135deg, #fa5001, #ff8c00);
-  --gradient-mesh:
-    radial-gradient(at 0% 0%, hsla(240, 5%, 15%, 0.1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(240, 4%, 20%, 0.08) 0, transparent 50%),
-    radial-gradient(at 50% 100%, hsla(240, 5%, 10%, 0.05) 0, transparent 50%);
-
-  /* Sidebar tokens */
-  --sidebar-background: 240 10% 2%;
-  --sidebar-foreground: 0 0% 95%;
-  --sidebar-primary: 19 99% 49%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 6% 10%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 240 5% 12%;
-  --sidebar-ring: 19 99% 49%;
 
   /* App chrome and installed-PWA safe areas */
   --app-header-height: 4rem;
@@ -70,25 +19,33 @@
 
 /* Tailwind v4 theme configuration - Ignore "Unknown at rule @theme" lint warnings as this is a v4 feature */
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+  --color-background: hsl(var(--surface-app));
+  --color-foreground: hsl(var(--content-primary));
+
+  --color-card: hsl(var(--surface-card));
+  --color-card-foreground: hsl(var(--content-primary));
+
+  --color-popover: hsl(var(--surface-popover));
+  --color-popover-foreground: hsl(var(--content-primary));
+
+  --color-primary: hsl(var(--action-primary));
+  --color-primary-foreground: hsl(var(--content-on-primary));
+
+  --color-secondary: hsl(var(--surface-secondary));
+  --color-secondary-foreground: hsl(var(--content-secondary));
+
+  --color-muted: hsl(var(--surface-muted));
+  --color-muted-foreground: hsl(var(--content-muted));
+
+  --color-accent: hsl(var(--action-accent));
+  --color-accent-foreground: hsl(var(--content-on-accent));
+
+  --color-destructive: hsl(var(--status-danger));
+  --color-destructive-foreground: hsl(var(--content-on-danger));
+
+  --color-border: hsl(var(--border-default));
+  --color-input: hsl(var(--control-border));
+  --color-ring: hsl(var(--focus-ring));
 
   --font-sans: var(--font-outfit), system-ui, sans-serif;
   --font-display: var(--font-bebas), sans-serif;

@@ -1,0 +1,43 @@
+:root {
+  /* Dark / obsidian surfaces */
+  --color-obsidian-black: 240 10% 2%;
+  --color-obsidian-deepest: 240 5% 2%;
+  --color-obsidian-deep: 240 4% 7%;
+  --color-obsidian-raised: 240 4% 9%;
+  --color-obsidian-panel: 240 4% 10%;
+  --color-obsidian-soft: 240 4% 12%;
+  --color-obsidian-muted: 240 4% 15%;
+
+  /* Cooler slate values currently used */
+  --color-slate-deep: 240 6% 10%;
+  --color-slate-soft: 240 5% 12%;
+  --color-slate-muted: 240 5% 15%;
+  --color-slate-light: 240 5% 65%;
+
+  /* Light neutrals */
+  --color-white-pure: 0 0% 100%;
+  --color-white-bright: 0 0% 98%;
+  --color-white-soft: 0 0% 95%;
+
+  /* Product orange */
+  --color-orange-strong: 19 99% 49%;
+  --color-orange-deep: 19 99% 45%;
+  --color-orange-warm: #ff8c00;
+
+  /* Status */
+  --color-red-strong: 0 84% 60%;
+
+  /* Raw translucent visual values */
+  --overlay-white-faint: hsla(0, 0%, 100%, 0.06);
+  --overlay-obsidian-glass: hsla(240, 6%, 7%, 0.7);
+
+  --overlay-orange-glow: hsla(19, 99%, 49%, 0.3);
+  --overlay-orange-glow-faint: hsla(19, 99%, 49%, 0.08);
+
+  --overlay-obsidian-mesh-strong: hsla(240, 5%, 15%, 0.1);
+  --overlay-obsidian-mesh-medium: hsla(240, 4%, 20%, 0.08);
+  --overlay-obsidian-mesh-soft: hsla(240, 5%, 10%, 0.05);
+
+  /* Existing base radius */
+  --radius-rounded: 1rem;
+}
