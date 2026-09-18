@@ -18,3 +18,8 @@ export {
   getManagerDirectory,
   MANAGER_DIRECTORY_POLICY,
 } from './server/services/manager-directory.service';
+export {
+  getManagerCaptainStats,
+  getManagerHomeAwayStats,
+  MANAGER_PERFORMANCE_POLICY,
+} from './server/services/manager-performance.service';

@@ -8,6 +8,7 @@ export type {
 } from './models/manager-reads';
 export type { ManagerContributorViewModel } from './models/manager-contributors';
 export type { ManagerDirectoryViewModel } from './models/manager-directory';
+export type { ManagerCaptainStats, ManagerHomeAwayStats } from './models/manager-performance';
 export type {
   ManagerProfileResult,
   ManagerProfileDesktop,

@@ -1,7 +1,11 @@
 import { pool as pgClient } from '../../client';
 import { resolveReadSeasonId } from '../../season-context';
 import { getPlayerFormMap } from './playerForm';
-import { getManagerDirectory } from '@/features/managers/server';
+import {
+  getManagerDirectory,
+  getManagerCaptainStats,
+  getManagerHomeAwayStats,
+} from '@/features/managers/server';
 
 export interface User {
   id: number;
@@ -160,115 +164,14 @@ export { getManagerSquadData as getUserSquadDetails } from '@/features/managers/
  * Get user's captain statistics
  */
 export async function getUserCaptainStats(userId: number | string): Promise<CaptainStats> {
-  const seasonId = await resolveReadSeasonId();
-  const overallQuery = `
-    SELECT 
-      COUNT(DISTINCT l.round_id) as total_rounds,
-      SUM(COALESCE(prs.fantasy_points, 0)) as extra_points,
-      AVG(COALESCE(prs.fantasy_points, 0)) as avg_points
-    FROM lineups l
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-  `;
-  const overallRes = await (pgClient as any).query(overallQuery, [userId, seasonId]);
-  const overall = overallRes.rows[0];
-
-  const mostUsedQuery = `
-    SELECT 
-      p.id as player_id,
-      p.name,
-      COUNT(DISTINCT l.round_id) as times_captain,
-      AVG(COALESCE(prs.fantasy_points, 0)) as avg_as_captain,
-      SUM(COALESCE(prs.fantasy_points, 0)) as total_as_captain
-    FROM lineups l
-    JOIN players p ON l.player_id = p.id
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-    GROUP BY l.player_id, p.id, p.name
-    ORDER BY times_captain DESC, avg_as_captain DESC
-  `;
-  const mostUsedRes = await (pgClient as any).query(mostUsedQuery, [userId, seasonId]);
-  const mostUsed = mostUsedRes.rows;
-
-  const bestQuery = `
-    SELECT 
-      p.name,
-      COALESCE(prs.fantasy_points, 0) as points
-    FROM lineups l
-    JOIN players p ON l.player_id = p.id
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-    ORDER BY points DESC
-    LIMIT 1
-  `;
-  const bestRes = await (pgClient as any).query(bestQuery, [userId, seasonId]);
-  const best = bestRes.rows[0];
-
-  const worstQuery = `
-    SELECT 
-      p.name,
-      COALESCE(prs.fantasy_points, 0) as points
-    FROM lineups l
-    JOIN players p ON l.player_id = p.id
-    LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
-    WHERE l.season_id = $2 AND l.user_id = $1 AND l.is_captain = TRUE
-    ORDER BY points ASC
-    LIMIT 1
-  `;
-  const worstRes = await (pgClient as any).query(worstQuery, [userId, seasonId]);
-  const worst = worstRes.rows[0];
-
-  return {
-    total_rounds: overall ? parseInt(overall.total_rounds) : 0,
-    extra_points: overall ? parseInt(overall.extra_points) : 0,
-    avg_points: overall ? parseFloat(overall.avg_points) : 0,
-    most_used: mostUsed.map((m: any) => ({
-      ...m,
-      avg_as_captain: parseFloat(m.avg_as_captain) || 0,
-      times_captain: parseInt(m.times_captain) || 0,
-      total_as_captain: parseInt(m.total_as_captain) || 0,
-    })),
-    best_round: best
-      ? { name: best.name, points: parseInt(best.points) || 0 }
-      : { name: '', points: 0 },
-    worst_round: worst
-      ? { name: worst.name, points: parseInt(worst.points) || 0 }
-      : { name: '', points: 0 },
-  };
+  return (await getManagerCaptainStats(userId)) as unknown as CaptainStats;
 }
 
 /**
  * Get user's home/away performance
  */
 export async function getUserHomeAwayStats(userId: number | string): Promise<HomeAwayStats> {
-  const seasonId = await resolveReadSeasonId();
-  const query = `
-    SELECT 
-      SUM(points_home) as total_home,
-      SUM(points_away) as total_away,
-      SUM(played_home) as games_home,
-      SUM(played_away) as games_away
-    FROM player_seasons
-    WHERE season_id = $1 AND owner_id = $2
-  `;
-
-  const statsRes = await (pgClient as any).query(query, [seasonId, userId]);
-  const stats = statsRes.rows[0];
-
-  // Safely parse
-  const totalHome = parseInt(stats.total_home) || 0;
-  const totalAway = parseInt(stats.total_away) || 0;
-  const gamesHome = parseInt(stats.games_home) || 0;
-  const gamesAway = parseInt(stats.games_away) || 0;
-
-  return {
-    total_home: totalHome,
-    total_away: totalAway,
-    avg_home: gamesHome > 0 ? Math.round(totalHome / gamesHome) : 0,
-    avg_away: gamesAway > 0 ? Math.round(totalAway / gamesAway) : 0,
-    difference_pct:
-      totalHome > 0 && totalAway > 0 ? Math.round(((totalHome - totalAway) / totalAway) * 100) : 0,
-  };
+  return (await getManagerHomeAwayStats(userId)) as unknown as HomeAwayStats;
 }
 
 /**

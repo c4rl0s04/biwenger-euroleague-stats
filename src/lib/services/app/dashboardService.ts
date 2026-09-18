@@ -11,8 +11,6 @@ import {
   getCaptainRecommendations,
   getMarketOpportunities,
   getUserSeasonStats,
-  getUserCaptainStats,
-  getUserHomeAwayStats,
   getPersonalizedAlerts,
   getUserSquadDetails,
   getLeagueAveragePoints,
@@ -31,6 +29,7 @@ import {
   getRoundDetails,
   resolveRoundIdByPolicy,
 } from '../../db';
+import { getManagerCaptainStats, getManagerHomeAwayStats } from '@/features/managers/server';
 import {
   getDashboardPlayerBirthdays,
   getDashboardRisingStars,
@@ -43,11 +42,11 @@ import { CONFIG } from '../../config';
 // These wrap query functions 1:1 for consistent service layer usage
 
 export async function fetchCaptainStats(userId: string | number) {
-  return await getUserCaptainStats(userId);
+  return await getManagerCaptainStats(userId);
 }
 
 export async function fetchHomeAwayStats(userId: string | number) {
-  return await getUserHomeAwayStats(userId);
+  return await getManagerHomeAwayStats(userId);
 }
 
 export async function fetchLeagueAveragePoints() {
@@ -258,8 +257,8 @@ export async function getUserDashboardData(userId: string | number) {
   const [seasonStats, captainStats, homeAwayStats, alerts, squadDetails, leaderGap] =
     await Promise.all([
       getUserSeasonStats(userId),
-      getUserCaptainStats(userId),
-      getUserHomeAwayStats(userId),
+      getManagerCaptainStats(userId),
+      getManagerHomeAwayStats(userId),
       getPersonalizedAlerts(userId, 5),
       getUserSquadDetails(userId),
       getLeaderComparison(String(userId)),

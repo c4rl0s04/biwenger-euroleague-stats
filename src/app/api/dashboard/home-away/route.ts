@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { fetchHomeAwayStats } from '@/lib/services';
+import { getManagerHomeAwayStats } from '@/features/managers/server';
 import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 import { getRequestUserId } from '@/lib/utils/api-auth';
 
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return errorResponse(userIdValidation.error, 400);
     }
 
-    const stats = await fetchHomeAwayStats(userIdValidation.value);
+    const stats = await getManagerHomeAwayStats(userIdValidation.value);
     return privateJsonResponse({ success: true, data: { stats } });
   } catch (error) {
     console.error('API Error:', error);
