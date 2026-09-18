@@ -32,7 +32,7 @@ The C06 Managers Directory & Remaining Analytics migration establishes complete 
 
 ## Preserved contracts, quirks, and exact semantics
 
-- **Directory Contract**: IDs preserved as strings or numbers as returned by database, nullable icon preserved, `color_index` preserved. Public cache headers: `public, max-age=900, stale-while-revalidate=60`. Error response: `private, no-store, max-age=0, must-revalidate`.
+- **Directory Contract**: Manager IDs remain string IDs; nullable name/icon and `color_index` are preserved. Public cache headers: `public, max-age=900, stale-while-revalidate=60`. Error response: `private, no-store, max-age=0, must-revalidate`.
 - **Captain Stats Contract**: 4 sequential queries. Total rounds, extra points, and average points formatted with integer/float parsing. When database row contains NULLs, `parseInt(null) -> NaN` serializes to `null` in JSON. Most used captain defaults: `times_captain` integer, `avg_as_captain` float with 1 decimal. Best/worst captain round points integer.
 - **Home/Away Stats Contract**: Sequential bind order `[seasonId, userId]`. Preserves missing-row behavior (`TypeError` when `rows[0]` is undefined). Rounding formulas: `Math.round(total_home / games_home)` and `Math.round(((total_home - total_away) / total_away) * 100)`.
 - **Captain Recommendations**: Consumes `getPlayerFormStats(3)` from `@/features/players/server`. Thresholds: `>= 25` ('Excelente forma'), `>= 18` ('Buena forma'), `>= 12` ('Forma regular'), `< 12` ('Forma baja'), `null` ('Sin datos'). Filter: `avg_recent_points != null && avg_recent_points > 0`. Excludes `'X'`, `'?'`, and `''` when counting recent games. Default limit is `3` for service calls, while HTTP route explicitly passes `6`.
