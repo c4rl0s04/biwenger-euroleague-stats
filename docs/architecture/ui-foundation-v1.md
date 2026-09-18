@@ -337,6 +337,9 @@ file.
 Manager, team, competition and statistic colors retain domain ownership. They must not be folded into
 brand tokens merely because they appear visually in shared components.
 
+Similarly, domain-specific styling (such as `--manager-card-bg`) and runtime shell layout variables
+(such as `--app-header-height` and `--app-safe-area-top`) remain outside the global token foundation.
+
 ### Token file architecture
 
 The target foundation uses two explicit token files:
@@ -353,13 +356,13 @@ Examples:
 
 ```css
 :root {
-  --color-obsidian-950: 240 5% 2%;
-  --color-obsidian-900: 240 4% 7%;
-  --color-neutral-50: 0 0% 98%;
-  --color-orange-500: 19 99% 49%;
-  --color-red-500: 0 84% 60%;
+  --color-obsidian-deepest: 240 5% 2%;
+  --color-obsidian-deep: 240 4% 7%;
+  --color-white-bright: 0 0% 98%;
+  --color-orange-strong: 19 99% 49%;
+  --color-red-strong: 0 84% 60%;
 
-  --radius-card: 1rem;
+  --radius-rounded: 1rem;
 }
 ```
 
@@ -369,11 +372,11 @@ Examples:
 
 ```css
 :root {
-  --surface-app: var(--color-obsidian-950);
-  --surface-card: var(--color-obsidian-900);
-  --content-primary: var(--color-neutral-50);
-  --action-primary: var(--color-orange-500);
-  --status-danger: var(--color-red-500);
+  --surface-app: var(--color-obsidian-deepest);
+  --surface-card: var(--color-obsidian-deep);
+  --content-primary: var(--color-white-bright);
+  --action-primary: var(--color-orange-strong);
+  --status-danger: var(--color-red-strong);
 }
 ```
 
@@ -458,9 +461,9 @@ Example:
 
 ```css
 :root {
-  --surface-app: var(--color-obsidian-950);
-  --surface-card: var(--color-obsidian-900);
-  --action-primary: var(--color-orange-500);
+  --surface-app: var(--color-obsidian-deepest);
+  --surface-card: var(--color-obsidian-deep);
+  --action-primary: var(--color-orange-strong);
 
   /* Legacy compatibility bridge */
   --background: var(--surface-app);
@@ -560,15 +563,15 @@ comparison, not hidden inside the file split.
 
 The intended hierarchy is:
 
-| Role | Default direction |
-| --- | --- |
-| Page display title | Bebas Neue / display face |
-| Major section title | Bebas Neue / display face |
-| Card title | Outfit or Inter, strong weight |
-| Body | Outfit |
-| Compact controls | Inter where useful |
-| Numeric metrics | tabular numerals with strong weight |
-| Labels / metadata | compact uppercase only when it improves scanning |
+| Role                | Default direction                                |
+| ------------------- | ------------------------------------------------ |
+| Page display title  | Bebas Neue / display face                        |
+| Major section title | Bebas Neue / display face                        |
+| Card title          | Outfit or Inter, strong weight                   |
+| Body                | Outfit                                           |
+| Compact controls    | Inter where useful                               |
+| Numeric metrics     | tabular numerals with strong weight              |
+| Labels / metadata   | compact uppercase only when it improves scanning |
 
 Avoid applying uppercase/display typography indiscriminately. Dense tables, long names and controls
 should prioritize readability over decoration.
@@ -808,18 +811,18 @@ Libraries support behavior; they do not own the product's visual identity.
 
 ### Existing and retained
 
-| Need | Direction |
-| --- | --- |
-| Framework | React 19 + Next.js 16 |
-| Styling | Tailwind CSS v4 |
-| Tokens | Existing CSS custom properties |
-| Class composition | Existing `clsx` + `tailwind-merge` / `cn` |
-| Icons | Lucide |
-| Charts | Recharts |
-| Motion | Framer Motion |
-| Search/command behavior | Existing `cmdk` where appropriate |
-| Validation | Zod |
-| Testing | Vitest + Playwright |
+| Need                    | Direction                                 |
+| ----------------------- | ----------------------------------------- |
+| Framework               | React 19 + Next.js 16                     |
+| Styling                 | Tailwind CSS v4                           |
+| Tokens                  | Existing CSS custom properties            |
+| Class composition       | Existing `clsx` + `tailwind-merge` / `cn` |
+| Icons                   | Lucide                                    |
+| Charts                  | Recharts                                  |
+| Motion                  | Framer Motion                             |
+| Search/command behavior | Existing `cmdk` where appropriate         |
+| Validation              | Zod                                       |
+| Testing                 | Vitest + Playwright                       |
 
 ### Candidate additions
 
