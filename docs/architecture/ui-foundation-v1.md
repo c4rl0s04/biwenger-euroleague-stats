@@ -337,6 +337,225 @@ file.
 Manager, team, competition and statistic colors retain domain ownership. They must not be folded into
 brand tokens merely because they appear visually in shared components.
 
+### Token file architecture
+
+The target foundation uses two explicit token files:
+
+```text
+src/styles/tokens/
+  base-tokens.css
+  semantic-tokens.css
+```
+
+`base-tokens.css` owns raw design values. These tokens describe what values exist, not what they mean.
+
+Examples:
+
+```css
+:root {
+  --palette-obsidian-950: 240 5% 2%;
+  --palette-obsidian-900: 240 4% 7%;
+  --palette-neutral-50: 0 0% 98%;
+  --palette-orange-500: 19 99% 49%;
+  --palette-red-500: 0 84% 60%;
+
+  --radius-card: 1rem;
+}
+```
+
+`semantic-tokens.css` assigns product meaning to those values.
+
+Examples:
+
+```css
+:root {
+  --surface-app: var(--palette-obsidian-950);
+  --surface-card: var(--palette-obsidian-900);
+  --content-primary: var(--palette-neutral-50);
+  --action-primary: var(--palette-orange-500);
+  --status-danger: var(--palette-red-500);
+}
+```
+
+New UI should depend on semantic meaning wherever possible. A Button should ask for the primary-action
+color, not know that the product currently uses a particular orange. A Card should consume a surface
+token, not a raw obsidian palette value.
+
+### Incremental token migration
+
+The token extraction must not require deleting `globals.css` or changing the visual output of the
+application in one step.
+
+The migration uses a compatibility bridge.
+
+#### Stage T0 — establish the baseline
+
+Before moving token declarations:
+
+- record the current token values;
+- keep existing browser/visual baselines;
+- run normal verification;
+- treat any visual difference in the extraction commit as a regression.
+
+#### Stage T1 — introduce the two token files
+
+Create:
+
+```text
+src/styles/tokens/base-tokens.css
+src/styles/tokens/semantic-tokens.css
+```
+
+Initially, base tokens should be extracted from values that already exist in `globals.css`.
+Do not redesign the palette during this step.
+
+Semantic tokens map those base values to UI meaning.
+
+#### Stage T2 — load tokens through globals.css
+
+`src/app/globals.css` remains the single global stylesheet entry point loaded by the root layout.
+
+Its top-level structure becomes conceptually:
+
+```css
+@import 'tailwindcss';
+@import '../styles/tokens/base-tokens.css';
+@import '../styles/tokens/semantic-tokens.css';
+
+@theme inline {
+  /* Tailwind bridge to semantic tokens */
+}
+
+/* true global/base styles */
+/* temporary legacy styles still awaiting migration */
+```
+
+The root layout does not need to import every token file separately. `globals.css` acts as the
+composition root for global CSS.
+
+#### Stage T3 — preserve legacy token aliases
+
+Existing components currently consume names such as:
+
+```text
+--background
+--foreground
+--card
+--primary
+--muted
+--border
+--ring
+--sidebar-background
+...
+```
+
+Do not break those consumers during extraction.
+
+`semantic-tokens.css` should temporarily expose compatibility aliases that resolve to the new
+canonical semantic tokens.
+
+Example:
+
+```css
+:root {
+  --surface-app: var(--palette-obsidian-950);
+  --surface-card: var(--palette-obsidian-900);
+  --action-primary: var(--palette-orange-500);
+
+  /* Legacy compatibility bridge */
+  --background: var(--surface-app);
+  --card: var(--surface-card);
+  --primary: var(--action-primary);
+}
+```
+
+This makes the new token system active immediately while old code continues resolving exactly the
+same values.
+
+The existing Tailwind `@theme inline` mapping can continue exposing utilities such as
+`bg-background`, `text-foreground` and `border-border` during the transition.
+
+#### Stage T4 — keep globals.css, but shrink its responsibility
+
+The goal is **not** necessarily to delete `globals.css`.
+
+A final global stylesheet still has legitimate responsibilities:
+
+- Tailwind import/theme bridge;
+- token imports;
+- document/body defaults;
+- global focus behavior;
+- accessibility helpers;
+- true app-wide reset/base rules.
+
+What should gradually leave `globals.css` are implementation-specific concerns such as:
+
+- historical card styling;
+- feature-specific utilities;
+- shell component styling that belongs with the new shell;
+- mobile component implementations;
+- obsolete animation/theme experiments.
+
+The current large `globals.css` therefore becomes smaller incrementally rather than disappearing.
+
+#### Stage T5 — new UI uses canonical semantics
+
+All new foundation components should consume the new semantic system rather than introduce new raw
+colors or depend on legacy-only aliases.
+
+Examples:
+
+```text
+Button        → action semantics
+Surface       → surface semantics
+Card          → surface + border + radius semantics
+Muted text    → content-muted
+Error state   → status-danger
+```
+
+Tailwind utilities may remain the rendering mechanism as long as their `@theme` mapping points to the
+canonical semantic tokens.
+
+#### Stage T6 — migrate legacy consumers slice by slice
+
+When an existing component or shell slice is migrated:
+
+1. identify its raw colors and legacy token references;
+2. map them to canonical semantic tokens;
+3. move component-specific styling out of global CSS when appropriate;
+4. verify visual parity;
+5. remove only aliases/utilities that have no remaining consumers.
+
+Do not remove a legacy token merely because the new foundation no longer uses it.
+
+#### Stage T7 — retire compatibility aliases
+
+Only after repository-wide consumer checks show that a legacy token name has no remaining runtime
+consumer should its alias be removed.
+
+The end state is:
+
+```text
+base-tokens.css
+      ↓
+semantic-tokens.css
+      ↓
+Tailwind/theme bridge
+      ↓
+UI foundation + shell + features
+```
+
+with `globals.css` acting as a small global composition/root stylesheet rather than the owner of
+every visual concern.
+
+### Token migration safety rule
+
+Token extraction and visual redesign are separate operations.
+
+The first token commits must preserve the exact current rendered values. Improvements to palette,
+spacing scales, radii or visual hierarchy should be made in later explicit design changes with browser
+comparison, not hidden inside the file split.
+
 ## Typography
 
 The intended hierarchy is:
