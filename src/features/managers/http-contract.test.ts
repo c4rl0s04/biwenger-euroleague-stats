@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 vi.mock('server-only', () => ({}));
 vi.mock('@/features/players/server', () => ({
   getPlayerRecentScores: vi.fn(async () => [{ playerId: 1, recentScores: '4,X' }]),
+  getPlayerFormStats: vi.fn(async () => []),
 }));
 vi.mock('@/features/standings/server', () => ({
   getSimpleStandings: vi.fn(async () => [

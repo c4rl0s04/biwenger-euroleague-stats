@@ -17,6 +17,9 @@ vi.mock('@/features/managers/server', () => ({
   getManagerRoundsData: reads.fetchUserRecentRounds,
   getManagerSeasonStatsData: reads.fetchUserSeasonStats,
   getManagerSquadData: reads.fetchUserSquadDetails,
+  getManagerCaptainStats: reads.fetchCaptainStats,
+  getManagerCaptainRecommendations: reads.fetchCaptainRecommendations,
+  getManagerHomeAwayStats: reads.fetchHomeAwayStats,
 }));
 
 import { GET as rounds } from '../player/rounds/route';
