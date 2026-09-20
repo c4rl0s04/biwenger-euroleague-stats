@@ -594,12 +594,15 @@ Responsibilities:
 
 It should not add a title, icon or analytical semantics.
 
-Suggested semantic variants:
+UI-01A semantic variants:
 
 - `default`;
 - `raised`;
-- `subtle`;
-- `interactive`.
+- `subtle`.
+
+Interaction is an independent `interactive?: boolean` visual treatment, not a variant or button
+behavior. Surface uses one canonical `--radius-surface` and owns no padding. Raised hierarchy uses
+the existing popover surface; UI-01A introduces no new elevation token.
 
 ### Card
 
@@ -619,12 +622,23 @@ Card
 └── optional CardFooter
 ```
 
-Recommended configurable concerns:
+UI-01A configurable concerns:
 
 - density: `comfortable | compact`;
-- accent: semantic accent or none;
-- interaction: static or interactive;
-- optional loading state through composition rather than a completely separate visual theme.
+- surface variant: `default | raised | subtle`;
+- interaction: `interactive?: boolean`, defaulting to false;
+- loading/empty/error content through composition, with no state or accent/theme props on Card.
+
+Card owns root padding and gaps (`comfortable` by default); nested cards choose density independently
+without React context. Header accepts `icon`, `eyebrow` and `action` nodes. CardTitle uses an explicit
+`as: 'h2' | 'h3' | 'h4'` choice, defaulting to `h3`, independently of visual size.
+
+New consumers opt into `@/components/ui/foundation`; `@/components/ui` retains the legacy Card.
+Surface and the Card anatomy require no client boundary. During coexistence, Surface consumes
+`--surface-card` directly to avoid the legacy `.bg-card` border/transition override. Its interactive
+border rules locally override the unlayered universal border color, and CardTitle locally overrides
+the global heading typography. Future primitives must check these global CSS interactions without
+changing existing consumers.
 
 Avoid reintroducing multiple unrelated card themes such as glass/mesh/neo unless the product explicitly
 adopts them as separate supported visual modes.
