@@ -2,13 +2,17 @@
 
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
-import HeadToHeadCard from '@/components/rounds/stats/history/HeadToHeadCard';
+import HeadToHeadCard from './HeadToHeadCard';
+import { selectDesktopManager } from '../validation/selection';
 import { Section } from '@/components/layout';
-import { Subheading, PageHeader } from '@/components/ui';
+import { PageHeader } from '@/components/ui';
 
-export default function ComparePageClient() {
+export default function DesktopCompareScreen() {
   const { currentUser } = useClientUser();
-  const { data, loading, error } = useApiData('/api/compare/data');
+  const { data, loading, error } =
+    /** @type {{ data?: import('../models/compare').CompareDataResponse, loading: boolean, error: unknown }} */ (
+      useApiData('/api/compare/data')
+    );
 
   if (loading) {
     return (
@@ -31,7 +35,7 @@ export default function ComparePageClient() {
   }
 
   // Find the full user object for current user (to ensure we have consistent data type)
-  const activeUser = data.users.find((u) => u.id === currentUser?.id) || data.users[0];
+  const activeUser = selectDesktopManager(data.users, currentUser?.id);
 
   return (
     <div className="min-h-screen container mx-auto px-4 pb-8">

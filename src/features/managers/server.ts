@@ -29,3 +29,9 @@ export {
   MANAGER_PREPARATION_POLICY,
 } from './server/services/manager-preparation.service';
 export { getOwnedPlayers } from './server/services/owned-players.service';
+
+export {
+  getComparisonManagers,
+  getComparisonSquad,
+  MANAGER_COMPARISON_POLICY,
+} from './server/services/comparison.service';

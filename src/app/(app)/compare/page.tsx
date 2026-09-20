@@ -1,8 +1,7 @@
-import ComparePageClient from '@/components/compare/ComparePageClient';
+import { DesktopCompareScreen, MobileCompareScreen } from '@/features/compare/public';
 import { auth } from '@/auth';
-import MobileCompareScreen from '@/components/mobile/screens/MobileCompareScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-import { getCompareDataLite } from '@/lib/services';
+import { getCompareDataLite } from '@/features/compare/server';
 
 export const metadata = {
   title: 'Comparativa | Biwenger Stats',
@@ -15,5 +14,5 @@ export default async function ComparePage() {
     const [data, session] = await Promise.all([getCompareDataLite(), auth()]);
     return <MobileCompareScreen users={data.users} currentUserId={session?.user?.id} />;
   }
-  return <ComparePageClient />;
+  return <DesktopCompareScreen />;
 }

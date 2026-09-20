@@ -25,3 +25,5 @@ export type {
 export { default as ManagerProfileScreen } from './components/ManagerProfileScreen';
 export { default as ManagerProfileSectionScreen } from './components/ManagerProfileSectionScreen';
 export type { OwnedPlayer } from './models/owned-player';
+
+export type { ComparisonManager, ComparisonSquadMember } from './models/comparison';

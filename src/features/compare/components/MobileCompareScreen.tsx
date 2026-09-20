@@ -5,15 +5,15 @@ import {
   MobileScreen,
   MobileScreenHeader,
   MobileSectionHeading,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
-type RecordValue = Record<string, any>;
+import type { ComparisonManager } from '@/features/managers/public';
 
 export default function MobileCompareScreen({
   users,
   currentUserId,
 }: {
-  users: RecordValue[];
+  users: ComparisonManager[];
   currentUserId?: string | number;
 }) {
   return (
