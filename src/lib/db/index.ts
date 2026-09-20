@@ -10,7 +10,6 @@ export * from './queries/core/teams';
 
 export * from './queries/competition/rounds';
 export * from './queries/competition/matches';
-export * from './queries/competition/schedule';
 export * from './queries/competition/standings';
 
 export * from './queries/analytics/performance';

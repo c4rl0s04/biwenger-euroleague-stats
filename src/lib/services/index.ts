@@ -107,7 +107,7 @@ export {
 export { getCompareData, getCompareDataLite } from './features/compareService';
 
 // Schedule Service
-export { getUserScheduleService, fetchScheduleRounds } from './app/scheduleService';
+export { getUserScheduleService } from './app/scheduleService';
 
 // Search Service
 export { performGlobalSearch } from './features/searchService';

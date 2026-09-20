@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { getColorForUser } from '@/lib/constants/colors';
-import AutoAlignButton from './AutoAlignButton';
 
+/** @param {{users: import('@/features/managers/public').ManagerDirectoryViewModel[], activeUserId?: string, activeRoundId: number | null, rounds: import('../models/schedule').ScheduleRound[], matches?: import('../models/schedule').ScheduleMatch[]}} props */
 export default function ScheduleControls({ users, activeUserId, activeRoundId, rounds, matches }) {
   const router = useRouter();
 

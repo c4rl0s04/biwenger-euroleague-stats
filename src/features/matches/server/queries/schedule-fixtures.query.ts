@@ -1,8 +1,9 @@
-import { db } from '../../index';
-import { matches, teams, players, playerSeasons } from '../../schema';
-import { and, eq, desc, asc, min, max, sql } from 'drizzle-orm';
+import 'server-only';
+import { db } from '@/lib/db/client';
+import { matches, teams } from '@/lib/db/schema';
+import { and, eq, desc, asc, min, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { resolveReadSeasonId } from '../../season-context';
+import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 // 1. Get List of Rounds (with deduplication logic handled in JS for now or refined SQL)
 /**
@@ -77,29 +78,6 @@ export async function fetchMatchesForRound(roundId: number) {
     .leftJoin(awayTeam, eq(matches.awayId, awayTeam.id))
     .where(and(eq(matches.roundId, roundId), eq(matches.seasonId, seasonId)))
     .orderBy(asc(matches.date));
-
-  return rows;
-}
-
-// 5. Fetch User Players
-export async function fetchUserPlayers(userId: number) {
-  const seasonId = await resolveReadSeasonId();
-  const rows = await db
-    .select({
-      id: players.id,
-      name: players.name,
-      team_id: playerSeasons.teamId,
-      team_name: teams.shortName,
-      team_code: sql<string>`COALESCE((SELECT provider_team_code FROM official_team_mappings WHERE season_id=${seasonId} AND team_id=${teams.id} AND provider='euroleague_advanced'), ${teams.code})`,
-      position: playerSeasons.position,
-      price: playerSeasons.price,
-      img: sql<string>`COALESCE((SELECT image_url FROM official_player_mappings WHERE season_id=${seasonId} AND player_id=${players.id} AND provider='euroleague_advanced' AND status='matched'), ${players.img})`,
-      puntos: playerSeasons.puntos,
-    })
-    .from(playerSeasons)
-    .innerJoin(players, eq(playerSeasons.playerId, players.id))
-    .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
-    .where(and(eq(playerSeasons.seasonId, seasonId), eq(playerSeasons.ownerId, userId.toString())));
 
   return rows;
 }

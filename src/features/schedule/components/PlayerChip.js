@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
+/** @param {{player: import('../models/schedule').ScheduleMatchPlayer}} props */
 export default function PlayerChip({ player }) {
   // Use a default color if missing (though DB should provide it now)
   const teamColor = player.team_color || '#A1A1AA';

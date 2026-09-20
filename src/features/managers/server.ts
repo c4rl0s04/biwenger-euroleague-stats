@@ -28,3 +28,4 @@ export {
   getManagerPersonalizedAlerts,
   MANAGER_PREPARATION_POLICY,
 } from './server/services/manager-preparation.service';
+export { getOwnedPlayers } from './server/services/owned-players.service';

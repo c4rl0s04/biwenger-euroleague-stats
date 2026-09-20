@@ -24,3 +24,4 @@ export type {
 } from './models/manager-profile';
 export { default as ManagerProfileScreen } from './components/ManagerProfileScreen';
 export { default as ManagerProfileSectionScreen } from './components/ManagerProfileSectionScreen';
+export type { OwnedPlayer } from './models/owned-player';

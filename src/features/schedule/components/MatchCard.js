@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { formatMatchTime } from '@/lib/utils/date';
 import PlayerChip from './PlayerChip';
 
+/** @param {{match: import('../models/schedule').ScheduleMatch}} props */
 export default function MatchCard({ match }) {
   const hasPlayers = match.user_players.length > 0;
 

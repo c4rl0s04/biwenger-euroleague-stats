@@ -18,3 +18,4 @@ export type {
   OfficialPlaysViewModel,
   OfficialShotsViewModel,
 } from './models/official-game';
+export type { ScheduleRoundOption, ScheduleFixture } from './models/schedule-fixture';

@@ -12,3 +12,9 @@ export {
   getOfficialShotData,
   MatchesInputError,
 } from './server/services/official-game.service';
+export {
+  getScheduleRoundOptions,
+  findScheduleRound,
+  getLatestDatedScheduleRound,
+  getScheduleFixtures,
+} from './server/services/schedule-fixtures.service';

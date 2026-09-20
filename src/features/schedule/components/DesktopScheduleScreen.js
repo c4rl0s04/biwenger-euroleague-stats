@@ -1,40 +1,12 @@
-import { getUserScheduleService, fetchScheduleRounds, fetchAllUsers } from '@/lib/services';
-import { auth } from '@/auth';
 import { AlertCircle } from 'lucide-react';
-import ScheduleControls from '@/components/schedule/ScheduleControls';
-import MatchCard from '@/components/schedule/MatchCard';
-import RoundSummary from '@/components/schedule/RoundSummary';
-import AutoAlignButton from '@/components/schedule/AutoAlignButton';
+import ScheduleControls from './ScheduleControls';
+import MatchCard from './MatchCard';
+import RoundSummary from './RoundSummary';
+import AutoAlignButton from './ScheduleLineupAction';
 import { Section } from '@/components/layout';
 import { PageHeader } from '@/components/ui';
-import MobileScheduleScreen from '@/components/mobile/screens/MobileScheduleScreen';
-import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-
-export default async function SchedulePage({ searchParams }) {
-  const [params, users, rounds, session, phone] = await Promise.all([
-    searchParams,
-    fetchAllUsers(),
-    fetchScheduleRounds(),
-    auth(),
-    isPhonePresentation(),
-  ]);
-  const userId = session?.user?.id;
-  const roundId = params?.roundId ? parseInt(params.roundId) : null;
-
-  const schedule = userId
-    ? await getUserScheduleService(userId, roundId)
-    : { found: false, message: 'No user selected' };
-
-  if (phone) {
-    return (
-      <MobileScheduleScreen
-        schedule={schedule}
-        rounds={rounds}
-        userName={users.find((user) => String(user.id) === String(userId))?.name}
-      />
-    );
-  }
-
+/** @param {{model: import('../models/schedule').ScheduleScreenModel}} props */
+export default function DesktopScheduleScreen({ model: { schedule, users, rounds, userId } }) {
   const groupedMatches = schedule.found
     ? schedule.matches.reduce((acc, match) => {
         const date = new Date(match.date);

@@ -1,5 +1,6 @@
 import { getColorForUser } from '@/lib/constants/colors';
 
+/** @param {{players?: import('../models/schedule').SchedulePlayer[], activeUserId?: string, colorIndex?: number}} props */
 export default function RoundSummary({ players = [], activeUserId, colorIndex }) {
   if (players.length === 0) return null;
 
