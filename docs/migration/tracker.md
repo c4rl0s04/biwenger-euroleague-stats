@@ -87,12 +87,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 04 — Schedule
 
-- **State:** Planned.
+- **State:** Implemented; scoped checks pass, but unconditional acceptance is open for the pre-existing verification-wrapper failure. Not merged or deployed.
 - **Dependencies / approval:** 02; current Matches/Rounds/Managers contracts.
 - **Scope:** Own schedule composition and squad overlay; reuse Matches map; exclude lineup submission.
 - **Completion check:** Thin pages, typed services/screens, preserved dates, filters and phone parity.
-- **Evidence:** Legacy batch 006; no current acceptance.
-- **Next action:** Inventory /schedule and /schedule/map, then pin assignment.
+- **Evidence:** [Task 04 receipt](reports/task-04-schedule.md), branch `refactor/schedule-read-architecture`.
+- **Next action:** Review `84e0721a` and separately address the recorded verification-wrapper issue; preserve the Assistant adapter for Task 20 and frozen lineup command for Task 15. Do not integrate or deploy yet.
 
 ### Task 05 — Compare
 

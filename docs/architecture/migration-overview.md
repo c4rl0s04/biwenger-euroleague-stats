@@ -96,7 +96,9 @@ Tournaments, Predictions, Playoffs, public Market and Managers remaining reads a
 PRs #35–39 respectively. Their receipts retain original test evidence; this update does not
 certify their production deployments.
 
-Remaining read features: Schedule (Task 04), Compare (05), Dashboard (06–07), News/Home (08–09)
+Schedule (Task 04) is now implemented locally, not merged or deployed; see its
+[acceptance receipt](../migration/reports/task-04-schedule.md), including the existing verification-wrapper limitation.
+Remaining read features: Compare (05), Dashboard (06–07), News/Home (08–09)
 and Season Review (10–11). Sensitive operations are Tasks 12–21; infrastructure/shared UI and final
 closure are Tasks 22–27. The tracker owns their states and acceptance criteria.
 

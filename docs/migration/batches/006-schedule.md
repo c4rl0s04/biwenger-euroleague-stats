@@ -11,7 +11,8 @@ status: draft
 
 Historical worker placeholder. Current scope and dependencies are in [tracker Tasks 04](../tracker.md).
 The original pilot restrictions below explain its creation; they are not the current task queue.
-A new pinned assignment is required before implementation.
+Task 04 was separately approved and implemented on `refactor/schedule-read-architecture`;
+see its [receipt](../reports/task-04-schedule.md). Do not execute this obsolete placeholder.
 
 **DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
 Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
