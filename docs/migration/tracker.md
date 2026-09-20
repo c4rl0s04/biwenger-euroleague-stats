@@ -74,16 +74,16 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Scope:** Reconcile summaries, history and all remaining scopes; documentation only.
 - **Completion check:** One linked tracker, all findings assigned, documentation checks pass.
 - **Evidence:** This documentation branch; validation below.
-- **Next action:** Review this local documentation commit; Task 03 needs separate cleanup approval.
+- **Next action:** Review this local documentation commit; approved Task 03 cleanup is recorded below.
 
 ### Task 03 — Approved worktree cleanup
 
-- **State:** Planned.
-- **Dependencies / approval:** 01–02; explicit deletion approval.
+- **State:** Verified locally; cleanup receipt not merged or pushed.
+- **Dependencies / approval:** 01–02; user approved the Task 03 cleanup plan.
 - **Scope:** Remove only approved integrated checkouts after ignored-file preservation; no unique branches/stashes.
 - **Completion check:** Cleanup receipt lists exact removals and recovery refs.
-- **Evidence:** Task 01 inventory.
-- **Next action:** Confirm exact targets and current ancestry before removing.
+- **Evidence:** [Cleanup receipt](reports/2026-09-20-worktree-cleanup.md); eight integrated checkouts removed, branches and stashes preserved.
+- **Next action:** Review the local receipt; plan Task 04 (Schedule) separately.
 
 ### Task 04 — Schedule
 
