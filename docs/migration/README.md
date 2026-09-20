@@ -9,6 +9,9 @@ status: active
 
 # Migration worker queue
 
+Current Git starting-point audit: [Task 01 reconciliation](reports/2026-09-20-reconciliation.md).
+Consult it before using historical assignments; global status reconciliation is the next task.
+
 ## Start here
 
 Read [worker protocol](worker-protocol.md), then **only the assigned batch**.
