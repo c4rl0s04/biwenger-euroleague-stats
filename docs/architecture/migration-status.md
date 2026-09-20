@@ -51,27 +51,28 @@ Managers remaining reads migration: C06 Managers remaining reads (directory, cap
 are integrated via PR #39 at `1933e033`. The
 [C06 receipt](../migration/reports/c06-manager-remaining-reads.md) records contracts and verification evidence.
 
-| Domains                                                  | Status / next boundary                                                                                                            |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified                                                |
-| Players                                                  | Integrated; manager adapter removed in the read-foundations release                                                               |
-| Rounds                                                   | Calendar and historical read experience implemented; see current release receipt                                                  |
-| Managers                                                 | Profile and remaining reads integrated via PR #39; private operations and adapter retirement remain                               |
-| Standings                                                | Complete Standings read slice implemented; see current release receipt                                                            |
-| Tournaments                                              | Complete read experience integrated; catalogue, details, bracket and analytics feature-owned                                      |
-| Predictions                                              | Read experience integrated via PR #36; ingestion/commands separately scoped                                                       |
-| Playoffs                                                 | Read experience integrated via PR #37; final verification closure remains                                                         |
-| Schedule                                                 | Task 04 verified locally on fix/verifier-config-isolation; Assistant adapter and lineup command deliberately retained; not merged |
-| Market public reads                                      | Complete public read experience integrated via PR #38                                                                             |
-| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                                                           |
-| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                                                            |
-| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                                               |
-| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                                               |
-| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                                                 |
-| Accounts, Settings                                       | Separate authentication/linking/encrypted-credential boundary approval required                                                   |
-| Assistant                                                | Deferred pending privacy/provider review                                                                                          |
-| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                                              |
-| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                                                    |
+| Domains                                                  | Status / next boundary                                                                                                 |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified                                     |
+| Players                                                  | Integrated; manager adapter removed in the read-foundations release                                                    |
+| Rounds                                                   | Calendar and historical read experience implemented; see current release receipt                                       |
+| Managers                                                 | Profile and remaining reads integrated via PR #39; private operations and adapter retirement remain                    |
+| Standings                                                | Complete Standings read slice implemented; see current release receipt                                                 |
+| Tournaments                                              | Complete read experience integrated; catalogue, details, bracket and analytics feature-owned                           |
+| Predictions                                              | Read experience integrated via PR #36; ingestion/commands separately scoped                                            |
+| Playoffs                                                 | Read experience integrated via PR #37; final verification closure remains                                              |
+| Schedule                                                 | Task 04 integrated/deployed at 6aa275b6; Assistant adapter and lineup command deliberately retained                    |
+| Market public reads                                      | Complete public read experience integrated via PR #38                                                                  |
+| Compare                                                  | Task 05 verified locally at 70c325c7; full/lite services and screens owned; Assistant adapter retained; not integrated |
+| Dashboard                                                | Legacy composition; Tasks 06–07                                                                                        |
+| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                                                 |
+| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                                    |
+| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                                    |
+| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                                      |
+| Accounts, Settings                                       | Separate authentication/linking/encrypted-credential boundary approval required                                        |
+| Assistant                                                | Deferred pending privacy/provider review                                                                               |
+| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                                   |
+| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                                         |
 
 ## HTTP contracts and compatibility
 

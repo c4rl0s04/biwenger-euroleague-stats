@@ -9,6 +9,14 @@ status: active
 
 # Schedule read migration
 
+Release follow-up: Tasks 01–04 and the verifier correction were fast-forwarded and pushed
+at `6aa275b6c5c7ae2138a530888093ef30230a4234`. Vercel
+`dpl_8zRNoRJgWedSKVh9W2tpUUKvF5zz` reached READY at the matching SHA.
+Full verification passed (2,236 tests / one existing skip; 24 existing lint warnings).
+Login/session and protected-route smoke checks passed; bounded runtime error/fatal/5xx
+scans were empty. The build-log connector was unavailable, and authenticated production
+visual review remains manual. Historical local-only evidence below is preserved.
+
 Branch: `refactor/schedule-read-architecture`.
 Worktree: `../biwengerstats-next-schedule-read-architecture`.
 Base: `52564d056a68cb46319fe73cbfc03c0c9145763d`, carrying Tasks 01–03 documentation

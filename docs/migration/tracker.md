@@ -60,48 +60,48 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 01 — Synchronize and reconcile
 
-- **State:** Verified locally.
+- **State:** Integrated and pushed in main `6aa275b6`.
 - **Dependencies / approval:** None.
 - **Scope:** Refresh main; classify all saved work without deletion.
 - **Completion check:** Pinned main and preservation inventory; no stranded work hidden.
 - **Evidence:** 143e7f27; Task 01 report.
-- **Next action:** Delivered; report not yet merged.
+- **Next action:** Delivered and integrated; retain historical reconciliation evidence.
 
 ### Task 02 — Authoritative tracker
 
-- **State:** Verified locally; documentation delivery, not merged or deployed.
+- **State:** Integrated and pushed in main `6aa275b6`.
 - **Dependencies / approval:** 01.
 - **Scope:** Reconcile summaries, history and all remaining scopes; documentation only.
 - **Completion check:** One linked tracker, all findings assigned, documentation checks pass.
 - **Evidence:** This documentation branch; validation below.
-- **Next action:** Review this local documentation commit; approved Task 03 cleanup is recorded below.
+- **Next action:** Keep this tracker current as each task is accepted.
 
 ### Task 03 — Approved worktree cleanup
 
-- **State:** Verified locally; cleanup receipt not merged or pushed.
+- **State:** Cleanup completed; receipt integrated and pushed in main `6aa275b6`.
 - **Dependencies / approval:** 01–02; user approved the Task 03 cleanup plan.
 - **Scope:** Remove only approved integrated checkouts after ignored-file preservation; no unique branches/stashes.
 - **Completion check:** Cleanup receipt lists exact removals and recovery refs.
 - **Evidence:** [Cleanup receipt](reports/2026-09-20-worktree-cleanup.md); eight integrated checkouts removed, branches and stashes preserved.
-- **Next action:** Review the local receipt; plan Task 04 (Schedule) separately.
+- **Next action:** Preserve retained branches and stashes until separately reviewed.
 
 ### Task 04 — Schedule
 
-- **State:** Verified locally on `fix/verifier-config-isolation` (Schedule plus test-isolation fix). Not merged or deployed.
+- **State:** Integrated and deployed at `6aa275b6c5c7ae2138a530888093ef30230a4234`.
 - **Dependencies / approval:** 02; current Matches/Rounds/Managers contracts.
 - **Scope:** Own schedule composition and squad overlay; reuse Matches map; exclude lineup submission.
 - **Completion check:** Thin pages, typed services/screens, preserved dates, filters and phone parity.
 - **Evidence:** [Task 04 receipt](reports/task-04-schedule.md), Schedule `84e0721a` plus isolation fix `344ed0e8`; full verifier passes.
-- **Next action:** Review the combined branch and plan Task 05 separately; preserve the Assistant adapter for Task 20 and frozen lineup command for Task 15. Integration/deployment still require separate authorization.
+- **Next action:** Proceed with Task 05; preserve the Assistant adapter for Task 20 and frozen lineup command for Task 15. Vercel `dpl_8zRNoRJgWedSKVh9W2tpUUKvF5zz` is READY at the matching SHA; production visual review remains manual and the build-log connector was unavailable.
 
 ### Task 05 — Compare
 
-- **State:** Planned.
+- **State:** Verified locally on `refactor/compare-read-architecture` (`70c325c7`), based on `6aa275b6`; not integrated or deployed.
 - **Dependencies / approval:** 04 or independently ready upstream contracts.
 - **Scope:** Own comparisons, full/lite APIs and screens; reuse Managers/Rounds/Standings/Market.
 - **Completion check:** Same selections and responses; retained HeadToHeadCard has its proper owner.
-- **Evidence:** Legacy batch 009.
-- **Next action:** Trace routes and full/lite consumers.
+- **Evidence:** [Task 05 receipt](reports/task-05-compare.md); full/lite consumers and access/cache policy traced.
+- **Next action:** Review and integrate as its own release before Task 06; full verification and 9/9 browser cases passed. Retain the Assistant adapter until Task 20.
 
 ### Task 06 — Dashboard data
 

@@ -136,6 +136,13 @@ snapshots solely to hide a regression. Browser failures retain screenshots and t
 
 ## Test responsibilities
 
+Compare adds three macOS references (phone picker/detail and full desktop comparison) captured
+from unchanged application source at `6aa275b6`. `compare.spec.ts` exercises authenticated
+synthetic-data navigation and desktop rival selection across all nine viewports, preserving the
+same browser/API error guards. Linux runs semantic checks without creating new visual references
+from migrated output. Service and HTTP tests cover full/lite payloads, cookie/query independence,
+headers, selection quirks, ranking formulas, failures and mapped-field allowlists.
+
 Standings adds nine phone references (overview plus eight sections) and desktop ranking/progression
 references captured from unchanged `38bf2de4` with the same synthetic fixture. The original passed
 a second run without snapshot updates. Candidate comparisons must use these images unchanged.
