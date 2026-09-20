@@ -1,5 +1,20 @@
-import { describe, expect, it } from 'vitest';
-import { getSeasonConfig, validateSeasonConfig } from '../config';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+let getSeasonConfig;
+let validateSeasonConfig;
+
+beforeEach(async () => {
+  // CONFIG.DB.SKIP is captured at import time. Test validation against controlled
+  // state without removing the verifier's database-disabled child environment.
+  vi.resetModules();
+  vi.stubEnv('SKIP_DB', 'false');
+  ({ getSeasonConfig, validateSeasonConfig } = await import('../config'));
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.resetModules();
+});
 
 const validEnv = {
   SEASON_ID: '2026-27',
@@ -43,6 +58,49 @@ describe('canonical season configuration', () => {
       DATABASE_URL: 'postgres://localhost:5432/db',
     };
     expect(() => validateSeasonConfig({}, credentialsEnv)).not.toThrow();
+  });
+
+  it('allows an explicit database skip without bypassing provider validation', () => {
+    expect(() =>
+      validateSeasonConfig(
+        {},
+        {
+          BIWENGER_TOKEN: 'fixture-only',
+          BIWENGER_USER_ID: '123',
+          SKIP_DB: 'true',
+        }
+      )
+    ).not.toThrow();
+    expect(() => validateSeasonConfig({}, { SKIP_DB: 'true' })).toThrow(
+      /BIWENGER_TOKEN is required/
+    );
+  });
+
+  it('preserves the import-time skip used by verification even after the environment changes', async () => {
+    vi.stubEnv('SKIP_DB', 'true');
+    vi.resetModules();
+    const { validateSeasonConfig: validateSkipped } = await import('../config');
+    vi.stubEnv('SKIP_DB', 'false');
+    expect(() =>
+      validateSkipped(
+        {},
+        {
+          BIWENGER_TOKEN: 'fixture-only',
+          BIWENGER_USER_ID: '123',
+          SKIP_DB: 'false',
+        }
+      )
+    ).not.toThrow();
+    // The independently imported non-skip validator still enforces the original assertion.
+    expect(() =>
+      validateSeasonConfig(
+        {},
+        {
+          BIWENGER_TOKEN: 'fixture-only',
+          BIWENGER_USER_ID: '123',
+        }
+      )
+    ).toThrow(/DATABASE_URL is required/);
   });
 
   it('rejects stale or malformed optional season codes and dates if provided', () => {

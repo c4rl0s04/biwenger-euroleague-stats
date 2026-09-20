@@ -29,6 +29,14 @@ absent provider configuration are expected in a database-disabled environment; i
 with their modules; tooling tests live alongside scripts. [Vitest setup](../../src/tests/setup.ts)
 mocks authentication and request headers for isolated tests.
 
+The verifier keeps `SKIP_DB=true` in every child process, so accidental imports of the canonical
+database client use its mock pool. Configuration-validation tests must control both their explicit
+environment input and import-time configuration: `CONFIG.DB.SKIP` is captured when `config.js`
+loads. The config suite resets modules, stubs `SKIP_DB` before importing, and restores environment
+state afterwards. It still asserts that missing database configuration is rejected when skipping
+is disabled, and separately tests explicit and import-time skip behavior. Do not remove database
+safety flags or missing-configuration assertions merely to make the verifier pass.
+
 ## Browser verification
 
 [Playwright configuration](../../playwright.config.ts) covers compact phones, iPhones, Android,
