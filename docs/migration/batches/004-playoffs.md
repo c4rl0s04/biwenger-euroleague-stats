@@ -9,8 +9,8 @@ status: active
 
 # Playoffs read experience
 
-**IMPLEMENTED — do not dispatch a duplicate migration.** The Playoffs read slice is completed
-and verified on `integration/playoffs-migration`. See the [C04 implementation and acceptance receipt](../reports/c04-playoff-reads.md).
+**MERGED — do not dispatch a duplicate migration.** PR #37 integrated the read slice.
+See the [master tracker](../tracker.md) and [C04 receipt](../reports/c04-playoff-reads.md).
 The following notes preserve the original worker-planning context.
 
 - Intended scope: Move the existing Playoffs read experience and its distinct scoring rules.

@@ -9,9 +9,12 @@ status: active
 
 # Batch 005 — Manager directory and remaining analytics
 
-Authoritative base: `0253f53f624d2685507d7f7f3c0736f0c9ef5a22` (`origin/main`).
+**MERGED — do not redispatch.** PR #39 integrated the remaining reads at `1933e033`.
+See the [master tracker](../tracker.md). The assignment below is historical.
+
+Original assignment base: `0253f53f624d2685507d7f7f3c0736f0c9ef5a22`.
 Branch: `integration/managers-remaining-reads-migration`.
-Status: IMPLEMENTED AND LOCALLY VERIFIED / AWAITING INDEPENDENT REVIEW.
+Status at original handoff: IMPLEMENTED AND LOCALLY VERIFIED / AWAITING INDEPENDENT REVIEW.
 
 ## Scope
 

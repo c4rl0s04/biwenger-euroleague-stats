@@ -9,9 +9,9 @@ status: active
 
 # Public Market reads
 
-**IMPLEMENTED AND LOCALLY VERIFIED / AWAITING INDEPENDENT REVIEW — do not dispatch a duplicate migration.**
-The Market public read slice is implemented and verified on branch `integration/market-reads-migration`,
-awaiting independent review before merge to main. See the [C05 implementation and acceptance receipt](../reports/c05-market-reads.md).
+**MERGED — do not dispatch a duplicate migration.** PR #38 integrated the public read slice.
+Private provider operations remain separately gated. See the [master tracker](../tracker.md)
+and [C05 receipt](../reports/c05-market-reads.md).
 The following notes preserve the original worker-planning context.
 
 - Intended scope: Establish ownership only for demonstrably public Market statistical reads.

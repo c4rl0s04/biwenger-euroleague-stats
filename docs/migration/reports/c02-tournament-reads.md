@@ -9,6 +9,13 @@ status: active
 
 # C02 Tournament read migration
 
+Current integration checkpoint (2026-09-20): **MERGED**, PR #35, `73402fc6`.
+Deployment was not reverified by this documentation update. Use the [master tracker](../tracker.md)
+for remaining work and current task IDs. Original baselines, counts and pre-merge states below
+are historical acceptance evidence, not new test results or active assignments.
+
+## Original receipt (historical)
+
 Source baseline: `c9d6a816`, campaign branch `refactor/architecture-completion`.
 **IMPLEMENTED AND VERIFIED at e14fe39aa3e8a572da93f35462d911f631d3ff97.**
 Integrated on main via PR #35 (`integration/tournaments-migration`). Earlier checkpoint sections below are historical evidence, not current blockers.

@@ -9,8 +9,8 @@ status: active
 
 # Predictions read experience
 
-**IMPLEMENTED — do not dispatch a duplicate migration.** The Predictions read slice is completed
-and verified on integration/predictions-migration. See the [C03 implementation and acceptance receipt](../reports/c03-prediction-reads.md).
+**MERGED — do not dispatch a duplicate migration.** PR #36 integrated the read slice.
+See the [master tracker](../tracker.md) and [C03 receipt](../reports/c03-prediction-reads.md).
 The following notes preserve the original worker-planning context.
 
 - Intended scope: Move existing prediction read composition and scoring ownership into a bounded feature.

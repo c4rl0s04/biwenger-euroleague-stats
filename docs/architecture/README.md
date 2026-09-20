@@ -15,7 +15,8 @@ status: active
 - [UI component layering target](ui-component-layers.md) — agreed post-domain-migration UI composition and reuse direction.
 - [Data and sync](data-and-sync.md) — local-first data ingestion, persistence ownership, and write safety.
 - [Authentication and security](authentication-and-security.md) — page protection, credentials, database access, and API responsibilities.
-- [Migration overview](migration-overview.md) — current feature coverage, remaining work, and migration milestones.
+- [Migration master tracker](../migration/tracker.md) — authoritative task states, dependencies, gates and next actions.
+- [Migration overview](migration-overview.md) — feature coverage summary; historical evidence remains in the ledger.
 
 Consequential choices are recorded separately in the [decision log](../decisions/README.md).
 Operational commands belong in [operations](../operations/README.md), while exact configuration,

@@ -9,6 +9,10 @@ status: draft
 
 # Compare read composition
 
+Historical worker placeholder. Current scope and dependencies are in [tracker Tasks 05](../tracker.md).
+The original pilot restrictions below explain its creation; they are not the current task queue.
+A new pinned assignment is required before implementation.
+
 **DRAFT / BLOCKED — do not execute.** Return to the [queue](../README.md).
 Only Batch 001 is authorized for the pilot. No branch/base/write set has been reserved here.
 

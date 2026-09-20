@@ -10,7 +10,9 @@ status: active
 
 # Architecture migration status
 
-For current coverage and remaining work, see the [migration overview](migration-overview.md).
+For current tasks and states, use the [master tracker](../migration/tracker.md); the
+[migration overview](migration-overview.md) summarizes scope. This ledger preserves dated evidence,
+including superseded pre-merge states. Do not treat historical checkpoints as active assignments.
 
 ## Verified starting point — 2026-09-05
 
@@ -34,12 +36,11 @@ are implemented, verified and integrated via PR #35. The
 [C02 receipt](../migration/reports/c02-tournament-reads.md) records contracts and verification evidence.
 
 Predictions read migration: C03 Predictions reads (overview, sections, calculations and queries)
-are implemented and verified on branch `integration/predictions-migration`; integration is tracked
-in PR #36. The
+are integrated via PR #36 at `f1ae88da`. The
 [C03 receipt](../migration/reports/c03-prediction-reads.md) records contracts and verification evidence.
 
 Playoffs read migration: C04 Playoffs reads (leaderboard, predictions, detail and screen services)
-are implemented and verified on branch `integration/playoffs-migration`. The
+are integrated via PR #37 at `3c2a3ac8`. The
 [C04 receipt](../migration/reports/c04-playoff-reads.md) records contracts and verification evidence.
 
 Market public reads migration: C05 Market public reads (catalogue listings, transfers, duels, stats, analytics, sections, queries, mappers and services)
@@ -47,30 +48,30 @@ are integrated via PR #38. The
 [C05 receipt](../migration/reports/c05-market-reads.md) records contracts and verification evidence.
 
 Managers remaining reads migration: C06 Managers remaining reads (directory, captain stats, home/away performance, captain recommendations, and personalized alerts: manager-specific price-gain, price-loss and recent high-performance alerts)
-are implemented and verified on branch `integration/managers-remaining-reads-migration` (awaiting independent review before merge). The
+are integrated via PR #39 at `1933e033`. The
 [C06 receipt](../migration/reports/c06-manager-remaining-reads.md) records contracts and verification evidence.
 
-| Domains                                                  | Status / next boundary                                                                                    |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified                        |
-| Players                                                  | Integrated; manager adapter removed in the read-foundations release                                       |
-| Rounds                                                   | Calendar and historical read experience implemented; see current release receipt                          |
-| Managers                                                 | Profile integrated; Directory and Remaining Analytics implemented and verified on branch; awaiting review |
-| Standings                                                | Complete Standings read slice implemented; see current release receipt                                    |
-| Tournaments                                              | Complete read experience integrated; catalogue, details, bracket and analytics feature-owned              |
-| Predictions                                              | Complete read experience implemented and verified; integration tracked in PR #36                          |
-| Playoffs                                                 | Complete read experience implemented and verified; leaderboard, detail and scoring feature-owned          |
-| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                                            |
-| Market public reads                                      | Complete public read experience integrated via PR #38                                                     |
-| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                                   |
-| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                                    |
-| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                       |
-| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                       |
-| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                         |
-| Accounts, Settings                                       | Deferred pending credential observation gate                                                              |
-| Assistant                                                | Deferred pending privacy/provider review                                                                  |
-| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                      |
-| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                            |
+| Domains                                                  | Status / next boundary                                                                              |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Matches, Teams                                           | Integrated; official DTOs, server guards and transitive graph enforcement verified                  |
+| Players                                                  | Integrated; manager adapter removed in the read-foundations release                                 |
+| Rounds                                                   | Calendar and historical read experience implemented; see current release receipt                    |
+| Managers                                                 | Profile and remaining reads integrated via PR #39; private operations and adapter retirement remain |
+| Standings                                                | Complete Standings read slice implemented; see current release receipt                              |
+| Tournaments                                              | Complete read experience integrated; catalogue, details, bracket and analytics feature-owned        |
+| Predictions                                              | Read experience integrated via PR #36; ingestion/commands separately scoped                         |
+| Playoffs                                                 | Read experience integrated via PR #37; final verification closure remains                           |
+| Schedule                                                 | Map uses Matches; squad overlay remains legacy                                                      |
+| Market public reads                                      | Complete public read experience integrated via PR #38                                               |
+| Dashboard, Compare                                       | Legacy composition; migrate after owning read contracts                                             |
+| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                              |
+| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                 |
+| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                 |
+| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                   |
+| Accounts, Settings                                       | Separate authentication/linking/encrypted-credential boundary approval required                     |
+| Assistant                                                | Deferred pending privacy/provider review                                                            |
+| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                |
+| Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                      |
 
 ## HTTP contracts and compatibility
 

@@ -9,6 +9,13 @@ status: active
 
 # C05 Public Market Reads migration
 
+Current integration checkpoint (2026-09-20): **MERGED**, PR #38, `0253f53f`.
+Deployment was not reverified by this documentation update. Use the [master tracker](../tracker.md)
+for remaining work and current task IDs. Original baselines, counts and pre-merge states below
+are historical acceptance evidence, not new test results or active assignments.
+
+## Original receipt (historical)
+
 Baseline: `3c2a3ac8ce403b6a3d93b8256b9806931c4969d9` on `main` (PR #37 merge).
 Worktree: `/Users/carlosandreshuete/Documents/Projects/biwengerstats-next-market-reads`
 Branch: `integration/market-reads-migration`

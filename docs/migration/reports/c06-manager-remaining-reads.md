@@ -9,6 +9,13 @@ status: active
 
 # C06 Managers Directory & Remaining Analytics migration
 
+Current integration checkpoint (2026-09-20): **MERGED**, PR #39, `1933e033`.
+Deployment was not reverified by this documentation update. Use the [master tracker](../tracker.md)
+for remaining work and current task IDs. Original baselines, counts and pre-merge states below
+are historical acceptance evidence, not new test results or active assignments.
+
+## Original receipt (historical)
+
 Baseline: `0253f53f624d2685507d7f7f3c0736f0c9ef5a22` on `main` (PR #38 merge).
 Worktree: `/Users/carlosandreshuete/Documents/Projects/biwengerstats-next-managers-remaining-reads`
 Branch: `integration/managers-remaining-reads-migration`

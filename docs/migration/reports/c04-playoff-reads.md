@@ -9,6 +9,13 @@ status: active
 
 # C04 Playoffs read migration
 
+Current integration checkpoint (2026-09-20): **MERGED**, PR #37, `3c2a3ac8`.
+Deployment was not reverified by this documentation update. Use the [master tracker](../tracker.md)
+for remaining work and current task IDs. Original baselines, counts and pre-merge states below
+are historical acceptance evidence, not new test results or active assignments.
+
+## Original receipt (historical)
+
 Baseline: 3c0517e2 on refactor/architecture-completion. IMPLEMENTED AND LOCALLY VERIFIED.
 Unmerged and undeployed; campaign-wide viewport/Linux closure remains C14. Historical checkpoints follow.
 Previous complete source verification: 1531 passing tests, one skip; Predictions browser acceptance

@@ -9,6 +9,13 @@ status: active
 
 # C03 Predictions read migration
 
+Current integration checkpoint (2026-09-20): **MERGED**, PR #36, `f1ae88da`.
+Deployment was not reverified by this documentation update. Use the [master tracker](../tracker.md)
+for remaining work and current task IDs. Original baselines, counts and pre-merge states below
+are historical acceptance evidence, not new test results or active assignments.
+
+## Original receipt (historical)
+
 Baseline: 661f545d on refactor/architecture-completion. IMPLEMENTED AND LOCALLY VERIFIED.
 Unmerged and undeployed; campaign-wide viewport/Linux closure remains C14. Historical checkpoints follow.
 The preceding full campaign verification passed 1507 tests plus one skip and Tournament browser checks.

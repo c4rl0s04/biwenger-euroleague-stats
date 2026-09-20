@@ -10,9 +10,10 @@ status: active
 
 # Migration overview
 
-This is a scope summary, not a percentage-complete estimate. A feature directory does
-not mean its screens, queries, APIs and operations are all migrated. Release evidence
-and historical decisions live in the [migration ledger](migration-status.md).
+This is a scope summary, not an independent task queue. The [master tracker](../migration/tracker.md)
+is authoritative for remaining tasks, dependencies and next actions. Reconciled at main `1933e033`
+on 2026-09-20. A migrated read experience does not mean every mutation or external consumer is
+finished. Release evidence and historical decisions remain in the [migration ledger](migration-status.md).
 
 ## Status vocabulary
 
@@ -62,8 +63,9 @@ desktop/iPhone Profile screenshots. Profile Linux screenshot baselines and an
 authenticated real-production-data visual review remain manual follow-ups, not
 unfinished Profile implementation. Release evidence is recorded in the ledger.
 
-The manager directory and unrelated manager analytics are separate pending scopes;
-this milestone does not claim that every Managers-domain capability is migrated.
+At that historical milestone, directory and other analytics were pending. They subsequently
+merged in PR #39. Private commands and downstream adapter retirement remain separate scopes;
+this does not mean the accepted Profile read implementation must be repeated.
 Legacy user/Tournament adapters stay for other consumers, while Profile no longer
 imports the global service barrel. Reports distinguish **complete user-facing
 scopes**, **partial domain foundations**, and **not-yet-migrated areas**. A data-service
@@ -88,19 +90,22 @@ formulas, ID/null distinctions, route-specific caching and external compatibilit
 The [Standings implementation report](../migration/reports/001-standings.md) records corrections;
 the release receipt distinguishes local checks from integration and deployment.
 
-## Remaining regular migration work
+## Current merged scopes and remaining work
 
-1. Managers remaining reads slice (directory, captain stats, home/away, recommendations and alerts)
-   implemented and verified on branch `integration/managers-remaining-reads-migration` (awaiting review).
-2. Tournaments read slice integrated via PR #35.
-3. Predictions read slice integrated via PR #36.
-4. Playoffs read slice integrated via PR #37.
-5. Market public reads slice integrated via PR #38.
-6. Migrate Schedule, Dashboard, Compare, Home and News compositions
-   after their owning read services are ready.
-7. Move Season Review's pure engine/artifact readers into an explicit feature boundary.
-8. Finish application-shell/shared-UI ownership and remove obsolete global adapters only
-   after checking all consumers. Evaluate canonical API names without deleting legacy URLs.
+Tournaments, Predictions, Playoffs, public Market and Managers remaining reads are merged via
+PRs #35–39 respectively. Their receipts retain original test evidence; this update does not
+certify their production deployments.
+
+Remaining read features: Schedule (Task 04), Compare (05), Dashboard (06–07), News/Home (08–09)
+and Season Review (10–11). Sensitive operations are Tasks 12–21; infrastructure/shared UI and final
+closure are Tasks 22–27. The tracker owns their states and acceptance criteria.
+
+Residual Team detail orchestration/shared Player form work from the preserved campaign belongs
+to Task 25 review against the current schema. Saved Market components already match main; do not
+restart its old checkpoint Q. External Rounds/Standings/Market adapters retire as their final
+consumers migrate. Search interaction ownership belongs to Task 23. Unique UI token work is Task 24.
+The known Market phone-bids defect needs a separate behavior decision before final acceptance.
+Existing URLs remain compatibility contracts; renaming them is not a completion requirement.
 
 Existing code references: [legacy queries](../../src/lib/db/queries),
 [legacy services](../../src/lib/services), [application pages](../../src/app), and
@@ -131,7 +136,7 @@ See the [data and sync architecture](data-and-sync.md),
 
 - Hoopgrid: challenge creation in GET and mixed read/write/private-response behavior.
 - Lineup and Market private operations: provider mutation and authorization review.
-- Accounts and Settings: authentication, linking and credential observation gate.
+- Accounts and Settings: authentication, linking and encrypted credential-boundary review.
 - Assistant: privacy/provider review before structural migration of its orchestration.
 
 Authentication/session behavior, credential encryption and rotation, database authorization,
