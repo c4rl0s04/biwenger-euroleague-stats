@@ -16,8 +16,9 @@ on application main `1933e033434d5a35564b199705a40836f6ebed81`.
 This is local implementation only: no merge, push or deployment authorized.
 
 Implementation commit: `84e0721a5c6e2331fd9193f3fc91a9935fcefb62`.
-Source migration is implemented; unconditional acceptance remains open because the existing
-verification wrapper fails as documented below. It has not been suppressed or fixed in this slice.
+At the original Schedule handoff, unconditional acceptance remained open because the existing
+verification wrapper failed as documented below. The separately authorized isolation follow-up
+at the end of this receipt records the correction; historical failed runs are retained.
 
 ## Scope and contracts
 
@@ -110,7 +111,7 @@ longer printed by the migrated Schedule service. No new logging of personal data
   `npx --no-install drizzle-kit check` passed. Neither check applies migrations.
 - Final documentation formatting/check and `git diff --check` passed.
 
-The verification-wrapper issue belongs to a separate tooling correction: decide whether the
+At the original handoff, the verification-wrapper issue required a separate tooling correction: decide whether the
 wrapper should scope `SKIP_DB` to the build or whether the config test must isolate imported
 configuration state. Do not simply remove the missing-database assertion. Re-run the wrapper
 after that reviewed correction before marking unconditional acceptance complete.
@@ -120,3 +121,39 @@ production visual review belongs to a later separately authorized release. The d
 contains one match and one owned player; multi-player ordering, empty/error and identity cases
 are covered by service/page tests rather than claimed as populated browser coverage.
 No current production behavior or deployment is certified by this report.
+
+## Configuration-test isolation follow-up
+
+Branch: `fix/verifier-config-isolation`, worktree `../biwengerstats-next-verifier-config-isolation`,
+based on Schedule receipt `1aaf3376`. The original Schedule branch is left unchanged.
+
+Fix commit: `344ed0e85150c7961e76a61939ceadd65024e23d`. Task 04 is now **verified locally**
+on this combined Schedule-plus-fix branch, not merged or deployed.
+
+The original four-test config suite failed under `SKIP_DB=true` and the same missing-database
+assertion passed when imported with `SKIP_DB=false`. `validateSeasonConfig` uses both its explicit
+environment argument and `CONFIG.DB.SKIP`, captured at module import. The test had controlled only
+the former. Removing the verifier flag would also remove its mock-pool safeguard, so that option
+was rejected.
+
+The config test now resets modules and sets its import environment before loading the real config
+module, then restores environment/module state after each test. The original missing-database
+assertion is unchanged. Added tests cover explicit skip, import-time skip despite later environment
+changes, and retained provider validation. Verifier tests mock process spawning, not validation:
+they verify disabled DB access in every child with absent/false/true inherited flags, unchanged
+parent environment, command ordering and fail-fast behavior. They never start child commands or
+record the inherited environment.
+
+No runtime configuration, verifier implementation, database client, schema, dependencies or Schedule
+application code changed. No production or provider operations were performed.
+
+- Focused config tests: 6/6 passed under both `SKIP_DB=true` and `SKIP_DB=false`.
+- Combined config/verifier regression tests: 11/11 passed under `SKIP_DB=true`.
+- `npm run verify`: **PASS**, exit 0. Six skills, architecture (938 modules / 65 protected
+  entrypoints), documentation (98 notes), typecheck, 2,236 tests passed / one existing skip,
+  lint (zero errors / the same 24 image warnings), database-disabled production build,
+  schema metadata (37 source and snapshot tables, no drift), Drizzle check and diff check all passed.
+  Missing-provider build warnings remain unchanged. No tests or safety flags were disabled.
+- Browser tests are not repeated for this test-only correction. The unchanged Schedule source retains
+  the preceding 9/9 viewport and original-reference acceptance; Linux references and production
+  visual review remain the documented follow-ups, not newly claimed checks.

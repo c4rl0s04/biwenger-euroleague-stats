@@ -87,12 +87,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 04 — Schedule
 
-- **State:** Implemented; scoped checks pass, but unconditional acceptance is open for the pre-existing verification-wrapper failure. Not merged or deployed.
+- **State:** Verified locally on `fix/verifier-config-isolation` (Schedule plus test-isolation fix). Not merged or deployed.
 - **Dependencies / approval:** 02; current Matches/Rounds/Managers contracts.
 - **Scope:** Own schedule composition and squad overlay; reuse Matches map; exclude lineup submission.
 - **Completion check:** Thin pages, typed services/screens, preserved dates, filters and phone parity.
-- **Evidence:** [Task 04 receipt](reports/task-04-schedule.md), branch `refactor/schedule-read-architecture`.
-- **Next action:** Review `84e0721a` and separately address the recorded verification-wrapper issue; preserve the Assistant adapter for Task 20 and frozen lineup command for Task 15. Do not integrate or deploy yet.
+- **Evidence:** [Task 04 receipt](reports/task-04-schedule.md), Schedule `84e0721a` plus isolation fix `344ed0e8`; full verifier passes.
+- **Next action:** Review the combined branch and plan Task 05 separately; preserve the Assistant adapter for Task 20 and frozen lineup command for Task 15. Integration/deployment still require separate authorization.
 
 ### Task 05 — Compare
 
