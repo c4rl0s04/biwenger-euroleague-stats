@@ -12,7 +12,8 @@ status: active
 
 - [System overview](system-overview.md) — system context, runtime responsibilities, and repository map.
 - [Application layers](application-layers.md) — browser-to-database request flow and boundaries.
-- [UI component layering target](ui-component-layers.md) — agreed post-domain-migration UI composition and reuse direction.
+- [UI component layering target](ui-component-layers.md) — agreed UI composition and reuse direction.
+- [UI foundation v1](ui-foundation-v1.md) — implementation-ready foundation for tokens, primitives, compositions, theming, and the Season Predictions pilot.
 - [Data and sync](data-and-sync.md) — local-first data ingestion, persistence ownership, and write safety.
 - [Authentication and security](authentication-and-security.md) — page protection, credentials, database access, and API responsibilities.
 - [Migration master tracker](../migration/tracker.md) — authoritative task states, dependencies, gates and next actions.

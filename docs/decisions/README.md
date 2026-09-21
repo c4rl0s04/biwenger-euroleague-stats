@@ -17,6 +17,7 @@ status: active
 - [ADR-0005: Season-scoped domain model](0005-season-scoped-domain-model.md)
 - [ADR-0006: Encrypted personal provider credentials](0006-encrypted-personal-provider-credentials.md)
 - [ADR-0007: Server-only database access](0007-server-only-database-access.md)
+- [ADR-0008: Semantic theme preferences](0008-semantic-theme-preferences.md)
 
 Create future decisions from the [ADR template](adr-template.md). ADRs are append-only records:
 supersede an accepted decision with a new ADR instead of rewriting its historical context.
