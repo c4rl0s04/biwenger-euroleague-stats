@@ -105,12 +105,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 06 — Dashboard data
 
-- **State:** In progress on `refactor/dashboard-data-architecture`, based on `c184bee7` after the separate MapLibre fix.
+- **State:** Verified and fast-forward integrated into local main at `700b727b` (structure `2b59bff0`, separate cache correction `700b727b`), from `c184bee7`.
 - **Dependencies / approval:** Owning domain contracts; 02.
 - **Scope:** Assign remaining analytics, aggregate services and API handlers; no UI redesign.
 - **Completion check:** No duplicate domain calculations; personal reads retain private caching.
-- **Evidence:** [Task 06 receipt](reports/task-06-dashboard-data.md); eleven remaining APIs and page data reads now use feature contracts, with acceptance in progress. Three accepted manager APIs remain unchanged.
-- **Next action:** Complete validation and the separately approved recent-activity cache correction, then integrate/push when healthy. Task 07 screen ownership is not included.
+- **Evidence:** [Task 06 receipt](reports/task-06-dashboard-data.md); eleven remaining APIs and page data reads use feature contracts. Full verification and 18/18 browser checks passed. Three accepted manager APIs remain unchanged.
+- **Next action:** Task 07 screen ownership; retain News/Home/Assistant compatibility adapters until their assigned tasks. GitHub publication is checked separately from this local integration record; Vercel inspection is not required for this release.
 
 ### Task 07 — Dashboard screens
 

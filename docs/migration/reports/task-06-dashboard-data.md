@@ -94,7 +94,47 @@ composition-complete before Task 07; focused boundary tests enforce their direct
   News/landing function bodies, last-round emitted query bodies and three record SQL token streams.
 - Dependency audit: production zero; full audit retains five moderate development findings, tracked
   in the [security receipt](../../operations/maplibre-security-upgrade.md). No dependency changes.
-- Cache correction and final candidate browser acceptance remain pending at this structural checkpoint.
+- The separate cache correction passed a red/green check: seven header assertions failed against
+  the old public policy, then all 196 Dashboard/session-cache tests passed with the private policy.
+- Final candidate `npm run verify`: passed again, with 2,379 tests plus one existing skip and the
+  same 24 lint warnings. No schema drift, dependency change or new build warning.
+- `npm run test:e2e:local -- dashboard.spec.ts feature-screens.spec.ts`: **18 passed** across nine
+  configured viewports. Dashboard overview, five phone sections, eleven API contracts, exact fixture
+  payloads and public/private activity headers passed. Existing Matches/Teams macOS screenshot
+  references passed without changes. Browser exception/API-error guards remained enabled.
+- The browser server emitted `The destination stream closed early` after a feature-screen case.
+  The identical message exists in the unchanged baseline and MapLibre acceptance runs, documented
+  in the security receipt. It is an existing navigation/teardown observation, not a new Dashboard
+  regression; there were no browser exceptions or failed application API assertions.
+
+### Final command results
+
+| Command                                                                                                                                                                                                                                                                                | Result                                                                                      |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run typecheck`                                                                                                                                                                                                                                                                    | PASS                                                                                        |
+| `npm run test:run -- src/features/dashboard src/features/rounds src/features/standings src/features/matches src/features/market src/app/api/dashboard src/app/api/player src/app/api/__tests__/session-read-cache.test.ts src/lib/mobile/view-models/dashboard.test.ts --maxWorkers=2` | PASS, 828 tests (structural checkpoint)                                                     |
+| `npm run test:run -- src/app/api/dashboard src/app/api/__tests__/session-read-cache.test.ts --maxWorkers=2`                                                                                                                                                                            | PASS, 196 tests after cache correction                                                      |
+| `npm run test:run -- --maxWorkers=2`                                                                                                                                                                                                                                                   | PASS, 2,379 tests / one existing skip                                                       |
+| `npm run lint`                                                                                                                                                                                                                                                                         | PASS, zero errors / 24 existing warnings                                                    |
+| `SKIP_DB=true npm run build`                                                                                                                                                                                                                                                           | PASS, expected missing-provider warnings only                                               |
+| `npm run architecture:check`                                                                                                                                                                                                                                                           | PASS, 978 modules / 80 protected entrypoints                                                |
+| `npm run docs:check` / `npm run skills:check`                                                                                                                                                                                                                                          | PASS, 101 notes / six skills                                                                |
+| `npm run db:audit:schema:metadata`                                                                                                                                                                                                                                                     | PASS, 37 tables, no drift; no database connection                                           |
+| `npx --no-install drizzle-kit check`                                                                                                                                                                                                                                                   | PASS; no migrations applied                                                                 |
+| `git diff --check` and `git diff --check c184bee7..HEAD`                                                                                                                                                                                                                               | PASS                                                                                        |
+| `npm run test:e2e:local -- dashboard.spec.ts feature-screens.spec.ts`                                                                                                                                                                                                                  | PASS, 18/18, disposable local fixture only                                                  |
+| `npm audit --omit=dev` / `npm audit`                                                                                                                                                                                                                                                   | Production zero / five existing moderate development findings; no high or critical findings |
+
+## Integration record
+
+The clean local main fast-forwarded from `c184bee7` to `700b727b` after final verification:
+
+- `2b59bff0`: structural migration and compatibility tests.
+- `700b727b`: approved personalized-activity cache correction and unit/browser header checks.
+
+This receipt is a subsequent documentation-only commit. GitHub publication is verified against
+the final local/remote refs in the release handoff; this record does not claim a Vercel deployment
+was inspected. No other worktree was integrated, rewritten or removed.
 
 No dependency/schema/migration, authentication, credential, provider-operation, environment or
 Vercel configuration change belongs to this slice. Integration/push and deployment are distinct;
