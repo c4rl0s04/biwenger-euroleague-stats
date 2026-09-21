@@ -1,0 +1,50 @@
+name: Bootstrap Sync
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bootstrap-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: Bootstrap active season
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate providers and bootstrap active season
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+
+          BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
+          BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
+          BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
+          BIWENGER_API_VERSION_FALLBACK: ${{ vars.BIWENGER_API_VERSION_FALLBACK }}
+
+          SEASON_ID: ${{ vars.SEASON_ID }}
+          SEASON_NAME: ${{ vars.SEASON_NAME }}
+          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
+          LEAGUE_START_DATE: ${{ vars.LEAGUE_START_DATE }}
+          SEASON_AWARE_READS_CONFIRMED: ${{ vars.SEASON_AWARE_READS_CONFIRMED }}
+        run: npm run sync:preflight && npm run sync:bootstrap
