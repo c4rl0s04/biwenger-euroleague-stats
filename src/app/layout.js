@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CardThemeProvider } from '@/contexts/CardThemeContext';
 import PwaProvider from '@/components/pwa/PwaProvider';
+import { THEME_BOOTSTRAP_SCRIPT, THEME_COLORS } from '@/lib/theme/preferences';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -64,7 +65,6 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#050506',
 };
 
 import { SessionProvider } from 'next-auth/react';
@@ -72,6 +72,19 @@ import { SessionProvider } from 'next-auth/react';
 export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* OS fallback without JS; the resolver adds its own first chrome override before paint. */}
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content={THEME_COLORS.dark} />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content={THEME_COLORS.light}
+        />
+        <script
+          id="application-theme"
+          dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+        />
+      </head>
       <body
         className={`${outfit.variable} ${inter.variable} ${bebasNeue.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
       >

@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   /* Surfaces */
   --surface-app: var(--color-obsidian-deepest);
   --surface-card: var(--color-obsidian-deep);
@@ -131,4 +132,107 @@
 
   --sidebar-border: var(--shell-border);
   --sidebar-ring: var(--shell-focus-ring);
+}
+
+/* Explicit choices override the OS. No marker means system, including without JS. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  /* Surfaces: warm canvas, near-white card, white raised, recessed subtle. */
+  --surface-app: var(--color-paper-canvas);
+  --surface-card: var(--color-paper-card);
+  --surface-popover: var(--color-white-pure);
+  --surface-secondary: var(--color-paper-subtle);
+  --surface-muted: var(--color-paper-muted);
+
+  --content-primary: var(--color-ink-strong);
+  --content-secondary: var(--color-ink-secondary);
+  --content-muted: var(--color-ink-muted);
+  --content-on-primary: var(--color-white-pure);
+  --content-on-accent: var(--color-white-pure);
+  --content-on-danger: var(--color-white-pure);
+
+  /* Deeper orange/red support text and white action labels on light surfaces. */
+  --action-primary: var(--color-orange-ink);
+  --action-accent: var(--color-orange-pressed);
+  --status-danger: var(--color-red-ink);
+  --border-default: var(--color-slate-outline);
+  --control-border: var(--color-slate-control);
+  --focus-ring: var(--color-orange-ink);
+
+  --effect-glow-primary: none;
+  --effect-glow-subtle: none;
+  --effect-glass-border: var(--overlay-ink-faint);
+  --effect-glass-surface: var(--overlay-paper-glass);
+  --effect-gradient-card: linear-gradient(
+    165deg,
+    hsl(var(--color-white-pure)),
+    hsl(var(--color-paper-card))
+  );
+  --effect-gradient-accent: linear-gradient(
+    135deg,
+    hsl(var(--color-orange-ink)),
+    hsl(var(--color-orange-pressed))
+  );
+  --effect-gradient-mesh: none;
+
+  --shell-surface: var(--color-paper-card);
+  --shell-content: var(--color-ink-secondary);
+  --shell-action-primary: var(--color-orange-ink);
+  --shell-action-primary-content: var(--color-white-pure);
+  --shell-accent-surface: var(--color-paper-subtle);
+  --shell-accent-content: var(--color-ink-strong);
+  --shell-border: var(--color-slate-outline);
+  --shell-focus-ring: var(--color-orange-ink);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    /* Surfaces: warm canvas, near-white card, white raised, recessed subtle. */
+    --surface-app: var(--color-paper-canvas);
+    --surface-card: var(--color-paper-card);
+    --surface-popover: var(--color-white-pure);
+    --surface-secondary: var(--color-paper-subtle);
+    --surface-muted: var(--color-paper-muted);
+
+    --content-primary: var(--color-ink-strong);
+    --content-secondary: var(--color-ink-secondary);
+    --content-muted: var(--color-ink-muted);
+    --content-on-primary: var(--color-white-pure);
+    --content-on-accent: var(--color-white-pure);
+    --content-on-danger: var(--color-white-pure);
+
+    /* Deeper orange/red support text and white action labels on light surfaces. */
+    --action-primary: var(--color-orange-ink);
+    --action-accent: var(--color-orange-pressed);
+    --status-danger: var(--color-red-ink);
+    --border-default: var(--color-slate-outline);
+    --control-border: var(--color-slate-control);
+    --focus-ring: var(--color-orange-ink);
+
+    --effect-glow-primary: none;
+    --effect-glow-subtle: none;
+    --effect-glass-border: var(--overlay-ink-faint);
+    --effect-glass-surface: var(--overlay-paper-glass);
+    --effect-gradient-card: linear-gradient(
+      165deg,
+      hsl(var(--color-white-pure)),
+      hsl(var(--color-paper-card))
+    );
+    --effect-gradient-accent: linear-gradient(
+      135deg,
+      hsl(var(--color-orange-ink)),
+      hsl(var(--color-orange-pressed))
+    );
+    --effect-gradient-mesh: none;
+
+    --shell-surface: var(--color-paper-card);
+    --shell-content: var(--color-ink-secondary);
+    --shell-action-primary: var(--color-orange-ink);
+    --shell-action-primary-content: var(--color-white-pure);
+    --shell-accent-surface: var(--color-paper-subtle);
+    --shell-accent-content: var(--color-ink-strong);
+    --shell-border: var(--color-slate-outline);
+    --shell-focus-ring: var(--color-orange-ink);
+  }
 }

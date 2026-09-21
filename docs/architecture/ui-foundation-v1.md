@@ -581,8 +581,9 @@ Tailwind semantic bridge
 Surface / Card / primitives / shell / feature UI
 ```
 
-The current dark semantic mapping is the compatibility baseline. A dedicated future theme slice will
-add the light raw palette, light semantic mapping, root preference resolution and persistence.
+The dark semantic mapping remains the compatibility baseline. UI-01T adds the light raw palette,
+light semantic mapping, root preference resolution and persistence; its concrete runtime contract is
+recorded in [ADR-0008](../decisions/0008-semantic-theme-preferences.md#ui-01t-implementation-contract).
 
 Do not implement theming by cloning component trees or by spreading component-local `dark:` variants
 through the new foundation.

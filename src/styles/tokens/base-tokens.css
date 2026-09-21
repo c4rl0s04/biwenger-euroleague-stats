@@ -19,6 +19,22 @@
   --color-white-bright: 0 0% 98%;
   --color-white-soft: 0 0% 95%;
 
+  /* Light paper surfaces and ink: raw values, independent of semantic roles. */
+  --color-paper-canvas: 40 12% 95%;
+  --color-paper-card: 40 25% 99%;
+  --color-paper-subtle: 40 15% 92%;
+  --color-paper-muted: 40 10% 89%;
+  --color-ink-strong: 240 10% 12%;
+  --color-ink-secondary: 240 6% 24%;
+  --color-ink-muted: 240 5% 38%;
+  --color-slate-outline: 240 5% 78%;
+  --color-slate-control: 240 5% 50%;
+  --color-orange-ink: 19 95% 38%;
+  --color-orange-pressed: 19 95% 33%;
+  --color-red-ink: 0 72% 42%;
+  --overlay-ink-faint: hsla(240, 10%, 12%, 0.12);
+  --overlay-paper-glass: hsla(40, 25%, 99%, 0.92);
+
   /* Product orange */
   --color-orange-strong: 19 99% 49%;
   --color-orange-deep: 19 99% 45%;
