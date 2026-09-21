@@ -43,6 +43,11 @@ accidentally enabling sync for a frozen season.
 | `npm run sync -- --step=match-linking`                      | Run one descriptive step for diagnosis or recovery.             |
 | `npm run sync -- --step=euroleague-games --force-game=CODE` | Reconcile one old finalized official game.                      |
 
+The **Bootstrap Sync** GitHub Actions workflow exposes `sync:bootstrap` as a manual-only production
+operation. It runs the full provider preflight before writing and has no scheduled trigger. Use it
+once when initializing an active season, review the completed run, and only then enable the routine
+**Scheduled Sync** workflow.
+
 The declarative pipeline is:
 
 | Order | Step ID                   | Source              | Main storage owned                                                     | Modes              |

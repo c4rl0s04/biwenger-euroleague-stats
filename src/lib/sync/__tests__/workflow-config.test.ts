@@ -14,7 +14,7 @@ const requiredConfiguration = [
 ];
 
 describe('sync workflow season configuration', () => {
-  for (const workflowName of ['sync.yml', 'sync-live.yml']) {
+  for (const workflowName of ['sync.yml', 'sync-live.yml', 'sync-bootstrap.yml']) {
     it(`${workflowName} validates the complete canonical configuration`, () => {
       const workflow = fs.readFileSync(
         path.join(process.cwd(), '.github', 'workflows', workflowName),
@@ -40,5 +40,16 @@ describe('sync workflow season configuration', () => {
     expect(routine).toContain('npm run sync:preflight && npm run sync');
     expect(routine).not.toContain('sync:daily');
     expect(live).toContain('npm run sync:live');
+  });
+
+  it('bootstrap workflow is manual-only and runs the bootstrap pipeline after preflight', () => {
+    const bootstrap = fs.readFileSync(
+      path.join(process.cwd(), '.github', 'workflows', 'sync-bootstrap.yml'),
+      'utf8'
+    );
+
+    expect(bootstrap).toContain('workflow_dispatch:');
+    expect(bootstrap).not.toContain('schedule:');
+    expect(bootstrap).toContain('npm run sync:preflight && npm run sync:bootstrap');
   });
 });
