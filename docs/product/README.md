@@ -15,7 +15,8 @@ status: active
 Product documentation follows user domains rather than individual components. Each note connects
 behavior to its page entries, internal APIs, services, data access, and tests.
 
-- [Design context](design-system.md) — stable visual identity, theming, responsive, and interaction rules.\n- [UI design direction](ui-design-direction.md) — current visual evolution, page-composition patterns, and desktop/mobile product direction.
+- [Design context](design-system.md) — stable visual identity, theming, responsive, and interaction rules.
+- [UI design direction](ui-design-direction.md) — current visual evolution, page-composition patterns, and desktop/mobile product direction.
 
 ## Domains
 
