@@ -31,6 +31,10 @@ The dated entries below retain historical evidence; they are not all current blo
 
 ## Domain ledger
 
+Dashboard Task 06's baseline identified a pre-existing MapLibre attribution vulnerability.
+The separately approved [security upgrade](../operations/maplibre-security-upgrade.md) records
+the fix and acceptance evidence; it is not counted as Dashboard migration work.
+
 Tournament read migration: C02 Tournament reads (catalogue, detail, sections, bracket and analytics)
 are implemented, verified and integrated via PR #35. The
 [C02 receipt](../migration/reports/c02-tournament-reads.md) records contracts and verification evidence.

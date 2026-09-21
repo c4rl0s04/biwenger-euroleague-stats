@@ -10,6 +10,8 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Unmodified dependency artifacts copied by the MapLibre build preparation.
+    'public/vendor/maplibre/**',
   ]),
 ]);
 

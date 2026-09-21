@@ -1,6 +1,6 @@
 'use client';
 
-import MapLibreGL from 'maplibre-gl';
+import * as MapLibreGL from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {
   createContext,
@@ -18,6 +18,10 @@ import { createPortal } from 'react-dom';
 import { X, Minus, Plus, Locate, Maximize, Loader2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+
+// Keep the worker beside its shared ESM dependency; asset hashing alone does not
+// rewrite imports inside the worker. npm prebuild/predev prepare these local files.
+MapLibreGL.setWorkerUrl(`/vendor/maplibre/${MapLibreGL.getVersion()}/maplibre-gl-worker.mjs`);
 
 const defaultStyles = {
   dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
@@ -165,6 +169,8 @@ export const Map = forwardRef(function Map(
       container: containerRef.current,
       style: initialStyle,
       renderWorldCopies: false,
+      // Keep the v5 vector-tile overscaling behavior during the security upgrade.
+      zoomLevelsToOverscale: undefined,
       attributionControl: {
         compact: true,
       },
