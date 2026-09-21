@@ -166,6 +166,7 @@ try {
     DATABASE_URL: integrityConnectionString,
   });
   await run(['scripts/e2e/seed.mjs']);
+  await run(['scripts/dev/prepare-maplibre.mjs']);
   await run(['node_modules/next/dist/bin/next', 'build'], { SKIP_DB: 'true' });
   cpSync(path.join(root, 'public'), path.join(root, '.next/standalone/public'), {
     recursive: true,
