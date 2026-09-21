@@ -28,9 +28,7 @@ This document is **not** an instruction to:
 - install every library mentioned here immediately;
 - normalize every historical styling decision in one pass.
 
-Existing URLs, domain behavior, access rules, data contracts and current production visuals remain
-separate compatibility concerns. The [product design context](../product/design-system.md) remains the
-visual authority, while this document defines how new reusable UI should be structured.
+Existing URLs, domain behavior, access rules and data contracts remain separate compatibility concerns.\nThe [product design context](../product/design-system.md) defines stable visual rules and the\n[UI design direction](../product/ui-design-direction.md) defines the approved visual evolution. This\ndocument defines how reusable UI is structured so those designs can evolve without rewriting domain\narchitecture.
 
 ## Audit baseline
 
@@ -558,6 +556,56 @@ Token extraction and visual redesign are separate operations.
 The first token commits must preserve the exact current rendered values. Improvements to palette,
 spacing scales, radii or visual hierarchy should be made in later explicit design changes with browser
 comparison, not hidden inside the file split.
+
+### Theme-ready semantic architecture
+
+The token foundation must support the user preference model recorded in
+[ADR-0008](../decisions/0008-semantic-theme-preferences.md):
+
+```text
+system | dark | light
+```
+
+Theme selection belongs at the application root/shell. Shared UI and feature components consume
+semantic tokens and remain unaware of whether the resolved theme is light or dark.
+
+Target dependency:
+
+```text
+raw dark/light palette values
+          ↓
+theme-aware semantic mapping
+          ↓
+Tailwind semantic bridge
+          ↓
+Surface / Card / primitives / shell / feature UI
+```
+
+The current dark semantic mapping is the compatibility baseline. A dedicated future theme slice will
+add the light raw palette, light semantic mapping, root preference resolution and persistence.
+
+Do not implement theming by cloning component trees or by spreading component-local `dark:` variants
+through the new foundation.
+
+Surface hierarchy (`default | raised | subtle`) is independent from color theme.
+
+### Layout-neutral foundation
+
+The shared foundation must not assume that pages are grids of Cards.
+
+It must support feature screens composed from:
+
+- open canvas regions;
+- bounded Cards;
+- focal/hero regions;
+- data rails;
+- full-width charts/tables;
+- split views;
+- drawers/sheets;
+- responsive desktop/mobile compositions.
+
+Those are presentation choices above the primitive layer. Services/view models must remain independent
+from those choices so page design can evolve over time.
 
 ## Typography
 
@@ -1209,18 +1257,22 @@ Acceptance:
 - ownership boundaries explicit;
 - no production implementation or dependency changes required.
 
-### UI-01 — Minimal primitives
+### UI-01 — Foundation primitives and design readiness
 
-Implement only the primitives required by the Season Predictions first slice.
+UI-01A established Surface and the composable Card anatomy on the semantic-token foundation.
 
-Expected focus:
+Before expanding the primitive set, the product design direction and semantic theme decision must be
+treated as source-of-truth. The remaining UI-01 work should be theme-ready and layout-neutral.
 
-- Surface/Card anatomy;
-- Button;
-- Badge;
-- Avatar/EntityIdentity;
-- headers;
-- loading/empty states.
+Near-term slices:
+
+1. **UI-01T — theme foundation:** add the light raw palette, theme-aware semantic mappings, root
+   `system | dark | light` resolution/persistence and representative theme verification.
+2. **UI-01B — core primitives:** Button, IconButton where required, Badge, Avatar, Skeleton and Input.
+3. **UI-01C — shared compositions:** demonstrated reusable identity, empty-state, page/section header and
+   related patterns needed by the first new feature.
+
+Do not implement every possible primitive in advance.
 
 Use TypeScript/TSX for new boundaries.
 
