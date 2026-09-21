@@ -12,6 +12,23 @@ import { relevantRounds } from '../../rounds';
 
 const DEFAULT_SLEEP_MS = 600;
 
+export function historicalPriceDate(
+  value: unknown,
+  startsAt: string | null,
+  endsAt: string | null
+): string | null {
+  const validDate = (date: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+    Number.isFinite(Date.parse(date)) &&
+    new Date(date).toISOString().slice(0, 10) === date;
+  if (!startsAt || !validDate(startsAt) || (endsAt && !validDate(endsAt))) return null;
+  const raw = String(value);
+  if (!/^\d{6}$/.test(raw)) return null;
+  const date = `20${raw.slice(0, 2)}-${raw.slice(2, 4)}-${raw.slice(4, 6)}`;
+  if (!validDate(date) || date < startsAt || (endsAt && date > endsAt)) return null;
+  return date;
+}
+
 export interface BiwengerCatalogDependencies {
   fetchAllPlayers: typeof fetchAllPlayers;
   fetchRoundGames: typeof fetchRoundGames;
@@ -191,6 +208,12 @@ export async function syncBiwengerCatalog(
   );
 
   const mutations = preparePlayerMutations(db as any, { seasonId });
+  const boundaries = await db!.query(
+    'SELECT starts_at::text, ends_at::text FROM seasons WHERE id = $1',
+    [seasonId]
+  );
+  const startsAt = boundaries.rows[0]?.starts_at ?? null;
+  const endsAt = boundaries.rows[0]?.ends_at ?? null;
   const positions: any = CONFIG.POSITIONS;
   const teams = snapshot.teams;
 
@@ -212,6 +235,8 @@ export async function syncBiwengerCatalog(
   let newPlayersCount = 0;
   let skippedDetailsCount = 0;
   const warnings: string[] = [];
+  let skippedHistoricalPrices = 0;
+  if (!startsAt) warnings.push('Historical price import disabled: season starts_at is missing.');
 
   for (const [id, player] of Object.entries(playersList) as any[]) {
     const snapshot = normalizeBiwengerPlayer(id, player, positions);
@@ -268,7 +293,11 @@ export async function syncBiwengerCatalog(
 
           if (d.prices && Array.isArray(d.prices)) {
             for (const [dateInt, price] of d.prices) {
-              const dateStr = parsePriceDate(dateInt);
+              const dateStr = historicalPriceDate(dateInt, startsAt, endsAt);
+              if (!dateStr) {
+                skippedHistoricalPrices++;
+                continue;
+              }
               await mutations.insertMarketValue({
                 player_id: playerId,
                 price: price,
@@ -289,6 +318,11 @@ export async function syncBiwengerCatalog(
   }
 
   manager.log(`New players detected: ${newPlayersCount} (fetched full details)`);
+  if (skippedHistoricalPrices > 0) {
+    warnings.push(
+      `Skipped ${skippedHistoricalPrices} historical prices with invalid or out-of-season dates.`
+    );
+  }
   manager.log(`Existing players: ${skippedDetailsCount} (skipped details fetch, updated price)`);
 
   return {

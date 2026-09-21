@@ -1,12 +1,26 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   normalizeBiwengerPlayer,
+  historicalPriceDate,
   parseBiwengerDate,
   parsePriceDate,
   syncBiwengerCatalog,
 } from '../catalog';
 
 describe('Biwenger Catalog Service', () => {
+  it('accepts only real calendar dates inside the inclusive season boundaries', () => {
+    const start = '2026-09-01';
+    const end = '2027-06-30';
+    expect(historicalPriceDate(250921, start, end)).toBeNull();
+    expect(historicalPriceDate(260901, start, end)).toBe(start);
+    expect(historicalPriceDate(270630, start, end)).toBe(end);
+    expect(historicalPriceDate(270701, start, end)).toBeNull();
+    expect(historicalPriceDate(270701, start, null)).toBe('2027-07-01');
+    expect(historicalPriceDate(260930, null, null)).toBeNull();
+    for (const invalid of [260231, 261301, 'bad', null, 262509]) {
+      expect(historicalPriceDate(invalid, start, end)).toBeNull();
+    }
+  });
   describe('date helpers', () => {
     it('parses valid biwenger date integers (YYYYMMDD)', () => {
       expect(parseBiwengerDate(19950412)).toBe('1995-04-12');
@@ -42,7 +56,13 @@ describe('Biwenger Catalog Service', () => {
       };
       const mockDb = {
         select: vi.fn().mockReturnValue(mockSelect),
-        query: vi.fn().mockResolvedValue({ rows: [] }),
+        query: vi.fn().mockImplementation((sql: string) =>
+          Promise.resolve({
+            rows: sql.includes('starts_at::text')
+              ? [{ starts_at: '2025-09-01', ends_at: null }]
+              : [],
+          })
+        ),
       };
 
       const manager: any = {
@@ -86,7 +106,11 @@ describe('Biwenger Catalog Service', () => {
             birthday: 19910323,
             height: 181,
             weight: 88,
-            prices: [[250914, 5000000]],
+            prices: [
+              [250914, 5000000],
+              [240914, 4000000],
+              [250231, 4000000],
+            ],
           },
         }),
         sleep: vi.fn().mockResolvedValue(undefined),
@@ -101,6 +125,14 @@ describe('Biwenger Catalog Service', () => {
       expect(mockDependencies.fetchAllPlayers).toHaveBeenCalled();
       expect(mockDependencies.fetchRoundGames).toHaveBeenCalledWith(1);
       expect(mockDependencies.fetchPlayerDetails).toHaveBeenCalledWith(101);
+      const priceWrites = mockDb.query.mock.calls.filter(([sql]) =>
+        sql.includes('INSERT INTO market_values')
+      );
+      expect(priceWrites).toHaveLength(2);
+      expect(priceWrites[1][1]).toEqual(['2025-26', 101, 5000000, '2025-09-14']);
+      expect(result.warnings).toContain(
+        'Skipped 2 historical prices with invalid or out-of-season dates.'
+      );
     });
   });
 
