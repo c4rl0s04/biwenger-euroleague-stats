@@ -104,12 +104,24 @@ regression. Real-data production review and Linux Dashboard screenshot reference
 
 ## Integration status
 
-Not merged or pushed. During validation, `origin/main` advanced from `a5a44db0` to `70c0e34d`
-(`docs(ui): define design evolution and semantic theming`). Inspection confirms eight documentation
-files only, no application or AGENTS changes. Its updated design context explicitly preserves
-structural-compatibility mode; this migration does not implement the new visual direction.
+On 2026-09-21, the user authorized integration. Main had advanced to `f47e2a65`, including
+the documentation, UI token/card foundation and manual bootstrap workflow changes. Those changes
+were preserved; no sync workflow was executed. The unpublished Dashboard branch rebased without
+conflicts, and `git range-diff` confirmed both patches unchanged:
 
-The planned fast-forward is no longer possible without first incorporating that main commit.
-Rebasing the unpublished branch and rerunning validation was proposed to the user; integration awaits
-that decision. Primary main and unrelated worktrees have not been modified. Next domain task after
-release: **08 — News**. Do not start it as part of this slice.
+- `2f223fb8` → `6bc97fb6`: Dashboard implementation.
+- `3c48b9d4` → `c4c55057`: original verification receipt.
+
+Local main fast-forwarded to `c4c55057` after complete validation on the combined source:
+
+- `npm run verify`: PASS, including typecheck, 2,437 tests plus one existing skip,
+  lint (zero errors / 24 existing warnings), production build, skills, docs (105 notes),
+  architecture (983 modules / 82 entrypoints), metadata (37 tables), Drizzle and diff checks.
+- Focused Dashboard/API/session-cache command above: PASS, 251 tests.
+- `npm run test:e2e:local -- dashboard.spec.ts feature-screens.spec.ts`: PASS, 18 cases;
+  original screenshots unchanged, including Dashboard and Matches/Team comparisons.
+- `git diff --check origin/main..HEAD`: PASS.
+
+This receipt is prepared for GitHub publication with the verified commits. Vercel and real-data
+production behavior are not certified by these local checks. No unrelated worktree was changed.
+Next domain task: **08 — News**, not started in this integration.
