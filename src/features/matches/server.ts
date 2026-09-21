@@ -1,4 +1,5 @@
 import 'server-only';
+export { getRoundDetails, ROUND_DETAILS_POLICY } from './server/services/round-details.service';
 
 export {
   getMatchRoundScreenData,

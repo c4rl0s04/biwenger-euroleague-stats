@@ -1,4 +1,4 @@
-import { fetchRisingStars } from '@/lib/services';
+import { fetchRisingStars } from '@/features/dashboard/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

@@ -7,17 +7,35 @@ import {
   MobileSectionHeading,
 } from '@/components/mobile/MobileScreen';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
-import { getLeagueDashboardData, getNextRoundData, getUserDashboardData } from '@/lib/services';
+import {
+  getLeagueDashboardData,
+  getNextRoundData,
+  getUserDashboardData,
+} from '@/features/dashboard/server';
 
 type PageProps = { params: Promise<{ section: string }> };
-type RecordValue = Record<string, any>;
+import type { PersonalDashboard, DashboardDisplayPlayer } from '@/features/dashboard/public';
+import type {
+  ManagerCaptainStats,
+  ManagerSeasonStatsViewModel,
+  ManagerHomeAwayStats,
+} from '@/features/managers/public';
+import type { LeaderGap } from '@/features/standings/public';
+// Preserve the old optional display aliases (currently absent from the domain payload).
+type CaptainDisplay = Partial<ManagerCaptainStats> & {
+  captain_points?: number;
+  total_points?: number;
+  success_rate?: number;
+  average?: number;
+};
 
 const numeric = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const playerName = (player: RecordValue) => String(player.name ?? player.player_name ?? 'Jugador');
+const playerName = (player: DashboardDisplayPlayer) =>
+  String(player.name ?? player.player_name ?? 'Jugador');
 
 export default async function DashboardSectionPage({ params }: PageProps) {
   const { section } = await params;
@@ -29,9 +47,9 @@ export default async function DashboardSectionPage({ params }: PageProps) {
   let content;
 
   if (section === 'season') {
-    const dashboard = userId ? await getUserDashboardData(userId) : ({} as RecordValue);
-    const stats = (dashboard as RecordValue).seasonStats ?? {};
-    const captain = (dashboard as RecordValue).captainStats ?? {};
+    const dashboard: PersonalDashboard = userId ? await getUserDashboardData(userId) : {};
+    const stats: Partial<ManagerSeasonStatsViewModel> = dashboard.seasonStats ?? {};
+    const captain: CaptainDisplay = dashboard.captainStats ?? {};
     content = (
       <>
         <MobileMetricGrid>
@@ -63,9 +81,9 @@ export default async function DashboardSectionPage({ params }: PageProps) {
       </>
     );
   } else if (section === 'comparison') {
-    const dashboard = userId ? await getUserDashboardData(userId) : ({} as RecordValue);
-    const gap = (dashboard as RecordValue).leaderGap ?? {};
-    const homeAway = (dashboard as RecordValue).homeAwayStats ?? {};
+    const dashboard: PersonalDashboard = userId ? await getUserDashboardData(userId) : {};
+    const gap: Partial<LeaderGap> = dashboard.leaderGap ?? {};
+    const homeAway: Partial<ManagerHomeAwayStats> = dashboard.homeAwayStats ?? {};
     content = (
       <>
         <MobileMetricGrid>
@@ -110,7 +128,7 @@ export default async function DashboardSectionPage({ params }: PageProps) {
         <MobileSectionHeading>
           {section === 'market' ? 'Oportunidades' : 'Mejor forma'}
         </MobileSectionHeading>
-        {(entries ?? []).slice(0, 8).map((player: RecordValue, index: number) => (
+        {(entries ?? []).slice(0, 8).map((player: DashboardDisplayPlayer, index: number) => (
           <MobileListRow
             key={String(player.player_id ?? player.id ?? index)}
             href={
@@ -141,7 +159,7 @@ export default async function DashboardSectionPage({ params }: PageProps) {
           <MobileMetric label="MVP recientes" value={league.roundMVPs?.length ?? 0} tone="accent" />
         </MobileMetricGrid>
         <MobileSectionHeading>Rachas</MobileSectionHeading>
-        {players.slice(0, 8).map((player: RecordValue, index: number) => (
+        {players.slice(0, 8).map((player: DashboardDisplayPlayer, index: number) => (
           <MobileListRow
             key={String(player.player_id ?? player.id ?? index)}
             title={playerName(player)}

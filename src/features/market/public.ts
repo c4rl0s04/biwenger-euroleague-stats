@@ -1,4 +1,5 @@
 export { scoreMarketListing } from './lib/market-recommendation';
+export type { HighestTransferRecord, BiggestGainRecord } from './models/activity-records';
 export { default as MarketSectionRows } from './components/MarketSectionRows';
 export { default as MarketSectionScreen } from './components/MarketSectionScreen';
 export type { MarketSectionRow, MarketSectionModel } from './models/market-section';

@@ -5,6 +5,7 @@ export type {
   RoundCalendar,
   RoundSelectionPolicy,
 } from './models/calendar';
+export type { LastRoundMVP, LastRoundStats, HighestRoundRecord } from './models/last-round';
 export type * from './models/round-read';
 export { calculateStats } from './logic/performance';
 export type { RoundPerformance, CalculatedPerformanceStats } from './logic/performance';

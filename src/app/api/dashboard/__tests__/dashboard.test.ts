@@ -20,7 +20,9 @@ vi.mock('@/features/managers/server', () => ({
 }));
 
 // --- Mock all services ---
-vi.mock('@/lib/services', () => ({
+vi.mock('@/features/dashboard/server', async () => ({
+  ...(await import('@/features/dashboard/validation/activity-input')),
+  getDashboardIdealLineup: vi.fn(),
   fetchPlayerBirthdays: vi.fn(),
   fetchTopPlayers: vi.fn(),
   fetchCaptainStats: vi.fn(),
@@ -37,7 +39,7 @@ vi.mock('@/lib/services', () => ({
   fetchMarketOpportunities: vi.fn(),
 }));
 
-import * as services from '@/lib/services';
+import * as services from '@/features/dashboard/server';
 
 function mockRequest(
   path = 'http://localhost/api/dashboard',
@@ -201,9 +203,10 @@ describe('dashboard route contract coverage', () => {
   });
 
   it('covers simple dashboard data routes and cache envelopes', async () => {
-    vi.mocked(services.fetchLastRoundStats).mockResolvedValue([
-      { player_id: 1, round_name: 'J1', position: 'Base', points: 10 },
-    ] as any);
+    vi.mocked(services.getDashboardIdealLineup).mockResolvedValue({
+      data: { lineup: [], round_name: 'J1', total_points: 10 },
+      cacheSeconds: 300,
+    });
     vi.mocked(services.fetchMarketOpportunities).mockResolvedValue([{ id: 2 }] as any);
     vi.mocked(services.fetchLastRoundMVPs).mockResolvedValue([{ id: 3 }] as any);
     vi.mocked(services.fetchNextRound).mockResolvedValue({ id: 4 } as any);

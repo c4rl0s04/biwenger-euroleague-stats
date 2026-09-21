@@ -1,23 +1,15 @@
 import { NextRequest } from 'next/server';
-import { getRecentActivityData } from '@/lib/services';
+import { getRecentActivityData, parseActivityUserId } from '@/features/dashboard/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
-import { validateNumber } from '@/lib/utils/validation';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userIdParam = searchParams.get('userId');
-
-    let userId: string | null = null;
-    if (userIdParam) {
-      const validation = validateNumber(userIdParam, { min: 1, max: 999999999 });
-      if (!validation.valid) {
-        return errorResponse('Invalid user ID format', 400);
-      }
-      userId = String(validation.value);
-    }
+    const parsed = parseActivityUserId(searchParams);
+    if (!parsed.valid) return errorResponse('Invalid user ID format', 400);
+    const userId = parsed.value;
 
     const data = await getRecentActivityData(userId);
     return successResponse(data, CACHE_DURATIONS.SHORT);

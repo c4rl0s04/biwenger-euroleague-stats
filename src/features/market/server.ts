@@ -1,5 +1,10 @@
 import 'server-only';
 export {
+  getHighestTransferRecord,
+  getBiggestGainRecord,
+  MARKET_RECORDS_POLICY,
+} from './server/services/activity-records.service';
+export {
   getMobileMarketSection,
   MARKET_SECTION_POLICY,
 } from './server/services/market-section.service';

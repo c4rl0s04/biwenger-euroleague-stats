@@ -1,4 +1,9 @@
 import 'server-only';
+export {
+  getLeaderComparison,
+  getLeagueAveragePoints,
+  LEAGUE_COMPARISON_POLICY,
+} from './server/services/league-comparison.service';
 
 export {
   getFullStandings,

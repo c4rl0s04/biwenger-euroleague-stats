@@ -99,9 +99,11 @@ certify their production deployments.
 Schedule (Task 04) is integrated and deployed at `6aa275b6`;
 see its [acceptance receipt](../migration/reports/task-04-schedule.md). The config-test isolation
 follow-up resolves the prior verifier failure without changing application or verifier behavior.
-Compare (Task 05) is verified locally on `refactor/compare-read-architecture`, not integrated or
-deployed; its [receipt](../migration/reports/task-05-compare.md) records the full/lite services,
+Compare (Task 05) is integrated and pushed at `8bc0af22`; Vercel was not inspected under the user's
+GitHub-only release instruction. Its [receipt](../migration/reports/task-05-compare.md) records the full/lite services,
 screens, retained Assistant adapter and 9/9 original-screen browser acceptance.
+Dashboard data (06) is in progress from `c184bee7`; its [receipt](../migration/reports/task-06-dashboard-data.md)
+separates data ownership from the pending screen slice (07).
 Remaining read features: Dashboard (06–07), News/Home (08–09)
 and Season Review (10–11). Sensitive operations are Tasks 12–21; infrastructure/shared UI and final
 closure are Tasks 22–27. The tracker owns their states and acceptance criteria.

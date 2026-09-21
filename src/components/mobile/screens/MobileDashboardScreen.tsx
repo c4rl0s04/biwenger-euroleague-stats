@@ -8,7 +8,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-import type { MobileDashboardViewModel } from '@/lib/mobile/view-models/dashboard';
+import type { MobileDashboardViewModel } from '@/features/dashboard/public';
 
 import MobileNewsStrip from '../MobileNewsStrip';
 import {

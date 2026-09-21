@@ -96,21 +96,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 05 — Compare
 
-- **State:** Verified locally on `refactor/compare-read-architecture` (`70c325c7`), based on `6aa275b6`; not integrated or deployed.
+- **State:** Integrated and pushed to main at `8bc0af22` (implementation `70c325c7`); Vercel deployment not inspected under the user's GitHub-only release instruction.
 - **Dependencies / approval:** 04 or independently ready upstream contracts.
 - **Scope:** Own comparisons, full/lite APIs and screens; reuse Managers/Rounds/Standings/Market.
 - **Completion check:** Same selections and responses; retained HeadToHeadCard has its proper owner.
 - **Evidence:** [Task 05 receipt](reports/task-05-compare.md); full/lite consumers and access/cache policy traced.
-- **Next action:** Review and integrate as its own release before Task 06; full verification and 9/9 browser cases passed. Retain the Assistant adapter until Task 20.
+- **Next action:** Task 06 may proceed; retain the Assistant adapter until Task 20. Full verification and 9/9 browser cases passed before integration.
 
 ### Task 06 — Dashboard data
 
-- **State:** Planned.
+- **State:** In progress on `refactor/dashboard-data-architecture`, based on `c184bee7` after the separate MapLibre fix.
 - **Dependencies / approval:** Owning domain contracts; 02.
 - **Scope:** Assign remaining analytics, aggregate services and API handlers; no UI redesign.
 - **Completion check:** No duplicate domain calculations; personal reads retain private caching.
-- **Evidence:** Legacy batch 008; three manager APIs already migrated.
-- **Next action:** Inventory remaining Dashboard APIs; leave accepted manager reads intact.
+- **Evidence:** [Task 06 receipt](reports/task-06-dashboard-data.md); eleven remaining APIs and page data reads now use feature contracts, with acceptance in progress. Three accepted manager APIs remain unchanged.
+- **Next action:** Complete validation and the separately approved recent-activity cache correction, then integrate/push when healthy. Task 07 screen ownership is not included.
 
 ### Task 07 — Dashboard screens
 

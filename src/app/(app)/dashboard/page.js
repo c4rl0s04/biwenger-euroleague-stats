@@ -13,13 +13,16 @@ import {
 } from '@/components/dashboard';
 
 // Below-the-fold: Lazy load for better initial page load
-import { fetchNextRound } from '@/lib/services';
 import { auth } from '@/auth';
 import MobileDashboardScreen from '@/components/mobile/screens/MobileDashboardScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-import { toMobileDashboardViewModel } from '@/lib/mobile/view-models/dashboard';
-import { getLeagueDashboardData, getNextRoundData, getUserDashboardData } from '@/lib/services';
-import { fetchNewsFeed } from '@/lib/services/app/dashboardService';
+import { toMobileDashboardViewModel } from '@/features/dashboard/public';
+import {
+  getLeagueDashboardData,
+  getNextRoundData,
+  getUserDashboardData,
+} from '@/features/dashboard/server';
+import { fetchNewsFeed } from '@/lib/services/app/news-landing-legacy';
 
 const TopFormCard = nextDynamic(() => import('@/components/dashboard/TopFormCard'), {
   loading: () => <CardSkeleton />,

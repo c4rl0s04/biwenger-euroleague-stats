@@ -1,4 +1,10 @@
 import 'server-only';
+export {
+  getLastRoundMVPs,
+  getLastRoundStats,
+  getHighestRoundSnapshot,
+  LAST_ROUND_POLICY,
+} from './server/services/last-round.service';
 
 export { fetchRoundsList } from './server/services/round-list.service';
 export {

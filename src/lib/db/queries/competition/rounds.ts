@@ -1,4 +1,5 @@
-import { db } from '../../index';
+import { db } from '../../client';
+import { getRoundDetails as readRoundDetails } from '@/features/matches/server';
 import type { CalendarRound } from '@/features/rounds/public';
 import {
   getRoundCalendar,
@@ -6,21 +7,8 @@ import {
   getLastCompletedRoundId,
   getLastCompletedCalendarRound,
 } from '@/features/rounds/server';
-import {
-  matches,
-  porras,
-  userRounds,
-  playerRoundStats,
-  lineups,
-  teams,
-  players,
-  playerSeasons,
-  userSeasons,
-} from '../../schema';
-import { eq, asc, desc, sql, and, gte, lt, sum, count, max, min } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
-import { getTeamPositions, StandingsMatch } from '../../../logic/standings';
-import { NEXT_ROUND_CTE } from '../../sql_utils';
+import { matches, porras, userRounds, userSeasons } from '../../schema';
+import { eq, desc, sql, and } from 'drizzle-orm';
 import { resolveReadSeasonId } from '../../season-context';
 
 export interface PorrasRound {
@@ -119,91 +107,18 @@ function toLegacyRound(round: CalendarRound | null) {
  * Get full details for a specific round (matches, standings, etc.)
  */
 export async function getRoundDetails(roundId: string | number): Promise<Round | null> {
-  if (!roundId) return null;
-  const seasonId = await resolveReadSeasonId();
-
-  // 1. Basic info
-  const basicInfo = await db
-    .select({
-      round_id: matches.roundId,
-      round_name: max(matches.roundName),
-      start_date: min(matches.date),
-      end_date: max(matches.date),
-    })
-    .from(matches)
-    .where(and(eq(matches.seasonId, seasonId), eq(matches.roundId, Number(roundId))))
-    .groupBy(matches.roundId);
-
-  if (basicInfo.length === 0) return null;
-  const round: any = basicInfo[0];
-
-  // 2. Get team positions (Global context)
-  let positionMap = new Map<number, number>();
-  try {
-    const allFinishedMatches = (
-      await db
-        .select({
-          home_id: matches.homeId,
-          away_id: matches.awayId,
-          home_score: matches.homeScore,
-          away_score: matches.awayScore,
-          home_score_regtime: matches.homeScoreRegtime,
-          away_score_regtime: matches.awayScoreRegtime,
-          status: matches.status,
-        })
-        .from(matches)
-        .where(
-          and(
-            eq(matches.status, 'finished'),
-            eq(matches.seasonId, seasonId),
-            sql`${matches.homeScore} IS NOT NULL`,
-            sql`${matches.awayScore} IS NOT NULL`
-          )
-        )
-    ).map((m) => ({
-      ...m,
-      home_id: m.home_id!,
-      away_id: m.away_id!,
-      status: m.status!,
-    })) as StandingsMatch[];
-
-    positionMap = getTeamPositions(allFinishedMatches);
-  } catch (err) {
-    console.warn('Could not calculate standings:', err);
-  }
-
-  // 3. Get Matches for this round
-  const homeTeam = alias(teams, 'homeTeam');
-  const awayTeam = alias(teams, 'awayTeam');
-
-  const roundMatches = await db
-    .select({
-      home_id: matches.homeId,
-      away_id: matches.awayId,
-      home_team: homeTeam.name,
-      away_team: awayTeam.name,
-      date: matches.date,
-      status: matches.status,
-      home_score: matches.homeScore,
-      away_score: matches.awayScore,
-      home_logo: homeTeam.img,
-      home_short: homeTeam.shortName,
-      away_logo: awayTeam.img,
-      away_short: awayTeam.shortName,
-    })
-    .from(matches)
-    .leftJoin(homeTeam, eq(matches.homeId, homeTeam.id))
-    .leftJoin(awayTeam, eq(matches.awayId, awayTeam.id))
-    .where(and(eq(matches.seasonId, seasonId), eq(matches.roundId, Number(roundId))))
-    .orderBy(asc(matches.date));
-
-  round.matches = roundMatches.map((match: any) => ({
-    ...match,
-    home_position: positionMap.get(match.home_id) || null,
-    away_position: positionMap.get(match.away_id) || null,
-  }));
-
-  return round;
+  const round = await readRoundDetails(roundId);
+  if (!round) return null;
+  // Existing server callers historically receive Date objects; HTTP JSON is identical.
+  return {
+    ...round,
+    start_date: round.start_date ? new Date(round.start_date) : null,
+    end_date: round.end_date ? new Date(round.end_date) : null,
+    matches: round.matches.map((match) => ({
+      ...match,
+      date: match.date ? new Date(match.date) : null,
+    })),
+  } as unknown as Round;
 }
 
 /**
@@ -266,102 +181,7 @@ export { getManagerRoundsData as getUserRecentRounds } from '@/features/managers
 /**
  * Get best performers from the last completed round
  */
-export async function getLastRoundMVPs(limit = 5): Promise<any[]> {
-  const seasonId = await resolveReadSeasonId();
-  const lastRoundRes = await db
-    .select({
-      last_round_id: matches.roundId,
-    })
-    .from(matches)
-    .where(eq(matches.seasonId, seasonId))
-    .groupBy(matches.roundId)
-    .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
-    .orderBy(desc(matches.roundId))
-    .limit(1);
-
-  if (!lastRoundRes[0]) return [];
-  const lastRoundId = lastRoundRes[0].last_round_id;
-
-  return await db
-    .select({
-      player_id: playerRoundStats.playerId,
-      name: players.name,
-      team: teams.name,
-      position: playerSeasons.position,
-      points: playerRoundStats.fantasyPoints,
-      owner_name: userSeasons.name,
-      owner_color_index: userSeasons.colorIndex,
-    })
-    .from(playerRoundStats)
-    .innerJoin(players, eq(playerRoundStats.playerId, players.id))
-    .innerJoin(
-      playerSeasons,
-      and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
-    )
-    .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
-    .leftJoin(
-      userSeasons,
-      and(
-        eq(playerSeasons.ownerId, userSeasons.userId),
-        eq(playerSeasons.seasonId, userSeasons.seasonId)
-      )
-    )
-    .where(
-      and(eq(playerRoundStats.roundId, lastRoundId as any), eq(playerRoundStats.seasonId, seasonId))
-    )
-    .orderBy(desc(playerRoundStats.fantasyPoints))
-    .limit(limit);
-}
-
-/**
- * Get all player stats for the last completed round to calculate ideal lineup
- */
-export async function getLastRoundStats(): Promise<any[]> {
-  const seasonId = await resolveReadSeasonId();
-  const lastRoundRes = await db
-    .select({
-      last_round_id: matches.roundId,
-    })
-    .from(matches)
-    .where(eq(matches.seasonId, seasonId))
-    .groupBy(matches.roundId)
-    .having(sql`COUNT(*) = SUM(CASE WHEN ${matches.status} = 'finished' THEN 1 ELSE 0 END)`)
-    .orderBy(desc(matches.roundId))
-    .limit(1);
-
-  if (!lastRoundRes[0]) return [];
-  const lastRoundId = lastRoundRes[0].last_round_id;
-
-  return await db
-    .select({
-      player_id: playerRoundStats.playerId,
-      name: players.name,
-      team: teams.name,
-      position: playerSeasons.position,
-      price: playerSeasons.price,
-      points: playerRoundStats.fantasyPoints,
-      owner_name: userSeasons.name,
-      round_name: sql<string>`(SELECT round_name FROM matches WHERE season_id = ${seasonId} AND round_id = ${playerRoundStats.roundId} LIMIT 1)`,
-    })
-    .from(playerRoundStats)
-    .innerJoin(players, eq(playerRoundStats.playerId, players.id))
-    .innerJoin(
-      playerSeasons,
-      and(eq(playerSeasons.playerId, players.id), eq(playerSeasons.seasonId, seasonId))
-    )
-    .leftJoin(teams, eq(playerSeasons.teamId, teams.id))
-    .leftJoin(
-      userSeasons,
-      and(
-        eq(playerSeasons.ownerId, userSeasons.userId),
-        eq(playerSeasons.seasonId, userSeasons.seasonId)
-      )
-    )
-    .where(
-      and(eq(playerRoundStats.roundId, lastRoundId as any), eq(playerRoundStats.seasonId, seasonId))
-    )
-    .orderBy(desc(playerRoundStats.fantasyPoints));
-}
+export { getLastRoundMVPs, getLastRoundStats } from '@/features/rounds/server';
 
 /** Compatibility exports for unmigrated callers; Rounds owns these reads. */
 export {

@@ -15,7 +15,7 @@ vi.mock('@/features/players/server', () => ({
   getPlayerStatLeaders: vi.fn(),
 }));
 
-vi.mock('@/lib/services', () => ({
+vi.mock('@/features/dashboard/server', () => ({
   fetchLeagueAveragePoints: vi.fn(),
 }));
 
@@ -23,7 +23,7 @@ vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 
-import * as services from '@/lib/services';
+import * as services from '@/features/dashboard/server';
 import * as managerServices from '@/features/managers/server';
 import * as playerServices from '@/features/players/server';
 import { auth } from '@/auth';

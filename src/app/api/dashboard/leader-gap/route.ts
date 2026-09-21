@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { fetchLeaderComparison } from '@/lib/services';
+import { fetchLeaderComparison } from '@/features/dashboard/server';
 import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 import { getRequestUserId } from '@/lib/utils/api-auth';
 

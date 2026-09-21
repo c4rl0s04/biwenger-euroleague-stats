@@ -35,6 +35,10 @@ Dashboard Task 06's baseline identified a pre-existing MapLibre attribution vuln
 The separately approved [security upgrade](../operations/maplibre-security-upgrade.md) records
 the fix and acceptance evidence; it is not counted as Dashboard migration work.
 
+Dashboard Task 06 data migration is in progress from `c184bee7`; its
+[receipt](../migration/reports/task-06-dashboard-data.md) records domain ownership, compatibility,
+retained adapters and verification. Screen ownership remains Task 07.
+
 Tournament read migration: C02 Tournament reads (catalogue, detail, sections, bracket and analytics)
 are implemented, verified and integrated via PR #35. The
 [C02 receipt](../migration/reports/c02-tournament-reads.md) records contracts and verification evidence.

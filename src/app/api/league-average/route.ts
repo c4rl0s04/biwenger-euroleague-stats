@@ -1,4 +1,4 @@
-import { fetchLeagueAveragePoints } from '@/lib/services';
+import { fetchLeagueAveragePoints } from '@/features/dashboard/server';
 import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

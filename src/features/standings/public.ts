@@ -5,6 +5,7 @@ export type {
   ValueRankingEntry,
   LeagueOverview,
 } from './models/base-standings';
+export type { LeaderGap } from './models/league-comparison';
 export type { AllPlayAllEntry } from './models/all-play-all';
 
 // Components

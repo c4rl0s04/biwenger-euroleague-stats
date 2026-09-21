@@ -116,3 +116,9 @@ Integrate this slice independently after local acceptance and review rather than
 unrelated feature migrations. It is a self-contained read boundary with a smaller rollback and
 review surface; Dashboard can then start from the accepted main. Integration, remote CI and
 production verification remain a separately authorized release.
+
+## Subsequent integration evidence
+
+The user authorized integration and GitHub push without requiring Vercel inspection. Implementation
+`70c325c7` and this receipt at `8bc0af22` were fast-forwarded and pushed to main; both are ancestors
+of the Task 06 base `c184bee7`. This closes integration, not a claim of verified production deployment.
