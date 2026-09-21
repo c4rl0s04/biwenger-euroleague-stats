@@ -105,6 +105,9 @@ screens, retained Assistant adapter and 9/9 original-screen browser acceptance.
 Dashboard data (06) is verified and integrated into local main at `700b727b`; its
 [receipt](../migration/reports/task-06-dashboard-data.md) records 18/18 browser checks and separates
 data ownership from the pending screen slice (07). GitHub publication and Vercel verification are distinct.
+Dashboard screens (07) are now verified locally at `2f223fb8`, with 18 browser cases and twelve
+original Dashboard screenshot comparisons passing. Integration awaits reconciliation with the newer
+documentation-only main commit; see the [Task 07 receipt](../migration/reports/task-07-dashboard-screens.md).
 Remaining read features: Dashboard screens (07), News/Home (08–09)
 and Season Review (10–11). Sensitive operations are Tasks 12–21; infrastructure/shared UI and final
 closure are Tasks 22–27. The tracker owns their states and acceptance criteria.

@@ -21,7 +21,7 @@ Worktree: `../biwengerstats-next-dashboard-screen-architecture`.
 - [x] Keep pages thin, with typed screen contracts and deliberate feature exports.
 - [x] Register both page entrypoints; document exact temporary News/authentication edges.
 - [x] Remove obsolete paths after checking all consumers; update tests and documentation.
-- [ ] Complete focused/full verification and original-screen browser comparisons.
+- [x] Complete focused/full verification and original-screen browser comparisons.
 - [ ] Integrate and publish only after acceptance; preserve unrelated worktrees.
 
 ## Compatibility boundaries
@@ -70,3 +70,46 @@ No production database or provider operations are used for validation.
   and six desktop sections. The final desktop references were refreshed from the unchanged standalone
   build after adding an assertion for the settled €1,500,000 spring animation; no candidate image
   was used as an original reference. News expansion and the REB selector are exercised.
+
+## Final validation
+
+Implementation commit: `2f223fb8f27a8db3f6a193902c99c360c72dfc06`.
+
+| Command                                                                                                                            | Result                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `npm run typecheck`                                                                                                                | PASS                                                |
+| `npm run test:run -- src/features/dashboard src/app/api/dashboard src/app/api/__tests__/session-read-cache.test.ts --maxWorkers=2` | PASS, 251 tests                                     |
+| `npm run test:run -- --maxWorkers=2`                                                                                               | PASS, 2,410 tests / one existing skip               |
+| `npm run lint`                                                                                                                     | PASS, zero errors / same 24 existing warnings       |
+| `SKIP_DB=true npm run build`                                                                                                       | PASS, expected missing-provider warnings            |
+| `npm run architecture:check`                                                                                                       | PASS, 980 modules / 82 entrypoints                  |
+| `npm run docs:check`                                                                                                               | PASS, 102 notes                                     |
+| `npm run skills:check`                                                                                                             | PASS, six repository skills                         |
+| `npm run db:audit:schema:metadata`                                                                                                 | PASS, 37 tables / no drift / no database connection |
+| `npx --no-install drizzle-kit check`                                                                                               | PASS; no schema migrations applied                  |
+| `git diff --check` / `git diff --cached --check`                                                                                   | PASS                                                |
+| `npm run verify`                                                                                                                   | PASS, complete workflow above                       |
+| `npm run test:e2e:local -- dashboard.spec.ts feature-screens.spec.ts`                                                              | PASS, 18 cases across nine projects                 |
+
+All twelve Dashboard references and existing Matches/Team references passed without candidate
+snapshot updates. Desktop verification also delays TopForm, checks its skeleton, then returns a
+synthetic unsuccessful envelope and verifies the existing empty fallback. RisingStars receives an
+empty list. Independent personal cards still load. The isolated negative-case page requires exactly
+one expected synthetic console error, zero browser exceptions and zero failed HTTP responses; normal
+browser exception/API guards are unchanged. Tests never submit provider or application mutations.
+
+The known `The destination stream closed early` server message occurred after a feature-screen
+case, as in the previously documented unchanged baseline/MapLibre runs. It is not a new Dashboard
+regression. Real-data production review and Linux Dashboard screenshot references remain unverified.
+
+## Integration status
+
+Not merged or pushed. During validation, `origin/main` advanced from `a5a44db0` to `70c0e34d`
+(`docs(ui): define design evolution and semantic theming`). Inspection confirms eight documentation
+files only, no application or AGENTS changes. Its updated design context explicitly preserves
+structural-compatibility mode; this migration does not implement the new visual direction.
+
+The planned fast-forward is no longer possible without first incorporating that main commit.
+Rebasing the unpublished branch and rerunning validation was proposed to the user; integration awaits
+that decision. Primary main and unrelated worktrees have not been modified. Next domain task after
+release: **08 — News**. Do not start it as part of this slice.

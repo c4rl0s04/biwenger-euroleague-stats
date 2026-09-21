@@ -38,6 +38,9 @@ the fix and acceptance evidence; it is not counted as Dashboard migration work.
 Dashboard Task 06 data migration is verified and integrated into local main at `700b727b`; its
 [receipt](../migration/reports/task-06-dashboard-data.md) records domain ownership, compatibility,
 retained adapters and verification. Screen ownership remains Task 07.
+Task 07 screen ownership is verified locally at `2f223fb8`, not integrated or pushed; the
+[screen receipt](../migration/reports/task-07-dashboard-screens.md) records full verification,
+18 passing browser cases, original visual references and the pending rebase decision after main advanced.
 
 Tournament read migration: C02 Tournament reads (catalogue, detail, sections, bracket and analytics)
 are implemented, verified and integrated via PR #35. The

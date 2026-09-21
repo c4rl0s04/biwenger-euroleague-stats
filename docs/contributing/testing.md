@@ -136,6 +136,15 @@ snapshots solely to hide a regression. Browser failures retain screenshots and t
 
 ## Test responsibilities
 
+Dashboard Task 07 adds twelve macOS references from unchanged `a5a44db0`: phone overview/five
+sections and six desktop sections. The original implementation passed repeated comparisons before
+migration. Captures wait for the squad-value JS spring to settle; only the randomized News headline
+is masked. All nine projects check navigation and API contracts, while desktop/iPhone compare images.
+The desktop statistics selector and phone News expander are exercised. A separate local browser page
+delays a card request and injects an unsuccessful envelope/empty data to check skeletons and preserved
+fallbacks; it asserts the exact expected synthetic console error rather than weakening normal guards.
+Linux Dashboard screenshots and real-production-data visual review remain separate follow-ups.
+
 Compare adds three macOS references (phone picker/detail and full desktop comparison) captured
 from unchanged application source at `6aa275b6`. `compare.spec.ts` exercises authenticated
 synthetic-data navigation and desktop rival selection across all nine viewports, preserving the
