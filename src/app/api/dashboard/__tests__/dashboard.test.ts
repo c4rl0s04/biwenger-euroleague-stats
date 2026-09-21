@@ -223,14 +223,19 @@ describe('dashboard route contract coverage', () => {
       await market.GET(),
       await mvps.GET(),
       await next.GET(),
-      await recent.GET(
-        mockRequest('http://localhost/api/dashboard/recent-activity', { userId: '42' })
-      ),
     ]) {
       expect(response.status).toBe(200);
       const json = await response.json();
       expect(json.success).toBe(true);
       expect(response.headers.get('Cache-Control')).toContain('stale-while-revalidate');
     }
+    const personalized = await recent.GET(
+      mockRequest('http://localhost/api/dashboard/recent-activity', { userId: '42' })
+    );
+    expect(personalized.status).toBe(200);
+    expect((await personalized.json()).success).toBe(true);
+    expect(personalized.headers.get('Cache-Control')).toBe(
+      'private, no-store, max-age=0, must-revalidate'
+    );
   });
 });

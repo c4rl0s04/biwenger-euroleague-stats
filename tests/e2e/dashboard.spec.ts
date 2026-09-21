@@ -88,6 +88,9 @@ test('Dashboard overview and phone sections retain their read experience', async
     if (endpoint === 'leader-gap')
       expect(payload.data).toMatchObject({ user_points: 55, gap: 0, is_leader: true });
     if (endpoint === 'recent-activity') {
+      expect(response.headers()['cache-control']).toBe(
+        'public, max-age=60, stale-while-revalidate=60'
+      );
       expect(payload.data.recentRecords[0]).toMatchObject({
         type: 'highest_round',
         user_name: 'Fixture Rival',
@@ -96,6 +99,12 @@ test('Dashboard overview and phone sections retain their read experience', async
       expect(payload.data.personalizedAlerts).toEqual([]);
     }
   }
+  const personalizedActivity = await page.request.get('/api/dashboard/recent-activity?userId=1');
+  expect(personalizedActivity.status()).toBe(200);
+  expect((await personalizedActivity.json()).success).toBe(true);
+  expect(personalizedActivity.headers()['cache-control']).toBe(
+    'private, no-store, max-age=0, must-revalidate'
+  );
   const average = await page.request.get('/api/league-average');
   expect(average.status()).toBe(200);
   expect(await average.json()).toEqual({ success: true, data: { average: 27.5 } });

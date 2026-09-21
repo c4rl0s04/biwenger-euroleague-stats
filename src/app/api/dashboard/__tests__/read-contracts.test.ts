@@ -170,7 +170,9 @@ describe('recent-activity URL identity (no session fallback)', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ success: true, data });
     expect(reads.getRecentActivityData).toHaveBeenCalledWith(id);
-    expect(response.headers.get('cache-control')).toBe(publicCache(60));
+    expect(response.headers.get('cache-control')).toBe(
+      id === null ? publicCache(60) : privateCache
+    );
   });
   it.each(['0', '-1', '1000000000', 'null', 'undefined', 'abc', ' '])(
     'rejects %s without reading',
