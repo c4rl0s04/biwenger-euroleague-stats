@@ -92,6 +92,10 @@ the release receipt distinguishes local checks from integration and deployment.
 
 ## Current merged scopes and remaining work
 
+News (Task 08) is verified locally, with full verification and 27 browser cases passing; see the
+[News receipt](../migration/reports/task-08-news.md). It owns the shared ticker and Dashboard strip,
+not a new page. This does not mark Home complete or claim a release.
+
 Tournaments, Predictions, Playoffs, public Market and Managers remaining reads are merged via
 PRs #35–39 respectively. Their receipts retain original test evidence; this update does not
 certify their production deployments.

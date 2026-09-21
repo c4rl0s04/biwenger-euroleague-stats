@@ -136,6 +136,14 @@ snapshots solely to hide a regression. Browser failures retain screenshots and t
 
 ## Test responsibilities
 
+News adds desktop/iPhone macOS references captured from unchanged `b7505a29`, with a second
+original-source comparison before migration. Desktop uses a fixed synthetic ticker response and
+freezes marquee motion; phone uses the real local feed and masks only the randomly selected headline.
+Disclosure content/count and public API behavior are asserted separately. All nine projects exercise
+News; the desktop negative case isolates expected loading/empty/failure behavior without changing
+shared browser error guards. Navigation uses the real app link, avoiding forced-document reloads
+that cancel WebKit prefetches. Linux runs semantic checks; News Linux image references remain pending.
+
 Dashboard Task 07 adds twelve macOS references from unchanged `a5a44db0`: phone overview/five
 sections and six desktop sections. The original implementation passed repeated comparisons before
 migration. Captures wait for the squad-value JS spring to settle; only the randomized News headline
