@@ -12,13 +12,21 @@ status: active
 
 ## Status and scope
 
-This records the agreed future UI structure, not a claim that it is already implemented.
-The domain architecture migration comes first. A subsequent UI consolidation pass will inventory
-existing components, extract useful reusable patterns and adopt these layers incrementally.
-This note does not authorize starting that pass, redesigning screens or changing current migration scope.
+This records the agreed UI structure, not a claim that it is already fully implemented.
+
+The domain/application migration and UI migration now proceed in controlled parallel:
+
+- new shared foundation work may be implemented against stable domain boundaries;
+- new features may adopt the target UI architecture directly;
+- broad legacy-UI consolidation waits until the owning domain/shell boundary is understood;
+- UI work must not move queries/services or weaken feature ownership merely to simplify presentation;
+- intentional visual redesign is allowed only in an explicitly scoped design-evolution slice.
 
 The [application layers](application-layers.md) govern data ownership and feature boundaries.
-The [design context](../product/design-system.md) remains the authority for current styling.
+The [design context](../product/design-system.md) defines stable product-design rules, while the
+[UI design direction](../product/ui-design-direction.md) records the approved visual evolution.
+The [UI foundation v1](ui-foundation-v1.md) turns these targets into the implementation direction for
+new shared UI without authorizing an indiscriminate legacy rewrite.
 
 ## Layers, from foundations to complete screens
 
