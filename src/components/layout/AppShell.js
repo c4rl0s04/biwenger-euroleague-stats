@@ -4,7 +4,7 @@ import TopHeader from './TopHeader';
 import Sidebar from './Sidebar';
 import MobileNavigation from './MobileNavigation';
 import { Github, Twitter, Instagram } from 'lucide-react';
-import NewsTicker from '../ui/NewsTicker';
+import { NewsTicker } from '@/features/news/public';
 import { NavigationFeedbackProvider, NavigationLink } from './NavigationFeedback';
 
 export default function AppShell({ children, presentationMode = 'desktop' }) {

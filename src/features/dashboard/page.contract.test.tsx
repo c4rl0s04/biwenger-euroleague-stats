@@ -19,7 +19,7 @@ vi.mock('@/features/dashboard/server', () => ({
   getLeagueDashboardData: mocks.league,
   getNextRoundData: mocks.next,
 }));
-vi.mock('@/lib/services/app/news-landing-legacy', () => ({ fetchNewsFeed: mocks.news }));
+vi.mock('@/features/news/server', () => ({ fetchNewsFeed: mocks.news }));
 vi.mock('next/dynamic', () => ({ default: () => () => null }));
 vi.mock('@/components/ui', () => ({ CardSkeleton: () => null, PageHeader: () => null }));
 vi.mock('@/components/layout', () => ({ Section: () => null }));

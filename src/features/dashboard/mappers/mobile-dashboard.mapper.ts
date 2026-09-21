@@ -1,3 +1,5 @@
+import { toMobileNewsItems } from '@/features/news/public';
+import type { MobileNewsItem } from '@/features/news/public';
 import type { MobileDashboardInput } from '../models/mobile-dashboard';
 
 export interface MobileDashboardViewModel {
@@ -12,7 +14,7 @@ export interface MobileDashboardViewModel {
   nextRound: { id: string; name: string } | null;
   alerts: Array<{ id: string; title: string; severity: string }>;
   formPlayers: string[];
-  news: Array<{ id: string; title: string; description: string }>;
+  news: MobileNewsItem[];
 }
 
 const finiteNumber = (value: unknown): number => {
@@ -54,10 +56,6 @@ export function toMobileDashboardViewModel({
       .slice(0, 3)
       .map((player) => String(player.name ?? player.player_name ?? ''))
       .filter(Boolean),
-    news: news.slice(0, 3).map((item, index) => ({
-      id: String(item.id ?? index),
-      title: String(item.title ?? item.text ?? 'Actualidad de la liga'),
-      description: String(item.description ?? item.message ?? ''),
-    })),
+    news: toMobileNewsItems(news),
   };
 }

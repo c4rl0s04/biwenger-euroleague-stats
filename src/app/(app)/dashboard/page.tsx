@@ -10,8 +10,8 @@ import {
   getNextRoundData,
   getUserDashboardData,
 } from '@/features/dashboard/server';
-// News remains unchanged until Task 08; this page is its explicit temporary consumer.
-import { fetchNewsFeed } from '@/lib/services/app/news-landing-legacy';
+// Compose News directly through its server contract; no internal HTTP hop.
+import { fetchNewsFeed } from '@/features/news/server';
 
 export const dynamic = 'force-dynamic';
 

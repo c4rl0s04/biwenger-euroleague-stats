@@ -1,3 +1,4 @@
+import type { MobileNewsInput } from '@/features/news/public';
 import type {
   ManagerSeasonStatsViewModel,
   ManagerSquadViewModel,
@@ -26,11 +27,5 @@ export interface MobileDashboardInput {
       name?: string;
     } | null;
   };
-  news: Array<{
-    id?: string | number;
-    title?: string;
-    text?: string;
-    description?: string;
-    message?: string;
-  }>;
+  news: MobileNewsInput[];
 }

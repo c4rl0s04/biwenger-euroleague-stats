@@ -1,4 +1,9 @@
 import 'server-only';
+export {
+  getUpcomingFeedMatches,
+  getRecentFeedResults,
+  FEED_MATCHES_POLICY,
+} from './server/services/feed-matches.service';
 export { getRoundDetails, ROUND_DETAILS_POLICY } from './server/services/round-details.service';
 
 export {

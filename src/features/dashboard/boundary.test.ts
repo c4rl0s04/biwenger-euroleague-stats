@@ -46,7 +46,7 @@ it('registers all eleven HTTP adapters with only the existing leader-gap authent
   for (const edge of edges)
     expect(edge.edge).toMatch(/-> (src\/auth.js|src\/lib\/credentials\/repository.ts) ->/);
 });
-it('pages use Dashboard services and screens directly; only News remains assigned to Task 08', () => {
+it('pages use Dashboard services and screens directly alongside the News contract', () => {
   for (const file of [
     'src/app/(app)/dashboard/page.tsx',
     'src/app/(app)/dashboard/[section]/page.tsx',

@@ -1,10 +1,6 @@
 import { Radio } from 'lucide-react';
 
-interface MobileNewsItem {
-  id: string;
-  title: string;
-  description?: string;
-}
+import type { MobileNewsItem } from '../models/news';
 
 export default function MobileNewsStrip({ items }: { items: MobileNewsItem[] }) {
   if (!items.length) return null;

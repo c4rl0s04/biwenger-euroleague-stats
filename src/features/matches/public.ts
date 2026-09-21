@@ -1,3 +1,4 @@
+export type { FeedMatch, FeedResult } from './models/feed-match';
 export { MatchRoundScreen } from './components/MatchRoundScreen';
 export { MatchesScreen } from './components/MatchesScreen';
 export { default as MatchVenueMap } from './components/map/MatchVenueMap';

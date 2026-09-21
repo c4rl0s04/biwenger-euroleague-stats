@@ -10,7 +10,7 @@ import {
 
 import type { MobileDashboardViewModel } from '../mappers/mobile-dashboard.mapper';
 
-import MobileNewsStrip from '@/components/mobile/MobileNewsStrip';
+import { MobileNewsStrip } from '@/features/news/public';
 import {
   MobileListRow,
   MobileMetric,
