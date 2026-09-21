@@ -3,7 +3,7 @@
  * Import dashboard components from this file for cleaner imports:
  *
  * @example
- * import { StandingsCard, TopPlayersCard, StreakCard } from '@/components/dashboard';
+ * Internal card barrel. Other features consume Dashboard screens through public.ts.
  */
 
 // Standings & Rankings

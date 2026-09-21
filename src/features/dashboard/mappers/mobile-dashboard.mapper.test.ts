@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toMobileDashboardViewModel } from './dashboard';
+import { toMobileDashboardViewModel } from './mobile-dashboard.mapper';
 
 describe('toMobileDashboardViewModel', () => {
   it('keeps only the compact, serializable summary required by the phone screen', () => {

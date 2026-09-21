@@ -1,12 +1,9 @@
 import { auth } from '@/auth';
-import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
-import {
-  MobileListRow,
-  MobileMetric,
-  MobileMetricGrid,
-  MobileSectionHeading,
-} from '@/components/mobile/MobileScreen';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
+import {
+  MobileDashboardSectionScreen,
+  type DashboardSectionContent,
+} from '@/features/dashboard/public';
 import {
   getLeagueDashboardData,
   getNextRoundData,
@@ -14,171 +11,19 @@ import {
 } from '@/features/dashboard/server';
 
 type PageProps = { params: Promise<{ section: string }> };
-import type { PersonalDashboard, DashboardDisplayPlayer } from '@/features/dashboard/public';
-import type {
-  ManagerCaptainStats,
-  ManagerSeasonStatsViewModel,
-  ManagerHomeAwayStats,
-} from '@/features/managers/public';
-import type { LeaderGap } from '@/features/standings/public';
-// Preserve the old optional display aliases (currently absent from the domain payload).
-type CaptainDisplay = Partial<ManagerCaptainStats> & {
-  captain_points?: number;
-  total_points?: number;
-  success_rate?: number;
-  average?: number;
-};
-
-const numeric = (value: unknown) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const playerName = (player: DashboardDisplayPlayer) =>
-  String(player.name ?? player.player_name ?? 'Jugador');
 
 export default async function DashboardSectionPage({ params }: PageProps) {
   const { section } = await params;
-  const pathname = `/dashboard/${section}`;
-  const route = await requireMobileRoute(pathname);
+  const route = await requireMobileRoute(`/dashboard/${section}`);
   const session = await auth();
   const userId = session?.user?.id;
-
-  let content;
-
-  if (section === 'season') {
-    const dashboard: PersonalDashboard = userId ? await getUserDashboardData(userId) : {};
-    const stats: Partial<ManagerSeasonStatsViewModel> = dashboard.seasonStats ?? {};
-    const captain: CaptainDisplay = dashboard.captainStats ?? {};
-    content = (
-      <>
-        <MobileMetricGrid>
-          <MobileMetric
-            label="Posición"
-            value={numeric(stats.position) ? `#${stats.position}` : '—'}
-            tone="accent"
-          />
-          <MobileMetric
-            label="Puntos"
-            value={numeric(stats.total_points).toLocaleString('es-ES')}
-          />
-          <MobileMetric
-            label="Media"
-            value={numeric(stats.average_points).toLocaleString('es-ES')}
-            detail="por jornada"
-          />
-          <MobileMetric label="Podios" value={numeric(stats.podiums)} tone="positive" />
-        </MobileMetricGrid>
-        <MobileSectionHeading>Capitanes</MobileSectionHeading>
-        <MobileListRow
-          title="Puntos como capitán"
-          trailing={numeric(captain.captain_points ?? captain.total_points)}
-        />
-        <MobileListRow
-          title="Acierto medio"
-          trailing={`${numeric(captain.success_rate ?? captain.average).toLocaleString('es-ES')}%`}
-        />
-      </>
-    );
-  } else if (section === 'comparison') {
-    const dashboard: PersonalDashboard = userId ? await getUserDashboardData(userId) : {};
-    const gap: Partial<LeaderGap> = dashboard.leaderGap ?? {};
-    const homeAway: Partial<ManagerHomeAwayStats> = dashboard.homeAwayStats ?? {};
-    content = (
-      <>
-        <MobileMetricGrid>
-          <MobileMetric
-            label="Tus puntos"
-            value={numeric(gap.user_points).toLocaleString('es-ES')}
-          />
-          <MobileMetric
-            label={gap.is_leader ? 'Ventaja' : 'Distancia'}
-            value={`${gap.is_leader ? '+' : '-'}${numeric(gap.gap_to_second ?? gap.gap)}`}
-            tone={gap.is_leader ? 'positive' : 'negative'}
-          />
-          <MobileMetric
-            label="Media casa"
-            value={numeric(homeAway.avg_home).toLocaleString('es-ES')}
-          />
-          <MobileMetric
-            label="Media fuera"
-            value={numeric(homeAway.avg_away).toLocaleString('es-ES')}
-          />
-        </MobileMetricGrid>
-        <MobileSectionHeading>Referencia</MobileSectionHeading>
-        <MobileListRow
-          title={gap.leader_name ?? 'Líder de la liga'}
-          subtitle="Puntuación de referencia"
-          trailing={numeric(gap.leader_points)}
-        />
-      </>
-    );
+  let data: DashboardSectionContent;
+  if (section === 'season' || section === 'comparison') {
+    data = { kind: section, dashboard: userId ? await getUserDashboardData(userId) : {} };
   } else if (section === 'next-round' || section === 'market') {
-    const round = await getNextRoundData(userId ?? null);
-    const entries = section === 'market' ? round.marketOpportunities : round.captainRecommendations;
-    content = (
-      <>
-        <MobileMetricGrid>
-          <MobileMetric label="Jornada" value={round.nextRound?.round_name ?? '—'} tone="accent" />
-          <MobileMetric
-            label={section === 'market' ? 'Oportunidades' : 'Capitanes'}
-            value={entries?.length ?? 0}
-          />
-        </MobileMetricGrid>
-        <MobileSectionHeading>
-          {section === 'market' ? 'Oportunidades' : 'Mejor forma'}
-        </MobileSectionHeading>
-        {(entries ?? []).slice(0, 8).map((player: DashboardDisplayPlayer, index: number) => (
-          <MobileListRow
-            key={String(player.player_id ?? player.id ?? index)}
-            href={
-              player.player_id || player.id ? `/player/${player.player_id ?? player.id}` : undefined
-            }
-            leading={<strong>{index + 1}</strong>}
-            title={playerName(player)}
-            subtitle={player.team ?? player.form_label}
-            trailing={
-              player.avg_recent_points != null
-                ? Number(player.avg_recent_points).toFixed(1)
-                : undefined
-            }
-          />
-        ))}
-      </>
-    );
+    data = { kind: section, round: await getNextRoundData(userId ?? null) };
   } else {
-    const league = await getLeagueDashboardData();
-    const players = [...(league.hotStreaks ?? []), ...(league.coldStreaks ?? [])];
-    content = (
-      <>
-        <MobileMetricGrid>
-          <MobileMetric
-            label="Media liga"
-            value={numeric(league.leagueAverage).toLocaleString('es-ES')}
-          />
-          <MobileMetric label="MVP recientes" value={league.roundMVPs?.length ?? 0} tone="accent" />
-        </MobileMetricGrid>
-        <MobileSectionHeading>Rachas</MobileSectionHeading>
-        {players.slice(0, 8).map((player: DashboardDisplayPlayer, index: number) => (
-          <MobileListRow
-            key={String(player.player_id ?? player.id ?? index)}
-            title={playerName(player)}
-            subtitle={player.team ?? 'Racha de liga'}
-            trailing={player.streak ?? player.avg_points}
-          />
-        ))}
-      </>
-    );
+    data = { kind: 'league', league: await getLeagueDashboardData() };
   }
-
-  return (
-    <MobileDetailScaffold
-      title={route.definition.title}
-      context="Dashboard"
-      backHref="/dashboard"
-      description="Una vista enfocada para decidir rápido sin recorrer todo el dashboard."
-    >
-      {content}
-    </MobileDetailScaffold>
-  );
+  return <MobileDashboardSectionScreen title={route.definition.title} data={data} />;
 }

@@ -8,9 +8,9 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-import type { MobileDashboardViewModel } from '@/features/dashboard/public';
+import type { MobileDashboardViewModel } from '../mappers/mobile-dashboard.mapper';
 
-import MobileNewsStrip from '../MobileNewsStrip';
+import MobileNewsStrip from '@/components/mobile/MobileNewsStrip';
 import {
   MobileListRow,
   MobileMetric,
@@ -19,7 +19,7 @@ import {
   MobileScreenHeader,
   MobileSectionHeading,
   MobileSectionLink,
-} from '../MobileScreen';
+} from '@/components/mobile/MobileScreen';
 
 const compactMoney = new Intl.NumberFormat('es-ES', {
   notation: 'compact',

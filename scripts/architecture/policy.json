@@ -1,5 +1,7 @@
 {
   "entrypoints": [
+    "src/app/(app)/dashboard/page.tsx",
+    "src/app/(app)/dashboard/[section]/page.tsx",
     "src/app/api/dashboard/birthdays/route.ts",
     "src/app/api/dashboard/rising-stars/route.ts",
     "src/app/api/dashboard/top-players/route.ts",
@@ -82,6 +84,76 @@
     "src/app/api/compare/data/lite/route.ts"
   ],
   "exceptions": [
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/[section]/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/[section]/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/[section]/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/[section]/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Dashboard page authentication reaches frozen authentication/credential infrastructure. Presentation migration preserves that security boundary; this does not exempt Dashboard domain queries.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint: src/app/(app)/dashboard/page.tsx -> src/lib/services/app/news-landing-legacy.ts",
+      "reason": "Phone overview retains the existing shared News feed; Task 07 moves Dashboard presentation, not News reads.",
+      "removeWhen": "Task 08 provides the News server contract and updates this page."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/dashboard/page.tsx -> src/lib/services/app/news-landing-legacy.ts -> src/lib/db/index.ts",
+      "reason": "The existing News feed still reaches its legacy database barrel. This exact temporary edge is outside Dashboard-owned data orchestration.",
+      "removeWhen": "Task 08 migrates News queries/services and this page consumes its server contract."
+    },
     {
       "edge": "entrypoint-persistence: src/app/api/dashboard/leader-gap/route.ts -> src/auth.js -> drizzle-orm",
       "reason": "Existing getRequestUserId session fallback reaches frozen authentication/credential infrastructure, not manager statistical queries. This exact edge preserves the current security boundary without authorizing other persistence helpers.",

@@ -1,0 +1,49 @@
+{
+  "BirthdayCard.js": ["useApiData('/api/dashboard/birthdays')"],
+  "CaptainStatsCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/dashboard/captain-stats?userId=${currentUser.id}` : null), {\n    transform: (d) => d?.stats || d,\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})"
+  ],
+  "CaptainSuggestCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/dashboard/captain-suggest?userId=${currentUser.id}` : null), {\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})"
+  ],
+  "HomeAwayCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/dashboard/home-away?userId=${currentUser.id}` : null), {\n    transform: (d) => d?.stats || d,\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})"
+  ],
+  "IdealLineupCard.js": ["useApiData('/api/dashboard/ideal-lineup')"],
+  "KpiBentoCard.js": [],
+  "LeaderGapCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/dashboard/leader-gap?userId=${currentUser.id}` : null), {\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})"
+  ],
+  "LeagueComparisonCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/player/stats?userId=${currentUser.id}` : null), {\n    transform: (d) => d?.stats || d,\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})",
+    "useApiData('/api/league-average', {\n    skip: !currentUser,\n})"
+  ],
+  "MarketActivityCard.js": [
+    "useApiData(() => `/api/dashboard/recent-activity?userId=${currentUser?.id || ''}`, { dependencies: [currentUser?.id] })"
+  ],
+  "MarketOpportunitiesCard.js": ["useApiData('/api/dashboard/market-opportunities')"],
+  "MySeasonCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/player/stats?userId=${currentUser.id}` : null), {\n    transform: (d) => d?.stats || d,\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})"
+  ],
+  "NextMatchesCard.js": ["useApiData('/api/dashboard/next-round')"],
+  "NextRoundSubtitle.js": ["useApiData('/api/dashboard/next-round')"],
+  "RecentActivityCard.js": [
+    "useApiData(`/api/dashboard/recent-activity?userId=${userId}`, {\n    dependencies: [userId],\n})"
+  ],
+  "RecentRoundsCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/player/rounds?userId=${currentUser.id}` : null), {\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})"
+  ],
+  "RisingStarsCard.js": ["useApiData('/api/dashboard/rising-stars')"],
+  "SquadValueCard.js": [
+    "useApiData(() => (currentUser?.id ? `/api/player/squad?userId=${currentUser.id}` : null), {\n    dependencies: [currentUser?.id],\n    skip: !currentUser,\n})"
+  ],
+  "StatsLeadersCard.js": [
+    "useApiData(`/api/stats/leaders?type=${currentConfig.query}`, {\n    dependencies: [statType],\n})"
+  ],
+  "StreakCard.js": [
+    "useApiData('/api/player/streaks', {\n    transform: (d) => d?.[cfg.dataKey] || [],\n    dependencies: [cfg.dataKey],\n})"
+  ],
+  "TopFormCard.js": ["useApiData('/api/dashboard/top-form')"],
+  "TopPlayersCard.js": ["useApiData('/api/dashboard/top-players')"],
+  "WeekMVPsCard.js": ["useApiData('/api/dashboard/mvps')"]
+}

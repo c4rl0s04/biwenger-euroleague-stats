@@ -5,15 +5,14 @@
  * @example
  * // Import from specific categories
  * import { LoadingSkeleton, FadeIn } from '@/components/ui';
- * import { StandingsCard } from '@/components/dashboard';
+ * import { DesktopDashboardScreen } from '@/features/dashboard/public';
  *
  * // Or import categories
  * import * as UI from '@/components/ui';
- * import * as Dashboard from '@/components/dashboard';
+ * import * as Dashboard from '@/features/dashboard/public';
  */
 
 // Re-export all component categories
 export * from './ui';
-export * from './dashboard';
 export * from './standings';
 export * from './player';

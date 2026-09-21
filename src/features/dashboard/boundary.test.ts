@@ -46,9 +46,9 @@ it('registers all eleven HTTP adapters with only the existing leader-gap authent
   for (const edge of edges)
     expect(edge.edge).toMatch(/-> (src\/auth.js|src\/lib\/credentials\/repository.ts) ->/);
 });
-it('pages use Dashboard services directly while composition and News remain assigned to Tasks 07/08', () => {
+it('pages use Dashboard services and screens directly; only News remains assigned to Task 08', () => {
   for (const file of [
-    'src/app/(app)/dashboard/page.js',
+    'src/app/(app)/dashboard/page.tsx',
     'src/app/(app)/dashboard/[section]/page.tsx',
   ]) {
     const source = fs.readFileSync(file, 'utf8');
@@ -57,12 +57,12 @@ it('pages use Dashboard services directly while composition and News remain assi
       .filter(ts.isImportDeclaration)
       .map((node) => (node.moduleSpecifier as ts.StringLiteral).text);
     expect(imports).toContain('@/features/dashboard/server');
+    expect(imports).toContain('@/features/dashboard/public');
     expect(imports).not.toContain('@/lib/services');
     expect(imports.some((name) => name.includes('/db'))).toBe(false);
     expect(source).not.toContain('Record<string, any>');
     expect(source).not.toMatch(/fetch\(['"]\/api/);
   }
-  expect(
-    fs.readFileSync('src/components/mobile/screens/MobileDashboardScreen.tsx', 'utf8')
-  ).toContain("from '@/features/dashboard/public'");
+  expect(fs.existsSync('src/components/mobile/screens/MobileDashboardScreen.tsx')).toBe(false);
+  expect(fs.existsSync('src/lib/mobile/view-models/dashboard.ts')).toBe(false);
 });

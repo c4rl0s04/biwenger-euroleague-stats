@@ -10,90 +10,76 @@ import {
   HomeAwayCard,
   LeagueComparisonCard,
   NextMatchesCard,
-} from '@/components/dashboard';
+} from '../components/cards';
 
-// Below-the-fold: Lazy load for better initial page load
-import { auth } from '@/auth';
-import MobileDashboardScreen from '@/components/mobile/screens/MobileDashboardScreen';
-import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-import { toMobileDashboardViewModel } from '@/features/dashboard/public';
-import {
-  getLeagueDashboardData,
-  getNextRoundData,
-  getUserDashboardData,
-} from '@/features/dashboard/server';
-import { fetchNewsFeed } from '@/lib/services/app/news-landing-legacy';
-
-const TopFormCard = nextDynamic(() => import('@/components/dashboard/TopFormCard'), {
+const TopFormCard = nextDynamic(() => import('../components/cards/TopFormCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const CaptainSuggestCard = nextDynamic(() => import('@/components/dashboard/CaptainSuggestCard'), {
+const CaptainSuggestCard = nextDynamic(() => import('../components/cards/CaptainSuggestCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
 const MarketOpportunitiesCard = nextDynamic(
-  () => import('@/components/dashboard/MarketOpportunitiesCard'),
+  () => import('../components/cards/MarketOpportunitiesCard'),
   {
     loading: () => <CardSkeleton />,
     ssr: true,
   }
 );
 
-const TopPlayersCard = nextDynamic(() => import('@/components/dashboard/TopPlayersCard'), {
+const TopPlayersCard = nextDynamic(() => import('../components/cards/TopPlayersCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const MarketActivityCard = nextDynamic(() => import('@/components/dashboard/MarketActivityCard'), {
+const MarketActivityCard = nextDynamic(() => import('../components/cards/MarketActivityCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const RisingStarsCard = nextDynamic(() => import('@/components/dashboard/RisingStarsCard'), {
+const RisingStarsCard = nextDynamic(() => import('../components/cards/RisingStarsCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const BirthdayCard = nextDynamic(() => import('@/components/dashboard/BirthdayCard'), {
+const BirthdayCard = nextDynamic(() => import('../components/cards/BirthdayCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const NextRoundSubtitle = nextDynamic(() => import('@/components/dashboard/NextRoundSubtitle'), {
+const NextRoundSubtitle = nextDynamic(() => import('../components/cards/NextRoundSubtitle'), {
   loading: () => <span className="inline-block h-6 w-48 animate-pulse rounded bg-secondary" />,
 });
 
-const WeekMVPsCard = nextDynamic(() => import('@/components/dashboard/WeekMVPsCard'), {
+const WeekMVPsCard = nextDynamic(() => import('../components/cards/WeekMVPsCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const StatsLeadersCard = nextDynamic(() => import('@/components/dashboard/StatsLeadersCard'), {
+const StatsLeadersCard = nextDynamic(() => import('../components/cards/StatsLeadersCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const StreakCard = nextDynamic(() => import('@/components/dashboard/StreakCard'), {
+const StreakCard = nextDynamic(() => import('../components/cards/StreakCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const IdealLineupCard = nextDynamic(() => import('@/components/dashboard/IdealLineupCard'), {
+const IdealLineupCard = nextDynamic(() => import('../components/cards/IdealLineupCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-const NextMatchesCardDynamic = nextDynamic(() => import('@/components/dashboard/NextMatchesCard'), {
+const NextMatchesCardDynamic = nextDynamic(() => import('../components/cards/NextMatchesCard'), {
   loading: () => <CardSkeleton />,
   ssr: true,
 });
 
-export const dynamic = 'force-dynamic';
-
-function DesktopDashboard() {
+export default function DesktopDashboardScreen() {
   return (
     <div>
       {/* Header Section */}
@@ -165,29 +151,5 @@ function DesktopDashboard() {
         <BirthdayCard />
       </Section>
     </div>
-  );
-}
-
-export default async function Dashboard() {
-  if (!(await isPhonePresentation())) return <DesktopDashboard />;
-
-  const session = await auth();
-  const userId = session?.user?.id;
-  const [userDashboard, leagueDashboard, nextRoundData, news] = await Promise.all([
-    userId ? getUserDashboardData(userId) : Promise.resolve({}),
-    getLeagueDashboardData(),
-    getNextRoundData(userId ?? null),
-    fetchNewsFeed(),
-  ]);
-
-  return (
-    <MobileDashboardScreen
-      data={toMobileDashboardViewModel({
-        userDashboard,
-        leagueDashboard,
-        nextRoundData,
-        news,
-      })}
-    />
   );
 }

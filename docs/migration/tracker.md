@@ -114,12 +114,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 07 — Dashboard screens
 
-- **State:** Planned.
+- **State:** Implemented on `refactor/dashboard-screen-architecture` from `a5a44db0`; final verification in progress.
 - **Dependencies / approval:** 06.
 - **Scope:** Move desktop/phone composition, cards and loading orchestration.
 - **Completion check:** Thin pages; existing loading order, content and interaction preserved.
-- **Evidence:** No current acceptance.
-- **Next action:** Capture original views and migrate composition.
+- **Evidence:** [Task 07 receipt](reports/task-07-dashboard-screens.md); original desktop/phone references, unchanged card implementations, typed screens and protected page adapters.
+- **Next action:** Finish full verification and browser comparison, then integrate/push if healthy. News ownership remains Task 08.
 
 ### Task 08 — News
 

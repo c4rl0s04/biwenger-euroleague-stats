@@ -23,17 +23,14 @@ vi.mock('@/lib/services/app/news-landing-legacy', () => ({ fetchNewsFeed: mocks.
 vi.mock('next/dynamic', () => ({ default: () => () => null }));
 vi.mock('@/components/ui', () => ({ CardSkeleton: () => null, PageHeader: () => null }));
 vi.mock('@/components/layout', () => ({ Section: () => null }));
-vi.mock('@/components/dashboard', () => ({
-  MySeasonCard: () => null,
-  SquadValueCard: () => null,
-  RecentRoundsCard: () => null,
-  CaptainStatsCard: () => null,
-  LeaderGapCard: () => null,
-  HomeAwayCard: () => null,
-  LeagueComparisonCard: () => null,
-  NextMatchesCard: () => null,
+vi.mock('@/features/dashboard/public', async () => ({
+  DesktopDashboardScreen: () => createElement('main', {}, 'Desktop Dashboard'),
+  MobileDashboardScreen: ({ data }: { data: { managerName: string } }) =>
+    createElement('main', {}, data.managerName),
+  MobileDashboardSectionScreen: (await import('./screens/MobileDashboardSectionScreen')).default,
+  toMobileDashboardViewModel: (await import('./mappers/mobile-dashboard.mapper'))
+    .toMobileDashboardViewModel,
 }));
-vi.mock('@/components/mobile/screens/MobileDashboardScreen', () => ({ default: () => null }));
 vi.mock('@/components/mobile/MobileDetailScaffold', () => ({
   default: ({ children }: { children: ReactNode }) => createElement('main', {}, children),
 }));
@@ -47,6 +44,7 @@ vi.mock('@/components/mobile/MobileScreen', () => ({
     createElement('h2', {}, children),
 }));
 import Section from '@/app/(app)/dashboard/[section]/page';
+import Overview from '@/app/(app)/dashboard/page';
 
 beforeEach(() => {
   Object.values(mocks).forEach((mock) => mock.mockReset());
@@ -71,6 +69,33 @@ beforeEach(() => {
   });
   mocks.news.mockResolvedValue([]);
 });
+it('desktop delegates to its screen without phone service calls or identity reads', async () => {
+  mocks.phone.mockResolvedValue(false);
+  expect(renderToStaticMarkup(await Overview())).toContain('Desktop Dashboard');
+  for (const mock of [mocks.auth, mocks.personal, mocks.league, mocks.next, mocks.news])
+    expect(mock).not.toHaveBeenCalled();
+});
+it('phone overview resolves identity once and composes the existing service projections', async () => {
+  expect(renderToStaticMarkup(await Overview())).toContain('Manager');
+  expect(mocks.auth).toHaveBeenCalledTimes(1);
+  expect(mocks.personal).toHaveBeenCalledWith('007');
+  expect(mocks.next).toHaveBeenCalledWith('007');
+  expect(mocks.league).toHaveBeenCalledTimes(1);
+  expect(mocks.news).toHaveBeenCalledTimes(1);
+});
+it('phone overview retains missing-session fallbacks without a personal read', async () => {
+  mocks.auth.mockResolvedValue(null);
+  expect(renderToStaticMarkup(await Overview())).toContain('Tu equipo');
+  expect(mocks.personal).not.toHaveBeenCalled();
+  expect(mocks.next).toHaveBeenCalledWith(null);
+});
+it.each(['personal', 'league', 'next', 'news'] as const)(
+  'preserves overview %s failure propagation',
+  async (name) => {
+    mocks[name].mockRejectedValue(new Error('read failure'));
+    await expect(Overview()).rejects.toThrow('read failure');
+  }
+);
 it('honors the section guard before identity or data reads', async () => {
   mocks.guard.mockRejectedValue(new Error('route boundary'));
   await expect(Section({ params: Promise.resolve({ section: 'invalid' }) })).rejects.toThrow(
