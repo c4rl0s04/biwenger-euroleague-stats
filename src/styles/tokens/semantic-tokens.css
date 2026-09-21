@@ -1,0 +1,134 @@
+:root {
+  /* Surfaces */
+  --surface-app: var(--color-obsidian-deepest);
+  --surface-card: var(--color-obsidian-deep);
+  --surface-popover: var(--color-obsidian-raised);
+  --surface-secondary: var(--color-obsidian-soft);
+  --surface-muted: var(--color-obsidian-muted);
+
+  /* Content */
+  --content-primary: var(--color-white-bright);
+  --content-secondary: var(--color-white-soft);
+  --content-muted: var(--color-slate-light);
+
+  --content-on-primary: var(--color-white-pure);
+  --content-on-accent: var(--color-white-pure);
+  --content-on-danger: var(--color-white-pure);
+
+  /* Actions */
+  --action-primary: var(--color-orange-strong);
+  --action-accent: var(--color-orange-deep);
+
+  /* Status */
+  --status-danger: var(--color-red-strong);
+
+  /* Borders / controls */
+  --border-default: var(--color-slate-muted);
+  --control-border: var(--color-slate-muted);
+  --focus-ring: var(--color-orange-strong);
+
+  /* Shape */
+  --radius-surface: var(--radius-rounded);
+
+  /* Effects */
+  --effect-glow-primary: 0 0 40px var(--overlay-orange-glow);
+  --effect-glow-subtle: 0 0 80px var(--overlay-orange-glow-faint);
+
+  --effect-glass-border: var(--overlay-white-faint);
+  --effect-glass-surface: var(--overlay-obsidian-glass);
+
+  --effect-gradient-card: linear-gradient(
+    165deg,
+    hsl(var(--color-obsidian-panel)),
+    hsl(var(--color-obsidian-deepest))
+  );
+
+  --effect-gradient-accent: linear-gradient(
+    135deg,
+    hsl(var(--color-orange-strong)),
+    var(--color-orange-warm)
+  );
+
+  --effect-gradient-mesh:
+    radial-gradient(at 0% 0%, var(--overlay-obsidian-mesh-strong) 0, transparent 50%),
+    radial-gradient(at 100% 0%, var(--overlay-obsidian-mesh-medium) 0, transparent 50%),
+    radial-gradient(at 50% 100%, var(--overlay-obsidian-mesh-soft) 0, transparent 50%);
+
+  /* Application shell semantics */
+  --shell-surface: var(--color-obsidian-black);
+  --shell-content: var(--color-white-soft);
+
+  --shell-action-primary: var(--color-orange-strong);
+  --shell-action-primary-content: var(--color-white-pure);
+
+  --shell-accent-surface: var(--color-slate-deep);
+  --shell-accent-content: var(--color-white-pure);
+
+  --shell-border: var(--color-slate-soft);
+  --shell-focus-ring: var(--color-orange-strong);
+
+  /* ========================================
+     LEGACY COMPATIBILITY BRIDGE
+
+     Existing UI still consumes these names.
+
+     New foundation components must NOT introduce new
+     dependencies on these aliases.
+
+     Remove each alias only after repository-wide
+     consumer verification.
+     ======================================== */
+
+  --background: var(--surface-app);
+  --foreground: var(--content-primary);
+
+  --card: var(--surface-card);
+  --card-foreground: var(--content-primary);
+
+  --popover: var(--surface-popover);
+  --popover-foreground: var(--content-primary);
+
+  --primary: var(--action-primary);
+  --primary-foreground: var(--content-on-primary);
+
+  --secondary: var(--surface-secondary);
+  --secondary-foreground: var(--content-secondary);
+
+  --muted: var(--surface-muted);
+  --muted-foreground: var(--content-muted);
+
+  --accent: var(--action-accent);
+  --accent-foreground: var(--content-on-accent);
+
+  --destructive: var(--status-danger);
+  --destructive-foreground: var(--content-on-danger);
+
+  --border: var(--border-default);
+  --input: var(--control-border);
+  --ring: var(--focus-ring);
+
+  --radius: var(--radius-surface);
+
+  --glow-primary: var(--effect-glow-primary);
+  --glow-subtle: var(--effect-glow-subtle);
+
+  --glass-border: var(--effect-glass-border);
+  --glass-surface: var(--effect-glass-surface);
+
+  --gradient-card: var(--effect-gradient-card);
+  --gradient-accent: var(--effect-gradient-accent);
+  --gradient-mesh: var(--effect-gradient-mesh);
+
+  /* Existing shell/sidebar aliases */
+  --sidebar-background: var(--shell-surface);
+  --sidebar-foreground: var(--shell-content);
+
+  --sidebar-primary: var(--shell-action-primary);
+  --sidebar-primary-foreground: var(--shell-action-primary-content);
+
+  --sidebar-accent: var(--shell-accent-surface);
+  --sidebar-accent-foreground: var(--shell-accent-content);
+
+  --sidebar-border: var(--shell-border);
+  --sidebar-ring: var(--shell-focus-ring);
+}
