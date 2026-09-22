@@ -1,6 +1,6 @@
 import MobileSeasonReviewDetail from '@/components/mobile/screens/MobileSeasonReviewDetail';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
-import { getSeasonReviewPageData } from '@/lib/season-review/read-analysis';
+import { getSeasonReviewPageData } from '@/features/season-review/server';
 
 type ReviewSection = 'real' | 'limits' | 'simulations' | 'configurations' | 'methodology';
 type PageProps = { params: Promise<{ section: string }> };

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { auth } from '@/auth';
-import { simulateSeasonResilience } from '@/lib/services';
+import { simulateSeasonResilience } from '@/features/season-review/server';
 import { runSeasonReviewScenario } from './actions';
 
-vi.mock('@/lib/services', () => ({
+vi.mock('@/features/season-review/server', () => ({
   simulateSeasonResilience: vi.fn(),
 }));
 

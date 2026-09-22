@@ -4,7 +4,7 @@ import {
   runSeasonMonteCarlo,
   simulateSeason,
 } from './season-simulator';
-import type { SeasonSimulationDataset } from './simulation-types';
+import type { SeasonSimulationDataset } from '../../models/simulation-types';
 
 const dataset: SeasonSimulationDataset = {
   startingBudget: 40_000_000,

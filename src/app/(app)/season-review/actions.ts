@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/auth';
-import { simulateSeasonResilience } from '@/lib/services';
+import { simulateSeasonResilience } from '@/features/season-review/server';
 
 export async function runSeasonReviewScenario(input: unknown) {
   const session = await auth();

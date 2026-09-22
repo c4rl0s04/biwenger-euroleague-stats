@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/ui';
 import SeasonReviewClient from '@/components/season-review/SeasonReviewClient';
 import MobileSeasonReviewScreen from '@/components/mobile/screens/MobileSeasonReviewScreen';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-import { getSeasonReviewPageData } from '@/lib/season-review/read-analysis';
+import { getSeasonReviewPageData } from '@/features/season-review/server';
 
 export const metadata: Metadata = {
   title: 'Análisis 25/26 | Biwenger Stats',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildEvolutionChartModel, buildEvolutionMilestones } from './evolution-chart';
-import type { HistoricalTimelinePoint } from './types';
+import type { HistoricalTimelinePoint } from '../../models/types';
 
 const timeline: HistoricalTimelinePoint[] = [
   {

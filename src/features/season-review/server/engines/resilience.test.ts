@@ -7,7 +7,7 @@ import {
   resilienceRequestSchema,
   simulateRecovery,
 } from './resilience';
-import type { EconomicLedgerInput, RecoveryEnvironment } from './types';
+import type { EconomicLedgerInput, RecoveryEnvironment } from '../../models/types';
 
 const ledgerInput: EconomicLedgerInput = {
   startingBudget: 40_000_000,

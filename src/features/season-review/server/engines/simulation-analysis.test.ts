@@ -9,7 +9,7 @@ import {
   simulatePairedSeason,
   summarizePairedSeason,
 } from './simulation-analysis';
-import type { SeasonSimulationDataset } from './simulation-types';
+import type { SeasonSimulationDataset } from '../../models/simulation-types';
 
 const pairedDataset: SeasonSimulationDataset = {
   startingBudget: 40_000_000,
