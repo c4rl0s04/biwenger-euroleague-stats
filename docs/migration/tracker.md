@@ -141,12 +141,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 10 — Season Review data
 
-- **State:** Planned.
+- **State:** Verified locally on `refactor/season-review-data`, base `fd424956`.
 - **Dependencies / approval:** 02; separation from product PR 29.
 - **Scope:** Own existing pure engines, artifacts and read orchestration; assign generation commands to 21.
 - **Completion check:** Unchanged calculations/artifact formats with typed, tested contracts.
-- **Evidence:** Legacy batch 011; not the new simulator.
-- **Next action:** Inventory reads, scripts and action side effects.
+- **Evidence:** [Task 10 receipt](reports/task-10-season-review-data.md); Season Review services, engines, queries, and boundary tests pass.
+- **Next action:** Task 11 Season Review screens.
 
 ### Task 11 — Season Review screens
 
