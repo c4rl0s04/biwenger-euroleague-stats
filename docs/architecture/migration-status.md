@@ -31,6 +31,11 @@ The dated entries below retain historical evidence; they are not all current blo
 
 ## Domain ledger
 
+Task 09 Home is implemented locally on `refactor/home-feature-architecture`, base `5174e9a0`.
+The [Home receipt](../migration/reports/task-09-home.md) records `/`, activity and landing APIs,
+feature-owned composition, shared request-local Standings reads and verification evidence.
+It is not integrated or published; Task 10 has not started.
+
 Task 08 News is verified and fast-forward integrated into local main at `69dfa07f`,
 rebased onto `4929e035`. The [News receipt](../migration/reports/task-08-news.md) records its typed read
 boundary, Matches query ownership, preserved public API policy, 2,470 tests and 27 browser cases.
@@ -81,7 +86,7 @@ are integrated via PR #39 at `1933e033`. The
 | Market public reads                                      | Complete public read experience integrated via PR #38                                                                         |
 | Compare                                                  | Task 05 integrated/pushed at 8bc0af22; full/lite services and screens owned; Assistant adapter retained                       |
 | Dashboard                                                | Task 06 data integrated locally at 700b727b; full verification and 18 browser checks passed; screen ownership remains Task 07 |
-| Home, News, Search                                       | Search read boundary released; Home, News and shell composition remain                                                        |
+| Home, News, Search                                       | Home Task 09 implemented locally; News Task 08 integrated; Search reads released, shell/search interactions remain            |
 | Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                                           |
 | Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                                           |
 | Lineup, Market operations                                | Deferred pending provider-operation security gate                                                                             |
@@ -123,7 +128,9 @@ requires approval or reliable usage evidence. No alias has been added by this ob
 - Rounds owns current/next/last fantasy-round policy; Matches owns games.
 - Managers owns squads; Lineup must retain its existing HTTP contract while the
   legacy Players manager adapter is replaced.
-- Dashboard, Home, Compare and Schedule compose owning domain contracts, not SQL.
+- Dashboard, Home, Compare and Schedule services compose owning domain contracts, not SQL.
+  Home's unique unified activity projection remains in its own query layer to preserve cross-domain
+  ordering and cursor pagination; it is not split into independently paginated feature reads.
 - Credentials, authentication and synchronization remain protected infrastructure.
 
 ## Validation and repository health

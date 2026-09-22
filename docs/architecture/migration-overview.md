@@ -92,6 +92,11 @@ the release receipt distinguishes local checks from integration and deployment.
 
 ## Current merged scopes and remaining work
 
+Home (Task 09) is implemented locally, not integrated or published; see the
+[Home receipt](../migration/reports/task-09-home.md). It owns `/`, the phone activity/summary,
+desktop landing and both existing APIs. Its query projection preserves one unified timeline;
+services reuse Rounds, Managers and Standings contracts. Task 10 has not started.
+
 News (Task 08) is verified and integrated into local main at `69dfa07f`, with full verification and 27 browser cases passing; see the
 [News receipt](../migration/reports/task-08-news.md). It owns the shared ticker and Dashboard strip,
 not a new page. GitHub publication accompanies the integration receipt; production deployment is not verified. Home remains pending.

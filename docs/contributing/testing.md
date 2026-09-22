@@ -136,6 +136,15 @@ snapshots solely to hide a regression. Browser failures retain screenshots and t
 
 ## Test responsibilities
 
+Home Task 09 adds desktop-hero and phone-timeline macOS references captured at unchanged `5174e9a0`.
+Both passed a second original-source comparison before migration. Relative activity timestamps are
+masked and the unrelated desktop News ticker receives an empty synthetic response; event content
+remains visible. All nine projects check Home APIs, filters and existing composition. An isolated
+iPhone case tests delayed loading, an expected HTTP failure, retry, cursor pagination, duplicate-ID
+removal and filter snapshot restoration without weakening the shared browser error guards.
+Linux runs semantic checks; Home Linux image references and production-data visual review remain
+separate follow-ups.
+
 News adds desktop/iPhone macOS references captured from unchanged `b7505a29`, with a second
 original-source comparison before migration. Desktop uses a fixed synthetic ticker response and
 freezes marquee motion; phone uses the real local feed and masks only the randomly selected headline.

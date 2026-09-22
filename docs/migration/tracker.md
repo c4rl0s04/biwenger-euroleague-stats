@@ -132,12 +132,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 09 — Home
 
-- **State:** Planned.
+- **State:** Implemented locally on `refactor/home-feature-architecture`, base `5174e9a0`; acceptance in progress, unmerged and unpushed.
 - **Dependencies / approval:** 08 plus Rounds/Market/Managers contracts.
 - **Scope:** Own feed aggregation and screens; no new feed functionality.
 - **Completion check:** Same activity/filters/pagination; last-round adapters retired where unused.
-- **Evidence:** Legacy batch 010.
-- **Next action:** Inventory Home consumers and cache/identity rules.
+- **Evidence:** [Task 09 receipt](reports/task-09-home.md); Home activity/summary/landing contracts and original-screen references.
+- **Next action:** Complete final verification and review before separate integration. Task 10 has not started.
 
 ### Task 10 — Season Review data
 
