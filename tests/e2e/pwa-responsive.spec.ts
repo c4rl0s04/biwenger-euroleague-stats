@@ -72,15 +72,19 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
     const header = page.locator('header.mobile-native-header');
     const searchButton = page.getByRole('button', { name: 'Abrir búsqueda' });
     const profileButton = page.getByRole('button', { name: 'Abrir perfil' });
-    const [headerBox, searchBox, profileBox] = await Promise.all([
-      header.boundingBox(),
-      searchButton.boundingBox(),
-      profileButton.boundingBox(),
-    ]);
+    // WebKit can report the preceding layout immediately after the safe-area variable changes.
+    // Keep the original geometry requirements and wait for the resulting layout to settle.
+    await expect(async () => {
+      const [headerBox, searchBox, profileBox] = await Promise.all([
+        header.boundingBox(),
+        searchButton.boundingBox(),
+        profileButton.boundingBox(),
+      ]);
 
-    expect(headerBox?.height).toBeGreaterThanOrEqual(96);
-    expect(searchBox?.y).toBeGreaterThanOrEqual(32);
-    expect(profileBox?.y).toBeGreaterThanOrEqual(32);
+      expect(headerBox?.height).toBeGreaterThanOrEqual(96);
+      expect(searchBox?.y).toBeGreaterThanOrEqual(32);
+      expect(profileBox?.y).toBeGreaterThanOrEqual(32);
+    }).toPass({ timeout: 15000 });
 
     const navigation = page.getByRole('navigation', { name: 'Navegación principal móvil' });
     await expect(navigation).toBeVisible();
