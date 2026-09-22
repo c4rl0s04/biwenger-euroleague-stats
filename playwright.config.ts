@@ -28,6 +28,8 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     locale: 'es-ES',
     timezoneId: 'Europe/Madrid',
+    // Existing visual references are the dark appearance contract; theme tests override this.
+    colorScheme: 'dark',
     contextOptions: { reducedMotion: 'reduce' },
   },
   projects: [
