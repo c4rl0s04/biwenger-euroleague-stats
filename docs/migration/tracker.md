@@ -141,7 +141,7 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 10 — Season Review data
 
-- **State:** Verified locally on `refactor/season-review-data`, base `fd424956`.
+- **State:** Integrated into main at `c28481b2`.
 - **Dependencies / approval:** 02; separation from product PR 29.
 - **Scope:** Own existing pure engines, artifacts and read orchestration; assign generation commands to 21.
 - **Completion check:** Unchanged calculations/artifact formats with typed, tested contracts.
@@ -150,12 +150,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 11 — Season Review screens
 
-- **State:** Planned.
+- **State:** Verified locally on `refactor/season-review-screens`, base `c28481b2`.
 - **Dependencies / approval:** 10.
 - **Scope:** Own existing pages, sections and presentation, excluding new simulator/product plans.
 - **Completion check:** Same desktop/phone output consuming feature models.
-- **Evidence:** No current acceptance.
-- **Next action:** Capture original output and move composition.
+- **Evidence:** [Task 11 receipt](reports/task-11-season-review-screens.md); Season Review screens, page adapters, architecture policy, and boundary tests pass.
+- **Next action:** Task 12 Sensitive-operation inventory.
 
 ### Task 12 — Sensitive-operation inventory
 
