@@ -1,7 +1,7 @@
 import 'server-only';
 import { db, pgClient } from '@/lib/db/client';
 import { matches } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, asc, desc } from 'drizzle-orm';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import {
   inferGhostPosition,
@@ -44,7 +44,7 @@ export async function getAllRounds(): Promise<RoundOptionRow[]> {
     .from(matches)
     .where(eq(matches.seasonId, seasonId))
     .groupBy(matches.roundId, matches.roundName)
-    .orderBy(desc(matches.roundId));
+    .orderBy(asc(matches.roundId));
 }
 
 /**

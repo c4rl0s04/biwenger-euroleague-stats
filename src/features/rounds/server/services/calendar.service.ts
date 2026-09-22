@@ -2,7 +2,7 @@ import 'server-only';
 
 import { resolveCalendarSeasonId } from '../queries/calendar-season.query';
 import type { CalendarRound, RoundSelectionPolicy } from '../../models/calendar';
-import { deriveRoundCalendar, selectRoundId } from '../calendar-policy';
+import { deriveRoundCalendar, deriveRoundCalendarState, selectRoundId } from '../calendar-policy';
 import { mapCalendarMatch } from '../mappers/calendar.mapper';
 import { listCalendarRows } from '../queries/calendar.query';
 
@@ -21,6 +21,11 @@ export function createCalendarService(deps: {
     const now = deps.now();
     return deriveRoundCalendar((await deps.listRows(seasonId)).map(mapCalendarMatch), now);
   }
+  async function getRoundCalendarState() {
+    const seasonId = await deps.resolveSeason();
+    const now = deps.now();
+    return deriveRoundCalendarState((await deps.listRows(seasonId)).map(mapCalendarMatch), now);
+  }
   async function resolveRoundIdByPolicy(policy: RoundSelectionPolicy) {
     return selectRoundId(await getRoundCalendar(), policy);
   }
@@ -36,6 +41,7 @@ export function createCalendarService(deps: {
   }
   return {
     getRoundCalendar,
+    getRoundCalendarState,
     resolveRoundIdByPolicy,
     getLastCompletedRoundId,
     getLastCompletedCalendarRound,
@@ -44,6 +50,7 @@ export function createCalendarService(deps: {
 
 export const {
   getRoundCalendar,
+  getRoundCalendarState,
   resolveRoundIdByPolicy,
   getLastCompletedRoundId,
   getLastCompletedCalendarRound,

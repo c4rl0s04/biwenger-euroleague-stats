@@ -1,5 +1,12 @@
-export type RoundSelectionPolicy = 'active_or_next' | 'active_or_last';
+export type RoundSelectionPolicy =
+  | 'active_or_upcoming'
+  | 'active_or_finished'
+  | 'active_or_next'
+  | 'active_or_last';
+
 export type CalendarStatus = 'upcoming' | 'live' | 'finished';
+
+export type SeasonPhase = 'preseason' | 'in_season' | 'postseason';
 
 export interface CalendarMatch {
   id: number;
@@ -18,6 +25,14 @@ export interface CalendarRound {
   finishedMatches: number;
   matches: CalendarMatch[];
   status: CalendarStatus;
+}
+
+export interface RoundCalendarState {
+  rounds: CalendarRound[];
+  liveRound: CalendarRound | null;
+  lastFinishedRound: CalendarRound | null;
+  nextUpcomingRound: CalendarRound | null;
+  seasonPhase: SeasonPhase;
 }
 
 export interface RoundCalendar {

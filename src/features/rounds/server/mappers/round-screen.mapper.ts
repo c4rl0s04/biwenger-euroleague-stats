@@ -56,7 +56,7 @@ export function mapRoundOverview(
   return {
     rounds: lists.rounds,
     activeRoundId,
-    description: round?.round_name ?? 'Jornada activa',
+    description: round?.round_name ?? (activeRoundId != null ? 'Jornada activa' : 'Pretemporada'),
     points: Number(user?.points ?? 0).toLocaleString('es-ES'),
     ideal: Number(user?.ideal_points ?? 0).toLocaleString('es-ES'),
     efficiency: `${Number(user?.coachRating?.efficiency ?? 0).toLocaleString('es-ES')}%`,

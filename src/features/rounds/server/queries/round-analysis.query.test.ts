@@ -61,7 +61,7 @@ beforeEach(() => {
 });
 
 describe('Rounds read query compatibility', () => {
-  it('keeps the two-field season-scoped selector and descending ID ordering without cache', async () => {
+  it('keeps the two-field season-scoped selector and ascending ID ordering without cache', async () => {
     await getAllRounds();
     await getAllRounds();
     expect(mocks.season).toHaveBeenCalledTimes(2);
@@ -71,9 +71,10 @@ describe('Rounds read query compatibility', () => {
     expect(dialect.sqlToQuery(mocks.where.mock.calls[0][0])).toMatchObject({
       params: ['fixture-season'],
     });
-    expect(dialect.sqlToQuery(mocks.orderBy.mock.calls[0][0]).sql).toBe(
-      '"matches"."round_id" desc'
+    expect(dialect.sqlToQuery(mocks.orderBy.mock.calls[0][0]).sql).toContain(
+      '"matches"."round_id"'
     );
+    expect(dialect.sqlToQuery(mocks.orderBy.mock.calls[0][0]).sql).not.toContain('desc');
   });
 
   it('reconstructs exactly one ghost using stored total and captain priority', async () => {

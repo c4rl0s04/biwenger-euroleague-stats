@@ -46,6 +46,7 @@ export {
 
 export {
   getRoundCalendar,
+  getRoundCalendarState,
   resolveRoundIdByPolicy,
   getLastCompletedRoundId,
   getLastCompletedCalendarRound,

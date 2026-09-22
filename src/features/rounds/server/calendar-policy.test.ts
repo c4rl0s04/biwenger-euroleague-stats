@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deriveRoundCalendar, selectRoundId } from './calendar-policy';
+import { deriveRoundCalendar, deriveRoundCalendarState, selectRoundId } from './calendar-policy';
 import { mapCalendarMatch } from './mappers/calendar.mapper';
 import type { CalendarMatch, RoundSelectionPolicy } from '../public';
 
@@ -19,12 +19,61 @@ describe('round chronology compatibility', () => {
   it('returns explicit empty states', () => {
     expect(deriveRoundCalendar([], now)).toEqual({ currentRound: null, nextRound: null });
   });
-  it('preserves preseason policy priorities, not round number ordering', () => {
-    const state = deriveRoundCalendar([match(1, 9, future), match(2, 3, future)], now);
-    expect(state.currentRound?.roundId).toBe(9);
-    expect(state.nextRound?.roundId).toBe(3);
-    expect(selectRoundId(state, 'active_or_last')).toBe(3);
-    expect(selectRoundId(state, 'active_or_next')).toBe(3);
+  it('selects the first upcoming round for preparation and null for results during preseason', () => {
+    const matches = [match(1, 9, future), match(2, 3, future)];
+    const state = deriveRoundCalendar(matches, now);
+    const comprehensive = deriveRoundCalendarState(matches, now);
+
+    expect(comprehensive.seasonPhase).toBe('preseason');
+    expect(comprehensive.liveRound).toBeNull();
+    expect(comprehensive.lastFinishedRound).toBeNull();
+    expect(comprehensive.nextUpcomingRound?.roundId).toBe(9);
+
+    expect(selectRoundId(state, 'active_or_next')).toBe(9);
+    expect(selectRoundId(state, 'active_or_upcoming')).toBe(9);
+    expect(selectRoundId(state, 'active_or_last')).toBeNull();
+    expect(selectRoundId(state, 'active_or_finished')).toBeNull();
+
+    expect(selectRoundId(comprehensive, 'active_or_next')).toBe(9);
+    expect(selectRoundId(comprehensive, 'active_or_upcoming')).toBe(9);
+    expect(selectRoundId(comprehensive, 'active_or_last')).toBeNull();
+    expect(selectRoundId(comprehensive, 'active_or_finished')).toBeNull();
+  });
+  it('selects upcoming round for preparation and finished round for results between rounds', () => {
+    const matches = [match(1, 1, past, 'finished'), match(2, 2, future)];
+    const state = deriveRoundCalendar(matches, now);
+    const comprehensive = deriveRoundCalendarState(matches, now);
+
+    expect(comprehensive.seasonPhase).toBe('in_season');
+    expect(comprehensive.liveRound).toBeNull();
+    expect(comprehensive.lastFinishedRound?.roundId).toBe(1);
+    expect(comprehensive.nextUpcomingRound?.roundId).toBe(2);
+
+    expect(selectRoundId(state, 'active_or_upcoming')).toBe(2);
+    expect(selectRoundId(state, 'active_or_finished')).toBe(1);
+  });
+  it('selects live round for both preparation and results during a live round', () => {
+    const matches = [match(1, 1, past, 'finished'), match(2, 2, past, 'live'), match(3, 3, future)];
+    const state = deriveRoundCalendar(matches, now);
+    const comprehensive = deriveRoundCalendarState(matches, now);
+
+    expect(comprehensive.seasonPhase).toBe('in_season');
+    expect(comprehensive.liveRound?.roundId).toBe(2);
+    expect(selectRoundId(state, 'active_or_upcoming')).toBe(2);
+    expect(selectRoundId(state, 'active_or_finished')).toBe(2);
+  });
+  it('selects last finished round for both policies in postseason', () => {
+    const matches = [match(1, 1, past, 'finished'), match(2, 2, past, 'finished')];
+    const state = deriveRoundCalendar(matches, now);
+    const comprehensive = deriveRoundCalendarState(matches, now);
+
+    expect(comprehensive.seasonPhase).toBe('postseason');
+    expect(comprehensive.liveRound).toBeNull();
+    expect(comprehensive.lastFinishedRound?.roundId).toBe(2);
+    expect(comprehensive.nextUpcomingRound).toBeNull();
+
+    expect(selectRoundId(state, 'active_or_upcoming')).toBe(2);
+    expect(selectRoundId(state, 'active_or_finished')).toBe(2);
   });
   it('keeps unfinished past matches active, including postponed status', () => {
     const state = deriveRoundCalendar(

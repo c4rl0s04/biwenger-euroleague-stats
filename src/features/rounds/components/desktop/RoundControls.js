@@ -7,19 +7,20 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
   if (!lists?.rounds) return null;
 
   const currentRoundIndex = lists.rounds.findIndex((r) => r.round_id === selectedRoundId);
-  const isFirst = currentRoundIndex === 0;
-  const isLast = currentRoundIndex === lists.rounds.length - 1;
+  const isFirst = currentRoundIndex <= 0;
+  const isLast = currentRoundIndex >= lists.rounds.length - 1;
 
   const handlePrev = () => {
-    if (isLast) return;
-    const nextRound = lists.rounds[currentRoundIndex + 1];
-    onChangeRound(nextRound.round_id);
+    if (isFirst || currentRoundIndex === -1) return;
+    const prevRound = lists.rounds[currentRoundIndex - 1];
+    if (prevRound) onChangeRound(prevRound.round_id);
   };
 
   const handleNext = () => {
-    if (isFirst) return;
-    const nextRound = lists.rounds[currentRoundIndex - 1];
-    onChangeRound(nextRound.round_id);
+    if (isLast) return;
+    const nextRound =
+      currentRoundIndex === -1 ? lists.rounds[0] : lists.rounds[currentRoundIndex + 1];
+    if (nextRound) onChangeRound(nextRound.round_id);
   };
 
   return (
@@ -29,7 +30,8 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
         <button
           onClick={handlePrev}
           className="p-3 rounded-full hover:bg-secondary/50 text-zinc-400 hover:text-primary transition-all disabled:opacity-20 cursor-pointer"
-          disabled={isLast}
+          disabled={isFirst}
+          aria-label="Jornada anterior"
         >
           <ChevronLeft size={28} />
         </button>
@@ -39,12 +41,10 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
             value={selectedRoundId}
             onChange={onChangeRound}
             options={
-              lists.rounds
-                .map((r) => ({
-                  value: r.round_id,
-                  label: (r.round_name || `Jornada ${r.round_id}`).replace(/\s*\(aplazada\)/i, ''),
-                }))
-                .reverse() || []
+              lists.rounds.map((r) => ({
+                value: r.round_id,
+                label: (r.round_name || `Jornada ${r.round_id}`).replace(/\s*\(aplazada\)/i, ''),
+              })) || []
             }
             className="w-fit mx-auto"
             buttonClassName="h-16 text-5xl md:text-6xl font-black font-display justify-center bg-transparent border-none hover:text-primary transition-all cursor-pointer px-6"
@@ -56,7 +56,8 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
         <button
           onClick={handleNext}
           className="p-3 rounded-full hover:bg-secondary/50 text-zinc-400 hover:text-primary transition-all disabled:opacity-20 cursor-pointer"
-          disabled={isFirst}
+          disabled={isLast}
+          aria-label="Jornada siguiente"
         >
           <ChevronRight size={28} />
         </button>

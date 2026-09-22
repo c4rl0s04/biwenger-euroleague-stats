@@ -22,7 +22,7 @@ export function createRoundScreenService(deps: RoundScreenDependencies) {
     requestedRound?: string | number | null
   ) {
     const lists = await deps.lists();
-    const activeRoundId = requestedRound ?? lists.defaultRoundId ?? lists.rounds[0]?.round_id;
+    const activeRoundId = requestedRound ?? lists.defaultRoundId ?? null;
     const data = userId && activeRoundId ? await deps.complete(activeRoundId, userId) : null;
     return mapRoundOverview(lists, activeRoundId, data, userId);
   }

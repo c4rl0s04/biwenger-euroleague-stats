@@ -19,7 +19,7 @@ export function createRoundsListService(deps: {
       deps.managers(),
       deps.lastCompleted(),
     ]);
-    const defaultRoundId = (await deps.resolveRound('active_or_last')) || rounds[0]?.round_id;
+    const defaultRoundId = (await deps.resolveRound('active_or_last')) ?? null;
     return {
       rounds: rounds.map(mapRoundOption),
       users: users.map(mapRoundManager),

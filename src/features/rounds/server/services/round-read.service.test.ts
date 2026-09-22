@@ -172,7 +172,7 @@ describe('Rounds history services', () => {
   });
 });
 describe('Rounds lists and formations', () => {
-  it('retains discarded last-completed read, delayed policy and zero fallback', async () => {
+  it('retains discarded last-completed read, delayed policy and null default in preseason', async () => {
     const calls: string[] = [];
     const service = createRoundsListService({
       rounds: async () => {
@@ -189,13 +189,13 @@ describe('Rounds lists and formations', () => {
       },
       resolveRound: async () => {
         calls.push('policy');
-        return 0;
+        return null;
       },
     });
     expect(await service.fetchRoundsList()).toEqual({
       rounds: [{ round_id: 4, round_name: null }],
       users: [manager],
-      defaultRoundId: 4,
+      defaultRoundId: null,
     });
     expect(calls).toEqual(['rounds', 'managers', 'last', 'policy']);
   });

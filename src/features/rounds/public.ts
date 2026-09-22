@@ -3,7 +3,9 @@ export type {
   CalendarRound,
   CalendarStatus,
   RoundCalendar,
+  RoundCalendarState,
   RoundSelectionPolicy,
+  SeasonPhase,
 } from './models/calendar';
 export type { LastRoundMVP, LastRoundStats, HighestRoundRecord } from './models/last-round';
 export type * from './models/round-read';

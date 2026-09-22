@@ -15,6 +15,7 @@ import {
   X,
   Check,
   TrendingUp,
+  Calendar,
 } from 'lucide-react';
 
 import { apiClient } from '@/lib/api-client';
@@ -65,7 +66,9 @@ export default function RoundsPageClient() {
   // Initialize Round & User
   useEffect(() => {
     if (lists?.rounds?.length > 0 && !selectedRoundId) {
-      setSelectedRoundId(lists.defaultRoundId || lists.rounds[0].round_id);
+      if (lists.defaultRoundId) {
+        setSelectedRoundId(lists.defaultRoundId);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lists]);
@@ -308,123 +311,141 @@ export default function RoundsPageClient() {
         </ElegantCard>
 
         {/* MAIN LAYOUT - 2 COLUMNS ON XL (Flexbox for equal height) */}
-        <div className="flex flex-col xl:flex-row gap-6">
-          {/* LEFT COLUMN: STANDINGS + STATS (1/3 width) */}
-          <div className="xl:w-1/3 flex flex-col justify-start gap-6">
-            <RoundStandings
-              roundId={selectedRoundId}
-              selectedUserId={selectedUserId}
-              onSelectUser={setSelectedUserId}
-              standings={fullRoundData?.users} // PASS PROPS DOWN
-            />
-
-            {/* Moved Stats Sidebar here to fill vertical space */}
-            <RoundStatsSidebar
-              stats={statsData}
-              loading={quickDataLoading}
-              roundId={selectedRoundId}
-              userId={selectedUserId}
-              leftOutPlayers={statsData?.user?.leftOut || []}
-              coachRating={statsData?.user?.coachRating}
-              currentRoundStatus={
-                lists?.rounds?.find((r) => String(r.round_id) === String(selectedRoundId))
-                  ?.status || 'finished'
-              }
-              summary={currentSummary}
-              viewMode={viewMode}
-            />
+        {!selectedRoundId ? (
+          <div className="mt-8 rounded-2xl border border-white/10 bg-secondary/20 p-8 text-center backdrop-blur-md">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
+              <Calendar size={32} />
+            </div>
+            <h3 className="text-xl font-bold font-display text-white mb-2">
+              Temporada en preparación
+            </h3>
+            <p className="max-w-md mx-auto text-sm text-zinc-400">
+              Aún no se ha disputado ninguna jornada. Las puntuaciones, alineaciones y análisis
+              estarán disponibles tan pronto como comience la competición. Puedes seleccionar una
+              jornada en el selector superior para consultar el calendario.
+            </p>
           </div>
+        ) : (
+          <div className="flex flex-col xl:flex-row gap-6">
+            {/* LEFT COLUMN: STANDINGS + STATS (1/3 width) */}
+            <div className="xl:w-1/3 flex flex-col justify-start gap-6">
+              <RoundStandings
+                roundId={selectedRoundId}
+                selectedUserId={selectedUserId}
+                onSelectUser={setSelectedUserId}
+                standings={fullRoundData?.users} // PASS PROPS DOWN
+              />
 
-          {/* RIGHT COLUMN: COURT + BENCH (2/3 width) */}
-          <div className="xl:w-2/3 flex flex-col gap-4">
-            {/* View Toggles */}
-            <div className="mx-auto flex w-full max-w-full overflow-x-auto rounded-xl border border-white/5 bg-secondary/30 p-1 shadow-inner backdrop-blur-md transition-all duration-300 hover:border-white/10 sm:w-fit">
-              <button
-                onClick={() => setViewMode('user')}
-                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user' ? 'bg-primary text-white shadow-[0_0_15px_rgba(250,80,1,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-              >
-                <User size={14} /> Alineación
-              </button>
-              <button
-                onClick={() => setViewMode('user_ideal')}
-                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-              >
-                <BrainCircuit size={14} /> Mi Ideal
-              </button>
-              <button
-                onClick={() => setViewMode('ideal')}
-                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-              >
-                <Star size={14} /> Global
-              </button>
+              {/* Moved Stats Sidebar here to fill vertical space */}
+              <RoundStatsSidebar
+                stats={statsData}
+                loading={quickDataLoading}
+                roundId={selectedRoundId}
+                userId={selectedUserId}
+                leftOutPlayers={statsData?.user?.leftOut || []}
+                coachRating={statsData?.user?.coachRating}
+                currentRoundStatus={
+                  lists?.rounds?.find((r) => String(r.round_id) === String(selectedRoundId))
+                    ?.status || 'finished'
+                }
+                summary={currentSummary}
+                viewMode={viewMode}
+              />
             </div>
 
-            <ElegantCard title={title} icon={icon} color={color} className="w-full">
-              <div className="aspect-[3/4] min-h-[360px] w-full sm:aspect-[4/3] sm:min-h-[500px] lg:aspect-[16/10] xl:min-h-[600px]">
-                {isCourtLoading ? (
-                  <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
-                    Cargando datos...
-                  </div>
-                ) : (
-                  <BasketballCourt
-                    players={currentStarters}
-                    onPlayerClick={handlePlayerClick}
-                    className="h-full w-full"
-                  />
-                )}
-              </div>
-            </ElegantCard>
-
-            {/* Bench */}
-            {isBenchVisible && (
-              <div className="mt-4">
-                <ElegantCard
-                  title="Banquillo"
-                  icon={Users}
-                  className="w-full opacity-90"
-                  color="blue"
+            {/* RIGHT COLUMN: COURT + BENCH (2/3 width) */}
+            <div className="xl:w-2/3 flex flex-col gap-4">
+              {/* View Toggles */}
+              <div className="mx-auto flex w-full max-w-full overflow-x-auto rounded-xl border border-white/5 bg-secondary/30 p-1 shadow-inner backdrop-blur-md transition-all duration-300 hover:border-white/10 sm:w-fit">
+                <button
+                  onClick={() => setViewMode('user')}
+                  className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user' ? 'bg-primary text-white shadow-[0_0_15px_rgba(250,80,1,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
                 >
-                  <Bench
-                    players={currentBench}
-                    viewMode="tactical"
-                    onPlayerClick={handlePlayerClick}
-                  />
-                </ElegantCard>
+                  <User size={14} /> Alineación
+                </button>
+                <button
+                  onClick={() => setViewMode('user_ideal')}
+                  className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                >
+                  <BrainCircuit size={14} /> Mi Ideal
+                </button>
+                <button
+                  onClick={() => setViewMode('ideal')}
+                  className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                >
+                  <Star size={14} /> Global
+                </button>
               </div>
-            )}
+
+              <ElegantCard title={title} icon={icon} color={color} className="w-full">
+                <div className="aspect-[3/4] min-h-[360px] w-full sm:aspect-[4/3] sm:min-h-[500px] lg:aspect-[16/10] xl:min-h-[600px]">
+                  {isCourtLoading ? (
+                    <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
+                      Cargando datos...
+                    </div>
+                  ) : (
+                    <BasketballCourt
+                      players={currentStarters}
+                      onPlayerClick={handlePlayerClick}
+                      className="h-full w-full"
+                    />
+                  )}
+                </div>
+              </ElegantCard>
+
+              {/* Bench */}
+              {isBenchVisible && (
+                <div className="mt-4">
+                  <ElegantCard
+                    title="Banquillo"
+                    icon={Users}
+                    className="w-full opacity-90"
+                    color="blue"
+                  >
+                    <Bench
+                      players={currentBench}
+                      viewMode="tactical"
+                      onPlayerClick={handlePlayerClick}
+                    />
+                  </ElegantCard>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </Section>
 
       {/* SECTION: PLAYER STATS */}
-      <Section title="Estadísticas de Jugadores" delay={100} background="section-raised">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* MVP - Fantasy Points Leader */}
-          <StatLeaderCard
-            player={statsData?.global?.mvp}
-            statType="mvp"
-            statValue={statsData?.global?.mvp?.points}
-          />
-          {/* Top Scorer - Real Points */}
-          <StatLeaderCard
-            player={statsData?.global?.topScorer}
-            statType="points"
-            statValue={statsData?.global?.topScorer?.stat_value}
-          />
-          {/* Top Rebounder */}
-          <StatLeaderCard
-            player={statsData?.global?.topRebounder}
-            statType="rebounds"
-            statValue={statsData?.global?.topRebounder?.stat_value}
-          />
-          {/* Top Assister */}
-          <StatLeaderCard
-            player={statsData?.global?.topAssister}
-            statType="assists"
-            statValue={statsData?.global?.topAssister?.stat_value}
-          />
-        </div>
-      </Section>
+      {selectedRoundId && (
+        <Section title="Estadísticas de Jugadores" delay={100} background="section-raised">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* MVP - Fantasy Points Leader */}
+            <StatLeaderCard
+              player={statsData?.global?.mvp}
+              statType="mvp"
+              statValue={statsData?.global?.mvp?.points}
+            />
+            {/* Top Scorer - Real Points */}
+            <StatLeaderCard
+              player={statsData?.global?.topScorer}
+              statType="points"
+              statValue={statsData?.global?.topScorer?.stat_value}
+            />
+            {/* Top Rebounder */}
+            <StatLeaderCard
+              player={statsData?.global?.topRebounder}
+              statType="rebounds"
+              statValue={statsData?.global?.topRebounder?.stat_value}
+            />
+            {/* Top Assister */}
+            <StatLeaderCard
+              player={statsData?.global?.topAssister}
+              statType="assists"
+              statValue={statsData?.global?.topAssister?.stat_value}
+            />
+          </div>
+        </Section>
+      )}
 
       {/* SECTION: HISTORIAL DE RENDIMIENTO */}
       <Section title="Historial de Rendimiento" delay={200} background="section-base">
