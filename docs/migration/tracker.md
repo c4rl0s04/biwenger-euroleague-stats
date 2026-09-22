@@ -123,12 +123,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 08 — News
 
-- **State:** Verified locally on `refactor/news-feature-architecture`, base `b7505a29`; not merged or pushed.
+- **State:** Verified and fast-forward integrated into local main at `69dfa07f`, rebased onto `4929e035`; GitHub publication accompanies this receipt. Production deployment is not verified.
 - **Dependencies / approval:** 02; existing ingestion boundaries.
 - **Scope:** Own feed retrieval, parsing, validation and existing HTTP contracts; no provider redesign.
 - **Completion check:** Typed reusable News read contract with original ordering/error behavior.
 - **Evidence:** [Task 08 receipt](reports/task-08-news.md); News widgets/service, Market/Matches contracts and original browser references.
-- **Next action:** Review the local slice before separate integration. Full verifier (2,469 tests), focused contracts (364 tests) and 27 browser cases pass. Task 09 has not started.
+- **Next action:** Task 09 Home, after separate approval. Combined-source verifier (2,470 tests), focused contracts (364 tests) and 27 browser cases pass. Task 09 has not started.
 
 ### Task 09 — Home
 

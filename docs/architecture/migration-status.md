@@ -31,9 +31,10 @@ The dated entries below retain historical evidence; they are not all current blo
 
 ## Domain ledger
 
-Task 08 News is verified locally and unmerged on `refactor/news-feature-architecture`,
-base `b7505a29`. The [News receipt](../migration/reports/task-08-news.md) records its typed read
-boundary, Matches query ownership, preserved public API policy, 2,469 tests and 27 browser cases.
+Task 08 News is verified and fast-forward integrated into local main at `69dfa07f`,
+rebased onto `4929e035`. The [News receipt](../migration/reports/task-08-news.md) records its typed read
+boundary, Matches query ownership, preserved public API policy, 2,470 tests and 27 browser cases.
+GitHub publication accompanies the receipt; production deployment has not been verified.
 
 Dashboard Task 06's baseline identified a pre-existing MapLibre attribution vulnerability.
 The separately approved [security upgrade](../operations/maplibre-security-upgrade.md) records

@@ -12,7 +12,36 @@ status: active
 Base: `b7505a29`. Branch: `refactor/news-feature-architecture`.
 Implementation commit: `136a139c`.
 Worktree: `../biwengerstats-next-news-feature-architecture`.
-Local implementation only; not integrated, pushed or deployed. Task 09 has not started.
+Original implementation details below are historical; current integration evidence follows.
+Task 09 has not started.
+
+## Integration — 2026-09-22
+
+Fetched main `4929e03509fe3d1d5042b0747ea19c6b90a4d76e` adds only the independent
+historical-price sync correction and its tests. Both checkouts were clean. Rebase was conflict-free:
+
+- `136a139c` → `5fd8c962` (News implementation).
+- `eb46d951` → `69dfa07f` (acceptance documentation).
+
+`git range-diff` confirms identical patches for both commits. Local main was fast-forwarded to
+`69dfa07f`; this documentation commit accompanies normal GitHub publication. No force push,
+merge commit, unrelated feature integration, application correction or configuration change was needed.
+
+Combined-source validation passed:
+
+- `npm run verify`: skills, architecture (993 modules / 83 protected entrypoints), documentation,
+  typecheck, 2,470 tests plus one existing skip, lint (zero errors / 24 existing warnings),
+  database-disabled production build, schema metadata audit, Drizzle check and diff check.
+- The focused News/Matches/Market/Dashboard/API command listed below: 364 tests / 41 files passed.
+- `npm run test:e2e:local -- news.spec.ts dashboard.spec.ts feature-screens.spec.ts`:
+  27 cases passed across nine projects; original screenshots unchanged. Disposable local database
+  and application were stopped normally. No production operations occurred.
+- `git diff --check origin/main..HEAD`: passed before integration.
+
+Expected missing-provider build notices remain. No browser failures occurred in this integration run.
+Linux News screenshot references and real-production-data visual review remain outstanding.
+Vercel deployment was not inspected under the GitHub-only release workflow; this is not a claim
+of production readiness verification. No Task 09 or theme work was included.
 
 ## Ownership and compatibility
 

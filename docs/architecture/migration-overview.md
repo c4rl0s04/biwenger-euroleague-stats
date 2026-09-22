@@ -92,9 +92,9 @@ the release receipt distinguishes local checks from integration and deployment.
 
 ## Current merged scopes and remaining work
 
-News (Task 08) is verified locally, with full verification and 27 browser cases passing; see the
+News (Task 08) is verified and integrated into local main at `69dfa07f`, with full verification and 27 browser cases passing; see the
 [News receipt](../migration/reports/task-08-news.md). It owns the shared ticker and Dashboard strip,
-not a new page. This does not mark Home complete or claim a release.
+not a new page. GitHub publication accompanies the integration receipt; production deployment is not verified. Home remains pending.
 
 Tournaments, Predictions, Playoffs, public Market and Managers remaining reads are merged via
 PRs #35–39 respectively. Their receipts retain original test evidence; this update does not
@@ -112,7 +112,7 @@ data ownership from the pending screen slice (07). GitHub publication and Vercel
 Dashboard screens (07) are verified and integrated locally at `c4c55057` after rebasing onto
 `f47e2a65`, with 2,437 tests and 18 browser cases passing, including original screenshots.
 See the [Task 07 receipt](../migration/reports/task-07-dashboard-screens.md) for publication context.
-Remaining read features: News/Home (08–09)
+Remaining read features: Home (09)
 and Season Review (10–11). Sensitive operations are Tasks 12–21; infrastructure/shared UI and final
 closure are Tasks 22–27. The tracker owns their states and acceptance criteria.
 
