@@ -94,6 +94,17 @@ test('News retains desktop ticker and phone disclosure', async ({ page, request 
         await r.fulfill({ json: { success: true, data: [] } });
       });
       try {
+        // Finish the existing background card reads before the deliberate reload below;
+        // otherwise the test itself aborts them and creates unrelated fetch errors.
+        const standingsReady = Promise.all(
+          ['/api/standings/theoretical', '/api/standings/points-progression'].map(async (path) => {
+            const response = await negative.waitForResponse(
+              (response) => new URL(response.url()).pathname === path
+            );
+            expect(response.status()).toBe(200);
+            expect(await response.finished()).toBeNull();
+          })
+        );
         await negative.goto('/standings');
         await started;
         await expect(negative.getByText('Breaking', { exact: true })).toHaveCount(0);
@@ -102,6 +113,8 @@ test('News retains desktop ticker and phone disclosure', async ({ page, request 
         );
         release();
         await emptyResponse;
+        await standingsReady;
+        expect(errors).toEqual([]);
         await expect(negative.getByText('Breaking', { exact: true })).toHaveCount(0);
         await negative.unroute('**/api/news');
         await negative.route('**/api/news', (r) =>
