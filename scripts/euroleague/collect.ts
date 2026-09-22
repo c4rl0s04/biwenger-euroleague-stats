@@ -6,6 +6,7 @@ import {
   portraitUrl,
   collectionSchema,
   SEASON,
+  DEFAULT_COLLECTION_PATH,
   normalizeEuroleaguePlayerCode,
   normalizeCountry,
   parseSpanishDate,
@@ -13,7 +14,7 @@ import {
 
 const { values } = parseArgs({
   options: {
-    output: { type: 'string', default: '/tmp/euroleague-collection-2026.json' },
+    output: { type: 'string', default: DEFAULT_COLLECTION_PATH },
     headless: { type: 'boolean', default: true },
     rosters: { type: 'boolean', default: true },
   },

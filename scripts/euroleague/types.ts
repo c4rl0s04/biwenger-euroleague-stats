@@ -1,7 +1,11 @@
 import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 
 export const SEASON = '2026-27';
+export const DEFAULT_COLLECTION_PATH = fileURLToPath(
+  new URL('./data/euroleague-rosters-2026.json', import.meta.url)
+);
 
 export const normalize = (value: string) =>
   value

@@ -6,6 +6,7 @@ import { createCliPool } from '../../src/lib/db/cli';
 import {
   hash,
   SEASON,
+  DEFAULT_COLLECTION_PATH,
   type Candidate,
   type Mapping,
   type Manifest,
@@ -19,7 +20,7 @@ import { validateImage } from './validate';
 
 const { values } = parseArgs({
   options: {
-    input: { type: 'string', default: '/tmp/euroleague-collection-2026.json' },
+    input: { type: 'string', default: DEFAULT_COLLECTION_PATH },
     'dry-run': { type: 'boolean', default: false },
     apply: { type: 'boolean', default: false },
     interactive: { type: 'boolean', default: false },
