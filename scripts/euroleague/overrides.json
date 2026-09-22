@@ -1,0 +1,18 @@
+{
+  "BES:P009025": {
+    "playerCode": "P009025",
+    "teamCode": "BES",
+    "siteName": "ANTHONY BROWN",
+    "targetId": 43256,
+    "targetName": "AB",
+    "resolvedBy": "initial_alias"
+  },
+  "BAR:P007553": {
+    "playerCode": "P007553",
+    "teamCode": "BAR",
+    "siteName": "OLEK BALCEROWSKI",
+    "targetId": 31793,
+    "targetName": "Balcerowski Aleksander",
+    "resolvedBy": "initial_alias"
+  }
+}

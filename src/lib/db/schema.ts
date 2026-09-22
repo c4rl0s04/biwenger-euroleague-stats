@@ -121,6 +121,7 @@ export const players = pgTable('players', {
   euroleagueCode: text('euroleague_code'),
   country: text('country'),
   img: text('img'),
+  profileUrl: text('profile_url'),
 });
 
 // 2b. Season-specific player state.

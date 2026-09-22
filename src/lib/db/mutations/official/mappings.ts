@@ -34,9 +34,14 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
        ) VALUES ($1,$2,'euroleague_advanced',$3,$4,$5,$6,$7,$8::jsonb,NOW())
        ON CONFLICT (season_id, provider, provider_team_code) DO UPDATE SET
          team_id=EXCLUDED.team_id, provider_name=EXCLUDED.provider_name,
-         crest_url=COALESCE(EXCLUDED.crest_url,official_team_mappings.crest_url),
+         crest_url=CASE WHEN official_team_mappings.raw_payload ? 'website_image'
+           THEN official_team_mappings.crest_url
+           ELSE COALESCE(EXCLUDED.crest_url,official_team_mappings.crest_url) END,
          match_method=EXCLUDED.match_method, confidence=EXCLUDED.confidence,
-         raw_payload=EXCLUDED.raw_payload, updated_at=NOW()`,
+         raw_payload=COALESCE(EXCLUDED.raw_payload,'{}'::jsonb) ||
+           CASE WHEN official_team_mappings.raw_payload ? 'website_image'
+             THEN jsonb_build_object('website_image',official_team_mappings.raw_payload->'website_image')
+             ELSE '{}'::jsonb END, updated_at=NOW()`,
       [
         seasonId,
         mapping.teamId,
@@ -63,7 +68,9 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
              THEN official_player_mappings.player_id ELSE EXCLUDED.player_id END,
          provider_name=EXCLUDED.provider_name,
          provider_team_code=EXCLUDED.provider_team_code,
-         image_url=COALESCE(EXCLUDED.image_url,official_player_mappings.image_url),
+         image_url=CASE WHEN official_player_mappings.raw_payload ? 'website_image'
+           THEN official_player_mappings.image_url
+           ELSE COALESCE(EXCLUDED.image_url,official_player_mappings.image_url) END,
          age=COALESCE(EXCLUDED.age,official_player_mappings.age),
          match_method=CASE
            WHEN official_player_mappings.status IN ('matched','ignored')
@@ -74,7 +81,10 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
          status=CASE
            WHEN official_player_mappings.status IN ('matched','ignored')
              THEN official_player_mappings.status ELSE EXCLUDED.status END,
-         raw_payload=EXCLUDED.raw_payload, updated_at=NOW()`,
+         raw_payload=COALESCE(EXCLUDED.raw_payload,'{}'::jsonb) ||
+           CASE WHEN official_player_mappings.raw_payload ? 'website_image'
+             THEN jsonb_build_object('website_image',official_player_mappings.raw_payload->'website_image')
+             ELSE '{}'::jsonb END, updated_at=NOW()`,
       [
         seasonId,
         mapping.playerId,
