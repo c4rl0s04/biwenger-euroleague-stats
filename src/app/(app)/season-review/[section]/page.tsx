@@ -1,4 +1,4 @@
-import MobileSeasonReviewDetail from '@/components/mobile/screens/MobileSeasonReviewDetail';
+import { MobileSeasonReviewDetail } from '@/features/season-review/public';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
 import { getSeasonReviewPageData } from '@/features/season-review/server';
 

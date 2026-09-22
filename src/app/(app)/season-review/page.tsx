@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { PageHeader } from '@/components/ui';
-import SeasonReviewClient from '@/components/season-review/SeasonReviewClient';
-import MobileSeasonReviewScreen from '@/components/mobile/screens/MobileSeasonReviewScreen';
+import {
+  DesktopSeasonReviewScreen,
+  MobileSeasonReviewScreen,
+} from '@/features/season-review/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 import { getSeasonReviewPageData } from '@/features/season-review/server';
 
@@ -30,7 +32,7 @@ export default async function SeasonReviewPage() {
         title="Análisis 25/26"
         description="Desde 40 M€ iguales: cuándo se abrió la brecha y qué reglas hacen recuperable un error."
       />
-      <SeasonReviewClient overview={overview} simulationAnalysis={simulationAnalysis} />
+      <DesktopSeasonReviewScreen overview={overview} simulationAnalysis={simulationAnalysis} />
     </main>
   );
 }
