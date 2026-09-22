@@ -161,6 +161,19 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
           probe.remove();
           return color;
         };
+        const btnPrimary = getComputedStyle(document.getElementById('theme-btn-primary')!);
+        const btnSecondary = getComputedStyle(document.getElementById('theme-btn-secondary')!);
+        const inputNormal = getComputedStyle(document.getElementById('theme-input-normal')!);
+        const inputInvalid = getComputedStyle(document.getElementById('theme-input-invalid')!);
+        const skeleton = getComputedStyle(document.getElementById('theme-skeleton')!);
+        const btnPrimaryRect = document
+          .getElementById('theme-btn-primary')!
+          .getBoundingClientRect();
+        const iconBtnRect = document.getElementById('theme-icon-btn')!.getBoundingClientRect();
+        const inputNormalRect = document
+          .getElementById('theme-input-normal')!
+          .getBoundingClientRect();
+
         return {
           background: card.backgroundColor,
           foreground: card.color,
@@ -172,6 +185,22 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
           danger: resolve('--status-danger'),
           primary: resolve('--action-primary'),
           onPrimary: resolve('--content-on-primary'),
+          btnPrimaryBg: btnPrimary.backgroundColor,
+          btnPrimaryFg: btnPrimary.color,
+          btnSecondaryBg: btnSecondary.backgroundColor,
+          inputBg: inputNormal.backgroundColor,
+          inputFg: inputNormal.color,
+          inputBorder: inputNormal.borderColor,
+          inputInvalidBorder: inputInvalid.borderColor,
+          skeletonBg: skeleton.backgroundColor,
+          btnHeight: btnPrimaryRect.height,
+          iconBtnWidth: iconBtnRect.width,
+          iconBtnHeight: iconBtnRect.height,
+          inputHeight: inputNormalRect.height,
+          expectedActionPrimaryContent: resolve('--action-primary-content'),
+          expectedControlSurface: resolve('--control-surface'),
+          expectedControlContent: resolve('--control-content'),
+          expectedControlBorder: resolve('--control-border'),
           expected: {
             background: resolve('--surface-card'),
             foreground: resolve('--content-primary'),
@@ -203,6 +232,32 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
       expect(contrast(colors.danger, colors.background)).toBeGreaterThanOrEqual(4.5);
       if (theme === 'light')
         expect(contrast(colors.primary, colors.onPrimary)).toBeGreaterThanOrEqual(4.5);
+
+      // Core primitives semantic resolution & contrast
+      expect(colors.btnPrimaryBg).toBe(colors.primary);
+      expect(colors.btnPrimaryFg).toBe(colors.expectedActionPrimaryContent);
+      expect(colors.btnSecondaryBg).toBe(colors.subtle);
+      expect(colors.inputBg).toBe(colors.expectedControlSurface);
+      expect(colors.inputFg).toBe(colors.expectedControlContent);
+      expect(colors.inputBorder).toBe(colors.expectedControlBorder);
+      expect(colors.inputInvalidBorder).toBe(colors.danger);
+      expect(colors.skeletonBg).toBe(colors.subtle);
+
+      // Primary Button text contrast must be >= 4.5 in BOTH dark and light themes
+      expect(contrast(colors.btnPrimaryFg, colors.btnPrimaryBg)).toBeGreaterThanOrEqual(4.5);
+
+      // Canonical touch target sizes (>= 44px)
+      expect(colors.btnHeight).toBeGreaterThanOrEqual(44);
+      expect(colors.inputHeight).toBeGreaterThanOrEqual(44);
+      expect(colors.iconBtnHeight).toBeGreaterThanOrEqual(44);
+      expect(colors.iconBtnWidth).toBeGreaterThanOrEqual(44);
+      expect(colors.iconBtnWidth).toBe(colors.iconBtnHeight);
+
+      await page.locator('#theme-btn-primary').focus();
+      await expect(page.locator('#theme-btn-primary')).toBeFocused();
+      await page.locator('#theme-input-normal').focus();
+      await expect(page.locator('#theme-input-normal')).toBeFocused();
+
       await page.locator('#theme-focus').focus();
       await expect(page.locator('#theme-card')).toHaveCSS('border-color', colors.focus);
     }).toPass({ timeout: 15000 });

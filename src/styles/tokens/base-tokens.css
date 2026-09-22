@@ -56,4 +56,5 @@
 
   /* Existing base radius */
   --radius-rounded: 1rem;
+  --radius-control: 0.5rem;
 }

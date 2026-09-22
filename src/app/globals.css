@@ -47,6 +47,11 @@
   --color-input: hsl(var(--control-border));
   --color-ring: hsl(var(--focus-ring));
 
+  --color-action-primary-content: hsl(var(--action-primary-content));
+  --color-control-surface: hsl(var(--control-surface));
+  --color-control-content: hsl(var(--control-content));
+  --color-control-placeholder: hsl(var(--control-placeholder));
+
   --font-sans: var(--font-outfit), system-ui, sans-serif;
   --font-display: var(--font-bebas), sans-serif;
   --font-ui: var(--font-inter), sans-serif;

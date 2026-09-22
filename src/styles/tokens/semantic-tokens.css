@@ -18,6 +18,7 @@
 
   /* Actions */
   --action-primary: var(--color-orange-strong);
+  --action-primary-content: var(--color-obsidian-black);
   --action-accent: var(--color-orange-deep);
 
   /* Status */
@@ -25,11 +26,15 @@
 
   /* Borders / controls */
   --border-default: var(--color-slate-muted);
+  --control-surface: var(--color-obsidian-soft);
+  --control-content: var(--content-primary);
+  --control-placeholder: var(--content-muted);
   --control-border: var(--color-slate-muted);
   --focus-ring: var(--color-orange-strong);
 
   /* Shape */
   --radius-surface: var(--radius-rounded);
+  --radius-control: var(--radius-control);
 
   /* Effects */
   --effect-glow-primary: 0 0 40px var(--overlay-orange-glow);
@@ -153,9 +158,13 @@
 
   /* Deeper orange/red support text and white action labels on light surfaces. */
   --action-primary: var(--color-orange-ink);
+  --action-primary-content: var(--color-white-pure);
   --action-accent: var(--color-orange-pressed);
   --status-danger: var(--color-red-ink);
   --border-default: var(--color-slate-outline);
+  --control-surface: var(--color-white-pure);
+  --control-content: var(--content-primary);
+  --control-placeholder: var(--content-muted);
   --control-border: var(--color-slate-control);
   --focus-ring: var(--color-orange-ink);
 
@@ -204,9 +213,13 @@
 
     /* Deeper orange/red support text and white action labels on light surfaces. */
     --action-primary: var(--color-orange-ink);
+    --action-primary-content: var(--color-white-pure);
     --action-accent: var(--color-orange-pressed);
     --status-danger: var(--color-red-ink);
     --border-default: var(--color-slate-outline);
+    --control-surface: var(--color-white-pure);
+    --control-content: var(--content-primary);
+    --control-placeholder: var(--content-muted);
     --control-border: var(--color-slate-control);
     --focus-ring: var(--color-orange-ink);
 
