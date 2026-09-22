@@ -6,7 +6,11 @@ import { auth } from '@/auth';
 const { getHomeFeedPage } = vi.hoisted(() => ({ getHomeFeedPage: vi.fn() }));
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/services/app/homeService', () => ({ getHomeFeedPage }));
+vi.mock('@/features/home/server', () => ({ getHomeFeedPage }));
+vi.mock(
+  '@/features/home/public',
+  async () => await import('@/features/home/validation/activity-filter')
+);
 
 const request = (query = '') => new NextRequest(`http://localhost/api/home/activity${query}`);
 
@@ -102,5 +106,41 @@ describe('GET /api/home/activity', () => {
 
     expect(response.status).toBe(400);
     expect(getHomeFeedPage).not.toHaveBeenCalled();
+  });
+
+  it('preserves first query value semantics and ignores unrelated parameters', async () => {
+    const { GET, dynamic } = await import('./route');
+    expect(dynamic).toBe('force-dynamic');
+    const response = await GET(request('?type=transfers&type=unknown&cursor=&limit=999'));
+    expect(response.status).toBe(200);
+    expect(getHomeFeedPage).toHaveBeenCalledWith({ filter: 'transfers', cursor: '' });
+  });
+
+  it('returns the same league read for different authenticated identities without a public cache', async () => {
+    const { GET } = await import('./route');
+    for (const id of ['7', '8']) {
+      vi.mocked(auth).mockResolvedValue({ user: { id } } as never);
+      const response = await GET(request());
+      expect(await response.json()).toEqual({ items: [], nextCursor: null, hasMore: false });
+      expect(response.headers.get('cache-control')).toBe('private, no-store');
+    }
+    expect(getHomeFeedPage.mock.calls).toEqual([
+      [{ filter: 'all', cursor: null }],
+      [{ filter: 'all', cursor: null }],
+    ]);
+  });
+
+  it('preserves the generic private 500 envelope on unexpected failures', async () => {
+    getHomeFeedPage.mockRejectedValue(new Error('synthetic storage failure'));
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const { GET } = await import('./route');
+      const response = await GET(request());
+      expect(response.status).toBe(500);
+      expect(response.headers.get('cache-control')).toBe('private, no-store');
+      expect(await response.json()).toEqual({ error: 'No se pudo cargar la actividad' });
+    } finally {
+      logger.mockRestore();
+    }
   });
 });

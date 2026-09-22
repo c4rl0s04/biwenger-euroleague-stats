@@ -22,4 +22,3 @@ export {
   getManagerHomeAwayStats as fetchHomeAwayStats,
   getManagerCaptainRecommendations as fetchCaptainRecommendations,
 } from '@/features/managers/server';
-export { fetchLandingStats } from './news-landing-legacy';

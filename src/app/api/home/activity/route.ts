@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { auth } from '@/auth';
-import { normalizeHomeActivityFilter } from '@/lib/home/contracts';
-import { getHomeFeedPage } from '@/lib/services/app/homeService';
+import { normalizeHomeActivityFilter } from '@/features/home/public';
+import { getHomeFeedPage } from '@/features/home/server';
 
 export const dynamic = 'force-dynamic';
 

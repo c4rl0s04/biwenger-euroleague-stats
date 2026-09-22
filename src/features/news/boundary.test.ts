@@ -30,7 +30,7 @@ describe('News ownership', () => {
       expect(read(path)).toContain('@/features/news/public');
     expect(existsSync('src/components/ui/NewsTicker.js')).toBe(false);
     expect(existsSync('src/components/mobile/MobileNewsStrip.tsx')).toBe(false);
-    expect(read('src/lib/services/app/news-landing-legacy.ts')).not.toContain('fetchNewsFeed');
+    expect(existsSync('src/lib/services/app/news-landing-legacy.ts')).toBe(false);
     expect(read('src/lib/db/queries/competition/matches.ts')).not.toMatch(
       /function getUpcomingMatches|function getRecentResults/
     );

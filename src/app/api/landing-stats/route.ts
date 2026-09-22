@@ -1,4 +1,4 @@
-import { fetchLandingStats } from '@/lib/services';
+import { fetchLandingStats } from '@/features/home/server';
 import { successResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';

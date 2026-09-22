@@ -121,7 +121,5 @@ export {
 } from './features/seasonResilienceService';
 
 // Dashboard Extensions
-export { fetchLandingStats } from './app/dashboardService';
 
 // Mobile Home Service
-export { getHomeFeedPage, getHomeSummary } from './app/homeService';

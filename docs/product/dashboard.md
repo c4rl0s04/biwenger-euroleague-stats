@@ -23,13 +23,16 @@ does not need to block the entire page.
 
 ## Implementation map
 
-- Pages: [`src/app/(app)/page.js`](<../../src/app/(app)/page.js>) and
+- Pages: [`src/app/(app)/page.tsx`](<../../src/app/(app)/page.tsx>) and
   [`src/app/(app)/dashboard/page.tsx`](<../../src/app/(app)/dashboard/page.tsx>).
-- UI: [`src/components/home`](../../src/components/home) and
+- UI: [`Home components`](../../src/features/home/components) and
   [`Dashboard screens`](../../src/features/dashboard/screens) and feature-owned cards.
 - Dashboard data: [`server.ts`](../../src/features/dashboard/server.ts); legacy
   [`dashboardService.ts`](../../src/lib/services/app/dashboardService.ts) remains a compatibility facade
-  for consumers assigned to later tasks. News now has its own feature contract; Home remains separate.
+  for consumers assigned to later tasks. News and Home have separate feature contracts.
+- Home data: [`Home services`](../../src/features/home/server.ts) own activity, personal summary
+  and landing statistics. Desktop retains its landing-statistics request; phone streams summary
+  and initial activity separately, with browser filter/pagination requests to `/api/home/activity`.
 - HTTP: [`src/app/api/dashboard`](../../src/app/api/dashboard) plus `/api/landing-stats`.
 - Tests: [`dashboard.test.ts`](../../src/app/api/dashboard/__tests__/dashboard.test.ts) and related
   service/query utility tests.

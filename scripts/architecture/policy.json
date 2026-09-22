@@ -1,5 +1,8 @@
 {
   "entrypoints": [
+    "src/app/(app)/page.tsx",
+    "src/app/api/home/activity/route.ts",
+    "src/app/api/landing-stats/route.ts",
     "src/app/api/news/route.ts",
     "src/app/(app)/dashboard/page.tsx",
     "src/app/(app)/dashboard/[section]/page.tsx",
@@ -503,6 +506,66 @@
     {
       "edge": "entrypoint-persistence: src/app/(app)/compare/[userId]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
       "reason": "Existing Compare page session identity reaches frozen authentication/credential infrastructure, not Compare statistical queries. Preserve this exact pre-existing access flow until the separate Accounts security gate.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/home/activity/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/home/activity/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/home/activity/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/home/activity/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/home/activity/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/index.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/home/activity/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Home authentication reaches frozen authentication/credential infrastructure; no Home domain-query exception.",
       "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
     }
   ]

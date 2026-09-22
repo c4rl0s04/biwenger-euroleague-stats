@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/lib/services', () => ({
+vi.mock('@/features/home/server', () => ({
   fetchLandingStats: vi.fn(),
 }));
 
-import * as services from '@/lib/services';
+import * as services from '@/features/home/server';
 
 describe('miscellaneous API route contracts', () => {
   beforeEach(() => vi.clearAllMocks());

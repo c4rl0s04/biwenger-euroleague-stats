@@ -2,12 +2,12 @@ import 'server-only';
 
 import { cache } from 'react';
 
-import { getExtendedStandings } from '@/lib/db/queries/competition/standings';
+import { getRequestStandings } from '@/features/standings/server';
 import { listAvailableSeasons, getActiveSeasonId } from '@/lib/seasons';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 /** Deduplicates the standings read when the app shell and a screen need it in one request. */
-export const getAppStandings = cache(async () => getExtendedStandings());
+export const getAppStandings = getRequestStandings;
 
 export const getAppSeasonContext = cache(async () => {
   const [seasons, currentSeasonId, activeSeasonId] = await Promise.all([

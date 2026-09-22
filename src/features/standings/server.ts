@@ -108,3 +108,9 @@ export {
 } from './server/queries/base.query';
 
 export { getStandingsOverview, getStandingsSection } from './server/services/screens.service';
+
+export {
+  getRequestStandings,
+  REQUEST_STANDINGS_POLICY,
+} from './server/services/request-standings.service';
+export { getSimpleStandings as getLandingStandings } from './server/services/base-standings.service';
