@@ -233,5 +233,6 @@ describe('application theme preference', () => {
     ).map((m) => m[1]);
     for (const role of roles) expect(explicit).toContain(`${role}:`);
     expect(explicit).not.toContain('--radius-surface');
+    expect(explicit).not.toContain('--radius-control');
   });
 });

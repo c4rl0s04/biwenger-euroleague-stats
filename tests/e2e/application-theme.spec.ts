@@ -161,8 +161,17 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
           probe.remove();
           return color;
         };
+        const resolveRadius = (name: string) => {
+          const probe = document.createElement('div');
+          probe.style.borderRadius = `var(${name})`;
+          document.body.append(probe);
+          const radius = getComputedStyle(probe).borderRadius;
+          probe.remove();
+          return radius;
+        };
         const btnPrimary = getComputedStyle(document.getElementById('theme-btn-primary')!);
         const btnSecondary = getComputedStyle(document.getElementById('theme-btn-secondary')!);
+        const iconBtn = getComputedStyle(document.getElementById('theme-icon-btn')!);
         const inputNormal = getComputedStyle(document.getElementById('theme-input-normal')!);
         const inputInvalid = getComputedStyle(document.getElementById('theme-input-invalid')!);
         const skeleton = getComputedStyle(document.getElementById('theme-skeleton')!);
@@ -197,6 +206,12 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
           iconBtnWidth: iconBtnRect.width,
           iconBtnHeight: iconBtnRect.height,
           inputHeight: inputNormalRect.height,
+          btnPrimaryRadius: btnPrimary.borderRadius,
+          btnSecondaryRadius: btnSecondary.borderRadius,
+          iconBtnRadius: iconBtn.borderRadius,
+          inputRadius: inputNormal.borderRadius,
+          skeletonRadius: skeleton.borderRadius,
+          expectedControlRadius: resolveRadius('--radius-control'),
           expectedActionPrimaryContent: resolve('--action-primary-content'),
           expectedControlSurface: resolve('--control-surface'),
           expectedControlContent: resolve('--control-content'),
@@ -252,6 +267,15 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
       expect(colors.iconBtnHeight).toBeGreaterThanOrEqual(44);
       expect(colors.iconBtnWidth).toBeGreaterThanOrEqual(44);
       expect(colors.iconBtnWidth).toBe(colors.iconBtnHeight);
+
+      // Computed control border radius verification
+      // Must resolve to non-zero value matching semantic --radius-control (8px / 0.5rem), identical across themes
+      expect(colors.expectedControlRadius).toBe('8px');
+      expect(colors.btnPrimaryRadius).toBe(colors.expectedControlRadius);
+      expect(colors.btnSecondaryRadius).toBe(colors.expectedControlRadius);
+      expect(colors.iconBtnRadius).toBe(colors.expectedControlRadius);
+      expect(colors.inputRadius).toBe(colors.expectedControlRadius);
+      expect(colors.skeletonRadius).toBe(colors.expectedControlRadius);
 
       await page.locator('#theme-btn-primary').focus();
       await expect(page.locator('#theme-btn-primary')).toBeFocused();

@@ -461,12 +461,14 @@ describe('Skeleton', () => {
     expect(html).toContain('h-6 w-32');
   });
 
-  it('allows overriding aria attributes and merging props', () => {
+  it('allows overriding aria attributes and merging props when deliberately accessible', () => {
     const html = renderToStaticMarkup(
-      <Skeleton role="status" aria-label="Loading..." id="skel-1" />
+      <Skeleton role="status" aria-label="Loading..." aria-hidden={false} id="skel-1" />
     );
     expect(html).toContain('role="status"');
     expect(html).toContain('aria-label="Loading..."');
+    expect(html).toContain('aria-hidden="false"');
+    expect(html).not.toContain('aria-hidden="true"');
     expect(html).toContain('id="skel-1"');
   });
 });

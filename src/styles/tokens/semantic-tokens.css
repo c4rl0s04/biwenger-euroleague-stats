@@ -34,7 +34,7 @@
 
   /* Shape */
   --radius-surface: var(--radius-rounded);
-  --radius-control: var(--radius-control);
+  --radius-control: var(--radius-compact);
 
   /* Effects */
   --effect-glow-primary: 0 0 40px var(--overlay-orange-glow);
