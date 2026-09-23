@@ -150,7 +150,7 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 11 — Season Review screens
 
-- **State:** Verified locally on `refactor/season-review-screens`, base `c28481b2`.
+- **State:** Integrated into main at `0b001b17`.
 - **Dependencies / approval:** 10.
 - **Scope:** Own existing pages, sections and presentation, excluding new simulator/product plans.
 - **Completion check:** Same desktop/phone output consuming feature models.
@@ -159,12 +159,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 12 — Sensitive-operation inventory
 
-- **State:** Planned.
+- **State:** Verified locally on `docs/sensitive-operation-inventory`, base `0b001b17`.
 - **Dependencies / approval:** 02; read-only inspection.
 - **Scope:** Enumerate DB reads, provider reads and writes across every method/action.
 - **Completion check:** Per-operation matrix: identity, permission, credential boundary, cache, retry, side effect, failure and reconciliation.
-- **Evidence:** Security gates; no implementation approval implied.
-- **Next action:** Inspect flows; propose bounded approvals for 13–21.
+- **Evidence:** [Task 12 receipt](reports/task-12-sensitive-operation-inventory.md); 16 operations inventoried across provider mutations, private reads, credentials, DB writes, and AI providers.
+- **Next action:** Task 13 Provider boundaries.
 
 ### Task 13 — Provider boundaries
 
