@@ -1269,7 +1269,10 @@ Near-term slices:
 
 1. **UI-01T — theme foundation:** add the light raw palette, theme-aware semantic mappings, root
    `system | dark | light` resolution/persistence and representative theme verification.
-2. **UI-01B — core primitives:** Button, IconButton where required, Badge, Avatar, Skeleton and Input.
+2. **UI-01B — core primitives:** Button, IconButton, Badge, Avatar, Skeleton and Input implemented on
+   additive semantic tokens (`--action-primary-content`, `--control-surface`, `--control-content`,
+   `--control-placeholder`, `--radius-control`), meeting WCAG AA contrast in both themes, supporting
+   server rendering without `'use client'`, and exported via `@/components/ui/foundation`.
 3. **UI-01C — shared compositions:** demonstrated reusable identity, empty-state, page/section header and
    related patterns needed by the first new feature.
 

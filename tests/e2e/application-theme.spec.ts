@@ -161,6 +161,28 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
           probe.remove();
           return color;
         };
+        const resolveRadius = (name: string) => {
+          const probe = document.createElement('div');
+          probe.style.borderRadius = `var(${name})`;
+          document.body.append(probe);
+          const radius = getComputedStyle(probe).borderRadius;
+          probe.remove();
+          return radius;
+        };
+        const btnPrimary = getComputedStyle(document.getElementById('theme-btn-primary')!);
+        const btnSecondary = getComputedStyle(document.getElementById('theme-btn-secondary')!);
+        const iconBtn = getComputedStyle(document.getElementById('theme-icon-btn')!);
+        const inputNormal = getComputedStyle(document.getElementById('theme-input-normal')!);
+        const inputInvalid = getComputedStyle(document.getElementById('theme-input-invalid')!);
+        const skeleton = getComputedStyle(document.getElementById('theme-skeleton')!);
+        const btnPrimaryRect = document
+          .getElementById('theme-btn-primary')!
+          .getBoundingClientRect();
+        const iconBtnRect = document.getElementById('theme-icon-btn')!.getBoundingClientRect();
+        const inputNormalRect = document
+          .getElementById('theme-input-normal')!
+          .getBoundingClientRect();
+
         return {
           background: card.backgroundColor,
           foreground: card.color,
@@ -172,6 +194,28 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
           danger: resolve('--status-danger'),
           primary: resolve('--action-primary'),
           onPrimary: resolve('--content-on-primary'),
+          btnPrimaryBg: btnPrimary.backgroundColor,
+          btnPrimaryFg: btnPrimary.color,
+          btnSecondaryBg: btnSecondary.backgroundColor,
+          inputBg: inputNormal.backgroundColor,
+          inputFg: inputNormal.color,
+          inputBorder: inputNormal.borderColor,
+          inputInvalidBorder: inputInvalid.borderColor,
+          skeletonBg: skeleton.backgroundColor,
+          btnHeight: btnPrimaryRect.height,
+          iconBtnWidth: iconBtnRect.width,
+          iconBtnHeight: iconBtnRect.height,
+          inputHeight: inputNormalRect.height,
+          btnPrimaryRadius: btnPrimary.borderRadius,
+          btnSecondaryRadius: btnSecondary.borderRadius,
+          iconBtnRadius: iconBtn.borderRadius,
+          inputRadius: inputNormal.borderRadius,
+          skeletonRadius: skeleton.borderRadius,
+          expectedControlRadius: resolveRadius('--radius-control'),
+          expectedActionPrimaryContent: resolve('--action-primary-content'),
+          expectedControlSurface: resolve('--control-surface'),
+          expectedControlContent: resolve('--control-content'),
+          expectedControlBorder: resolve('--control-border'),
           expected: {
             background: resolve('--surface-card'),
             foreground: resolve('--content-primary'),
@@ -203,6 +247,41 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
       expect(contrast(colors.danger, colors.background)).toBeGreaterThanOrEqual(4.5);
       if (theme === 'light')
         expect(contrast(colors.primary, colors.onPrimary)).toBeGreaterThanOrEqual(4.5);
+
+      // Core primitives semantic resolution & contrast
+      expect(colors.btnPrimaryBg).toBe(colors.primary);
+      expect(colors.btnPrimaryFg).toBe(colors.expectedActionPrimaryContent);
+      expect(colors.btnSecondaryBg).toBe(colors.subtle);
+      expect(colors.inputBg).toBe(colors.expectedControlSurface);
+      expect(colors.inputFg).toBe(colors.expectedControlContent);
+      expect(colors.inputBorder).toBe(colors.expectedControlBorder);
+      expect(colors.inputInvalidBorder).toBe(colors.danger);
+      expect(colors.skeletonBg).toBe(colors.subtle);
+
+      // Primary Button text contrast must be >= 4.5 in BOTH dark and light themes
+      expect(contrast(colors.btnPrimaryFg, colors.btnPrimaryBg)).toBeGreaterThanOrEqual(4.5);
+
+      // Canonical touch target sizes (>= 44px)
+      expect(colors.btnHeight).toBeGreaterThanOrEqual(44);
+      expect(colors.inputHeight).toBeGreaterThanOrEqual(44);
+      expect(colors.iconBtnHeight).toBeGreaterThanOrEqual(44);
+      expect(colors.iconBtnWidth).toBeGreaterThanOrEqual(44);
+      expect(colors.iconBtnWidth).toBe(colors.iconBtnHeight);
+
+      // Computed control border radius verification
+      // Must resolve to non-zero value matching semantic --radius-control (8px / 0.5rem), identical across themes
+      expect(colors.expectedControlRadius).toBe('8px');
+      expect(colors.btnPrimaryRadius).toBe(colors.expectedControlRadius);
+      expect(colors.btnSecondaryRadius).toBe(colors.expectedControlRadius);
+      expect(colors.iconBtnRadius).toBe(colors.expectedControlRadius);
+      expect(colors.inputRadius).toBe(colors.expectedControlRadius);
+      expect(colors.skeletonRadius).toBe(colors.expectedControlRadius);
+
+      await page.locator('#theme-btn-primary').focus();
+      await expect(page.locator('#theme-btn-primary')).toBeFocused();
+      await page.locator('#theme-input-normal').focus();
+      await expect(page.locator('#theme-input-normal')).toBeFocused();
+
       await page.locator('#theme-focus').focus();
       await expect(page.locator('#theme-card')).toHaveCSS('border-color', colors.focus);
     }).toPass({ timeout: 15000 });
