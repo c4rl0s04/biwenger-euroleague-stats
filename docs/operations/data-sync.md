@@ -34,14 +34,19 @@ accidentally enabling sync for a frozen season.
 
 ## Modes
 
-| Command                                                     | Purpose                                                         |
-| ----------------------------------------------------------- | --------------------------------------------------------------- |
-| `npm run sync`                                              | Routine ordered refresh.                                        |
-| `npm run sync:bootstrap`                                    | Routine pipeline plus one-time initial squads and user colors.  |
-| `npm run sync:live`                                         | Official game data and missing Biwenger lineups only.           |
-| `npm run sync:playoffs`                                     | Apply custom playoff metadata and results from checked-in JSON. |
-| `npm run sync -- --step=match-linking`                      | Run one descriptive step for diagnosis or recovery.             |
-| `npm run sync -- --step=euroleague-games --force-game=CODE` | Reconcile one old finalized official game.                      |
+| Command                                                     | Purpose                                                              |
+| ----------------------------------------------------------- | -------------------------------------------------------------------- |
+| `npm run sync`                                              | Routine ordered refresh.                                             |
+| `npm run sync:bootstrap`                                    | Routine pipeline plus one-time initial squads and user colors.       |
+| `npm run sync:live`                                         | Official game data and missing Biwenger lineups only.                |
+| `npm run sync:playoffs`                                     | Apply custom playoff metadata and results from checked-in JSON.      |
+| `npm run sync:euroleague`                                   | Preview EuroLeague official website bio data & photoshoot portraits. |
+| `npm run sync:euroleague:apply`                             | Commit EuroLeague official website photoshoot portraits & bio data.  |
+| `npm run sync -- --step=match-linking`                      | Run one descriptive step for diagnosis or recovery.                  |
+| `npm run sync -- --step=euroleague-games --force-game=CODE` | Reconcile one old finalized official game.                           |
+
+For official EuroLeague website photoshoot scraping and bio enrichment, see the
+[EuroLeague official website sync runbook](euroleague-website-sync.md).
 
 The **Bootstrap Sync** GitHub Actions workflow exposes `sync:bootstrap` as a manual-only production
 operation. It runs the full provider preflight before writing and has no scheduled trigger. Use it

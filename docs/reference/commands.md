@@ -29,20 +29,23 @@ status: active
 
 ## Setup and synchronization
 
-| Command                  | Behavior                                                                         |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `npm run setup`          | Interactive local environment setup.                                             |
-| `npm run sync`           | Routine guarded synchronization pipeline.                                        |
-| `npm run sync:bootstrap` | Routine pipeline plus bootstrap-only derived data.                               |
-| `npm run sync:live`      | Official game data and missing-lineup synchronization.                           |
-| `npm run sync:preflight` | Validate configuration and workflow readiness without running the main pipeline. |
-| `npm run sync:playoffs`  | Apply checked-in custom playoff data.                                            |
+| Command                           | Behavior                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
+| `npm run setup`                   | Interactive local environment setup.                                                       |
+| `npm run sync`                    | Routine guarded synchronization pipeline.                                                  |
+| `npm run sync:bootstrap`          | Routine pipeline plus bootstrap-only derived data.                                         |
+| `npm run sync:live`               | Official game data and missing-lineup synchronization.                                     |
+| `npm run sync:preflight`          | Validate configuration and workflow readiness without running the main pipeline.           |
+| `npm run sync:playoffs`           | Apply checked-in custom playoff data.                                                      |
+| `npm run sync:euroleague`         | Dry-run check for official website bio enrichments and photoshoot portraits.               |
+| `npm run sync:euroleague:apply`   | Atomically commit official website bio enrichments and photoshoot portraits to PostgreSQL. |
+| `npm run sync:euroleague:collect` | Scrape official rosters and photoshoot portraits from the EuroLeague website.              |
 
 Use descriptive step IDs for targeted recovery, for example
 `npm run sync -- --step=biwenger-market`. Only
 `--step=euroleague-games` accepts `--force-game=<positive game code>`.
 
-See the [data sync runbook](../operations/data-sync.md) before running a mutating sync.
+See the [data sync runbook](../operations/data-sync.md) and [EuroLeague official website sync runbook](../operations/euroleague-website-sync.md) before running a mutating sync.
 
 ## Tests
 
