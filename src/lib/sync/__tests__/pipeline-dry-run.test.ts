@@ -13,7 +13,11 @@ vi.mock('../../db/client', () => ({ pool: mockDb, db: mockDb }));
 vi.mock('../../db/schema-validation', () => ({
   validateSchemaReady: vi.fn(async () => {}),
 }));
-vi.mock('../../utils/cache', () => ({ clearCache: vi.fn() }));
+vi.mock('../../utils/cache', () => ({
+  clearCache: vi.fn(),
+  CACHE_TTL: { SHORT: 60, MEDIUM: 300, LONG: 900, VERY_LONG: 3600 },
+  cached: vi.fn(async (_k, _t, fn) => fn()),
+}));
 vi.mock('../season-guard', () => ({
   assertSyncSeasonWritable: vi.fn(async () => ({
     seasonId: '2025-26',

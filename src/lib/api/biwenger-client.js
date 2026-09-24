@@ -1,57 +1,16 @@
 /**
- * Biwenger API Client (Unofficial)
+ * Biwenger API Client (Unofficial) - Compatibility Layer
+ * Delegates to the typed, secure provider boundary in src/features/provider/server
  */
 
 import { CONFIG } from '../config.js';
-
-// Auxiliary wait function
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Helper to get random delay between min and max ms
-const getRandomDelay = (min = 2000, max = 5000) => {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-/**
- * Generic fetch wrapper for Biwenger API with Retry Logic
- * @param {string} endpoint - API endpoint (relative to BASE_URL)
- * @param {object} options - Internal options for retries
- * @returns {Promise<any>} - JSON response
- */
-// --- Version Caching State ---
-let cachedVersion = null;
-
-/**
- * Ensures we have the API version.
- * Fetches from /account if not cached.
- */
-async function ensureApiVersion() {
-  if (cachedVersion) return cachedVersion;
-
-  try {
-    // Determine recursive call by checking if we are already fetching account
-    // (This is handled in biwengerFetch by checking the endpoint arg)
-    const res = await biwengerFetch('/account', { skipVersionCheck: true });
-    if (res.version) {
-      cachedVersion = res.version;
-      console.log(`✅ Biwenger API Version Detected: ${cachedVersion}`);
-    } else if (CONFIG.API.VERSION_FALLBACK) {
-      cachedVersion = CONFIG.API.VERSION_FALLBACK;
-      console.warn(`⚠️ Biwenger version missing; using configured fallback ${cachedVersion}`);
-    } else {
-      throw new Error('Biwenger account response did not include an API version');
-    }
-  } catch (e) {
-    if (!CONFIG.API.VERSION_FALLBACK) {
-      throw new Error(
-        `Failed to detect Biwenger API version and BIWENGER_API_VERSION_FALLBACK is not configured: ${e.message}`
-      );
-    }
-    cachedVersion = CONFIG.API.VERSION_FALLBACK;
-    console.warn(`⚠️ Failed to detect API version, using configured fallback: ${cachedVersion}`);
-  }
-  return cachedVersion;
-}
+import {
+  biwengerProviderClient,
+  BiwengerRateLimitError,
+  BiwengerAuthError,
+  BiwengerProviderError,
+  BiwengerMutationError,
+} from '../../features/provider/server';
 
 /**
  * Generic fetch wrapper for Biwenger API with Retry Logic and Version Injection
@@ -60,111 +19,49 @@ async function ensureApiVersion() {
  * @returns {Promise<any>} - JSON response
  */
 export async function biwengerFetch(endpoint, options = {}) {
-  const tokenRaw = CONFIG.API.TOKEN;
-  const leagueId = CONFIG.API.LEAGUE_ID;
-  const userId = CONFIG.API.USER_ID;
-
-  // Default retry configuration
   const {
-    retries = 3,
-    retryDelay = 5000,
-    skipVersionCheck = false,
     method = 'GET',
     body,
+    retries,
+    retryDelay,
+    skipVersionCheck = false,
     customToken,
     customUserId,
     cache,
   } = options;
 
-  if (!tokenRaw) throw new Error('BIWENGER_TOKEN is missing');
-  if (!leagueId) throw new Error('BIWENGER_LEAGUE_ID is missing');
-
-  // --- DYNAMIC VERSION INJECTION ---
-  let finalEndpoint = endpoint;
-
-  // Recursion Guard: Don't check version if we are fetching the account/version itself
-  if (!skipVersionCheck && endpoint !== '/account') {
-    const v = await ensureApiVersion();
-    if (v) {
-      // Append param intelligently
-      const separator = finalEndpoint.includes('?') ? '&' : '?';
-      finalEndpoint = `${finalEndpoint}${separator}v=${v}`;
-    }
-  }
-  // ---------------------------------
-
-  const url = `${CONFIG.API.BASE_URL}${finalEndpoint}`;
-  const token = customToken
-    ? customToken.startsWith('Bearer ')
-      ? customToken
-      : `Bearer ${customToken}`
-    : tokenRaw.startsWith('Bearer ')
-      ? tokenRaw
-      : `Bearer ${tokenRaw}`;
-
-  const headers = {
-    Authorization: token,
-    'X-League': leagueId,
-    'X-User': customUserId || userId,
-    Accept: 'application/json, text/plain, */*',
-    'User-Agent':
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  const context = {
+    token: customToken,
+    userId: customUserId,
   };
 
-  if (body) {
-    headers['Content-Type'] = 'application/json';
+  const isMutation = method === 'POST' || method === 'PUT' || method === 'DELETE';
+
+  if (isMutation) {
+    const result = await biwengerProviderClient.command(
+      endpoint,
+      {
+        method,
+        body,
+        skipVersionCheck,
+        retries,
+        retryDelay,
+      },
+      context
+    );
+    return result.raw ?? { success: true, status: result.httpStatus };
   }
 
-  // RANDOM DELAY: Safety measure against bans (2-5 seconds random)
-  const safeDelay = getRandomDelay(2000, 5000);
-  console.log(`Fetching: ${url} (Wait: ${safeDelay}ms)`);
-  await sleep(safeDelay);
-
-  try {
-    const fetchOptions = { headers, method, cache };
-    if (body) {
-      fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
-    }
-
-    const response = await fetch(url, fetchOptions);
-
-    // --- RETRY LOGIC FOR 429 ---
-    if (response.status === 429) {
-      if (retries > 0) {
-        console.warn(`⚠️ Rate Limit (429). Pausing ${retryDelay}ms before retrying...`);
-        await sleep(retryDelay);
-        // Recursive call: 1 less attempt, double wait time (Exponential Backoff)
-        return biwengerFetch(endpoint, {
-          ...options,
-          retries: retries - 1,
-          retryDelay: retryDelay * 2,
-        });
-      } else {
-        throw new Error(`Biwenger API Error: 429 Too Many Requests (Max retries exceeded)`);
-      }
-    }
-    // ------------------------------------
-
-    if (!response.ok) {
-      // Provider response bodies are deliberately excluded because they may
-      // contain credentials or other private account data.
-      throw new Error(`Biwenger API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const text = await response.text();
-    try {
-      return text ? JSON.parse(text) : { success: true, status: response.status };
-    } catch (e) {
-      // If it's not JSON but has content, return as text
-      return { success: true, status: response.status, raw: text };
-    }
-  } catch (error) {
-    // Avoid logging error if it's an internal retry, unless it's the final one
-    if (retries === 0 || !error.message.includes('429')) {
-      console.error(`Failed to fetch ${endpoint}:`, error.message);
-    }
-    throw error;
-  }
+  return biwengerProviderClient.query(
+    endpoint,
+    {
+      retries,
+      retryDelay,
+      skipVersionCheck,
+      cache,
+    },
+    context
+  );
 }
 
 // --- Specific method exports ---

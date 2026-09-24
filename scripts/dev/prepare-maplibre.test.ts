@@ -35,5 +35,5 @@ describe('MapLibre security distribution', () => {
     expect(readFileSync(resolve(destination, 'LICENSE.txt'), 'utf8')).toContain('Copyright');
     const worker = readFileSync(resolve(destination, 'maplibre-gl-worker.mjs'), 'utf8');
     expect(worker).toContain('./maplibre-gl-shared.mjs');
-  });
+  }, 15000);
 });

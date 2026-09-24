@@ -13,3 +13,6 @@ vi.mock('next/headers', () => ({
   headers: vi.fn(() => new Map()),
   cookies: vi.fn(() => new Map()),
 }));
+
+// Global mock for server-only to allow Node test runners to execute server modules
+vi.mock('server-only', () => ({}));

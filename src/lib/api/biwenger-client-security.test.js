@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('server-only', () => ({}));
+
 const CANARY_PROVIDER_BODY = 'provider-body-with-bearer-canary-token';
 
 describe('Biwenger client error redaction', () => {

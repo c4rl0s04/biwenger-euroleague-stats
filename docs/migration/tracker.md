@@ -188,12 +188,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 13 — Provider boundaries
 
-- **State:** Planned; approval gate.
+- **State:** Verified locally on `refactor/provider-boundaries`.
 - **Dependencies / approval:** 12; explicit security/scope approval.
 - **Scope:** Introduce only needed feature adapters around current HTTP/credential infrastructure.
 - **Completion check:** Separate read/command contracts, filtered outputs and reviewed retry/uncertain-outcome policy.
-- **Evidence:** No current acceptance.
-- **Next action:** Pin existing behavior; request decisions before observable corrections.
+- **Evidence:** [Task 13 receipt](reports/task-13-provider-boundaries.md); typed boundaries, query/command separation, fail-closed mutations, zero secret leakage, 27 boundary tests pass.
+- **Next action:** Proceed with Task 14 Lineup reads.
 
 ### Task 14 — Lineup reads
 
