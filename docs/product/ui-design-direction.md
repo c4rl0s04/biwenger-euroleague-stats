@@ -468,9 +468,9 @@ UI-01A  Surface + composable Card foundation           complete
 
 DESIGN DIRECTION CHECKPOINT                             this specification
 
-UI-01T theme-ready token/runtime work                  next design-system slice
-UI-01B core primitives                                 Button, IconButton, Badge, Avatar, Skeleton, Input
-UI-01C shared compositions                             identity, empty states, headers, etc.
+UI-01T theme-ready token/runtime work                  complete (merged 55765dfe)
+UI-01B core primitives                                 complete (merged 665fd1d7)
+UI-01C shared compositions                             next design-system slice
 UI-02  interactive controls                            selectors, overlays and related behavior
 UI-03  Season Predictions pilot                       first new-page design validation
 UI-04  foundation/design review                       refine before broad adoption

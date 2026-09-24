@@ -31,10 +31,20 @@ The dated entries below retain historical evidence; they are not all current blo
 
 ## Domain ledger
 
-Task 09 Home is implemented locally on `refactor/home-feature-architecture`, base `5174e9a0`.
+Task 09 Home is verified and integrated into main at `fd424956`.
 The [Home receipt](../migration/reports/task-09-home.md) records `/`, activity and landing APIs,
-feature-owned composition, shared request-local Standings reads and verification evidence.
-It is not integrated or published; Task 10 has not started.
+feature-owned composition, shared request-local Standings reads, 2,505 passing tests, and 190 browser cases across all viewports and visual baselines.
+
+Task 10 Season Review data is verified and integrated into main at `c28481b2`.
+The [Season Review data receipt](../migration/reports/task-10-season-review-data.md) records its calculation engines, raw queries, services, and boundary tests.
+
+Task 11 Season Review screens is verified and integrated into main at `0b001b17`.
+The [Season Review screens receipt](../migration/reports/task-11-season-review-screens.md) records presentation screens, page adapters, and boundary tests.
+
+Task 12 Sensitive-operation inventory is verified and integrated into main at `b678cd14`.
+The [Task 12 receipt](../migration/reports/task-12-sensitive-operation-inventory.md) records the comprehensive audit of 16 database writes, provider mutations, credential lifecycles, and AI operations, establishing the security gate for Tasks 13–21.
+
+UI migration track: UI-01A (design tokens), UI-01T (semantic theming at `55765dfe`), and UI-01B (core primitives at `665fd1d7` via PR #44; see [UI-01B receipt](../migration/reports/ui-01b-core-primitives.md)) are integrated into main.
 
 Task 08 News is verified and fast-forward integrated into local main at `69dfa07f`,
 rebased onto `4929e035`. The [News receipt](../migration/reports/task-08-news.md) records its typed read
@@ -82,17 +92,22 @@ are integrated via PR #39 at `1933e033`. The
 | Tournaments                                              | Complete read experience integrated; catalogue, details, bracket and analytics feature-owned                                  |
 | Predictions                                              | Read experience integrated via PR #36; ingestion/commands separately scoped                                                   |
 | Playoffs                                                 | Read experience integrated via PR #37; final verification closure remains                                                     |
-| Schedule                                                 | Task 04 integrated/deployed at 6aa275b6; Assistant adapter and lineup command deliberately retained                           |
+| Schedule                                                 | Task 04 integrated/deployed at `6aa275b6`; Assistant adapter and lineup command deliberately retained                         |
 | Market public reads                                      | Complete public read experience integrated via PR #38                                                                         |
-| Compare                                                  | Task 05 integrated/pushed at 8bc0af22; full/lite services and screens owned; Assistant adapter retained                       |
-| Dashboard                                                | Task 06 data integrated locally at 700b727b; full verification and 18 browser checks passed; screen ownership remains Task 07 |
-| Home, News, Search                                       | Home Task 09 implemented locally; News Task 08 integrated; Search reads released, shell/search interactions remain            |
-| Season Review                                            | Existing pure engine and artifact readers; feature boundary pending                                                           |
-| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response                                                           |
-| Lineup, Market operations                                | Deferred pending provider-operation security gate                                                                             |
-| Accounts, Settings                                       | Separate authentication/linking/encrypted-credential boundary approval required                                               |
-| Assistant                                                | Deferred pending privacy/provider review                                                                                      |
-| Shell, shared UI                                         | Structural ownership pass after domains; no redesign                                                                          |
+| Compare                                                  | Task 05 integrated/pushed at `8bc0af22`; full/lite services and screens owned; Assistant adapter retained                     |
+| Dashboard                                                | Task 06 data integrated at `700b727b`; Task 07 screens integrated at `c4c55057`; full verification and 18 browser checks pass |
+| News                                                     | Task 08 integrated at `69dfa07f`; shared ticker and feed reads owned; ingestion in Task 22                                    |
+| Home                                                     | Task 09 integrated at `fd424956`; activity, summary and landing reads owned; shell pass in Task 23                            |
+| Search                                                   | Search reads released; shell/search interactions remain in Task 23                                                            |
+| Season Review                                            | Tasks 10 & 11 integrated at `c28481b2` and `0b001b17`; calculation engines and presentation screens owned                     |
+| Sensitive Operations Inventory                           | Task 12 integrated at `b678cd14`; security gate established for Tasks 13–21                                                   |
+| Provider boundaries                                      | Task 13 planned; next active domain milestone                                                                                 |
+| Hoopgrid                                                 | Security gate: challenge creation in GET and mixed private response (Task 19)                                                 |
+| Lineup, Market operations                                | Provider-operation security gates (Tasks 14–17)                                                                               |
+| Accounts, Settings                                       | Authentication, linking, and encrypted credential boundary review (Task 18)                                                   |
+| Assistant                                                | Privacy and provider review before structural migration (Task 20)                                                             |
+| UI Foundation & Primitives                               | UI-00, UI-01A, UI-01T (`55765dfe`), and UI-01B (`665fd1d7`, PR #44) integrated; UI-01C next                                   |
+| Shell, shared UI                                         | Structural ownership pass after domains; no redesign (Tasks 23–24)                                                            |
 | Login protocol, PWA utility routes, framework boundaries | Infrastructure; no artificial feature required                                                                                |
 
 ## HTTP contracts and compatibility

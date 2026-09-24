@@ -12,7 +12,7 @@ status: active
 Base: `5174e9a06f27f41a7bfa77051f8e2845fe1a2995`.
 Branch: `refactor/home-feature-architecture`.
 Worktree: `../biwengerstats-next-home-feature-architecture`.
-Implementation in progress; not integrated or pushed. Task 10 has not started.
+Verification complete; integrated into `main` at `fd424956`. Task 10 (Season Review data) followed.
 
 ## Scope and flow
 
@@ -105,5 +105,5 @@ Final combined rerun and browser acceptance completed cleanly: `npm run verify` 
 
 No production database, provider mutation, schema, dependency, authentication, credential,
 environment or deployment configuration changes. Linux Home screenshot references and authenticated
-real-production-data visual review remain separate checks. Next scope after acceptance: Task 10
-Season Review data, not started here. Integration remains a separate approval.
+real-production-data visual review remain separate checks. Integrated into `main` at `fd424956`. Next scope:
+Task 10 Season Review data.

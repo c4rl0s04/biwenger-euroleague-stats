@@ -11,8 +11,8 @@ status: active
 # Migration overview
 
 This is a scope summary, not an independent task queue. The [master tracker](../migration/tracker.md)
-is authoritative for remaining tasks, dependencies and next actions. Reconciled at main `1933e033`
-on 2026-09-20. A migrated read experience does not mean every mutation or external consumer is
+is authoritative for remaining tasks, dependencies and next actions. Reconciled at main `8dbdce9c`
+on 2026-09-24. A migrated read experience does not mean every mutation or external consumer is
 finished. Release evidence and historical decisions remain in the [migration ledger](migration-status.md).
 
 ## Status vocabulary
@@ -39,14 +39,20 @@ Tournament read migration: Tournament catalogue/detail/sections, analytics and s
 fully migrated into `src/features/tournaments` and integrated on main via PR #35. See the
 [C02 receipt](../migration/reports/c02-tournament-reads.md) for exact evidence, contracts and testing details.
 
-| Domain      | Established boundary                                                                              | Still to migrate                                                            |
-| ----------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Rounds      | Calendar plus historical results, analysis, APIs and desktop/phone screens (completed read slice) | Separate Home/Dashboard last-round projections and legacy consumer adapters |
-| Managers    | Complete Profile, Directory, Captain Stats, Home/Away, Captain Recommendations and Alerts         | Lineup squad mutations, private operations (reserved for security gate)     |
-| Standings   | Complete rankings, progression, performance/draft analytics, APIs and screens                     | External leader-gap/league-average consumers and adapter retirement         |
-| Search      | Validated directory search, typed results and HTTP service                                        | Shell/search interaction ownership during the shared UI pass                |
-| Tournaments | Complete read experience (catalogue, detail, sections, bracket and analytics)                     | External Profile consumer compatibility maintained                          |
-| Predictions | Complete read experience (overview, evolution, ranking, teams, history)                           | Prediction ingestion and sync actions reserved for separate scope           |
+| Domain        | Established boundary                                                                              | Still to migrate                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Rounds        | Calendar plus historical results, analysis, APIs and desktop/phone screens (completed read slice) | Separate Home/Dashboard last-round projections and legacy consumer adapters |
+| Managers      | Complete Profile, Directory, Captain Stats, Home/Away, Captain Recommendations and Alerts         | Lineup squad mutations, private operations (reserved for security gate)     |
+| Standings     | Complete rankings, progression, performance/draft analytics, APIs and screens                     | External leader-gap/league-average consumers and adapter retirement         |
+| Search        | Validated directory search, typed results and HTTP service                                        | Shell/search interaction ownership during the shared UI pass                |
+| Tournaments   | Complete read experience (catalogue, detail, sections, bracket and analytics)                     | External Profile consumer compatibility maintained                          |
+| Predictions   | Complete read experience (overview, evolution, ranking, teams, history)                           | Prediction ingestion and sync actions reserved for separate scope           |
+| Schedule      | Complete schedule read experience and squad overlay (Task 04)                                     | Lineup submission commands (Task 15) and Assistant adapter (Task 20)        |
+| Compare       | Complete comparisons, full/lite APIs, and screens (Task 05)                                       | Assistant adapter (Task 20) and final closure (Task 25)                     |
+| Dashboard     | Full analytics data reads and desktop/phone presentation screens (Tasks 06–07)                    | News/Home/Assistant legacy adapter retirement (Tasks 08/09/20)              |
+| News          | Shared ticker, Dashboard strip, and feed reads (Task 08)                                          | Feed ingestion and sync lifecycle (Task 22)                                 |
+| Home          | Personal summary, unified activity feed, and landing reads (Task 09)                              | Shell and layout interaction pass (Task 23)                                 |
+| Season Review | Pure calculation engines, artifact reader, and presentation screens (Tasks 10–11)                 | Report generation commands (Task 21)                                        |
 
 ## Previous deployed milestone: Manager Profile
 
@@ -92,41 +98,22 @@ the release receipt distinguishes local checks from integration and deployment.
 
 ## Current merged scopes and remaining work
 
-Home (Task 09) is implemented locally, not integrated or published; see the
-[Home receipt](../migration/reports/task-09-home.md). It owns `/`, the phone activity/summary,
-desktop landing and both existing APIs. Its query projection preserves one unified timeline;
-services reuse Rounds, Managers and Standings contracts. Task 10 has not started.
+All read experiences across the application are now fully migrated into feature architecture:
 
-News (Task 08) is verified and integrated into local main at `69dfa07f`, with full verification and 27 browser cases passing; see the
-[News receipt](../migration/reports/task-08-news.md). It owns the shared ticker and Dashboard strip,
-not a new page. GitHub publication accompanies the integration receipt; production deployment is not verified. Home remains pending.
+- **Schedule (Task 04)** is integrated and deployed at `6aa275b6`; see the [Schedule receipt](../migration/reports/task-04-schedule.md).
+- **Compare (Task 05)** is integrated and pushed at `8bc0af22`; see the [Compare receipt](../migration/reports/task-05-compare.md).
+- **Dashboard data & screens (Tasks 06–07)** are integrated locally and pushed at `700b727b` and `c4c55057`; see the [Dashboard data receipt](../migration/reports/task-06-dashboard-data.md) and [Dashboard screen receipt](../migration/reports/task-07-dashboard-screens.md).
+- **News (Task 08)** is integrated at `69dfa07f`; see the [News receipt](../migration/reports/task-08-news.md).
+- **Home (Task 09)** is integrated at `fd424956`; see the [Home receipt](../migration/reports/task-09-home.md). It owns `/`, the phone activity/summary, desktop landing, and both existing APIs with full verification (2,505 tests) and 190 browser cases.
+- **Season Review data (Task 10)** is integrated at `c28481b2`; see the [Season Review data receipt](../migration/reports/task-10-season-review-data.md).
+- **Season Review screens (Task 11)** is integrated at `0b001b17`; see the [Season Review screens receipt](../migration/reports/task-11-season-review-screens.md).
+- **Sensitive-operation inventory (Task 12)** is integrated at `b678cd14`; see the [Task 12 inventory receipt](../migration/reports/task-12-sensitive-operation-inventory.md). It inventories 16 database writes, provider mutations, credential boundaries, and AI provider operations, serving as the required security gate for Tasks 13–21.
 
-Tournaments, Predictions, Playoffs, public Market and Managers remaining reads are merged via
-PRs #35–39 respectively. Their receipts retain original test evidence; this update does not
-certify their production deployments.
+Tournaments, Predictions, Playoffs, public Market and Managers remaining reads were earlier merged via PRs #35–39.
 
-Schedule (Task 04) is integrated and deployed at `6aa275b6`;
-see its [acceptance receipt](../migration/reports/task-04-schedule.md). The config-test isolation
-follow-up resolves the prior verifier failure without changing application or verifier behavior.
-Compare (Task 05) is integrated and pushed at `8bc0af22`; Vercel was not inspected under the user's
-GitHub-only release instruction. Its [receipt](../migration/reports/task-05-compare.md) records the full/lite services,
-screens, retained Assistant adapter and 9/9 original-screen browser acceptance.
-Dashboard data (06) is verified and integrated into local main at `700b727b`; its
-[receipt](../migration/reports/task-06-dashboard-data.md) records 18/18 browser checks and separates
-data ownership from the pending screen slice (07). GitHub publication and Vercel verification are distinct.
-Dashboard screens (07) are verified and integrated locally at `c4c55057` after rebasing onto
-`f47e2a65`, with 2,437 tests and 18 browser cases passing, including original screenshots.
-See the [Task 07 receipt](../migration/reports/task-07-dashboard-screens.md) for publication context.
-Remaining read features: Home (09)
-and Season Review (10–11). Sensitive operations are Tasks 12–21; infrastructure/shared UI and final
-closure are Tasks 22–27. The tracker owns their states and acceptance criteria.
+The next domain milestone is **Task 13 — Provider boundaries**, which initiates the provider and mutation migration track (Tasks 13–21). In parallel, the UI migration track has completed UI-00, UI-01A, UI-01T (`55765dfe`), and UI-01B (`665fd1d7`, PR #44, core primitives: Button, IconButton, Input, Badge, Avatar, Skeleton); the next UI milestone is **UI-01C — Interactive Controls & Overlays**.
 
-Residual Team detail orchestration/shared Player form work from the preserved campaign belongs
-to Task 25 review against the current schema. Saved Market components already match main; do not
-restart its old checkpoint Q. External Rounds/Standings/Market adapters retire as their final
-consumers migrate. Search interaction ownership belongs to Task 23. Unique UI token work is Task 24.
-The known Market phone-bids defect needs a separate behavior decision before final acceptance.
-Existing URLs remain compatibility contracts; renaming them is not a completion requirement.
+Residual Team detail orchestration/shared Player form work from the preserved campaign belongs to Task 25 review against the current schema. Saved Market components already match main; do not restart its old checkpoint Q. External Rounds/Standings/Market adapters retire as their final consumers migrate. Search interaction ownership belongs to Task 23. Unique UI token work is Task 24. The known Market phone-bids defect needs a separate behavior decision before final acceptance. Existing URLs remain compatibility contracts; renaming them is not a completion requirement.
 
 Existing code references: [legacy queries](../../src/lib/db/queries),
 [legacy services](../../src/lib/services), [application pages](../../src/app), and
