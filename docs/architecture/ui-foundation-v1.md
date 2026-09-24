@@ -1260,21 +1260,26 @@ Acceptance:
 
 ### UI-01 — Foundation primitives and design readiness
 
-UI-01A established Surface and the composable Card anatomy on the semantic-token foundation.
+UI-01 establishes the foundational token, theming and primitive layers:
 
-Before expanding the primitive set, the product design direction and semantic theme decision must be
-treated as source-of-truth. The remaining UI-01 work should be theme-ready and layout-neutral.
-
-Near-term slices:
-
-1. **UI-01T — theme foundation:** add the light raw palette, theme-aware semantic mappings, root
-   `system | dark | light` resolution/persistence and representative theme verification.
-2. **UI-01B — core primitives:** Button, IconButton, Badge, Avatar, Skeleton and Input implemented on
-   additive semantic tokens (`--action-primary-content`, `--control-surface`, `--control-content`,
-   `--control-placeholder`, `--radius-control`), meeting WCAG AA contrast in both themes, supporting
-   server rendering without `'use client'`, and exported via `@/components/ui/foundation`.
-3. **UI-01C — shared compositions:** demonstrated reusable identity, empty-state, page/section header and
-   related patterns needed by the first new feature.
+1. **UI-01A — surface and card foundation (complete):** established `Surface` and the composable `Card`
+   anatomy (`Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) on
+   the semantic-token foundation.
+2. **UI-01T — theme foundation (complete):** integrated at `55765dfe`. Added the light raw palette,
+   theme-aware semantic mappings (`:root[data-theme='light']` and `@media (prefers-color-scheme: light)`),
+   synchronous `<head>` bootstrap script (`THEME_BOOTSTRAP_SCRIPT`), root `system | dark | light`
+   resolution, persistence store and comprehensive theme verification.
+3. **UI-01B — core primitives (complete):** integrated at `665fd1d7` via
+   [PR #44](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/44); see the
+   [UI-01B receipt](../migration/reports/ui-01b-core-primitives.md). Implemented `Button`, `IconButton`,
+   `Input`, `Badge`, `Avatar` and `Skeleton` on additive semantic tokens (`--action-primary-content`,
+   `--control-surface`, `--control-content`, `--control-placeholder`, `--control-border`, and
+   theme-independent `--radius-compact: 0.5rem` → `--radius-control: var(--radius-compact)`). Resolves
+   WCAG AA primary action contrast (dark 6.35:1, light 5.83:1) without modifying legacy `--primary-foreground`.
+   Supports React Server Components without `'use client'` and exports exclusively through
+   `@/components/ui/foundation`.
+4. **UI-01C — shared compositions (next design-system slice):** reusable identity, empty-state,
+   page/section header and related patterns needed by the first new feature.
 
 Do not implement every possible primitive in advance.
 

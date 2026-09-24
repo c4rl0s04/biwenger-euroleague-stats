@@ -9,16 +9,13 @@ status: active
 
 # Architecture migration master tracker
 
-Last reconciled: 2026-09-20 against fetched `origin/main`
-`1933e033434d5a35564b199705a40836f6ebed81`.
+Last reconciled: 2026-09-24 against fetched `origin/main`
+`8dbdce9ca56db0faf40c7a94d58fc94d6c8c9720`.
 This is the authoritative task/status queue. The [overview](../architecture/migration-overview.md)
 summarizes it; the [ledger](../architecture/migration-status.md) and receipts preserve evidence.
 If newer code/history contradicts this checkpoint, refresh the evidence before acting.
 
-Task 02 is documentation-only on `docs/migration-tracker`, in
-`../biwengerstats-next-migration-tracker`, stacked on Task 01 report commit `143e7f27`.
-Neither documentation commit is claimed merged or deployed. No current implementation, cleanup,
-parallel dispatch, security change or release is authorized merely by a planned row.
+Tasks 01 through 12 are integrated in `main` (closing all read-domain migrations, worktree cleanup, and the sensitive-operation inventory). In parallel, the UI migration track has integrated UI-00, UI-01A, UI-01T, and UI-01B (`Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton`). No current implementation, cleanup, parallel dispatch, security change or release is authorized merely by a planned row.
 
 ## How to read status
 
@@ -47,9 +44,32 @@ evidence unless a new command and source state are given. No whole-feature perce
 | Playoffs reads/screens                                     | [PR #37](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/37), `3c2a3ac8`; [receipt](reports/c04-playoff-reads.md)           | Preserve distinct scoring; commands and final verification remain separate.                              |
 | Public Market reads/screens                                | [PR #38](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/38), `0253f53f`; [receipt](reports/c05-market-reads.md)            | Private flows: 16–17; Dashboard/Assistant adapters: 06/20/25; known bids defect below.                   |
 | Managers remaining reads                                   | [PR #39](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/39), `1933e033`; [receipt](reports/c06-manager-remaining-reads.md) | Command/security infrastructure: 14–18; downstream adapters: 25.                                         |
+| Schedule read experience                                   | Integrated and deployed at `6aa275b6`; [receipt](reports/task-04-schedule.md)                                                          | Lineup submission commands: 15; Assistant adapter: 20.                                                   |
+| Compare full/lite reads & screens                          | Integrated at `8bc0af22`; [receipt](reports/task-05-compare.md)                                                                        | Assistant adapter: 20; final closure: 25.                                                                |
+| Dashboard data reads                                       | Integrated at `700b727b`; [receipt](reports/task-06-dashboard-data.md)                                                                 | Adapters for News/Home/Assistant retired in 08/09/20.                                                    |
+| Dashboard presentation screens                             | Integrated at `c4c55057`; [receipt](reports/task-07-dashboard-screens.md)                                                              | Final closure: 25.                                                                                       |
+| News ticker & feed reads                                   | Integrated at `69dfa07f`; [receipt](reports/task-08-news.md)                                                                           | Feed ingestion: 22.                                                                                      |
+| Home activity, summary & landing                           | Integrated at `fd424956`; [receipt](reports/task-09-home.md)                                                                           | Shell/layout interactions: 23.                                                                           |
+| Season Review data & calculation engines                   | Integrated at `c28481b2`; [receipt](reports/task-10-season-review-data.md)                                                             | Report generation commands: 21.                                                                          |
+| Season Review presentation screens                         | Integrated at `0b001b17`; [receipt](reports/task-11-season-review-screens.md)                                                          | Final closure: 25.                                                                                       |
+| Sensitive-operation inventory                              | Integrated at `b678cd14`; [receipt](reports/task-12-sensitive-operation-inventory.md)                                                  | Gates Tasks 13–21 provider boundaries, commands, credentials and AI operations.                          |
 
-PRs #35–39 are confirmed merged, not newly certified deployed by this tracker.
+PRs #35–39 and subsequent tasks through Task 12 are confirmed merged into `main`.
 Older deployment receipts remain valid historical observations, not proof about today's production.
+
+## UI migration track
+
+The UI migration runs in parallel with the domain architecture migration, systematically replacing ad-hoc inline styles and legacy global CSS with a tokenized, accessible design system. See [UI foundation](../architecture/ui-foundation-v1.md) and [design direction](../product/ui-design-direction.md).
+
+| Slice      | Scope                                    | State / Evidence                                                                                                                                                  | Next boundary / owner                                         |
+| ---------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **UI-00**  | Visual baseline & design direction       | Completed; documented in `ui-design-direction.md` and `ui-foundation-v1.md`                                                                                       | Informs semantic tokens and primitive specs                   |
+| **UI-01A** | Design tokens foundation                 | Completed; base palette, scales, and typography                                                                                                                   | Foundation for semantic theming                               |
+| **UI-01T** | Semantic theming & tokens reconciliation | Integrated at `55765dfe`; complete light/dark theme variables, surfaces, text, borders, actions                                                                   | Token layer consumed by UI-01B primitives                     |
+| **UI-01B** | Core UI primitives                       | Integrated via PR #44 at `665fd1d7`; [receipt](reports/ui-01b-core-primitives.md). Six primitives: `Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton` | Primitives exported from `src/components/ui`; UI-01C controls |
+| **UI-01C** | Interactive controls & overlays          | Planned; Dialog/Modal, Popover/Tooltip, Dropdown/Select, Tabs, Toggle/Switch, Checkbox                                                                            | Builds on UI-01B primitives and floating-ui/radix patterns    |
+| **UI-02**  | Compositions & shared domain layouts     | Planned; cards, stat displays, table patterns, responsive section wrappers                                                                                        | Consumes UI-01 primitives and controls                        |
+| **UI-03**  | Feature screen migration                 | Planned; migrating feature presentation to the design system                                                                                                      | Incremental adoption per domain                               |
 
 ## Ordered task queue
 
@@ -128,16 +148,16 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Scope:** Own feed retrieval, parsing, validation and existing HTTP contracts; no provider redesign.
 - **Completion check:** Typed reusable News read contract with original ordering/error behavior.
 - **Evidence:** [Task 08 receipt](reports/task-08-news.md); News widgets/service, Market/Matches contracts and original browser references.
-- **Next action:** Task 09 Home, after separate approval. Combined-source verifier (2,470 tests), focused contracts (364 tests) and 27 browser cases pass. Task 09 has not started.
+- **Next action:** Task 09 Home; completed and integrated at `fd424956`.
 
 ### Task 09 — Home
 
-- **State:** Implemented locally on `refactor/home-feature-architecture`, base `5174e9a0`; acceptance in progress, unmerged and unpushed.
+- **State:** Integrated into main at `fd424956`.
 - **Dependencies / approval:** 08 plus Rounds/Market/Managers contracts.
 - **Scope:** Own feed aggregation and screens; no new feed functionality.
 - **Completion check:** Same activity/filters/pagination; last-round adapters retired where unused.
-- **Evidence:** [Task 09 receipt](reports/task-09-home.md); Home activity/summary/landing contracts and original-screen references.
-- **Next action:** Complete final verification and review before separate integration. Task 10 has not started.
+- **Evidence:** [Task 09 receipt](reports/task-09-home.md); Home activity/summary/landing contracts and original-screen references. Full verify (2,505 tests) and 190 browser cases pass.
+- **Next action:** Task 10 Season Review data; completed and integrated at `c28481b2`.
 
 ### Task 10 — Season Review data
 
@@ -146,7 +166,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Scope:** Own existing pure engines, artifacts and read orchestration; assign generation commands to 21.
 - **Completion check:** Unchanged calculations/artifact formats with typed, tested contracts.
 - **Evidence:** [Task 10 receipt](reports/task-10-season-review-data.md); Season Review services, engines, queries, and boundary tests pass.
-- **Next action:** Task 11 Season Review screens.
+- **Next action:** Task 11 Season Review screens; completed and integrated at `0b001b17`.
 
 ### Task 11 — Season Review screens
 
@@ -155,16 +175,16 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Scope:** Own existing pages, sections and presentation, excluding new simulator/product plans.
 - **Completion check:** Same desktop/phone output consuming feature models.
 - **Evidence:** [Task 11 receipt](reports/task-11-season-review-screens.md); Season Review screens, page adapters, architecture policy, and boundary tests pass.
-- **Next action:** Task 12 Sensitive-operation inventory.
+- **Next action:** Task 12 Sensitive-operation inventory; completed and integrated at `b678cd14`.
 
 ### Task 12 — Sensitive-operation inventory
 
-- **State:** Verified locally on `docs/sensitive-operation-inventory`, base `0b001b17`.
+- **State:** Integrated into main at `b678cd14` (commit `3f2a9881`).
 - **Dependencies / approval:** 02; read-only inspection.
 - **Scope:** Enumerate DB reads, provider reads and writes across every method/action.
 - **Completion check:** Per-operation matrix: identity, permission, credential boundary, cache, retry, side effect, failure and reconciliation.
 - **Evidence:** [Task 12 receipt](reports/task-12-sensitive-operation-inventory.md); 16 operations inventoried across provider mutations, private reads, credentials, DB writes, and AI providers.
-- **Next action:** Task 13 Provider boundaries.
+- **Next action:** Task 13 Provider boundaries (next active implementation milestone).
 
 ### Task 13 — Provider boundaries
 
@@ -302,9 +322,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-If cleanup approval is not available, preserve the worktrees; it does not require restarting accepted
-features or granting unrelated authority. The next implementation feature is **Task 04 Schedule**,
-after a pinned assignment; the immediate next administrative task is **Task 03**, subject to approval.
+All read-domain scopes (Tasks 04–11) and the sensitive-operation security inventory (Task 12) are merged into `main`. The next domain milestone is **Task 13 — Provider boundaries**, subject to security gate approval. In the UI migration track, UI-01B is merged and the next milestone is **UI-01C — Interactive Controls & Overlays**.
 
 ## Standard acceptance for implementation tasks
 
