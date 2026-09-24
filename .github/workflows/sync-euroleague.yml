@@ -1,0 +1,78 @@
+name: EuroLeague Website Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Sync mode'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - 'apply'
+          - 'dry-run'
+          - 'collect-and-apply'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-euroleague-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  euroleague-sync:
+    name: EuroLeague Website Sync (${{ inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers (if collecting)
+        if: inputs.mode == 'collect-and-apply'
+        run: npx playwright install --with-deps chromium
+
+      - name: Scrape latest EuroLeague rosters (if collecting)
+        if: inputs.mode == 'collect-and-apply'
+        run: npm run sync:euroleague:collect
+
+      - name: Run EuroLeague synchronizer
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          SEASON_ID: ${{ vars.SEASON_ID }}
+          SEASON_NAME: ${{ vars.SEASON_NAME }}
+          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
+        run: |
+          if [ "${{ inputs.mode }}" = "dry-run" ]; then
+            npm run sync:euroleague
+          else
+            npm run sync:euroleague:apply
+          fi
+
+      - name: Commit updated roster collection (if collecting)
+        if: inputs.mode == 'collect-and-apply'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add scripts/euroleague/data/euroleague-rosters-2026.json
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(euroleague): update official roster collection via GitHub Action"
+            git push origin ${{ github.ref_name }}
+          else
+            echo "No roster changes detected."
+          fi

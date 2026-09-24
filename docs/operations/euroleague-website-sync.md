@@ -156,3 +156,17 @@ Enter choice [1-1, s]: 1
 ```
 
 Selected matches are automatically persisted to [`scripts/euroleague/overrides.json`](../../scripts/euroleague/overrides.json) so future runs resolve them deterministically without user intervention.
+
+---
+
+## Running via GitHub Actions (UI)
+
+To synchronize or scrape without using a local terminal or configuring local credentials:
+
+1. Navigate to your repository on GitHub.
+2. Click the **Actions** tab.
+3. Select **EuroLeague Website Sync** from the left sidebar.
+4. Click **Run workflow**, select the execution mode from the dropdown, and click the green button:
+   - **`apply` (Default)**: Uses the committed roster collection to enrich PostgreSQL in ~5 seconds.
+   - **`dry-run`**: Validates CDN portraits and logs the full report without writing changes.
+   - **`collect-and-apply`**: Launches headless Chromium on Ubuntu, scrapes the latest EuroLeague rosters, applies new portraits to PostgreSQL, and commits the updated JSON back to the repository.
