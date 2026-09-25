@@ -243,6 +243,7 @@ export class BiwengerProviderClient {
     options: BiwengerQueryOptions = {},
     context?: BiwengerRequestContext
   ): Promise<T> {
+    const effectiveContext = context ?? options.context;
     const policy: ProviderRetryPolicy = {
       ...this.readRetryPolicy,
       maxRetries: options.retries !== undefined ? options.retries : this.readRetryPolicy.maxRetries,
@@ -261,7 +262,7 @@ export class BiwengerProviderClient {
             headers: options.headers,
             cache: options.cache,
           },
-          context
+          effectiveContext
         );
       },
       policy,
@@ -299,6 +300,7 @@ export class BiwengerProviderClient {
           : this.commandRetryPolicy.initialDelayMs,
     };
 
+    const effectiveContext = context ?? options.context;
     return executeWithRetry(
       async () => {
         try {
@@ -311,7 +313,7 @@ export class BiwengerProviderClient {
               delayMs: options.delayMs,
               headers: options.headers,
             },
-            context
+            effectiveContext
           );
 
           // Verify whether provider returned a soft error object in a 200 payload

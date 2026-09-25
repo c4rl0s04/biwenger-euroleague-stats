@@ -18,6 +18,7 @@ export interface BiwengerQueryOptions {
   cache?: RequestCache;
   delayMs?: number;
   headers?: Record<string, string>;
+  context?: BiwengerRequestContext;
 }
 
 export interface BiwengerCommandOptions {
@@ -28,6 +29,7 @@ export interface BiwengerCommandOptions {
   headers?: Record<string, string>;
   retries?: number;
   retryDelay?: number;
+  context?: BiwengerRequestContext;
 }
 
 export interface ProviderCommandResult {

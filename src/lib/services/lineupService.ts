@@ -4,7 +4,8 @@ import { assertProviderMutationSucceeded } from './providerMutationResult';
 import { biwengerCredentials } from '../credentials/service';
 
 /**
- * Service to handle raw Lineup operations
+ * Service to handle raw Lineup operations.
+ * Retained for backward compatibility until Task 15.
  */
 export const lineupService = {
   /**

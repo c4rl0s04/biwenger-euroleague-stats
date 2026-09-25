@@ -188,7 +188,7 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 13 — Provider boundaries
 
-- **State:** Verified locally on `refactor/provider-boundaries`.
+- **State:** Integrated into main at `19531f1f`.
 - **Dependencies / approval:** 12; explicit security/scope approval.
 - **Scope:** Introduce only needed feature adapters around current HTTP/credential infrastructure.
 - **Completion check:** Separate read/command contracts, filtered outputs and reviewed retry/uncertain-outcome policy.
@@ -197,12 +197,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 14 — Lineup reads
 
-- **State:** Planned; approval gate.
+- **State:** Integrated into main at `b40d9256`.
 - **Dependencies / approval:** 12–13; scoped approval.
 - **Scope:** Own live provider reads, safe models and related composition; preserve manager squad contract.
 - **Completion check:** Private no-store policy and account isolation tested; no credential leakage.
-- **Evidence:** Existing lineupService retained.
-- **Next action:** Freeze current input/output contracts and mock provider reads.
+- **Evidence:** [Task 14 receipt](reports/task-14-lineup-reads.md); typed SafeLineupResponse, lineupReadService with executeUserProviderQuery, canary redaction, schedule freeze preserved.
+- **Next action:** Proceed with Task 15 Lineup commands.
 
 ### Task 15 — Lineup commands
 
