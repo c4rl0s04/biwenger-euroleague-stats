@@ -43,6 +43,6 @@ jobs:
 
       - name: Run post-deploy smoke probes
         run: |
-          TARGET="${{ inputs.target_url || github.event.deployment_status.target_url || 'https://advanced-euroleague-biwenger-stats.vercel.app' }}"
+          TARGET="${{ inputs.target_url || 'https://advanced-euroleague-biwenger-stats.vercel.app' }}"
           echo "Running smoke check against: $TARGET"
           npm run smoke:deploy "$TARGET"

@@ -45,6 +45,7 @@ const ROUTE_CONTRACT_MANIFEST: Record<string, RouteContractEntry> = {
   '/api/dashboard/rising-stars': { status: 'covered', reason: 'dashboard handler contract tests' },
   '/api/dashboard/top-form': { status: 'covered', reason: 'dashboard handler contract tests' },
   '/api/dashboard/top-players': { status: 'covered', reason: 'dashboard handler contract tests' },
+  '/api/health': { status: 'covered', reason: 'health check handler contract tests' },
   '/api/hoopgrid/guess': { status: 'covered', reason: 'handler contract tests' },
   '/api/hoopgrid/list': { status: 'covered', reason: 'handler contract tests' },
   '/api/hoopgrid/today': { status: 'covered', reason: 'handler contract tests' },
