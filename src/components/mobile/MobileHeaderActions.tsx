@@ -25,13 +25,16 @@ const MobileUserAvatar = UserAvatar as unknown as ComponentType<{
 
 export default function MobileHeaderActions() {
   const [activeSheet, setActiveSheet] = useState<'search' | 'profile' | null>(null);
-  const { currentUser, isAuthenticated } = useClientUser() as unknown as {
+  const { currentUser, isAuthenticated, isClient } = useClientUser() as unknown as {
     currentUser: MobileHeaderUser | null;
     isAuthenticated: boolean;
+    isClient: boolean;
   };
 
   const closeSheet = () => setActiveSheet(null);
-  const profileName = currentUser?.name ?? 'Perfil';
+  const activeUser = isClient ? currentUser : null;
+  const activeAuthenticated = Boolean(isClient && isAuthenticated);
+  const profileName = activeUser?.name ?? 'Perfil';
 
   return (
     <div className="mobile-native-header-actions">
@@ -53,8 +56,8 @@ export default function MobileHeaderActions() {
         aria-expanded={activeSheet === 'profile'}
         aria-haspopup="dialog"
       >
-        {currentUser ? (
-          <MobileUserAvatar src={currentUser.icon} alt={profileName} size={28} />
+        {activeUser ? (
+          <MobileUserAvatar src={activeUser.icon} alt={profileName} size={28} />
         ) : (
           <UserCircle2 size={23} aria-hidden="true" />
         )}
@@ -76,27 +79,27 @@ export default function MobileHeaderActions() {
         open={activeSheet === 'profile'}
         onClose={closeSheet}
         title="Cuenta"
-        description={isAuthenticated ? 'Sesión de mánager' : 'Accede a tu liga'}
+        description={activeAuthenticated ? 'Sesión de mánager' : 'Accede a tu liga'}
       >
         <div className="mobile-account-sheet-content">
           <div className="mobile-account-identity">
-            {currentUser ? (
-              <MobileUserAvatar src={currentUser.icon} alt={profileName} size={52} />
+            {activeUser ? (
+              <MobileUserAvatar src={activeUser.icon} alt={profileName} size={52} />
             ) : (
               <span className="mobile-account-avatar-fallback">
                 <UserCircle2 size={28} aria-hidden="true" />
               </span>
             )}
             <div>
-              <span>{isAuthenticated ? 'Manager conectado' : 'Sin sesión'}</span>
+              <span>{activeAuthenticated ? 'Manager conectado' : 'Sin sesión'}</span>
               <strong>{profileName}</strong>
             </div>
           </div>
 
-          {isAuthenticated && currentUser ? (
+          {activeAuthenticated && activeUser ? (
             <>
               <NavigationLink
-                href={`/user/${currentUser.id}`}
+                href={`/user/${activeUser.id}`}
                 navigationLabel="Perfil"
                 onClick={closeSheet}
                 className="mobile-account-action"

@@ -11,4 +11,11 @@ describe('mobile header actions', () => {
     expect(source).toContain('title="Buscar"');
     expect(source).toContain('title="Cuenta"');
   });
+
+  it('guards active user and authentication with isClient to prevent hydration mismatch', () => {
+    const source = readFileSync(new URL('./MobileHeaderActions.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain('isClient');
+    expect(source).toContain('activeUser = isClient ? currentUser : null');
+  });
 });
