@@ -17,6 +17,8 @@ status: active
 - [Database safety](database-safety.md) — backups, audits, migrations, and price-cache repair.
 - [Credential encryption](credential-encryption.md) — manager credential deployment, migration,
   rotation, rollback, and cleanup gates.
+- [Deployment and rollback](deployment-and-rollback.md) — production deployment lifecycle, post-deploy
+  smoke checks, and tiered rollback procedures.
 - [Season lifecycle](season-lifecycle.md) — freeze a completed season and activate the next one.
 - [Season simulations](season-simulations.md) — calculate and publish complete-season Monte Carlo
   results.

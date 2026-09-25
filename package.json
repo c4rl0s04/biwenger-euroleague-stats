@@ -58,7 +58,8 @@
     "verify": "node scripts/dev/verify.mjs",
     "test:db:local": "tsx scripts/db/test-local.ts",
     "test:e2e:local": "node scripts/e2e/run.mjs",
-    "test:e2e:update": "node scripts/e2e/run.mjs --update-snapshots"
+    "test:e2e:update": "node scripts/e2e/run.mjs --update-snapshots",
+    "smoke:deploy": "tsx scripts/operations/smoke-deploy.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",

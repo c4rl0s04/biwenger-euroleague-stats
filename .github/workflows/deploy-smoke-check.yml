@@ -1,0 +1,48 @@
+name: Deployment Smoke Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to probe (defaults to production URL)'
+        required: false
+        type: string
+        default: 'https://advanced-euroleague-biwenger-stats.vercel.app'
+  deployment_status:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-smoke-check-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  smoke-check:
+    name: Deployment Smoke Check
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'deployment_status' &&
+       github.event.deployment_status.state == 'success' &&
+       (github.event.deployment_status.environment == 'Production' || github.event.deployment_status.environment == 'production'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run post-deploy smoke probes
+        run: |
+          TARGET="${{ inputs.target_url || github.event.deployment_status.target_url || 'https://advanced-euroleague-biwenger-stats.vercel.app' }}"
+          echo "Running smoke check against: $TARGET"
+          npm run smoke:deploy "$TARGET"
