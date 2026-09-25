@@ -62,6 +62,7 @@
     "smoke:deploy": "tsx scripts/operations/smoke-deploy.ts"
   },
   "dependencies": {
+    "@sentry/nextjs": "^11.0.0",
     "@vercel/analytics": "^1.6.1",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",

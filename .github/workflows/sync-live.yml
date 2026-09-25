@@ -54,3 +54,6 @@ jobs:
           EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
           LEAGUE_START_DATE: ${{ vars.LEAGUE_START_DATE }}
           SEASON_AWARE_READS_CONFIRMED: ${{ vars.SEASON_AWARE_READS_CONFIRMED }}
+
+          # Observability
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}

@@ -1,4 +1,5 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -65,4 +66,10 @@ const nextConfig = {
   },
 };
 
-export default bundleAnalyzer(nextConfig);
+export default withSentryConfig(bundleAnalyzer(nextConfig), {
+  silent: !process.env.CI,
+  disableLogger: true,
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+  },
+});

@@ -52,6 +52,28 @@ describe('SyncManager', () => {
     expect(manager.hasErrors).toBe(true);
   });
 
+  it('dispatches failed step details to the observability layer', async () => {
+    const observability = await import('../../observability/sentry');
+    const spy = vi.spyOn(observability, 'captureSyncError');
+    const { SyncManager } = await import('../manager');
+    const manager = new SyncManager({ useAdvisoryLock: false });
+    manager.addStep(
+      definition('failing-step', async () => {
+        throw new Error('network down');
+      })
+    );
+
+    await manager.run();
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({
+        stepId: 'failing-step',
+        syncMode: 'routine',
+      })
+    );
+  });
+
   it('skips all work when the shared advisory lock is unavailable', async () => {
     const lockClient = {
       query: vi.fn(async () => ({ rows: [{ locked: false }] })),
