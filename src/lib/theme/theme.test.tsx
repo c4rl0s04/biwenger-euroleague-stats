@@ -116,39 +116,38 @@ describe('application theme preference', () => {
   );
 
   it.each([null, '', 'glass', 'neo', 'DARK', '<script>'])(
-    'invalid historical value %s defaults to system',
+    'missing or invalid historical value %s stays on the dark compatibility baseline',
     (value) => {
-      const client = browser(value, true);
-      expect(parseThemePreference(value)).toBe('system');
+      const client = browser(value, false);
+      expect(parseThemePreference(value)).toBe('dark');
       runInNewContext(THEME_BOOTSTRAP_SCRIPT, client.target);
       expect(client.root.dataset.theme).toBe('dark');
       expect(createThemeStore(client.window).getSnapshot()).toEqual({
-        theme: 'system',
+        theme: 'dark',
         resolvedTheme: 'dark',
       });
     }
   );
 
-  it('persists preferences, follows the OS only in system, and detaches listeners', () => {
+  it('persists preferences, follows the OS only after explicit system opt-in, and detaches listeners', () => {
     const client = browser(null, true);
     const store = createThemeStore(client.window);
     const listener = vi.fn();
     const stop = store.subscribe(listener);
     client.changeOS(false);
+    expect(store.getSnapshot()).toEqual({ theme: 'dark', resolvedTheme: 'dark' });
+    store.setTheme('system');
+    expect(client.values.get('theme')).toBe('system');
     expect(store.getSnapshot()).toEqual({ theme: 'system', resolvedTheme: 'light' });
-    store.setTheme('dark');
-    expect(client.values.get('theme')).toBe('dark');
     client.changeOS(true);
+    expect(store.getSnapshot().resolvedTheme).toBe('dark');
+    store.setTheme('dark');
     client.changeOS(false);
     expect(store.getSnapshot().resolvedTheme).toBe('dark');
     store.setTheme('light');
     client.changeOS(true);
     expect(client.values.get('theme')).toBe('light');
     expect(store.getSnapshot().resolvedTheme).toBe('light');
-    store.setTheme('system');
-    expect(client.values.get('theme')).toBe('system');
-    expect(store.getSnapshot().resolvedTheme).toBe('dark');
-    expect(createThemeStore(client.window).getSnapshot().theme).toBe('system');
     stop();
     expect(client.mediaListeners.size).toBe(0);
     expect(client.storageListeners.size).toBe(0);
@@ -175,7 +174,7 @@ describe('application theme preference', () => {
     client.changeStorage('light');
     expect(store.getSnapshot().theme).toBe('light');
     client.changeStorage('glass');
-    expect(store.getSnapshot()).toEqual({ theme: 'system', resolvedTheme: 'light' });
+    expect(store.getSnapshot()).toEqual({ theme: 'dark', resolvedTheme: 'dark' });
     stop();
   });
 
@@ -211,21 +210,31 @@ describe('application theme preference', () => {
       </ThemeProvider>
     );
     expect(html).toContain('<main>');
-    expect(html).toContain('system/light/false');
+    expect(html).toContain('dark/dark/false');
     expect(html).toContain('Available before hydration');
     expect(html).toContain('var(--surface-card)');
     expect(html).not.toMatch(/dark:|light:|data-theme/);
   });
 
-  it('keeps the no-JS light mapping identical to the explicit mapping', () => {
+  it('throws an explicit error when useTheme is called outside ThemeProvider', () => {
+    function ThemeConsumerWithoutProvider() {
+      useTheme();
+      return null;
+    }
+    expect(() => renderToStaticMarkup(<ThemeConsumerWithoutProvider />)).toThrow(
+      'useTheme must be used within a ThemeProvider'
+    );
+  });
+
+  it('keeps light mode fully defined but explicit during the legacy rollout', () => {
     const css = readFileSync(
       new URL('../../styles/tokens/semantic-tokens.css', import.meta.url),
       'utf8'
     );
     const explicit = css.split(":root[data-theme='light'] {")[1].split('}')[0];
-    const fallback = css.split(':root:not([data-theme]) {')[1].split('}')[0];
-    expect(fallback.replace(/\s+/g, ' ')).toBe(explicit.replace(/\s+/g, ' '));
-    const dark = css.split('/* Explicit choices')[0];
+    expect(css).not.toContain(':root:not([data-theme])');
+    expect(css).not.toContain('@media (prefers-color-scheme: light)');
+    const dark = css.split('/* Light remains an explicit opt-in')[0];
     const roles = Array.from(
       dark.matchAll(
         /(--(?:surface|content|action|status|border|control|focus|effect|shell)-[\w-]+):/g
