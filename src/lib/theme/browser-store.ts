@@ -1,5 +1,6 @@
 import {
   applyTheme,
+  DEFAULT_THEME_PREFERENCE,
   parseThemePreference,
   readThemePreference,
   resolveTheme,
@@ -13,7 +14,10 @@ export type ThemeSnapshot = { theme: ThemePreference; resolvedTheme: ResolvedThe
 
 // Stable SSR/hydration snapshot. CSS and the head script own first-paint colors;
 // React never needs to withhold the server-rendered children to determine them.
-export const SERVER_THEME: ThemeSnapshot = { theme: 'system', resolvedTheme: 'light' };
+export const SERVER_THEME: ThemeSnapshot = {
+  theme: DEFAULT_THEME_PREFERENCE,
+  resolvedTheme: DEFAULT_THEME_PREFERENCE,
+};
 
 export function createThemeStore(target: Window) {
   const media = target.matchMedia(THEME_MEDIA_QUERY);

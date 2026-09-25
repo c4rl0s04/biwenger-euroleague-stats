@@ -25,15 +25,9 @@ type ThemeContextValue = {
   toggleSnow: () => void;
 };
 
-const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'system',
-  resolvedTheme: 'light',
-  setTheme: () => {},
-  showSnow: false,
-  toggleSnow: () => {},
-});
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-export function useTheme() {
+export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider');

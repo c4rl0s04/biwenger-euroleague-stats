@@ -73,13 +73,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        {/* OS fallback without JS; the resolver adds its own first chrome override before paint. */}
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content={THEME_COLORS.dark} />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: light)"
-          content={THEME_COLORS.light}
-        />
+        {/* Legacy rollout fallback: dark until the shell and pages are theme-ready. */}
+        <meta name="theme-color" content={THEME_COLORS.dark} />
         <script
           id="application-theme"
           dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
