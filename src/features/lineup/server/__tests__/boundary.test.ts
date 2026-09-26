@@ -18,12 +18,15 @@ describe('Lineup feature boundary contracts', () => {
     expect(publicFile).not.toMatch(/drizzle/);
   });
 
-  it('ensures lineupReadService is only exported by server.ts', async () => {
+  it('ensures lineupReadService and lineupCommandService are only exported by server.ts', async () => {
     const serverModule = await import('../../server');
     expect(serverModule.lineupReadService).toBeDefined();
     expect(typeof serverModule.lineupReadService.getLineup).toBe('function');
+    expect(serverModule.lineupCommandService).toBeDefined();
+    expect(typeof serverModule.lineupCommandService.updateLineup).toBe('function');
 
     const publicModule = await import('../../public');
     expect((publicModule as Record<string, unknown>).lineupReadService).toBeUndefined();
+    expect((publicModule as Record<string, unknown>).lineupCommandService).toBeUndefined();
   });
 });

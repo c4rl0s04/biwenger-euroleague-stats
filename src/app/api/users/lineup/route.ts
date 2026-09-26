@@ -1,6 +1,10 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
-import { lineupService } from '@/lib/services/lineupService';
+import {
+  lineupReadService,
+  lineupCommandService,
+  LineupValidationError,
+} from '@/features/lineup/server';
 import { errorResponse, mutationSuccessResponse, privateJsonResponse } from '@/lib/utils/response';
 
 /**
@@ -19,24 +23,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { lineup } = await request.json();
-
-    if (!lineup) {
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
       return errorResponse('Se requiere el objeto "lineup"', 400);
     }
 
-    await lineupService.updateLineup({
-      lineup,
-      userId: session.user.id as string,
-    });
+    if (!body || typeof body !== 'object' || !body.lineup) {
+      return errorResponse('Se requiere el objeto "lineup"', 400);
+    }
+
+    const result = await lineupCommandService.updateLineup(session.user.id as string, body.lineup);
 
     return mutationSuccessResponse({
-      message: 'Alineación actualizada en Biwenger',
-      status: 'completed',
+      message: result.message,
+      status: result.status,
     });
-  } catch {
+  } catch (error: any) {
+    if (error instanceof LineupValidationError) {
+      return errorResponse(error.message, 400);
+    }
     console.error('[API Lineup] Mutation failed');
-    return errorResponse('Error al procesar la solicitud de alineación');
+    const message =
+      error instanceof Error &&
+      !error.message.includes('token') &&
+      !error.message.includes('Bearer') &&
+      !error.message.includes('authorization')
+        ? error.message
+        : 'Error al procesar la solicitud de alineación';
+    return errorResponse(message, 500);
   }
 }
 
@@ -54,11 +70,17 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    const lineup = await lineupService.getLineup(session.user.id as string);
+    const lineup = await lineupReadService.getLineup(session.user.id as string);
 
     return privateJsonResponse({ success: true, data: lineup });
-  } catch {
+  } catch (error: any) {
     console.error('[API Lineup GET] Request failed');
-    return errorResponse('Error al obtener la alineación');
+    const message =
+      error instanceof Error &&
+      !error.message.includes('token') &&
+      !error.message.includes('Bearer')
+        ? error.message
+        : 'Error al obtener la alineación';
+    return errorResponse(message, 500);
   }
 }

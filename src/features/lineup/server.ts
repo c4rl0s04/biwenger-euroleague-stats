@@ -7,6 +7,17 @@ export {
 } from './server/services/lineup-read.service';
 
 export {
+  lineupCommandService,
+  type LineupCommandService,
+} from './server/services/lineup-command.service';
+
+export {
+  validateLineupCommand,
+  validateLineupRequestBody,
+  LineupValidationError,
+} from './validation/lineup-command.schema';
+
+export {
   mapToSafeLineupResponse,
   mapLineup,
   mapPlayers,
@@ -23,6 +34,8 @@ export type {
   SafeMarketListing,
   SafeLineupOffer,
   SafeLineupResponse,
+  LineupCommandInput,
+  LineupCommandResult,
   BiwengerUserData,
   BiwengerUserLineupData,
   BiwengerUserPlayerData,

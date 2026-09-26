@@ -7,4 +7,6 @@ export type {
   SafeMarketListing,
   SafeLineupOffer,
   SafeLineupResponse,
+  LineupCommandInput,
+  LineupCommandResult,
 } from './models/lineup';

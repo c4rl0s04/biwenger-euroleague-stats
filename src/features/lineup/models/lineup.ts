@@ -90,3 +90,17 @@ export interface BiwengerUserData {
   offers?: BiwengerUserOfferData[];
   [key: string]: unknown;
 }
+
+export interface LineupCommandInput {
+  type?: string;
+  playersID: SafeIdentifier[];
+  reservesID?: SafeIdentifier[];
+  captain?: SafeIdentifier | null;
+  striker?: SafeIdentifier | null;
+  coach?: SafeIdentifier | null;
+}
+
+export interface LineupCommandResult {
+  status: 'completed';
+  message: string;
+}

@@ -16,10 +16,28 @@ vi.mock('@/lib/services', () => ({
   fetchAllUsers: vi.fn(),
 }));
 
+const lineupMocks = vi.hoisted(() => ({
+  getLineup: vi.fn(),
+  updateLineup: vi.fn(),
+}));
+
+vi.mock('@/features/lineup/server', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/features/lineup/server')>();
+  return {
+    ...actual,
+    lineupReadService: {
+      getLineup: lineupMocks.getLineup,
+    },
+    lineupCommandService: {
+      updateLineup: lineupMocks.updateLineup,
+    },
+  };
+});
+
 vi.mock('@/lib/services/lineupService', () => ({
   lineupService: {
-    getLineup: vi.fn(),
-    updateLineup: vi.fn(),
+    getLineup: lineupMocks.getLineup,
+    updateLineup: lineupMocks.updateLineup,
   },
 }));
 
@@ -114,9 +132,10 @@ describe('user and lineup route contracts', () => {
   });
 
   it('covers GET and POST /api/users/lineup contracts', async () => {
-    vi.mocked(lineupService.getLineup).mockResolvedValue({ playersID: [1] } as any);
-    vi.mocked(lineupService.updateLineup).mockResolvedValue({
-      status: 200,
+    lineupMocks.getLineup.mockResolvedValue({ playersID: [1] } as any);
+    lineupMocks.updateLineup.mockResolvedValue({
+      status: 'completed',
+      message: 'Alineación actualizada en Biwenger',
       token: 'lineup-provider-canary-token',
       privateProviderPayload: { authorization: 'Bearer lineup-provider-canary-token' },
     } as any);
@@ -125,7 +144,7 @@ describe('user and lineup route contracts', () => {
     const getResponse = await GET(makeRequest('http://localhost/api/users/lineup'));
     expect(getResponse.status).toBe(200);
     expect((await getResponse.json()).success).toBe(true);
-    expect(lineupService.getLineup).toHaveBeenCalledWith('42');
+    expect(lineupMocks.getLineup).toHaveBeenCalledWith('42');
 
     const postResponse = await POST(
       jsonRequest('http://localhost/api/users/lineup', {
@@ -141,9 +160,11 @@ describe('user and lineup route contracts', () => {
     expect(JSON.stringify(postJson)).not.toContain('privateProviderPayload');
     expect(postResponse.headers.get('cache-control')).toContain('private');
     expect(postResponse.headers.get('cache-control')).toContain('no-store');
-    expect(lineupService.updateLineup).toHaveBeenCalledWith({
-      lineup: { type: '1-2-2', playersID: [1], reservesID: [], captain: 1 },
-      userId: '42',
+    expect(lineupMocks.updateLineup).toHaveBeenCalledWith('42', {
+      type: '1-2-2',
+      playersID: [1],
+      reservesID: [],
+      captain: 1,
     });
 
     const missingPost = await POST(jsonRequest('http://localhost/api/users/lineup', {}));
@@ -164,8 +185,8 @@ describe('user and lineup route contracts', () => {
 
     expect(getResponse.status).toBe(401);
     expect(postResponse.status).toBe(401);
-    expect(lineupService.getLineup).not.toHaveBeenCalled();
-    expect(lineupService.updateLineup).not.toHaveBeenCalled();
+    expect(lineupMocks.getLineup).not.toHaveBeenCalled();
+    expect(lineupMocks.updateLineup).not.toHaveBeenCalled();
   });
 
   it('covers /api/user/change-password auth and success contracts', async () => {

@@ -206,12 +206,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 15 — Lineup commands
 
-- **State:** Planned; approval gate.
+- **State:** Integrated into main at `098bb0c9`.
 - **Dependencies / approval:** 14; command approval.
 - **Scope:** Own lineup submission; preserve auth and external behavior.
 - **Completion check:** Mocked success/failure/uncertain outcomes and deliberate reconciliation; no blind retries.
-- **Evidence:** No current acceptance.
-- **Next action:** Review request validation and write permission before extraction.
+- **Evidence:** [Task 15 receipt](reports/task-15-lineup-commands.md); lineupCommandService with executeUserProviderCommand, Zod schema validation, fail-closed policy, /api/users/lineup unfrozen.
+- **Next action:** Proceed with Task 16 Private Market reads.
 
 ### Task 16 — Private Market reads
 
