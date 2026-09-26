@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { getPlayerProfileData } from '@/features/players/server';
 import { performGlobalSearch } from '@/features/search/server';
 import { STOP_WORDS } from '../../constants/assistant-instructions';

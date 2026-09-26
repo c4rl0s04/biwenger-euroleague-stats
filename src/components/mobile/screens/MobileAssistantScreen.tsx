@@ -1,1 +1,1 @@
-export { default } from '@/features/assistant/public';
+export { MobileAssistantScreen as default } from '@/features/assistant/public';

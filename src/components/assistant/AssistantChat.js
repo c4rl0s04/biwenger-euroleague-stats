@@ -1,1 +1,1 @@
-export { default } from '@/features/assistant/public';
+export { AssistantChat as default } from '@/features/assistant/public';
