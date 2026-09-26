@@ -93,7 +93,12 @@
     "src/app/test-hoopgrid/page.js",
     "src/app/api/hoopgrid/today/route.ts",
     "src/app/api/hoopgrid/guess/route.ts",
-    "src/app/api/hoopgrid/list/route.ts"
+    "src/app/api/hoopgrid/list/route.ts",
+    "src/app/(app)/assistant/page.js",
+    "src/app/(app)/assistant/[conversationId]/page.tsx",
+    "src/app/api/assistant/route.ts",
+    "src/app/api/assistant/conversations/route.ts",
+    "src/app/api/assistant/conversations/[id]/route.ts"
   ],
   "exceptions": [
     {
@@ -695,6 +700,101 @@
       "edge": "entrypoint-persistence: src/app/hoopgrid-cheatsheet/page.js -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
       "reason": "Existing Hoopgrid cheatsheet page session identity reaches frozen authentication/credential infrastructure; no Hoopgrid domain-query exception.",
       "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/[id]/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Assistant conversation detail route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/[id]/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Assistant conversation detail route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/[id]/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Assistant conversation detail route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/[id]/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Assistant conversation detail route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/[id]/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing Assistant conversation detail route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/[id]/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Assistant conversation detail route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Assistant conversations list/create route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Assistant conversations list/create route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Assistant conversations list/create route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Assistant conversations list/create route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing Assistant conversations list/create route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/conversations/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Assistant conversations list/create route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Assistant message route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Assistant message route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Assistant message route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Assistant message route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing Assistant message route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/assistant/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Assistant message route authentication reaches frozen authentication/credential infrastructure; no Assistant domain-query exception.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "legacy-service: src/features/assistant/server/services/assistant-context.service.ts -> src/lib/services/index.ts",
+      "reason": "Assistant conversational context aggregates read-only cross-domain stats (market, squad, standings, schedule, compare) via established service facades as permitted in Task 20 tracker evidence.",
+      "removeWhen": "Cross-domain contracts are fully migrated and consolidated into unified feature exports in post-migration cleanup."
     }
   ]
 }

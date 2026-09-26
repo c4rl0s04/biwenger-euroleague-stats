@@ -1,4 +1,4 @@
-import MobileAssistantScreen from '@/components/mobile/screens/MobileAssistantScreen';
+import { MobileAssistantScreen } from '@/features/assistant/public';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
 
 type PageProps = { params: Promise<{ conversationId: string }> };

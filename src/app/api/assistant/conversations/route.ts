@@ -1,14 +1,10 @@
-import { z } from 'zod';
 import { auth } from '@/auth';
 import {
-  createAssistantConversation,
-  listAssistantConversations,
-} from '@/lib/services/features/assistantService';
+  assistantCommandService,
+  assistantReadService,
+  AssistantValidationError,
+} from '@/features/assistant/server';
 import { errorResponse, privateJsonResponse } from '@/lib/utils/response';
-
-const createConversationSchema = z.object({
-  firstPrompt: z.string().trim().min(1).max(4000),
-});
 
 export async function GET() {
   try {
@@ -18,9 +14,9 @@ export async function GET() {
       return errorResponse('No autorizado. Debes iniciar sesión para usar el asistente.', 401);
     }
 
-    const conversations = await listAssistantConversations(session.user.id);
+    const data = await assistantReadService.listConversations(session.user.id);
 
-    return privateJsonResponse({ success: true, data: { conversations } });
+    return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('[API Assistant Conversations] Error:', error);
     return errorResponse('No se han podido cargar las conversaciones.', 500);
@@ -35,19 +31,21 @@ export async function POST(request: Request) {
       return errorResponse('No autorizado. Debes iniciar sesión para usar el asistente.', 401);
     }
 
-    const parsedRequest = createConversationSchema.safeParse(await request.json());
-
-    if (!parsedRequest.success) {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
       return errorResponse('No se ha podido crear la conversación con ese mensaje.', 400);
     }
 
-    const conversation = await createAssistantConversation(
-      session.user.id,
-      parsedRequest.data.firstPrompt
-    );
+    const conversation = await assistantCommandService.createConversation(session.user.id, body);
 
     return privateJsonResponse({ success: true, data: { conversation } }, 201);
   } catch (error) {
+    if (error instanceof AssistantValidationError) {
+      return errorResponse(error.message, 400);
+    }
+
     console.error('[API Assistant Conversations] Error:', error);
     return errorResponse('No se ha podido crear la conversación.', 500);
   }

@@ -242,21 +242,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 19 — Hoopgrid
 
-- **State:** Implemented and verified on `refactor/hoopgrid`.
+- **State:** Integrated into main at `2336446b`.
 - **Dependencies / approval:** 12; explicit behavior/security decisions.
 - **Scope:** Separate challenge reads, creation and guesses, including test/cheatsheet routes.
 - **Completion check:** Side-effecting GET concurrency race resolved with idempotent conflict handling; answer privacy preserved; cheatsheet protected behind session authentication; Zod validation and safe serializable models enforced.
 - **Evidence:** [Task 19 receipt](reports/task-19-hoopgrid.md); `hoopgridCommandService`, `hoopgridReadService`, `hoopgridRepository`, 4 test suites (36 tests), 0 architecture violations across 94 entrypoints, full test suite (2,755 tests) and build passing.
-- **Next action:** Fast-forward merge into main; proceed with Task 20 Assistant.
+- **Next action:** Completed; proceed with Task 20 Assistant.
 
 ### Task 20 — Assistant
 
-- **State:** Planned; approval gate.
+- **State:** Implemented and verified on `refactor/assistant`.
 - **Dependencies / approval:** 12–13 plus owning domain contracts.
 - **Scope:** Own context, conversations, provider calls and screens; no paid/production validation.
-- **Completion check:** Ownership, streaming/cancellation, privacy and failure contracts preserved.
-- **Evidence:** Legacy Market/manager adapters may still be consumed.
-- **Next action:** Trace methods and use synthetic provider responses.
+- **Completion check:** Conversation ownership, session authentication, fail-closed provider error handling, privacy/redaction, and route contracts preserved.
+- **Evidence:** [Task 20 receipt](reports/task-20-assistant.md); `assistantCommandService`, `assistantReadService`, `assistantProviderService`, `assistantContextService`, `assistantRepository`, 51 tests passed, 0 architecture violations across 99 entrypoints, full test suite (2,776 tests) and build passing.
+- **Next action:** Fast-forward merge into main; proceed with Task 21 Other actions.
 
 ### Task 21 — Other actions
 

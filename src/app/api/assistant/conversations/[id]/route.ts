@@ -1,19 +1,11 @@
-import { z } from 'zod';
 import { auth } from '@/auth';
 import {
-  deleteAssistantConversation,
-  findAssistantConversation,
-  getAssistantMessages,
-} from '@/lib/services/features/assistantService';
+  assistantCommandService,
+  assistantReadService,
+  AssistantConversationNotFoundError,
+  AssistantValidationError,
+} from '@/features/assistant/server';
 import { errorResponse, privateJsonResponse } from '@/lib/utils/response';
-
-const idSchema = z.string().uuid();
-
-async function getOwnedConversation(userId: string, rawId: string) {
-  const parsedId = idSchema.safeParse(rawId);
-  if (!parsedId.success) return null;
-  return findAssistantConversation(userId, parsedId.data);
-}
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -24,16 +16,18 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     }
 
     const { id } = await params;
-    const conversation = await getOwnedConversation(session.user.id, id);
+    const data = await assistantReadService.getConversation(session.user.id, id);
 
-    if (!conversation) {
+    if (!data) {
       return errorResponse('La conversación no existe o no pertenece al usuario.', 404);
     }
 
-    const messages = await getAssistantMessages(conversation.id);
-
-    return privateJsonResponse({ success: true, data: { conversation, messages } });
+    return privateJsonResponse({ success: true, data });
   } catch (error) {
+    if (error instanceof AssistantValidationError) {
+      return errorResponse(error.message, 400);
+    }
+
     console.error('[API Assistant Conversation] Error:', error);
     return errorResponse('No se ha podido cargar la conversación.', 500);
   }
@@ -48,16 +42,18 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     }
 
     const { id } = await params;
-    const conversation = await getOwnedConversation(session.user.id, id);
+    await assistantCommandService.deleteConversation(session.user.id, id);
 
-    if (!conversation) {
-      return errorResponse('La conversación no existe o no pertenece al usuario.', 404);
+    return privateJsonResponse({ success: true, data: { id } });
+  } catch (error) {
+    if (error instanceof AssistantValidationError) {
+      return errorResponse(error.message, 400);
     }
 
-    await deleteAssistantConversation(session.user.id, conversation.id);
+    if (error instanceof AssistantConversationNotFoundError) {
+      return errorResponse(error.message, 404);
+    }
 
-    return privateJsonResponse({ success: true, data: { id: conversation.id } });
-  } catch (error) {
     console.error('[API Assistant Conversation] Error:', error);
     return errorResponse('No se ha podido eliminar la conversación.', 500);
   }

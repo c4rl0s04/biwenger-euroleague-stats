@@ -37,8 +37,8 @@ const { services, playerContextService } = vi.hoisted(() => ({
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/services', () => services);
+vi.mock('../server/services/assistant-player-context.service', () => playerContextService);
 vi.mock('@/lib/services/features/assistantPlayerContextService', () => playerContextService);
-vi.mock('@/features/assistant/server/services/assistant-player-context.service', () => playerContextService);
 
 describe('assistant context service', () => {
   beforeEach(() => {
@@ -79,7 +79,7 @@ describe('assistant context service', () => {
 
   it('selects player context for player questions', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     playerContextService.buildPlayerContextForMessage.mockResolvedValue(
       'Jugador: Walter Tavares\nMedia fantasy temporada: 16.4'
     );
@@ -102,7 +102,7 @@ describe('assistant context service', () => {
 
   it('uses the signed-in user id for personal squad context', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     services.fetchUserSeasonStats.mockResolvedValue({
       name: 'Carlos',
       position: 2,
@@ -138,7 +138,7 @@ describe('assistant context service', () => {
 
   it('selects market context for market questions', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     services.fetchMarketOpportunities.mockResolvedValue([{ name: 'Jugador barato', price: 1000 }]);
 
     const blocks = await buildAssistantContext({
@@ -155,7 +155,7 @@ describe('assistant context service', () => {
 
   it('selects league context for standings questions', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     services.getFullStandings.mockResolvedValue([{ id: '42', name: 'Carlos', total_points: 900 }]);
 
     const blocks = await buildAssistantContext({
@@ -172,7 +172,7 @@ describe('assistant context service', () => {
 
   it('selects comparison context for manager comparison questions', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     services.getCompareDataLite.mockResolvedValue({
       users: [
         { id: '42', name: 'Carlos' },
@@ -209,7 +209,7 @@ describe('assistant context service', () => {
 
   it('logs selected providers only in development', async () => {
     const { buildAssistantContext } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
     vi.stubEnv('NODE_ENV', 'development');
 
@@ -226,7 +226,7 @@ describe('assistant context service', () => {
 
   it('adds prediction context for projection questions', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     services.fetchUserSquadDetails.mockResolvedValue({
       players: [
         {
@@ -293,7 +293,7 @@ describe('assistant context service', () => {
 
   it('adds recommended lineup context for lineup questions', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     services.fetchUserSquadDetails.mockResolvedValue({
       players: [
         {
@@ -387,7 +387,7 @@ describe('assistant context service', () => {
 
   it('does not load DB-heavy context for unrelated generic questions', async () => {
     const { buildAssistantContext, getAssistantContextProviderNamesForMessage } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
 
     const blocks = await buildAssistantContext({
       userId: '42',
@@ -403,7 +403,7 @@ describe('assistant context service', () => {
 
   it('redacts secrets and raw emails from context blocks', async () => {
     const { buildAssistantContext, formatAssistantContextBlocks } =
-      await import('@/lib/services/features/assistantContextService');
+      await import('../server/services/assistant-context.service');
     playerContextService.buildPlayerContextForMessage.mockResolvedValue(
       'Jugador: Tavares\nemail: carlos@example.com\npassword: abc123\nbiwenger_token: token-123'
     );
