@@ -25,9 +25,9 @@ vi.mock('@/features/market/server', async () => ({
   getLiveMarketTransfers: (await import('@/lib/services')).fetchLiveMarketTransfers,
   getBestValueDetails: (await import('@/lib/services')).fetchBestValueDetails,
   getBiddingDuelDetails: (await import('@/lib/services')).fetchBiddingDuelDetails,
-  ...(await import('@/features/market/validation/market-transfers')),
+  ...(await import('@/features/market/trends/validation/market-transfers')),
   getMarketTrendsAnalysis: (await import('@/lib/services')).fetchMarketTrendsAnalysis,
-  ...(await import('@/features/market/validation/market-trends')),
+  ...(await import('@/features/market/trends/validation/market-trends')),
 }));
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {

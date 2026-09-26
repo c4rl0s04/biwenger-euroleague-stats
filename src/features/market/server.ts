@@ -3,28 +3,28 @@ export {
   getHighestTransferRecord,
   getBiggestGainRecord,
   MARKET_RECORDS_POLICY,
-} from './server/services/activity-records.service';
+} from './trends/server/services/activity-records.service';
 export {
   getMobileMarketSection,
   MARKET_SECTION_POLICY,
-} from './server/services/market-section.service';
+} from './screens/server/services/market-section.service';
 export {
   getMobileMarketOverview,
   MARKET_SCREEN_POLICY,
-} from './server/services/market-screen.service';
+} from './screens/server/services/market-screen.service';
 export {
   fetchMarketStats,
   MARKET_ANALYTICS_POLICY,
-} from './server/services/market-analytics.service';
+} from './analytics/server/services/market-analytics.service';
 export {
   getMarketOverviewKPIs,
   getPositionAnalysis,
   getBiddingDuelsStats,
-} from './server/services/market-overview.service';
+} from './analytics/server/services/market-overview.service';
 export {
   getRecentTransfers,
   getSignificantPriceChanges,
-} from './server/services/market-activity-extra.service';
+} from './trends/server/services/market-activity-extra.service';
 export {
   getBestRevaluation,
   getBestValuePlayer,
@@ -39,7 +39,7 @@ export {
   getQuickestFlip,
   getLongestProfitableHold,
   getWorstRevaluation,
-} from './server/services/market-investments.service';
+} from './analytics/server/services/market-investments.service';
 export {
   getRecordBid,
   getTheThief,
@@ -47,7 +47,7 @@ export {
   getTheVictim,
   getOverpayerManager,
   getInflatedPlayer,
-} from './server/services/market-auctions.service';
+} from './analytics/server/services/market-auctions.service';
 export {
   getTopTransferredPlayer,
   getRecordTransfer,
@@ -55,32 +55,32 @@ export {
   getBestSeller,
   getMostOwnersPlayer,
   getManagerMarketStats,
-} from './server/services/market-summary.service';
+} from './analytics/server/services/market-summary.service';
 export {
   getCurrentMarketListings,
   getMarketOpportunities,
   MARKET_CATALOGUE_POLICY,
-} from './server/services/market-catalogue.service';
+} from './catalogue/server/services/market-catalogue.service';
 export {
   getAllTransfers,
   getMarketTrends,
   getMarketKPIs,
   getMarketPageData,
   MARKET_ACTIVITY_POLICY,
-} from './server/services/market-activity.service';
+} from './trends/server/services/market-activity.service';
 export {
   getLiveMarketTransfers,
   getBestValueDetails,
   getBiddingDuelDetails,
   MARKET_TRANSFER_READ_POLICY,
-} from './server/services/market-transfers.service';
+} from './trends/server/services/market-transfers.service';
 export {
   parseMarketReadId,
   parseMarketDuelIds,
   parseMarketTransferParams,
-} from './validation/market-transfers';
+} from './trends/validation/market-transfers';
 export {
   getMarketTrendsAnalysis,
   MARKET_TRENDS_POLICY,
-} from './server/services/market-trends.service';
-export { parseMarketTrendDays } from './validation/market-trends';
+} from './trends/server/services/market-trends.service';
+export { parseMarketTrendDays } from './trends/validation/market-trends';

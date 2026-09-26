@@ -15,9 +15,9 @@ vi.mock('@/features/market/server', async () => ({
   getLiveMarketTransfers: mocks.fetchLiveMarketTransfers,
   getBestValueDetails: mocks.fetchBestValueDetails,
   getBiddingDuelDetails: mocks.fetchBiddingDuelDetails,
-  ...(await import('@/features/market/validation/market-transfers')),
+  ...(await import('@/features/market/trends/validation/market-transfers')),
   getMarketTrendsAnalysis: mocks.fetchMarketTrendsAnalysis,
-  ...(await import('@/features/market/validation/market-trends')),
+  ...(await import('@/features/market/trends/validation/market-trends')),
 }));
 import { GET as market } from '../route';
 import { GET as stats } from '../stats/route';
