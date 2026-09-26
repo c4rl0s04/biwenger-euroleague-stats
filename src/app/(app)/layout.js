@@ -1,6 +1,6 @@
-import ClientWrapper from '@/components/layout/ClientWrapper';
-import AppShell from '@/components/layout/AppShell';
-import { SectionProvider } from '@/components/layout/SectionContext';
+import { AppProviders } from '@/components/shell/shared/AppProviders';
+import { SectionProvider } from '@/components/shell/shared/SectionContext';
+import { AppShell } from '@/components/shell/AppShell';
 import { getPresentationMode } from '@/lib/mobile/presentation-server';
 import { getAppStandings, getAppSeasonContext } from '@/lib/services/app/appShellService';
 
@@ -13,10 +13,10 @@ export default async function AppLayout({ children }) {
   ]);
 
   return (
-    <ClientWrapper users={users} seasonContext={seasonContext}>
+    <AppProviders users={users} seasonContext={seasonContext}>
       <SectionProvider>
         <AppShell presentationMode={presentationMode}>{children}</AppShell>
       </SectionProvider>
-    </ClientWrapper>
+    </AppProviders>
   );
 }

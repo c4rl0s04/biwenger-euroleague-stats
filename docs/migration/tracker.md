@@ -278,12 +278,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 23 — Shell / search interactions
 
-- **State:** Planned; first production adoption slice after UI foundation hardening.
-- **Dependencies / approval:** Stable domain access contracts; 18 only where account/auth behavior is changed.
+- **State:** Complete and verified on task worktree / branch `refactor/application-shell`; prepared for PR review.
+- **Dependencies / approval:** Stable domain access contracts; UI-01H rollout hardening complete (PR #46).
 - **Scope:** Establish `src/components/shell` as the owner of persistent chrome, with shared/desktop/mobile/integration boundaries; migrate app background/content frame, sidebar, top header, footer, phone bottom navigation/More menu and global capability placement onto the new UI foundation while preserving routing, authentication, search-data ownership and PWA behavior. Search/control behavior stays separately bounded.
 - **Completion check:** Acyclic reusable composition; explicit shared/desktop/mobile ownership; preserved keyboard/focus/navigation/mobile/safe-area behavior; no auth/provider ownership drift; no duplicate legacy/new shell implementation; obsolete layout files/exports/styles removed once consumer checks prove them unused.
-- **Evidence:** Search data boundary already merged; UI foundation and rollout hardening evidence is recorded in Task 24 and PR #46.
-- **Next action:** Inventory current shell consumers and baseline desktop/phone behavior, then migrate AppShell as the first production consumer. Do not re-migrate Search SQL or change auth behavior as part of the visual slice.
+- **Evidence:** [Task 23 receipt](reports/task-23-application-shell.md); `npm run verify` passed all 10 checks (332 test files, 2,687 tests, 1,049 modules in architecture check, 52/52 static pages generated in Next.js build), and 100% of Playwright E2E suites passed (`pwa-responsive.spec.ts` 27/27, `application-theme.spec.ts` 65/65, `home-architecture.spec.ts` 10/10).
+- **Next action:** Review and merge PR for Task 23; proceed with demand-driven UI-01C and feature screen migrations.
 
 ### Task 24 — Shared UI / tokens
 
@@ -322,7 +322,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), and lineup commands (Task 15) are merged into `main`. The next domain milestone is **Task 16 — Private Market reads**. In the UI migration track, UI-01A, UI-01T, and UI-01B are integrated; UI-01H rollout hardening is complete after PR #46, followed by the **Application Shell** migration as the first production consumer, before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
+All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), and lineup commands (Task 15) are merged into `main`. The next domain milestone is **Task 16 — Private Market reads**. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 — Application Shell** is complete and validated on branch `refactor/application-shell` for PR review, establishing the canonical chrome foundation before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
 
 ## UI presentation ownership and cleanup contract
 

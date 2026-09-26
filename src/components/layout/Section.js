@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId } from 'react';
-import { useSections } from './SectionContext';
+import { useSections } from '@/components/shell/shared/SectionContext';
 import { FadeIn } from '@/components/ui';
 
 /**

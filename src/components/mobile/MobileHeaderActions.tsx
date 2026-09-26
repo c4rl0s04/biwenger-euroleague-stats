@@ -4,8 +4,8 @@ import { LogIn, LogOut, Search, Settings, UserCircle2, X } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useState, type ComponentType } from 'react';
 
-import SearchDropdown from '@/components/layout/SearchDropdown';
-import { NavigationLink } from '@/components/layout/NavigationFeedback';
+import { GlobalSearch } from '@/components/shell/integrations/GlobalSearch';
+import { NavigationLink } from '@/components/shell/shared/NavigationFeedback';
 import { UserAvatar } from '@/components/ui';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 
@@ -69,7 +69,7 @@ export default function MobileHeaderActions() {
         description="Jugadores, equipos y mánagers"
       >
         <div className="mobile-search-sheet-content">
-          <SearchDropdown onClose={closeSheet} />
+          <GlobalSearch onClose={closeSheet} />
           <button type="button" className="mobile-sheet-secondary-action" onClick={closeSheet}>
             <X size={18} aria-hidden="true" /> Cerrar búsqueda
           </button>

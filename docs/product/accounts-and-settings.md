@@ -25,7 +25,8 @@ Authentication mechanics and route boundaries are documented in
 
 - Pages: [`login`](<../../src/app/(auth)/login>), [`user/[id]`](<../../src/app/(app)/user/[id]>), and
   [`settings`](<../../src/app/(app)/settings>).
-- UI: [`src/components/user`](../../src/components/user) plus settings-local components.
+- UI: [`AccountMenu`](../../src/components/shell/integrations/AccountMenu.tsx) plus settings-local
+  components.
 - Services: [`userService.ts`](../../src/lib/services/core/userService.ts) and lineup/player services
   used by manager profiles.
 - HTTP: `/api/auth/*`, `/api/user/change-password`, `/api/user/link-biwenger`, and `/api/users/*`.

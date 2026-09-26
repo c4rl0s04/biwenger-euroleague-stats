@@ -1,20 +1,41 @@
 'use client';
 
-import Link from 'next/link';
+import Link, { type LinkProps } from 'next/link';
 import { usePathname } from 'next/navigation';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 
-const NavigationFeedbackContext = createContext({
+export interface PendingNavigation {
+  href: string;
+  label: string;
+  sourcePathname: string;
+}
+
+export interface NavigationFeedbackContextValue {
+  beginNavigation: (href: string, label?: string) => void;
+  isNavigatingTo: (href: string) => boolean;
+  pendingNavigation: PendingNavigation | null;
+}
+
+const NavigationFeedbackContext = createContext<NavigationFeedbackContextValue>({
   beginNavigation: () => {},
   isNavigatingTo: () => false,
   pendingNavigation: null,
 });
 
-export function NavigationFeedbackProvider({ children }) {
+export function NavigationFeedbackProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [pendingNavigation, setPendingNavigation] = useState<PendingNavigation | null>(null);
 
-  const beginNavigation = useCallback((href, label = 'la página') => {
+  const beginNavigation = useCallback((href: string, label = 'la página') => {
     if (!href || typeof window === 'undefined') return;
 
     const target = new URL(String(href), window.location.href);
@@ -39,10 +60,10 @@ export function NavigationFeedbackProvider({ children }) {
     return () => window.clearTimeout(timeout);
   }, [pendingNavigation]);
 
-  const value = useMemo(
+  const value = useMemo<NavigationFeedbackContextValue>(
     () => ({
       beginNavigation,
-      isNavigatingTo: (href) => {
+      isNavigatingTo: (href: string) => {
         if (!activeNavigation || typeof window === 'undefined') return false;
         const target = new URL(String(href), window.location.href);
         return `${target.pathname}${target.search}` === activeNavigation.href;
@@ -71,15 +92,28 @@ export function NavigationFeedbackProvider({ children }) {
   );
 }
 
-export function useNavigationFeedback() {
+export function useNavigationFeedback(): NavigationFeedbackContextValue {
   return useContext(NavigationFeedbackContext);
 }
 
-export function NavigationLink({ href, navigationLabel, onClick, children, ...props }) {
-  const { beginNavigation, isNavigatingTo } = useNavigationFeedback();
-  const pending = isNavigatingTo(href);
+export interface NavigationLinkProps
+  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps>, LinkProps {
+  navigationLabel?: string;
+  className?: string;
+  children: ReactNode;
+}
 
-  const handleClick = (event) => {
+export function NavigationLink({
+  href,
+  navigationLabel,
+  onClick,
+  children,
+  ...props
+}: NavigationLinkProps) {
+  const { beginNavigation, isNavigatingTo } = useNavigationFeedback();
+  const pending = isNavigatingTo(String(href));
+
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);
     if (
       event.defaultPrevented ||
@@ -93,7 +127,7 @@ export function NavigationLink({ href, navigationLabel, onClick, children, ...pr
       return;
     }
 
-    beginNavigation(href, navigationLabel);
+    beginNavigation(String(href), navigationLabel);
   };
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type ReactNode } from 'react';
 import { Command } from 'cmdk';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
@@ -16,21 +16,50 @@ import {
   Calendar,
   Shirt,
   Vote,
+  type LucideIcon,
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
-export default function CommandPalette() {
+interface AppPage {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  keywords: string[];
+}
+
+interface SearchPlayerResult {
+  id: string | number;
+  name: string;
+  team?: string;
+}
+
+interface SearchTeamResult {
+  id: string | number;
+  name: string;
+}
+
+interface SearchUserResult {
+  id: string | number;
+  name: string;
+}
+
+interface SearchResults {
+  players: SearchPlayerResult[];
+  teams: SearchTeamResult[];
+  users: SearchUserResult[];
+}
+
+export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState({ players: [], teams: [], users: [] });
+  const [results, setResults] = useState<SearchResults>({ players: [], teams: [], users: [] });
   const router = useRouter();
   const { toggleSnow, showSnow } = useTheme();
 
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Define your app pages here
-  const appPages = [
+  const appPages: AppPage[] = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, keywords: ['home', 'inicio'] },
     { name: 'Clasificación', href: '/standings', icon: TrendingUp, keywords: ['ranking', 'tabla'] },
     { name: 'Mercado', href: '/market', icon: ShoppingBag, keywords: ['fichajes', 'compras'] },
@@ -41,17 +70,17 @@ export default function CommandPalette() {
 
   // Toggle with Cmd+K or Ctrl+K
   useEffect(() => {
-    const down = (e) => {
+    const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setOpen((prev) => !prev);
       }
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  // Force focus whenever the palette opens
+  // Focus when opened
   useEffect(() => {
     if (open) {
       const timer = setTimeout(() => {
@@ -71,10 +100,12 @@ export default function CommandPalette() {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const data = await apiClient.get(`/api/search?q=${encodeURIComponent(query)}`);
-        setResults(data.data || { players: [], teams: [], users: [] });
+        const res = (await apiClient.get(`/api/search?q=${encodeURIComponent(query)}`)) as {
+          data?: SearchResults;
+        };
+        setResults(res.data || { players: [], teams: [], users: [] });
       } catch (error) {
-        console.error(error);
+        console.error('CommandPalette search error:', error);
       } finally {
         setLoading(false);
       }
@@ -83,7 +114,7 @@ export default function CommandPalette() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // 2. Filter pages client-side
+  // Filter pages client-side
   const filteredPages =
     query === ''
       ? []
@@ -93,7 +124,7 @@ export default function CommandPalette() {
             page.keywords.some((k) => k.includes(query.toLowerCase()))
         );
 
-  const handleSelect = (callback) => {
+  const handleSelect = (callback: () => void) => {
     callback();
     setOpen(false);
     setQuery('');
@@ -113,7 +144,7 @@ export default function CommandPalette() {
         shouldFilter={false}
       >
         <div className="flex items-center border-b border-border px-4" cmdk-input-wrapper="">
-          <Search className="w-5 h-5 text-muted-foreground mr-2" />
+          <Search className="w-5 h-5 text-muted-foreground mr-2 shrink-0" />
           <Command.Input
             ref={inputRef}
             autoFocus
@@ -133,13 +164,13 @@ export default function CommandPalette() {
                 className="text-xs font-medium text-muted-foreground mb-2 px-2"
               >
                 {appPages.slice(0, 3).map((page) => (
-                  <Item
+                  <CommandPaletteItem
                     key={page.name}
                     icon={page.icon}
                     onSelect={() => handleSelect(() => router.push(page.href))}
                   >
                     Ir a {page.name}
-                  </Item>
+                  </CommandPaletteItem>
                 ))}
               </Command.Group>
 
@@ -147,9 +178,12 @@ export default function CommandPalette() {
                 heading="Configuración"
                 className="text-xs font-medium text-muted-foreground mb-2 px-2"
               >
-                <Item icon={Snowflake} onSelect={() => handleSelect(() => toggleSnow())}>
+                <CommandPaletteItem
+                  icon={Snowflake}
+                  onSelect={() => handleSelect(() => toggleSnow())}
+                >
                   {showSnow ? 'Desactivar Nieve' : 'Activar Nieve'}
-                </Item>
+                </CommandPaletteItem>
               </Command.Group>
             </>
           )}
@@ -157,21 +191,20 @@ export default function CommandPalette() {
           {/* Search Results */}
           {query.length > 0 && (
             <>
-              {/* 3. Render Filtered Pages (Purple) */}
               {filteredPages.length > 0 && (
                 <Command.Group
                   heading="Páginas"
-                  className="text-xs font-medium text-purple-400/70 mb-2 px-2"
+                  className="text-xs font-medium text-purple-400/80 mb-2 px-2"
                 >
                   {filteredPages.map((p) => (
-                    <Item
+                    <CommandPaletteItem
                       key={p.name}
                       type="page"
                       icon={p.icon}
                       onSelect={() => handleSelect(() => router.push(p.href))}
                     >
                       Ir a {p.name}
-                    </Item>
+                    </CommandPaletteItem>
                   ))}
                 </Command.Group>
               )}
@@ -187,18 +220,20 @@ export default function CommandPalette() {
                   {results.players.length > 0 && (
                     <Command.Group
                       heading="Jugadores"
-                      className="text-xs font-medium text-blue-400/70 mb-2 px-2"
+                      className="text-xs font-medium text-blue-400/80 mb-2 px-2"
                     >
                       {results.players.map((p) => (
-                        <Item
+                        <CommandPaletteItem
                           key={p.id}
                           type="player"
                           icon={User}
                           onSelect={() => handleSelect(() => router.push(`/player/${p.id}`))}
                         >
                           <span className="font-medium">{p.name}</span>
-                          <span className="ml-2 text-xs opacity-70 font-normal">{p.team}</span>
-                        </Item>
+                          {p.team && (
+                            <span className="ml-2 text-xs opacity-70 font-normal">{p.team}</span>
+                          )}
+                        </CommandPaletteItem>
                       ))}
                     </Command.Group>
                   )}
@@ -206,17 +241,17 @@ export default function CommandPalette() {
                   {results.teams.length > 0 && (
                     <Command.Group
                       heading="Equipos"
-                      className="text-xs font-medium text-amber-400/70 mb-2 px-2"
+                      className="text-xs font-medium text-amber-400/80 mb-2 px-2"
                     >
                       {results.teams.map((t) => (
-                        <Item
+                        <CommandPaletteItem
                           key={t.name}
                           type="team"
                           icon={Trophy}
                           onSelect={() => handleSelect(() => router.push(`/team/${t.id}`))}
                         >
                           {t.name}
-                        </Item>
+                        </CommandPaletteItem>
                       ))}
                     </Command.Group>
                   )}
@@ -224,17 +259,17 @@ export default function CommandPalette() {
                   {results.users.length > 0 && (
                     <Command.Group
                       heading="Usuarios"
-                      className="text-xs font-medium text-emerald-400/70 mb-2 px-2"
+                      className="text-xs font-medium text-emerald-400/80 mb-2 px-2"
                     >
                       {results.users.map((u) => (
-                        <Item
+                        <CommandPaletteItem
                           key={u.id}
                           type="user"
                           icon={Users}
                           onSelect={() => handleSelect(() => router.push(`/user/${u.id}`))}
                         >
                           {u.name}
-                        </Item>
+                        </CommandPaletteItem>
                       ))}
                     </Command.Group>
                   )}
@@ -259,10 +294,22 @@ export default function CommandPalette() {
   );
 }
 
-function Item({ children, icon: Icon, onSelect, type = 'default' }) {
+interface CommandPaletteItemProps {
+  children: ReactNode;
+  icon?: LucideIcon;
+  onSelect: () => void;
+  type?: 'default' | 'page' | 'player' | 'team' | 'user';
+}
+
+function CommandPaletteItem({
+  children,
+  icon: Icon,
+  onSelect,
+  type = 'default',
+}: CommandPaletteItemProps) {
   const getTypeStyles = () => {
     switch (type) {
-      case 'page': // New Page Style (Purple)
+      case 'page':
         return 'aria-selected:bg-purple-500/10 aria-selected:text-purple-400 text-muted-foreground';
       case 'player':
         return 'aria-selected:bg-blue-500/10 aria-selected:text-blue-400 text-muted-foreground';
@@ -306,3 +353,4 @@ function Item({ children, icon: Icon, onSelect, type = 'default' }) {
     </Command.Item>
   );
 }
+export default CommandPalette;

@@ -4,22 +4,34 @@ import { useState } from 'react';
 import { ChevronDown, Calendar, Check, History, Sparkles } from 'lucide-react';
 import { useSeason } from '@/contexts/SeasonContext';
 
-export default function SeasonSelector({ className = '' }) {
-  const { seasons, currentSeasonId, activeSeasonId, isCustomSeason, selectSeason } = useSeason();
+export interface SeasonSelectorProps {
+  className?: string;
+}
+
+interface SeasonContextType {
+  seasons: Array<{ id: string; name?: string; active?: boolean }>;
+  currentSeasonId: string;
+  activeSeasonId: string;
+  currentSeason: { id: string; name?: string; active?: boolean } | null;
+  isCustomSeason: boolean;
+  selectSeason: (seasonId: string) => void;
+}
+
+export function SeasonSelector({ className = '' }: SeasonSelectorProps) {
+  const { seasons, currentSeasonId, activeSeasonId, isCustomSeason, selectSeason } =
+    useSeason() as unknown as SeasonContextType;
   const [isOpen, setIsOpen] = useState(false);
 
   if (!seasons || seasons.length <= 1) {
     return null;
   }
 
-  const currentSeason = seasons.find((s) => s.id === currentSeasonId);
-  // Short display label: e.g. "2026-27" -> "26/27" or full id
-  const formatShortSeason = (id) => {
+  const formatShortSeason = (id?: string) => {
     const parts = id?.split('-');
     if (parts?.length === 2 && parts[0].length === 4 && parts[1].length === 2) {
       return `${parts[0].slice(2)}/${parts[1]}`;
     }
-    return id;
+    return id || '';
   };
 
   return (
@@ -27,7 +39,7 @@ export default function SeasonSelector({ className = '' }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="shell-action touch-target flex items-center gap-2 px-3 py-2 bg-card/40 hover:bg-white/5 border border-white/10 rounded-xl transition-all cursor-pointer group"
+        className="shell-action touch-target flex items-center gap-2 px-3 py-2 bg-card/60 hover:bg-secondary border border-border/60 rounded-xl transition-all cursor-pointer group"
         aria-label={isOpen ? 'Cerrar selector de temporada' : 'Abrir selector de temporada'}
         aria-expanded={isOpen}
         aria-haspopup="true"
@@ -43,7 +55,7 @@ export default function SeasonSelector({ className = '' }) {
         <div className="flex items-center gap-1.5 text-xs font-semibold tracking-tight">
           <span className="text-foreground">{formatShortSeason(currentSeasonId)}</span>
           {isCustomSeason ? (
-            <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
               Histórico
             </span>
           ) : (
@@ -65,14 +77,14 @@ export default function SeasonSelector({ className = '' }) {
         <>
           <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
           <div
-            className="absolute right-0 mt-2 w-64 bg-card/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-2 z-[70] animate-in fade-in zoom-in-95 duration-150"
+            className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl p-2 z-[70] animate-in fade-in zoom-in-95 duration-150"
             role="menu"
           >
-            <div className="px-3 py-2 border-b border-white/5">
+            <div className="px-3 py-2 border-b border-border/40">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Seleccionar Temporada
               </p>
-              <p className="text-xs text-foreground/70 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Navega por datos de campañas anteriores
               </p>
             </div>
@@ -95,7 +107,7 @@ export default function SeasonSelector({ className = '' }) {
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all ${
                       isSelected
                         ? 'bg-primary/15 text-primary font-bold'
-                        : 'hover:bg-white/5 text-foreground/80 hover:text-white'
+                        : 'hover:bg-secondary text-foreground'
                     }`}
                     role="menuitem"
                   >
@@ -122,14 +134,14 @@ export default function SeasonSelector({ className = '' }) {
             </div>
 
             {isCustomSeason && (
-              <div className="pt-2 mt-1 border-t border-white/5">
+              <div className="pt-2 mt-1 border-t border-border/40">
                 <button
                   type="button"
                   onClick={() => {
                     setIsOpen(false);
                     selectSeason(activeSeasonId);
                   }}
-                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold text-primary hover:bg-primary/10 rounded-lg transition-colors cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Volver a temporada en curso</span>
@@ -142,3 +154,5 @@ export default function SeasonSelector({ className = '' }) {
     </div>
   );
 }
+
+export default SeasonSelector;
