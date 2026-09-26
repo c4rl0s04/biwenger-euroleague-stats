@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import MobileSettingsDetail from '@/components/mobile/screens/MobileSettingsDetail';
+import { MobileSettingsDetail } from '@/features/accounts/public';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
 
 type SettingsSection = 'account' | 'biwenger' | 'appearance' | 'install';

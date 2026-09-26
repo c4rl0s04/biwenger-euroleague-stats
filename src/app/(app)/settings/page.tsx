@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth';
-import DesktopSettingsScreen from '@/components/settings/DesktopSettingsScreen';
-import MobileSettingsScreen from '@/components/mobile/screens/MobileSettingsScreen';
+import { DesktopSettingsScreen, MobileSettingsScreen } from '@/features/accounts/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export default async function SettingsPage() {

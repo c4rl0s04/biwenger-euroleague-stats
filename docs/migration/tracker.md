@@ -224,21 +224,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 17 — Market commands
 
-- **State:** Implemented and verified on `refactor/market-commands`.
+- **State:** Integrated into main at `d10e76e3`.
 - **Dependencies / approval:** 16; command approval.
 - **Scope:** Own selling, withdrawing and offer decisions, not provider behavior changes.
 - **Completion check:** Permission, redaction, partial local-update failure and uncertain provider outcomes tested.
 - **Evidence:** [Task 17 receipt](reports/task-17-market-commands.md); `marketCommandService` with `executeUserProviderCommand`, Zod schemas, fail-closed policy, dual-write DB reconciliation.
-- **Next action:** Proceed with Task 18 Accounts / Settings.
+- **Next action:** Completed; proceed with Task 18 Accounts / Settings.
 
 ### Task 18 — Accounts / Settings
 
-- **State:** Planned; approval gate.
+- **State:** Implemented and verified on `refactor/accounts-settings`.
 - **Dependencies / approval:** 12–13; scoped approval.
 - **Scope:** Own account orchestration/screens; retain reviewed Auth.js and encrypted credential infrastructure.
-- **Completion check:** No session/token/storage regression; explicit trusted infrastructure contracts.
-- **Evidence:** Plaintext credential fallback already removed on main.
-- **Next action:** Inventory linking/password/settings boundaries; never restore old fallback.
+- **Completion check:** Encapsulated password and Biwenger link mutations, Zod validation, zero token leakage, AES-256-GCM credential delegation, settings screens migrated to feature ownership, tests and full pipeline green.
+- **Evidence:** [Task 18 receipt](reports/task-18-accounts-settings.md); `accountCommandService`, `accountReadService`, `accountRepository`, `ChangePasswordInputSchema`, `LinkBiwengerInputSchema`, 30 new unit tests, 0 architecture violations across 88 entrypoints, full test suite passing.
+- **Next action:** Fast-forward merge into main; proceed with Task 19 Hoopgrid.
 
 ### Task 19 — Hoopgrid
 
