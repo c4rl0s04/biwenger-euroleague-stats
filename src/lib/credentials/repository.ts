@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { and, count, eq, ne, sql } from 'drizzle-orm';
-import { db } from '@/lib/db';
+import { db } from '@/lib/db/client';
 import { userBiwengerCredentials, users } from '@/lib/db/schema';
 import type { CredentialEnvelope, CredentialRecordRepository, StoredCredential } from './types';
 import type { CredentialMaintenanceRepository } from './maintenance';

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
-import { marketActionsService } from '@/lib/services/marketActionsService';
+import { marketCommandService, MarketCommandValidationError } from '@/features/market/server';
 import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 /**
@@ -15,35 +15,34 @@ export async function POST(request: NextRequest) {
       return errorResponse('No autorizado. Debes iniciar sesión para vender jugadores.', 401);
     }
 
-    // 2. Parse and validate the body
-    const body = await request.json();
-    const { playerId, price, type = 'sell' } = body;
-
-    if (!playerId) {
-      return errorResponse('ID de jugador faltante.', 400);
+    // 2. Parse body
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse('Cuerpo de solicitud inválido', 400);
     }
 
-    if (price === undefined || price === null) {
-      return errorResponse('Precio de venta faltante.', 400);
-    }
-
-    // 3. Call the service to place the player on the market or sell immediately
-    const parsedPlayerId = Number(playerId);
-    await marketActionsService.placeOnMarket({
-      playerId: parsedPlayerId,
-      price: Number(price),
-      type,
-      userId: session.user.id as string,
-    });
+    // 3. Execute command
+    const result = await marketCommandService.sellPlayer(session.user.id as string, body);
 
     return mutationSuccessResponse({
-      message: 'Jugador procesado en el mercado correctamente',
-      status: 'completed',
-      playerId: parsedPlayerId,
-      mode: type,
+      message: result.message,
+      status: result.status,
+      playerId: result.playerId,
+      mode: result.mode,
     });
-  } catch {
-    console.error('Market sell mutation failed');
-    return errorResponse('Error al poner el jugador en el mercado', 500);
+  } catch (error: any) {
+    if (error instanceof MarketCommandValidationError) {
+      return errorResponse(error.message, 400);
+    }
+    console.error('[API Market Sell] Mutation failed');
+    const message =
+      error instanceof Error &&
+      !error.message.includes('token') &&
+      !error.message.includes('Bearer')
+        ? error.message
+        : 'Error al poner el jugador en el mercado';
+    return errorResponse(message, 500);
   }
 }

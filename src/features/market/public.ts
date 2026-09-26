@@ -66,3 +66,28 @@ export type {
   MarketRecommendation,
   MarketRecommendationInput,
 } from './catalogue/lib/market-recommendation';
+export type {
+  SellPlayerInput,
+  SellPlayerResult,
+  SellAllInput,
+  SellAllResult,
+  WithdrawPlayerInput,
+  WithdrawPlayerResult,
+  AcceptOfferInput,
+  AcceptOfferResult,
+  RejectOfferInput,
+  RejectOfferResult,
+} from './commands/models/market-command.models';
+export {
+  MarketCommandValidationError,
+  sellPlayerInputSchema,
+  sellAllInputSchema,
+  withdrawPlayerInputSchema,
+  acceptOfferInputSchema,
+  rejectOfferInputSchema,
+  validateSellPlayerInput,
+  validateSellAllInput,
+  validateWithdrawPlayerInput,
+  validateAcceptOfferInput,
+  validateRejectOfferInput,
+} from './commands/validation/market-command.schema';

@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { marketActionsService } from '@/lib/services/marketActionsService';
+import { marketCommandService, MarketCommandValidationError } from '@/features/market/server';
 import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 export async function POST(request: Request) {
@@ -9,21 +9,27 @@ export async function POST(request: Request) {
       return errorResponse('No autorizado', 401);
     }
 
-    const { offerId } = await request.json();
-
-    if (!offerId) {
-      return errorResponse('ID de oferta no proporcionado', 400);
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse('Cuerpo de solicitud inválido', 400);
     }
 
-    const parsedOfferId = parseInt(offerId);
-    await marketActionsService.rejectOffer({
-      offerId: parsedOfferId,
-      userId: session.user.id,
-    });
+    const result = await marketCommandService.rejectOffer(session.user.id as string, body);
 
-    return mutationSuccessResponse({ status: 'completed', offerId: parsedOfferId });
-  } catch {
-    console.error('Offer reject mutation failed');
-    return errorResponse('Error al rechazar la oferta', 500);
+    return mutationSuccessResponse({ status: result.status, offerId: result.offerId });
+  } catch (error: any) {
+    if (error instanceof MarketCommandValidationError) {
+      return errorResponse(error.message, 400);
+    }
+    console.error('[API Market Offer Reject] Mutation failed');
+    const message =
+      error instanceof Error &&
+      !error.message.includes('token') &&
+      !error.message.includes('Bearer')
+        ? error.message
+        : 'Error al rechazar la oferta';
+    return errorResponse(message, 500);
   }
 }

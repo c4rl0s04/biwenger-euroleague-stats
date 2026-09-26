@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { marketActionsService } from '@/lib/services/marketActionsService';
+import { marketCommandService, MarketCommandValidationError } from '@/features/market/server';
 import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 export async function DELETE(request: Request) {
@@ -16,15 +16,22 @@ export async function DELETE(request: Request) {
       return errorResponse('ID de jugador no proporcionado', 400);
     }
 
-    const parsedPlayerId = parseInt(playerId);
-    await marketActionsService.withdrawFromMarket({
-      playerId: parsedPlayerId,
-      userId: session.user.id,
+    const result = await marketCommandService.withdrawPlayer(session.user.id as string, {
+      playerId,
     });
 
-    return mutationSuccessResponse({ status: 'completed', playerId: parsedPlayerId });
-  } catch {
-    console.error('Market remove mutation failed');
-    return errorResponse('Error al retirar del mercado', 500);
+    return mutationSuccessResponse({ status: result.status, playerId: result.playerId });
+  } catch (error: any) {
+    if (error instanceof MarketCommandValidationError) {
+      return errorResponse(error.message, 400);
+    }
+    console.error('[API Market Remove] Mutation failed');
+    const message =
+      error instanceof Error &&
+      !error.message.includes('token') &&
+      !error.message.includes('Bearer')
+        ? error.message
+        : 'Error al retirar del mercado';
+    return errorResponse(message, 500);
   }
 }

@@ -34,7 +34,7 @@ describe('Rounds architecture registration', () => {
       expect(exceptions).toHaveLength(6);
       for (const entry of exceptions) {
         expect(entry.edge).toMatch(
-          / -> (src\/auth\.js|src\/lib\/credentials\/repository\.ts) -> (drizzle-orm|src\/lib\/db\/(index|schema)\.ts)$/
+          / -> (src\/auth\.js|src\/lib\/credentials\/repository\.ts) -> (drizzle-orm|src\/lib\/db\/(client|index|schema)\.ts)$/
         );
         expect(entry.removeWhen).toContain('security gate');
       }

@@ -19,6 +19,8 @@ async function clearLocalPlayerOwner(playerId: number) {
 
 /**
  * Service to handle Market Write operations on Biwenger
+ * @deprecated Migrated to `marketCommandService` in `src/features/market/server`.
+ * Retained for legacy test compatibility until Task 25.
  */
 export const marketActionsService = {
   /**

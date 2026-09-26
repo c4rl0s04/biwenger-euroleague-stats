@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { marketActionsService } from '@/lib/services/marketActionsService';
+import { marketCommandService, MarketCommandValidationError } from '@/features/market/server';
 import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 export async function POST(request: Request) {
@@ -9,27 +9,31 @@ export async function POST(request: Request) {
       return errorResponse('No autorizado', 401);
     }
 
-    const { offerId, playerId } = await request.json();
-
-    if (!offerId) {
-      return errorResponse('ID de oferta no proporcionado', 400);
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse('Cuerpo de solicitud inválido', 400);
     }
 
-    const parsedOfferId = Number(offerId);
-    const parsedPlayerId = playerId ? Number(playerId) : undefined;
-    await marketActionsService.acceptOffer({
-      offerId: parsedOfferId,
-      userId: session.user.id,
-      playerId: parsedPlayerId,
-    });
+    const result = await marketCommandService.acceptOffer(session.user.id as string, body);
 
     return mutationSuccessResponse({
-      status: 'completed',
-      offerId: parsedOfferId,
-      ...(parsedPlayerId ? { playerId: parsedPlayerId } : {}),
+      status: result.status,
+      offerId: result.offerId,
+      ...(result.playerId ? { playerId: result.playerId } : {}),
     });
-  } catch {
-    console.error('Offer accept mutation failed');
-    return errorResponse('Error al aceptar la oferta', 500);
+  } catch (error: any) {
+    if (error instanceof MarketCommandValidationError) {
+      return errorResponse(error.message, 400);
+    }
+    console.error('[API Market Offer Accept] Mutation failed');
+    const message =
+      error instanceof Error &&
+      !error.message.includes('token') &&
+      !error.message.includes('Bearer')
+        ? error.message
+        : 'Error al aceptar la oferta';
+    return errorResponse(message, 500);
   }
 }

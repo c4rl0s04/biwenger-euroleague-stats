@@ -84,3 +84,32 @@ export {
   MARKET_TRENDS_POLICY,
 } from './trends/server/services/market-trends.service';
 export { parseMarketTrendDays } from './trends/validation/market-trends';
+export {
+  marketCommandService,
+  createMarketCommandService,
+  type MarketCommandService,
+} from './commands/server/services/market-command.service';
+export {
+  marketCommandRepository,
+  type MarketCommandRepository,
+} from './commands/server/repositories/market-command.repository';
+export {
+  MarketCommandValidationError,
+  validateSellPlayerInput,
+  validateSellAllInput,
+  validateWithdrawPlayerInput,
+  validateAcceptOfferInput,
+  validateRejectOfferInput,
+} from './commands/validation/market-command.schema';
+export type {
+  SellPlayerInput,
+  SellPlayerResult,
+  SellAllInput,
+  SellAllResult,
+  WithdrawPlayerInput,
+  WithdrawPlayerResult,
+  AcceptOfferInput,
+  AcceptOfferResult,
+  RejectOfferInput,
+  RejectOfferResult,
+} from './commands/models/market-command.models';

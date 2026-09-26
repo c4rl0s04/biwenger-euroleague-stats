@@ -215,21 +215,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 16 — Private Market reads
 
-- **State:** Planned; approval gate.
+- **State:** Verified no-op; receipt integrated.
 - **Dependencies / approval:** 12–13; scoped approval.
 - **Scope:** Migrate only private account/offer reads confirmed in source; exclude public analytics and mutations.
 - **Completion check:** Private typed models isolated from public cache/contracts.
-- **Evidence:** Public slice already merged in PR 38.
-- **Next action:** Inventory actual operations; document no-op only if absence is proven.
+- **Evidence:** [Task 16 receipt](reports/task-16-private-market-reads.md); exhaustive source audit establishes absence of standalone private reads; user listings/offers canonically owned by `features/lineup` under Task 14.
+- **Next action:** Proceed with Task 17 Market commands.
 
 ### Task 17 — Market commands
 
-- **State:** Planned; approval gate.
+- **State:** Implemented and verified on `refactor/market-commands`.
 - **Dependencies / approval:** 16; command approval.
 - **Scope:** Own selling, withdrawing and offer decisions, not provider behavior changes.
 - **Completion check:** Permission, redaction, partial local-update failure and uncertain provider outcomes tested.
-- **Evidence:** Existing marketActionsService retained.
-- **Next action:** Pin each existing command and local reconciliation behavior.
+- **Evidence:** [Task 17 receipt](reports/task-17-market-commands.md); `marketCommandService` with `executeUserProviderCommand`, Zod schemas, fail-closed policy, dual-write DB reconciliation.
+- **Next action:** Proceed with Task 18 Accounts / Settings.
 
 ### Task 18 — Accounts / Settings
 

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
-import { marketActionsService } from '@/lib/services/marketActionsService';
+import { marketCommandService, MarketCommandValidationError } from '@/features/market/server';
 import { mutationSuccessResponse, errorResponse } from '@/lib/utils/response';
 
 /**
@@ -15,22 +15,32 @@ export async function POST(request: NextRequest) {
       return errorResponse('No autorizado. Debes iniciar sesión para vender jugadores.', 401);
     }
 
-    // 2. Parse and validate the body
-    const body = await request.json();
-    const { pricePercentage = 100 } = body;
+    // 2. Parse body
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch {
+      body = {};
+    }
 
     // 3. Call the service to place all players on the market
-    await marketActionsService.placeAllOnMarket({
-      pricePercentage: Number(pricePercentage),
-      userId: session.user.id as string,
-    });
+    const result = await marketCommandService.sellAllSquad(session.user.id as string, body);
 
     return mutationSuccessResponse({
-      message: 'Plantilla entera puesta en mercado',
-      status: 'completed',
+      message: result.message,
+      status: result.status,
     });
-  } catch {
-    console.error('Market sell-all mutation failed');
-    return errorResponse('Error masivo al poner en el mercado', 500);
+  } catch (error: any) {
+    if (error instanceof MarketCommandValidationError) {
+      return errorResponse(error.message, 400);
+    }
+    console.error('[API Market Sell-All] Mutation failed');
+    const message =
+      error instanceof Error &&
+      !error.message.includes('token') &&
+      !error.message.includes('Bearer')
+        ? error.message
+        : 'Error masivo al poner en el mercado';
+    return errorResponse(message, 500);
   }
 }
