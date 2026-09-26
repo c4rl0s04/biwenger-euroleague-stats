@@ -1,12 +1,12 @@
-import { hoopgridService } from '@/lib/services/features/hoopgridService';
+import {
+  hoopgridCommandService,
+  HoopgridValidationError,
+} from '@/features/hoopgrid/server';
 import { auth } from '@/auth';
 import { privateJsonResponse } from '@/lib/utils/response';
 
 export async function POST(request: Request) {
   try {
-    const { challengeId, cellIndex, playerId, dryRun, action, guesses } = await request.json();
-
-    // 1. Auth & User check (Strict Session)
     const session = await auth();
     const userId = session?.user?.id;
 
@@ -14,37 +14,20 @@ export async function POST(request: Request) {
       return privateJsonResponse({ error: 'Unauthorized' }, 401);
     }
 
-    if (action === 'submitBatch') {
-      const results: any[] = [];
-      const batchGuesses = guesses as Record<string, { playerId: number; isCorrect: boolean }>;
+    const body = await request.json();
 
-      for (const [cellIdxStr, p] of Object.entries(batchGuesses)) {
-        if (!p.isCorrect) continue;
-        const cellIdx = parseInt(cellIdxStr);
-        const res = await hoopgridService.submitGuess(
-          challengeId,
-          userId,
-          cellIdx,
-          p.playerId,
-          false
-        );
-        results.push({ cellIndex: cellIdx, ...res });
-      }
-      return privateJsonResponse({ success: true, results });
+    if (body?.action === 'submitBatch') {
+      const result = await hoopgridCommandService.submitBatchGuesses(body, userId);
+      return privateJsonResponse(result);
     }
 
-    // 2. Submit guess via service
-    const result = await hoopgridService.submitGuess(
-      challengeId,
-      userId,
-      cellIndex,
-      playerId,
-      dryRun
-    );
-
+    const result = await hoopgridCommandService.submitGuess(body, userId);
     return privateJsonResponse(result);
   } catch (error: any) {
+    if (error instanceof HoopgridValidationError) {
+      return privateJsonResponse({ error: error.message, details: error.errors }, 400);
+    }
     console.error('Hoopgrid Guess Error:', error);
-    return privateJsonResponse({ error: error.message }, 500);
+    return privateJsonResponse({ error: error.message || 'Internal Server Error' }, 500);
   }
 }

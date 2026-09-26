@@ -1,0 +1,85 @@
+export const HOOPGRID_POSITIONS = [
+  { value: 'Base', label: 'Base' },
+  { value: 'Alero', label: 'Alero' },
+  { value: 'Pivot', label: 'Pívot' },
+];
+
+export const HOOPGRID_STATS = [
+  // Averages (Biwenger Points vs PIR)
+  { type: 'stat_avg', field: 'fantasyPoints', threshold: 12, label: '12+ Pts Biw. (Media)' },
+  { type: 'stat_avg', field: 'valuation', threshold: 15, label: '15+ PIR (Media)' },
+
+  // Traditional Stats (Media)
+  { type: 'stat_avg', field: 'points', threshold: 12, label: '12+ Puntos (Media)' },
+  { type: 'stat_avg', field: 'assists', threshold: 5, label: '5+ Asis. (Media)' },
+  { type: 'stat_avg', field: 'rebounds', threshold: 6, label: '6+ Reb. (Media)' },
+  { type: 'stat_avg', field: 'minutes', threshold: 24, label: '24+ Min. (Media)' },
+
+  // Sniper Achievement (Media)
+  {
+    type: 'percentage',
+    value: { madeField: 'threePointsMade', attField: 'threePointsAttempted', threshold: 0.4 },
+    label: '40%+ Triples (Media)',
+  },
+  { type: 'stat_avg', field: 'threePointsMade', threshold: 2.2, label: '2.2+ Triples (Media)' },
+
+  // Single Game Peaks
+  { type: 'stat_single', field: 'points', threshold: 30, label: '30+ Puntos (1 Part.)' },
+  { type: 'stat_single', field: 'assists', threshold: 10, label: '10+ Asis. (1 Part.)' },
+  { type: 'stat_single', field: 'rebounds', threshold: 12, label: '12+ Reb. (1 Part.)' },
+  { type: 'stat_single', field: 'valuation', threshold: 35, label: '35+ PIR (1 Part.)' },
+  { type: 'stat_single', field: 'steals', threshold: 4, label: '4+ Robos (1 Part.)' },
+  { type: 'stat_single', field: 'blocks', threshold: 3, label: '3+ Tapones (1 Part.)' },
+
+  // Special Achievement
+  { type: 'double_double', label: 'Doble-Doble (1 Part.)' },
+
+  // Season Totals
+  { type: 'stat_total', field: 'fantasyPoints', threshold: 400, label: '400+ Pts Biw. (Total)' },
+  { type: 'stat_total', field: 'threePointsMade', threshold: 50, label: '50+ Triples (Total)' },
+];
+
+export const HOOPGRID_MARKET = [
+  { type: 'price_min', value: 15000000, label: 'Precio > 15M' },
+  { type: 'price_min', value: 20000000, label: 'Precio > 20M' },
+  { type: 'price_max', value: 5000000, label: 'Precio < 5M' },
+  { type: 'price_max', value: 3000000, label: 'Ganga (< 3M)' },
+];
+
+export const HOOPGRID_OWNERSHIP = [
+  { type: 'ownership', value: 'current', label: 'En Plantilla' },
+  { type: 'ownership', value: 'free', label: 'Agente Libre' },
+  { type: 'ownership', value: 'past_not_current', label: 'Anteriormente en plantilla' },
+  { type: 'ownership', value: 'never', label: 'Nunca Fichado' },
+];
+
+export const HOOPGRID_COUNTRIES = [
+  { value: 'United States of America', label: 'EE.UU.' },
+  { value: 'Spain', label: 'España' },
+  { value: 'France', label: 'Francia' },
+  { value: 'Serbia', label: 'Serbia' },
+  { value: 'Lithuania', label: 'Lituania' },
+  { value: 'Greece', label: 'Grecia' },
+  { value: 'Italy', label: 'Italia' },
+  { value: 'Germany', label: 'Alemania' },
+  { value: 'Turkey', label: 'Turquía' },
+  { value: 'Argentina', label: 'Argentina' },
+  { value: 'Slovenia', label: 'Eslovenia' },
+  { value: 'Croatia', label: 'Croacia' },
+  { value: 'Latvia', label: 'Letonia' },
+  { value: 'Montenegro', label: 'Montenegro' },
+];
+
+export const HOOPGRID_HEIGHT = [
+  { type: 'height_min', value: 210, label: '2.10m o más' },
+  { type: 'height_min', value: 205, label: '2.05m o más' },
+  { type: 'height_max', value: 190, label: 'Menos de 1.90m' },
+  { type: 'height_max', value: 185, label: 'Menos de 1.85m' },
+];
+
+export const HOOPGRID_AGE = [
+  { type: 'age_max', value: 25, label: '25 años o menos' },
+  { type: 'age_max', value: 23, label: '23 años o menos' },
+  { type: 'age_min', value: 30, label: '30 años o más' },
+  { type: 'age_min', value: 33, label: '33 años o más' },
+];

@@ -233,21 +233,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 18 — Accounts / Settings
 
-- **State:** Implemented and verified on `refactor/accounts-settings`.
+- **State:** Integrated into main at `be1ca039`.
 - **Dependencies / approval:** 12–13; scoped approval.
 - **Scope:** Own account orchestration/screens; retain reviewed Auth.js and encrypted credential infrastructure.
 - **Completion check:** Encapsulated password and Biwenger link mutations, Zod validation, zero token leakage, AES-256-GCM credential delegation, settings screens migrated to feature ownership, tests and full pipeline green.
 - **Evidence:** [Task 18 receipt](reports/task-18-accounts-settings.md); `accountCommandService`, `accountReadService`, `accountRepository`, `ChangePasswordInputSchema`, `LinkBiwengerInputSchema`, 30 new unit tests, 0 architecture violations across 88 entrypoints, full test suite passing.
-- **Next action:** Fast-forward merge into main; proceed with Task 19 Hoopgrid.
+- **Next action:** Completed; proceed with Task 19 Hoopgrid.
 
 ### Task 19 — Hoopgrid
 
-- **State:** Planned; approval gate.
+- **State:** Implemented and verified on `refactor/hoopgrid`.
 - **Dependencies / approval:** 12; explicit behavior/security decisions.
 - **Scope:** Separate challenge reads, creation and guesses, including test/cheatsheet routes.
-- **Completion check:** Side-effecting GET and answer privacy deliberately handled; no silent protocol change.
-- **Evidence:** Security gate.
-- **Next action:** Pin all routes/actions and resolve mixed-read/write decisions.
+- **Completion check:** Side-effecting GET concurrency race resolved with idempotent conflict handling; answer privacy preserved; cheatsheet protected behind session authentication; Zod validation and safe serializable models enforced.
+- **Evidence:** [Task 19 receipt](reports/task-19-hoopgrid.md); `hoopgridCommandService`, `hoopgridReadService`, `hoopgridRepository`, 4 test suites (36 tests), 0 architecture violations across 94 entrypoints, full test suite (2,755 tests) and build passing.
+- **Next action:** Fast-forward merge into main; proceed with Task 20 Assistant.
 
 ### Task 20 — Assistant
 

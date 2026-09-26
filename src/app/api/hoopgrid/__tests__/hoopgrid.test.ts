@@ -4,44 +4,27 @@ import { auth } from '@/auth';
 
 vi.setConfig({ testTimeout: 15000 });
 
-const { dbMock, hoopgridServiceMock } = vi.hoisted(() => {
-  const selectable = {
-    orderBy: vi.fn(),
-    leftJoin: vi.fn(() => ({
-      where: vi.fn(),
-    })),
-  };
-
+const { hoopgridReadServiceMock, hoopgridCommandServiceMock } = vi.hoisted(() => {
   return {
-    dbMock: {
-      query: {
-        hoopgridChallenges: {
-          findFirst: vi.fn(),
-        },
-      },
-      select: vi.fn(() => ({
-        from: vi.fn(() => selectable),
-      })),
-      selectable,
+    hoopgridReadServiceMock: {
+      listChallenges: vi.fn(),
+      getTodayChallenge: vi.fn(),
     },
-    hoopgridServiceMock: {
+    hoopgridCommandServiceMock: {
       submitGuess: vi.fn(),
-      generateDailyChallenge: vi.fn(),
+      submitBatchGuesses: vi.fn(),
     },
   };
 });
 
-vi.mock('@/lib/db', () => ({
-  db: dbMock,
-}));
-
-vi.mock('@/lib/services/features/hoopgridService', () => ({
-  hoopgridService: hoopgridServiceMock,
-  HoopgridService: {
-    calculateComplexity: vi.fn(() => 42),
-    getRarity: vi.fn(async () => 7),
-  },
-}));
+vi.mock('@/features/hoopgrid/server', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/features/hoopgrid/server')>();
+  return {
+    ...actual,
+    hoopgridReadService: hoopgridReadServiceMock,
+    hoopgridCommandService: hoopgridCommandServiceMock,
+  };
+});
 
 function request(path: string): NextRequest {
   return new NextRequest(path);
@@ -59,21 +42,40 @@ describe('hoopgrid route contracts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(auth).mockResolvedValue({ user: { id: '42' } } as any);
-    dbMock.selectable.orderBy.mockResolvedValue([
-      { id: 'challenge-1', gameDate: '2026-05-18', number: 1, possibleCounts: '[1]' },
-    ]);
-    dbMock.selectable.leftJoin.mockReturnValue({
-      where: vi.fn(async () => [
-        { cellIndex: 0, playerId: 1, isCorrect: true, playerName: 'Player', playerImg: null },
-      ]),
+
+    hoopgridReadServiceMock.listChallenges.mockResolvedValue({
+      challenges: [
+        {
+          id: 'challenge-1',
+          gameDate: '2026-05-18',
+          number: 1,
+          possibleCounts: '[1]',
+          complexity: 42,
+        },
+      ],
     });
-    dbMock.query.hoopgridChallenges.findFirst.mockResolvedValue({
-      id: 'challenge-1',
-      gameDate: '2026-05-18',
-      rows: '[]',
-      cols: '[]',
-      possibleCounts: '[1]',
-      isActive: true,
+
+    hoopgridReadServiceMock.getTodayChallenge.mockResolvedValue({
+      challenge: {
+        id: 'challenge-1',
+        gameDate: '2026-05-18',
+        number: 1,
+        rows: [],
+        cols: [],
+        possibleCounts: [1],
+        complexity: 42,
+        isActive: true,
+      },
+      userGuesses: [
+        {
+          cellIndex: 0,
+          playerId: 1,
+          isCorrect: true,
+          playerName: 'Player',
+          playerImg: null,
+          rarity: 7,
+        },
+      ],
     });
   });
 
@@ -92,7 +94,7 @@ describe('hoopgrid route contracts', () => {
         complexity: 42,
       },
     ]);
-  }, 10000);
+  });
 
   it('covers GET /api/hoopgrid/today existing challenge contract', async () => {
     const { GET } = await import('@/app/api/hoopgrid/today/route');
@@ -103,10 +105,15 @@ describe('hoopgrid route contracts', () => {
     expect(json.challenge.id).toBe('challenge-1');
     expect(json.challenge.complexity).toBe(42);
     expect(json.userGuesses[0].rarity).toBe(7);
+    expect(hoopgridReadServiceMock.getTodayChallenge).toHaveBeenCalledWith('2026-05-18', '42');
   });
 
   it('covers POST /api/hoopgrid/guess auth and success contracts', async () => {
-    hoopgridServiceMock.submitGuess.mockResolvedValue({ success: true, isCorrect: true });
+    hoopgridCommandServiceMock.submitGuess.mockResolvedValue({
+      isCorrect: true,
+      rarity: 15,
+      guess: { id: 'g1' },
+    });
 
     const { POST } = await import('@/app/api/hoopgrid/guess/route');
     const response = await POST(
@@ -118,7 +125,11 @@ describe('hoopgrid route contracts', () => {
       })
     );
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ success: true, isCorrect: true });
+    expect(await response.json()).toEqual({
+      isCorrect: true,
+      rarity: 15,
+      guess: { id: 'g1' },
+    });
 
     vi.mocked(auth).mockResolvedValue(null as any);
     const unauthorized = await POST(
@@ -132,7 +143,10 @@ describe('hoopgrid route contracts', () => {
   });
 
   it('covers POST /api/hoopgrid/guess batch contract', async () => {
-    hoopgridServiceMock.submitGuess.mockResolvedValue({ success: true });
+    hoopgridCommandServiceMock.submitBatchGuesses.mockResolvedValue({
+      success: true,
+      results: [{ cellIndex: 0, isCorrect: true, rarity: 15 }],
+    });
 
     const { POST } = await import('@/app/api/hoopgrid/guess/route');
     const response = await POST(
@@ -149,6 +163,6 @@ describe('hoopgrid route contracts', () => {
 
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
-    expect(json.results).toEqual([{ cellIndex: 0, success: true }]);
+    expect(json.results).toEqual([{ cellIndex: 0, isCorrect: true, rarity: 15 }]);
   });
 });

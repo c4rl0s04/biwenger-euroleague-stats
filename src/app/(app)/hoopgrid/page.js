@@ -1,8 +1,5 @@
-import HoopgridClient from '@/components/hoopgrid/HoopgridClient';
-import MobileHoopgridScreen from '@/components/mobile/screens/MobileHoopgridScreen';
-import { PageHeader } from '@/components/ui';
+import { DesktopHoopgridScreen, MobileHoopgridScreen } from '@/features/hoopgrid/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
-import { Suspense } from 'react';
 
 /**
  * Hoopgrid Page
@@ -17,29 +14,5 @@ export const metadata = {
 
 export default async function HoopgridPage() {
   if (await isPhonePresentation()) return <MobileHoopgridScreen />;
-
-  return (
-    <div className="min-h-screen bg-background">
-      <main className="w-full relative z-10">
-        {/* Header Section */}
-        <PageHeader
-          title="Hoopgrid Diario"
-          description="Completa la cuadrícula de 3x3 seleccionando jugadores que cumplan ambos criterios."
-        />
-
-        {/* Section Title & Game Container */}
-        <div className="container mx-auto px-4 pb-20">
-          <div className="flex flex-col items-center justify-center">
-            <Suspense
-              fallback={
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-              }
-            >
-              <HoopgridClient />
-            </Suspense>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+  return <DesktopHoopgridScreen />;
 }
