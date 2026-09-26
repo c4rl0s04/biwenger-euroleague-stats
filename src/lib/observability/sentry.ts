@@ -90,7 +90,10 @@ export interface SyncErrorContext {
 /**
  * Captures background sync and crawler errors with structured tags and execution metrics.
  */
-export function captureSyncError(error: unknown, context: SyncErrorContext = {}): string | undefined {
+export function captureSyncError(
+  error: unknown,
+  context: SyncErrorContext = {}
+): string | undefined {
   const err = error instanceof Error ? error : new Error(String(error || 'Unknown sync error'));
 
   // Never crash during error reporting

@@ -53,4 +53,7 @@ jobs:
 
           # Observability
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+
+          # Node runtime conditions
+          NODE_OPTIONS: --conditions=react-server
         run: npm run sync:preflight && npm run sync
