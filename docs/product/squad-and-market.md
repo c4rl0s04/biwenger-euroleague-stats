@@ -26,11 +26,11 @@ rejecting offers.
 
 - Pages: [`lineup`](<../../src/app/(app)/lineup>) and [`market`](<../../src/app/(app)/market>).
 - UI: [`src/components/lineup`](../../src/components/lineup) and
-  [`src/features/market/components`](../../src/features/market/components).
+  [`src/features/market`](../../src/features/market) sub-domains (`catalogue`, `analytics`, `trends`, `screens`).
 - Services: [`lineupService.ts`](../../src/lib/services/lineupService.ts), market read services under
-  [`src/features/market/server`](../../src/features/market/server), and
+  [`src/features/market/server.ts`](../../src/features/market/server.ts), and
   [`marketActionsService.ts`](../../src/lib/services/marketActionsService.ts).
-- Data: market queries under [`src/features/market/server/queries`](../../src/features/market/server/queries),
+- Data: market queries under [`src/features/market`](../../src/features/market) (`catalogue/server/queries`, `analytics/server/queries`, `trends/server/queries`),
   current ownership, lineups, transfers, bids, listings, and market-value
   history under [`src/lib/db`](../../src/lib/db).
 - HTTP: `/api/market/*`, `/api/users/lineup`, and player squad endpoints.

@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import fixtures from '@/features/market/server/fixtures/analytics-original.json';
+import fixtures from '@/features/market/analytics/server/fixtures/analytics-original.json';
 vi.mock('server-only', () => ({}));
 const fake = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
 vi.mock('../../index', () => ({ db: {}, pgClient: { query: fake.query } }));

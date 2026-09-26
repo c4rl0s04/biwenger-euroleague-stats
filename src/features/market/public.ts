@@ -1,13 +1,13 @@
-export { scoreMarketListing } from './lib/market-recommendation';
-export type { HighestTransferRecord, BiggestGainRecord } from './models/activity-records';
-export { default as MarketSectionRows } from './components/MarketSectionRows';
-export { default as MarketSectionScreen } from './components/MarketSectionScreen';
-export type { MarketSectionRow, MarketSectionModel } from './models/market-section';
-export { default as DesktopMarketScreen } from './components/DesktopMarketScreen';
-export { default as MobileMarketScreen } from './components/MobileMarketScreen';
-export type { MobileMarketOverview } from './models/market-screen';
-export type { PlayerProfitability } from './models/market-investments';
-export type { MarketAnalytics } from './models/market-analytics';
+export { scoreMarketListing } from './catalogue/lib/market-recommendation';
+export type { HighestTransferRecord, BiggestGainRecord } from './trends/models/activity-records';
+export { default as MarketSectionRows } from './screens/components/MarketSectionRows';
+export { default as MarketSectionScreen } from './screens/components/MarketSectionScreen';
+export type { MarketSectionRow, MarketSectionModel } from './screens/models/market-section';
+export { default as DesktopMarketScreen } from './screens/components/DesktopMarketScreen';
+export { default as MobileMarketScreen } from './screens/components/MobileMarketScreen';
+export type { MobileMarketOverview } from './screens/models/market-screen';
+export type { PlayerProfitability } from './analytics/models/market-investments';
+export type { MarketAnalytics } from './analytics/models/market-analytics';
 export type {
   MarketOverviewKPIs,
   PositionAnalysis,
@@ -15,8 +15,8 @@ export type {
   BidDuelRecord,
   BidDuelSummary,
   BiddingDuelsStats,
-} from './models/market-overview';
-export type { RecentTransfer, PriceChange } from './models/market-activity-extra';
+} from './analytics/models/market-overview';
+export type { RecentTransfer, PriceChange } from './trends/models/market-activity-extra';
 export type {
   BestRevaluation,
   BestValuePlayer,
@@ -30,7 +30,7 @@ export type {
   QuickFlip,
   LongHold,
   Devaluation,
-} from './models/market-investments';
+} from './analytics/models/market-investments';
 export type {
   RecordBid,
   TheThief,
@@ -38,7 +38,7 @@ export type {
   TheVictim,
   OverpayerManager,
   InflatedPlayer,
-} from './models/market-auctions';
+} from './analytics/models/market-auctions';
 export type {
   TopTransferredPlayer,
   EnrichedTransfer,
@@ -46,20 +46,23 @@ export type {
   BestSeller,
   MostOwnersPlayer,
   ManagerMarketStats,
-} from './models/market-summary';
-export type { CurrentMarketListing, MarketOpportunity } from './models/market-catalogue';
-export type { MarketTrendDay } from './models/market-trends';
+} from './analytics/models/market-summary';
+export type { CurrentMarketListing, MarketOpportunity } from './catalogue/models/market-catalogue';
+export type { MarketTrendDay } from './trends/models/market-trends';
 export type {
   MarketActivityTransfer,
   MarketActivityTrend,
   MarketActivityKPIs,
   MarketActivityOverview,
-} from './models/market-activity';
+} from './trends/models/market-activity';
 export type {
   MarketTransfersInput,
   MarketTransfer,
   MarketTransferPage,
   MarketValueDetail,
   MarketDuelDetail,
-} from './models/market-transfers';
-export type { MarketRecommendation, MarketRecommendationInput } from './lib/market-recommendation';
+} from './trends/models/market-transfers';
+export type {
+  MarketRecommendation,
+  MarketRecommendationInput,
+} from './catalogue/lib/market-recommendation';
