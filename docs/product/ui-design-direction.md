@@ -300,6 +300,27 @@ Do not remove important information simply because the desktop table does not fi
 Desktop and phone should share the same domain view model whenever practical while being free to use
 different presentation components when information priority or interaction genuinely changes.
 
+## Presentation ownership target
+
+The final product should make presentation ownership obvious from the repository structure:
+
+- Next.js route files remain under `src/app` and choose/orchestrate presentation; mobile is not a
+  second application router.
+- persistent global chrome lives under `src/components/shell`, separated into shared, desktop and
+  mobile/PWA presentation where useful;
+- feature-specific desktop and mobile screens live with the owning feature;
+- reusable domain-independent UI lives under the shared UI foundation;
+- reusable phone-only page scaffolds may remain globally shared, but feature-specific mobile screens do not.
+
+The intended reuse boundary is **shared meaning and contracts**, not forced identical markup. Desktop and
+phone may compose the same data/view model differently. Avoid one giant responsive screen filled with
+device conditionals when the information architecture is genuinely different.
+
+File reorganization follows product migration rather than preceding it: AppShell establishes the pattern,
+then each feature is moved into the target ownership structure when that feature's UI is migrated or
+redesigned. This keeps structural changes tied to verified user-facing slices instead of creating a
+repository-wide move with no behavioral value.
+
 ## Page archetypes
 
 Use these as composition guidance, not rigid templates.
@@ -480,6 +501,10 @@ UI-04  foundation/design review                       refine before broad adopti
 Later:
 feature-by-feature legacy page migration
 ```
+
+Each migrated feature slice also owns its structural cleanup: move feature-specific desktop/mobile screens
+to the owning feature, update barrels/imports/tests, remove obsolete global mobile screens or legacy UI
+files after consumer checks, and leave no duplicate old/new implementation behind.
 
 Exact task ordering may change when a demonstrated dependency justifies it, but new primitives must be
 theme-ready and must not assume that every page is a Card grid.
