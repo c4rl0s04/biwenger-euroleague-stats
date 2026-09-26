@@ -235,33 +235,87 @@ entry points.
 
 ### Shell target direction
 
+The shell migration establishes the canonical presentation-ownership pattern for the rest of the UI
+migration. Organize by **ownership first**, then by presentation where desktop and phone/PWA genuinely
+need different compositions.
+
 Directional structure:
 
 ```text
-src/components/
-  ui/
-    primitives/
-    controls/
-    compositions/
+src/
+  app/
+    (app)/
+      ...                    # routing/orchestration only
 
-  shell/
-    AppShell.tsx
-    AppBackground.tsx
-    AppHeader.tsx
-    Sidebar.tsx
-    Footer.tsx
-    MobileNavigation.tsx
-    GlobalSearch.tsx
-    SeasonSelector.tsx
-    NewsStrip.tsx
+  components/
+    ui/
+      primitives/            # domain-independent base UI
+      controls/              # reusable interactions
+      compositions/          # reusable domain-independent compositions
+
+    shell/
+      AppShell.tsx            # presentation-mode orchestration
+      shared/
+        AppBackground.tsx
+        AppMain.tsx
+        AppBrand.tsx
+        NavigationFeedback.tsx
+        navigation.ts
+      desktop/
+        DesktopShell.tsx
+        AppHeader.tsx
+        Sidebar.tsx
+        AppFooter.tsx
+      mobile/
+        MobileShell.tsx
+        MobileNavigation.tsx
+        MobileMoreMenu.tsx
+      integrations/
+        GlobalSearch.tsx
+        SeasonSelector.tsx
+        AccountMenu.tsx
+
+    mobile/
+      ...                    # reusable phone-only, domain-independent page compositions
+
+  features/
+    <domain>/
+      public.ts
+      server.ts
+      models/
+      server/
+      components/
+        shared/
+        desktop/
+        mobile/
+      screens/
+        desktop/
+        mobile/
 ```
 
-This is not a mandate to create every file immediately. Existing shell components should be migrated
-incrementally after their dependencies and route contracts are understood.
+Not every optional folder must exist for a small feature. Create `shared/`, `desktop/`, or `mobile/`
+when the distinction improves ownership and navigation rather than to satisfy a directory template.
 
-The current `src/components/layout` and `src/components/mobile` code are audit inputs, not automatic
-target ownership. Some current mobile primitives may become shared responsive UI; some navigation
-components will remain shell-specific.
+Ownership rules:
+
+- `src/app` owns URLs, route params, guards/auth orchestration, presentation detection and wiring to
+  feature/shell contracts. Route files stay thin and do not own full desktop/mobile implementations.
+- `src/components/ui` owns domain-independent UI only.
+- `src/components/shell` owns persistent application chrome and **where** global capabilities appear.
+  It may know route/navigation structure but must not absorb Search, News, Season or Auth business logic.
+- `src/components/mobile` may retain reusable phone-specific compositions such as screen scaffolds,
+  bottom sheets or mobile-only interaction patterns when they are domain-independent. It must not become
+  a home for feature-specific screens.
+- `src/features/<domain>` owns feature meaning and both desktop/mobile feature presentation.
+  A `MobileMarketScreen`, `MobileDashboardScreen` or `MobileLineupScreen` belongs to its feature,
+  not to a global mobile-screen folder.
+- desktop and mobile should share view models, contracts and meaningful subcomponents when semantics are
+  identical, but they may use separate top-level screens when information hierarchy or interaction differs.
+
+The current `src/components/layout`, legacy `src/components/ui`, global mobile-screen files and mixed
+feature screen conventions are migration inputs, not final ownership. Do not perform a repository-wide
+directory-only refactor before shell work. The AppShell slice establishes this pattern first; each later
+feature UI migration moves only the files owned by that feature and proves its cleanup before completion.
 
 ### Shell migration order
 
@@ -278,8 +332,12 @@ A likely sequence is:
 6. footer and global news/ticker surfaces;
 7. legacy shell cleanup and visual-regression verification.
 
-This shell migration is part of the complete UI migration, even though it is not required before the
-Season Predictions pilot.
+The shell slice is complete only when the new shell is the sole owner of persistent application chrome:
+old shell files, compatibility exports and styling are deleted once repository-wide consumer checks prove
+they are unused. Do not keep duplicate old/new shell implementations merely as a precaution.
+
+This shell migration is part of the complete UI migration and establishes the file-ownership convention
+that later feature UI migrations follow.
 
 ## Design tokens
 
