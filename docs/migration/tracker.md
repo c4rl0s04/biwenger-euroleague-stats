@@ -278,12 +278,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 23 — Shell / search interactions
 
-- **State:** Planned; presentation migration is now an early UI adoption slice.
+- **State:** Planned; first production adoption slice after UI foundation hardening.
 - **Dependencies / approval:** Stable domain access contracts; 18 only where account/auth behavior is changed.
-- **Scope:** Migrate sidebar, top bar, footer/mobile navigation and shared shell presentation onto the new UI foundation while preserving routing, authentication, search-data ownership and PWA behavior. Search/control behavior stays separately bounded.
-- **Completion check:** Acyclic reusable composition, preserved keyboard/focus/mobile/safe-area behavior, and no auth/provider ownership drift.
-- **Evidence:** Search data boundary already merged; UI foundation evidence is recorded in Task 24.
-- **Next action:** After UI rollout hardening, inventory shell chrome and migrate it as the first production consumer. Do not re-migrate Search SQL or change auth behavior as part of the visual slice.
+- **Scope:** Establish `src/components/shell` as the owner of persistent chrome, with shared/desktop/mobile/integration boundaries; migrate app background/content frame, sidebar, top header, footer, phone bottom navigation/More menu and global capability placement onto the new UI foundation while preserving routing, authentication, search-data ownership and PWA behavior. Search/control behavior stays separately bounded.
+- **Completion check:** Acyclic reusable composition; explicit shared/desktop/mobile ownership; preserved keyboard/focus/navigation/mobile/safe-area behavior; no auth/provider ownership drift; no duplicate legacy/new shell implementation; obsolete layout files/exports/styles removed once consumer checks prove them unused.
+- **Evidence:** Search data boundary already merged; UI foundation and rollout hardening evidence is recorded in Task 24 and PR #46.
+- **Next action:** Inventory current shell consumers and baseline desktop/phone behavior, then migrate AppShell as the first production consumer. Do not re-migrate Search SQL or change auth behavior as part of the visual slice.
 
 ### Task 24 — Shared UI / tokens
 
@@ -323,6 +323,60 @@ real provider mutations and changes to credentials/authorization unless separate
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
 All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), and lineup commands (Task 15) are merged into `main`. The next domain milestone is **Task 16 — Private Market reads**. In the UI migration track, UI-01A, UI-01T, and UI-01B are integrated; UI-01H rollout hardening is complete after PR #46, followed by the **Application Shell** migration as the first production consumer, before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
+
+## UI presentation ownership and cleanup contract
+
+UI migration uses the following final ownership model:
+
+```text
+src/app/                         routes and orchestration only
+src/components/ui/               domain-independent primitives/controls/compositions
+src/components/shell/            persistent global chrome
+  shared/                        shell behavior/presentation shared across modes
+  desktop/                       desktop-only shell composition
+  mobile/                        phone/PWA-only shell composition
+  integrations/                  placement adapters for search/season/account capabilities
+src/components/mobile/           reusable phone-only, domain-independent page compositions
+src/features/<domain>/           feature meaning and feature-owned presentation
+  components/shared/
+  components/desktop/
+  components/mobile/
+  screens/desktop/
+  screens/mobile/
+```
+
+Folders may be omitted for small features, but ownership must remain unambiguous.
+
+Migration rules:
+
+1. Do **not** perform a repository-wide presentation/file move before AppShell. Task 23 establishes the
+   pattern first.
+2. A route under `src/app` stays the URL entrypoint and may choose desktop/phone presentation; mobile
+   does not become a parallel router.
+3. Feature-specific screens move into the owning feature when that feature's UI slice migrates.
+   Global mobile folders retain only domain-independent reusable phone compositions.
+4. Reuse shared contracts, view models and semantically identical subcomponents. Do not force desktop
+   and mobile into one conditional-heavy component when their information architecture differs.
+5. Every migrated slice inventories old files, compatibility wrappers, barrel exports, styles and tests.
+   Update consumers first, then delete items proven unused. Empty folders and dead exports are removed.
+6. A slice is not complete while both old and new implementations remain without a documented,
+   still-used compatibility boundary.
+7. Cleanup must preserve route URLs, auth/access rules, domain contracts, PWA safe areas, keyboard/focus
+   behavior and required desktop/phone information parity.
+
+### UI slice cleanup checklist
+
+Before marking a shell or feature UI slice complete:
+
+- [ ] final owner and desktop/mobile/shared placement are explicit;
+- [ ] route files remain thin orchestration;
+- [ ] feature-specific mobile screens no longer live in global mobile folders;
+- [ ] imports and public/server barrels point to the final owner;
+- [ ] repository-wide searches show whether legacy files/exports still have consumers;
+- [ ] obsolete files, exports, aliases and slice-specific global styles are deleted when unused;
+- [ ] no speculative shared abstraction was added without demonstrated reuse;
+- [ ] desktop, phone/PWA, theme, accessibility and navigation regressions are covered as appropriate;
+- [ ] migration documentation records any intentionally retained compatibility boundary and its removal condition.
 
 ## Standard acceptance for implementation tasks
 
