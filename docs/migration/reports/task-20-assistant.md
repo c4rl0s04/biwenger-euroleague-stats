@@ -72,7 +72,7 @@ Task 20 establishes the dedicated feature namespace `src/features/assistant/`, e
   - `src/features/assistant/__tests__/assistant-context.service.test.ts`: 10 passed.
   - `src/lib/services/features/__tests__/assistantContextService.test.ts`: 10 passed.
   - `src/app/api/assistant/__tests__/assistant.test.ts`: 10 passed.
-- **Architecture Integrity:** `npm run architecture:check` passed with 0 violations across 99 entrypoints and 1,097 modules.
+- **Architecture Integrity:** `npm run architecture:check` passed with 0 violations across 99 entrypoints and 1,097 modules; `src/tests/architecture/server-guards.test.ts` passed (144/144 tests).
 - **Type Safety:** `npm run typecheck` passed with 0 errors.
 - **ESLint:** `npm run lint` passed with 0 errors.
 - **Documentation Vault:** `npm run docs:check` passed across 120 notes.
