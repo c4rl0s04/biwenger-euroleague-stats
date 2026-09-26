@@ -59,7 +59,8 @@
     "test:db:local": "tsx scripts/db/test-local.ts",
     "test:e2e:local": "node scripts/e2e/run.mjs",
     "test:e2e:update": "node scripts/e2e/run.mjs --update-snapshots",
-    "smoke:deploy": "tsx scripts/operations/smoke-deploy.ts"
+    "smoke:deploy": "tsx scripts/operations/smoke-deploy.ts",
+    "ledger": "tsx -r dotenv/config scripts/finance/manager-cash-ledger.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^11.0.0",
