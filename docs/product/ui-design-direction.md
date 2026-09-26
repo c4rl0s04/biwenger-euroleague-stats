@@ -122,7 +122,7 @@ Dark
 Light
 ```
 
-`System` is the preferred default.
+`System` remains the target/preferred user preference default for the fully migrated product. During the incremental legacy UI rollout, absence of a stored preference resolves to `dark` so unmigrated screens remain on the compatibility baseline.
 
 The application shell/root resolves that preference to a rendered light or dark theme. Shared
 components remain unaware of the active theme and consume semantic tokens only.
@@ -468,16 +468,17 @@ UI-01A  Surface + composable Card foundation           complete
 
 DESIGN DIRECTION CHECKPOINT                             this specification
 
-UI-01T theme-ready token/runtime work                  complete (merged 55765dfe)
-UI-01B core primitives                                 complete (merged 665fd1d7)
-UI-01C shared compositions                             next design-system slice
+UI-01T theme-ready token/runtime work                  implemented foundation capability
+UI-01B core primitives                                 implemented foundation capability
+UI-01H rollout hardening                               dark compatibility default for legacy UI
+UI-SHELL application shell/chrome migration            first production adoption
+UI-01C shared compositions                             extract from demonstrated shell/page needs
 UI-02  interactive controls                            selectors, overlays and related behavior
 UI-03  Season Predictions pilot                       first new-page design validation
 UI-04  foundation/design review                       refine before broad adoption
 
 Later:
-legacy feature UI migration
-application-shell migration
+feature-by-feature legacy page migration
 ```
 
 Exact task ordering may change when a demonstrated dependency justifies it, but new primitives must be

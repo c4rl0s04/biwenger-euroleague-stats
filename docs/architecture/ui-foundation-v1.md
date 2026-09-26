@@ -16,8 +16,8 @@ This document defines the first implementation-ready UI foundation for new Biwen
 It turns the target layering described in [UI component layering](ui-component-layers.md) into a
 concrete component-system direction without starting the global legacy-UI migration.
 
-The first intended consumer is the new season-predictions experience. It should be built on this
-foundation so the project can validate the architecture against a real feature before applying it to
+The first production consumer is the application shell/chrome, followed by Season Predictions as the
+first new-page validation. This validates the architecture against real surfaces before applying it to
 older screens.
 
 This document is **not** an instruction to:
@@ -581,9 +581,12 @@ Tailwind semantic bridge
 Surface / Card / primitives / shell / feature UI
 ```
 
-The dark semantic mapping remains the compatibility baseline. UI-01T adds the light raw palette,
-light semantic mapping, root preference resolution and persistence; its concrete runtime contract is
-recorded in [ADR-0008](../decisions/0008-semantic-theme-preferences.md#ui-01t-implementation-contract).
+The dark semantic mapping remains the compatibility baseline. UI-01T added the light raw palette,
+light semantic mapping, root preference resolution and persistence; UI-01H hardened rollout boundaries:
+`system` remains the target/preferred user preference default for the fully migrated product, while during
+the incremental legacy UI rollout, absence of a stored preference resolves to `dark` so unmigrated screens
+remain on the compatibility baseline. Explicit `dark`, `light`, and `system` preferences remain fully supported;
+concrete runtime contracts are recorded in [ADR-0008](../decisions/0008-semantic-theme-preferences.md).
 
 Do not implement theming by cloning component trees or by spreading component-local `dark:` variants
 through the new foundation.
@@ -1266,7 +1269,7 @@ UI-01 establishes the foundational token, theming and primitive layers:
    anatomy (`Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) on
    the semantic-token foundation.
 2. **UI-01T — theme foundation (complete):** integrated at `55765dfe`. Added the light raw palette,
-   theme-aware semantic mappings (`:root[data-theme='light']` and `@media (prefers-color-scheme: light)`),
+   theme-aware semantic mappings (`:root[data-theme='light']`),
    synchronous `<head>` bootstrap script (`THEME_BOOTSTRAP_SCRIPT`), root `system | dark | light`
    resolution, persistence store and comprehensive theme verification.
 3. **UI-01B — core primitives (complete):** integrated at `665fd1d7` via
@@ -1278,8 +1281,10 @@ UI-01 establishes the foundational token, theming and primitive layers:
    WCAG AA primary action contrast (dark 6.35:1, light 5.83:1) without modifying legacy `--primary-foreground`.
    Supports React Server Components without `'use client'` and exports exclusively through
    `@/components/ui/foundation`.
-4. **UI-01C — shared compositions (next design-system slice):** reusable identity, empty-state,
-   page/section header and related patterns needed by the first new feature.
+4. **UI-01H — Foundation rollout hardening (this milestone):** protect unmigrated legacy UI: `system` remains the target default preference once migrated, while missing/invalid preferences resolve to the dark compatibility baseline during rollout; remove automatic no-JS light fallback; make `ThemeContext` enforce its provider boundary; and verify hydration safety across SSR and client stores. Light mode infrastructure is preserved for explicit opt-in.
+5. **First production adoption — Application shell / chrome migration:** migrate the global chrome (`AppShell`, `Sidebar`, `TopHeader`, `MobileNavigation`, footer, safe areas) onto the new foundation.
+6. **UI-01C — shared compositions (demand-driven):** extract reusable identity (`EntityIdentity`), `EmptyState`, and header patterns (`PageHeader`, `SectionHeader`) from demonstrated shell and page reuse, rather than speculative creation.
+7. **UI-02 — Interactive controls & overlays:** selectors, searchable select, overlays, and dialogs where needed.
 
 Do not implement every possible primitive in advance.
 

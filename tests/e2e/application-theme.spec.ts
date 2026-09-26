@@ -8,12 +8,11 @@ async function expectTheme(page: Page, theme: 'dark' | 'light') {
   await expect(root).toHaveClass(theme);
   await expect(root).toHaveCSS('color-scheme', theme);
   const chrome = page.locator('meta[name="theme-color"]');
-  await expect(chrome).toHaveCount(3);
+  await expect(chrome).toHaveCount(2);
   await expect(chrome.first()).toHaveAttribute('id', 'application-theme-color');
   await expect(chrome.first()).not.toHaveAttribute('media');
   await expect(chrome.first()).toHaveAttribute('content', theme === 'dark' ? '#050506' : '#f4f3f1');
   await expect(chrome.nth(1)).toHaveAttribute('content', '#050506');
-  await expect(chrome.nth(2)).toHaveAttribute('content', '#f4f3f1');
 }
 
 // Dispatch a storage notification for isolated palette checks; native cross-tab delivery is tested below.
@@ -44,6 +43,11 @@ for (const theme of ['light', 'dark'] as const) {
   test(`stored ${theme} is applied before hydration and survives reload/navigation`, async ({
     page,
   }, testInfo) => {
+    const hydrationErrors: string[] = [];
+    page.on('pageerror', (error) => {
+      if (/Hydration failed|React error #418/.test(error.message))
+        hydrationErrors.push(error.message);
+    });
     await page.emulateMedia({ colorScheme: theme === 'light' ? 'dark' : 'light' });
     await page.addInitScript((theme) => {
       if (localStorage.getItem('theme') === null) localStorage.setItem('theme', theme);
@@ -92,6 +96,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.waitForLoadState('networkidle');
     await expectTheme(page, theme);
     expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe(theme);
+    expect(hydrationErrors).toEqual([]);
     if (['desktop-1440', 'iphone-13'].includes(testInfo.project.name)) {
       await testInfo.attach(`${theme}-existing-page`, {
         body: await page.screenshot({ path: testInfo.outputPath(`${theme}-existing-page.png`) }),
@@ -107,8 +112,10 @@ test('system follows OS changes, explicit choices win, invalid historical values
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('/install');
   await page.waitForLoadState('networkidle');
-  await expectTheme(page, 'light');
+  await expectTheme(page, 'dark');
+  expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
   await changePreference(page, 'system');
+  await expectTheme(page, 'light');
   await page.emulateMedia({ colorScheme: 'dark' });
   await expectTheme(page, 'dark');
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('system');
@@ -298,12 +305,12 @@ test('unchanged Surface/Card markup resolves readable semantic colors in both th
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false, colorScheme: 'light' });
-  test('server content and system palette remain available', async ({ page }) => {
+  test('server content stays on the dark compatibility baseline', async ({ page }) => {
     await page.goto('/install');
     await expect(page.getByRole('heading', { name: /BiwengerStats en tu móvil/i })).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-theme');
-    await expect(page.locator('html')).toHaveCSS('color-scheme', 'light');
-    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(244, 243, 241)');
+    await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark');
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(5, 5, 5)');
     await page.emulateMedia({ colorScheme: 'dark' });
     await expect(page.locator('html')).not.toHaveAttribute('data-theme');
     await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark');
@@ -352,7 +359,7 @@ test('native cross-tab changes preserve system through reload and navigation', a
     await writer.evaluate(() => localStorage.setItem('theme', 'dark'));
     await expectTheme(page, 'dark');
     await writer.evaluate(() => localStorage.removeItem('theme'));
-    await expectTheme(page, 'light');
+    await expectTheme(page, 'dark');
   } finally {
     await writer.close();
   }
@@ -375,7 +382,7 @@ test('blocked theme storage leaves SSR and hydrated content usable', async ({ pa
   await page.goto('/install');
   await page.waitForLoadState('networkidle');
   await expect(page.getByRole('heading', { name: /BiwengerStats en tu móvil/i })).toBeVisible();
-  await expectTheme(page, 'light');
+  await expectTheme(page, 'dark');
   await page.emulateMedia({ colorScheme: 'dark' });
   await expectTheme(page, 'dark');
   await page.getByRole('link', { name: 'Abrir inicio de sesión' }).click();
@@ -383,9 +390,14 @@ test('blocked theme storage leaves SSR and hydrated content usable', async ({ pa
   await expectTheme(page, 'dark');
 });
 
-test('real application light smoke retains content and shell navigation', async ({
+test('real application explicit light smoke retains content and shell navigation', async ({
   page,
 }, testInfo) => {
+  const hydrationErrors: string[] = [];
+  page.on('pageerror', (error) => {
+    if (/Hydration failed|React error #418/.test(error.message))
+      hydrationErrors.push(error.message);
+  });
   test.skip(
     !['desktop-1440', 'iphone-13'].includes(testInfo.project.name),
     'Representative desktop and phone smoke coverage.'
@@ -437,4 +449,5 @@ test('real application light smoke retains content and shell navigation', async 
     await expect(page.getByRole('dialog', { name: /Más secciones/i })).toBeHidden();
     await expectTheme(page, 'light');
   }
+  expect(hydrationErrors).toEqual([]);
 });

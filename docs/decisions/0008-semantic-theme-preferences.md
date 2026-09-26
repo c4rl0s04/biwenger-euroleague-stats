@@ -33,7 +33,7 @@ The supported user preference model is:
 system | dark | light
 ```
 
-`system` is the default preference.
+`system` remains the target/preferred user preference default for the fully migrated product. During the incremental legacy UI rollout, absence of a stored preference resolves to `dark` so unmigrated screens remain on the compatibility baseline.
 
 The application shell/root is responsible for resolving the preference to the rendered theme and for
 making that state available at the document root.
@@ -80,30 +80,28 @@ The independent `showSnow` / `toggleSnow` contract and `showSnow` storage key re
 Legacy `CardThemeContext`, Card variants and their old ThemeSwitcher are separate and unchanged.
 
 The application reuses localStorage key `theme`. Valid preferences are `system`, `dark` and `light`;
-missing, invalid and historical Card-style values fall back to `system`. Selecting a preference
+missing, invalid and historical Card-style values fall back to `dark` during the legacy rollout to protect unmigrated screens. Selecting a preference
 persists that preference, so OS changes never turn stored `system` into `dark` or `light`.
 Storage failures leave the current page usable. Other-tab storage changes are observed.
 
 The canonical resolved marker is `html[data-theme="dark" | "light"]`. Matching `.dark` / `.light`
 classes are maintained only for the existing map observer. The same resolver sets CSS `color-scheme`
 and prepends its own unconditional `meta#application-theme-color` as the first chrome-color choice.
-Root layout's two media-qualified `theme-color` tags remain untouched as the no-JavaScript fallback.
-This ownership split prevents React from duplicating a hoisted meta tag whose content was changed
-before hydration. Viewport sizing and PWA install/offline contracts remain unchanged. The installed
+Root layout keeps one static dark `theme-color` as the no-JavaScript compatibility fallback.
+The runtime resolver prepends its own unconditional themed meta tag when JavaScript is available.
+This ownership split avoids mutating React's fallback node before hydration. Viewport sizing and PWA install/offline contracts remain unchanged. The installed
 manifest/splash colors remain static and are not a runtime theme selector.
 
 On full loads, a small static script in `<head>` reads the preference and resolves the OS before body
 paint. It contains no user-generated script source. Only the intentionally adjusted HTML root
 suppresses hydration warnings. The provider always renders children on the server, and
-`useSyncExternalStore` supplies the same `system` / `light` snapshot during SSR and hydration before
+`useSyncExternalStore` supplies the deterministic `dark` / `dark` snapshot during SSR and hydration before
 subscribing to the browser snapshot. That snapshot is not the visual default: semantic CSS and the
 head script own first-paint colors. Future controls must use semantic styling and must not hide the
 application or select component palettes based on this hydration snapshot.
 
-Without JavaScript, the root has no theme marker and CSS follows `prefers-color-scheme`; stored local
-preferences cannot be read in that case. The shared root retains the exact dark mappings, shape and
-legacy aliases. Explicit light and the no-marker/light-OS fallback use identical light mappings,
-with a test preventing drift between the two CSS blocks. Light uses paper/ink surfaces, deeper orange
+Without JavaScript, the root has no theme marker and stays on the dark compatibility baseline; stored local
+preferences cannot be read in that case. Automatic light application based on OS alone is removed during rollout so legacy screens are protected, while explicit `:root[data-theme='light']` remains fully implemented for opt-in. Light uses paper/ink surfaces, deeper orange
 and destructive red, stronger control borders and quiet effects. Surface and composable Card require
 no theme props or implementation changes. No dependency or production showcase route is added.
 

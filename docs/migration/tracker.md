@@ -278,21 +278,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 23 — Shell / search interactions
 
-- **State:** Planned.
-- **Dependencies / approval:** Domain access contracts; 18 where auth is involved.
-- **Scope:** Own layouts/navigation/selectors/search UI/providers/PWA shell; no redesign.
-- **Completion check:** Acyclic reusable composition, preserved keyboard/focus/mobile behavior.
-- **Evidence:** Search data boundary already merged.
-- **Next action:** Inventory shared controls; do not re-migrate Search SQL.
+- **State:** Planned; presentation migration is now an early UI adoption slice.
+- **Dependencies / approval:** Stable domain access contracts; 18 only where account/auth behavior is changed.
+- **Scope:** Migrate sidebar, top bar, footer/mobile navigation and shared shell presentation onto the new UI foundation while preserving routing, authentication, search-data ownership and PWA behavior. Search/control behavior stays separately bounded.
+- **Completion check:** Acyclic reusable composition, preserved keyboard/focus/mobile/safe-area behavior, and no auth/provider ownership drift.
+- **Evidence:** Search data boundary already merged; UI foundation evidence is recorded in Task 24.
+- **Next action:** After UI rollout hardening, inventory shell chrome and migrate it as the first production consumer. Do not re-migrate Search SQL or change auth behavior as part of the visual slice.
 
 ### Task 24 — Shared UI / tokens
 
-- **State:** Planned.
-- **Dependencies / approval:** 23 and domain component ownership.
-- **Scope:** Review saved UI foundation and shared/domain controls; no cosmetic redesign or universal-card abstraction.
-- **Completion check:** Justified tokens/controls, domain-owned cards; unchanged appearance verified.
-- **Evidence:** Unmerged 2ebf1fee and related UI design branch.
-- **Next action:** Reconcile unique token work against current main before adoption.
+- **State:** Foundation integrated and hardened; ready for production adoption.
+- **Dependencies / approval:** Broad legacy adoption still depends on the owning shell/domain boundary; foundation work itself is additive.
+- **Scope:** Maintain one semantic token system and domain-independent shared foundation. Integrated work includes token extraction, Surface/composable Card, system/dark/light runtime capability and core primitives. Do not bulk-restyle legacy pages or create a universal-card abstraction.
+- **Completion check:** Foundation contracts remain server-compatible and accessible; legacy screens default to the dark compatibility baseline until migrated; shared compositions are extracted only from demonstrated shell/page reuse.
+- **Evidence:** PR #40 design direction; `f868a602` token foundation; `222ae61b` Surface/Card; PR #43 (`55765dfe`) UI-01T; PR #44 (`665fd1d7`) UI-01B.
+- **Next action:** Use Task 23 shell/chrome as the first production consumer while extracting UI-01C compositions from real reuse.
 
 ### Task 25 — Exhaustive ownership closure
 
@@ -322,7 +322,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-All read-domain scopes (Tasks 04–11) and the sensitive-operation security inventory (Task 12) are merged into `main`. The next domain milestone is **Task 13 — Provider boundaries**, subject to security gate approval. In the UI migration track, UI-01B is merged and the next milestone is **UI-01C — Interactive Controls & Overlays**.
+All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), and lineup commands (Task 15) are merged into `main`. The next domain milestone is **Task 16 — Private Market reads**. In the UI migration track, UI-01A, UI-01T, and UI-01B are integrated; UI-01H rollout hardening is complete after PR #46, followed by the **Application Shell** migration as the first production consumer, before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
 
 ## Standard acceptance for implementation tasks
 
