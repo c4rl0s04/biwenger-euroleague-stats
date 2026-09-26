@@ -16,6 +16,7 @@ import {
 } from './rounds';
 import { assertSyncSeasonWritable } from './season-guard';
 import { SyncReporter, type ReporterWriter } from './reporter';
+import { captureSyncError } from '../observability/sentry';
 
 export type SyncMode = 'routine' | 'bootstrap' | 'live';
 export type SyncSource = 'biwenger' | 'euroleague' | 'database' | 'biwenger+database';
@@ -109,9 +110,21 @@ export class SyncManager {
     this.reporter.stepWarning(message);
   }
 
-  error(message: string, error?: unknown): void {
+  error(
+    message: string,
+    error?: unknown,
+    context?: { stepId?: string; durationMs?: number }
+  ): void {
     this.logs.push({ type: 'error', message, error, timestamp: new Date() });
     this.hasErrors = true;
+    captureSyncError(error || message, {
+      stepId: context?.stepId,
+      durationMs: context?.durationMs,
+      seasonId: this.context.seasonId,
+      syncMode: this.mode,
+      warningsCount: this.warningsCount,
+      extra: { message },
+    });
   }
 
   async run(): Promise<void> {
@@ -233,13 +246,13 @@ export class SyncManager {
         } catch (error) {
           const durationMs = Date.now() - stepStartedAt;
           failedStep = step;
-          this.error(`${step.id} failed.`, error);
+          this.error(`${step.id} failed.`, error, { stepId: step.id, durationMs });
           this.reporter.stepFailed({ step, durationMs, error });
           break;
         }
       }
     } catch (error) {
-      this.error('Synchronization preconditions failed.', error);
+      this.error('Synchronization preconditions failed.', error, { stepId: 'preconditions' });
       this.reporter.preconditionsFailed({ error });
     } finally {
       if (!this.hasErrors) clearCache();

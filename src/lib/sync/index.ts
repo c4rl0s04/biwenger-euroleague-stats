@@ -77,8 +77,10 @@ export async function syncData(args = process.argv.slice(2)): Promise<number> {
 if (process.env.NODE_ENV !== 'test') {
   syncData()
     .then((code) => process.exit(code))
-    .catch((error) => {
+    .catch(async (error) => {
       console.error('Synchronization failed:', error instanceof Error ? error.message : error);
+      const { captureSyncError } = await import('../observability/sentry');
+      captureSyncError(error, { stepId: 'fatal-unhandled' });
       process.exit(1);
     });
 }
