@@ -11,18 +11,21 @@ export interface AccountMenuProps {
   className?: string;
 }
 
-interface CurrentUser {
+export interface CurrentUser {
   id: string | number;
   name: string;
   icon?: string | null;
 }
 
+export interface ClientUserState {
+  currentUser: CurrentUser | null;
+  isClient: boolean;
+  isAuthenticated: boolean;
+  isReady?: boolean;
+}
+
 export function AccountMenu({ className = '' }: AccountMenuProps) {
-  const { currentUser, isClient, isAuthenticated } = useClientUser() as unknown as {
-    currentUser: CurrentUser | null;
-    isClient: boolean;
-    isAuthenticated: boolean;
-  };
+  const { currentUser, isClient, isAuthenticated } = useClientUser() as ClientUserState;
   const [isOpen, setIsOpen] = useState(false);
 
   // Guard against SSR / client hydration discrepancies (prevents React #418)

@@ -6,36 +6,52 @@ import { SeasonProvider } from '@/contexts/SeasonContext';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import { CommandPalette } from '@/components/shell/integrations/CommandPalette';
 
+export interface AppUser {
+  id?: string | number;
+  user_id?: string | number;
+  name?: string | null;
+  icon?: string | null;
+  [key: string]: unknown;
+}
+
+export interface AppSeasonItem {
+  id: string;
+  name?: string;
+  active?: boolean;
+}
+
 export interface AppSeasonContextProps {
-  seasons?: Array<{ id: string; name?: string; active?: boolean }>;
+  seasons?: AppSeasonItem[];
   currentSeasonId?: string;
   activeSeasonId?: string;
 }
 
 export interface AppProvidersProps {
   children: ReactNode;
-  users?: unknown[];
+  users?: AppUser[];
   seasonContext?: AppSeasonContextProps | null;
 }
 
-const AnySeasonProvider = SeasonProvider as React.ComponentType<{
+interface SeasonProviderProps {
   children: ReactNode;
-  seasons?: Array<{ id: string; name?: string; active?: boolean }>;
+  seasons?: AppSeasonItem[];
   currentSeasonId?: string;
   activeSeasonId?: string;
-}>;
+}
+
+const TypedSeasonProvider = SeasonProvider as React.FC<SeasonProviderProps>;
 
 export function AppProviders({ children, users, seasonContext }: AppProvidersProps) {
   return (
     <UserProvider users={users}>
-      <AnySeasonProvider
+      <TypedSeasonProvider
         seasons={seasonContext?.seasons}
         currentSeasonId={seasonContext?.currentSeasonId}
         activeSeasonId={seasonContext?.activeSeasonId}
       >
         <CommandPalette />
         <ErrorBoundary>{children}</ErrorBoundary>
-      </AnySeasonProvider>
+      </TypedSeasonProvider>
     </UserProvider>
   );
 }

@@ -19,7 +19,7 @@ interface SeasonContextType {
 
 export function SeasonSelector({ className = '' }: SeasonSelectorProps) {
   const { seasons, currentSeasonId, activeSeasonId, isCustomSeason, selectSeason } =
-    useSeason() as unknown as SeasonContextType;
+    useSeason() as SeasonContextType;
   const [isOpen, setIsOpen] = useState(false);
 
   if (!seasons || seasons.length <= 1) {

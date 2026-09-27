@@ -4,10 +4,7 @@ import {
   hoopgridRepository,
 } from '@/features/hoopgrid/server';
 
-export type {
-  CriteriaType,
-  HoopgridCriteria as Criteria,
-} from '@/features/hoopgrid/public';
+export type { CriteriaType, HoopgridCriteria as Criteria } from '@/features/hoopgrid/public';
 
 export class HoopgridService {
   static calculateComplexity(possibleCounts: number[] | string | null): number {

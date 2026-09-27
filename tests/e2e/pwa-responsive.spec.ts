@@ -100,10 +100,27 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
     await navigationPromise;
     await expect(page).toHaveURL(/\/standings/);
 
-    await navigation.getByRole('button', { name: 'Más' }).click();
-    await expect(page.getByRole('dialog', { name: /Más secciones/i })).toBeVisible();
+    const moreButton = navigation.getByRole('button', { name: 'Más' });
+    await moreButton.click();
+    const moreDialog = page.getByRole('dialog', { name: /Más secciones/i });
+    await expect(moreDialog).toBeVisible();
+
+    const closeButton = page.getByRole('button', { name: 'Cerrar menú Más' });
+    await expect(closeButton).toBeFocused();
+
+    // Focus trap: Shift+Tab from first element wraps to last focusable element in dialog
+    await page.keyboard.press('Shift+Tab');
+    const lastFocusable = moreDialog.locator('a[href], button:not([disabled])').last();
+    await expect(lastFocusable).toBeFocused();
+
+    // Focus trap: Tab from last element wraps back to first element (close button)
+    await page.keyboard.press('Tab');
+    await expect(closeButton).toBeFocused();
+
+    // Dismiss with Escape and verify focus restoration to the trigger button
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog', { name: /Más secciones/i })).toBeHidden();
+    await expect(moreDialog).toBeHidden();
+    await expect(moreButton).toBeFocused();
   } else {
     releaseStandingsRequest();
     await expect(page.getByRole('navigation', { name: 'Navegación principal móvil' })).toHaveCount(

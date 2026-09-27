@@ -1,7 +1,10 @@
 import 'server-only';
 
 export { HoopgridRepository, hoopgridRepository } from './server/repositories/hoopgrid.repository';
-export { HoopgridCommandService, hoopgridCommandService } from './server/services/hoopgrid-command.service';
+export {
+  HoopgridCommandService,
+  hoopgridCommandService,
+} from './server/services/hoopgrid-command.service';
 export { HoopgridReadService, hoopgridReadService } from './server/services/hoopgrid-read.service';
 
 export type {

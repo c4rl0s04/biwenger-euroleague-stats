@@ -38,7 +38,10 @@ const { services, playerContextService } = vi.hoisted(() => ({
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/services', () => services);
 vi.mock('@/lib/services/features/assistantPlayerContextService', () => playerContextService);
-vi.mock('@/features/assistant/server/services/assistant-player-context.service', () => playerContextService);
+vi.mock(
+  '@/features/assistant/server/services/assistant-player-context.service',
+  () => playerContextService
+);
 
 describe('assistant context service', () => {
   beforeEach(() => {

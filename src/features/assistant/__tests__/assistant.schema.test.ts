@@ -86,9 +86,9 @@ describe('assistant schemas and validation', () => {
     it('rejects empty or excessively long prompt', () => {
       expect(CreateConversationSchema.safeParse({ firstPrompt: '' }).success).toBe(false);
       expect(CreateConversationSchema.safeParse({ firstPrompt: '   ' }).success).toBe(false);
-      expect(
-        CreateConversationSchema.safeParse({ firstPrompt: 'x'.repeat(4001) }).success
-      ).toBe(false);
+      expect(CreateConversationSchema.safeParse({ firstPrompt: 'x'.repeat(4001) }).success).toBe(
+        false
+      );
     });
   });
 

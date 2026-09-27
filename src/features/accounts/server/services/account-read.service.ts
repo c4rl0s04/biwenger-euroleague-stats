@@ -7,9 +7,7 @@ import {
 } from '../repositories/account.repository';
 
 export class AccountReadService {
-  constructor(
-    private readonly repository: AccountRepository = defaultAccountRepository
-  ) {}
+  constructor(private readonly repository: AccountRepository = defaultAccountRepository) {}
 
   async getAccountSettings(
     userId: string,

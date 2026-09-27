@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Download, Settings, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { IconButton } from '@/components/ui/foundation';
 import {
   NAV_ITEMS,
   MOBILE_PRIMARY_ITEMS,
@@ -16,9 +17,10 @@ import { SeasonSelector } from '../integrations/SeasonSelector';
 export interface MobileMoreMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  triggerRef?: React.RefObject<HTMLElement | null>;
 }
 
-export function MobileMoreMenu({ isOpen, onClose }: MobileMoreMenuProps) {
+export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuProps) {
   const pathname = usePathname();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -38,7 +40,8 @@ export function MobileMoreMenu({ isOpen, onClose }: MobileMoreMenuProps) {
   useEffect(() => {
     if (!isOpen) return undefined;
 
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    previousFocusRef.current = (triggerRef?.current ||
+      document.activeElement) as HTMLElement | null;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
@@ -76,9 +79,9 @@ export function MobileMoreMenu({ isOpen, onClose }: MobileMoreMenuProps) {
     return () => {
       document.body.style.overflow = originalOverflow;
       document.removeEventListener('keydown', handleKeyDown);
-      previousFocusRef.current?.focus();
+      (triggerRef?.current || previousFocusRef.current)?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, triggerRef]);
 
   if (!isOpen) return null;
 
@@ -107,15 +110,16 @@ export function MobileMoreMenu({ isOpen, onClose }: MobileMoreMenuProps) {
               Más secciones
             </h2>
           </div>
-          <button
+          <IconButton
             ref={closeButtonRef}
-            type="button"
+            variant="secondary"
+            size="md"
             onClick={onClose}
-            className="mobile-sheet-close"
+            className="rounded-2xl"
             aria-label="Cerrar menú Más"
           >
             <X size={21} aria-hidden="true" />
-          </button>
+          </IconButton>
         </header>
 
         <div className="px-5 pb-4 space-y-3">

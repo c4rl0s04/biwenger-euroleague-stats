@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { IconButton } from '@/components/ui/foundation';
 import { useSections } from '../shared/SectionContext';
 import { NAV_ITEMS, isNavigationItemActive } from '../shared/navigation';
 
@@ -48,10 +49,11 @@ export function Sidebar({ className = '' }: SidebarProps) {
     >
       {/* Desktop Collapse / Expand Toggle */}
       <div className="flex items-center h-14 px-4 border-b border-border/30 justify-center">
-        <button
-          type="button"
+        <IconButton
+          variant="ghost"
+          size="sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-xl hover:bg-secondary text-muted-foreground transition-all duration-200 hover:text-foreground group cursor-pointer"
+          className="group cursor-pointer rounded-xl"
           aria-label={isCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
         >
           {isCollapsed ? (
@@ -59,7 +61,7 @@ export function Sidebar({ className = '' }: SidebarProps) {
           ) : (
             <ChevronLeft size={18} className="group-hover:scale-110" aria-hidden="true" />
           )}
-        </button>
+        </IconButton>
       </div>
 
       {/* Navigation Items */}

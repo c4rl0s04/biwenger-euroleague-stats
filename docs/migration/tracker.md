@@ -15,7 +15,7 @@ This is the authoritative task/status queue. The [overview](../architecture/migr
 summarizes it; the [ledger](../architecture/migration-status.md) and receipts preserve evidence.
 If newer code/history contradicts this checkpoint, refresh the evidence before acting.
 
-Tasks 01 through 12 are integrated in `main` (closing all read-domain migrations, worktree cleanup, and the sensitive-operation inventory). In parallel, the UI migration track has integrated UI-00, UI-01A, UI-01T, and UI-01B (`Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton`). No current implementation, cleanup, parallel dispatch, security change or release is authorized merely by a planned row.
+Tasks 01 through 19 are integrated in `main` (closing all read domains, sensitive-operation inventory, lineup commands, market commands, accounts/settings, and hoopgrid). In parallel, the UI migration track has integrated UI-00, UI-01A, UI-01T, UI-01B, and UI-01H (`Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton`, rollout hardening). Task 23 / UI-SHELL is complete and hardened on PR #49. No current implementation, cleanup, parallel dispatch, security change or release is authorized merely by a planned row.
 
 ## How to read status
 
@@ -61,15 +61,18 @@ Older deployment receipts remain valid historical observations, not proof about 
 
 The UI migration runs in parallel with the domain architecture migration, systematically replacing ad-hoc inline styles and legacy global CSS with a tokenized, accessible design system. See [UI foundation](../architecture/ui-foundation-v1.md) and [design direction](../product/ui-design-direction.md).
 
-| Slice      | Scope                                    | State / Evidence                                                                                                                                                  | Next boundary / owner                                         |
-| ---------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| **UI-00**  | Visual baseline & design direction       | Completed; documented in `ui-design-direction.md` and `ui-foundation-v1.md`                                                                                       | Informs semantic tokens and primitive specs                   |
-| **UI-01A** | Design tokens foundation                 | Completed; base palette, scales, and typography                                                                                                                   | Foundation for semantic theming                               |
-| **UI-01T** | Semantic theming & tokens reconciliation | Integrated at `55765dfe`; complete light/dark theme variables, surfaces, text, borders, actions                                                                   | Token layer consumed by UI-01B primitives                     |
-| **UI-01B** | Core UI primitives                       | Integrated via PR #44 at `665fd1d7`; [receipt](reports/ui-01b-core-primitives.md). Six primitives: `Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton` | Primitives exported from `src/components/ui`; UI-01C controls |
-| **UI-01C** | Interactive controls & overlays          | Planned; Dialog/Modal, Popover/Tooltip, Dropdown/Select, Tabs, Toggle/Switch, Checkbox                                                                            | Builds on UI-01B primitives and floating-ui/radix patterns    |
-| **UI-02**  | Compositions & shared domain layouts     | Planned; cards, stat displays, table patterns, responsive section wrappers                                                                                        | Consumes UI-01 primitives and controls                        |
-| **UI-03**  | Feature screen migration                 | Planned; migrating feature presentation to the design system                                                                                                      | Incremental adoption per domain                               |
+| Slice        | Scope                                    | State / Evidence                                                                                                                                                  | Next boundary / owner                                        |
+| ------------ | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **UI-00**    | Visual baseline & design direction       | Completed; documented in `ui-design-direction.md` and `ui-foundation-v1.md`                                                                                       | Informs semantic tokens and primitive specs                  |
+| **UI-01A**   | Design tokens foundation                 | Completed; base palette, scales, and typography                                                                                                                   | Foundation for semantic theming                              |
+| **UI-01T**   | Semantic theming & tokens reconciliation | Integrated at `55765dfe`; complete light/dark theme variables, surfaces, text, borders, actions                                                                   | Token layer consumed by UI-01B primitives                    |
+| **UI-01B**   | Core UI primitives                       | Integrated via PR #44 at `665fd1d7`; [receipt](reports/ui-01b-core-primitives.md). Six primitives: `Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton` | Primitives exported from `src/components/ui/foundation`      |
+| **UI-01H**   | Rollout hardening                        | Integrated via PR #46 at `6db446fd`; dark baseline default, strict ThemeContext, 0 React #418 SSR hydration mismatches                                            | Foundation hardened for production chrome adoption           |
+| **UI-SHELL** | Application Shell Migration (Task 23)    | Implemented & verified on PR #49 (`refactor/application-shell`); [receipt](reports/task-23-application-shell.md)                                                  | Chrome foundation established for downstream feature screens |
+| **UI-01C**   | Interactive controls & overlays          | Planned; Dialog/Modal, Popover/Tooltip, Dropdown/Select, Tabs, Toggle/Switch, Checkbox                                                                            | Builds on UI-01B primitives and floating-ui/radix patterns   |
+| **UI-02**    | Compositions & shared domain layouts     | Planned; cards, stat displays, table patterns, responsive section wrappers                                                                                        | Consumes UI-01 primitives and controls                       |
+| **UI-03**    | Feature screen migration                 | Planned; migrating feature presentation to the design system                                                                                                      | Incremental adoption per domain                              |
+| **UI-04**    | Polish, regression & accessibility audit | Planned; visual parity, comprehensive E2E matrix, WCAG 2.2 AA verification                                                                                        | Final design system verification and closure                 |
 
 ## Ordered task queue
 
@@ -260,12 +263,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 21 — Other actions
 
-- **State:** Implemented and verified on `refactor/other-actions`.
+- **State:** Integrated into main at `af55af80`.
 - **Dependencies / approval:** 12 plus 10 and command inventory.
 - **Scope:** Close discovered generation/submission/other writes, not new product features.
 - **Completion check:** Exhaustive command inventory documented; offline analysis and simulation CLI scripts (`scripts/analysis/*`) migrated to `@/features/season-review/server` and `@/features/season-review/public`; Hoopgrid challenge generator migrated to `@/features/hoopgrid/server`; package script runtime conditions fixed; focused CLI tests passing.
 - **Evidence:** [Task 21 receipt](reports/task-21-other-actions.md); 5 CLI tests passed, server guards (144 tests) passed, 0 architecture violations, build and schema audit green.
-- **Next action:** Fast-forward merge into main; proceed with Task 22 Infrastructure / cache lifecycle.
+- **Next action:** Completed; proceed with Task 22 Infrastructure / cache lifecycle.
 
 ### Task 22 — Infrastructure / cache lifecycle
 
@@ -322,7 +325,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), and lineup commands (Task 15) are merged into `main`. The next domain milestone is **Task 16 — Private Market reads**. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 — Application Shell** is complete and validated on branch `refactor/application-shell` for PR review, establishing the canonical chrome foundation before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
+All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), lineup commands (Task 15), private market reads audit (Task 16), market commands (Task 17), accounts/settings (Task 18), hoopgrid (Task 19), assistant (Task 20), and other actions (Task 21) are merged into `main`. The next domain milestone is **Task 22 — Infrastructure / cache lifecycle**. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 / UI-SHELL — Application Shell** is complete and validated on branch `refactor/application-shell` for PR #49 review, establishing the canonical chrome foundation before demand-driven **UI-01C — Interactive Controls & Overlays**, **UI-02 — Compositions & Shared Domain Layouts**, and **UI-03 — Feature Screen Migration**.
 
 ## UI presentation ownership and cleanup contract
 

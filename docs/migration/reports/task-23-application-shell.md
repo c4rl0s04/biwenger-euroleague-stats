@@ -9,7 +9,7 @@ status: active
 
 # Task 23 — Application Shell Migration
 
-Base: `ef7f9f97`.
+Base: `af55af80`.
 Branch: `refactor/application-shell`.
 State: Complete and verified on task worktree; prepared for PR review.
 
@@ -37,21 +37,21 @@ src/components/shell/
 - **`SectionContext.tsx`**: Typed section registration provider with DOM-ordered anchors (`requestAnimationFrame`) for dynamic in-page navigation.
 - **`NavigationFeedback.tsx`**: Route transition progress bar and screen-reader polite status announcements (`role="status"`, `aria-live="polite"`).
 - **`AppBrand.tsx`**: Accessible brand wordmark and logo via `next/image` with link to `/`.
-- **`AppBackground.tsx`**: Quiet sports analytics canvas using semantic tokens (`--surface-app`, `--effect-glow-primary`, `--effect-glow-subtle`).
+- **`AppBackground.tsx`**: Quiet sports analytics canvas using semantic tokens (`--surface-app`, `--effect-shell-ambient-primary`, `--effect-shell-ambient-subtle`) without component-local `dark:` overrides.
 - **`AppMain.tsx`**: Semantic `<main id="main-content" tabIndex={-1} className="app-main-content">` landmark.
-- **`AppProviders.tsx`**: Replaces `ClientWrapper.js`, composing `UserProvider`, `SeasonProvider`, `ErrorBoundary`, and `CommandPalette`.
+- **`AppProviders.tsx`**: Replaces `ClientWrapper.js`, composing `UserProvider`, `SeasonProvider`, `ErrorBoundary`, and `CommandPalette` with strongly typed props.
 
 ### 2. Desktop shell (`src/components/shell/desktop/`)
 
-- **`Sidebar.tsx`**: Desktop navigation with collapsible drawer, auto-collapse on tablet viewports (768px-1023px), and dynamic section sub-lists.
+- **`Sidebar.tsx`**: Desktop navigation with collapsible drawer using `<IconButton>` primitive, auto-collapse on tablet viewports (768px-1023px), and dynamic section sub-lists.
 - **`AppHeader.tsx`**: Desktop header composing brand, global search, settings link, season selector, and account menu. Removed fake notifications UI (bell icon + pulsing dot).
 - **`AppFooter.tsx`**: Semantic footer with valid GitHub repo link, clean navigation links, and copyright. Excludes fake interactive spans.
 - **`DesktopShell.tsx`**: Orchestrates header, sidebar, news ticker (`@/features/news/public`), main content, and footer.
 
 ### 3. Mobile shell (`src/components/shell/mobile/`)
 
-- **`MobileNavigation.tsx`**: Fixed bottom navigation bar with 4 primary destinations, active state styling, pending navigation spinner, and "Más" button.
-- **`MobileMoreMenu.tsx`**: Accessible dialog (`role="dialog"`, `aria-modal="true"`) with Tab focus trap, Escape handling, body scroll lock, focus restoration, global search, season selector, and categorized navigation links.
+- **`MobileNavigation.tsx`**: Fixed bottom navigation bar with 4 primary destinations, active state styling, pending navigation spinner, stable `useCallback` for `onClose`, and "Más" button.
+- **`MobileMoreMenu.tsx`**: Accessible dialog (`role="dialog"`, `aria-modal="true"`) with `<IconButton>` close button, Tab / Shift+Tab focus trap, Escape handling, body scroll lock, focus restoration, global search, season selector, and categorized navigation links.
 - **`MobileShell.tsx`**: Orchestrates main content frame and mobile bottom navigation.
 
 ### 4. Integrations (`src/components/shell/integrations/`)

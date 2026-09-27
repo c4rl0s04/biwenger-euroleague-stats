@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { LoaderCircle, MoreHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { MOBILE_PRIMARY_ITEMS, isNavigationItemActive } from '../shared/navigation';
 import { NavigationLink, useNavigationFeedback } from '../shared/NavigationFeedback';
 import { MobileMoreMenu } from './MobileMoreMenu';
@@ -14,6 +14,8 @@ export interface MobileNavigationProps {
 export function MobileNavigation({ className = '' }: MobileNavigationProps) {
   const pathname = usePathname();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const handleCloseMore = useCallback(() => setIsMoreOpen(false), []);
   const { isNavigatingTo } = useNavigationFeedback();
   const primaryActive = MOBILE_PRIMARY_ITEMS.some((item) =>
     isNavigationItemActive(pathname, item.href)
@@ -46,8 +48,12 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
             );
           })}
           <button
+            ref={moreButtonRef}
             type="button"
-            onClick={() => setIsMoreOpen(true)}
+            onClick={() => {
+              moreButtonRef.current?.focus();
+              setIsMoreOpen(true);
+            }}
             aria-expanded={isMoreOpen}
             aria-haspopup="dialog"
             className={`mobile-nav-item ${!primaryActive ? 'mobile-nav-item-active' : ''}`}
@@ -57,7 +63,7 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
           </button>
         </div>
       </nav>
-      <MobileMoreMenu isOpen={isMoreOpen} onClose={() => setIsMoreOpen(false)} />
+      <MobileMoreMenu isOpen={isMoreOpen} onClose={handleCloseMore} triggerRef={moreButtonRef} />
     </>
   );
 }

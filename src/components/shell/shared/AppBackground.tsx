@@ -14,17 +14,15 @@ export function AppBackground({ children, className = '' }: AppBackgroundProps) 
       {/* Ambient subtle glow background - CSS semantic tokens ensure automatic dark/light compatibility */}
       <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden" aria-hidden="true">
         <div
-          className="absolute -top-[20%] right-[-10%] h-[50vw] w-[50vw] max-w-[650px] rounded-full blur-[140px] opacity-40 dark:opacity-20"
+          className="absolute -top-[20%] right-[-10%] h-[50vw] w-[50vw] max-w-[650px] rounded-full blur-[140px]"
           style={{
-            background:
-              'var(--effect-glow-primary, radial-gradient(circle, hsl(var(--primary) / 0.08), transparent 70%))',
+            background: 'var(--effect-shell-ambient-primary)',
           }}
         />
         <div
-          className="absolute top-[40%] -left-[10%] h-[40vw] w-[40vw] max-w-[500px] rounded-full blur-[120px] opacity-30 dark:opacity-15"
+          className="absolute top-[40%] -left-[10%] h-[40vw] w-[40vw] max-w-[500px] rounded-full blur-[120px]"
           style={{
-            background:
-              'var(--effect-glow-subtle, radial-gradient(circle, hsl(var(--primary) / 0.04), transparent 70%))',
+            background: 'var(--effect-shell-ambient-subtle)',
           }}
         />
       </div>

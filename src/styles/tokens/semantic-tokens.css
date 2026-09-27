@@ -60,6 +60,17 @@
     radial-gradient(at 100% 0%, var(--overlay-obsidian-mesh-medium) 0, transparent 50%),
     radial-gradient(at 50% 100%, var(--overlay-obsidian-mesh-soft) 0, transparent 50%);
 
+  --effect-shell-ambient-primary: radial-gradient(
+    circle,
+    hsl(var(--color-orange-strong) / 0.08),
+    transparent 70%
+  );
+  --effect-shell-ambient-subtle: radial-gradient(
+    circle,
+    hsl(var(--color-orange-strong) / 0.04),
+    transparent 70%
+  );
+
   /* Application shell semantics */
   --shell-surface: var(--color-obsidian-black);
   --shell-content: var(--color-white-soft);
@@ -139,7 +150,7 @@
   --sidebar-ring: var(--shell-focus-ring);
 }
 
-/* Explicit choices override the OS. Unmigrated screens stay dark by default without JS. */
+/* Light remains an explicit opt-in during legacy rollout. Unmigrated screens stay dark by default without JS. */
 :root[data-theme='light'] {
   color-scheme: light;
   /* Surfaces: warm canvas, near-white card, white raised, recessed subtle. */
@@ -183,6 +194,16 @@
     hsl(var(--color-orange-pressed))
   );
   --effect-gradient-mesh: none;
+  --effect-shell-ambient-primary: radial-gradient(
+    circle,
+    hsl(var(--color-orange-ink) / 0.04),
+    transparent 70%
+  );
+  --effect-shell-ambient-subtle: radial-gradient(
+    circle,
+    hsl(var(--color-orange-ink) / 0.02),
+    transparent 70%
+  );
 
   --shell-surface: var(--color-paper-card);
   --shell-content: var(--color-ink-secondary);
