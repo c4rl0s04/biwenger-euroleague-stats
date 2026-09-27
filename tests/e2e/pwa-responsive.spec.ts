@@ -1,3 +1,4 @@
+import { expectShellPalette } from './shell-style-contract';
 import { expect, test } from './fixtures';
 import type { Page } from 'playwright';
 
@@ -62,6 +63,7 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/dashboard/);
 
+  await expectShellPalette(page);
   const presentation = await page.locator('[data-presentation]').getAttribute('data-presentation');
 
   if (presentation === 'phone') {

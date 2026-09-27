@@ -1,3 +1,4 @@
+import { expectShellPalette } from './shell-style-contract';
 import { execFileSync } from 'node:child_process';
 import type { Page } from 'playwright';
 import { expect, test } from './fixtures';
@@ -425,6 +426,7 @@ test('real application explicit light smoke retains content and shell navigation
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
     await page.waitForLoadState('networkidle');
     await expectTheme(page, 'light');
+    await expectShellPalette(page);
     expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
     const dimensions = await page.evaluate(() => ({
       viewport: innerWidth,

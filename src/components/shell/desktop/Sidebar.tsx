@@ -92,7 +92,7 @@ export function Sidebar({ className = '' }: SidebarProps) {
                       size={20}
                       className={`transition-all duration-200 shrink-0 ${
                         isActive
-                          ? 'text-primary drop-shadow-[0_0_8px_hsla(19,99%,49%,0.4)] scale-105'
+                          ? 'text-primary drop-shadow-[0_0_8px_var(--effect-shell-brand-glow)] scale-105'
                           : 'group-hover:text-foreground group-hover:scale-105'
                       }`}
                       aria-hidden="true"

@@ -57,6 +57,20 @@ describe('AccountMenu', () => {
     expect(html).toContain('Acceso Manager');
   });
 
+  it.each([
+    ['Fixture Manager', 'F'],
+    ['  Carlos H ', 'C'],
+    ['', '?'],
+  ])('renders a compact avatar fallback for %j', (name, initial) => {
+    mockClientUserState.isAuthenticated = true;
+    mockClientUserState.currentUser = { id: '12345', name, icon: null };
+    const html = renderToStaticMarkup(<AccountMenu />);
+    expect(html).toMatch(
+      new RegExp('aria-label="[^"]+">' + (initial === '?' ? '\\?' : initial) + '</span>')
+    );
+    expect(html).not.toContain('<img');
+  });
+
   it('renders user button and avatar when authenticated', () => {
     mockClientUserState.isAuthenticated = true;
     mockClientUserState.isClient = true;

@@ -9,7 +9,7 @@ export interface AppBackgroundProps {
 export function AppBackground({ children, className = '' }: AppBackgroundProps) {
   return (
     <div
-      className={`relative min-h-screen bg-[var(--surface-app)] text-[var(--content-primary)] ${className}`}
+      className={`relative isolate min-h-screen bg-[hsl(var(--surface-app))] text-[hsl(var(--content-primary))] ${className}`}
     >
       {/* Ambient subtle glow background - CSS semantic tokens ensure automatic dark/light compatibility */}
       <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden" aria-hidden="true">

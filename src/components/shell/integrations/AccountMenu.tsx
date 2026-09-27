@@ -11,21 +11,8 @@ export interface AccountMenuProps {
   className?: string;
 }
 
-export interface CurrentUser {
-  id: string | number;
-  name: string;
-  icon?: string | null;
-}
-
-export interface ClientUserState {
-  currentUser: CurrentUser | null;
-  isClient: boolean;
-  isAuthenticated: boolean;
-  isReady?: boolean;
-}
-
 export function AccountMenu({ className = '' }: AccountMenuProps) {
-  const { currentUser, isClient, isAuthenticated } = useClientUser() as ClientUserState;
+  const { currentUser, isClient, isAuthenticated } = useClientUser();
   const [isOpen, setIsOpen] = useState(false);
 
   // Guard against SSR / client hydration discrepancies (prevents React #418)
@@ -62,8 +49,8 @@ export function AccountMenu({ className = '' }: AccountMenuProps) {
       >
         <Avatar
           src={currentUser.icon || undefined}
-          alt={currentUser.name}
-          fallback={currentUser.name}
+          alt={currentUser.name || 'Manager'}
+          fallback={currentUser.name?.trim().charAt(0).toUpperCase() || '?'}
           size="sm"
           className="ring-1 ring-border group-hover:ring-primary/50 transition-all"
         />

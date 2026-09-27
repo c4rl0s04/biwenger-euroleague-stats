@@ -8,18 +8,8 @@ export interface SeasonSelectorProps {
   className?: string;
 }
 
-interface SeasonContextType {
-  seasons: Array<{ id: string; name?: string; active?: boolean }>;
-  currentSeasonId: string;
-  activeSeasonId: string;
-  currentSeason: { id: string; name?: string; active?: boolean } | null;
-  isCustomSeason: boolean;
-  selectSeason: (seasonId: string) => void;
-}
-
 export function SeasonSelector({ className = '' }: SeasonSelectorProps) {
-  const { seasons, currentSeasonId, activeSeasonId, isCustomSeason, selectSeason } =
-    useSeason() as SeasonContextType;
+  const { seasons, currentSeasonId, activeSeasonId, isCustomSeason, selectSeason } = useSeason();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!seasons || seasons.length <= 1) {

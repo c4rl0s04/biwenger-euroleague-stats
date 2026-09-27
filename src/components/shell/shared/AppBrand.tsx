@@ -21,7 +21,7 @@ export function AppBrand({ className = '', showWordmark = true }: AppBrandProps)
           fill
           priority
           unoptimized
-          className="object-contain drop-shadow-[0_0_12px_hsla(19,99%,49%,0.4)]"
+          className="object-contain drop-shadow-[0_0_12px_var(--effect-shell-brand-glow)]"
           sizes="56px"
         />
       </div>

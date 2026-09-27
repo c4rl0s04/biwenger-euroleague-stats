@@ -71,6 +71,13 @@
     transparent 70%
   );
 
+  /* Shared shell effects; complete CSS colors, unlike HSL-channel surface roles. */
+  --effect-shell-brand-glow: hsl(var(--action-primary) / 0.4);
+  --shell-progress-accent: var(--color-orange-warm);
+  --shell-overlay: hsl(var(--color-black) / 0.72);
+  --shell-navigation-shadow: 0 -18px 45px hsl(var(--color-black) / 0.42);
+  --shell-sheet-shadow: 0 -28px 75px hsl(var(--color-black) / 0.65);
+
   /* Application shell semantics */
   --shell-surface: var(--color-obsidian-black);
   --shell-content: var(--color-white-soft);
@@ -204,6 +211,12 @@
     hsl(var(--color-orange-ink) / 0.02),
     transparent 70%
   );
+
+  --effect-shell-brand-glow: hsl(var(--action-primary) / 0.2);
+  --shell-progress-accent: hsl(var(--action-accent));
+  --shell-overlay: hsl(var(--color-ink-strong) / 0.4);
+  --shell-navigation-shadow: 0 -18px 45px hsl(var(--color-ink-strong) / 0.12);
+  --shell-sheet-shadow: 0 -28px 75px hsl(var(--color-ink-strong) / 0.2);
 
   --shell-surface: var(--color-paper-card);
   --shell-content: var(--color-ink-secondary);
