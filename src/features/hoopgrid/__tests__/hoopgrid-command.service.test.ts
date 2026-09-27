@@ -96,25 +96,121 @@ describe('HoopgridCommandService', () => {
     };
 
     it('validates team, pos, and country criteria', () => {
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'team', value: 'RMB', label: 'RMB' }, [], [])).toBe(true);
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'team', value: 'BAR', label: 'BAR' }, [], [])).toBe(false);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'team', value: 'RMB', label: 'RMB' },
+          [],
+          []
+        )
+      ).toBe(true);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'team', value: 'BAR', label: 'BAR' },
+          [],
+          []
+        )
+      ).toBe(false);
 
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'pos', value: 'Base', label: 'Base' }, [], [])).toBe(true);
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'pos', value: 'Pivot', label: 'Pivot' }, [], [])).toBe(false);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'pos', value: 'Base', label: 'Base' },
+          [],
+          []
+        )
+      ).toBe(true);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'pos', value: 'Pivot', label: 'Pivot' },
+          [],
+          []
+        )
+      ).toBe(false);
 
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'country', value: 'Spain', label: 'Spain' }, [], [])).toBe(true);
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'country', value: 'France', label: 'France' }, [], [])).toBe(false);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'country', value: 'Spain', label: 'Spain' },
+          [],
+          []
+        )
+      ).toBe(true);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'country', value: 'France', label: 'France' },
+          [],
+          []
+        )
+      ).toBe(false);
     });
 
     it('validates price, height, and age criteria', () => {
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'price_min', value: 8000000, label: '8M+' }, [], [])).toBe(true);
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'price_max', value: 5000000, label: '<5M' }, [], [])).toBe(false);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'price_min', value: 8000000, label: '8M+' },
+          [],
+          []
+        )
+      ).toBe(true);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'price_max', value: 5000000, label: '<5M' },
+          [],
+          []
+        )
+      ).toBe(false);
 
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'height_min', value: 190, label: '190+' }, [], [])).toBe(true);
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'height_max', value: 190, label: '<190' }, [], [])).toBe(false);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'height_min', value: 190, label: '190+' },
+          [],
+          []
+        )
+      ).toBe(true);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'height_max', value: 190, label: '<190' },
+          [],
+          []
+        )
+      ).toBe(false);
 
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'age_min', value: 20, label: '20+' }, [], [])).toBe(true);
-      expect(service.validateCriteriaSync(basePlayer, [], { type: 'age_max', value: 18, label: '<18' }, [], [])).toBe(false);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'age_min', value: 20, label: '20+' },
+          [],
+          []
+        )
+      ).toBe(true);
+      expect(
+        service.validateCriteriaSync(
+          basePlayer,
+          [],
+          { type: 'age_max', value: 18, label: '<18' },
+          [],
+          []
+        )
+      ).toBe(false);
     });
 
     it('validates stat averages, single game, and totals', () => {
@@ -171,16 +267,18 @@ describe('HoopgridCommandService', () => {
         )
       ).toBe(true);
 
-      const statsWithPercentage = [
-        { threePointsMade: 4, threePointsAttempted: 8 },
-      ];
+      const statsWithPercentage = [{ threePointsMade: 4, threePointsAttempted: 8 }];
       expect(
         service.validateCriteriaSync(
           basePlayer,
           statsWithPercentage,
           {
             type: 'percentage',
-            value: { madeField: 'threePointsMade', attField: 'threePointsAttempted', threshold: 0.5 },
+            value: {
+              madeField: 'threePointsMade',
+              attField: 'threePointsAttempted',
+              threshold: 0.5,
+            },
             label: '50% 3P',
           },
           [],
@@ -194,7 +292,11 @@ describe('HoopgridCommandService', () => {
         service.validateCriteriaSync(
           basePlayer,
           [],
-          { type: 'user_ownership', value: { userId: 'u-1', mode: 'current' }, label: 'u-1 current' },
+          {
+            type: 'user_ownership',
+            value: { userId: 'u-1', mode: 'current' },
+            label: 'u-1 current',
+          },
           [],
           []
         )

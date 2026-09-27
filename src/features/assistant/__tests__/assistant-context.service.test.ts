@@ -208,8 +208,7 @@ describe('assistant context service', () => {
   });
 
   it('logs selected providers only in development', async () => {
-    const { buildAssistantContext } =
-      await import('../server/services/assistant-context.service');
+    const { buildAssistantContext } = await import('../server/services/assistant-context.service');
     const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
     vi.stubEnv('NODE_ENV', 'development');
 

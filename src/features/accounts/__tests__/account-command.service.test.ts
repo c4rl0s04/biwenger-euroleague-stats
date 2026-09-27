@@ -27,7 +27,10 @@ describe('AccountCommandService', () => {
       storeBiwengerCredential: vi.fn(),
     };
     mockFetch = vi.fn();
-    service = new AccountCommandService(mockRepo as unknown as AccountRepository, mockFetch as unknown as typeof fetch);
+    service = new AccountCommandService(
+      mockRepo as unknown as AccountRepository,
+      mockFetch as unknown as typeof fetch
+    );
   });
 
   describe('changePassword', () => {
@@ -192,9 +195,9 @@ describe('AccountCommandService', () => {
         json: async () => ({ token: canaryToken, message: `Bad token: ${canaryToken}` }),
       });
 
-      await expect(
-        service.linkBiwenger('user-1', { password: 'wrongPassword' })
-      ).rejects.toThrow(AccountProviderAuthError);
+      await expect(service.linkBiwenger('user-1', { password: 'wrongPassword' })).rejects.toThrow(
+        AccountProviderAuthError
+      );
 
       expect(JSON.stringify(warnSpy.mock.calls)).not.toContain(canaryToken);
       expect(mockRepo.storeBiwengerCredential).not.toHaveBeenCalled();
@@ -234,9 +237,9 @@ describe('AccountCommandService', () => {
         json: async () => ({ otherField: 123 }),
       });
 
-      await expect(
-        service.linkBiwenger('user-1', { password: 'somePassword' })
-      ).rejects.toThrow(AccountProviderAuthError);
+      await expect(service.linkBiwenger('user-1', { password: 'somePassword' })).rejects.toThrow(
+        AccountProviderAuthError
+      );
     });
 
     it('throws AccountStorageError when credential storage fails without leaking canary', async () => {
@@ -258,9 +261,9 @@ describe('AccountCommandService', () => {
 
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-      await expect(
-        service.linkBiwenger('user-1', { password: 'somePassword' })
-      ).rejects.toThrow(AccountStorageError);
+      await expect(service.linkBiwenger('user-1', { password: 'somePassword' })).rejects.toThrow(
+        AccountStorageError
+      );
 
       expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(canaryToken);
       errorSpy.mockRestore();

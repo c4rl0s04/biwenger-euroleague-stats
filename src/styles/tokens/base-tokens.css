@@ -43,6 +43,8 @@
   /* Status */
   --color-red-strong: 0 84% 60%;
 
+  --color-black: 0 0% 0%;
+
   /* Raw translucent visual values */
   --overlay-white-faint: hsla(0, 0%, 100%, 0.06);
   --overlay-obsidian-glass: hsla(240, 6%, 7%, 0.7);

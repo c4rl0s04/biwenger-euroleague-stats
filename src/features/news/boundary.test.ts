@@ -10,7 +10,7 @@ function files(path: string): string[] {
 describe('News ownership', () => {
   it('keeps app-shell composition out of the generic layout barrel', () => {
     expect(read('src/components/layout/index.js')).not.toContain('./AppShell');
-    expect(read('src/app/(app)/layout.js')).toContain('@/components/layout/AppShell');
+    expect(read('src/app/(app)/layout.js')).toContain('@/components/shell/AppShell');
   });
   it('uses explicit server-only services and client-safe exports', () => {
     expect(read('src/features/news/server.ts')).toMatch(/^import 'server-only'/);
@@ -24,10 +24,11 @@ describe('News ownership', () => {
     for (const path of ['src/app/api/news/route.ts', 'src/app/(app)/dashboard/page.tsx'])
       expect(read(path)).toContain('@/features/news/server');
     for (const path of [
-      'src/components/layout/AppShell.js',
+      'src/components/shell/desktop/DesktopShell.tsx',
       'src/features/dashboard/screens/MobileDashboardScreen.tsx',
     ])
       expect(read(path)).toContain('@/features/news/public');
+    expect(existsSync('src/components/layout/AppShell.js')).toBe(false);
     expect(existsSync('src/components/ui/NewsTicker.js')).toBe(false);
     expect(existsSync('src/components/mobile/MobileNewsStrip.tsx')).toBe(false);
     expect(existsSync('src/lib/services/app/news-landing-legacy.ts')).toBe(false);

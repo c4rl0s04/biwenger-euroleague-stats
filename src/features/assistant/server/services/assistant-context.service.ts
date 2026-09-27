@@ -30,10 +30,7 @@ import {
   getUserScheduleService,
 } from '@/lib/services';
 import { MAX_BLOCK_CHARS, MAX_TOTAL_CONTEXT_CHARS } from '../../constants/assistant-instructions';
-import type {
-  AssistantContextBlock,
-  AssistantContextRequest,
-} from '../../models/assistant.models';
+import type { AssistantContextBlock, AssistantContextRequest } from '../../models/assistant.models';
 import { buildPlayerContextForMessage } from './assistant-player-context.service';
 
 type ContextProviderName =

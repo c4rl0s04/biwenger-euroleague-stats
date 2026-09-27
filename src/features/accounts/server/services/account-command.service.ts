@@ -1,10 +1,7 @@
 import 'server-only';
 
 import bcrypt from 'bcryptjs';
-import type {
-  ChangePasswordResult,
-  LinkBiwengerResult,
-} from '../../models/account.models';
+import type { ChangePasswordResult, LinkBiwengerResult } from '../../models/account.models';
 import {
   AccountValidationError,
   parseChangePasswordInput,

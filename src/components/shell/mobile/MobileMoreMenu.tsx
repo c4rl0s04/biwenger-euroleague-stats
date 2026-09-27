@@ -1,67 +1,87 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Download, LoaderCircle, MoreHorizontal, Settings, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import SearchDropdown from './SearchDropdown';
-import SeasonSelector from './SeasonSelector';
-import { MOBILE_PRIMARY_ITEMS, NAV_ITEMS, isNavigationItemActive } from './navigation';
-import { NavigationLink, useNavigationFeedback } from './NavigationFeedback';
+import { Download, Settings, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { IconButton } from '@/components/ui/foundation';
+import {
+  NAV_ITEMS,
+  MOBILE_PRIMARY_ITEMS,
+  MOBILE_NAV_CATEGORIES,
+  isNavigationItemActive,
+} from '../shared/navigation';
+import { NavigationLink } from '../shared/NavigationFeedback';
+import { GlobalSearch } from '../integrations/GlobalSearch';
+import { SeasonSelector } from '../integrations/SeasonSelector';
 
-function MoreSheet({ isOpen, onClose }) {
+export interface MobileMoreMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  triggerRef?: React.RefObject<HTMLElement | null>;
+}
+
+export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuProps) {
   const pathname = usePathname();
-  const dialogRef = useRef(null);
-  const closeButtonRef = useRef(null);
-  const previousFocusRef = useRef(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
   const secondaryItems = NAV_ITEMS.filter(
     (item) => !MOBILE_PRIMARY_ITEMS.some((primary) => primary.href === item.href)
   );
-  const categories = [
-    { name: 'Equipo', hrefs: ['/players', '/market', '/lineup'] },
-    { name: 'Liga', hrefs: ['/matches', '/rounds', '/compare'] },
-    { name: 'Competición', hrefs: ['/tournaments', '/predictions', '/playoffs'] },
-    { name: 'Herramientas', hrefs: ['/assistant', '/hoopgrid', '/season-review'] },
-  ].map((category) => ({
+
+  const categories = MOBILE_NAV_CATEGORIES.map((category) => ({
     ...category,
-    items: secondaryItems.filter((item) => category.hrefs.includes(item.href)),
+    items: secondaryItems.filter((item) =>
+      (category.hrefs as readonly string[]).includes(item.href)
+    ),
   }));
 
   useEffect(() => {
     if (!isOpen) return undefined;
-    previousFocusRef.current = document.activeElement;
+
+    previousFocusRef.current = (triggerRef?.current ||
+      document.activeElement) as HTMLElement | null;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    // Focus close button on open
     closeButtonRef.current?.focus();
 
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         onClose();
         return;
       }
+
       if (event.key !== 'Tab' || !dialogRef.current) return;
-      const focusable = dialogRef.current.querySelectorAll(
-        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
       );
       if (!focusable.length) return;
+
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
+
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
-        last.focus();
+        last?.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
-        first.focus();
+        first?.focus();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.body.style.overflow = originalOverflow;
       document.removeEventListener('keydown', handleKeyDown);
-      previousFocusRef.current?.focus?.();
+      (triggerRef?.current || previousFocusRef.current)?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, triggerRef]);
 
   if (!isOpen) return null;
 
@@ -86,19 +106,20 @@ function MoreSheet({ isOpen, onClose }) {
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">
               Navegación
             </p>
-            <h2 id="mobile-more-title" className="mt-1 text-3xl text-white">
+            <h2 id="mobile-more-title" className="mt-1 text-3xl font-display text-foreground">
               Más secciones
             </h2>
           </div>
-          <button
+          <IconButton
             ref={closeButtonRef}
-            type="button"
+            variant="secondary"
+            size="md"
             onClick={onClose}
-            className="mobile-sheet-close"
+            className="rounded-2xl"
             aria-label="Cerrar menú Más"
           >
             <X size={21} aria-hidden="true" />
-          </button>
+          </IconButton>
         </header>
 
         <div className="px-5 pb-4 space-y-3">
@@ -108,7 +129,7 @@ function MoreSheet({ isOpen, onClose }) {
             </span>
             <SeasonSelector />
           </div>
-          <SearchDropdown onClose={onClose} />
+          <GlobalSearch onClose={onClose} />
         </div>
 
         <nav aria-label="Resto de secciones" className="mobile-more-content">
@@ -141,14 +162,15 @@ function MoreSheet({ isOpen, onClose }) {
             </section>
           ))}
 
-          <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/8 pt-4">
+          <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border/40 pt-4">
             <NavigationLink
               href="/settings"
               navigationLabel="Ajustes"
               onClick={onClose}
               className="mobile-more-link"
             >
-              <Settings size={20} aria-hidden="true" /> Ajustes
+              <Settings size={20} aria-hidden="true" />
+              <span>Ajustes</span>
             </NavigationLink>
             <NavigationLink
               href="/install"
@@ -156,7 +178,8 @@ function MoreSheet({ isOpen, onClose }) {
               onClick={onClose}
               className="mobile-more-link"
             >
-              <Download size={20} aria-hidden="true" /> Instalar
+              <Download size={20} aria-hidden="true" />
+              <span>Instalar</span>
             </NavigationLink>
           </div>
         </nav>
@@ -165,51 +188,4 @@ function MoreSheet({ isOpen, onClose }) {
   );
 }
 
-export default function MobileNavigation() {
-  const pathname = usePathname();
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const { isNavigatingTo } = useNavigationFeedback();
-  const primaryActive = MOBILE_PRIMARY_ITEMS.some((item) =>
-    isNavigationItemActive(pathname, item.href)
-  );
-
-  return (
-    <>
-      <nav aria-label="Navegación principal móvil" className="mobile-bottom-nav">
-        <div className="mobile-bottom-nav-inner">
-          {MOBILE_PRIMARY_ITEMS.map((item) => {
-            const active = isNavigationItemActive(pathname, item.href);
-            const pending = isNavigatingTo(item.href);
-            return (
-              <NavigationLink
-                key={item.href}
-                href={item.href}
-                navigationLabel={item.shortName || item.name}
-                aria-current={active ? 'page' : undefined}
-                className={`mobile-nav-item ${active ? 'mobile-nav-item-active' : ''} ${pending ? 'mobile-nav-item-pending' : ''}`}
-              >
-                {pending ? (
-                  <LoaderCircle className="mobile-nav-spinner" size={21} aria-hidden="true" />
-                ) : (
-                  <item.icon size={21} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
-                )}
-                <span>{item.shortName || item.name}</span>
-              </NavigationLink>
-            );
-          })}
-          <button
-            type="button"
-            onClick={() => setIsMoreOpen(true)}
-            aria-expanded={isMoreOpen}
-            aria-haspopup="dialog"
-            className={`mobile-nav-item ${!primaryActive ? 'mobile-nav-item-active' : ''}`}
-          >
-            <MoreHorizontal size={22} aria-hidden="true" />
-            <span>Más</span>
-          </button>
-        </div>
-      </nav>
-      <MoreSheet isOpen={isMoreOpen} onClose={() => setIsMoreOpen(false)} />
-    </>
-  );
-}
+export default MobileMoreMenu;

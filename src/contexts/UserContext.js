@@ -3,8 +3,16 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 
-const UserContext = createContext();
+/**
+ * Presentation contracts owned by the user context, shared with shell integrations.
+ * @typedef {{id?: string | number, user_id?: string | number, name?: string | null, icon?: string | null}} UserOption
+ * @typedef {{id: string | number, name?: string | null, icon?: string | null}} CurrentUser
+ * @typedef {{children: import('react').ReactNode, users?: UserOption[]}} UserProviderProps
+ * @typedef {{currentUser: CurrentUser | null, selectUser: (userId: string | number) => void, clearUser: () => void, isLoading: boolean, users?: UserOption[], isAuthenticated: boolean}} UserContextValue
+ */
+const UserContext = createContext(/** @type {UserContextValue | undefined} */ (undefined));
 
+/** @param {UserProviderProps} props */
 export function UserProvider({ children, users }) {
   const { data: session, status } = useSession();
 

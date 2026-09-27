@@ -12,14 +12,7 @@ const getServerSnapshot = () => false;
  * Hook that combines client-side detection with user context.
  * Use this in components that depend on currentUser from localStorage.
  *
- * @returns {{
- *   isClient: boolean - true on client after hydration
- *   isReady: boolean - true when client AND user is loaded
- *   currentUser: object | null
- *   selectUser: function
- *   clearUser: function
- *   users: array
- * }}
+ * @returns {import('@/contexts/UserContext').UserContextValue & {isClient: boolean, isReady: boolean}}
  */
 export function useClientUser() {
   const isClient = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);

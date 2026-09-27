@@ -55,10 +55,7 @@ export class AssistantCommandService {
     private readonly provider: AssistantProviderService = assistantProviderService
   ) {}
 
-  async createConversation(
-    userId: string,
-    rawInput: unknown
-  ): Promise<AssistantConversation> {
+  async createConversation(userId: string, rawInput: unknown): Promise<AssistantConversation> {
     const parsed = CreateConversationSchema.safeParse(rawInput);
     if (!parsed.success) {
       throw new AssistantValidationError(

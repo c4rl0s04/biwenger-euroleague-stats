@@ -1,7 +1,4 @@
-import {
-  hoopgridCommandService,
-  HoopgridValidationError,
-} from '@/features/hoopgrid/server';
+import { hoopgridCommandService, HoopgridValidationError } from '@/features/hoopgrid/server';
 import { auth } from '@/auth';
 import { privateJsonResponse } from '@/lib/utils/response';
 

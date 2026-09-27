@@ -2,8 +2,16 @@
 
 import { createContext, useContext } from 'react';
 
-const SeasonContext = createContext(null);
+/**
+ * Client-safe season selection contract. Server season resolution remains in lib/seasons.
+ * @typedef {{id: string, name?: string, active?: boolean}} SeasonItem
+ * @typedef {{seasons?: SeasonItem[], currentSeasonId?: string, activeSeasonId?: string}} SeasonSelection
+ * @typedef {SeasonSelection & {children: import('react').ReactNode}} SeasonProviderProps
+ * @typedef {{seasons: SeasonItem[], currentSeasonId?: string, activeSeasonId?: string, currentSeason: SeasonItem | null, isCustomSeason: boolean, selectSeason: (seasonId?: string) => void}} SeasonContextValue
+ */
+const SeasonContext = createContext(/** @type {SeasonContextValue | null} */ (null));
 
+/** @param {SeasonProviderProps} props */
 export function SeasonProvider({ children, seasons = [], currentSeasonId, activeSeasonId }) {
   const isCustomSeason = Boolean(
     currentSeasonId && activeSeasonId && currentSeasonId !== activeSeasonId

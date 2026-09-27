@@ -115,12 +115,15 @@ export class HoopgridRepository {
       })
       .from(hoopgridGuesses)
       .leftJoin(players, eq(hoopgridGuesses.playerId, players.id))
-      .where(
-        and(eq(hoopgridGuesses.challengeId, challengeId), eq(hoopgridGuesses.userId, userId))
-      );
+      .where(and(eq(hoopgridGuesses.challengeId, challengeId), eq(hoopgridGuesses.userId, userId)));
   }
 
-  async getRarity(challengeId: string, cellIndex: number, playerId: number, userId: string): Promise<number> {
+  async getRarity(
+    challengeId: string,
+    cellIndex: number,
+    playerId: number,
+    userId: string
+  ): Promise<number> {
     const results = await db
       .select({
         playerId: hoopgridGuesses.playerId,
@@ -216,12 +219,17 @@ export class HoopgridRepository {
         .select()
         .from(playerRoundStats)
         .where(
-          and(eq(playerRoundStats.seasonId, activeSeasonId), eq(playerRoundStats.playerId, playerId))
+          and(
+            eq(playerRoundStats.seasonId, activeSeasonId),
+            eq(playerRoundStats.playerId, playerId)
+          )
         ),
       db
         .select()
         .from(initialSquads)
-        .where(and(eq(initialSquads.seasonId, activeSeasonId), eq(initialSquads.playerId, playerId))),
+        .where(
+          and(eq(initialSquads.seasonId, activeSeasonId), eq(initialSquads.playerId, playerId))
+        ),
       db
         .select()
         .from(fichajes)
@@ -243,14 +251,8 @@ export class HoopgridRepository {
     const [allPlayers, allStats, allInitial, allFichajes, allUsersList, seasonTeams] =
       await Promise.all([
         this.getSeasonPlayers(activeSeasonId),
-        db
-          .select()
-          .from(playerRoundStats)
-          .where(eq(playerRoundStats.seasonId, activeSeasonId)),
-        db
-          .select()
-          .from(initialSquads)
-          .where(eq(initialSquads.seasonId, activeSeasonId)),
+        db.select().from(playerRoundStats).where(eq(playerRoundStats.seasonId, activeSeasonId)),
+        db.select().from(initialSquads).where(eq(initialSquads.seasonId, activeSeasonId)),
         db.select().from(fichajes).where(eq(fichajes.seasonId, activeSeasonId)),
         db
           .select({

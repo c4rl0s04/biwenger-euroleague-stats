@@ -179,7 +179,8 @@ export function HoopgridCriteriaScreen() {
 
         <footer className="pt-10 border-t border-border text-center">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">
-            These parameters are combined to form a 3x3 matrix in <code>hoopgridCommandService.ts</code>
+            These parameters are combined to form a 3x3 matrix in{' '}
+            <code>hoopgridCommandService.ts</code>
           </p>
         </footer>
       </div>
