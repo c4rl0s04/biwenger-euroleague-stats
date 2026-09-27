@@ -22,6 +22,8 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { PageHeader, ElegantCard, FadeIn } from '@/components/ui';
 import Section from '@/components/layout/Section';
+import { Surface } from '@/components/ui/foundation';
+import { ThemePreferenceControl } from '../components/ThemePreferenceControl';
 import { usePwa } from '@/components/pwa/PwaProvider';
 
 function InstallationSettings() {
@@ -516,6 +518,17 @@ export default function DesktopSettingsScreen({ biwengerLinked = false }) {
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 mt-4">
+          <section aria-labelledby="settings-appearance-title" className="mb-8">
+            <h2
+              id="settings-appearance-title"
+              className="mb-4 text-xl font-semibold text-foreground"
+            >
+              Apariencia
+            </h2>
+            <Surface className="p-5 sm:p-6">
+              <ThemePreferenceControl />
+            </Surface>
+          </section>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-12">
             {/* Sidebar Navigation */}
             <div className="lg:col-span-1">

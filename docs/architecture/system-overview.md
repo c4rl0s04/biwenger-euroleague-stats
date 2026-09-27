@@ -63,9 +63,10 @@ corresponding seasonal model. Exact table ownership is documented in the
   remain thin framework adapters as domains migrate.
 - **Shared UI** under [`src/components`](../../src/components) owns the shell and genuinely reusable
   presentation. Domain-specific components move with their feature ownership.
-- **Shared competition rules and reads** under [`src/lib/competition`](../../src/lib/competition) retain explicit
-  shared domain ownership. Task 25 retired the global service adapters; domain services
-  live under [`src/features`](../../src/features).
+- **Domain queries and services** live under their owners in [`src/features`](../../src/features).
+  Task 25 retired the global service adapters; the global query directory was subsequently removed.
+- **Shared competition rules and reads** under [`src/lib/competition`](../../src/lib/competition)
+  retain explicit shared domain ownership for reused calculations and projections.
 - **Database infrastructure** under [`src/lib/db`](../../src/lib/db) owns the Drizzle schema, shared
   PostgreSQL client, focused mutations, validation, and migration/readiness tooling.
 - **Synchronization** under [`src/lib/sync`](../../src/lib/sync) owns provider ingestion,

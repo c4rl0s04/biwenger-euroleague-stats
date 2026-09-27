@@ -43,7 +43,9 @@ Dark
 Light
 ```
 
-`System` is the default.
+`System` is the target default for the fully migrated product. During the current rollout, a missing
+preference keeps the dark compatibility baseline. Settings exposes explicit System, Dark and Light
+preferences; legacy feature-page migration remains incremental.
 
 Theme selection changes semantic-token mappings, not component structure. Shared UI, shell and feature
 components must consume semantic roles rather than contain independent dark/light palettes.
