@@ -919,3 +919,13 @@ infrastructure audit based on main `89267368`, including the new price-history s
 reporting command. Ownership remains in shared infrastructure; advisory-lock cleanup and
 cache lifecycle contracts are verified separately from UI migration. Refer to the master
 tracker for integration status and the receipt for actual validation results and retained limits.
+
+## Task 25A non-UI ownership closure
+
+Implementation `55893d73` on `refactor/ownership-closure` is verified locally, not merged or pushed.
+The [25A receipt](../migration/reports/task-25a-ownership-closure.md) records 42 retired runtime
+adapters/helpers, direct Assistant/Team/Lineup contracts, retained shared projections, a reproducible
+1,109-module inventory and 119 protected entrypoints. Full verification passed with 2,836 tests
+and eight existing skips; the disposable phone Lineup browser regression and PostgreSQL
+integrity checks passed. Task 25 remains open: 25B follows Tasks 23–24, and 216 exact
+authentication/credential persistence exceptions remain separately gated.

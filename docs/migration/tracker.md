@@ -296,12 +296,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 25 — Exhaustive ownership closure
 
-- **State:** Planned as 25A non-UI closure and 25B UI-dependent reconciliation.
+- **State:** 25A implemented and verified locally at `55893d73`; 25B UI-dependent reconciliation remains pending.
 - **Dependencies / approval:** 25A can proceed after Task 22; 25B and final closure depend on Tasks 23–24.
 - **Scope:** Enumerate all runtime entrypoints/modules; resolve Team/Player leftovers and remove obsolete adapters/exceptions.
 - **Completion check:** Zero unassigned migration work; no temporary debt; retained infrastructure/protocol URLs justified.
-- **Evidence:** [Task 25 plan](task-25-plan.md), grounded in main `1be12d61`; Task 01 residual Team/Player work remains input, not proof of current gaps.
-- **Next action:** Inventory live consumers, replace Assistant global service-barrel reads, resolve Team/Player shared-query ownership, then retire unused adapters and audit exact exceptions. Coordinate UI-dependent cleanup with the existing UI migration.
+- **Evidence:** [Task 25 plan](task-25-plan.md) and [25A closure receipt](reports/task-25a-ownership-closure.md), grounded in main `1be12d61`.
+- **Next action:** Integrate the verified 25A branch when scheduled; reconcile shell/UI adapters after Tasks 23–24 integrate and resolve the separately gated authentication exceptions before full Task 25 closure.
 
 ### Task 26 — Full regression acceptance
 
