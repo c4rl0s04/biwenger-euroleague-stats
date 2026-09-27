@@ -260,21 +260,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 21 — Other actions
 
-- **State:** Implemented and verified on `refactor/other-actions`.
+- **State:** Integrated into main at `af55af80`.
 - **Dependencies / approval:** 12 plus 10 and command inventory.
 - **Scope:** Close discovered generation/submission/other writes, not new product features.
 - **Completion check:** Exhaustive command inventory documented; offline analysis and simulation CLI scripts (`scripts/analysis/*`) migrated to `@/features/season-review/server` and `@/features/season-review/public`; Hoopgrid challenge generator migrated to `@/features/hoopgrid/server`; package script runtime conditions fixed; focused CLI tests passing.
 - **Evidence:** [Task 21 receipt](reports/task-21-other-actions.md); 5 CLI tests passed, server guards (144 tests) passed, 0 architecture violations, build and schema audit green.
-- **Next action:** Fast-forward merge into main; proceed with Task 22 Infrastructure / cache lifecycle.
+- **Next action:** Completed; proceed with Task 22 Infrastructure / cache lifecycle.
 
 ### Task 22 — Infrastructure / cache lifecycle
 
-- **State:** Planned.
+- **State:** Implemented and verified on `refactor/infrastructure`, based on main `89267368`.
 - **Dependencies / approval:** Read/command contracts stable; inventory can start earlier.
 - **Scope:** Review DB infrastructure, sync, scripts, locks and invalidation; not a wholesale sync rewrite.
 - **Completion check:** Retained infrastructure has ownership/rationale; identity/season cache keys and invalidation verified.
-- **Evidence:** Task 01 superseded sync histories.
-- **Next action:** Audit current main only; no production sync or schema operations.
+- **Evidence:** [Task 22 receipt](reports/task-22-infrastructure-cache.md); retained ownership and operational limits audited; lock cleanup fixed; 35 focused checks including two disposable PostgreSQL tests passed; full `npm run verify` passed with 2,848 tests.
+- **Next action:** Fast-forward merge into main; proceed with Task 23 Shell / search interactions.
 
 ### Task 23 — Shell / search interactions
 
@@ -322,7 +322,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), and lineup commands (Task 15) are merged into `main`. The next domain milestone is **Task 16 — Private Market reads**. In the UI migration track, UI-01A, UI-01T, and UI-01B are integrated; UI-01H rollout hardening is complete after PR #46, followed by the **Application Shell** migration as the first production consumer, before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
+Tasks 04–21 are integrated. Task 22 infrastructure / cache lifecycle is implemented and verified on `refactor/infrastructure`. In the UI migration track, UI-01A, UI-01T, and UI-01B are integrated; UI-01H rollout hardening is complete after PR #46, followed by **Task 23 — Shell / search interactions** as the first production consumer, before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
 
 ## UI presentation ownership and cleanup contract
 

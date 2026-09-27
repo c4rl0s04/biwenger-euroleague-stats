@@ -26,6 +26,28 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
+it('resolves the season before each lookup and evicts only the requested season', async () => {
+  query.resolveAllPlayAllSeason.mockResolvedValue('synthetic-a');
+  await fetchAllPlayAllStats();
+  query.resolveAllPlayAllSeason.mockResolvedValue('synthetic-b');
+  await fetchAllPlayAllStats();
+  await fetchAllPlayAllStats();
+  expect(query.listAllPlayAllUsers.mock.calls).toEqual([['synthetic-a'], ['synthetic-b']]);
+
+  const { clearCacheByPrefix } = await import('@/lib/utils/cache');
+  clearCacheByPrefix('advanced:all-play-all:synthetic-a');
+  await fetchAllPlayAllStats();
+  expect(query.listAllPlayAllUsers).toHaveBeenCalledTimes(2);
+  query.resolveAllPlayAllSeason.mockResolvedValue('synthetic-a');
+  await fetchAllPlayAllStats();
+  expect(query.listAllPlayAllUsers.mock.calls).toEqual([
+    ['synthetic-a'],
+    ['synthetic-b'],
+    ['synthetic-a'],
+  ]);
+  expect(query.resolveAllPlayAllSeason).toHaveBeenCalledTimes(5);
+});
+
 it.each(['legacy-first', 'feature-first'])(
   'shares one unchanged raw cache across both contracts: %s',
   async (order) => {

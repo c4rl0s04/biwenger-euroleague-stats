@@ -911,3 +911,11 @@ Linux Rounds screenshot references and authenticated real-data production visual
 remain outstanding; Linux semantic coverage is enabled. Recommended next bounded read
 batch: Standings performance and initial-squad/draft analytics with formula tests,
 followed by its remaining screens. No other migration slice was started.
+
+## Task 22 infrastructure closure
+
+The [Task 22 receipt](../migration/reports/task-22-infrastructure-cache.md) records the current
+infrastructure audit based on main `89267368`, including the new price-history sync and cash
+reporting command. Ownership remains in shared infrastructure; advisory-lock cleanup and
+cache lifecycle contracts are verified separately from UI migration. Refer to the master
+tracker for integration status and the receipt for actual validation results and retained limits.
