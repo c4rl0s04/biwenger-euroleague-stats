@@ -649,6 +649,12 @@ concrete runtime contracts are recorded in [ADR-0008](../decisions/0008-semantic
 Do not implement theming by cloning component trees or by spreading component-local `dark:` variants
 through the new foundation.
 
+The runtime now has a production Settings control: Accounts owns `ThemePreferenceControl`, shared
+by desktop Settings and mobile Appearance. It consumes `useTheme` and native radios; generic
+primitives remain independent from ThemeContext. Selection uses the stored preference; the resolved
+system theme is descriptive only. Light/system remain explicit opt-ins and legacy page migration
+remains incremental. This bounded addition does not start UI-03 or migrate PageHeader/Section.
+
 Surface hierarchy (`default | raised | subtle`) is independent from color theme.
 
 ### Layout-neutral foundation
