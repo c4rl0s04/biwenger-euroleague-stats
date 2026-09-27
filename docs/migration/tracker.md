@@ -300,7 +300,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Dependencies / approval:** 25A can proceed after Task 22; 25B and final closure depend on Tasks 23–24.
 - **Scope:** Enumerate all runtime entrypoints/modules; resolve Team/Player leftovers and remove obsolete adapters/exceptions.
 - **Completion check:** Zero unassigned migration work; no temporary debt; retained infrastructure/protocol URLs justified.
-- **Evidence:** [Task 25 plan](task-25-plan.md) and [25A closure receipt](reports/task-25a-ownership-closure.md), grounded in main `1be12d61`.
+- **Evidence:** [Task 25 plan](task-25-plan.md), [25B reconciliation plan](task-25b-plan.md), and [25A closure receipt](reports/task-25a-ownership-closure.md), grounded in main `1be12d61`.
 - **Next action:** Integrate the verified 25A branch when scheduled; reconcile shell/UI adapters after Tasks 23–24 integrate and resolve the separately gated authentication exceptions before full Task 25 closure.
 
 ### Task 26 — Full regression acceptance
