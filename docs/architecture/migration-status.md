@@ -961,3 +961,22 @@ Standings phone differences reproduce. Original screenshots and strict compariso
 unchanged. The [acceptance receipt](../migration/reports/task-26-regression-acceptance.md)
 records evidence and decisions still required; Task 26 is not complete and Task 27 is
 not authorized by this validation result.
+
+## Task 26 closure follow-up
+
+PR #53 merged at `0736b96d`; main CI, Vercel production and the post-deploy smoke check
+all passed. PR #52 authentication ownership is integrated, superseding the earlier
+branch-only status above. Global runtime service adapters and per-entrypoint auth
+exceptions have been retired; live presentation compatibility remains supported during
+UI adoption.
+
+[PR #54](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/54) fixes the phone
+background and bids findings and reconciles reviewed desktop shell references. The
+[Task 26 receipt](../migration/reports/task-26-regression-acceptance.md) is the current
+verification record, including original Linux visual-reference coverage limits.
+
+Task 26 final macOS comparisons passed on `16020bba`: 60 default cases with four expected
+project/fixture skips, plus both populated-Market desktop/iPhone cases. No phone reference
+was updated. Sixteen desktop references reflect the reviewed merged shell; thresholds and
+masks are unchanged. Task 26 is complete for the documented architecture scope. Task 27
+reconciles the final PR #54 merge with main CI and the production deployment.

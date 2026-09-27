@@ -281,12 +281,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 23 — Shell / search interactions
 
-- **State:** Complete and verified on task worktree / branch `refactor/application-shell`; prepared for PR review.
+- **State:** Integrated through PR #49 at `9cfb84e5`; final combined regression evidence is recorded under Task 26.
 - **Dependencies / approval:** Stable domain access contracts; UI-01H rollout hardening complete (PR #46).
 - **Scope:** Establish `src/components/shell` as the owner of persistent chrome, with shared/desktop/mobile/integration boundaries; migrate app background/content frame, sidebar, top header, footer, phone bottom navigation/More menu and global capability placement onto the new UI foundation while preserving routing, authentication, search-data ownership and PWA behavior. Search/control behavior stays separately bounded.
 - **Completion check:** Acyclic reusable composition; explicit shared/desktop/mobile ownership; preserved keyboard/focus/navigation/mobile/safe-area behavior; no auth/provider ownership drift; no duplicate legacy/new shell implementation; obsolete layout files/exports/styles removed once consumer checks prove them unused.
 - **Evidence:** [Task 23 receipt](reports/task-23-application-shell.md) records the candidate, current checks, visual decisions, and retained compatibility boundaries; historical counts are not final acceptance evidence.
-- **Next action:** Review PR #49 after exact-candidate checks pass. Then UI-01C demand-driven shared compositions → UI-02 interactive controls / overlays → UI-03 Season Predictions pilot → UI-04 foundation/design review → feature-by-feature legacy UI migration. No next milestone is implemented by Task 23.
+- **Next action:** PR #49 is merged. Continue UI-01C demand-driven shared compositions → UI-02 interactive controls / overlays → UI-03 Season Predictions pilot → UI-04 foundation/design review → feature-by-feature legacy UI migration. No next milestone is implemented by Task 23.
 
 ### Task 24 — Shared UI / tokens
 
@@ -299,33 +299,33 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 25 — Exhaustive ownership closure
 
-- **State:** 25A and bounded 25B integrated through PR #50 at `c0c91dd4`. Deferred authentication ownership integrated through PR #52 at `ebc4da6d`; UI-owned compatibility remains pending.
+- **State:** 25A and bounded 25B integrated through PR #50 at `c0c91dd4`. Deferred authentication ownership integrated through PR #52 at `ebc4da6d`. Live presentation compatibility is assigned to the ongoing UI adoption track.
 - **Dependencies / approval:** 25A can proceed after Task 22; 25B and final closure depend on Tasks 23–24.
 - **Scope:** Enumerate all runtime entrypoints/modules; resolve Team/Player leftovers and remove obsolete adapters/exceptions.
-- **Completion check:** Zero unassigned migration work; no temporary debt; retained infrastructure/protocol URLs justified.
+- **Completion check:** Zero unassigned architecture migration work; retained infrastructure/protocol URLs and live UI compatibility explicitly owned.
 - **Evidence:** [Task 25 plan](task-25-plan.md), [25B reconciliation plan](task-25b-plan.md), [25A closure receipt](reports/task-25a-ownership-closure.md), and [25B reconciliation receipt](reports/task-25b-ui-ownership.md), grounded in main `1be12d61`.
-- **Next action:** Authentication ownership is integrated; see the [receipt](reports/task-25-auth-ownership.md). Reconcile Section/theme/capability compatibility after the separate UI owner integrates adoption work. Full closure still requires retirement or explicit permanent-boundary acceptance.
+- **Next action:** Authentication ownership is integrated; see the [receipt](reports/task-25-auth-ownership.md). Section/theme/capability compatibility remains supported for live consumers during UI adoption. Its retirement belongs to that adoption work; do not delete live code or reopen completed feature migrations.
 
 ### Task 26 — Full regression acceptance
 
-- **State:** Regression run performed on `chore/regression-acceptance` (draft PR #53); standard CI and Linux matrices pass, but 13 macOS screenshot failures and scoped acceptance decisions keep Task 26 open.
+- **State:** Verified and complete for the architecture acceptance scope in PR #54: standard/runtime CI and all nine Linux browser projects pass; final macOS comparisons pass (60 default cases plus two populated-Market cases). Original Linux visual expansion remains an explicitly tracked coverage limit.
 - **Dependencies / approval:** 25 and exact combined candidate.
 - **Scope:** Run full checks and complete affected API/security/desktop/mobile/Linux matrices.
 - **Completion check:** Required checks pass; missing coverage and known defect decisions resolved; no masked regressions.
 - **Evidence:** [Task 26 acceptance receipt](reports/task-26-regression-acceptance.md); historical receipts are inputs, not new acceptance.
-- **Next action:** Review the recorded macOS visual differences with the UI owner; resolve the Market phone-bids decision and Linux reference-coverage acceptance. Populated Market now has its own passing CI job; original screenshots remain unchanged.
+- **Next action:** PR #53 restored main CI and production deployment. Integrate the verified PR #54 closure and confirm its final main CI, production alias and smoke check under Task 27.
 
 ### Task 27 — Release / final reconciliation
 
-- **State:** Planned; release gate.
+- **State:** Release reconciliation accompanying PR #54. Main recovery at `0736b96d` is deployed and smoke-tested; confirm the final closure merge separately.
 - **Dependencies / approval:** 26; explicit push/deploy approval.
 - **Scope:** Integrate approved history, verify CI/deployment and preservation; no unapproved production writes.
 - **Completion check:** Main/origin/deployed SHA agree, smoke/log checks pass and final receipt closes every task.
 - **Evidence:** Not inferred from prior PR merges.
-- **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
+- **Next action:** The user authorized integration and deployment verification for this closure. Record the final main SHA, successful production deployment and smoke checks; keep unavailable verification explicit.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-Tasks 04–22 are integrated into main. Task 22 closed at `2c06e2bc`; Task 23 continues in the existing `refactor/application-shell` worktree. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 / UI-SHELL — Application Shell** is complete and validated on branch `refactor/application-shell` for PR #49 review, establishing the canonical chrome foundation before **UI-01C — demand-driven shared compositions**, **UI-02 — interactive controls / overlays**, **UI-03 — Season Predictions pilot**, **UI-04 — foundation/design review**, then feature-by-feature legacy UI migration.
+Tasks 04–25 are integrated into main. Task 22 closed at `2c06e2bc`; Task 23 merged through PR #49. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 / UI-SHELL — Application Shell** is integrated through PR #49, establishing the canonical chrome foundation before **UI-01C — demand-driven shared compositions**, **UI-02 — interactive controls / overlays**, **UI-03 — Season Predictions pilot**, **UI-04 — foundation/design review**, then feature-by-feature legacy UI migration.
 
 ## UI presentation ownership and cleanup contract
 
@@ -402,24 +402,24 @@ An unsafe existing behavior needs an explicit correction decision, not silent pr
 
 ## Task 01 finding-to-owner register
 
-| Finding                                                                       | Required disposition                                                                                   | Owner / closure evidence                                                                |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| Five feature integration worktrees and three integrated maintenance worktrees | Eligible for approved cleanup only after fresh ancestry and ignored-artifact preservation              | 03; removal receipt, not blanket deletion                                               |
-| Saved campaign `68781e86`, predecessor `1e889c8e`                             | Preserve; complete Market component tree already identical to main, including checkpoint Q             | 25 reviews remaining unique changes; no Market restart                                  |
-| Shared Player form leaf/catalogue-facts/roster services                       | Review need for acyclic ownership, preserving current season and DNP contracts                         | 25, before affected consumer changes where needed; source comparison and contract tests |
-| Team detail orchestration/records and tests                                   | Assess query-to-service responsibility correction on current schema                                    | 25; deliberate service/query boundary and compatibility evidence                        |
-| Missing fixture-selector and Player form regression tests                     | Review assertion relevance; add useful coverage without restoring obsolete fixture data                | 25–26                                                                                   |
-| Old completion guide/campaign inventory/C01 receipt                           | Preserve historical source; new Task IDs and current scope here supersede its scheduling               | 02 delivered by this tracker; never restore old schema/fallback assumptions             |
-| `refactor/ui-token-foundation` and `origin/docs/ui-foundation-v1`             | Unique implementation/design, not yet accepted or merged                                               | 24                                                                                      |
-| Original visual-baseline worktrees                                            | Preserve provenance; different PNGs do not imply originals should overwrite current references         | 26; 03 must retain required evidence                                                    |
-| Missing Linux/original references and broader viewport verification           | Enumerate exact feature/scenario gaps from tests/receipts; close before final acceptance               | 26; include populated Market opt-in scenario and CI coverage                            |
-| Market phone `/market/bids` non-iterable duel-data defect                     | Known preserved pre-existing error; request scoped behavior decision, not an architectural cleanup fix | 25 coordinates decision; 26 cannot claim error-free acceptance while unresolved         |
-| Remaining global adapters and auth graph exceptions                           | Track actual callers and retirement condition; no broad exemptions or fake domain wrappers             | Owning feature tasks, 18/22, then 25                                                    |
-| Season Review v5 simulator PR #29 and inherited PWA/archive/sync history      | Separate product work; preserve, do not absorb into existing Season Review migration                   | Outside migration; 03 cannot discard unique history                                     |
-| New unscored season-prediction design at `e29cc86e`                           | Separate future product; not existing Predictions feature                                              | Outside migration; retained                                                             |
-| Superseded sync history / stash 0 (`be737523`)                                | Historical recovery; no bulk restoration of old database/provider code                                 | Retain; 22 may consult after current-schema review                                      |
-| Stash 1 (`a3eda423`) asks for 13 recent rounds, current UI uses 12            | Separate product decision, not an adapter or migration fix                                             | Outside migration; retained                                                             |
-| Plaintext credential fallback already removed                                 | Current encrypted store is authoritative; historical observation gate is obsolete                      | 18 preserves current security contract                                                  |
+| Finding                                                                       | Required disposition                                                                                                                      | Owner / closure evidence                                                                |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Five feature integration worktrees and three integrated maintenance worktrees | Eligible for approved cleanup only after fresh ancestry and ignored-artifact preservation                                                 | 03; removal receipt, not blanket deletion                                               |
+| Saved campaign `68781e86`, predecessor `1e889c8e`                             | Preserve; complete Market component tree already identical to main, including checkpoint Q                                                | 25 reviews remaining unique changes; no Market restart                                  |
+| Shared Player form leaf/catalogue-facts/roster services                       | Review need for acyclic ownership, preserving current season and DNP contracts                                                            | 25, before affected consumer changes where needed; source comparison and contract tests |
+| Team detail orchestration/records and tests                                   | Assess query-to-service responsibility correction on current schema                                                                       | 25; deliberate service/query boundary and compatibility evidence                        |
+| Missing fixture-selector and Player form regression tests                     | Review assertion relevance; add useful coverage without restoring obsolete fixture data                                                   | 25–26                                                                                   |
+| Old completion guide/campaign inventory/C01 receipt                           | Preserve historical source; new Task IDs and current scope here supersede its scheduling                                                  | 02 delivered by this tracker; never restore old schema/fallback assumptions             |
+| `refactor/ui-token-foundation` and `origin/docs/ui-foundation-v1`             | Token foundation integrated; production shell consumes the canonical semantic tokens                                                      | 24                                                                                      |
+| Original visual-baseline worktrees                                            | Preserve provenance; different PNGs do not imply originals should overwrite current references                                            | 26; 03 must retain required evidence                                                    |
+| Missing Linux/original references and broader viewport verification           | Nine Linux semantic projects plus existing Linux/macOS visual references; original Linux expansion remains an explicit coverage follow-up | 26; include populated Market opt-in scenario and CI coverage                            |
+| Market phone `/market/bids` non-iterable duel-data defect                     | Correction authorized in Task 26 closure; typed bids mapping and empty/populated browser coverage in PR #54                               | 26; service/page contracts and both Market browser fixtures                             |
+| Remaining global adapters and auth graph exceptions                           | Track actual callers and retirement condition; no broad exemptions or fake domain wrappers                                                | Owning feature tasks, 18/22, then 25                                                    |
+| Season Review v5 simulator PR #29 and inherited PWA/archive/sync history      | Separate product work; preserve, do not absorb into existing Season Review migration                                                      | Outside migration; 03 cannot discard unique history                                     |
+| New unscored season-prediction design at `e29cc86e`                           | Separate future product; not existing Predictions feature                                                                                 | Outside migration; retained                                                             |
+| Superseded sync history / stash 0 (`be737523`)                                | Historical recovery; no bulk restoration of old database/provider code                                                                    | Retain; 22 may consult after current-schema review                                      |
+| Stash 1 (`a3eda423`) asks for 13 recent rounds, current UI uses 12            | Separate product decision, not an adapter or migration fix                                                                                | Outside migration; retained                                                             |
+| Plaintext credential fallback already removed                                 | Current encrypted store is authoritative; historical observation gate is obsolete                                                         | 18 preserves current security contract                                                  |
 
 Outside-migration findings have a preservation disposition, not a requirement to merge unrelated
 product work before architecture completion.

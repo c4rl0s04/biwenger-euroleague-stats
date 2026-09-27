@@ -134,6 +134,20 @@ require inspecting the output and updating baselines with `npm run test:e2e:upda
 snapshots solely to hide a regression. Browser failures retain screenshots and traces in
 `test-results/`; CI uploads these artifacts for review. See the [design context](../product/design-system.md).
 
+## Current reference maintenance
+
+Task 26 reconciles desktop macOS references with the intentionally merged Task 23 shell.
+The [acceptance receipt](../migration/reports/task-26-regression-acceptance.md) distinguishes
+those current-shell references from original pre-migration evidence retained in Git history.
+The historical provenance notes below continue to identify the original source commits;
+“unchanged” describes those original migration comparisons, not a ban on reviewed shell updates.
+Phone references remain unchanged for the Task 26 background correction.
+
+Affected captures use `waitForScreenshotPaint` to await fonts, finish finite entrance motion,
+and wait two paint frames. This settles rendering before Playwright's existing strict comparison;
+it does not hide text, change comparison thresholds or replace semantic assertions.
+Both empty and populated Market scenarios include the repaired phone bids section.
+
 ## Test responsibilities
 
 Home Task 09 adds desktop-hero and phone-timeline macOS references captured at unchanged `5174e9a0`.
