@@ -38,10 +38,12 @@ or eligibility changes therefore require tests and a documentation update in the
 - UI and services: the [Rounds](../../src/features/rounds), [Schedule](../../src/features/schedule),
   [Matches](../../src/features/matches), [Standings](../../src/features/standings), and
   [Compare](../../src/features/compare) feature owners.
-- Data: feature-owned queries under [Rounds](../../src/features/rounds/server/queries) and
-  [Standings](../../src/features/standings/server/queries).
+- Data: feature-owned queries include [Rounds](../../src/features/rounds/server/queries) and
+  [Standings](../../src/features/standings/server/queries); reused player-form and manager-directory
+  projections belong to the [shared competition domain](../../src/lib/competition).
 - HTTP: `/api/rounds/*`, `/api/standings/*`, `/api/compare/*`, and `/api/league-average`.
-- Tests: route suites under the corresponding [`src/app/api`](../../src/app/api) domains and
+- Tests: route suites under the corresponding [`src/app/api`](../../src/app/api) domains,
+  shared logic tests under [`src/lib/competition/logic`](../../src/lib/competition/logic), and
   colocated service, query, and contract suites under [Rounds](../../src/features/rounds/server),
   [Standings](../../src/features/standings/server), and [Compare](../../src/features/compare/server).
 

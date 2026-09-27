@@ -989,3 +989,16 @@ project/fixture skips, plus both populated-Market desktop/iPhone cases. No phone
 was updated. Sixteen desktop references reflect the reviewed merged shell; thresholds and
 masks are unchanged. Task 26 is complete for the documented architecture scope. Task 27
 reconciles the final PR #54 merge with main CI and the production deployment.
+
+## Post-closure ownership audit follow-up
+
+The audit of main `016d2488` found business rules inside legacy Lineup/Schedule presentation
+and direct Hoopgrid CLI persistence that import-only checks did not identify. The
+[ownership residue receipt](../migration/reports/ownership-residue.md) records the bounded
+follow-up on `refactor/ownership-residue`. Presentation migration and production acceptance
+remain separate. Earlier milestone reports above are historical evidence, not an exhaustive
+assertion that legacy components contain no domain rules.
+
+Review of ownership candidate `3cadaeb5` additionally identified the nullable Schedule date
+contract and duplicated offer financial projections. The same branch closes these through
+Lineup's public contract; see the receipt's review follow-up for preserved behavior and checks.

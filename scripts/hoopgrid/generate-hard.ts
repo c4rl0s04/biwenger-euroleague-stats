@@ -5,15 +5,11 @@ import * as path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 dotenv.config();
 
-import { hoopgridChallenges } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
-
 /**
  * Script to generate a series of high-difficulty Hoopgrid challenges.
  * Usage: npx tsx scripts/hoopgrid/generate-hard.ts [count] [minDifficulty]
  */
 async function main() {
-  const { db } = await import('@/lib/db');
   const { hoopgridCommandService } = await import('@/features/hoopgrid/server');
 
   const args = process.argv.slice(2);
@@ -25,16 +21,7 @@ async function main() {
     `🚀 Starting generation of ${count} challenges with difficulty range [${minDifficulty} - ${maxDifficulty}]...`
   );
 
-  // Get the last challenge date
-  const lastChallenge = await db.query.hoopgridChallenges.findFirst({
-    orderBy: desc(hoopgridChallenges.gameDate),
-  });
-
-  let startDate = new Date();
-  if (lastChallenge) {
-    startDate = new Date(lastChallenge.gameDate);
-    startDate.setDate(startDate.getDate() + 1);
-  }
+  const startDate = await hoopgridCommandService.getNextGenerationDate();
 
   for (let i = 0; i < count; i++) {
     const targetDate = startDate.toISOString().split('T')[0];

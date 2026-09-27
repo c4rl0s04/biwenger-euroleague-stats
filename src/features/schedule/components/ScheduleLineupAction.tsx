@@ -1,7 +1,7 @@
 import AutoAlignButton from '@/components/schedule/AutoAlignButton';
 import type { ScheduleMatch } from '../models/schedule';
 
-/** Frozen command compatibility boundary. Ownership moves with Task 15, not this read migration. */
+/** Presentation adapter; automatic selection rules belong to the Lineup public contract. */
 export default function ScheduleLineupAction({
   matches,
   userName,

@@ -88,6 +88,26 @@ export function classifyModule(file) {
       verification: 'accounts, provider, credentials and auth tests',
       blocker: null,
     };
+  if (file.startsWith('scripts/hoopgrid/'))
+    return {
+      owner: 'Hoopgrid',
+      disposition: 'feature-owned',
+      contract: 'operational adapter through Hoopgrid server contract; no direct persistence',
+      verification: 'architecture domain CLI rule and Hoopgrid service tests',
+      blocker: null,
+    };
+  if (file.startsWith('src/components/lineup/') || file.startsWith('src/components/schedule/'))
+    return {
+      owner: file.startsWith('src/components/lineup/')
+        ? 'Lineup presentation'
+        : 'Schedule presentation',
+      disposition: 'UI-owned',
+      contract:
+        'legacy presentation; extracted selection, ranking, squad enrichment and form rules use Lineup public contract',
+      verification:
+        'Lineup logic tests; import checks do not prove absence of inline business rules',
+      blocker: 'presentation migration remains separate; semantic ownership requires manual review',
+    };
   if (file.startsWith('scripts/') || file.startsWith('src/lib/sync/'))
     return {
       owner: file.startsWith('src/lib/sync/')
@@ -177,7 +197,7 @@ export function createInventory(root) {
           : file.includes('/api/health/')
             ? 'operational health endpoint intentionally accesses database health infrastructure'
             : file.startsWith('scripts/')
-              ? 'operational command/helper; inventory only, feature rules do not govern operational database work'
+              ? 'operational command/helper; Hoopgrid domain CLI boundaries enforced; remaining infrastructure commands inventoried separately'
               : file.startsWith('src/app/')
                 ? 'UI/framework adapter; reconcile with Tasks 23–24 in 25B'
                 : 'framework infrastructure',

@@ -25,3 +25,14 @@ export type {
   NormalizedLineup,
   LineupNormalizationInput,
 } from './logic/lineup';
+
+export { buildAutoLineup } from './logic/auto-lineup';
+export { rankSwapCandidates, calculateSquadFormAverage, enrichLineupSquad } from './logic/squad';
+export type { AutoAlignPlayer, AutoAlignMatch } from './logic/auto-lineup';
+
+export { projectLineupOffer } from './logic/offer-projection';
+export type {
+  LineupOfferPlayer,
+  LineupOfferPrice,
+  LineupOfferProjection,
+} from './logic/offer-projection';

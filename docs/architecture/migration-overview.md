@@ -130,12 +130,12 @@ At this historical milestone, the next domain step was **Task 13 — Provider bo
 
 Residual Team detail orchestration/shared Player form work from the preserved campaign belongs to Task 25 review against the current schema. Saved Market components already match main; do not restart its old checkpoint Q. External Rounds/Standings/Market adapters retire as their final consumers migrate. Search interaction ownership belongs to Task 23. Unique UI token work is Task 24. The known Market phone-bids defect needs a separate behavior decision before final acceptance. Existing URLs remain compatibility contracts; renaming them is not a completion requirement.
 
-Existing code references: [database infrastructure](../../src/lib/db),
-[application pages](../../src/app), and
-[domain features](../../src/features). Some old modules are thin compatibility exports;
-others still own substantial logic. Global service adapters were retired during Task 25 ownership
-closure, and the global query directory was removed after queries moved to their feature owners.
-File counts alone would overstate remaining duplication.
+Existing code references: [shared competition domain](../../src/lib/competition),
+[database infrastructure](../../src/lib/db), [application pages](../../src/app), and
+[domain features](../../src/features). Global service adapters were retired during Task 25 ownership
+closure; the global query directory was removed after its queries moved to feature owners or the
+shared competition domain. Remaining legacy presentation is tracked separately and needs semantic
+ownership review; file counts and import checks alone do not establish that it contains no domain rules.
 
 ## Adjacent database and security foundation
 
@@ -176,3 +176,12 @@ Completion requires coherent ownership across services, queries, models, screens
 HTTP consumers; tested compatibility and cache/access policy; green checks; and verified
 deployment. Visual redesign remains a separate project. Current architectural work is intended
 to preserve appearance and interactions, not create a new premium visual design yet.
+
+## Follow-up: rules inside legacy presentation
+
+The audit of `016d2488` identified automatic lineup selection, squad enrichment, swap ranking
+and squad-table form rules inside Lineup/Schedule components, plus direct Hoopgrid CLI reads.
+The [ownership residue follow-up](../migration/reports/ownership-residue.md) moves those rules
+into their feature contracts without moving or redesigning the screens. Import enforcement
+now includes the Hoopgrid CLI; semantic review remains necessary for legacy presentation.
+This bounded cleanup does not constitute integration or production acceptance.

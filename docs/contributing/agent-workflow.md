@@ -69,6 +69,9 @@ nonportable instruction patterns. It is a packaging check, not proof of the qual
 cross-feature deep imports throughout source, feature dependency cycles including type edges,
 client-safe runtime graphs, persistence ownership inside features, and migrated framework adapters.
 It follows relative and alias imports, literal dynamic imports, and CommonJS requires.
+The Hoopgrid domain CLI is also scanned and must use feature contracts instead of direct
+persistence. Other operational infrastructure scripts remain inventoried separately. Import
+checks cannot detect inline business rules; legacy presentation still requires semantic review.
 
 [Policy](../../scripts/architecture/policy.json) lists the migrated pages/routes under enforcement.
 Add entrypoints as each domain migrates. Legacy global modules are traversed when reached from

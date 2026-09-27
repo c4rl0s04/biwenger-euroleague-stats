@@ -28,7 +28,7 @@ const externalServer = (name) =>
     name
   );
 
-export function readGraph(root, sourceRoots = ['src']) {
+export function readGraph(root, sourceRoots = ['src', 'scripts/hoopgrid']) {
   const files = [];
   function walk(directory) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -40,6 +40,7 @@ export function readGraph(root, sourceRoots = ['src']) {
   }
   for (const entry of sourceRoots) {
     const full = path.join(root, entry);
+    if (!existsSync(full)) continue;
     if (statSync(full).isDirectory()) walk(full);
     else if (/\.[cm]?[jt]sx?$/.test(full) && !full.endsWith('.d.ts') && !isTest(full))
       files.push(full);
@@ -156,6 +157,7 @@ export function checkGraph(graph, policy) {
     }
     if (
       (owner ||
+        file.startsWith('scripts/hoopgrid/') ||
         isSharedPresentation(file) ||
         isSeasonContract(file) ||
         policy.entrypoints.includes(file)) &&
@@ -164,6 +166,13 @@ export function checkGraph(graph, policy) {
       report('computed-import', file, 'nonliteral module target');
     for (const edge of node.imports) {
       const target = edge.target;
+      if (
+        file.startsWith('scripts/hoopgrid/') &&
+        ((target && (isPersistence(target) || (featureOf(target) && !isContract(target)))) ||
+          /^(?:@\/lib\/db(?:\/|$)|drizzle-orm(?:\/|$)|pg$)/.test(edge.specifier))
+      )
+        report('domain-cli-boundary', file, target ?? edge.specifier);
+
       const importPath =
         target ??
         (edge.specifier.startsWith('@/')

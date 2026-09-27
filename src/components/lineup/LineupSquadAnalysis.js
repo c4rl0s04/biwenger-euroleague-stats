@@ -1,5 +1,7 @@
 'use client';
 
+import { calculateSquadFormAverage } from '@/features/lineup/public';
+
 import Link from 'next/link';
 import { useState } from 'react';
 import {
@@ -71,15 +73,7 @@ export default function LineupSquadAnalysis({ squad = [], onPlayerClick, onSellC
     const players = squad
       .filter((p) => p.position === pos)
       .map((p) => {
-        // Calculate a numeric average for "Forma" sorting
-        const scores = p.recent_scores
-          ? p.recent_scores
-              .split(',')
-              .filter((s) => s !== 'X')
-              .map(Number)
-          : [];
-        const formaAvg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-        return { ...p, forma_avg: formaAvg };
+        return { ...p, forma_avg: calculateSquadFormAverage(p.recent_scores) };
       });
 
     acc[pos] = [...players].sort((a, b) => {
