@@ -41,7 +41,6 @@ const queries = vi.hoisted(() =>
     ].map((name) => [name, vi.fn()])
   )
 );
-vi.mock('../db', () => queries);
 vi.mock('@/features/market/analytics/server/services/market-summary.service', () => ({
   getTopTransferredPlayer: queries.getTopTransferredPlayer,
   getRecordTransfer: queries.getRecordTransfer,
@@ -96,12 +95,12 @@ vi.mock('@/features/market/analytics/server/queries/market-manager.query', () =>
 
 import {
   fetchMarketStats,
-  fetchCurrentMarketListings,
-  fetchLiveMarketTransfers,
-  fetchMarketTrendsAnalysis,
-  fetchBestValueDetails,
-  fetchBiddingDuelDetails,
-} from './marketService';
+  getCurrentMarketListings as fetchCurrentMarketListings,
+  getLiveMarketTransfers as fetchLiveMarketTransfers,
+  getMarketTrendsAnalysis as fetchMarketTrendsAnalysis,
+  getBestValueDetails as fetchBestValueDetails,
+  getBiddingDuelDetails as fetchBiddingDuelDetails,
+} from '@/features/market/server';
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -232,7 +231,7 @@ it('propagates aggregate failure without returning a partial response or caching
 it('preserves narrow loader arguments and returns their values without envelope changes', async () => {
   queries.getCurrentMarketListings.mockResolvedValue([{ player_id: 7 }]);
   expect(await fetchCurrentMarketListings()).toEqual([{ player_id: 7 }]);
-  await fetchLiveMarketTransfers();
+  await fetchLiveMarketTransfers({});
   await fetchLiveMarketTransfers({ page: 2, limit: 3, buyer: 'A' });
   expect(queries.getLiveMarketTransfers.mock.calls).toEqual([
     [{}],

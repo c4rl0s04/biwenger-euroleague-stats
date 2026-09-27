@@ -11,7 +11,7 @@ vi.mock('@/lib/db/client', () => ({
   db: { query: fake.query },
   pgClient: { query: fake.query },
 }));
-vi.mock('../../season-context', () => ({ resolveReadSeasonId: fake.season }));
+vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: fake.season }));
 vi.mock('@/features/players/server', () => ({
   getPlayerFormStats: async (...args: number[]) => {
     const map = await fake.form(...args);
@@ -29,7 +29,7 @@ vi.mock('@/features/players/server', () => ({
     );
   },
 }));
-import { getMarketOpportunities } from './market';
+import { getMarketOpportunities } from '@/features/market/server';
 
 beforeEach(() => {
   vi.resetAllMocks();

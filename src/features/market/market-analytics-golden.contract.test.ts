@@ -8,7 +8,7 @@ vi.mock('@/lib/db/client', () => ({
   pgClient: { query: fake.query },
 }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: fake.season }));
-import * as legacy from './market';
+import * as legacy from '@/features/market/server';
 const reads = legacy as unknown as Record<string, (...args: number[]) => Promise<unknown>>;
 
 it.each(fixtures)('$name excludes extra record fields and keeps empty results', async (fixture) => {

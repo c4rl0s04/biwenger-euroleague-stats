@@ -11,7 +11,7 @@ vi.mock('@/lib/db/client', () => ({
   db: { query: dependencies.query },
   pgClient: { query: dependencies.query },
 }));
-vi.mock('../../season-context', () => ({ resolveReadSeasonId: dependencies.season }));
+vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: dependencies.season }));
 vi.mock('@/features/players/server', () => ({
   getPlayerFormStats: vi.fn(() => {
     throw new Error('Transfer reads must not request Player form');
@@ -24,7 +24,7 @@ import {
   getAllTransfers,
   getMarketTrends,
   getMarketKPIs,
-} from './market';
+} from '@/features/market/server';
 
 beforeEach(() => {
   vi.resetAllMocks();

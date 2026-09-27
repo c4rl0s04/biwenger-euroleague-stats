@@ -1,39 +1,44 @@
 import 'server-only';
 
 import {
-  fetchCaptainRecommendations,
-  fetchCaptainStats,
   fetchEfficiencyStats,
   fetchLeagueComparisonStats,
-  fetchMarketOpportunities,
-  fetchMarketStats,
-  fetchMarketTrendsAnalysis,
-  fetchRecentTransfers,
   fetchReliabilityStats,
-  fetchRoundStandings,
   fetchRoundWinners,
-  fetchNextRound,
-  fetchTopPlayersByForm,
-  fetchUserLineup,
-  fetchUserRecentRounds,
-  fetchUserSeasonStats,
-  fetchUserSquadDetails,
-  fetchUserTopContributors,
   fetchValueRanking,
   fetchVolatilityStats,
-  getCompareDataLite,
-  getCurrentRoundState,
   getFullStandings,
   getLeagueOverview,
-  getNextRoundData,
+} from '@/features/standings/server';
+import {
+  getManagerCaptainRecommendations as fetchCaptainRecommendations,
+  getManagerCaptainStats as fetchCaptainStats,
+  getManagerRoundsData as fetchUserRecentRounds,
+  getManagerSeasonStatsData as fetchUserSeasonStats,
+  getManagerSquadData as fetchUserSquadDetails,
+  getManagerContributorsData as fetchUserTopContributors,
+} from '@/features/managers/server';
+import {
+  getMarketOpportunities as fetchMarketOpportunities,
+  fetchMarketStats,
+  getMarketTrendsAnalysis as fetchMarketTrendsAnalysis,
+  getRecentTransfers as fetchRecentTransfers,
+} from '@/features/market/server';
+import {
+  fetchRoundStandings,
+  fetchUserLineup,
   getUserPerformanceHistoryService,
-  getUserScheduleService,
-} from '@/lib/services';
+  getRoundCalendar,
+} from '@/features/rounds/server';
+import {
+  fetchNextRound,
+  fetchTopPlayersByForm,
+  getNextRoundData,
+} from '@/features/dashboard/server';
+import { getCompareDataLite } from '@/features/compare/server';
+import { getUserSchedule as getUserScheduleService } from '@/features/schedule/server';
 import { MAX_BLOCK_CHARS, MAX_TOTAL_CONTEXT_CHARS } from '../../constants/assistant-instructions';
-import type {
-  AssistantContextBlock,
-  AssistantContextRequest,
-} from '../../models/assistant.models';
+import type { AssistantContextBlock, AssistantContextRequest } from '../../models/assistant.models';
 import { buildPlayerContextForMessage } from './assistant-player-context.service';
 
 type ContextProviderName =
@@ -460,7 +465,7 @@ async function buildMyTeamContext(request: AssistantContextRequest): Promise<str
     await Promise.all([
       fetchUserSquadDetails(request.userId),
       fetchUserSeasonStats(request.userId),
-      fetchUserRecentRounds(request.userId),
+      fetchUserRecentRounds(String(request.userId), 100),
       fetchCaptainStats(request.userId),
       fetchCaptainRecommendations(request.userId, 6),
       fetchUserTopContributors(request.userId),
@@ -693,7 +698,7 @@ async function buildLeagueContext(request: AssistantContextRequest): Promise<str
 
 async function buildRoundsContext(request: AssistantContextRequest): Promise<string | null> {
   const [roundState, nextRound, schedule, history] = await Promise.all([
-    getCurrentRoundState(),
+    getRoundCalendar(),
     getNextRoundData(request.userId),
     getUserScheduleService(request.userId),
     getUserPerformanceHistoryService(request.userId),
@@ -702,7 +707,8 @@ async function buildRoundsContext(request: AssistantContextRequest): Promise<str
   const currentRound = asRecord(roundStateRecord.currentRound);
   const nextRoundRecord = asRecord(asRecord(nextRound).nextRound);
   const targetRoundId =
-    pickFirst(currentRound, ['id', 'round_id']) ?? pickFirst(nextRoundRecord, ['id', 'round_id']);
+    pickFirst(currentRound, ['roundId', 'id', 'round_id']) ??
+    pickFirst(nextRoundRecord, ['id', 'round_id']);
 
   const [lineup, roundStandings] = targetRoundId
     ? await Promise.all([
@@ -715,7 +721,7 @@ async function buildRoundsContext(request: AssistantContextRequest): Promise<str
 
   return [
     'Round/schedule context:',
-    `Jornada actual: ${compactValue(pickFirst(currentRound, ['name', 'round_name', 'id', 'round_id']))}`,
+    `Jornada actual: ${compactValue(pickFirst(currentRound, ['roundName', 'name', 'round_name', 'roundId', 'id', 'round_id']))}`,
     `Próxima jornada: ${compactValue(pickFirst(nextRoundRecord, ['name', 'round_name', 'id', 'round_id']))}`,
     `Partidos con jugadores del usuario: ${formatItems(
       scheduleRecord.matches,

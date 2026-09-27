@@ -18,7 +18,7 @@ vi.mock('@/lib/db/client', () => ({
   db: { query: dependencies.query },
   pgClient: { query: dependencies.query },
 }));
-vi.mock('../../season-context', () => ({ resolveReadSeasonId: dependencies.season }));
+vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: dependencies.season }));
 vi.mock('@/features/teams/server', () => ({
   getAllTeamsPlayoffProbabilities: dependencies.probabilities,
   getAllTeamMatchesCount: dependencies.counts,
@@ -41,7 +41,7 @@ vi.mock('@/features/players/server', () => ({
   },
 }));
 
-import { getCurrentMarketListings, getMarketTrendsAnalysis } from './market';
+import { getCurrentMarketListings, getMarketTrendsAnalysis } from '@/features/market/server';
 
 beforeEach(() => {
   vi.resetAllMocks();

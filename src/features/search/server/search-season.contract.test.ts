@@ -17,7 +17,7 @@ vi.mock('@/lib/db/season-context', () => ({
   resolveReadSeasonId: mocks.resolveReadSeasonId,
 }));
 
-import { globalSearch } from '../search';
+import { performGlobalSearch as globalSearch } from '@/features/search/server';
 
 describe('globalSearch season isolation', () => {
   beforeEach(() => {

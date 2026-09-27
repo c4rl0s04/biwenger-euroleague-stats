@@ -31,9 +31,7 @@ describe('News ownership', () => {
     expect(existsSync('src/components/ui/NewsTicker.js')).toBe(false);
     expect(existsSync('src/components/mobile/MobileNewsStrip.tsx')).toBe(false);
     expect(existsSync('src/lib/services/app/news-landing-legacy.ts')).toBe(false);
-    expect(read('src/lib/db/queries/competition/matches.ts')).not.toMatch(
-      /function getUpcomingMatches|function getRecentResults/
-    );
+    expect(existsSync('src/lib/db/queries/competition/matches.ts')).toBe(false);
   });
   it('protects News HTTP and removes Dashboard News exceptions', () => {
     const policy = read('scripts/architecture/policy.json');

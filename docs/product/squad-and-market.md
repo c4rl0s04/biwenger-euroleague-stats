@@ -27,9 +27,8 @@ rejecting offers.
 - Pages: [`lineup`](<../../src/app/(app)/lineup>) and [`market`](<../../src/app/(app)/market>).
 - UI: [`src/components/lineup`](../../src/components/lineup) and
   [`src/features/market`](../../src/features/market) sub-domains (`catalogue`, `analytics`, `trends`, `screens`).
-- Services: [`lineupService.ts`](../../src/lib/services/lineupService.ts), market read services under
-  [`src/features/market/server.ts`](../../src/features/market/server.ts), and
-  [`marketActionsService.ts`](../../src/lib/services/marketActionsService.ts).
+- Services: [Lineup reads and commands](../../src/features/lineup/server.ts) and
+  [Market reads and commands](../../src/features/market/server.ts).
 - Data: market queries under [`src/features/market`](../../src/features/market) (`catalogue/server/queries`, `analytics/server/queries`, `trends/server/queries`),
   current ownership, lineups, transfers, bids, listings, and market-value
   history under [`src/lib/db`](../../src/lib/db).

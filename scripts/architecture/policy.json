@@ -98,7 +98,27 @@
     "src/app/(app)/assistant/[conversationId]/page.tsx",
     "src/app/api/assistant/route.ts",
     "src/app/api/assistant/conversations/route.ts",
-    "src/app/api/assistant/conversations/[id]/route.ts"
+    "src/app/api/assistant/conversations/[id]/route.ts",
+    "src/app/api/market/offers/accept/route.ts",
+    "src/app/api/market/offers/reject/route.ts",
+    "src/app/api/market/remove/route.ts",
+    "src/app/api/market/sell/route.ts",
+    "src/app/api/market/sell-all/route.ts",
+    "src/app/api/player/streaks/route.ts",
+    "src/app/api/players/[id]/stats/route.ts",
+    "src/app/api/stats/leaders/route.ts",
+    "src/app/api/user/change-password/route.ts",
+    "src/app/api/user/link-biwenger/route.ts",
+    "src/app/api/users/lineup/route.ts",
+    "src/app/(app)/lineup/[section]/page.tsx",
+    "src/app/(app)/lineup/page.js",
+    "src/app/(app)/player/[id]/[section]/page.tsx",
+    "src/app/(app)/player/[id]/page.js",
+    "src/app/(app)/players/[section]/page.tsx",
+    "src/app/(app)/players/page.js",
+    "src/app/(app)/settings/[section]/page.tsx",
+    "src/app/(app)/settings/page.tsx",
+    "src/app/(app)/season-review/actions.ts"
   ],
   "exceptions": [
     {
@@ -792,9 +812,394 @@
       "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
     },
     {
-      "edge": "legacy-service: src/features/assistant/server/services/assistant-context.service.ts -> src/lib/services/index.ts",
-      "reason": "Assistant conversational context aggregates read-only cross-domain stats (market, squad, standings, schedule, compare) via established service facades as permitted in Task 20 tracker evidence.",
-      "removeWhen": "Cross-domain contracts are fully migrated and consolidated into unified feature exports in post-migration cleanup."
+      "edge": "entrypoint-persistence: src/app/api/market/offers/accept/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/accept/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/accept/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/accept/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/accept/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/accept/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/reject/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/reject/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/reject/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/reject/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/reject/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/offers/reject/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/remove/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/remove/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/remove/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/remove/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/remove/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/remove/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell-all/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell-all/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell-all/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell-all/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell-all/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell-all/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/market/sell/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/change-password/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/change-password/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/change-password/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/change-password/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/change-password/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/change-password/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/link-biwenger/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/link-biwenger/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/link-biwenger/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/link-biwenger/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/link-biwenger/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/user/link-biwenger/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/users/lineup/route.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/users/lineup/route.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/users/lineup/route.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/users/lineup/route.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/users/lineup/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/api/users/lineup/route.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated command Route Handler reaches frozen authentication/credential infrastructure. Only this exact existing persistence edge is retained; feature commands remain behind their server contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/[section]/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/[section]/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/[section]/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/[section]/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/page.js -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/page.js -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/page.js -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/page.js -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/page.js -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/lineup/page.js -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/[section]/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/[section]/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/[section]/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/[section]/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/[section]/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/page.tsx -> src/auth.js -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/page.tsx -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/page.tsx -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/page.tsx -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/settings/page.tsx -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing authenticated page reaches frozen authentication/credential infrastructure. This exact edge preserves session behavior while domain data stays behind its feature contract; visual ownership remains with the UI migration.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/season-review/actions.ts -> src/auth.js -> drizzle-orm",
+      "reason": "Existing Season Review server action reaches frozen authentication/credential infrastructure. This exact edge preserves session checks; simulation uses the feature contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/season-review/actions.ts -> src/auth.js -> src/lib/db/index.ts",
+      "reason": "Existing Season Review server action reaches frozen authentication/credential infrastructure. This exact edge preserves session checks; simulation uses the feature contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/season-review/actions.ts -> src/auth.js -> src/lib/db/schema.ts",
+      "reason": "Existing Season Review server action reaches frozen authentication/credential infrastructure. This exact edge preserves session checks; simulation uses the feature contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/season-review/actions.ts -> src/lib/credentials/repository.ts -> drizzle-orm",
+      "reason": "Existing Season Review server action reaches frozen authentication/credential infrastructure. This exact edge preserves session checks; simulation uses the feature contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/season-review/actions.ts -> src/lib/credentials/repository.ts -> src/lib/db/client.ts",
+      "reason": "Existing Season Review server action reaches frozen authentication/credential infrastructure. This exact edge preserves session checks; simulation uses the feature contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
+    },
+    {
+      "edge": "entrypoint-persistence: src/app/(app)/season-review/actions.ts -> src/lib/credentials/repository.ts -> src/lib/db/schema.ts",
+      "reason": "Existing Season Review server action reaches frozen authentication/credential infrastructure. This exact edge preserves session checks; simulation uses the feature contract.",
+      "removeWhen": "Accounts/credential infrastructure passes its separate security gate and exposes a deliberate authentication contract recognized by the architecture policy."
     }
   ]
 }

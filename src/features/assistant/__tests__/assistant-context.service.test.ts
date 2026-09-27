@@ -36,9 +36,48 @@ const { services, playerContextService } = vi.hoisted(() => ({
 }));
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/services', () => services);
+vi.mock('@/features/standings/server', () => ({
+  fetchEfficiencyStats: services.fetchEfficiencyStats,
+  fetchLeagueComparisonStats: services.fetchLeagueComparisonStats,
+  fetchReliabilityStats: services.fetchReliabilityStats,
+  fetchRoundWinners: services.fetchRoundWinners,
+  fetchValueRanking: services.fetchValueRanking,
+  fetchVolatilityStats: services.fetchVolatilityStats,
+  getFullStandings: services.getFullStandings,
+  getLeagueOverview: services.getLeagueOverview,
+}));
+vi.mock('@/features/managers/server', () => ({
+  getManagerCaptainRecommendations: services.fetchCaptainRecommendations,
+  getManagerCaptainStats: services.fetchCaptainStats,
+  getManagerRoundsData: services.fetchUserRecentRounds,
+  getManagerSeasonStatsData: services.fetchUserSeasonStats,
+  getManagerSquadData: services.fetchUserSquadDetails,
+  getManagerContributorsData: services.fetchUserTopContributors,
+}));
+vi.mock('@/features/market/server', () => ({
+  getMarketOpportunities: services.fetchMarketOpportunities,
+  fetchMarketStats: services.fetchMarketStats,
+  getMarketTrendsAnalysis: services.fetchMarketTrendsAnalysis,
+  getRecentTransfers: services.fetchRecentTransfers,
+}));
+vi.mock('@/features/rounds/server', () => ({
+  fetchRoundStandings: services.fetchRoundStandings,
+  fetchUserLineup: services.fetchUserLineup,
+  getUserPerformanceHistoryService: services.getUserPerformanceHistoryService,
+  getRoundCalendar: services.getCurrentRoundState,
+}));
+vi.mock('@/features/dashboard/server', () => ({
+  fetchNextRound: services.fetchNextRound,
+  fetchTopPlayersByForm: services.fetchTopPlayersByForm,
+  getNextRoundData: services.getNextRoundData,
+}));
+vi.mock('@/features/compare/server', () => ({
+  getCompareDataLite: services.getCompareDataLite,
+}));
+vi.mock('@/features/schedule/server', () => ({
+  getUserSchedule: services.getUserScheduleService,
+}));
 vi.mock('../server/services/assistant-player-context.service', () => playerContextService);
-vi.mock('@/lib/services/features/assistantPlayerContextService', () => playerContextService);
 
 describe('assistant context service', () => {
   beforeEach(() => {
@@ -129,6 +168,7 @@ describe('assistant context service', () => {
     );
     expect(services.fetchUserSquadDetails).toHaveBeenCalledWith('42');
     expect(services.fetchUserSeasonStats).toHaveBeenCalledWith('42');
+    expect(services.fetchUserRecentRounds).toHaveBeenCalledWith('42', 100);
     expect(blocks.some((block) => block.label === 'Signed-in user context')).toBe(true);
     const contextText = blocks.map((block) => block.content).join('\n');
     expect(contextText).toContain('Carlos');
@@ -208,8 +248,7 @@ describe('assistant context service', () => {
   });
 
   it('logs selected providers only in development', async () => {
-    const { buildAssistantContext } =
-      await import('../server/services/assistant-context.service');
+    const { buildAssistantContext } = await import('../server/services/assistant-context.service');
     const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
     vi.stubEnv('NODE_ENV', 'development');
 
@@ -383,6 +422,38 @@ describe('assistant context service', () => {
     expect(contextText).toContain('Titulares recomendados');
     expect(contextText).toContain('Sexto hombre recomendado');
     expect(contextText).toContain('rival difícil');
+  });
+
+  it('uses canonical calendar identifiers and preserves schedule context and actor identity', async () => {
+    const { buildAssistantContext } = await import('../server/services/assistant-context.service');
+    services.getCurrentRoundState.mockResolvedValue({
+      currentRound: { roundId: 7, roundName: 'Jornada 7' },
+      nextRound: null,
+    });
+    services.getUserScheduleService.mockResolvedValue({
+      found: true,
+      matches: [
+        {
+          home_team: 'RMA',
+          away_team: 'BAR',
+          total_players: 2,
+          date: '2026-01-01T12:00:00.000Z',
+          listItem: { secretFixture: 'not context' },
+        },
+      ],
+      userPlayers: [],
+    });
+    const blocks = await buildAssistantContext({
+      userId: '0042',
+      message: '¿Cómo va la jornada y mi calendario?',
+    });
+    const content = blocks.map((block) => block.content).join('\n');
+    expect(services.fetchUserLineup).toHaveBeenCalledWith('0042', '7');
+    expect(services.fetchRoundStandings).toHaveBeenCalledWith('7');
+    expect(services.getUserScheduleService).toHaveBeenCalledWith('0042');
+    expect(content).toContain('Jornada actual: Jornada 7');
+    expect(content).toContain('RMA vs BAR: 2 jugadores');
+    expect(content).not.toContain('not context');
   });
 
   it('does not load DB-heavy context for unrelated generic questions', async () => {

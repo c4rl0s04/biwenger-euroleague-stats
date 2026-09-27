@@ -15,8 +15,14 @@ import {
   getManagerHomeAwayStats,
   MANAGER_PERFORMANCE_POLICY,
 } from './services/manager-performance.service';
-import { getUserCaptainStats, getUserHomeAwayStats } from '@/lib/db/queries/core/users';
-import { fetchCaptainStats, fetchHomeAwayStats } from '@/lib/services/app/dashboardService';
+import {
+  getManagerCaptainStats as getUserCaptainStats,
+  getManagerHomeAwayStats as getUserHomeAwayStats,
+} from '@/features/managers/server';
+import {
+  getManagerCaptainStats as fetchCaptainStats,
+  getManagerHomeAwayStats as fetchHomeAwayStats,
+} from '@/features/managers/server';
 import { GET as captainStatsRoute } from '@/app/api/dashboard/captain-stats/route';
 import { GET as homeAwayRoute } from '@/app/api/dashboard/home-away/route';
 

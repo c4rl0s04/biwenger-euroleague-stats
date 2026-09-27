@@ -17,7 +17,7 @@ vi.mock('@/features/standings/server/services/all-play-all.service', () => ({
     },
   ],
 }));
-import { getAllPlayAllStats } from '@/lib/db/queries/analytics/advanced_stats';
+import { getAllPlayAllStats } from './queries/advanced.query';
 
 it('legacy adapter preserves NaN for existing server/mobile consumers', async () => {
   const rows = await getAllPlayAllStats();

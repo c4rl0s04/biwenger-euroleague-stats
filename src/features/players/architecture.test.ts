@@ -35,11 +35,10 @@ describe('players feature boundaries', () => {
   it('uses Team barrels only and removes obsolete Player implementations', () => {
     const mapperSource = source('./server/mappers/player.mapper.ts');
     const serviceSource = source('./server/services/player-profile.service.ts');
-    const serviceBarrel = source('../../lib/services/index.ts');
     expect(mapperSource).toContain("from '@/features/teams/public'");
     expect(serviceSource).toContain("from '@/features/teams/server'");
     expect(serviceSource).not.toMatch(/features\/teams\/(server|components|models)\//);
-    expect(serviceBarrel).not.toContain('playerService');
+    expect(existsSync(new URL('../../lib/services/index.ts', import.meta.url))).toBe(false);
     expect(
       existsSync(new URL('../../components/player-profile/PlayerProfileClient.js', import.meta.url))
     ).toBe(false);

@@ -27,23 +27,6 @@ export {
   ROUND_SCREEN_POLICY,
 } from './server/services/round-screen.service';
 
-// Existing database-name adapters require these query contracts. Screens/pages
-// use the mapped services above, never these persistence-shaped projections.
-export {
-  getAllRounds,
-  getUserLineup,
-  hasOfficialStats,
-  getOfficialStandings,
-  getLivingStandings,
-  getCoachRating,
-  getRoundGlobalStats,
-  getIdealLineup,
-  getPlayersLeftOut,
-  getUserRoundsHistoryDAO,
-  getUserOptimization,
-  getLineupUsageStats,
-} from './server/queries/round-analysis.query';
-
 export {
   getRoundCalendar,
   getRoundCalendarState,

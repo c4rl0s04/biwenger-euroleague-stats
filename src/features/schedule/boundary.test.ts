@@ -22,9 +22,7 @@ it('registers both pages and retires the old persistence implementation', () => 
   expect(policy.entrypoints).toContain('src/app/(app)/schedule/page.tsx');
   expect(policy.entrypoints).toContain('src/app/(app)/schedule/map/page.tsx');
   expect(existsSync('src/lib/db/queries/competition/schedule.ts')).toBe(false);
-  const bridge = readFileSync('src/lib/services/app/scheduleService.ts', 'utf8');
-  expect(bridge).toContain('@/features/schedule/server');
-  expect(bridge).not.toMatch(/drizzle|lib\/db|fetch\(/);
+  expect(existsSync('src/lib/services/app/scheduleService.ts')).toBe(false);
 });
 it('keeps explicit private freshness and client/server separation', () => {
   const server = readFileSync('src/features/schedule/server.ts', 'utf8');

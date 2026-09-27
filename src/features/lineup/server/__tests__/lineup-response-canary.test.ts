@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createSafeLineupResponse } from './lineupResponse';
+import { mapToSafeLineupResponse as createSafeLineupResponse } from '../mappers/lineup-read.mapper';
 
 const CANARY_TOKEN = 'lineup-read-canary-token-never-expose';
 

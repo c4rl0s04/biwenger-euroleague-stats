@@ -8,7 +8,7 @@ const root = path.resolve(import.meta.dirname, '../..');
 it.each([
   ['features/matches/server/queries/match-list.query.ts', '@/lib/db/client'],
   ['lib/db/queries/core/playerForm.ts', '../../client'],
-  ['lib/db/queries/core/teams.ts', '../../client'],
+  ['features/teams/server/queries/team-competition.query.ts', '@/lib/db/client'],
 ])('%s uses the database-only connection instead of the legacy domain barrel', (file, expected) => {
   const source = ts.createSourceFile(
     file,

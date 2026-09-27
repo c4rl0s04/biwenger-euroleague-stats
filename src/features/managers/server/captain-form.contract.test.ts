@@ -14,18 +14,18 @@ vi.mock('@/lib/db/season-context', () => ({
   resolveReadSeasonId: vi.fn(),
 }));
 
-vi.mock('../playerForm', () => ({
+vi.mock('@/lib/db/queries/core/playerForm', () => ({
   getPlayerFormMap: vi.fn(),
 }));
 
-vi.mock('../manager-directory', () => ({
+vi.mock('@/lib/db/queries/core/manager-directory', () => ({
   readManagerDirectory: vi.fn(),
 }));
 
 import { pool as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
-import { getPlayerFormMap } from '../playerForm';
-import { getCaptainRecommendations } from '../users';
+import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
+import { getManagerCaptainRecommendations as getCaptainRecommendations } from '@/features/managers/server';
 
 describe('getCaptainRecommendations null form semantics', () => {
   beforeEach(() => {

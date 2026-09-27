@@ -12,7 +12,7 @@ import {
   getAllTeamMatchesCount,
   getAllTeamsPlayoffProbabilities,
   getTeamPlayoffProbability,
-} from './teams';
+} from '@/features/teams/server';
 
 beforeEach(() => {
   vi.resetAllMocks();

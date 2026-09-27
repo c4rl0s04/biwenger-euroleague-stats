@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 
@@ -145,16 +145,12 @@ it('owns catalogue orchestration with deliberate cross-feature contracts and all
     /\bany\b|\bDate\b|drizzle|queries/
   );
   expect(feature('catalogue/server/mappers/market-catalogue.mapper.ts')).not.toContain('...row');
-  expect(read('src/lib/db/queries/features/market.ts')).not.toContain('getPlayerFormMap');
+  expect(existsSync('src/lib/db/queries/features/market.ts')).toBe(false);
 });
 
 it('owns every remaining analytics query, projection and stats HTTP boundary', () => {
-  expect(read('src/lib/db/queries/features/market.ts')).not.toMatch(
-    /SELECT|pgClient|resolveReadSeasonId|export async function/
-  );
-  expect(read('src/lib/services/marketService.ts')).not.toMatch(
-    /\bany\b|Promise.all|from ['"].*db/
-  );
+  expect(existsSync('src/lib/db/queries/features/market.ts')).toBe(false);
+  expect(existsSync('src/lib/services/marketService.ts')).toBe(false);
   const service = feature('analytics/server/services/market-analytics.service.ts');
   expect(service).toContain("from '../queries/market-manager.query'");
   expect(service).not.toMatch(/@\/lib\/(db|services)|\bany\b/);
@@ -210,10 +206,7 @@ it('owns basic activity orchestration and registers its HTTP boundary', () => {
   );
   expect(read('src/app/api/market/route.ts')).toContain('@/features/market/server');
   expect(read('src/app/api/market/route.ts')).not.toMatch(/@\/lib\/(db|services)|queries/);
-  expect(read('src/lib/services/features/marketService.ts')).toContain(
-    "export { getMarketPageData } from '@/features/market/server'"
-  );
-  expect(read('src/lib/services/features/marketService.ts')).not.toContain('Promise.all');
+  expect(existsSync('src/lib/services/features/marketService.ts')).toBe(false);
   const policy = JSON.parse(read('scripts/architecture/policy.json'));
   expect(policy.entrypoints).toContain('src/app/api/market/route.ts');
   expect(

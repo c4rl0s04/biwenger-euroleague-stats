@@ -8,8 +8,8 @@ vi.mock('@/lib/credentials/service', () => ({
   },
 }));
 
-vi.mock('@/lib/api/biwenger-client.js', () => ({
-  biwengerFetch: vi.fn(),
+vi.mock('@/features/provider/server/client', () => ({
+  biwengerProviderClient: { command: vi.fn(), query: vi.fn() },
 }));
 
 vi.mock('@/lib/db', () => ({
@@ -19,9 +19,9 @@ vi.mock('@/lib/db', () => ({
 }));
 
 import { biwengerCredentials } from '@/lib/credentials/service';
-import { biwengerFetch } from '@/lib/api/biwenger-client.js';
-import { marketActionsService } from './marketActionsService';
-import { lineupService } from './lineupService';
+import { biwengerProviderClient } from '../client';
+import { marketCommandService } from '@/features/market/server';
+import { lineupCommandService, lineupReadService } from '@/features/lineup/server';
 
 describe('market and lineup credential adoption', () => {
   const credential = 'synthetic-service-gateway-token';
@@ -31,14 +31,17 @@ describe('market and lineup credential adoption', () => {
     vi.mocked(biwengerCredentials.withCredential).mockImplementation(
       async (_userId, _operation, callback) => callback(credential)
     );
-    vi.mocked(biwengerFetch).mockResolvedValue({ status: 200, data: { lineup: {} } });
+    vi.mocked(biwengerProviderClient.command).mockResolvedValue({
+      status: 'completed',
+      httpStatus: 200,
+    });
+    vi.mocked(biwengerProviderClient.query).mockResolvedValue({ lineup: {} });
   });
 
   it('uses the authenticated actor boundary for market commands', async () => {
-    await marketActionsService.placeOnMarket({
+    await marketCommandService.sellPlayer('authenticated-actor', {
       playerId: 7,
       price: 1_000,
-      userId: 'authenticated-actor',
     });
 
     expect(biwengerCredentials.withCredential).toHaveBeenCalledWith(
@@ -46,18 +49,17 @@ describe('market and lineup credential adoption', () => {
       'market.place',
       expect.any(Function)
     );
-    expect(biwengerFetch).toHaveBeenCalledWith(
+    expect(biwengerProviderClient.command).toHaveBeenCalledWith(
       '/market',
       expect.objectContaining({
-        customToken: credential,
-        customUserId: 'authenticated-actor',
+        context: { token: credential, userId: 'authenticated-actor' },
       })
     );
   });
 
   it('uses the authenticated actor boundary for lineup reads and writes', async () => {
-    await lineupService.updateLineup({ lineup: { playersID: [7] }, userId: 'actor' });
-    await lineupService.getLineup('actor');
+    await lineupCommandService.updateLineup('actor', { playersID: [7] });
+    await lineupReadService.getLineup('actor');
 
     expect(biwengerCredentials.withCredential).toHaveBeenNthCalledWith(
       1,
@@ -72,9 +74,12 @@ describe('market and lineup credential adoption', () => {
       expect.any(Function)
     );
     expect(
-      vi.mocked(biwengerFetch).mock.calls.every(([, options]) => {
-        const requestOptions = options as { customUserId?: string } | undefined;
-        return requestOptions?.customUserId === 'actor';
+      [
+        ...vi.mocked(biwengerProviderClient.command).mock.calls,
+        ...vi.mocked(biwengerProviderClient.query).mock.calls,
+      ].every(([, options]) => {
+        const requestOptions = options as { context?: { userId?: string } } | undefined;
+        return requestOptions?.context?.userId === 'actor';
       })
     ).toBe(true);
   });

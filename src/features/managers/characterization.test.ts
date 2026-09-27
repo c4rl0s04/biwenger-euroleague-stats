@@ -31,12 +31,12 @@ vi.mock('@/auth', () => ({
 }));
 
 import {
-  getAllUsers,
-  getUserCaptainStats,
-  getUserHomeAwayStats,
-  getCaptainRecommendations,
-  getPersonalizedAlerts,
-} from '@/lib/db/queries/core/users';
+  getManagerDirectory as getAllUsers,
+  getManagerCaptainStats as getUserCaptainStats,
+  getManagerHomeAwayStats as getUserHomeAwayStats,
+  getManagerCaptainRecommendations as getCaptainRecommendations,
+  getManagerPersonalizedAlerts as getPersonalizedAlerts,
+} from '@/features/managers/server';
 import { GET as usersRoute, dynamic as usersDynamic } from '@/app/api/users/route';
 import { GET as captainStatsRoute } from '@/app/api/dashboard/captain-stats/route';
 import { GET as homeAwayRoute } from '@/app/api/dashboard/home-away/route';

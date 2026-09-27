@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -19,7 +19,7 @@ const externalServer = (name) =>
     name
   );
 
-export function readGraph(root) {
+export function readGraph(root, sourceRoots = ['src']) {
   const files = [];
   function walk(directory) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -29,7 +29,12 @@ export function readGraph(root) {
         files.push(full);
     }
   }
-  walk(path.join(root, 'src'));
+  for (const entry of sourceRoots) {
+    const full = path.join(root, entry);
+    if (statSync(full).isDirectory()) walk(full);
+    else if (/\.[cm]?[jt]sx?$/.test(full) && !full.endsWith('.d.ts') && !isTest(full))
+      files.push(full);
+  }
   const configFile = ts.readConfigFile(path.join(root, 'tsconfig.json'), ts.sys.readFile);
   if (configFile.error) throw new Error('Cannot read tsconfig.json');
   const config = ts.parseJsonConfigFileContent(configFile.config, ts.sys, root);
