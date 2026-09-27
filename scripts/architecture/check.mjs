@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { isSecurityContract, checkSecurityBoundaries } from './security-boundaries.mjs';
 
 const normalize = (value) => value.split(path.sep).join('/');
 const featureOf = (file) => /^src\/features\/([^/]+)\//.exec(file)?.[1];
@@ -11,6 +12,7 @@ const isContract = (file) => /^src\/features\/[^/]+\/(public|server)\.ts$/.test(
 const isPersistence = (file) =>
   /^src\/lib\/db\//.test(file) || /\/server\/(queries|repositories)\//.test(file);
 const isServer = (file) =>
+  file === 'src/lib/auth/repository.ts' ||
   isSeasonContract(file) ||
   isPersistence(file) ||
   /^src\/lib\/(services|credentials)\//.test(file) ||
@@ -114,7 +116,7 @@ export function readGraph(root, sourceRoots = ['src']) {
 }
 
 export function checkGraph(graph, policy) {
-  const errors = new Set();
+  const errors = new Set(checkSecurityBoundaries(graph));
   const usedExceptions = new Set();
   const featureEdges = new Map();
   function report(kind, from, to) {
@@ -226,6 +228,7 @@ export function checkGraph(graph, policy) {
         } else if (
           target &&
           !isSeasonContract(target) &&
+          !isSecurityContract(target) &&
           !/^src\/features\/[^/]+\/server\.ts$/.test(target)
         )
           inspect(target);
@@ -237,6 +240,7 @@ export function checkGraph(graph, policy) {
   // Type-only edges participate in ownership/cycles, but cannot leak runtime server code.
   for (const [start, node] of graph) {
     if (
+      !node.client &&
       !isSharedPresentation(start) &&
       (!featureOf(start) ||
         !(node.client || start.endsWith('/public.ts') || start.includes('/components/')))

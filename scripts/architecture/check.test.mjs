@@ -31,42 +31,75 @@ function check(files, policy = { entrypoints: [], exceptions: [] }) {
 }
 
 describe('feature import graph', () => {
-  it('does not extend a frozen authentication exception to other routes or helpers', () => {
-    const route = 'src/app/api/player/stats/route.ts';
-    const auth = 'src/auth.js';
-    const edge = `entrypoint-persistence: ${route} -> ${auth} -> drizzle-orm`;
-    const policy = {
-      entrypoints: [route],
-      exceptions: [
-        { edge, reason: 'Existing session infrastructure', removeWhen: 'Accounts gate' },
-      ],
-    };
+  it('validates authentication internals even when reached through the permanent contract', () => {
+    const route = 'src/app/api/auth/[...nextauth]/route.ts';
     const files = {
       [route]: "import '@/auth';",
-      [auth]: "import 'drizzle-orm';",
+      'src/auth.js': "import 'server-only'; import '@/lib/auth/repository';",
+      'src/lib/auth/repository.ts': "import 'server-only'; import 'drizzle-orm';",
     };
+    const policy = { entrypoints: [route], exceptions: [] };
     expect(check(files, policy)).toEqual([]);
-    expect(check({ ...files, [auth]: 'export {};' }, policy)).toContain(`Stale exception: ${edge}`);
+    expect(
+      check({ ...files, 'src/auth.js': "import 'server-only'; import 'drizzle-orm';" }, policy)
+    ).toContain('security-dependency: src/auth.js -> drizzle-orm');
+    expect(check({ ...files, [route]: "import '@/lib/auth/repository';" }, policy)).toContain(
+      `security-deep-import: ${route} -> src/lib/auth/repository.ts`
+    );
     expect(
       check(
         {
           ...files,
-          [route]: "import '@/auth'; import '@/lib/hidden-query';",
-          'src/lib/hidden-query.ts': "import 'drizzle-orm';",
+          'src/auth.js': "import 'server-only'; import '@/lib/leak';",
+          'src/lib/leak.ts': "import 'drizzle-orm';",
         },
         policy
       )
-    ).toContain(`entrypoint-persistence: ${route} -> src/lib/hidden-query.ts -> drizzle-orm`);
-    const other = 'src/app/api/other/route.ts';
+    ).toContain('security-dependency: src/auth.js -> src/lib/leak.ts');
     expect(
       check(
-        { ...files, [other]: "import '@/auth';" },
-        {
-          ...policy,
-          entrypoints: [route, other],
-        }
+        { ...files, 'src/components/Legacy.js': "'use client'; import '@/auth';" },
+        policy
+      ).some((e) => e.startsWith('client-leak:'))
+    ).toBe(true);
+    expect(
+      check({ ...files, 'src/auth.js': "import 'server-only'; import(variable);" }, policy)
+    ).toContain('security-computed-import: src/auth.js');
+  });
+
+  it('enforces credential contract internals and rejects direct or transitive leaks', () => {
+    const route = 'src/app/api/example/route.ts';
+    const files = {
+      [route]: "import '@/lib/credentials/server';",
+      'src/lib/credentials/server.ts': "import 'server-only'; export { value } from './service';",
+      'src/lib/credentials/service.ts': "import 'server-only'; export const value = 1;",
+    };
+    const policy = { entrypoints: [route], exceptions: [] };
+    expect(check(files, policy)).toEqual([]);
+    expect(check({ ...files, [route]: "import '@/lib/credentials/service';" }, policy)).toContain(
+      `security-deep-import: ${route} -> src/lib/credentials/service.ts`
+    );
+    expect(
+      check(
+        { ...files, 'src/lib/credentials/service.ts': "import 'server-only'; import 'pg';" },
+        policy
       )
-    ).toContain(`entrypoint-persistence: ${other} -> ${auth} -> drizzle-orm`);
+    ).toContain('security-dependency: src/lib/credentials/service.ts -> pg');
+    expect(
+      check(
+        {
+          ...files,
+          'src/components/Legacy.js': "'use client'; import '@/lib/credentials/server';",
+        },
+        policy
+      ).some((e) => e.startsWith('client-leak:'))
+    ).toBe(true);
+    expect(
+      check(
+        { ...files, 'src/lib/credentials/server.ts': "export { value } from './service';" },
+        policy
+      )
+    ).toContain('Missing server-only: src/lib/credentials/server.ts');
   });
 
   it('keeps the manager-read exception exact and rejects it once the adapter disappears', () => {

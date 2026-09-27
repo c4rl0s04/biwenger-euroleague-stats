@@ -27,8 +27,9 @@ status: active
 - Tournament reads and UI: [`Tournament feature`](../../src/features/tournaments), with thin page
   adapters. Snapshot projection and final acceptance progress is recorded in the
   [C02 receipt](../migration/reports/c02-tournament-reads.md).
-- Predictions/Playoffs UI and services belong to the
-  [Predictions](../../src/features/predictions) and [Playoffs](../../src/features/playoffs) features.
+- Predictions and Playoffs own their services and migrated presentation under
+  [`src/features/predictions`](../../src/features/predictions) and
+  [`src/features/playoffs`](../../src/features/playoffs).
 - Data: Tournament-owned read queries; remaining legacy queries and mutations under
   [`src/lib/db`](../../src/lib/db).
 - Sync: `biwenger-board` and `biwenger-tournaments`, plus the separate playoff command and

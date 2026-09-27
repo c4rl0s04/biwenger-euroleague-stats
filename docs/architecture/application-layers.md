@@ -58,10 +58,9 @@ for graph enforcement; its scope and explicit legacy exceptions are described in
 
 ## Legacy compatibility
 
-Application services now live under their [feature owners](../../src/features); the global service
-adapters were retired during Task 25 ownership closure. Remaining legacy
-[queries](../../src/lib/db/queries) and shared [mutations](../../src/lib/db/mutations) retain
-explicit compatibility or infrastructure responsibilities.
+Global service adapters were retired in Task 25. Domain services live under
+[features](../../src/features); retained shared [queries](../../src/lib/db/queries) and
+[mutations](../../src/lib/db/mutations) have explicit infrastructure owners.
 Do not infer ownership or deletion readiness from file location alone.
 
 Existing browser consumers may use [useApiData](../../src/lib/hooks/useApiData.js) and

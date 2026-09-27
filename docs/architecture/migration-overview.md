@@ -10,10 +10,19 @@ status: active
 
 # Migration overview
 
-This is a scope summary, not an independent task queue. The [master tracker](../migration/tracker.md)
-is authoritative for remaining tasks, dependencies and next actions. Reconciled at main `8dbdce9c`
-on 2026-09-24. A migrated read experience does not mean every mutation or external consumer is
-finished. Release evidence and historical decisions remain in the [migration ledger](migration-status.md).
+The feature architecture implementation is integrated through Task 25 (PRs #50 and #52).
+Task 26 verifies the combined application and corrects regressions; Task 27 reconciles main,
+CI and the production deployment. The [master tracker](../migration/tracker.md) and
+[Task 26 receipt](../migration/reports/task-26-regression-acceptance.md) hold current evidence.
+
+All application read domains, private-operation boundaries, offline jobs and synchronization
+ownership have completed their implementation batches. Retained database infrastructure and
+framework/authentication adapters are deliberate owners, not unfinished feature migrations.
+Live Section, theme and mobile compatibility components remain supported while UI adoption
+continues; they must not be deleted before their consumers migrate.
+
+The feature-by-feature entries below are historical milestones. Their original “remaining”
+columns describe dependencies at that point in time, not the current task queue.
 
 ## Status vocabulary
 
@@ -33,7 +42,7 @@ models and desktop/mobile composition. Their public/server contracts, HTTP compa
 server guards and transitive import graphs are tested. Some explicitly retained shared
 query adapters remain; these references are not a claim that all global code is gone.
 
-## Read foundations and their remaining work
+## Historical read foundations and their dependencies
 
 Tournament read migration: Tournament catalogue/detail/sections, analytics and screens are now
 fully migrated into `src/features/tournaments` and integrated on main via PR #35. See the
@@ -111,7 +120,7 @@ All read experiences across the application are now fully migrated into feature 
 
 Tournaments, Predictions, Playoffs, public Market and Managers remaining reads were earlier merged via PRs #35–39.
 
-The next domain milestone is **Task 13 — Provider boundaries**, which initiates the provider and mutation migration track (Tasks 13–21). In parallel, the UI migration track has completed UI-00, UI-01A, UI-01T (`55765dfe`), and UI-01B (`665fd1d7`, PR #44, core primitives: Button, IconButton, Input, Badge, Avatar, Skeleton); the next UI milestone is **UI-01C — Interactive Controls & Overlays**.
+At this historical milestone, the next domain step was **Task 13 — Provider boundaries**. Tasks 13–22 have since integrated. In parallel, the UI migration track has completed UI-00, UI-01A, UI-01T (`55765dfe`), and UI-01B (`665fd1d7`, PR #44, core primitives: Button, IconButton, Input, Badge, Avatar, Skeleton); the next UI milestone is **UI-01C — Interactive Controls & Overlays**.
 
 Residual Team detail orchestration/shared Player form work from the preserved campaign belongs to Task 25 review against the current schema. Saved Market components already match main; do not restart its old checkpoint Q. External Rounds/Standings/Market adapters retire as their final consumers migrate. Search interaction ownership belongs to Task 23. Unique UI token work is Task 24. The known Market phone-bids defect needs a separate behavior decision before final acceptance. Existing URLs remain compatibility contracts; renaming them is not a completion requirement.
 

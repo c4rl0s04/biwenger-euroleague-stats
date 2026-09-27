@@ -1,3 +1,4 @@
+import { waitForScreenshotPaint } from './screenshot-ready';
 import type { Page, TestInfo } from 'playwright/test';
 import { test, expect } from './fixtures';
 
@@ -5,7 +6,7 @@ async function capture(page: Page, info: TestInfo, name: string) {
   // References are captured from unchanged 38bf2de4 on macOS, never candidate output.
   if (process.platform !== 'darwin' || !['iphone-13', 'desktop-1440'].includes(info.project.name))
     return;
-  await page.evaluate(() => document.fonts.ready);
+  await waitForScreenshotPaint(page);
   await page.mouse.move(0, 0);
   await expect(page).toHaveScreenshot(name + '.png', {
     fullPage: false,

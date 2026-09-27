@@ -112,3 +112,49 @@ it('propagates failures and does not memoize repeated reads', async () => {
   expect(MARKET_SECTION_POLICY.serverCache).toBe('none');
   expect(MARKET_SECTION_POLICY.identity).toBe('none');
 });
+
+it('renders bids from the object aggregate, deduplicates duels and returns serializable rows', async () => {
+  fake.stats.mockResolvedValue({
+    recordBid: [{ transfer_id: 12, player_name: 'Player', player_team: 'Team', precio: 120 }],
+    biddingDuels: {
+      users: [
+        { id: 1, name: 'First' },
+        { id: 2, name: 'Second' },
+      ],
+      matrix: { 1: { 2: { duels: 3 } }, 2: { 1: { duels: 3 } } },
+    },
+    overpayerManager: [{ user_id: '1', name: 'First', total_overpay: 20 }],
+  });
+  const model = await getMobileMarketSection('bids');
+  expect(model.rows).toEqual([
+    { key: 'bid-12', title: 'Player', subtitle: 'Team', value: 120, href: null },
+    {
+      key: 'duel-1-2',
+      title: 'First / Second',
+      subtitle: 'Pujas disputadas',
+      value: 3,
+      href: null,
+    },
+    { key: 'overpayer-1', title: 'First', subtitle: 'Sobreprecio total', value: 20, href: null },
+  ]);
+  expect(JSON.parse(JSON.stringify(model))).toEqual(model);
+  expect(fake.stats).toHaveBeenCalledTimes(1);
+});
+
+it('handles empty bids and keeps the existing 20-row limit', async () => {
+  fake.stats.mockResolvedValue({
+    recordBid: [],
+    biddingDuels: { users: [], matrix: {} },
+    overpayerManager: [],
+  });
+  expect(await getMobileMarketSection('bids')).toEqual({ rows: [] });
+  fake.stats.mockResolvedValue({
+    recordBid: Array.from({ length: 30 }, (_, i) => ({
+      transfer_id: i,
+      player_name: 'Player',
+      player_team: null,
+      precio: i,
+    })),
+  });
+  expect((await getMobileMarketSection('bids')).rows).toHaveLength(20);
+});

@@ -22,7 +22,7 @@ it('keeps Dashboard persistence-free and uses explicit typed domain contracts', 
   expect(entry).toMatch(/^import 'server-only';/);
   expect(fs.readFileSync(path.join(root, 'public.ts'), 'utf8')).not.toContain('/server');
 });
-it('registers all eleven HTTP adapters with only the existing leader-gap authentication exceptions', () => {
+it('registers all eleven HTTP adapters without persistence exceptions', () => {
   const policy = JSON.parse(fs.readFileSync('scripts/architecture/policy.json', 'utf8'));
   for (const name of [
     'birthdays',
@@ -38,13 +38,7 @@ it('registers all eleven HTTP adapters with only the existing leader-gap authent
   ])
     expect(policy.entrypoints).toContain(`src/app/api/dashboard/${name}/route.ts`);
   expect(policy.entrypoints).toContain('src/app/api/league-average/route.ts');
-  expect(
-    policy.exceptions.filter((e: { edge: string }) => e.edge.includes('features/dashboard'))
-  ).toEqual([]);
-  const edges = policy.exceptions.filter((e: { edge: string }) => e.edge.includes('/leader-gap/'));
-  expect(edges).toHaveLength(6);
-  for (const edge of edges)
-    expect(edge.edge).toMatch(/-> (src\/auth.js|src\/lib\/credentials\/repository.ts) ->/);
+  expect(policy.exceptions).toEqual([]);
 });
 it('pages use Dashboard services and screens directly alongside the News contract', () => {
   for (const file of [

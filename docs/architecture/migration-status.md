@@ -939,3 +939,44 @@ request contract. Architecture coverage now includes 124 protected entrypoints. 
 tests, production build and browser acceptance were deferred by explicit user request;
 CI verification remains pending. Section/theme/capability adoption and the 216 exact
 authentication/credential exceptions still prevent full Task 25 closure.
+
+## Task 25 deferred authentication ownership
+
+The [authentication ownership receipt](../migration/reports/task-25-auth-ownership.md)
+records the follow-up to merged PR #50. Login and JWT refresh queries move into an
+authentication repository; application credential consumers use a server-only contract.
+Exact internal dependency enforcement replaces 216 per-entrypoint exceptions and includes
+the NextAuth handler among 125 protected entrypoints. The change is implemented on
+`refactor/auth-ownership`; integration and broad acceptance are not implied. UI-owned
+compatibility remains with the parallel UI migration and keeps full Task 25 closure open.
+
+## Task 26 regression acceptance
+
+[Draft PR #53](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/53) corrects stale
+Task 25 boundary tests and adds populated-Market CI coverage plus full browser sharding.
+Code candidate `9ae1b9fd` passes standard CI (2,872 tests, eight skips) and Linux browsers
+(261 default passes, 27 skips; nine populated-Market passes). macOS reports 12 default
+screenshot failures and one populated-Market phone screenshot failure; the two Rounds/
+Standings phone differences reproduce. Original screenshots and strict comparisons remain
+unchanged. The [acceptance receipt](../migration/reports/task-26-regression-acceptance.md)
+records evidence and decisions still required; Task 26 is not complete and Task 27 is
+not authorized by this validation result.
+
+## Task 26 closure follow-up
+
+PR #53 merged at `0736b96d`; main CI, Vercel production and the post-deploy smoke check
+all passed. PR #52 authentication ownership is integrated, superseding the earlier
+branch-only status above. Global runtime service adapters and per-entrypoint auth
+exceptions have been retired; live presentation compatibility remains supported during
+UI adoption.
+
+[PR #54](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/54) fixes the phone
+background and bids findings and reconciles reviewed desktop shell references. The
+[Task 26 receipt](../migration/reports/task-26-regression-acceptance.md) is the current
+verification record, including original Linux visual-reference coverage limits.
+
+Task 26 final macOS comparisons passed on `16020bba`: 60 default cases with four expected
+project/fixture skips, plus both populated-Market desktop/iPhone cases. No phone reference
+was updated. Sixteen desktop references reflect the reviewed merged shell; thresholds and
+masks are unchanged. Task 26 is complete for the documented architecture scope. Task 27
+reconciles the final PR #54 merge with main CI and the production deployment.
