@@ -16,6 +16,7 @@ import { PageHeader } from '@/components/ui';
 import { LayoutGrid, HandCoins, TrendingUp } from 'lucide-react';
 import Section from '@/components/layout/Section';
 import {
+  enrichLineupSquad,
   realignTactics,
   normalizeLineupConfig,
   deriveRotation,
@@ -64,55 +65,16 @@ export default function LineupClient({ userId }) {
           apiClient.get('/api/users/lineup').catch(() => ({ success: false })),
         ]);
 
-        let onSaleIds = new Set();
-        let listingPrices = new Map();
-        let playerOffers = new Map();
-        let purchaseMap = new Map(); // Map<playerId, OwnerObject>
-
         if (lineupRes.success && lineupRes.data) {
           setLineupConfig(normalizeLineupConfig(lineupRes.data.lineup));
-
-          // Extract players currently on sale and pending offers
-          const marketListings = lineupRes.data.market || [];
-          const offersListings = lineupRes.data.offers || [];
-          const biwengerPlayers = lineupRes.data.players || [];
-
-          // Map purchase prices from Biwenger
-          biwengerPlayers.forEach((p) => {
-            if (p.id && p.owner) purchaseMap.set(String(p.id), p.owner);
-          });
-
-          marketListings.forEach((m) => {
-            const id = m.playerID || m.player?.id || m.id;
-            if (id) {
-              onSaleIds.add(String(id));
-              if (m.price) listingPrices.set(String(id), m.price);
-            }
-          });
-
-          offersListings.forEach((o) => {
-            if (Array.isArray(o.requestedPlayers)) {
-              o.requestedPlayers.forEach((id) => {
-                const pid = String(id);
-                onSaleIds.add(pid);
-
-                // Group offers by player
-                if (!playerOffers.has(pid)) playerOffers.set(pid, []);
-                playerOffers.get(pid).push(o);
-              });
-            }
-          });
         }
-
         if (squadRes.success && squadRes.data) {
-          const enrichedPlayers = (squadRes.data.players || []).map((p) => ({
-            ...p,
-            isOnSale: onSaleIds.has(String(p.id)),
-            listingPrice: listingPrices.get(String(p.id)) || null,
-            offers: playerOffers.get(String(p.id)) || [],
-            owner: purchaseMap.get(String(p.id)) || null, // Inject Biwenger ownership data
-          }));
-          setSquad(enrichedPlayers);
+          setSquad(
+            enrichLineupSquad(
+              squadRes.data.players || [],
+              lineupRes.success ? lineupRes.data : null
+            )
+          );
         }
       } catch (err) {
         console.error('Error loading lineup data:', err);

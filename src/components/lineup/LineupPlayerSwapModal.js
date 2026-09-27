@@ -1,5 +1,6 @@
 'use client';
 
+import { rankSwapCandidates } from '@/features/lineup/public';
 import { useState } from 'react';
 import { X, Search, UserPlus, ArrowLeftRight, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,28 +21,10 @@ export default function LineupPlayerSwapModal({
 
   if (!isOpen || !targetPlayer) return null;
 
-  // 1. Filter squad based on position (if starter) and search term
-  const filteredPlayers = squad.filter((p) => {
-    // If starter, must match position
-    if (isStarter && p.position !== targetPlayer.position) return false;
-
-    // Search match
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
-
-    // Don't show the player we are currently swapping
-    return String(p.id) !== String(targetPlayer.id);
-  });
-
-  // Sort: Active players first, then by performance
-  const sortedPlayers = [...filteredPlayers].sort((a, b) => {
-    const aActive = activeIds.has(String(a.id));
-    const bActive = activeIds.has(String(b.id));
-    if (aActive !== bActive) return aActive ? -1 : 1;
-
-    const scoreA = (a.average || 0) * 100 + (a.points || 0);
-    const scoreB = (b.average || 0) * 100 + (b.points || 0);
-    return scoreB - scoreA;
-  });
+  const searchedPlayers = squad.filter(
+    (p) => !search || p.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const sortedPlayers = rankSwapCandidates(searchedPlayers, targetPlayer, isStarter, activeIds);
 
   return (
     <AnimatePresence>

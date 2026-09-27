@@ -2,12 +2,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { expect, it } from 'vitest';
 
-it('preserves the schedule lineup command callers', () => {
+it('preserves the unchanged lineup preview and HTTP command adapter', () => {
   const files = [
-    [
-      'src/components/schedule/AutoAlignButton.js',
-      'cc4a8fde140cacd35c70a70b74ec008db9f79ff879ec5fc757ef3848a810e636',
-    ],
     [
       'src/components/schedule/LineupModal.js',
       '8d1945bbf45be9fd75d174d63951666d460ee66cbbd042cb98cd3a1943558d20',
@@ -36,4 +32,13 @@ it('keeps explicit private freshness and client/server separation', () => {
   ]) {
     expect(readFileSync(path, 'utf8')).not.toMatch(/\bany\b|unstable_cache|['"]use cache['"]/);
   }
+});
+
+it('delegates automatic selection to Lineup while retaining the existing command endpoint', () => {
+  // Whole-file freezing no longer applies to this intentionally extracted domain algorithm.
+  // Payload, selection, ordering and errors are covered by Lineup logic tests.
+  const source = readFileSync('src/components/schedule/AutoAlignButton.js', 'utf8');
+  expect(source).toContain("import { buildAutoLineup } from '@/features/lineup/public'");
+  expect(source).toContain('apiClient.saveLineup(lineupPayload)');
+  expect(source).not.toContain('posCount');
 });
