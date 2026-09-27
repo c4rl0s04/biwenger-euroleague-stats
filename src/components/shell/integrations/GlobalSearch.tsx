@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Search, User, Users, Trophy, X, Loader2, type LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { EmptyState } from '@/components/ui/foundation';
 import { apiClient } from '@/lib/api-client';
 import { useNavigationFeedback } from '../shared/NavigationFeedback';
 
@@ -264,9 +265,9 @@ export function GlobalSearch({ onClose, className = '', autoFocus = false }: Glo
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50 max-h-[400px] overflow-y-auto">
           {!hasResults && !loading && (
-            <div className="p-4 text-center text-muted-foreground text-sm">
+            <EmptyState className="p-4">
               No se encontraron resultados para &ldquo;{query}&rdquo;
-            </div>
+            </EmptyState>
           )}
 
           {/* Players */}

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, type ReactNode } from 'react';
 import { Command } from 'cmdk';
 import { useRouter } from 'next/navigation';
+import { EmptyState, ModalDialog } from '@/components/ui/foundation';
 import { apiClient } from '@/lib/api-client';
 import {
   Search,
@@ -80,16 +81,6 @@ export function CommandPalette() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  // Focus when opened
-  useEffect(() => {
-    if (open) {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 10);
-      return () => clearTimeout(timer);
-    }
-  }, [open]);
-
   // Fetch search results (API)
   useEffect(() => {
     if (query.length < 2) {
@@ -133,7 +124,10 @@ export function CommandPalette() {
   if (!open) return null;
 
   return (
-    <div
+    <ModalDialog
+      aria-label="Buscar en la aplicación"
+      initialFocusRef={inputRef}
+      onClose={() => setOpen(false)}
       className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-[15vh] px-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) setOpen(false);
@@ -147,7 +141,6 @@ export function CommandPalette() {
           <Search className="w-5 h-5 text-muted-foreground mr-2 shrink-0" />
           <Command.Input
             ref={inputRef}
-            autoFocus
             value={query}
             onValueChange={setQuery}
             placeholder="Buscar página, jugador, equipo..."
@@ -284,13 +277,11 @@ export function CommandPalette() {
             results.players.length === 0 &&
             results.teams.length === 0 &&
             results.users.length === 0 && (
-              <div className="py-14 text-center text-muted-foreground text-sm">
-                No se encontraron resultados.
-              </div>
+              <EmptyState className="py-14">No se encontraron resultados.</EmptyState>
             )}
         </Command.List>
       </Command>
-    </div>
+    </ModalDialog>
   );
 }
 

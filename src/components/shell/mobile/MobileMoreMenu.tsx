@@ -2,8 +2,8 @@
 
 import { usePathname } from 'next/navigation';
 import { Download, Settings, X } from 'lucide-react';
-import { useEffect, useRef } from 'react';
-import { IconButton } from '@/components/ui/foundation';
+import { useRef } from 'react';
+import { IconButton, ModalDialog } from '@/components/ui/foundation';
 import {
   NAV_ITEMS,
   MOBILE_PRIMARY_ITEMS,
@@ -22,9 +22,7 @@ export interface MobileMoreMenuProps {
 
 export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuProps) {
   const pathname = usePathname();
-  const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const secondaryItems = NAV_ITEMS.filter(
     (item) => !MOBILE_PRIMARY_ITEMS.some((primary) => primary.href === item.href)
@@ -37,52 +35,6 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
     ),
   }));
 
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    previousFocusRef.current = (triggerRef?.current ||
-      document.activeElement) as HTMLElement | null;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    // Focus close button on open
-    closeButtonRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-
-      if (event.key !== 'Tab' || !dialogRef.current) return;
-
-      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (!focusable.length) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.removeEventListener('keydown', handleKeyDown);
-      (triggerRef?.current || previousFocusRef.current)?.focus();
-    };
-  }, [isOpen, onClose, triggerRef]);
-
   if (!isOpen) return null;
 
   return (
@@ -93,10 +45,11 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
         onClick={onClose}
         aria-label="Cerrar navegación"
       />
-      <section
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
+      <ModalDialog
+        as="section"
+        onClose={onClose}
+        initialFocusRef={closeButtonRef}
+        returnFocusRef={triggerRef}
         aria-labelledby="mobile-more-title"
         className="mobile-more-sheet"
       >
@@ -183,7 +136,7 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
             </NavigationLink>
           </div>
         </nav>
-      </section>
+      </ModalDialog>
     </div>
   );
 }

@@ -22,3 +22,5 @@ export { Badge, type BadgeProps, type BadgeVariant } from './primitives/Badge';
 export { Avatar, type AvatarProps, type AvatarSize } from './primitives/Avatar';
 export { Input, type InputProps } from './primitives/Input';
 export { Skeleton, type SkeletonProps } from './primitives/Skeleton';
+export { EmptyState } from './compositions/EmptyState';
+export { ModalDialog, type ModalDialogProps } from './controls/ModalDialog';
