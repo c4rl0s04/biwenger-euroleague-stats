@@ -1,3 +1,30 @@
+export type LineupIdentifier = string | number;
+export interface TacticalPlayer {
+  id?: LineupIdentifier;
+  position?: string | null;
+  average?: number | null;
+  puntos?: number | null;
+  price?: number | null;
+}
+export interface TacticalLineup {
+  playersID?: LineupIdentifier[];
+  reservesID?: LineupIdentifier[];
+  captain?: LineupIdentifier | null;
+  type?: string;
+}
+export interface NormalizedLineup {
+  playersID: string[];
+  reservesID: string[];
+  captain: string | null;
+  type: string;
+}
+export interface LineupNormalizationInput {
+  playersID?: unknown;
+  reservesID?: unknown;
+  captain?: LineupIdentifier | { id?: LineupIdentifier } | null;
+  type?: string;
+}
+
 /**
  * Lineup Logic Utility
  * Professional tactical realignment and rotation management.
@@ -7,7 +34,7 @@
  * Parse formation type string (e.g. "2-2-1") into position requirements
  * Euroleague: [Bases, Aleros, Pivots] -> [Pos 1, Pos 2, Pos 3]
  */
-export function parseFormation(type) {
+export function parseFormation(type: string): Record<string, number> {
   const [b, a, p] = type.split('-').map(Number);
   return { Base: b, Alero: a, Pivot: p };
 }
@@ -15,7 +42,10 @@ export function parseFormation(type) {
 /**
  * Calculates a weighted performance score for a player.
  */
-export function calculatePerfScore(player, captainId) {
+export function calculatePerfScore(
+  player: TacticalPlayer | null | undefined,
+  captainId?: LineupIdentifier | null
+): number {
   if (!player) return -1;
   const isCap = String(player.id) === String(captainId);
   // Priority: Captain > Avg Points > Total Points > Price
@@ -33,40 +63,50 @@ export function calculatePerfScore(player, captainId) {
  * 2. Keeps exactly 5 players on the bench.
  * 3. Minimizes changes to the user's manual selection.
  */
-export function realignTactics(newType, squad, currentLineup) {
+export function realignTactics(
+  newType: string,
+  squad: TacticalPlayer[],
+  currentLineup: TacticalLineup
+): { playersID: string[]; reservesID: string[] } {
   const targets = parseFormation(newType);
-  const getPlayer = (id) => squad.find((p) => String(p.id) === String(id));
+  const getPlayer = (id: LineupIdentifier) => squad.find((p) => String(p.id) === String(id));
 
   // In this mode, playersID contains all 10 (Starters + Bench)
   const allActiveIds = Array.isArray(currentLineup.playersID) ? currentLineup.playersID : [];
 
-  let S = allActiveIds.slice(0, 5).map(getPlayer).filter(Boolean);
-  let B = allActiveIds.slice(5, 10).map(getPlayer).filter(Boolean);
+  let S = allActiveIds
+    .slice(0, 5)
+    .map(getPlayer)
+    .filter((player): player is TacticalPlayer => Boolean(player));
+  let B = allActiveIds
+    .slice(5, 10)
+    .map(getPlayer)
+    .filter((player): player is TacticalPlayer => Boolean(player));
 
   const activeIds = new Set([...S, ...B].map((p) => String(p.id)));
   let R = squad.filter((p) => !activeIds.has(String(p.id)));
 
-  const sortByPerf = (a, b) =>
+  const sortByPerf = (a: TacticalPlayer, b: TacticalPlayer) =>
     calculatePerfScore(b, currentLineup.captain) - calculatePerfScore(a, currentLineup.captain);
-  const sortByPerfAsc = (a, b) =>
+  const sortByPerfAsc = (a: TacticalPlayer, b: TacticalPlayer) =>
     calculatePerfScore(a, currentLineup.captain) - calculatePerfScore(b, currentLineup.captain);
 
   // 1. Identify current counts
-  const C = { Base: 0, Alero: 0, Pivot: 0 };
+  const C: Record<string, number> = { Base: 0, Alero: 0, Pivot: 0 };
   S.forEach((p) => {
     const pos = p.position || 'Base';
     C[pos] = (C[pos] || 0) + 1;
   });
 
   const posNames = ['Base', 'Alero', 'Pivot'];
-  const U = {}; // Surplus
-  const D = {}; // Deficit
+  const U: Record<string, number> = {}; // Surplus
+  const D: Record<string, number> = {}; // Deficit
   posNames.forEach((pos) => {
     U[pos] = Math.max(0, C[pos] - targets[pos]);
     D[pos] = Math.max(0, targets[pos] - C[pos]);
   });
 
-  let demotedPool = [];
+  let demotedPool: TacticalPlayer[] = [];
 
   // 2. Remove Surplus from Starters
   posNames.forEach((pos) => {
@@ -125,27 +165,34 @@ export function realignTactics(newType, squad, currentLineup) {
 
   // CRITICAL: Starters (S) must be ordered by position to match Biwenger's internal validation
   // Order: Base -> Alero -> Pivot
-  const posOrder = { Base: 1, Alero: 2, Pivot: 3 };
+  const posOrder: Record<string, number> = { Base: 1, Alero: 2, Pivot: 3 };
   const sortedS = [...S].sort((a, b) => {
-    const orderA = posOrder[a.position] || 1;
-    const orderB = posOrder[b.position] || 1;
+    const orderA = posOrder[a.position as string] || 1;
+    const orderB = posOrder[b.position as string] || 1;
     return orderA - orderB;
   });
 
   // Return exactly 10 in playersID (5 sorted starters + 5 bench)
   // Ensure we have exactly 10 unique IDs as strings
-  const finalIds = [...new Set([...sortedS, ...finalB].map((p) => String(p.id)))].slice(0, 10);
+  const finalIds = Array.from(new Set([...sortedS, ...finalB].map((p) => String(p.id)))).slice(
+    0,
+    10
+  );
 
   return {
     playersID: finalIds,
-    reservesID: [...new Set(finalR.map((p) => String(p.id)))],
+    reservesID: Array.from(new Set(finalR.map((p) => String(p.id)))),
   };
 }
 
 /**
  * Perform a manual player swap or replacement
  */
-export function performSwap(targetId, newId, currentLineup) {
+export function performSwap<T extends TacticalLineup>(
+  targetId: LineupIdentifier,
+  newId: LineupIdentifier,
+  currentLineup: T
+): T | (Omit<T, 'playersID' | 'reservesID' | 'captain'> & TacticalLineup) {
   // Normalize all input IDs to strings for reliable comparison
   const tId = String(targetId);
   const nId = String(newId);
@@ -178,8 +225,8 @@ export function performSwap(targetId, newId, currentLineup) {
   }
 
   // Deduplicate just in case
-  playersID = [...new Set(playersID)].slice(0, 10);
-  reservesID = [...new Set(reservesID)];
+  playersID = Array.from(new Set(playersID)).slice(0, 10);
+  reservesID = Array.from(new Set(reservesID));
 
   // If the target was the captain, transfer captaincy to the new player
   let captain = currentLineup.captain;
@@ -198,7 +245,7 @@ export function performSwap(targetId, newId, currentLineup) {
 /**
  * Map a raw Biwenger lineup object into a normalized config
  */
-export function normalizeLineupConfig(lineup = {}) {
+export function normalizeLineupConfig(lineup: LineupNormalizationInput = {}): NormalizedLineup {
   let captainId = lineup.captain;
   if (captainId && typeof captainId === 'object') captainId = captainId.id;
 
@@ -215,9 +262,12 @@ export function normalizeLineupConfig(lineup = {}) {
 /**
  * Derive starters and bench player objects from IDs + squad
  */
-export function deriveRotation(lineupConfig, squad) {
+export function deriveRotation<T extends TacticalPlayer>(
+  lineupConfig: TacticalLineup,
+  squad: T[] | null | undefined
+): { starters: (T & { is_captain: boolean })[]; bench: T[] } {
   const safeSquad = Array.isArray(squad) ? squad : [];
-  const getById = (id) => safeSquad.find((p) => p && String(p.id) === String(id));
+  const getById = (id: LineupIdentifier) => safeSquad.find((p) => p && String(p.id) === String(id));
 
   const allActiveIds = Array.isArray(lineupConfig.playersID) ? lineupConfig.playersID : [];
 
@@ -227,12 +277,12 @@ export function deriveRotation(lineupConfig, squad) {
       const p = getById(id);
       return p ? { ...p, is_captain: String(id) === String(lineupConfig.captain) } : null;
     })
-    .filter(Boolean);
+    .filter((player): player is T & { is_captain: boolean } => Boolean(player));
 
   const bench = allActiveIds
     .slice(5, 10)
     .map((id) => getById(id))
-    .filter(Boolean);
+    .filter((player): player is T => Boolean(player));
 
   return { starters, bench };
 }

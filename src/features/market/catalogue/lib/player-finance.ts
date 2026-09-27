@@ -18,7 +18,7 @@ export const BIDDING_STRATEGIES = [
  * @param {number} score Recommendation score (0-100)
  * @returns {number} The suggested bid amount
  */
-export function calculateTargetPrice(price, score = 0) {
+export function calculateTargetPrice(price: number | null | undefined, score: number = 0): number {
   if (!price) return 0;
 
   // Find the appropriate strategy based on the score
@@ -47,7 +47,7 @@ export function calculateTargetPrice(price, score = 0) {
  * @param {number} score Recommendation score (0-100)
  * @returns {string} The strategy label
  */
-export function getStrategyLabel(score = 0) {
+export function getStrategyLabel(score: number = 0): string {
   const strategy = BIDDING_STRATEGIES.find((s) => score >= s.threshold);
   return strategy ? strategy.label : 'Evitar';
 }

@@ -4,7 +4,7 @@ import { Check, LoaderCircle, Save, Star, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { apiClient } from '@/lib/api-client';
-import { deriveRotation, normalizeLineupConfig, performSwap } from '@/lib/utils/lineup-logic';
+import { deriveRotation, normalizeLineupConfig, performSwap } from '@/features/lineup/public';
 
 import MobileBottomSheet from '../MobileBottomSheet';
 import {
