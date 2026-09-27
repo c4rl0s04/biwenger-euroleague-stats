@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Star } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import Subheading from '@/components/ui/Subheading';
 import MarketKPIs from '../../trends/components/MarketKPIs';
 import TopTransferredCard from '../../analytics/components/cards/TopTransferredCard';

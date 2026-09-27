@@ -118,7 +118,12 @@
     "src/app/(app)/players/page.js",
     "src/app/(app)/settings/[section]/page.tsx",
     "src/app/(app)/settings/page.tsx",
-    "src/app/(app)/season-review/actions.ts"
+    "src/app/(app)/season-review/actions.ts",
+    "src/app/(app)/layout.js",
+    "src/app/layout.js",
+    "src/app/(auth)/login/page.js",
+    "src/app/install/page.js",
+    "src/app/offline/page.js"
   ],
   "exceptions": [
     {

@@ -46,14 +46,14 @@ describe('Application shell architecture boundary', () => {
     }
   });
 
-  it('preserves layout barrel strictly for legacy Section compatibility', () => {
-    const layoutIndex = read('src/components/layout/index.js');
-    expect(layoutIndex).toContain("export { default as Section } from './Section';");
-    expect(layoutIndex).not.toContain('TopHeader');
-    expect(layoutIndex).not.toContain('Sidebar');
-    expect(layoutIndex).not.toContain('Navbar');
-    expect(layoutIndex).not.toContain('ClientWrapper');
-    expect(layoutIndex).not.toContain('SearchDropdown');
+  it('retires dead barrels and keeps the live Section compatibility composition explicit', () => {
+    expect(existsSync('src/components/index.js')).toBe(false);
+    expect(existsSync('src/components/layout/index.js')).toBe(false);
+    expect(existsSync('src/lib/services/app/appShellService.ts')).toBe(false);
+    expect(read('src/components/layout/Section.js')).toContain(
+      '@/components/shell/shared/SectionContext'
+    );
+    expect(read('src/app/(app)/layout.js')).toContain('@/lib/seasons/server');
   });
 
   it('wires root app layout to shell components', () => {

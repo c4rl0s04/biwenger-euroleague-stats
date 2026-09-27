@@ -9,7 +9,7 @@ function files(path: string): string[] {
 }
 describe('News ownership', () => {
   it('keeps app-shell composition out of the generic layout barrel', () => {
-    expect(read('src/components/layout/index.js')).not.toContain('./AppShell');
+    expect(existsSync('src/components/layout/index.js')).toBe(false);
     expect(read('src/app/(app)/layout.js')).toContain('@/components/shell/AppShell');
   });
   it('uses explicit server-only services and client-safe exports', () => {

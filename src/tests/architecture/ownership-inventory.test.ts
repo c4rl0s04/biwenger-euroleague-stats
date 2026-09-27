@@ -76,5 +76,37 @@ it('distinguishes retained shared projections, authentication gates and UI adapt
     'cycle'
   );
   expect(classifyModule('src/lib/db/queries/core/users.ts').blocker).toContain('security gate');
-  expect(classifyModule('src/lib/services/app/appShellService.ts').blocker).toContain('25B');
+  expect(classifyModule('src/components/layout/Section.js').blocker).toContain('25B');
+  expect(classifyModule('src/lib/seasons/server.ts').blocker).toBeNull();
+});
+
+it('rejects season infrastructure leaks and generic UI ownership violations', () => {
+  const node = (
+    imports: { specifier: string; target: string | null; typeOnly: boolean }[],
+    client = false
+  ) => ({ imports, client, computedImports: false });
+  const edge = (specifier: string, target: string | null) => ({
+    specifier,
+    target,
+    typeOnly: false,
+  });
+  const graph = new Map([
+    [
+      'src/components/shell/Bad.tsx',
+      node([edge('@/lib/seasons/server', 'src/lib/seasons/server.ts')], true),
+    ],
+    [
+      'src/components/ui/Bad.tsx',
+      node([edge('@/components/shell/Bad', 'src/components/shell/Bad.tsx')], true),
+    ],
+    ['src/lib/seasons/server.ts', node([edge('server-only', null), edge('pg', null)])],
+  ]);
+  const errors = checkGraph(graph, { entrypoints: [], exceptions: [] });
+  expect(
+    errors.some((error: string) => error.startsWith('client-leak: src/components/shell/Bad.tsx'))
+  ).toBe(true);
+  expect(errors).toContain(
+    'primitive-ownership: src/components/ui/Bad.tsx -> src/components/shell/Bad.tsx'
+  );
+  expect(errors).toContain('season-contract: src/lib/seasons/server.ts -> pg');
 });

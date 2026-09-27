@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Filter, X, Euro, SortAsc, SortDesc } from 'lucide-react';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import MarketPlayerCard from './MarketPlayerCard';
 import CustomSelect from '@/components/ui/CustomSelect';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';

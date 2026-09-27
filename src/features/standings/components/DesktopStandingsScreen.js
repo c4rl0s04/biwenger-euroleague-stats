@@ -1,6 +1,6 @@
 'use client';
 
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import dynamic from 'next/dynamic';
 import { CardSkeleton, PageHeader } from '@/components/ui';
 import {

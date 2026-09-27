@@ -37,8 +37,8 @@ describe('Home feature ownership', () => {
       expect(existsSync(p)).toBe(false);
   });
   it('preserves a single request-cache identity for AppShell and Home without caching Home results', () => {
-    expect(read('src/lib/services/app/appShellService.ts')).toContain(
-      'getAppStandings = getRequestStandings'
+    expect(read('src/app/(app)/layout.js')).toContain(
+      "import { getRequestStandings } from '@/features/standings/server'"
     );
     expect(read('src/features/home/server/services/summary.service.ts')).toContain(
       'standings: getRequestStandings'

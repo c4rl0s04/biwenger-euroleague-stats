@@ -58,13 +58,13 @@ export function classifyModule(file) {
       verification: 'logic and consuming feature suites',
       blocker: null,
     };
-  if (file === 'src/lib/services/app/appShellService.ts')
+  if (file === 'src/lib/seasons/server.ts')
     return {
-      owner: 'application-shell',
-      disposition: 'temporary adapter',
-      contract: 'request-scoped standings and season context',
-      verification: 'request-standings and shell suites',
-      blocker: '25B / Tasks 23–24 integration',
+      owner: 'season infrastructure',
+      disposition: 'retained shared infrastructure',
+      contract: 'server-only request-cached serializable season selection',
+      verification: 'season context and architecture contracts',
+      blocker: null,
     };
   if (file === 'src/lib/db/queries/core/playerForm.ts')
     return {

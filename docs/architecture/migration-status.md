@@ -929,3 +929,13 @@ adapters/helpers, direct Assistant/Team/Lineup contracts, retained shared projec
 and eight existing skips; the disposable phone Lineup browser regression and PostgreSQL
 integrity checks passed. Task 25 remains open: 25B follows Tasks 23–24, and 216 exact
 authentication/credential persistence exceptions remain separately gated.
+
+## Task 25B UI ownership reconciliation
+
+The [25B receipt](../migration/reports/task-25b-ui-ownership.md) records the combined
+25A and shell candidate on `refactor/ui-ownership-closure`. The final shell service and
+unused component/layout barrels are retired; season composition has a typed, server-only
+request contract. Architecture coverage now includes 124 protected entrypoints. Full local
+tests, production build and browser acceptance were deferred by explicit user request;
+CI verification remains pending. Section/theme/capability adoption and the 216 exact
+authentication/credential exceptions still prevent full Task 25 closure.

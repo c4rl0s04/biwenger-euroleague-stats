@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/ui';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import AssistantChat from '../components/AssistantChat';
 
 export interface DesktopAssistantScreenProps {

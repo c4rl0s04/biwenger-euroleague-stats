@@ -14,7 +14,7 @@ import LineupOfferModal from './LineupOfferModal';
 import LineupPutAllOnMarketModal from './LineupPutAllOnMarketModal';
 import { PageHeader } from '@/components/ui';
 import { LayoutGrid, HandCoins, TrendingUp } from 'lucide-react';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import {
   realignTactics,
   normalizeLineupConfig,
