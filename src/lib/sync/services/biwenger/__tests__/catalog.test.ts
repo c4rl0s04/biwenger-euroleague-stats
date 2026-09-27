@@ -1,38 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  normalizeBiwengerPlayer,
-  historicalPriceDate,
-  parseBiwengerDate,
-  parsePriceDate,
-  syncBiwengerCatalog,
-} from '../catalog';
+import { normalizeBiwengerPlayer, parseBiwengerDate, syncBiwengerCatalog } from '../catalog';
 
 describe('Biwenger Catalog Service', () => {
-  it('accepts only real calendar dates inside the inclusive season boundaries', () => {
-    const start = '2026-09-01';
-    const end = '2027-06-30';
-    expect(historicalPriceDate(250921, start, end)).toBeNull();
-    expect(historicalPriceDate(260901, start, end)).toBe(start);
-    expect(historicalPriceDate(270630, start, end)).toBe(end);
-    expect(historicalPriceDate(270701, start, end)).toBeNull();
-    expect(historicalPriceDate(270701, start, null)).toBe('2027-07-01');
-    expect(historicalPriceDate(260930, null, null)).toBeNull();
-    for (const invalid of [260231, 261301, 'bad', null, 262509]) {
-      expect(historicalPriceDate(invalid, start, end)).toBeNull();
-    }
-  });
   describe('date helpers', () => {
     it('parses valid biwenger date integers (YYYYMMDD)', () => {
       expect(parseBiwengerDate(19950412)).toBe('1995-04-12');
       expect(parseBiwengerDate('20010930')).toBe('2001-09-30');
       expect(parseBiwengerDate(null)).toBeNull();
       expect(parseBiwengerDate(12345)).toBeNull();
-    });
-
-    it('parses price date integers (YYMMDD) handling day/month transposition', () => {
-      expect(parsePriceDate(260914)).toBe('2026-09-14');
-      // If month > 12, swaps month and day: 262509 -> year 2026, month 09, day 25
-      expect(parsePriceDate(262509)).toBe('2026-09-25');
     });
   });
 
@@ -128,11 +103,9 @@ describe('Biwenger Catalog Service', () => {
       const priceWrites = mockDb.query.mock.calls.filter(([sql]) =>
         sql.includes('INSERT INTO market_values')
       );
-      expect(priceWrites).toHaveLength(2);
-      expect(priceWrites[1][1]).toEqual(['2025-26', 101, 5000000, '2025-09-14']);
-      expect(result.warnings).toContain(
-        'Skipped 2 historical prices with invalid or out-of-season dates.'
-      );
+      expect(priceWrites).toHaveLength(0);
+      expect(mockDb.query.mock.calls.some(([sql]) => sql.includes('UPDATE players'))).toBe(true);
+      expect(result.warnings).toEqual([]);
     });
   });
 

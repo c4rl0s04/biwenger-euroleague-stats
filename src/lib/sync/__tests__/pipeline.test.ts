@@ -27,6 +27,18 @@ describe('declarative sync pipeline', () => {
     ]);
   });
 
+  it('assigns daily history to its own step in routine/bootstrap, never live', () => {
+    expect(
+      PIPELINE.filter((step) => step.writes.includes('market_values')).map((step) => step.id)
+    ).toEqual(['biwenger-price-history']);
+    for (const mode of ['routine', 'bootstrap'] as const) {
+      const ids = selectPipeline(mode).map((step) => step.id);
+      expect(ids.indexOf('biwenger-price-history')).toBe(ids.indexOf('biwenger-catalog') + 1);
+    }
+    expect(selectPipeline('bootstrap', 'biwenger-price-history')).toHaveLength(1);
+    expect(() => selectPipeline('live', 'biwenger-price-history')).toThrow(/not available/);
+  });
+
   it('rejects numeric steps and unsafe force-game combinations', () => {
     expect(() => selectPipeline('routine', '5')).toThrow(/Unknown sync step/);
     expect(() => parseSyncArgs(['--force-game=10'])).toThrow(/requires --step=euroleague-games/);

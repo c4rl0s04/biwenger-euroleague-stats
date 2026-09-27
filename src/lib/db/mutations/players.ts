@@ -37,12 +37,6 @@ export interface UpdatePlayerDetailsParams {
   id: number; // biwenger_id
 }
 
-export interface InsertMarketValueParams {
-  player_id: number;
-  price: number;
-  date: string;
-}
-
 export interface UpsertTeamParams {
   id: number;
   name: string;
@@ -53,7 +47,6 @@ export interface UpsertTeamParams {
 export interface PlayerMutations {
   upsertPlayer: (params: UpsertPlayerParams) => Promise<void>;
   updatePlayerDetails: (params: UpdatePlayerDetailsParams) => Promise<void>;
-  insertMarketValue: (params: InsertMarketValueParams) => Promise<void>;
   getLastDate: (playerId: number) => Promise<{ last_date: Date | string } | undefined>;
   getPlayerBioStatus: (
     playerId: number
@@ -139,16 +132,6 @@ export function preparePlayerMutations(
         WHERE id = $4
       `;
       await db.query(sql, [params.birth_date, params.height, params.weight, params.id]);
-    },
-
-    // Insert Market Value History
-    insertMarketValue: async (params: InsertMarketValueParams) => {
-      const sql = `
-        INSERT INTO market_values (season_id, player_id, price, date)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (season_id, player_id, date) DO NOTHING
-      `;
-      await db.query(sql, [seasonId, params.player_id, params.price, params.date]);
     },
 
     // Get Last Market Value Date (for incremental sync)

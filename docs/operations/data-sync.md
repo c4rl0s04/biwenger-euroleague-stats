@@ -57,19 +57,20 @@ The declarative pipeline is:
 
 | Order | Step ID                   | Source              | Main storage owned                                                     | Modes              |
 | ----: | ------------------------- | ------------------- | ---------------------------------------------------------------------- | ------------------ |
-|     1 | `biwenger-catalog`        | Biwenger            | `players`, `teams`, `player_seasons`, `market_values`                  | routine, bootstrap |
-|     2 | `euroleague-master-data`  | EuroLeague          | `matches`, standings, team/player mappings                             | routine, bootstrap |
-|     3 | `match-linking`           | Biwenger + database | `matches` links and official sporting fields                           | routine, bootstrap |
-|     4 | `biwenger-users`          | Biwenger            | `users`, `user_seasons`                                                | routine, bootstrap |
-|     5 | `euroleague-games`        | EuroLeague          | game state, boxscores, events, shots, sporting round statistics        | all                |
-|     6 | `biwenger-fantasy-points` | Biwenger            | only `player_round_stats.fantasy_points`                               | routine, bootstrap |
-|     7 | `biwenger-lineups`        | Biwenger            | `lineups`, `user_rounds`                                               | all                |
-|     8 | `biwenger-board`          | Biwenger            | transfers, bids, finances, and prediction pools in one pagination pass | routine, bootstrap |
-|     9 | `biwenger-squads`         | Biwenger            | current `player_seasons.owner_id`                                      | routine, bootstrap |
-|    10 | `biwenger-market`         | Biwenger            | current-day `market_listings` snapshot                                 | routine, bootstrap |
-|    11 | `biwenger-tournaments`    | Biwenger            | tournaments, phases, fixtures, and standings                           | routine, bootstrap |
-|    12 | `initial-squads`          | Database            | `initial_squads`                                                       | bootstrap          |
-|    13 | `user-colors`             | Database            | `user_seasons.color_index`                                             | bootstrap          |
+|     1 | `biwenger-catalog`        | Biwenger            | `players`, `teams`, `player_seasons`                                   | routine, bootstrap |
+|     2 | `biwenger-price-history`  | Biwenger            | `market_values`, namespaced `sync_meta` checkpoints                    | routine, bootstrap |
+|     3 | `euroleague-master-data`  | EuroLeague          | `matches`, standings, team/player mappings                             | routine, bootstrap |
+|     4 | `match-linking`           | Biwenger + database | `matches` links and official sporting fields                           | routine, bootstrap |
+|     5 | `biwenger-users`          | Biwenger            | `users`, `user_seasons`                                                | routine, bootstrap |
+|     6 | `euroleague-games`        | EuroLeague          | game state, boxscores, events, shots, sporting round statistics        | all                |
+|     7 | `biwenger-fantasy-points` | Biwenger            | only `player_round_stats.fantasy_points`                               | routine, bootstrap |
+|     8 | `biwenger-lineups`        | Biwenger            | `lineups`, `user_rounds`                                               | all                |
+|     9 | `biwenger-board`          | Biwenger            | transfers, bids, finances, and prediction pools in one pagination pass | routine, bootstrap |
+|    10 | `biwenger-squads`         | Biwenger            | current `player_seasons.owner_id`                                      | routine, bootstrap |
+|    11 | `biwenger-market`         | Biwenger            | current-day `market_listings` snapshot                                 | routine, bootstrap |
+|    12 | `biwenger-tournaments`    | Biwenger            | tournaments, phases, fixtures, and standings                           | routine, bootstrap |
+|    13 | `initial-squads`          | Database            | `initial_squads`                                                       | bootstrap          |
+|    14 | `user-colors`             | Database            | `user_seasons.color_index`                                             | bootstrap          |
 
 Running a single step is an explicit recovery operation and does not automatically run its declared
 dependencies. Check that prerequisite data is current first. Numeric `--step` values are rejected.
@@ -91,6 +92,50 @@ RUN_DB_TESTS=true TEST_DATABASE_URL=postgresql://.../biwenger_disposable \
 
 It verifies stable canonical row counts, a frozen `2025-26` fingerprint, unchanged historical
 global identities, and absence of official writes outside the active season.
+
+## Daily player price history
+
+The catalogue updates the latest `player_seasons.price` cache, but does not invent dated history
+from its undated current-price snapshot. `biwenger-price-history` imports explicit Biwenger date/price
+pairs for every player in the configured season, including existing identities and players no longer
+listed in the catalogue. It inserts missing records, corrects differing prices, and leaves unchanged
+rows and dates absent from the provider untouched. Late introductions and provider gaps are not
+filled with synthetic values. History is bounded by season dates and the UTC date captured at run start.
+
+Routine execution refreshes each player after 24 hours. Bootstrap checks everyone regardless of
+freshness and invalidates those checkpoints before fetching, so interrupted forced refreshes remain
+due for routine retry. Checkpoints use `biwenger-price-history:v1:<season>:<player>` keys in the existing
+`sync_meta` table; changes to season boundaries invalidate freshness. Price writes and the checkpoint
+commit atomically. Valid empty histories are counted separately and checked again after 24 hours;
+malformed responses or failed writes never advance a checkpoint. Failed players are reported by ID;
+the remaining due players are still attempted, then the step fails so the pipeline stops and exits nonzero.
+Rerunning routine mode retains successful work and retries due players.
+
+Two concurrent player reads preserve the provider client's request delays and rate-limit retries.
+The step reports fetched/skipped players, inserted/corrected/unchanged prices, empty histories and
+failures. Inspect its duration against the scheduled job's 30-minute total budget; do not change
+provider pacing or workflow limits silently to mask overruns.
+
+After the usual target, backup and writable-season checks, reconcile just prices (without running
+bootstrap's initial-squad or other steps):
+
+```bash
+npm run sync:bootstrap -- --step=biwenger-price-history
+```
+
+Repeat that targeted command to verify zero inserts/corrections for unchanged provider history.
+Routine recovery uses `npm run sync -- --step=biwenger-price-history` and respects checkpoints.
+Never treat a populated latest date as proof that earlier dates are complete.
+
+The dedicated SQL regression test starts its own disposable local PostgreSQL cluster, applies
+committed migrations, and tests corrections, gap recovery, idempotency and atomic checkpoint failure:
+
+```bash
+RUN_PRICE_HISTORY_DB_TESTS=true SKIP_DB=true npm run test:run -- src/lib/sync/repositories/price-history.integration.test.ts
+```
+
+Implementation and check results are recorded in the
+[market-value sync validation receipt](market-value-sync-validation.md).
 
 ## Execute and verify
 
