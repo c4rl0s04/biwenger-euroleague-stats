@@ -7,6 +7,7 @@ import { CheckCircle2, Download, Loader2, ShieldCheck, Smartphone } from 'lucide
 
 import { usePwa } from '@/components/pwa/PwaProvider';
 import { useTheme } from '@/contexts/ThemeContext';
+import { ThemePreferenceControl } from '../components/ThemePreferenceControl';
 
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 
@@ -201,21 +202,16 @@ function AppearanceSettings() {
   const { showSnow, toggleSnow } = useTheme();
   return (
     <div className="mobile-settings-options">
+      <ThemePreferenceControl />
       <div className="mobile-settings-option">
         <span>
-          <strong>Tema oscuro</strong>
-          <small>Identidad visual principal de BiwengerStats</small>
-        </span>
-        <span className="mobile-settings-badge">Activo</span>
-      </div>
-      <div className="mobile-settings-option">
-        <span>
-          <strong>Efecto de nieve</strong>
+          <strong className="text-foreground!">Efecto de nieve</strong>
           <small>Preferencia visual guardada en este dispositivo</small>
         </span>
         <button
           type="button"
           role="switch"
+          aria-label="Efecto de nieve"
           aria-checked={showSnow}
           onClick={toggleSnow}
           className="mobile-settings-switch"
@@ -269,7 +265,7 @@ export default function MobileSettingsDetail({
   biwengerLinked?: boolean;
 }) {
   const current = copy[section];
-  return (
+  const screen = (
     <MobileDetailScaffold
       title={current.title}
       context="Ajustes"
@@ -281,5 +277,10 @@ export default function MobileSettingsDetail({
       {section === 'appearance' && <AppearanceSettings />}
       {section === 'install' && <InstallSettings />}
     </MobileDetailScaffold>
+  );
+  return section === 'appearance' ? (
+    <div className="[&_.mobile-native-back-title]:text-foreground!">{screen}</div>
+  ) : (
+    screen
   );
 }

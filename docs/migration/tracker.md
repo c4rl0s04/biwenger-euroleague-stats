@@ -74,6 +74,18 @@ The UI migration runs in parallel with the domain architecture migration, system
 | **UI-03**    | Season Predictions pilot                 | Planned; first feature pilot of the new foundation                                                                                                                           | Validate before broader feature migration                    |
 | **UI-04**    | Foundation/design review                 | Planned; visual parity, comprehensive E2E matrix, WCAG 2.2 AA verification                                                                                                   | Final design system verification and closure                 |
 
+### Settings theme preference
+
+The runtime theme infrastructure now has a production Settings control, owned by Accounts and reused
+on desktop `/settings` and phone `/settings/appearance`. System / Dark / Light apply immediately;
+selection and persistence use the preference, with resolved System state shown only as secondary copy.
+Snow, dark rollout baseline and legacy Card themes are unchanged. Light/system are explicit user
+preferences; legacy feature-page migration remains incremental.
+
+PR #51 is merged; this change uses the latest shared foundation from `main` without modifying its
+branch or cherry-picking. Finish any pending UI-01C/UI-02 integration, then UI-03 Season Predictions.
+UI-03 remains planned and unstarted. See the [verification receipt](reports/theme-preference-settings.md).
+
 ## Ordered task queue
 
 Owner for every row is the coordinating migration task until a named assignment is explicitly made.

@@ -97,7 +97,7 @@ paint. It contains no user-generated script source. Only the intentionally adjus
 suppresses hydration warnings. The provider always renders children on the server, and
 `useSyncExternalStore` supplies the deterministic `dark` / `dark` snapshot during SSR and hydration before
 subscribing to the browser snapshot. That snapshot is not the visual default: semantic CSS and the
-head script own first-paint colors. Future controls must use semantic styling and must not hide the
+head script own first-paint colors. Preference controls must use semantic styling and must not hide the
 application or select component palettes based on this hydration snapshot.
 
 Without JavaScript, the root has no theme marker and stays on the dark compatibility baseline; stored local
@@ -127,6 +127,18 @@ Costs and follow-up:
 - theme preference persistence and first-render behavior require dedicated regression testing;
 - visual regression coverage should eventually include representative dark and light states;
 - legacy hard-coded colors can only be retired incrementally as their owning UI slices migrate.
+
+### Production Settings control
+
+Accounts owns `src/features/accounts/components/ThemePreferenceControl.tsx`, reused by desktop
+`/settings` and phone `/settings/appearance`. Native grouped radios expose Sistema / Oscuro / Claro
+(System / Dark / Light), apply immediately through `useTheme().setTheme`, and select the stored
+`theme`, never `resolvedTheme`. System resolution is secondary copy only. Snow stays independent.
+Settings is the canonical preference UI; the shell Settings link remains unchanged.
+
+Light/system are explicit user preferences. Legacy feature-page migration remains incremental;
+this control does not imply those pages are fully light-ready or start UI-03. Storage, hydration,
+bootstrap, provider ownership, semantic mappings, browser chrome and the dark rollout default are unchanged.
 
 ## Alternatives considered
 

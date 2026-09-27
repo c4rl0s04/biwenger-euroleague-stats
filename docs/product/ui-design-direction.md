@@ -127,8 +127,14 @@ Light
 The application shell/root resolves that preference to a rendered light or dark theme. Shared
 components remain unaware of the active theme and consume semantic tokens only.
 
-The current dark theme is the compatibility baseline. A future light palette must be designed as a
-first-class palette rather than produced by naïvely inverting dark colors.
+The current dark theme is the compatibility baseline. The implemented light palette has its own
+semantic mapping rather than naïvely inverting dark colors.
+
+Settings now exposes System / Dark / Light (Sistema / Oscuro / Claro) through a shared Accounts
+preference control on desktop and phone Appearance. Changes apply immediately and persist on the
+device; System follows OS changes while remaining the selected preference. Snow is independent.
+Light/system are explicit user preferences; legacy feature-page migration remains incremental.
+This production control does not mark Season Predictions (UI-03) started.
 
 Light mode should preserve:
 

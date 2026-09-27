@@ -13,7 +13,10 @@ interface MobileSettingsScreenProps {
 
 export default function MobileSettingsScreen({ biwengerLinked }: MobileSettingsScreenProps) {
   return (
-    <MobileScreen labelledBy="mobile-screen-title">
+    <MobileScreen
+      labelledBy="mobile-screen-title"
+      className="[&_.mobile-native-title]:text-foreground!"
+    >
       <MobileScreenHeader
         eyebrow="Cuenta"
         title="Ajustes"
