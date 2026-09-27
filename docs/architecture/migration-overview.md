@@ -21,6 +21,12 @@ framework/authentication adapters are deliberate owners, not unfinished feature 
 Live Section, theme and mobile compatibility components remain supported while UI adoption
 continues; they must not be deleted before their consumers migrate.
 
+A subsequent ownership audit identified active global domain helpers beyond the UI migration.
+The [domain ownership follow-up](../migration/reports/domain-ownership-closure.md) moves Lineup,
+Market bidding and Accounts persistence into their features and gives reusable competition
+calculations/queries explicit shared contracts. Task 27 acceptance must use the eventual merged
+follow-up commit; earlier release evidence does not validate these changes.
+
 The feature-by-feature entries below are historical milestones. Their original “remaining”
 columns describe dependencies at that point in time, not the current task queue.
 

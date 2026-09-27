@@ -246,3 +246,70 @@ describe('feature import graph', () => {
     ).toEqual([]);
   });
 });
+
+describe('shared competition ownership', () => {
+  it('rejects retired helpers even when deleted, using alias and relative imports', () => {
+    const errors = check({
+      'src/lib/consumer.ts': "import '@/lib/utils/lineup-logic'; import './db/queries/core/users';",
+    });
+    expect(errors).toContain(
+      'retired-domain-import: src/lib/consumer.ts -> src/lib/utils/lineup-logic'
+    );
+    expect(errors).toContain(
+      'retired-domain-import: src/lib/consumer.ts -> src/lib/db/queries/core/users'
+    );
+  });
+  it('permits pure and server contracts but rejects deep consumers', () => {
+    const files = {
+      'src/lib/competition/public.ts': "export * from './logic/score';",
+      'src/lib/competition/logic/score.ts': 'export const score = 1;',
+      'src/lib/competition/server.ts':
+        "import 'server-only'; export * from './server/queries/form';",
+      'src/lib/competition/server/queries/form.ts': "import '@/lib/db/client';",
+      'src/lib/db/client.ts': 'export const db = {};',
+      'src/features/example/server/queries/read.ts': "import '@/lib/competition/server';",
+      'src/features/example/public.ts': "export * from '@/lib/competition/public';",
+    };
+    expect(check(files)).toEqual([]);
+    expect(
+      check({ ...files, 'src/lib/consumer.ts': "import './competition/logic/score';" })
+    ).toContain(
+      'competition-deep-import: src/lib/consumer.ts -> src/lib/competition/logic/score.ts'
+    );
+  });
+  it('rejects dependencies on features and database access from pure logic', () => {
+    const errors = check({
+      'src/lib/competition/logic/score.ts':
+        "import '@/features/example/public'; import '@/lib/db/client';",
+      'src/features/example/public.ts': 'export const score = 1;',
+      'src/lib/db/client.ts': 'export const db = {};',
+    });
+    expect(errors).toContain(
+      'competition-dependency: src/lib/competition/logic/score.ts -> src/features/example/public.ts'
+    );
+    expect(errors).toContain(
+      'competition-dependency: src/lib/competition/logic/score.ts -> src/lib/db/client.ts'
+    );
+  });
+  it('detects transitive server leaks in the public contract without a client consumer', () => {
+    expect(
+      check({
+        'src/lib/competition/public.ts': "export * from './logic/score';",
+        'src/lib/competition/logic/score.ts': "export * from '../server/queries/form';",
+        'src/lib/competition/server/queries/form.ts':
+          "import 'server-only'; export const score = 1;",
+      }).some((error) => error.startsWith('client-leak: src/lib/competition/public.ts'))
+    ).toBe(true);
+  });
+  it('requires the server-only marker and rejects dynamic imports and provider dependencies', () => {
+    const errors = check({
+      'src/lib/competition/server.ts': 'export const score = 1;',
+      'src/lib/competition/logic/score.ts':
+        "import '@/lib/api/biwenger-client'; const name = 'x'; import(name);",
+      'src/lib/api/biwenger-client.ts': 'export const client = {};',
+    });
+    expect(errors).toContain('Missing server-only: src/lib/competition/server.ts');
+    expect(errors.some((error) => error.startsWith('competition-computed-import:'))).toBe(true);
+    expect(errors.some((error) => error.startsWith('competition-dependency:'))).toBe(true);
+  });
+});

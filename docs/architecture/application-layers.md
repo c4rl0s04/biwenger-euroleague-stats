@@ -59,8 +59,8 @@ for graph enforcement; its scope and explicit legacy exceptions are described in
 ## Legacy compatibility
 
 Global service adapters were retired in Task 25. Domain services live under
-[features](../../src/features); retained shared [queries](../../src/lib/db/queries) and
-[mutations](../../src/lib/db/mutations) have explicit infrastructure owners.
+[features](../../src/features); shared [competition projections](../../src/lib/competition) and
+retained [mutations](../../src/lib/db/mutations) have explicit domain and infrastructure owners.
 Do not infer ownership or deletion readiness from file location alone.
 
 Existing browser consumers may use [useApiData](../../src/lib/hooks/useApiData.js) and
@@ -74,3 +74,16 @@ Consult the [internal API reference](../reference/internal-api.md) and real rout
 Authentication, credentials, synchronization, and database infrastructure retain their existing
 ownership and safety rules. Do not create artificial feature wrappers for framework or cross-domain
 infrastructure.
+
+## Shared competition domain
+
+`src/lib/competition` owns reused competition rules and season-scoped projections without depending
+on application features. Consume pure calculations through `public.ts`; consume player-form and
+active-manager directory queries through the server-only `server.ts`. Database access is restricted
+to its server query layer. These are shared domain capabilities, not generic infrastructure or
+compatibility adapters. Keeping this dependency below features avoids Players/Teams and manager
+read cycles. Do not add feature-specific behavior to this module merely to bypass feature contracts.
+
+Lineup tactics belong to Lineup; bidding recommendations belong to Market; account password
+persistence belongs to Accounts. The remaining shared user mutation factory serves synchronization.
+The unused fantasy-scoring helper is a test-covered reference formula, not a runtime dependency.

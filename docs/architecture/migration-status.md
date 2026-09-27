@@ -14,6 +14,15 @@ For current tasks and states, use the [master tracker](../migration/tracker.md);
 [migration overview](migration-overview.md) summarizes scope. This ledger preserves dated evidence,
 including superseded pre-merge states. Do not treat historical checkpoints as active assignments.
 
+## Domain ownership follow-up — 2026-09-27
+
+Branch `refactor/domain-ownership`, based on main `4d9b2ba3`, closes global Lineup/bidding
+helpers and Accounts password persistence dependencies. Competition calculations, player form
+and the active-manager directory have explicit shared domain ownership and enforced public/server
+contracts. See the [receipt](../migration/reports/domain-ownership-closure.md) for validation and
+integration status. This follow-up is separate from ongoing UI adoption and precedes Task 27
+acceptance of the eventual merged commit.
+
 ## Verified starting point — 2026-09-05
 
 - Local and fetched remote main: `a9f0dc929fd08df5a35e2a690b4859762afa7ad8`.
