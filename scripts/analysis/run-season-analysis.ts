@@ -2,21 +2,21 @@ import 'dotenv/config';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { pgClient } from '../../src/lib/db/index';
-import { getSeasonReviewRawData } from '../../src/lib/db/queries/analytics/season-review';
+import { pgClient } from '@/lib/db';
 import {
+  getSeasonReviewRawData,
   aggregateConfigurationSamples,
   generateConfigurationGrid,
   generateSeedManifest,
   simulatePairedSeason,
   summarizePairedSeason,
-} from '../../src/lib/season-review/simulation-analysis';
-import { buildSeasonSimulationDataset } from '../../src/lib/season-review/simulation-dataset';
+  buildSeasonSimulationDataset,
+} from '@/features/season-review/server';
 import type {
   SimulationAnalysisArtifact,
   SimulationAnalysisShardArtifact,
   SimulationAnalysisStage,
-} from '../../src/lib/season-review/simulation-types';
+} from '@/features/season-review/public';
 
 function requiredInteger(name: string, fallback: number) {
   const value = Number(process.env[name] || fallback);

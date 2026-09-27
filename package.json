@@ -48,7 +48,7 @@
     "simulation:run": "NODE_OPTIONS=--conditions=react-server tsx -r dotenv/config scripts/analysis/run-season-simulations.ts",
     "simulation:merge": "tsx scripts/analysis/merge-season-simulations.ts",
     "simulation:analysis:run": "NODE_OPTIONS=--conditions=react-server tsx -r dotenv/config scripts/analysis/run-season-analysis.ts",
-    "simulation:analysis:merge": "tsx scripts/analysis/merge-season-analysis.ts",
+    "simulation:analysis:merge": "NODE_OPTIONS=--conditions=react-server tsx scripts/analysis/merge-season-analysis.ts",
     "simulation:analysis:calibrate": "NODE_OPTIONS=--conditions=react-server tsx -r dotenv/config scripts/analysis/calibrate-season-analysis.ts",
     "prepare": "husky",
     "worktree:setup": "node scripts/dev/worktree.mjs setup",

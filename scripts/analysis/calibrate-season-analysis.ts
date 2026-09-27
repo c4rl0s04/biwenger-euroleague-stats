@@ -1,10 +1,12 @@
 import 'dotenv/config';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { pgClient } from '../../src/lib/db/index';
-import { calibrateSeasonSimulator } from '../../src/lib/season-review/simulation-dataset';
-import type { SimulationAnalysisArtifact } from '../../src/lib/season-review/simulation-types';
-import { getSeasonResilienceOverview } from '../../src/lib/services/features/seasonResilienceService';
+import { pgClient } from '@/lib/db';
+import {
+  calibrateSeasonSimulator,
+  getSeasonResilienceOverview,
+} from '@/features/season-review/server';
+import type { SimulationAnalysisArtifact } from '@/features/season-review/public';
 
 async function main() {
   const file = resolve(

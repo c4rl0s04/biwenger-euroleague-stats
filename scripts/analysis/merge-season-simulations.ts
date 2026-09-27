@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import type {
   SeasonSimulationArtifact,
   SeasonSimulationArtifactEntry,
-} from '../../src/lib/season-review/simulation-types';
+} from '@/features/season-review/public';
 
 const inputDirectory = resolve(
   process.cwd(),

@@ -1,15 +1,18 @@
 import 'dotenv/config';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { pgClient } from '../../src/lib/db/index';
-import { getSeasonReviewRawData } from '../../src/lib/db/queries/analytics/season-review';
-import { buildSeasonSimulationDataset } from '../../src/lib/season-review/simulation-dataset';
-import { runSeasonMonteCarlo } from '../../src/lib/season-review/season-simulator';
+import { pgClient } from '@/lib/db';
+import {
+  getSeasonReviewRawData,
+  buildSeasonSimulationDataset,
+  runSeasonMonteCarlo,
+} from '@/features/season-review/server';
 import type {
   SeasonSimulationArtifact,
   SeasonSimulationArtifactEntry,
-} from '../../src/lib/season-review/simulation-types';
-import type { ResilienceConfig, ShockConfig } from '../../src/lib/season-review/types';
+  ResilienceConfig,
+  ShockConfig,
+} from '@/features/season-review/public';
 
 const historical: ResilienceConfig = {
   rosterCap: 25,

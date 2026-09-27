@@ -5,7 +5,7 @@ import * as path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 dotenv.config();
 
-import { hoopgridChallenges } from '../../src/lib/db/schema';
+import { hoopgridChallenges } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 /**
@@ -13,8 +13,8 @@ import { eq, desc } from 'drizzle-orm';
  * Usage: npx tsx scripts/hoopgrid/generate-hard.ts [count] [minDifficulty]
  */
 async function main() {
-  const { db } = await import('../../src/lib/db/client');
-  const { hoopgridService } = await import('../../src/lib/services/features/hoopgridService');
+  const { db } = await import('@/lib/db');
+  const { hoopgridCommandService } = await import('@/features/hoopgrid/server');
 
   const args = process.argv.slice(2);
   const count = parseInt(args[0]) || 5;
@@ -41,12 +41,12 @@ async function main() {
     console.log(`\n📅 Generating for ${targetDate}...`);
 
     try {
-      const challenge = await hoopgridService.generateDailyChallenge(
+      const challenge = await hoopgridCommandService.generateDailyChallenge(
         targetDate,
         minDifficulty,
         maxDifficulty
       );
-      const complexity = hoopgridService.calculateComplexity(challenge.possibleCounts);
+      const complexity = hoopgridCommandService.calculateComplexity(challenge.possibleCounts);
       console.log(
         `✅ Success! Challenge #${challenge.number} generated with complexity: ${complexity}`
       );

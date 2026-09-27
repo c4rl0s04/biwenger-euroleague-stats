@@ -1,14 +1,11 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import {
-  buildSimulationRanking,
-  selectSimulationShortlist,
-} from '../../src/lib/season-review/simulation-analysis';
+import { buildSimulationRanking, selectSimulationShortlist } from '@/features/season-review/server';
 import type {
   SimulationAnalysisArtifact,
   SimulationAnalysisShardArtifact,
   SimulationAnalysisStage,
-} from '../../src/lib/season-review/simulation-types';
+} from '@/features/season-review/public';
 
 const inputDirectory = resolve(
   process.cwd(),

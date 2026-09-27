@@ -251,21 +251,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 20 — Assistant
 
-- **State:** Implemented and verified on `refactor/assistant`.
+- **State:** Integrated into main at `1290d214`.
 - **Dependencies / approval:** 12–13 plus owning domain contracts.
 - **Scope:** Own context, conversations, provider calls and screens; no paid/production validation.
 - **Completion check:** Conversation ownership, session authentication, fail-closed provider error handling, privacy/redaction, and route contracts preserved.
 - **Evidence:** [Task 20 receipt](reports/task-20-assistant.md); `assistantCommandService`, `assistantReadService`, `assistantProviderService`, `assistantContextService`, `assistantRepository`, 51 tests passed, 0 architecture violations across 99 entrypoints, full test suite (2,776 tests) and build passing.
-- **Next action:** Fast-forward merge into main; proceed with Task 21 Other actions.
+- **Next action:** Completed; proceed with Task 21 Other actions.
 
 ### Task 21 — Other actions
 
-- **State:** Planned; approval gate where sensitive.
+- **State:** Implemented and verified on `refactor/other-actions`.
 - **Dependencies / approval:** 12 plus 10 and command inventory.
 - **Scope:** Close discovered generation/submission/other writes, not new product features.
-- **Completion check:** Every command owned and tested, or explicitly justified as infrastructure.
-- **Evidence:** Discovery required; absence is not assumed.
-- **Next action:** Assign each discovered action a scoped implementation or retention decision.
+- **Completion check:** Exhaustive command inventory documented; offline analysis and simulation CLI scripts (`scripts/analysis/*`) migrated to `@/features/season-review/server` and `@/features/season-review/public`; Hoopgrid challenge generator migrated to `@/features/hoopgrid/server`; package script runtime conditions fixed; focused CLI tests passing.
+- **Evidence:** [Task 21 receipt](reports/task-21-other-actions.md); 5 CLI tests passed, server guards (144 tests) passed, 0 architecture violations, build and schema audit green.
+- **Next action:** Fast-forward merge into main; proceed with Task 22 Infrastructure / cache lifecycle.
 
 ### Task 22 — Infrastructure / cache lifecycle
 
