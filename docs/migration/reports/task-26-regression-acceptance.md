@@ -1,6 +1,6 @@
 ---
 title: Task 26 regression acceptance
-description: Exact-candidate regression evidence and unresolved acceptance gates after Task 25.
+description: Combined architecture regression corrections, visual provenance and release evidence.
 audience:
   - maintainer
   - contributor
@@ -10,127 +10,116 @@ status: active
 
 # Task 26 — Regression acceptance
 
-Base: main `ebc4da6d`, including Task 25 authentication ownership (PR #52).
-Current code/CI candidate: `9ae1b9fd` (following test corrections `57b97367` and `ed23dadc`) on `chore/regression-acceptance`,
-[draft PR #53](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/53).
-This task verifies the architecture migration; UI implementation remains with its owner.
-Task 26 is not accepted: reproducible macOS visual failures and explicit acceptance decisions remain. No deployment or production operation is performed.
+The architecture implementation is integrated through Task 25. This task verifies that
+combined application, corrects regressions and reconciles evidence; it does not require
+completion of the separate feature-by-feature UI adoption project.
 
-## Baseline failure and correction
+## Restore main
 
-[Main CI](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36338510556)
-failed typecheck because the Rounds boundary test still required six retired authentication
-exceptions per page. TypeScript inferred the now-empty JSON array as `never[]`; the test
-would also have failed its old count assertion. This prevented the browser build from
-reaching its tests. Formatting, architecture and lint passed on that baseline.
+Main `ebc4da6d` failed TypeScript checking after PR #52 retired authentication exceptions
+but left tests expecting them. The Rounds test inferred the empty exception array as
+`never[]`, blocking both ordinary CI and the browser build. Dashboard and Season Review
+also retained obsolete exception assertions; Market tests mocked a removed layout barrel.
 
-The correction asserts zero exceptions and continued use of the deliberate authentication
-contract by both Rounds pages. It preserves the page/API registration assertions and
-mobile presentation checks. The focused Rounds file passed all three tests. The first full candidate run then
-found two more stale exception-count assertions (Dashboard and Season Review) and two
-Market suites still mocking the deleted layout barrel. These now assert zero exceptions
-and mock the direct Section import. All 39 tests in the five affected files passed in
-the pinned Linux image with the corrected source mounted read-only. No runtime code
-changed and no assertions were skipped.
+[PR #53](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/53) corrects these tests,
+shards the complete default browser suite into four jobs and adds a separate populated
+Market fixture job. No runtime behavior, screenshot threshold or skip was changed there.
+It merged at `0736b96d`:
 
-## Acceptance matrix
+- [Main CI](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36342653059): passed, including all five browser jobs.
+- [Production deployment](https://vercel.com/carlosandreshuete-1394s-projects/advanced-euroleague-biwenger-stats/7u2qHpNapfsAmBygQAFYYAxMVZqL): READY, target production, exact main SHA and production alias confirmed.
+- [Production smoke](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36342713741): passed.
 
-| Coverage                                                                                             | Evidence / remaining work                                                                                                                              |
-| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Skills, architecture, lint, typecheck, docs, full unit/API/security tests, schema metadata and build | PASS on `ed23dadc`: 2,872 tests passed / 8 skipped; typecheck, lint, architecture, docs, metadata/Drizzle and production build passed.                 |
-| Linux desktop, tablet, phone and landscape                                                           | PASS on `9ae1b9fd`: four shards total 261 passed / 27 expected fixture/project skips, across all nine configured projects.                             |
-| macOS desktop and phone screenshots                                                                  | FAIL: default fixture 48 passed / 4 skipped / 12 screenshot failures; populated Market 1 passed / 1 screenshot failure. Original references preserved. |
-| Populated Market                                                                                     | PASS: dedicated Linux CI matrix job using `--fixture=market` and `market-populated.spec.ts`; all nine projects passed (3.1 minutes on `9ae1b9fd`).     |
-| Phone Market bids                                                                                    | Known pre-existing non-iterable duel object; scoped correction decision requested. It remains a blocker until resolved or explicitly dispositioned.    |
-| Missing original Linux screenshots                                                                   | Semantic tests do not replace missing visual references; gaps listed below remain explicit.                                                            |
-| Deployment and production smoke                                                                      | Task 27, not inferred from preview success or a skipped smoke workflow.                                                                                |
+Earlier skipped smoke jobs were expected: the workflow runs automatically only after a
+successful production deployment, not after previews or failed builds.
 
-The local `npm run verify` passed skills, architecture and docs. Its slow typecheck was
-stopped after candidate CI passed typecheck; remaining standard checks use the CI evidence
-rather than claiming the interrupted local verifier passed.
+## Remaining findings and corrections
 
-[Candidate CI](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36340208644)
-is the final code/CI run for `9ae1b9fd` (PR merge ref). Four default-fixture shards cover all 288 cases; the separate populated-Market job covers nine. Earlier unsharded runs were cancelled after supersession, not reported as passing.
-The initial local browser attempt failed before starting because a reused dependency worktree disappeared. Dependencies were installed independently with `npm ci`; the retry passed disposable PostgreSQL integrity checks, built successfully, and completed the browser runs below.
+[PR #54](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/54) contains the bounded
+follow-up on `fix/task26-closure`:
 
-Local browser commands use a clean, environment-free worktree and disposable databases;
-no provider mutations or production credentials are involved.
+- **Phone background:** AppBackground accepted but ignored presentationMode and covered
+  the existing `.mobile-app` gradient with an opaque desktop canvas. Phone mode now leaves
+  the phone-owned background visible. The palette contract checks that real owner and
+  asserts its gradient. Original phone references are retained.
+- **Desktop paint:** ambient effects and content now have explicit separate stacking
+  levels. Captures wait for fonts, finite entrance animations and two paint frames before
+  comparing images. This avoids accepting partially painted text as a new reference.
+- **Phone bids:** the legacy page spread `biddingDuels`, which is an object containing
+  users and a matrix. The page now invokes the typed Market section service. Its mapper
+  emits record bids, unique nonempty rival pairs and overpayment rows, preserving the
+  existing 20-row limit and empty state. Route guards still precede all reads; no HTTP
+  contract, authentication policy, database schema or provider mutation changes.
+- **Bids coverage:** focused service/page tests cover empty data, duplicate duel directions,
+  row ordering, serialization and limits. Both empty and populated browser fixtures now
+  navigate the bids section; the populated case requires a duel row.
+- **Documentation:** the overview and tracker distinguish historical implementation
+  milestones from current verification and release work.
 
-## Visual provenance and retained gaps
+## Visual provenance
 
-Existing Linux Matches/Team references remain enforced. Manager Profile, Rounds, Home,
-News, Dashboard, Compare, Standings, Schedule, Predictions, Playoffs, Tournaments and
-Market screenshot assertions are macOS-only in the current specs. These Linux reference
-gaps must not be filled using migrated output and then described as pre-migration proof.
-Their original-source references require a separate provenance-preserving capture or
-an explicit acceptance decision. No screenshot was updated to conceal a regression.
+The initial macOS run recorded 48 passes, four fixture/project skips and 12 default
+screenshot failures, plus one populated-Market phone screenshot failure. Those failures
+were not treated as passing simply because Linux CI was green. The original diagnostic
+examples remain in [visual evidence](task-26-visual-evidence/manager-profile-diff.png).
 
-Task 25 UI-owned compatibility adoption remains separate. Passing this candidate cannot
-establish acceptance for later UI-agent commits; affected checks must be rerun after
-those integrate. Task 27 still requires release/deployment reconciliation.
+Desktop references predated the already-merged Task 23 shell: header controls, sidebar
+spacing and toggle, semantic surfaces, account avatar and footer changed in PR #49.
+References are reviewed against those intentional changes after correcting paint issues.
+They are current-shell regression references, not newly invented pre-migration evidence;
+the original files remain available in Git history at `0736b96d`.
 
-## macOS failure evidence and next owner
+No screenshot threshold is loosened, no new mask hides content, and no failing route is
+removed from browser coverage. Phone references are not regenerated for the background fix.
+New bids behavior is checked semantically rather than claiming a pre-existing successful
+screenshot of a route that previously crashed.
 
-Commands (all use disposable local databases):
+## Acceptance scope and retained coverage limits
 
-- `npm run test:e2e:local -- --project=iphone-13 --project=desktop-1440`: 48 passed, four expected project/fixture skips, 12 screenshot failures (6.9 minutes of browser execution).
-- `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts --project=iphone-13 --project=desktop-1440`: desktop passed; phone overview screenshot failed (569 differing pixels).
-- `npm run test:e2e:local -- tests/e2e/rounds.spec.ts tests/e2e/standings.spec.ts --project=iphone-13`: both phone failures reproduced, with the same 524/367 differing pixels.
+Architecture acceptance uses the full unit/API/security and graph checks, all nine Linux
+browser projects, populated Market coverage, and reviewed desktop/iPhone macOS visual
+comparisons. Existing Linux Matches/Team screenshots remain enforced.
 
-All 13 failures are screenshot comparisons, not an exception from the auth or service layer.
-An early screenshot assertion stops the rest of that test, so later interactions in those
-macOS tests are not claimed as verified. Linux semantic coverage remains separate evidence.
+Original Linux references are still absent for Manager Profile, Rounds, Home, News,
+Dashboard, Compare, Standings, Schedule, Predictions, Playoffs, Tournaments and Market.
+These are explicitly retained visual-coverage follow-ups, not evidence of an incomplete
+feature migration or proof of pixel parity on Linux. Recover original-source references
+when extending that platform's visual suite; never label migrated output as original.
+Real-production-data visual exploration and installed/offline PWA behavior also remain
+outside the deterministic fixture checks, as documented in the testing guide.
 
-| Viewport                      | Failing reference                     | Differing pixels |
-| ----------------------------- | ------------------------------------- | ---------------- |
-| Desktop 1440                  | `playoffs-overview.png`               | 9569             |
-| iPhone 13                     | `standings-progression.png`           | 367              |
-| Desktop 1440                  | `manager-not-found.png`               | 17793            |
-| Desktop 1440                  | `predictions-overview.png`            | 9538             |
-| iPhone 13                     | `rounds-lineup.png`                   | 524              |
-| Desktop 1440                  | `market-empty-overview.png`           | 10086            |
-| Desktop 1440                  | `standings-ranking.png`               | 11081            |
-| Desktop 1440                  | `tournaments-catalogue.png`           | 104988           |
-| Desktop 1440                  | `schedule-overview.png`               | 9293             |
-| Desktop 1440                  | `manager-profile.png`                 | 8498             |
-| Desktop 1440                  | `compare-desktop.png`                 | 106237           |
-| Desktop 1440                  | `rounds-overview.png`                 | 10000            |
-| iPhone 13 (populated fixture) | `market-populated-phone-overview.png` | 569              |
+Section/theme/mobile compatibility code still has live UI consumers. It remains owned
+and supported during UI adoption. No dead global service adapter needs to be retained
+for that reason, and no live presentation code should be deleted merely to reduce a
+legacy directory count.
 
-Reviewed examples: [Rounds phone diff](task-26-visual-evidence/rounds-lineup-diff.png),
-[Standings phone diff](task-26-visual-evidence/standings-progression-diff.png), and
-[Manager Profile desktop diff](task-26-visual-evidence/manager-profile-diff.png).
-The inspected desktop Manager Profile, Compare and Tournament diffs are dominated by the
-merged shell header/sidebar/footer changes; some smaller content differences also need
-review. The phone differences concentrate around text. Their cause is not yet established.
-Do not treat this as authorization to regenerate references or as proof that all differences
-are harmless. UI owner review is required, keeping the approved shell separate from
-architecture behavior. No thresholds, masks or snapshots were changed in this task.
+## Final verification
 
-Full traces/screenshots are retained locally in `/tmp/task26-macos-default-evidence` and
-`/tmp/task26-macos-market-evidence`; these temporary directories are not permanent CI artifacts.
-The three committed diff images preserve representative review evidence.
+Task 26 is **verified and complete within the acceptance scope above**. All 13 initial
+macOS screenshot failures are resolved; the bids crash is corrected and exercised.
+The coverage limits above remain explicit and are not represented as passing comparisons.
 
-Outstanding decisions: the master tracker explicitly requires a scoped behavior decision
-for the pre-existing Market phone-bids crash. That decision was requested and remains
-unanswered. Acceptance of Linux semantics plus existing macOS references versus recovery
-of original Linux screenshots was also requested, with no acceptance inferred from silence.
+Code candidate `f3f98371` passed [full CI](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36343448003).
+Reference/capture candidate `16020bba` is covered by [the subsequent CI run](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36343899769)
+and the local comparisons below.
 
-## Final verification disposition
+| Check / command                                                                                                            | Result                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Full CI standard checks (skills, architecture, lint, typecheck, format, docs, tests, build, metadata/Drizzle)              | PASS: 2,876 tests passed, eight existing skips; 1,063 modules / 125 protected entrypoints / zero exceptions. |
+| Linux default browser matrix                                                                                               | PASS: 261 cases / 27 expected project/fixture skips across nine projects.                                    |
+| Linux populated Market job                                                                                                 | PASS: nine cases, including bids on phone projects.                                                          |
+| `npm run test:e2e:local -- --project=iphone-13 --project=desktop-1440`                                                     | PASS on `16020bba`: 60 passed / four expected project/fixture skips, no screenshot updates, seven minutes.   |
+| `npm run test:e2e:local -- --fixture=market tests/e2e/market-populated.spec.ts --project=iphone-13 --project=desktop-1440` | PASS on `16020bba`: both desktop and iPhone passed, no snapshot updates (34.8 seconds).                      |
+| Focused Market page/service and AppBackground Vitest suites                                                                | PASS: 22 tests.                                                                                              |
+| Local `npm run typecheck` and `npm run lint`                                                                               | PASS: zero lint errors, 25 existing warnings.                                                                |
+| Local `npm run db:audit:schema:metadata` and `npx --no-install drizzle-kit check`                                          | PASS; offline only.                                                                                          |
+| Local `npm run docs:check` and `git diff --check`                                                                          | PASS before release.                                                                                         |
 
-The complete [code/CI candidate run](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36340208644)
-passed. Default Linux shards reported 67/65/64/65 passes and 5/7/8/7 skips respectively.
-The separate populated Market job passed nine cases. No flaky-retry result was reported.
-The default fixture's nine populated-Market skips are covered by that separate job; other
-skips remain explicit project-specific conditions rather than silently counted passes.
+The initial local verifier exposed a test deliberately asserting the old bids crash. It was
+replaced with the guarded successful service contract, and the subsequent full CI passed.
+An overlapping typecheck initially raced Next's generated type files; its later standalone
+rerun passed. Superseded diagnostic/capture runs are not counted as final acceptance.
 
-Standard CI passed formatting, skills, architecture, lint, typecheck, docs, all 2,872 unit
-tests (eight existing skips), schema metadata/Drizzle checks and the production build.
-Local documentation and diff checks passed for this receipt. The evidence-only follow-up
-commit changes documentation and diagnostic images; it does not change the validated code.
-
-Acceptance is **not complete**. Resolve/review the 13 macOS screenshot failures, decide the
-known bids defect, and decide original Linux visual-reference coverage before marking
-Task 26 complete. Do not merge this draft as an assertion of full acceptance or advance
-Task 27 on the strength of green CI alone. No application behavior or visual reference
-was modified by these test and CI corrections.
+Task 27 verifies the final integrated main SHA, production alias and post-deploy smoke.
+Those release URLs and results are recorded in PR #54 after integration; preview success
+alone is not production evidence.

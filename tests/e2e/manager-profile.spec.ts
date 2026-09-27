@@ -1,3 +1,4 @@
+import { waitForScreenshotPaint } from './screenshot-ready';
 import type { Locator, Page, TestInfo } from 'playwright/test';
 import { test, expect } from './fixtures';
 
@@ -133,7 +134,7 @@ async function capture(page: Page, testInfo: TestInfo, name: string, target?: Lo
     !['iphone-13', 'desktop-1440'].includes(testInfo.project.name)
   )
     return;
-  await page.evaluate(() => document.fonts.ready);
+  await waitForScreenshotPaint(page);
   if (testInfo.project.name === 'desktop-1440') {
     if (name === 'manager-profile') {
       await page.locator('#points-evolution').scrollIntoViewIfNeeded();

@@ -1,3 +1,4 @@
+import { waitForScreenshotPaint } from './screenshot-ready';
 import pg from 'pg';
 import { assertFixtureTarget } from '../../scripts/e2e/safety.mjs';
 import { test, expect } from './fixtures';
@@ -46,7 +47,7 @@ test('Playoffs preserves ranking, phone detail and both desktop media states', a
         !['iphone-13', 'desktop-1440'].includes(info.project.name)
       )
         return;
-      await page.evaluate(() => document.fonts.ready);
+      await waitForScreenshotPaint(page);
       await page.mouse.move(0, 0);
       await expect(page).toHaveScreenshot(`${name}.png`, {
         fullPage: phone,

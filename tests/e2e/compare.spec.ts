@@ -1,3 +1,4 @@
+import { waitForScreenshotPaint } from './screenshot-ready';
 import { test, expect } from './fixtures';
 
 test('Compare preserves opponent selection and original screens', async ({ page }, info) => {
@@ -19,7 +20,7 @@ test('Compare preserves opponent selection and original screens', async ({ page 
   const capture = async (name: string) => {
     if (process.platform !== 'darwin' || !['iphone-13', 'desktop-1440'].includes(info.project.name))
       return;
-    await page.evaluate(() => document.fonts.ready);
+    await waitForScreenshotPaint(page);
     await page.mouse.move(0, 0);
     await expect(page).toHaveScreenshot(`${name}.png`, {
       fullPage: true,

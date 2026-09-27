@@ -1,3 +1,4 @@
+import { waitForScreenshotPaint } from './screenshot-ready';
 import { test, expect } from './fixtures';
 
 test('Schedule preserves original read screens and map navigation', async ({ page }, info) => {
@@ -21,7 +22,7 @@ test('Schedule preserves original read screens and map navigation', async ({ pag
   const capture = async (name: string) => {
     if (process.platform !== 'darwin' || !['iphone-13', 'desktop-1440'].includes(info.project.name))
       return;
-    await page.evaluate(() => document.fonts.ready);
+    await waitForScreenshotPaint(page);
     await page.mouse.move(0, 0);
     await expect(page).toHaveScreenshot(`${name}.png`, {
       fullPage: phone,

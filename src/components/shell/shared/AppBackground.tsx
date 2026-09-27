@@ -6,13 +6,19 @@ export interface AppBackgroundProps {
   presentationMode?: 'desktop' | 'phone';
 }
 
-export function AppBackground({ children, className = '' }: AppBackgroundProps) {
+export function AppBackground({
+  children,
+  className = '',
+  presentationMode = 'desktop',
+}: AppBackgroundProps) {
+  // The phone shell already owns its gradient through .mobile-app.
+  if (presentationMode === 'phone') return <>{children}</>;
   return (
     <div
       className={`relative isolate min-h-screen bg-[hsl(var(--surface-app))] text-[hsl(var(--content-primary))] ${className}`}
     >
       {/* Ambient subtle glow background - CSS semantic tokens ensure automatic dark/light compatibility */}
-      <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden" aria-hidden="true">
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
         <div
           className="absolute -top-[20%] right-[-10%] h-[50vw] w-[50vw] max-w-[650px] rounded-full blur-[140px]"
           style={{
@@ -26,7 +32,7 @@ export function AppBackground({ children, className = '' }: AppBackgroundProps) 
           }}
         />
       </div>
-      {children}
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
