@@ -1,8 +1,35 @@
-import { describe, expect, it } from 'vitest';
-import { buildAutoLineup, type AutoAlignPlayer } from './auto-lineup';
+import type { ScheduleMatch } from '@/features/schedule/public';
+import { describe, expect, expectTypeOf, it } from 'vitest';
+import { buildAutoLineup, type AutoAlignPlayer, type AutoAlignMatch } from './auto-lineup';
 import { calculateSquadFormAverage, enrichLineupSquad, rankSwapCandidates } from './squad';
 
 describe('automatic lineup compatibility', () => {
+  it('accepts the real Schedule contract, including null dates', () => {
+    expectTypeOf<ScheduleMatch>().toExtend<AutoAlignMatch<AutoAlignPlayer>>();
+    const result = buildAutoLineup([
+      {
+        date: '2026-09-01',
+        user_players: [
+          { id: 4, position: 'Pivot' },
+          { id: 5, position: 'Alero' },
+          { id: 6, position: 'Base' },
+        ],
+      },
+      {
+        date: null,
+        user_players: [
+          { id: 1, position: 'Base' },
+          { id: 2, position: 'Base' },
+          { id: 3, position: 'Alero' },
+        ],
+      },
+    ]);
+    expect(result.lineupPayload.playersID).toEqual([1, 2, 3, 5, 4, 6]);
+    expect(
+      result.starters.filter((p) => p.id === 1 || p.id === 2 || p.id === 3).map((p) => p.matchDate)
+    ).toEqual([0, 0, 0]);
+  });
+
   it('orders starters by role, limits roles to three, picks captain and keeps earliest bench order', () => {
     const players = Array.from({ length: 12 }, (_, i) => ({
       id: i === 0 ? '0' : i,

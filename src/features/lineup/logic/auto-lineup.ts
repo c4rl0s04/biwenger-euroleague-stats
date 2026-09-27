@@ -6,7 +6,7 @@ export interface AutoAlignPlayer {
   puntos?: number | null;
 }
 export interface AutoAlignMatch<T extends AutoAlignPlayer> {
-  date: string;
+  date: string | null;
   user_players: T[];
 }
 type SelectedAutoAlignPlayer<T> = T & { matchDate: number; normPos: 'Base' | 'Alero' | 'Pivot' };
@@ -19,9 +19,15 @@ export function buildAutoLineup<T extends AutoAlignPlayer>(
   formationType: string;
   lineupPayload: LineupCommandInput;
 } {
+  // Preserve the existing new Date(null) epoch ordering for unscheduled matches.
   // 1. Flatten and Sort Players by Date
   const allPlayers = matches
-    .flatMap((m) => m.user_players.map((p) => ({ ...p, matchDate: new Date(m.date).getTime() })))
+    .flatMap((m) =>
+      m.user_players.map((p) => ({
+        ...p,
+        matchDate: new Date(m.date === null ? 0 : m.date).getTime(),
+      }))
+    )
     .sort((a, b) => a.matchDate - b.matchDate);
 
   if (allPlayers.length === 0) {
