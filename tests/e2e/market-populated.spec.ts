@@ -1,3 +1,4 @@
+import { waitForScreenshotPaint } from './screenshot-ready';
 import { test, expect } from './fixtures';
 import type { Locator, Page } from 'playwright/test';
 
@@ -31,7 +32,7 @@ test('populated Market preserves listings, history and ranking interaction', asy
     // initialized from the migrated output. Linux references remain a C14 requirement.
     if (process.platform !== 'darwin' || !['iphone-13', 'desktop-1440'].includes(info.project.name))
       return;
-    await page.evaluate(() => document.fonts.ready);
+    await waitForScreenshotPaint(page);
     await page.mouse.move(0, 0);
     await expect(target).toHaveScreenshot(`${name}.png`, {
       animations: 'disabled',

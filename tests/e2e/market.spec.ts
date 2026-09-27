@@ -1,3 +1,4 @@
+import { waitForScreenshotPaint } from './screenshot-ready';
 import { test, expect } from './fixtures';
 
 test('Market original overview and working phone sections preserve empty-fixture layout', async ({
@@ -19,11 +20,11 @@ test('Market original overview and working phone sections preserve empty-fixture
     ).toBeVisible();
 
   const capture = async (name: string) => {
-    // Screen source is unchanged at 91a3ea7f. These are pre-screen-migration references,
-    // not complete Market acceptance: populated data, drawers and bids remain outstanding.
+    // Original screen references came from 91a3ea7f; Task 26 reviews desktop
+    // chrome against the merged shell. Bids and populated coverage run separately.
     if (process.platform !== 'darwin' || !['iphone-13', 'desktop-1440'].includes(info.project.name))
       return;
-    await page.evaluate(() => document.fonts.ready);
+    await waitForScreenshotPaint(page);
     await page.mouse.move(0, 0);
     await expect(page).toHaveScreenshot(`${name}.png`, {
       fullPage: phone,
