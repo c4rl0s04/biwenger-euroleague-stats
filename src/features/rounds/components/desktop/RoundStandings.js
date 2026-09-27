@@ -8,7 +8,7 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { cn } from '@/lib/utils';
 import { getColorForUser } from '@/lib/constants/colors';
-import { calcEfficiency } from '@/lib/utils/efficiency';
+import { calcEfficiency } from '@/lib/competition/public';
 
 export default function RoundStandings({
   roundId,

@@ -3,7 +3,7 @@ import 'server-only';
 import { CONFIG } from '@/lib/config';
 import { pool as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
-import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
+import { getPlayerFormMap } from '@/lib/competition/server';
 
 export interface CorePlayer {
   id: number | string;

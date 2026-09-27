@@ -1,7 +1,7 @@
 import 'server-only';
 import type { HomeActivityRow, HomeRoundHighlightPlayerRow } from '../queries/home-feed.query';
 import type { HomeActivityEvent } from '../../models/contracts';
-import { selectIdealLineup } from '@/lib/logic/ideal-lineup';
+import { selectIdealLineup } from '@/lib/competition/public';
 import { parseTournamentWinner } from './tournament-winner';
 const asNumber = (value: unknown) => Number(value ?? 0);
 const asString = (value: unknown, fallback = '') =>

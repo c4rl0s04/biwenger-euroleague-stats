@@ -78,7 +78,7 @@ describe('Manager directory service and preserved HTTP contract', () => {
       new URL('./queries/manager-directory.query.ts', import.meta.url),
       'utf8'
     );
-    expect(query).toContain('@/lib/db/queries/core/manager-directory');
+    expect(query).toContain('@/lib/competition/server');
     expect(query).not.toMatch(/SELECT\s|features\/rounds/);
   });
 });

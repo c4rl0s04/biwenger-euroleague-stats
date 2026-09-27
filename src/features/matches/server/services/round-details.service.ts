@@ -1,5 +1,5 @@
 import 'server-only';
-import { getTeamPositions, type StandingsMatch } from '@/lib/logic/standings';
+import { getTeamPositions, type StandingsMatch } from '@/lib/competition/public';
 import {
   queryRoundInfo,
   queryFinishedMatches,

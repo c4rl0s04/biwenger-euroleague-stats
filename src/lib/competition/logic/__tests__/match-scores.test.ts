@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateRegularTimeScores, getStandingsScores } from '@/lib/logic/match-scores';
+import { calculateRegularTimeScores, getStandingsScores } from '@/lib/competition/public';
 
 describe('calculateRegularTimeScores', () => {
   it('returns null scores when header is null', () => {

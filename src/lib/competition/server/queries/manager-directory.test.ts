@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ query: vi.fn(), season: vi.fn() }));
-vi.mock('../../client', () => ({ pool: { query: mocks.query }, db: { query: mocks.query } }));
-vi.mock('../../season-context', () => ({ resolveReadSeasonId: mocks.season }));
+vi.mock('@/lib/db/client', () => ({ pool: { query: mocks.query }, db: { query: mocks.query } }));
+vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 import { readManagerDirectory } from './manager-directory';
 beforeEach(() => {
   vi.clearAllMocks();

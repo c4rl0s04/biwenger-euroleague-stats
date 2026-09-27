@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { pool as pgClient } from '@/lib/db/client';
-import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
+import { getPlayerFormMap } from '@/lib/competition/server';
 import {
   getTeamMatchesCount,
   getTeamPlayoffProbability,
