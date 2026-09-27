@@ -2,7 +2,7 @@
 
 import { LogIn, LogOut, Search, Settings, UserCircle2, X } from 'lucide-react';
 import { signOut } from 'next-auth/react';
-import { useState, type ComponentType } from 'react';
+import { useState, useRef, type ComponentType } from 'react';
 
 // Temporary page-composition → shell capability boundary; see Task 23 compatibility receipt.
 import { GlobalSearch } from '@/components/shell/integrations/GlobalSearch';
@@ -22,6 +22,9 @@ export default function MobileHeaderActions() {
   const [activeSheet, setActiveSheet] = useState<'search' | 'profile' | null>(null);
   const { currentUser, isAuthenticated, isClient } = useClientUser();
 
+  const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const profileTriggerRef = useRef<HTMLButtonElement>(null);
+
   const closeSheet = () => setActiveSheet(null);
   const activeUser = isClient ? currentUser : null;
   const activeAuthenticated = Boolean(isClient && isAuthenticated);
@@ -31,6 +34,7 @@ export default function MobileHeaderActions() {
     <div className="mobile-native-header-actions">
       <button
         type="button"
+        ref={searchTriggerRef}
         className="mobile-native-icon-button"
         onClick={() => setActiveSheet('search')}
         aria-label="Abrir búsqueda"
@@ -41,6 +45,7 @@ export default function MobileHeaderActions() {
       </button>
       <button
         type="button"
+        ref={profileTriggerRef}
         className="mobile-native-avatar"
         onClick={() => setActiveSheet('profile')}
         aria-label="Abrir perfil"
@@ -55,6 +60,7 @@ export default function MobileHeaderActions() {
       </button>
       <MobileBottomSheet
         open={activeSheet === 'search'}
+        returnFocusRef={searchTriggerRef}
         onClose={closeSheet}
         title="Buscar"
         description="Jugadores, equipos y mánagers"
@@ -68,6 +74,7 @@ export default function MobileHeaderActions() {
       </MobileBottomSheet>
       <MobileBottomSheet
         open={activeSheet === 'profile'}
+        returnFocusRef={profileTriggerRef}
         onClose={closeSheet}
         title="Cuenta"
         description={activeAuthenticated ? 'Sesión de mánager' : 'Accede a tu liga'}

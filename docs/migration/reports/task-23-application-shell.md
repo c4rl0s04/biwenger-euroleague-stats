@@ -9,6 +9,13 @@ status: active
 
 # Task 23 — Application Shell Migration
 
+## Final integration
+
+PR #49 merged normally on 2026-09-27 at `9cfb84e51a0b3c46f70fdc47ed8f9a98a8bdce2b`.
+The reviewed head was `620a4036add4e7e7fc831bba77343cc6a5d4e442`: zero commits behind main,
+all four required checks green, no unresolved review threads. The merge is ancestral to main.
+The candidate evidence below is historical; this paragraph records final integration.
+
 Base: `1be12d61`.
 Branch: `refactor/application-shell`.
 State: Implemented and locally verified; merge remains gated on the published exact-head checks.
@@ -370,4 +377,4 @@ The pre-Task-22 publication `0842fe6c` / synthetic candidate `c36d1d5e` passed t
 
 ## Next milestone
 
-UI-01C — demand-driven shared compositions, followed by UI-02 — interactive controls / overlays, UI-03 — Season Predictions pilot, UI-04 — foundation/design review, then feature-by-feature legacy UI migration. None is implemented by this PR. PR #49 is not merged automatically.
+UI-01C — demand-driven shared compositions, followed by UI-02 — interactive controls / overlays, UI-03 — Season Predictions pilot, UI-04 — foundation/design review, then feature-by-feature legacy UI migration. None is implemented by this PR. PR #49 was subsequently merged with explicit authorization; see final integration above.

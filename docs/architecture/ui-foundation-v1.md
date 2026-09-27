@@ -1341,25 +1341,22 @@ UI-01 establishes the foundational token, theming and primitive layers:
    `@/components/ui/foundation`.
 4. **UI-01H — Foundation rollout hardening (this milestone):** protect unmigrated legacy UI: `system` remains the target default preference once migrated, while missing/invalid preferences resolve to the dark compatibility baseline during rollout; remove automatic no-JS light fallback; make `ThemeContext` enforce its provider boundary; and verify hydration safety across SSR and client stores. Light mode infrastructure is preserved for explicit opt-in.
 5. **UI-SHELL — Application shell / chrome migration (Task 23, PR #49):** first production adoption; migrate the global chrome (`AppShell`, `Sidebar`, `TopHeader`, `MobileNavigation`, footer, safe areas) onto the new foundation.
-6. **UI-01C — shared compositions (demand-driven):** extract reusable identity (`EntityIdentity`), `EmptyState`, and header patterns (`PageHeader`, `SectionHeader`) from demonstrated shell and page reuse, rather than speculative creation.
-7. **UI-02 — Interactive controls & overlays:** selectors, searchable select, overlays, and dialogs where needed.
+6. **UI-01C — bounded shared compositions (implemented and verified):** `EmptyState` now shares empty-result copy presentation between GlobalSearch and CommandPalette. No domain data or surface policy; caller spacing is preserved. See the [UI-01C/UI-02 receipt](../migration/reports/ui-01c-ui-02-shared-ui.md).
+7. **UI-02 — bounded interactive foundation (implemented and verified):** `ModalDialog` shares focus, Escape, restoration and scroll-lock behavior between MobileBottomSheet, MobileMoreMenu and CommandPalette. Owners retain surface, portal/backdrop, placement and animation. No selector or full overlay library is claimed.
 
 Do not implement every possible primitive in advance.
 
 Use TypeScript/TSX for new boundaries.
 
-### UI-02 — Selection controls
+### UI-02 — Interactive controls
 
-Implement the generic selection interaction and the first domain wrapper.
+The current bounded delivery is `ModalDialog`, justified by three existing overlay consumers.
+It mounts only while open, requires an accessible name, and accepts initial/return focus refs.
+It is intentionally unstyled: compose existing primitives for new presentation; retained owners
+keep their current markup, portal/layers, safe areas and reduced-motion rules.
 
-Expected focus:
-
-- SearchableSelect;
-- Player/Manager option presentation;
-- keyboard/focus behavior;
-- responsive popover/sheet behavior where needed.
-
-This is the first point at which a headless interaction dependency such as Radix may be justified.
+SearchableSelect, domain option wrappers, popovers and other controls remain demand-driven future
+work. They are not prerequisites imposed by this slice, and no new dependency was needed.
 
 ### UI-03 — Season Predictions pilot
 
