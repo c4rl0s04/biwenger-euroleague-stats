@@ -3,7 +3,11 @@ import { expect } from './fixtures';
 
 /** Exercise computed CSS, so invalid token syntax cannot pass as inert class strings. */
 export async function expectShellPalette(page: Page) {
-  const canvas = page.locator('[data-presentation] > div');
+  // The phone root owns its gradient; desktop uses the inner ambient canvas.
+  const phone =
+    (await page.locator('[data-presentation]').getAttribute('data-presentation')) === 'phone';
+  const canvas = page.locator(phone ? '[data-presentation]' : '[data-presentation] > div');
+  if (phone) await expect(canvas).toHaveCSS('background-image', /radial-gradient\(/);
   const expected = await page.evaluate(() => {
     const probe = document.createElement('span');
     probe.style.backgroundColor = 'hsl(var(--surface-app))';

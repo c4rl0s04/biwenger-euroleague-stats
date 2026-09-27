@@ -59,6 +59,7 @@ test('populated Market preserves listings, history and ranking interaction', asy
     await expect(activity.getByText('Fixture Market Wing', { exact: true })).toHaveCount(2);
     await capture('market-populated-phone-activity', activity);
     for (const [section, title] of [
+      ['bids', 'Pujas'],
       ['transfers', 'Fichajes'],
       ['investments', 'Inversiones'],
     ]) {
@@ -66,7 +67,9 @@ test('populated Market preserves listings, history and ranking interaction', asy
       await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
       await expect(page.locator('.mobile-record-index').first()).toBeVisible();
       await expect(page.getByText('No hay datos disponibles para esta vista.')).toHaveCount(0);
-      await capture(`market-populated-phone-${section}`);
+      if (section === 'bids') {
+        await expect(page.getByText('Pujas disputadas', { exact: true }).first()).toBeVisible();
+      } else await capture(`market-populated-phone-${section}`);
       await page.getByRole('link', { name: 'Volver a Mercado', exact: true }).click();
       await expect(page).toHaveURL(/\/market$/);
     }

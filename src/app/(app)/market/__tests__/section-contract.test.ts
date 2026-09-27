@@ -1,5 +1,4 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import type { BiddingDuelsStats } from '@/features/market/public';
 
 const fake = vi.hoisted(() => ({
   guard: vi.fn(),
@@ -25,21 +24,6 @@ beforeEach(() => {
   fake.guard.mockResolvedValue({ definition: { title: 'Fixture section' } });
 });
 
-it('characterizes the existing phone bids failure with the actual duel contract shape', async () => {
-  const biddingDuels: BiddingDuelsStats = {
-    users: [],
-    matrix: {},
-    hottestRivalry: null,
-    biggestDominance: null,
-  };
-  fake.stats.mockResolvedValue({ recordBid: [], biddingDuels, overpayerManager: [] });
-  await expect(MarketSectionPage({ params: Promise.resolve({ section: 'bids' }) })).rejects.toThrow(
-    TypeError
-  );
-  expect(fake.guard).toHaveBeenCalledWith('/market/bids');
-  expect(fake.stats).toHaveBeenCalledExactlyOnceWith();
-});
-
 it.each(['bids', 'transfers', 'investments', 'trends', 'unknown'])(
   'preserves the route guard before any data read for %s',
   async (section) => {
@@ -53,7 +37,7 @@ it.each(['bids', 'transfers', 'investments', 'trends', 'unknown'])(
   }
 );
 
-it.each(['transfers', 'trends', 'investments'])(
+it.each(['bids', 'transfers', 'trends', 'investments'])(
   'passes the guarded %s selection to the typed screen service',
   async (section) => {
     fake.section.mockResolvedValue({ rows: [] });
