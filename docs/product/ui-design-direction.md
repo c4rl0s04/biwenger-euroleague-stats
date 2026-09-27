@@ -492,7 +492,7 @@ DESIGN DIRECTION CHECKPOINT                             this specification
 UI-01T theme-ready token/runtime work                  implemented foundation capability
 UI-01B core primitives                                 implemented foundation capability
 UI-01H rollout hardening                               dark compatibility default for legacy UI
-UI-SHELL application shell/chrome migration            first production adoption
+UI-SHELL application shell/chrome migration            Task 23 / PR #49; first production adoption
 UI-01C shared compositions                             extract from demonstrated shell/page needs
 UI-02  interactive controls                            selectors, overlays and related behavior
 UI-03  Season Predictions pilot                       first new-page design validation
