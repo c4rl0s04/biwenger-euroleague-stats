@@ -27,6 +27,14 @@ import { HoopgridRepository, hoopgridRepository } from '../repositories/hoopgrid
 export class HoopgridCommandService {
   constructor(private readonly repository: HoopgridRepository = hoopgridRepository) {}
 
+  /** Uncached operational read; includes inactive challenges, as the CLI historically did. */
+  async getNextGenerationDate(): Promise<Date> {
+    const lastChallenge = await this.repository.findLatestChallenge();
+    const startDate = lastChallenge ? new Date(lastChallenge.gameDate) : new Date();
+    if (lastChallenge) startDate.setDate(startDate.getDate() + 1);
+    return startDate;
+  }
+
   calculateComplexity(possibleCounts: number[] | string | null): number {
     if (!possibleCounts) return 0;
     const counts = typeof possibleCounts === 'string' ? JSON.parse(possibleCounts) : possibleCounts;

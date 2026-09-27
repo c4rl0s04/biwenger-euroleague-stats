@@ -13,6 +13,7 @@ describe('HoopgridCommandService', () => {
 
   beforeEach(() => {
     repositoryMock = {
+      findLatestChallenge: vi.fn(),
       findChallengeByDate: vi.fn(),
       findChallengeById: vi.fn(),
       listChallenges: vi.fn(),
@@ -26,6 +27,33 @@ describe('HoopgridCommandService', () => {
     };
 
     service = new HoopgridCommandService(repositoryMock as unknown as HoopgridRepository);
+  });
+
+  describe('getNextGenerationDate', () => {
+    it('advances the latest date, including inactive challenges', async () => {
+      repositoryMock.findLatestChallenge.mockResolvedValue({
+        gameDate: '2026-12-31',
+        isActive: false,
+      });
+      expect((await service.getNextGenerationDate()).toISOString().slice(0, 10)).toBe('2027-01-01');
+      expect(repositoryMock.findLatestChallenge).toHaveBeenCalledOnce();
+    });
+    it('uses the current date when no challenge exists', async () => {
+      vi.useFakeTimers();
+      try {
+        vi.setSystemTime(new Date('2026-09-27T12:00:00Z'));
+        repositoryMock.findLatestChallenge.mockResolvedValue(undefined);
+        expect((await service.getNextGenerationDate()).toISOString()).toBe(
+          '2026-09-27T12:00:00.000Z'
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+    it('propagates lookup failures', async () => {
+      repositoryMock.findLatestChallenge.mockRejectedValue(new Error('lookup failed'));
+      await expect(service.getNextGenerationDate()).rejects.toThrow('lookup failed');
+    });
   });
 
   describe('calculateComplexity', () => {

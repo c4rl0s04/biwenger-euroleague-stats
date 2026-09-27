@@ -29,6 +29,10 @@ export class HoopgridRepository {
     };
   }
 
+  async findLatestChallenge() {
+    return db.query.hoopgridChallenges.findFirst({ orderBy: desc(hoopgridChallenges.gameDate) });
+  }
+
   async findChallengeByDate(dateStr: string) {
     return await db.query.hoopgridChallenges.findFirst({
       where: (ch, { eq, and }) => and(eq(ch.gameDate, dateStr), eq(ch.isActive, true)),
