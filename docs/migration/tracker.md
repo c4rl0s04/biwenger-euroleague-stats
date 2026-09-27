@@ -296,12 +296,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 25 — Exhaustive ownership closure
 
-- **State:** Planned.
-- **Dependencies / approval:** 04–24; review upstream gaps earlier when needed.
+- **State:** Planned as 25A non-UI closure and 25B UI-dependent reconciliation.
+- **Dependencies / approval:** 25A can proceed after Task 22; 25B and final closure depend on Tasks 23–24.
 - **Scope:** Enumerate all runtime entrypoints/modules; resolve Team/Player leftovers and remove obsolete adapters/exceptions.
 - **Completion check:** Zero unassigned migration work; no temporary debt; retained infrastructure/protocol URLs justified.
-- **Evidence:** Task 01 residual Team/Player work and test candidates.
-- **Next action:** Review residual boundaries before affected consumers; close all final exceptions.
+- **Evidence:** [Task 25 plan](task-25-plan.md), grounded in main `1be12d61`; Task 01 residual Team/Player work remains input, not proof of current gaps.
+- **Next action:** Inventory live consumers, replace Assistant global service-barrel reads, resolve Team/Player shared-query ownership, then retire unused adapters and audit exact exceptions. Coordinate UI-dependent cleanup with the existing UI migration.
 
 ### Task 26 — Full regression acceptance
 
