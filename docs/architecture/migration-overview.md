@@ -116,7 +116,7 @@ The next domain milestone is **Task 13 — Provider boundaries**, which initiate
 Residual Team detail orchestration/shared Player form work from the preserved campaign belongs to Task 25 review against the current schema. Saved Market components already match main; do not restart its old checkpoint Q. External Rounds/Standings/Market adapters retire as their final consumers migrate. Search interaction ownership belongs to Task 23. Unique UI token work is Task 24. The known Market phone-bids defect needs a separate behavior decision before final acceptance. Existing URLs remain compatibility contracts; renaming them is not a completion requirement.
 
 Existing code references: [legacy queries](../../src/lib/db/queries),
-[legacy services](../../src/lib/services), [application pages](../../src/app), and
+[application pages](../../src/app), and
 [domain features](../../src/features). Some old modules are thin compatibility exports;
 others still own substantial logic. File counts alone would overstate remaining duplication.
 

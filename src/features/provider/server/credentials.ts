@@ -7,7 +7,7 @@ export async function executeUserProviderQuery<T>(
   queryRunner: (client: BiwengerProviderClient, context: BiwengerRequestContext) => Promise<T>,
   client: BiwengerProviderClient = biwengerProviderClient
 ): Promise<T> {
-  const { biwengerCredentials } = await import('@/lib/credentials/service');
+  const { biwengerCredentials } = await import('@/lib/credentials/server');
   return biwengerCredentials.withCredential(userId, operation, async (credential) => {
     const context: BiwengerRequestContext = {
       token: credential,
@@ -26,7 +26,7 @@ export async function executeUserProviderCommand(
   ) => Promise<ProviderCommandResult>,
   client: BiwengerProviderClient = biwengerProviderClient
 ): Promise<ProviderCommandResult> {
-  const { biwengerCredentials } = await import('@/lib/credentials/service');
+  const { biwengerCredentials } = await import('@/lib/credentials/server');
   return biwengerCredentials.withCredential(userId, operation, async (credential) => {
     const context: BiwengerRequestContext = {
       token: credential,

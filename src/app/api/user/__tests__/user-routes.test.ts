@@ -30,7 +30,7 @@ vi.mock('@/features/lineup/server', async (importOriginal) => {
   };
 });
 
-vi.mock('@/lib/credentials/service', () => ({
+vi.mock('@/lib/credentials/server', () => ({
   biwengerCredentials: {
     storeCredential: vi.fn(),
   },
@@ -75,7 +75,7 @@ import { getUserWithPassword } from '@/lib/db/queries/core/users';
 import { prepareUserMutations } from '@/lib/db/mutations/users';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import { biwengerCredentials } from '@/lib/credentials/service';
+import { biwengerCredentials } from '@/lib/credentials/server';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);

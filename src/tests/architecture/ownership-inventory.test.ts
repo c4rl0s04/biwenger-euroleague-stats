@@ -75,7 +75,7 @@ it('distinguishes retained shared projections, authentication gates and UI adapt
   expect(classifyModule('src/lib/db/queries/core/manager-directory.ts').contract).toContain(
     'cycle'
   );
-  expect(classifyModule('src/lib/db/queries/core/users.ts').blocker).toContain('security gate');
+  expect(classifyModule('src/lib/db/queries/core/users.ts').blocker).toBeNull();
   expect(classifyModule('src/components/layout/Section.js').blocker).toContain('25B');
   expect(classifyModule('src/lib/seasons/server.ts').blocker).toBeNull();
 });
