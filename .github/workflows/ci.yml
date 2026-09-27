@@ -69,11 +69,16 @@ jobs:
         run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}"
 
   browser:
-    name: Browser contracts and visual regression (${{ matrix.fixture }})
+    name: Browser contracts and visual regression (${{ matrix.fixture }}, ${{ matrix.shard }}/${{ matrix.shards }})
     strategy:
       fail-fast: false
       matrix:
-        fixture: [default, market]
+        include:
+          - { fixture: default, shard: 1, shards: 4 }
+          - { fixture: default, shard: 2, shards: 4 }
+          - { fixture: default, shard: 3, shards: 4 }
+          - { fixture: default, shard: 4, shards: 4 }
+          - { fixture: market, shard: 1, shards: 1 }
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 25
     steps:
@@ -91,11 +96,11 @@ jobs:
           fi
           docker run --rm --init --ipc=host --platform linux/arm64 -e CI=true \
             -v "$PWD/test-results:/workspace/test-results" biwenger-e2e \
-            --fixture=${{ matrix.fixture }} "${browser_args[@]}"
+            --fixture=${{ matrix.fixture }} --shard=${{ matrix.shard }}/${{ matrix.shards }} "${browser_args[@]}"
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-results-${{ matrix.fixture }}
+          name: browser-results-${{ matrix.fixture }}-${{ matrix.shard }}
           path: test-results/
           retention-days: 7
