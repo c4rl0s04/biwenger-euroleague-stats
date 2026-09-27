@@ -313,3 +313,25 @@ describe('shared competition ownership', () => {
     expect(errors.some((error) => error.startsWith('competition-dependency:'))).toBe(true);
   });
 });
+
+describe('Hoopgrid operational ownership', () => {
+  it('rejects direct persistence and deep feature imports from the CLI, including relative paths', () => {
+    expect(
+      check({
+        'src/lib/db/client.ts': 'export const db = {};',
+        'src/features/hoopgrid/server/repositories/repo.ts': 'export const repo = {};',
+        'scripts/hoopgrid/generate-hard.ts':
+          "import '../../src/lib/db/client'; import '../../src/features/hoopgrid/server/repositories/repo'; import 'drizzle-orm';",
+      }).filter((e) => e.startsWith('domain-cli-boundary'))
+    ).toHaveLength(3);
+  });
+  it('allows the server contract from the CLI', () => {
+    expect(
+      check({
+        'src/features/hoopgrid/server.ts': "import 'server-only';",
+        'scripts/hoopgrid/generate-hard.ts':
+          "const service = import('@/features/hoopgrid/server');",
+      })
+    ).toEqual([]);
+  });
+});

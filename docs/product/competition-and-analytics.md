@@ -38,11 +38,11 @@ or eligibility changes therefore require tests and a documentation update in the
 - UI and services: the [Rounds](../../src/features/rounds), [Schedule](../../src/features/schedule),
   [Matches](../../src/features/matches), [Standings](../../src/features/standings), and
   [Compare](../../src/features/compare) feature owners.
-- Data: competition and analytics queries under
-  [`src/lib/db/queries`](../../src/lib/db/queries).
+- Data: queries belong to the feature owners above; reused player-form and manager-directory
+  projections belong to the [shared competition domain](../../src/lib/competition).
 - HTTP: `/api/rounds/*`, `/api/standings/*`, `/api/compare/*`, and `/api/league-average`.
 - Tests: route suites under the corresponding [`src/app/api`](../../src/app/api) domains and logic
-  tests under [`src/lib/logic/__tests__`](../../src/lib/logic/__tests__).
+  tests under [`src/lib/competition/logic`](../../src/lib/competition/logic).
 
 ## Edge cases
 
